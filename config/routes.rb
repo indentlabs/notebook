@@ -1,4 +1,6 @@
 PlanCharacters::Application.routes.draw do
+  resources :characters
+
   resources :users
   
   # Main pages
