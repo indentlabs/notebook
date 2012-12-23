@@ -1,4 +1,6 @@
 PlanCharacters::Application.routes.draw do
+  get "main/index"
+
   resources :sessions
   resources :users
   
