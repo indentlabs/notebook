@@ -1,10 +1,19 @@
 PlanCharacters::Application.routes.draw do
-  get "main/index"
-
-  resources :sessions
   resources :users
   
-  get '/logout', :to => 'sessions#destroy'
+  # Main pages
+  root :to => 'main#index', :as => :homepage
+  
+  # Sessions
+  get  '/login',  :to => 'sessions#new',     :as => :login
+  post '/login',  :to => 'sessions#create',  :as => :login_process
+  get  '/logout', :to => 'sessions#destroy', :as => :logout
+
+  # Users
+  get  '/register', :to => 'users#new',    :as => :signup
+  post '/register', :to => 'users#create', :as => :signup_process
+  get  '/account',  :to => 'users#edit',   :as => :account
+  put  '/account',  :to => 'users#update', :as => :account_process
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -52,10 +61,6 @@ PlanCharacters::Application.routes.draw do
   #     # (app/controllers/admin/products_controller.rb)
   #     resources :products
   #   end
-
-  # You can have the root of your site routed with "root"
-  # just remember to delete public/index.html.
-  # root :to => 'welcome#index'
 
   # See how all your routes lay out with "rake routes"
 
