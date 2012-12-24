@@ -41,6 +41,13 @@ class CharactersController < ApplicationController
   # POST /characters.json
   def create
     @character = Character.new(params[:character])
+    
+    unless session[:user]
+      redirect_to homepage_path, notice: 'You must be logged in to do that!'
+      return
+    end
+    
+    @character.user_id = session[:user]
 
     respond_to do |format|
       if @character.save
