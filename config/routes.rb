@@ -1,8 +1,6 @@
 PlanCharacters::Application.routes.draw do
   resources :characters
 
-  resources :users
-  
   # Main pages
   root :to => 'main#index', :as => :homepage
   
@@ -16,6 +14,15 @@ PlanCharacters::Application.routes.draw do
   post '/register', :to => 'users#create', :as => :signup_process
   get  '/account',  :to => 'users#edit',   :as => :account
   put  '/account',  :to => 'users#update', :as => :account_process
+  
+  # Characters
+  get    '/characters',         :to => 'characters#index',   :as => :character_list
+  get    '/character/:id',      :to => 'characters#show',    :as => :character
+  get    '/character/:id/edit', :to => 'characters#edit',    :as => :character_edit
+  put    '/character/:id',      :to => 'characters#update',  :as => :character_edit_process
+  get    '/characters/new',     :to => 'characters#new',     :as => :character_create
+  post   '/characters/new',     :to => 'characters#create',  :as => :character_create_process
+  delete '/character/:id',      :to => 'characters#destroy', :as => :character_destroy
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

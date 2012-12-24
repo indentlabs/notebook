@@ -1,4 +1,7 @@
 class CharactersController < ApplicationController
+  before_filter :redirect_if_not_logged_in
+  before_filter :require_ownership_of_character, :only => [:show, :edit, :update, :destroy]
+
   # GET /characters
   # GET /characters.json
   def index
@@ -41,12 +44,6 @@ class CharactersController < ApplicationController
   # POST /characters.json
   def create
     @character = Character.new(params[:character])
-    
-    unless session[:user]
-      redirect_to homepage_path, notice: 'You must be logged in to do that!'
-      return
-    end
-    
     @character.user_id = session[:user]
 
     respond_to do |format|
