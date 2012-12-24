@@ -1,25 +1,32 @@
-<h1>Listing characters</h1>
-
-<table>
-  <tr>
-    <th>Name</th>
-    <th>Age</th>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
-
-<% @characters.each do |character| %>
-  <tr>
-    <td><%= character.name %></td>
-    <td><%= character.age %></td>
-    <td><%= link_to 'Show', character %></td>
-    <td><%= link_to 'Edit', character_edit_path(character) %></td>
-    <td><%= link_to 'Destroy', character, confirm: 'Are you sure?', method: :delete %></td>
-  </tr>
-<% end %>
+<%- model_class = Character.new.class -%>
+<h1><%=t '.title', :default => model_class.model_name.human.pluralize %></h1>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th><%= model_class.human_attribute_name(:name) %></th>
+      <th><%= model_class.human_attribute_name(:age) %></th>
+      <th><%=t '.actions', :default => t("helpers.actions") %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @characters.each do |character| %>
+      <tr>
+        <td><%= link_to character.name, character_path(character) %></td>
+        <td><%= character.age %></td>
+        <td>
+          <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                      character_edit_path(character), :class => 'btn btn-mini' %>
+          <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                      character_path(character),
+                      :method => :delete,
+                      :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
+                      :class => 'btn btn-mini btn-danger' %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
 </table>
 
-<br />
-
-<%= link_to 'New Character', character_create_path %>
+<%= link_to t('.new', :default => t("helpers.links.new")),
+            character_create_path,
+            :class => 'btn btn-primary' %>

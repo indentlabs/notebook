@@ -1,6 +1,6 @@
 class CharactersController < ApplicationController
   before_filter :redirect_if_not_logged_in
-  before_filter :require_ownership_of_character, :only => [:show, :edit, :update, :destroy]
+  before_filter :require_ownership_of_character, :only => [:show, :edit, :destroy]
 
   # GET /characters
   # GET /characters.json

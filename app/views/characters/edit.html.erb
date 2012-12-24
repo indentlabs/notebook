@@ -1,6 +1,24 @@
-<h1>Editing character</h1>
+<%- model_class = @character.class -%>
+<h1><%=t '.title', :default => t('helpers.titles.edit', :model => model_class.model_name.human,
+                                 :default => "Edit #{model_class.model_name.human}") %></h1>
 
-<%= render 'form' %>
+<%= form_for @character, :url => character_edit_process_path, :html => { :class => 'form-horizontal' } do |f| %>
+  <div class="control-group">
+    <%= f.label :name, :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :name, :class => 'text_field' %>
+    </div>
+  </div>
+  <div class="control-group">
+    <%= f.label :age, :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :age, :class => 'text_field' %>
+    </div>
+  </div>
 
-<%= link_to 'Show', @character %> |
-<%= link_to 'Back', character_list_path %>
+  <div class="form-actions">
+    <%= f.submit nil, :class => 'btn btn-primary' %>
+    <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
+                character_list_path, :class => 'btn' %>
+  </div>
+<% end %>
