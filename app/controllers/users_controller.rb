@@ -1,4 +1,6 @@
 class UsersController < ApplicationController
+  before_filter :redirect_if_not_logged_in, :only => [:edit, :update]
+  
   # GET /users/new
   # GET /users/new.json
   def new
@@ -12,7 +14,7 @@ class UsersController < ApplicationController
 
   # GET /users/1/edit
   def edit
-    @user = User.find(params[:id])
+    @user = User.find(session[:user])
   end
 
   # POST /users
@@ -35,7 +37,7 @@ class UsersController < ApplicationController
   # PUT /users/1
   # PUT /users/1.json
   def update
-    @user = User.find(params[:id])
+    @user = User.find(session[:user])
 
     respond_to do |format|
       if @user.update_attributes(params[:user])

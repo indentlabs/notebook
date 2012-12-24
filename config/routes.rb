@@ -12,7 +12,7 @@ PlanCharacters::Application.routes.draw do
   get  '/register', :to => 'users#new',    :as => :signup
   post '/register', :to => 'users#create', :as => :signup_process
   get  '/account',  :to => 'users#edit',   :as => :account
-  put  '/account',  :to => 'users#update', :as => :account_process
+  put  '/register', :to => 'users#update', :as => :account_process
   
   # Characters
   get    '/characters',         :to => 'characters#index',   :as => :character_list
