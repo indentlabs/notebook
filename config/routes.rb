@@ -13,6 +13,7 @@ PlanCharacters::Application.routes.draw do
   post '/register', :to => 'users#create', :as => :signup_process
   get  '/account',  :to => 'users#edit',   :as => :account
   put  '/register', :to => 'users#update', :as => :account_process
+  get  '/be-anonymous', :to => 'users#anonymous', :as => :anonymous
   
   # Characters
   get    '/characters',         :to => 'characters#index',   :as => :character_list

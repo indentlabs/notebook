@@ -49,4 +49,7 @@ class UsersController < ApplicationController
       end
     end
   end
+  
+  def anonymous
+  end
 end
