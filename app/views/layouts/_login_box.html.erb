@@ -1,8 +1,18 @@
 <% if session[:user] %>
-	<ul class="nav">
-		<li><%= link_to User.find(session[:user]).name, '/account' %></li>
-		<li><%= link_to "Log out", logout_path %></li>
-	</ul>
+	<div class="btn-group">
+		<a class="btn" href="/account">
+			<i class="icon-user icon-white"></i>
+			<%= User.find(session[:user]).name %>
+		</a>
+		<a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+		<ul class="dropdown-menu">
+		  <li><a href="/account">Account Settings</a></li>
+		  <li class="divider"></li>
+		  <li><a href="#">Privacy Policy</a></li>
+		  <li class="divider"></li>
+		  <li><a href="/logout">Log out</a></li>
+		</ul>
+	</div>
 <% else %>
 	<ul class="nav">
 		<li><a href="/login">Login</a></li>
