@@ -1,5 +1,4 @@
 PlanCharacters::Application.routes.draw do
-  resources :characters
 
   # Main pages
   root :to => 'main#index', :as => :homepage

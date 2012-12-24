@@ -5,7 +5,7 @@ class CharactersController < ApplicationController
   # GET /characters
   # GET /characters.json
   def index
-    @characters = Character.all
+    @characters = Character.where(user_id: session[:user])
 
     respond_to do |format|
       format.html # index.html.erb
