@@ -6,6 +6,10 @@ class CharactersController < ApplicationController
   # GET /characters.json
   def index
     @characters = Character.where(user_id: session[:user])
+    
+    if @characters.size == 0
+      @characters = []
+    end
 
     respond_to do |format|
       format.html # index.html.erb
@@ -80,7 +84,7 @@ class CharactersController < ApplicationController
     @character.destroy
 
     respond_to do |format|
-      format.html { redirect_to characters_url }
+      format.html { redirect_to character_list_url }
       format.json { head :no_content }
     end
   end
