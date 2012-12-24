@@ -1,9 +1,15 @@
 <% if session[:user] %>
-	<div>
-		Hello, <%= User.find(session[:user]).name %> |
-		<%= link_to "Log out", logout_path %>
-	</div>
+	<ul class="nav">
+		<li><%= link_to User.find(session[:user]).name, '/account' %></li>
+		<li><%= link_to "Log out", logout_path %></li>
+	</ul>
 <% else %>
-	<%= link_to "Log in", login_path %> to start, or
-	<%= link_to "Register", signup_path %> a new account
+	<ul class="nav">
+		<li><a href="/login">Login</a></li>
+		<li><a href="/register">Register</a></li>
+		<li><a href="/adoption">
+			Adoption
+			<i class="icon-question-sign"></i>
+		</a></li>
+	</ul>
 <% end %>
