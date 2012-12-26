@@ -2,31 +2,31 @@ class Character
   include Mongoid::Document
   
   # Appearance
-  field :name,      :type => String
-  #gender
-  field :age,       :type => String
-  field :height,    :type => String
-  field :weight,    :type => String
-  field :haircolor, :type => String
-  field :hairstyle, :type => String
-  field :eyecolor,  :type => String
-  #race
-  field :skintone,  :type => String
-  field :bodytype,  :type => String
+  field :name,       :type => String
+  field :gender,     :type => String
+  field :age,        :type => String
+  field :height,     :type => String
+  field :weight,     :type => String
+  field :haircolor,  :type => String
+  field :hairstyle,  :type => String
+  field :eyecolor,   :type => String
+  field :race,       :type => String
+  field :skintone,   :type => String
+  field :bodytype,   :type => String
   field :identmarks, :type => String # Identifying marks
-  
+
   # Social
-  #best friend
-  #religion
-  #politics
-  #prejudices
-  #job
-  #pet
+  field :bestfriend, :type => String
+  field :religion, :type => String
+  field :politics, :type => String
+  field :prejudices, :type => String
+  field :occupation, :type => String
+  field :pets, :type => String
   #How might others describe him?
   #What would others change about him?
   
   # Behavior
-  #mannerisms
+  field :mannerisms, :type => String
   #What drives this character?
   #What is standing in his way?
   #What is he most afraid of?
@@ -35,28 +35,26 @@ class Character
   #What kind of trouble does he get in?
   
   # History
-	#birthday
-  #born at
-	#schooled at
+  field :birthday, :type => String
+  field :birthplace, :type => String
+  field :education, :type => String
 	#What is his deepest secret?
 	#Does he have a history of criminal activity?
 
 	# Favorites
-	#color
-	#food
-	#possession
-	#weapon
-	#animal
-	#leisure activities
+	field :fave_color, :type => String
+	field :fave_food, :type => String
+	field :fave_possession, :type => String
+	field :fave_weapon, :type => String
+	field :fave_animal, :type => String
+	#favorite leisure activities
 	
 	# Relationships
-	#father
-	#mother
-	#spouse
-	#siblings
-	#friends
-	#enemies
-	#pets
+	field :father, :type => String
+	field :mother, :type => String
+	field :spouse, :type => String
+	field :siblings, :type => String
+	field :archenemy, :type => String
 	
 	# More...
 	#additional notes
