@@ -2,7 +2,16 @@ development:
     host: localhost
     database: plan_characters_dev
 
+<% if ENV['MONGOHQ_URL'] %>
+  <% uri = URI.parse(ENV['MONGOHQ_URL']) %>
 production:
+  <<: *defaults
   sessions:
     default:
-      uri: <%= ENV['MONGOHQ_URL'] %>
+      <<: *default_session
+      database: <%= uri.path.sub('/','') %>
+      username: <%= uri.user %>
+      password: <%= uri.password %>
+      hosts:
+        - <%= uri.host %>:<%= uri.port %>
+<% end %>
