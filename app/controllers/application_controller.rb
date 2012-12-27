@@ -17,4 +17,11 @@ class ApplicationController < ActionController::Base
   	  redirect_to character_list_path, :notice => "You don't have permission to do that!"
   	end
   end
+  
+  def require_ownership_of_equipment
+  	equipment = Equipment.find(params[:id])
+  	unless session[:user] and session[:user] == equipment.user.id
+  	  redirect_to equipment_list_path, :notice => "You don't have permission to do that!"
+  	end
+  end
 end

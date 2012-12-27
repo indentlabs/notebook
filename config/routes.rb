@@ -23,6 +23,15 @@ PlanCharacters::Application.routes.draw do
   get    '/character/:id/edit', :to => 'characters#edit',    :as => :character_edit
   put    '/character/:id',      :to => 'characters#update',  :as => :character_edit_process
   delete '/character/:id',      :to => 'characters#destroy', :as => :character_destroy
+  
+  # Equipment
+  get    '/equipment',          :to => 'equipment#index',   :as => :equipment_list
+  get    '/equipment/new',      :to => 'equipment#new',     :as => :equipment_create
+  post   '/equipment/new',      :to => 'equipment#create',  :as => :equipment_create_process
+  get    '/equipment/:id',      :to => 'equipment#show',    :as => :equipment
+  get    '/equipment/:id/edit', :to => 'equipment#edit',    :as => :equipment_edit
+  put    '/equipment/:id',      :to => 'equipment#update',  :as => :equipment_edit_process
+  delete '/equipment/:id',      :to => 'equipment#destroy', :as => :equipment_destroy
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
