@@ -3,8 +3,11 @@ $(document).ready ->
     $(".tab").removeClass "active"
     $("#show_" + tab_name).parent().addClass "active"
     $(".section").hide()
-    $("#" + tab_name + "_section").css("visibility", "visible").hide().fadeIn "fast"
+    $("." + tab_name + "_section").css("visibility", "visible").hide().fadeIn "fast"
 
+  $("#show_general").click ->
+    show_tab "general"
+    
   $("#show_appearance").click ->
     show_tab "appearance"
 
@@ -26,5 +29,4 @@ $(document).ready ->
   $("#show_more").click ->
     show_tab "more"
 
-  show_tab "appearance"
-
+  show_tab "general"
