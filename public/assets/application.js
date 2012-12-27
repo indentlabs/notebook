@@ -11770,37 +11770,7 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 }).call(this);
 (function() {
 
-  $(document).ready(function() {
-    var show_tab;
-    show_tab = function(tab_name) {
-      $(".tab").removeClass("active");
-      $("#show_" + tab_name).parent().addClass("active");
-      $(".section").hide();
-      return $("#" + tab_name + "_section").css("visibility", "visible").hide().fadeIn("fast");
-    };
-    $("#show_appearance").click(function() {
-      return show_tab("appearance");
-    });
-    $("#show_social").click(function() {
-      return show_tab("social");
-    });
-    $("#show_behavior").click(function() {
-      return show_tab("behavior");
-    });
-    $("#show_history").click(function() {
-      return show_tab("history");
-    });
-    $("#show_favorites").click(function() {
-      return show_tab("favorites");
-    });
-    $("#show_relationships").click(function() {
-      return show_tab("relationships");
-    });
-    $("#show_more").click(function() {
-      return show_tab("more");
-    });
-    return show_tab("appearance");
-  });
+
 
 }).call(this);
 (function() {
