@@ -1,10 +1,13 @@
 class Character
   include Mongoid::Document
-  
-  # Appearance
+
+	# General
   field :name,       :type => String
+	field :role,       :type => String
   field :gender,     :type => String
   field :age,        :type => String
+
+  # Appearance
   field :height,     :type => String
   field :weight,     :type => String
   field :haircolor,  :type => String
