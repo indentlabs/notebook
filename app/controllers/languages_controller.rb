@@ -1,4 +1,4 @@
-class LanguageController < ApplicationController
+class LanguagesController < ApplicationController
   before_filter :redirect_if_not_logged_in
   before_filter :require_ownership_of_language, :only => [:show, :edit, :destroy]
 
