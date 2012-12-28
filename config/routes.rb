@@ -50,9 +50,16 @@ PlanCharacters::Application.routes.draw do
 		put    '/language/:id',      :to => 'languages#update',  :as => :language_edit_process
 		delete '/language/:id',      :to => 'languages#destroy', :as => :language_destroy
 		
+		# Locations
+		get    '/locations',         :to => 'locations#index',   :as => :location_list
+		get    '/location/new',      :to => 'locations#new',     :as => :location_create
+		post   '/location/new',      :to => 'locations#create',  :as => :location_create_process
+		get    '/location/:id',      :to => 'locations#show',    :as => :location
+		get    '/location/:id/edit', :to => 'locations#edit',    :as => :location_edit
+		put    '/location/:id',      :to => 'locations#update',  :as => :location_edit_process
+		delete '/location/:id',      :to => 'locations#destroy', :as => :location_destroy
+		
 		# Coming Soon TM
-		get '/languages', :to => 'main#comingsoon'
-		get '/locations', :to => 'main#comingsoon'
 		get '/magic',     :to => 'main#comingsoon'
 		get '/plots',     :to => 'main#comingsoon'
 	end

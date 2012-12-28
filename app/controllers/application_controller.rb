@@ -31,4 +31,11 @@ class ApplicationController < ActionController::Base
   	  redirect_to language_list_path, :notice => "You don't have permission to do that!"
   	end
   end
+  
+  def require_ownership_of_location
+  	location = Location.find(params[:id])
+  	unless session[:user] and session[:user] == location.user.id
+  	  redirect_to location_list_path, :notice => "You don't have permission to do that!"
+  	end
+  end
 end
