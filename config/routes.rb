@@ -15,10 +15,10 @@ PlanCharacters::Application.routes.draw do
   get  '/logout', :to => 'sessions#destroy', :as => :logout
 
   # Users
-  get  '/register', :to => 'users#new',    :as => :signup
-  post '/register', :to => 'users#create', :as => :signup_process
-  get  '/account',  :to => 'users#edit',   :as => :account
-  put  '/register', :to => 'users#update', :as => :account_process
+  get  '/register',     :to => 'users#new',    :as => :signup
+  post '/register',     :to => 'users#create', :as => :signup_process
+  get  '/account',      :to => 'users#edit',   :as => :account
+  put  '/register',     :to => 'users#update', :as => :account_process
   get  '/be-anonymous', :to => 'users#anonymous', :as => :anonymous
   
   # Planning
@@ -65,17 +65,17 @@ PlanCharacters::Application.routes.draw do
   
   # Revise
   scope '/revise' do
-  	get '/checklists',          :to 'main#comingsoon'
-  	get '/analytics',           :to 'main#comingsoon'
-  	get '/peer-critiques',      :to 'main#comingsoon'
-  	get '/professional-review', :to 'main#comingsoon'
+  	get '/checklists',          :to => 'main#comingsoon'
+  	get '/analytics',           :to => 'main#comingsoon'
+  	get '/peer-critiques',      :to => 'main#comingsoon'
+  	get '/professional-review', :to => 'main#comingsoon'
   end
   
   # Submit
   scope '/submit' do
-  	get '/blog',              :to 'main#comingsoon'
-  	get '/print-publishers',  :to 'main#comingsoon'
-  	get '/online-publishers', :to 'main#comingsoon'
+  	get '/blog',              :to => 'main#comingsoon'
+  	get '/print-publishers',  :to => 'main#comingsoon'
+  	get '/online-publishers', :to => 'main#comingsoon'
   end
 
   # The priority is based upon order of creation:
