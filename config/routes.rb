@@ -46,7 +46,11 @@ PlanCharacters::Application.routes.draw do
 		get '/locations', :to => 'main#comingsoon'
 		get '/magic',     :to => 'main#comingsoon'
 		get '/plots',     :to => 'main#comingsoon'
-		get '/adoption',  :to => 'main#comingsoon'
+	end
+	
+	# Adoption Agency
+	scope '/adoption' do
+		get '/', :to => 'main#comingsoon'
 	end
 	
   # Write
