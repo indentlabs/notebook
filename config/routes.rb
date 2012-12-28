@@ -41,6 +41,15 @@ PlanCharacters::Application.routes.draw do
 		put    '/equipment/:id',      :to => 'equipment#update',  :as => :equipment_edit_process
 		delete '/equipment/:id',      :to => 'equipment#destroy', :as => :equipment_destroy
 		
+		# Languages
+		get    '/languages',         :to => 'language#index',   :as => :language_list
+		get    '/language/new',      :to => 'language#new',     :as => :language_create
+		post   '/language/new',      :to => 'language#create',  :as => :language_create_process
+		get    '/language/:id',      :to => 'language#show',    :as => :language
+		get    '/language/:id/edit', :to => 'language#edit',    :as => :language_edit
+		put    '/language/:id',      :to => 'language#update',  :as => :language_edit_process
+		delete '/language/:id',      :to => 'language#destroy', :as => :language_destroy
+		
 		# Coming Soon TM
 		get '/languages', :to => 'main#comingsoon'
 		get '/locations', :to => 'main#comingsoon'
