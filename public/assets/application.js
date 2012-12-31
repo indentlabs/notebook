@@ -11866,6 +11866,38 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 }).call(this);
 (function() {
 
+  $(document).ready(function() {
+    var show_tab;
+    show_tab = function(tab_name) {
+      $(".tab").removeClass("active");
+      $("#show_" + tab_name).parent().addClass("active");
+      $(".section").hide();
+      return $("." + tab_name + "_section").css("visibility", "visible").hide().fadeIn("fast");
+    };
+    $("#show_general").click(function() {
+      return show_tab("general");
+    });
+    $("#show_culture").click(function() {
+      return show_tab("culture");
+    });
+    $("#show_cities").click(function() {
+      return show_tab("cities");
+    });
+    $("#show_geography").click(function() {
+      return show_tab("geography");
+    });
+    $("#show_history").click(function() {
+      return show_tab("history");
+    });
+    $("#show_more").click(function() {
+      return show_tab("more");
+    });
+    return show_tab("general");
+  });
+
+}).call(this);
+(function() {
+
 
 
 }).call(this);
