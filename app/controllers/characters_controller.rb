@@ -11,6 +11,8 @@ class CharactersController < ApplicationController
       @characters = []
     end
 
+		@characters = @characters.sort { |a, b| a.name.downcase <=> b.name.downcase }
+
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @characters }
