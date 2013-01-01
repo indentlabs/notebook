@@ -8,6 +8,8 @@ class LocationsController < ApplicationController
     if @locations.size == 0
       @locations = []
     end
+    
+		@locations = @locations.sort { |a, b| a.name.downcase <=> b.name.downcase }
 
     respond_to do |format|
       format.html # index.html.erb

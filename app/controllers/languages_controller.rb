@@ -8,6 +8,8 @@ class LanguagesController < ApplicationController
     if @languages.size == 0
       @languages = []
     end
+    
+		@languages = @languages.sort { |a, b| a.name.downcase <=> b.name.downcase }
 
     respond_to do |format|
       format.html # index.html.erb
