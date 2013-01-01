@@ -4,7 +4,7 @@ class Location
   # General
   field :name, :type => String
   field :type_of, :type => String
-  field :located_at, :type => String # to image
+  field :located_at, :type => String
   
   # Culture
   field :population, :type => String
