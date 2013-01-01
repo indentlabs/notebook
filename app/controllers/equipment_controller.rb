@@ -8,6 +8,8 @@ class EquipmentController < ApplicationController
     if @equipment.size == 0
       @equipment = []
     end
+    
+		@equipment = @equipment.sort { |a, b| a.name.downcase <=> b.name.downcase }
 
     respond_to do |format|
       format.html # index.html.erb
