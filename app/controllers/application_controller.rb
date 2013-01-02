@@ -1,6 +1,53 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
   
+  helper_method :character_picker
+  helper_method :equipment_picker
+  helper_method :language_picker
+  helper_method :location_picker
+  
+  # View Helpers
+  def character_picker
+  	html = '<ul class="dropdown-menu">'
+  	Character.where(user_id: session[:user]).each do |i|
+  		html << '<li><a href="#">' + i.name + '</a></li>'
+  	end
+  	html << '</ul>'
+
+  	return html.html_safe
+  end
+  
+  def equipment_picker
+  	html = '<ul class="dropdown-menu">'
+  	Equipment.where(user_id: session[:user]).each do |i|
+  		html << '<li><a href="#">' + i.name + '</a></li>'
+  	end
+  	html << '</ul>'
+
+  	return html.html_safe
+  end
+  
+  def language_picker
+  	html = '<ul class="dropdown-menu">'
+  	Language.where(user_id: session[:user]).each do |i|
+  		html << '<li><a href="#">' + i.name + '</a></li>'
+  	end
+  	html << '</ul>'
+
+  	return html.html_safe
+  end
+  
+  def location_picker
+  	html = '<ul class="dropdown-menu">'
+  	Location.where(user_id: session[:user]).each do |i|
+  		html << '<li><a href="#">' + i.name + '</a></li>'
+  	end
+  	html << '</ul>'
+
+  	return html.html_safe
+  end
+  
+  # Authentication
   def is_logged_in?
     session[:user]
   end
