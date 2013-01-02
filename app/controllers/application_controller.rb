@@ -8,13 +8,16 @@ class ApplicationController < ActionController::Base
   
   # View Helpers
   def character_picker
+  	characters = Character.where(user_id: session[:user])
+  	return if characters.length == 0
+  
   	html = '<span class="btn-group input-append help-inline">'
   	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
   	html << '<i class="icon-user"></i> '
   	html << '<span class="caret"></span>'
   	html << '</button>'
   	html << '<ul class="dropdown-menu dropdown-picker">'
-  	Character.where(user_id: session[:user]).each do |i|
+  	characters.each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end
   	html << '</ul>'
@@ -24,13 +27,16 @@ class ApplicationController < ActionController::Base
   end
   
   def equipment_picker
+  	equipment = Equipment.where(user_id: session[:user])
+  	return if equipment.length == 0
+  
   	html = '<span class="btn-group input-append help-inline">'
   	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
   	html << '<i class="icon-shopping-cart"></i> '
   	html << '<span class="caret"></span>'
   	html << '</button>'
   	html << '<ul class="dropdown-menu dropdown-picker">'
-  	Equipment.where(user_id: session[:user]).each do |i|
+  	equipment.each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end
   	html << '</ul>'
@@ -40,13 +46,16 @@ class ApplicationController < ActionController::Base
   end
   
   def language_picker
+  	languages = Language.where(user_id: session[:user])
+  	return if languages.length == 0
+  
   	html = '<span class="btn-group input-append help-inline">'
   	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
   	html << '<i class="icon-comment"></i> '
   	html << '<span class="caret"></span>'
   	html << '</button>'
   	html << '<ul class="dropdown-menu dropdown-picker">'
-  	Language.where(user_id: session[:user]).each do |i|
+  	languages.each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end
   	html << '</ul>'
@@ -56,13 +65,16 @@ class ApplicationController < ActionController::Base
   end
   
   def location_picker
+  	locations = Location.where(user_id: session[:user])
+  	return if locations.length == 0
+  
   	html = '<span class="btn-group input-append help-inline">'
   	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
   	html << '<i class="icon-map-marker"></i> '
   	html << '<span class="caret"></span>'
   	html << '</button>'
   	html << '<ul class="dropdown-menu dropdown-picker">'
-  	Location.where(user_id: session[:user]).each do |i|
+  	locations.each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end
   	html << '</ul>'
