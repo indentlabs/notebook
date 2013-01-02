@@ -11903,6 +11903,35 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 }).call(this);
 (function() {
 
+  $(document).ready(function() {
+    var show_tab;
+    show_tab = function(tab_name) {
+      $(".tab").removeClass("active");
+      $("#show_" + tab_name).parent().addClass("active");
+      $(".section").hide();
+      return $("." + tab_name + "_section").css("visibility", "visible").hide().fadeIn("fast");
+    };
+    $("#show_general").click(function() {
+      return show_tab("general");
+    });
+    $("#show_appearance").click(function() {
+      return show_tab("appearance");
+    });
+    $("#show_alignment").click(function() {
+      return show_tab("alignment");
+    });
+    $("#show_effects").click(function() {
+      return show_tab("effects");
+    });
+    $("#show_more").click(function() {
+      return show_tab("more");
+    });
+    return show_tab("general");
+  });
+
+}).call(this);
+(function() {
+
 
 
 }).call(this);
