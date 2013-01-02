@@ -1,0 +1,47 @@
+<%- model_class = @magic.class -%>
+
+<%= render :partial => 'tabs' %>
+
+<dl class="dl-horizontal hidden section general_section">
+  <dt><strong><%= model_class.human_attribute_name(:name) %>:</strong></dt>
+  <dd><%= @magic.name %></dd>
+  <dt><strong><%= model_class.human_attribute_name(:type_of) %>:</strong></dt>
+  <dd><%= @magic.type_of %></dd>
+</dl>
+
+<dl class="dl-horizontal hidden section appearance_section">
+  <dt><strong><%= model_class.human_attribute_name(:manifestation) %>:</strong></dt>
+  <dd><%= @magic.manifestation %></dd>
+  <dt><strong><%= model_class.human_attribute_name(:symptoms) %>:</strong></dt>
+  <dd><%= @magic.symptoms %></dd>
+</dl>
+
+<dl class="dl-horizontal hidden section alignment_section">
+  <dt><strong>Element:</strong></dt>
+  <dd><%= @magic.element %></dd>
+  <dt><strong>Diety:</strong></dt>
+  <dd><%= @magic.diety %></dd>
+</dl>
+
+<dl class="dl-horizontal hidden section effects_section">
+  <dt><strong>Harmful effects:</strong></dt>
+  <dd><%= @magic.harmfulness %></dd>
+  <dt><strong>Helpful effects:</strong></dt>
+  <dd><%= @magic.helpfulness %></dd>
+</dl>
+
+<dl class="dl-horizontal hidden section "more_section">
+</dl>
+
+<div class="form-actions">
+  <%= link_to t('.back', :default => t("helpers.links.back")),
+              magic_list_path, :class => 'btn'  %>
+  <%= link_to t('.edit', :default => t("helpers.links.edit")),
+              magic_edit_path(@magic), :class => 'btn' %>
+  <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+              magic_path(@magic),
+              :method => 'delete',
+              :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
+              :class => 'btn btn-danger' %>
+</div>
+

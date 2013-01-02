@@ -59,6 +59,15 @@ PlanCharacters::Application.routes.draw do
 		put    '/location/:id',      :to => 'locations#update',  :as => :location_edit_process
 		delete '/location/:id',      :to => 'locations#destroy', :as => :location_destroy
 		
+		# Magic
+		get    '/magic',          :to => 'magic#index',   :as => :magic_list
+		get    '/magic/new',      :to => 'magic#new',     :as => :magic_create
+		post   '/magic/new',      :to => 'magic#create',  :as => :magic_create_process
+		get    '/magic/:id',      :to => 'magic#show',    :as => :magic
+		get    '/magic/:id/edit', :to => 'magic#edit',    :as => :magic_edit
+		put    '/magic/:id',      :to => 'magic#update',  :as => :magic_edit_process
+		delete '/magic/:id',      :to => 'magic#destroy', :as => :magic_destroy
+		
 		# Coming Soon TM
 		get '/magic',     :to => 'main#comingsoon'
 		get '/plots',     :to => 'main#comingsoon'

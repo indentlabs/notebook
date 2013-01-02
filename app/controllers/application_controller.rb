@@ -121,4 +121,11 @@ class ApplicationController < ActionController::Base
   	  redirect_to location_list_path, :notice => "You don't have permission to do that!"
   	end
   end
+  
+  def require_ownership_of_magic
+  	magic = Magic.find(params[:id])
+  	unless session[:user] and session[:user] == magic.user.id
+  	  redirect_to magic_list_path, :notice => "You don't have permission to do that!"
+  	end
+  end
 end
