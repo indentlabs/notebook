@@ -8,41 +8,65 @@ class ApplicationController < ActionController::Base
   
   # View Helpers
   def character_picker
-  	html = '<ul class="dropdown-menu">'
+  	html = '<span class="btn-group input-append help-inline">'
+  	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
+  	html << '<i class="icon-user"></i> '
+  	html << '<span class="caret"></span>'
+  	html << '</button>'
+  	html << '<ul class="dropdown-menu">'
   	Character.where(user_id: session[:user]).each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end
   	html << '</ul>'
+  	html << '</span>'
 
   	return html.html_safe
   end
   
   def equipment_picker
-  	html = '<ul class="dropdown-menu">'
+  	html = '<span class="btn-group input-append help-inline">'
+  	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
+  	html << '<i class="icon-shopping-cart"></i> '
+  	html << '<span class="caret"></span>'
+  	html << '</button>'
+  	html << '<ul class="dropdown-menu">'
   	Equipment.where(user_id: session[:user]).each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end
   	html << '</ul>'
+  	html << '</span>'
 
   	return html.html_safe
   end
   
   def language_picker
-  	html = '<ul class="dropdown-menu">'
+  	html = '<span class="btn-group input-append help-inline">'
+  	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
+  	html << '<i class="icon-comment"></i> '
+  	html << '<span class="caret"></span>'
+  	html << '</button>'
+  	html << '<ul class="dropdown-menu">'
   	Language.where(user_id: session[:user]).each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end
   	html << '</ul>'
+  	html << '</span>'
 
   	return html.html_safe
   end
   
   def location_picker
-  	html = '<ul class="dropdown-menu">'
+  	html = '<span class="btn-group input-append help-inline">'
+  	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
+  	html << '<i class="icon-map-marker"></i> '
+  	html << '<span class="caret"></span>'
+  	html << '</button>'
+  	html << '<ul class="dropdown-menu">'
   	Location.where(user_id: session[:user]).each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end
   	html << '</ul>'
+  	html << '</span>'
 
   	return html.html_safe
   end
