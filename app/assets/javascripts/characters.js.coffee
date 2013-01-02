@@ -28,5 +28,9 @@ $(document).ready ->
 
   $("#show_more").click ->
     show_tab "more"
+  
+  $(".dropdown-picker li a").click ->
+    val = $(this).text()
+    $(this).closest('.controls').find('input').val(val)
 
   show_tab "general"

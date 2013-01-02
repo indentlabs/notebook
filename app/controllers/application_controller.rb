@@ -13,7 +13,7 @@ class ApplicationController < ActionController::Base
   	html << '<i class="icon-user"></i> '
   	html << '<span class="caret"></span>'
   	html << '</button>'
-  	html << '<ul class="dropdown-menu">'
+  	html << '<ul class="dropdown-menu dropdown-picker">'
   	Character.where(user_id: session[:user]).each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end
@@ -29,7 +29,7 @@ class ApplicationController < ActionController::Base
   	html << '<i class="icon-shopping-cart"></i> '
   	html << '<span class="caret"></span>'
   	html << '</button>'
-  	html << '<ul class="dropdown-menu">'
+  	html << '<ul class="dropdown-menu dropdown-picker">'
   	Equipment.where(user_id: session[:user]).each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end
@@ -45,7 +45,7 @@ class ApplicationController < ActionController::Base
   	html << '<i class="icon-comment"></i> '
   	html << '<span class="caret"></span>'
   	html << '</button>'
-  	html << '<ul class="dropdown-menu">'
+  	html << '<ul class="dropdown-menu dropdown-picker">'
   	Language.where(user_id: session[:user]).each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end
@@ -61,7 +61,7 @@ class ApplicationController < ActionController::Base
   	html << '<i class="icon-map-marker"></i> '
   	html << '<span class="caret"></span>'
   	html << '</button>'
-  	html << '<ul class="dropdown-menu">'
+  	html << '<ul class="dropdown-menu dropdown-picker">'
   	Location.where(user_id: session[:user]).each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end

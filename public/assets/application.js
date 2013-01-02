@@ -11802,6 +11802,11 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
     $("#show_more").click(function() {
       return show_tab("more");
     });
+    $(".dropdown-picker li a").click(function() {
+      var val;
+      val = $(this).text();
+      return $(this).closest('.controls').find('input').val(val);
+    });
     return show_tab("general");
   });
 
