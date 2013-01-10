@@ -55,7 +55,7 @@ class ApplicationController < ActionController::Base
   	html << '<i class="icon-comment"></i> '
   	html << '<span class="caret"></span>'
   	html << '</button>'
-  	html << '<ul class="dropdown-menu dropdown-picker">'
+  	html << '<ul class="dropdown-menu dropdown-picker" id="universe-selector">'
   	languages.each do |i|
   		html << '<li><a href="#">' + i.name + '</a></li>'
   	end
@@ -94,9 +94,9 @@ class ApplicationController < ActionController::Base
   	html << '<span class="caret"></span>'
   	html << '</button>'
   	html << '<ul class="dropdown-menu dropdown-picker">'
-		html << '<li><a href="#">All universes</a></li>'
+		html << '<li><a href="/plan/characters">All universes</a></li>'
   	universes.each do |i|
-  		html << '<li><a href="#">' + i.name + '</a></li>'
+  		html << '<li><a href="/plan/characters/from/' + i.name.strip + '">' + i.name + '</a></li>'
   	end
   	html << '</ul>'
   	html << '</span>'
