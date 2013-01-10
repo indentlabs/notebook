@@ -10,6 +10,11 @@ class CharactersController < ApplicationController
     if @characters.size == 0
       @characters = []
     end
+    
+    if params[:universe]
+    	@universe = Universe.where(user_id: session[:user]).where(name: params[:universe].strip).first
+	    @characters = @characters.where(universe_id: @universe.id)    	
+    end
 
 		@characters = @characters.sort { |a, b| a.name.downcase <=> b.name.downcase }
 

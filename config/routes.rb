@@ -25,7 +25,7 @@ PlanCharacters::Application.routes.draw do
   scope '/plan' do
 		# Characters
 		get    '/characters',         :to => 'characters#index',   :as => :character_list
-		get    '/characters/from/:universe', :to => 'characters#filter', :as => :characters_by_universe
+		get    '/characters/from/:universe', :to => 'characters#index', :as => :characters_by_universe
 		get    '/character/new',      :to => 'characters#new',     :as => :character_create
 		post   '/character/new',      :to => 'characters#create',  :as => :character_create_process
 		get    '/character/:id',      :to => 'characters#show',    :as => :character
@@ -35,7 +35,7 @@ PlanCharacters::Application.routes.draw do
 		
 		# Equipment
 		get    '/equipment',          :to => 'equipment#index',   :as => :equipment_list
-		get    '/equipment/from/:universe', :to => 'equipment#filter', :as => :equipment_by_universe
+		get    '/equipment/from/:universe', :to => 'equipment#index', :as => :equipment_by_universe
 		get    '/equipment/new',      :to => 'equipment#new',     :as => :equipment_create
 		post   '/equipment/new',      :to => 'equipment#create',  :as => :equipment_create_process
 		get    '/equipment/:id',      :to => 'equipment#show',    :as => :equipment
@@ -45,7 +45,7 @@ PlanCharacters::Application.routes.draw do
 		
 		# Languages
 		get    '/languages',         :to => 'languages#index',   :as => :language_list
-		get    '/languages/from/:universe', :to => 'languages#filter',   :as => :languages_by_universe
+		get    '/languages/from/:universe', :to => 'languages#index',   :as => :languages_by_universe
 		get    '/language/new',      :to => 'languages#new',     :as => :language_create
 		post   '/language/new',      :to => 'languages#create',  :as => :language_create_process
 		get    '/language/:id',      :to => 'languages#show',    :as => :language
@@ -55,7 +55,7 @@ PlanCharacters::Application.routes.draw do
 		
 		# Locations
 		get    '/locations',         :to => 'locations#index',   :as => :location_list
-		get    '/locations/from/:universe', :to => 'locations#filter', :as => :locations_by_universe
+		get    '/locations/from/:universe', :to => 'locations#index', :as => :locations_by_universe
 		get    '/location/new',      :to => 'locations#new',     :as => :location_create
 		post   '/location/new',      :to => 'locations#create',  :as => :location_create_process
 		get    '/location/:id',      :to => 'locations#show',    :as => :location
@@ -65,7 +65,7 @@ PlanCharacters::Application.routes.draw do
 		
 		# Magic
 		get    '/magic',          :to => 'magic#index',   :as => :magic_list
-		get    '/magic/from/:universe', :to => 'magic#filter', :as => :magic_by_universe
+		get    '/magic/from/:universe', :to => 'magic#index', :as => :magic_by_universe
 		get    '/magic/new',      :to => 'magic#new',     :as => :magic_create
 		post   '/magic/new',      :to => 'magic#create',  :as => :magic_create_process
 		get    '/magic/:id',      :to => 'magic#show',    :as => :magic

@@ -64,4 +64,5 @@ class Character
 	#additional fields
 
   belongs_to :user
+  belongs_to :universe
 end
