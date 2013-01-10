@@ -128,4 +128,11 @@ class ApplicationController < ActionController::Base
   	  redirect_to magic_list_path, :notice => "You don't have permission to do that!"
   	end
   end
+  
+  def require_ownership_of_universe
+  	universe = Universe.find(params[:id])
+  	unless session[:user] and session[:user] == universe.user.id
+  	  redirect_to universe_list_path, :notice => "You don't have permission to do that!"
+  	end
+  end
 end
