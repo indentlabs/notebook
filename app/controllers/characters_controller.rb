@@ -74,7 +74,9 @@ class CharactersController < ApplicationController
   def update
     @character = Character.find(params[:id])
     
-		unless params[:character][:universe].empty?
+		if params[:character][:universe].empty?
+		  params[:character][:universe] = nil
+		else
 			params[:character][:universe] = Universe.where(user_id: session[:user]).where(name: params[:character][:universe].strip).first
 		end
 
