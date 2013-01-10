@@ -56,6 +56,7 @@ class CharactersController < ApplicationController
   def create
     @character = Character.new(params[:character])
     @character.user_id = session[:user]
+    @character.universe = Universe.where(user_id: session[:user]).where(name: params[:character][:universe].strip).first
 
     respond_to do |format|
       if @character.save
@@ -72,6 +73,10 @@ class CharactersController < ApplicationController
   # PUT /characters/1.json
   def update
     @character = Character.find(params[:id])
+    
+		unless params[:character][:universe].empty?
+			params[:character][:universe] = Universe.where(user_id: session[:user]).where(name: params[:character][:universe].strip).first
+		end
 
     respond_to do |format|
       if @character.update_attributes(params[:character])

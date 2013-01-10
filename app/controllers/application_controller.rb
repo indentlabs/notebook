@@ -6,6 +6,7 @@ class ApplicationController < ActionController::Base
   helper_method :language_picker
   helper_method :location_picker
   helper_method :universe_picker
+  helper_method :universe_filter
   
   # View Helpers
   def character_picker
@@ -85,6 +86,25 @@ class ApplicationController < ActionController::Base
   end
   
   def universe_picker
+  	universes = Universe.where(user_id: session[:user])
+  	return if universes.length == 0
+  
+  	html = '<span class="btn-group input-append help-inline">'
+  	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
+  	html << '<i class="icon-globe"></i> '
+  	html << '<span class="caret"></span>'
+  	html << '</button>'
+  	html << '<ul class="dropdown-menu dropdown-picker">'
+  	universes.each do |i|
+  		html << '<li><a href="#">' + i.name + '</a></li>'
+  	end
+  	html << '</ul>'
+  	html << '</span>'
+
+  	return html.html_safe
+  end
+  
+  def universe_filter
   	universes = Universe.where(user_id: session[:user])
   	return if universes.length == 0
   
