@@ -1,14 +1,16 @@
 <%- model_class = Character.new.class -%>
 <h1>
 	<%=t '.title', :default => model_class.model_name.human.pluralize %>
-	<small>from universe: </small><%= universe_filter %>
+	<% if Universe.where(user_id: session[:user]).length > 0 %>
+		<small>from universe: </small><%= universe_filter %>
+	<% end %>
 </h1>
 <table class="table table-striped">
   <thead>
     <tr>
       <th><%= model_class.human_attribute_name(:name) %></th>
       <th><%= model_class.human_attribute_name(:role) %></th>
-      <% unless @selected_universe_filter %>
+      <% if Universe.where(user_id: session[:user]).length > 0 and not @selected_universe_filter  %>
 	      <th><%= model_class.human_attribute_name(:universe) %></th>
       <% end %>
       <th><%=t '.actions', :default => t("helpers.actions") %></th>
@@ -19,7 +21,7 @@
       <tr>
         <td><%= link_to character.name, character_path(character) %></td>
         <td><%= character.role %></td>
-        <% unless @selected_universe_filter %>
+        <% if Universe.where(user_id: session[:user]).length > 0 and not @selected_universe_filter %>
         	<td><%= character.universe ? character.universe.name : "" %></td>
         <% end %>
         <td>
