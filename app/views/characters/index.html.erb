@@ -8,6 +8,9 @@
     <tr>
       <th><%= model_class.human_attribute_name(:name) %></th>
       <th><%= model_class.human_attribute_name(:role) %></th>
+      <% unless @selected_universe_filter %>
+	      <th><%= model_class.human_attribute_name(:universe) %></th>
+      <% end %>
       <th><%=t '.actions', :default => t("helpers.actions") %></th>
     </tr>
   </thead>
@@ -16,6 +19,9 @@
       <tr>
         <td><%= link_to character.name, character_path(character) %></td>
         <td><%= character.role %></td>
+        <% unless @selected_universe_filter %>
+        	<td><%= character.universe ? character.universe.name : "" %></td>
+        <% end %>
         <td>
           <%= link_to t('.view', :default => t("helpers.links.view")),
                       character_path(character), :class => 'btn btn-mini' %>
