@@ -107,10 +107,14 @@ class ApplicationController < ActionController::Base
   def universe_filter
   	universes = Universe.where(user_id: session[:user])
   	return if universes.length == 0
+  	
+  	unless @selected_universe_filter
+  	  @selected_universe_filter = 'All universes'
+  	end
   
   	html = '<span class="btn-group input-append help-inline">'
   	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
-  	html << '<i class="icon-globe"></i> '
+  	html << '<i class="icon-globe"></i> ' + @selected_universe_filter + ' '
   	html << '<span class="caret"></span>'
   	html << '</button>'
   	html << '<ul class="dropdown-menu dropdown-picker">'
