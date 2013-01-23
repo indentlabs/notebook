@@ -59,6 +59,7 @@ PlanCharacters::Application.routes.draw do
 		get    '/locations/from/:universe', :to => 'locations#index', :as => :locations_by_universe
 		get    '/location/new',      :to => 'locations#new',     :as => :location_create
 		post   '/location/new',      :to => 'locations#create',  :as => :location_create_process
+		get    '/location/new/:type_of', :to => 'locations#new',     :as => :location_create_type
 		get    '/location/:id',      :to => 'locations#show',    :as => :location
 		get    '/location/:id/edit', :to => 'locations#edit',    :as => :location_edit
 		put    '/location/:id',      :to => 'locations#update',  :as => :location_edit_process
