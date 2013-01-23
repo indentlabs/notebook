@@ -16,6 +16,11 @@ class Magic
   # Effects
   field :harmfulness, :type => String # Harmful effects
   field :helpfulness, :type => String # Helpful effects
+
+  # Requirements
+  field :resource, :type => String # Resource required
+  field :skill_level, :type => String # Skill required
+  field :limitations, :type => String
   
   # More
 

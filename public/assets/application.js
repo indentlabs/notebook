@@ -11923,6 +11923,9 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
     $("#show_effects").click(function() {
       return show_tab("effects");
     });
+    $("#show_requirements").click(function() {
+      return show_tab("requirements");
+    });
     $("#show_more").click(function() {
       return show_tab("more");
     });

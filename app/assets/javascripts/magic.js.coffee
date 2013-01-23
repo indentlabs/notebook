@@ -17,6 +17,9 @@ $(document).ready ->
   $("#show_effects").click ->
     show_tab "effects"
     
+  $("#show_requirements").click ->
+    show_tab "requirements"
+
   $("#show_more").click ->
     show_tab "more"
 
