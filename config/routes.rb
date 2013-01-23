@@ -20,6 +20,7 @@ PlanCharacters::Application.routes.draw do
   get  '/account',      :to => 'users#edit',   :as => :account
   put  '/register',     :to => 'users#update', :as => :account_process
   get  '/be-anonymous', :to => 'users#anonymous', :as => :anonymous
+  get  '/anon-login',   :to => 'users#anonymous_login', :as => :anonymous_login
   
   # Planning
   scope '/plan' do

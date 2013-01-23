@@ -34,6 +34,22 @@ class UsersController < ApplicationController
     end
   end
 
+	def anonymous_login
+		id = rand(10000000).to_s + rand(10000000).to_s
+    @user = User.new(:name => 'Anonymous-' + id.to_s, :email => id.to_s + '@localhost', :password => id.to_s)
+
+    respond_to do |format|
+      if @user.save
+		    session[:user] = @user.id
+        format.html { redirect_to homepage_path, notice: 'You have been logged in to a temporary account that will delete itself (and everything you create with it!) as soon as you log out.' }
+        format.json { render json: @user, status: :created }
+      else
+        format.html { render action: "new" }
+        format.json { render json: @user.errors, status: :unprocessable_entity }
+      end
+    end
+	end
+
   # PUT /users/1
   # PUT /users/1.json
   def update
