@@ -37,6 +37,7 @@ PlanCharacters::Application.routes.draw do
 		get    '/equipment',          :to => 'equipment#index',   :as => :equipment_list
 		get    '/equipment/from/:universe', :to => 'equipment#index', :as => :equipment_by_universe
 		get    '/equipment/new',      :to => 'equipment#new',     :as => :equipment_create
+		get    '/equipment/new/:type_of', :to => 'equipment#new',     :as => :equipment_create_type
 		post   '/equipment/new',      :to => 'equipment#create',  :as => :equipment_create_process
 		get    '/equipment/:id',      :to => 'equipment#show',    :as => :equipment
 		get    '/equipment/:id/edit', :to => 'equipment#edit',    :as => :equipment_edit
