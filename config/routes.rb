@@ -70,6 +70,7 @@ PlanCharacters::Application.routes.draw do
 		get    '/magic/from/:universe', :to => 'magic#index', :as => :magic_by_universe
 		get    '/magic/new',      :to => 'magic#new',     :as => :magic_create
 		post   '/magic/new',      :to => 'magic#create',  :as => :magic_create_process
+		get    '/magic/new/:type_of', :to => 'magic#new',     :as => :magic_create_type
 		get    '/magic/:id',      :to => 'magic#show',    :as => :magic
 		get    '/magic/:id/edit', :to => 'magic#edit',    :as => :magic_edit
 		put    '/magic/:id',      :to => 'magic#update',  :as => :magic_edit_process
