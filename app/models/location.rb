@@ -4,7 +4,7 @@ class Location
   # General
   field :name, :type => String
   field :type_of, :type => String
-  field :located_at, :type => String
+  field :description, :type => String
   
   # Culture
   field :population, :type => String
@@ -22,6 +22,7 @@ class Location
   # Geography
   field :area, :type => String
   field :crops, :type => String
+  field :located_at, :type => String
   
   # History
   field :established_year, :type => String
