@@ -41,7 +41,7 @@ class UsersController < ApplicationController
     respond_to do |format|
       if @user.save
 		    session[:user] = @user.id
-        format.html { redirect_to homepage_path, notice: 'You have been logged in to a temporary account that will delete itself (and everything you create with it!) as soon as you log out.' }
+        format.html { redirect_to dashboard_path, notice: 'You have been logged in to a temporary account that will delete itself (and everything you create with it!) as soon as you log out.' }
         format.json { render json: @user, status: :created }
       else
         format.html { render action: "new" }

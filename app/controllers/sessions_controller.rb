@@ -24,7 +24,7 @@ class SessionsController < ApplicationController
     session[:user] = user[0].id
       
     respond_to do |format|
-      format.html { redirect_to homepage_path, notice: 'Login successful.' }
+      format.html { redirect_to dashboard_path, notice: 'Login successful.' }
       format.json { render json: true, status: :created }
 	  end
 

@@ -5,7 +5,7 @@ PlanCharacters::Application.routes.draw do
   
   # User-centric stuff
   scope '/my' do
-  	get '/content',     :to => 'main#dashboard'
+  	get '/content',     :to => 'main#dashboard', :as => :dashboard
   	get '/submissions', :to => 'main#comingsoon'
   end
   
