@@ -4,4 +4,7 @@ class MainController < ApplicationController
   
   def comingsoon
   end
+  
+  def dashboard
+  end
 end
