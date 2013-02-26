@@ -7,13 +7,13 @@ class CharactersController < ApplicationController
   def index
     @characters = Character.where(user_id: session[:user])
     
-    if @characters.size == 0
+    if @characters.length == 0
       @characters = []
     end
     
     if params[:universe]
     	@universe = Universe.where(user_id: session[:user]).where(name: params[:universe].strip).first
-	    @characters = @characters.where(universe_id: @universe.id)
+      @characters = @characters.where(universe_id: @universe.id) if @characters.length > 0
 	    @selected_universe_filter = @universe.name  	
     end
 
