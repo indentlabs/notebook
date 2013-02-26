@@ -94,6 +94,11 @@ PlanCharacters::Application.routes.draw do
 	scope '/adoption' do
 		get '/', :to => 'main#comingsoon'
 	end
+
+	# Idea Market
+	scope '/market' do
+		get '/', :to => 'main#comingsoon'
+	end
 	
   # Write
   scope '/write' do
