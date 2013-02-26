@@ -1,14 +1,21 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
   
+  helper_method :nl2br
+  
   helper_method :character_picker
   helper_method :equipment_picker
   helper_method :language_picker
   helper_method :location_picker
   helper_method :universe_picker
+  
   helper_method :universe_filter
   
   # View Helpers
+  def nl2br(string)
+    string.gsub("\n\r","<br>").gsub("\r", "").gsub("\n", "<br />").html_safe
+  end
+  
   def character_picker
   	characters = Character.where(user_id: session[:user])
   	return if characters.length == 0
