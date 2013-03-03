@@ -35,7 +35,7 @@ $(document).ready ->
 
   show_tab "general"
 
-  $(".random_name_generator").click ->
+  $(".character_name_generator").click ->
     target = $(this).parent().find(".text_field")
     $.ajax
       dataType: "text"
@@ -45,7 +45,7 @@ $(document).ready ->
 
     0
 
-  $(".random_age_generator").click ->
+  $(".character_age_generator").click ->
     target = $(this).parent().find(".text_field")
     $.ajax
       dataType: "text"

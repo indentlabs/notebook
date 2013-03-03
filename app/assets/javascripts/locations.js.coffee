@@ -24,3 +24,13 @@ $(document).ready ->
     show_tab "more"
 
   show_tab "general"
+
+  $(".location_name_generator").click ->
+    target = $(this).parent().find(".text_field")
+    $.ajax
+      dataType: "text"
+      url: "/generate/location/name"
+      success: (data) ->
+        target.val data
+
+    0
