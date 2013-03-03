@@ -90,6 +90,17 @@ PlanCharacters::Application.routes.draw do
 		get '/plots',     :to => 'main#comingsoon'
 	end
 	
+	# Generators
+	scope '/generate' do
+	  # General information
+	  
+	  # Character information
+	  scope '/character' do
+	    get '/name',      :to => 'generator#character_name'
+	  end
+
+	end
+	
 	# Adoption Agency
 	scope '/adoption' do
 		get '/', :to => 'main#comingsoon'
