@@ -34,3 +34,13 @@ $(document).ready ->
     $(this).closest('.controls').find('input').val(val)
 
   show_tab "general"
+
+  $(".random_name_generator").click ->
+    target = $(this).parent().find(".text_field")
+    $.ajax
+      dataType: "text"
+      url: "/generate/character/name"
+      success: (data) ->
+        target.val data
+
+    0

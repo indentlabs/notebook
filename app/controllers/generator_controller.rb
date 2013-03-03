@@ -10,6 +10,6 @@ class GeneratorController < ApplicationController
     render :json => [
       @all_first_names[rand(@all_first_names.length)],
       @all_last_names[rand(@all_last_names.length)]
-    ].join(' ')
+    ].join(' '), :status => :ok
   end
 end

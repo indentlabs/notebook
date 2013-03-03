@@ -11807,7 +11807,19 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
       val = $(this).text();
       return $(this).closest('.controls').find('input').val(val);
     });
-    return show_tab("general");
+    show_tab("general");
+    return $(".random_name_generator").click(function() {
+      var target;
+      target = $(this).parent().find(".text_field");
+      $.ajax({
+        dataType: "text",
+        url: "/generate/character/name",
+        success: function(data) {
+          return target.val(data);
+        }
+      });
+      return 0;
+    });
   });
 
 }).call(this);
@@ -11838,6 +11850,11 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
     });
     return show_tab("general");
   });
+
+}).call(this);
+(function() {
+
+
 
 }).call(this);
 (function() {
