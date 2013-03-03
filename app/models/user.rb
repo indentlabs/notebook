@@ -7,6 +7,17 @@ class User
   validates_presence_of :name, :email, :password
   validates_uniqueness_of :name, :email
 
+  def content
+    {
+      :characters => characters,
+      :equipment  => equipment,
+      :languages  => languages,
+      :locations  => locations,
+      :magics     => magics,
+      :universes  => universes
+    }
+  end
+
   def characters
     Character.where(user_id: id)
   end
