@@ -97,6 +97,7 @@ PlanCharacters::Application.routes.draw do
 	  # Character information
 	  scope '/character' do
 	    get '/name',      :to => 'generator#character_name'
+	    get '/age',       :to => 'generator#character_age'
 	  end
 
 	end

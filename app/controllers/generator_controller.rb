@@ -10,6 +10,13 @@ class GeneratorController < ApplicationController
     render :json => [
       @all_first_names[rand(@all_first_names.length)],
       @all_last_names[rand(@all_last_names.length)]
-    ].join(' '), :status => :ok
+    ].join(' ')
+  end
+  
+  def character_age
+    @upper_limit = 100
+    @lower_limit = 2
+    
+    render :json => rand(@upper_limit - @lower_limit + 1) + @lower_limit
   end
 end

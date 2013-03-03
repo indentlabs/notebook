@@ -11808,12 +11808,24 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
       return $(this).closest('.controls').find('input').val(val);
     });
     show_tab("general");
-    return $(".random_name_generator").click(function() {
+    $(".random_name_generator").click(function() {
       var target;
       target = $(this).parent().find(".text_field");
       $.ajax({
         dataType: "text",
         url: "/generate/character/name",
+        success: function(data) {
+          return target.val(data);
+        }
+      });
+      return 0;
+    });
+    return $(".random_age_generator").click(function() {
+      var target;
+      target = $(this).parent().find(".text_field");
+      $.ajax({
+        dataType: "text",
+        url: "/generate/character/age",
         success: function(data) {
           return target.val(data);
         }

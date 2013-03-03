@@ -44,3 +44,13 @@ $(document).ready ->
         target.val data
 
     0
+
+  $(".random_age_generator").click ->
+    target = $(this).parent().find(".text_field")
+    $.ajax
+      dataType: "text"
+      url: "/generate/character/age"
+      success: (data) ->
+        target.val data
+
+    0
