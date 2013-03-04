@@ -21,7 +21,7 @@ class GeneratorController < ApplicationController
   end
 
   def location_name
-    @prefixes = ["New", "Los", "Fort", "City of ", "El", "Saint", "Des", "Little", "Big", "North", "East", "South", "West", "Round", "The", "Broken", "Santa"]
+    @prefixes = ["New", "Los", "Fort", "City of", "El", "Saint", "Des", "Little", "Big", "North", "East", "South", "West", "Round", "The", "Broken", "Santa"]
     @postfixes = ["Port", "City", "Grove", "Pines", "Falls", "Heights", "Oaks", "Rapids", "Valley", "Mountains", "Peaks", "Arbor", "Mesa", "Gardens", "Palms", "Beach", "Bend", "Ruins"]
     @syllables = ["lo", "chi", "ca", "go", "hou", "ston", "nix", "pho", "an", "ant", "ton", "io", "san", "die", "dia", "dal", "las", "son", "vil", "pol", "ral", "polis", "diana", "aus", "tin", "fran", "cis", "co", "col", "umb", "bus", "cha", "mem", "phis", "sea", "wor", "the", "tha", "den", "was", "bal", "ti", "mo", "ash", "wau", "kee", "ki", "ru", "lu", "cest", "pro", "ora", "ode", "mu", "ill", "ville", "vil"]
     
