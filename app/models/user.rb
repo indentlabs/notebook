@@ -6,6 +6,12 @@ class User
 
   validates_presence_of :name, :email, :password
   validates_uniqueness_of :name, :email
+  
+  before_create :hash_password
+  def hash_password
+    require 'digest'
+    self.password = Digest::MD5.hexdigest(self.name + "'s password IS... " + self.password + " (lol!)")
+  end
 
   def content
     {

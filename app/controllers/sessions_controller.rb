@@ -13,9 +13,11 @@ class SessionsController < ApplicationController
   # POST /sessions
   # POST /sessions.json
   def create
+    require 'digest'
     login = Session.new(params[:session])
     
-    user = User.where(name: login.username, password: login.password)
+    hash = Digest::MD5.hexdigest(login.username + "'s password IS... " + login.password + " (lol!)")
+    user = User.where(name: login.username, password: hash)
     if user.length < 1
       redirect_to login_path, notice: 'Username or password incorrect'
       return
