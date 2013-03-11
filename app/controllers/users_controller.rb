@@ -41,7 +41,8 @@ class UsersController < ApplicationController
     respond_to do |format|
       if @user.save
 		    session[:user] = @user.id
-        format.html { redirect_to dashboard_path, notice: 'You have been logged in to a temporary account that will delete itself (and everything you create with it!) as soon as you log out.' }
+        session[:anon_user] = true
+        format.html { redirect_to dashboard_path }
         format.json { render json: @user, status: :created }
       else
         format.html { render action: "new" }
@@ -57,6 +58,7 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       if @user.update_attributes(params[:user])
+        session[:anon_user] = false
         format.html { redirect_to homepage_path, notice: 'Successfully updated.' }
         format.json { head :no_content }
       else

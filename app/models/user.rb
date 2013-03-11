@@ -25,6 +25,17 @@ class User
     }
   end
 
+  def content_count
+    [
+      characters.length, 
+      equipment.length, 
+      languages.length, 
+      locations.length, 
+      magics.length, 
+      universes.length
+    ].sum
+  end
+
   def characters
     Character.where(user_id: id)
   end
