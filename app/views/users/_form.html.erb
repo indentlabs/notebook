@@ -1,4 +1,14 @@
 <%= form_for @user, :url => signup_process_path, :html => { :class => 'form-horizontal' } do |f| %>
+  <% if @user.errors.messages.length > 0 %>
+    <div class="alert">
+      <strong>Oops!</strong> There was a problem. See the high-tech bug report below and please try again!<br />
+      <ul>
+        <% @user.errors.messages.keys.each do |key| %>
+          <li><%= key.capitalize %>: <%= @user.errors.messages[key] %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
   <div class="control-group">
     <%= f.label :name, :class => 'control-label' %>
     <div class="controls">
@@ -7,7 +17,7 @@
       <% else %>
         <%= f.text_field :name, :class => 'text_field' %>
       <% end %>
-	    <span class="help-inline">This is the username you will log in with. Spaces are allowed.</span>
+	    <span class="help-inline muted">This is the username you will log in with. Spaces are allowed.</span>
     </div>
   </div>
   <div class="control-group">
