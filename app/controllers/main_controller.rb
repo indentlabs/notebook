@@ -9,6 +9,9 @@ class MainController < ApplicationController
   
   def comingsoon
   end
+
+  def anoninfo
+  end
   
   def dashboard
     @characters = Character.where(user_id: session[:user])
