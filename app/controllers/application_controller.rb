@@ -143,7 +143,7 @@ class ApplicationController < ActionController::Base
   
   def redirect_if_not_logged_in
     unless is_logged_in?
-      redirect_to login_path, :notice => "You must be logged in to do that!"
+      redirect_to signup_path, :notice => "You must be logged in to do that!"
     end
   end
   
