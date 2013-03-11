@@ -13,6 +13,7 @@ class ApplicationController < ActionController::Base
   
   # View Helpers
   def nl2br(string)
+    #simple_format string
     string.gsub("\n\r","<br>").gsub("\r", "").gsub("\n", "<br />").html_safe
   end
   
