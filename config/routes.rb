@@ -5,7 +5,8 @@ PlanCharacters::Application.routes.draw do
 
   # Info pages
   scope '/about' do
-  	get '/anon-login', :to => 'main#anoninfo', :as => :anon_info
+    get '/anon-login', :to => 'main#anoninfo',    :as => :anon_info
+    get '/privacy',    :to => 'main#privacyinfo', :as => :privacy_info
   end
   
   # User-centric stuff
