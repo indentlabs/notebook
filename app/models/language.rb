@@ -16,6 +16,7 @@ class Language
   field :locations, :type => String
   
   # More
+  field :notes, :type => String
 
   belongs_to :user
 end

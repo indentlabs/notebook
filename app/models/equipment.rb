@@ -20,6 +20,7 @@ class Equipment
   field :magic, :type => String # Magical Properties
   
   # More
+  field :notes, :type => String
 
   belongs_to :user
 end

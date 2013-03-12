@@ -60,7 +60,7 @@ class Character
 	field :archenemy, :type => String
 	
 	# More...
-	#additional notes
+	field :notes, :type => String
 	#additional fields
 
   belongs_to :user

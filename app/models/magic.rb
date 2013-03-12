@@ -24,6 +24,7 @@ class Magic
   field :limitations, :type => String
   
   # More
+  field :notes, :type => String
 
   belongs_to :user
 end

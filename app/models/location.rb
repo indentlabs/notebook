@@ -29,6 +29,7 @@ class Location
   field :notable_wars, :type => String
   
   # More
+  field :notes, :type => String
 
   belongs_to :user
 end
