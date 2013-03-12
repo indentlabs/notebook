@@ -1,0 +1,8 @@
+<%
+  # Destroy old sessions if a user has been deleted
+  begin
+    User.find(session[:user])
+  rescue Mongoid::Errors::DocumentNotFound
+    session[:user] = nil
+  end
+%>
