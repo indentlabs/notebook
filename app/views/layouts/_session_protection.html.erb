@@ -4,6 +4,10 @@
     User.find(session[:user]) if session[:user]
   rescue Mongoid::Errors::DocumentNotFound
     session[:user] = nil
-    redirect_to homepage_path
+    %>
+      <script type="text/javascript">
+        window.location.href="<%= homepage_path %>"
+      </script>
+    <%
   end
 %>
