@@ -7,9 +7,7 @@ module ApplicationHelper
 			return name
 		end
 
-		link = nil
-		result = 0
-
+		result = nil
 		type = type.downcase
 
 		case type
@@ -28,10 +26,19 @@ module ApplicationHelper
 			result = Universe.where(:name => name, :user_id => session[:user])
 		end
 
-		if result.length > 0
+		if result and result.length > 0
 			return link_to name, result.first
 		else
 			return name
 		end
+	end
+
+	def print_property(title, value, type)
+		return unless value and value.length > 0
+
+	  return [
+	  	"<dt><strong>", title, ":</strong></dt>",
+	  	"<dd>", simple_format(link_if_present(value, type)), "</dd>"
+	  ].join("").to_s.html_safe
 	end
 end

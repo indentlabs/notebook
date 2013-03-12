@@ -11,6 +11,7 @@ class Equipment
   
   # History
   field :original_owner, :type => String
+  field :current_owner, :type => String
   field :made_by, :type => String
   field :materials, :type => String
   field :year_made, :type => String

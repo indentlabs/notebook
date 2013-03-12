@@ -3,92 +3,57 @@
 <%= render :partial => 'tabs' %>
 
 <dl class="dl-horizontal hidden section general_section">
-  <dt><strong><%= model_class.human_attribute_name(:name) %>:</strong></dt>
-  <dd><%= simple_format @character.name %></dd>
-  <dt><strong>Role in story:</strong></dt>
-  <dd><%= simple_format @character.role %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:gender) %>:</strong></dt>
-  <dd><%= simple_format @character.gender %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:age) %>:</strong></dt>
-  <dd><%= simple_format @character.age %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:universe) %>:</strong></dt>
-  <dd><%= simple_format link_if_present @character.universe ? @character.universe.name : "", "universe" %></dd>
+  <%= print_property("Role in story", @character.role, "") %>
+  <%= print_property("Gender", @character.gender, "") %>
+  <%= print_property("Age", @character.age, "") %>
+  <%= print_property("Universe", @character.universe ? @character.universe.name : "", "universe") %>
 </dl>
 
 <dl class="dl-horizontal hidden section appearance_section">
-  <dt><strong><%= model_class.human_attribute_name(:weight) %>:</strong></dt>
-  <dd><%= simple_format @character.weight %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:height) %>:</strong></dt>
-  <dd><%= simple_format @character.height %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:haircolor) %>:</strong></dt>
-  <dd><%= simple_format @character.haircolor %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:hairstyle) %>:</strong></dt>
-  <dd><%= simple_format @character.hairstyle %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:eyecolor) %>:</strong></dt>
-  <dd><%= simple_format @character.eyecolor %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:race) %>:</strong></dt>
-  <dd><%= simple_format @character.race %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:skintone) %>:</strong></dt>
-  <dd><%= simple_format @character.skintone %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:bodytype) %>:</strong></dt>
-  <dd><%= simple_format @character.bodytype %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:identmarks) %>:</strong></dt>
-  <dd><%= simple_format @character.identmarks %></dd>
+  <%= print_property("Weight", @character.weight, "") %>
+  <%= print_property("Height", @character.height, "") %>
+  <%= print_property("Haircolor", @character.haircolor, "") %>
+  <%= print_property("Hairstyle", @character.hairstyle, "") %>
+  <%= print_property("Eyecolor", @character.eyecolor, "") %>
+  <%= print_property("Race", @character.race, "") %>
+  <%= print_property("Skintone", @character.skintone, "") %>
+  <%= print_property("Body type", @character.bodytype, "") %>
+  <%= print_property("Identifying marks", @character.identmarks, "") %>
 </dl>
 
 <dl class="dl-horizontal hidden section social_section">
-  <dt><strong>Best friend:</strong></dt>
-  <dd><%= simple_format link_if_present @character.bestfriend, "character" %></dd>
-  <dt><strong>Religion:</strong></dt>
-  <dd><%= simple_format @character.religion %></dd>
-  <dt><strong>Politics:</strong></dt>
-  <dd><%= simple_format @character.politics %></dd>
-  <dt><strong>Prejudices:</strong></dt>
-  <dd><%= simple_format @character.prejudices %></dd>
-  <dt><strong>Occupation:</strong></dt>
-  <dd><%= simple_format @character.occupation %></dd>
-  <dt><strong>Pets:</strong></dt>
-  <dd><%= simple_format @character.pets %></dd>
+  <%= print_property("Best friend", @character.bestfriend, "character") %>
+  <%= print_property("Religion", @character.religion, "") %>
+  <%= print_property("Politics", @character.politics, "") %>
+  <%= print_property("Prejudices", @character.prejudices, "") %>
+  <%= print_property("Occupation", @character.occupation, "") %>
+  <%= print_property("Pets", @character.pets, "") %>
 </dl>
 
 <dl class="dl-horizontal hidden section behavior_section">
-  <dt><strong><%= model_class.human_attribute_name(:mannerisms) %>:</strong></dt>
-  <dd><%= simple_format @character.mannerisms %></dd>
+  <%= print_property("Mannerisms", @character.mannerisms, "") %>
 </dl>
 
 <dl class="dl-horizontal hidden section history_section">
-  <dt><strong><%= model_class.human_attribute_name(:birthday) %>:</strong></dt>
-  <dd><%= simple_format @character.birthday %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:birthplace) %>:</strong></dt>
-  <dd><%= simple_format link_if_present @character.birthplace, "location" %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:education) %>:</strong></dt>
-  <dd><%= simple_format @character.education %></dd>
+  <%= print_property("Birthday", @character.birthday, "") %>
+  <%= print_property("Birthplace", @character.birthplace, "location") %>
+  <%= print_property("Education", @character.education, "location") %>
 </dl>
 
 <dl class="dl-horizontal hidden section favorites_section">
-  <dt><strong><%= model_class.human_attribute_name(:color) %>:</strong></dt>
-  <dd><%= simple_format @character.fave_color %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:food) %>:</strong></dt>
-  <dd><%= simple_format @character.fave_food %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:possession) %>:</strong></dt>
-  <dd><%= simple_format link_if_present @character.fave_possession, "equipment" %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:weapon) %>:</strong></dt>
-  <dd><%= simple_format link_if_present @character.fave_weapon, "equipment" %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:animal) %>:</strong></dt>
-  <dd><%= simple_format @character.fave_animal %></dd>
+  <%= print_property("Color", @character.fave_color, "") %>
+  <%= print_property("Food", @character.fave_food, "equipment") %>
+  <%= print_property("Possession", @character.fave_possession, "equipment") %>
+  <%= print_property("Weapon", @character.fave_weapon, "equipment") %>
+  <%= print_property("Animal", @character.fave_animal, "character") %>
 </dl>
 
 <dl class="dl-horizontal hidden section relationships_section">
-  <dt><strong><%= model_class.human_attribute_name(:father) %>:</strong></dt>
-  <dd><%= simple_format link_if_present @character.father, "character" %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:mother) %>:</strong></dt>
-  <dd><%= simple_format link_if_present @character.mother, "character" %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:spouse) %>:</strong></dt>
-  <dd><%= simple_format link_if_present @character.spouse, "character" %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:siblings) %>:</strong></dt>
-  <dd><%= simple_format link_if_present @character.siblings, "character" %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:archenemy) %>:</strong></dt>
-  <dd><%= simple_format link_if_present @character.archenemy, "character" %></dd>
+  <%= print_property("Father", @character.father, "character") %>
+  <%= print_property("Mother", @character.mother, "character") %>
+  <%= print_property("Spouse", @character.spouse, "character") %>
+  <%= print_property("Siblings", @character.siblings, "character") %>
+  <%= print_property("Archenemy", @character.archenemy, "character") %>
 </dl>
 
 <dl class="dl-horizontal hidden section more_section">
