@@ -1,3 +1,30 @@
-# Place all the behaviors and hooks related to the matching controller here.
-# All this logic will automatically be available in application.js.
-# You can use CoffeeScript in this file: http://jashkenas.github.com/coffee-script/
+$(document).ready ->
+  $(".location_name_generator").click ->
+  target = $(this).parent().find(".text_field")
+  $.ajax
+    dataType: "text"
+    url: "/generate/location/name"
+    success: (data) ->
+      target.val data
+
+  0
+
+$(".character_name_generator").click ->
+  target = $(this).parent().find(".text_field")
+  $.ajax
+    dataType: "text"
+    url: "/generate/character/name"
+    success: (data) ->
+      target.val data
+
+  0
+
+$(".character_age_generator").click ->
+  target = $(this).parent().find(".text_field")
+  $.ajax
+    dataType: "text"
+    url: "/generate/character/age"
+    success: (data) ->
+      target.val data
+
+  0

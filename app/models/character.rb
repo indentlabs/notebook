@@ -65,4 +65,6 @@ class Character
 
   belongs_to :user
   belongs_to :universe
+
+  embeds_many :custom_fields
 end
