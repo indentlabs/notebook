@@ -10,3 +10,5 @@ $(document).ready ->
   ]).each (key, val) ->
     $("#show_" + val).click ->
       show_tab val
+
+  show_tab "general"
