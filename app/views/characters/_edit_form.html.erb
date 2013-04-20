@@ -38,7 +38,25 @@
     </div>
   </div>
 
-  <%= render :partial => '/layouts/planning/custom_fields', :locals => { :section => "General" } %>
+  <hr />
+  <%= f.fields_for :custom_fields do |custom_field| %>
+  <div>
+    <h5 class="muted toggle-custom-fields"><i class="icon-chevron-down"></i> Advanced: Add your own fields to this tab</h5>
+    <div class="more-fields-form custom-field-form">
+      <br />
+
+      <div class="fields-container">
+        <%= render "custom_fields", :fb => custom_field %>
+      </div>
+
+      <div class="btn btn-small add-custom-field">
+        <i class="icon-plus"></i> Add Field
+      </div>
+
+    </div>
+  </div>
+  <% end %>
+  <hr />
 </div>
 
 <div class="hidden section appearance_section">

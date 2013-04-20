@@ -40,6 +40,7 @@ class CharactersController < ApplicationController
   # GET /characters/new.json
   def new
     @character = Character.new
+    @character.custom_fields.build
 
     respond_to do |format|
       format.html # new.html.erb
@@ -50,11 +51,14 @@ class CharactersController < ApplicationController
   # GET /characters/1/edit
   def edit
     @character = Character.find(params[:id])
+    @character.custom_fields.build
   end
 
   # POST /characters
   # POST /characters.json
   def create
+    #raise params.to_yaml
+
     @character = Character.new(params[:character])
     @character.user_id = session[:user]
     @character.universe = Universe.where(user_id: session[:user]).where(name: params[:character][:universe].strip).first

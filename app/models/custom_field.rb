@@ -4,5 +4,5 @@ class CustomField
   field :value, :type => String
   field :section, :type => String
 
-  embedded_in :character
+  belongs_to :character
 end

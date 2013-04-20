@@ -66,5 +66,6 @@ class Character
   belongs_to :user
   belongs_to :universe
 
-  embeds_many :custom_fields
+  has_many :custom_fields
+  accepts_nested_attributes_for :custom_fields #, :reject_if => lambda { |a| a[:key].blank? and a[:value].blank? }
 end
