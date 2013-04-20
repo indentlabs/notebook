@@ -4,6 +4,7 @@ class Universe
 	# General
   field :name,        :type => String
   field :description, :type => String
+  field :history,  :type => String
 	
 	# More...
 	
