@@ -41,6 +41,7 @@ class Character
   field :birthday, :type => String
   field :birthplace, :type => String
   field :education, :type => String
+  field :background, :type => String
 	#What is his deepest secret?
 	#Does he have a history of criminal activity?
 
