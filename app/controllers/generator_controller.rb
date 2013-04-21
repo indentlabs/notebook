@@ -1,4 +1,40 @@
 class GeneratorController < ApplicationController
+
+  # Character
+
+  def character_age
+    @upper_limit = 100
+    @lower_limit = 2
+    
+    render :json => rand(@upper_limit - @lower_limit + 1) + @lower_limit
+  end
+
+  def character_haircolor
+    @possible_colors = ["Blonde", "Black", "Brown", "Red", "Bald", "White", "Grey", "Balding", "Greying", "Bleached", "Blue", "Green", "Purple", "Orange", "Auburn", "Strawberry", "Chestnut", "Dirty Blonde", "Rainbow", "Black tips"]
+
+    render :json => @possible_colors[rand(@possible_colors.length)]
+  end
+
+  def character_hairstyle
+    @possible_styles = ["Afro", "Bald", "Balding", "Bob cut", "Bowl cut", "Bouffant", "Braided", "Bun", "Butch", "Buzz cut", "Chignon", "Chonmage", "Comb over", "Cornrows", "Crew cut", "Dreadlocks", "Emo", "Fauxhawk", "Feathered", "Flattop", "Fringe", "Liberty Spikes", "Long hair, straight", "Long hair, curly", "Long hair, wavy", "Mohawk", "Mop-top", "Odango", "Pageboy", "Parted", "Pigtails", "Pixie cut", "Pompadour", "Ponytail", "Rattail", "Rocker", "Slicked back", "Spiky, short", "Spiky, long", "Short, curly", "Short, wavy", "Short, thin", "Short, straight"]
+
+    render :json => @possible_styles[rand(@possible_styles.length)]
+  end
+
+  def character_height
+    @upper_foot_limit = 6
+    @lower_foot_limit = 2
+    @upper_inch_limit = 11
+    @lower_inch_limit = 0
+
+    render :json => [
+      rand(@upper_foot_limit - @lower_foot_limit + 1) + @lower_foot_limit,
+      "'",
+      rand(@upper_inch_limit - @lower_inch_limit + 1) + @lower_inch_limit,
+      '"'
+      ].join
+  end
+
   def character_name
     @male_first_names = ["James", "John", "Robert", "Michael", "William", "David", "Richard", "Charles", "Joseph", "Thomas", "Christopher", "Daniel", "Paul", "Mark", "Donald", "George", "Kenneth", "Steven", "Edward", "Brian", "Ronald", "Anthony", "Kevin", "Jason", "Matthew", "Gary", "Timothy", "Jose", "Larry", "Jeffrey", "Frank", "Scott", "Eric", "Stephen", "Andrew", "Raymond", "Gregory"]
     @female_first_names = ["Mary", "Patricia", "Linda", "Barbara", "Elizabeth", "Jennifer", "Maria", "Susan", "Margaret", "Margret", "Dorothy", "Lisa", "Nancy", "Karen", "Betty", "Helen", "Sandra", "Donna", "Carol", "Ruth", "Sharon", "Michelle", "Laura", "Sarah", "Kimberly", "Deborah", "Jessica", "Shirley", "Cynthia", "Angela", "Melissa", "Brenda", "Amy", "Anna", "Rebecca", "Virginia", "Kathleen", "Pamela"]
@@ -12,13 +48,21 @@ class GeneratorController < ApplicationController
       @all_last_names[rand(@all_last_names.length)]
     ].join(' ')
   end
-  
-  def character_age
-    @upper_limit = 100
-    @lower_limit = 2
-    
+
+  def character_race
+    @possible_races = ["Angel", "Animal", "Arachnoid", "Bird", "Construct", "Dark Elf", "Dwarf", "Elemental", "Elf", "Fey", "Genie", "Gnome", "Half-Dwarf", "Half-Elf", "Half-Orc", "Halfling", "Human", "Insectoid", "Orc", "Reptilian", "Vampire", "Werewolf"]
+
+    render :json => @possible_races[rand(@possible_races.length)]
+  end
+
+  def character_weight
+    @upper_limit = 240
+    @lower_limit = 80
+
     render :json => rand(@upper_limit - @lower_limit + 1) + @lower_limit
   end
+
+  # Location
 
   def location_name
     @prefixes = ["New", "Los", "Fort", "City of", "El", "Saint", "Des", "Little", "Big", "North", "East", "South", "West", "Round", "The", "Broken", "Santa"]

@@ -102,8 +102,13 @@ PlanCharacters::Application.routes.draw do
   
     # Character information
     scope '/character' do
-      get '/name',      :to => 'generator#character_name'
       get '/age',       :to => 'generator#character_age'
+      get '/haircolor', :to => 'generator#character_haircolor'
+      get '/hairstyle', :to => 'generator#character_hairstyle'
+      get '/height',    :to => 'generator#character_height'
+      get '/name',      :to => 'generator#character_name'
+      get '/race',      :to => 'generator#character_race'
+      get '/weight',    :to => 'generator#character_weight'
     end
   
     # Location information
