@@ -96,26 +96,54 @@ PlanCharacters::Application.routes.draw do
 	get '/plots',     :to => 'main#comingsoon'
   end
 	
-  # Generators
+  # API Endpoints
   scope '/generate' do
     # General information
   
     # Character information
     scope '/character' do
-      get '/age',       :to => 'generator#character_age'
-      get '/haircolor', :to => 'generator#character_haircolor'
-      get '/hairstyle', :to => 'generator#character_hairstyle'
-      get '/height',    :to => 'generator#character_height'
-      get '/name',      :to => 'generator#character_name'
-      get '/race',      :to => 'generator#character_race'
-      get '/weight',    :to => 'generator#character_weight'
+      get '/age',               :to => 'generator#character_age'
+      get '/bodytype',          :to => 'generator#character_bodytype'
+      get '/eyecolor',          :to => 'generator#character_eyecolor'
+      get '/facial-hair',       :to => 'generator#character_facialhair'
+      get '/haircolor',         :to => 'generator#character_haircolor'
+      get '/hairstyle',         :to => 'generator#character_hairstyle'
+      get '/height',            :to => 'generator#character_height'
+      get '/identifying-mark',  :to => 'generator#character_identifyingmark'
+      get '/name',              :to => 'generator#character_name'
+      get '/race',              :to => 'generator#character_race'
+      get '/skintone',          :to => 'generator#character_skintone'
+      get '/weight',            :to => 'generator#character_weight'
     end
   
     # Location information
     scope '/location' do
-      get '/name',      :to => 'generator#location_name'
+      get '/name',              :to => 'generator#location_name'
     end
 
+    # Equipment location
+    scope '/equipment' do
+      scope '/weapon' do
+        get '/',                :to => 'generator#equipment_weapon'
+
+        get '/axe',             :to => 'generator#equipment_weapon_axe'
+        get '/bow',             :to => 'generator#equipment_weapon_bow'
+        get '/club',            :to => 'generator#equipment_weapon_club'
+        get '/fist',            :to => 'generator#equipment_weapon_fist'
+        get '/flexible',        :to => 'generator#equipment_weapon_flexible'
+        #todo /gun
+        get '/polearm',         :to => 'generator#equipment_weapon_polearm'
+        get '/shortsword',      :to => 'generator#equipment_weapon_shortsword'
+        get '/sword',           :to => 'generator#equipment_weapon_sword'
+        get '/thrown',          :to => 'generator#equipment_weapon_thrown'
+      end 
+
+      scope '/armor' do
+        get '/',                :to => 'generator#equipment_armor'
+
+        get '/shield',          :to => 'generator#equipment_armor_shield'
+      end
+    end
   end
 
   # Adoption Agency
