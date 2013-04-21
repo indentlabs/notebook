@@ -12,6 +12,7 @@ class Character
   field :weight,     :type => String
   field :haircolor,  :type => String
   field :hairstyle,  :type => String
+  field :facialhair, :type => String
   field :eyecolor,   :type => String
   field :race,       :type => String
   field :skintone,   :type => String
