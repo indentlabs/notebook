@@ -78,7 +78,7 @@ class GeneratorController < ApplicationController
   end
 
   def character_race
-    @possible_races = ["Angel", "Animal", "Arachnoid", "Bird", "Construct", "Dark Elf", "Dwarf", "Elemental", "Elf", "Fey", "Genie", "Gnome", "Half-Dwarf", "Half-Elf", "Half-Orc", "Halfling", "Human", "Insectoid", "Orc", "Reptilian", "Vampire", "Werewolf"]
+    @possible_races = ["Android", "Angel", "Animal", "Arachnoid", "Bird", "Construct", "Dark Elf", "Dwarf", "Elemental", "Elf", "Fairy", "Fey", "Genie", "Gnome", "Half-Dwarf", "Half-Elf", "Half-Orc", "Halfling", "Human", "Insectoid", "Orc", "Reptilian", "Robot", "Spirit", "Vampire", "Werewolf"]
 
     render :json => @possible_races[rand(@possible_races.length)]
   end
