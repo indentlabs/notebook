@@ -28,7 +28,7 @@ class GeneratorController < ApplicationController
   end
 
   def character_haircolor
-    @possible_colors = ["Blonde", "Black", "Brown", "Red", "Bald", "White", "Grey", "Balding", "Greying", "Bleached", "Blue", "Green", "Purple", "Orange", "Auburn", "Strawberry", "Chestnut", "Dirty Blonde", "Rainbow", "Black tips"]
+    @possible_colors = ["Blonde", "Black", "Brown", "Red", "Bald", "White", "Grey", "Balding", "Greying", "Bleached", "Blue", "Green", "Purple", "Orange", "Auburn", "Strawberry", "Chestnut", "Dirty Blonde", "Rainbow", "Black tips", "Jet black", "Raven black"]
 
     render :json => @possible_colors[rand(@possible_colors.length)]
   end
