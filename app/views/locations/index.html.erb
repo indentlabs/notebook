@@ -1,46 +1,55 @@
 <%- model_class = Location.new.class -%>
-<h1><%=t '.title', :default => model_class.model_name.human.pluralize %></h1>
 <% if @locations.length > 0 %>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th><%= model_class.human_attribute_name(:name) %></th>
-      <th><%= model_class.human_attribute_name(:type) %></th>
-      <th><%= model_class.human_attribute_name(:description) %></th>
-      <th><%=t '.actions', :default => t("helpers.actions") %></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @locations.each do |location| %>
-      <tr>
-        <td style="width: 260px;"><%= simple_format link_to location.name, location_path(location) %></td>
-        <td style="width: 130px;"><%= simple_format location.type_of %></td>
-        <td><%= simple_format truncate(location.description, :length => 256) %></td>
-        <td style="width: 130px;">
-          <%= link_to t('.view', :default => t("helpers.links.view")),
-                      location_path(location), :class => 'btn btn-mini' %>
-          <%= link_to t('.edit', :default => t("helpers.links.edit")),
-                      location_edit_path(location), :class => 'btn btn-mini' %>
-          <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
-                      location_path(location),
-                      :method => :delete,
-                      :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
-                      :class => 'btn btn-mini btn-danger' %>
-        </td>
-      </tr>
+<div class="card">
+  <h3 class="card-heading simple">
+    Your locations
+    <% if false and Universe.where(user_id: session[:user]).length > 0 %>
+      <small>from <%= universe_filter %></small>
     <% end %>
-  </tbody>
-</table>
+  </h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th><%= model_class.human_attribute_name(:name) %></th>
+        <th><%= model_class.human_attribute_name(:type) %></th>
+        <th><%= model_class.human_attribute_name(:description) %></th>
+        <th><%=t '.actions', :default => t("helpers.actions") %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @locations.each do |location| %>
+        <tr>
+          <td style="width: 160px;"><%= simple_format link_to location.name, location_path(location) %></td>
+          <td><%= simple_format location.type_of %></td>
+          <td><%= simple_format truncate(location.description, :length => 256) %></td>
+          <td style="width: 180px;">
+            <%= link_to t('.view', :default => t("helpers.links.view")),
+                        location_path(location), :class => 'btn' %>
+            <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                        location_edit_path(location), :class => 'btn' %>
+            <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                        location_path(location),
+                        :method => :delete,
+                        :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
+                        :class => 'btn btn-danger' %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
 <% end %>
 
-<div class="well" style="margin-top: 20px;">
-	<h4>Planning locations</h4>
-	<p>
-		Worldbuilding should never be neglected; keep track of where your characters are, where they have been, and where they are going. 
-	</p>
-	
-	<%= link_to 'New location', location_create_path, :class => 'btn btn-primary' %>
+<div class="card">
+  <h3 class="card-heading simple">Planning locations</h3>
+  <div class="card-body">
+    <p>
+      Worldbuilding should never be neglected; keep track of where your characters are, where they have been, and where they are going. 
+    </p>
+    <%= link_to 'New location', location_create_path, :class => 'btn btn-primary' %>
 
-	<%= link_to 'New country', location_create_type_path(:country), :class => 'btn' %>
-	<%= link_to 'New city', location_create_type_path(:city), :class => 'btn' %>
+    <%= link_to 'New country', location_create_type_path(:country), :class => 'btn' %>
+    <%= link_to 'New city', location_create_type_path(:city), :class => 'btn' %>
+  </div>
+  <div class="card-comments"></div>
 </div>
