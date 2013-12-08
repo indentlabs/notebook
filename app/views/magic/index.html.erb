@@ -1,47 +1,55 @@
 <%- model_class = Magic.new.class -%>
-<h1>Magic</h1>
 <% if @magics.length > 0 %>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th><%= model_class.human_attribute_name(:name) %></th>
-      <th><%= model_class.human_attribute_name(:type) %></th>
-      <th><%=t '.actions', :default => t("helpers.actions") %></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @magics.each do |magic| %>
-      <tr>
-        <td style="width: 260px;"><%= simple_format link_to magic.name, magic_path(magic) %></td>
-        <td><%= simple_format magic.type_of %></td>
-        <td style="width: 130px;">
-          <%= link_to t('.view', :default => t("helpers.links.view")),
-                      magic_path(magic), :class => 'btn btn-mini' %>
-          <%= link_to t('.edit', :default => t("helpers.links.edit")),
-                      magic_edit_path(magic), :class => 'btn btn-mini' %>
-          <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
-                      magic_path(magic),
-                      :method => :delete,
-                      :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
-                      :class => 'btn btn-mini btn-danger' %>
-        </td>
-      </tr>
+<div class="card">
+  <h3 class="card-heading simple">
+    Magic
+    <% if false and Universe.where(user_id: session[:user]).length > 0 %>
+      <small>from <%= universe_filter %></small>
     <% end %>
-  </tbody>
-</table>
+  </h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th><%= model_class.human_attribute_name(:name) %></th>
+        <th><%= model_class.human_attribute_name(:type) %></th>
+        <th><%=t '.actions', :default => t("helpers.actions") %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @magics.each do |magic| %>
+        <tr>
+          <td style="width: 160px;"><%= simple_format link_to magic.name, magic_path(magic) %></td>
+          <td><%= simple_format magic.type_of %></td>
+          <td style="width: 180px;">
+            <%= link_to t('.view', :default => t("helpers.links.view")),
+                        magic_path(magic), :class => 'btn' %>
+            <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                        magic_edit_path(magic), :class => 'btn' %>
+            <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                        magic_path(magic),
+                        :method => :delete,
+                        :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
+                        :class => 'btn btn-danger' %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
 <% end %>
 
-<div class="well" style="margin-top: 20px;">
-	<h4>Planning magic</h4>
-	<p>
-		Magic, the most wonderous thing! How does it work?
-	</p>
-	
-	<%= link_to 'New magic', magic_create_path, :class => 'btn btn-primary' %>
+<div class="card">
+  <h3 class="card-heading simple">Planning magic</h3>
+  <div class="card-body">
+    <p>
+      Magic, the most wonderous thing! How does it work?
+    </p>
+    <%= link_to 'New magic', magic_create_path, :class => 'btn btn-primary' %>
 
-	<%= link_to 'New spell', magic_create_type_path(:spell), :class => 'btn' %>
-	<%= link_to 'New enchantment', magic_create_type_path(:enchantment), :class => 'btn' %>
-	<%= link_to 'New curse', magic_create_type_path(:curse), :class => 'btn' %>
-	<%= link_to 'New potion', magic_create_type_path(:potion), :class => 'btn' %>
+    <%= link_to 'New spell', magic_create_type_path(:spell), :class => 'btn' %>
+    <%= link_to 'New enchantment', magic_create_type_path(:enchantment), :class => 'btn' %>
+    <%= link_to 'New curse', magic_create_type_path(:curse), :class => 'btn' %>
+    <%= link_to 'New potion', magic_create_type_path(:potion), :class => 'btn' %>
+  </div>
+  <div class="card-comments"></div>
 </div>
-
