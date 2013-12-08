@@ -1,19 +1,17 @@
 <% if session[:user] %>
-	<div class="btn-group">
-		<a class="btn" href="/my/content">
-			<i class="icon-user"></i>
-			<%= User.find(session[:user]).name %>
-		</a>
-		<a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
-		<ul class="dropdown-menu">
-		  <li><a href="/my/content">My Content</a></li>
-		  <li><a href="/account">Account Settings</a></li>
-		  <li class="divider"></li>
-		  <li><a href="/about/privacy">Privacy Policy</a></li>
-		  <li class="divider"></li>
-		  <li><a href="/logout">Log out</a></li>
-		</ul>
-	</div>
+	Logged in as 
+	<a class="dropdown-toggle" data-toggle="dropdown" href="/account">
+		<%= User.find(session[:user]).name %>
+		<span class="caret"></span>
+	</a>
+	<ul class="dropdown-menu">
+		<li><a href="/my/content">My Content</a></li>
+		<li><a href="/account">Account Settings</a></li>
+		<li class="divider"></li>
+		<li><a href="/about/privacy">Privacy Policy</a></li>
+		<li class="divider"></li>
+		<li><a href="/logout">Log out</a></li>
+	</ul>
 <% else %>
 	<ul class="nav">
 		<li><a href="/login">Login</a></li>
