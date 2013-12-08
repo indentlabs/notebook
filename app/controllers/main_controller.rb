@@ -12,6 +12,9 @@ class MainController < ApplicationController
 
   def anoninfo
   end
+
+  def attribution
+  end
   
   def dashboard
     @characters = Character.where(user_id: session[:user])
