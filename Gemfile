@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.3'
+gem 'rails', '3.2.13'
 
 # Mongo stuff
 gem 'bson_ext', '1.6.0'  
