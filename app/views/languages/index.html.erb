@@ -1,39 +1,48 @@
 <%- model_class = Language.new.class -%>
-<h1><%=t '.title', :default => model_class.model_name.human.pluralize %></h1>
 <% if @languages.length > 0 %>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th><%= model_class.human_attribute_name(:name) %></th>
-      <th><%=t '.actions', :default => t("helpers.actions") %></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @languages.each do |language| %>
-      <tr>
-        <td><%= simple_format link_to language.name, language_path(language) %></td>
-        <td style="width: 130px;">
-          <%= link_to t('.view', :default => t("helpers.links.view")),
-                      language_path(language), :class => 'btn btn-mini' %>
-          <%= link_to t('.edit', :default => t("helpers.links.edit")),
-                      language_edit_path(language), :class => 'btn btn-mini' %>
-          <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
-                      language_path(language),
-                      :method => :delete,
-                      :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
-                      :class => 'btn btn-mini btn-danger' %>
-        </td>
-      </tr>
+<div class="card">
+  <h3 class="card-heading simple">
+    Your characters
+    <% if false or Universe.where(user_id: session[:user]).length > 0 %>
+      <small>from <%= universe_filter %></small>
     <% end %>
-  </tbody>
-</table>
+  </h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th><%= model_class.human_attribute_name(:name) %></th>
+        <th><%=t '.actions', :default => t("helpers.actions") %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @languages.each do |language| %>
+        <tr>
+          <td style="width: 160px;"><%= simple_format link_to language.name, language_path(language) %></td>
+          <td style="width: 180px;">
+            <%= link_to t('.view', :default => t("helpers.links.view")),
+                        language_path(language), :class => 'btn' %>
+            <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                        language_edit_path(language), :class => 'btn' %>
+            <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                        language_path(language),
+                        :method => :delete,
+                        :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
+                        :class => 'btn btn-danger' %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
 <% end %>
 
-<div class="well" style="margin-top: 20px;">
-	<h4>Planning languages</h4>
-	<p>
-		English doesn't have to be the only language in your story. Whether you're planning differing dialects or completely new languages, you want to keep track of what defines them. 
-	</p>
-	
-	<%= link_to 'New language', language_create_path, :class => 'btn btn-primary' %>
+<div class="card">
+  <h3 class="card-heading simple">Planning languages</h3>
+  <div class="card-body">
+    <p>
+      English doesn't have to be the only language in your story. Whether you're planning differing dialects or completely new languages, you want to keep track of what defines them. 
+    </p>
+    <%= link_to 'New language', language_create_path, :class => 'btn btn-primary' %>
+  </div>
+  <div class="card-comments"></div>
 </div>
