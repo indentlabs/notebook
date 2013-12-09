@@ -146,6 +146,20 @@ class ApplicationController < ActionController::Base
       redirect_to signup_path, :notice => "You must be logged in to do that!"
     end
   end
+
+  def create_anonymous_account_if_not_logged_in
+    unless is_logged_in?
+      id = rand(10000000).to_s + rand(10000000).to_s # lol
+      @user = User.new(:name => 'Anonymous-' + id.to_s, :email => id.to_s + '@localhost', :password => id.to_s)
+
+      if @user.save
+        session[:user] = @user.id
+        session[:anon_user] = true
+      else
+        create_anonymous_account_if_not_logged_in
+      end
+    end
+  end
   
   def require_ownership_of_character
   	character = Character.find(params[:id])

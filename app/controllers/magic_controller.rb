@@ -1,5 +1,5 @@
 class MagicController < ApplicationController
-  before_filter :redirect_if_not_logged_in
+  before_filter :create_anonymous_account_if_not_logged_in, :only => [:new, :edit, :show, :create, :update, :destoy]
   before_filter :require_ownership_of_magic, :only => [:show, :edit, :destroy]
 
   def index
