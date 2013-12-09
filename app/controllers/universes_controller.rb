@@ -1,5 +1,5 @@
 class UniversesController < ApplicationController
-  before_filter :create_anonymous_account_if_not_logged_in, :only => [:new, :edit, :show, :create, :update, :destoy]
+  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :show, :create, :update, :destoy]
   before_filter :require_ownership_of_universe, :only => [:show, :edit, :destroy]
 
   def index
