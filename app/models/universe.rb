@@ -1,12 +1,14 @@
 class Universe
   include Mongoid::Document
 
-	# General
+  # General
   field :name,        :type => String
   field :description, :type => String
+  
+  # History
   field :history,  :type => String
-	
-	# More...
+
+  # More...
 	
   belongs_to :user
 end
