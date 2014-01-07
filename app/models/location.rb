@@ -11,8 +11,6 @@ class Location
   has_mongoid_attached_file :map, styles: {
     original: '1920x1680>',
     thumb:    '200x200>',
-    square:   '300x300#',
-    medium:   '400x400>'
   }
 
   # Culture
