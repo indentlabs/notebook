@@ -1,5 +1,6 @@
 class Location
   include Mongoid::Document
+  include Mongoid::Paperclip
   
   # General
   field :name, :type => String
@@ -7,10 +8,11 @@ class Location
   field :description, :type => String
   
   # Map
-  has_attached_file :map, styles: {
-    thumb:  '200x200>',
-    square: '300x300#',
-    medium: '400x400>'
+  has_mongoid_attached_file :map, styles: {
+    original: '1920x1680>',
+    thumb:    '200x200>',
+    square:   '300x300#',
+    medium:   '400x400>'
   }
 
   # Culture
