@@ -8,8 +8,9 @@ gem 'mongo', '1.6.0'
 gem 'mongoid'
 
 # File uploads
-gem 'paperclip'
-gem 'aws-sdk'
+gem 'mongoid-paperclip', :require => "mongoid_paperclip"
+gem 'aws-sdk', '~> 1.3.4'
+gem 'rmagick'
 
 # Gems used only for assets and not required
 # in production environments by default.

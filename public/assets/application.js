@@ -12365,6 +12365,9 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
     $("#show_general").click(function() {
       return show_tab("general");
     });
+    $("#show_map").click(function() {
+      return show_tab("map");
+    });
     $("#show_culture").click(function() {
       return show_tab("culture");
     });

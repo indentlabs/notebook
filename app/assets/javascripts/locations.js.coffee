@@ -8,6 +8,9 @@ $(document).ready ->
   $("#show_general").click ->
     show_tab "general"
     
+  $("#show_map").click ->
+    show_tab "map"
+    
   $("#show_culture").click ->
     show_tab "culture"
     
