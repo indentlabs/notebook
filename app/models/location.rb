@@ -6,6 +6,13 @@ class Location
   field :type_of, :type => String
   field :description, :type => String
   
+  # Map
+  has_attached_file :map, styles: {
+    thumb:  '200x200>',
+    square: '300x300#',
+    medium: '400x400>'
+  }
+
   # Culture
   field :population, :type => String
   field :language, :type => String
