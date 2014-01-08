@@ -12384,6 +12384,12 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
       return show_tab("more");
     });
     show_tab("general");
+    $("#placeholder_map_input").on('click', function(e) {
+      console.log("input");
+      e.preventDefault();
+      $("#location_map").trigger('click');
+      return $('#location_map').removeClass('hidden');
+    });
     return $(".location_name_generator").click(function() {
       var target;
       target = $(this).parent().find(".text_field");
