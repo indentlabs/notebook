@@ -25,13 +25,17 @@
 
 <div class="hidden section map_section">
   <div class="control-group">
-    <%= f.label :map, :class => 'control-label' %>
-    <div class="controls">
-      <%= f.file_field :map, :class => 'text_field' %>
-    </div>
-    <% if @location.map and @location.map.url(:original) %>
+    <% if @location.map and @location.map.url(:original) != "/assets/placeholders/map.png" %>
       <%= image_tag @location.map.url(:original) %>
+      <% @map_class = '' %>
+    <% else %>
+      <%= image_tag 'placeholders/map.png', id: 'placeholder_map_input' %>
+      <% @map_class = 'hidden' %>
     <% end %>
+    <%= f.label :map, :class => 'control-label ' + @map_class %>
+    <div class="controls">
+      <%= f.file_field :map, :class => 'text_field ' + @map_class %>
+    </div>
   </div>
 </div>
 

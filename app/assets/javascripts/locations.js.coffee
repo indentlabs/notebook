@@ -28,6 +28,12 @@ $(document).ready ->
 
   show_tab "general"
 
+  $("#placeholder_map_input").on 'click', (e) ->
+    console.log "input"
+    e.preventDefault()
+    $("#location_map").trigger 'click'
+    $('#location_map').removeClass 'hidden'
+
   $(".location_name_generator").click ->
     target = $(this).parent().find(".text_field")
     $.ajax
