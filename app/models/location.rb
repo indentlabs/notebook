@@ -8,14 +8,16 @@ class Location
   field :description, :type => String
   
   # Map
-  has_mongoid_attached_file :map, styles: {
-#    original: '1920x1680>',
-#    thumb:    '200x200>',
+  has_mongoid_attached_file :map, 
+    styles: {
+#     original: '1920x1680>',
+#     thumb:    '200x200>',
 # todo
 # make banner for cards
 # resize full-size for large-cards
 # make thumbnail for small-cards
-  }
+    },
+    default_url: '/assets/placeholders/map.png'
 
   # Culture
   field :population, :type => String
