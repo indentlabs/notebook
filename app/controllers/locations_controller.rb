@@ -42,14 +42,26 @@ class LocationsController < ApplicationController
   def create
     @location = Location.new(params[:location])
     @location.user_id = session[:user]
+    notice = ''
 
     respond_to do |format|
-      if @location.save
-        format.html { redirect_to @location, notice: 'Location was successfully created.' }
-        format.json { render json: @location, status: :created, location: @location }
-      else
-        format.html { render action: "new" }
-        format.json { render json: @location.errors, status: :unprocessable_entity }
+      begin
+        if @location.save
+          if notice == ''
+            notice = 'Location was successfully created.'
+          end
+
+          format.html { redirect_to @location, notice: notice }
+          format.json { render json: @location, status: :created, location: @location }
+        else
+          format.html { render action: "new" }
+          format.json { render json: @location.errors, status: :unprocessable_entity }
+        end
+      rescue Errno::ECONNRESET
+        # Connection was reset, probably because of the file upload. Try again without it.
+        @location.map = nil
+        notice = 'Location was created, but your map did not upload. Please try again.'
+        retry
       end
     end
   end
@@ -58,12 +70,19 @@ class LocationsController < ApplicationController
     @location = Location.find(params[:id])
 
     respond_to do |format|
-      if @location.update_attributes(params[:location])
-        format.html { redirect_to @location, notice: 'Location was successfully updated.' }
-        format.json { head :no_content }
-      else
-        format.html { render action: "edit" }
-        format.json { render json: @location.errors, status: :unprocessable_entity }
+      begin
+        if @location.update_attributes(params[:location])
+          format.html { redirect_to @location, notice: 'Location was successfully updated.' }
+          format.json { head :no_content }
+        else
+          format.html { render action: "edit" }
+          format.json { render json: @location.errors, status: :unprocessable_entity }
+        end
+      rescue Errno::ECONNRESET
+        # Connection was reset, probably because of the file upload. Try again without it.
+        @location.map = nil
+        notice = 'Location was created, but your map did not upload. Please try again.'
+        retry
       end
     end
   end
