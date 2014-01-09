@@ -43,6 +43,7 @@ class LanguagesController < ApplicationController
   def create
     @language = Language.new(params[:language])
     @language.user_id = session[:user]
+    @language.universe = Universe.where(user_id: session[:user]).where(name: params[:language][:universe].strip).first
 
     respond_to do |format|
       if @language.save
@@ -57,6 +58,11 @@ class LanguagesController < ApplicationController
 
   def update
     @language = Language.find(params[:id])
+    if params[:language][:universe].empty?
+      params[:language][:universe] = nil
+    else
+      params[:language][:universe] = Universe.where(user_id: session[:user]).where(name: params[:language][:universe].strip).first
+    end
 
     respond_to do |format|
       if @language.update_attributes(params[:language])
