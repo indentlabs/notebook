@@ -23,8 +23,9 @@ class Magic
   field :skill_level, :type => String # Skill required
   field :limitations, :type => String
   
-  # More
+  # Notes
   field :notes, :type => String
+  field :private_notes, :type => String
 
   belongs_to :user
   belongs_to :universe

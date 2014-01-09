@@ -31,8 +31,11 @@
     <%= print_property("Limitations", @magic.limitations, "") %>
   </dl>
 
-  <dl class="dl-horizontal hidden section more_section">
+  <dl class="dl-horizontal hidden section notes_section">
     <%= print_property("Notes", @magic.notes, "") %>
+    <% if session[:user] and session[:user] == @magic.user.id %>
+      <%= print_property("Private notes", @magic.private_notes, "") %>
+    <% end %>
   </dl>
 
   <% if session[:user] and session[:user] == @magic.user.id %>
