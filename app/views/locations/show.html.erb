@@ -40,8 +40,11 @@
     <%= print_property("Notable wars", @location.notable_wars, "") %>
   </dl>
 
-  <dl class="dl-horizontal hidden section more_section">
+  <dl class="dl-horizontal hidden section notes_section">
     <%= print_property("Notes", @location.notes, "") %>
+    <% if session[:user] and session[:user] == @location.user.id %>
+      <%= print_property("Private notes", @location.private_notes, "") %>
+    <% end %>
   </dl>
 
   <% if session[:user] and session[:user] == @location.user.id %>

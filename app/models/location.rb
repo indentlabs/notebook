@@ -41,8 +41,9 @@ class Location
   field :established_year, :type => String
   field :notable_wars, :type => String
   
-  # More
+  # Notes
   field :notes, :type => String
+  field :private_notes, :type => String
 
   belongs_to :user
   belongs_to :universe
