@@ -26,6 +26,9 @@ $(document).ready ->
   $("#show_relationships").click ->
     show_tab "relationships"
 
+  $("#show_settings").click ->
+    show_tab "settings"
+
   $("#show_more").click ->
     show_tab "more"
   
