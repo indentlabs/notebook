@@ -43,6 +43,8 @@ class LocationsController < ApplicationController
   def create
     @location = Location.new(params[:location])
     @location.user_id = session[:user]
+    @location.universe = Universe.where(user_id: session[:user]).where(name: params[:location][:universe].strip).first
+
     notice = ''
 
     respond_to do |format|
@@ -69,6 +71,12 @@ class LocationsController < ApplicationController
 
   def update
     @location = Location.find(params[:id])
+
+    if params[:location][:universe].empty?
+      params[:location][:universe] = nil
+    else
+      params[:location][:universe] = Universe.where(user_id: session[:user]).where(name: params[:location][:universe].strip).first
+    end
 
     respond_to do |format|
       begin
