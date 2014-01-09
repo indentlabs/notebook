@@ -1,6 +1,7 @@
 class CharactersController < ApplicationController
-  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :show, :create, :update, :destoy]
-  before_filter :require_ownership_of_character, :only => [:show, :edit, :destroy]
+  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :create, :update]
+  before_filter :require_ownership_of_character, :only => [:update, :edit, :destroy]
+  before_filter :hide_private_characters, :only => [:show]
 
   # GET /characters
   # GET /characters.json

@@ -202,4 +202,50 @@ class ApplicationController < ActionController::Base
   	  redirect_to universe_list_path, :notice => "You don't have permission to do that!"
   	end
   end
+
+  def hide_private_universe
+    universe = Universe.find(params[:id])
+    unless (session[:user] and session[:user] == universe.user.id) or universe.privacy.downcase == 'public'
+      redirect_to universe_list_path, :notice => "You don't have permission to view that!"
+    end
+  end
+
+  def hide_private_character
+    character = Character.find(params[:id])
+    unless (session[:user] and session[:user] == character.user.id) or character.privacy.downcase == 'public'
+      redirect_to character_list_path, :notice => "You don't have permission to view that!"
+    end
+  end
+
+  def hide_private_equipment
+    equipment = Equipment.find(params[:id])
+    unless (session[:user] and session[:user] == equipment.user.id) or equipment.privacy.downcase == 'public'
+      redirect_to equipment_list_path, :notice => "You don't have permission to view that!"
+    end
+  end
+
+  def hide_private_language
+    language = Language.find(params[:id])
+    unless (session[:user] and session[:user] == language.user.id) or language.privacy.downcase == 'public'
+      redirect_to language_list_path, :notice => "You don't have permission to view that!"
+    end
+  end
+
+  def hide_private_location
+    location = Location.find(params[:id])
+    unless (session[:user] and session[:user] == location.user.id) or location.privacy.downcase == 'public'
+      redirect_to location_list_path, :notice => "You don't have permission to view that!"
+    end
+  end
+
+  def hide_private_magic
+    magic = Magic.find(params[:id])
+    unless (session[:user] and session[:user] == magic.user.id) or magic.privacy.downcase == 'public'
+      redirect_to magic_list_path, :notice => "You don't have permission to view that!"
+    end
+  end
+
+
+
+
 end

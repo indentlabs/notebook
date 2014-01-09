@@ -1,6 +1,7 @@
 class EquipmentController < ApplicationController
-  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :show, :create, :update, :destoy]
-  before_filter :require_ownership_of_equipment, :only => [:show, :edit, :destroy]
+  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :create, :update]
+  before_filter :require_ownership_of_equipment, :only => [:update, :edit, :destroy]
+  before_filter :hide_private_equipment, :only => [:show]
 
   def index
   	@equipment = Equipment.where(user_id: session[:user])

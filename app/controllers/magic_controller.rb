@@ -1,6 +1,7 @@
 class MagicController < ApplicationController
-  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :show, :create, :update, :destoy]
-  before_filter :require_ownership_of_magic, :only => [:show, :edit, :destroy]
+  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :create, :update]
+  before_filter :require_ownership_of_magic, :only => [:edit, :destroy]
+  before_filter :hide_private_magic, :only => [:show]
 
   def index
   	@magics = Magic.where(user_id: session[:user])
@@ -9,7 +10,7 @@ class MagicController < ApplicationController
       @magics = []
     end
     
-		@magics = @magics.sort { |a, b| a.name.downcase <=> b.name.downcase }
+    @magics = @magics.sort { |a, b| a.name.downcase <=> b.name.downcase }
 
     respond_to do |format|
       format.html # index.html.erb

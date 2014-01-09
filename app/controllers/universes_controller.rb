@@ -1,6 +1,7 @@
 class UniversesController < ApplicationController
-  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :show, :create, :update, :destoy]
-  before_filter :require_ownership_of_universe, :only => [:show, :edit, :destroy]
+  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :create, :update]
+  before_filter :require_ownership_of_universe, :only => [:edit, :update, :destroy]
+  before_filter :hide_private_universe, :only => [:show]
 
   def index
   	@universes = Universe.where(user_id: session[:user])
@@ -9,7 +10,7 @@ class UniversesController < ApplicationController
       @universes = []
     end
     
-		@universes = @universes.sort { |a, b| a.name.downcase <=> b.name.downcase }
+    @universes = @universes.sort { |a, b| a.name.downcase <=> b.name.downcase }
 
     respond_to do |format|
       format.html # index.html.erb
