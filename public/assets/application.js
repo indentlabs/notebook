@@ -12452,7 +12452,29 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 }).call(this);
 (function() {
 
-
+  $(document).ready(function() {
+    var show_content_tab;
+    show_content_tab = function(tab_name) {
+      $(".content-section").hide();
+      return $("." + tab_name + "_section").css("visibility", "visible").hide().fadeIn("fast");
+    };
+    $("#show_characters").click(function() {
+      return show_content_tab("characters");
+    });
+    $("#show_equipment").click(function() {
+      return show_content_tab("equipment");
+    });
+    $("#show_languages").click(function() {
+      return show_content_tab("languages");
+    });
+    $("#show_locations").click(function() {
+      return show_content_tab("locations");
+    });
+    return $("#show_magic").click(function() {
+      show_content_tab("magic");
+      return 0;
+    });
+  });
 
 }).call(this);
 (function() {
