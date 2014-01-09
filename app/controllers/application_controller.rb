@@ -212,35 +212,35 @@ class ApplicationController < ActionController::Base
 
   def hide_private_character
     character = Character.find(params[:id])
-    unless (session[:user] and session[:user] == character.user.id) or character.privacy.downcase == 'public'
+    unless (session[:user] and session[:user] == character.user.id) or (character.universe and character.universe.privacy.downcase == 'public')
       redirect_to character_list_path, :notice => "You don't have permission to view that!"
     end
   end
 
   def hide_private_equipment
     equipment = Equipment.find(params[:id])
-    unless (session[:user] and session[:user] == equipment.user.id) or equipment.privacy.downcase == 'public'
+    unless (session[:user] and session[:user] == equipment.user.id) or (equipment.universe and equipment.universe.privacy.downcase == 'public')
       redirect_to equipment_list_path, :notice => "You don't have permission to view that!"
     end
   end
 
   def hide_private_language
     language = Language.find(params[:id])
-    unless (session[:user] and session[:user] == language.user.id) or language.privacy.downcase == 'public'
+    unless (session[:user] and session[:user] == language.user.id) or (language.universe and language.universe.privacy.downcase == 'public')
       redirect_to language_list_path, :notice => "You don't have permission to view that!"
     end
   end
 
   def hide_private_location
     location = Location.find(params[:id])
-    unless (session[:user] and session[:user] == location.user.id) or location.privacy.downcase == 'public'
+    unless (session[:user] and session[:user] == location.user.id) or (location.universe and location.universe.privacy.downcase == 'public')
       redirect_to location_list_path, :notice => "You don't have permission to view that!"
     end
   end
 
   def hide_private_magic
     magic = Magic.find(params[:id])
-    unless (session[:user] and session[:user] == magic.user.id) or magic.privacy.downcase == 'public'
+    unless (session[:user] and session[:user] == magic.user.id) or (magic.universe and magic.universe.privacy.downcase == 'public')
       redirect_to magic_list_path, :notice => "You don't have permission to view that!"
     end
   end
