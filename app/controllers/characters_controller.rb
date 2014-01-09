@@ -13,12 +13,12 @@ class CharactersController < ApplicationController
     end
     
     if params[:universe]
-    	@universe = Universe.where(user_id: session[:user]).where(name: params[:universe].strip).first
+      @universe = Universe.where(user_id: session[:user]).where(name: params[:universe].strip).first
       @characters = @characters.where(universe_id: @universe.id) if @characters.length > 0
-	    @selected_universe_filter = @universe.name  	
+      @selected_universe_filter = @universe.name  	
     end
 
-		@characters = @characters.sort { |a, b| a.name.downcase <=> b.name.downcase }
+    @characters = @characters.sort { |a, b| a.name.downcase <=> b.name.downcase }
 
     respond_to do |format|
       format.html # index.html.erb
@@ -76,11 +76,11 @@ class CharactersController < ApplicationController
   def update
     @character = Character.find(params[:id])
     
-		if params[:character][:universe].empty?
-		  params[:character][:universe] = nil
-		else
-			params[:character][:universe] = Universe.where(user_id: session[:user]).where(name: params[:character][:universe].strip).first
-		end
+    if params[:character][:universe].empty?
+      params[:character][:universe] = nil
+    else
+      params[:character][:universe] = Universe.where(user_id: session[:user]).where(name: params[:character][:universe].strip).first
+    end
 
     respond_to do |format|
       if @character.update_attributes(params[:character])

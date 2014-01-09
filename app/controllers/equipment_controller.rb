@@ -43,6 +43,7 @@ class EquipmentController < ApplicationController
   def create
     @equipment = Equipment.new(params[:equipment])
     @equipment.user_id = session[:user]
+    @equipment.universe = Universe.where(user_id: session[:user]).where(name: params[:equipment][:universe].strip).first
 
     respond_to do |format|
       if @equipment.save
@@ -57,6 +58,12 @@ class EquipmentController < ApplicationController
 
   def update
     @equipment = Equipment.find(params[:id])
+
+    if params[:equipment][:universe].empty?
+      params[:equipment][:universe] = nil
+    else
+      params[:equipment][:universe] = Universe.where(user_id: session[:user]).where(name: params[:equipment][:universe].strip).first
+    end
 
     respond_to do |format|
       if @equipment.update_attributes(params[:equipment])

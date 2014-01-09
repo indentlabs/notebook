@@ -1,9 +1,9 @@
 class Character
   include Mongoid::Document
 
-	# General
+  # General
   field :name,       :type => String
-	field :role,       :type => String
+  field :role,       :type => String
   field :gender,     :type => String
   field :age,        :type => String
 
@@ -43,27 +43,27 @@ class Character
   field :birthplace, :type => String
   field :education, :type => String
   field :background, :type => String
-	#What is his deepest secret?
-	#Does he have a history of criminal activity?
+  #What is his deepest secret?
+  #Does he have a history of criminal activity?
 
-	# Favorites
-	field :fave_color, :type => String
-	field :fave_food, :type => String
-	field :fave_possession, :type => String
-	field :fave_weapon, :type => String
-	field :fave_animal, :type => String
-	#favorite leisure activities
+  # Favorites
+  field :fave_color, :type => String
+  field :fave_food, :type => String
+  field :fave_possession, :type => String
+  field :fave_weapon, :type => String
+  field :fave_animal, :type => String
+  #favorite leisure activities
 	
-	# Relationships
-	field :father, :type => String
-	field :mother, :type => String
-	field :spouse, :type => String
-	field :siblings, :type => String
-	field :archenemy, :type => String
+  # Relationships
+  field :father, :type => String
+  field :mother, :type => String
+  field :spouse, :type => String
+  field :siblings, :type => String
+  field :archenemy, :type => String
 	
-	# More...
-	field :notes, :type => String
-	#additional fields
+  # More...
+  field :notes, :type => String
+  #additional fields
 
   belongs_to :user
   belongs_to :universe

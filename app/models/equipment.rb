@@ -23,4 +23,5 @@ class Equipment
   field :notes, :type => String
 
   belongs_to :user
+  belongs_to :universe
 end
