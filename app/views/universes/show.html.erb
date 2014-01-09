@@ -31,6 +31,61 @@
   <% end %>
 </div>
 
+<% if @universe.content_count > 0 %>
+
+<div class="card">
+  <h3 class="card-heading simple">
+    In this universe...
+  </h3>
+
+  <div class="card-body">
+
+    <ul class="nav nav-tabs">
+      <% if @universe.characters.length > 0 %>
+        <% label = (@universe.characters.length == 1 ? "character" : "characters") %>
+        <li class="tab"><%= link_to @universe.characters.length.to_s + " " + label, "#", :id => "show_characters" %></li>
+      <% end %>
+      <% if @universe.equipment.length > 0 %>
+        <li class="tab"><%= link_to @universe.equipment.length.to_s + " equipment", "#", :id => "show_equipment" %></li>
+      <% end %>
+      <% if @universe.languages.length > 0 %>
+        <% label = (@universe.languages.length == 1 ? "language" : "languages") %>
+        <li class="tab"><%= link_to @universe.languages.length.to_s + " " + label, "#", :id => "show_languages" %></li>
+      <% end %>
+      <% if @universe.locations.length > 0 %>
+        <% label = (@universe.locations.length == 1 ? "location" : "locations") %>
+        <li class="tab"><%= link_to @universe.locations.length.to_s + " " + label, "#", :id => "show_locations" %></li>
+      <% end %>
+      <% if @universe.magics.length > 0 %>
+        <li class="tab"><%= link_to @universe.locations.length.to_s + " magic", "#", :id => "show_magic" %></li>
+      <% end %>
+    </ul>
+
+    <dl class="dl-horizontal hidden content-section characters_section">
+      <% @characters = @universe.characters %>
+      <%= render 'characters/list' %>
+    </dl>
+    <dl class="dl-horizontal hidden content-section equipment_section">
+      Eq
+    </dl>
+    <dl class="dl-horizontal hidden content-section languages_section">
+Lang
+    </dl>
+    <dl class="dl-horizontal hidden content-section locations_section">
+Loc
+    </dl>
+    <dl class="dl-horizontal hidden content-section magic_section">
+Magic
+    </dl>
+
+  </div>
+  
+  <div class="card-comments"></div>
+
+</div>	
+
+<% end %>
+
 <% u = User.find(session[:user]) if session[:user] %>
 <% if session[:user] and u.content_count == 1 and u.universes.length == 1 %>
   <div class="card">
