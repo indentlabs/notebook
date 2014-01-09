@@ -9,6 +9,8 @@ class Universe
   field :history,  :type => String
 
   # More...
+  field :notes, :type => String
+  field :private_notes, :type => String
 
   # Settings
   field :privacy, :type => String # Whether or not this universe is public, options are 'private' or 'public'

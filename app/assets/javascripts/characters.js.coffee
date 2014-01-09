@@ -29,6 +29,9 @@ $(document).ready ->
   $("#show_settings").click ->
     show_tab "settings"
 
+  $("#show_notes").click ->
+    show_tab "notes"
+  
   $("#show_more").click ->
     show_tab "more"
   
