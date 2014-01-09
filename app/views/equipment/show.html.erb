@@ -26,8 +26,11 @@
     <%= print_property("Magical properties", @equipment.magic, "") %>
   </dl>
 
-  <dl class="dl-horizontal hidden section more_section">
+  <dl class="dl-horizontal hidden section notes_section">
     <%= print_property("Notes", @equipment.notes, "") %>
+    <% if session[:user] and session[:user] == @equipment.user.id %>
+      <%= print_property("Private notes", @equipment.private_notes, "") %>
+    <% end %>
   </dl>
 
   <% if session[:user] and session[:user] == @equipment.user.id %>

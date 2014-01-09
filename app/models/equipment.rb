@@ -19,8 +19,9 @@ class Equipment
   # Abilities
   field :magic, :type => String # Magical Properties
   
-  # More
+  # Notes
   field :notes, :type => String
+  field :private_notes, :type => String
 
   belongs_to :user
   belongs_to :universe
