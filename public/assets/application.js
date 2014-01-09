@@ -12253,6 +12253,9 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
     $("#show_relationships").click(function() {
       return show_tab("relationships");
     });
+    $("#show_settings").click(function() {
+      return show_tab("settings");
+    });
     $("#show_more").click(function() {
       return show_tab("more");
     });
