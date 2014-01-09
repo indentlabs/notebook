@@ -43,6 +43,7 @@ class MagicController < ApplicationController
   def create
     @magic = Magic.new(params[:magic])
     @magic.user_id = session[:user]
+    @magic.universe = Universe.where(user_id: session[:user]).where(name: params[:magic][:universe].strip).first
 
     respond_to do |format|
       if @magic.save
@@ -57,6 +58,12 @@ class MagicController < ApplicationController
 
   def update
     @magic = Magic.find(params[:id])
+
+    if params[:magic][:universe].empty?
+      params[:magic][:universe] = nil
+    else
+      params[:magic][:universe] = Universe.where(user_id: session[:user]).where(name: params[:magic][:universe].strip).first
+    end
 
     respond_to do |format|
       if @magic.update_attributes(params[:magic])
