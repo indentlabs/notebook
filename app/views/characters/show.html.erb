@@ -60,8 +60,11 @@
     <%= print_property("Archenemy", @character.archenemy, "character") %>
   </dl>
 
-  <dl class="dl-horizontal hidden section more_section">
+  <dl class="dl-horizontal hidden section notes_section">
     <%= print_property("Notes", @character.notes, "") %>
+    <% if session[:user] and session[:user] == @character.user.id %>
+      <%= print_property("Private notes", @character.private_notes, "") %>
+    <% end %>
   </dl>
 
   <% if session[:user] and session[:user] == @character.user.id %>

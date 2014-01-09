@@ -61,8 +61,9 @@ class Character
   field :siblings, :type => String
   field :archenemy, :type => String
 	
-  # More...
+  # Notes
   field :notes, :type => String
+  field :private_notes, :type => String
   #additional fields
 
   belongs_to :user
