@@ -10,7 +10,7 @@ see [live website](http://indentapp.com)
 
 Indent is a writer's planning tool for creating anything from universes to characters, to plots, to individual items.
 
-It is also meant to expand into many areas to benefit writers, including areas like:
+It is also meant to expand into many areas to benefit writers (and exciting to developers), including areas like:
 
 - Automated revision services
 - Structuring real-time natural language processing output into a semantically reusable state
@@ -30,7 +30,7 @@ You'll notice there are *a lot* of issues in *a lot* of milestones. Call it feat
 TL;DR Milestones are independent of each other -- work on whatever you want to see made!
 
 
-## Installing the Indent stack locally (for development)
+## Installing the Indent stack locally
 
 Install curl
 
@@ -39,15 +39,18 @@ Install curl
 Install rvm
 
     \curl -sSL https://get.rvm.io | bash
-    source /home/drusepth/.rvm/scripts/rvm
+    
+    source ~/.rvm/scripts/rvm
 
-Install ruby 1.9.3
+Install ruby 2.1.0
 
-    rvm install ruby 2.0.0
+    rvm install ruby 2.1.0
+    
+    rvm use 2.1.0
 
 Install rails 4.0.1
 
-    gem install rails
+    gem install rails -v 4.0.1
 
 Install mongodb
 
@@ -59,14 +62,29 @@ Install mongodb
 
     sudo apt-get install mongodb-10gen
 
+Install necessary libraries
+
+    sudo apt-get install imagemagick libmagickwand-dev
+
 Install gems
 
     bundle install
 
-You can run the rails server with
+Optional: To enable the uploading and editing of images (used in Locations management, etc), you will need to create a file named set_aws_credentials.rb with the following content:
+
+    [[ $_ != $0 ]] && echo "Ready to run your server!" || echo "This script needs to be sourced!"
+
+    export AWS_BUCKET="<your bucket>"
+    export AWS_ACCESS_KEY_ID="<your access key id>"
+    export AWS_SECRET_ACCESS_KEY="<your secret access key>"
+
+And then set your AWS credentials with
+
+    source set_aws_credentials.rb
+    
+Finally, run the server with 
 
     rails server
-
 
 ## Deployment to indentapp.com
 
