@@ -1,6 +1,6 @@
 # Indent
 
-----
+
 ## What is Indent?
 see [live website](http://indentapp.com)
 
@@ -20,7 +20,7 @@ It is also meant to expand into many areas to benefit writers, including areas l
 - Machine learning on generating character and location names, suggesting realistic defaults (random or not), and more
 - and tons more
 
-----
+
 ## The Issue Tracker
 
 If you are interested in helping out, check out the issue tracker. I've loaded it with tons of action-based, chunk-sized improvements that I think anyone familiar with Rails will be able to jump in and complete. Feel free to make suggestions, open issues, join discussions, or ask where you should look in the code to get started implementing something. :)
@@ -29,7 +29,7 @@ You'll notice there are *a lot* of issues in *a lot* of milestones. Call it feat
 
 TL;DR Milestones are independent of each other -- work on whatever you want to see made!
 
-----
+
 ## Installing the Indent stack locally (for development)
 
 Install curl
@@ -43,9 +43,9 @@ Install rvm
 
 Install ruby 1.9.3
 
-    rvm install ruby 1.9.3
+    rvm install ruby 2.0.0
 
-Install rails
+Install rails 4.0.1
 
     gem install rails
 
@@ -67,18 +67,20 @@ You can run the rails server with
 
     rails server
 
-----
+
 ## Deployment to indentapp.com
 
 Deployment to the live stage will only be done by approved developers, and consists of a deployment of
 
 - deploy github to staging (done only by approved developers)
 
-- run regression tests on staging environment (identical to live)
+- mirror data from live into staging
 
-- deploy to live (viewed at indentapp.com)
+- run regression tests on staging environment
 
-----
+- deploy from staging to live (viewed at indentapp.com)
+
+
 ## Thanks
 
 Feel free to get in touch if you have any questions, comments, or concerns! :)
