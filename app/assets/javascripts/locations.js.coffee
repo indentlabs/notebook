@@ -1,45 +1,7 @@
 $(document).ready ->
-  show_tab = (tab_name) ->
-    $(".tab").removeClass "active"
-    $("#show_" + tab_name).parent().addClass "active"
-    $(".section").hide()
-    $("." + tab_name + "_section").css("visibility", "visible").hide().fadeIn "fast"
 
-  $("#show_general").click ->
-    show_tab "general"
-    
-  $("#show_map").click ->
-    show_tab "map"
-    
-  $("#show_culture").click ->
-    show_tab "culture"
-    
-  $("#show_cities").click ->
-    show_tab "cities"
-    
-  $("#show_geography").click ->
-    show_tab "geography"
-    
-  $("#show_history").click ->
-    show_tab "history"
-    
-  $("#show_more").click ->
-    show_tab "more"
-
-  show_tab "general"
-
-  $("#placeholder_map_input").on 'click', (e) ->
-    console.log "input"
+  # Enable clicking an image to upload a map
+  $('#placeholder_map_input').on 'click', (e) ->
     e.preventDefault()
-    $("#location_map").trigger 'click'
+    $('#location_map').trigger 'click'
     $('#location_map').removeClass 'hidden'
-
-  $(".location_name_generator").click ->
-    target = $(this).parent().find(".text_field")
-    $.ajax
-      dataType: "text"
-      url: "/generate/location/name"
-      success: (data) ->
-        target.val data
-
-    0

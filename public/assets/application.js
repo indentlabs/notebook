@@ -12225,264 +12225,96 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 (function() {
 
   $(document).ready(function() {
-    var show_tab;
-    show_tab = function(tab_name) {
-      $(".tab").removeClass("active");
-      $("#show_" + tab_name).parent().addClass("active");
-      $(".section").hide();
-      return $("." + tab_name + "_section").css("visibility", "visible").hide().fadeIn("fast");
-    };
-    $("#show_general").click(function() {
-      return show_tab("general");
+    $('.character_name_generator').click(function() {
+      var target;
+      target = $(this).parent().find('.text_field');
+      $.ajax({
+        dataType: 'text',
+        url: '/generate/character/name',
+        success: function(data) {
+          return target.val(data);
+        }
+      });
+      return 0;
     });
-    $("#show_appearance").click(function() {
-      return show_tab("appearance");
+    $('.character_age_generator').click(function() {
+      var target;
+      target = $(this).parent().find('.text_field');
+      $.ajax({
+        dataType: 'text',
+        url: '/generate/character/age',
+        success: function(data) {
+          return target.val(data);
+        }
+      });
+      return 0;
     });
-    $("#show_social").click(function() {
-      return show_tab("social");
+    return $('.location_name_generator').click(function() {
+      var target;
+      target = $(this).parent().find('.text_field');
+      $.ajax({
+        dataType: 'text',
+        url: '/generate/location/name',
+        success: function(data) {
+          return target.val(data);
+        }
+      });
+      return 0;
     });
-    $("#show_behavior").click(function() {
-      return show_tab("behavior");
+  });
+
+}).call(this);
+(function() {
+
+  $(document).ready(function() {
+    return $('#placeholder_map_input').on('click', function(e) {
+      e.preventDefault();
+      $('#location_map').trigger('click');
+      return $('#location_map').removeClass('hidden');
     });
-    $("#show_history").click(function() {
-      return show_tab("history");
-    });
-    $("#show_favorites").click(function() {
-      return show_tab("favorites");
-    });
-    $("#show_relationships").click(function() {
-      return show_tab("relationships");
-    });
-    $("#show_settings").click(function() {
-      return show_tab("settings");
-    });
-    $("#show_notes").click(function() {
-      return show_tab("notes");
-    });
-    $("#show_more").click(function() {
-      return show_tab("more");
-    });
-    $(".dropdown-picker li a").click(function() {
+  });
+
+}).call(this);
+(function() {
+
+  $(document).ready(function() {
+    return $('.dropdown-picker li a').click(function() {
       var val;
       val = $(this).text();
       return $(this).closest('.controls').find('input').val(val);
     });
-    show_tab("general");
-    $(".character_name_generator").click(function() {
-      var target;
-      target = $(this).parent().find(".text_field");
-      $.ajax({
-        dataType: "text",
-        url: "/generate/character/name",
-        success: function(data) {
-          return target.val(data);
-        }
-      });
-      return 0;
-    });
-    return $(".character_age_generator").click(function() {
-      var target;
-      target = $(this).parent().find(".text_field");
-      $.ajax({
-        dataType: "text",
-        url: "/generate/character/age",
-        success: function(data) {
-          return target.val(data);
-        }
-      });
-      return 0;
-    });
   });
 
 }).call(this);
 (function() {
 
   $(document).ready(function() {
-    var show_tab;
+    var list_of_content_tabs, list_of_valid_tabs, show_content_tab, show_tab;
     show_tab = function(tab_name) {
-      $(".tab").removeClass("active");
-      $("#show_" + tab_name).parent().addClass("active");
-      $(".section").hide();
-      return $("." + tab_name + "_section").css("visibility", "visible").hide().fadeIn("fast");
+      $('.tab').removeClass('active');
+      $('#show_' + tab_name).parent().addClass('active');
+      $('.section').hide();
+      return $('.' + tab_name + '_section').css('visibility', 'visible').hide().fadeIn('fast');
     };
-    $("#show_general").click(function() {
-      return show_tab("general");
-    });
-    $("#show_appearance").click(function() {
-      return show_tab("appearance");
-    });
-    $("#show_history").click(function() {
-      return show_tab("history");
-    });
-    $("#show_abilities").click(function() {
-      return show_tab("abilities");
-    });
-    $("#show_more").click(function() {
-      return show_tab("more");
-    });
-    return show_tab("general");
-  });
-
-}).call(this);
-(function() {
-
-
-
-}).call(this);
-(function() {
-
-  $(document).ready(function() {
-    var show_tab;
-    show_tab = function(tab_name) {
-      $(".tab").removeClass("active");
-      $("#show_" + tab_name).parent().addClass("active");
-      $(".section").hide();
-      return $("." + tab_name + "_section").css("visibility", "visible").hide().fadeIn("fast");
-    };
-    $("#show_general").click(function() {
-      return show_tab("general");
-    });
-    $("#show_vocabulary").click(function() {
-      return show_tab("vocabulary");
-    });
-    $("#show_history").click(function() {
-      return show_tab("history");
-    });
-    $("#show_speakers").click(function() {
-      return show_tab("speakers");
-    });
-    $("#show_more").click(function() {
-      return show_tab("more");
-    });
-    return show_tab("general");
-  });
-
-}).call(this);
-(function() {
-
-  $(document).ready(function() {
-    var show_tab;
-    show_tab = function(tab_name) {
-      $(".tab").removeClass("active");
-      $("#show_" + tab_name).parent().addClass("active");
-      $(".section").hide();
-      return $("." + tab_name + "_section").css("visibility", "visible").hide().fadeIn("fast");
-    };
-    $("#show_general").click(function() {
-      return show_tab("general");
-    });
-    $("#show_map").click(function() {
-      return show_tab("map");
-    });
-    $("#show_culture").click(function() {
-      return show_tab("culture");
-    });
-    $("#show_cities").click(function() {
-      return show_tab("cities");
-    });
-    $("#show_geography").click(function() {
-      return show_tab("geography");
-    });
-    $("#show_history").click(function() {
-      return show_tab("history");
-    });
-    $("#show_more").click(function() {
-      return show_tab("more");
-    });
-    show_tab("general");
-    $("#placeholder_map_input").on('click', function(e) {
-      console.log("input");
-      e.preventDefault();
-      $("#location_map").trigger('click');
-      return $('#location_map').removeClass('hidden');
-    });
-    return $(".location_name_generator").click(function() {
-      var target;
-      target = $(this).parent().find(".text_field");
-      $.ajax({
-        dataType: "text",
-        url: "/generate/location/name",
-        success: function(data) {
-          return target.val(data);
-        }
-      });
-      return 0;
-    });
-  });
-
-}).call(this);
-(function() {
-
-  $(document).ready(function() {
-    var show_tab;
-    show_tab = function(tab_name) {
-      $(".tab").removeClass("active");
-      $("#show_" + tab_name).parent().addClass("active");
-      $(".section").hide();
-      return $("." + tab_name + "_section").css("visibility", "visible").hide().fadeIn("fast");
-    };
-    $("#show_general").click(function() {
-      return show_tab("general");
-    });
-    $("#show_appearance").click(function() {
-      return show_tab("appearance");
-    });
-    $("#show_alignment").click(function() {
-      return show_tab("alignment");
-    });
-    $("#show_effects").click(function() {
-      return show_tab("effects");
-    });
-    $("#show_requirements").click(function() {
-      return show_tab("requirements");
-    });
-    $("#show_more").click(function() {
-      return show_tab("more");
-    });
-    return show_tab("general");
-  });
-
-}).call(this);
-(function() {
-
-
-
-}).call(this);
-(function() {
-
-
-
-}).call(this);
-(function() {
-
-  $(document).ready(function() {
-    var show_content_tab;
     show_content_tab = function(tab_name) {
-      $(".content-section").hide();
-      return $("." + tab_name + "_section").css("visibility", "visible").hide().fadeIn("fast");
+      $('.content-section').hide();
+      return $('.' + tab_name + '_section').css('visibility', 'visible').hide().fadeIn('fast');
     };
-    $("#show_characters").click(function() {
-      return show_content_tab("characters");
+    list_of_valid_tabs = ['general', 'appearance', 'social', 'behavior', 'history', 'favorites', 'relationships', 'settings', 'notes', 'more', 'abilities', 'speakers', 'vocabulary', 'map', 'culture', 'cities', 'geography', 'alignment', 'effects', 'requirements'];
+    list_of_valid_tabs.forEach(function(tab) {
+      return $('#show_' + tab).click(function() {
+        return show_tab(tab);
+      });
     });
-    $("#show_equipment").click(function() {
-      return show_content_tab("equipment");
+    list_of_content_tabs = ['characters', 'equipment', 'languages', 'locations', 'magic'];
+    list_of_content_tabs.forEach(function(tab) {
+      return $('#show_' + tab).click(function() {
+        return show_content_tab(tab);
+      });
     });
-    $("#show_languages").click(function() {
-      return show_content_tab("languages");
-    });
-    $("#show_locations").click(function() {
-      return show_content_tab("locations");
-    });
-    return $("#show_magic").click(function() {
-      show_content_tab("magic");
-      return 0;
-    });
+    show_tab('general');
+    return 0;
   });
-
-}).call(this);
-(function() {
-
-
 
 }).call(this);
 // This is a manifest file that'll be compiled into application.js, which will include all the files
