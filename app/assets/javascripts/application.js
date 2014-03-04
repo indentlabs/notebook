@@ -12,7 +12,4 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require twitter/bootstrap
-//= require bootstrap
-//= require bootplus/bootstrap
 //= require_tree .
