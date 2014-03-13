@@ -1,6 +1,6 @@
 # Indent
 
-
+[![Build Status](https://travis-ci.org/Cantido/Indent.png)](https://travis-ci.org/Cantido/Indent)
 
 ## What is Indent?
 see [live website](http://indentapp.com)
