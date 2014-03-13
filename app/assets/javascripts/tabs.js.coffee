@@ -9,7 +9,7 @@ $(document).ready ->
   # Define function to show content tabs
   show_content_tab = (tab_name) ->
     $('.content-section').hide()
-    $('.' + tab_name + '_section').css('visibility', 'visible').hide().fadeIn 'fast'
+    $('.' + tab_name + '_section').removeClass('hidden').hide().fadeIn 'fast'
 
   # Enable tab functionality on a whitelist of tab names
   list_of_valid_tabs = [
