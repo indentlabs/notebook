@@ -1,27 +1,36 @@
 <%- model_class = Location.new.class -%>
-<% if @locations.length > 0 %>
-<div class="card">
-  <h3 class="card-heading simple">
-    Your locations
-    <% if false and Universe.where(user_id: session[:user]).length > 0 %>
-      <small>from <%= universe_filter %></small>
-    <% end %>
-  </h3>
 
-  <%= render 'list' %>
+<div class="row">
+
+<% if @locations.length > 0 %>
+<div class="col-md-12">
+  <div class="card">
+    <h1 class="card-heading">
+      Your locations
+      <% if false and Universe.where(user_id: session[:user]).length > 0 %>
+        <small>from <%= universe_filter %></small>
+      <% end %>
+    </h1>
+  </div>
 </div>
+
+<%= render 'list' %>
 <% end %>
 
-<div class="card">
-  <h3 class="card-heading simple">Planning locations</h3>
-  <div class="card-body">
-    <p>
-      Worldbuilding should never be neglected; keep track of where your characters are, where they have been, and where they are going. 
-    </p>
-    <%= link_to 'New location', location_create_path, :class => 'btn btn-primary' %>
-
-    <%= link_to 'New country', location_create_type_path(:country), :class => 'btn' %>
-    <%= link_to 'New city', location_create_type_path(:city), :class => 'btn' %>
+<div class="col-md-4">
+  <div class="card">
+    <h1 class="card-heading simple">Planning locations</h1>
+    <div class="card-body">
+      <p>
+        Worldbuilding should never be neglected; keep track of where your characters are, where they have been, and where they are going. 
+      </p>
+    </div>
+    <div class="card-comments">
+      <%= link_to 'New location', location_create_path, :class => 'btn btn-primary' %>
+      <%= link_to 'New country', location_create_type_path(:country), :class => 'btn' %>
+      <%= link_to 'New city', location_create_type_path(:city), :class => 'btn' %>
+    </div>
   </div>
-  <div class="card-comments"></div>
+</div>
+
 </div>
