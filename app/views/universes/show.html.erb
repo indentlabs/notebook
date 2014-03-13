@@ -1,41 +1,49 @@
 <%- model_class = @universe.class -%>
 
 <div class="card">
-  <%= render :partial => 'tabs' %>
-
-  <dl class="dl-horizontal hidden section general_section">
-    <%= print_property("Name", @universe.name, "") %>
-    <%= print_property("Description", @universe.description, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section history_section">
-    <%= print_property("History", @universe.history, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section notes_section">
-    <%= print_property("Notes", @universe.notes, "") %>
-    <% if session[:user] and session[:user] == @universe.user.id %>
-      <%= print_property("Private notes", @universe.private_notes, "") %>
+  <h1 class="card-heading">
+    <% if @universe.privacy and @universe.privacy.downcase == "public" %>
+      <span class="glyphicon glyphicon-globe pull-right" style="font-size: 18px;"></span>
     <% end %>
-  </dl>
+    <%= @universe.name %> <small>by <%= @universe.user.name %></small>
+  </h1>
+  <%= render :partial => 'tabs' %>
+  <div class="card-body">
 
-  <dl class="dl-horizontal hidden section settings_section">
-    <%= print_property("Privacy", @universe.privacy, "") %>
-  </dl>
+    <dl class="dl-horizontal hidden section general_section">
+      <%= print_property("Name", @universe.name, "") %>
+      <%= print_property("Description", @universe.description, "") %>
+    </dl>
 
-  <% if session[:user] and session[:user] == @universe.user.id %>
-  <div class="form-actions">
-    <%= link_to t('.back', :default => t("helpers.links.back")),
-                universe_list_path, :class => 'btn'  %>
-    <%= link_to t('.edit', :default => t("helpers.links.edit")),
-                universe_edit_path(@universe), :class => 'btn' %>
-    <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
-                universe_path(@universe),
-                :method => 'delete',
-                :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
-                :class => 'btn btn-danger' %>
+    <dl class="dl-horizontal hidden section history_section">
+      <%= print_property("History", @universe.history, "") %>
+    </dl>
+
+    <dl class="dl-horizontal hidden section notes_section">
+      <%= print_property("Notes", @universe.notes, "") %>
+      <% if session[:user] and session[:user] == @universe.user.id %>
+        <%= print_property("Private notes", @universe.private_notes, "") %>
+      <% end %>
+    </dl>
+
+    <dl class="dl-horizontal hidden section settings_section">
+      <%= print_property("Privacy", @universe.privacy, "") %>
+    </dl>
+
+    <% if session[:user] and session[:user] == @universe.user.id %>
+      <div class="form-actions">
+        <%= link_to t('.back', :default => t("helpers.links.back")),
+                    universe_list_path, :class => 'btn'  %>
+        <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                    universe_edit_path(@universe), :class => 'btn' %>
+        <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                    universe_path(@universe),
+                    :method => 'delete',
+                    :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
+                    :class => 'btn btn-danger' %>
+      </div>
+    <% end %>
   </div>
-  <% end %>
 </div>
 
 <% if @universe.content_count > 0 %>
