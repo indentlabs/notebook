@@ -1,7 +1,13 @@
 <%- model_class = @character.class -%>
 
 <div class="card">
+  <h1 class="card-heading">
+    <%= @character.name %>
+  </h1>
+
   <%= render :partial => 'tabs' %>
+
+  <div class="card-body">
 
   <dl class="dl-horizontal hidden section general_section">
     <%= print_property("Name", @character.name, "") %>
@@ -66,6 +72,10 @@
       <%= print_property("Private notes", @character.private_notes, "") %>
     <% end %>
   </dl>
+  
+  </div>
+  
+  <div class="card-comments">
 
   <% if session[:user] and session[:user] == @character.user.id %>
   <div class="form-actions">
@@ -80,5 +90,7 @@
                 :class => 'btn btn-danger' %>
   </div>
   <% end %>
+
+  </div>
 
 </div>
