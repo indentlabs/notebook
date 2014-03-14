@@ -43,11 +43,11 @@ Install rvm
     
     source ~/.rvm/scripts/rvm
 
-Install ruby 2.1.0
+Install ruby 2.0.0
 
-    rvm install ruby 2.1.0
+    rvm install ruby 2.0.0
     
-    rvm use 2.1.0
+    rvm use 2.0.0
 
 Install rails 4.0.1
 
