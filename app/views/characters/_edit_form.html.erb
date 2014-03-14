@@ -32,8 +32,8 @@
   </div>
   <div class="control-group">
     <%= f.label :universe, :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :universe, :class => 'text_field', :value => @character.universe ? @character.universe.name : "" %>
+    <div class="input-group">
+      <%= f.text_field :universe, :class => 'form-control', :value => @character.universe ? @character.universe.name : "" %>
       <%= universe_picker %>
     </div>
   </div>
@@ -103,12 +103,12 @@
 </div>
 
 <div class="hidden section social_section">
-  <div class="control-group">
-    <%= f.label 'Best Friend', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :bestfriend, :class => 'text_field' %>
+  <div>
+    <%= f.label 'Best Friend', class: 'control-label' %>
+    <span class="input-group">
+      <%= f.text_field :bestfriend, class: 'form-control' %>
       <%= character_picker %>
-    </div>
+    </span>
   </div>
   <div class="control-group">
     <%= f.label 'Religion', :class => 'control-label' %>
@@ -277,5 +277,9 @@
     <%= f.submit nil, :class => 'btn btn-primary' %>
     <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
                 character_list_path, :class => 'btn' %>
+    <%= link_to 'Delete character', character_path,
+                :class => 'btn pull-right btn-danger',
+                :method => :delete,
+                :confirm => 'Are you sure? This action cannot be undone!' %>
   </div>
 <% end %>
