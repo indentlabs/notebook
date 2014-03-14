@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
 
   helper :html
+  helper :my_content
   
   helper_method :nl2br
   
