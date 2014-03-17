@@ -2,7 +2,7 @@ require 'test_helper'
 
 class SessionsControllerTest < ActionController::TestCase
   setup do
-    @session = sessions(:one)
+    @session = build(:session)
   end
 
   test "should get index" do
