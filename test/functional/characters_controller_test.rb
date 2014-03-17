@@ -4,6 +4,10 @@ class CharactersControllerTest < ActionController::TestCase
   setup do
     @character = create(:character)
   end
+  
+  teardown do
+    DatabaseCleaner.clean
+  end
 
   test "should get index" do
     get :index
