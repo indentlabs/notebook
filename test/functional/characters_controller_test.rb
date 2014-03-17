@@ -2,7 +2,7 @@ require 'test_helper'
 
 class CharactersControllerTest < ActionController::TestCase
   setup do
-    @character = build(:character)
+    @character = create(:character)
   end
 
   test "should get index" do
@@ -17,8 +17,10 @@ class CharactersControllerTest < ActionController::TestCase
   end
 
   test "should create character" do
+    new_character = build(:character)
+    
     assert_difference('Character.count') do
-      post :create, character: { age: @character.age, name: @character.name }
+      post :create, character: { age: new_character.age, name: character.name }
     end
 
     assert_redirected_to character_path(assigns(:character))
