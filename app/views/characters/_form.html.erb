@@ -1,13 +1,21 @@
-<%= form_for @character, :url => character_create_process_path, :html => { :class => 'form-horizontal' } do |f| %>
 <div class="hidden section starter_section general_section">
-  <div class="control-group">
-    <%= f.label :name, :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :name, :class => 'text_field' %>
-      <a href="#" class="help-inline character_name_generator">
-        <i class="icon-refresh"></i> Randomize
+  <div class="row">
+    <div class="col-xs-2" style="text-align: right;">
+      <%= f.label :name, :class => 'control-label' %>
+    </div>
+    <div class="col-xs-9">
+      <%= f.text_field :name, :class => 'form-control' %>
+    </div>
+    <div class="col-xs-1">
+      <a href="#" class="btn character_name_generator">
+        <span class="glyphicon glyphicon-random"></span>
       </a>
     </div>
+  </div>
+
+
+
+  <div class="control-group">
   </div>
   <div class="control-group">
     <%= f.label 'Role in story', :class => 'control-label' %>
@@ -32,8 +40,8 @@
   </div>
   <div class="control-group">
     <%= f.label :universe, :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :universe, :class => 'text_field', :value => @character.universe ? @character.universe.name : "" %>
+    <div class="input-group">
+      <%= f.text_field :universe, :class => 'form-control', :value => @character.universe ? @character.universe.name : "" %>
       <%= universe_picker %>
     </div>
   </div>
@@ -103,12 +111,12 @@
 </div>
 
 <div class="hidden section social_section">
-  <div class="control-group">
-    <%= f.label 'Best Friend', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :bestfriend, :class => 'text_field' %>
+  <div>
+    <%= f.label 'Best Friend', class: 'control-label' %>
+    <span class="input-group">
+      <%= f.text_field :bestfriend, class: 'form-control' %>
       <%= character_picker %>
-    </div>
+    </span>
   </div>
   <div class="control-group">
     <%= f.label 'Religion', :class => 'control-label' %>
@@ -271,10 +279,3 @@
     </div>
   </div>
 </div>
-
-  <div class="form-actions">
-    <%= f.submit nil, :class => 'btn btn-primary' %>
-    <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
-                character_list_path, :class => 'btn' %>
-  </div>
-<% end %>
