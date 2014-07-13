@@ -56,7 +56,7 @@ class CharactersController < ApplicationController
   # POST /characters
   # POST /characters.json
   def create
-    @character = Character.new(params[:character])
+    @character = Character.create(params.require(:character).permit(:name, :age, :universe_id))
     @character.user_id = session[:user]
     @character.universe = Universe.where(user_id: session[:user]).where(name: params[:character][:universe].strip).first
 
@@ -96,8 +96,7 @@ class CharactersController < ApplicationController
   # DELETE /characters/1
   # DELETE /characters/1.json
   def destroy
-    @character = Character.find(params[:id])
-    @character.destroy
+    Character.find(params[:id]).delete
 
     respond_to do |format|
       format.html { redirect_to character_list_url }
