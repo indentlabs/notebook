@@ -56,7 +56,7 @@ class CharactersController < ApplicationController
   # POST /characters
   # POST /characters.json
   def create
-    @character = Character.create(params.require(:character).permit(:name, :age, :universe_id))
+    @character = Character.create(character_params)
     @character.user_id = session[:user]
     @character.universe = Universe.where(user_id: session[:user]).where(name: params[:character][:universe].strip).first
 
@@ -83,7 +83,7 @@ class CharactersController < ApplicationController
     end
 
     respond_to do |format|
-      if @character.update_attributes(params[:character])
+      if @character.update_attributes(character_params)
         format.html { redirect_to @character, notice: 'Character was successfully updated.' }
         format.json { head :no_content }
       else
@@ -103,4 +103,18 @@ class CharactersController < ApplicationController
       format.json { head :no_content }
     end
   end
+  
+  private
+    def character_params
+      params.require(:character).permit(
+        :universe_id, :user_id,
+        :name, :age, :role, :gender, :age,
+        :height, :weight, :haircolor, :facialhair, :eyecolor, :race, :skintone, :bodytype, :identmarks,
+        :bestfriend, :religion, :politics, :prejudices, :occupation, :pets,
+        :mannerisms,
+        :birthday, :birthplace, :education, :background,
+        :fave_color, :fave_food, :fave_possession, :fave_weapon, :fave_animal,
+        :father, :mother, :spouse, :siblings, :archenemy,
+        :notes, :private_notes)
+    end
 end

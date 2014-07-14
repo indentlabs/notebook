@@ -3,8 +3,9 @@ require 'test_helper'
 class CharactersControllerTest < ActionController::TestCase
   setup do
     @user = users(:one)
-    @session = sessions(:one)
     @universe = universes(:one)
+    
+    session[:user] = users(:one).id
   end
 
   test "should get index" do
@@ -19,10 +20,8 @@ class CharactersControllerTest < ActionController::TestCase
   end
 
   test "should create character" do
-    @character = characters(:one)
-    
     assert_difference('Character.count') do
-      post :create, character: { age: @character.age, name: @character.name, universe: @universe}
+      post :create, character: { age: "Created Age", name: "Created Name", universe: @universe}
     end
 
     assert_redirected_to character_path(assigns(:character))
@@ -38,8 +37,7 @@ class CharactersControllerTest < ActionController::TestCase
   test "should get edit" do
     @character = characters(:one)
     get :edit, id: @character.id
-    assert_response 302
-    assert_redirected_to character_edit_path(@character)
+    assert_response :success
   end
 
   test "should update character" do
@@ -51,14 +49,10 @@ class CharactersControllerTest < ActionController::TestCase
   end
 
   test "should destroy character" do
-    @character = characters(:one)
     assert_difference('Character.count', -1) do
-      delete :destroy, id: @character.id
+      delete :destroy, id: characters(:one).id
     end
-    
-    get :show, id: @character
-    assert_response 404
 
-    assert_redirected_to characters_path
+    assert_redirected_to character_list_url
   end
 end
