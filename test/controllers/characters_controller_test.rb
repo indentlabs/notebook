@@ -5,7 +5,7 @@ class CharactersControllerTest < ActionController::TestCase
     @user = users(:one)
     @universe = universes(:one)
     
-    session[:user] = users(:one).id
+    log_in_user(:one)
   end
 
   test "should get index" do
