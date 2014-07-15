@@ -41,7 +41,7 @@ class LanguagesController < ApplicationController
   end
 
   def create
-    @language = Language.new(params[:language])
+    @language = Language.new(language_params)
     @language.user_id = session[:user]
     @language.universe = Universe.where(user_id: session[:user]).where(name: params[:language][:universe].strip).first
 
@@ -65,7 +65,7 @@ class LanguagesController < ApplicationController
     end
 
     respond_to do |format|
-      if @language.update_attributes(params[:language])
+      if @language.update_attributes(language_params)
         format.html { redirect_to @language, notice: 'Language was successfully updated.' }
         format.json { head :no_content }
       else
@@ -84,4 +84,16 @@ class LanguagesController < ApplicationController
       format.json { head :no_content }
     end
   end
+  
+  private
+    def language_params
+      params.require(:language).permit(
+        :user_id, :universe_id,
+        :name,
+        :words,
+        :established_year, :established_location,
+        :characters, :locations,
+        :notes)
+      end
+        
 end
