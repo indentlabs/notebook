@@ -1,5 +1,4 @@
 class Equipment < ActiveRecord::Base
-  def create
-    Equipment.create(params.permit!)
-  end
+  belongs_to :user
+  belongs_to :universe
 end

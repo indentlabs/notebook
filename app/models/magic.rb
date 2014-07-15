@@ -1,5 +1,4 @@
 class Magic < ActiveRecord::Base
-  def create
-    Magic.create(params.permit!)
-  end
+  belongs_to :user
+  belongs_to :universe
 end

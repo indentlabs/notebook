@@ -1,5 +1,3 @@
 class Session < ActiveRecord::Base
-  def create
-    Session.create(params.permit!)
-  end
+  validates_presence_of :username, :password
 end

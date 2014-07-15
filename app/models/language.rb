@@ -1,5 +1,4 @@
 class Language < ActiveRecord::Base
-  def create
-    Language.create(params.permit!)
-  end
+  belongs_to :user
+  belongs_to :universe
 end
