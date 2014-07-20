@@ -1,12 +1,15 @@
 require 'test_helper'
 
 class MagicTest < ActiveSupport::TestCase
-  test "magic exists" do
-    assert_not_nil magics(:one)
+  test "magic not valid without a name" do
+    magic = magics(:one)
+    magic.name = nil
+    
+    refute magic.valid?, "Magic name is not being validated for presence"
   end
   
-  test "magic belongs to user and universe" do
-    assert_equal users(:one), magics(:one).user
-    assert_equal universes(:one), magics(:one).universe
+  test "magic fixture assumptions" do
+    assert_not_nil magics(:one), "Magics fixture :one is unavailable"
+    assert magics(:one).valid?, "Magics fixture :one is not valid"
   end
 end

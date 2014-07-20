@@ -1,4 +1,6 @@
 class Universe < ActiveRecord::Base
+  validates_presence_of :name
+  
   belongs_to :user
   has_many :characters
   has_many :equipment

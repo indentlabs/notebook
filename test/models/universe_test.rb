@@ -1,23 +1,20 @@
 require 'test_helper'
 
 class UniverseTest < ActiveSupport::TestCase
-  test "universe exists" do
-    assert_not_nil universes(:one)
+  test "universe not valid without a name" do
+    universe = universes(:one)
+    universe.name = nil
+    
+    refute universe.valid?, "Universe name is not being validated for presence"
   end
   
-  test "universe belongs to user" do
-    assert_equal users(:one), universes(:one).user
-  end
-  
-  test "associations associate" do
-    assert_not_nil universes(:one).characters
-    assert_not_nil universes(:one).equipment
-    assert_not_nil universes(:one).languages
-    assert_not_nil universes(:one).locations
-    assert_not_nil universes(:one).magics
+  test "universe fixture assumptions" do
+    assert_not_nil universes(:one), "Universes fixture :one is not available"
+    assert universes(:one).valid?, "Universes fixture :one is not a valid universe"
+    assert_equal users(:one), universes(:one).user, "Universe fixture :one not associated with User fixture :one"
   end
   
   test "can count content" do
-    assert_equal 5, universes(:one).content_count
+    assert_equal 5, universes(:one).content_count, "Universe didn't count its content properly"
   end
 end

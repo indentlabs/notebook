@@ -1,4 +1,6 @@
 class User < ActiveRecord::Base
+  validates_presence_of :name, :password, :email
+  
   has_many :characters
   has_many :equipment
   has_many :languages
