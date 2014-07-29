@@ -1,8 +1,23 @@
 module HtmlHelper
+  def picker_from_type(content_type)
+    case content_type
+    when 'character'
+      character_picker
+    when 'universe'
+      universe_picker
+    when 'equipment'
+      equipment_picker
+    when 'language'
+      language_picker
+    when 'location'
+      location_picker
+    end
+  end
+
   def generate_picker_code_for(content_array, glyphicon_id)
     return if content_array.length == 0
     [
-      '<div class="input-group-btn">',
+      '<span class="dropdown-picker">',
         '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">',
           '<span class="glyphicon glyphicon-'+glyphicon_id+'"></span>',
           '<span class="caret"></span>',
@@ -12,7 +27,7 @@ module HtmlHelper
             '<li><a href="#">' + content.name + '</a></li>'
           },
         '</ul>',
-      '</div>'
+      '</span>'
     ].join("\n").html_safe
   end
 
