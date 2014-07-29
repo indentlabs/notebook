@@ -23,6 +23,9 @@ $(document).ready ->
     $('#show_' + tab).click ->
       show_tab tab
 
+  $('.expand-all').click ->
+    $('.section').removeClass('hidden').show()
+
   # Enable content tab functionality for whitelisted content types
   list_of_content_tabs = [
     'characters', 'equipment', 'languages', 'locations', 'magic'
