@@ -1,6 +1,7 @@
 $(document).ready ->
   # Define function to close all open tabs then open a specific one
   show_tab = (tab_name) ->
+    $('.' + tab_name + '_section').closest('.card').find('.card-heading').text(tab_name)
     $('.tab').removeClass 'active'
     $('#show_' + tab_name).parent().addClass 'active'
     $('.section').hide()
