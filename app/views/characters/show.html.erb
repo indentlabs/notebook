@@ -1,84 +1,99 @@
 <%- model_class = @character.class -%>
 
-<div class="card">
-  <%= render :partial => 'tabs' %>
-
-  <dl class="dl-horizontal hidden section general_section">
-    <%= print_property("Name", @character.name, "") %>
-    <%= print_property("Role in story", @character.role, "") %>
-    <%= print_property("Gender", @character.gender, "") %>
-    <%= print_property("Age", @character.age, "") %>
-    <%= print_property("Universe", @character.universe ? @character.universe.name : "", "universe") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section appearance_section">
-    <%= print_property("Weight", @character.weight, "") %>
-    <%= print_property("Height", @character.height, "") %>
-    <%= print_property("Haircolor", @character.haircolor, "") %>
-    <%= print_property("Hairstyle", @character.hairstyle, "") %>
-    <%= print_property("Facial hair", @character.facialhair, "") %>
-    <%= print_property("Eyecolor", @character.eyecolor, "") %>
-    <%= print_property("Race", @character.race, "") %>
-    <%= print_property("Skintone", @character.skintone, "") %>
-    <%= print_property("Body type", @character.bodytype, "") %>
-    <%= print_property("Identifying marks", @character.identmarks, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section social_section">
-    <%= print_property("Best friend", @character.bestfriend, "character") %>
-    <%= print_property("Religion", @character.religion, "") %>
-    <%= print_property("Politics", @character.politics, "") %>
-    <%= print_property("Prejudices", @character.prejudices, "") %>
-    <%= print_property("Occupation", @character.occupation, "") %>
-    <%= print_property("Pets", @character.pets, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section behavior_section">
-    <%= print_property("Mannerisms", @character.mannerisms, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section history_section">
-    <%= print_property("Birthday", @character.birthday, "") %>
-    <%= print_property("Birthplace", @character.birthplace, "location") %>
-    <%= print_property("Education", @character.education, "location") %>
-    <%= print_property("Background", @character.background, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section favorites_section">
-    <%= print_property("Color", @character.fave_color, "") %>
-    <%= print_property("Food", @character.fave_food, "equipment") %>
-    <%= print_property("Possession", @character.fave_possession, "equipment") %>
-    <%= print_property("Weapon", @character.fave_weapon, "equipment") %>
-    <%= print_property("Animal", @character.fave_animal, "character") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section relationships_section">
-    <%= print_property("Father", @character.father, "character") %>
-    <%= print_property("Mother", @character.mother, "character") %>
-    <%= print_property("Spouse", @character.spouse, "character") %>
-    <%= print_property("Siblings", @character.siblings, "character") %>
-    <%= print_property("Archenemy", @character.archenemy, "character") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section notes_section">
-    <%= print_property("Notes", @character.notes, "") %>
-    <% if session[:user] and session[:user] == @character.user.id %>
-      <%= print_property("Private notes", @character.private_notes, "") %>
-    <% end %>
-  </dl>
-
-  <% if session[:user] and session[:user] == @character.user.id %>
-  <div class="form-actions">
-    <%= link_to t('.back', :default => t("helpers.links.back")),
-                character_list_path, :class => 'btn'  %>
-    <%= link_to t('.edit', :default => t("helpers.links.edit")),
-                character_edit_path(@character), :class => 'btn' %>
-    <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
-                character_path(@character),
-                :method => 'delete',
-                :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
-                :class => 'btn btn-danger' %>
+<div class="row">
+  <div class="col-xs-3">
+    <div class="card">
+      <%= render :partial => 'tabs' %>
+    </div>
   </div>
-  <% end %>
 
+  <div class="col-xs-9">
+    <div class="card">
+      <h1 class="card-heading">
+        <%= @character.name %>
+      </h1>
+
+      <div class="card-body">
+
+      <dl class="dl-horizontal hidden section general_section">
+        <%= print_property("Name", @character.name) %>
+        <%= print_property("Role in story", @character.role) %>
+        <%= print_property("Gender", @character.gender) %>
+        <%= print_property("Age", @character.age) %>
+        <%= print_property("Universe", @character.universe ? @character.universe.name : "", "universe") %>
+      </dl>
+
+      <dl class="dl-horizontal hidden section appearance_section">
+        <%= print_property("Weight", @character.weight) %>
+        <%= print_property("Height", @character.height) %>
+        <%= print_property("Haircolor", @character.haircolor) %>
+        <%= print_property("Hairstyle", @character.hairstyle) %>
+        <%= print_property("Facial hair", @character.facialhair) %>
+        <%= print_property("Eyecolor", @character.eyecolor) %>
+        <%= print_property("Race", @character.race) %>
+        <%= print_property("Skintone", @character.skintone) %>
+        <%= print_property("Body type", @character.bodytype) %>
+        <%= print_property("Identifying marks", @character.identmarks) %>
+      </dl>
+
+      <dl class="dl-horizontal hidden section social_section">
+        <%= print_property("Best friend", @character.bestfriend, "character") %>
+        <%= print_property("Religion", @character.religion) %>
+        <%= print_property("Politics", @character.politics) %>
+        <%= print_property("Prejudices", @character.prejudices) %>
+        <%= print_property("Occupation", @character.occupation) %>
+        <%= print_property("Pets", @character.pets) %>
+      </dl>
+
+      <dl class="dl-horizontal hidden section behavior_section">
+        <%= print_property("Mannerisms", @character.mannerisms) %>
+      </dl>
+
+      <dl class="dl-horizontal hidden section history_section">
+        <%= print_property("Birthday", @character.birthday) %>
+        <%= print_property("Birthplace", @character.birthplace, "location") %>
+        <%= print_property("Education", @character.education, "location") %>
+        <%= print_property("Background", @character.background) %>
+      </dl>
+
+      <dl class="dl-horizontal hidden section favorites_section">
+        <%= print_property("Color", @character.fave_color) %>
+        <%= print_property("Food", @character.fave_food, "equipment") %>
+        <%= print_property("Possession", @character.fave_possession, "equipment") %>
+        <%= print_property("Weapon", @character.fave_weapon, "equipment") %>
+        <%= print_property("Animal", @character.fave_animal, "character") %>
+      </dl>
+
+      <dl class="dl-horizontal hidden section relationships_section">
+        <%= print_property("Father", @character.father, "character") %>
+        <%= print_property("Mother", @character.mother, "character") %>
+        <%= print_property("Spouse", @character.spouse, "character") %>
+        <%= print_property("Siblings", @character.siblings, "character") %>
+        <%= print_property("Archenemy", @character.archenemy, "character") %>
+      </dl>
+
+      <dl class="dl-horizontal hidden section notes_section">
+        <%= print_property("Notes", @character.notes) %>
+        <% if session[:user] and session[:user] == @character.user.id %>
+          <%= print_property("Private notes", @character.private_notes) %>
+        <% end %>
+      </dl>
+      
+      </div>
+      
+      <div class="card-comments">
+
+      <% if session[:user] and session[:user] == @character.user.id %>
+      <div class="form-actions">
+        <%= link_to t('.back', :default => t("helpers.links.back")),
+                    character_list_path, :class => 'btn'  %>
+        <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                    character_edit_path(@character), :class => 'btn' %>
+      </div>
+      <% end %>
+
+      </div>
+
+    </div>
+  </div>
 </div>

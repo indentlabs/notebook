@@ -1,35 +1,31 @@
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Role</th>
-      <th>Universe</th>
-      <% if session[:user] %>
-        <th><%=t '.actions', :default => t("helpers.actions") %></th>
-      <% end %>
-    </tr>
-  </thead>
-  <tbody>
-    <% @characters.each do |character| %>
-      <tr>
-        <td style="width: 160px;"><%= simple_format link_to character.name, character_path(character) %></td>
-        <td><%= simple_format character.role %></td>
-        <td><%= character.universe ? character.universe.name : "" %></td>
-        <td style="width: 180px;">
+<% @characters.each do |character| %>
+  <div class="col-md-3">
+    <div class="card">
+      <h1 class="card-heading">
+        <%= simple_format link_to character.name, character_path(character) %>
+      </h1>
+      <div class="card-body">
+        <p>
+          <strong>
+            <% if character.role.length > 0 %>
+              <%= character.role %><% if character.age.length > 0 %>, <%= character.age %><% end %>
+            <% end %>
+          </strong>
+        </p>
+        <p>
+        </p>
+      </div>
+      <div class="card-comments">
+        <p>
           <% if session[:user] and session[:user] == character.user.id %>
             <%= link_to t('.view', :default => t("helpers.links.view")),
                         character_path(character), :class => 'btn' %>
             <%= link_to t('.edit', :default => t("helpers.links.edit")),
                         character_edit_path(character), :class => 'btn' %>
-            <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
-                        character_path(character),
-                        :method => :delete,
-                        :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
-                        :class => 'btn btn-danger' %>
           <% end %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
+        
+        </p>
+      </div>
+    </div>
+  </div>
+<% end %>

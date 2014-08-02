@@ -1,99 +1,29 @@
-<%= form_for @magic, :url => magic_create_process_path, :html => { :class => 'form-horizontal' } do |f| %>
 <div class="hidden section starter_section general_section">
-  <div class="control-group">
-    <%= f.label :name, :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :name, :class => 'text_field' %>
-    </div>
-  </div>
-  <div class="control-group">
-    <%= f.label :type_of_magic, :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :type_of, :class => 'text_field', :value => (params[:type_of] || "").capitalize %>
-      <span class="help-inline">For example: Spell, Ability, Enchantment, etc</span>
-    </div>
-  </div>
-  <div class="control-group">
-    <%= f.label :universe, :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :universe, :class => 'text_field', :value => @magic.universe ? @magic.universe.name : "" %>
-      <%= universe_picker %>
-    </div>
-  </div>
+  <%= generate_form_row_for(f, :name) %>
+  <%= generate_form_row_for(f, :type_of, 'Type of magic') %>
+  <%= generate_form_row_for(f, :universe, nil, [{:action => 'universe_picker', :icon => 'globe'}]) %>
 </div>
 
 <div class="hidden section appearance_section">
-  <div class="control-group">
-    <%= f.label 'Manifestation', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_area :manifestation, :class => 'text_area', :rows => 12, :style => "width: 80%;" %>
-    </div>
-  </div>
-  <div class="control-group">
-    <%= f.label 'Symptoms', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_area :symptoms, :class => 'text_area', :rows => 12, :style => "width: 80%;" %>
-    </div>
-  </div>
+  <%= generate_form_row_for(f, :manifestation) %>
+  <%= generate_form_row_for(f, :symptoms) %>
 </div>
 
 <div class="hidden section alignment_section">
-  <div class="control-group">
-    <%= f.label 'Element', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :element, :class => 'text_field' %>
-    </div>
-  </div>
-  <div class="control-group">
-    <%= f.label 'Deity', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :diety, :class => 'text_field' %>
-    </div>
-  </div>
+  <%= generate_form_row_for(f, :element) %>
+  <%= generate_form_row_for(f, :diety) %>
 </div>
 
 <div class="hidden section effects_section">
-  <div class="control-group">
-    <%= f.label 'Harmful effects', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_area :harmfulness, :class => 'text_area', :rows => 3 %>
-    </div>
-  </div>
-  <div class="control-group">
-    <%= f.label 'Helpful effects', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_area :helpfulness, :class => 'text_area', :rows => 3 %>
-    </div>
-  </div>
-  <div class="control-group">
-    <%= f.label 'Neutral effects', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_area :neutralness, :class => 'text_area', :rows => 3 %>
-    </div>
-  </div>
+  <%= generate_form_row_for(f, :harmfulness) %>
+  <%= generate_form_row_for(f, :helpfulness) %>
+  <%= generate_form_row_for(f, :neutralness) %>
 </div>
 
 <div class="hidden section requirements_section">
-  <div class="control-group">
-    <%= f.label 'Resource cost', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :resource, :class => 'text_field' %>
-    </div>
-  </div>
-  <div class="control-group">
-    <%= f.label 'Skill required', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :skill_level, :class => 'text_field' %>
-    </div>
-  </div>
-  <div class="control-group">
-    <%= f.label 'Limitations', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :limitations, :class => 'text_field' %>
-      <div class="help-inline">What <em>can't</em> this magic do?</div>
-    </div>
-  </div>
-
+  <%= generate_form_row_for(f, :resource, 'Resource cost') %>
+  <%= generate_form_row_for(f, :skill_level, 'Skill required') %>
+  <%= generate_form_row_for(f, :limitations) %>
 </div>
 
 <div class="hidden section notes_section">
@@ -110,10 +40,3 @@
     </div>
   </div>
 </div>
-
-  <div class="form-actions">
-    <%= f.submit nil, :class => 'btn btn-primary' %>
-    <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
-                magic_list_path, :class => 'btn' %>
-  </div>
-<% end %>

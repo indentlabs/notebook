@@ -1,19 +1,6 @@
-<%= form_for @language, :url => language_create_process_path, :html => { :class => 'form-horizontal' } do |f| %>
 <div class="hidden section starter_section general_section">
-  <div class="control-group">
-    <%= f.label :name, :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :name, :class => 'text_field' %>
-    </div>
-  </div>
-
-  <div class="control-group">
-    <%= f.label :universe, :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :universe, :class => 'text_field', :value => @language.universe ? @language.universe.name : "" %>
-      <%= universe_picker %>
-    </div>
-  </div>
+  <%= generate_form_row_for(f, :name, nil) %>
+  <%= generate_form_row_for(f, :universe, nil, [{:action => 'universe_picker', :icon => 'globe'}]) %>
 </div>
 
 <div class="hidden section vocabulary_section">
@@ -26,35 +13,13 @@
 </div>
 
 <div class="hidden section history_section">
-  <div class="control-group">
-    <%= f.label 'Established year', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :established_year, :class => 'text_field' %>
-    </div>
-  </div>
-  <div class="control-group">
-    <%= f.label 'Established location', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :established_location, :class => 'text_field' %>
-    </div>
-  </div>
-
+  <%= generate_form_row_for(f, :established_year, nil) %>
+  <%= generate_form_row_for(f, :established_location, 'Established in', [{:action => 'location_picker', :icon => 'globe'}]) %>
 </div>
 
 <div class="hidden section speakers_section">
-  <div class="control-group">
-    <%= f.label 'Fluent characters', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_area :characters, :class => 'text_field', :rows => 3 %>
-    </div>
-  </div>
-  <div class="control-group">
-    <%= f.label 'Speaking locations', :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_area :locations, :class => 'text_field', :rows => 3 %>
-    </div>
-  </div>
-
+  <%= generate_form_row_for(f, :characters, nil, [{:action => 'character_picker', :icon => 'user'}]) %>
+  <%= generate_form_row_for(f, :locations, nil, [{:action => 'location_picker', :icon => 'globe'}]) %>
 </div>
 
 <div class="hidden section more_section">
@@ -65,10 +30,3 @@
     </div>
   </div>
 </div>
-
-  <div class="form-actions">
-    <%= f.submit nil, :class => 'btn btn-primary' %>
-    <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
-                language_list_path, :class => 'btn' %>
-  </div>
-<% end %>

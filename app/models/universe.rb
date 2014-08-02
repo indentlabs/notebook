@@ -47,4 +47,9 @@ class Universe
     Magic.where(universe_id: id)
   end
 
+
+  def to_s
+    self.name
+  end
+
 end

@@ -1,50 +1,65 @@
 <%- model_class = @equipment.class -%>
 
-<div class="card">
-  <%= render :partial => 'tabs' %>
+<%- model_class = @character.class -%>
 
-  <dl class="dl-horizontal hidden section general_section">
-    <%= print_property("Name", @equipment.name, "") %>
-    <%= print_property("Type", @equipment.equip_type, "") %>
-    <%= print_property("Description", @equipment.description, "") %>
-    <%= print_property("Universe", @equipment.universe ? @equipment.universe.name : "", "universe") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section appearance_section">
-    <%= print_property("Weight", @equipment.weight, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section history_section">
-    <%= print_property("Original owner", @equipment.original_owner, "character") %>
-    <%= print_property("Current owner", @equipment.current_owner, "character") %>
-    <%= print_property("Made by", @equipment.made_by, "character") %>
-    <%= print_property("Materials used", @equipment.materials, "equipment") %>
-    <%= print_property("Year made", @equipment.year_made, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section abilities_section">
-    <%= print_property("Magical properties", @equipment.magic, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section notes_section">
-    <%= print_property("Notes", @equipment.notes, "") %>
-    <% if session[:user] and session[:user] == @equipment.user.id %>
-      <%= print_property("Private notes", @equipment.private_notes, "") %>
-    <% end %>
-  </dl>
-
-  <% if session[:user] and session[:user] == @equipment.user.id %>
-  <div class="form-actions">
-    <%= link_to t('.back', :default => t("helpers.links.back")),
-                equipment_list_path, :class => 'btn'  %>
-    <%= link_to t('.edit', :default => t("helpers.links.edit")),
-                equipment_edit_path(@equipment), :class => 'btn' %>
-    <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
-                equipment_path(@equipment),
-                :method => 'delete',
-                :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
-                :class => 'btn btn-danger' %>
+<div class="row">
+  <div class="col-xs-3">
+    <div class="card">
+      <%= render :partial => 'tabs' %>
+    </div>
   </div>
-  <% end %>
 
+  <div class="col-xs-9">
+    <div class="card">
+      <h1 class="card-heading">
+        <%= @equipment.name %>
+      </h1>
+
+      <div class="card-body">
+
+        <dl class="dl-horizontal hidden section general_section">
+          <%= print_property("Name", @equipment.name, "") %>
+          <%= print_property("Type", @equipment.equip_type, "") %>
+          <%= print_property("Description", @equipment.description, "") %>
+          <%= print_property("Universe", @equipment.universe ? @equipment.universe.name : "", "universe") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section appearance_section">
+          <%= print_property("Weight", @equipment.weight, "") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section history_section">
+          <%= print_property("Original owner", @equipment.original_owner, "character") %>
+          <%= print_property("Current owner", @equipment.current_owner, "character") %>
+          <%= print_property("Made by", @equipment.made_by, "character") %>
+          <%= print_property("Materials used", @equipment.materials, "equipment") %>
+          <%= print_property("Year made", @equipment.year_made, "") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section abilities_section">
+          <%= print_property("Magical properties", @equipment.magic, "") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section notes_section">
+          <%= print_property("Notes", @equipment.notes, "") %>
+          <% if session[:user] and session[:user] == @equipment.user.id %>
+            <%= print_property("Private notes", @equipment.private_notes, "") %>
+          <% end %>
+        </dl>
+      
+      </div>
+      
+      <div class="card-comments">
+        <% if session[:user] and session[:user] == @equipment.user.id %>
+          <div class="form-actions">
+            <%= link_to t('.back', :default => t("helpers.links.back")),
+                        equipment_list_path, :class => 'btn'  %>
+            <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                        equipment_edit_path(@equipment), :class => 'btn' %>
+          </div>
+        <% end %>
+      </div>
+
+    </div>
+  </div>
 </div>

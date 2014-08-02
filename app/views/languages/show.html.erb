@@ -1,43 +1,58 @@
 <%- model_class = @language.class -%>
 
-<div class="card">
-  <%= render :partial => 'tabs' %>
-
-  <dl class="dl-horizontal hidden section general_section">
-    <%= print_property("Name", @language.name, "") %>
-    <%= print_property("Universe", @language.universe ? @language.universe.name : "", "universe") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section vocabulary_section">
-    <%= print_property("Words", @language.words, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section history_section">
-    <%= print_property("Established year", @language.established_year, "") %>
-    <%= print_property("Established location", @language.established_location, "location") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section speakers_section">
-    <%= print_property("Fluent characters", @language.characters, "") %>
-    <%= print_property("Locations spoken", @language.locations, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section more_section">
-    <%= print_property("Notes", @language.notes, "") %>
-  </dl>
-
- <% if session[:user] and session[:user] == @language.user.id %>
-  <div class="form-actions">
-    <%= link_to t('.back', :default => t("helpers.links.back")),
-                language_list_path, :class => 'btn'  %>
-    <%= link_to t('.edit', :default => t("helpers.links.edit")),
-                language_edit_path(@language), :class => 'btn' %>
-    <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
-                language_path(@language),
-                :method => 'delete',
-                :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
-                :class => 'btn btn-danger' %>
+<div class="row">
+  <div class="col-xs-3">
+    <div class="card">
+      <%= render :partial => 'tabs' %>
+    </div>
   </div>
-  <% end %>
 
+  <div class="col-xs-9">
+    <div class="card">
+      <h1 class="card-heading">
+        <%= @language.name %>
+      </h1>
+
+      <div class="card-body">
+
+        <dl class="dl-horizontal hidden section general_section">
+          <%= print_property("Name", @language.name, "") %>
+          <%= print_property("Universe", @language.universe ? @language.universe.name : "", "universe") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section vocabulary_section">
+          <%= print_property("Words", @language.words, "") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section history_section">
+          <%= print_property("Established year", @language.established_year, "") %>
+          <%= print_property("Established location", @language.established_location, "location") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section speakers_section">
+          <%= print_property("Fluent characters", @language.characters, "") %>
+          <%= print_property("Locations spoken", @language.locations, "") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section more_section">
+          <%= print_property("Notes", @language.notes, "") %>
+        </dl>
+      
+      </div>
+      
+      <div class="card-comments">
+
+      <% if session[:user] and session[:user] == @language.user.id %>
+      <div class="form-actions">
+        <%= link_to t('.back', :default => t("helpers.links.back")),
+                    language_list_path, :class => 'btn'  %>
+        <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                    language_edit_path(@language), :class => 'btn' %>
+      </div>
+      <% end %>
+
+      </div>
+
+    </div>
+  </div>
 </div>

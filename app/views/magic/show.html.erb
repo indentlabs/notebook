@@ -1,55 +1,68 @@
 <%- model_class = @magic.class -%>
 
-<div class="card">
-  <%= render :partial => 'tabs' %>
-
-  <dl class="dl-horizontal hidden section general_section">
-    <%= print_property("Name", @magic.name, "") %>
-    <%= print_property("Type of", @magic.type_of, "") %>
-    <%= print_property("Universe", @magic.universe ? @magic.universe.name : "", "universe") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section appearance_section">
-    <%= print_property("Manifestation", @magic.manifestation, "") %>
-    <%= print_property("Symptoms", @magic.symptoms, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section alignment_section">
-    <%= print_property("Element", @magic.element, "") %>
-    <%= print_property("Deity", @magic.diety, "character") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section effects_section">
-    <%= print_property("Harmful effects", @magic.harmfulness, "") %>
-    <%= print_property("Helpful effects", @magic.helpfulness, "") %>
-    <%= print_property("Neutral effects", @magic.neutralness, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section requirements_section">
-    <%= print_property("Resource cost", @magic.resource, "") %>
-    <%= print_property("Skill required", @magic.skill_level, "") %>
-    <%= print_property("Limitations", @magic.limitations, "") %>
-  </dl>
-
-  <dl class="dl-horizontal hidden section notes_section">
-    <%= print_property("Notes", @magic.notes, "") %>
-    <% if session[:user] and session[:user] == @magic.user.id %>
-      <%= print_property("Private notes", @magic.private_notes, "") %>
-    <% end %>
-  </dl>
-
-  <% if session[:user] and session[:user] == @magic.user.id %>
-  <div class="form-actions">
-    <%= link_to t('.back', :default => t("helpers.links.back")),
-                magic_list_path, :class => 'btn'  %>
-    <%= link_to t('.edit', :default => t("helpers.links.edit")),
-                magic_edit_path(@magic), :class => 'btn' %>
-    <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
-                magic_path(@magic),
-                :method => 'delete',
-                :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
-                :class => 'btn btn-danger' %>
+<div class="row">
+  <div class="col-xs-3">
+    <div class="card">
+      <%= render :partial => 'tabs' %>
+    </div>
   </div>
-  <% end %>
 
+  <div class="col-xs-9">
+    <div class="card">
+      <h1 class="card-heading">
+        <%= @magic.name %>
+      </h1>
+
+      <div class="card-body">
+        <dl class="dl-horizontal hidden section general_section">
+          <%= print_property("Name", @magic.name, "") %>
+          <%= print_property("Type of", @magic.type_of, "") %>
+          <%= print_property("Universe", @magic.universe ? @magic.universe.name : "", "universe") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section appearance_section">
+          <%= print_property("Manifestation", @magic.manifestation, "") %>
+          <%= print_property("Symptoms", @magic.symptoms, "") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section alignment_section">
+          <%= print_property("Element", @magic.element, "") %>
+          <%= print_property("Deity", @magic.diety, "character") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section effects_section">
+          <%= print_property("Harmful effects", @magic.harmfulness, "") %>
+          <%= print_property("Helpful effects", @magic.helpfulness, "") %>
+          <%= print_property("Neutral effects", @magic.neutralness, "") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section requirements_section">
+          <%= print_property("Resource cost", @magic.resource, "") %>
+          <%= print_property("Skill required", @magic.skill_level, "") %>
+          <%= print_property("Limitations", @magic.limitations, "") %>
+        </dl>
+
+        <dl class="dl-horizontal hidden section notes_section">
+          <%= print_property("Notes", @magic.notes, "") %>
+          <% if session[:user] and session[:user] == @magic.user.id %>
+            <%= print_property("Private notes", @magic.private_notes, "") %>
+          <% end %>
+        </dl>
+      </div>
+      
+      <div class="card-comments">
+
+      <% if session[:user] and session[:user] == @magic.user.id %>
+      <div class="form-actions">
+        <%= link_to t('.back', :default => t("helpers.links.back")),
+                    magic_list_path, :class => 'btn'  %>
+        <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                    magic_edit_path(@magic), :class => 'btn' %>
+      </div>
+      <% end %>
+
+      </div>
+
+    </div>
+  </div>
 </div>
