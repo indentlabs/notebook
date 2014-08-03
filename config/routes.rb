@@ -25,7 +25,7 @@ PlanCharacters::Application.routes.draw do
   get  '/register',     :to => 'users#new',    :as => :signup
   post '/register',     :to => 'users#create', :as => :signup_process
   get  '/account',      :to => 'users#edit',   :as => :account
-  put  '/register',     :to => 'users#update', :as => :account_process
+  patch  '/register',     :to => 'users#update', :as => :account_process
   get  '/be-anonymous', :to => 'users#anonymous', :as => :anonymous
   get  '/anon-login',   :to => 'users#anonymous_login', :as => :anonymous_login
   
@@ -38,7 +38,7 @@ PlanCharacters::Application.routes.draw do
     post   '/character/new',      :to => 'characters#create',  :as => :character_create_process
     get    '/character/:id',      :to => 'characters#show',    :as => :character
     get    '/character/:id/edit', :to => 'characters#edit',    :as => :character_edit
-    put    '/character/:id',      :to => 'characters#update',  :as => :character_edit_process
+    patch    '/character/:id',      :to => 'characters#update',  :as => :character_edit_process
     delete '/character/:id',      :to => 'characters#destroy', :as => :character_destroy
 
     # Equipment
@@ -49,7 +49,7 @@ PlanCharacters::Application.routes.draw do
     post   '/equipment/new',      :to => 'equipment#create',  :as => :equipment_create_process
     get    '/equipment/:id',      :to => 'equipment#show',    :as => :equipment
     get    '/equipment/:id/edit', :to => 'equipment#edit',    :as => :equipment_edit
-    put    '/equipment/:id',      :to => 'equipment#update',  :as => :equipment_edit_process
+    patch  '/equipment/:id',      :to => 'equipment#update',  :as => :equipment_edit_process
     delete '/equipment/:id',      :to => 'equipment#destroy', :as => :equipment_destroy
 
     # Languages
@@ -59,7 +59,7 @@ PlanCharacters::Application.routes.draw do
     post   '/language/new',      :to => 'languages#create',  :as => :language_create_process
     get    '/language/:id',      :to => 'languages#show',    :as => :language
     get    '/language/:id/edit', :to => 'languages#edit',    :as => :language_edit
-    put    '/language/:id',      :to => 'languages#update',  :as => :language_edit_process
+    patch    '/language/:id',      :to => 'languages#update',  :as => :language_edit_process
     delete '/language/:id',      :to => 'languages#destroy', :as => :language_destroy
 
     # Locations
@@ -70,7 +70,7 @@ PlanCharacters::Application.routes.draw do
     get    '/location/new/:type_of', :to => 'locations#new',     :as => :location_create_type
     get    '/location/:id',      :to => 'locations#show',    :as => :location
     get    '/location/:id/edit', :to => 'locations#edit',    :as => :location_edit
-    put    '/location/:id',      :to => 'locations#update',  :as => :location_edit_process
+    patch  '/location/:id',      :to => 'locations#update',  :as => :location_edit_process
     delete '/location/:id',      :to => 'locations#destroy', :as => :location_destroy
 
     # Magic
@@ -81,7 +81,7 @@ PlanCharacters::Application.routes.draw do
     get    '/magic/new/:type_of', :to => 'magic#new',     :as => :magic_create_type
     get    '/magic/:id',      :to => 'magic#show',    :as => :magic
     get    '/magic/:id/edit', :to => 'magic#edit',    :as => :magic_edit
-    put    '/magic/:id',      :to => 'magic#update',  :as => :magic_edit_process
+    patch  '/magic/:id',      :to => 'magic#update',  :as => :magic_edit_process
     delete '/magic/:id',      :to => 'magic#destroy', :as => :magic_destroy
 
     # Universes
@@ -90,7 +90,7 @@ PlanCharacters::Application.routes.draw do
     post   '/universe/new',      :to => 'universes#create',  :as => :universe_create_process
     get    '/universe/:id',      :to => 'universes#show',    :as => :universe
     get    '/universe/:id/edit', :to => 'universes#edit',    :as => :universe_edit
-    put    '/universe/:id',      :to => 'universes#update',  :as => :universe_edit_process
+    patch  '/universe/:id',      :to => 'universes#update',  :as => :universe_edit_process
     delete '/universe/:id',      :to => 'universes#destroy', :as => :universe_destroy
 
     # Coming Soon TM

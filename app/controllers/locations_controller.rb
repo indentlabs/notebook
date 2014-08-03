@@ -41,7 +41,7 @@ class LocationsController < ApplicationController
   end
 
   def create
-    @location = Location.new(params[:location])
+    @location = Location.new(location_params)
     @location.user_id = session[:user]
     @location.universe = Universe.where(user_id: session[:user]).where(name: params[:location][:universe].strip).first
 
@@ -80,7 +80,7 @@ class LocationsController < ApplicationController
 
     respond_to do |format|
       begin
-        if @location.update_attributes(params[:location])
+        if @location.update_attributes(location_params)
           format.html { redirect_to @location, notice: 'Location was successfully updated.' }
           format.json { head :no_content }
         else
@@ -105,4 +105,17 @@ class LocationsController < ApplicationController
       format.json { head :no_content }
     end
   end
+  
+  private
+    def location_params
+      params.require(:location).permit(
+        :universe_id, :user_id,
+        :name, :type_of, :description,
+        :map,
+        :population, :currency, :motto,
+        :capital, :largest_city, :notable_cities,
+        :area, :crops, :located_at,
+        :stablishment_year, :notable_wars,
+        :notes, :private_notes)
+    end
 end

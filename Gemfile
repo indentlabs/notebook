@@ -4,6 +4,7 @@ gem 'rails', '4.1.0'
 gem 'sqlite3'
 gem 'paperclip', '~> 4.2.0'
 gem 'rmagick'
+gem 'aws-sdk', '~> 1.50'
 
 gem 'sass-rails', '~> 4.0.3'
 gem 'less-rails'

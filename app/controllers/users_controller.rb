@@ -20,7 +20,7 @@ class UsersController < ApplicationController
   # POST /users
   # POST /users.json
   def create
-    @user = User.new(params[:user])
+    @user = User.new(user_params)
     respond_to do |format|
       if @user.save
 		    session[:user] = @user.id
@@ -57,7 +57,7 @@ class UsersController < ApplicationController
     @user = User.find(session[:user])
 
     respond_to do |format|
-      if @user.update_attributes(params[:user])
+      if @user.update_attributes(user_params)
         session[:anon_user] = false
         format.html { redirect_to homepage_path, notice: 'Successfully updated.' }
         format.json { head :no_content }
@@ -70,4 +70,9 @@ class UsersController < ApplicationController
   
   def anonymous
   end
+
+  private
+    def user_params
+      params.require(:user).permit(:name, :password, :email)
+    end
 end

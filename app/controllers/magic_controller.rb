@@ -41,7 +41,7 @@ class MagicController < ApplicationController
   end
 
   def create
-    @magic = Magic.new(params[:magic])
+    @magic = Magic.new(magic_params)
     @magic.user_id = session[:user]
     @magic.universe = Universe.where(user_id: session[:user]).where(name: params[:magic][:universe].strip).first
 
@@ -66,7 +66,7 @@ class MagicController < ApplicationController
     end
 
     respond_to do |format|
-      if @magic.update_attributes(params[:magic])
+      if @magic.update_attributes(magic_params)
         format.html { redirect_to @magic, notice: 'Magic was successfully updated.' }
         format.json { head :no_content }
       else
@@ -85,4 +85,16 @@ class MagicController < ApplicationController
       format.json { head :no_content }
     end
   end
+  
+  private
+    def magic_params
+      params.require(:magic).permit(
+        :universe_id, :user_id,
+        :name, :type_of,
+        :manifestation, :symptoms,
+        :element, :diety,
+        :harmfulness, :helpfulness, :neutralness,
+        :resource, :skill_level, :limitations,
+        :notes, :private_notes)
+    end
 end

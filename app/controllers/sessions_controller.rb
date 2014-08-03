@@ -14,8 +14,7 @@ class SessionsController < ApplicationController
   # POST /sessions.json
   def create
     require 'digest'
-    login = Session.new(params[:session])
-
+    login = Session.new(session_params)
     hash = Digest::MD5.hexdigest(login.username + "'s password IS... " + login.password + " (lol!)")
     user = User.where(name: login.username, password: hash)
     if user.length < 1
@@ -42,4 +41,9 @@ class SessionsController < ApplicationController
       format.json { head :no_content }
     end
   end
+  
+  private
+    def session_params
+      params.require(:session).permit(:username, :password)
+    end
 end
