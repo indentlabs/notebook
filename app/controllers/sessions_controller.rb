@@ -15,7 +15,7 @@ class SessionsController < ApplicationController
   def create
     require 'digest'
     login = Session.new(params[:session])
-    
+
     hash = Digest::MD5.hexdigest(login.username + "'s password IS... " + login.password + " (lol!)")
     user = User.where(name: login.username, password: hash)
     if user.length < 1
@@ -25,7 +25,7 @@ class SessionsController < ApplicationController
     
     session[:user] = user[0].id
     session.delete(:anon_user)
-      
+
     respond_to do |format|
       format.html { redirect_to dashboard_path, notice: 'Login successful.' }
       format.json { render json: true, status: :created }
