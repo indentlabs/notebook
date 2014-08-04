@@ -1,37 +1,6 @@
 <%- model_class = @character.class -%>
 
-<div class="row">
-  <div class="col-xs-3">
-    <div class="card">
-      <h1 class="card-heading">Facets</h1>
-      <%= render :partial => 'tabs' %>
-    </div>
-    
-    <div class="card">
-      <h1 class="card-heading">Danger-zone</h1>
-      <div class="card-body">
-        <%= link_to 'Delete character forever', character_path,
-            :class => 'btn btn-danger',
-            :method => :delete,
-            :confirm => 'Are you sure? This action cannot be undone!' %>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-xs-8">
-    <div class="card">
-      <h1 class="card-heading">Editing <%= @character.name %></h1>
-      <%= form_for @character, 
-          :url => character_edit_process_path, 
-          :html => { :class => 'form-horizontal' } do |form| %>
-        <div class="card-body">
-          <%= render :partial => 'form', :locals => { :f => form } %>
-        </div>
-        <div class="card-comments">
-          <%= form.submit nil, :class => 'btn btn-primary' %>
-          <%= link_to 'Cancel', character_list_path, :class => 'btn' %>
-        </div>
-      <% end %>
-    </div>
-  </div>
+<div class="card">
+	<%= render :partial => 'tabs' %>
+	<%= render :partial => 'edit_form' %>
 </div>

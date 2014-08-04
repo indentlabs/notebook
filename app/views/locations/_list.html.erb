@@ -1,28 +1,35 @@
-<% @locations.each do |location| %>
-  <div class="col-md-4">
-    <div class="card">
-      <h1 class="card-heading"><%= location.name %></h1>
-      <div class="card-body">
-        <% if location.map.url != '/assets/placeholders/map.png' %>
-          <a href="<%= location_path(location) %>">
-            <%= image_tag location.map.url, style: 'width: 100%' %>
-          </a>
-        <% end %>
-        <% if location.type_of and location.type_of.length > 0 %>
-          <div><strong><%= location.type_of %></strong></div>
-        <% end %>
-        <p>
-          <%= simple_format truncate(location.description, length: 256) %>
-        </p>
-      </div>
-      <div class="card-comments">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <% if session[:user] %>
+        <th><%=t '.actions', :default => t("helpers.actions") %></th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+    <% @locations.each do |location| %>
+      <tr>
+        <td style="width: 160px;"><%= simple_format link_to location.name, location_path(location) %></td>
+        <td><%= simple_format location.type_of %></td>
+        <td><%= simple_format truncate(location.description, :length => 256) %></td>
+        <td style="width: 180px;">
           <% if session[:user] and session[:user] == location.user.id %>
             <%= link_to t('.view', :default => t("helpers.links.view")),
                         location_path(location), :class => 'btn' %>
             <%= link_to t('.edit', :default => t("helpers.links.edit")),
                         location_edit_path(location), :class => 'btn' %>
-          <% end %>      
-      </div>
-    </div>
-  </div>
-<% end %>
+            <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                        location_path(location),
+                        :method => :delete,
+                        :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
+                        :class => 'btn btn-danger' %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+

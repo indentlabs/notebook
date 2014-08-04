@@ -1,0 +1,75 @@
+<%= form_for @language, :url => language_edit_process_path, :html => { :class => 'form-horizontal' } do |f| %>
+<div class="hidden section starter_section general_section">
+  <div class="control-group">
+    <%= f.label :name, :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :name, :class => 'text_field' %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <%= f.label :universe, :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :universe, :class => 'text_field', :value => @language.universe ? @language.universe.name : "" %>
+      <%= universe_picker %>
+    </div>
+  </div>
+
+</div>
+
+<div class="hidden section vocabulary_section">
+  <div class="control-group">
+    <%= f.label 'Words', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_area :words, :class => 'text_field', :rows => 6 %>
+    </div>
+  </div>
+</div>
+
+<div class="hidden section history_section">
+  <div class="control-group">
+    <%= f.label 'Established year', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :established_year, :class => 'text_field' %>
+    </div>
+  </div>
+  <div class="control-group">
+    <%= f.label 'Established location', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :established_location, :class => 'text_field' %>
+    </div>
+  </div>
+
+</div>
+
+<div class="hidden section speakers_section">
+  <div class="control-group">
+    <%= f.label 'Fluent characters', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_area :characters, :class => 'text_field', :rows => 3 %>
+    </div>
+  </div>
+  <div class="control-group">
+    <%= f.label 'Speaking locations', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_area :locations, :class => 'text_field', :rows => 3 %>
+    </div>
+  </div>
+
+</div>
+
+<div class="hidden section more_section">
+  <div class="control-group">
+    <%= f.label 'Notes', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_area :notes, :class => 'text_area', :rows => 12, :style => "width: 80%;" %>
+    </div>
+  </div>
+</div>
+
+  <div class="form-actions">
+    <%= f.submit nil, :class => 'btn btn-primary' %>
+    <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
+                language_list_path, :class => 'btn' %>
+  </div>
+<% end %>

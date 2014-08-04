@@ -2,7 +2,7 @@ $(document).ready ->
 
   # Character name generator
   $('.character_name_generator').click ->
-    target = $(this).closest('.row').find('input[type=text]')
+    target = $(this).parent().find '.text_field'
     $.ajax
       dataType: 'text'
       url:      '/generate/character/name'
@@ -12,7 +12,7 @@ $(document).ready ->
 
   # Character age generator
   $('.character_age_generator').click ->
-    target = $(this).closest('.row').find('input[type=text]')
+    target = $(this).parent().find '.text_field'
     $.ajax
       dataType: 'text'
       url:      '/generate/character/age'
@@ -22,7 +22,7 @@ $(document).ready ->
 
   # Location name generator
   $('.location_name_generator').click ->
-    target = $(this).closest('.row').find('input[type=text]')
+    target = $(this).parent().find '.text_field'
     $.ajax
       dataType: 'text'
       url:      '/generate/location/name'

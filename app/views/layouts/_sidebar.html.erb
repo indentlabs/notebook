@@ -1,60 +1,34 @@
-<% if flash[:notice] %>
-	<div class="card">
-		<div class="card-body">
-			<div class="alert alert-notice">
-				<%= flash[:notice] %>
-			</div>
-		</div>
-	</div>
-<% end %>
+<% if session[:user] %>
 
-<% if flash[:alert] %>
-	<div class="card">
-		<div class="card-body">
-			<div class="alert alert-notice">
-				<%= flash[:alert] %>
-			</div>
-		</div>
-	</div>
-<% end %>
-
-<% if session[:anon_user] and session[:user] and User.find(session[:user]).content_count > 0 && !current_page?(account_path) %>
-	<div class="card">
-		<div class="card-heading">Anonymous accounts</div>
-		<div class="card-body">
-			You are currently using an <a href="/about/anon-login">anonymous account</a>. In order to save the brilliant things you have created with it, please <a href="/account">click here</a> to give yourself a username and password.
-		</div>
-		<div class="card-comments"></div>
-	</div>
-<% end %>
-
-<% unless session[:user] %>
+<% else %>
 <div class="card">
-	<h1 class="card-heading">Get started instantly</h1>
+	<h3 class="card-heading simple">Get started instantly</h3>
 	<div class="card-body">
 		Nobody likes creating accounts just to try things out. You can get started making things immediately and create your account later if you want.
 	</div>
 	<div class="card-comments">
 		<div class="comments-collapse-toggle">
-			<p>
-				<a href="/anon-login">Get started</a> or
-				<a data-toggle="collapse" data-target="#c1-comments" href="#">
-					Learn more <i class="icon-angle-down"></i>
-				</a>
-			</p>
+			<a href="/anon-login">Get started</a>or
+			<a data-toggle="collapse" data-target="#c1-comments" href="#">
+				Learn more <i class="icon-angle-down"></i>
+			</a>
 		</div>
 		<div id="c1-comments" class="comments collapse">
-			<p>
-				If you jump right in to creating things, an account will be created for you. As you flesh out characters and worlds, your ideas will be safe and sound under this account, which does not ever expire unless you delete it yourself. 
-			</p>
-			<p>
-				At any time, you can change the account's login information, so if you make some good progress you can just create an account and <em>tada!</em> all of your ideas are private to your new account, always there for you.
-			</p>
-			<p>
-				<a data-toggle="collapse" data-target="#c1-comments" href="#">
-					Collapse card <i class="icon-angle-up"></i>
-				</a>
-			</p>
+			<div class="media">
+				<div class="media-body">
+					<p>
+						If you jump right in to creating things, an account will be created for you. As you flesh out characters and worlds, your ideas will be safe and sound under this account, which does not ever expire unless you delete it yourself. 
+					</p>
+					<p>
+						At any time, you can change the account's login information, so if you make some good progress you can just create an account and <em>tada!</em> all of your ideas are private to your new account, always there for you.
+					</p>
+					<p>
+						<a data-toggle="collapse" data-target="#c1-comments" href="#">
+							Collapse card <i class="icon-angle-up"></i>
+						</a>
+					</p>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>

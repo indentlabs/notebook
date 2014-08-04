@@ -1,24 +1,25 @@
 <%- model_class = Magic.new.class -%>
 <% if @magics.length > 0 %>
 <div class="card">
-  <h1 class="card-heading">
+  <h3 class="card-heading simple">
     Magic
     <% if false and Universe.where(user_id: session[:user]).length > 0 %>
       <small>from <%= universe_filter %></small>
     <% end %>
-  </h1>
+  </h3>
 
   <%= render 'list' %>
 </div>
 <% end %>
 
 <div class="card">
-  <h1 class="card-heading">Planning magic</h1>
+  <h3 class="card-heading simple">Planning magic</h3>
   <div class="card-body">
     <p>
       Magic, the most wonderous thing! How does it work?
     </p>
     <%= link_to 'New magic', magic_create_path, :class => 'btn btn-primary' %>
+
     <%= link_to 'New spell', magic_create_type_path(:spell), :class => 'btn' %>
     <%= link_to 'New enchantment', magic_create_type_path(:enchantment), :class => 'btn' %>
     <%= link_to 'New curse', magic_create_type_path(:curse), :class => 'btn' %>

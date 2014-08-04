@@ -1,68 +1,49 @@
 <%- model_class = @universe.class -%>
 
-<div class="row">
-  <div class="col-xs-3">
-    <div class="card">
-      <%= render :partial => 'tabs' %>
-    </div>
+<div class="card">
+  <%= render :partial => 'tabs' %>
+
+  <dl class="dl-horizontal hidden section general_section">
+    <%= print_property("Name", @universe.name, "") %>
+    <%= print_property("Description", @universe.description, "") %>
+  </dl>
+
+  <dl class="dl-horizontal hidden section history_section">
+    <%= print_property("History", @universe.history, "") %>
+  </dl>
+
+  <dl class="dl-horizontal hidden section notes_section">
+    <%= print_property("Notes", @universe.notes, "") %>
+    <% if session[:user] and session[:user] == @universe.user.id %>
+      <%= print_property("Private notes", @universe.private_notes, "") %>
+    <% end %>
+  </dl>
+
+  <dl class="dl-horizontal hidden section settings_section">
+    <%= print_property("Privacy", @universe.privacy, "") %>
+  </dl>
+
+  <% if session[:user] and session[:user] == @universe.user.id %>
+  <div class="form-actions">
+    <%= link_to t('.back', :default => t("helpers.links.back")),
+                universe_list_path, :class => 'btn'  %>
+    <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                universe_edit_path(@universe), :class => 'btn' %>
+    <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                universe_path(@universe),
+                :method => 'delete',
+                :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
+                :class => 'btn btn-danger' %>
   </div>
-
-  <div class="col-xs-9">
-    <div class="card">
-      <h1 class="card-heading">
-          <% if @universe.privacy and @universe.privacy.downcase == "public" %>
-            <span class="glyphicon glyphicon-globe pull-right" style="font-size: 18px;"></span>
-          <% end %>
-          <%= @universe.name %> <small>by <%= @universe.user.name %></small>
-      </h1>
-
-      <div class="card-body">
-
-        <dl class="dl-horizontal hidden section general_section">
-          <%= print_property("Name", @universe.name, "") %>
-          <%= print_property("Description", @universe.description, "") %>
-        </dl>
-
-        <dl class="dl-horizontal hidden section history_section">
-          <%= print_property("History", @universe.history, "") %>
-        </dl>
-
-        <dl class="dl-horizontal hidden section notes_section">
-          <%= print_property("Notes", @universe.notes, "") %>
-          <% if session[:user] and session[:user] == @universe.user.id %>
-            <%= print_property("Private notes", @universe.private_notes, "") %>
-          <% end %>
-        </dl>
-
-        <dl class="dl-horizontal hidden section settings_section">
-          <%= print_property("Privacy", @universe.privacy, "") %>
-        </dl>
-      
-      </div>
-      
-      <div class="card-comments">
-
-        <% if session[:user] and session[:user] == @universe.user.id %>
-          <div class="form-actions">
-            <%= link_to t('.back', :default => t("helpers.links.back")),
-                        universe_list_path, :class => 'btn'  %>
-            <%= link_to t('.edit', :default => t("helpers.links.edit")),
-                        universe_edit_path(@universe), :class => 'btn' %>
-          </div>
-        <% end %>
-
-      </div>
-
-    </div>
-  </div>
+  <% end %>
 </div>
 
 <% if @universe.content_count > 0 %>
 
 <div class="card">
-  <h1 class="card-heading">
+  <h3 class="card-heading simple">
     In this universe...
-  </h1>
+  </h3>
 
   <div class="card-body">
 
@@ -86,20 +67,16 @@
         <li class="tab"><%= link_to @universe.magics.length.to_s + " magic", "#", :id => "show_magic" %></li>
       <% end %>
     </ul>
-  </div>
-</div>
-<div>
-  <div>
 
     <dl class="dl-horizontal hidden content-section characters_section">
       <% @characters = @universe.characters %>
       <%= render 'characters/list' %>
     </dl>
-    <dl class="dl-horizontal hidden content-section equipment_section card">
+    <dl class="dl-horizontal hidden content-section equipment_section">
       <% @equipment = @universe.equipment %>
       <%= render 'equipment/list' %>
     </dl>
-    <dl class="dl-horizontal hidden content-section languages_section card">
+    <dl class="dl-horizontal hidden content-section languages_section">
       <% @languages = @universe.languages %>
       <%= render 'languages/list' %>
     </dl>
@@ -107,7 +84,7 @@
       <% @locations = @universe.locations %>
       <%= render 'locations/list' %>
     </dl>
-    <dl class="dl-horizontal hidden content-section magic_section card">
+    <dl class="dl-horizontal hidden content-section magic_section">
       <% @magics = @universe.magics %>
       <%= render 'magic/list' %>
     </dl>
@@ -116,7 +93,7 @@
   
   <div class="card-comments"></div>
 
-</div>  
+</div>	
 
 <% end %>
 

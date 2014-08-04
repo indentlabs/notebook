@@ -1,10 +1,13 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
-
-  helper :html
-  helper :my_content
   
   helper_method :nl2br
+  
+  helper_method :character_picker
+  helper_method :equipment_picker
+  helper_method :language_picker
+  helper_method :location_picker
+  helper_method :universe_picker
   
   helper_method :universe_filter
   
@@ -12,6 +15,101 @@ class ApplicationController < ActionController::Base
   def nl2br(string)
     #simple_format string
     string.gsub("\n\r","<br>").gsub("\r", "").gsub("\n", "<br />").html_safe
+  end
+  
+  def character_picker
+  	characters = Character.where(user_id: session[:user])
+  	return if characters.length == 0
+  
+  	html = '<span class="btn-group input-append help-inline">'
+  	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
+  	html << '<i class="icon-user"></i> '
+  	html << '<span class="caret"></span>'
+  	html << '</button>'
+  	html << '<ul class="dropdown-menu dropdown-picker">'
+  	characters.each do |i|
+  		html << '<li><a href="#">' + i.name + '</a></li>'
+  	end
+  	html << '</ul>'
+  	html << '</span>'
+
+  	return html.html_safe
+  end
+  
+  def equipment_picker
+  	equipment = Equipment.where(user_id: session[:user])
+  	return if equipment.length == 0
+  
+  	html = '<span class="btn-group input-append help-inline">'
+  	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
+  	html << '<i class="icon-shopping-cart"></i> '
+  	html << '<span class="caret"></span>'
+  	html << '</button>'
+  	html << '<ul class="dropdown-menu dropdown-picker">'
+  	equipment.each do |i|
+  		html << '<li><a href="#">' + i.name + '</a></li>'
+  	end
+  	html << '</ul>'
+  	html << '</span>'
+
+  	return html.html_safe
+  end
+  
+  def language_picker
+  	languages = Language.where(user_id: session[:user])
+  	return if languages.length == 0
+  
+  	html = '<span class="btn-group input-append help-inline">'
+  	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
+  	html << '<i class="icon-comment"></i> '
+  	html << '<span class="caret"></span>'
+  	html << '</button>'
+  	html << '<ul class="dropdown-menu dropdown-picker" id="universe-selector">'
+  	languages.each do |i|
+  		html << '<li><a href="#">' + i.name + '</a></li>'
+  	end
+  	html << '</ul>'
+  	html << '</span>'
+
+  	return html.html_safe
+  end
+  
+  def location_picker
+  	locations = Location.where(user_id: session[:user])
+  	return if locations.length == 0
+  
+  	html = '<span class="btn-group input-append help-inline">'
+  	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
+  	html << '<i class="icon-map-marker"></i> '
+  	html << '<span class="caret"></span>'
+  	html << '</button>'
+  	html << '<ul class="dropdown-menu dropdown-picker">'
+  	locations.each do |i|
+  		html << '<li><a href="#">' + i.name + '</a></li>'
+  	end
+  	html << '</ul>'
+  	html << '</span>'
+
+  	return html.html_safe
+  end
+  
+  def universe_picker
+  	universes = Universe.where(user_id: session[:user])
+  	return if universes.length == 0
+  
+  	html = '<span class="btn-group input-append help-inline">'
+  	html << '<button class="btn dropdown-toggle" data-toggle="dropdown">'
+  	html << '<i class="icon-globe"></i> '
+  	html << '<span class="caret"></span>'
+  	html << '</button>'
+  	html << '<ul class="dropdown-menu dropdown-picker">'
+  	universes.each do |i|
+  		html << '<li><a href="#">' + i.name + '</a></li>'
+  	end
+  	html << '</ul>'
+  	html << '</span>'
+
+  	return html.html_safe
   end
   
   def universe_filter

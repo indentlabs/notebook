@@ -1,41 +1,40 @@
 <%- model_class = Universe.new.class -%>
-
-<div class="row">
-
-  <% if @universes.length > 0 %>
-    <% @universes.each do |universe| %>
-      <div class="col-md-4">
-        <div class="card">
-          <h1 class="card-heading">
-            <% if universe.privacy and universe.privacy.downcase == "public" %>
-              <span class="glyphicon glyphicon-globe pull-right" style="font-size: 16px;"></span>
-            <% end %>
-            <%= universe.name %>
-          </h1>
-          <div class="card-body"> 
-            <p><%= simple_format truncate(universe.description, length: 256) %>
-          </div>
-          <div class="card-comments">
+<% if @universes.length > 0 %>
+<div class="card">
+  <h3 class="card-heading simple">Your universes</h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th><%= model_class.human_attribute_name(:name) %></th>
+        <th><%= model_class.human_attribute_name(:description) %></th>
+        <th><%=t '.actions', :default => t("helpers.actions") %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @universes.each do |universe| %>
+        <tr>
+          <td style="width: 160px;"><%= simple_format link_to universe.name, universe_path(universe) %></td>
+          <td><%= simple_format truncate(universe.description, :length => 256) %></td>
+          <td style="width: 180px;">
             <%= link_to t('.view', :default => t("helpers.links.view")), universe_path(universe), :class => 'btn' %>
-            <%= link_to t('.edit', :default => t("helpers.links.edit")), universe_edit_path(universe), :class => 'btn' %>            
-          </div>
-        </div>
-      </div>
-    <% end %>
-  <% end %>
-
-  <div class="col-md-4">
-    <div class="card">
-      <h1 class="card-heading">What is a universe?</h1>
-      <div class="card-body">
-        <p>
-          Literally, <em>a universe</em>. The universe your character exists in. The universe their friends, family, and foes exist in. The universe that contains their hometown, their country, their planet &ndash; everything that exists in their world. Sticking it all in a universe keeps it separate from other universes that other stories might be happening in. 
-        </p>
-      </div>
-      <div class="card-comments">
-        <%= link_to 'New universe', universe_create_path, :class => 'btn btn-primary' %>
-      </div>
-    </div>
-  </div>
+            <%= link_to t('.edit', :default => t("helpers.links.edit")), universe_edit_path(universe), :class => 'btn' %>
+            <%= link_to t('.destroy', :default => t("helpers.links.destroy")), universe_path(universe), :method => :delete, :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')), :class => 'btn btn-danger' %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
 </div>
+<% end %>
 
+<div class="card" style="margin-top: 20px;">
+  <h3 class="card-heading simple">What is a universe?</h3>
+  <div class="card-body">
+    <p>
+      Literally, <em>a universe</em>. The universe your character exists in. The universe their friends, family, and foes exist in. The universe that contains their hometown, their country, their planet &ndash; everything that exists in their world. Sticking it all in a universe keeps it separate from other universes that other stories might be happening in. 
+    </p>
+
+    <%= link_to 'New universe', universe_create_path, :class => 'btn btn-primary' %>
+  </div>
+  <div class="card-comments"></div>
+</div>

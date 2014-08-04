@@ -1,24 +1,86 @@
+<%= form_for @equipment, :url => equipment_create_process_path, :html => { :class => 'form-horizontal' } do |f| %>
 <div class="hidden section starter_section general_section">
-  <%= generate_form_row_for(f, :name, nil) %>
-  <%= generate_form_row_for(f, :equip_type, 'Type') %>
-  <%= generate_form_row_for(f, :description, nil) %>
-  <%= generate_form_row_for(f, :universe, nil, [{:action => 'universe_picker', :icon => 'globe'}]) %>
+  <div class="control-group">
+    <%= f.label :name, :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :name, :class => 'text_field' %>
+    </div>
+  </div>
+  <div class="control-group">
+    <%= f.label :equipment_type, :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :equip_type, :class => 'text_field', :value => (params[:type_of] || "").capitalize %>
+    </div>
+  </div>
+  <div class="control-group">
+    <%= f.label 'Description', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_area :description, :class => 'text_field', :rows => 3, :style => "width: 80%;" %>
+    </div>
+  </div>
+  <div class="control-group">
+    <%= f.label :universe, :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :universe, :class => 'text_field', :value => @equipment.universe ? @equipment.universe.name : "" %>
+      <%= universe_picker %>
+    </div>
+  </div>
 </div>
 
 <div class="hidden section appearance_section">
-  <%= generate_form_row_for(f, :weight, nil) %>
+  <div class="control-group">
+    <%= f.label 'Weight', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :weight, :class => 'text_field' %>
+    </div>
+  </div>
 </div>
 
 <div class="hidden section history_section">
-  <%= generate_form_row_for(f, :original_owner, nil, [{:action => 'character_picker', :icon => 'user'}]) %>
-  <%= generate_form_row_for(f, :current_owner, nil, [{:action => 'character_picker', :icon => 'user'}]) %>
-  <%= generate_form_row_for(f, :made_by, nil, [{:action => 'character_picker', :icon => 'user'}]) %>
-  <%= generate_form_row_for(f, :materials, nil) %>
-  <%= generate_form_row_for(f, :year_made, nil) %>
+  <div class="control-group">
+    <%= f.label 'Original owner', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :original_owner, :class => 'text_field' %>
+      <%= character_picker %>
+    </div>
+  </div>
+  <div class="control-group">
+    <%= f.label 'Current owner', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :current_owner, :class => 'text_field' %>
+      <%= character_picker %>
+    </div>
+  </div>
+  <div class="control-group">
+    <%= f.label 'Made by', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :made_by, :class => 'text_field' %>
+			<%= character_picker %>
+    </div>
+  </div>
+  <div class="control-group">
+    <%= f.label 'Materials', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :materials, :class => 'text_field' %>
+    </div>
+  </div>
+  <div class="control-group">
+    <%= f.label 'Year made', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_field :year_made, :class => 'text_field' %>
+    </div>
+  </div>
+
 </div>
 
 <div class="hidden section abilities_section">
-  <%= generate_form_row_for(f, :magic, nil) %>
+  <div class="control-group">
+    <%= f.label 'Magic', :class => 'control-label' %>
+    <div class="controls">
+      <%= f.text_area :magic, :class => 'text_field', :rows => 3 %>
+    </div>
+  </div>
+
 </div>
 
 <div class="hidden section notes_section">
@@ -35,3 +97,10 @@
     </div>
   </div>
 </div>
+
+  <div class="form-actions">
+    <%= f.submit nil, :class => 'btn btn-primary' %>
+    <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
+                equipment_list_path, :class => 'btn' %>
+  </div>
+<% end %>

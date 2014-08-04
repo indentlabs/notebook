@@ -1,77 +1,67 @@
 <%- model_class = @location.class -%>
 
-<div class="row">
-  <div class="col-xs-3">
-    <div class="card">
-      <%= render :partial => 'tabs' %>
-    </div>
+<div class="card">
+  <%= render :partial => 'tabs' %>
+
+  <dl class="dl-horizontal hidden section general_section">
+    <%= print_property("Name", @location.name, "") %>
+    <%= print_property("Type of", @location.type_of, "") %>
+    <%= print_property("Description", @location.description, "") %>
+    <%= print_property("Universe", @location.universe ? @location.universe.name : "", "universe") %>
+  </dl>
+
+  <dl class="dl-horizontal hidden section map_section">
+    <% if @location.map and @location.map.url(:original) %>
+      <%= image_tag @location.map.url(:original) %>
+    <% end %>
+  </dl>
+
+  <dl class="dl-horizontal hidden section culture_section">
+    <%= print_property("Population", @location.population, "") %>
+    <%= print_property("Language", @location.language, "language") %>
+    <%= print_property("Currency", @location.currency, "") %>
+    <%= print_property("Motto", @location.motto, "") %>
+  </dl>
+
+  <dl class="dl-horizontal hidden section cities_section">
+    <%= print_property("Capital", @location.capital, "location") %>
+    <%= print_property("Largest city", @location.largest_city, "location") %>
+    <%= print_property("Notable cities", @location.notable_cities, "location") %>
+  </dl>
+
+  <dl class="dl-horizontal hidden section geography_section">
+    <%= print_property("Area", @location.area, "") %>
+    <%= print_property("Crops", @location.crops, "equipment") %>
+    <%= print_property("Located", @location.located_at, "location") %>
+  </dl>
+
+  <dl class="dl-horizontal hidden section history_section">
+    <%= print_property("Established in", @location.established_year, "") %>
+    <%= print_property("Notable wars", @location.notable_wars, "") %>
+  </dl>
+
+  <dl class="dl-horizontal hidden section notes_section">
+    <%= print_property("Notes", @location.notes, "") %>
+    <% if session[:user] and session[:user] == @location.user.id %>
+      <%= print_property("Private notes", @location.private_notes, "") %>
+    <% end %>
+  </dl>
+
+  <% if session[:user] and session[:user] == @location.user.id %>
+  <div class="form-actions">
+    <%= link_to t('.back', :default => t("helpers.links.back")),
+                location_list_path, :class => 'btn'  %>
+    <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                location_edit_path(@location), :class => 'btn' %>
+    <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                location_path(@location),
+                :method => 'delete',
+                :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')),
+                :class => 'btn btn-danger' %>
   </div>
+  <% end %>
 
-  <div class="col-xs-9">
-    <div class="card">
-      <h1 class="card-heading">
-        <%= @location.name %>
-      </h1>
-
-      <div class="card-body">
-
-        <dl class="dl-horizontal hidden section general_section">
-          <%= print_property("Name", @location.name, "") %>
-          <%= print_property("Type of", @location.type_of, "") %>
-          <%= print_property("Description", @location.description, "") %>
-          <%= print_property("Universe", @location.universe ? @location.universe.name : "", "universe") %>
-        </dl>
-
-        <dl class="dl-horizontal hidden section map_section">
-          <% if @location.map and @location.map.url(:original) %>
-            <%= image_tag @location.map.url(:original) %>
-          <% end %>
-        </dl>
-
-        <dl class="dl-horizontal hidden section culture_section">
-          <%= print_property("Population", @location.population, "") %>
-          <%= print_property("Language", @location.language, "language") %>
-          <%= print_property("Currency", @location.currency, "") %>
-          <%= print_property("Motto", @location.motto, "") %>
-        </dl>
-
-        <dl class="dl-horizontal hidden section cities_section">
-          <%= print_property("Capital", @location.capital, "location") %>
-          <%= print_property("Largest city", @location.largest_city, "location") %>
-          <%= print_property("Notable cities", @location.notable_cities, "location") %>
-        </dl>
-
-        <dl class="dl-horizontal hidden section geography_section">
-          <%= print_property("Area", @location.area, "") %>
-          <%= print_property("Crops", @location.crops, "equipment") %>
-          <%= print_property("Located", @location.located_at, "location") %>
-        </dl>
-
-        <dl class="dl-horizontal hidden section history_section">
-          <%= print_property("Established in", @location.established_year, "") %>
-          <%= print_property("Notable wars", @location.notable_wars, "") %>
-        </dl>
-
-        <dl class="dl-horizontal hidden section notes_section">
-          <%= print_property("Notes", @location.notes, "") %>
-          <% if session[:user] and session[:user] == @location.user.id %>
-            <%= print_property("Private notes", @location.private_notes, "") %>
-          <% end %>
-        </dl>
-  
-      </div>
-      <div class="card-comments">
-
-        <% if session[:user] and session[:user] == @location.user.id %>
-        <div class="form-actions">
-          <%= link_to t('.back', :default => t("helpers.links.back")),
-                      location_list_path, :class => 'btn'  %>
-          <%= link_to t('.edit', :default => t("helpers.links.edit")),
-                      location_edit_path(@location), :class => 'btn' %>
-        </div>
-        <% end %>
-
-      </div>
+</div>
 
 <!--
 <% if @location.map.url(:original) != '/assets/placeholders/map.png' %>
@@ -80,6 +70,3 @@
 </div>
 <% end %>
 -->
-    </div>
-  </div>
-</div>

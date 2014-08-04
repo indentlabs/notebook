@@ -1,30 +1,25 @@
-<div class="row">
-
-  <div class="col-md-12">
-    <div class="card" style="overflow: visible">
-      <h1 class="card-heading simple">
-        Your characters
-        <% if Universe.where(user_id: session[:user]).length > 0 %>
-          <small>from <%= universe_filter %></small>
-        <% end %>
-      </h1>
-    </div>
-  </div>
+<% if @characters.length > 0 %>
+<div class="card">
+  <h3 class="card-heading simple">
+    Your characters
+    <% if Universe.where(user_id: session[:user]).length > 0 %>
+      <small>from <%= universe_filter %></small>
+    <% end %>
+  </h3>
 
   <%= render 'list' %>
-
-  <div class="col-md-3">
-    <div class="card">
-      <h1 class="card-heading">Planning characters</h1>
-      <div class="card-body">
-        <p>
-          Consistency is sometimes hard to keep, and having a reference of everything about your character for yourself can help you down the line, especially if you're writing a series.
-        </p>
-      </div>
-      <div class="card-comments">
-        <%= link_to 'New character', character_create_path, :class => 'btn btn-primary' %>
-      </div>
-    </div>
-  </div>
-
 </div>
+
+<% end %>
+
+<div class="card">
+  <h3 class="card-heading simple">Planning characters</h3>
+  <div class="card-body">
+    <p>
+      Consistency is sometimes hard to keep, and having a reference of everything about your character for yourself can help you down the line, especially if you're writing a series.
+    </p>
+    <%= link_to 'New character', character_create_path, :class => 'btn btn-primary' %>
+  </div>
+  <div class="card-comments"></div>
+</div>
+
