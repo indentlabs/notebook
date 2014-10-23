@@ -4,13 +4,13 @@ class LocationsController < ApplicationController
   before_filter :hide_private_location, :only => [:show]
 
   def index
-  	@locations = Location.where(user_id: session[:user])
+    @locations = Location.where(user_id: session[:user])
     
     if @locations.size == 0
       @locations = []
     end
     
-		@locations = @locations.sort { |a, b| a.name.downcase <=> b.name.downcase }
+    @locations = @locations.sort { |a, b| a.name.downcase <=> b.name.downcase }
 
     respond_to do |format|
       format.html # index.html.erb
