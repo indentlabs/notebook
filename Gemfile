@@ -18,3 +18,4 @@ gem 'jquery-rails'
 
 gem 'capybara'
 gem 'selenium-webdriver'
+gem 'coveralls', require: false
