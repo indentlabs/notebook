@@ -35,6 +35,7 @@ class SessionsController < ApplicationController
   # GET /logout
   def destroy
     session.delete(:user)
+    session.delete(:anon_user)
 
     respond_to do |format|
       format.html { redirect_to homepage_path, notice: 'Logged out!' }
