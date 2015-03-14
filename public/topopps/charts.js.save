@@ -1,0 +1,54 @@
+var status_data = [
+  { label: "Qualifying", data: 24, color: "#528AAA"}, 
+  { label: "Developing", data: 18, color: "#80699B"}, 
+  { label: "Negotiations", data: 9, color: "#AA4643"}, 
+  { label: "Pending", data: 4, color: "#3D96AE"}
+];
+
+var progress_data = [
+  { label: "Profits", data: 60, color: "#77B34F" },
+  { label: "Quarterly Goal", data: 40, color: "#ffffff"}
+];
+
+var performance_data = [
+  { label: "In Progress", data: 22, color: "#A1CC3A" },
+  { label: "Won", data: 15, color: "#528aaa" },
+  { label: "Loss", data: 4, color: "#E33627" },  
+];
+
+var forecast_data = [
+  { label: "Sunny", data: 8, color: "#528aaa" },  
+  { label: "Cloudy", data: 4, color: "#E33627" },  
+  { label: "Rainy", data: 4, color: "#E33627" },  
+  { label: "Hellfire", data: 4, color: "#E33627" },
+];
+
+$(document).ready(function () {
+    $.plot($("#status-piechart"), status_data, {
+         series: { pie: { show: true } },
+         grid: { hoverable: true },
+         legend: { labelBoxBorderColor: "none" }
+    });
+    $.plot($("#progress-piechart"), progress_data, {
+         series: { pie: { show: true } },
+         grid: { hoverable: true },
+         legend: { show: false }
+    });    
+    $.plot($("#performance-piechart"), performance_data, {
+         series: { pie: { show: true } },
+         grid: { hoverable: true },
+         legend: { labelBoxBorderColor: "none" }
+    });
+    $.plot($("#forecast-piechart"), forecast_data, {
+         series: { pie: { show: true } },
+         grid: { hoverable: true },
+         legend: { labelBoxBorderColor: "none" }
+    });
+    
+    //$("#status-piechart").bind("plothover", pieHover);
+});
+function pieHover(event, pos, obj) {
+  if (!obj)
+    return; percent = parseFloat(obj.series.percent).toFixed(2);
+  $("#pieHover").html('<span>' + percent+'% </span>')
+}

@@ -33,7 +33,7 @@ module ApplicationHelper
 		end
 	end
 
-	def print_property(title, value, type)
+	def print_property(title, value, type = "")
 		return unless value and value.length > 0
 
 	  return [
