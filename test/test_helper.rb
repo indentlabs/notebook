@@ -32,6 +32,8 @@ class ActionDispatch::IntegrationTest
     within('#new_session') do
       fill_in 'session[username]', :with => user
       fill_in 'session[password]', :with => password
+    end
+    within('#session-actions') do
       click_on 'Log in'
     end
   end

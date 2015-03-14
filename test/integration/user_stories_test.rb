@@ -5,7 +5,6 @@ class UserStoriesTest < ActionDispatch::IntegrationTest
   
   test 'creating a new user ends at the new user\'s dashboard' do
     register_as 'tester', 'test@example.com', 'password'
-    
     assert_equal dashboard_path, current_path, 'New user was not directed to their dashboard after creating an account'
   end
   
