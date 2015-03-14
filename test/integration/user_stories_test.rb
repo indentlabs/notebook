@@ -14,7 +14,7 @@ class UserStoriesTest < ActionDispatch::IntegrationTest
     assert_equal dashboard_path, current_path, 'Existing user was not directed to their dashboard after logging in'
   end
   
-  test 'logging in anonymousely goes into an empty dashboard' do
+  test 'logging in anonymously goes into an empty dashboard' do
     log_in_as_anon
     
     assert_equal dashboard_path, current_path, 'Anonymous user was not directed to their dashboard after logging in'
