@@ -2,7 +2,7 @@ class MainController < ApplicationController
   before_filter :redirect_if_not_logged_in, :only => [:dashboard]
   
   def index
-    if session[:user]
+    if session && session[:user]
       redirect_to :dashboard
     end
   end

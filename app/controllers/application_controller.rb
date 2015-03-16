@@ -40,7 +40,7 @@ class ApplicationController < ActionController::Base
   
   # Authentication
   def is_logged_in?
-    session[:user]
+    session && session[:user]
   end
   
   def redirect_if_not_logged_in
