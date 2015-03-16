@@ -1,6 +1,16 @@
+sudo: false # Tell travis-ci to use their container-based infrastructure
+
 language: ruby
 rvm: 2.1.1
+cache: bundler
+
+env:
+  - TEST_SUITE=units
+  - TEST_SUITE=integration
+  - TEST_SUITE=functionals
 
 before_script:
   - cp config/database.yml.travis config/database.yml
   - psql -c 'create database travis_ci_test;' -U postgres
+
+script: "bundle exec rake test:$TEST_SUITE"
