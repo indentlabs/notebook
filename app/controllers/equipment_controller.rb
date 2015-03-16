@@ -41,7 +41,7 @@ class EquipmentController < ApplicationController
   end
 
   def create
-    @equipment = Equipment.new(params[:equipment])
+    @equipment = Equipment.create(equipment_params)
     @equipment.user_id = session[:user]
     @equipment.universe = Universe.where(user_id: session[:user]).where(name: params[:equipment][:universe].strip).first
 
@@ -66,7 +66,7 @@ class EquipmentController < ApplicationController
     end
 
     respond_to do |format|
-      if @equipment.update_attributes(params[:equipment])
+      if @equipment.update_attributes(equipment_params)
         format.html { redirect_to @equipment, notice: 'Equipment was successfully updated.' }
         format.json { head :no_content }
       else
@@ -85,4 +85,15 @@ class EquipmentController < ApplicationController
       format.json { head :no_content }
     end
   end
+  
+  private
+    def equipment_params
+      params.require(:equipment).permit(
+        :universe_id, :user_id,
+        :name, :equip_type,
+        :description, :weight,
+        :original_owner, :current_owner, :made_by, :materials, :year_made,
+        :magic,
+        :notes, :private_notes)
+    end
 end

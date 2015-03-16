@@ -2,7 +2,7 @@
   # Destroy old sessions if a user has been deleted
   begin
     User.find(session[:user]) if session[:user]
-  rescue Mongoid::Errors::DocumentNotFound
+  rescue ActiveRecord::RecordNotFound
     session = {}
     %>
       <script type="text/javascript">

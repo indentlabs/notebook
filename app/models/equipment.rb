@@ -1,28 +1,6 @@
-class Equipment
-  include Mongoid::Document
+class Equipment < ActiveRecord::Base
+  #validates_presence_of :name
   
-  # General
-  field :name,       :type => String
-  field :equip_type, :type => String
-  
-  # Appearance
-  field :description, :type => String
-  field :weight, :type => String
-  
-  # History
-  field :original_owner, :type => String
-  field :current_owner, :type => String
-  field :made_by, :type => String
-  field :materials, :type => String
-  field :year_made, :type => String
-  
-  # Abilities
-  field :magic, :type => String # Magical Properties
-  
-  # Notes
-  field :notes, :type => String
-  field :private_notes, :type => String
-
   belongs_to :user
   belongs_to :universe
 end

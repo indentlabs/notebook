@@ -1,50 +1,8 @@
-class Location
-  include Mongoid::Document
-  include Mongoid::Paperclip
+class Location < ActiveRecord::Base
+  has_attached_file :map,  :styles => { :original => "1920x1080>", :thumb => "200x200>" }
+  validates_attachment_content_type :map, :content_type => /\Aimage\/.*\Z/
+  validates_presence_of :name
   
-  # General
-  field :name, :type => String
-  field :type_of, :type => String
-  field :description, :type => String
-  
-  # Map
-  has_mongoid_attached_file :map, 
-    styles: {
-#     original: '1920x1680>',
-#     thumb:    '200x200>',
-# todo
-# make banner for cards
-# resize full-size for large-cards
-# make thumbnail for small-cards
-    },
-    default_url: '/assets/placeholders/map.png'
-
-  # Culture
-  field :population, :type => String
-  field :language, :type => String
-  field :currency, :type => String
-  field :motto, :type => String
-  #field :flag, :type => Image
-  #field :seal, :type => Image
-  
-  # Cities
-  field :capital, :type => String
-  field :largest_city, :type => String
-  field :notable_cities, :type => String
-  
-  # Geography
-  field :area, :type => String
-  field :crops, :type => String
-  field :located_at, :type => String
-  
-  # History
-  field :established_year, :type => String
-  field :notable_wars, :type => String
-  
-  # Notes
-  field :notes, :type => String
-  field :private_notes, :type => String
-
   belongs_to :user
   belongs_to :universe
 end

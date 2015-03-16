@@ -1,13 +1,6 @@
 language: ruby
-rvm: 2.0.0
-services: mongodb
+rvm: 2.1.1
 
-matrix:
-  include:
-    - rvm: 2.1.0
-      gemfile: gemfiles/Gemfile.ruby-2.1.0
-  allow_failures:
-    - rvm: 2.1.0
-      gemfile: gemfiles/Gemfile.ruby-2.1.0
-    
-
+before_script:
+  - cp config/database.yml.travis config/database.yml
+  - psql -c 'create database travis_ci_test;' -U postgres

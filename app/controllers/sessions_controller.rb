@@ -14,8 +14,7 @@ class SessionsController < ApplicationController
   # POST /sessions.json
   def create
     require 'digest'
-    login = Session.new(params[:session])
-
+    login = Session.new(session_params)
     hash = Digest::MD5.hexdigest(login.username + "'s password IS... " + login.password + " (lol!)")
     user = User.where(name: login.username, password: hash)
     if user.length < 1
@@ -36,10 +35,16 @@ class SessionsController < ApplicationController
   # GET /logout
   def destroy
     session.delete(:user)
+    session.delete(:anon_user)
 
     respond_to do |format|
       format.html { redirect_to homepage_path, notice: 'Logged out!' }
       format.json { head :no_content }
     end
   end
+  
+  private
+    def session_params
+      params.require(:session).permit(:username, :password)
+    end
 end

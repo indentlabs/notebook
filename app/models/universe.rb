@@ -1,22 +1,13 @@
-class Universe
-  include Mongoid::Document
-
-  # General
-  field :name,        :type => String
-  field :description, :type => String
+class Universe < ActiveRecord::Base
+  #validates_presence_of :name
   
-  # History
-  field :history,  :type => String
-
-  # More...
-  field :notes, :type => String
-  field :private_notes, :type => String
-
-  # Settings
-  field :privacy, :type => String # Whether or not this universe is public, options are 'private' or 'public'
-	
   belongs_to :user
-
+  has_many :characters
+  has_many :equipment
+  has_many :languages
+  has_many :locations
+  has_many :magics
+  
   def content_count
     [
       characters.length,
@@ -26,30 +17,4 @@ class Universe
       magics.length,
     ].sum
   end
-
-  def characters
-    Character.where(universe_id: id)
-  end
-
-  def equipment
-    Equipment.where(universe_id: id)
-  end
-
-  def languages
-    Language.where(universe_id: id)
-  end
-
-  def locations
-    Location.where(universe_id: id)
-  end
-
-  def magics
-    Magic.where(universe_id: id)
-  end
-
-
-  def to_s
-    self.name
-  end
-
 end

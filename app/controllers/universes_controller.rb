@@ -41,7 +41,7 @@ class UniversesController < ApplicationController
   end
 
   def create
-    @universe = Universe.new(params[:universe])
+    @universe = Universe.new(universe_params)
     @universe.user_id = session[:user]
 
     respond_to do |format|
@@ -59,7 +59,7 @@ class UniversesController < ApplicationController
     @universe = Universe.find(params[:id])
 
     respond_to do |format|
-      if @universe.update_attributes(params[:universe])
+      if @universe.update_attributes(universe_params)
         format.html { redirect_to @universe, notice: 'Universe was successfully updated.' }
         format.json { head :no_content }
       else
@@ -78,4 +78,14 @@ class UniversesController < ApplicationController
       format.json { head :no_content }
     end
   end
+  
+  private
+    def universe_params
+      params.require(:universe).permit(
+        :user_id,
+        :name, :description,
+        :history,
+        :privacy,
+        :notes, :private_notes)
+    end
 end
