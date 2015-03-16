@@ -7,6 +7,13 @@ class ApplicationController < ActionController::Base
   helper_method :nl2br
   
   helper_method :universe_filter
+
+  # Rails changed cookie format in rails 4, so log out all old users so they get the new version
+  rescue_from JSON::ParserError, with: :force_user_logout
+  def force_user_logout
+    reset_session
+    redirect_to login_path
+  end
   
   # View Helpers
   def nl2br(string)
