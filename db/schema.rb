@@ -106,6 +106,7 @@ ActiveRecord::Schema.define(version: 20140713043535) do
     t.text    "private_notes"
     t.text    "map_file_name"
     t.text    "map_content_size"
+    t.text    "map_content_type"
     t.integer "map_file_size"
     t.integer "map_updated_at"
   end
