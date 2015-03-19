@@ -3,7 +3,7 @@ require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
 require 'capybara/rails'
 require 'coveralls'
-Coveralls.wear_merged!('rails')
+Coveralls.wear!('rails')
 
 class ActiveSupport::TestCase
   fixtures :all
