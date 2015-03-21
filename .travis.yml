@@ -1,13 +1,30 @@
 sudo: false # Tell travis-ci to use their container-based infrastructure
 
 language: ruby
-rvm: 2.1.1
+rvm:
+  - 2.1.1
+  - 2.2.1
+  - ruby-head
+
+gemfile:
+  - Gemfile
+  - gemfiles/rails-4.2.edge.gemfile
+
 cache: bundler
+
+matrix:
+  allow_failures:
+    - rvm: 2.2.1
+    - rvm: ruby-head
+    - gemfile: gemfiles/rails-4.2.edge.gemfile
 
 env:
   - TEST_SUITE=units        # test/models, test/helpers, test/unit
   - TEST_SUITE=integration  # test/integration
   - TEST_SUITE=functionals  # test/controllers, test/mailers, test/functional
+
+bundler_args: --without production
+
 before_script:
   - cp config/database.yml.travis config/database.yml
   - psql -c 'create database travis_ci_test;' -U postgres
