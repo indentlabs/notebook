@@ -9,9 +9,7 @@ gem 'paperclip', '~> 4.2.0'
 group :production do
   gem 'less-rails'
   gem 'less-rails-fontawesome'
-  gem 'sass-rails', '~> 4.0.3'
   gem 'uglifier', '>= 1.3.0'
-  gem 'coffee-rails', '~> 4.0.0'
   gem 'bootplus-rails'
   gem 'rmagick'
   gem 'aws-sdk', '~> 1.50'
@@ -23,6 +21,8 @@ group :test, :production do
 end
 
 group :test, :development do
+  gem 'sass-rails', '~> 4.0.3'
+  gem 'coffee-rails', '~> 4.0.0'
   gem 'capybara'
   gem 'selenium-webdriver'
   gem 'coveralls', require: false
