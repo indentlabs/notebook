@@ -2,10 +2,10 @@ require 'test_helper'
 
 class CharactersControllerTest < ActionController::TestCase
   setup do
-    @user = users(:one)
-    @universe = universes(:one)
+    @user = users(:tolkien)
+    @universe = universes(:middleearth)
     
-    log_in_user(:one)
+    log_in_user(:tolkien)
   end
 
   test "should get index" do
@@ -28,20 +28,20 @@ class CharactersControllerTest < ActionController::TestCase
   end
 
   test "should show character" do
-    @character = characters(:one)
+    @character = characters(:frodo)
     
     get :show, id: @character.id
     assert_response :success
   end
 
   test "should get edit" do
-    @character = characters(:one)
+    @character = characters(:frodo)
     get :edit, id: @character.id
     assert_response :success
   end
 
   test "should update character" do
-    @character = characters(:one)
+    @character = characters(:frodo)
     put :update, id: @character, character: { age: @character.age, name: @character.name, universe: @universe }
     
     assert_response 302
@@ -50,7 +50,7 @@ class CharactersControllerTest < ActionController::TestCase
 
   test "should destroy character" do
     assert_difference('Character.count', -1) do
-      delete :destroy, id: characters(:one).id
+      delete :destroy, id: characters(:frodo).id
     end
 
     assert_redirected_to character_list_url

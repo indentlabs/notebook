@@ -2,7 +2,7 @@ require 'test_helper'
 
 class EquipmentControllerTest < ActionController::TestCase
   setup do
-    log_in_user(:one)
+    log_in_user(:tolkien)
   end
   
   test "should get index" do
@@ -18,32 +18,32 @@ class EquipmentControllerTest < ActionController::TestCase
 
   test "should create equipment" do
     assert_difference('Equipment.count') do
-      post :create, equipment: { name: "Created Equipment", universe: universes(:one)}
+      post :create, equipment: { name: "Created Equipment", universe: universes(:middleearth)}
     end
 
     assert_redirected_to equipment_path(assigns(:equipment))
   end
 
   test "should show equipment" do
-    get :show, id: equipment(:one).id
+    get :show, id: equipment(:sting).id
     assert_response :success
   end
 
   test "should get edit" do
-    get :edit, id: equipment(:one).id
+    get :edit, id: equipment(:sting).id
     assert_response :success
   end
 
   test "should update equipment" do
-    put :update, id: equipment(:one).id, equipment: { name: "Updated Equipment Name", universe: universes(:one) }
+    put :update, id: equipment(:sting).id, equipment: { name: "Updated Equipment Name", universe: universes(:middleearth) }
     
     assert_response 302
-    assert_redirected_to equipment_path(equipment(:one))
+    assert_redirected_to equipment_path(equipment(:sting))
   end
 
   test "should destroy equipment" do
     assert_difference('Equipment.count', -1) do
-      delete :destroy, id: equipment(:one).id
+      delete :destroy, id: equipment(:sting).id
     end
 
     assert_redirected_to equipment_list_url

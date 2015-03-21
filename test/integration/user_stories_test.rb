@@ -9,7 +9,7 @@ class UserStoriesTest < ActionDispatch::IntegrationTest
   end
   
   test 'logging in as an existing user goes to the users dashboard' do
-    log_in_as 'TestUser', 'TestPassword'
+    log_in_as 'JRRTolkien', 'Mellon'
     
     assert_equal dashboard_path, current_path, 'Existing user was not directed to their dashboard after logging in'
   end
@@ -26,7 +26,7 @@ class UserStoriesTest < ActionDispatch::IntegrationTest
   test 'Anonymous flag is reset on user logins' do
     log_in_as_anon
     log_out
-    log_in_as 'TestUser', 'TestPassword'
+    log_in_as 'JRRTolkien', 'Mellon'
     refute page.has_content?('You are currently using an anonymous account'), 'Logged-in user was told they were using an anonymous account, regression of #366'
   end
 end
