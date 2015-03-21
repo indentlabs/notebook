@@ -1,26 +1,30 @@
 source 'https://rubygems.org'
 
 gem 'rails', '4.1.0'
-gem 'sqlite3'
+gem 'jquery-rails'
 gem 'paperclip', '~> 4.2.0'
-gem 'rmagick'
-gem 'aws-sdk', '~> 1.50'
-gem 'pg'
-gem 'tzinfo-data'
 
 group :production do
   gem 'less-rails'
   gem 'less-rails-fontawesome'
+  gem 'sass-rails', '~> 4.0.3'
+  gem 'uglifier', '>= 1.3.0'
+  gem 'coffee-rails', '~> 4.0.0'
+  gem 'bootplus-rails'
+  gem 'rmagick'
+  gem 'aws-sdk', '~> 1.50'
 end
 
-gem 'sass-rails', '~> 4.0.3'
-gem 'uglifier', '>= 1.3.0'
-gem 'coffee-rails', '~> 4.0.0'
-gem 'therubyracer',  platforms: :ruby
-gem 'bootplus-rails'
-gem 'jquery-rails'
+group :test, :production do
+  gem 'pg'
+  gem 'therubyracer',  platforms: :ruby
+end
 
-gem 'capybara'
-gem 'selenium-webdriver'
-gem 'coveralls', require: false
-gem 'simplecov', :require => false, :group => :test
+group :test, :development do
+  gem 'capybara'
+  gem 'selenium-webdriver'
+  gem 'coveralls', require: false
+  gem 'simplecov', :require => false
+  gem 'sqlite3'
+  gem 'tzinfo-data' # addresses a bug when working on Windows
+end
