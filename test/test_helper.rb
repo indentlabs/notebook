@@ -41,6 +41,10 @@ class ActionDispatch::IntegrationTest
     end
   end
   
+  def log_in_as_user
+    log_in_as 'Tolkien', 'Mellon'
+  end
+  
   def log_in_as_anon
     visit homepage_path
     click_on 'Login'
