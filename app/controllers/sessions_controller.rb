@@ -13,9 +13,8 @@ class SessionsController < ApplicationController
   # POST /sessions
   # POST /sessions.json
   def create
-    require 'digest'
     login = Session.new(session_params)
-    hash = Digest::MD5.hexdigest(login.username + "'s password IS... " + login.password + " (lol!)")
+    hash = SessionsController.create_password_digest login.username, login.password
     user = User.where(name: login.username, password: hash)
     if user.length < 1
       redirect_to login_path, notice: 'Username or password incorrect'
@@ -41,6 +40,11 @@ class SessionsController < ApplicationController
       format.html { redirect_to homepage_path, notice: 'Logged out!' }
       format.json { head :no_content }
     end
+  end
+  
+  def self.create_password_digest(username, password)
+    require 'digest'
+    return Digest::MD5.hexdigest(username + "'s password IS... " + password + " (lol!)")
   end
   
   private
