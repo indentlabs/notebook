@@ -42,7 +42,7 @@ class ActionDispatch::IntegrationTest
   end
   
   def log_in_as_user
-    log_in_as 'Tolkien', 'Mellon'
+    log_in_as 'JRRTolkien', 'Mellon'
   end
   
   def log_in_as_anon
