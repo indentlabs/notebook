@@ -46,7 +46,7 @@ class LocationStoriesTest < ActionDispatch::IntegrationTest
     visit location_list_path
     click_on 'Edit'
     click_on 'show_map'
-    attach_file 'location_map', 'test/integration/shire_map.jpg'
+    attach_file 'location_map', 'test/fixtures/shire_map.jpg'
     click_on 'Update Location'
     assert_equal location_path(locations(:shire)), current_path
   end
