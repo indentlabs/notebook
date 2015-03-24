@@ -15,13 +15,13 @@ class CharacterTest < ActiveSupport::TestCase
     assert characters(:frodo).valid?, 'Characters fixture is not valid'
 
     assert_equal(
-      expected: users(:tolkien),
-      actual: characters(:frodo).user,
-      message: 'Characters fixture is not associated with Users fixture')
+      users(:tolkien),
+      characters(:frodo).user,
+      'Characters fixture is not associated with Users fixture')
 
     assert_equal(
-      expected: universes(:middleearth),
-      actual: characters(:frodo).universe,
-      message: 'Characters fixture is not associated with Universes fixture')
+      universes(:middleearth),
+      characters(:frodo).universe,
+      'Characters fixture is not associated with Universes fixture')
   end
 end
