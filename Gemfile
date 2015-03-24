@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 
 gem 'rails', '4.1.0'
 gem 'jquery-rails'
-gem 'sass-rails', '~> 4.0.3', :require => 'sass'
+gem 'sass-rails', '~> 4.0.3', require: 'sass'
 gem 'coffee-rails', '~> 4.0.0'
 gem 'paperclip', '~> 4.2.0'
 gem 'rmagick'
@@ -25,8 +25,8 @@ end
 group :test, :development do
   gem 'capybara'
   gem 'selenium-webdriver'
-  gem 'coveralls', :require => false
-  gem 'simplecov', :require => false
+  gem 'coveralls', require: false
+  gem 'simplecov', require: false
   gem 'rubocop', require: false
   gem 'sqlite3'
   gem 'tzinfo-data' # addresses a bug when working on Windows
