@@ -1,19 +1,27 @@
 require 'test_helper'
 
+# Tests for the model class Character
 class CharacterTest < ActiveSupport::TestCase
-  test "character not valid without a name" do
-    skip "Validation has been disabled due to conflicts during the database migration. We are considering removing this validation"
+  test 'character not valid without a name' do
+    skip 'Validation disabled due to database migration conflicts.'
     character = characters(:frodo)
     character.name = nil
-    
-    refute character.valid?, "Character name not being validated for presence"
+
+    refute character.valid?, 'Character name not being validated for presence'
   end
-  
-  test "characters fixture assumptions" do
-    assert_not_nil characters(:frodo), "Characters fixture :one is not available"
-    assert characters(:frodo).valid?, "Characters fixture :one is not valid"
-    
-    assert_equal users(:tolkien), characters(:frodo).user, "Characters fixture :one is not associated with Users fixture :one"
-    assert_equal universes(:middleearth), characters(:frodo).universe, "Characters fixture :one is not associated with Universes fixture :one"
+
+  test 'characters fixture assumptions' do
+    assert_not_nil characters(:frodo), 'Characters fixture is not available'
+    assert characters(:frodo).valid?, 'Characters fixture is not valid'
+
+    assert_equal(
+      expected: users(:tolkien),
+      actual: characters(:frodo).user,
+      message: 'Characters fixture is not associated with Users fixture')
+
+    assert_equal(
+      expected: universes(:middleearth),
+      actual: characters(:frodo).universe,
+      message: 'Characters fixture is not associated with Universes fixture')
   end
 end
