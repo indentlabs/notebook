@@ -7,14 +7,14 @@ gem 'jquery-rails'
 gem 'sass-rails', '~> 4.0.3', :require => 'sass'
 gem 'coffee-rails', '~> 4.0.0'
 gem 'paperclip', '~> 4.2.0'
+gem 'rmagick'
+gem 'aws-sdk', '~> 1.50'
 
 group :production do
   gem 'less-rails'
   gem 'less-rails-fontawesome'
   gem 'uglifier', '>= 1.3.0'
   gem 'bootplus-rails'
-  gem 'rmagick'
-  gem 'aws-sdk', '~> 1.50'
 end
 
 group :test, :production do
