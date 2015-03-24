@@ -21,11 +21,10 @@ sting = Equipment.create({
   :user => tolkien,
   :universe => middleearth})
 
-# Issues #415 and #416 prevent us from seeding locations
-#shire = Location.create({
-#  :name => 'The Shire',
-#  :user => tolkien,
-#  :universe => middleearth})
+shire = Location.create({
+  :name => 'The Shire',
+  :user => tolkien,
+  :universe => middleearth})
 
 sindarin = Language.create({
   :name => 'Sindarin',
