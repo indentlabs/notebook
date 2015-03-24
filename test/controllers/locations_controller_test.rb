@@ -72,7 +72,7 @@ class LocationsControllerTest < ActionController::TestCase
     end
   end
   
-    test "should reject images with an empty type" do
+  test "should reject images with an empty type" do
     assert_no_difference('Location.count') do
       map = fixture_file_upload('mordor_map.jpg', '')
       post :create, location: { name: 'Mordor', map: map, universe: @universe, user: @user }
