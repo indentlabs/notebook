@@ -40,4 +40,14 @@ class LocationStoriesTest < ActionDispatch::IntegrationTest
     click_on 'Create Location'
     assert_equal location_path(Location.where(:name => 'Mordor').first), current_path
   end
+  
+  test 'a user can upload a map to an existing location' do
+    log_in_as_user
+    visit location_list_path
+    click_on 'Edit'
+    click_on 'show_map'
+    attach_file 'location_map', 'test/integration/shire_map.jpg'
+    click_on 'Update Location'
+    assert_equal location_path(locations(:shire)), current_path
+  end
 end
