@@ -27,6 +27,7 @@ group :test, :development do
   gem 'selenium-webdriver'
   gem 'coveralls', :require => false
   gem 'simplecov', :require => false
+  gem 'rubocop', require: false
   gem 'sqlite3'
   gem 'tzinfo-data' # addresses a bug when working on Windows
 end
