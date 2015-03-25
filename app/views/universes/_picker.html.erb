@@ -1,0 +1,12 @@
+<span class="btn-group input-append help-inline">
+  <button class="btn dropdown-toggle" data-toggle="dropdown">
+    <i class="icon-globe"></i><%= @selected_universe_filter || t(:all_universes) %>
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu dropdown-picker">
+    <li><a href="/plan/characters"><%= t :all_universes %></a></li>
+    <% Universe.where(user_id: session[:user]).each do |i| %>
+      <li><a href="/plan/characters/from/<%= i.name.strip %>"><%= i.name %></a></li>
+    <% end %>
+  </ul>
+</span>
