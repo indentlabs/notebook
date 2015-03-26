@@ -11,7 +11,7 @@ class CharactersController < ApplicationController
   def index
     @characters = Character.where(user_id: session[:user]).presence || []
     populate_universe_fields if params[:universe]
-    @characters.sort
+    @characters.sort!
 
     respond_to do |format|
       format.html # index.html.erb
