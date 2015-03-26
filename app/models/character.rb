@@ -5,6 +5,8 @@ class Character < ActiveRecord::Base
 
   belongs_to :user
   belongs_to :universe
+  
+  before_save :nil_blank_universe
 
   def <=>(anOther)
     name.downcase <=> anOther.name.downcase
