@@ -1,15 +1,15 @@
 class LocationsController < ApplicationController
-  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :create, :update]
-  before_filter :require_ownership_of_location, :only => [:update, :edit, :destroy]
-  before_filter :hide_private_location, :only => [:show]
+  before_action :create_anonymous_account_if_not_logged_in, only: [:edit, :create, :update]
+  before_action :require_ownership_of_location, only: [:update, :edit, :destroy]
+  before_action :hide_private_location, only: [:show]
 
   def index
     @locations = Location.where(user_id: session[:user])
-    
+
     if @locations.size == 0
       @locations = []
     end
-    
+
     @locations = @locations.sort { |a, b| a.name.downcase <=> b.name.downcase }
 
     respond_to do |format|
@@ -57,7 +57,7 @@ class LocationsController < ApplicationController
           format.html { redirect_to @location, notice: notice }
           format.json { render json: @location, status: :created, location: @location }
         else
-          format.html { render action: "new" }
+          format.html { render action: 'new' }
           format.json { render json: @location.errors, status: :unprocessable_entity }
         end
       rescue Errno::ECONNRESET
@@ -84,7 +84,7 @@ class LocationsController < ApplicationController
           format.html { redirect_to @location, notice: 'Location was successfully updated.' }
           format.json { head :no_content }
         else
-          format.html { render action: "edit" }
+          format.html { render action: 'edit' }
           format.json { render json: @location.errors, status: :unprocessable_entity }
         end
       rescue Errno::ECONNRESET
@@ -105,17 +105,18 @@ class LocationsController < ApplicationController
       format.json { head :no_content }
     end
   end
-  
+
   private
-    def location_params
-      params.require(:location).permit(
-        :universe_id, :user_id,
-        :name, :type_of, :description,
-        :map,
-        :population, :currency, :motto,
-        :capital, :largest_city, :notable_cities,
-        :area, :crops, :located_at,
-        :stablishment_year, :notable_wars,
-        :notes, :private_notes)
-    end
+
+  def location_params
+    params.require(:location).permit(
+      :universe_id, :user_id,
+      :name, :type_of, :description,
+      :map,
+      :population, :currency, :motto,
+      :capital, :largest_city, :notable_cities,
+      :area, :crops, :located_at,
+      :stablishment_year, :notable_wars,
+      :notes, :private_notes)
+  end
 end

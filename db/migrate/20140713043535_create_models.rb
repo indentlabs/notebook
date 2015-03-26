@@ -1,7 +1,7 @@
 class CreateModels < ActiveRecord::Migration
   def change
     create_table :characters do |t|
-      t.string :name, :null => false
+      t.string :name, null: false
       t.string :role
       t.string :gender
       t.string :age
@@ -25,25 +25,25 @@ class CreateModels < ActiveRecord::Migration
       t.text :prejudices
       t.text :occupation
       t.text :pets
-      #How might others describe him?
-      #What would others change about him?
+      # How might others describe him?
+      # What would others change about him?
 
       # Behavior
       t.text :mannerisms
-      #What drives this character?
-      #What is standing in his way?
-      #What is he most afraid of?
-      #What does he need most?
-      #What makes him vulnerable?
-      #What kind of trouble does he get in?
+      # What drives this character?
+      # What is standing in his way?
+      # What is he most afraid of?
+      # What does he need most?
+      # What makes him vulnerable?
+      # What kind of trouble does he get in?
 
       # History
       t.text :birthday
       t.text :birthplace
       t.text :education
       t.text :background
-      #What is his deepest secret?
-      #Does he have a history of criminal activity?
+      # What is his deepest secret?
+      # Does he have a history of criminal activity?
 
       # Favorites
       t.string :fave_color
@@ -51,7 +51,7 @@ class CreateModels < ActiveRecord::Migration
       t.string :fave_possession
       t.string :fave_weapon
       t.string :fave_animal
-      #favorite leisure activities
+      # favorite leisure activities
 
       # Relationships
       t.text :father
@@ -63,16 +63,16 @@ class CreateModels < ActiveRecord::Migration
       # Notes
       t.text :notes
       t.text :private_notes
-        
+
       t.belongs_to :user
       t.belongs_to :universe
-      
+
       t.timestamps
     end
-    
+
     create_table :equipment do |t|
       # General
-      t.string :name, :null => false
+      t.string :name, null: false
       t.string :equip_type
 
       # Appearance
@@ -92,16 +92,16 @@ class CreateModels < ActiveRecord::Migration
       # Notes
       t.text :notes
       t.text :private_notes
-      
+
       t.belongs_to :user
       t.belongs_to :universe
 
       t.timestamps
     end
-    
+
     create_table :languages do |t|
       # General
-      t.string :name, :null => false
+      t.string :name, null: false
 
       # Vocabulary
       t.text :words
@@ -122,10 +122,10 @@ class CreateModels < ActiveRecord::Migration
 
       t.timestamps
     end
-    
+
     create_table :locations do |t|
       # General
-      t.string :name, :null => false
+      t.string :name, null: false
       t.string :type_of
       t.text :description
 
@@ -137,8 +137,8 @@ class CreateModels < ActiveRecord::Migration
       t.string :language
       t.string :currency
       t.string :motto
-      #field :flag, :type => Image
-      #field :seal, :type => Image
+      # field :flag, :type => Image
+      # field :seal, :type => Image
 
       # Cities
       t.text :capital
@@ -163,10 +163,10 @@ class CreateModels < ActiveRecord::Migration
 
       t.timestamps
     end
-    
+
     create_table :magics do |t|
       # General
-      t.string :name, :null => false
+      t.string :name, null: false
       t.string :type_of # "Type of": Spell, Ability, Enchantment, etc
 
       # Appearance
@@ -177,7 +177,7 @@ class CreateModels < ActiveRecord::Migration
       t.string :element
       t.string :diety
 
-    # # Effects
+      # # Effects
       t.text :harmfulness # Harmful effects
       t.text :helpfulness # Helpful effects
       t.text :neutralness # Neutral effects
@@ -196,18 +196,17 @@ class CreateModels < ActiveRecord::Migration
 
       t.timestamps
     end
-    
+
     create_table :sessions do |t|
-      
-      t.string :username, :unique => true, :null => false
-      t.string :password, :null => false
-      
+      t.string :username, unique: true, null: false
+      t.string :password, null: false
+
       t.timestamps
     end
-    
+
     create_table :universes do |t|
       # General
-      t.string :name, :null => false
+      t.string :name, null: false
       t.text :description
 
       # History
@@ -224,11 +223,11 @@ class CreateModels < ActiveRecord::Migration
 
       t.timestamps
     end
-    
+
     create_table :users do |t|
-      t.string :name, :unique => true, :null => false
-      t.string :email, :unique => true, :null => false
-      t.string :password, :null => false
+      t.string :name, unique: true, null: false
+      t.string :email, unique: true, null: false
+      t.string :password, null: false
 
       t.timestamps
     end

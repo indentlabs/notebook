@@ -20,7 +20,7 @@ class SessionsController < ApplicationController
       redirect_to login_path, notice: 'Username or password incorrect'
       return
     end
-    
+
     session[:user] = user[0].id
     session.delete(:anon_user)
 
@@ -28,7 +28,6 @@ class SessionsController < ApplicationController
       format.html { redirect_to dashboard_path, notice: 'Login successful.' }
       format.json { render json: true, status: :created }
     end
-
   end
 
   # GET /logout
@@ -41,14 +40,15 @@ class SessionsController < ApplicationController
       format.json { head :no_content }
     end
   end
-  
+
   def self.create_password_digest(username, password)
     require 'digest'
-    return Digest::MD5.hexdigest(username + "'s password IS... " + password + " (lol!)")
+    Digest::MD5.hexdigest(username + "'s password IS... " + password + ' (lol!)')
   end
-  
+
   private
-    def session_params
-      params.require(:session).permit(:username, :password)
-    end
+
+  def session_params
+    params.require(:session).permit(:username, :password)
+  end
 end

@@ -1,16 +1,16 @@
 class EquipmentController < ApplicationController
-  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :create, :update]
-  before_filter :require_ownership_of_equipment, :only => [:update, :edit, :destroy]
-  before_filter :hide_private_equipment, :only => [:show]
+  before_action :create_anonymous_account_if_not_logged_in, only: [:edit, :create, :update]
+  before_action :require_ownership_of_equipment, only: [:update, :edit, :destroy]
+  before_action :hide_private_equipment, only: [:show]
 
   def index
-  	@equipment = Equipment.where(user_id: session[:user])
-    
+    @equipment = Equipment.where(user_id: session[:user])
+
     if @equipment.size == 0
       @equipment = []
     end
-    
-		@equipment = @equipment.sort { |a, b| a.name.downcase <=> b.name.downcase }
+
+    @equipment = @equipment.sort { |a, b| a.name.downcase <=> b.name.downcase }
 
     respond_to do |format|
       format.html # index.html.erb
@@ -50,7 +50,7 @@ class EquipmentController < ApplicationController
         format.html { redirect_to @equipment, notice: 'Equipment was successfully created.' }
         format.json { render json: @equipment, status: :created, location: @equipment }
       else
-        format.html { render action: "new" }
+        format.html { render action: 'new' }
         format.json { render json: @equipment.errors, status: :unprocessable_entity }
       end
     end
@@ -70,7 +70,7 @@ class EquipmentController < ApplicationController
         format.html { redirect_to @equipment, notice: 'Equipment was successfully updated.' }
         format.json { head :no_content }
       else
-        format.html { render action: "edit" }
+        format.html { render action: 'edit' }
         format.json { render json: @equipment.errors, status: :unprocessable_entity }
       end
     end
@@ -85,15 +85,16 @@ class EquipmentController < ApplicationController
       format.json { head :no_content }
     end
   end
-  
+
   private
-    def equipment_params
-      params.require(:equipment).permit(
-        :universe_id, :user_id,
-        :name, :equip_type,
-        :description, :weight,
-        :original_owner, :current_owner, :made_by, :materials, :year_made,
-        :magic,
-        :notes, :private_notes)
-    end
+
+  def equipment_params
+    params.require(:equipment).permit(
+      :universe_id, :user_id,
+      :name, :equip_type,
+      :description, :weight,
+      :original_owner, :current_owner, :made_by, :materials, :year_made,
+      :magic,
+      :notes, :private_notes)
+  end
 end
