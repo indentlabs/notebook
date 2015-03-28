@@ -1,6 +1,5 @@
 # Generates random Character values
 class CharactersGeneratorController < ApplicationController
-
   def age
     @upper_limit = 100
     @lower_limit = 2
