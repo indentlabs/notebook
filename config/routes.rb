@@ -102,46 +102,46 @@ PlanCharacters::Application.routes.draw do
 
     # Character information
     scope '/character' do
-      get '/age',               to: 'generator#character_age'
-      get '/bodytype',          to: 'generator#character_bodytype'
-      get '/eyecolor',          to: 'generator#character_eyecolor'
-      get '/facial-hair',       to: 'generator#character_facialhair'
-      get '/haircolor',         to: 'generator#character_haircolor'
-      get '/hairstyle',         to: 'generator#character_hairstyle'
-      get '/height',            to: 'generator#character_height'
-      get '/identifying-mark',  to: 'generator#character_identifyingmark'
-      get '/name',              to: 'generator#character_name'
-      get '/race',              to: 'generator#character_race'
-      get '/skintone',          to: 'generator#character_skintone'
-      get '/weight',            to: 'generator#character_weight'
+      get '/age',               to: 'characters_generator#age'
+      get '/bodytype',          to: 'characters_generator#bodytype'
+      get '/eyecolor',          to: 'characters_generator#eyecolor'
+      get '/facial-hair',       to: 'characters_generator#facialhair'
+      get '/haircolor',         to: 'characters_generator#haircolor'
+      get '/hairstyle',         to: 'characters_generator#hairstyle'
+      get '/height',            to: 'characters_generator#height'
+      get '/identifying-mark',  to: 'characters_generator#identifyingmark'
+      get '/name',              to: 'characters_generator#name'
+      get '/race',              to: 'characters_generator#race'
+      get '/skintone',          to: 'characters_generator#skintone'
+      get '/weight',            to: 'characters_generator#weight'
     end
 
     # Location information
     scope '/location' do
-      get '/name',              to: 'generator#location_name'
+      get '/name',              to: 'locations_generator#name'
     end
 
     # Equipment location
     scope '/equipment' do
       scope '/weapon' do
-        get '/',                to: 'generator#equipment_weapon'
+        get '/',                to: 'equipment_generator#weapon'
 
-        get '/axe',             to: 'generator#equipment_weapon_axe'
-        get '/bow',             to: 'generator#equipment_weapon_bow'
-        get '/club',            to: 'generator#equipment_weapon_club'
-        get '/fist',            to: 'generator#equipment_weapon_fist'
-        get '/flexible',        to: 'generator#equipment_weapon_flexible'
+        get '/axe',             to: 'equipment_generator#weapon_axe'
+        get '/bow',             to: 'equipment_generator#weapon_bow'
+        get '/club',            to: 'equipment_generator#weapon_club'
+        get '/fist',            to: 'equipment_generator#weapon_fist'
+        get '/flexible',        to: 'equipment_generator#weapon_flexible'
         # todo /gun
-        get '/polearm',         to: 'generator#equipment_weapon_polearm'
-        get '/shortsword',      to: 'generator#equipment_weapon_shortsword'
-        get '/sword',           to: 'generator#equipment_weapon_sword'
-        get '/thrown',          to: 'generator#equipment_weapon_thrown'
+        get '/polearm',         to: 'equipment_generator#weapon_polearm'
+        get '/shortsword',      to: 'equipment_generator#weapon_shortsword'
+        get '/sword',           to: 'equipment_generator#weapon_sword'
+        get '/thrown',          to: 'equipment_generator#weapon_thrown'
       end
 
       scope '/armor' do
-        get '/',                to: 'generator#equipment_armor'
+        get '/',                to: 'equipment_generator#armor'
 
-        get '/shield',          to: 'generator#equipment_armor_shield'
+        get '/shield',          to: 'equipment_generator#armor_shield'
       end
     end
   end
