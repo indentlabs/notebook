@@ -1,10 +1,10 @@
+# Controller for top-level pages of the site that do not have
+# an associated model
 class MainController < ApplicationController
   before_action :redirect_if_not_logged_in, only: [:dashboard]
 
   def index
-    if session && session[:user]
-      redirect_to :dashboard
-    end
+    redirect_to :dashboard if session && session[:user]
   end
 
   def comingsoon
@@ -17,14 +17,30 @@ class MainController < ApplicationController
   end
 
   def dashboard
-    @characters = Character.where(user_id: session[:user])
-    @equipment = Equipment.where(user_id: session[:user])
-    @languages = Language.where(user_id: session[:user])
-    @locations = Location.where(user_id: session[:user])
-    @magics = Magic.where(user_id: session[:user])
-    @universes = Universe.where(user_id: session[:user])
+    fetch_all_models
 
-    @things = [@characters.length, @equipment.length, @languages.length,
-               @locations.length, @magics.length, @universes.length].sum
+    @things = content_count
+  end
+
+  def fetch_all_models
+    userid = session[:user]
+
+    @characters = Character.where(user_id: userid)
+    @equipment = Equipment.where(user_id: userid)
+    @languages = Language.where(user_id: userid)
+    @locations = Location.where(user_id: userid)
+    @magics = Magic.where(user_id: userid)
+    @universes = Universe.where(user_id: userid)
+  end
+
+  def content_count
+    [
+      @characters.length,
+      @equipment.length,
+      @languages.length,
+      @locations.length,
+      @magics.length,
+      @universes.length
+    ].sum
   end
 end
