@@ -1,3 +1,4 @@
+# Helps to get content owned by the current user
 module MyContentHelper
   def my_characters
     Character.where(user_id: session[:user])

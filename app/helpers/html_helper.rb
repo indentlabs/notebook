@@ -1,3 +1,4 @@
+# Helps generate small HTML constructs
 module HtmlHelper
   def picker_from_type(content_type)
     case content_type
@@ -18,7 +19,8 @@ module HtmlHelper
     return if content_array.length == 0
     [
       '<span class="dropdown-picker">',
-      '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">',
+      '<button type="button" class="btn btn-default dropdown-toggle" \
+       data-toggle="dropdown">',
       '<span class="glyphicon glyphicon-' + glyphicon_id + '"></span>',
       '<span class="caret"></span>',
       '</button>',

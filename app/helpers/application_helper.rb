@@ -1,6 +1,7 @@
+# Helps generate HTML constructs for object owned by the user
 module ApplicationHelper
-  # Will output a link to the item if it exists and is owned by the current logged-in user
-  # Otherwise will just print a text title
+  # Will output a link to the item if it exists and is owned by the 
+  # current logged-in user. Otherwise will just print a text title
   def link_if_present(name, type)
     unless session[:user]
       return name
