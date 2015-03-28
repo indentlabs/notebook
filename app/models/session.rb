@@ -1,3 +1,6 @@
+##
+# A currently-logged-in User
 class Session < ActiveRecord::Base
-  validates_presence_of :username, :password
+  validates :username, presence: true
+  validates :password, presence: true
 end

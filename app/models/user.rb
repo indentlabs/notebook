@@ -1,5 +1,9 @@
+##
+# a person using the Indent web application. Owns all other content.
 class User < ActiveRecord::Base
-  validates_presence_of :name, :password, :email
+  validates :name, presence: true
+  validates :password, presence: true
+  validates :email, presence: true
 
   before_save :hash_password
 
@@ -12,7 +16,8 @@ class User < ActiveRecord::Base
 
   def hash_password
     require 'digest'
-    self.password = Digest::MD5.hexdigest(name + "'s password IS... " + password + ' (lol!)')
+    self.password = Digest::MD5.hexdigest(
+      name + "'s password IS... " + password + ' (lol!)')
   end
 
   def content

@@ -1,5 +1,12 @@
+##
+# = u-ni-verse
+# == /'yoone,vers/
+#
+# 1. a particular sphere of activity, interest, or experience
+#
+#    contains all canonically-related content created by Users
 class Universe < ActiveRecord::Base
-  validates_presence_of :name
+  validates :name, presence: true
 
   belongs_to :user
   has_many :characters
