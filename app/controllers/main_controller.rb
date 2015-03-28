@@ -2,7 +2,6 @@
 # an associated model
 class MainController < ApplicationController
   before_action :redirect_if_not_logged_in, only: [:dashboard]
-
   def index
     redirect_to :dashboard if session && session[:user]
   end
@@ -17,30 +16,15 @@ class MainController < ApplicationController
   end
 
   def dashboard
-    fetch_all_models
+    user = User.where(id: session[:user]).first
 
-    @things = content_count
-  end
+    @characters = user.characters
+    @equipment = user.equipment
+    @languages = user.languages
+    @locations = user.locations
+    @magics = user.magics
+    @universes = user.universes
 
-  def fetch_all_models
-    userid = session[:user]
-
-    @characters = Character.where(user_id: userid)
-    @equipment = Equipment.where(user_id: userid)
-    @languages = Language.where(user_id: userid)
-    @locations = Location.where(user_id: userid)
-    @magics = Magic.where(user_id: userid)
-    @universes = Universe.where(user_id: userid)
-  end
-
-  def content_count
-    [
-      @characters.length,
-      @equipment.length,
-      @languages.length,
-      @locations.length,
-      @magics.length,
-      @universes.length
-    ].sum
+    @things = user.content_count
   end
 end
