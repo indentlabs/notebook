@@ -1,5 +1,6 @@
 require 'test_helper'
 
+# Tests for the LocationsController class
 class LocationsControllerTest < ActionController::TestCase
   setup do
     @user = users(:tolkien)
@@ -21,7 +22,11 @@ class LocationsControllerTest < ActionController::TestCase
 
   test 'should create location' do
     assert_difference('Location.count') do
-      post :create, location: { name: 'Isengard', universe: @universe, user: @user }
+      post :create, location: {
+        name: 'Isengard',
+        universe: @universe,
+        user: @user
+      }
     end
 
     assert_redirected_to location_path(assigns(:location))
@@ -42,7 +47,10 @@ class LocationsControllerTest < ActionController::TestCase
 
   test 'should update location' do
     @location = locations(:shire)
-    put :update, id: @location, location: { name: 'Bag End', universe: @universe }
+    put :update, id: @location, location: {
+      name: 'Bag End',
+      universe: @universe
+    }
 
     assert_response 302
     assert_redirected_to location_path(@location)
@@ -59,7 +67,12 @@ class LocationsControllerTest < ActionController::TestCase
   test 'should create location with image' do
     assert_difference('Location.count') do
       map = fixture_file_upload('mordor_map.jpg', 'image/jpeg')
-      post :create, location: { name: 'Mordor', map: map, universe: @universe, user: @user }
+      post :create, location: {
+        name: 'Mordor',
+        map: map,
+        universe: @universe,
+        user: @user
+      }
     end
 
     assert_redirected_to location_path(assigns(:location))
@@ -68,14 +81,24 @@ class LocationsControllerTest < ActionController::TestCase
   test 'should reject images with an invalid type' do
     assert_no_difference('Location.count') do
       map = fixture_file_upload('mordor_map.jpg', 'invalid/notanimage')
-      post :create, location: { name: 'Mordor', map: map, universe: @universe, user: @user }
+      post :create, location: {
+        name: 'Mordor',
+        map: map,
+        universe: @universe,
+        user: @user
+      }
     end
   end
 
   test 'should reject images with an empty type' do
     assert_no_difference('Location.count') do
       map = fixture_file_upload('mordor_map.jpg', '')
-      post :create, location: { name: 'Mordor', map: map, universe: @universe, user: @user }
+      post :create, location: {
+        name: 'Mordor',
+        map: map,
+        universe: @universe,
+        user: @user
+      }
     end
   end
 end

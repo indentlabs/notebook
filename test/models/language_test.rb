@@ -1,8 +1,9 @@
 require 'test_helper'
 
+# Tests for the Language model class
 class LanguageTest < ActiveSupport::TestCase
   test 'language not valid without a name' do
-    skip 'Validation has been disabled due to conflicts during the database migration. We are considering removing this validation entirely'
+    skip 'Validation disabled due to database migration conflicts.'
     language = languages(:sindarin)
     language.name = nil
 

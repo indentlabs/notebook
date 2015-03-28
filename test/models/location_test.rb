@@ -1,5 +1,6 @@
 require 'test_helper'
 
+# Tests for the Location model class
 class LocationTest < ActiveSupport::TestCase
   test 'location not valid without a name' do
     location = locations(:shire)
@@ -9,10 +10,16 @@ class LocationTest < ActiveSupport::TestCase
   end
 
   test 'location fixture assumptions' do
-    assert_not_nil locations(:shire), 'Locations fixture :one not available'
-    assert locations(:shire).valid?, 'Locations fixture :one not valid'
+    assert_not_nil locations(:shire),
+                   'Locations fixture not available'
 
-    assert_equal users(:tolkien), locations(:shire).user, 'Locations fixture :one not associated with Users fixture :one'
-    assert_equal universes(:middleearth), locations(:shire).universe, 'Locations fixture :one not associated with Universes fixture :one'
+    assert locations(:shire).valid?,
+           'Locations fixture not valid'
+
+    assert_equal users(:tolkien), locations(:shire).user,
+                 'Locations fixture associated with Users fixture'
+
+    assert_equal universes(:middleearth), locations(:shire).universe,
+                 'Locations fixture not associated with Universes fixture'
   end
 end

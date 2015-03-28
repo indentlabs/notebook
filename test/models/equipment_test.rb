@@ -1,8 +1,9 @@
 require 'test_helper'
 
+# Tests for the Equipment model class
 class EquipmentTest < ActiveSupport::TestCase
   test 'equipment not valid without a name' do
-    skip 'Validation has been disabled due to conflicts during the database migration. We are considering removing this validation entirely'
+    skip 'Validation disabled due to database migration conflicts.'
     equipment = equipment(:sting)
     equipment.name = nil
 

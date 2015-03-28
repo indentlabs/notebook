@@ -1,8 +1,9 @@
 require 'test_helper'
 
+# Tests for the Universe model class
 class UniverseTest < ActiveSupport::TestCase
   test 'universe not valid without a name' do
-    skip 'Validation has been disabled due to conflicts during the database migration. We are considering removing this validation entirely'
+    skip 'Validation disabled due to database migration conflicts.'
     universe = universes(:middleearth)
     universe.name = nil
 
@@ -10,12 +11,18 @@ class UniverseTest < ActiveSupport::TestCase
   end
 
   test 'universe fixture assumptions' do
-    assert_not_nil universes(:middleearth), 'Universes fixture :one is not available'
-    assert universes(:middleearth).valid?, 'Universes fixture :one is not a valid universe'
-    assert_equal users(:tolkien), universes(:middleearth).user, 'Universe fixture :one not associated with User fixture :one'
+    assert_not_nil universes(:middleearth),
+                   'Universes fixture is not available'
+
+    assert universes(:middleearth).valid?,
+           'Universes fixture is not a valid universe'
+
+    assert_equal users(:tolkien), universes(:middleearth).user,
+                 'Universe fixture not associated with User fixture'
   end
 
   test 'can count content' do
-    assert_equal 5, universes(:middleearth).content_count, "Universe didn't count its content properly"
+    assert_equal 5, universes(:middleearth).content_count,
+                 "Universe didn't count its content properly"
   end
 end

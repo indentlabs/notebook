@@ -1,5 +1,6 @@
 require 'test_helper'
 
+# Tests for the CharactersController class
 class CharactersControllerTest < ActionController::TestCase
   setup do
     @user = users(:tolkien)
@@ -21,7 +22,11 @@ class CharactersControllerTest < ActionController::TestCase
 
   test 'should create character' do
     assert_difference('Character.count') do
-      post :create, character: { age: 'Created Age', name: 'Created Name', universe: @universe }
+      post :create, character: {
+        age: 'Created Age',
+        name: 'Created Name',
+        universe: @universe
+      }
     end
 
     assert_redirected_to character_path(assigns(:character))
@@ -42,7 +47,12 @@ class CharactersControllerTest < ActionController::TestCase
 
   test 'should update character' do
     @character = characters(:frodo)
-    put :update, id: @character, character: { age: @character.age, name: @character.name, universe: @universe }
+
+    put :update, id: @character, character: {
+      age: @character.age,
+      name: @character.name,
+      universe: @universe
+    }
 
     assert_response 302
     assert_redirected_to character_path(@character)

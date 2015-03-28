@@ -1,8 +1,9 @@
 require 'test_helper'
 
+# Tests for the Magic model class
 class MagicTest < ActiveSupport::TestCase
   test 'magic not valid without a name' do
-    skip 'Validation has been disabled due to conflicts during the database migration. We are considering removing this validation entirely'
+    skip 'Validation disabled due to database migration conflicts.'
     magic = magics(:wizard)
     magic.name = nil
 
@@ -10,7 +11,7 @@ class MagicTest < ActiveSupport::TestCase
   end
 
   test 'magic fixture assumptions' do
-    assert_not_nil magics(:wizard), 'Magics fixture :one is unavailable'
-    assert magics(:wizard).valid?, 'Magics fixture :one is not valid'
+    assert_not_nil magics(:wizard), 'Magics fixture is unavailable'
+    assert magics(:wizard).valid?, 'Magics fixture is not valid'
   end
 end

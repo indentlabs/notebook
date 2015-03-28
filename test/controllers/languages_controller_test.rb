@@ -1,5 +1,6 @@
 require 'test_helper'
 
+# Tests for the LanguagesController class
 class LanguagesControllerTest < ActionController::TestCase
   setup do
     log_in_user(:tolkien)
@@ -18,7 +19,10 @@ class LanguagesControllerTest < ActionController::TestCase
 
   test 'should create language' do
     assert_difference('Language.count', 1) do
-      post :create, language: { name: 'Created Language', universe: universes(:middleearth) }
+      post :create, language: {
+        name: 'Created Language',
+        universe: universes(:middleearth)
+      }
     end
 
     assert_redirected_to language_path(assigns(:language))
@@ -35,7 +39,10 @@ class LanguagesControllerTest < ActionController::TestCase
   end
 
   test 'should update language' do
-    put :update, id: languages(:sindarin).id, language: { name: 'Updated Language Name', universe: universes(:middleearth) }
+    put :update, id: languages(:sindarin).id, language: {
+      name: 'Updated Language Name',
+      universe: universes(:middleearth)
+    }
 
     assert_redirected_to language_path(languages(:sindarin))
   end
