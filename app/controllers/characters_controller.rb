@@ -54,7 +54,7 @@ class CharactersController < ApplicationController
     # rubocop:disable LineLength
     respond_to do |format|
       if @character.save
-        format.html { render_html_success t(:character_create_success) }
+        format.html { render_html_success t(:create_success, Character.model_name.human) }
         format.json { render json: @character, status: :created, location: @character }
       else
         format.html { render action: 'new' }
@@ -71,7 +71,7 @@ class CharactersController < ApplicationController
 
     respond_to do |format|
       if @character.update_attributes(character_params)
-        format.html { render_html_success t(:character_update_success) }
+        format.html { render_html_success t(:update_success, Character.model_name.human) }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
