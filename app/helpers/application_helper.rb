@@ -1,35 +1,35 @@
 # Helps generate HTML constructs for object owned by the user
 module ApplicationHelper
-  # Will output a link to the item if it exists and is owned by the 
+  # Will output a link to the item if it exists and is owned by the
   # current logged-in user. Otherwise will just print a text title
   def link_if_present(name, type)
-    unless session[:user]
-      return name
-    end
+    return name unless session[:user]
+    userid = Users.where(id: session[:user]).first.id
 
-    result = nil
     type = type.downcase
-
-    case type
-    when 'character'
-      result = Character.where(name: name, user_id: session[:user])
-    when 'equipment'
-      result = Equipment.where(name: name, user_id: session[:user])
-    when 'language'
-      result = Language.where(name: name, user_id: session[:user])
-    when 'location'
-      result = Location.where(name: name, user_id: session[:user])
-    when 'magic'
-      result = Magic.where(name: name, user_id: session[:user])
-    # Plot stuff
-    when 'universe'
-      result = Universe.where(name: name, user_id: session[:user])
-    end
+    result = find_by_name_and_type name, type, userid
 
     if result && result.length > 0
       return link_to name, result.first
     else
       return name
+    end
+  end
+
+  def find_by_name_and_type(name, type, userid)
+    model = find_model_by_type type
+
+    model.where(name: name, user_id: userid).first unless model.nil?
+  end
+
+  def find_model_by_type(type) # rubocop:disable Style/CyclomaticComplexity
+    case type
+    when 'character' then return Character
+    when 'equipment' then return Equipment
+    when 'language' then return Language
+    when 'location' then return Location
+    when 'magic' then return Magic
+    when 'universe' then return Universe
     end
   end
 
