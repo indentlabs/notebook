@@ -51,7 +51,7 @@ class CharactersController < ApplicationController
   def create
     @character = create_character_from_params
 
-    # rubocop:disable LineLength
+    # rubocop:disable LineLength, AbcSize
     respond_to do |format|
       if @character.save
         format.html { render_html_success t(:create_success, Character.model_name.human) }
@@ -61,12 +61,12 @@ class CharactersController < ApplicationController
         format.json { render_json_error_unprocessable }
       end
     end
-    # rubocop:enable LineLength
+    # rubocop:enable LineLength, AbcSize
   end
 
   # PUT /characters/1
   # PUT /characters/1.json
-  def update
+  def update # rubocop:disable AbcSize
     @character = update_character_from_params
 
     respond_to do |format|
