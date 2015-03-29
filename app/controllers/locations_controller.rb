@@ -1,16 +1,16 @@
+# Controller for the Location model
 class LocationsController < ApplicationController
-  before_action :create_anonymous_account_if_not_logged_in, only: [:edit, :create, :update]
-  before_action :require_ownership_of_location, only: [:update, :edit, :destroy]
+  before_action :create_anonymous_account_if_not_logged_in,
+                only: [:edit, :create, :update]
+
+  before_action :require_ownership_of_location,
+                only: [:update, :edit, :destroy]
+
   before_action :hide_private_location, only: [:show]
 
   def index
     @locations = Location.where(user_id: session[:user])
-
-    if @locations.size == 0
-      @locations = []
-    end
-
-    @locations = @locations.sort { |a, b| a.name.downcase <=> b.name.downcase }
+                 .order(:name).presence || []
 
     respond_to do |format|
       format.html # index.html.erb
@@ -41,19 +41,12 @@ class LocationsController < ApplicationController
   end
 
   def create
-    @location = Location.new(location_params)
-    @location.user_id = session[:user]
-    @location.universe = Universe.where(user_id: session[:user]).where(name: params[:location][:universe].strip).first
-
-    notice = ''
+    @location = create_location_from_params
 
     respond_to do |format|
       begin
         if @location.save
-          if notice == ''
-            notice = 'Location was successfully created.'
-          end
-
+          notice = t(:create_success, Location.model_name.human) if notice.blank?
           format.html { redirect_to @location, notice: notice }
           format.json { render json: @location, status: :created, location: @location }
         else
@@ -61,36 +54,33 @@ class LocationsController < ApplicationController
           format.json { render json: @location.errors, status: :unprocessable_entity }
         end
       rescue Errno::ECONNRESET
-        # Connection was reset, probably because of the file upload. Try again without it.
+        # Connection was reset, probably because of the file upload.
+        # Try again without it.
         @location.map = nil
-        notice = 'Location was created, but your map did not upload. Please try again.'
+        notice = t :location_create_upload_map_error
         retry
       end
     end
   end
 
   def update
-    @location = Location.find(params[:id])
-
-    if params[:location][:universe].empty?
-      params[:location][:universe] = nil
-    else
-      params[:location][:universe] = Universe.where(user_id: session[:user]).where(name: params[:location][:universe].strip).first
-    end
+    @location = update_location_from_params
 
     respond_to do |format|
       begin
         if @location.update_attributes(location_params)
-          format.html { redirect_to @location, notice: 'Location was successfully updated.' }
+          notice = t :update_success, Location.model_name.human if notice.blank?
+          format.html { redirect_to @location, notice: notice }
           format.json { head :no_content }
         else
           format.html { render action: 'edit' }
           format.json { render json: @location.errors, status: :unprocessable_entity }
         end
       rescue Errno::ECONNRESET
-        # Connection was reset, probably because of the file upload. Try again without it.
+        # Connection was reset, probably because of the file upload.
+        # Try again without it.
         @location.map = nil
-        notice = 'Location was created, but your map did not upload. Please try again.'
+        notice = t :location_update_upload_map_error
         retry
       end
     end
@@ -110,13 +100,26 @@ class LocationsController < ApplicationController
 
   def location_params
     params.require(:location).permit(
-      :universe_id, :user_id,
-      :name, :type_of, :description,
-      :map,
-      :population, :currency, :motto,
-      :capital, :largest_city, :notable_cities,
-      :area, :crops, :located_at,
-      :stablishment_year, :notable_wars,
+      :universe_id, :user_id, :name, :type_of, :description, :map,
+      :population, :currency, :motto, :capital, :largest_city, :notable_cities,
+      :area, :crops, :located_at, :stablishment_year, :notable_wars,
       :notes, :private_notes)
+  end
+
+  def create_location_from_params
+    location = Location.new(location_params)
+    location.user_id = session[:user]
+    location.universe = universe_from_location_params
+    location
+  end
+
+  def update_location_from_params
+    params[:location][:universe] = universe_from_location_params
+    Location.find(params[:id])
+  end
+
+  def universe_from_location_params
+    Universe.where(user_id: session[:user],
+                   name: params[:location][:universe].strip).first
   end
 end
