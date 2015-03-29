@@ -1,16 +1,15 @@
+# Controller for the Magic model
 class MagicController < ApplicationController
-  before_action :create_anonymous_account_if_not_logged_in, only: [:edit, :create, :update]
-  before_action :require_ownership_of_magic, only: [:edit, :destroy]
+  before_action :create_anonymous_account_if_not_logged_in,
+                only: [:edit, :create, :update]
+
+  before_action :require_ownership_of_magic,
+                only: [:edit, :destroy]
+
   before_action :hide_private_magic, only: [:show]
 
   def index
-    @magics = Magic.where(user_id: session[:user])
-
-    if @magics.size == 0
-      @magics = []
-    end
-
-    @magics = @magics.sort { |a, b| a.name.downcase <=> b.name.downcase }
+    @magics = Magic.where(user_id: session[:user]).order(:name).presence || []
 
     respond_to do |format|
       format.html # index.html.erb
@@ -41,13 +40,12 @@ class MagicController < ApplicationController
   end
 
   def create
-    @magic = Magic.new(magic_params)
-    @magic.user_id = session[:user]
-    @magic.universe = Universe.where(user_id: session[:user]).where(name: params[:magic][:universe].strip).first
+    @magic = create_magic_from_params
 
     respond_to do |format|
       if @magic.save
-        format.html { redirect_to @magic, notice: 'Magic was successfully created.' }
+        notice = t :create_success, Magic.model_name.human
+        format.html { redirect_to @magic, notice: notice }
         format.json { render json: @magic, status: :created, location: @magic }
       else
         format.html { render action: 'new' }
@@ -59,15 +57,10 @@ class MagicController < ApplicationController
   def update
     @magic = Magic.find(params[:id])
 
-    if params[:magic][:universe].empty?
-      params[:magic][:universe] = nil
-    else
-      params[:magic][:universe] = Universe.where(user_id: session[:user]).where(name: params[:magic][:universe].strip).first
-    end
-
     respond_to do |format|
       if @magic.update_attributes(magic_params)
-        format.html { redirect_to @magic, notice: 'Magic was successfully updated.' }
+        notice = t :update_success, Magic.model_name.human
+        format.html { redirect_to @magic, notice: notice }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
@@ -97,5 +90,17 @@ class MagicController < ApplicationController
       :harmfulness, :helpfulness, :neutralness,
       :resource, :skill_level, :limitations,
       :notes, :private_notes)
+  end
+
+  def create_magic_from_params
+    magic Magic.new(magic_params)
+    magic.user_id = session[:user]
+    magic.universe = universe_from_magic_params
+    magic
+  end
+
+  def universe_from_magic_params
+    Universe.where(user_id: session[:user],
+                   name: params[:magic][:universe].strip).first
   end
 end
