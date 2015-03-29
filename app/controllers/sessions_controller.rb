@@ -16,7 +16,7 @@ class SessionsController < ApplicationController
   def create
     user = user_from_params
 
-    if user.empty?
+    if user.nil?
       redirect_to login_path, notice: t(:username_password_incorrect)
       return
     end
