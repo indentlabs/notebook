@@ -1,4 +1,6 @@
 PlanCharacters::Application.routes.draw do
+  # rubocop:disable LineLength
+
   # Main pages
   root to: 'main#index', as: :homepage
 
@@ -131,7 +133,7 @@ PlanCharacters::Application.routes.draw do
         get '/club',            to: 'equipment_generator#weapon_club'
         get '/fist',            to: 'equipment_generator#weapon_fist'
         get '/flexible',        to: 'equipment_generator#weapon_flexible'
-        # todo /gun
+        # TODO: /gun
         get '/polearm',         to: 'equipment_generator#weapon_polearm'
         get '/shortsword',      to: 'equipment_generator#weapon_shortsword'
         get '/sword',           to: 'equipment_generator#weapon_sword'
@@ -180,4 +182,6 @@ PlanCharacters::Application.routes.draw do
     get '/print-publishers',  to: 'main#comingsoon'
     get '/online-publishers', to: 'main#comingsoon'
   end
+
+  # rubocop:enable LineLength
 end
