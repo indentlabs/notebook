@@ -30,6 +30,10 @@ class ApplicationController < ActionController::Base
   end
 
   # Authentication
+  def log_in(user)
+    session[:user] = user.id
+  end
+
   def logged_in?
     session && session[:user]
   end
@@ -109,6 +113,7 @@ class ApplicationController < ActionController::Base
   private
 
   def create_anonymous_user
+    # TODO: guarantee anonymous id is random (or just let db assign it?)
     id = rand(10_000_000).to_s + rand(10_000_000).to_s # lol
 
     User.new(
