@@ -1,16 +1,16 @@
+# Controller for the Language model
 class LanguagesController < ApplicationController
-  before_action :create_anonymous_account_if_not_logged_in, only: [:edit, :create, :update]
-  before_action :require_ownership_of_language, only: [:update, :edit, :destroy]
+  before_action :create_anonymous_account_if_not_logged_in,
+                only: [:edit, :create, :update]
+
+  before_action :require_ownership_of_language,
+                only: [:update, :edit, :destroy]
+
   before_action :hide_private_language, only: [:show]
 
   def index
     @languages = Language.where(user_id: session[:user])
-
-    if @languages.size == 0
-      @languages = []
-    end
-
-    @languages = @languages.sort { |a, b| a.name.downcase <=> b.name.downcase }
+                 .order(:name).presence || []
 
     respond_to do |format|
       format.html # index.html.erb
@@ -41,32 +41,29 @@ class LanguagesController < ApplicationController
   end
 
   def create
-    @language = Language.new(language_params)
-    @language.user_id = session[:user]
-    @language.universe = Universe.where(user_id: session[:user]).where(name: params[:language][:universe].strip).first
+    @language = create_language_from_params
 
+    # rubocop:disable LineLength
     respond_to do |format|
       if @language.save
-        format.html { redirect_to @language, notice: 'Language was successfully created.' }
+        notice = t :create_success, Language.model_name.human
+        format.html { redirect_to @language, notice: notice }
         format.json { render json: @language, status: :created, location: @language }
       else
         format.html { render action: 'new' }
         format.json { render json: @language.errors, status: :unprocessable_entity }
       end
     end
+    # rubocop:enable LineLength
   end
 
   def update
-    @language = Language.find(params[:id])
-    if params[:language][:universe].empty?
-      params[:language][:universe] = nil
-    else
-      params[:language][:universe] = Universe.where(user_id: session[:user]).where(name: params[:language][:universe].strip).first
-    end
+    @language = update_language_from_params
 
     respond_to do |format|
       if @language.update_attributes(language_params)
-        format.html { redirect_to @language, notice: 'Language was successfully updated.' }
+        notice = t :update_success, Language.model_name.human
+        format.html { redirect_to @language, notice: notice }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
@@ -76,8 +73,7 @@ class LanguagesController < ApplicationController
   end
 
   def destroy
-    @language = Language.find(params[:id])
-    @language.destroy
+    @language = Language.find(params[:id]).destroy
 
     respond_to do |format|
       format.html { redirect_to language_list_url }
@@ -95,5 +91,22 @@ class LanguagesController < ApplicationController
       :established_year, :established_location,
       :characters, :locations,
       :notes)
-    end
+  end
+
+  def update_language_from_params
+    params[:language][:universe] = universe_from_language_params
+    Language.find(params[:id])
+  end
+
+  def create_language_from_params
+    language = Language.create(language_params)
+    language.user_id = session[:user]
+    language.universe = universe_from_language_params
+    language
+  end
+
+  def universe_from_language_params
+    Universe.where(user_id: session[:user],
+                   name: params[:language][:universe].strip).first.presence
+  end
 end
