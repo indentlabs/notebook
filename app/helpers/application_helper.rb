@@ -18,7 +18,7 @@ module ApplicationHelper
     model.where(name: name, user_id: userid).first unless model.nil?
   end
 
-  def find_model_by_type(type) # rubocop:disable Style/CyclomaticComplexity
+  def find_model_by_type(type) # rubocop:disable Metrics/CyclomaticComplexity
     case type
     when 'character' then return Character
     when 'equipment' then return Equipment
