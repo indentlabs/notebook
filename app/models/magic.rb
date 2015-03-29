@@ -10,6 +10,8 @@
 #
 #    "do you believe in magic?"
 class Magic < ActiveRecord::Base
+  include NilsBlankUniverse
+
   validates :name, presence: true
 
   belongs_to :user

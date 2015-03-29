@@ -8,6 +8,8 @@
 #
 #    spoken within a Universe
 class Language < ActiveRecord::Base
+  include NilsBlankUniverse
+
   validates :name, presence: true
 
   belongs_to :user
