@@ -26,7 +26,7 @@ class UsersController < ApplicationController
     respond_to do |format|
       if @user.save
         log_in @user
-        notice = t(:create_success, User.model_name.human)
+        notice = t(:create_success, model_name: User.model_name.human)
         format.html { redirect_to homepage_path, notice: notice }
         format.json { render json: @user, status: :created }
       else

@@ -46,7 +46,7 @@ class LanguagesController < ApplicationController
     # rubocop:disable LineLength
     respond_to do |format|
       if @language.save
-        notice = t :create_success, Language.model_name.human
+        notice = t :create_success, model_name: Language.model_name.human
         format.html { redirect_to @language, notice: notice }
         format.json { render json: @language, status: :created, location: @language }
       else
@@ -62,7 +62,7 @@ class LanguagesController < ApplicationController
 
     respond_to do |format|
       if @language.update_attributes(language_params)
-        notice = t :update_success, Language.model_name.human
+        notice = t :update_success, model_name: Language.model_name.human
         format.html { redirect_to @language, notice: notice }
         format.json { head :no_content }
       else

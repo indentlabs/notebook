@@ -40,13 +40,14 @@ class LocationsController < ApplicationController
     @location = Location.find(params[:id])
   end
 
+  # rubocop:disable LineLength
   def create
     @location = create_location_from_params
 
     respond_to do |format|
       begin
         if @location.save
-          notice = t(:create_success, Location.model_name.human) if notice.blank?
+          notice = t(:create_success, model_name: Location.model_name.human) if notice.blank?
           format.html { redirect_to @location, notice: notice }
           format.json { render json: @location, status: :created, location: @location }
         else
@@ -62,14 +63,16 @@ class LocationsController < ApplicationController
       end
     end
   end
+  # rubocop:enable LineLength
 
+  # rubocop:disable LineLength
   def update
     @location = update_location_from_params
 
     respond_to do |format|
       begin
         if @location.update_attributes(location_params)
-          notice = t :update_success, Location.model_name.human if notice.blank?
+          notice = t :update_success, model_name: Location.model_name.human if notice.blank?
           format.html { redirect_to @location, notice: notice }
           format.json { head :no_content }
         else
@@ -85,6 +88,7 @@ class LocationsController < ApplicationController
       end
     end
   end
+  # rubocop:enable LineLength
 
   def destroy
     @location = Location.find(params[:id])

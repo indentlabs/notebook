@@ -54,7 +54,7 @@ class CharactersController < ApplicationController
     # rubocop:disable LineLength, AbcSize
     respond_to do |format|
       if @character.save
-        format.html { render_html_success t(:create_success, Character.model_name.human) }
+        format.html { render_html_success t(:create_success, model_name: Character.model_name.human) }
         format.json { render json: @character, status: :created, location: @character }
       else
         format.html { render action: 'new' }
@@ -66,12 +66,13 @@ class CharactersController < ApplicationController
 
   # PUT /characters/1
   # PUT /characters/1.json
-  def update # rubocop:disable AbcSize
+  # rubocop:disable LineLength, AbcSize
+  def update
     @character = update_character_from_params
 
     respond_to do |format|
       if @character.update_attributes(character_params)
-        format.html { render_html_success t(:update_success, Character.model_name.human) }
+        format.html { render_html_success t(:update_success, model_name: Character.model_name.human) }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
@@ -79,6 +80,7 @@ class CharactersController < ApplicationController
       end
     end
   end
+  # rubocop:enable LineLength, AbcSize
 
   # DELETE /characters/1
   # DELETE /characters/1.json

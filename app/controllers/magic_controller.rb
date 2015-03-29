@@ -44,7 +44,7 @@ class MagicController < ApplicationController
 
     respond_to do |format|
       if @magic.save
-        notice = t :create_success, Magic.model_name.human
+        notice = t :create_success, model_name: Magic.model_name.human
         format.html { redirect_to @magic, notice: notice }
         format.json { render json: @magic, status: :created, location: @magic }
       else
@@ -59,7 +59,7 @@ class MagicController < ApplicationController
 
     respond_to do |format|
       if @magic.update_attributes(magic_params)
-        notice = t :update_success, Magic.model_name.human
+        notice = t :update_success, model_name: Magic.model_name.human
         format.html { redirect_to @magic, notice: notice }
         format.json { head :no_content }
       else

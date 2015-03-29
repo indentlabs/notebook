@@ -45,7 +45,7 @@ class UniversesController < ApplicationController
 
     respond_to do |format|
       if @universe.save
-        notice = t :create_success, Universe.model_name.human
+        notice = t :create_success, model_name: Universe.model_name.human
         format.html { redirect_to @universe, notice: notice }
         format.json { render json: @universe, status: :created, location: @universe }
       else
@@ -60,7 +60,7 @@ class UniversesController < ApplicationController
 
     respond_to do |format|
       if @universe.update_attributes(universe_params)
-        notice = t :update_success, Universe.model_name.human
+        notice = t :update_success, model_name: Universe.model_name.human
         format.html { redirect_to @universe, notice:  notice }
         format.json { head :no_content }
       else

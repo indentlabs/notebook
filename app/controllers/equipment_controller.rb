@@ -47,7 +47,7 @@ class EquipmentController < ApplicationController
     # rubocop:disable LineLength
     respond_to do |format|
       if @equipment.save
-        format.html { redirect_to @equipment, notice: t(:create_success, Equipment.model_name.human) }
+        format.html { redirect_to @equipment, notice: t(:create_success, model_name: Equipment.model_name.human) }
         format.json { render json: @equipment, status: :created, location: @equipment }
       else
         format.html { render action: 'new' }
@@ -63,7 +63,7 @@ class EquipmentController < ApplicationController
     # rubocop:disable LineLength
     respond_to do |format|
       if @equipment.update_attributes(equipment_params)
-        format.html { redirect_to @equipment, notice: t(:update_success, Equipment.model_name.human) }
+        format.html { redirect_to @equipment, notice: t(:update_success, model_name: Equipment.model_name.human) }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
