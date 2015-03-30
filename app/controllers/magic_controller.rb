@@ -93,7 +93,7 @@ class MagicController < ApplicationController
   end
 
   def create_magic_from_params
-    magic Magic.new(magic_params)
+    magic = Magic.new(magic_params)
     magic.user_id = session[:user]
     magic.universe = universe_from_magic_params
     magic
