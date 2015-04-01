@@ -19,6 +19,19 @@ module ActiveSupport
   end
 end
 
+module ActionController
+  # Helper methods for controller tests
+  class TestCase
+    def assert_assigns(method, assigned = {})
+      get method
+      assert_response :success
+      assigned.each do |val|
+        assert_not assigns(val).blank?, "Controller did not assign #{val}"
+      end
+    end
+  end
+end
+
 module ActionDispatch
   # Helper methods for integration tests
   class IntegrationTest

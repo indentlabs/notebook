@@ -64,12 +64,4 @@ class CharactersGeneratorControllerTest < ActionController::TestCase
     assert_assigns :weight, [:upper_limit, :lower_limit]
     assert_operator assigns(:lower_limit), :<=, assigns(:upper_limit)
   end
-
-  def assert_assigns(method, assigned = {})
-    get method
-    assert_response :success
-    assigned.each do |val|
-      assert_not assigns(val).blank?, "Controller did not assign #{val}"
-    end
-  end
 end
