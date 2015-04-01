@@ -26,7 +26,7 @@ module ActionController
       get method
       assert_response :success
       assigned.each do |val|
-        assert_not assigns(val).blank?, "Controller did not assign #{val}"
+        assert_not assigns(val).blank?, "#{method} did not assign #{val}"
       end
     end
   end
