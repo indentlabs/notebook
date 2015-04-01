@@ -21,6 +21,8 @@ class LocationsGeneratorController < ApplicationController
       return @prefixes.sample + ' ' + base
     elsif rand <= @postfix_occurrence
       return base + ' ' + @postfixes.sample
+    else
+      return base
     end
   end
 
