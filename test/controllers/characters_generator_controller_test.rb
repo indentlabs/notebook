@@ -36,6 +36,9 @@ class CharactersGeneratorControllerTest < ActionController::TestCase
     ]
     assert_operator assigns(:lower_foot_limit), :<=, assigns(:upper_foot_limit)
     assert_operator assigns(:lower_inch_limit), :<=, assigns(:upper_inch_limit)
+
+    assert_operator assigns(:lower_foot_limit), :>=, 0
+    assert_operator assigns(:lower_inch_limit), :>=, 0
   end
 
   test 'identifying mark' do
@@ -63,5 +66,6 @@ class CharactersGeneratorControllerTest < ActionController::TestCase
   test 'weight' do
     assert_assigns :weight, [:upper_limit, :lower_limit]
     assert_operator assigns(:lower_limit), :<=, assigns(:upper_limit)
+    assert_operator assigns(:lower_limit), :>=, 0
   end
 end
