@@ -34,4 +34,16 @@ class UsersControllerTest < ActionController::TestCase
     get :anonymous_login
     assert_redirected_to dashboard_path
   end
+
+  test 'can update user' do
+    log_in_user :tolkien
+    post :update, user: {
+      name: 'JRRTolkien',
+      password: 'Mellon',
+      email: 'jrr@localhost'
+    }
+    assert_redirected_to homepage_path
+    assert_not_nil assigns(:user)
+    assert_equal assigns(:user).email, 'jrr@localhost'
+  end
 end

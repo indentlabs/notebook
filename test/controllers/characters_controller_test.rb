@@ -65,4 +65,19 @@ class CharactersControllerTest < ActionController::TestCase
 
     assert_redirected_to character_list_url
   end
+
+  test 'create anonymous account if not logged in' do
+    session[:user] = nil
+    assert_difference('Character.count') do
+      post :create, character: {
+        age: 'Created Age',
+        name: 'Created Name',
+        universe: @universe
+      }
+    end
+
+    assert_redirected_to character_path(assigns(:character))
+    assert_not_nil session[:user]
+    assert session[:anon_user]
+  end
 end
