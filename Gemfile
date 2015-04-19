@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-gem 'bcrypt', '~> 3.1.7'
+gem 'bcrypt-ruby', '~> 3.1.5'
 gem 'rails', '4.1.0'
 gem 'jquery-rails'
 gem 'sass-rails', '~> 4.0.3', require: 'sass'
