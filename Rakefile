@@ -3,5 +3,9 @@
 # be available to Rake.
 
 require File.expand_path('../config/application', __FILE__)
+require 'rubocop/rake_task'
+
+RuboCop::RakeTask.new
+task default: 'rubocop'
 
 Rails.application.load_tasks
