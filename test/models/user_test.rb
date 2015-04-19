@@ -25,7 +25,8 @@ class UserTest < ActiveSupport::TestCase
 
   test 'user fixture assumptions' do
     assert_not_nil users(:tolkien), 'User fixture is unavailable'
-    assert users(:tolkien).valid?, 'User fixture is not a valid user'
+    assert users(:tolkien).valid?, "User fixture is not a valid user:
+                                   #{users(:tolkien).errors.messages}"
   end
 
   test 'can get user content' do
