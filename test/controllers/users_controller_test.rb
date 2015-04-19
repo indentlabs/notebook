@@ -1,5 +1,6 @@
 require 'test_helper'
 
+# Tests for the UsersController class
 class UsersControllerTest < ActionController::TestCase
   test 'editing a user requires login' do
     get :edit, id: users(:tolkien).id

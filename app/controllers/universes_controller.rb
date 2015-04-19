@@ -1,16 +1,15 @@
+# Controller for the Universe model
 class UniversesController < ApplicationController
-  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :create, :update]
-  before_filter :require_ownership_of_universe, :only => [:edit, :update, :destroy]
-  before_filter :hide_private_universe, :only => [:show]
+  before_action :create_anonymous_account_if_not_logged_in,
+                only: [:edit, :create, :update]
+
+  before_action :require_ownership_of_universe,
+                only: [:edit, :update, :destroy]
+
+  before_action :hide_private_universe, only: [:show]
 
   def index
-  	@universes = Universe.where(user_id: session[:user])
-    
-    if @universes.size == 0
-      @universes = []
-    end
-    
-    @universes = @universes.sort { |a, b| a.name.downcase <=> b.name.downcase }
+    @universes = Universe.where(user_id: session[:user]).order(:name).presence || []
 
     respond_to do |format|
       format.html # index.html.erb
@@ -46,10 +45,11 @@ class UniversesController < ApplicationController
 
     respond_to do |format|
       if @universe.save
-        format.html { redirect_to @universe, notice: 'Universe was successfully created.' }
+        notice = t :create_success, model_name: Universe.model_name.human
+        format.html { redirect_to @universe, notice: notice }
         format.json { render json: @universe, status: :created, location: @universe }
       else
-        format.html { render action: "new" }
+        format.html { render action: 'new' }
         format.json { render json: @universe.errors, status: :unprocessable_entity }
       end
     end
@@ -60,10 +60,11 @@ class UniversesController < ApplicationController
 
     respond_to do |format|
       if @universe.update_attributes(universe_params)
-        format.html { redirect_to @universe, notice: 'Universe was successfully updated.' }
+        notice = t :update_success, model_name: Universe.model_name.human
+        format.html { redirect_to @universe, notice:  notice }
         format.json { head :no_content }
       else
-        format.html { render action: "edit" }
+        format.html { render action: 'edit' }
         format.json { render json: @universe.errors, status: :unprocessable_entity }
       end
     end
@@ -78,14 +79,15 @@ class UniversesController < ApplicationController
       format.json { head :no_content }
     end
   end
-  
+
   private
-    def universe_params
-      params.require(:universe).permit(
-        :user_id,
-        :name, :description,
-        :history,
-        :privacy,
-        :notes, :private_notes)
-    end
+
+  def universe_params
+    params.require(:universe).permit(
+      :user_id,
+      :name, :description,
+      :history,
+      :privacy,
+      :notes, :private_notes)
+  end
 end

@@ -1,12 +1,11 @@
+# Controller for top-level pages of the site that do not have
+# an associated model
 class MainController < ApplicationController
-  before_filter :redirect_if_not_logged_in, :only => [:dashboard]
-  
+  before_action :redirect_if_not_logged_in, only: [:dashboard]
   def index
-    if session && session[:user]
-      redirect_to :dashboard
-    end
+    redirect_to :dashboard if session && session[:user]
   end
-  
+
   def comingsoon
   end
 
@@ -15,16 +14,17 @@ class MainController < ApplicationController
 
   def attribution
   end
-  
+
   def dashboard
-    @characters = Character.where(user_id: session[:user])
-    @equipment = Equipment.where(user_id: session[:user])
-    @languages = Language.where(user_id: session[:user])
-    @locations = Location.where(user_id: session[:user])
-    @magics = Magic.where(user_id: session[:user])
-    @universes = Universe.where(user_id: session[:user])
-    
-    @things = [ @characters.length, @equipment.length, @languages.length, 
-                @locations.length, @magics.length, @universes.length ].sum
+    user = User.where(id: session[:user]).first
+
+    @characters = user.characters
+    @equipment = user.equipment
+    @languages = user.languages
+    @locations = user.locations
+    @magics = user.magics
+    @universes = user.universes
+
+    @things = user.content_count
   end
 end
