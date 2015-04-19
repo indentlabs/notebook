@@ -7,6 +7,7 @@ require 'rails/all'
 Bundler.require(*Rails.groups)
 
 module PlanCharacters
+  # Default application environment configurations
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those
     # specified here.
@@ -25,5 +26,9 @@ module PlanCharacters
     # config.i18n.load_path += Dir[Rails.root.join(
     #                              'my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
+
+    # Filter sensitive parameters out of logs
+    config.filter_paramters << :password
+    config.filter_paramters << :password_confirmation
   end
 end
