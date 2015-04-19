@@ -1,3 +1,4 @@
+# Controller for user Sessions
 class SessionsController < ApplicationController
   # GET /sessions/new
   # GET /sessions/new.json
@@ -13,22 +14,19 @@ class SessionsController < ApplicationController
   # POST /sessions
   # POST /sessions.json
   def create
-    login = Session.new(session_params)
-    hash = SessionsController.create_password_digest login.username, login.password
-    user = User.where(name: login.username, password: hash)
-    if user.length < 1
-      redirect_to login_path, notice: 'Username or password incorrect'
+    user = user_from_params
+
+    if user.nil?
+      redirect_to login_path, notice: t(:username_password_incorrect)
       return
     end
-    
-    session[:user] = user[0].id
-    session.delete(:anon_user)
+
+    build_session_for user
 
     respond_to do |format|
-      format.html { redirect_to dashboard_path, notice: 'Login successful.' }
+      format.html { redirect_to dashboard_path, notice: t(:login_successful) }
       format.json { render json: true, status: :created }
     end
-
   end
 
   # GET /logout
@@ -37,18 +35,32 @@ class SessionsController < ApplicationController
     session.delete(:anon_user)
 
     respond_to do |format|
-      format.html { redirect_to homepage_path, notice: 'Logged out!' }
+      format.html { redirect_to homepage_path, notice: t(:logged_out) }
       format.json { head :no_content }
     end
   end
-  
+
   def self.create_password_digest(username, password)
     require 'digest'
-    return Digest::MD5.hexdigest(username + "'s password IS... " + password + " (lol!)")
+    Digest::MD5.hexdigest(
+      username + "'s password IS... " + password + ' (lol!)')
   end
-  
+
   private
-    def session_params
-      params.require(:session).permit(:username, :password)
-    end
+
+  def user_from_params
+    login = Session.new(session_params)
+    hash = SessionsController.create_password_digest(login.username,
+                                                     login.password)
+    User.where(name: login.username, password: hash).first
+  end
+
+  def build_session_for(user)
+    session[:user] = user.id
+    session.delete(:anon_user)
+  end
+
+  def session_params
+    params.require(:session).permit(:username, :password)
+  end
 end

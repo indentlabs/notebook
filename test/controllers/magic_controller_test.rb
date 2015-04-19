@@ -1,5 +1,6 @@
 require 'test_helper'
 
+# Tests for the MagicController class
 class MagicControllerTest < ActionController::TestCase
   setup do
     @user = users(:tolkien)

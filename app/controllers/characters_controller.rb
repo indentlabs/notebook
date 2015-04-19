@@ -1,24 +1,17 @@
+# Controller for the Character model
 class CharactersController < ApplicationController
-  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :create, :update]
-  before_filter :require_ownership_of_character, :only => [:update, :edit, :destroy]
-  before_filter :hide_private_character, :only => [:show]
+  before_action :create_anonymous_account_if_not_logged_in,
+                only: [:edit, :create, :update]
+  before_action :require_ownership_of_character,
+                only: [:update, :edit, :destroy]
+  before_action :hide_private_character, only: [:show]
 
   # GET /characters
   # GET /characters.json
   def index
     @characters = Character.where(user_id: session[:user])
-    
-    if @characters.length == 0
-      @characters = []
-    end
-    
-    if params[:universe]
-      @universe = Universe.where(user_id: session[:user]).where(name: params[:universe].strip).first
-      @characters = @characters.where(universe_id: @universe.id) if @characters.length > 0
-      @selected_universe_filter = @universe.name  	
-    end
-
-    @characters = @characters.sort { |a, b| a.name.downcase <=> b.name.downcase }
+                  .order(:name).presence || []
+    populate_universe_fields if params[:universe]
 
     respond_to do |format|
       format.html # index.html.erb
@@ -56,42 +49,38 @@ class CharactersController < ApplicationController
   # POST /characters
   # POST /characters.json
   def create
-    @character = Character.create(character_params)
-    @character.user_id = session[:user]
-    @character.universe = Universe.where(user_id: session[:user]).where(name: params[:character][:universe].strip).first
+    @character = create_character_from_params
 
+    # rubocop:disable LineLength, AbcSize
     respond_to do |format|
       if @character.save
-        format.html { redirect_to @character, notice: 'Character was successfully created.' }
+        format.html { render_html_success t(:create_success, model_name: Character.model_name.human) }
         format.json { render json: @character, status: :created, location: @character }
       else
-        format.html { render action: "new" }
-        format.json { render json: @character.errors, status: :unprocessable_entity }
+        format.html { render action: 'new' }
+        format.json { render_json_error_unprocessable }
       end
     end
+    # rubocop:enable LineLength, AbcSize
   end
 
   # PUT /characters/1
   # PUT /characters/1.json
+  # rubocop:disable LineLength, AbcSize
   def update
-    @character = Character.find(params[:id])
-    
-    if params[:character][:universe].empty?
-      params[:character][:universe] = nil
-    else
-      params[:character][:universe] = Universe.where(user_id: session[:user]).where(name: params[:character][:universe].strip).first
-    end
+    @character = update_character_from_params
 
     respond_to do |format|
       if @character.update_attributes(character_params)
-        format.html { redirect_to @character, notice: 'Character was successfully updated.' }
+        format.html { render_html_success t(:update_success, model_name: Character.model_name.human) }
         format.json { head :no_content }
       else
-        format.html { render action: "edit" }
-        format.json { render json: @character.errors, status: :unprocessable_entity }
+        format.html { render action: 'edit' }
+        format.json { render_json_error_unprocessable }
       end
     end
   end
+  # rubocop:enable LineLength, AbcSize
 
   # DELETE /characters/1
   # DELETE /characters/1.json
@@ -103,18 +92,50 @@ class CharactersController < ApplicationController
       format.json { head :no_content }
     end
   end
-  
+
   private
-    def character_params
-      params.require(:character).permit(
-        :universe_id, :user_id,
-        :name, :age, :role, :gender, :age,
-        :height, :weight, :haircolor, :facialhair, :eyecolor, :race, :skintone, :bodytype, :identmarks,
-        :bestfriend, :religion, :politics, :prejudices, :occupation, :pets,
-        :mannerisms,
-        :birthday, :birthplace, :education, :background,
-        :fave_color, :fave_food, :fave_possession, :fave_weapon, :fave_animal,
-        :father, :mother, :spouse, :siblings, :archenemy,
-        :notes, :private_notes)
-    end
+
+  def character_params
+    params.require(:character).permit(
+      :universe_id, :user_id,
+      :name, :age, :role, :gender, :age, :height, :weight, :haircolor,
+      :facialhair, :eyecolor, :race, :skintone, :bodytype, :identmarks,
+      :bestfriend, :religion, :politics, :prejudices, :occupation, :pets,
+      :mannerisms, :birthday, :birthplace, :education, :background,
+      :fave_color, :fave_food, :fave_possession, :fave_weapon, :fave_animal,
+      :father, :mother, :spouse, :siblings, :archenemy, :notes, :private_notes)
+  end
+
+  def populate_universe_fields
+    @universe = Universe.where(user_id: session[:user],
+                               name: params[:universe].strip).first
+    @characters =
+      @characters.where(universe_id: @universe.id) if @characters.blank?
+    @selected_universe_filter = @universe.name
+  end
+
+  def universe_from_character_params
+    Universe.where(user_id: session[:user],
+                   name: params[:character][:universe].strip).first.presence
+  end
+
+  def create_character_from_params
+    character = Character.create(character_params)
+    character.user_id = session[:user]
+    character.universe = universe_from_character_params
+    character
+  end
+
+  def update_character_from_params
+    params[:character][:universe] = universe_from_character_params
+    Character.find(params[:id])
+  end
+
+  def render_json_error_unprocessable
+    render json: @character.errors, status: :unprocessable_entity
+  end
+
+  def render_html_success(notice)
+    redirect_to @character, notice: notice
+  end
 end

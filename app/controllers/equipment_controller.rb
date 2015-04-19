@@ -1,16 +1,17 @@
+# Controller for the Equipment model
 class EquipmentController < ApplicationController
-  before_filter :create_anonymous_account_if_not_logged_in, :only => [:edit, :create, :update]
-  before_filter :require_ownership_of_equipment, :only => [:update, :edit, :destroy]
-  before_filter :hide_private_equipment, :only => [:show]
+  before_action :create_anonymous_account_if_not_logged_in,
+                only: [:edit, :create, :update]
+
+  before_action :require_ownership_of_equipment,
+                only: [:update, :edit, :destroy]
+
+  before_action :hide_private_equipment, only: [:show]
 
   def index
-  	@equipment = Equipment.where(user_id: session[:user])
-    
-    if @equipment.size == 0
-      @equipment = []
-    end
-    
-		@equipment = @equipment.sort { |a, b| a.name.downcase <=> b.name.downcase }
+    @equipment = Equipment
+                 .where(user_id: session[:user])
+                 .order(:name).presence || []
 
     respond_to do |format|
       format.html # index.html.erb
@@ -41,39 +42,35 @@ class EquipmentController < ApplicationController
   end
 
   def create
-    @equipment = Equipment.create(equipment_params)
-    @equipment.user_id = session[:user]
-    @equipment.universe = Universe.where(user_id: session[:user]).where(name: params[:equipment][:universe].strip).first
+    @equipment = create_equipment_from_params
 
+    # rubocop:disable LineLength
     respond_to do |format|
       if @equipment.save
-        format.html { redirect_to @equipment, notice: 'Equipment was successfully created.' }
+        format.html { redirect_to @equipment, notice: t(:create_success, model_name: Equipment.model_name.human) }
         format.json { render json: @equipment, status: :created, location: @equipment }
       else
-        format.html { render action: "new" }
+        format.html { render action: 'new' }
         format.json { render json: @equipment.errors, status: :unprocessable_entity }
       end
     end
+    # rubocop:enable LineLength
   end
 
   def update
-    @equipment = Equipment.find(params[:id])
+    @equipment = update_equipment_from_params
 
-    if params[:equipment][:universe].empty?
-      params[:equipment][:universe] = nil
-    else
-      params[:equipment][:universe] = Universe.where(user_id: session[:user]).where(name: params[:equipment][:universe].strip).first
-    end
-
+    # rubocop:disable LineLength
     respond_to do |format|
       if @equipment.update_attributes(equipment_params)
-        format.html { redirect_to @equipment, notice: 'Equipment was successfully updated.' }
+        format.html { redirect_to @equipment, notice: t(:update_success, model_name: Equipment.model_name.human) }
         format.json { head :no_content }
       else
-        format.html { render action: "edit" }
+        format.html { render action: 'edit' }
         format.json { render json: @equipment.errors, status: :unprocessable_entity }
       end
     end
+    # rubocop:enable LineLength
   end
 
   def destroy
@@ -85,15 +82,48 @@ class EquipmentController < ApplicationController
       format.json { head :no_content }
     end
   end
-  
+
   private
-    def equipment_params
-      params.require(:equipment).permit(
-        :universe_id, :user_id,
-        :name, :equip_type,
-        :description, :weight,
-        :original_owner, :current_owner, :made_by, :materials, :year_made,
-        :magic,
-        :notes, :private_notes)
-    end
+
+  def equipment_params
+    params.require(:equipment).permit(
+      :universe_id, :user_id,
+      :name, :equip_type,
+      :description, :weight,
+      :original_owner, :current_owner, :made_by, :materials, :year_made,
+      :magic,
+      :notes, :private_notes)
+  end
+
+  def populate_universe_fields
+    @universe = Universe.where(user_id: session[:user],
+                               name: params[:universe].strip).first
+    @equipment =
+      @equipment.where(universe_id: @universe.id) if @equipment.blank?
+  end
+
+  def universe_from_equipment_params
+    Equipment.where(user_id: session[:user],
+                    name: params[:equipment][:universe].strip).first.presence
+  end
+
+  def create_equipment_from_params
+    equipment = Equipment.create(equipment_params)
+    equipment.user_id = session[:user]
+    equipment.universe = universe_from_equipment_params
+    equipment
+  end
+
+  def update_equipment_from_params
+    params[:equipment][:universe] = universe_from_equipment_params
+    Equipment.find(params[:id])
+  end
+
+  def render_json_error_unprocessable
+    render json: @equipment.errors, status: :unprocessable_entity
+  end
+
+  def render_html_success(notice)
+    redirect_to @equipment, notice: notice
+  end
 end
