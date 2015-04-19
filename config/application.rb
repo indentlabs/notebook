@@ -28,7 +28,7 @@ module PlanCharacters
     # config.i18n.default_locale = :de
 
     # Filter sensitive parameters out of logs
-    config.filter_paramters << :password
-    config.filter_paramters << :password_confirmation
+    config.filter_parameters << :password
+    config.filter_parameters << :password_confirmation
   end
 end
