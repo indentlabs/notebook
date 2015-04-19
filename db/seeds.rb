@@ -4,9 +4,9 @@ tolkien = User.create(name: 'JRRTolkien',
                       email: 'tolkien@example.com',
                       password: 'Mellon')
 
-Universe.create(name: 'Middle-Earth',
-                user: tolkien,
-                privacy: 'public')
+middleearth = Universe.create(name: 'Middle-Earth',
+                              user: tolkien,
+                              privacy: 'public')
 
 Character.create(name: 'Frodo Baggins',
                  user: tolkien,
