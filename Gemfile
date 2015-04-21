@@ -2,7 +2,6 @@
 
 source 'https://rubygems.org'
 
-gem 'bcrypt-ruby', '~> 3.0.1'
 gem 'rails', '4.1.0'
 gem 'jquery-rails'
 gem 'sass-rails', '~> 4.0.3', require: 'sass'
@@ -10,6 +9,7 @@ gem 'coffee-rails', '~> 4.0.0'
 gem 'paperclip', '~> 4.2.0'
 gem 'rmagick', '2.13.4'
 gem 'aws-sdk', '~> 1.50'
+gem 'bcrypt', '~> 3.1.10'
 
 group :production do
   gem 'less-rails'
