@@ -7,8 +7,7 @@ gem 'coffee-rails', '~> 4.0.0'
 gem 'paperclip', '~> 4.2.0'
 gem 'rmagick', '2.13.4'
 gem 'aws-sdk', '~> 1.50'
-gem 'bcrypt-ruby', '3.0.1'
-gem 'bcrypt', '3.1.10'
+gem 'bcrypt', '~> 3.1.10', platforms: :ruby
 
 group :production do
   gem 'less-rails'
