@@ -46,15 +46,26 @@ class ApplicationController < ActionController::Base
   def create_anonymous_account_if_not_logged_in
     return if logged_in?
 
-    @user = create_anonymous_user
-
-    if @user.save
-      session[:user] = @user.id
-      session[:anon_user] = true
-    else
-      # layman's collision detection
-      create_anonymous_account_if_not_logged_in
+    # layman's collision detection
+    10.times do
+      @user = create_anonymous_user
+      break if @user.save
     end
+
+    return if @user.nil?
+
+    session[:user] = @user.id
+    session[:anon_user] = true
+  end
+
+  def create_anonymous_user
+    # TODO: guarantee anonymous id is random (or just let db assign it?)
+    id = rand(10_000_000).to_s + rand(10_000_000).to_s # lol
+
+    User.new(
+      name: 'Anonymous-' + id.to_s,
+      email: id.to_s + '@localhost',
+      password: id.to_s)
   end
 
   # Require ownership
@@ -111,16 +122,6 @@ class ApplicationController < ActionController::Base
   end
 
   private
-
-  def create_anonymous_user
-    # TODO: guarantee anonymous id is random (or just let db assign it?)
-    id = rand(10_000_000).to_s + rand(10_000_000).to_s # lol
-
-    User.new(
-      name: 'Anonymous-' + id.to_s,
-      email: id.to_s + '@localhost',
-      password: id.to_s)
-  end
 
   def redirect_if_not_owned(object_to_check, redirect_path)
     return if owned_by_current_user? object_to_check

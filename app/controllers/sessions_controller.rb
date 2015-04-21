@@ -50,9 +50,19 @@ class SessionsController < ApplicationController
 
   def user_from_params
     login = Session.new(session_params)
-    hash = SessionsController.create_password_digest(login.username,
-                                                     login.password)
-    User.where(name: login.username, password: hash).first
+    user = User.find_by(name: login.username)
+    migrate_to_bcrypt(user, login.password) if user.old_password.present?
+    user.try(:authenticate, login.password)
+  end
+
+  def migrate_to_bcrypt(user, password)
+    hash = SessionsController.create_password_digest user.name, password
+
+    return unless user.old_password == hash
+
+    user.old_password = nil
+    user.password = password
+    user.save
   end
 
   def build_session_for(user)
