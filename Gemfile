@@ -1,5 +1,3 @@
-# Please be sure to update the experimental buildfiles in the gemfiles folder
-
 source 'https://rubygems.org'
 
 gem 'rails', '4.1.0'
@@ -32,3 +30,5 @@ group :test, :development do
   gem 'sqlite3'
   gem 'tzinfo-data' # addresses a bug when working on Windows
 end
+
+# Please be sure to update the experimental buildfiles in the gemfiles folder
