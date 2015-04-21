@@ -16,7 +16,7 @@ class SessionsControllerTest < ActionController::TestCase
                    'new bcrypt scheme'
   end
 
-  test 'user\'s old password is cleared when migrated' do
+  test 'old password is cleared when user is migrated' do
     post :create, session: {
       username: users(:martin).name,
       password: 'HODOR'

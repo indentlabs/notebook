@@ -37,7 +37,7 @@ class UserSecurePasswordTest < ActiveSupport::TestCase
                     password_confirmation: @rightpass)
 
     assert user.save,
-           'Wasn\'t able to save user despite matching password '\
+           'Was not able to save user despite matching password '\
            'and confirmation'
   end
 
@@ -46,7 +46,7 @@ class UserSecurePasswordTest < ActiveSupport::TestCase
                     email: @email,
                     password: @rightpass)
 
-    assert user.save, 'Wasn\'t able to save user despite having a password'
+    assert user.save, 'Was not able to save user despite having a password'
   end
 
   test 'cannot authenticate a user with the incorrect password' do
