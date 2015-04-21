@@ -49,12 +49,13 @@ class ApplicationController < ActionController::Base
     # layman's collision detection
     10.times do
       @user = create_anonymous_user
-
-      next unless @user.save
-
-      session[:user] = @user.id
-      session[:anon_user] = true
+      break if @user.save
     end
+
+    return if @user.nil?
+
+    session[:user] = @user.id
+    session[:anon_user] = true
   end
 
   def create_anonymous_user
