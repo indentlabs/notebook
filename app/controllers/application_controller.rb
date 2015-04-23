@@ -2,6 +2,8 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
 
+  before_action :set_locale
+
   helper :html
   helper :my_content
 
@@ -21,6 +23,14 @@ class ApplicationController < ActionController::Base
   def nl2br(string)
     # simple_format string
     string.gsub("\n\r", '<br>').gsub("\r", '').gsub("\n", '<br />').html_safe
+  end
+
+  def set_locale
+    I18n.locale = params[:locale] || locale_from_accept_language_header
+  end
+
+  def locale_from_accept_language_header
+    request.env['HTTP_ACCEPT_LANGUAGE'].scan(/^[a-z]{2}/).first
   end
 
   def universe_filter
