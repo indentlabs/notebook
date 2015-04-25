@@ -7,6 +7,7 @@
 #
 #    exists within a Universe.
 class Equipment < ActiveRecord::Base
+  include HasPrivacy
   include Comparable
   include NilsBlankUniverse
 
