@@ -24,9 +24,12 @@ module PlanCharacters
     # from config/locales/*.rb,yml are auto loaded.
     #
 
-    # config.i18n.default_locale = :de
+    
     config.i18n.load_path +=
       Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
+
+    config.i18n.default_locale = :en
+    config.i18n.fallbacks = [:en]
 
     # Filter sensitive parameters out of logs
     config.filter_parameters << :password
