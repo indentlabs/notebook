@@ -22,9 +22,7 @@ module PlanCharacters
 
     # The default locale is :en and all translations
     # from config/locales/*.rb,yml are auto loaded.
-    #
 
-    
     config.i18n.load_path +=
       Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
 
