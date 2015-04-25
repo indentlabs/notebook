@@ -24,8 +24,8 @@ module Localized
   # 1. a URL paramter called "locale"
   # 2. the +HTTP_ACCEPT_LANGUAGE+ header property
   def requested_locale
-      validate_locale locale_from_url_params ||
-                        locale_from_accept_language_header
+    validate_locale locale_from_url_params ||
+      locale_from_accept_language_header
   end
 
   # Returns the given locale if localizations for it are available.
