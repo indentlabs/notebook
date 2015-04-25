@@ -3,9 +3,10 @@
   <div class="col-md-12">
     <div class="card" style="overflow: visible">
       <h1 class="card-heading simple">
-        Your characters
-        <% if Universe.where(user_id: session[:user]).length > 0 %>
-          <small>from <%= render 'universes/picker' %></small>
+        <% if Universe.where(user_id: session[:user]).length == 0 %>
+          <small><%= t '.your_characters' %></small>
+        <% else %>
+          <small><%= t '.your_characters_from_universe_html', universe: render('universes/picker') %></small>
         <% end %>
       </h1>
     </div>
@@ -15,14 +16,12 @@
 
   <div class="col-md-3">
     <div class="card">
-      <h1 class="card-heading">Planning characters</h1>
+      <h1 class="card-heading"><%= t '.new_character_card_header' %></h1>
       <div class="card-body">
-        <p>
-          Consistency is sometimes hard to keep, and having a reference of everything about your character for yourself can help you down the line, especially if you're writing a series.
-        </p>
+        <p><%= t '.new_character_card_body' %></p>
       </div>
       <div class="card-comments">
-        <%= link_to 'New character', character_create_path, :class => 'btn btn-primary' %>
+        <%= link_to t('helpers.titles.new', model: Character.model_name.human), character_create_path, class: 'btn btn-primary' %>
       </div>
     </div>
   </div>
