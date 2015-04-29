@@ -1,6 +1,5 @@
 # Superclass for all model controllers
 class ApplicationController < ActionController::Base
-  include Localized
   protect_from_forgery
 
   helper :html
