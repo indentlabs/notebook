@@ -10,6 +10,7 @@
 #
 #    "do you believe in magic?"
 class Magic < ActiveRecord::Base
+  include HasPrivacy
   include NilsBlankUniverse
 
   validates :name, presence: true
