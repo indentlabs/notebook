@@ -8,7 +8,6 @@ gem 'paperclip', '~> 4.2.0'
 gem 'rmagick', '2.13.4'
 gem 'aws-sdk', '~> 1.50'
 gem 'bcrypt', '~> 3.1.10', platforms: [:ruby, :mingw, :x64_mingw]
-gem 'rails-i18n', '~> 4.0.0'
 
 group :production do
   gem 'less-rails'
