@@ -4,9 +4,6 @@ class EquipmentController < ApplicationController
 
   before_action :create_anonymous_account_if_not_logged_in,
                 only: [:edit, :create, :update]
-
-  before_action :hide_private_equipment, only: [:show]
-
   def index
     @equipment = Equipment
                  .where(user_id: session[:user])

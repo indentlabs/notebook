@@ -5,10 +5,6 @@ class LanguagesController < ApplicationController
   before_action :create_anonymous_account_if_not_logged_in,
                 only: [:edit, :create, :update]
 
-  before_action :require_ownership, only: [:update, :edit, :destroy]
-
-  before_action :hide_private_language, only: [:show]
-
   def index
     @languages = Language.where(user_id: session[:user])
                  .order(:name).presence || []

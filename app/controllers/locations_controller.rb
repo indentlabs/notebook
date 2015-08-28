@@ -5,8 +5,6 @@ class LocationsController < ApplicationController
   before_action :create_anonymous_account_if_not_logged_in,
                 only: [:edit, :create, :update]
 
-  before_action :hide_private_location, only: [:show]
-
   def index
     @locations = Location.where(user_id: session[:user])
                  .order(:name).presence || []

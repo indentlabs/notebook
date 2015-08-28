@@ -4,7 +4,6 @@ class CharactersController < ApplicationController
 
   before_action :create_anonymous_account_if_not_logged_in,
                 only: [:edit, :create, :update]
-  before_action :hide_private_character, only: [:show]
 
   # GET /characters
   # GET /characters.json
