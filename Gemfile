@@ -29,6 +29,10 @@ group :test, :development do
   gem 'rubocop', require: false
   gem 'sqlite3'
   gem 'tzinfo-data' # addresses a bug when working on Windows
+
+  gem 'guard'
+  gem 'guard-minitest'
+  gem 'guard-rubocop'
 end
 
 # Please be sure to update the experimental buildfiles in the gemfiles folder
