@@ -28,7 +28,7 @@ class ApplicationController < ActionController::Base
   end
 
   # Authentication
-  #todo replace with devise
+  # replace with devise
   def log_in(user)
     session[:user] = user.id
   end
@@ -67,30 +67,11 @@ class ApplicationController < ActionController::Base
       password: id.to_s)
   end
 
-  # Require ownership
-
-  def require_ownership_of_character
-    redirect_if_not_owned Character.find(params[:id]), character_list_path
-  end
-
-  def require_ownership_of_equipment
-    redirect_if_not_owned Equipment.find(params[:id]), equipment_list_path
-  end
-
-  def require_ownership_of_language
-    redirect_if_not_owned Language.find(params[:id]), language_list_path
-  end
-
-  def require_ownership_of_location
-    redirect_if_not_owned Location.find(params[:id]), location_list_path
-  end
-
-  def require_ownership_of_magic
-    redirect_if_not_owned Magic.find(params[:id]), magic_list_path
-  end
-
-  def require_ownership_of_universe
-    redirect_if_not_owned Universe.find(params[:id]), universe_list_path
+  def require_ownership
+    model = self.class.to_s.chomp("Controller").singularize.constantize
+    redirect_if_not_owned model.find(params[:id]), send("#{model.to_s.downcase}_list_path")
+  rescue
+    redirect_to '/'
   end
 
   # Hide, if private

@@ -33,6 +33,7 @@ group :test, :development do
   gem 'guard'
   gem 'guard-minitest'
   gem 'guard-rubocop'
+  gem 'pry'
 end
 
 # Please be sure to update the experimental buildfiles in the gemfiles folder
