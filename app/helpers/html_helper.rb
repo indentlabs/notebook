@@ -1,18 +1,8 @@
 # Helps generate small HTML constructs
 module HtmlHelper
-  def picker_from_type(content_type)
-    case content_type
-    when 'character'
-      character_picker
-    when 'universe'
-      universe_picker
-    when 'equipment'
-      equipment_picker
-    when 'language'
-      language_picker
-    when 'location'
-      location_picker
-    end
+  def picker_for(content_type)
+    picker = "#{content_type}_picker"
+    send(picker) if respond_to? picker
   end
 
   def generate_picker_code_for(content_array, glyphicon_id)

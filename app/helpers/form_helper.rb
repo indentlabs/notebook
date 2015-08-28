@@ -20,7 +20,7 @@ module FormHelper
   def toolbox_button_for(config = {})
     if config[:action].ends_with? '_picker'
       picker_type = config[:action].split('_picker').first
-      picker_from_type picker_type
+      picker_for picker_type
     else
       [
         "<button type='button' class='btn btn-default #{config[:action]}'>",

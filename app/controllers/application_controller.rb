@@ -6,7 +6,6 @@ class ApplicationController < ActionController::Base
   helper :my_content
 
   helper_method :nl2br
-
   helper_method :universe_filter
 
   # Rails changed cookie format in rails 4, so log out all old users so that
@@ -24,12 +23,12 @@ class ApplicationController < ActionController::Base
   end
 
   def universe_filter
-    return if Universe.where(user_id: session[:user]).length.zero?
-    return if @selected_universe_filter
-    @selected_universe_filter = t(:all_universes)
+    return if User.universes.empty?
+    @selected_universe_filter ||= t(:all_universes)
   end
 
   # Authentication
+  #todo replace with devise
   def log_in(user)
     session[:user] = user.id
   end
