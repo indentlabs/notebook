@@ -23,7 +23,7 @@ class ApplicationController < ActionController::Base
   end
 
   def universe_filter
-    return if User.universes.empty?
+    return if User.find_by(id: session[:user]).universes.empty?
     @selected_universe_filter ||= t(:all_universes)
   end
 
