@@ -3,24 +3,24 @@
 <div class="row">
   <div class="col-xs-3">
     <div class="card">
-      <h1 class="card-heading">Facets</h1>
+      <h1 class="card-heading"><%= t '.tabs_header' %></h1>
       <%= render :partial => 'tabs' %>
     </div>
     
     <div class="card">
-      <h1 class="card-heading">Danger-zone</h1>
+      <h1 class="card-heading"><%= t '.delete_card_header' %></h1>
       <div class="card-body">
-        <%= link_to 'Delete character forever', character_path,
-            :class => 'btn btn-danger',
-            :method => :delete,
-            :confirm => 'Are you sure? This action cannot be undone!' %>
+        <%= link_to t('helpers.titles.delete', model: Character.model_name.human), character_path,
+            class: 'btn btn-danger',
+            method: :delete,
+            data: { confirm: t('helpers.links.confirm') } %>
       </div>
     </div>
   </div>
   
   <div class="col-xs-8">
     <div class="card">
-      <h1 class="card-heading">Editing <%= @character.name %></h1>
+      <h1 class="card-heading"><%= t 'helpers.titles.edit', model: @character.name %></h1>
       <%= form_for @character, 
           :url => character_edit_process_path, 
           :html => { :class => 'form-horizontal' } do |form| %>
@@ -29,7 +29,7 @@
         </div>
         <div class="card-comments">
           <%= form.submit nil, :class => 'btn btn-primary' %>
-          <%= link_to 'Cancel', character_list_path, :class => 'btn' %>
+          <%= link_to t('helpers.links.cancel'), character_list_path, :class => 'btn' %>
         </div>
       <% end %>
     </div>

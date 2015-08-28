@@ -7,6 +7,7 @@
 #
 #    exists within a Universe.
 class Character < ActiveRecord::Base
+  include HasPrivacy
   include Comparable
   include NilsBlankUniverse
 

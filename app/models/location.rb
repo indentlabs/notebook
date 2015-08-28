@@ -7,6 +7,7 @@
 #
 #    exists within a Universe
 class Location < ActiveRecord::Base
+  include HasPrivacy
   include NilsBlankUniverse
 
   has_attached_file :map,  styles: { original: '1920x1080>', thumb: '200x200>' }

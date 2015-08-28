@@ -6,6 +6,8 @@
 #
 #    contains all canonically-related content created by Users
 class Universe < ActiveRecord::Base
+  include HasPrivacy
+
   validates :name, presence: true
 
   belongs_to :user

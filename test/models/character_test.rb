@@ -24,4 +24,12 @@ class CharacterTest < ActiveSupport::TestCase
       characters(:frodo).universe,
       'Characters fixture is not associated with Universes fixture')
   end
+
+  test 'private?' do
+    refute characters(:frodo).private?
+  end
+
+  test 'public?' do
+    assert characters(:frodo).public?
+  end
 end

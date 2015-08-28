@@ -1,7 +1,8 @@
 # Helps to generate forms and buttons
 module FormHelper
   def generate_form_row_for(form_handler, field, label_override = nil, toolbox = {})
-    label = (label_override.nil? ? field : label_override.titleize)
+    default = label_override.nil? ? field : label_override.titleize
+    label = I18n.t(label_override, :default => default.to_s)
     [
       '<div class="row">',
       '<div class="col-xs-2" style="text-align: right;">',
