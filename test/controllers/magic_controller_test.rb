@@ -4,6 +4,7 @@ require 'test_helper'
 class MagicControllerTest < ActionController::TestCase
   setup do
     @user = users(:tolkien)
+    @other_user = users(:rowling)
     @universe = universes(:middleearth)
 
     log_in_user(:tolkien)
@@ -51,6 +52,16 @@ class MagicControllerTest < ActionController::TestCase
 
   test 'should destroy magic' do
     assert_difference('Magic.count', -1) do
+      delete :destroy, id: magics(:wizard).id
+    end
+
+    assert_redirected_to magic_list_url
+  end
+
+  test 'should not be able to destroy magic as stranger' do
+    log_in_user(:rowling)
+
+    assert_difference('Magic.count', 0) do
       delete :destroy, id: magics(:wizard).id
     end
 

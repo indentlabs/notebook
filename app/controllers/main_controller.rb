@@ -2,6 +2,7 @@
 # an associated model
 class MainController < ApplicationController
   before_action :redirect_if_not_logged_in, only: [:dashboard]
+
   def index
     redirect_to :dashboard if session && session[:user]
   end

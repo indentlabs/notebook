@@ -1,9 +1,9 @@
 # Controller for the Universe model
 class UniversesController < ApplicationController
+  include HasOwnership
+
   before_action :create_anonymous_account_if_not_logged_in,
                 only: [:edit, :create, :update]
-
-  before_action :require_ownership, only: [:edit, :update, :destroy]
 
   before_action :hide_private_universe, only: [:show]
 

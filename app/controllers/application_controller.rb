@@ -74,8 +74,6 @@ class ApplicationController < ActionController::Base
     redirect_to '/'
   end
 
-  # Hide, if private
-
   def hide_private_universe
     return if Universe.find(params[:id]).privacy.downcase == 'public'
     redirect_to universe_list_path, notice: t(:no_view_permission)

@@ -1,9 +1,9 @@
 # Controller for the Equipment model
 class EquipmentController < ApplicationController
+  include HasOwnership
+
   before_action :create_anonymous_account_if_not_logged_in,
                 only: [:edit, :create, :update]
-
-  before_action :require_ownership, only: [:update, :edit, :destroy]
 
   before_action :hide_private_equipment, only: [:show]
 
