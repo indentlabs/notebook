@@ -5,8 +5,8 @@ ENV['coverage'] = 'no'
 
 group :default do
   guard :rubocop, all_on_start: false, keep_failed: false, cli: '--rails --format simple' do
-    watch(%r{.+\.rb$})
-    watch(%r{(?:.+/)?\.rubocop\.yml$}) { |m| File.dirname(m[0]) }
+    watch(/.+\.rb$/)
+    watch(%r{(?:.+/)?.rubocop.yml$}) { |m| File.dirname(m[0]) }
   end
 
   guard :minitest, spring: false, all_on_start: false, all_after_pass: false, keep_failed: true do

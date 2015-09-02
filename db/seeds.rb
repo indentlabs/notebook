@@ -4,10 +4,6 @@ tolkien = User.create(name: 'JRRTolkien',
                       email: 'tolkien@example.com',
                       password: 'Mellon')
 
-rowling = User.create(name: 'JKRowling',
-                      email: 'rowling@example.com',
-                      password: 'Granger')
-
 middleearth = Universe.create(name: 'Middle-Earth',
                               user: tolkien,
                               privacy: 'public')

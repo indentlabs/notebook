@@ -66,5 +66,4 @@ class ApplicationController < ActionController::Base
       email: id.to_s + '@localhost',
       password: id.to_s)
   end
-
 end

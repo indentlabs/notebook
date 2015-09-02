@@ -9,6 +9,6 @@ module NilsBlankUniverse
   end
 
   def nil_blank_universe
-    universe = nil if universe.blank?
+    self.universe = nil if universe.blank?
   end
 end
