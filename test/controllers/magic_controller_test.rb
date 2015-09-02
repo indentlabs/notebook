@@ -13,7 +13,7 @@ class MagicControllerTest < ActionController::TestCase
   test 'should get index' do
     get :index
     assert_response :success
-    assert_not_nil assigns(:magics)
+    assert_not_nil assigns(:content)
   end
 
   test 'should get new' do
@@ -26,7 +26,7 @@ class MagicControllerTest < ActionController::TestCase
       post :create, magic: { name: 'Magic Rings', universe: @universe }
     end
 
-    assert_redirected_to magic_path(assigns(:magic))
+    assert_redirected_to magic_path(assigns(:content))
   end
 
   test 'should show magic' do

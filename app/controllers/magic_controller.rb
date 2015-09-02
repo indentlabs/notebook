@@ -1,6 +1,5 @@
 # Controller for the Magic model
 class MagicController < ContentController
-
   private
 
   def content_params

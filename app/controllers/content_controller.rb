@@ -91,7 +91,6 @@ class ContentController < ApplicationController
     end
   end
 
-
   private
 
   # Override in content classes
