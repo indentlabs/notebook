@@ -15,8 +15,7 @@ class EquipmentController < ContentController
   def populate_universe_fields
     @universe = Universe.where(user_id: session[:user],
                                name: params[:universe].strip).first
-    @equipment =
-      @equipment.where(universe_id: @universe.id) if @equipment.blank?
+    @equipment = @equipment.where(universe_id: @universe.id) if @equipment.blank?
   end
 
   def universe_from_equipment_params
