@@ -1,82 +1,8 @@
 # Controller for the Language model
 class LanguagesController < ContentController
-
-  def index
-    @languages = Language.where(user_id: session[:user])
-                 .order(:name).presence || []
-
-    respond_to do |format|
-      format.html # index.html.erb
-      format.json { render json: @languages }
-    end
-  end
-
-  def show
-    @language = Language.find(params[:id])
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @language }
-    end
-  end
-
-  def new
-    @language = Language.new
-
-    respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: @language }
-    end
-  end
-
-  def edit
-    @language = Language.find(params[:id])
-  end
-
-  def create
-    @language = create_language_from_params
-
-    # rubocop:disable LineLength
-    respond_to do |format|
-      if @language.save
-        notice = t :create_success, model_name: Language.model_name.human
-        format.html { redirect_to @language, notice: notice }
-        format.json { render json: @language, status: :created, location: @language }
-      else
-        format.html { render action: 'new' }
-        format.json { render json: @language.errors, status: :unprocessable_entity }
-      end
-    end
-    # rubocop:enable LineLength
-  end
-
-  def update
-    @language = update_language_from_params
-
-    respond_to do |format|
-      if @language.update_attributes(language_params)
-        notice = t :update_success, model_name: Language.model_name.human
-        format.html { redirect_to @language, notice: notice }
-        format.json { head :no_content }
-      else
-        format.html { render action: 'edit' }
-        format.json { render json: @language.errors, status: :unprocessable_entity }
-      end
-    end
-  end
-
-  def destroy
-    @language = Language.find(params[:id]).destroy
-
-    respond_to do |format|
-      format.html { redirect_to language_list_url }
-      format.json { head :no_content }
-    end
-  end
-
   private
 
-  def language_params
+  def content_params
     params.require(:language).permit(
       :user_id, :universe_id,
       :name,
