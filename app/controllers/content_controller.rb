@@ -47,7 +47,7 @@ class ContentController < ApplicationController
       .new(content_params)
       .tap do |c|
         c.user_id = session[:user]
-        c.universe = universe_from_params
+        c.universe = universe_from_params if c.respond_to? :universe #todo this doesn't actually work
       end
 
     respond_to do |format|
@@ -99,6 +99,7 @@ class ContentController < ApplicationController
   end
 
   def universe_from_params
+    return unless params[content_symbol].include? :universe
     Universe.where(user_id: session[:user], name: params[content_symbol][:universe].strip).first
   end
 

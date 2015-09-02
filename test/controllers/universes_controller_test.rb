@@ -11,7 +11,7 @@ class UniversesControllerTest < ActionController::TestCase
   test 'should get index' do
     get :index
     assert_response :success
-    assert_not_nil assigns(:universes)
+    assert_not_nil assigns(:content)
   end
 
   test 'should get new' do
@@ -24,7 +24,7 @@ class UniversesControllerTest < ActionController::TestCase
       post :create, universe: { name: 'Hyrule' }
     end
 
-    assert_redirected_to universe_path(assigns(:universe))
+    assert_redirected_to universe_path(assigns(:content))
   end
 
   test 'should show universe' do
@@ -48,7 +48,7 @@ class UniversesControllerTest < ActionController::TestCase
     assert_redirected_to universe_path(@universe)
   end
 
-  test 'should destroy universe' do # MWAHAHAHAHAHA!!!!!!
+  test 'should destroy universe' do # MWAHAHAHAHAHA!!!!!!!
     assert_difference('Universe.count', -1) do
       delete :destroy, id: universes(:middleearth).id
     end
