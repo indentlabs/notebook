@@ -9,7 +9,7 @@ class EquipmentControllerTest < ActionController::TestCase
   test 'should get index' do
     get :index
     assert_response :success
-    assert_not_nil assigns(:equipment)
+    assert_not_nil assigns(:content)
   end
 
   test 'should get new' do
@@ -25,7 +25,7 @@ class EquipmentControllerTest < ActionController::TestCase
       }
     end
 
-    assert_redirected_to equipment_path(assigns(:equipment))
+    assert_redirected_to equipment_path(assigns(:content))
   end
 
   test 'should show equipment' do
