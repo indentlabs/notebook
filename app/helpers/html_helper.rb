@@ -1,8 +1,17 @@
 # Helps generate small HTML constructs
 module HtmlHelper
+  PICKER_ICONS = {
+    'character' => 'user',
+    'universe' => 'globe',
+    'equipment' => 'gift',
+    'language' => 'comment',
+    'location' => 'road'
+  }
+
   def picker_for(content_type)
-    picker = "#{content_type}_picker"
-    send(picker) if respond_to? picker
+    content_array = send "my_#{content_type.pluralize}"
+    generate_picker_code_for(content_array, PICKER_ICONS[content_type])
+  rescue
   end
 
   def generate_picker_code_for(content_array, glyphicon_id)
@@ -21,25 +30,5 @@ module HtmlHelper
       '</ul>',
       '</span>'
     ].join("\n").html_safe
-  end
-
-  def character_picker
-    generate_picker_code_for(my_characters, 'user')
-  end
-
-  def universe_picker
-    generate_picker_code_for(my_universes, 'globe')
-  end
-
-  def equipment_picker
-    generate_picker_code_for(my_equipment, 'gift')
-  end
-
-  def language_picker
-    generate_picker_code_for(my_languages, 'comment')
-  end
-
-  def location_picker
-    generate_picker_code_for(my_locations, 'road')
   end
 end
