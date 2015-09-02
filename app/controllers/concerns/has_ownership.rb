@@ -7,6 +7,8 @@ module HasOwnership
     before_action :hide_if_private, only: [:show]
   end
 
+  private
+
   def redirect_path
     model = self.class.to_s.chomp('Controller').singularize.constantize
     "#{model.to_s.downcase}_list_path"
@@ -27,9 +29,6 @@ module HasOwnership
   rescue
     redirect_to '/'
   end
-
-
-  private
 
   def redirect_if_not_owned(object_to_check, redirect_path)
     return if owned_by_current_user? object_to_check

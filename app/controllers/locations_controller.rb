@@ -1,9 +1,5 @@
 # Controller for the Location model
-class LocationsController < ApplicationController
-  include HasOwnership
-  
-  before_action :create_anonymous_account_if_not_logged_in,
-                only: [:edit, :create, :update]
+class LocationsController < ContentController
 
   def index
     @locations = Location.where(user_id: session[:user])

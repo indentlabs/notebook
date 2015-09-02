@@ -1,9 +1,5 @@
 # Controller for the Character model
-class CharactersController < ApplicationController
-  include HasOwnership
-
-  before_action :create_anonymous_account_if_not_logged_in,
-                only: [:edit, :create, :update]
+class CharactersController < ContentController
 
   # GET /characters
   # GET /characters.json

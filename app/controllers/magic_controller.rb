@@ -1,9 +1,5 @@
 # Controller for the Magic model
-class MagicController < ApplicationController
-  include HasOwnership
-
-  before_action :create_anonymous_account_if_not_logged_in,
-                only: [:edit, :create, :update]
+class MagicController < ContentController
 
   def index
     @magics = Magic.where(user_id: session[:user]).order(:name).presence || []

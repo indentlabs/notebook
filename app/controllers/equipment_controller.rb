@@ -1,9 +1,6 @@
 # Controller for the Equipment model
-class EquipmentController < ApplicationController
-  include HasOwnership
+class EquipmentController < ContentController
 
-  before_action :create_anonymous_account_if_not_logged_in,
-                only: [:edit, :create, :update]
   def index
     @equipment = Equipment
                  .where(user_id: session[:user])
