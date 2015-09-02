@@ -41,41 +41,23 @@ class ContentController < ApplicationController
   end
 
   def create
-    content_type = content_type_from_controller(self.class)
+    initialize_object
 
-    @content = content_type
-      .new(content_params)
-      .tap do |c|
-        c.user_id = session[:user]
-        c.universe = universe_from_params if c.respond_to? :universe #todo this doesn't actually work
-      end
-
-    respond_to do |format|
-      if @content.save
-        notice = t :create_success, model_name: content_type.model_name.human
-        format.html { redirect_to @content, notice: notice }
-        format.json { render json: @content, status: :created, location: @content }
-      else
-        format.html { render action: 'new' }
-        format.json { render json: @content.errors, status: :unprocessable_entity }
-      end
+    if @content.save
+      successful_response(@content, t(:create_success, model_name: humanized_model_name))
+    else
+      failed_response('new', :unprocessable_entity)
     end
   end
 
   def update
     content_type = content_type_from_controller(self.class)
-
     @content = content_type.find(params[:id])
 
-    respond_to do |format|
-      if @content.update_attributes(content_params)
-        notice = t :update_success, model_name: content_type.model_name.human
-        format.html { redirect_to @content, notice: notice }
-        format.json { head :no_content }
-      else
-        format.html { render action: 'edit' }
-        format.json { render json: @content.errors, status: :unprocessable_entity }
-      end
+    if @content.update_attributes(content_params)
+      successful_response(@content, t(:update_success, model_name: humanized_model_name))
+    else
+      failed_response('edit', :unprocessable_entity)
     end
   end
 
@@ -84,14 +66,21 @@ class ContentController < ApplicationController
     @content = content_type.find(params[:id])
     @content.destroy
 
-    respond_to do |format|
-      notice = t :delete_success, model_name: content_type.model_name.human
-      format.html { redirect_to send("#{@content.class.to_s.downcase}_list_path"), notice: notice }
-      format.json { head :no_content }
-    end
+    url = send("#{@content.class.to_s.downcase}_list_path")
+    successful_response(url, t(:delete_success, model_name: humanized_model_name))
   end
 
   private
+
+  def initialize_object
+    content_type = content_type_from_controller(self.class)
+    @content = content_type
+      .new(content_params)
+      .tap do |c|
+        c.user_id = session[:user]
+        c.universe = universe_from_params if c.respond_to? :universe #todo this doesn't actually work?
+      end
+  end
 
   # Override in content classes
   def content_params
@@ -105,5 +94,23 @@ class ContentController < ApplicationController
 
   def content_symbol
     content_type_from_controller(self.class).to_s.downcase.to_sym
+  end
+
+  def successful_response(url, notice)
+    respond_to do |format|
+      format.html { redirect_to url, notice: notice }
+      format.json { render json: @content || {}, status: :success, notice: notice }
+    end
+  end
+
+  def failed_response(action, status)
+    respond_to do |format|
+      format.html { render action: action }
+      format.json { render json: @content.errors, status: status }
+    end
+  end
+
+  def humanized_model_name
+    content_type_from_controller(self.class).model_name.human
   end
 end
