@@ -34,6 +34,8 @@ group :test, :development do
   gem 'guard-minitest'
   gem 'guard-rubocop'
   gem 'pry'
+  gem 'better_errors'
+  gem 'binding_of_caller'
 end
 
 # Please be sure to update the experimental buildfiles in the gemfiles folder
