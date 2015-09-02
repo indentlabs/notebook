@@ -12,7 +12,7 @@ class CharactersControllerTest < ActionController::TestCase
   test 'should get index' do
     get :index
     assert_response :success
-    assert_not_nil assigns(:characters)
+    assert_not_nil assigns(:content)
   end
 
   test 'should get new' do
@@ -29,7 +29,7 @@ class CharactersControllerTest < ActionController::TestCase
       }
     end
 
-    assert_redirected_to character_path(assigns(:character))
+    assert_redirected_to character_path(assigns(:content))
   end
 
   test 'should show character' do
@@ -76,7 +76,7 @@ class CharactersControllerTest < ActionController::TestCase
       }
     end
 
-    assert_redirected_to character_path(assigns(:character))
+    assert_redirected_to character_path(assigns(:content))
     assert_not_nil session[:user]
     assert session[:anon_user]
   end
