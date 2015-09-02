@@ -10,21 +10,22 @@ module HasOwnership
   private
 
   def redirect_path
-    model = self.class.to_s.chomp('Controller').singularize.constantize
+    model = content_type_from_controller(self.class)
     "#{model.to_s.downcase}_list_path"
   end
 
   def require_ownership
-    model = self.class.to_s.chomp('Controller').singularize.constantize
+    model = content_type_from_controller(self.class)
     redirect_if_not_owned model.find(params[:id]), send(redirect_path)
   rescue
     redirect_to '/'
   end
 
   def hide_if_private
+    return # todo this
     return if try(:privacy).try(:downcase) == 'public'
 
-    model = self.class.to_s.chomp('Controller').singularize.constantize
+    model = content_type_from_controller(self.class)
     redirect_if_private model.find(params[:id]), redirect_path
   rescue
     redirect_to '/'
@@ -36,7 +37,7 @@ module HasOwnership
   end
 
   def redirect_if_private(object_to_check, redirect_path)
-    return if public? object_to_check
+    return if visble? object_to_check
     redirect_to redirect_path, notice: t(:no_view_permission)
   end
 
@@ -44,9 +45,11 @@ module HasOwnership
     session[:user] && session[:user] == object.user.id
   end
 
-  def public?(object)
-    (owned_by_current_user? object) || \
-      (object.universe && object.universe.privacy.downcase == 'public')
+  def visible?(object)
+    [
+      owned_by_current_user?(object),
+      object.universe.try(:privacy).try(:downcase) == 'public'
+    ].any?
   end
 
   module ClassMethods

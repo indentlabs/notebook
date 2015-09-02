@@ -11,12 +11,8 @@ module ApplicationHelper
   end
 
   def find_by_name_and_type(name, type, userid)
-    model = find_model_by_type type
+    model = type.titleize.constantize unless type.blank?
     model.where(name: name, user_id: userid).first unless model.nil?
-  end
-
-  def find_model_by_type(type)
-    type.titleize.constantize unless type.blank?
   end
 
   def print_property(title, value, type = '')

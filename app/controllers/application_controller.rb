@@ -66,4 +66,8 @@ class ApplicationController < ActionController::Base
       email: id.to_s + '@localhost',
       password: id.to_s)
   end
+
+  def content_type_from_controller(content_controller_name)
+    content_controller_name.to_s.chomp('Controller').singularize.constantize
+  end
 end
