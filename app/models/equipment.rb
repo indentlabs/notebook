@@ -18,4 +18,12 @@ class Equipment < ActiveRecord::Base
   def <=>(other)
     name.downcase <=> other.name.downcase
   end
+
+  def table_columns
+    {
+      'Name' => -> { link_to name, self },
+      'Type' => equip_type,
+      'Description' => description
+    }
+  end
 end
