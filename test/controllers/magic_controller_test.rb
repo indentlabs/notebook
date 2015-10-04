@@ -4,6 +4,7 @@ require 'test_helper'
 class MagicControllerTest < ActionController::TestCase
   setup do
     @user = users(:tolkien)
+    @other_user = users(:rowling)
     @universe = universes(:middleearth)
 
     log_in_user(:tolkien)
@@ -12,7 +13,7 @@ class MagicControllerTest < ActionController::TestCase
   test 'should get index' do
     get :index
     assert_response :success
-    assert_not_nil assigns(:magics)
+    assert_not_nil assigns(:content)
   end
 
   test 'should get new' do
@@ -25,7 +26,7 @@ class MagicControllerTest < ActionController::TestCase
       post :create, magic: { name: 'Magic Rings', universe: @universe }
     end
 
-    assert_redirected_to magic_path(assigns(:magic))
+    assert_redirected_to magic_path(assigns(:content))
   end
 
   test 'should show magic' do
@@ -51,6 +52,16 @@ class MagicControllerTest < ActionController::TestCase
 
   test 'should destroy magic' do
     assert_difference('Magic.count', -1) do
+      delete :destroy, id: magics(:wizard).id
+    end
+
+    assert_redirected_to magic_list_url
+  end
+
+  test 'should not be able to destroy magic as stranger' do
+    log_in_user(:rowling)
+
+    assert_difference('Magic.count', 0) do
       delete :destroy, id: magics(:wizard).id
     end
 

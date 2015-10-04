@@ -14,7 +14,7 @@ class EquipmentTest < ActiveSupport::TestCase
     assert_not_nil equipment(:sting)
   end
 
-  test 'equipement belongs to user and universe' do
+  test 'equipment belongs to user and universe' do
     assert_equal users(:tolkien), equipment(:sting).user
     assert_equal universes(:middleearth), equipment(:sting).universe
   end

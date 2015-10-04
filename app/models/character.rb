@@ -18,4 +18,15 @@ class Character < ActiveRecord::Base
   def <=>(other)
     name.downcase <=> other.name.downcase
   end
+
+  def card_title
+    name
+  end
+
+  def card_subtitle
+    [
+      role,
+      age
+    ].compact.join ', '
+  end
 end

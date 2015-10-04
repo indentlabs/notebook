@@ -1,0 +1,26 @@
+<% content.each do |content| %>
+  <div class="col-md-3">
+    <div class="card">
+      <h1 class="card-heading">
+        <%= simple_format link_to content.card_title, content %>
+      </h1>
+      <div class="card-body">
+        <p>
+          <strong>
+            <%= content.card_subtitle %>
+          </strong>
+        </p>
+        <p>
+        </p>
+      </div>
+      <div class="card-comments">
+        <p>
+          <% if session[:user] and session[:user] == content.user.id %>
+            <%= link_to t('.view', :default => t("helpers.links.view")), content, :class => 'btn' %>
+            <%= link_to t('.edit', :default => t("helpers.links.edit")), content, :class => 'btn' %>
+          <% end %>
+        </p>
+      </div>
+    </div>
+  </div>
+<% end %>

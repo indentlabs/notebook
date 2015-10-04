@@ -9,7 +9,7 @@ class LanguagesControllerTest < ActionController::TestCase
   test 'should get index' do
     get :index
     assert_response :success
-    assert_not_nil assigns(:languages)
+    assert_not_nil assigns(:content)
   end
 
   test 'should get new' do
@@ -25,7 +25,7 @@ class LanguagesControllerTest < ActionController::TestCase
       }
     end
 
-    assert_redirected_to language_path(assigns(:language))
+    assert_redirected_to language_path(assigns(:content))
   end
 
   test 'should show language' do

@@ -12,7 +12,7 @@ class LocationsControllerTest < ActionController::TestCase
   test 'should get index' do
     get :index
     assert_response :success
-    assert_not_nil assigns(:locations)
+    assert_not_nil assigns(:content)
   end
 
   test 'should get new' do
@@ -29,7 +29,7 @@ class LocationsControllerTest < ActionController::TestCase
       }
     end
 
-    assert_redirected_to location_path(assigns(:location))
+    assert_redirected_to location_path(assigns(:content))
   end
 
   test 'should show location' do
@@ -75,7 +75,7 @@ class LocationsControllerTest < ActionController::TestCase
       }
     end
 
-    assert_redirected_to location_path(assigns(:location))
+    assert_redirected_to location_path(assigns(:content))
   end
 
   test 'should reject images with an invalid type' do
