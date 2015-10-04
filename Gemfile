@@ -11,9 +11,9 @@ gem 'bcrypt', '~> 3.1.10', platforms: [:ruby, :mingw, :x64_mingw]
 
 gem 'twitter-bootstrap-rails'
 gem 'bootstrap-material-design'
+gem 'less-rails'
 
 group :production do
-  gem 'less-rails'
   gem 'less-rails-fontawesome'
   gem 'uglifier', '>= 1.3.0'
 end
