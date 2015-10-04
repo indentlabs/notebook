@@ -13,7 +13,6 @@ group :production do
   gem 'less-rails'
   gem 'less-rails-fontawesome'
   gem 'uglifier', '>= 1.3.0'
-  gem 'bootplus-rails'
 end
 
 group :test, :production do
