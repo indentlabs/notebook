@@ -67,6 +67,10 @@ class ApplicationController < ActionController::Base
       password: id.to_s)
   end
 
+  def content_type_from_controller_as_string(content_controller_name)
+    content_controller_name.to_s.chomp('Controller').singularize
+  end
+
   def content_type_from_controller(content_controller_name)
     content_controller_name.to_s.chomp('Controller').singularize.constantize
   end

@@ -2,12 +2,15 @@ class ContentController < ApplicationController
   include HasOwnership
 
   before_action :create_anonymous_account_if_not_logged_in, only: [:edit, :create, :update]
+  before_action :set_content_type_as_string
 
   def index
     @content = content_type_from_controller(self.class)
       .where(user_id: session[:user])
       .order(:name)
       .presence || []
+
+    @page_title = "Your #{@content_type_as_string.pluralize}".capitalize
 
     respond_to do |format|
       format.html # index.html.erb
@@ -19,6 +22,8 @@ class ContentController < ApplicationController
     @content = content_type_from_controller(self.class)
       .find(params[:id])
 
+    @page_title = "#{@content_type_as_string} #{@content.name}"
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @content }
@@ -29,6 +34,8 @@ class ContentController < ApplicationController
     @content = content_type_from_controller(self.class)
     	.new
 
+    @page_title = "New #{@content_type_as_string}"
+
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: @content }
@@ -38,6 +45,8 @@ class ContentController < ApplicationController
   def edit
     @content = content_type_from_controller(self.class)
     	.find(params[:id])
+
+    @page_title = "Editing #{@content.name}"
   end
 
   def create
@@ -94,6 +103,10 @@ class ContentController < ApplicationController
 
   def content_symbol
     content_type_from_controller(self.class).to_s.downcase.to_sym
+  end
+
+  def set_content_type_as_string
+    @content_type_as_string = content_type_from_controller_as_string(self.class)
   end
 
   def successful_response(url, notice)
