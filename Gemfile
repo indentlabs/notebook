@@ -10,7 +10,7 @@ gem 'aws-sdk', '~> 1.50'
 gem 'bcrypt', '~> 3.1.10', platforms: [:ruby, :mingw, :x64_mingw]
 
 gem 'twitter-bootstrap-rails'
-gem 'bootstrap-material-design'
+gem 'material_design_lite-rails'
 gem 'less-rails'
 
 group :production do
