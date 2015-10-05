@@ -1,61 +1,43 @@
-<% if flash[:notice] %>
-	<div class="card">
-		<div class="card-body">
-			<div class="alert alert-notice">
-				<%= flash[:notice] %>
-			</div>
-		</div>
-	</div>
-<% end %>
+<div class="demo-drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
 
-<% if flash[:alert] %>
-	<div class="card">
-		<div class="card-body">
-			<div class="alert alert-notice">
-				<%= flash[:alert] %>
-			</div>
-		</div>
-	</div>
-<% end %>
+    <header class="demo-drawer-header">
+        <i class="material-icons universe-title" role="presentation">vpn_lock</i>
+        <div class="demo-avatar-dropdown">
+            <span>All Universes</span>
+            <div class="mdl-layout-spacer"></div>
+            <button id="accbtn" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+                <i class="material-icons" role="presentation">arrow_drop_down</i>
+                <span class="visuallyhidden">Select a universe</span>
+            </button>
+            <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="accbtn">
+                <li class="mdl-menu__item">All Universes</li>
+                <li class="mdl-menu__item">Other Universe</li>
+                <li class="mdl-menu__item">Other Universe</li>
+                <li class="mdl-menu__item">Other Universe</li>
+                <li class="mdl-menu__item"><i class="material-icons">add</i>Create a universe</li>
+            </ul>
+        </div>
+    </header>
 
-<% if session[:anon_user] and session[:user] and User.find(session[:user]).content_count > 0 && !current_page?(account_path) %>
-	<div class="card">
-		<div class="card-heading">Anonymous accounts</div>
-		<div class="card-body">
-			You are currently using an <a href="/about/anon-login">anonymous account</a>. In order to save the brilliant things you have created with it, please <a href="/account">click here</a> to give yourself a username and password.
-		</div>
-		<div class="card-comments"></div>
-	</div>
-<% end %>
-
-<% unless session[:user] %>
-<div class="card">
-	<h1 class="card-heading">Get started instantly</h1>
-	<div class="card-body">
-		Nobody likes creating accounts just to try things out. You can get started making things immediately and create your account later if you want.
-	</div>
-	<div class="card-comments">
-		<div class="comments-collapse-toggle">
-			<p>
-				<a href="/anon-login">Get started</a> or
-				<a data-toggle="collapse" data-target="#c1-comments" href="#">
-					Learn more <i class="icon-angle-down"></i>
-				</a>
-			</p>
-		</div>
-		<div id="c1-comments" class="comments collapse">
-			<p>
-				If you jump right in to creating things, an account will be created for you. As you flesh out characters and worlds, your ideas will be safe and sound under this account, which does not ever expire unless you delete it yourself. 
-			</p>
-			<p>
-				At any time, you can change the account's login information, so if you make some good progress you can just create an account and <em>tada!</em> all of your ideas are private to your new account, always there for you.
-			</p>
-			<p>
-				<a data-toggle="collapse" data-target="#c1-comments" href="#">
-					Collapse card <i class="icon-angle-up"></i>
-				</a>
-			</p>
-		</div>
-	</div>
+    <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
+        <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">home</i>Overview</a>
+        <%= link_to character_list_path, class: "mdl-navigation__link" do %>
+            <i class="mdl-color-text--blue-grey-400 material-icons">people</i> Characters
+        <% end %>
+        <%= link_to location_list_path, class: "mdl-navigation__link" do %>
+            <i class="mdl-color-text--blue-grey-400 material-icons">device_hub</i> Locations
+        <% end %>
+        <%= link_to magic_list_path, class: "mdl-navigation__link" do %>
+            <i class="mdl-color-text--blue-grey-400 material-icons">flash_on</i> Magic
+        <% end %>
+        <%= link_to language_list_path, class: "mdl-navigation__link" do %>
+            <i class="mdl-color-text--blue-grey-400 material-icons">forum</i> Language
+        <% end %>
+        <%= link_to equipment_list_path, class: "mdl-navigation__link" do %>
+            <i class="mdl-color-text--blue-grey-400 material-icons">security</i> Equipment
+        <% end %>
+        <a class="mdl-navigation__link" href="#"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">add</i>Add content types</a>
+        <div class="mdl-layout-spacer"></div>
+        <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">person</i>Andrew Brown</a>
+    </nav>
 </div>
-<% end %>
