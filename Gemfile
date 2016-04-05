@@ -1,6 +1,8 @@
 source 'https://rubygems.org'
 
-gem 'rails', '4.1.0'
+ruby "2.2.3"
+
+gem 'rails', '4.2.0'
 gem 'jquery-rails'
 gem 'sass-rails', '~> 4.0.3', require: 'sass'
 gem 'coffee-rails', '~> 4.0.0'
