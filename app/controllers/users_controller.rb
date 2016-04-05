@@ -15,7 +15,7 @@ class UsersController < ApplicationController
 
   # GET /users/1/edit
   def edit
-    @user = User.find(session[:user])
+    @user = current_user #todo just use current_user in view
   end
 
   # POST /users
@@ -27,23 +27,7 @@ class UsersController < ApplicationController
       if @user.save
         log_in @user
         notice = t(:create_success, model_name: User.model_name.human)
-        format.html { redirect_to homepage_path, notice: notice }
-        format.json { render json: @user, status: :created }
-      else
-        format.html { render action: 'new' }
-        format.json { render json: @user.errors, status: :unprocessable_entity }
-      end
-    end
-  end
-
-  def anonymous_login
-    @user = create_anonymous_user
-
-    respond_to do |format|
-      if @user.save
-        session[:user] = @user.id
-        session[:anon_user] = true
-        format.html { redirect_to dashboard_path }
+        format.html { redirect_to root_url, notice: notice }
         format.json { render json: @user, status: :created }
       else
         format.html { render action: 'new' }
@@ -55,12 +39,11 @@ class UsersController < ApplicationController
   # PUT /users/1
   # PUT /users/1.json
   def update
-    @user = User.find(session[:user])
+    @user = current_user
 
     respond_to do |format|
       if @user.update_attributes(user_params)
-        session[:anon_user] = false
-        format.html { redirect_to homepage_path, notice: 'Successfully updated.' }
+        format.html { redirect_to root_url, notice: 'Successfully updated.' }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
@@ -75,7 +58,6 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:name, :email,
-                                 :password, :password_confirmation)
+    params.require(:user).permit(:name, :email, :password, :password_confirmation)
   end
 end

@@ -225,7 +225,7 @@ class CreateModels < ActiveRecord::Migration
     end
 
     create_table :users do |t|
-      t.string :name, unique: true, null: false
+      t.string :name, null: true
       t.string :email, unique: true, null: false
       t.string :password, null: false
 

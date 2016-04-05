@@ -5,11 +5,9 @@ class User < ActiveRecord::Base
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
-  validates :name, presence: true
-  validates :email, presence: true
 
-  has_secure_password
-  before_save :hash_old_password
+  #validates :name,  presence: true
+  validates :email, presence: true
 
   has_many :characters
   has_many :equipment
@@ -17,15 +15,6 @@ class User < ActiveRecord::Base
   has_many :locations
   has_many :magics
   has_many :universes
-
-  def hash_old_password
-    require 'digest'
-
-    return if old_password.blank?
-
-    self.old_password = Digest::MD5.hexdigest(
-      name + "'s password IS... " + old_password + ' (lol!)')
-  end
 
   def content
     {

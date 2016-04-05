@@ -1,12 +1,12 @@
 <ul class="nav navbar-nav">
-  <% if session[:user] %>
+  <% if user_signed_in? %>
     <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown">
         <span class="glyphicon glyphicon-user"></span>
         <b class="caret"></b>
       </a>
       <ul class="dropdown-menu">
-        <li><a href="/account">Logged in as <%= User.find(session[:user]).name %></a></li>
+        <li><a href="/account">Logged in as <%= current_user.email %></a></li>
         <li class="divider"></li>
     	<li><a href="/my/content">My Content</a></li>
         <li><a href="/account">Account Settings</a></li>
@@ -17,11 +17,11 @@
         <li><a href="https://docs.google.com/forms/d/11O6mHMIFFbNiUfdj6eqStXnARPcj3tWnYOQ-90QktDk/viewform" target="_blank">Give feedback</a></li>
         <li><a href="https://docs.google.com/forms/d/1ncA82di103_e3KjG8PCHO9g9RQY0_89I6mSQf2L0S4g/viewform" target="_blank">Request a feature</a></li>
         <li class="divider"></li>
-        <li><a href="/logout">Log out</a></li>        
+        <li><%= link_to 'Log out', destroy_user_session_path, :method => :delete %></li>
       </ul>
     </li>
   <% else %>
-    <li><a href="/login">Login</a></li>
-    <li><a href="/register">Register</a></li>
+    <li><%= link_to 'Sign up', new_user_registration_path %></li>
+    <li><%= link_to 'Log in', new_user_session_path %></li>
   <% end %>
 </ul>

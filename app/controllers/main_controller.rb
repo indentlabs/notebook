@@ -4,7 +4,7 @@ class MainController < ApplicationController
   before_action :redirect_if_not_logged_in, only: [:dashboard]
 
   def index
-    redirect_to :dashboard if session && session[:user]
+    redirect_to :dashboard if user_signed_in?
   end
 
   def comingsoon
@@ -17,7 +17,8 @@ class MainController < ApplicationController
   end
 
   def dashboard
-    user = User.where(id: session[:user]).first
+    #todo just use @user in the view
+    user = User.where(id: current_user.id).first
 
     @characters = user.characters
     @equipment = user.equipment

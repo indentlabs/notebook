@@ -39,7 +39,7 @@ module ActionDispatch
     include Capybara::DSL
 
     def register_as(name, email, password)
-      visit homepage_path
+      visit root_url
       click_on 'Register'
       fill_in 'user_name', with: name
       fill_in 'user_email', with: email
@@ -48,7 +48,7 @@ module ActionDispatch
     end
 
     def log_in_as(user, password)
-      visit homepage_path
+      visit root_url
       click_on 'Login'
       within('#new_session') do
         fill_in 'session[username]', with: user
@@ -64,7 +64,7 @@ module ActionDispatch
     end
 
     def log_in_as_anon
-      visit homepage_path
+      visit root_url
       click_on 'Login'
       click_on 'Be Anonymous'
       click_on 'I understand, create an account for me'
