@@ -26,6 +26,9 @@ PlanCharacters::Application.configure do
   # Do not compress assets
   config.assets.compress = false
 
+  # Devise default url options
+  config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+
   # DEVELOPMENT S3 settings for Paperclip uploads ON DEVELOPMENT
   config.paperclip_defaults = {
     storage: :s3,

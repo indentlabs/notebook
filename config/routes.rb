@@ -1,8 +1,9 @@
 PlanCharacters::Application.routes.draw do
+  devise_for :users
   # rubocop:disable LineLength
 
   # Main pages
-  root to: 'main#index', as: :homepage
+  root to: 'main#index'
 
   # Info pages
   scope '/about' do
