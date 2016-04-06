@@ -15,16 +15,5 @@ class MainController < ApplicationController
   end
 
   def dashboard
-    #todo just use @user in the view
-    user = User.where(id: current_user.id).first
-
-    @characters = user.characters
-    @equipment = user.equipment
-    @languages = user.languages
-    @locations = user.locations
-    @magics = user.magics
-    @universes = user.universes
-
-    @things = user.content_count
   end
 end

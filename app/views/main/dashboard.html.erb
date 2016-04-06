@@ -1,35 +1,184 @@
-<% if @things > 0 %>
-  <div class="col-md-4">
-    <div class="card">
-      <h1 class="card-heading">
-      <small>You've created a total of</small> <%= @things %> <small><%= "thing".pluralize(@things) %>!</small>
-      </h1>
-
-      <div class="card-body">
-        <p>
-          Keep it up!
-        </p>
+<div class="row">
+  <div class="col m6">
+    <div class="card hoverable">
+      <div class="card-image waves-effect waves-block waves-light">
+        <img class="activator" src="http://img12.deviantart.net/9cda/i/2013/116/c/d/portals_by_digb-d632p4j.jpg" style="height: 390px;">
       </div>
-      <div class="card-comments"></div>
+      <div class="card-content">
+        <span class="card-title activator grey-text text-darken-4">
+          You've created <%= current_user.universes.count %> universes
+          <i class="material-icons right">more_vert</i>
+        </span>
+        <p><a href="#">Create another</a></p>
+      </div>
+      <div class="card-reveal">
+        <span class="card-title grey-text text-darken-4">
+          Universes
+          <i class="material-icons right">close</i>
+        </span>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Created at</th>
+            <th>Last modified</th>
+            <th></th>
+          </tr>
+          <% current_user.universes.each do |universe| %>
+          <tr>
+            <td><%= link_to universe.name, universe %></td>
+            <td><%= universe.description %></td>
+            <td><%= universe.created_at %></td>
+            <td><%= universe.updated_at %></td>
+            <td>
+              <%= link_to universe_edit_path(universe) do %>
+                <i class="material-icons">edit</i>
+              <% end %>
+            </td>
+          </tr>
+          <% end %>
+        </table>
+        <%= link_to 'Create another', universe_create_path, class: 'btn' %>
+      </div>
     </div>
   </div>
 
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-body">
-        <p>
-          <h2><%= @characters.length %> <small><%= link_to "character".pluralize(@characters.length), character_list_path %></small></h2>
-          <h2><%= @equipment.length %> <small><%= link_to "piece".pluralize(@equipment.length) + " of equipment", equipment_list_path %></small></h2>
-          <h2><%= @languages.length %> <small><%= link_to "language".pluralize(@languages.length), language_list_path %></small></h2>
-          <h2><%= @locations.length %> <small><%= link_to "location".pluralize(@locations.length), location_list_path %></small></h2>
-          <h2><%= @magics.length %> <small><%= link_to "manifestation".pluralize(@magics.length) + " of magic", magic_list_path %></small></h2>
-          <h2><%= @universes.length %> <small><%= link_to "universe".pluralize(@universes.length), universe_list_path %></small></h2>
-        </p>
+  <div class="col m6">
+    <div class="card hoverable">
+      <div class="card-image waves-effect waves-block waves-light">
+        <img class="activator" src="http://pre07.deviantart.net/f769/th/pre/i/2013/226/7/8/wanderings_by_trevorcarlsongay-d6hza0x.jpg" style="height: 390px;">
       </div>
-      <div class="card-comments"></div>
+      <div class="card-content">
+        <span class="card-title activator grey-text text-darken-4">
+          You've created <%= current_user.characters.count %> characters
+          <i class="material-icons right">more_vert</i>
+        </span>
+        <p><a href="#">Create another</a></p>
+      </div>
+      <div class="card-reveal">
+        <span class="card-title grey-text text-darken-4">
+          Characters
+          <i class="material-icons right">close</i>
+        </span>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Created at</th>
+            <th>Last modified</th>
+            <th></th>
+          </tr>
+          <% current_user.characters.each do |character| %>
+          <tr>
+            <td><%= link_to character.name, character %></td>
+            <td><%= character.role %></td>
+            <td><%= character.created_at %></td>
+            <td><%= character.updated_at %></td>
+            <td>
+              <%= link_to character_edit_path(character) do %>
+                <i class="material-icons">edit</i>
+              <% end %>
+            </td>
+          </tr>
+          <% end %>
+        </table>
+        <%= link_to 'Create another', character_create_path, class: 'btn' %>
+      </div>
     </div>
   </div>
 
-<% else %>
-  <%= render 'dashboard_intro' %>
-<% end %>
+  <div class="col m6">
+    <div class="card hoverable">
+      <div class="card-image waves-effect waves-block waves-light">
+        <img class="activator" src="http://pre10.deviantart.net/526f/th/pre/f/2013/331/f/3/calltoconvention_by_paulsgruff-d6vth1g.jpg" style="height: 390px;">
+      </div>
+      <div class="card-content">
+        <span class="card-title activator grey-text text-darken-4">
+          You've created <%= current_user.locations.count %> locations
+          <i class="material-icons right">more_vert</i>
+        </span>
+        <p><%= link_to 'Create another', location_create_path %></p>
+      </div>
+      <div class="card-reveal">
+        <span class="card-title grey-text text-darken-4">
+          Locations
+          <i class="material-icons right">close</i>
+        </span>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Created at</th>
+            <th>Last modified</th>
+            <th></th>
+          </tr>
+          <% current_user.locations.each do |location| %>
+          <tr>
+            <td><%= link_to location.name, location %></td>
+            <td><%= location.description %></td>
+            <td><%= location.type_of %></td>
+            <td><%= location.created_at %></td>
+            <td><%= location.updated_at %></td>
+            <td>
+              <%= link_to location_edit_path(location) do %>
+                <i class="material-icons">edit</i>
+              <% end %>
+            </td>
+          </tr>
+          <% end %>
+        </table>
+        <%= link_to 'Create another', location_create_path, class: 'btn' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col m6">
+    <div class="card hoverable">
+      <div class="card-image waves-effect waves-block waves-light">
+        <img class="activator" src="https://i.imgur.com/9nalIJG.jpg" style="height: 390px;">
+      </div>
+      <div class="card-content">
+        <span class="card-title activator grey-text text-darken-4">
+          You've created <%= current_user.equipment.count %> items
+          <i class="material-icons right">more_vert</i>
+        </span>
+        <p><%= link_to 'Create another', item_create_path %></p>
+      </div>
+      <div class="card-reveal">
+        <span class="card-title grey-text text-darken-4">
+          Items
+          <i class="material-icons right">close</i>
+        </span>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Created at</th>
+            <th>Last modified</th>
+            <th></th>
+          </tr>
+          <% current_user.equipment.each do |item| %>
+          <tr>
+            <td><%= link_to item.name, item %></td>
+            <td><%= item.description %></td>
+            <td><%= item.type_of %></td>
+            <td><%= item.created_at %></td>
+            <td><%= item.updated_at %></td>
+            <td>
+              <%= link_to item_edit_path(item) do %>
+                <i class="material-icons">edit</i>
+              <% end %>
+            </td>
+          </tr>
+          <% end %>
+        </table>
+        <%= link_to 'Create another', item_create_path, class: 'btn' %>
+      </div>
+    </div>
+  </div>
+
+  <%# todo %>
+
+</div>
