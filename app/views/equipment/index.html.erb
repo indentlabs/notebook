@@ -1,8 +1,8 @@
 <% if @content.length > 0 %>
 <div class="card">
   <h3 class="card-heading simple">
-    Your equipment
-    <% if false and Universe.where(user_id: session[:user]).length > 0 %>
+    Your items
+    <% if false and Universe.where(user_id: current_user.id).length > 0 %>
       <small>from <%= render 'universes/picker' %></small>
     <% end %>
   </h3>
@@ -12,14 +12,14 @@
 <% end %>
 
 <div class="card">
-  <h3 class="card-heading simple">Planning equipment</h3>
+  <h3 class="card-heading simple">Planning items</h3>
   <div class="card-body">
     <p>
       A legendary sword or decrepit family shield are capable of telling a story all on their own. Before including them in your literary masterpiece, you should flesh their history out and keep their stories straight.
     </p>
-    <%= link_to 'New Equipment', equipment_create_path, :class => 'btn btn-primary' %>
-    <%= link_to 'New Weapon', equipment_create_type_path(:weapon), :class => 'btn' %>
-    <%= link_to 'New Armor', equipment_create_type_path(:armor), :class => 'btn' %>
+    <%= link_to 'New Item', item_create_path, :class => 'btn btn-primary' %>
+    <%= link_to 'New Weapon', item_create_type_path(:weapon), :class => 'btn' %>
+    <%= link_to 'New Armor', item_create_type_path(:armor), :class => 'btn' %>
   </div>
   <div class="card-comments"></div>
 </div>

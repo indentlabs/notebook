@@ -1,7 +1,6 @@
 # Controller for the User model
+#todo not sure this is even needed with devise
 class UsersController < ApplicationController
-  before_action :redirect_if_not_logged_in, only: [:edit, :update]
-
   # GET /users/new
   # GET /users/new.json
   def new

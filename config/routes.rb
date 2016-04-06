@@ -23,14 +23,6 @@ PlanCharacters::Application.routes.draw do
   post '/login',  to: 'sessions#create',  as: :login_process
   get '/logout', to: 'sessions#destroy', as: :logout
 
-  # Users
-  get '/register',     to: 'users#new',    as: :signup
-  post '/register',     to: 'users#create', as: :signup_process
-  get '/account',      to: 'users#edit',   as: :account
-  patch '/register',     to: 'users#update', as: :account_process
-  get '/be-anonymous', to: 'users#anonymous', as: :anonymous
-  get '/anon-login',   to: 'users#anonymous_login', as: :anonymous_login
-
   # Planning
   scope '/plan' do
     # Characters
@@ -43,26 +35,16 @@ PlanCharacters::Application.routes.draw do
     patch '/character/:id',      to: 'characters#update',  as: :character_edit_process
     delete '/character/:id',      to: 'characters#destroy', as: :character_destroy
 
-    # Equipment
-    get '/equipment',          to: 'equipment#index',   as: :equipment_list
-    get '/equipment/from/:universe', to: 'equipment#index', as: :equipment_by_universe
-    get '/equipment/new',      to: 'equipment#new',     as: :equipment_create
-    get '/equipment/new/:type_of', to: 'equipment#new',     as: :equipment_create_type
-    post '/equipment/new',      to: 'equipment#create',  as: :equipment_create_process
-    get '/equipment/:id',      to: 'equipment#show',    as: :equipment
-    get '/equipment/:id/edit', to: 'equipment#edit',    as: :equipment_edit
-    patch '/equipment/:id',      to: 'equipment#update',  as: :equipment_edit_process
-    delete '/equipment/:id',      to: 'equipment#destroy', as: :equipment_destroy
-
-    # Languages
-    get '/languages',         to: 'languages#index',   as: :language_list
-    get '/languages/from/:universe', to: 'languages#index',   as: :languages_by_universe
-    get '/language/new',      to: 'languages#new',     as: :language_create
-    post '/language/new',      to: 'languages#create',  as: :language_create_process
-    get '/language/:id',      to: 'languages#show',    as: :language
-    get '/language/:id/edit', to: 'languages#edit',    as: :language_edit
-    patch '/language/:id',      to: 'languages#update',  as: :language_edit_process
-    delete '/language/:id',      to: 'languages#destroy', as: :language_destroy
+    # Items
+    get '/items',          to: 'equipment#index',   as: :item_list
+    get '/items/from/:universe', to: 'equipment#index', as: :item_by_universe
+    get '/item/new',      to: 'equipment#new',     as: :item_create
+    get '/item/new/:type_of', to: 'equipment#new',     as: :item_create_type
+    post '/item/new',      to: 'equipment#create',  as: :item_create_process
+    get '/item/:id',      to: 'equipment#show',    as: :item
+    get '/item/:id/edit', to: 'equipment#edit',    as: :item_edit
+    patch '/item/:id',      to: 'equipment#update',  as: :item_edit_process
+    delete '/item/:id',      to: 'equipment#destroy', as: :item_destroy
 
     # Locations
     get '/locations',         to: 'locations#index',   as: :location_list
@@ -74,17 +56,6 @@ PlanCharacters::Application.routes.draw do
     get '/location/:id/edit', to: 'locations#edit',    as: :location_edit
     patch '/location/:id',      to: 'locations#update',  as: :location_edit_process
     delete '/location/:id',      to: 'locations#destroy', as: :location_destroy
-
-    # Magic
-    get '/magic',          to: 'magic#index',   as: :magic_list
-    get '/magic/from/:universe', to: 'magic#index', as: :magic_by_universe
-    get '/magic/new',      to: 'magic#new',     as: :magic_create
-    post '/magic/new',      to: 'magic#create',  as: :magic_create_process
-    get '/magic/new/:type_of', to: 'magic#new',     as: :magic_create_type
-    get '/magic/:id',      to: 'magic#show',    as: :magic
-    get '/magic/:id/edit', to: 'magic#edit',    as: :magic_edit
-    patch '/magic/:id',      to: 'magic#update',  as: :magic_edit_process
-    delete '/magic/:id',      to: 'magic#destroy', as: :magic_destroy
 
     # Universes
     get '/universes',         to: 'universes#index',   as: :universe_list

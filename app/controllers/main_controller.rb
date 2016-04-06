@@ -1,8 +1,6 @@
 # Controller for top-level pages of the site that do not have
 # an associated model
 class MainController < ApplicationController
-  before_action :redirect_if_not_logged_in, only: [:dashboard]
-
   def index
     redirect_to :dashboard if user_signed_in?
   end
