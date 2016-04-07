@@ -1,41 +1,25 @@
 <%- model_class = @content.class -%>
 
-<div class="row">
+<h4>You've created <%= @content.count %> universes</h4>
 
-  <% if @content.length > 0 %>
-    <% @content.each do |universe| %>
-      <div class="col-md-4">
-        <div class="card">
-          <h1 class="card-heading">
-            <% if universe.privacy and universe.privacy.downcase == "public" %>
-              <span class="glyphicon glyphicon-globe pull-right" style="font-size: 16px;"></span>
-            <% end %>
-            <%= universe.name %>
-          </h1>
-          <div class="card-body"> 
-            <p><%= simple_format truncate(universe.description, length: 256) %>
-          </div>
-          <div class="card-comments">
-            <%= link_to t('.view', :default => t("helpers.links.view")), universe_path(universe), :class => 'btn' %>
-            <%= link_to t('.edit', :default => t("helpers.links.edit")), universe_edit_path(universe), :class => 'btn' %>            
-          </div>
-        </div>
-      </div>
-    <% end %>
+<ul class="collection">
+  <% @content.each do |universe| %>
+    <li class="collection-item avatar">
+      <i class="material-icons circle purple">vpn_lock</i>
+      <span class="title"><%= link_to universe.name, universe %></span>
+      <p class="truncate">
+        <%= universe.description %>
+      </p>
+      <p class='grey-text'>
+        <em>last edited <%= universe.updated_at.strftime("%m/%d/%Y") %></em>
+      </p>
+      <span class="secondary-content">
+        <%= link_to universe_edit_path(universe) do %>
+          <i class="material-icons">edit</i>
+        <% end %>
+      </span>
+    </li>
   <% end %>
+</ul>
 
-  <div class="col-md-4">
-    <div class="card">
-      <h1 class="card-heading">What is a universe?</h1>
-      <div class="card-body">
-        <p>
-          Literally, <em>a universe</em>. The universe your character exists in. The universe their friends, family, and foes exist in. The universe that contains their hometown, their country, their planet &ndash; everything that exists in their world. Sticking it all in a universe keeps it separate from other universes that other stories might be happening in. 
-        </p>
-      </div>
-      <div class="card-comments">
-        <%= link_to 'New universe', universe_create_path, :class => 'btn btn-primary' %>
-      </div>
-    </div>
-  </div>
-</div>
-
+<%= link_to 'Create another universe', universe_create_path, :class => 'btn' %>

@@ -1,30 +1,25 @@
-<div class="row">
+<%- model_class = @content.class -%>
 
-  <div class="col-md-12">
-    <div class="card" style="overflow: visible">
-      <h1 class="card-heading simple">
-        Your characters
-        <% if Universe.where(user_id: session[:user]).length > 0 %>
-          <small>from <%= render 'universes/picker' %></small>
+<h4>You've created <%= @content.count %> characters</h4>
+
+<ul class="collection">
+  <% @content.each do |character| %>
+    <li class="collection-item avatar">
+      <i class="material-icons circle red">group</i>
+      <span class="title"><%= link_to character.name, character %></span>
+      <p class="truncate">
+        <%= character.role %>
+      </p>
+      <p class='grey-text'>
+        <em>last edited <%= character.updated_at.strftime("%m/%d/%Y") %></em>
+      </p>
+      <span class="secondary-content">
+        <%= link_to character_edit_path(character) do %>
+          <i class="material-icons">edit</i>
         <% end %>
-      </h1>
-    </div>
-  </div>
+      </span>
+    </li>
+  <% end %>
+</ul>
 
-  <%= render 'content/list/cards', content: @content %>
-
-  <div class="col-md-3">
-    <div class="card">
-      <h1 class="card-heading">Planning characters</h1>
-      <div class="card-body">
-        <p>
-          Consistency is sometimes hard to keep, and having a reference of everything about your character for yourself can help you down the line, especially if you're writing a series.
-        </p>
-      </div>
-      <div class="card-comments">
-        <%= link_to 'New character', character_create_path, :class => 'btn btn-primary' %>
-      </div>
-    </div>
-  </div>
-
-</div>
+<%= link_to 'Create another character', character_create_path, :class => 'btn' %>
