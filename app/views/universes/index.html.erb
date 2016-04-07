@@ -1,25 +1,4 @@
-<%- model_class = @content.class -%>
-
 <h4>You've created <%= @content.count %> universes</h4>
-
-<ul class="collection">
-  <% @content.each do |universe| %>
-    <li class="collection-item avatar">
-      <i class="material-icons circle purple">vpn_lock</i>
-      <span class="title"><%= link_to universe.name, universe %></span>
-      <p class="truncate">
-        <%= universe.description %>
-      </p>
-      <p class='grey-text'>
-        <em>last edited <%= universe.updated_at.strftime("%m/%d/%Y") %></em>
-      </p>
-      <span class="secondary-content">
-        <%= link_to universe_edit_path(universe) do %>
-          <i class="material-icons">edit</i>
-        <% end %>
-      </span>
-    </li>
-  <% end %>
-</ul>
+<%= render partial: 'content/list/list', locals: { content_list: @content } %>
 
 <%= link_to 'Create another universe', universe_create_path, :class => 'btn' %>

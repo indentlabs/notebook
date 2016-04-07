@@ -1,25 +1,4 @@
-<%- model_class = @content.class -%>
-
 <h4>You've created <%= @content.count %> characters</h4>
-
-<ul class="collection">
-  <% @content.each do |character| %>
-    <li class="collection-item avatar">
-      <i class="material-icons circle red">group</i>
-      <span class="title"><%= link_to character.name, character %></span>
-      <p class="truncate">
-        <%= character.role %>
-      </p>
-      <p class='grey-text'>
-        <em>last edited <%= character.updated_at.strftime("%m/%d/%Y") %></em>
-      </p>
-      <span class="secondary-content">
-        <%= link_to character_edit_path(character) do %>
-          <i class="material-icons">edit</i>
-        <% end %>
-      </span>
-    </li>
-  <% end %>
-</ul>
+<%= render partial: 'content/list/list', locals: { content_list: @content } %>
 
 <%= link_to 'Create another character', character_create_path, :class => 'btn' %>

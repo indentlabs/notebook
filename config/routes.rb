@@ -31,7 +31,7 @@ PlanCharacters::Application.routes.draw do
     get '/character/new',      to: 'characters#new',     as: :character_create
     post '/character/new',      to: 'characters#create',  as: :character_create_process
     get '/character/:id',      to: 'characters#show',    as: :character
-    get '/character/:id/edit', to: 'characters#edit',    as: :character_edit
+    get '/character/:id/edit', to: 'characters#edit',    as: :edit_character
     patch '/character/:id',      to: 'characters#update',  as: :character_edit_process
     delete '/character/:id',      to: 'characters#destroy', as: :character_destroy
 
@@ -42,7 +42,7 @@ PlanCharacters::Application.routes.draw do
     get '/item/new/:type_of', to: 'items#new',     as: :item_create_type
     post '/item/new',      to: 'items#create',  as: :item_create_process
     get '/item/:id',      to: 'items#show',    as: :item
-    get '/item/:id/edit', to: 'items#edit',    as: :item_edit
+    get '/item/:id/edit', to: 'items#edit',    as: :edit_item
     patch '/item/:id',      to: 'items#update',  as: :item_edit_process
     delete '/item/:id',      to: 'items#destroy', as: :item_destroy
 
@@ -53,7 +53,7 @@ PlanCharacters::Application.routes.draw do
     post '/location/new',      to: 'locations#create',  as: :location_create_process
     get '/location/new/:type_of', to: 'locations#new',     as: :location_create_type
     get '/location/:id',      to: 'locations#show',    as: :location
-    get '/location/:id/edit', to: 'locations#edit',    as: :location_edit
+    get '/location/:id/edit', to: 'locations#edit',    as: :edit_location
     patch '/location/:id',      to: 'locations#update',  as: :location_edit_process
     delete '/location/:id',      to: 'locations#destroy', as: :location_destroy
 
@@ -62,7 +62,7 @@ PlanCharacters::Application.routes.draw do
     get '/universe/new',      to: 'universes#new',     as: :universe_create
     post '/universe/new',      to: 'universes#create',  as: :universe_create_process
     get '/universe/:id',      to: 'universes#show',    as: :universe
-    get '/universe/:id/edit', to: 'universes#edit',    as: :universe_edit
+    get '/universe/:id/edit', to: 'universes#edit',    as: :edit_universe
     patch '/universe/:id',      to: 'universes#update',  as: :universe_edit_process
     delete '/universe/:id',      to: 'universes#destroy', as: :universe_destroy
 

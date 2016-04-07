@@ -15,6 +15,14 @@ class Item < ActiveRecord::Base
   belongs_to :user
   belongs_to :universe
 
+  def self.color
+    'amber'
+  end
+
+  def self.icon
+    'beach_access'
+  end
+
   def self.attribute_categories
     {
       general_information: {

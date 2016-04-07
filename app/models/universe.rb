@@ -25,6 +25,14 @@ class Universe < ActiveRecord::Base
     ].sum
   end
 
+  def self.color
+    'purple'
+  end
+
+  def self.icon
+    'vpn_lock'
+  end
+
   def self.attribute_categories
     {
       general_information: {

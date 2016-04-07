@@ -15,6 +15,18 @@ class Character < ActiveRecord::Base
   belongs_to :user
   belongs_to :universe
 
+  def description
+    role
+  end
+
+  def self.color
+    'red'
+  end
+
+  def self.icon
+    'group'
+  end
+
   def self.attribute_categories
     {
       general_information: {

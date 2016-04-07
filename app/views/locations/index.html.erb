@@ -1,25 +1,4 @@
-<%- model_class = @content.class -%>
-
 <h4>You've created <%= @content.count %> locations</h4>
-
-<ul class="collection">
-  <% @content.each do |location| %>
-    <li class="collection-item avatar">
-      <i class="material-icons circle green">terrain</i>
-      <span class="title"><%= link_to location.name, location %></span>
-      <p class="truncate">
-        <%= location.description %>
-      </p>
-      <p class='grey-text'>
-        <em>last edited <%= location.updated_at.strftime("%m/%d/%Y") %></em>
-      </p>
-      <span class="secondary-content">
-        <%= link_to location_edit_path(location) do %>
-          <i class="material-icons">edit</i>
-        <% end %>
-      </span>
-    </li>
-  <% end %>
-</ul>
+<%= render partial: 'content/list/list', locals: { content_list: @content } %>
 
 <%= link_to 'Create another location', location_create_path, :class => 'btn' %>

@@ -17,7 +17,15 @@ class Location < ActiveRecord::Base
   belongs_to :user
   belongs_to :universe
 
-   def self.attribute_categories
+  def self.icon
+    'terrain'
+  end
+
+  def self.color
+    'green'
+  end
+
+  def self.attribute_categories
     {
       general_information: {
         icon: 'info',

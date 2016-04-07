@@ -20,7 +20,15 @@
 	<% end %>
 </div>
 
-<% unless user_signed_in? %>
+<% if user_signed_in? %>
+
+
+<% all_content = %i(universes characters locations items).map { |c| current_user.send(c) }.flatten.sort_by(&:created_at).reverse.first(10) %>
+  <% if all_content.count > 0 %>
+    <%= render partial: 'content/list/list', locals: { content_list: all_content, title: 'Your recent creations' } %>
+  <% end %>
+
+<% else %>
 
 <div class="row">
     <div class="col s12">
