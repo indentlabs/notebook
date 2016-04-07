@@ -36,15 +36,15 @@ PlanCharacters::Application.routes.draw do
     delete '/character/:id',      to: 'characters#destroy', as: :character_destroy
 
     # Items
-    get '/items',          to: 'equipment#index',   as: :item_list
-    get '/items/from/:universe', to: 'equipment#index', as: :item_by_universe
-    get '/item/new',      to: 'equipment#new',     as: :item_create
-    get '/item/new/:type_of', to: 'equipment#new',     as: :item_create_type
-    post '/item/new',      to: 'equipment#create',  as: :item_create_process
-    get '/item/:id',      to: 'equipment#show',    as: :item
-    get '/item/:id/edit', to: 'equipment#edit',    as: :item_edit
-    patch '/item/:id',      to: 'equipment#update',  as: :item_edit_process
-    delete '/item/:id',      to: 'equipment#destroy', as: :item_destroy
+    get '/items',          to: 'items#index',   as: :item_list
+    get '/items/from/:universe', to: 'items#index', as: :item_by_universe
+    get '/item/new',      to: 'items#new',     as: :item_create
+    get '/item/new/:type_of', to: 'items#new',     as: :item_create_type
+    post '/item/new',      to: 'items#create',  as: :item_create_process
+    get '/item/:id',      to: 'items#show',    as: :item
+    get '/item/:id/edit', to: 'items#edit',    as: :item_edit
+    patch '/item/:id',      to: 'items#update',  as: :item_edit_process
+    delete '/item/:id',      to: 'items#destroy', as: :item_destroy
 
     # Locations
     get '/locations',         to: 'locations#index',   as: :location_list

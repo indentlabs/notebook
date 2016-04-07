@@ -6,7 +6,7 @@
 # 1. the necessary items for a particular purpose.
 #
 #    exists within a Universe.
-class Equipment < ActiveRecord::Base
+class Item < ActiveRecord::Base
   include Comparable
   include NilsBlankUniverse
 
@@ -22,7 +22,7 @@ class Equipment < ActiveRecord::Base
   def table_columns
     {
       'Name' => -> { link_to name, self },
-      'Type' => equip_type,
+      'Type' => item_type,
       'Description' => description
     }
   end

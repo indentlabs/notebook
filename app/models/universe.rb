@@ -10,7 +10,7 @@ class Universe < ActiveRecord::Base
 
   belongs_to :user
   has_many :characters
-  has_many :equipment
+  has_many :items
   has_many :languages
   has_many :locations
   has_many :magics
@@ -18,7 +18,7 @@ class Universe < ActiveRecord::Base
   def content_count
     [
       characters.length,
-      equipment.length,
+      items.length,
       languages.length,
       locations.length,
       magics.length

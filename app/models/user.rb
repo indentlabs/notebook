@@ -10,7 +10,7 @@ class User < ActiveRecord::Base
   validates :email, presence: true
 
   has_many :characters
-  has_many :equipment
+  has_many :items
   has_many :languages
   has_many :locations
   has_many :magics
@@ -19,7 +19,7 @@ class User < ActiveRecord::Base
   def content
     {
       characters: characters,
-      equipment: equipment,
+      items: items,
       languages: languages,
       locations: locations,
       magics: magics,
@@ -30,7 +30,7 @@ class User < ActiveRecord::Base
   def content_count
     [
       characters.length,
-      equipment.length,
+      items.length,
       languages.length,
       locations.length,
       magics.length,

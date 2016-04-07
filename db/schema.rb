@@ -57,9 +57,9 @@ ActiveRecord::Schema.define(version: 20160405035806) do
     t.datetime "updated_at"
   end
 
-  create_table "equipment", force: :cascade do |t|
+  create_table "items", force: :cascade do |t|
     t.string   "name",           null: false
-    t.string   "equip_type"
+    t.string   "item_type"
     t.text     "description"
     t.string   "weight"
     t.string   "original_owner"
