@@ -1,6 +1,5 @@
 # Controller for the Character model
 class CharactersController < ContentController
-  before_action :authenticate_user!
 
   private
 

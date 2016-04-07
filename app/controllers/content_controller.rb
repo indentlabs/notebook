@@ -1,5 +1,7 @@
 class ContentController < ApplicationController
   include HasOwnership
+  
+  before_action :authenticate_user!
 
   def index
     @content = content_type_from_controller(self.class)

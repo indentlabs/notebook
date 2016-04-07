@@ -7,8 +7,6 @@
 #
 #    exists within a Universe
 class Location < ActiveRecord::Base
-  include NilsBlankUniverse
-
   has_attached_file :map,  styles: { original: '1920x1080>', thumb: '200x200>' }
   validates_attachment_content_type :map, content_type: %r{\Aimage\/.*\Z}
 

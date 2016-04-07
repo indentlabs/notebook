@@ -7,9 +7,6 @@
 #
 #    exists within a Universe.
 class Item < ActiveRecord::Base
-  include Comparable
-  include NilsBlankUniverse
-
   validates :name, presence: true
 
   belongs_to :user

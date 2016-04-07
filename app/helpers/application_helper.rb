@@ -4,8 +4,7 @@ module ApplicationHelper
   # current logged-in user. Otherwise will just print a text title
   def link_if_present(name, type)
     return name unless session[:user]
-    userid = User.where(id: session[:user]).first.id
-    result = find_by_name_and_type name, type.downcase, userid
+    result = find_by_name_and_type name, type.downcase, current_user.id
 
     result.nil? ? name : link_to(name, result)
   end
