@@ -1,12 +1,20 @@
-<%
-  fields_not_to_edit = ['id', 'created_at', 'updated_at']
-%>
-
-<div class="row">
-  <% (@content.attribute_names - fields_not_to_edit).reject { |x| x.end_with? '_id' }.each do |field| %>
-    <div class="input-field col s12">
-      <%= f.text_field field %>
-      <label for="<%= field %>"><%= field.humanize.capitalize %></label>
-    </div>
-  <% end %>
-</div>
+<ul class="collapsible popout" data-collapsible="accordion">
+	<% @content.class.attribute_categories.each do |category, data| %>
+	  <li>
+	    <div class="collapsible-header <%= 'active' if category == @content.class.attribute_categories.first.first %>">
+	      <i class="material-icons"><%= data[:icon] %></i>
+	      <%= category.to_s.humanize.capitalize %>
+	    </div>
+	    <div class="collapsible-body">
+	      <table class="highlight">
+			<% data[:attributes].each do |attribute| %>
+			    <div class="input-field col s12">
+			        <%= f.text_field attribute %>
+			        <label for="<%= attribute %>"><%= attribute.humanize.capitalize %></label>
+			    </div>
+			<% end %>
+	      </table>
+	    </div>
+	  </li>
+	<% end %>
+</ul>
