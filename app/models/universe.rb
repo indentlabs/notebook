@@ -24,4 +24,25 @@ class Universe < ActiveRecord::Base
       magics.length
     ].sum
   end
+
+  def self.attribute_categories
+    {
+      general_information: {
+        icon: 'info',
+        attributes: %w(name description),
+      },
+      history: {
+        icon: 'face',
+        attributes: %w(history)
+      },
+      settings: {
+        icon: 'face',
+        attributes: %w(privacy)
+      },
+      notes: {
+        icon: 'edit',
+        attributes: %w(notes private_notes)
+      }
+    }
+  end
 end

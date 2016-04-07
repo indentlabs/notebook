@@ -1,25 +1,25 @@
-<% if @content.length > 0 %>
-<div class="card">
-  <h3 class="card-heading simple">
-    Your items
-    <% if false and Universe.where(user_id: current_user.id).length > 0 %>
-      <small>from <%= render 'universes/picker' %></small>
-    <% end %>
-  </h3>
+<%- model_class = @content.class -%>
 
-  <%= render 'content/list/table', content: @content %>
-</div>
-<% end %>
+<h4>You've created <%= @content.count %> items</h4>
 
-<div class="card">
-  <h3 class="card-heading simple">Planning items</h3>
-  <div class="card-body">
-    <p>
-      A legendary sword or decrepit family shield are capable of telling a story all on their own. Before including them in your literary masterpiece, you should flesh their history out and keep their stories straight.
-    </p>
-    <%= link_to 'New Item', item_create_path, :class => 'btn btn-primary' %>
-    <%= link_to 'New Weapon', item_create_type_path(:weapon), :class => 'btn' %>
-    <%= link_to 'New Armor', item_create_type_path(:armor), :class => 'btn' %>
-  </div>
-  <div class="card-comments"></div>
-</div>
+<ul class="collection">
+  <% @content.each do |item| %>
+    <li class="collection-item avatar">
+      <i class="material-icons circle amber">beach_access</i>
+      <span class="title"><%= link_to item.name, item %></span>
+      <p class="truncate">
+        <%= item.description %>
+      </p>
+      <p class='grey-text'>
+        <em>last edited <%= item.updated_at.strftime("%m/%d/%Y") %></em>
+      </p>
+      <span class="secondary-content">
+        <%= link_to item_edit_path(item) do %>
+          <i class="material-icons">edit</i>
+        <% end %>
+      </span>
+    </li>
+  <% end %>
+</ul>
+
+<%= link_to 'Create another item', item_create_path, :class => 'btn' %>
