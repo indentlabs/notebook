@@ -42,7 +42,7 @@ module HasOwnership
   end
 
   def owned_by_current_user?(object)
-    session[:user] && session[:user] == object.user.id
+    current_user == object.user
   end
 
   def visible?(object)
