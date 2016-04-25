@@ -1,91 +1,17 @@
-<div class="row">
-	<% if alert %>
-	  <div class="col s12">
-	    <div class="card-panel amber darken-3 hoverable">
-	      <span class="white-text">
-	      	<%= alert %>
-	      </span>
-	    </div>
-	  </div>
-	<% end %>
-
-	<% if notice %>
-	  <div class="col s12">
-	    <div class="card-panel light-blue darken-3 hoverable">
-	      <span class="white-text">
-	      	<%= notice %>
-	      </span>
-	    </div>
-	  </div>
-	<% end %>
-</div>
+<%= render 'cards/ui/alert' %>
+<%= render 'cards/ui/notice' %>
 
 <% if user_signed_in? %>
 
-
-<% all_content = %i(universes characters locations items).map { |c| current_user.send(c) }.flatten.sort_by(&:created_at).reverse.first(10) %>
-  <% if all_content.count > 0 %>
-    <%= render partial: 'content/list/list', locals: { content_list: all_content, title: 'Recent creations' } %>
-  <% end %>
+  <%= yield :sidebar_top %>
+  <%= render 'cards/user/recent_activity' %>
+  <%= yield :sidebar_bottom %>
 
 <% else %>
 
-<div class="row">
-    <div class="col s12">
-      <div class="card hoverable">
-        <div class="card-image">
-          <%= image_tag 'card-headers/universes.jpg' %>
-          <span class="card-title">Build universes</span>
-        </div>
-        <div class="card-content">
-          <p>
-          	You know you've always wanted to create <em>an entire universe</em>. Now's your chance!
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col s12">
-      <div class="card hoverable">
-        <div class="card-image">
-          <%= image_tag 'card-headers/characters.jpg' %>
-          <span class="card-title">Create characters</span>
-        </div>
-        <div class="card-content">
-          <p>
-          	Plan physical appearance, behaviorisms, social roles, family &ndash; even a favorite color!
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col s12">
-      <div class="card hoverable">
-        <div class="card-image">
-          <%= image_tag 'card-headers/locations.jpg' %>
-          <span class="card-title">Construct locations</span>
-        </div>
-        <div class="card-content">
-          <p>
-          	Upload maps, link areas, track demographics, and keep track of history.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col s12">
-      <div class="card hoverable">
-        <div class="card-image">
-          <%= image_tag 'card-headers/items.jpg' %>
-          <span class="card-title">Track items</span>
-        </div>
-        <div class="card-content">
-          <p>
-          	Every weapon was made by someone, and every book has an owner. Keep track of every aspect of your items.
-          </p>
-        </div>
-      </div>
-    </div>
-</div>
+  <%= render 'cards/universe_intro' %>
+  <%= render 'cards/character_intro' %>
+  <%= render 'cards/location_intro' %>
+  <%= render 'cards/item_intro' %>
 
 <% end %>
