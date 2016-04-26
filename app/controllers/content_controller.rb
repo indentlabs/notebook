@@ -1,7 +1,9 @@
 class ContentController < ApplicationController
   include HasOwnership
-  
+
   before_action :authenticate_user!
+
+  # TODO: put a lot of this in ContentManagementService
 
   def index
     @content = content_type_from_controller(self.class)
@@ -16,8 +18,9 @@ class ContentController < ApplicationController
   end
 
   def show
-    @content = content_type_from_controller(self.class)
-      .find(params[:id])
+    # TODO: Secure this with content class whitelist lel
+    @content = content_type_from_controller(self.class).find(params[:id])
+    @question = QuestionService.question(Content.new @content.slice(*content_param_list))
 
     respond_to do |format|
       format.html # show.html.erb

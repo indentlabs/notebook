@@ -12,6 +12,10 @@ gem 'aws-sdk', '~> 1.50'
 gem 'devise'
 gem 'material_icons'
 
+# Libraries
+#gem 'serendipitous', :path => "~/Code/indent/serendipitous-gem"
+gem 'serendipitous', :git => 'git://github.com/indentlabs/serendipitous-gem.git'
+
 group :production do
   gem 'less-rails'
   gem 'less-rails-fontawesome'
