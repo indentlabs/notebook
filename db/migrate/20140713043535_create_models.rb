@@ -99,30 +99,6 @@ class CreateModels < ActiveRecord::Migration
       t.timestamps
     end
 
-    create_table :languages do |t|
-      # General
-      t.string :name, null: false
-
-      # Vocabulary
-      t.text :words
-
-      # History
-      t.string :established_year
-      t.string :established_location
-
-      # Speakers
-      t.text :characters
-      t.text :locations
-
-      # More
-      t.text :notes
-
-      t.belongs_to :user
-      t.belongs_to :universe
-
-      t.timestamps
-    end
-
     create_table :locations do |t|
       # General
       t.string :name, null: false
@@ -153,39 +129,6 @@ class CreateModels < ActiveRecord::Migration
       # History
       t.string :established_year
       t.text :notable_wars
-
-      # Notes
-      t.text :notes
-      t.text :private_notes
-
-      t.belongs_to :user
-      t.belongs_to :universe
-
-      t.timestamps
-    end
-
-    create_table :magics do |t|
-      # General
-      t.string :name, null: false
-      t.string :type_of # "Type of": Spell, Ability, Enchantment, etc
-
-      # Appearance
-      t.text :manifestation
-      t.text :symptoms
-
-      # Alignment
-      t.string :element
-      t.string :diety
-
-      # # Effects
-      t.text :harmfulness # Harmful effects
-      t.text :helpfulness # Helpful effects
-      t.text :neutralness # Neutral effects
-
-      # Requirements
-      t.text :resource # Resource required
-      t.text :skill_level # Skill required
-      t.text :limitations
 
       # Notes
       t.text :notes
