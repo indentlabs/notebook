@@ -28,7 +28,7 @@ class Character < ActiveRecord::Base
 
   def self.attribute_categories
     {
-      general_information: {
+      general: {
         icon: 'info',
         attributes: %w(name role gender age universe_id),
       },
@@ -52,7 +52,7 @@ class Character < ActiveRecord::Base
         icon: 'star',
         attributes: %w(fave_color fave_food fave_possession fave_weapon fave_animal)
       },
-      relationships: {
+      relations: {
         icon: 'face',
         attributes: %w(mother father spouse siblings archenemy)
       },

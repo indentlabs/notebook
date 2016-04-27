@@ -2,25 +2,34 @@
   <%= render partial: 'cards/serendipitous/content_question', locals: { question: @question, content: @content } %>
 <% end %>
 
-<h4><%= content.name %></h4>
-<ul class="collapsible popout" data-collapsible="accordion">
 
-<% content.class.attribute_categories.each do |category, data| %>
-  <li>
-    <div class="collapsible-header <%= 'active' if category == content.class.attribute_categories.first.first %>">
-      <i class="material-icons"><%= data[:icon] %></i>
-      <%= category.to_s.humanize.capitalize %>
-    </div>
-    <div class="collapsible-body">
-      <table class="highlight">
-        <% data[:attributes].each do |attribute| %>
-          <tr>
-            <td><%= attribute.humanize.capitalize %></td>
-            <td><%= content.send attribute %></td>
+<div class="row">
+  <div class="col s12">
+    <div class="card hoverable">
+      <div class="card-content">
+        <div class="card-title center">
+          <span class="red-text"><i class="material-icons right"><%= content.class.icon %></i></span>
+          <%= content.name %>
+        </div>
+        <ul class="tabs">
+          <% content.class.attribute_categories.each do |category, data| %>
+            <li class="tab col s3 <%= "disabled" unless data[:attributes].any? { |m| content.send(m).present? } %>"><a href="#<%= category %>"><%= category.to_s.humanize %></a></li>
+          <% end %>
+        </ul>
+        <% content.class.attribute_categories.each do |category, data| %>
+          <div id="<%= category %>" class="row">
+            <% data[:attributes].each do |attribute| %>
+              <div class="col s6 m6 l3 right-align flow-text grey-text"><%= attribute.humanize.capitalize %></div>
+              <div class="col s6 m6 l3 <%= "flow-text" unless content.send(attribute).to_s.length > 140 %> "><%= content.send(attribute) %>&nbsp;</div>
+              <%# TODO: if text is > 240, truncate and add "Read more" link that opens modal %>
+            <% end %>
+          </div>
         <% end %>
-      </table>
-    </div>
-  </li>
-<% end %>
+      </div>
 
-</ul>
+      <div class="card-action">
+        <%= yield :content_show_footer %>
+      </div>
+    </div>
+  </div>
+</div>
