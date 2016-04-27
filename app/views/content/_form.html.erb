@@ -1,3 +1,11 @@
+<% if content.errors.any? %>
+<div class="card-panel">
+  This <%= content.class.to_s.downcase %> had errors:
+  <% content.errors.full_messages.each do |msg| %>
+    <li><%= msg %></li>
+  <% end %>
+</div>
+<% end %>
 
 <div class="row">
   <div class="col s12">
@@ -13,12 +21,12 @@
             <% end %>
 
             <ul id='options-menu' class='dropdown-content'>
-              <li><a href="#!">Share this <%= @content.class.to_s.downcase %></a></li>
+              <li><a href="#!">Share this <%= content.class.to_s.downcase %></a></li>
               <li><a href="#!">Do something else</a></li>
               <li class="divider"></li>
-              <% if @content.persisted? %>
+              <% if content.persisted? %>
                 <li>
-                  <%= link_to "Delete this #{@content.class.to_s.downcase} forever", @content,
+                  <%= link_to "Delete this #{content.class.to_s.downcase} forever", content,
                     :class => 'red-text',
                     :method => :delete,
                     :confirm => 'Are you sure? This action cannot be undone!' %>
@@ -26,7 +34,11 @@
               <% end %>
             </ul>
           </span>
-          <%= content.name %>
+          <% if content.persisted? %>
+            <%= content.name %>
+          <% else %>
+            Create your new <%= content.class.to_s.downcase %>
+          <% end %>
         </div>
         <ul class="hoverable tabs" style="margin-bottom: 10px;">
           <% content.class.attribute_categories.each do |category, data| %>
@@ -51,6 +63,9 @@
             <% end %>
           </div>
         <% end %>
+      </div>
+      <div class="card-action center">
+        <%= f.submit nil, class: 'btn' %>
       </div>
     </div>
   </div>
