@@ -40,10 +40,7 @@ class Character < ActiveRecord::Base
         icon: 'groups',
         attributes: %w(bestfriend religion politics prejudices occupation)
       },
-      mannerisms: {
-        icon: 'groups',
-        attributes: %w(mannerisms)
-      },
+      # TODO: remove schema for mannerisms
       history: {
         icon: 'info',
         attributes: %w(birthday birthplace education background)
