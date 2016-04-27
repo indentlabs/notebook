@@ -76,20 +76,6 @@ ActiveRecord::Schema.define(version: 20160405035806) do
     t.datetime "updated_at"
   end
 
-  create_table "languages", force: :cascade do |t|
-    t.string   "name",                 null: false
-    t.text     "words"
-    t.string   "established_year"
-    t.string   "established_location"
-    t.text     "characters"
-    t.text     "locations"
-    t.text     "notes"
-    t.integer  "user_id"
-    t.integer  "universe_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "locations", force: :cascade do |t|
     t.string   "name",             null: false
     t.string   "type_of"
@@ -110,27 +96,6 @@ ActiveRecord::Schema.define(version: 20160405035806) do
     t.text     "located_at"
     t.string   "established_year"
     t.text     "notable_wars"
-    t.text     "notes"
-    t.text     "private_notes"
-    t.integer  "user_id"
-    t.integer  "universe_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "magics", force: :cascade do |t|
-    t.string   "name",          null: false
-    t.string   "type_of"
-    t.text     "manifestation"
-    t.text     "symptoms"
-    t.string   "element"
-    t.string   "diety"
-    t.text     "harmfulness"
-    t.text     "helpfulness"
-    t.text     "neutralness"
-    t.text     "resource"
-    t.text     "skill_level"
-    t.text     "limitations"
     t.text     "notes"
     t.text     "private_notes"
     t.integer  "user_id"
