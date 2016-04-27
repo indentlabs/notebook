@@ -1,41 +1,4 @@
-<%- model_class = @content.class -%>
+<h4>You've created <%= @content.count %> universes</h4>
+<%= render partial: 'content/list/list', locals: { content_list: @content } %>
 
-<div class="row">
-
-  <% if @content.length > 0 %>
-    <% @content.each do |universe| %>
-      <div class="col-md-4">
-        <div class="card">
-          <h1 class="card-heading">
-            <% if universe.privacy and universe.privacy.downcase == "public" %>
-              <span class="glyphicon glyphicon-globe pull-right" style="font-size: 16px;"></span>
-            <% end %>
-            <%= universe.name %>
-          </h1>
-          <div class="card-body"> 
-            <p><%= simple_format truncate(universe.description, length: 256) %>
-          </div>
-          <div class="card-comments">
-            <%= link_to t('.view', :default => t("helpers.links.view")), universe_path(universe), :class => 'btn' %>
-            <%= link_to t('.edit', :default => t("helpers.links.edit")), universe_edit_path(universe), :class => 'btn' %>            
-          </div>
-        </div>
-      </div>
-    <% end %>
-  <% end %>
-
-  <div class="col-md-4">
-    <div class="card">
-      <h1 class="card-heading">What is a universe?</h1>
-      <div class="card-body">
-        <p>
-          Literally, <em>a universe</em>. The universe your character exists in. The universe their friends, family, and foes exist in. The universe that contains their hometown, their country, their planet &ndash; everything that exists in their world. Sticking it all in a universe keeps it separate from other universes that other stories might be happening in. 
-        </p>
-      </div>
-      <div class="card-comments">
-        <%= link_to 'New universe', universe_create_path, :class => 'btn btn-primary' %>
-      </div>
-    </div>
-  </div>
-</div>
-
+<%= link_to 'Create another universe', universe_create_path, :class => 'btn' %>

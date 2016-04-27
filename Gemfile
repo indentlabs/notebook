@@ -1,21 +1,27 @@
 source 'https://rubygems.org'
 
-ruby "2.2.3"
+ruby '2.2.3'
 
-gem 'rails', '4.2.0'
+gem 'rails'
 gem 'jquery-rails'
-gem 'sass-rails', '~> 4.0.3', require: 'sass'
-gem 'coffee-rails', '~> 4.0.0'
+gem 'sass-rails'
+gem 'coffee-rails'
 gem 'paperclip', '~> 4.2.0'
 gem 'rmagick', '2.13.4'
 gem 'aws-sdk', '~> 1.50'
-gem 'bcrypt', '~> 3.1.10', platforms: [:ruby, :mingw, :x64_mingw]
+gem 'devise'
+gem 'material_icons'
+
+# Libraries
+#gem 'serendipitous', :path => "~/Code/indent/serendipitous-gem"
+gem 'serendipitous', :git => 'git://github.com/indentlabs/serendipitous-gem.git'
 
 group :production do
   gem 'less-rails'
   gem 'less-rails-fontawesome'
   gem 'uglifier', '>= 1.3.0'
   gem 'bootplus-rails'
+  #gem 'rails_12factor'
 end
 
 group :test, :production do

@@ -1,11 +1,13 @@
 class ContentController < ApplicationController
   include HasOwnership
 
-  before_action :create_anonymous_account_if_not_logged_in, only: [:edit, :create, :update]
+  before_action :authenticate_user!
+
+  # TODO: put a lot of this in ContentManagementService
 
   def index
     @content = content_type_from_controller(self.class)
-      .where(user_id: session[:user])
+      .where(user_id: current_user.id)
       .order(:name)
       .presence || []
 
@@ -16,8 +18,9 @@ class ContentController < ApplicationController
   end
 
   def show
-    @content = content_type_from_controller(self.class)
-      .find(params[:id])
+    # TODO: Secure this with content class whitelist lel
+    @content = content_type_from_controller(self.class).find(params[:id])
+    @question = QuestionService.question(Content.new @content.slice(*content_param_list))
 
     respond_to do |format|
       format.html # show.html.erb
@@ -77,7 +80,7 @@ class ContentController < ApplicationController
     @content = content_type
       .new(content_params)
       .tap do |c|
-        c.user_id = session[:user]
+        c.user_id = current_user.id
         c.universe = universe_from_params if c.respond_to? :universe #todo this doesn't actually work?
       end
   end
@@ -89,7 +92,7 @@ class ContentController < ApplicationController
 
   def universe_from_params
     return unless params[content_symbol].include? :universe
-    Universe.where(user_id: session[:user], name: params[content_symbol][:universe].strip).first
+    Universe.where(user_id: current_user.id, name: params[content_symbol][:universe].strip).first
   end
 
   def content_symbol

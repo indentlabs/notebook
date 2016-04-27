@@ -27,7 +27,7 @@ class UsersControllerTest < ActionController::TestCase
         email: 'tolkienjr@example.com'
       }
     end
-    assert_redirected_to homepage_path
+    assert_redirected_to root_url
   end
 
   test 'can create an anonymous account' do
@@ -42,7 +42,7 @@ class UsersControllerTest < ActionController::TestCase
       password: 'Mellon',
       email: 'jrr@localhost'
     }
-    assert_redirected_to homepage_path
+    assert_redirected_to root_url
     assert_not_nil assigns(:user)
     assert_equal assigns(:user).email, 'jrr@localhost'
   end

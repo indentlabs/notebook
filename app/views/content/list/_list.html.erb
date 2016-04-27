@@ -1,0 +1,22 @@
+<ul class="collection <%= 'with-header' if local_assigns[:title] %> hoverable">
+  <% if local_assigns[:title] %>
+    <li class="collection-header"><h4><%= title %></h4></li>
+  <% end %>
+  <% content_list.each do |content| %>
+    <li class="collection-item avatar">
+      <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
+      <span class="title"><%= link_to content.name, content %></span>
+      <p class="truncate">
+        <%= content.description %>
+      </p>
+      <p class='grey-text'>
+        <em>last edited <%= content.updated_at.strftime("%m/%d/%Y") %></em>
+      </p>
+      <span class="secondary-content">
+        <%= link_to edit_polymorphic_path(content) do %>
+          <i class="material-icons">edit</i>
+        <% end %>
+      </span>
+    </li>
+  <% end %>
+</ul>

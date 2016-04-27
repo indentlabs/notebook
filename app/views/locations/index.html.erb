@@ -1,36 +1,4 @@
-<%- model_class = @content.class -%>
+<h4>You've created <%= @content.count %> locations</h4>
+<%= render partial: 'content/list/list', locals: { content_list: @content } %>
 
-<div class="row">
-
-<% if @content.length > 0 %>
-<div class="col-md-12">
-  <div class="card">
-    <h1 class="card-heading">
-      Your locations
-      <% if false and Universe.where(user_id: session[:user]).length > 0 %>
-        <small>from <%= render 'universes/picker' %></small>
-      <% end %>
-    </h1>
-  </div>
-</div>
-
-<%= render 'list' %>
-<% end %>
-
-<div class="col-md-4">
-  <div class="card">
-    <h1 class="card-heading simple">Planning locations</h1>
-    <div class="card-body">
-      <p>
-        Worldbuilding should never be neglected; keep track of where your characters are, where they have been, and where they are going. 
-      </p>
-    </div>
-    <div class="card-comments">
-      <%= link_to 'New location', location_create_path, :class => 'btn btn-primary' %>
-      <%= link_to 'New country', location_create_type_path(:country), :class => 'btn' %>
-      <%= link_to 'New city', location_create_type_path(:city), :class => 'btn' %>
-    </div>
-  </div>
-</div>
-
-</div>
+<%= link_to 'Create another location', location_create_path, :class => 'btn' %>

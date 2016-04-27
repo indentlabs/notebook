@@ -1,29 +1,61 @@
-<nav class="navbar navbar-fixed-top" role="navigation">
-  <div class="navbar-header">
-    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-      <span class="sr-only">Toggle navigation</span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-    <a class="navbar-brand" href="/">Indent</a>
-  </div>
+<ul id="dropdown1" class="dropdown-content">
+  <li><%= link_to 'Account settings', edit_user_registration_path %></li>
+  <li class="divider"></li>
+  <li><%= link_to "Sign out", destroy_user_session_path, :method => :delete %></li>
+</ul>
 
-  <div class="collapse navbar-collapse" id="navbar-container">
-    <ul class="nav navbar-nav">
-      <% if session[:user] %>
-        <li><a href="/"><span class="glyphicon glyphicon-home"></span></a></li>
-      <% end %>
-      <li><a href="/plan/characters">Characters</a></li>
-      <li class="active"><a href="/plan/equipment">Equipment</a></li>
-      <li><a href="/plan/languages">Languages</a></li>
-      <li><a href="/plan/locations">Locations</a></li>
-      <li><a href="/plan/magic">Magic</a></li>
-      <li><a href="/plan/universes">Universes</a></li>
-    </ul>
+<div class="navbar-fixed">
+  <nav class="light-blue">
+    <div class="nav-wrapper">
+      <%= link_to 'Notebook', root_url, class: 'brand-logo center' %>
 
-    <div class="navbar-right">
-      <%= render 'layouts/login_box' %>
+      <ul class="right hide-on-small-and-down">
+        <% if user_signed_in? %>
+          <li>
+            <a href="<%= universe_list_url %>" class="tooltipped" data-position="bottom" data-delay="100" data-tooltip="Universes">
+              <i class="material-icons">vpn_lock</i>
+            </a>
+          </li>
+          <li>
+            <a href="<%= character_list_url %>" class="tooltipped" data-position="bottom" data-delay="100" data-tooltip="Characters">
+              <i class="material-icons">group</i>
+            </a>
+          </li>
+          <li>
+            <a href="<%= location_list_url %>" class="tooltipped" data-position="bottom" data-delay="100" data-tooltip="Locations">
+              <i class="material-icons">terrain</i>
+            </a>
+          </li>
+          <li>
+            <a href="<%= item_list_url %>" class="tooltipped" data-position="bottom" data-delay="100" data-tooltip="Items">
+              <i class="material-icons">beach_access</i>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-button tooltipped" href="#!" data-activates="dropdown1" data-position="bottom" data-delay="100" data-tooltip="You">
+              <i class="material-icons">person</i>
+            </a>
+          </li>
+        <% else %>
+          <li><%= link_to 'Sign in', new_user_session_path %></li>
+          <li><%= link_to 'Sign up', new_user_registration_path %></li>
+        <% end %>
+      </ul>
+      <ul class="left hide-on-med-and-down">
+        <li>
+          <%= link_to root_url do %>
+            <i class="material-icons">home</i>
+          <% end %>
+        <li>
+          <form>
+            <div class="input-field">
+              <input id="search" type="search" required>
+              <label for="search"><i class="material-icons">search</i></label>
+              <i class="material-icons">close</i>
+            </div>
+          </form>
+        </li>
+      </ul>
     </div>
-  </div>
-</nav>
+  </nav>
+</div>

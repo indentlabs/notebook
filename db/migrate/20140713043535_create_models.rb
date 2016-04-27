@@ -70,10 +70,10 @@ class CreateModels < ActiveRecord::Migration
       t.timestamps
     end
 
-    create_table :equipment do |t|
+    create_table :items do |t|
       # General
       t.string :name, null: false
-      t.string :equip_type
+      t.string :item_type
 
       # Appearance
       t.text :description
@@ -225,7 +225,7 @@ class CreateModels < ActiveRecord::Migration
     end
 
     create_table :users do |t|
-      t.string :name, unique: true, null: false
+      t.string :name, null: true
       t.string :email, unique: true, null: false
       t.string :password, null: false
 

@@ -15,7 +15,7 @@ class CharacterStoriesTest < ActionDispatch::IntegrationTest
     log_in_as_user
     visit character_list_path
     click_on 'Edit'
-    assert_equal character_edit_path(characters(:frodo)), current_path
+    assert_equal edit_character_path(characters(:frodo)), current_path
   end
 
   test 'view button shows character list' do
@@ -29,6 +29,6 @@ class CharacterStoriesTest < ActionDispatch::IntegrationTest
     log_in_as_user
     visit character_path(characters(:frodo))
     click_on 'Edit'
-    assert_equal character_edit_path(characters(:frodo)), current_path
+    assert_equal edit_character_path(characters(:frodo)), current_path
   end
 end

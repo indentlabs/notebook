@@ -10,7 +10,7 @@ class Universe < ActiveRecord::Base
 
   belongs_to :user
   has_many :characters
-  has_many :equipment
+  has_many :items
   has_many :languages
   has_many :locations
   has_many :magics
@@ -18,10 +18,39 @@ class Universe < ActiveRecord::Base
   def content_count
     [
       characters.length,
-      equipment.length,
+      items.length,
       languages.length,
       locations.length,
       magics.length
     ].sum
+  end
+
+  def self.color
+    'purple'
+  end
+
+  def self.icon
+    'vpn_lock'
+  end
+
+  def self.attribute_categories
+    {
+      general_information: {
+        icon: 'info',
+        attributes: %w(name description),
+      },
+      history: {
+        icon: 'face',
+        attributes: %w(history)
+      },
+      settings: {
+        icon: 'face',
+        attributes: %w(privacy)
+      },
+      notes: {
+        icon: 'edit',
+        attributes: %w(notes private_notes)
+      }
+    }
   end
 end
