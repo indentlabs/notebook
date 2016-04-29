@@ -1,4 +1,8 @@
 PlanCharacters::Application.routes.draw do
+  get 'siblingship/create'
+
+  get 'siblingship/destroy'
+
   devise_for :users
   # rubocop:disable LineLength
 
