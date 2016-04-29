@@ -47,7 +47,6 @@ ActiveRecord::Schema.define(version: 20160405035806) do
     t.text     "father"
     t.text     "mother"
     t.text     "spouse"
-    t.text     "siblings"
     t.text     "archenemy"
     t.text     "notes"
     t.text     "private_notes"

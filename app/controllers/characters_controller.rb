@@ -16,6 +16,7 @@ class CharactersController < ContentController
       :mannerisms, :birthday, :birthplace, :education, :background,
       :fave_color, :fave_food, :fave_possession, :fave_weapon, :fave_animal,
       :father, :mother, :spouse, :siblings, :archenemy, :notes, :private_notes
+      # TODO: remove :siblings if needed / nested attributes
     ]
   end
 end

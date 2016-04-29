@@ -52,6 +52,7 @@ class Character < ActiveRecord::Base
       relations: {
         icon: 'face',
         attributes: %w(mother father spouse siblings archenemy)
+        # TODO: recognize siblings is association
       },
       notes: {
         icon: 'edit',
