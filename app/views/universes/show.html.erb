@@ -1,1 +1,147 @@
 <%= render partial: 'content/show', locals: { content: @content } %>
+
+
+<%# TODO: move the rest (and their twins in dashboard.html) to a partial %>
+
+
+  <div class="col s12 m12 l4">
+    <div class="card hoverable">
+      <div class="card-image waves-effect waves-block waves-light">
+        <%= image_tag 'card-headers/characters.jpg', class: 'activator', style: 'height: 390px' %>
+      </div>
+      <div class="card-content">
+        <span class="card-title activator grey-text text-darken-4">
+          Contains <%= pluralize(@content.characters.count, 'character') %>
+          <i class="material-icons right">arrow_upward</i>
+        </span>
+        <p>
+          <%= link_to 'Create another', character_create_path %>
+        </p>
+      </div>
+      <div class="card-reveal">
+        <span class="card-title grey-text text-darken-4">
+          Characters
+          <i class="material-icons right">close</i>
+        </span>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Created at</th>
+            <th>Last modified</th>
+            <th></th>
+          </tr>
+          <% @content.characters.each do |character| %>
+          <tr>
+            <td><%= link_to character.name, character %></td>
+            <td><%= character.role %></td>
+            <td><%= character.created_at.strftime("%m/%d/%Y") %></td>
+            <td><%= character.updated_at.strftime("%m/%d/%Y") %></td>
+            <td>
+              <%= link_to edit_character_path(character) do %>
+                <i class="material-icons">edit</i>
+              <% end %>
+            </td>
+          </tr>
+          <% end %>
+        </table>
+        <%= link_to 'Create another', character_create_path, class: 'btn' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12 m12 l4">
+    <div class="card hoverable">
+      <div class="card-image waves-effect waves-block waves-light">
+        <%= image_tag 'card-headers/locations.jpg', class: 'activator', style: 'height: 390px' %>
+      </div>
+      <div class="card-content">
+        <span class="card-title activator grey-text text-darken-4">
+          Contains <%= pluralize(@content.locations.count, 'location') %>
+          <i class="material-icons right">arrow_upward</i>
+        </span>
+        <p>
+          <%= link_to 'Create another', location_create_path %>
+        </p>
+      </div>
+      <div class="card-reveal">
+        <span class="card-title grey-text text-darken-4">
+          Locations
+          <i class="material-icons right">close</i>
+        </span>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Created at</th>
+            <th>Last modified</th>
+            <th></th>
+          </tr>
+          <% @content.locations.each do |location| %>
+          <tr>
+            <td><%= link_to location.name, location %></td>
+            <td><%= location.description %></td>
+            <td><%= location.type_of %></td>
+            <td><%= location.created_at.strftime("%m/%d/%Y") %></td>
+            <td><%= location.updated_at.strftime("%m/%d/%Y") %></td>
+            <td>
+              <%= link_to edit_location_path(location) do %>
+                <i class="material-icons">edit</i>
+              <% end %>
+            </td>
+          </tr>
+          <% end %>
+        </table>
+        <%= link_to 'Create another', location_create_path, class: 'btn' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12 m12 l4">
+    <div class="card hoverable">
+      <div class="card-image waves-effect waves-block waves-light">
+        <%= image_tag 'card-headers/items.jpg', class: 'activator', style: 'height: 390px' %>
+      </div>
+      <div class="card-content">
+        <span class="card-title activator grey-text text-darken-4">
+          Contains <%= pluralize(@content.items.count, 'items') %>
+          <i class="material-icons right">arrow_upward</i>
+        </span>
+        <p>
+          <%= link_to 'Create another', item_create_path %>
+        </p>
+      </div>
+      <div class="card-reveal">
+        <span class="card-title grey-text text-darken-4">
+          Items
+          <i class="material-icons right">close</i>
+        </span>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Created at</th>
+            <th>Last modified</th>
+            <th></th>
+          </tr>
+          <% @content.items.each do |item| %>
+          <tr>
+            <td><%= link_to item.name, item %></td>
+            <td><%= item.description %></td>
+            <td><%= item.item_type %></td>
+            <td><%= item.created_at.strftime("%m/%d/%Y") %></td>
+            <td><%= item.updated_at.strftime("%m/%d/%Y") %></td>
+            <td>
+              <%= link_to edit_item_path(item) do %>
+                <i class="material-icons">edit</i>
+              <% end %>
+            </td>
+          </tr>
+          <% end %>
+        </table>
+        <%= link_to 'Create another', item_create_path, class: 'btn' %>
+      </div>
+    </div>
+  </div>
