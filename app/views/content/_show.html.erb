@@ -20,8 +20,23 @@
           <div id="<%= category %>" class="row">
             <% data[:attributes].each do |attribute| %>
               <div class="col s6 m6 l3 right-align flow-text grey-text"><%= attribute.humanize.capitalize %></div>
-              <div class="col s6 m6 l3 <%= "flow-text" unless content.send(attribute).to_s.length > 140 %> "><%= content.send(attribute) %>&nbsp;</div>
-              <%# TODO: if text is > 240, truncate and add "Read more" link that opens modal %>
+
+              <% value = content.send(attribute) %>
+              <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
+                <div class="col s6 m6 l3 flow-text">
+                  <% value.each do |li| %>
+                    <div>
+                      <span class="<%= content.class.color %>-text"><i class="material-icons"><%= content.class.icon %></i></span>
+                      <%= link_to li.name, li %>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <%# TODO: if text is > 240, truncate and add "Read more" link that opens modal %>
+                <div class="col s6 m6 l3 <%= "flow-text" unless value.to_s.length > 140 %>">
+                  <%= value %>&nbsp;
+                </div>
+              <% end %>
             <% end %>
           </div>
         <% end %>

@@ -14,6 +14,25 @@ class Character < ActiveRecord::Base
 
   belongs_to :universe
 
+  # TODO: Rip all this out into a HasSiblings concern (or better yet, generalize it into a HasRelationship concern)
+  has_many :siblingships
+  has_many :siblings, through: :siblingships
+
+  has_many :inverse_siblingships, class_name: 'Siblingship', foreign_key: 'sibling_id'
+  has_many :inverse_siblings, through: :inverse_siblingships, source: :character
+
+
+
+
+
+
+
+
+
+
+
+
+
   def description
     role
   end
