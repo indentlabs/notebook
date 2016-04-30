@@ -1,5 +1,6 @@
 # Controller for the Character model
 class CharactersController < ContentController
+  autocomplete :character, :name, full: true, limit: 10 # TODO: probably set full: false after testing
 
   private
 

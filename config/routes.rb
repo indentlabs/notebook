@@ -1,7 +1,10 @@
 PlanCharacters::Application.routes.draw do
   get 'siblingship/create'
-
   get 'siblingship/destroy'
+
+  # TODO: move character stuff into here
+
+
 
   devise_for :users
   # rubocop:disable LineLength
@@ -38,6 +41,10 @@ PlanCharacters::Application.routes.draw do
     get '/character/:id/edit', to: 'characters#edit',    as: :edit_character
     patch '/character/:id',      to: 'characters#update',  as: :character_edit_process
     delete '/character/:id',      to: 'characters#destroy', as: :character_destroy
+
+    resources :characters do
+      get :autocomplete_character_name, on: :collection, as: :autocomplete_name
+    end
 
     # Items
     get '/items',          to: 'items#index',   as: :item_list

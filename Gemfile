@@ -20,6 +20,7 @@ gem 'material_icons'
 # Javascript
 gem 'coffee-rails'
 gem 'jquery-rails'
+gem 'jquery-ui-rails'
 gem 'rails-jquery-autocomplete'
 
 # Smarts
