@@ -14,9 +14,7 @@ Rails.application.routes.draw do
 
   # Info pages
   scope '/about' do
-    get '/anon-login', to: 'main#anoninfo',    as: :anon_info
     get '/privacy',    to: 'main#privacyinfo', as: :privacy_info
-    get '/attribution', to: 'main#attribution', as: :attribution_info
   end
 
   # User-centric stuff
@@ -97,6 +95,9 @@ Rails.application.routes.draw do
     end
   end
 
+
+
+
   # Adoption Agency
   scope '/adoption' do
     get '/', to: 'main#comingsoon'
@@ -105,31 +106,6 @@ Rails.application.routes.draw do
   # Idea Market
   scope '/market' do
     get '/', to: 'main#comingsoon'
-  end
-
-  # Write
-  scope '/write' do
-    get '/lyrics',     to: 'main#comingsoon'
-    get '/novel',      to: 'main#comingsoon'
-    get '/nonfiction', to: 'main#comingsoon'
-    get '/poetry',     to: 'main#comingsoon'
-    get '/screenplay', to: 'main#comingsoon'
-    get '/story',      to: 'main#comingsoon'
-  end
-
-  # Revise
-  scope '/revise' do
-    get '/checklists',          to: 'main#comingsoon'
-    get '/analytics',           to: 'main#comingsoon'
-    get '/peer-critiques',      to: 'main#comingsoon'
-    get '/professional-review', to: 'main#comingsoon'
-  end
-
-  # Submit
-  scope '/submit' do
-    get '/blog',              to: 'main#comingsoon'
-    get '/print-publishers',  to: 'main#comingsoon'
-    get '/online-publishers', to: 'main#comingsoon'
   end
 
   # rubocop:enable LineLength
