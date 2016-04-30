@@ -1,8 +1,8 @@
-PlanCharacters::Application.routes.draw do
+Rails.application.routes.draw do
   get 'siblingship/create'
   get 'siblingship/destroy'
 
-  # TODO: move character stuff into here
+  # TODO: transition scopes blocks to resource blocks
 
 
 
@@ -33,53 +33,19 @@ PlanCharacters::Application.routes.draw do
   # Planning
   scope '/plan' do
     # Characters
-    get '/characters',         to: 'characters#index',   as: :character_list
-    get '/characters/from/:universe', to: 'characters#index', as: :characters_by_universe
-    get '/character/new',      to: 'characters#new',     as: :character_create
-    post '/character/new',      to: 'characters#create',  as: :character_create_process
-    get '/character/:id',      to: 'characters#show',    as: :character
-    get '/character/:id/edit', to: 'characters#edit',    as: :edit_character
-    patch '/character/:id',      to: 'characters#update',  as: :character_edit_process
-    delete '/character/:id',      to: 'characters#destroy', as: :character_destroy
-
     resources :characters do
       get :autocomplete_character_name, on: :collection, as: :autocomplete_name
     end
-
-    # Items
-    get '/items',          to: 'items#index',   as: :item_list
-    get '/items/from/:universe', to: 'items#index', as: :item_by_universe
-    get '/item/new',      to: 'items#new',     as: :item_create
-    get '/item/new/:type_of', to: 'items#new',     as: :item_create_type
-    post '/item/new',      to: 'items#create',  as: :item_create_process
-    get '/item/:id',      to: 'items#show',    as: :item
-    get '/item/:id/edit', to: 'items#edit',    as: :edit_item
-    patch '/item/:id',      to: 'items#update',  as: :item_edit_process
-    delete '/item/:id',      to: 'items#destroy', as: :item_destroy
-
-    # Locations
-    get '/locations',         to: 'locations#index',   as: :location_list
-    get '/locations/from/:universe', to: 'locations#index', as: :locations_by_universe
-    get '/location/new',      to: 'locations#new',     as: :location_create
-    post '/location/new',      to: 'locations#create',  as: :location_create_process
-    get '/location/new/:type_of', to: 'locations#new',     as: :location_create_type
-    get '/location/:id',      to: 'locations#show',    as: :location
-    get '/location/:id/edit', to: 'locations#edit',    as: :edit_location
-    patch '/location/:id',      to: 'locations#update',  as: :location_edit_process
-    delete '/location/:id',      to: 'locations#destroy', as: :location_destroy
-
-    # Universes
-    get '/universes',         to: 'universes#index',   as: :universe_list
-    get '/universe/new',      to: 'universes#new',     as: :universe_create
-    post '/universe/new',      to: 'universes#create',  as: :universe_create_process
-    get '/universe/:id',      to: 'universes#show',    as: :universe
-    get '/universe/:id/edit', to: 'universes#edit',    as: :edit_universe
-    patch '/universe/:id',      to: 'universes#update',  as: :universe_edit_process
-    delete '/universe/:id',      to: 'universes#destroy', as: :universe_destroy
+    resources :items
+    resources :locations
+    resources :universes
 
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'
   end
+
+
+
 
   # API Endpoints
   scope '/generate' do
