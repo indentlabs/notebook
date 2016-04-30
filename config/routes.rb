@@ -1,9 +1,7 @@
 Rails.application.routes.draw do
+  # TODO: siblingships resource
   get 'siblingship/create'
   get 'siblingship/destroy'
-
-  # TODO: transition scopes blocks to resource blocks
-
 
 
   devise_for :users

@@ -24,7 +24,9 @@ class Character < ActiveRecord::Base
 
 
 
-
+  def tag_partial
+    "partial"
+  end
 
 
 
