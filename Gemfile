@@ -1,27 +1,37 @@
 source 'https://rubygems.org'
 
 ruby '2.2.3'
-
 gem 'rails'
-gem 'jquery-rails'
-gem 'sass-rails'
-gem 'coffee-rails'
+
+# Storage
+gem 'aws-sdk', '~> 1.50'
+
+# Image processing
 gem 'paperclip', '~> 4.2.0'
 gem 'rmagick', '2.13.4'
-gem 'aws-sdk', '~> 1.50'
+
+# Authentication
 gem 'devise'
+
+# Design
+gem 'sass-rails'
 gem 'material_icons'
 
-# Libraries
+# Javascript
+gem 'coffee-rails'
+gem 'jquery-rails'
+gem 'rails-jquery-autocomplete'
+
+# Smarts
 #gem 'serendipitous', :path => "~/Code/indent/serendipitous-gem"
 gem 'serendipitous', :git => 'git://github.com/indentlabs/serendipitous-gem.git'
 
 group :production do
-  gem 'less-rails'
-  gem 'less-rails-fontawesome'
+#  gem 'less-rails'
+#  gem 'less-rails-fontawesome'
   gem 'uglifier', '>= 1.3.0'
-  gem 'bootplus-rails'
-  #gem 'rails_12factor'
+#  gem 'bootplus-rails'
+#  gem 'rails_12factor'
 end
 
 group :test, :production do
