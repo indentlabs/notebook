@@ -15,9 +15,9 @@
           <span class="right">
             <i class="material-icons red-text"><%= content.class.icon %></i>
             <% if content.persisted? %>
-            <a class='dropdown-button black-text' href='#' data-activates='options-menu'>
-              <i class="material-icons">more_vert</i>
-            </a>
+              <a class='dropdown-button black-text' href='#' data-activates='options-menu' data-constrainwidth='false'>
+                <i class="material-icons">more_vert</i>
+              </a>
             <% end %>
 
             <ul id='options-menu' class='dropdown-content'>
@@ -59,7 +59,7 @@
                 <% value = content.send(attribute) %>
                 <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
                   <div>
-                  <%= f.label attribute, attribute.humanize.capitalize %>
+                    <%= f.label attribute, attribute.humanize.capitalize %>
                   </div>
                   <% value.each do |li| %>
                     <div class="chip">
@@ -70,9 +70,23 @@
                       <i class="material-icons">close</i>
                     </div>
                   <% end %>
+                  <% klass = value.build.class %>
+
+                  <a class='dropdown-button black-text' href='#' data-activates='relation-<%= attribute %>' data-constrainwidth='false'>
+                    <i class="material-icons">add</i>
+                  </a>
+
+                  <ul id='relation-<%= attribute %>' class='dropdown-content'>
+                    <% current_user.send("#{klass.to_s.downcase}s").each do |li| %>
+                      <% next if content.persisted? && value.include?(li) %>
+                      <li><%= li.name %></li>
+                    <% end %>
+                  </ul>
+
                   <div class="input-field">
                     <%= f.label attribute, "Add #{value.any? ? 'another' : 'one'}" %>
-                    <%= f.autocomplete_field :siblings, autocomplete_name_characters_path, 'data-delimiter' => ', ', multiple: true, 'data-auto-focus' => true %>
+                    <%= f.autocomplete_field :siblings, autocomplete_name_characters_path, 'data-delimiter' => ', ', multiple: true, 'data-auto-focus' => true, id_element: '#autocomplete_siblings' %>
+                    <%= hidden_field :autocomplete, :siblings %>
                   </div>
                 <% else %>
                   <div class="input-field">
@@ -92,3 +106,11 @@
     </div>
   </div>
 </div>
+
+<%# TODO: move this to chips.js or something %>
+<% content_for :javascript do %>
+//  $('.js-chip-selector').change(function () {
+//    alert('change');
+//  });
+//  alert('loaded');
+<% end %>
