@@ -81,7 +81,7 @@ class ContentController < ApplicationController
       .new(content_params)
       .tap do |c|
         c.user_id = current_user.id
-        c.universe = universe_from_params if c.respond_to? :universe #todo this doesn't actually work?
+        c.universe = universe_from_params if c.respond_to? :universe # TODO: this doesn't actually work?
       end
   end
 
