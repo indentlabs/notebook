@@ -56,9 +56,22 @@
             <% data[:attributes].each do |attribute| %>
               <div class="col s10 m8 l4">
                 <%# TODO: not this lol %>
-                <% if content.send(attribute).is_a?(ActiveRecord::Associations::CollectionProxy) %>
+                <% value = content.send(attribute) %>
+                <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
+                  <div>
+                  <%= f.label attribute, attribute.humanize.capitalize %>
+                  </div>
+                  <% value.each do |li| %>
+                    <div class="chip">
+                      <%= link_to li do %>
+                        <span class="<%= content.class.color %>-text"><i class="material-icons left"><%= content.class.icon %></i></span>
+                        <%= li.name %>
+                      <% end %>
+                      <i class="material-icons">close</i>
+                    </div>
+                  <% end %>
                   <div class="input-field">
-                    <%= f.label attribute, attribute.humanize.capitalize %>
+                    <%= f.label attribute, "Add #{value.any? ? 'another' : 'one'}" %>
                     <%= f.autocomplete_field :siblings, autocomplete_name_characters_path, 'data-delimiter' => ', ', multiple: true, 'data-auto-focus' => true %>
                   </div>
                 <% else %>
