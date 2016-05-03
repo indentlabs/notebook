@@ -1,5 +1,7 @@
 # Controller for the Location model
 class LocationsController < ContentController
+  autocomplete :location, :name
+
   private
 
   def content_params

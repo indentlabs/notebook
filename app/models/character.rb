@@ -23,6 +23,8 @@ class Character < ActiveRecord::Base
   relates :spouses,      with: :marriages
   relates :archenemies,  with: :archenemyship
 
+  relates :birthplaces,  with: :birthings
+
   def description
     role
   end
@@ -52,7 +54,7 @@ class Character < ActiveRecord::Base
       # TODO: remove schema for mannerisms
       history: {
         icon: 'info',
-        attributes: %w(birthday birthplace education background)
+        attributes: %w(birthday birthplaces education background)
       },
       favorites: {
         icon: 'star',

@@ -3,9 +3,9 @@
   <% uuid = SecureRandom.uuid %>
 
   <% if f.object && f.object.send(attribute) %>
+    <% klass = f.object.send(attribute).class %>
 
     <div class="chip">
-      <% klass = f.object.send(attribute).class %>
       <%= link_to f.object.send(attribute) do %>
         <span class="<%= klass.color %>-text">
           <i class="material-icons left"><%= klass.icon %></i>
@@ -17,10 +17,11 @@
     <%= link_to_remove_association 'remove', f %>
 
   <% else %>
+    <% klass = parent.send(attribute.pluralize).build.class.name.downcase %>
 
     <div class="input-field">
       <%= f.label attribute %>
-      <%= f.autocomplete_field "#{attribute}_id", autocomplete_name_characters_path, 'data-auto-focus' => true, id_element: "##{uuid}" %>
+      <%= f.autocomplete_field "#{attribute}_id", send("autocomplete_name_#{klass.pluralize}_path"), 'data-auto-focus' => true, id_element: "##{uuid}" %>
       <%= f.hidden_field "#{attribute}_id", id: uuid %>
 
       <%= link_to_remove_association 'remove', f %>

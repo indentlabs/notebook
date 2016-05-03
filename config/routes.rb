@@ -1,9 +1,4 @@
 Rails.application.routes.draw do
-  # TODO: siblingships resource
-  get 'siblingship/create'
-  get 'siblingship/destroy'
-
-
   devise_for :users
   # rubocop:disable LineLength
 
@@ -33,7 +28,9 @@ Rails.application.routes.draw do
       get :autocomplete_character_name, on: :collection, as: :autocomplete_name
     end
     resources :items
-    resources :locations
+    resources :locations do
+      get :autocomplete_location_name, on: :collection, as: :autocomplete_name
+    end
     resources :universes
 
     # Coming Soon TM
