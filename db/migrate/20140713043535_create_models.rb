@@ -19,7 +19,6 @@ class CreateModels < ActiveRecord::Migration
       t.string :identmarks # Identifying marks
 
       # Social
-      t.text :bestfriend
       t.text :religion
       t.text :politics
       t.text :prejudices
@@ -52,10 +51,6 @@ class CreateModels < ActiveRecord::Migration
       t.string :fave_weapon
       t.string :fave_animal
       # favorite leisure activities
-
-      # Relationships
-      t.text :spouse
-      t.text :archenemy
 
       # Notes
       t.text :notes

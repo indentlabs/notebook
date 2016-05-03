@@ -16,12 +16,12 @@ class Character < ActiveRecord::Base
 
   include HasContentGroupers
 
-  relates :siblings, with: :siblingships
-  relates :fathers,  with: :fatherships
-  relates :mothers,  with: :motherships
-
-
-
+  relates :siblings,     with: :siblingships
+  relates :fathers,      with: :fatherships
+  relates :mothers,      with: :motherships
+  relates :best_friends, with: :best_friendships
+  relates :spouses,      with: :marriages
+  relates :archenemies,  with: :archenemyship
 
   def description
     role
@@ -47,7 +47,7 @@ class Character < ActiveRecord::Base
       },
       social: {
         icon: 'groups',
-        attributes: %w(bestfriend religion politics prejudices occupation)
+        attributes: %w(best_friends religion politics prejudices occupation)
       },
       # TODO: remove schema for mannerisms
       history: {
@@ -60,7 +60,7 @@ class Character < ActiveRecord::Base
       },
       relations: {
         icon: 'face',
-        attributes: %w(mothers fathers spouse siblings archenemy)
+        attributes: %w(mothers fathers spouses siblings archenemies)
       },
       notes: {
         icon: 'edit',

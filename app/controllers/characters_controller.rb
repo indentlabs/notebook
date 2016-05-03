@@ -16,13 +16,16 @@ class CharactersController < ContentController
       :universe_id, :user_id,
       :name, :age, :role, :gender, :age, :height, :weight, :haircolor,
       :facialhair, :eyecolor, :race, :skintone, :bodytype, :identmarks,
-      :bestfriend, :religion, :politics, :prejudices, :occupation, :pets,
+      :religion, :politics, :prejudices, :occupation, :pets,
       :mannerisms, :birthday, :birthplace, :education, :background,
       :fave_color, :fave_food, :fave_possession, :fave_weapon, :fave_animal,
       :spouse, :archenemy, :notes, :private_notes,
       siblingships_attributes: [:id, :sibling_id, :_destroy],
       fatherships_attributes:  [:id, :father_id, :_destroy],
-      motherships_attributes:  [:id, :mother_id, :_destroy]
+      motherships_attributes:  [:id, :mother_id, :_destroy],
+      best_friendships_attributes: [:id, :best_friend_id, :_destroy],
+      spouses_attributes:      [:id, :spouse_id, :_destroy],
+      archenemies_attributes:  [:id, :archenemy_id, :_destroy]
     ]
   end
 end

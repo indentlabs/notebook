@@ -11,7 +11,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160503183859) do
+ActiveRecord::Schema.define(version: 20160503193541) do
+
+  create_table "archenemyships", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "archenemy_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  create_table "best_friendships", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "best_friend_id"
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
+  end
 
   create_table "characters", force: :cascade do |t|
     t.string   "name",            null: false
@@ -110,6 +126,14 @@ ActiveRecord::Schema.define(version: 20160503183859) do
     t.integer  "universe_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "marriages", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "spouse_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
   end
 
   create_table "motherships", force: :cascade do |t|
