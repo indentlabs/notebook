@@ -1,11 +1,4 @@
-<% if content.errors.any? %>
-<div class="card-panel">
-  This <%= content.class.to_s.downcase %> had errors:
-  <% content.errors.full_messages.each do |msg| %>
-    <li><%= msg %></li>
-  <% end %>
-</div>
-<% end %>
+<%= render 'content/form/errors', content: content %>
 
 <div class="row">
   <div class="col s12">
@@ -14,34 +7,14 @@
         <div class="card-title center">
           <span class="right">
             <i class="material-icons red-text"><%= content.class.icon %></i>
-            <% if content.persisted? %>
-              <a class='dropdown-button black-text' href='#' data-activates='options-menu' data-constrainwidth='false'>
-                <i class="material-icons">more_vert</i>
-              </a>
-            <% end %>
-
-            <ul id='options-menu' class='dropdown-content'>
-              <%# TODO: something with these %>
-              <li><a href="#!">Share this <%= content.class.to_s.downcase %></a></li>
-              <li><a href="#!">Do something else</a></li>
-              <li class="divider"></li>
-              <% if content.persisted? %>
-                <li>
-                  <%= link_to "Delete this #{content.class.to_s.downcase} forever", content,
-                    :class => 'red-text',
-                    :method => :delete,
-                    :confirm => 'Are you sure? This action cannot be undone!' %>
-                </li>
-              <% end %>
-            </ul>
+            <%= render 'content/form/actions_dropdown', content: content %>
           </span>
-          <% if content.persisted? %>
-            <%= content.name %>
-          <% else %>
-            Create your new <%= content.class.to_s.downcase %>
-          <% end %>
+
+          <%= render 'content/form/title', content: content %>
         </div>
-        <ul class="hoverable tabs" style="margin-bottom: 10px;">
+
+        <%# Tabs %>
+        <ul class="hoverable tabs">
           <% content.class.attribute_categories.each do |category, data| %>
             <li class="tab col s12">
               <a href="#<%= category %>">
@@ -51,6 +24,9 @@
             </li>
           <% end %>
         </ul>
+        <br />
+
+        <%# Content panels %>
         <% content.class.attribute_categories.each do |category, data| %>
           <div id="<%= category %>" class="row">
             <% data[:attributes].each do |attribute| %>
@@ -58,29 +34,11 @@
                 <%# TODO: not this lol %>
                 <% value = content.send(attribute) %>
                 <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
-                  <div>
-                    <%= f.label attribute, attribute.humanize.capitalize %>
-                  </div>
-
-                  <div id="siblingships">
-                    <%= f.fields_for :siblingships do |siblingships| %>
-                      <%= render 'siblingship_fields', f: siblingships %>
-                    <% end %>
-                    <div class="links">
-                      <%= link_to_add_association 'add sibling', f, :siblingships, class: 'btn red' %>
-                    </div>
-                  </div>
-
-                  <%# klass = value.build.class %>
-
+                  <%= render 'content/form/relation_input', f: f, attribute: attribute %>
                 <% else %>
-                  <div class="input-field">
-                    <%= f.label attribute, attribute.humanize.capitalize %>
-                    <%= f.text_area attribute, class: 'materialize-textarea', placeholder: 'Write as little or as much as you want!' %>
-                  </div>
+                  <%= render 'content/form/text_input', f: f, attribute: attribute %>
                 <% end %>
-            </div>
-              <%# TODO: if text is > 240, truncate and add "Read more" link that opens modal %>
+              </div>
             <% end %>
           </div>
         <% end %>
@@ -91,11 +49,3 @@
     </div>
   </div>
 </div>
-
-<%# TODO: move this to chips.js or something %>
-<% content_for :javascript do %>
-//  $('.js-chip-selector').change(function () {
-//    alert('change');
-//  });
-//  alert('loaded');
-<% end %>

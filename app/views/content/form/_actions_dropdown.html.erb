@@ -1,0 +1,20 @@
+<% if content.persisted? %>
+  <a class='dropdown-button black-text' href='#' data-activates='options-menu' data-constrainwidth='false'>
+    <i class="material-icons">more_vert</i>
+  </a>
+<% end %>
+
+<ul id='options-menu' class='dropdown-content'>
+  <%# TODO: something with these %>
+  <li><a href="#!">Share this <%= content.class.to_s.downcase %></a></li>
+  <li><a href="#!">Do something else</a></li>
+  <li class="divider"></li>
+  <% if content.persisted? %>
+    <li>
+      <%= link_to "Delete this #{content.class.to_s.downcase} forever", content,
+        :class => 'red-text',
+        :method => :delete,
+        :confirm => 'Are you sure? This action cannot be undone!' %>
+    </li>
+  <% end %>
+</ul>
