@@ -4,10 +4,15 @@
 
 <div id="<%= relation %>">
   <%= f.fields_for relation do |builder| %>
-    <%= render "#{relation.singularize}_fields", f: builder %>
+    <%= render 'content/form/groupship_fields', f: builder, attribute: attribute.singularize %>
   <% end %>
   <div class="links">
     <% color = f.object.send(attribute).build.class.color %>
-    <%= link_to_add_association "add #{attribute.to_s.singularize}", f, relation, class: "btn #{color}" %>
+    <%= link_to_add_association "add #{attribute.to_s.singularize}", f, relation,
+        class: "btn #{color}",
+        partial: 'content/form/groupship_fields',
+        render_options: { locals: {
+            attribute: attribute.singularize
+        }} %>
   </div>
 </div>

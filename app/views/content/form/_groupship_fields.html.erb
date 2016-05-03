@@ -2,12 +2,12 @@
 
   <% uuid = SecureRandom.uuid %>
 
-  <% if f.object && f.object.sibling %>
+  <% if f.object && f.object.send(attribute) %>
 
     <div class="chip">
-      <%= link_to f.object.sibling do %>
+      <%= link_to f.object.send(attribute) do %>
         <span class="<%= Character.color %>-text"><i class="material-icons left"><%= Character.icon %></i></span>
-        <%= f.object.sibling.name %>
+        <%= f.object.send(attribute).name %>
       <% end %>
     </div>
 
@@ -17,8 +17,8 @@
 
     <div class="input-field">
       <%= f.label :sibling %>
-      <%= f.autocomplete_field :sibling_id, autocomplete_name_characters_path, 'data-auto-focus' => true, id_element: "##{uuid}" %>
-      <%= f.hidden_field :sibling_id, id: uuid %>
+      <%= f.autocomplete_field "#{attribute}_id", autocomplete_name_characters_path, 'data-auto-focus' => true, id_element: "##{uuid}" %>
+      <%= f.hidden_field "#{attribute}_id", id: uuid %>
 
       <%= link_to_remove_association 'remove', f %>
     </div>

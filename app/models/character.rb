@@ -22,7 +22,13 @@ class Character < ActiveRecord::Base
   has_many :inverse_siblingships, class_name: 'Siblingship', foreign_key: 'sibling_id'
   has_many :inverse_siblings, through: :inverse_siblingships, source: :character
 
+  # Fathership
+  has_many :fatherships
+  has_many :fathers, through: :fatherships
+  accepts_nested_attributes_for :fatherships, reject_if: :all_blank, allow_destroy: true
 
+  has_many :inverse_fatherships, class_name: 'Fathership', foreign_key: 'father_id'
+  has_many :inverse_fathers, through: :inverse_fatherships, source: :character
 
 
 
@@ -64,8 +70,7 @@ class Character < ActiveRecord::Base
       },
       relations: {
         icon: 'face',
-        attributes: %w(mother father spouse siblings archenemy)
-        # TODO: recognize siblings is association
+        attributes: %w(mother fathers spouse siblings archenemy)
       },
       notes: {
         icon: 'edit',
