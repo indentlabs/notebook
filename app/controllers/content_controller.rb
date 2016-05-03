@@ -20,7 +20,7 @@ class ContentController < ApplicationController
   def show
     # TODO: Secure this with content class whitelist lel
     @content = content_type_from_controller(self.class).find(params[:id])
-    @question = QuestionService.question(Content.new @content.slice(*content_param_list))
+    @question = QuestionService.question(Content.new @content.slice(*content_param_list.reject { |x| x.is_a?(Hash) }))
 
     respond_to do |format|
       format.html # show.html.erb

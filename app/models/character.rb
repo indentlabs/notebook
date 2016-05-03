@@ -17,18 +17,10 @@ class Character < ActiveRecord::Base
   # TODO: Rip all this out into a HasSiblings concern (or better yet, generalize it into a HasRelationship concern)
   has_many :siblingships
   has_many :siblings, through: :siblingships
-  accepts_nested_attributes_for :siblingships
+  accepts_nested_attributes_for :siblingships, reject_if: :all_blank, allow_destroy: true
 
   has_many :inverse_siblingships, class_name: 'Siblingship', foreign_key: 'sibling_id'
   has_many :inverse_siblings, through: :inverse_siblingships, source: :character
-
-
-
-  def tag_partial
-    "partial"
-  end
-
-
 
 
 

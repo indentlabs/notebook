@@ -17,6 +17,9 @@ gem 'devise'
 gem 'sass-rails'
 gem 'material_icons'
 
+# Quality of Life
+gem 'cocoon'
+
 # Javascript
 gem 'coffee-rails'
 gem 'jquery-rails'

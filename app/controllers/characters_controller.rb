@@ -19,8 +19,8 @@ class CharactersController < ContentController
       :bestfriend, :religion, :politics, :prejudices, :occupation, :pets,
       :mannerisms, :birthday, :birthplace, :education, :background,
       :fave_color, :fave_food, :fave_possession, :fave_weapon, :fave_animal,
-      :father, :mother, :spouse, :siblings, :archenemy, :notes, :private_notes
-      # TODO: remove :siblings if needed / nested attributes
+      :father, :mother, :spouse, :archenemy, :notes, :private_notes,
+      siblingships_attributes: [:id, :sibling_id, :_destroy]
     ]
   end
 end

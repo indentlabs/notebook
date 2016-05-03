@@ -15,4 +15,5 @@
 //= require jquery-ui
 //= require jquery-ui/autocomplete
 //= require autocomplete-rails
+//= require cocoon
 //= require_tree .

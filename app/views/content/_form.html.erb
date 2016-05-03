@@ -70,24 +70,18 @@
                       <i class="material-icons">close</i>
                     </div>
                   <% end %>
-                  <% klass = value.build.class %>
 
-                  <a class='dropdown-button black-text' href='#' data-activates='relation-<%= attribute %>' data-constrainwidth='false'>
-                    <i class="material-icons">add</i>
-                  </a>
-
-                  <ul id='relation-<%= attribute %>' class='dropdown-content'>
-                    <% current_user.send("#{klass.to_s.downcase}s").each do |li| %>
-                      <% next if content.persisted? && value.include?(li) %>
-                      <li><%= li.name %></li>
+                  <div id="siblingships">
+                    <%= f.fields_for :siblingships do |siblingships| %>
+                      <%= render 'siblingship_fields', f: siblingships %>
                     <% end %>
-                  </ul>
-
-                  <div class="input-field">
-                    <%= f.label attribute, "Add #{value.any? ? 'another' : 'one'}" %>
-                    <%= f.autocomplete_field :siblings, autocomplete_name_characters_path, 'data-delimiter' => ', ', multiple: true, 'data-auto-focus' => true, id_element: '#autocomplete_siblings' %>
-                    <%= hidden_field :autocomplete, :siblings %>
+                    <div class="links">
+                      <%= link_to_add_association 'add sibling', f, :siblingships %>
+                    </div>
                   </div>
+
+                  <%# klass = value.build.class %>
+
                 <% else %>
                   <div class="input-field">
                     <%= f.label attribute, attribute.humanize.capitalize %>
