@@ -54,7 +54,6 @@ class CreateModels < ActiveRecord::Migration
       # favorite leisure activities
 
       # Relationships
-      t.text :mother
       t.text :spouse
       t.text :archenemy
 

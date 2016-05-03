@@ -18,7 +18,6 @@ class Character < ActiveRecord::Base
   has_many :siblingships
   has_many :siblings, through: :siblingships
   accepts_nested_attributes_for :siblingships, reject_if: :all_blank, allow_destroy: true
-
   has_many :inverse_siblingships, class_name: 'Siblingship', foreign_key: 'sibling_id'
   has_many :inverse_siblings, through: :inverse_siblingships, source: :character
 
@@ -26,9 +25,16 @@ class Character < ActiveRecord::Base
   has_many :fatherships
   has_many :fathers, through: :fatherships
   accepts_nested_attributes_for :fatherships, reject_if: :all_blank, allow_destroy: true
-
   has_many :inverse_fatherships, class_name: 'Fathership', foreign_key: 'father_id'
   has_many :inverse_fathers, through: :inverse_fatherships, source: :character
+
+  # TODO: design DSL in concern to condense these 5-line blocks into 1
+  # Mothership
+  has_many :motherships
+  has_many :mothers, through: :motherships
+  accepts_nested_attributes_for :motherships, reject_if: :all_blank, allow_destroy: true
+  has_many :inverse_motherships, class_name: 'Mothership', foreign_key: 'mother_id'
+  has_many :inverse_mothers, through: :inverse_motherships, source: :character
 
 
 
@@ -70,7 +76,7 @@ class Character < ActiveRecord::Base
       },
       relations: {
         icon: 'face',
-        attributes: %w(mother fathers spouse siblings archenemy)
+        attributes: %w(mothers fathers spouse siblings archenemy)
       },
       notes: {
         icon: 'edit',

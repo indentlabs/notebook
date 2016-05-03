@@ -19,9 +19,10 @@ class CharactersController < ContentController
       :bestfriend, :religion, :politics, :prejudices, :occupation, :pets,
       :mannerisms, :birthday, :birthplace, :education, :background,
       :fave_color, :fave_food, :fave_possession, :fave_weapon, :fave_animal,
-      :mother, :spouse, :archenemy, :notes, :private_notes,
+      :spouse, :archenemy, :notes, :private_notes,
       siblingships_attributes: [:id, :sibling_id, :_destroy],
-      fatherships_attributes:  [:id, :father_id, :_destroy]
+      fatherships_attributes:  [:id, :father_id, :_destroy],
+      motherships_attributes:  [:id, :mother_id, :_destroy]
     ]
   end
 end
