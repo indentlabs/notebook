@@ -34,7 +34,8 @@
                 <%# TODO: not this lol %>
                 <% value = content.send(attribute) %>
                 <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
-                  <%= render 'content/form/relation_input', f: f, attribute: attribute %>
+                  <% through_class = content.class.reflect_on_association(attribute).options[:through].to_s %>
+                  <%= render 'content/form/relation_input', f: f, attribute: attribute, relation: through_class %>
                 <% else %>
                   <%= render 'content/form/text_input', f: f, attribute: attribute %>
                 <% end %>

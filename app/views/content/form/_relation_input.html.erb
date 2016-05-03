@@ -2,11 +2,12 @@
   <%= f.label attribute, attribute.humanize.capitalize %>
 </div>
 
-<div id="siblingships">
-  <%= f.fields_for :siblingships do |siblingships| %>
-    <%= render 'siblingship_fields', f: siblingships %>
+<div id="<%= relation %>">
+  <%= f.fields_for relation do |builder| %>
+    <%= render "#{relation.singularize}_fields", f: builder %>
   <% end %>
   <div class="links">
-    <%= link_to_add_association 'add sibling', f, :siblingships, class: 'btn red' %>
+    <% color = f.object.send(attribute).build.class.color %>
+    <%= link_to_add_association "add #{attribute.to_s.singularize}", f, relation, class: "btn #{color}" %>
   </div>
 </div>
