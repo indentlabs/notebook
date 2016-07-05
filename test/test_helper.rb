@@ -22,6 +22,8 @@ end
 module ActionController
   # Helper methods for controller tests
   class TestCase
+    include Devise::TestHelpers
+    
     def assert_assigns(method, assigned = {})
       get method
       assert_response :success
@@ -38,36 +40,27 @@ module ActionDispatch
     # Make the Capybara DSL available in all integration tests
     include Capybara::DSL
 
-    def register_as(name, email, password)
+    def register_as(email, password)
       visit root_url
-      click_on 'Register'
-      fill_in 'user_name', with: name
-      fill_in 'user_email', with: email
-      fill_in 'user_password', with: password
-      click_on 'Create User'
+      click_on 'Sign up'
+      fill_in 'Email', with: email
+      fill_in 'Password', with: password
+      fill_in 'Password confirmation', with: password
+      within '#new_user' do
+        click_on 'Sign up'
+      end
     end
 
-    def log_in_as(user, password)
+    def log_in_as(email, password)
       visit root_url
-      click_on 'Login'
-      within('#new_session') do
-        fill_in 'session[username]', with: user
-        fill_in 'session[password]', with: password
-      end
-      within('#session-actions') do
-        click_on 'Log in'
-      end
+      click_on 'Sign in'
+      fill_in 'Email', with: email
+      fill_in 'Password', with: password
+      click_on 'Log in'
     end
 
     def log_in_as_user
-      log_in_as 'JRRTolkien', 'Mellon'
-    end
-
-    def log_in_as_anon
-      visit root_url
-      click_on 'Login'
-      click_on 'Be Anonymous'
-      click_on 'I understand, create an account for me'
+      log_in_as 'tolkien@example.com', 'Mellon'
     end
 
     def log_out

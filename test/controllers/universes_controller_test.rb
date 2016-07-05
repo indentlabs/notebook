@@ -2,6 +2,7 @@ require 'test_helper'
 
 # Tests for the UniversesController
 class UniversesControllerTest < ActionController::TestCase
+
   setup do
     @user = users(:tolkien)
 

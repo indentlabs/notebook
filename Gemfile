@@ -12,6 +12,7 @@ gem 'rmagick', '2.13.4'
 
 # Authentication
 gem 'devise'
+gem 'bcrypt'
 
 # Design
 gem 'sass-rails'
@@ -58,6 +59,8 @@ group :test, :development do
   gem 'pry'
   gem 'better_errors'
   gem 'binding_of_caller'
+  gem 'rails-perftest'
+  gem 'ruby-prof'
 end
 
 # Please be sure to update the experimental buildfiles in the gemfiles folder

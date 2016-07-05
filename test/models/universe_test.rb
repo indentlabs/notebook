@@ -22,7 +22,7 @@ class UniverseTest < ActiveSupport::TestCase
   end
 
   test 'can count content' do
-    assert_equal 5, universes(:middleearth).content_count,
+    assert_equal 2, universes(:middleearth).content_count,
                  "Universe didn't count its content properly"
   end
 end
