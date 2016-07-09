@@ -39,10 +39,10 @@ module ActionDispatch
   class IntegrationTest
     # Make the Capybara DSL available in all integration tests
     include Capybara::DSL
+    include FactoryGirl::Syntax::Methods
 
     def register_as(email, password)
-      visit root_url
-      click_on 'Sign up'
+      visit new_user_registration_path
       fill_in 'Email', with: email
       fill_in 'Password', with: password
       fill_in 'Password confirmation', with: password
@@ -52,11 +52,13 @@ module ActionDispatch
     end
 
     def log_in_as(email, password)
-      visit root_url
-      click_on 'Sign in'
+      visit new_user_session_path
       fill_in 'Email', with: email
       fill_in 'Password', with: password
-      click_on 'Log in'
+
+      within '#new_user' do
+        click_on 'Log in'
+      end
     end
 
     def log_in_as_user
@@ -64,7 +66,7 @@ module ActionDispatch
     end
 
     def log_out
-      visit logout_path
+      visit destroy_user_session_path
     end
 
     def teardown

@@ -53,6 +53,7 @@ group :test, :development do
   gem 'sqlite3'
   gem 'tzinfo-data' # addresses a bug when working on Windows
 
+  gem 'factory_girl_rails'
   gem 'guard'
   gem 'guard-minitest'
   gem 'guard-rubocop'
@@ -62,5 +63,3 @@ group :test, :development do
   gem 'rails-perftest'
   gem 'ruby-prof'
 end
-
-# Please be sure to update the experimental buildfiles in the gemfiles folder
