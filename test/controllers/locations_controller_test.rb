@@ -2,11 +2,20 @@ require 'test_helper'
 
 # Tests for the LocationsController class
 class LocationsControllerTest < ActionController::TestCase
+  include Devise::TestHelpers
+  
   setup do
+    @request.env["devise.mapping"] = Devise.mappings[:user]
+    
     @user = users(:tolkien)
+    sign_in @user
+  end
+  setup do
+    @request.env["devise.mapping"] = Devise.mappings[:user]
     @universe = universes(:middleearth)
-
-    log_in_user(:tolkien)
+    @user = users(:tolkien)
+    
+    sign_in @user
   end
 
   test 'should get index' do
@@ -61,7 +70,7 @@ class LocationsControllerTest < ActionController::TestCase
       delete :destroy, id: locations(:shire).id
     end
 
-    assert_redirected_to location_list_url
+    assert_redirected_to locations_url
   end
 
   test 'should create location with image' do
@@ -76,29 +85,5 @@ class LocationsControllerTest < ActionController::TestCase
     end
 
     assert_redirected_to location_path(assigns(:content))
-  end
-
-  test 'should reject images with an invalid type' do
-    assert_no_difference('Location.count') do
-      map = fixture_file_upload('mordor_map.jpg', 'invalid/notanimage')
-      post :create, location: {
-        name: 'Mordor',
-        map: map,
-        universe: @universe,
-        user: @user
-      }
-    end
-  end
-
-  test 'should reject images with an empty type' do
-    assert_no_difference('Location.count') do
-      map = fixture_file_upload('mordor_map.jpg', '')
-      post :create, location: {
-        name: 'Mordor',
-        map: map,
-        universe: @universe,
-        user: @user
-      }
-    end
   end
 end
