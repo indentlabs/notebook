@@ -2,11 +2,13 @@ require 'test_helper'
 
 # Tests for the UniversesController
 class UniversesControllerTest < ActionController::TestCase
-
+  include Devise::TestHelpers
+  
   setup do
+    @request.env["devise.mapping"] = Devise.mappings[:user]
+    
     @user = users(:tolkien)
-
-    log_in_user(:tolkien)
+    sign_in @user
   end
 
   test 'should get index' do
@@ -54,6 +56,6 @@ class UniversesControllerTest < ActionController::TestCase
       delete :destroy, id: universes(:middleearth).id
     end
 
-    assert_redirected_to universe_list_url
+    assert_redirected_to universes_url
   end
 end
