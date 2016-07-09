@@ -62,7 +62,9 @@ module ActionDispatch
     end
 
     def log_in_as_user
-      log_in_as 'tolkien@example.com', 'Mellon'
+      user = create(:user)
+      log_in_as user.email, user.password
+      return user
     end
 
     def log_out
