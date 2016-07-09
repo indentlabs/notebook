@@ -3,7 +3,6 @@ require 'test_helper'
 # Tests for the Universe model class
 class UniverseTest < ActiveSupport::TestCase
   test 'universe not valid without a name' do
-    skip 'Validation disabled due to database migration conflicts.'
     universe = universes(:middleearth)
     universe.name = nil
 
