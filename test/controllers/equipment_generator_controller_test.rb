@@ -2,10 +2,6 @@ require 'test_helper'
 
 # Tests for the EquipmentGeneratorController
 class EquipmentGeneratorControllerTest < ActionController::TestCase
-  test 'armor' do
-    skip 'method currently does nothing'
-  end
-
   test 'armor shield' do
     assert_assigns :armor_shield, [:shield_types]
   end
