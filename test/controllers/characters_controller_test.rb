@@ -2,11 +2,14 @@ require 'test_helper'
 
 # Tests for the CharactersController class
 class CharactersControllerTest < ActionController::TestCase
+  include Devise::TestHelpers
+  
   setup do
+    @request.env["devise.mapping"] = Devise.mappings[:user]
     @user = users(:tolkien)
     @universe = universes(:middleearth)
 
-    log_in_user(:tolkien)
+    sign_in @user
   end
 
   test 'should get index' do
@@ -63,21 +66,6 @@ class CharactersControllerTest < ActionController::TestCase
       delete :destroy, id: characters(:frodo).id
     end
 
-    assert_redirected_to character_list_url
-  end
-
-  test 'create anonymous account if not logged in' do
-    session[:user] = nil
-    assert_difference('Character.count') do
-      post :create, character: {
-        age: 'Created Age',
-        name: 'Created Name',
-        universe: @universe
-      }
-    end
-
-    assert_redirected_to character_path(assigns(:content))
-    assert_not_nil session[:user]
-    assert session[:anon_user]
+    assert_redirected_to characters_url
   end
 end

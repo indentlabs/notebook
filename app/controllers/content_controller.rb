@@ -69,7 +69,7 @@ class ContentController < ApplicationController
     @content = content_type.find(params[:id])
     @content.destroy
 
-    url = send("#{@content.class.to_s.downcase}_list_path")
+    url = send("#{@content.class.to_s.downcase.pluralize}_path")
     successful_response(url, t(:delete_success, model_name: humanized_model_name))
   end
 
