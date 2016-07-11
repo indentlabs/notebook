@@ -6,8 +6,8 @@ class CharactersControllerTest < ActionController::TestCase
   
   setup do
     @request.env["devise.mapping"] = Devise.mappings[:user]
-    @user = users(:tolkien)
-    @universe = universes(:middleearth)
+    @user = create(:user)
+    @universe = create(:universe, user: @user)
 
     sign_in @user
   end
@@ -24,11 +24,13 @@ class CharactersControllerTest < ActionController::TestCase
   end
 
   test 'should create character' do
+    character = build(:character, universe: @universe, age: 70)
+    
     assert_difference('Character.count') do
       post :create, character: {
-        age: 'Created Age',
-        name: 'Created Name',
-        universe: @universe
+        age: character.age,
+        name: character.name,
+        universe: character.universe
       }
     end
 
@@ -36,34 +38,37 @@ class CharactersControllerTest < ActionController::TestCase
   end
 
   test 'should show character' do
-    @character = characters(:frodo)
+    character = create(:character, user: @user)
 
-    get :show, id: @character.id
+    get :show, id: character.id
     assert_response :success
   end
 
   test 'should get edit' do
-    @character = characters(:frodo)
-    get :edit, id: @character.id
+    character = create(:character, user: @user)
+    
+    get :edit, id: character.id
     assert_response :success
   end
 
   test 'should update character' do
-    @character = characters(:frodo)
+    character = create(:character, age: 70, universe: @universe, user: @user)
 
-    put :update, id: @character, character: {
-      age: @character.age,
-      name: @character.name,
-      universe: @universe
+    put :update, id: character.id, character: {
+      age: character.age,
+      name: character.name,
+      universe: character.universe
     }
 
     assert_response 302
-    assert_redirected_to character_path(@character)
+    assert_redirected_to character_path(character)
   end
 
   test 'should destroy character' do
+    character = create(:character, user: @user)
+    
     assert_difference('Character.count', -1) do
-      delete :destroy, id: characters(:frodo).id
+      delete :destroy, id: character.id
     end
 
     assert_redirected_to characters_url

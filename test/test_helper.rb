@@ -11,7 +11,7 @@ require 'capybara/rails'
 module ActiveSupport
   # Helper methods for unit tests
   class TestCase
-    fixtures :all
+    include FactoryGirl::Syntax::Methods
 
     def log_in_user(user_fixture)
       session[:user] = users(user_fixture).id
