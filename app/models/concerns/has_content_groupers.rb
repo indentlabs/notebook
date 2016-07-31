@@ -6,7 +6,7 @@ module HasContentGroupers
   included do
     # relates :siblings, with: :siblingships
     # Defines :siblings and :siblingships relations, their inverses, and accepts nested attributes for the connecting class
-    def self.relates relation, with: nil, inverse: nil
+    def self.relates relation, with:, where: {}
       singularized_relation = relation.to_s.singularize
       connecting_class = with
 

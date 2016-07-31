@@ -30,6 +30,9 @@ gem 'rails-jquery-autocomplete'
 #gem 'serendipitous', :path => "~/Code/indent/serendipitous-gem"
 gem 'serendipitous', :git => 'git://github.com/indentlabs/serendipitous-gem.git'
 
+# Editor
+gem 'medium-editor-rails'
+
 group :production do
 #  gem 'less-rails'
 #  gem 'less-rails-fontawesome'

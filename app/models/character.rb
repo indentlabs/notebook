@@ -16,14 +16,20 @@ class Character < ActiveRecord::Base
 
   include HasContentGroupers
 
-  relates :siblings,     with: :siblingships
-  relates :fathers,      with: :fatherships
-  relates :mothers,      with: :motherships
-  relates :best_friends, with: :best_friendships
-  relates :spouses,      with: :marriages
-  relates :archenemies,  with: :archenemyship
+  # Characters
+  relates :siblings,       with: :siblingships
+  relates :fathers,        with: :fatherships
+  relates :mothers,        with: :motherships
+  relates :best_friends,   with: :best_friendships
+  relates :spouses,        with: :marriages
+  relates :archenemies,    with: :archenemyship
 
-  relates :birthplaces,  with: :birthings
+  # Locations
+  relates :birthplaces,    with: :birthings
+
+  # Items
+  relates :favorite_items, with: :ownerships, where: { favorite: true }
+
 
   def description
     role
