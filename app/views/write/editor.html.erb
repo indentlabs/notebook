@@ -3,13 +3,78 @@
     <div class="editor"></div>
   </div>
   <div class="col s3">
-    <div class="card-container">Cards</div>
+    <div class="card-container"></div>
   </div>
 </div>
 
 <script>
-  var editor = new MediumEditor('.editor', {});
+  var notebook_data = {
+    'characters': <%= @characters.to_json.html_safe %>,
+    'locations':  <%= @locations.to_json.html_safe %>,
+    'items':      <%= @items.to_json.html_safe %>,
+
+    'matches_anything': function (name) {
+      for (var i = 0, m = this.characters.length; i < m; i++) {
+        // TODO: We can break early if character/etc names are sorted and we pass where we'd match
+        if (name == this.characters[i]['name']) {
+          return this.characters[i];
+        }
+      }
+
+      for (var i = 0, m = this.locations.length; i < m; i++) {
+        if (name == this.locations[i]['name']) {
+          return this.locations[i];
+        }
+      }
+
+      for (var i = 0, m = this.items.length; i < m; i++) {
+        if (name == this.items[i]['name']) {
+          return this.items[i];
+        }
+      }
+
+      return null;
+    }
+  };
+
+  function build_card_template_for(data) {
+    var card = $('<div />').addClass('card')
+      .append($('<h5 />').addClass('title').text(data['name']))
+      .attr('identifier', data['name']);
+
+    var ignored_fields = [
+      'name', 'id', 'user_id', 'universe_id', 'created_at', 'updated_at'
+    ];
+
+    $.each(data, function (key, value) {
+      if (ignored_fields.indexOf(key) >= 0) {
+        return true; // return true == continue
+      }
+
+      // Don't add blank values
+      if (value == '' || value == null) { return true; }
+
+      card.append($('<div />').text(key + ': ' + value));
+    });
+
+    return card;
+  }
+
+  var editor = new MediumEditor('.editor', {
+    'disableExtraSpaces': true
+  });
   editor.subscribe('editableInput', function (data, editable) {
-    console.log($(editable).text());
+    var active_paragraph = $(editable).find('p:last');
+    var hotwords = active_paragraph.text().split(/[\r|\n|\s]+/).filter(Boolean).slice(-1);
+    // #TODO: Trigger this on text selection also, which makes hotwords > 1 more relevant
+
+    for (var i = 0, m = hotwords.length; i < m; i++) {
+      if ((match = notebook_data.matches_anything(hotwords[i])) != null) {
+        if ($('.card-container').find('.card[identifier=' + match['name'] + ']').length == 0) {
+          var card_to_create = build_card_template_for(match);
+          $('.card-container').prepend(card_to_create);
+        }
+      }
+    }
   });
 </script>
