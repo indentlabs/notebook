@@ -38,14 +38,25 @@
   };
 
   function build_card_template_for(data) {
-    var card = $('<div />').addClass('card')
-      .append($('<h5 />').addClass('title').text(data['name']))
+    var card = $('<div />').addClass('hoverable card')
+      .append($('<div />').addClass('card-content')
+        .append($('<span />').addClass('card-title activator').text(data['name']))
+      )
+      .append($('<div />').addClass('card-reveal')
+        .append($('<i />').addClass('material-icons right').text('X'))
+        .append($('<div />').addClass('extended-info').text('Extended info'))
+      )
+      .append($('<div />').addClass('card-action')
+        .append($('<a />').attr('href', '#').text('Clear'))
+        .append($('<a />').attr('href', '#').addClass('activator').text('More...'))
+      )
       .attr('identifier', data['name']);
 
     var ignored_fields = [
       'name', 'id', 'user_id', 'universe_id', 'created_at', 'updated_at'
     ];
 
+    var fieldset = $('<p />');
     $.each(data, function (key, value) {
       if (ignored_fields.indexOf(key) >= 0) {
         return true; // return true == continue
@@ -54,8 +65,9 @@
       // Don't add blank values
       if (value == '' || value == null) { return true; }
 
-      card.append($('<div />').text(key + ': ' + value));
+      fieldset.append($('<div />').text(key + ': ' + value));
     });
+    card.find('.card-content').append(fieldset);
 
     return card;
   }
