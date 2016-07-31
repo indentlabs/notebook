@@ -37,10 +37,9 @@ Rails.application.routes.draw do
     get '/plots',     to: 'main#comingsoon'
   end
 
-  scope '/write' do
+  scope '/scene/:scene_id' do
     get 'editor', to: 'write#editor'
   end
-
 
   # API Endpoints
   scope '/generate' do
