@@ -11,7 +11,7 @@ require 'capybara/rails'
 module ActiveSupport
   # Helper methods for unit tests
   class TestCase
-    fixtures :all
+    include FactoryGirl::Syntax::Methods
 
     def log_in_user(user_fixture)
       session[:user] = users(user_fixture).id
@@ -22,6 +22,8 @@ end
 module ActionController
   # Helper methods for controller tests
   class TestCase
+    include Devise::TestHelpers
+    
     def assert_assigns(method, assigned = {})
       get method
       assert_response :success
@@ -37,41 +39,36 @@ module ActionDispatch
   class IntegrationTest
     # Make the Capybara DSL available in all integration tests
     include Capybara::DSL
+    include FactoryGirl::Syntax::Methods
 
-    def register_as(name, email, password)
-      visit root_url
-      click_on 'Register'
-      fill_in 'user_name', with: name
-      fill_in 'user_email', with: email
-      fill_in 'user_password', with: password
-      click_on 'Create User'
+    def register_as(email, password)
+      visit new_user_registration_path
+      fill_in 'Email', with: email
+      fill_in 'Password', with: password
+      fill_in 'Password confirmation', with: password
+      within '#new_user' do
+        click_on 'Sign up'
+      end
     end
 
-    def log_in_as(user, password)
-      visit root_url
-      click_on 'Login'
-      within('#new_session') do
-        fill_in 'session[username]', with: user
-        fill_in 'session[password]', with: password
-      end
-      within('#session-actions') do
+    def log_in_as(email, password)
+      visit new_user_session_path
+      fill_in 'Email', with: email
+      fill_in 'Password', with: password
+
+      within '#new_user' do
         click_on 'Log in'
       end
     end
 
     def log_in_as_user
-      log_in_as 'JRRTolkien', 'Mellon'
-    end
-
-    def log_in_as_anon
-      visit root_url
-      click_on 'Login'
-      click_on 'Be Anonymous'
-      click_on 'I understand, create an account for me'
+      user = create(:user)
+      log_in_as user.email, user.password
+      return user
     end
 
     def log_out
-      visit logout_path
+      visit destroy_user_session_path
     end
 
     def teardown

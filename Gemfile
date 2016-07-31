@@ -1,6 +1,5 @@
 source 'https://rubygems.org'
 
-ruby '2.2.3'
 gem 'rails'
 
 # Storage
@@ -12,6 +11,7 @@ gem 'rmagick', '2.13.4'
 
 # Authentication
 gem 'devise'
+gem 'bcrypt'
 
 # Design
 gem 'sass-rails'
@@ -52,15 +52,19 @@ group :test, :development do
   gem 'coveralls', require: false
   gem 'simplecov', require: false
   gem 'rubocop', require: false
+  gem 'cucumber-rails', :require => false
+  gem 'database_cleaner'
+  
   gem 'sqlite3'
   gem 'tzinfo-data' # addresses a bug when working on Windows
 
+  gem 'factory_girl_rails'
   gem 'guard'
   gem 'guard-minitest'
   gem 'guard-rubocop'
   gem 'pry'
   gem 'better_errors'
   gem 'binding_of_caller'
+  gem 'rails-perftest'
+  gem 'ruby-prof'
 end
-
-# Please be sure to update the experimental buildfiles in the gemfiles folder
