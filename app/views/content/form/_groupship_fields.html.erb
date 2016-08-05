@@ -19,11 +19,15 @@
 
     <div class="input-field">
       <%= f.label attribute %>
-      <%= f.autocomplete_field "#{attribute}_id", send("autocomplete_name_#{klass.pluralize}_path"), 'data-auto-focus' => true, id_element: "##{uuid}" %>
-      <%= f.hidden_field "#{attribute}_id", id: uuid %>
-
+      <%= f.select "#{attribute}_id", current_user.send(klass.pluralize).map { |c| [c.name, c.id] }, include_blank: true %>
       <%= link_to_remove_association 'remove', f %>
     </div>
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('select').material_select();
+      });
+    </script>
 
   <% end %>
 </div>

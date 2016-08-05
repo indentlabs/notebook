@@ -54,7 +54,7 @@ group :test, :development do
   gem 'rubocop', require: false
   gem 'cucumber-rails', :require => false
   gem 'database_cleaner'
-  
+
   gem 'sqlite3'
   gem 'tzinfo-data' # addresses a bug when working on Windows
 
