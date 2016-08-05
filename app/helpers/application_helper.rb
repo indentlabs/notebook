@@ -22,4 +22,8 @@ module ApplicationHelper
       '<dd>', simple_format(link_if_present(value, type)), '</dd>'
     ].join('').to_s.html_safe
   end
+
+  def title(*parts)
+    content_for(:title) { (parts << 'Notebook').join(' - ') } unless parts.empty?
+  end
 end
