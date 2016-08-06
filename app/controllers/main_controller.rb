@@ -15,9 +15,9 @@ class MainController < ApplicationController
   end
 
   def dashboard
-    # content_type = %w(characters locations items).sample
-    # @content = current_user.send(content_type).sample
+    content_type = %w(characters locations items).sample
+    @content = current_user.send(content_type).sample
     # # TODO: get content_param_list from class controller to show question
-    # @question = QuestionService.question(Content.new @content.slice(*content_param_list))
+    @question = QuestionService.question(Content.new @content.slice(*@content.attributes.keys))
   end
 end
