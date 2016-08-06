@@ -31,11 +31,15 @@
           <div id="<%= category %>" class="row">
             <% data[:attributes].each do |attribute| %>
               <div class="col s10 m8 l4">
-                <%# TODO: not this lol %>
                 <% value = content.send(attribute) %>
                 <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
                   <% through_class = content.class.reflect_on_association(attribute).options[:through].to_s %>
                   <%= render 'content/form/relation_input', f: f, attribute: attribute, relation: through_class %>
+                <% elsif attribute == 'universe_id' %>
+                  <div class="input-field">
+                    <%= f.label attribute %><br />
+                    <%= f.select attribute, current_user.universes.sort_by(&:name).map { |u| [u.name, u.id] }.compact, include_blank: true %>
+                  </div>
                 <% else %>
                   <%= render 'content/form/text_input', f: f, attribute: attribute %>
                 <% end %>
