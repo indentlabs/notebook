@@ -27,7 +27,7 @@ class Location < ActiveRecord::Base
     {
       general_information: {
         icon: 'info',
-        attributes: %w(name type_of description universe),
+        attributes: %w(name type_of description universe_id),
       },
       #todo map
       culture: {
