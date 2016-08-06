@@ -17,11 +17,12 @@ class Character < ActiveRecord::Base
   include HasContentGroupers
 
   # Characters
-  relates :siblings,       with: :siblingships
   relates :fathers,        with: :fatherships
   relates :mothers,        with: :motherships
-  relates :best_friends,   with: :best_friendships
+  relates :siblings,       with: :siblingships
   relates :spouses,        with: :marriages
+  relates :children,       with: :childrenships
+  relates :best_friends,   with: :best_friendships
   relates :archenemies,    with: :archenemyship
 
   # Locations
@@ -68,7 +69,7 @@ class Character < ActiveRecord::Base
       },
       relations: {
         icon: 'face',
-        attributes: %w(mothers fathers spouses siblings archenemies)
+        attributes: %w(mothers fathers spouses siblings archenemies children)
       },
       notes: {
         icon: 'edit',
