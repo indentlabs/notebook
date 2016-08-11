@@ -9,8 +9,11 @@ class ContentController < ApplicationController
     @content = content_type_from_controller(self.class)
       .where(user_id: current_user.id)
       .order(:name)
-      .presence || []
 
+    # Filter
+    @content = @content.where(universe_id: params[:universe]) if params[:universe].present? || session[:universe].present?
+
+    @content ||= []
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @content }
