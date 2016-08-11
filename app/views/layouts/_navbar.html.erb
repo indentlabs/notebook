@@ -6,9 +6,11 @@
 
 <ul id="dropdown_universes" class="dropdown-content">
   <li><%= link_to "All universes", url_for(params.merge(:universe => :all)) %></li>
-  <li class="divider"></li>
-  <% current_user.universes.sort_by(&:name).each do |universe| %>
-    <li><%= link_to universe.name, "?universe=#{universe.id}" %></li>
+  <% if current_user %>
+    <li class="divider"></li>
+    <% current_user.universes.sort_by(&:name).each do |universe| %>
+      <li><%= link_to universe.name, "?universe=#{universe.id}" %></li>
+    <% end %>
   <% end %>
 </ul>
 
@@ -54,18 +56,21 @@
           <%= link_to root_url do %>
             <i class="material-icons">home</i>
           <% end %>
-        <li class="universe-selector <%= 'universe-filter-active' if @universe_scope.present? %>">
-          <%
-            if @universe_scope.present?
-              tooltip = "Limiting content to universe: #{@universe_scope.name}."
-            else
-              tooltip = "Limit content to a universe..."
-            end
-          %>
-          <a class="dropdown-button tooltipped" href="#!" data-activates="dropdown_universes" data-position="bottom" data-delay="100" data-tooltip="<%= tooltip %>">
-            <i class="material-icons">vpn_lock</i>
-          </a>
         </li>
+        <% if current_user && current_user.universes.length > 0 %>
+          <li class="universe-selector <%= 'universe-filter-active' if @universe_scope.present? %>">
+            <%
+              if @universe_scope.present?
+                tooltip = "Limiting content to universe: #{@universe_scope.name}."
+              else
+                tooltip = "Limit content to a universe..."
+              end
+            %>
+            <a class="dropdown-button tooltipped" href="#!" data-activates="dropdown_universes" data-position="bottom" data-delay="100" data-tooltip="<%= tooltip %>">
+              <i class="material-icons">vpn_lock</i>
+            </a>
+          </li>
+        <% end %>
       </ul>
     </div>
   </nav>
