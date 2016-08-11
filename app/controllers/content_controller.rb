@@ -10,7 +10,7 @@ class ContentController < ApplicationController
       .where(user_id: current_user.id)
       .order(:name)
 
-    @content = @content.where(universe: @universe_scope) if @universe_scope.present? && @content.respond_to?(:universe)
+    @content = @content.where(universe: @universe_scope) if @universe_scope.present? && @content.build.respond_to?(:universe)
     @content ||= []
 
     respond_to do |format|
