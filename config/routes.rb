@@ -7,7 +7,7 @@ Rails.application.routes.draw do
 
   # Info pages
   scope '/about' do
-    get '/privacy',    to: 'main#privacyinfo', as: :privacy_info
+    get '/privacy',    to: 'main#privacyinfo', as: :privacy_policy
   end
 
   # User-centric stuff
