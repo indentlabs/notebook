@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
     if params[:universe].present?
       if params[:universe] == 'all'
         session.delete(:universe_id)
-      elsif params[:universe].to_i.to_s == params[:universe]
+      elsif params[:universe].is_a?(String) && params[:universe].to_i.to_s == params[:universe]
         found_universe = Universe.find_by(user: current_user, id: params[:universe])
         session[:universe_id] = found_universe.id if found_universe
       end
