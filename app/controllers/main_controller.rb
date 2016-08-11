@@ -15,6 +15,8 @@ class MainController < ApplicationController
   end
 
   def dashboard
+    return redirect_to new_user_session_path unless user_signed_in?
+
     content_type = %w(characters locations items).sample
     @content = current_user.send(content_type).sample
     # # TODO: get content_param_list from class controller to show question
