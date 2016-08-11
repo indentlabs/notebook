@@ -2,6 +2,23 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
 
+  before_action do
+    if params[:universe].present?
+      if params[:universe] == 'all'
+        session.delete(:universe_id)
+      else
+        found_universe = Universe.find_by(user: current_user, id: params[:universe])
+        session[:universe_id] = found_universe.id if found_universe
+      end
+    end
+  end
+
+  before_action do
+    if current_user and session[:universe_id]
+      @universe_scope = Universe.find_by(user: current_user, id: session[:universe_id])
+    end
+  end
+
   def content_type_from_controller(content_controller_name)
     content_controller_name.to_s.chomp('Controller').singularize.constantize
   end
