@@ -19,9 +19,10 @@ class MainController < ApplicationController
 
     content_type = %w(characters locations items).sample
     @content = current_user.send(content_type).sample
-    # # TODO: get content_param_list from class controller to show question
+
     begin
-      @question = QuestionService.question(Content.new @content.slice(*@content.attributes.keys))
+      questionable_params = @content.class.attribute_categories.flat_map {|k, v| v[:attributes] }.reject {|k| k.end_with?('_id') }
+      @question = QuestionService.question(Content.new @content.slice(*questionable_params))
     rescue
     end
   end

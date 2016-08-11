@@ -1,11 +1,11 @@
-<% if question %>
+<% if question && !content.send(question[:field]).is_a?(ActiveRecord::Associations::CollectionProxy) %>
   <div class="card-panel hoverable light-blue lighten-4">
     <i class="material-icons <%= content.class.color %> circle right white-text"><%= content.class.icon %>`</i>
     <%= question[:question] %>
 
-    <%= form_for @content do |f| %>
+    <%= form_for content do |f| %>
       <%
-        value = @content.send(question[:field])
+        value = content.send(question[:field])
         if value.is_a?(ActiveRecord::Associations::CollectionProxy)
           klass = value.first.class || value.build.class
       %>
