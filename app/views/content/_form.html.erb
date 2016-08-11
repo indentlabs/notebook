@@ -38,7 +38,7 @@
                 <% elsif attribute == 'universe_id' %>
                   <div class="input-field">
                     <%= f.label attribute %><br />
-                    <%= f.select attribute, current_user.universes.sort_by(&:name).map { |u| [u.name, u.id] }.compact, include_blank: true %>
+                    <%= f.select attribute, current_user.universes.sort_by(&:name).map { |u| [u.name, u.id] }.compact, include_blank: true, selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id]) %>
                   </div>
                 <% else %>
                   <%= render 'content/form/text_input', f: f, attribute: attribute %>
