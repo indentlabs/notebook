@@ -1,7 +1,6 @@
 class ContentController < ApplicationController
   include HasOwnership
 
-  before_action :authenticate_user!
 
   # TODO: put a lot of this in ContentManagementService
 
