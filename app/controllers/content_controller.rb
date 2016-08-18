@@ -1,6 +1,7 @@
 class ContentController < ApplicationController
   include HasOwnership
 
+  before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy]
 
   # TODO: put a lot of this in ContentManagementService
 
