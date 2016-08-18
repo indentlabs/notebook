@@ -8,7 +8,7 @@ module HasOwnership
   end
 
   module ClassMethods
-    def owner
+    def owner # TODO: is this even used?
       user.id
     end
   end
@@ -26,7 +26,7 @@ module HasOwnership
   # Unless this content is shared, ensure only the owner can do this action
   def require_ownership_or_sharing
     model = content_type_from_controller(self.class).find(params[:id])
-    unless publicly_shared?(model)
+    unless model.user == current_user || publicly_shared?(model)
       if current_user
         redirect_to send(redirect_path), notice: t(:no_do_permission)
       else
@@ -39,7 +39,7 @@ module HasOwnership
   def redirect_if_not_owned(object_to_check, redirect_path)
     if current_user.nil?
       redirect_to new_user_session_path, notice: t(:no_do_permission)
-    elsif current_user != object_to_check.owner
+    elsif current_user != object_to_check.user
       redirect_to send(redirect_path), notice: t(:no_do_permission)
     end
   end
@@ -57,7 +57,7 @@ module HasOwnership
   def publicly_shared?(object)
     if object.respond_to?(:privacy)
       object.privacy.downcase == 'public'
-    elsif object.respond_to?(:universe)
+    elsif object.respond_to?(:universe) && object.universe.present?
       object.universe.privacy.downcase == 'public'
     else
       # All things are private unless specifically set public

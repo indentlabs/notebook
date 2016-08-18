@@ -40,6 +40,15 @@
                     <%= f.label attribute %><br />
                     <%= f.select attribute, current_user.universes.sort_by(&:name).map { |u| [u.name, u.id] }.compact, include_blank: true, selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id]) %>
                   </div>
+                <% elsif attribute == 'privacy' %>
+                  <div class="input-field">
+                    <%= f.label attribute %><br />
+                    <%= f.select attribute, [['Only visible to you', 'private'], ['Visible to anyone with the URL', 'public']] %>
+                    <div class="help-text">
+                      This setting applies to this universe and everything within it. If this universe is visible to others by URL, they will be able to click through and see the
+                      characters, locations, and items within this universe also.
+                    </div>
+                  </div>
                 <% else %>
                   <%= render 'content/form/text_input', f: f, attribute: attribute %>
                 <% end %>
