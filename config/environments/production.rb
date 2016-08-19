@@ -53,7 +53,8 @@ Rails.application.configure do
   # config.assets.precompile += %w( search.js )
 
   # Disable delivery errors, bad email addresses will be ignored
-  # config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
 
   # Enable threaded mode
   # config.threadsafe!
@@ -63,7 +64,7 @@ Rails.application.configure do
   config.i18n.fallbacks = true
 
   # Devise default url options
-  config.action_mailer.default_url_options = { host: 'notebook.indentlabs.com', port: 80 }
+  config.action_mailer.default_url_options = { host: 'notebook.ai', port: 80 }
 
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
