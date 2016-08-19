@@ -31,7 +31,6 @@ class Character < ActiveRecord::Base
   # Items
   relates :favorite_items, with: :ownerships, where: { favorite: true }
 
-
   def description
     role
   end

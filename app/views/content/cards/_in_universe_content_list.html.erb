@@ -1,0 +1,45 @@
+<div class="card hoverable">
+  <div class="card-image waves-effect waves-block waves-light">
+    <%= image_tag "card-headers/#{content_type.to_s.pluralize}.jpg", class: 'activator', style: 'height: 390px' %>
+  </div>
+  <div class="card-content">
+    <span class="card-title activator grey-text text-darken-4">
+      Contains <%= pluralize(content_list.count, content_type.to_s) %>
+      <i class="material-icons right">arrow_upward</i>
+    </span>
+    <p>
+      <%= link_to 'Create another', new_polymorphic_path(content_type) if current_user %>
+    </p>
+  </div>
+  <div class="card-reveal">
+    <span class="card-title grey-text text-darken-4">
+      <%= content_type.to_s.pluralize.titleize %>
+      <i class="material-icons right">close</i>
+    </span>
+    <table class="content-table">
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Created at</th>
+        <th>Last modified</th>
+        <th></th>
+      </tr>
+      <% content_list.each do |content| %>
+      <tr>
+        <td><%= link_to content.name, content %></td>
+        <td><%= content.description %></td>
+        <td><%= content.created_at.strftime("%m/%d/%Y") %></td>
+        <td><%= content.updated_at.strftime("%m/%d/%Y") %></td>
+        <td>
+          <div class="secondary-content">
+            <%= link_to edit_polymorphic_path(content) do %>
+              <i class="material-icons">edit</i>
+            <% end %>
+          </div>
+        </td>
+      </tr>
+      <% end %>
+    </table>
+    <%= link_to 'Create another', new_polymorphic_path(content_type), class: 'btn' if current_user %>
+  </div>
+</div>
