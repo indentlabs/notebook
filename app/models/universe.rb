@@ -17,7 +17,7 @@ class Universe < ActiveRecord::Base
     [
       characters.length,
       items.length,
-      locations.length,
+      locations.length
     ].sum
   end
 
@@ -33,7 +33,7 @@ class Universe < ActiveRecord::Base
     {
       general_information: {
         icon: 'info',
-        attributes: %w(name description),
+        attributes: %w(name description)
       },
       history: {
         icon: 'face',

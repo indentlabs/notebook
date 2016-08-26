@@ -7,7 +7,7 @@ Rails.application.routes.draw do
 
   # Info pages
   scope '/about' do
-    get '/privacy',    to: 'main#privacyinfo', as: :privacy_policy
+    get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
   end
 
   # User-centric stuff
@@ -17,8 +17,8 @@ Rails.application.routes.draw do
   end
 
   # Sessions
-  get '/login',  to: 'sessions#new',     as: :login
-  post '/login',  to: 'sessions#create',  as: :login_process
+  get '/login', to: 'sessions#new', as: :login
+  post '/login', to: 'sessions#create', as: :login_process
   get '/logout', to: 'sessions#destroy', as: :logout
 
   # Planning
@@ -90,9 +90,6 @@ Rails.application.routes.draw do
       end
     end
   end
-
-
-
 
   # Adoption Agency
   scope '/adoption' do

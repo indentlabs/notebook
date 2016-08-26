@@ -14,7 +14,7 @@ class ApplicationController < ActionController::Base
   end
 
   before_action do
-    if current_user and session[:universe_id]
+    if current_user && session[:universe_id]
       @universe_scope = Universe.find_by(user: current_user, id: session[:universe_id])
     end
   end

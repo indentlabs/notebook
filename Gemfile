@@ -27,23 +27,23 @@ gem 'jquery-ui-rails'
 gem 'rails-jquery-autocomplete'
 
 # Smarts
-#gem 'serendipitous', :path => "~/Code/indent/serendipitous-gem"
-gem 'serendipitous', :git => 'git://github.com/indentlabs/serendipitous-gem.git'
+# gem 'serendipitous', :path => "~/Code/indent/serendipitous-gem"
+gem 'serendipitous', git: 'git://github.com/indentlabs/serendipitous-gem.git'
 
 # Editor
 gem 'medium-editor-rails'
 
 group :production do
-#  gem 'less-rails'
-#  gem 'less-rails-fontawesome'
+  #  gem 'less-rails'
+  #  gem 'less-rails-fontawesome'
   gem 'uglifier', '>= 1.3.0'
-#  gem 'bootplus-rails'
+  #  gem 'bootplus-rails'
   gem 'rails_12factor'
 end
 
 group :test, :production do
   gem 'pg'
-  gem 'therubyracer',  platforms: :ruby
+  gem 'therubyracer', platforms: :ruby
 end
 
 group :test, :development do
@@ -52,7 +52,7 @@ group :test, :development do
   gem 'coveralls', require: false
   gem 'simplecov', require: false
   gem 'rubocop', require: false
-  gem 'cucumber-rails', :require => false
+  gem 'cucumber-rails', require: false
   gem 'database_cleaner'
 
   gem 'sqlite3'

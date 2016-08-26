@@ -47,7 +47,7 @@ class Character < ActiveRecord::Base
     {
       general: {
         icon: 'info',
-        attributes: %w(name role gender age universe_id),
+        attributes: %w(name role gender age universe_id)
       },
       appearance: {
         icon: 'face',

@@ -2,7 +2,6 @@ require 'test_helper'
 
 # Tests scenarios related to interacting with Locations
 class LocationStoriesTest < ActionDispatch::IntegrationTest
-
   setup do
     @user = log_in_as_user
     @location = create(:location, user: @user)
@@ -11,8 +10,8 @@ class LocationStoriesTest < ActionDispatch::IntegrationTest
   test 'location is displayed on locations list' do
     visit locations_path
     assert page.has_content?(@location.name),
-      "Page body didn't contain location name: "\
-      "#{@location.name} not found in \n#{page.body}"
+           "Page body didn't contain location name: "\
+           "#{@location.name} not found in \n#{page.body}"
   end
 
   test 'location list edit button edits location' do
@@ -23,12 +22,12 @@ class LocationStoriesTest < ActionDispatch::IntegrationTest
 
   test 'location list view button shows location' do
     visit locations_path
-    within(:css, ".collection-item:first") do
+    within(:css, '.collection-item:first') do
       click_on @location.name
     end
     assert_equal location_path(@location), current_path,
-      "Not on location path for location #{@location.name}: "\
-      "#{@location.name} not found in \n#{page.body}"
+                 "Not on location path for location #{@location.name}: "\
+                 "#{@location.name} not found in \n#{page.body}"
   end
 
   test 'a user can create a new location' do

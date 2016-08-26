@@ -24,7 +24,7 @@ class Item < ActiveRecord::Base
     {
       general_information: {
         icon: 'info',
-        attributes: %w(name item_type description universe_id),
+        attributes: %w(name item_type description universe_id)
       },
       appearance: {
         icon: 'face',

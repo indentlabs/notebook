@@ -5,14 +5,14 @@ class UserStoriesTest < ActionDispatch::IntegrationTest
   test 'clicking sign up goes to the sign up page' do
     visit root_url
     click_on 'Sign up'
-    
+
     assert_equal new_user_registration_path, current_path
   end
-  
+
   test 'submitting the user registration form dumps the user on their dashboard' do
     user = build(:user)
     register_as user.email, user.password
-    
+
     assert_equal dashboard_path, current_path
   end
 

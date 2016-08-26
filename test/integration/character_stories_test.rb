@@ -2,7 +2,6 @@ require 'test_helper'
 
 # Tests scenarios related to interacting with Characters
 class CharacterStoriesTest < ActionDispatch::IntegrationTest
-
   setup do
     @user = log_in_as_user
   end
