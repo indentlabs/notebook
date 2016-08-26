@@ -36,7 +36,6 @@ class LocationStoriesTest < ActionDispatch::IntegrationTest
     visit locations_path
     click_on 'Create another location'
     fill_in 'location_name', with: new_location.name
-    fill_in 'location_universe', with: new_location.universe.name
     click_on 'Create Location'
 
     assert_equal location_path(Location.where(name: new_location.name).first),
