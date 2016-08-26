@@ -2,7 +2,7 @@ require 'test_helper'
 
 # Tests scenarios related to interacting with Locations
 class LocationStoriesTest < ActionDispatch::IntegrationTest
-  
+
   setup do
     @user = log_in_as_user
     @location = create(:location, user: @user)
@@ -18,7 +18,7 @@ class LocationStoriesTest < ActionDispatch::IntegrationTest
   test 'location list edit button edits location' do
     visit location_path(@location)
     click_on 'Edit this location'
-    assert_equal edit_path(@location), current_path
+    assert_equal edit_location_path(@location), current_path
   end
 
   test 'location list view button shows location' do
