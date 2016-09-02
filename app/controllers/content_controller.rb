@@ -7,8 +7,8 @@ class ContentController < ApplicationController
 
   def index
     @content = content_type_from_controller(self.class)
-      .where(user_id: current_user.id)
-      .order(:name)
+               .where(user_id: current_user.id)
+               .order(:name)
 
     @content = @content.where(universe: @universe_scope) if @universe_scope.present? && @content.build.respond_to?(:universe)
     @content ||= []
@@ -30,7 +30,7 @@ class ContentController < ApplicationController
     # TODO: Secure this with content class whitelist lel
     @content = content_type_from_controller(self.class).find(params[:id])
 
-    #question = QuestionService.question(Content.new @content.slice(*content_param_list.flat_map { |v| v.is_a?(Symbol) ? v : v.keys.map { |k| k.to_s.chomp('_attributes').to_sym } }))
+    # question = QuestionService.question(Content.new @content.slice(*content_param_list.flat_map { |v| v.is_a?(Symbol) ? v : v.keys.map { |k| k.to_s.chomp('_attributes').to_sym } }))
     begin
       questionable_params = content_param_list.reject { |x| x.is_a?(Hash) || x.to_s.end_with?('_id') }
       @question = QuestionService.question(Content.new @content.slice(*questionable_params))
@@ -45,7 +45,7 @@ class ContentController < ApplicationController
 
   def new
     @content = content_type_from_controller(self.class)
-    	.new
+               .new
 
     respond_to do |format|
       format.html # new.html.erb
@@ -55,7 +55,7 @@ class ContentController < ApplicationController
 
   def edit
     @content = content_type_from_controller(self.class)
-    	.find(params[:id])
+               .find(params[:id])
   end
 
   def create
@@ -93,11 +93,11 @@ class ContentController < ApplicationController
   def initialize_object
     content_type = content_type_from_controller(self.class)
     @content = content_type
-      .new(content_params)
-      .tap do |c|
-        c.user_id = current_user.id
-        c.universe = universe_from_params if c.respond_to? :universe # TODO: this doesn't actually work?
-      end
+               .new(content_params)
+               .tap do |c|
+      c.user_id = current_user.id
+      c.universe = universe_from_params if c.respond_to? :universe # TODO: this doesn't actually work?
+    end
   end
 
   # Override in content classes

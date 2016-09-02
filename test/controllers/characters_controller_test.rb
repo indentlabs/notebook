@@ -3,9 +3,9 @@ require 'test_helper'
 # Tests for the CharactersController class
 class CharactersControllerTest < ActionController::TestCase
   include Devise::TestHelpers
-  
+
   setup do
-    @request.env["devise.mapping"] = Devise.mappings[:user]
+    @request.env['devise.mapping'] = Devise.mappings[:user]
     @user = create(:user)
     @universe = create(:universe, user: @user)
 
@@ -25,7 +25,7 @@ class CharactersControllerTest < ActionController::TestCase
 
   test 'should create character' do
     character = build(:character, universe: @universe, age: 70)
-    
+
     assert_difference('Character.count') do
       post :create, character: {
         age: character.age,
@@ -46,7 +46,7 @@ class CharactersControllerTest < ActionController::TestCase
 
   test 'should get edit' do
     character = create(:character, user: @user)
-    
+
     get :edit, id: character.id
     assert_response :success
   end
@@ -66,7 +66,7 @@ class CharactersControllerTest < ActionController::TestCase
 
   test 'should destroy character' do
     character = create(:character, user: @user)
-    
+
     assert_difference('Character.count', -1) do
       delete :destroy, id: character.id
     end

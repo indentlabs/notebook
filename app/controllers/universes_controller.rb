@@ -7,7 +7,7 @@ class UniversesController < ContentController
   end
 
   def content_param_list
-  	[
+    [
       :user_id,
       :name, :description,
       :history,

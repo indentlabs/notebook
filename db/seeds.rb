@@ -18,8 +18,8 @@ Character.create(name: 'Frodo Baggins',
                  age: '50')
 
 Item.create(name: 'Sting',
-                 user: tolkien,
-                 universe: middleearth)
+            user: tolkien,
+            universe: middleearth)
 
 Location.create(name: 'The Shire',
                 user: tolkien,

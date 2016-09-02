@@ -23,7 +23,7 @@ module ActionController
   # Helper methods for controller tests
   class TestCase
     include Devise::TestHelpers
-    
+
     def assert_assigns(method, assigned = {})
       get method
       assert_response :success
@@ -64,7 +64,7 @@ module ActionDispatch
     def log_in_as_user
       user = create(:user)
       log_in_as user.email, user.password
-      return user
+      user
     end
 
     def log_out

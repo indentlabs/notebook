@@ -56,14 +56,14 @@ module HasOwnership
 
   def publicly_shared?(object)
     if object.respond_to?(:privacy)
-      object.privacy.downcase == 'public'
+      object.privacy.casecmp('public').zero?
     elsif object.respond_to?(:universe) && object.universe.present?
-      object.universe.privacy.downcase == 'public'
+      object.universe.privacy.casecmp('public').zero?
     else
       # All things are private unless specifically set public
       false
     end
-  #rescue
-  #  false
+    # rescue
+    #  false
   end
 end

@@ -3,13 +3,12 @@ require 'test_helper'
 # Tests for the LocationsController class
 class LocationsControllerTest < ActionController::TestCase
   include Devise::TestHelpers
-  
 
   setup do
-    @request.env["devise.mapping"] = Devise.mappings[:user]
+    @request.env['devise.mapping'] = Devise.mappings[:user]
     @user = create(:user)
     @universe = create(:universe, user: @user)
-    
+
     sign_in @user
   end
 
@@ -26,7 +25,7 @@ class LocationsControllerTest < ActionController::TestCase
 
   test 'should create location' do
     location = build(:location, user: @user)
-    
+
     assert_difference('Location.count') do
       post :create, location: {
         name: location.name,
@@ -47,14 +46,14 @@ class LocationsControllerTest < ActionController::TestCase
 
   test 'should get edit' do
     location = create(:location, user: @user)
-    
+
     get :edit, id: location.id
     assert_response :success
   end
 
   test 'should update location' do
     location = create(:location, user: @user)
-    
+
     put :update, id: location, location: {
       name: location.name + ' Updated',
       universe: @universe
@@ -66,7 +65,7 @@ class LocationsControllerTest < ActionController::TestCase
 
   test 'should destroy location' do
     location = create(:location, user: @user)
-    
+
     assert_difference('Location.count', -1) do
       delete :destroy, id: location.id
     end
@@ -76,7 +75,7 @@ class LocationsControllerTest < ActionController::TestCase
 
   test 'should create location with image' do
     location = build(:location)
-    
+
     assert_difference('Location.count') do
       map = fixture_file_upload('mordor_map.jpg', 'image/jpeg')
       post :create, location: {
