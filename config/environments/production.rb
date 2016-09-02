@@ -64,7 +64,15 @@ Rails.application.configure do
   config.i18n.fallbacks = true
 
   # Devise default url options
-  config.action_mailer.default_url_options = { host: 'notebook.ai', port: 80 }
+  config.action_mailer.default_url_options = { host: 'www.notebook.ai', port: 80 }
+  ActionMailer::Base.smtp_settings = {
+    :address        => "smtp.sendgrid.net",
+    :port           => "25",
+    :authentication => :plain,
+    :user_name      => ENV['SENDGRID_USERNAME'],
+    :password       => ENV['SENDGRID_PASSWORD'],
+    :domain         => ENV['SENDGRID_DOMAIN']
+  }
 
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
