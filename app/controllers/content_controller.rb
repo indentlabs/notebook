@@ -92,11 +92,8 @@ class ContentController < ApplicationController
 
   def initialize_object
     content_type = content_type_from_controller(self.class)
-    @content = content_type
-               .new(content_params)
-               .tap do |c|
+    @content = content_type.new(content_params).tap do |c|
       c.user_id = current_user.id
-      c.universe = universe_from_params if c.respond_to? :universe # TODO: this doesn't actually work?
     end
   end
 
@@ -104,12 +101,6 @@ class ContentController < ApplicationController
   def content_params
     params
   end
-
-  def universe_from_params
-    return unless params[content_symbol].include? :universe
-    Universe.where(user_id: current_user.id, name: params[content_symbol][:universe].strip).first
-  end
-
   def content_symbol
     content_type_from_controller(self.class).to_s.downcase.to_sym
   end
