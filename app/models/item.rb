@@ -12,6 +12,13 @@ class Item < ActiveRecord::Base
   belongs_to :user
   belongs_to :universe
 
+  include HasContentGroupers
+
+  # Characters
+  relates :original_owners,           with: :original_ownerships
+  relates :current_owners,            with: :current_ownerships
+  relates :makers,                    with: :maker_relationships
+
   def self.color
     'amber'
   end
@@ -32,7 +39,7 @@ class Item < ActiveRecord::Base
       },
       history: {
         icon: 'face',
-        attributes: %w(original_owner current_owner made_by materials year_made)
+        attributes: %w(original_owners current_owners makers materials year_made)
       },
       abilities: {
         icon: 'face',
