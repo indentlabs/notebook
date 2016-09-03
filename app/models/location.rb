@@ -17,6 +17,9 @@ class Location < ActiveRecord::Base
 
   include HasContentGroupers
 
+  # Characters
+  relates :leaders,           with: :location_leaderships
+
   # Locations
   relates :capital_cities,    with: :capital_cities_relationships
   relates :largest_cities,    with: :largest_cities_relationships
@@ -39,7 +42,7 @@ class Location < ActiveRecord::Base
       # TODO: map
       culture: {
         icon: 'face',
-        attributes: %w(population language currency motto)
+        attributes: %w(leaders population language currency motto)
       },
       cities: {
         icon: 'face',
