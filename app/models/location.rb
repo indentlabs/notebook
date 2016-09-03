@@ -18,6 +18,7 @@ class Location < ActiveRecord::Base
   include HasContentGroupers
 
   # Locations
+  relates :capital_cities,    with: :capital_cities_relationships
   relates :largest_cities,    with: :largest_cities_relationships
   relates :notable_cities,    with: :notable_cities_relationships
 
@@ -42,7 +43,7 @@ class Location < ActiveRecord::Base
       },
       cities: {
         icon: 'face',
-        attributes: %w(capital largest_cities notable_cities)
+        attributes: %w(capital_cities largest_cities notable_cities)
       },
       geography: {
         icon: 'edit',
