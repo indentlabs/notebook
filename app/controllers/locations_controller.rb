@@ -11,9 +11,12 @@ class LocationsController < ContentController
   def content_param_list
     [
       :universe_id, :user_id, :name, :type_of, :description, #:map,
-      :population, :currency, :motto, :capital, :largest_city, :notable_cities,
+      :population, :currency, :motto, :capital, :notable_cities,
       :area, :crops, :located_at, :established_year, :notable_wars,
-      :notes, :private_notes
+      :notes, :private_notes,
+
+      # Relations
+      largest_cities_relationships_attributes:   [:id, :largest_city_id, :_destroy]
     ]
   end
 end

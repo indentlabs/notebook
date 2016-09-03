@@ -15,6 +15,11 @@ class Location < ActiveRecord::Base
   belongs_to :user
   belongs_to :universe
 
+  include HasContentGroupers
+
+  # Locations
+  relates :largest_cities,    with: :largest_cities_relationships
+
   def self.icon
     'terrain'
   end
@@ -36,7 +41,7 @@ class Location < ActiveRecord::Base
       },
       cities: {
         icon: 'face',
-        attributes: %w(capital largest_city notable_cities)
+        attributes: %w(capital largest_cities notable_cities)
       },
       geography: {
         icon: 'edit',
