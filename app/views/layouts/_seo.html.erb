@@ -1,0 +1,50 @@
+<%# This belongs inside the <head> tag %>
+
+<link rel="publisher" href="https://plus.google.com/u/0/+IndentLabs" />
+
+<%=
+  # Make sure description is no longer than 155 characters
+  site_name = "Notebook"
+  site_description = "Notebook is a set of tools for writers, game designers, and roleplayers to create magnificent universes, and everything within them."
+  site_url = request.host
+  site_image = "http://www.notebook.ai/assets/card-headers/hero-d5161eb41a02535f6656af83cacbdb8c.jpg"
+
+  display_meta_tags description: site_description,
+  # Recommended keywords tag length: up to 255 characters, 20 words.
+  keywords: %w[writing author fiction character universe location nanowrimo],
+  canonical: site_url,
+  twitter: {
+    card: "summary_large_image",
+    title: site_name,
+
+    # Page description must be less than 200 characters
+
+    description: site_description,
+    creator: "@IndentLabs",
+
+    # Twitter summary card with large image must be at least 280x150px
+    image: {
+      src: site_image
+    }
+  },
+  og: {
+    title: site_name,
+    type: "website",
+    url: site_url,
+    image: site_image,
+    description: site_description,
+    site_name: site_name,
+  }
+ %>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org/",
+  "@type": "WebSite",
+  "name": "<%= site_name %>",
+  "description": "<%= site_description %>",
+  "url": "<%= site_url %>",
+  "sameAs" : [
+    "http://indentapp.com"
+  ]
+}
+</script>
