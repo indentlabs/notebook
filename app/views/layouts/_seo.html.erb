@@ -1,50 +1,22 @@
 <%# This belongs inside the <head> tag %>
+<!-- Begin SEO partial -->
 
-<link rel="publisher" href="https://plus.google.com/118076966717703203223" />
-
-<%
-  # All of these values can be overridden elsewhere by using the set_meta_tags function
-
-  # Make sure description is no longer than 155 characters
-  site_name = "Notebook"
-  site_description = "Notebook is a set of tools for writers, game designers, and roleplayers to create magnificent universes, and everything within them."
-  site_url = request.host
-  site_image = "http://www.notebook.ai/assets/card-headers/hero-d5161eb41a02535f6656af83cacbdb8c.jpg"
-
-  set_meta_tags description: site_description,
-  # Recommended keywords tag length: up to 255 characters, 20 words.
-  keywords: %w[writing author fiction character universe location nanowrimo],
-  canonical: site_url,
-  twitter: {
-    card: "summary",
-    title: site_name,
-    url: site_url,
-    description: site_description, # Page description must be less than 200 characters
-    creator: "@IndentLabs",
-    image: {
-      # Twitter summary card with large image must be at least 280x150px
-      src: site_image
-    }
-  },
-  og: {
-    title: site_name,
-    type: "website",
-    url: site_url,
-    image: site_image,
-    description: site_description,
-    site_name: site_name,
-  }
- %>
- <%= display_meta_tags %>
-<script type="application/ld+json">
-{
-  "@context": "http://schema.org/",
-  "@type": "WebSite",
-  "name": "<%= site_name %>",
-  "description": "<%= site_description %>",
-  "url": "<%= site_url %>",
-  "sameAs" : [
-    "http://indentapp.com"
-  ]
-}
-</script>
+<%# Default values and pointers here only.
+Most content should be set in the pages themselves %>
+<%= display_meta_tags site: "Notebook",
+publisher: "https://plus.google.com/118076966717703203223",
+og: {
+  title: :title,
+  site_name: "Notebook",
+  image: :image_src,
+  url: request.url,
+  description: :description,
+},
+twitter: {
+  card: "summary",
+  title: :title,
+  image: :image_src,
+  url: request.url,
+  description: :description
+} %>
+<!-- End SEO partial -->
