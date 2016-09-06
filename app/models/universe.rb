@@ -6,6 +6,7 @@
 #
 #    contains all canonically-related content created by Users
 class Universe < ActiveRecord::Base
+  include PragmaticContext::Contextualizable
   validates :name, presence: true
 
   belongs_to :user
@@ -14,6 +15,17 @@ class Universe < ActiveRecord::Base
   has_many :locations
 
   scope :is_public, -> { where(privacy: "public") }
+
+  # Used for JSON-LD generation
+  contextualize_as_type 'http://schema.org/CreativeWork'
+  contextualize_with_id { |universe| Rails.application.routes.url_helpers.universe_url(universe) }
+  contextualize :user, as: 'http://schema.org/author'
+  contextualize :user, as: 'http://schema.org/copyrightHolder'
+  contextualize :characters, as: 'http://schema.org/character'
+  contextualize :items, as: 'http://schema.org/hasPart'
+  contextualize :locations, as: 'http://schema.org/hasPart'
+  contextualize :name, :as => 'http://schema.org/name'
+  contextualize :description, :as => 'http://schema.org/description'
 
   def content_count
     [
