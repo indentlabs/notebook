@@ -1,4 +1,4 @@
-<ul class="collection <%= 'with-header' if title.present? %> hoverable">
+<ul class="collection <%= 'with-header' if title.present? %>" style="border: 0">
   <% if title.present? %>
     <li class="collection-header"><h4><%= title %></h4></li>
   <% end %>
@@ -10,13 +10,12 @@
         <%= content.description %>
       </p>
       <p class='grey-text'>
-        <em>last edited <%= content.updated_at.strftime("%m/%d/%Y") %></em>
+          <% if content.respond_to?(:universe) && content.universe %>
+            <%= content.universe.name %>
+          <% else %>
+            <em>last edited <%= content.updated_at.strftime("%m/%d/%Y") %></em>
+          <% end %>
       </p>
-      <span class="secondary-content">
-        <%= link_to edit_polymorphic_path(content) do %>
-          <i class="material-icons">edit</i>
-        <% end %>
-      </span>
     </li>
   <% end %>
 </ul>

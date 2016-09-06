@@ -1,0 +1,58 @@
+<%
+	tabs = %w(universes characters locations items)
+
+	tab_content_list = {}
+	tabs.each do |tab|
+		tab_content_list[tab] = @user.send(tab).is_public.sort_by { |c| c.name.downcase }
+	end
+%>
+
+<div class="row">
+	<div class="col s4">
+		<div class="hoverable card">
+			<div class="card-image">
+				<%= image_tag 'card-headers/universes.jpg', style: 'height: 190px' %>
+				<span class="card-title"><%= @user.name.present? ? @user.name : 'Anonymous author' %></span>
+			</div>
+			<div class="card-content">
+				<p>
+					I'm creating universes on Notebook! I'm currently sharing the following public content:
+				</p>
+				<div class="row" style="text-align: center">
+					<% tabs.each do |tab| %>
+					<div class="col s6">
+						<h3><%= tab_content_list[tab].length %></h3>
+						<h6><%= tab.singularize.pluralize(tab_content_list[tab].length) %></h6>
+					</div>
+					<% end %>
+				</div>
+
+			</div>
+			<div class="card-action">
+				<a href="#">Author links coming soon</a>
+			</div>
+		</div>
+
+	  <!--
+      <div class="hoverable card">
+	      More information
+      </div>
+	  -->
+</div>
+
+<div class="card col s8">
+	<div>
+		<ul class="tabs">
+			<% tabs.each do |tab| %>
+			<li class="tab col s3 <%= "disabled" if tab_content_list[tab].empty? %>"><%= link_to pluralize(tab_content_list[tab].length, tab.singularize), "\##{tab}" %></li>
+			<% end %>
+		</ul>
+	</div>
+
+	<% tabs.each do |tab| %>
+	<div id="<%= tab %>" class="col s12">
+		<%= render partial: 'content/list/clean_list', locals: { content_list: tab_content_list[tab], title: '' } %>
+	</div>
+	<% end %>
+</div>
+</div>
