@@ -29,7 +29,6 @@ gem 'rails-jquery-autocomplete'
 # SEO
 gem 'meta-tags'
 gem 'sitemap_generator'
-gem 'pragmatic_context'
 
 # Smarts
 # gem 'serendipitous', :path => "~/Code/indent/serendipitous-gem"
