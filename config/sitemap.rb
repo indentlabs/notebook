@@ -37,4 +37,8 @@ SitemapGenerator::Sitemap.create do
       add location_path(location), lastmod: location.updated_at
     end
   end
+
+  User.find_each do |user|
+    add user_path(user), lastmod: user.updated_at
+  end
 end
