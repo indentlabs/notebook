@@ -31,6 +31,8 @@ class Character < ActiveRecord::Base
   # Items
   relates :favorite_items, with: :ownerships, where: { favorite: true }
 
+  scope :is_public, -> { joins(:universe).where(universes: { privacy: "public" }) }
+
   def description
     role
   end
