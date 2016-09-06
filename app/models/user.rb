@@ -1,7 +1,6 @@
 ##
 # a person using the Indent web application. Owns all other content.
 class User < ActiveRecord::Base
-  include PragmaticContext::Contextualizable
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -16,12 +15,6 @@ class User < ActiveRecord::Base
   has_many :locations
   has_many :magics
   has_many :universes
-
-  # Used for JSON-LD generation
-  contextualize_as_type 'http://schema.org/Person'
-  contextualize_with_id { |user| Rails.application.routes.url_helpers.user_url(user) }
-  contextualize :name, :as => 'http://schema.org/alternateName'
-  contextualize :email, :as => 'http://schema.org/email'
 
   # as_json would try to print the password digest, which requires authentication
   def as_json(options={})
