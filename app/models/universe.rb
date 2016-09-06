@@ -15,7 +15,6 @@ class Universe < ActiveRecord::Base
 
   scope :is_public, -> { where(privacy: "public") }
 
-
   def content_count
     [
       characters.length,
