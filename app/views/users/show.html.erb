@@ -3,7 +3,7 @@
 
 	tab_content_list = {}
 	tabs.each do |tab|
-		tab_content_list[tab] = @user.send(tab).is_public
+		tab_content_list[tab] = @user.send(tab).is_public.sort_by { |c| c.name.downcase }
 	end
 %>
 
@@ -12,7 +12,7 @@
 		<div class="hoverable card">
 			<div class="card-image">
 				<%= image_tag 'card-headers/universes.jpg', style: 'height: 190px' %>
-				<span class="card-title"><%= @user.name %></span>
+				<span class="card-title"><%= @user.name.present? ? @user.name : 'Anonymous author' %></span>
 			</div>
 			<div class="card-content">
 				<p>
@@ -22,7 +22,7 @@
 					<% tabs.each do |tab| %>
 					<div class="col s6">
 						<h3><%= tab_content_list[tab].length %></h3>
-						<h6><%= tab %></h6>
+						<h6><%= tab.singularize.pluralize(tab_content_list[tab].length) %></h6>
 					</div>
 					<% end %>
 				</div>
@@ -44,7 +44,7 @@
 	<div>
 		<ul class="tabs">
 			<% tabs.each do |tab| %>
-			<li class="tab col s3 <%= "disabled" if tab_content_list[tab].empty? %>"><%= link_to pluralize(tab_content_list[tab].length, tab), "\##{tab}" %></li>
+			<li class="tab col s3 <%= "disabled" if tab_content_list[tab].empty? %>"><%= link_to pluralize(tab_content_list[tab].length, tab.singularize), "\##{tab}" %></li>
 			<% end %>
 		</ul>
 	</div>

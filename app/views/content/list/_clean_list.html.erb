@@ -10,7 +10,11 @@
         <%= content.description %>
       </p>
       <p class='grey-text'>
-        <em>last edited <%= content.updated_at.strftime("%m/%d/%Y") %></em>
+          <% if content.respond_to?(:universe) && content.universe %>
+            <%= content.universe.name %>
+          <% else %>
+            <em>last edited <%= content.updated_at.strftime("%m/%d/%Y") %></em>
+          <% end %>
       </p>
     </li>
   <% end %>
