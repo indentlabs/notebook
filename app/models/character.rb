@@ -45,6 +45,14 @@ class Character < ActiveRecord::Base
     'group'
   end
 
+  def private?
+    !public?
+  end
+
+  def public?
+    privacy == 'public'
+  end
+
   def self.attribute_categories
     {
       general: {
