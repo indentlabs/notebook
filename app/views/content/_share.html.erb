@@ -1,0 +1,23 @@
+<div id="share-modal" class="modal">
+    <div class="modal-content">
+        <h4>Share</h4>
+        <p>Copy the text below:</p>
+        <textarea type="text" readonly onclick="this.focus();this.select()"><%= polymorphic_url(shared_content) %></textarea>
+
+        <p>Content must be <b>public</b>, or in a <b>public</b> Universe.</p>
+
+        <% if ((shared_content.respond_to? :universe) && shared_content.universe.present?) %>
+          <% universe_is_public = true %>
+          <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content.universe } %>
+        <% end %>
+
+        <% if shared_content.respond_to? :privacy %>
+          <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content, disabled: universe_is_public } %>
+        <% end %>
+
+
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">close</a>
+    </div>
+</div>
