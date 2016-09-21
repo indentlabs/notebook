@@ -16,23 +16,22 @@ class User < ActiveRecord::Base
   has_many :magics
   has_many :universes
 
-  # as_json would try to print the password digest, which requires authentication
+  # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
+  # This is different from to_json, which  converts it straight to an escaped JSON string,
+  # which is undesireable in a case like this, when we want to modify it
   def as_json(options={})
-    excludes = [:password_digest, :old_password]
-    options = {} if options.nil?
-    options[:except] ||= excludes
+    options[:except] ||= blacklisted_attributes
     super(options)
   end
 
+  # Returns this object as an escaped JSON string
   def to_json(options={})
-    options[:except] ||= [:password_digest, :old_password]
+    options[:except] ||= blacklisted_attributes
     super(options)
   end
-
-  # We have "as_json," "to_json," and "to_xml" to worry about. "to_json" doesn't print passwords
 
   def to_xml(options={})
-    options[:except] ||= [:password_digest, :old_password]
+    options[:except] ||= blacklisted_attributes
     super(options)
   end
 
@@ -56,5 +55,19 @@ class User < ActiveRecord::Base
       magics.length,
       universes.length
     ].sum
+  end
+
+  private
+
+  # Attributes that are non-public, and should be blacklisted from any public
+  # export (ex. in the JSON api, or SEO meta info about the user)
+  def blacklisted_attributes
+    [
+      :password_digest,
+      :old_password,
+      :encrypted_password,
+      :reset_password_token,
+      :email
+    ]
   end
 end
