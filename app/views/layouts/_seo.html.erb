@@ -1,38 +1,29 @@
-<%# This belongs inside the <head> tag %>
+<!-- SEO -->
+<%=
+# This belongs inside the <head> tag.
+# Default values and pointers here only.
+# Most content should be set in the pages themselves.
+# Any values set here can be overridden.
 
-<%# Default values and pointers here only.
-Most content should be set in the pages themselves %>
+# Default & site-wide values
 
-<%
-# default & site-wide values
-
-set_meta_tags site: "Notebook",
-publisher: "https://plus.google.com/118076966717703203223",
+display_meta_tags site: 'Notebook',
+publisher: 'https://plus.google.com/118076966717703203223',
 image_src: image_url('card-headers/hero.png'),
 og: {
   title: :title,
-  site_name: "Notebook",
+  site_name: 'Notebook',
   url: request.url,
   image: :image_src,
   description: :description,
 },
 twitter: {
-  card: "summary",
+  card: 'summary',
   title: :title,
   site: '@IndentLabs',
   image: :image_src,
   url: request.url,
   description: :description
 }
-
-# Content-specific values. These MUST be set before display_meta_tags, or else
-# they won't make it into the HTML
-
-if @content.present?
-  set_meta_tags(title: @content.name) if @content.respond_to?(:name)
-  set_meta_tags(description: @content.description) if @content.respond_to?(:description)
-end
 %>
-
-<%= display_meta_tags %>
-<!-- End SEO partial -->
+<!-- End SEO -->
