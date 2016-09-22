@@ -36,4 +36,6 @@ Rails.application.configure do
   config.active_support.test_order = :random
 
   config.active_record.raise_in_transactional_callbacks = true
+
+  default_url_options[:host] = 'localhost:3000'
 end
