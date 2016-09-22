@@ -14,6 +14,7 @@ class Character < ActiveRecord::Base
 
   belongs_to :universe
 
+  include HasPrivacy
   include HasContentGroupers
 
   # Characters
@@ -31,7 +32,6 @@ class Character < ActiveRecord::Base
   # Items
   relates :favorite_items, with: :ownerships, where: { favorite: true }
 
-  scope :is_public, -> { joins(:universe).where(universes: { privacy: "public" }) }
 
   def description
     role
@@ -43,14 +43,6 @@ class Character < ActiveRecord::Base
 
   def self.icon
     'group'
-  end
-
-  def private?
-    !public?
-  end
-
-  def public?
-    privacy == 'public'
   end
 
   def self.attribute_categories

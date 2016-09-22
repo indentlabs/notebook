@@ -9,23 +9,33 @@ class CharacterTest < ActiveSupport::TestCase
   end
 
   test 'character is public when privacy field contains "public"' do
-    character = build(:character, privacy: 'public')
+    universe = build(:universe, privacy: 'public')
+    character = build(:character, privacy: 'public', universe: universe)
 
-    assert character.public?
-    refute character.private?
+    assert character.public_content?
+    refute character.private_content?
   end
 
   test 'character is private when privacy field contains "private"' do
-    character = build(:character, privacy: 'private')
+    universe = build(:universe, privacy: 'public')
+    character = build(:character, privacy: 'private', universe: universe)
 
-    assert character.private?
-    refute character.public?
+    assert character.private_content?
+    refute character.public_content?
   end
 
   test 'character is private when privacy field is empty' do
     character = build(:character, privacy: '')
 
-    assert character.private?
-    refute character.public?
+    assert character.private_content?
+    refute character.public_content?
+  end
+
+  test 'character is private when universe is private' do
+    universe = build(:universe, privacy: 'private')
+    character = build(:character, privacy: 'public', universe: universe)
+
+    assert character.private_content?
+    refute character.public_content?
   end
 end
