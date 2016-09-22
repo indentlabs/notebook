@@ -9,8 +9,8 @@ module HasPrivacy
     end
 
     def public_content?
-      in_private_universe = respond_to?(:universe) && universe.present? && universe.private_content?
-      privacy == 'public' && !in_private_universe
+      universe_is_public = respond_to?(:universe) && universe.present? && universe.public_content?
+      privacy == 'public' || universe_is_public
     end
   end
 end
