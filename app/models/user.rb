@@ -37,6 +37,10 @@ class User < ActiveRecord::Base
     super(options)
   end
 
+  def name
+    self[:name] || 'Anonymous author'
+  end
+
   def content
     {
       characters: characters,
