@@ -26,5 +26,8 @@ module PlanCharacters
     # Filter sensitive parameters out of logs
     config.filter_parameters << :password
     config.filter_parameters << :password_confirmation
+
+    # Don't encode ampersands into \u0026 when creating JSON
+    config.active_support.escape_html_entities_in_json = false
   end
 end
