@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160920180129) do
+ActiveRecord::Schema.define(version: 20160922204317) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -103,7 +103,7 @@ ActiveRecord::Schema.define(version: 20160920180129) do
   end
 
   create_table "items", force: :cascade do |t|
-    t.string   "name",           null: false
+    t.string   "name",                               null: false
     t.string   "item_type"
     t.text     "description"
     t.string   "weight"
@@ -119,6 +119,7 @@ ActiveRecord::Schema.define(version: 20160920180129) do
     t.integer  "universe_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "privacy",        default: "private", null: false
   end
 
   create_table "largest_cities_relationships", force: :cascade do |t|
@@ -134,7 +135,7 @@ ActiveRecord::Schema.define(version: 20160920180129) do
   end
 
   create_table "locations", force: :cascade do |t|
-    t.string   "name",             null: false
+    t.string   "name",                                 null: false
     t.string   "type_of"
     t.text     "description"
     t.string   "map_file_name"
@@ -159,6 +160,7 @@ ActiveRecord::Schema.define(version: 20160920180129) do
     t.integer  "universe_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "privacy",          default: "private", null: false
   end
 
   create_table "maker_relationships", force: :cascade do |t|

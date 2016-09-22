@@ -12,6 +12,7 @@ class Item < ActiveRecord::Base
   belongs_to :user
   belongs_to :universe
 
+  include HasPrivacy
   include HasContentGroupers
 
   # Characters
