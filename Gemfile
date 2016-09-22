@@ -26,6 +26,9 @@ gem 'jquery-rails'
 gem 'jquery-ui-rails'
 gem 'rails-jquery-autocomplete'
 
+# SEO
+gem 'meta-tags'
+
 # Smarts
 # gem 'serendipitous', :path => "~/Code/indent/serendipitous-gem"
 gem 'serendipitous', git: 'git://github.com/indentlabs/serendipitous-gem.git'
