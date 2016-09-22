@@ -59,9 +59,10 @@ class User < ActiveRecord::Base
     ].sum
   end
 
-  def image_url
+  def image_url(size=80)
     email_md5 = Digest::MD5.hexdigest(email.downcase)
-    "https://www.gravatar.com/avatar/#{email_md5}?d=identicon"
+    # 80px is Gravatar's default size
+    "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}"
   end
 
   private
