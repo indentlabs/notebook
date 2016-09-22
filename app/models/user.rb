@@ -61,7 +61,7 @@ class User < ActiveRecord::Base
 
   def image_url
     email_md5 = Digest::MD5.hexdigest(email.downcase)
-    "https://www.gravatar.com/avatar/#{email_md5}"
+    "https://www.gravatar.com/avatar/#{email_md5}?d=identicon"
   end
 
   private
