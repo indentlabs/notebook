@@ -1,3 +1,5 @@
+require 'digest/md5'
+
 ##
 # a person using the Indent web application. Owns all other content.
 class User < ActiveRecord::Base
@@ -55,6 +57,11 @@ class User < ActiveRecord::Base
       magics.length,
       universes.length
     ].sum
+  end
+
+  def image_url
+    email_md5 = Digest::MD5.hexdigest(email.downcase)
+    "https://www.gravatar.com/avatar/#{email_md5}"
   end
 
   private
