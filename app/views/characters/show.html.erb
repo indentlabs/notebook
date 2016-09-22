@@ -1,1 +1,14 @@
+<%# to_json will escape any values into unicode escape sequences, so we can call html_safe %>
+
+<script type="application/ld+json">
+<%
+content_jsonld = {
+  '@id': character_url,
+  '@type': 'http://schema.org/Person',
+  'http://schema.org/name': @content.name
+}
+%>
+<%= content_jsonld.to_json.html_safe %>
+</script>
+
 <%= render partial: 'content/show', locals: { content: @content } %>

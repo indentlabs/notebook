@@ -16,6 +16,25 @@ class User < ActiveRecord::Base
   has_many :magics
   has_many :universes
 
+  # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
+  # This is different from to_json, which  converts it straight to an escaped JSON string,
+  # which is undesireable in a case like this, when we want to modify it
+  def as_json(options={})
+    options[:except] ||= blacklisted_attributes
+    super(options)
+  end
+
+  # Returns this object as an escaped JSON string
+  def to_json(options={})
+    options[:except] ||= blacklisted_attributes
+    super(options)
+  end
+
+  def to_xml(options={})
+    options[:except] ||= blacklisted_attributes
+    super(options)
+  end
+
   def content
     {
       characters: characters,
@@ -36,5 +55,19 @@ class User < ActiveRecord::Base
       magics.length,
       universes.length
     ].sum
+  end
+
+  private
+
+  # Attributes that are non-public, and should be blacklisted from any public
+  # export (ex. in the JSON api, or SEO meta info about the user)
+  def blacklisted_attributes
+    [
+      :password_digest,
+      :old_password,
+      :encrypted_password,
+      :reset_password_token,
+      :email
+    ]
   end
 end
