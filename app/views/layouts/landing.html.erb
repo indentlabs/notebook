@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <title><%= content_for?(:title) ? yield(:title) : 'Notebook' %></title>
   <%= stylesheet_link_tag 'application' %>
   <%= javascript_include_tag 'application' %>
   <%= csrf_meta_tags %>
@@ -9,39 +10,18 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
-
-  <%# <title> is set in _seo.html.erb %>
-  <%= render 'layouts/seo' %>
 </head>
 <body>
 
   <%= render 'layouts/navbar' %>
 
   <main>
-    <div>
-      <div class="row">
-        <div class="col s12 m12 l9">
-          <%= yield %>
-        </div>
-        <div class="col s12 m12 l3">
-          <%= render 'layouts/sidebar' %>
-        </div>
-      </div>
-    </div>
+    <%= yield %>
 
     <%= render 'layouts/ganalytics' %>
 
+    <a href="https://plus.google.com/118076966717703203223" rel="publisher"></a>
   </main>
-
-  <%= render 'layouts/footer' %>
-
-  <script type="text/javascript">
-    <%= yield :javascript %>
-
-    $(document).ready(function() {
-      $('select').material_select();
-    });
-  </script>
 
 </body>
 </html>

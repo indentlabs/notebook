@@ -91,4 +91,6 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   # TODO: double check this
   config.active_record.dump_schema_after_migration = false
+
+  default_url_options[:host] = 'www.notebook.ai'
 end
