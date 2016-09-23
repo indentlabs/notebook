@@ -9,20 +9,32 @@
           </div>
         </div>
 
-        <div class="row">
-          <p class="col s12">To be shareable, content must be <b>public</b> <em>or</em> in a <b>public</b> Universe.</p>
-        </div>
+        <% if current_user && shared_content.user == current_user %>
 
-        <% if ((shared_content.respond_to? :universe) && shared_content.universe.present?) %>
-        <div class="row">
-            <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content.universe } %>
-        </div>
-        <% end %>
+            <div class="row">
+              <p class="col s12">To be shareable, content must be <b>public</b> <em>or</em> in a <b>public</b> Universe.</p>
+            </div>
 
-        <% if shared_content.respond_to? :privacy %>
-        <div class="row">
-            <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content } %>
-        </div>
+            <% if ((shared_content.respond_to? :universe) && shared_content.universe.present?) %>
+            <div class="row">
+                <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content.universe } %>
+            </div>
+            <% end %>
+
+            <% if shared_content.respond_to? :privacy %>
+            <div class="row">
+                <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content } %>
+            </div>
+            <% end %>
+
+        <% else %>
+
+            <div class="row">
+                <p class="col s12">
+                    This <%= shared_content.class.to_s.downcase %> is being shared on Notebook.ai by <%= link_to shared_content.user.name, shared_content.user %>.
+                </p>
+            </div>
+
         <% end %>
     </div>
     <div class="modal-footer">
