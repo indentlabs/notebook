@@ -1,5 +1,5 @@
 <% if question && !content.send(question[:field]).is_a?(ActiveRecord::Associations::CollectionProxy) %>
-  <div class="card-panel hoverable light-blue lighten-4">
+  <div class="content-question card-panel hoverable light-blue lighten-4">
     <i class="material-icons <%= content.class.color %> circle right white-text"><%= content.class.icon %>`</i>
     <%= question[:question] %>
 
@@ -14,14 +14,14 @@
         else
       %>
           <div class="input-field">
-            <%= f.text_field question[:field] %>
-            <label for="last_name"><%= question[:field].humanize %></label>
+            <%= f.text_field question[:field], class: 'content-question-input' %>
+            <%= f.label question[:field], question[:field].humanize %>
           </div>
       <%
         end
       %>
 
-      <%= f.submit 'Save', class: 'waves-effect waves-light btn' %>
+      <%= f.submit 'Save', class: 'content-question-submit waves-effect waves-light btn' %>
     <% end %>
   </div>
 <% end %>
