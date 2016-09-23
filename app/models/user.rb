@@ -1,3 +1,5 @@
+require 'digest/md5'
+
 ##
 # a person using the Indent web application. Owns all other content.
 class User < ActiveRecord::Base
@@ -35,6 +37,10 @@ class User < ActiveRecord::Base
     super(options)
   end
 
+  def name
+    self[:name] || 'Anonymous author'
+  end
+
   def content
     {
       characters: characters,
@@ -55,6 +61,12 @@ class User < ActiveRecord::Base
       magics.length,
       universes.length
     ].sum
+  end
+
+  def image_url(size=80)
+    email_md5 = Digest::MD5.hexdigest(email.downcase)
+    # 80px is Gravatar's default size
+    "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
   end
 
   private
