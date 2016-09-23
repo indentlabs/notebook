@@ -8,14 +8,20 @@ class SerendipitousCardTest < ActionDispatch::IntegrationTest
     @character.save
 
     visit character_path(@character)
+
     modified_field_name = find(:css, '.content-question-input')[:id].split('_', 2)[1]
+    @character[modified_field_name] = 'Previous Value'
+    @character.save
+    previous_field_value = @character[modified_field_name]
 
     find(:css, '.content-question-input').set('Content Question Answer')
-    find(:css, '.content-question-submit').click
+    find('.content-question-submit').click
 
-    assert @character.changed?,
-           'Character was not changed when Serendipitous question was answered'
-    assert_includes @character.previous_changes, modified_field_name,
-                    "Answered a Serendipitous question about #{modified_field_name}, but #{@character.previous_changes} was changed"
+    # We can't use @character.changed? because after the form is submitted,
+    # the changes were saved.
+
+    @character.reload
+    assert_equal 'Content Question Answer', @character[modified_field_name],
+                 "expected field #{modified_field_name} to change from '#{previous_field_value}' to 'Content Question Answer', but it was '#{@character[modified_field_name]}'"
   end
 end
