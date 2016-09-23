@@ -7,3 +7,6 @@ $(document).ready ->
     setTimeout ( ->
       window.scrollTo(0, 0);
     ), 1
+
+  $('.share').click ->
+    $('#share-modal').openModal()

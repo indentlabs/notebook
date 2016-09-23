@@ -15,6 +15,7 @@ class Location < ActiveRecord::Base
   belongs_to :user
   belongs_to :universe
 
+  include HasPrivacy
   include HasContentGroupers
 
   # Characters
@@ -25,7 +26,7 @@ class Location < ActiveRecord::Base
   relates :largest_cities,    with: :largest_cities_relationships
   relates :notable_cities,    with: :notable_cities_relationships
 
-  scope :is_public, -> { joins(:universe).where(universes: { privacy: "public" }) }
+    scope :is_public, -> { joins(:universe).where('universes.privacy = ? OR locations.privacy = ?', 'public', 'public') }
 
   def self.icon
     'terrain'
