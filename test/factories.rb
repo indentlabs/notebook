@@ -27,4 +27,12 @@ FactoryGirl.define do
     user
     universe
   end
+
+  factory :item do
+    sequence :name do |n|
+      "Item #{n}"
+    end
+    user
+    universe
+  end
 end
