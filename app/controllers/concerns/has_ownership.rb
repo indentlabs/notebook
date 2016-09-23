@@ -55,15 +55,10 @@ module HasOwnership
   end
 
   def publicly_shared?(object)
-    if object.respond_to?(:privacy)
-      object.privacy.casecmp('public').zero?
-    elsif object.respond_to?(:universe) && object.universe.present?
-      object.universe.privacy.casecmp('public').zero?
-    else
-      # All things are private unless specifically set public
-      false
-    end
-    # rescue
-    #  false
+    object_is_public = object.respond_to?(:privacy) && object.privacy.present? && object.privacy.casecmp('public').zero?
+    object_universe_is_public = object.respond_to?(:universe) && object.universe.present? && object.universe.privacy.casecmp('public').zero?
+
+    # If either the content or the universe it's in are public, we treat the object as public
+    object_is_public || object_universe_is_public
   end
 end
