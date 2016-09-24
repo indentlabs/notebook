@@ -14,6 +14,7 @@ class Item < ActiveRecord::Base
 
   include HasPrivacy
   include HasContentGroupers
+  include Serendipitous::Concern
 
   # Characters
   relates :original_owners,           with: :original_ownerships

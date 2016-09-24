@@ -7,6 +7,7 @@
 #    contains all canonically-related content created by Users
 class Universe < ActiveRecord::Base
   include HasPrivacy
+  include Serendipitous::Concern
 
   validates :name, presence: true
 

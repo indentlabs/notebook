@@ -16,6 +16,7 @@ class Character < ActiveRecord::Base
 
   include HasPrivacy
   include HasContentGroupers
+  include Serendipitous::Concern
 
   # Characters
   relates :fathers,        with: :fatherships

@@ -17,6 +17,7 @@ class Location < ActiveRecord::Base
 
   include HasPrivacy
   include HasContentGroupers
+  include Serendipitous::Concern
 
   # Characters
   relates :leaders,           with: :location_leaderships
