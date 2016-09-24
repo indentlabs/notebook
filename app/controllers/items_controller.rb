@@ -13,7 +13,7 @@ class ItemsController < ContentController
       :description, :weight,
       :original_owner, :current_owner, :made_by, :materials, :year_made,
       :magic,
-      :notes, :private_notes,
+      :notes, :private_notes, :privacy,
 
       # Relations
       original_ownerships_attributes:           [:id, :original_owner_id, :_destroy],
