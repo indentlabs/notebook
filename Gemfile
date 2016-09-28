@@ -19,6 +19,7 @@ gem 'material_icons'
 
 # Quality of Life
 gem 'cocoon'
+gem 'dateslices'
 
 # Javascript
 gem 'coffee-rails'
@@ -35,6 +36,9 @@ gem 'serendipitous', git: 'git://github.com/indentlabs/serendipitous-gem.git'
 
 # Editor
 gem 'medium-editor-rails'
+
+# Graphs & Charts
+gem 'chartkick'
 
 group :production do
   #  gem 'less-rails'

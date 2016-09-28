@@ -43,6 +43,14 @@ Rails.application.routes.draw do
     get 'editor', to: 'write#editor'
   end
 
+  scope 'admin' do
+    get '/', to: 'admin#dashboard'
+    get '/universes', to: 'admin#universes'
+    get '/characters', to: 'admin#characters'
+    get '/locations', to: 'admin#locations'
+    get '/items', to: 'admin#items'
+  end
+
   # API Endpoints
   scope '/generate' do
     # General information
