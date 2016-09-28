@@ -8,8 +8,7 @@
 <div class="row">
 	<div class="col s6">
 		<h2>Universes per user</h1>
-		<%# bar_chart User.joins(:items).group("items.user_id").count() %>
-		TODO
+		<%= column_chart User.joins(:universes).group(:user_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
 	</div>
 	<div class="col s6">
 		<h2>Privacy per universe</h2>
@@ -20,17 +19,14 @@
 <div class="row">
 	<div class="col s4">
 		<h2>Characters per universe</h1>
-		<%# bar_chart Universe.joins(:items).group("items.universe_id").count() %>
-		TODO
+		<%= column_chart Universe.joins(:characters).group(:universe_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
 	</div>
 	<div class="col s4">
 		<h2>Locations per universe</h1>
-		<%# bar_chart Universe.joins(:items).group("items.universe_id").count() %>
-		TODO
+		<%= column_chart Universe.joins(:locations).group(:universe_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
 	</div>
 	<div class="col s4">
 		<h2>Items per universe</h1>
-		<%# bar_chart Universe.joins(:items).group("items.universe_id").count() %>
-		TODO
+		<%= column_chart Universe.joins(:items).group(:universe_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
 	</div>
 </div>
