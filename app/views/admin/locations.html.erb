@@ -1,0 +1,48 @@
+<div class="row">
+	<div class="col s12">
+		<h1>Location creations</h1>
+		<%= line_chart Location.group_by_day(:created_at) %>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col s4">
+		<h2>Locations per user</h1>
+		<%= column_chart User.joins(:locations).group(:user_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
+	</div>
+	<div class="col s4">
+		<h2>Locations per universe</h1>
+		<%= column_chart Universe.joins(:locations).group(:universe_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
+	</div>
+	<div class="col s4">
+		<h2>Location privacy</h1>
+		<%= pie_chart Location.where.not(privacy: "").group(:privacy).count() %>
+	</div>
+</div>
+
+<h1>Location usage data</h1>
+<div class="row">
+	<div class="col s6">
+		<h2>Most common names</h2>
+		<%= bar_chart Location.where.not(name: "").group(:name).order('count_all desc').limit(5).count() %>
+	</div>
+	<div class="col s6">
+		<h2>Most common types</h2>
+		<%= bar_chart Location.where.not(type_of: "").group(:type_of).order('count_all desc').limit(5).count() %>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col s4">
+		<h2>Common estab. years</h2>
+		<%= bar_chart Location.where.not(established_year: "").group(:established_year).order('count_all desc').limit(5).count() %>
+	</div>
+	<div class="col s4">
+		<h2>Most common currencies</h2>
+		<%= pie_chart Location.where.not(currency: "").group(:currency).order('count_all desc').limit(5).count() %>
+	</div>
+	<div class="col s4">
+		<h2>Most common languages</h2>
+		<%= pie_chart Location.where.not(language: "").where.not(language: nil).group(:language).order('count_all desc').limit(5).count() %>
+	</div>
+</div>
