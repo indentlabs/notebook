@@ -6,7 +6,7 @@
       <div class="card-content">
         <div class="card-title center">
           <span class="right">
-            <i class="material-icons red-text"><%= content.class.icon %></i>
+            <i class="material-icons <%= content.class.color %>-text"><%= content.class.icon %></i>
             <%= render 'content/form/actions_dropdown', content: content %>
           </span>
 
@@ -14,12 +14,21 @@
         </div>
 
         <%# Tabs %>
-        <ul class="hoverable tabs">
+        <ul class="hoverable tabs hide-on-small-only">
           <% content.class.attribute_categories.each do |category, data| %>
             <li class="tab col s12">
               <a href="#<%= category %>">
-                <i class="material-icons hide-on-med-and-down" style="font-size: 18px;"><%= data[:icon] %></i>
+                <i class="material-icons hide-on-med-and-down" style="font-size: 18px; position: relative; top: 3px;"><%= data[:icon] %></i>
                 <%= category.to_s.humanize %>
+              </a>
+            </li>
+          <% end %>
+        </ul>
+        <ul class="tabs hide-on-med-and-up">
+          <% content.class.attribute_categories.each do |category, data| %>
+            <li class="tab col s12">
+              <a href="#<%= category %>" class="tooltipped" data-position="bottom" data-delay="100" data-tooltip="<%= category.to_s.humanize %>">
+                <i class="material-icons" style="font-size: 18px; position: relative; top: 3px;"><%= data[:icon] %></i>
               </a>
             </li>
           <% end %>
@@ -30,16 +39,40 @@
         <% content.class.attribute_categories.each do |category, data| %>
           <div id="<%= category %>" class="row">
             <% data[:attributes].each do |attribute| %>
-              <div class="col s10 m8 l4">
+
+              <% # Do some dynamic resizing of columns based on how many columns there are
+                 # TODO: move this into some service or something? Dunno, doesn't belong here.
+
+                s_width = 12
+                m_width = 6
+                l_width = 4
+
+                if data[:attributes].length == 1
+                  # If there's only one field on this tab, go full-width on all screen sizes
+                  s_width = m_width = l_width = 12
+                elsif data[:attributes].length == 2
+                  # If there's two fields on this tab, go half-width on medium- and large-screens
+                  s_width = 12
+                  m_width = l_width = 6
+                elsif data[:attributes].length > 2
+                  # If there's at least 3 fields, use the defaults (detailed above)
+                end
+              %>
+
+              <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
+
                 <% value = content.send(attribute) %>
                 <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
+                  <%# Relation-setting UI %>
                   <% through_class = content.class.reflect_on_association(attribute).options[:through].to_s %>
                   <%= render 'content/form/relation_input', f: f, attribute: attribute, relation: through_class %>
+
                 <% elsif attribute == 'universe_id' %>
                   <div class="input-field">
                     <%= f.label attribute %><br />
                     <%= f.select attribute, current_user.universes.sort_by(&:name).map { |u| [u.name, u.id] }.compact, include_blank: true, selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id]) %>
                   </div>
+
                 <% elsif attribute == 'privacy' %>
                   <div class="input-field">
                     <%= f.label attribute %><br />
@@ -49,8 +82,16 @@
                       characters, locations, and items within this universe also.
                     </div>
                   </div>
+
+                <% elsif attribute == 'private_notes' %>
+                  <%= render 'content/form/text_input', f: f, attribute: attribute %>
+                    <div class="help-text">
+                      Private notes are <em>always</em> visible to only you, even if content is made public and shared.
+                    </div>
+
                 <% else %>
                   <%= render 'content/form/text_input', f: f, attribute: attribute %>
+
                 <% end %>
               </div>
             <% end %>

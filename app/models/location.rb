@@ -38,7 +38,7 @@ class Location < ActiveRecord::Base
 
   def self.attribute_categories
     {
-      general_information: {
+      overview: {
         icon: 'info',
         attributes: %w(name type_of description universe_id)
       },
@@ -48,15 +48,15 @@ class Location < ActiveRecord::Base
         attributes: %w(leaders population language currency motto)
       },
       cities: {
-        icon: 'face',
+        icon: 'business',
         attributes: %w(capital_cities largest_cities notable_cities)
       },
       geography: {
-        icon: 'edit',
+        icon: 'map',
         attributes: %w(area crops located_at)
       },
       history: {
-        icon: 'edit',
+        icon: 'book',
         attributes: %w(established_year notable_wars)
       },
       notes: {
