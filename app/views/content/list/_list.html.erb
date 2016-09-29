@@ -17,7 +17,16 @@
         <% if current_user && current_user == content.user %>
           <span class="tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>">
             <i class="material-icons">mode_edit</i>
-            edited <%= time_ago_in_words content.updated_at %> ago
+
+            <%
+              if content.updated_at == content.created_at
+                action = 'created'
+              else
+                action = 'updated'
+              end
+            %>
+
+            <%= action %> <%= time_ago_in_words content.updated_at %> ago
           </span>
         <% end %>
       </p>
