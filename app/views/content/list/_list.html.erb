@@ -10,9 +10,16 @@
         <%= content.description %>
       </p>
       <p class='grey-text'>
-        <em>last edited <%= content.updated_at.strftime("%m/%d/%Y") %></em>
+        <% if content.respond_to?(:universe) && content.universe.present? %>
+          <i class="material-icons"><%= Universe.icon %></i>
+          <%= link_to content.universe.name, content.universe %>,
+        <% end %>
+        <span class="tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>">
+          <i class="material-icons">mode_edit</i>
+          edited <%= time_ago_in_words content.updated_at %> ago
+        </span>
       </p>
-      <span class="secondary-content">
+      <span class="secondary-content badge-new">
         <%= link_to edit_polymorphic_path(content) do %>
           <i class="material-icons">edit</i>
         <% end %>
