@@ -84,10 +84,48 @@
                   </div>
 
                 <% elsif attribute == 'private_notes' %>
-                  <%= render 'content/form/text_input', f: f, attribute: attribute %>
+                  <div class="input-field content-field">
+                    <%= f.label attribute, attribute.humanize.capitalize %>
+                    <%= f.text_area attribute, class: "materialize-textarea", placeholder: 'Write as little or as much as you want!' %>
                     <div class="help-text">
                       Private notes are <em>always</em> visible to only you, even if content is made public and shared.
                     </div>
+                  </div>
+
+                <% elsif attribute == 'item_type' %>
+                  <% potential_item_types = t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +
+                    t('club_types') + t('flexible_weapon_types') + t('fist_weapon_types') + t('thrown_weapon_types') +
+                    t('polearm_types') + t('shortsword_types') + t('sword_types') + t('other_item_types')
+                  %>
+                  <%= render 'content/form/text_input', f: f, attribute: attribute, autocomplete: potential_item_types %>
+
+                <%# TODO: not make this so awful %>
+
+                <% elsif attribute == 'skintone' %>
+                  <%= render 'content/form/text_input', f: f, attribute: attribute, autocomplete: t('skin_colors') %>
+
+                <% elsif attribute == 'race' %>
+                  <%= render 'content/form/text_input', f: f, attribute: attribute, autocomplete: t('character_races') %>
+
+                <% elsif attribute == 'eyecolor' %>
+                  <%= render 'content/form/text_input', f: f, attribute: attribute, autocomplete: t('eye_colors') %>
+
+                <% elsif attribute == 'haircolor' %>
+                  <%= render 'content/form/text_input', f: f, attribute: attribute, autocomplete: t('hair_colors') %>
+
+                <% elsif attribute == 'hairstyle' %>
+                  <%= render 'content/form/text_input', f: f, attribute: attribute, autocomplete: t('hair_styles') %>
+
+                <% elsif attribute == 'facialhair' %>
+                  <%= render 'content/form/text_input', f: f, attribute: attribute, autocomplete: t('facial_hair_styles') %>
+
+                <% elsif attribute == 'bodytype' %>
+                  <%= render 'content/form/text_input', f: f, attribute: attribute, autocomplete: t('body_types') %>
+
+                <% elsif attribute == 'fave_weapon' %>
+                  <%= render 'content/form/text_input', f: f, attribute: attribute, autocomplete: t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +
+                    t('club_types') + t('flexible_weapon_types') + t('fist_weapon_types') + t('thrown_weapon_types') +
+                    t('polearm_types') + t('shortsword_types') + t('sword_types') %>
 
                 <% else %>
                   <%= render 'content/form/text_input', f: f, attribute: attribute %>
@@ -99,7 +137,7 @@
         <% end %>
       </div>
       <div class="card-action center">
-        <%= f.submit nil, class: 'btn' %>
+        <%= f.submit nil, class: "btn waves-effect waves-#{content.class.color}" %>
       </div>
     </div>
   </div>
