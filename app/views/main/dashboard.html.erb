@@ -2,20 +2,31 @@
   <%= render partial: 'cards/serendipitous/content_question', locals: { question: @question, content: @content } %>
 <% end %>
 
+<%
+  s_width = 12
+  m_width = 6
+  l_width = 3
+
+  if current_user.content_count > 0
+    # If we're losing 2 columns to the sidebar (if any content exists), only show 2 content types per row
+    l_width = 6
+  end
+%>
+
 <div class="row">
-  <div class="col s12 m12 l6">
+  <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
     <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: :universe, content_list: current_user.universes } %>
   </div>
 
-  <div class="col s12 m12 l6">
+  <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
     <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: :character, content_list: current_user.characters } %>
   </div>
 
-  <div class="col s12 m12 l6">
+  <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
     <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: :location, content_list: current_user.locations } %>
   </div>
 
-  <div class="col s12 m12 l6">
+  <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
     <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: :item, content_list: current_user.items } %>
   </div>
 </div>

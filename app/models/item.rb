@@ -38,11 +38,11 @@ class Item < ActiveRecord::Base
       },
       looks: {
         icon: 'redeem',
-        attributes: %w(weight)
+        attributes: %w(materials weight)
       },
       history: {
         icon: 'book',
-        attributes: %w(original_owners current_owners makers materials year_made)
+        attributes: %w(original_owners current_owners makers year_made)
       },
       abilities: {
         icon: 'flash_on',
