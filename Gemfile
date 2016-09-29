@@ -59,6 +59,7 @@ group :test, :development do
   gem 'coveralls', require: false
   gem 'simplecov', require: false
   gem 'rubocop', require: false
+  gem 'rspec-rails'
   gem 'cucumber-rails', require: false
   gem 'database_cleaner'
 
