@@ -2,197 +2,31 @@
   <%= render partial: 'cards/serendipitous/content_question', locals: { question: @question, content: @content } %>
 <% end %>
 
+<%
+  s_width = 12
+  m_width = 6
+  l_width = 3
+
+  if current_user.content_count > 0
+    # If we're losing 2 columns to the sidebar (if any content exists), only show 2 content types per row
+    l_width = 6
+  end
+%>
+
 <div class="row">
-  <div class="col s12 m12 l6">
-    <div class="card hoverable">
-      <div class="card-image waves-effect waves-block waves-light">
-        <%= image_tag 'card-headers/universes.jpg', class: 'activator', style: 'height: 390px' %>
-      </div>
-      <div class="card-content">
-        <span class="card-title activator grey-text text-darken-4">
-          You've created <%= current_user.universes.count %> universes
-          <%= link_to universes_path, class: 'black-text' do %>
-            <i class="material-icons right">zoom_out_map</i>
-          <% end %>
-          <i class="material-icons right">arrow_upward</i>
-        </span>
-        <p>
-          <%= link_to 'Create another', new_universe_path %>
-        </p>
-      </div>
-      <div class="card-reveal">
-        <span class="card-title grey-text text-darken-4">
-          Universes
-          <i class="material-icons right">close</i>
-        </span>
-        <table class="content-table">
-          <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th></th>
-          </tr>
-          <% current_user.universes.sort_by { |x| x.name.downcase }.each do |universe| %>
-          <tr>
-            <td><%= link_to universe.name, universe %></td>
-            <td><%= truncate(universe.description, length: 140) %></td>
-            <td>
-              <div class="secondary-content">
-                <%= link_to edit_universe_path(universe) do %>
-                  <i class="material-icons">edit</i>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <% end %>
-        </table>
-        <%= link_to 'Create another', new_universe_path, class: 'btn' %>
-      </div>
-    </div>
+  <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: :universe, content_list: current_user.universes } %>
   </div>
 
-  <div class="col s12 m12 l6">
-    <div class="card hoverable">
-      <div class="card-image waves-effect waves-block waves-light">
-        <%= image_tag 'card-headers/characters.jpg', class: 'activator', style: 'height: 390px' %>
-      </div>
-      <div class="card-content">
-        <span class="card-title activator grey-text text-darken-4">
-          You've created <%= current_user.characters.count %> characters
-          <%= link_to characters_path, class: 'black-text' do %>
-            <i class="material-icons right">zoom_out_map</i>
-          <% end %>
-          <i class="material-icons right">arrow_upward</i>
-        </span>
-        <p>
-          <%= link_to 'Create another', new_character_path %>
-        </p>
-      </div>
-      <div class="card-reveal">
-        <span class="card-title grey-text text-darken-4">
-          Characters
-          <i class="material-icons right">close</i>
-        </span>
-        <table class="content-table">
-          <tr>
-            <th>Name</th>
-            <th>Role</th>
-            <th></th>
-          </tr>
-          <% current_user.characters.sort_by { |x| x.name.downcase }.each do |character| %>
-          <tr>
-            <td><%= link_to character.name, character %></td>
-            <td><%= character.role %></td>
-            <td>
-              <div class="secondary-content">
-                <%= link_to edit_character_path(character) do %>
-                  <i class="material-icons">edit</i>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <% end %>
-        </table>
-        <%= link_to 'Create another', new_character_path, class: 'btn' %>
-      </div>
-    </div>
+  <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: :character, content_list: current_user.characters } %>
   </div>
 
-  <div class="col s12 m12 l6">
-    <div class="card hoverable">
-      <div class="card-image waves-effect waves-block waves-light">
-        <%= image_tag 'card-headers/locations.jpg', class: 'activator', style: 'height: 390px' %>
-      </div>
-      <div class="card-content">
-        <span class="card-title activator grey-text text-darken-4">
-          You've created <%= current_user.locations.count %> locations
-          <%= link_to locations_path, class: 'black-text' do %>
-            <i class="material-icons right">zoom_out_map</i>
-          <% end %>
-          <i class="material-icons right">arrow_upward</i>
-        </span>
-        <p>
-          <%= link_to 'Create another', new_location_path %>
-        </p>
-      </div>
-      <div class="card-reveal">
-        <span class="card-title grey-text text-darken-4">
-          Locations
-          <i class="material-icons right">close</i>
-        </span>
-        <table class="content-table">
-          <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Type</th>
-            <th></th>
-          </tr>
-          <% current_user.locations.sort_by { |x| x.name.downcase }.each do |location| %>
-          <tr>
-            <td><%= link_to location.name, location %></td>
-            <td><%= truncate(location.description, length: 140) %></td>
-            <td><%= location.type_of %></td>
-            <td>
-              <div class="secondary-content">
-                <%= link_to edit_location_path(location) do %>
-                  <i class="material-icons">edit</i>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <% end %>
-        </table>
-        <%= link_to 'Create another', new_location_path, class: 'btn' %>
-      </div>
-    </div>
+  <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: :location, content_list: current_user.locations } %>
   </div>
 
-  <div class="col s12 m12 l6">
-    <div class="card hoverable">
-      <div class="card-image waves-effect waves-block waves-light">
-        <%= image_tag 'card-headers/items.jpg', class: 'activator', style: 'height: 390px' %>
-      </div>
-      <div class="card-content">
-        <span class="card-title activator grey-text text-darken-4">
-          You've created <%= current_user.items.count %> items
-          <%= link_to items_path, class: 'black-text' do %>
-            <i class="material-icons right">zoom_out_map</i>
-          <% end %>
-          <i class="material-icons right">arrow_upward</i>
-        </span>
-        <p>
-          <%= link_to 'Create another', new_item_path %>
-        </p>
-      </div>
-      <div class="card-reveal">
-        <span class="card-title grey-text text-darken-4">
-          Items
-          <i class="material-icons right">close</i>
-        </span>
-        <table class="content-table">
-          <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Type</th>
-            <th></th>
-          </tr>
-          <% current_user.items.sort_by { |x| x.name.downcase }.each do |item| %>
-          <tr>
-            <td><%= link_to item.name, item %></td>
-            <td><%= truncate(item.description, length: 140) %></td>
-            <td><%= item.item_type %></td>
-            <td>
-              <div class="secondary-content">
-                <%= link_to edit_item_path(item) do %>
-                  <i class="material-icons">edit</i>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <% end %>
-        </table>
-        <%= link_to 'Create another', new_item_path, class: 'btn' %>
-      </div>
-    </div>
+  <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: :item, content_list: current_user.items } %>
   </div>
-
 </div>

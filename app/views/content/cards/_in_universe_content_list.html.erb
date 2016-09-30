@@ -1,6 +1,10 @@
+<%
+  content_type_class = content_type.to_s.titleize.constantize
+%>
+
 <div class="card hoverable">
   <div class="card-image waves-effect waves-block waves-light">
-    <%= image_tag "card-headers/#{content_type.to_s.pluralize}.jpg", class: 'activator', style: 'height: 390px' %>
+    <%= image_tag "card-headers/#{content_type.to_s.pluralize}.jpg", class: 'activator' %>
   </div>
   <div class="card-content">
     <span class="card-title activator grey-text text-darken-4">
@@ -8,34 +12,55 @@
       <i class="material-icons right">arrow_upward</i>
     </span>
     <p>
-      <%= link_to 'Create another', new_polymorphic_path(content_type) if current_user %>
+      <%= link_to "Create #{content_list.empty? ? 'your first one!' : 'another'}", new_polymorphic_path(content_type) if current_user %>
     </p>
   </div>
   <div class="card-reveal">
     <span class="card-title grey-text text-darken-4">
+      <% if content_list.any? %>
+        <i class="material-icons <%= content_type_class.color %>-text" style="position: relative; top: 3px">
+          <%= content_type_class.icon %>
+        </i>
+      <% end %>
       <%= content_type.to_s.pluralize.titleize %>
       <i class="material-icons right">close</i>
     </span>
-    <table class="content-table">
-      <tr>
-        <th>Name</th>
-        <th>Description</th>
-        <th></th>
-      </tr>
-      <% content_list.each do |content| %>
-      <tr>
-        <td><%= link_to content.name, content %></td>
-        <td><%= content.description %></td>
-        <td>
-          <div class="secondary-content">
-            <%= link_to edit_polymorphic_path(content) do %>
-              <i class="material-icons">edit</i>
-            <% end %>
-          </div>
-        </td>
-      </tr>
-      <% end %>
-    </table>
-    <%= link_to 'Create another', new_polymorphic_path(content_type), class: 'btn' if current_user %>
+    <% if content_list.any? %>
+      <table class="content-table bordered">
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th></th>
+        </tr>
+        <% content_list.each do |content| %>
+        <tr>
+          <td><%= link_to content.name, content %></td>
+          <td><%= truncate(content.description, length: 200) %></td>
+          <td>
+            <div class="secondary-content">
+              <%= link_to edit_polymorphic_path(content) do %>
+                <i class="material-icons">edit</i>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    <% elsif content_list.empty? %>
+      <div class="center">
+        <h1><i class="material-icons <%= content_type_class.color %>-text" style="font-size: 200%">
+          <%= content_type_class.icon %>
+        </i></h1>
+        <p>
+          <%= t("content_descriptions.#{content_type}") %>
+        </p>
+      </div>
+    <% end %>
+    <br />
+
+    <div class="center">
+      <% button_text = content_list.any? ? "Create another #{content_type}" : "Create your first #{content_type}" %>
+      <%= link_to button_text, new_polymorphic_path(content_type), class: 'btn' if current_user %>
+    </div>
   </div>
 </div>

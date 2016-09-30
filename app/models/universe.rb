@@ -36,21 +36,21 @@ class Universe < ActiveRecord::Base
 
   def self.attribute_categories
     {
-      general_information: {
+      overview: {
         icon: 'info',
         attributes: %w(name description)
       },
       history: {
-        icon: 'face',
+        icon: 'book',
         attributes: %w(history)
-      },
-      settings: {
-        icon: 'face',
-        attributes: %w(privacy)
       },
       notes: {
         icon: 'edit',
         attributes: %w(notes private_notes)
+      },
+      settings: {
+        icon: 'build',
+        attributes: %w(privacy)
       }
     }
   end

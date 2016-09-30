@@ -32,6 +32,7 @@ set_meta_tags title: content.name, description: content.description
           <div id="<%= category %>" class="row">
             <% data[:attributes].each do |attribute| %>
               <% next if attribute.start_with?("private") && @content.user != current_user %>
+              <% next if content.send(attribute).blank? %>
               <div class="row">
                 <div class="col s3 m3 l2 right-align flow-text grey-text"><%= attribute.humanize.capitalize %></div>
 
