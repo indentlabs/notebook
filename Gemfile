@@ -39,6 +39,7 @@ gem 'medium-editor-rails'
 
 # Graphs & Charts
 gem 'chartkick'
+gem 'slack-notifier'
 
 group :production do
   #  gem 'less-rails'
