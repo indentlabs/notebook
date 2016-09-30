@@ -10,18 +10,31 @@
         <%= f.object.send(attribute).name %>
       <% end %>
     </div>
-
-    <%= link_to_remove_association 'remove', f %>
+    <%= link_to_remove_association f do %>
+      <i class="material-icons red-text" style="position: relative; top: 8px; left: -3px;">close</i>
+    <% end %>
 
   <% else %>
     <% uuid = SecureRandom.uuid %>
     <% klass = parent.send(attribute.pluralize).build.class.name.downcase %>
 
     <div class="input-field">
-      <%= f.label attribute %>
+      <i class="material-icons prefix">account_circle</i>
+
+      <%= f.label attribute, class: 'active' %>
       <%# todo scope to universe %>
-      <%= f.select "#{attribute}_id", current_user.send(klass.pluralize).sort_by(&:name).map { |c| [c.name, c.id] }.compact, include_blank: true %>
-      <%= link_to_remove_association 'remove', f %>
+
+      <div class="row">
+        <div class="col s10">
+          <%= f.select "#{attribute}_id", current_user.send(klass.pluralize).sort_by(&:name).map { |c| [c.name, c.id] }.compact, include_blank: true %>
+        </div>
+
+        <div class="col s2">
+          <%= link_to_remove_association f do %>
+            <i class="material-icons red-text" style="position: relative; top: 10px; left: -15px;">close</i>
+          <% end %>
+        </div>
+      </div>
     </div>
 
     <script type="text/javascript">

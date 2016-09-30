@@ -1,7 +1,29 @@
+<%
+  content_type_class = @content.build.class
+  content_type = content_type_class.name.downcase
+%>
+
 <% content_for :sidebar_top do %>
   <%= render partial: 'cards/serendipitous/content_question', locals: { question: @question, content: @questioned_content } %>
 <% end %>
 
-<h4>You've created <%= @content.count %> <%= @content.build.class.name.downcase.pluralize %></h4>
-<%= render partial: 'content/list/list', locals: { content_list: @content } %>
-<%= link_to "Create another #{@content.build.class.name.downcase}", new_polymorphic_path(@content.build), :class => 'btn' %>
+<% if @content.any? %>
+  <h4>You've created <%= pluralize(@content.count, content_type) %></h4>
+  <%= render partial: 'content/list/list', locals: { content_list: @content } %>
+  <%= link_to "Create another #{content_type}", new_polymorphic_path(@content.build), :class => 'btn' %>
+
+<% elsif @content.empty? %>
+  <div class="center">
+    <h4>You haven't created any <%= content_type.pluralize %> yet!</h4>
+    <h1>
+      <i class="material-icons <%= content_type_class.color %>-text" style="font-size: 200%">
+        <%= content_type_class.icon %>
+      </i>
+    </h1>
+    <p>
+      <%= t("content_descriptions.#{content_type}") %>
+    </p>
+    <%= link_to "Create your first #{content_type}", new_polymorphic_path(@content.build), :class => 'btn' %>
+  </div>
+
+<% end %>
