@@ -32,7 +32,7 @@ gem 'meta-tags'
 
 # Smarts
 # gem 'serendipitous', :path => "~/git/serendipitous-gem"
-gem 'serendipitous', git: 'git://github.com/indentlabs/serendipitous-gem.git', branch: 'use-yml-files'
+gem 'serendipitous', git: 'https://github.com/indentlabs/serendipitous-gem.git'
 
 # Editor
 gem 'medium-editor-rails'
