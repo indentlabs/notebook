@@ -1,0 +1,48 @@
+<div class="row">
+	<div class="col s12">
+		<h1>Item creations</h1>
+		<%= line_chart Item.group_by_day(:created_at) %>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col s4">
+		<h2>Characters per user</h1>
+		<%= column_chart User.joins(:items).group(:user_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
+	</div>
+	<div class="col s4">
+		<h2>Items per universe</h1>
+		<%= column_chart Universe.joins(:items).group(:universe_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
+	</div>
+	<div class="col s4">
+		<h2>Item privacy</h1>
+		<%= pie_chart Item.where.not(privacy: "").group(:privacy).count() %>
+	</div>
+</div>
+
+<h1>Item usage data</h1>
+<div class="row">
+	<div class="col s6">
+		<h2>Most common names</h2>
+		<%= bar_chart Item.where.not(name: "").group(:name).order('count_all desc').limit(5).count() %>
+	</div>
+	<div class="col s6">
+		<h2>Most common types</h2>
+		<%= bar_chart Item.where.not(item_type: "").group(:item_type).order('count_all desc').limit(5).count() %>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col s4">
+		<h2>Common made years</h2>
+		<%= bar_chart Item.where.not(year_made: "").group(:year_made).order('count_all desc').limit(5).count() %>
+	</div>
+	<div class="col s4">
+		<h2>Common makers</h2>
+		<%= bar_chart Item.where.not(made_by: "").group(:made_by).order('count_all desc').limit(5).count() %>
+	</div>
+	<div class="col s4">
+		<h2>Most common weights</h2>
+		<%= bar_chart Item.where.not(weight: "").group(:weight).order('count_all desc').limit(5).count() %>
+	</div>
+</div>

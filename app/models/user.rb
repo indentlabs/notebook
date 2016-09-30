@@ -13,9 +13,7 @@ class User < ActiveRecord::Base
 
   has_many :characters
   has_many :items
-  has_many :languages
   has_many :locations
-  has_many :magics
   has_many :universes
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
@@ -45,9 +43,7 @@ class User < ActiveRecord::Base
     {
       characters: characters,
       items: items,
-      languages: languages,
       locations: locations,
-      magics: magics,
       universes: universes
     }
   end
@@ -56,9 +52,7 @@ class User < ActiveRecord::Base
     [
       characters.length,
       items.length,
-      languages.length,
       locations.length,
-      magics.length,
       universes.length
     ].sum
   end
