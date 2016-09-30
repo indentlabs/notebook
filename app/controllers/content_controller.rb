@@ -12,13 +12,8 @@ class ContentController < ApplicationController
 
     @content = @content.where(universe: @universe_scope) if @universe_scope.present? && @content.build.respond_to?(:universe)
     @content ||= []
-
-    begin
-      @questioned_content = @content.sample
-      questionable_params = content_param_list.reject { |x| x.is_a?(Hash) || x.to_s.end_with?('_id') }
-      @question = QuestionService.question(Content.new @questioned_content.slice(*questionable_params))
-    rescue
-    end
+    @questioned_content = @content.sample
+    @question = @questioned_content.question unless @questioned_content.nil?
 
     respond_to do |format|
       format.html # index.html.erb
@@ -29,15 +24,7 @@ class ContentController < ApplicationController
   def show
     # TODO: Secure this with content class whitelist lel
     @content = content_type_from_controller(self.class).find(params[:id])
-
-    if current_user and current_user == @content.user
-      # question = QuestionService.question(Content.new @content.slice(*content_param_list.flat_map { |v| v.is_a?(Symbol) ? v : v.keys.map { |k| k.to_s.chomp('_attributes').to_sym } }))
-      begin
-        questionable_params = content_param_list.reject { |x| x.is_a?(Hash) || x.to_s.end_with?('_id') }
-        @question = QuestionService.question(Content.new @content.slice(*questionable_params))
-      rescue
-      end
-    end
+    @question = @content.question if current_user.present? and current_user == @content.user
 
     respond_to do |format|
       format.html # show.html.erb
