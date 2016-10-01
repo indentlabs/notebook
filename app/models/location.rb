@@ -27,7 +27,7 @@ class Location < ActiveRecord::Base
   relates :largest_cities,    with: :largest_cities_relationships
   relates :notable_cities,    with: :notable_cities_relationships
 
-  scope :is_public, -> { joins(:universe).where('universes.privacy = ? OR locations.privacy = ?', 'public', 'public') }
+  scope :is_public, -> { eager_load(:universe).where('universes.privacy = ? OR locations.privacy = ?', 'public', 'public') }
 
   def self.icon
     'terrain'

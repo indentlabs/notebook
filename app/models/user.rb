@@ -57,6 +57,15 @@ class User < ActiveRecord::Base
     ].sum
   end
 
+  def public_content_count
+    [
+      characters.is_public.length,
+      items.is_public.length,
+      locations.is_public.length,
+      universes.is_public.length
+    ].sum
+  end
+
   def image_url(size=80)
     email_md5 = Digest::MD5.hexdigest(email.downcase)
     # 80px is Gravatar's default size
