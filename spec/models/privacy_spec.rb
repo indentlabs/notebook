@@ -2,7 +2,13 @@ require 'rails_helper'
 
 shared_examples_for 'content with privacy' do
   context 'model is public' do
-    let(:model) { build(:character, name: 'Ellen', privacy: 'public')}
+    let(:model) {
+      build(
+        described_class.model_name.param_key.to_sym,
+        name: 'Public model',
+        privacy: 'public'
+      )
+    }
 
     describe '.public_content?' do
       subject { model.public_content? }
