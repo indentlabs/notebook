@@ -21,7 +21,7 @@ class Item < ActiveRecord::Base
   relates :current_owners,            with: :current_ownerships
   relates :makers,                    with: :maker_relationships
 
-  scope :is_public, -> { joins(:universe).where('universes.privacy = ? OR items.privacy = ?', 'public', 'public') }
+  scope :is_public, -> { eager_load(:universe).where('universes.privacy = ? OR items.privacy = ?', 'public', 'public') }
 
   def self.color
     'amber'

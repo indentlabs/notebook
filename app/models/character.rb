@@ -33,7 +33,7 @@ class Character < ActiveRecord::Base
   # Items
   relates :favorite_items, with: :ownerships, where: { favorite: true }
 
-  scope :is_public, -> { joins(:universe).where('universes.privacy = ? OR characters.privacy = ?', 'public', 'public') }
+  scope :is_public, -> { eager_load(:universe).where('characters.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def description
     role

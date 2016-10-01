@@ -16,7 +16,7 @@ class Universe < ActiveRecord::Base
   has_many :items
   has_many :locations
 
-  scope :is_public, -> { where(privacy: "public") }
+  scope :is_public, -> { where(privacy: 'public') }
 
   def content_count
     [
