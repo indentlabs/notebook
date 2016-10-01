@@ -1,8 +1,8 @@
 require 'rails_helper'
 
-RSpec.describe Character, type: :model do
+RSpec.describe Item, type: :model do
   context 'when name is nil' do
-    subject { build(:character, name: nil) }
+    subject { build(:item, name: nil) }
     it { is_expected.to_not be_valid }
   end
 end
