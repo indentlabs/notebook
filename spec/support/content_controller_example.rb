@@ -15,8 +15,7 @@ shared_examples_for 'a controller for a content item' do
     sign_in @user
   end
 
-  let(:universe) { create(:universe, user: @user) }
-  let(:model) { create(@model_name.to_sym, user: @user, universe: universe) }
+  let(:model) { create(@model_name.to_sym, user: @user) }
 
   describe 'GET #index' do
     before { get :index }
@@ -39,7 +38,6 @@ shared_examples_for 'a controller for a content item' do
     before do
       post :create, @model_name => {
         name: model.name,
-        universe: model.universe
       }
 
     end
@@ -56,7 +54,6 @@ shared_examples_for 'a controller for a content item' do
     before do
       put :update, id: model.id, @model_name => {
           name: model.name,
-          universe: model.universe
         }
     end
     it { is_expected.to redirect_to(polymorphic_path(model)) }
