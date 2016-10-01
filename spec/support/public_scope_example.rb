@@ -69,11 +69,3 @@ shared_examples_for 'content with an is_public scope' do
     end
   end
 end
-
-RSpec.describe Character, type: :model do
-  it_behaves_like 'content with an is_public scope'
-end
-
-RSpec.describe Item, type: :model do
-  it_behaves_like 'content with an is_public scope'
-end

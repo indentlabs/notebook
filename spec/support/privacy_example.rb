@@ -1,11 +1,12 @@
 require 'rails_helper'
+require 'support/privacy_example'
+require 'support/public_scope_example'
 
 shared_examples_for 'content with privacy' do
   context 'model is public' do
     let(:model) {
       build(
         described_class.model_name.param_key.to_sym,
-        name: 'Public model',
         privacy: 'public'
       )
     }
@@ -15,12 +16,4 @@ shared_examples_for 'content with privacy' do
       it { is_expected.to be true }
     end
   end
-end
-
-RSpec.describe Character, type: :model do
-  it_behaves_like 'content with privacy'
-end
-
-RSpec.describe Item, type: :model do
-  it_behaves_like 'content with privacy'
 end
