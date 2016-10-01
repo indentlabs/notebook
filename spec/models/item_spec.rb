@@ -1,10 +1,9 @@
 require 'rails_helper'
 require 'support/privacy_example'
 require 'support/public_scope_example'
-require 'support/name_validation_example'
 
 RSpec.describe Item, type: :model do
   it_behaves_like 'content with privacy'
   it_behaves_like 'content with an is_public scope'
-  it_behaves_like 'content that validates presence of name'
+  it { is_expected.to validate_presence_of(:name) }
 end
