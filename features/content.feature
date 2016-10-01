@@ -15,6 +15,7 @@ Feature: Character sheets
       | character    |
       | location     |
       | item         |
+      | universe     |
 
   Scenario Outline: I change my content's name
     Given I have created a <content_type>
@@ -26,3 +27,4 @@ Feature: Character sheets
       | character    |
       | location     |
       | item         |
+      | universe     |
