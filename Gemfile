@@ -54,6 +54,8 @@ group :test, :production do
   gem 'therubyracer', platforms: :ruby
 end
 
+gem "codeclimate-test-reporter", group: :test, require: nil
+
 group :test, :development do
   gem 'capybara'
   gem 'selenium-webdriver'
