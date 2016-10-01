@@ -23,6 +23,10 @@ When 'I log in' do
   click_button 'Log in'
 end
 
+Given 'I am logged-in' do
+  step('I sign up')
+end
+
 When 'I log out' do
   visit destroy_user_session_path
 end
@@ -35,6 +39,7 @@ When /^I create a (character|location|item|universe)$/ do |model|
   visit new_polymorphic_path(model)
   fill_in "#{model}_name", with: 'My new content'
   click_on "Create #{model.titlecase}"
+  @model = model.classify.constantize.where(name: 'My new content', user: @user).first
 end
 
 Then /^that (character|location|item|universe) should be saved$/ do |model|
@@ -53,6 +58,25 @@ When /^I change my (character|location|item|universe)\'s name$/ do |model|
   @model.reload
 end
 
+When /^I view that (character|location|item|universe)$/ do |model|
+  visit polymorphic_path(@model)
+end
+
 Then /^that new name should be saved$/ do
   expect(@model.name).to eq('My changed name')
+end
+
+When 'I answer the Serendipitous question' do
+  @modified_field_name = find(:css, '.content-question-input')[:id].split('_', 2)[1]
+  @model[@modified_field_name] = 'Previous Value'
+  @model.save
+  @previous_field_value = @model[@modified_field_name]
+
+  find(:css, '.content-question-input').set('Content Question Answer')
+  find('.content-question-submit').click
+end
+
+Then 'that new field should be saved' do
+  @model.reload
+  expect(@model[@modified_field_name]).to eq('Content Question Answer')
 end
