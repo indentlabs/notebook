@@ -7,27 +7,28 @@ When 'I am logged-in' do
   click_button 'Log in'
 end
 
-When 'I create a character' do
-  visit new_character_path
-  fill_in 'character_name', with: 'My new character'
-  click_on 'Create Character'
+When /^I create a (character|location|item)$/ do |model|
+  visit new_polymorphic_path(model)
+  fill_in "#{model}_name", with: 'My new content'
+  click_on "Create #{model.titlecase}"
 end
 
-Then 'that character should be saved' do
-  expect(@user.characters.length).to eq(1)
+Then /^that (character|location|item) should be saved$/ do |model|
+  expect(@user.send(model.pluralize).length).to eq(1)
 end
 
-Given 'I have created a character' do
-  @character = create(:character, user: @user)
+Given /^I have created a (character|location|item)$/ do |model|
+  @model = create(model.to_sym, user: @user)
 end
 
-When 'I change my character\'s name' do
-  visit character_path(@character)
-  click_on 'Edit this character'
-  fill_in 'character_name', with: 'My character\'s changed name'
-  click_on 'Update Character'
+When /^I change my (character|location|item)\'s name$/ do |model|
+  visit polymorphic_path(@model)
+  click_on "Edit this #{model}"
+  fill_in "#{model}_name", with: 'My changed name'
+  click_on "Update #{model.titlecase}"
+  @model.reload
 end
 
-Then 'that new name should be saved' do
-  expect(@user.characters.first.name).to eq('My character\'s changed name')
+Then /^that new name should be saved$/ do
+  expect(@model.name).to eq('My changed name')
 end
