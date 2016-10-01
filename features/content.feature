@@ -4,7 +4,8 @@ Feature: Character sheets
   So that I don't forget
 
   Background:
-    Given I am logged-in
+    Given I have an account
+    And I log in
 
   Scenario Outline: I create new content
     When I create a <content_type>

@@ -1,10 +1,34 @@
-When 'I am logged-in' do
-  @user = create(:user)
+When 'I sign up' do
+  @user = build(:user)
 
+  visit new_user_registration_path
+  fill_in 'user_name', with: 'User Name'
+  fill_in 'user_email', with: @user.email
+  fill_in 'user_password', with: 'password'
+  fill_in 'user_password_confirmation', with: 'password'
+  click_button 'Sign up'
+
+  @user = User.where(email: @user.email).first
+end
+
+Given 'I have an account' do
+  step('I sign up')
+end
+
+When 'I log in' do
+  step('I log out')
   visit new_user_session_path
   fill_in 'user_email', with: @user.email
-  fill_in 'user_password', with: @user.password
+  fill_in 'user_password', with: 'password'
   click_button 'Log in'
+end
+
+When 'I log out' do
+  visit destroy_user_session_path
+end
+
+Then 'I should see my dashboard' do
+  expect(current_path).to eq(dashboard_path)
 end
 
 When /^I create a (character|location|item|universe)$/ do |model|
