@@ -1,4 +1,22 @@
-<ul id="dropdown1" class="dropdown-content">
+<ul id="desktop-user-dropdown" class="dropdown-content">
+  <li><%= link_to 'Your author profile', current_user if current_user %></li>
+  <li><%= link_to 'Account settings', edit_user_registration_path %></li>
+  <li class="divider"></li>
+  <li><%= link_to 'Report a problem', 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new' %></li>
+  <li><%= link_to 'Request a feature', 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new' %></li>
+  <li><%= link_to 'Leave feedback', 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new' %></li>
+  <li class="divider"></li>
+  <li><%= link_to 'Privacy policy', privacy_policy_path %></li>
+  <li class="divider"></li>
+  <li><%= link_to "Sign out", destroy_user_session_path %></li>
+</ul>
+
+<ul id="mobile-user-dropdown" class="dropdown-content">
+  <li><%= link_to 'Your universes', universes_path %></li>
+  <li><%= link_to 'Your characters', characters_path %></li>
+  <li><%= link_to 'Your locations', locations_path %></li>
+  <li><%= link_to 'Your items', items_path %></li>
+  <li class="divider"></li>
   <li><%= link_to 'Your author profile', current_user if current_user %></li>
   <li><%= link_to 'Account settings', edit_user_registration_path %></li>
   <li class="divider"></li>
@@ -26,6 +44,15 @@
     <div class="nav-wrapper">
       <%= link_to 'Notebook', root_url, class: 'brand-logo center' %>
 
+      <ul class="right hide-on-med-and-up">
+        <% if user_signed_in? %>
+        <li>
+          <a class="dropdown-button tooltipped" href="#!" data-activates="mobile-user-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your content">
+            <i class="material-icons">book</i>
+          </a>
+        </li>
+        <% end %>
+      </ul>
       <ul class="right hide-on-small-and-down">
         <% if user_signed_in? %>
           <li>
@@ -49,7 +76,7 @@
             </a>
           </li>
           <li>
-            <a class="dropdown-button tooltipped" href="#!" data-activates="dropdown1" data-position="bottom" data-delay="100" data-tooltip="You">
+            <a class="dropdown-button tooltipped" href="#!" data-activates="desktop-user-dropdown" data-position="bottom" data-delay="100" data-tooltip="You">
               <i class="material-icons">person</i>
             </a>
           </li>
@@ -58,7 +85,7 @@
           <li><%= link_to 'Sign up', new_user_registration_path %></li>
         <% end %>
       </ul>
-      <ul class="left hide-on-sm-and-down">
+      <ul class="left">
         <li>
           <%= link_to root_url do %>
             <i class="material-icons">home</i>

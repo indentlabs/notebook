@@ -16,6 +16,7 @@ class Character < ActiveRecord::Base
 
   include HasPrivacy
   include HasContentGroupers
+  include Serendipitous::Concern
 
   # Characters
   relates :fathers,        with: :fatherships
@@ -32,7 +33,7 @@ class Character < ActiveRecord::Base
   # Items
   relates :favorite_items, with: :ownerships, where: { favorite: true }
 
-  scope :is_public, -> { joins(:universe).where('universes.privacy = ? OR characters.privacy = ?', 'public', 'public') }
+  scope :is_public, -> { eager_load(:universe).where('characters.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def description
     role
@@ -48,30 +49,30 @@ class Character < ActiveRecord::Base
 
   def self.attribute_categories
     {
-      general: {
+      overview: {
         icon: 'info',
         attributes: %w(name role gender age universe_id)
       },
-      appearance: {
+      looks: {
         icon: 'face',
         attributes: %w(weight height haircolor hairstyle facialhair eyecolor race skintone bodytype identmarks)
       },
       social: {
         icon: 'groups',
-        attributes: %w(best_friends religion politics prejudices occupation)
+        attributes: %w(best_friends archenemies religion politics prejudices occupation)
       },
       # TODO: remove schema for mannerisms
       history: {
         icon: 'info',
         attributes: %w(birthday birthplaces education background)
       },
-      favorites: {
+      faves: {
         icon: 'star',
         attributes: %w(fave_color fave_food fave_possession fave_weapon fave_animal)
       },
-      relations: {
+      family: {
         icon: 'face',
-        attributes: %w(mothers fathers spouses siblings archenemies children)
+        attributes: %w(mothers fathers spouses siblings children)
       },
       notes: {
         icon: 'edit',

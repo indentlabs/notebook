@@ -7,6 +7,7 @@
 #    contains all canonically-related content created by Users
 class Universe < ActiveRecord::Base
   include HasPrivacy
+  include Serendipitous::Concern
 
   validates :name, presence: true
 
@@ -15,7 +16,7 @@ class Universe < ActiveRecord::Base
   has_many :items
   has_many :locations
 
-  scope :is_public, -> { where(privacy: "public") }
+  scope :is_public, -> { where(privacy: 'public') }
 
   def content_count
     [
@@ -35,21 +36,21 @@ class Universe < ActiveRecord::Base
 
   def self.attribute_categories
     {
-      general_information: {
+      overview: {
         icon: 'info',
         attributes: %w(name description)
       },
       history: {
-        icon: 'face',
+        icon: 'book',
         attributes: %w(history)
-      },
-      settings: {
-        icon: 'face',
-        attributes: %w(privacy)
       },
       notes: {
         icon: 'edit',
         attributes: %w(notes private_notes)
+      },
+      settings: {
+        icon: 'build',
+        attributes: %w(privacy)
       }
     }
   end

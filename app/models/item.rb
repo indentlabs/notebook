@@ -14,13 +14,14 @@ class Item < ActiveRecord::Base
 
   include HasPrivacy
   include HasContentGroupers
+  include Serendipitous::Concern
 
   # Characters
   relates :original_owners,           with: :original_ownerships
   relates :current_owners,            with: :current_ownerships
   relates :makers,                    with: :maker_relationships
 
-  scope :is_public, -> { joins(:universe).where('universes.privacy = ? OR items.privacy = ?', 'public', 'public') }
+  scope :is_public, -> { eager_load(:universe).where('universes.privacy = ? OR items.privacy = ?', 'public', 'public') }
 
   def self.color
     'amber'
@@ -32,20 +33,20 @@ class Item < ActiveRecord::Base
 
   def self.attribute_categories
     {
-      general_information: {
+      overview: {
         icon: 'info',
         attributes: %w(name item_type description universe_id)
       },
-      appearance: {
-        icon: 'face',
-        attributes: %w(weight)
+      looks: {
+        icon: 'redeem',
+        attributes: %w(materials weight)
       },
       history: {
-        icon: 'face',
-        attributes: %w(original_owners current_owners makers materials year_made)
+        icon: 'book',
+        attributes: %w(original_owners current_owners makers year_made)
       },
       abilities: {
-        icon: 'face',
+        icon: 'flash_on',
         attributes: %w(magic)
       },
       notes: {

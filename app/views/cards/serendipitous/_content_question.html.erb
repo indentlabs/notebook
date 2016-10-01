@@ -1,6 +1,6 @@
-<% if question && question[:field] && !content.send(question[:field]).is_a?(ActiveRecord::Associations::CollectionProxy) %>
+<% if question && question[:field] && question[:question].present? %>
   <div class="content-question card-panel hoverable light-blue lighten-4">
-    <i class="material-icons <%= content.class.color %> circle right white-text"><%= content.class.icon %>`</i>
+    <i class="material-icons <%= content.class.color %>-text circle right"><%= content.class.icon %></i>
     <%= question[:question] %>
 
     <%= form_for content do |f| %>
@@ -15,7 +15,7 @@
       %>
           <div class="input-field">
             <%= f.text_field question[:field], class: 'content-question-input' %>
-            <%= f.label question[:field], question[:field].humanize %>
+            <%= f.label content.class.human_attribute_name(question[:field]) %>
           </div>
       <%
         end
@@ -23,9 +23,12 @@
 
       <%# Using a plain old form.submit creates a button that only responds to a click on the button text,
           not anywhere else on the button. %>
-      <%= button_tag(type: 'submit', class: "content-question-submit waves-effect waves-light btn") do %>
-        Save
+      <%= button_tag(type: 'submit', class: "content-question-submit waves-effect waves-light btn #{content.class.color} right") do %>
+        Update <%= content.name.downcase %>
       <% end %>
+      <div style="clear: both;"></div>
     <% end %>
   </div>
+<% else %>
+<!-- decided not to render serendipitous card for this question: <%= question || 'nil'%> -->
 <% end %>

@@ -1,4 +1,25 @@
-<div class="input-field">
+<%
+  field_id = "#{f.object.class.name.downcase}_#{attribute}"
+
+  # TODO: Enable autocomplete when we can actually hide the dropdown if someone tabs out of a field.
+  #       Not the easiest thing in the world to do, apparently.
+%>
+
+<div class="input-field content-field">
   <%= f.label attribute, attribute.humanize.capitalize %>
-  <%= f.text_area attribute, class: 'materialize-textarea', placeholder: 'Write as little or as much as you want!' %>
+  <%= f.text_area attribute, class: "materialize-textarea #{defined?(autocomplete) && false ? 'autocomplete' : ''}", placeholder: 'Write as little or as much as you want!' %>
 </div>
+
+<% if defined?(autocomplete) && false %>
+  <script type="text/javascript">
+    $(function() {
+      $('#<%= field_id %>').autocomplete({
+        data: {
+          <% autocomplete.each do |autocomplete_option| %>
+            "<%= autocomplete_option %>": null,
+          <% end %>
+        }
+      });
+    });
+  </script>
+<% end %>

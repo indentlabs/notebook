@@ -24,11 +24,6 @@ class MainController < ApplicationController
 
     content_type = %w(characters locations items).sample
     @content = current_user.send(content_type).sample
-
-    begin
-      questionable_params = @content.class.attribute_categories.flat_map { |_k, v| v[:attributes] }.reject { |k| k.end_with?('_id') }
-      @question = QuestionService.question(Content.new @content.slice(*questionable_params))
-    rescue
-    end
+    @question = @content.question unless @content.nil?
   end
 end
