@@ -16,6 +16,8 @@ class ApplicationController < ActionController::Base
   before_action do
     if current_user && session[:universe_id]
       @universe_scope = Universe.find_by(user: current_user, id: session[:universe_id])
+    else
+      @universe_scope = nil
     end
   end
 

@@ -63,6 +63,7 @@ group :test, :development do
   gem 'simplecov', require: false
   gem 'rubocop', require: false
   gem 'rspec-rails'
+  gem 'rspec-prof'
   gem 'cucumber-rails', require: false
   gem 'database_cleaner'
 
