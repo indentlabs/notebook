@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails'
+gem 'rails', '4.2.5'
 
 # Storage
 gem 'aws-sdk', '~> 1.50'
@@ -77,6 +77,6 @@ group :test, :development do
   gem 'better_errors'
   gem 'binding_of_caller'
   gem 'rails-perftest'
-  gem 'ruby-prof'
   gem 'shoulda-matchers', '~> 3.1'
+  gem 'ruby-prof'
 end
