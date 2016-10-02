@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'support/devise'
 
-RSpec.describe LocationsGeneratorController, :type => :controller do
+RSpec.describe LocationsGeneratorController, type: :controller do
   describe 'GET #name' do
     before { get :name }
 

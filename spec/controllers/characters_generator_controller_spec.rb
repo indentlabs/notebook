@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'support/devise'
 
-RSpec.describe CharactersGeneratorController, :type => :controller do
+RSpec.describe CharactersGeneratorController, type: :controller do
   describe 'GET #age' do
     before { get :age }
     it { is_expected.to respond_with(200) }
@@ -120,7 +120,6 @@ RSpec.describe CharactersGeneratorController, :type => :controller do
   describe 'GET #name' do
     before { get :name }
     it { is_expected.to respond_with(200) }
-
 
     describe 'assigns(:male_first_names)' do
       subject { assigns(:male_first_names) }

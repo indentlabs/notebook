@@ -5,13 +5,13 @@ shared_examples_for 'content with an is_public scope' do
     let(:universe) { create(:universe, privacy: 'public') }
 
     context 'when model is private' do
-      let(:model) {
+      let(:model) do
         create(
           described_class.model_name.param_key.to_sym,
           universe: universe,
           privacy: 'private'
         )
-      }
+      end
 
       describe '#is_public' do
         subject { described_class.is_public }
@@ -20,13 +20,13 @@ shared_examples_for 'content with an is_public scope' do
     end
 
     context 'when model is public' do
-      let(:model) {
+      let(:model) do
         create(
           described_class.model_name.param_key.to_sym,
           universe: universe,
           privacy: 'public'
         )
-      }
+      end
 
       describe '#is_public' do
         subject { described_class.is_public }
@@ -39,13 +39,13 @@ shared_examples_for 'content with an is_public scope' do
     let(:universe) { build(:universe, privacy: 'private') }
 
     context 'when model is private' do
-      let(:model) {
+      let(:model) do
         create(
           described_class.model_name.param_key.to_sym,
           universe: universe,
           privacy: 'private'
         )
-      }
+      end
 
       describe '#is_public' do
         subject { described_class.is_public }
@@ -54,13 +54,13 @@ shared_examples_for 'content with an is_public scope' do
     end
 
     context 'when model is public' do
-      let(:model) {
+      let(:model) do
         create(
           described_class.model_name.param_key.to_sym,
           universe: universe,
           privacy: 'public'
         )
-      }
+      end
 
       describe '#is_public' do
         subject { described_class.is_public }

@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'support/devise'
 
-RSpec.describe AdminController, :type => :controller do
+RSpec.describe AdminController, type: :controller do
   describe 'GET #dashboard' do
     before { get :dashboard }
     it { is_expected.to respond_with(200) }
