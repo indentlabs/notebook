@@ -78,5 +78,5 @@ group :test, :development do
   gem 'binding_of_caller'
   gem 'rails-perftest'
   gem 'shoulda-matchers', '~> 3.1'
-  gem 'ruby-prof'
+  gem 'ruby-prof', '0.15.9'
 end
