@@ -19,6 +19,12 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  before_action do
+    @page_title ||= ''
+    @page_keywords ||= %w[writing author nanowrimo novel character fiction fantasy universe creative dnd roleplay larp game design]
+    @page_description ||= 'Notebook is a set of tools for writers, game designers, and roleplayers to create magnificent universes — and everything within them.'
+  end
+
   def content_type_from_controller(content_controller_name)
     content_controller_name.to_s.chomp('Controller').singularize.constantize
   end
