@@ -22,7 +22,7 @@ end
 module ActionController
   # Helper methods for controller tests
   class TestCase
-    include Devise::TestHelpers
+    include Devise::Test::ControllerHelpers
 
     def assert_assigns(method, assigned = {})
       get method
