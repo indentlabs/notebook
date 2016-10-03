@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails'
+gem 'rails', '4.2.5'
 
 # Storage
 gem 'aws-sdk', '~> 1.50'
@@ -10,12 +10,12 @@ gem 'paperclip', '~> 4.2.0'
 gem 'rmagick', '2.13.4'
 
 # Authentication
-gem 'devise'
 gem 'bcrypt'
+gem 'devise'
 
 # Design
-gem 'sass-rails'
 gem 'material_icons'
+gem 'sass-rails'
 
 # Quality of Life
 gem 'cocoon'
@@ -42,11 +42,8 @@ gem 'chartkick'
 gem 'slack-notifier'
 
 group :production do
-  #  gem 'less-rails'
-  #  gem 'less-rails-fontawesome'
-  gem 'uglifier', '>= 1.3.0'
-  #  gem 'bootplus-rails'
   gem 'rails_12factor'
+  gem 'uglifier', '>= 1.3.0'
 end
 
 group :test, :production do
@@ -54,25 +51,27 @@ group :test, :production do
   gem 'therubyracer', platforms: :ruby
 end
 
-group :test, :development do
+group :test do
+  gem 'better_errors'
+  gem 'binding_of_caller'
   gem 'capybara'
-  gem 'selenium-webdriver'
+  gem 'codeclimate-test-reporter', require: false
   gem 'coveralls', require: false
-  gem 'simplecov', require: false
-  gem 'rubocop', require: false
   gem 'cucumber-rails', require: false
   gem 'database_cleaner'
-
-  gem 'sqlite3'
-  gem 'tzinfo-data' # addresses a bug when working on Windows
-
   gem 'factory_girl_rails'
   gem 'guard'
   gem 'guard-minitest'
   gem 'guard-rubocop'
   gem 'pry'
-  gem 'better_errors'
-  gem 'binding_of_caller'
+  gem 'selenium-webdriver'
+  gem 'simplecov', require: false
+  gem 'sqlite3'
+  gem 'tzinfo-data' # addresses a bug when working on Windows
   gem 'rails-perftest'
-  gem 'ruby-prof'
+  gem 'rspec-prof'
+  gem 'rspec-rails'
+  gem 'rubocop', require: false
+  gem 'ruby-prof', '0.15.9'
+  gem 'shoulda-matchers', '~> 3.1'
 end
