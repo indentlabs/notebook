@@ -67,6 +67,12 @@
                   <% through_class = content.class.reflect_on_association(attribute).options[:through].to_s %>
                   <%= render 'content/form/relation_input', f: f, attribute: attribute, relation: through_class %>
 
+                <% elsif attribute == 'archetype' %>
+                  <div class="input-field">
+                    <%= f.label attribute %><br />
+                    <%= f.select attribute, options_for_select(t('archetypes'), selected: f.object.archetype), include_blank: true %>
+                  </div>
+
                 <% elsif attribute == 'universe_id' %>
                   <div class="input-field">
                     <%= f.label attribute %><br />
