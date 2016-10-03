@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160922204317) do
+ActiveRecord::Schema.define(version: 20161001232324) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -204,6 +204,12 @@ ActiveRecord::Schema.define(version: 20160922204317) do
     t.boolean  "favorite"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
+  end
+
+  create_table "past_ownerships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "item_id"
+    t.integer "past_owner_id"
   end
 
   create_table "sessions", force: :cascade do |t|
