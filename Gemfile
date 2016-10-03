@@ -42,10 +42,7 @@ gem 'chartkick'
 gem 'slack-notifier'
 
 group :production do
-  #  gem 'less-rails'
-  #  gem 'less-rails-fontawesome'
   gem 'uglifier', '>= 1.3.0'
-  #  gem 'bootplus-rails'
   gem 'rails_12factor'
 end
 
@@ -56,7 +53,7 @@ end
 
 gem "codeclimate-test-reporter", group: :test, require: nil
 
-group :test, :development do
+group :test do
   gem 'capybara'
   gem 'selenium-webdriver'
   gem 'coveralls', require: false
@@ -66,10 +63,8 @@ group :test, :development do
   gem 'rspec-prof'
   gem 'cucumber-rails', require: false
   gem 'database_cleaner'
-
   gem 'sqlite3'
   gem 'tzinfo-data' # addresses a bug when working on Windows
-
   gem 'factory_girl_rails'
   gem 'guard'
   gem 'guard-minitest'
