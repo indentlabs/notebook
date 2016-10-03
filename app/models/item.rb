@@ -18,6 +18,7 @@ class Item < ActiveRecord::Base
 
   # Characters
   relates :original_owners,           with: :original_ownerships
+  relates :past_owners,               with: :past_ownerships
   relates :current_owners,            with: :current_ownerships
   relates :makers,                    with: :maker_relationships
 
@@ -43,7 +44,7 @@ class Item < ActiveRecord::Base
       },
       history: {
         icon: 'book',
-        attributes: %w(original_owners current_owners makers year_made)
+        attributes: %w(original_owners past_owners current_owners makers year_made)
       },
       abilities: {
         icon: 'flash_on',

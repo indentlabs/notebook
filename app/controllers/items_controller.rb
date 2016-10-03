@@ -18,6 +18,7 @@ class ItemsController < ContentController
       # Relations
       original_ownerships_attributes:           [:id, :original_owner_id, :_destroy],
       current_ownerships_attributes:            [:id, :current_owner_id,  :_destroy],
+      past_ownerships_attributes:               [:id, :past_owner_id,     :_destroy],
       maker_relationships_attributes:           [:id, :maker_id,          :_destroy],
     ]
   end

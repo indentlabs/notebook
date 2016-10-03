@@ -1,25 +1,19 @@
-<% if question && question[:field] && question[:question].present? %>
+<%
+if question.present? &&
+   question[:field].present? &&
+   question[:question].present? &&
+   content.present?
+%>
   <div class="content-question card-panel hoverable light-blue lighten-4">
     <i class="material-icons <%= content.class.color %>-text circle right"><%= content.class.icon %></i>
     <%= question[:question] %>
 
     <%= form_for content do |f| %>
-      <%
-        value = content.send(question[:field])
-        if value.is_a?(ActiveRecord::Associations::CollectionProxy)
-          klass = value.first.class || value.build.class
-      %>
-        <%# render 'content/form/relation_input', f: f, attribute: question[:field].chomp('ship').pluralize, relation: question[:field].chomp('ships').pluralize %>
-      <%
-        else
-      %>
-          <div class="input-field">
-            <%= f.text_field question[:field], class: 'content-question-input' %>
-            <%= f.label content.class.human_attribute_name(question[:field]) %>
-          </div>
-      <%
-        end
-      %>
+
+      <div class="input-field">
+        <%= f.text_field question[:field], class: 'content-question-input' %>
+        <%= f.label content.class.human_attribute_name(question[:field]) %>
+      </div>
 
       <%# Using a plain old form.submit creates a button that only responds to a click on the button text,
           not anywhere else on the button. %>
