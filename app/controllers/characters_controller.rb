@@ -11,7 +11,7 @@ class CharactersController < ContentController
   def content_param_list
     [
       :universe_id, :user_id,
-      :name, :age, :role, :gender, :age, :height, :weight, :haircolor,
+      :name, :age, :role, :gender, :age, :archetype, :height, :weight, :haircolor,
       :facialhair, :eyecolor, :race, :skintone, :bodytype, :identmarks,
       :religion, :politics, :prejudices, :occupation, :pets,
       :mannerisms, :birthday, :education, :background,
