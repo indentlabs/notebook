@@ -81,7 +81,8 @@ class ExportController < ApplicationController
         if value.is_a?(ActiveRecord::Associations::CollectionProxy)
           value = value.map(&:name).to_sentence
         elsif attr.end_with?('_id') && value.present?
-          value = Universe.find(value.to_i).name
+          universe = Universe.where(id: value.to_i)
+          value = universe.name if universe
         end
 
         content_json[attr] = value
@@ -110,7 +111,8 @@ class ExportController < ApplicationController
           if value.is_a?(ActiveRecord::Associations::CollectionProxy)
             value = value.map(&:name).to_sentence
           elsif attr.end_with?('_id') && value.present?
-            value = Universe.find(value.to_i).name
+            universe = Universe.where(id: value.to_i)
+            value = universe.name if universe
           end
 
           text << "    #{attr}: #{value.split("\n").join("\n      ")}\n"
