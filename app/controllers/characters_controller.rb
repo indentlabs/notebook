@@ -15,7 +15,7 @@ class CharactersController < ContentController
       :facialhair, :eyecolor, :race, :skintone, :bodytype, :identmarks, :hairstyle,
       :religion, :politics, :prejudices, :occupation, :pets, :aliases,
       :mannerisms, :birthday, :education, :background,
-      :motivations, :flaws, :talents, :hobbies, :personality_type
+      :motivations, :flaws, :talents, :hobbies, :personality_type,
       :fave_color, :fave_food, :fave_possession, :fave_weapon, :fave_animal,
       :notes, :private_notes, :privacy,
       siblingships_attributes:     [:id, :sibling_id, :_destroy],
