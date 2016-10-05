@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161005115303) do
+ActiveRecord::Schema.define(version: 20161005120615) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -168,6 +168,10 @@ ActiveRecord::Schema.define(version: 20161005115303) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "privacy",          default: "private", null: false
+    t.string   "laws"
+    t.string   "climate"
+    t.string   "founding_story"
+    t.string   "sports"
   end
 
   create_table "maker_relationships", force: :cascade do |t|

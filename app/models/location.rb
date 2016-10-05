@@ -46,7 +46,7 @@ class Location < ActiveRecord::Base
       # TODO: map
       culture: {
         icon: 'face',
-        attributes: %w(leaders population language currency motto laws)
+        attributes: %w(leaders population language currency motto laws sports)
       },
       cities: {
         icon: 'business',
@@ -54,11 +54,11 @@ class Location < ActiveRecord::Base
       },
       geography: {
         icon: 'map',
-        attributes: %w(area crops located_at)
+        attributes: %w(area crops located_at climate)
       },
       history: {
         icon: 'book',
-        attributes: %w(established_year notable_wars)
+        attributes: %w(founding_story established_year notable_wars)
       },
       notes: {
         icon: 'edit',

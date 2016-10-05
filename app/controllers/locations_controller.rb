@@ -13,7 +13,8 @@ class LocationsController < ContentController
       :universe_id, :user_id, :name, :type_of, :description, #:map,
       :population, :currency, :motto, :language,
       :area, :crops, :located_at, :established_year, :notable_wars,
-      :notes, :private_notes, :privacy,
+      :notes, :private_notes, :privacy, :laws, :climate, :founding_story,
+      :sports,
 
       # Relations
       #todo might be able to inject/reflect these from :relates concern implementation
