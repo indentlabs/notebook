@@ -11,7 +11,7 @@ class LocationsController < ContentController
   def content_param_list
     [
       :universe_id, :user_id, :name, :type_of, :description, #:map,
-      :population, :currency, :motto,
+      :population, :currency, :motto, :language,
       :area, :crops, :located_at, :established_year, :notable_wars,
       :notes, :private_notes, :privacy,
 
