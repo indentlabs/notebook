@@ -12,7 +12,7 @@ class CharactersController < ContentController
     [
       :universe_id, :user_id,
       :name, :age, :role, :gender, :age, :archetype, :height, :weight, :haircolor,
-      :facialhair, :eyecolor, :race, :skintone, :bodytype, :identmarks,
+      :facialhair, :eyecolor, :race, :skintone, :bodytype, :identmarks, :hairstyle,
       :religion, :politics, :prejudices, :occupation, :pets,
       :mannerisms, :birthday, :education, :background,
       :fave_color, :fave_food, :fave_possession, :fave_weapon, :fave_animal,

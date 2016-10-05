@@ -44,6 +44,10 @@ class Universe < ActiveRecord::Base
         icon: 'book',
         attributes: %w(history)
       },
+      rules: {
+        icon: 'gavel',
+        attributes: %w(laws_of_physics magic_system technologies)
+      },
       notes: {
         icon: 'edit',
         attributes: %w(notes private_notes)

@@ -46,7 +46,7 @@ class Location < ActiveRecord::Base
       # TODO: map
       culture: {
         icon: 'face',
-        attributes: %w(leaders population language currency motto)
+        attributes: %w(leaders population language currency motto laws)
       },
       cities: {
         icon: 'business',
