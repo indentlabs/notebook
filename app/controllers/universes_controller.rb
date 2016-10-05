@@ -10,6 +10,7 @@ class UniversesController < ContentController
     [
       :user_id,
       :name, :description,
+      :laws_of_physics, :magic_system, :technologies,
       :history,
       :privacy,
       :notes, :private_notes

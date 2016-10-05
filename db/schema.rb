@@ -11,7 +11,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161003000856) do
+ActiveRecord::Schema.define(version: 20161005120615) do
+
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "character_id"
@@ -43,7 +44,7 @@ ActiveRecord::Schema.define(version: 20161003000856) do
   end
 
   create_table "characters", force: :cascade do |t|
-    t.string   "name",            null: false
+    t.string   "name",             null: false
     t.string   "role"
     t.string   "gender"
     t.string   "age"
@@ -80,6 +81,12 @@ ActiveRecord::Schema.define(version: 20161003000856) do
     t.datetime "updated_at"
     t.string   "privacy"
     t.string   "archetype"
+    t.string   "aliases"
+    t.string   "motivations"
+    t.string   "flaws"
+    t.string   "talents"
+    t.string   "hobbies"
+    t.string   "personality_type"
   end
 
   create_table "childrenships", force: :cascade do |t|
@@ -161,6 +168,10 @@ ActiveRecord::Schema.define(version: 20161003000856) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "privacy",          default: "private", null: false
+    t.string   "laws"
+    t.string   "climate"
+    t.string   "founding_story"
+    t.string   "sports"
   end
 
   create_table "maker_relationships", force: :cascade do |t|
@@ -228,7 +239,7 @@ ActiveRecord::Schema.define(version: 20161003000856) do
   end
 
   create_table "universes", force: :cascade do |t|
-    t.string   "name",          null: false
+    t.string   "name",            null: false
     t.text     "description"
     t.text     "history"
     t.text     "notes"
@@ -237,6 +248,9 @@ ActiveRecord::Schema.define(version: 20161003000856) do
     t.integer  "user_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "laws_of_physics"
+    t.string   "magic_system"
+    t.string   "technologies"
   end
 
   create_table "users", force: :cascade do |t|

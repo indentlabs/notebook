@@ -51,27 +51,26 @@ class Character < ActiveRecord::Base
     {
       overview: {
         icon: 'info',
-        attributes: %w(name role gender age archetype universe_id)
+        attributes: %w(name role gender age archetype aliases universe_id)
       },
       looks: {
         icon: 'face',
         attributes: %w(weight height haircolor hairstyle facialhair eyecolor race skintone bodytype identmarks)
       },
+      nature: {
+        icon: 'fingerprint',
+        attributes: %w(mannerisms motivations flaws prejudices talents hobbies personality_type)
+      },
       social: {
         icon: 'groups',
-        attributes: %w(best_friends archenemies religion politics prejudices occupation)
+        attributes: %w(best_friends archenemies religion politics occupation fave_color fave_food fave_possession fave_weapon fave_animal)
       },
-      # TODO: remove schema for mannerisms
       history: {
         icon: 'info',
         attributes: %w(birthday birthplaces education background)
       },
-      faves: {
-        icon: 'star',
-        attributes: %w(fave_color fave_food fave_possession fave_weapon fave_animal)
-      },
       family: {
-        icon: 'face',
+        icon: 'device_hub',
         attributes: %w(mothers fathers spouses siblings children)
       },
       notes: {
