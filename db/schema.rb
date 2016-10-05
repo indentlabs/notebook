@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161005111959) do
+ActiveRecord::Schema.define(version: 20161005115303) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -44,7 +44,7 @@ ActiveRecord::Schema.define(version: 20161005111959) do
   end
 
   create_table "characters", force: :cascade do |t|
-    t.string   "name",            null: false
+    t.string   "name",             null: false
     t.string   "role"
     t.string   "gender"
     t.string   "age"
@@ -81,6 +81,12 @@ ActiveRecord::Schema.define(version: 20161005111959) do
     t.datetime "updated_at"
     t.string   "privacy"
     t.string   "archetype"
+    t.string   "aliases"
+    t.string   "motivations"
+    t.string   "flaws"
+    t.string   "talents"
+    t.string   "hobbies"
+    t.string   "personality_type"
   end
 
   create_table "childrenships", force: :cascade do |t|
