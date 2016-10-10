@@ -1,9 +1,11 @@
 <%
+  content_name = f.object.class.content_name
+  field_id = "#{content_name}_#{field.name}"
   value = nil
-  if content.respond_to?(field.name.to_sym)
-    value = content.send(field.name.to_sym)
+  if f.object.respond_to?(field.name.to_sym)
+    value = f.object.send(field.name.to_sym)
   else
-    value = Attribute.where(user: current_user, attribute_field: field, entity: content).first
+    value = Attribute.where(user: current_user, attribute_field: field, entity: f.object).first
   end
   # TODO: Enable autocomplete when we can actually hide the dropdown if someone tabs out of a field.
   #       Not the easiest thing in the world to do, apparently.
@@ -14,15 +16,15 @@
   <% if field.system? %>
     <%= f.text_area field.name, value: value, class: "materialize-textarea #{defined?(autocomplete) && false ? 'autocomplete' : ''}", placeholder: 'Write as little or as much as you want!' %>
   <% else %>
-    <%= hidden_field_tag "#{content.class.content_name}[custom_attributes][][name]", field.name %>
-    <%= text_area_tag "#{content.class.content_name}[custom_attributes][][value]", value && value.value, class: "materialize-textarea #{defined?(autocomplete) && false ? 'autocomplete' : ''}", placeholder: 'Write as little or as much as you want!' %>
+    <%= hidden_field_tag "#{content_name}[custom_attribute_values][][name]", field.name %>
+    <%= text_area_tag "#{content_name}[custom_attribute_values][][value]", value && value.value, class: "materialize-textarea #{defined?(autocomplete) && false ? 'autocomplete' : ''}", placeholder: 'Write as little or as much as you want!' %>
   <% end %>
 </div>
 
 <% if defined?(autocomplete) && false %>
   <script type="text/javascript">
     $(function() {
-      $('#<%= "#{content.content_name}_#{field.name}" %>').autocomplete({
+      $('#<%= field_id %>').autocomplete({
         data: {
           <% autocomplete.each do |autocomplete_option| %>
             "<%= autocomplete_option %>": null,

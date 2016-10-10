@@ -17,7 +17,7 @@ class User < ActiveRecord::Base
   has_many :universes
   has_many :attribute_fields
   has_many :attribute_categories
-  has_many :custom_attributes, class_name: 'Attribute'
+  has_many :attribute_values, class_name: 'Attribute'
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,

@@ -4,7 +4,7 @@ module HasAttributes
   extend ActiveSupport::Concern
 
   included do
-    attr_accessor :custom_attributes
+    attr_accessor :custom_attribute_values
     after_save :update_custom_attributes
 
     def self.attribute_categories(user = nil)
@@ -19,11 +19,11 @@ module HasAttributes
     end
 
     def update_custom_attributes
-      (self.custom_attributes || []).each do |attribute|
+      (self.custom_attribute_values || []).each do |attribute|
         field = user.attribute_fields.find_by_name(attribute[:name])
         next if field.nil?
 
-        user.custom_attributes.where(entity: self, attribute_field_id: field.id).first_or_initialize.tap do |field|
+        user.attribute_values.where(entity: self, attribute_field_id: field.id).first_or_initialize.tap do |field|
           field.value = attribute[:value]
           field.save!
         end
