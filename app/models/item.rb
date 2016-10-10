@@ -12,6 +12,7 @@ class Item < ActiveRecord::Base
   belongs_to :user
   belongs_to :universe
 
+  include HasAttributes
   include HasPrivacy
   include HasContentGroupers
   include Serendipitous::Concern
@@ -31,28 +32,7 @@ class Item < ActiveRecord::Base
     'beach_access'
   end
 
-  def self.attribute_categories
-    {
-      overview: {
-        icon: 'info',
-        attributes: %w(name item_type description universe_id)
-      },
-      looks: {
-        icon: 'redeem',
-        attributes: %w(materials weight)
-      },
-      history: {
-        icon: 'book',
-        attributes: %w(original_owners current_owners makers year_made)
-      },
-      abilities: {
-        icon: 'flash_on',
-        attributes: %w(magic)
-      },
-      notes: {
-        icon: 'edit',
-        attributes: %w(notes private_notes)
-      }
-    }
+  def self.content_name
+    'item'
   end
 end

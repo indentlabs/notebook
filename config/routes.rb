@@ -25,6 +25,10 @@ Rails.application.routes.draw do
 
   # Planning
   scope '/plan' do
+    resources :attributes
+    resources :attribute_categories
+    resources :attribute_fields
+
     # Characters
     resources :characters do
       get :autocomplete_character_name, on: :collection, as: :autocomplete_name
@@ -33,6 +37,7 @@ Rails.application.routes.draw do
     resources :locations do
       get :autocomplete_location_name, on: :collection, as: :autocomplete_name
     end
+
     resources :universes
 
     # Coming Soon TM
@@ -45,6 +50,7 @@ Rails.application.routes.draw do
 
   scope 'admin' do
     get '/', to: 'admin#dashboard', as: :admin_dashboard
+    get '/attributes', to: 'admin#attributes', as: :admin_attributes
     get '/universes', to: 'admin#universes', as: :admin_universes
     get '/characters', to: 'admin#characters', as: :admin_characters
     get '/locations', to: 'admin#locations', as: :admin_locations

@@ -1,6 +1,5 @@
 <%
   content_type_class = @content.build.class
-  content_type = content_type_class.name.downcase
 %>
 
 <% content_for :sidebar_top do %>
@@ -8,22 +7,22 @@
 <% end %>
 
 <% if @content.any? %>
-  <h4>You've created <%= pluralize(@content.count, content_type) %></h4>
+  <h4>You've created <%= pluralize(@content.count, @content.content_name) %></h4>
   <%= render partial: 'content/list/list', locals: { content_list: @content } %>
-  <%= link_to "Create another #{content_type}", new_polymorphic_path(@content.build), :class => 'btn' %>
+  <%= link_to "Create another #{@content.content_name}", new_polymorphic_path(@content.build), :class => 'btn' %>
 
 <% elsif @content.empty? %>
   <div class="center">
-    <h4>You haven't created any <%= content_type.pluralize %> yet!</h4>
+    <h4>You haven't created any <%= @content.content_name.pluralize %> yet!</h4>
     <h1>
       <i class="material-icons <%= content_type_class.color %>-text" style="font-size: 200%">
         <%= content_type_class.icon %>
       </i>
     </h1>
     <p>
-      <%= t("content_descriptions.#{content_type}") %>
+      <%= t("content_descriptions.#{content_type_class.name.downcase}") %>
     </p>
-    <%= link_to "Create your first #{content_type}", new_polymorphic_path(@content.build), :class => 'btn' %>
+    <%= link_to "Create your first #{@content.content_name}", new_polymorphic_path(@content.build), :class => 'btn' %>
   </div>
 
 <% end %>

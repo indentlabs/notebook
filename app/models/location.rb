@@ -15,6 +15,7 @@ class Location < ActiveRecord::Base
   belongs_to :user
   belongs_to :universe
 
+  include HasAttributes
   include HasPrivacy
   include HasContentGroupers
   include Serendipitous::Concern
@@ -37,33 +38,7 @@ class Location < ActiveRecord::Base
     'green'
   end
 
-  def self.attribute_categories
-    {
-      overview: {
-        icon: 'info',
-        attributes: %w(name type_of description universe_id)
-      },
-      # TODO: map
-      culture: {
-        icon: 'face',
-        attributes: %w(leaders population language currency motto)
-      },
-      cities: {
-        icon: 'business',
-        attributes: %w(capital_cities largest_cities notable_cities)
-      },
-      geography: {
-        icon: 'map',
-        attributes: %w(area crops located_at)
-      },
-      history: {
-        icon: 'book',
-        attributes: %w(established_year notable_wars)
-      },
-      notes: {
-        icon: 'edit',
-        attributes: %w(notes private_notes)
-      }
-    }
+  def self.content_name
+    'location'
   end
 end
