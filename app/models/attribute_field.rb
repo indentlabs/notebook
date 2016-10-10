@@ -1,5 +1,7 @@
 class AttributeField < ActiveRecord::Base
   belongs_to :user
+  belongs_to :attribute_category
+  has_many :custom_attributes, class_name: 'Attribute'
 
   include HasAttributes
   include Serendipitous::Concern

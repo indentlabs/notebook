@@ -17,6 +17,7 @@ class LocationsController < ContentController
 
       # Relations
       #todo might be able to inject/reflect these from :relates concern implementation
+      custom_attributes:                         [:name, :value],
       location_leaderships_attributes:           [:id, :leader_id,       :_destroy],
       capital_cities_relationships_attributes:   [:id, :capital_city_id, :_destroy],
       largest_cities_relationships_attributes:   [:id, :largest_city_id, :_destroy],

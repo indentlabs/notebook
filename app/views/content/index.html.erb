@@ -7,9 +7,9 @@
 <% end %>
 
 <% if @content.any? %>
-  <h4>You've created <%= pluralize(@content.count, @content.content_name) %></h4>
+  <h4>You've created <%= pluralize(@content.count, @content.content_name.humanize.downcase) %></h4>
   <%= render partial: 'content/list/list', locals: { content_list: @content } %>
-  <%= link_to "Create another #{@content.content_name}", new_polymorphic_path(@content.build), :class => 'btn' %>
+  <%= link_to "Create another #{@content.content_name.humanize}", new_polymorphic_path(@content.build), :class => 'btn' %>
 
 <% elsif @content.empty? %>
   <div class="center">

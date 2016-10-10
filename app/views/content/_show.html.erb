@@ -12,6 +12,8 @@ set_meta_tags title: content.name, description: content.description
   <%= render partial: 'cards/serendipitous/content_question', locals: { question: @question, content: @content } %>
 <% end %>
 
+<% categories = content.class.attribute_categories(current_user) %>
+
 <div class="row">
   <div class="col s12">
     <div class="card hoverable">
@@ -19,18 +21,28 @@ set_meta_tags title: content.name, description: content.description
         <div class="card-title center">
           <span class="<%= content.class.color %>-text"><i class="material-icons right"><%= content.class.icon %></i></span>
           <a href="#" title="Share" class="share <%= content.class.color %>-text"><i class="material-icons right">share</i></a>
-          <%= content.name %>
+          <%= content.respond_to?(:label) ? content.label : content.name %>
         </div>
+
         <ul class="tabs" style="margin-bottom:30px;">
-          <% content.class.attribute_categories.each do |category| %>
-            <li class="tab col s3 <%= "disabled" unless category.attribute_fields.map(&:name).any? { |m| content.send(m).present? } %>"><a href="#<%= category.name %>_panel"><%= category.label %></a></li>
+          <% categories.each do |category| %>
+            <%= attribute_category_tab(content, category) %>
           <% end %>
         </ul>
-        <% content.class.attribute_categories.each do |category| %>
+
+        <% categories.each do |category| %>
           <div id="<%= category.name %>_panel" class="row">
             <% category.attribute_fields.each do |attribute| %>
               <% next if attribute.name.start_with?("private") && @content.user != current_user %>
-              <% value = content.send(attribute.name) %>
+
+              <% value = nil
+                 Rails.logger.info(attribute.label)
+                 if content.respond_to?(attribute.name.to_sym)
+                   value = content.send(attribute.name.to_sym)
+                 else
+                   value = Attribute.where(user: current_user, attribute_field: attribute, entity: content).first
+                 end
+              %>
               <% next if value.blank? %>
 
               <div class="row">
@@ -47,6 +59,10 @@ set_meta_tags title: content.name, description: content.description
                       </div>
                     <% end %>
                   </div>
+                <% elsif attribute.name == 'attribute_category_id' %>
+                  <div class="col s9 m9 l10 flow-text">
+                    <%= link_to content.attribute_category.label, content.attribute_category if content.attribute_category %>
+                  </div>
                 <% elsif attribute.name == 'universe_id' %>
                   <div class="col s9 m9 l10 flow-text">
                     <%= link_to content.universe.name, content.universe if content.universe %>
@@ -54,7 +70,7 @@ set_meta_tags title: content.name, description: content.description
                 <% else %>
                   <%# TODO: if text is > 240, truncate and add "Read more" link that opens modal %>
                   <div class="col s9 m9 l10 <%= "flow-text" unless value.to_s.length > 140 %>">
-                    <%= simple_format(value, class: 'long-form') %>&nbsp;
+                    <%= simple_format(value.is_a?(Attribute) ? value.value : value, class: 'long-form') %>&nbsp;
                   </div>
                 <% end %>
               </div>

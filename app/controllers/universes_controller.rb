@@ -12,7 +12,8 @@ class UniversesController < ContentController
       :name, :description,
       :history,
       :privacy,
-      :notes, :private_notes
+      :notes, :private_notes,
+      custom_attributes: [:name, :value]
     ]
   end
 end
