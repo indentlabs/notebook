@@ -55,6 +55,7 @@ Rails.application.routes.draw do
     get '/items.csv', to: 'export#items_csv', as: :items_csv
     get '/outline', to: 'export#outline', as: :notebook_outline
     get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
+    get '/notebook.xml', to: 'export#notebook_xml', as: :notebook_xml
   end
 
   scope '/scene/:scene_id' do

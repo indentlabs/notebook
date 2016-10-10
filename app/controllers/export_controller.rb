@@ -26,17 +26,19 @@ class ExportController < ApplicationController
   end
 
   def notebook_json
-    json_dump = current_user.content.map { |_, content| to_json(content) }.to_json
+    json_dump = current_user.content.map { |category, content| {"#{category}": fill_relations(content)} }.to_json
     send_data json_dump, filename: "notebook-#{Date.today}.json"
+  end
+
+  def notebook_xml
+    xml_dump = current_user.content.map { |category, content| {"#{category}": fill_relations(content)}}.to_xml
+    send_data xml_dump, filename: "notebook-#{Date.today}.xml"
   end
 
   def pdf
   end
 
   def html
-  end
-
-  def xml
   end
 
   def scrivener
@@ -68,15 +70,16 @@ class ExportController < ApplicationController
     end
   end
 
-  def to_json ar_relation
+  def fill_relations ar_relation
     ar_class = ar_relation.build.class
     attributes = ar_class.attribute_categories.flat_map { |k, v| v[:attributes] }
 
     ar_relation.map do |content|
-      content_json = {}
+      content_repr = {}
 
       attributes.each do |attr|
         value = content.send(attr)
+        next if value.nil? || value.blank?
 
         if value.is_a?(ActiveRecord::Associations::CollectionProxy)
           value = value.map(&:name).to_sentence
@@ -85,10 +88,10 @@ class ExportController < ApplicationController
           value = universe.name if universe
         end
 
-        content_json[attr] = value
+        content_repr[attr] = value
       end
 
-      content_json
+      content_repr
     end
   end
 
