@@ -41,6 +41,9 @@ gem 'medium-editor-rails'
 gem 'chartkick'
 gem 'slack-notifier'
 
+# Form enhancements
+gem 'redcarpet' #markdown formatting
+
 group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
