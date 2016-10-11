@@ -37,7 +37,6 @@ ActiveRecord::Schema.define(version: 20161003183741) do
 
   create_table "attribute_fields", force: :cascade do |t|
     t.integer  "user_id"
-    t.integer  "universe_id"
     t.integer  "attribute_category_id",                     null: false
     t.string   "name",                                      null: false
     t.string   "label",                                     null: false
@@ -52,7 +51,6 @@ ActiveRecord::Schema.define(version: 20161003183741) do
 
   create_table "attributes", force: :cascade do |t|
     t.integer  "user_id"
-    t.integer  "universe_id"
     t.integer  "attribute_field_id"
     t.string   "entity_type",                            null: false
     t.integer  "entity_id",                              null: false

@@ -15,7 +15,7 @@ module HasAttributes
       end
 
       return categories if user.nil?
-      [categories, user.attribute_categories.joins(:attribute_fields).where(['attribute_categories.entity_type = ?', content_name])].flatten
+      [categories, user.attribute_categories.joins(:attribute_fields).where(['attribute_categories.entity_type = ?', content_name])].flatten.uniq
     end
 
     def update_custom_attributes
