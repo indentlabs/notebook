@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'rails', '4.2.5'
+gem 'rails-i18n', '~> 4.0.0'
 
 # Storage
 gem 'aws-sdk', '~> 1.50'
@@ -64,6 +65,7 @@ group :test do
   gem 'guard'
   gem 'guard-minitest'
   gem 'guard-rubocop'
+  gem 'i18n-spec'
   gem 'pry'
   gem 'selenium-webdriver'
   gem 'simplecov', require: false
