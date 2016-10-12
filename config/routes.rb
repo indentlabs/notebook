@@ -39,16 +39,27 @@ Rails.application.routes.draw do
     get '/plots',     to: 'main#comingsoon'
   end
 
-  scope '/scene/:scene_id' do
-    get 'editor', to: 'write#editor'
-  end
-
   scope 'admin' do
     get '/', to: 'admin#dashboard', as: :admin_dashboard
     get '/universes', to: 'admin#universes', as: :admin_universes
     get '/characters', to: 'admin#characters', as: :admin_characters
     get '/locations', to: 'admin#locations', as: :admin_locations
     get '/items', to: 'admin#items', as: :admin_items
+  end
+
+  scope 'export' do
+    get '/', to: 'export#index', as: :notebook_export
+    get '/universes.csv', to: 'export#universes_csv', as: :universes_csv
+    get '/characters.csv', to: 'export#characters_csv', as: :characters_csv
+    get '/locations.csv', to: 'export#locations_csv', as: :locations_csv
+    get '/items.csv', to: 'export#items_csv', as: :items_csv
+    get '/outline', to: 'export#outline', as: :notebook_outline
+    get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
+    get '/notebook.xml', to: 'export#notebook_xml', as: :notebook_xml
+  end
+
+  scope '/scene/:scene_id' do
+    get 'editor', to: 'write#editor'
   end
 
   # API Endpoints
