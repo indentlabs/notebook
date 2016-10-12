@@ -1,0 +1,155 @@
+<ul id="slide-out" class="side-nav fixed">
+
+  <li class="no-padding universe-selector <%= 'universe-filter-active' if @universe_scope.present? %>">
+    <ul class="collapsible collapsible-accordion">
+      <li>
+        <a class="collapsible-header <%= @universe_scope.present? ? 'white-text' : 'black-text' %>">
+          <%
+            if @universe_scope.present?
+              tooltip = "#{@universe_scope.name}"
+            else
+              tooltip = "Lock into a universe..."
+            end
+          %>
+          <%= truncate tooltip %>
+          <i class="material-icons <%= @universe_scope.present? ? 'white-text' : 'black-text' %>">vpn_lock</i>
+        </a>
+        <div class="collapsible-body">
+          <ul>
+            <li>
+              <%= link_to "All universes", url_for(params.merge(:universe => :all)) %>
+            </li>
+            <li class="divider"></li>
+            <% current_user.universes.sort_by(&:name).each do |universe| %>
+              <li>
+                <%= link_to "?universe=#{universe.id}" do %>
+                  <%= truncate universe.name %>
+                <% end %>
+              </li>
+            <% end %>
+            <li class="divider"></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+
+  <!--
+  <li class="content-search">
+    <form>
+      <div class="input-field">
+        <input id="search" type="search" required placeholder="Search your notebook">
+        <i class="material-icons">search</i>
+      </div>
+    </form>
+  </li>
+  -->
+
+  <li>
+    <a href="<%= universes_url %>">
+      <i class="material-icons <%= Universe.color %>-text">vpn_lock</i>
+      Universes
+      <span class="badge">5</span>
+    </a>
+  </li>
+  <li>
+    <a href="<%= characters_url %>">
+      <i class="material-icons <%= Character.color %>-text">group</i>
+      Characters
+      <span class="badge">31</span>
+    </a>
+  </li>
+  <li>
+    <a href="<%= locations_url %>">
+      <i class="material-icons <%= Location.color %>-text">terrain</i>
+      Locations
+      <span class="badge">29</span>
+    </a>
+  </li>
+  <li>
+    <a href="<%= items_url %>">
+      <i class="material-icons <%= Item.color %>-text">beach_access</i>
+      Items
+      <span class="badge">16</span>
+    </a>
+  </li>
+
+  <li class="divider"></li>
+
+  <li>
+    <a href="<%= universes_url %>">
+      <i class="material-icons brown-text">pets</i>
+      Creatures
+      <span class="badge">8</span>
+    </a>
+  </li>
+  <li>
+    <a href="<%= characters_url %>">
+      <i class="material-icons orange-text">flare</i>
+      Magic
+      <span class="badge">31</span>
+    </a>
+  </li>
+  <li>
+    <a href="<%= locations_url %>">
+      <i class="material-icons grey-text">face</i>
+      Races
+      <span class="badge">29</span>
+    </a>
+  </li>
+  <li>
+    <a href="<%= items_url %>">
+      <i class="material-icons yellow-text">brightness_7</i>
+      Religions
+      <span class="badge">16</span>
+    </a>
+  </li>
+  <li>
+    <a href="<%= universes_url %>">
+      <i class="material-icons blue-text">forum</i>
+      Languages
+      <span class="badge">5</span>
+    </a>
+  </li>
+  <li>
+    <a href="<%= characters_url %>">
+      <i class="material-icons <%= Location.color %>-text">language</i>
+      Worlds
+      <span class="badge">31</span>
+    </a>
+  </li>
+
+  <li>
+    <a href="<%= items_url %>">
+      <i class="material-icons white-text">add</i>
+      Add more...
+    </a>
+  </li>
+
+  <li class="divider"></li>
+
+  <li>
+    <a href="<%= locations_url %>">
+      <i class="material-icons black-text">wc</i>
+      Groups
+      <span class="badge">29</span>
+    </a>
+  </li>
+  <li>
+    <a href="<%= items_url %>">
+      <i class="material-icons black-text">local_movies</i>
+      Scenes
+      <span class="badge">16</span>
+    </a>
+  </li>
+
+</ul>
+
+<script type="text/javascript">
+$(document).ready(function () {
+  // Initialize collapse button
+  $(".button-collapse").sideNav();
+  // Initialize collapsible (uncomment the line below if you use the dropdown variation)
+  //$('.collapsible').collapsible();
+})
+</script>
