@@ -8,31 +8,31 @@ class CharactersGeneratorController < ApplicationController
   end
 
   def bodytype
-    @possible_types = t(:body_types)
+    @possible_types = t('generators.characters.body_types')
 
     render json: @possible_types.sample
   end
 
   def eyecolor
-    @possible_colors = t(:eye_colors)
+    @possible_colors = t('generators.characters.eye_colors')
 
     render json: @possible_colors.sample
   end
 
   def facialhair
-    @possible_styles = t(:facial_hair_styles)
+    @possible_styles = t('generators.characters.facial_hair_styles')
 
     render json: @possible_styles.sample
   end
 
   def haircolor
-    @possible_colors = t(:hair_colors)
+    @possible_colors = t('generators.characters.hair_colors')
 
     render json: @possible_colors.sample
   end
 
   def hairstyle
-    @possible_styles = t(:hair_styles)
+    @possible_styles = t('generators.characters.hair_styles')
 
     render json: @possible_styles.sample
   end
@@ -50,18 +50,18 @@ class CharactersGeneratorController < ApplicationController
   end
 
   def identifyingmark
-    @possible_marks = t(:identifying_marks)
-    @possible_locations = t(:identifying_mark_locations)
+    @possible_marks = t('generators.characters.identifying_marks')
+    @possible_locations = t('generators.characters.identifying_mark_locations')
 
     render json: [
-      @possible_marks.sample, t(:on_the), @possible_locations.sample
+      @possible_marks.sample, t('generators.characters.on_the'), @possible_locations.sample
     ].join(' ') .capitalize
   end
 
   def name
-    @male_first_names = t(:male_first_names)
-    @female_first_names = t(:female_first_names)
-    @last_names = t(:last_names)
+    @male_first_names = t('generators.characters.names.male_first_names')
+    @female_first_names = t('generators.characters.names.female_first_names')
+    @last_names = t('generators.characters.names.last_names')
 
     @all_first_names = [] + @male_first_names + @female_first_names
     @all_last_names  = [] + @last_names
@@ -70,13 +70,13 @@ class CharactersGeneratorController < ApplicationController
   end
 
   def race
-    @possible_races = t(:character_races)
+    @possible_races = t('generators.characters.races')
 
     render json: @possible_races.sample
   end
 
   def skintone
-    @possible_tones = t(:skin_tones)
+    @possible_tones = t('generators.characters.skin_tones')
 
     render json: @possible_tones.sample
   end
