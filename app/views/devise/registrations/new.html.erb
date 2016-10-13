@@ -1,46 +1,61 @@
-<h2 class="center">Sign up for Notebook</h2>
+<div class="new-user-signup-form">
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-  <%= devise_error_messages! %>
+    <div class="row">
+      <h2 class="center">Start your notebook</h2>
+      <div class="col offset-l3 l6 offset-m2 m8 s12">
+        <div class="card login-card">
+          <div>
+            <div class="card-content">
+              <%= link_to "Continue with Google", omniauth_authorize_path(resource_name, :google_oauth2), class: "login-btn google z-depth-1" %>
 
-  <div class="card">
-    <div class="card-content">
+              <a href="#" id="email-signup-btn" class="btn-large login-email-btn"> <i class="material-icons">email</i> Sign up with email</a>
 
-      <div class="field">
-        <%= f.label :name %><br />
-        <%= f.text_field :name, autofocus: true %>
-      </div>
+            </div>
+            <div class="email-signup" id="email-signup">
+              <div class="card-content">
 
-      <div class="field">
-        <%= f.label :email %> <em>(This is the email you will log in with)</em><br />
-        <%= f.email_field :email %>
-      </div>
+                <div class="field">
+                  <%= f.label :name %><br />
+                  <%= f.text_field :name, autofocus: true %>
+                </div>
 
-      <div class="field">
-        <%= f.label :password %>
-        <% if @minimum_password_length %>
-        <em>(<%= @minimum_password_length %> characters minimum)</em>
-        <% end %><br />
-        <%= f.password_field :password, autocomplete: "off" %>
-      </div>
+                <div class="field">
+                  <%= f.label :email %> <em>(This is the email you will log in with)</em><br />
+                  <%= f.email_field :email %>
+                </div>
 
-      <div class="field">
-        <%= f.label :password_confirmation %><br />
-        <%= f.password_field :password_confirmation, autocomplete: "off" %>
-      </div>
+                <div class="field">
+                  <%= f.label :password %>
+                  <% if @minimum_password_length %>
+                  <em>(<%= @minimum_password_length %> characters minimum)</em>
+                  <% end %><br />
+                  <%= f.password_field :password, autocomplete: "off" %>
+                </div>
 
-      <div class="field">
-        <%= f.label :promo_code %><br />
-        <%= f.text_field :promo_code, value: 'NANOPREP - 100% off Notebook.ai for life!', disabled: "disabled" %>
-      </div>
+                <div class="field">
+                  <%= f.label :password_confirmation %><br />
+                  <%= f.password_field :password_confirmation, autocomplete: "off" %>
+                </div>
 
-      <div class="actions center">
-        <%= f.submit "Sign up", class: 'btn' %>
-        <p class="center">
-          <br />
-          <%= render "devise/shared/links" %>
-        </p>
+                <div class="field">
+                  <%= f.label :promo_code %><br />
+                  <%= f.text_field :promo_code, value: 'NANOPREP - 100% off Notebook.ai for life!', disabled: "disabled" %>
+                </div>
+
+                <div class="actions center">
+                  <%= f.submit "Sign up", class: 'btn' %>
+                  <p class="center">
+                    <br />
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-<% end %>
+
+    <%= devise_error_messages! %>
+  <% end %>
+</div>

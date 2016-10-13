@@ -1,5 +1,6 @@
 class RegistrationsController < Devise::RegistrationsController
   after_filter :add_account
+  layout 'application_nosidebar', only: [:new]
 
   private
 

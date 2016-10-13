@@ -12,6 +12,8 @@ gem 'rmagick', '2.13.4'
 # Authentication
 gem 'bcrypt'
 gem 'devise'
+gem 'omniauth'
+gem 'omniauth-google-oauth2'
 
 # Design
 gem 'material_icons'

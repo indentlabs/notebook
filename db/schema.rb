@@ -238,6 +238,12 @@ ActiveRecord::Schema.define(version: 20161005120615) do
     t.datetime "updated_at",   null: false
   end
 
+# Could not dump table "sqlite_stat1" because of following NoMethodError
+#   undefined method `[]' for nil:NilClass
+
+# Could not dump table "sqlite_stat4" because of following NoMethodError
+#   undefined method `[]' for nil:NilClass
+
   create_table "universes", force: :cascade do |t|
     t.string   "name",            null: false
     t.text     "description"

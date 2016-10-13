@@ -88,6 +88,26 @@ You should now see a copy of the site running locally at http://localhost:3000/!
     docker-compose up
 - You should now see a copy of the site running locally at http://localhost:3000/
 
+=== Setting up Auth
+- Copy `example.env` into `.env`
+
+==== Google
+- Sign into https://console.developers.google.com/
+- Create a new project: "notebook"
+- Credentials > OAuth Consent Screen
+-- Fill out the product name (at least)
+-- Save
+- Credentials > Create Credentials > Oauth Client ID
+-- Application Type: Web Application
+-- Name: Notebook.ai
+-- Add authorized javascript origins. For localhost, add `http://localhost:3000`
+-- Add authorized redirect URI. For localhost, add `http://localhost:3000/users/auth/google_oauth2/callback`
+- Add the Google+ API
+-- Library > Search "Google+ API" > Enable
+- Add the resulting credentials to .env
+- Probably wait ~1-2 mins for changes to take effect on Google's end
+
+
 == Deployment to notebook.ai
 
 Deployment to the live stage will only be done by approved developers, and consists of a deployment of
