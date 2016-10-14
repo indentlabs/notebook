@@ -13,11 +13,6 @@
 </ul>
 
 <ul id="mobile-user-dropdown" class="dropdown-content">
-  <li><%= link_to 'Your universes', universes_path %></li>
-  <li><%= link_to 'Your characters', characters_path %></li>
-  <li><%= link_to 'Your locations', locations_path %></li>
-  <li><%= link_to 'Your items', items_path %></li>
-  <li class="divider"></li>
   <li><%= link_to 'Your author profile', current_user if current_user %></li>
   <li><%= link_to 'Account settings', edit_user_registration_path %></li>
   <li class="divider"></li>
@@ -58,28 +53,8 @@
       <ul class="right hide-on-small-and-down">
         <% if user_signed_in? %>
           <li>
-            <a href="<%= universes_url %>" class="tooltipped" data-position="bottom" data-delay="100" data-tooltip="Universes">
-              <i class="material-icons">vpn_lock</i>
-            </a>
-          </li>
-          <li>
-            <a href="<%= characters_url %>" class="tooltipped" data-position="bottom" data-delay="100" data-tooltip="Characters">
-              <i class="material-icons">group</i>
-            </a>
-          </li>
-          <li>
-            <a href="<%= locations_url %>" class="tooltipped" data-position="bottom" data-delay="100" data-tooltip="Locations">
-              <i class="material-icons">terrain</i>
-            </a>
-          </li>
-          <li>
-            <a href="<%= items_url %>" class="tooltipped" data-position="bottom" data-delay="100" data-tooltip="Items">
-              <i class="material-icons">beach_access</i>
-            </a>
-          </li>
-          <li>
             <a class="dropdown-button tooltipped" href="#!" data-activates="desktop-user-dropdown" data-position="bottom" data-delay="100" data-tooltip="You">
-              <i class="material-icons">person</i>
+              <%= current_user.name %> &nbsp; ▾
             </a>
           </li>
         <% else %>
@@ -89,10 +64,16 @@
       </ul>
       <ul class="left">
         <li>
-          <%= link_to root_url do %>
-            <i class="material-icons">home</i>
-          <% end %>
+          <a href="#" data-activates="slide-out" class="button-collapse">
+            <i class="material-icons">menu</i>
+          </a>
         </li>
+        <li class="hide-on-med-and-down">
+          <a href="#">
+            <i class="material-icons">home</i>
+          </a>
+        </li>
+        <li>
         <% if current_user && current_user.universes.length > 0 %>
           <li class="universe-selector <%= 'universe-filter-active' if @universe_scope.present? %>">
             <%
