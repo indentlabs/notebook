@@ -16,14 +16,19 @@ class Universe < ActiveRecord::Base
   has_many :items
   has_many :locations
 
+  has_many :creatures
+
   scope :is_public, -> { where(privacy: 'public') }
 
-  def content_count
+  def content
     [
-      characters.length,
-      items.length,
-      locations.length
-    ].sum
+      characters, locations, items,
+      creatures
+    ].flatten
+  end
+
+  def content_count
+    content.count
   end
 
   def self.color
