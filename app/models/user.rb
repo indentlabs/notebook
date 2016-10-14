@@ -19,6 +19,7 @@ class User < ActiveRecord::Base
 
   # Extended content types
   has_many :creatures
+  has_many :races
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
@@ -72,7 +73,7 @@ class User < ActiveRecord::Base
 
   def recent_content
     [
-      characters, locations, items, universes, creatures
+      characters, locations, items, universes, creatures, races
     ].flatten
       .sort_by(&:updated_at)
       .last(10)

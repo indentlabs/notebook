@@ -1,0 +1,18 @@
+class RacesController < ContentController
+  private
+
+  def content_params
+    params.require(:race).permit(content_param_list)
+  end
+
+  def content_param_list
+    %i(
+      name description other_names universe_id
+      body_shape skin_colors height weight notable_features variance_clothing
+      strengths weaknesses
+      traditions beliefs governments technologies occupations economics favorite_foods
+      notable_events
+      notes private_notes
+    )
+  end
+end

@@ -37,6 +37,7 @@ Rails.application.routes.draw do
 
     # Extended content types
     resources :creatures
+    resources :races
 
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'

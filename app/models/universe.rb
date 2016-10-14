@@ -12,11 +12,14 @@ class Universe < ActiveRecord::Base
   validates :name, presence: true
 
   belongs_to :user
+  # Core content types
   has_many :characters
   has_many :items
   has_many :locations
 
+  # Extended content types
   has_many :creatures
+  has_many :races
 
   scope :is_public, -> { where(privacy: 'public') }
 
