@@ -1,4 +1,3 @@
-# Controller for the Universe model
 class UniversesController < ContentController
   private
 

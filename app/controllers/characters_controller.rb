@@ -1,4 +1,3 @@
-# Controller for the Character model
 class CharactersController < ContentController
   autocomplete :character, :name
 

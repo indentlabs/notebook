@@ -13,12 +13,6 @@ class MainController < ApplicationController
   def comingsoon
   end
 
-  def anoninfo
-  end
-
-  def attribution
-  end
-
   def dashboard
     return redirect_to new_user_session_path unless user_signed_in?
 

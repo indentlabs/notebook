@@ -1,4 +1,3 @@
-<% all_content = %i(universes characters locations items).map { |c| current_user.send(c) }.flatten.sort_by(&:updated_at).reverse.first(10) %>
-<% if all_content.count > 0 %>
-  <%= render partial: 'content/list/list', locals: { content_list: all_content, title: 'Recent creations' } %>
+<% if current_user.recent_content.count > 0 %>
+  <%= render partial: 'content/list/list', locals: { content_list: current_user.recent_content, title: 'Recent creations' } %>
 <% end %>

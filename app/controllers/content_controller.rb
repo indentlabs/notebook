@@ -16,7 +16,7 @@ class ContentController < ApplicationController
     @question = @questioned_content.question unless @questioned_content.nil?
 
     respond_to do |format|
-      format.html # index.html.erb
+      format.html { render 'content/index' }
       format.json { render json: @content }
     end
   end
@@ -27,7 +27,7 @@ class ContentController < ApplicationController
     @question = @content.question if current_user.present? and current_user == @content.user
 
     respond_to do |format|
-      format.html # show.html.erb
+      format.html { render 'content/show', locals: { content: @content } }
       format.json { render json: @content }
     end
   end
@@ -37,7 +37,7 @@ class ContentController < ApplicationController
                .new
 
     respond_to do |format|
-      format.html # new.html.erb
+      format.html { render 'content/new', locals: { content: @content } }
       format.json { render json: @content }
     end
   end
@@ -45,6 +45,11 @@ class ContentController < ApplicationController
   def edit
     @content = content_type_from_controller(self.class)
                .find(params[:id])
+
+    respond_to do |format|
+      format.html { render 'content/edit', locals: { content: @content } }
+      format.json { render json: @content }
+    end
   end
 
   def create
