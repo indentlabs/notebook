@@ -13,11 +13,6 @@
 </ul>
 
 <ul id="mobile-user-dropdown" class="dropdown-content">
-  <li><%= link_to 'Your universes', universes_path %></li>
-  <li><%= link_to 'Your characters', characters_path %></li>
-  <li><%= link_to 'Your locations', locations_path %></li>
-  <li><%= link_to 'Your items', items_path %></li>
-  <li class="divider"></li>
   <li><%= link_to 'Your author profile', current_user if current_user %></li>
   <li><%= link_to 'Account settings', edit_user_registration_path %></li>
   <li class="divider"></li>
@@ -73,7 +68,13 @@
             <i class="material-icons">menu</i>
           </a>
         </li>
-        <% if current_user && current_user.universes.length > 0 && false %>
+        <li class="hide-on-med-and-down">
+          <a href="#">
+            <i class="material-icons">home</i>
+          </a>
+        </li>
+        <li>
+        <% if current_user && current_user.universes.length > 0 %>
           <li class="universe-selector <%= 'universe-filter-active' if @universe_scope.present? %>">
             <%
               if @universe_scope.present?
