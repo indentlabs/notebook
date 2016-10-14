@@ -20,6 +20,7 @@ class Universe < ActiveRecord::Base
   # Extended content types
   has_many :creatures
   has_many :races
+  has_many :religions
 
   scope :is_public, -> { where(privacy: 'public') }
 
