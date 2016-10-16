@@ -22,6 +22,7 @@ class Universe < ActiveRecord::Base
   has_many :races
   has_many :religions
   has_many :magics
+  has_many :languages
 
   scope :is_public, -> { where(privacy: 'public') }
 

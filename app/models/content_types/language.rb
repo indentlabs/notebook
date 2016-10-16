@@ -1,4 +1,4 @@
-class Religion < ActiveRecord::Base
+class Language < ActiveRecord::Base
   validates :name, presence: true
 
   belongs_to :user
@@ -10,24 +10,18 @@ class Religion < ActiveRecord::Base
   include HasContentGroupers
   include Serendipitous::Concern
 
-  # Characters
-  # relates :notable_figures, with: :something
-  # relates :dieties, with: :something
-
-  # Locations
-  # relates :practicing_locations, with: :something
-
-  # Items
-  # relates :artifacts, with: :something
-
   scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
+  def description
+    "Language"
+  end
+
   def self.color
-    'yellow'
+    'blue'
   end
 
   def self.icon
-    'brightness_7'
+    'forum'
   end
 
   def self.attribute_categories

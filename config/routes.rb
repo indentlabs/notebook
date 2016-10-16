@@ -40,6 +40,7 @@ Rails.application.routes.draw do
     resources :races
     resources :religions
     resources :magics
+    resources :languages
 
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161014223701) do
+ActiveRecord::Schema.define(version: 20161016213335) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -158,6 +158,25 @@ ActiveRecord::Schema.define(version: 20161014223701) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "privacy",        default: "private", null: false
+  end
+
+  create_table "languages", force: :cascade do |t|
+    t.string   "name"
+    t.string   "other_names"
+    t.integer  "universe_id"
+    t.integer  "user_id"
+    t.string   "history"
+    t.string   "typology"
+    t.string   "dialectical_information"
+    t.string   "register"
+    t.string   "phonology"
+    t.string   "grammar"
+    t.string   "numbers"
+    t.string   "quantifiers"
+    t.string   "notes"
+    t.string   "private_notes"
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
   end
 
   create_table "largest_cities_relationships", force: :cascade do |t|
