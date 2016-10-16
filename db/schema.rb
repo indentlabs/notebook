@@ -205,6 +205,28 @@ ActiveRecord::Schema.define(version: 20161014223701) do
     t.string   "sports"
   end
 
+  create_table "magics", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "type_of"
+    t.integer  "universe_id"
+    t.integer  "user_id"
+    t.string   "visuals"
+    t.string   "effects"
+    t.string   "positive_effects"
+    t.string   "negative_effects"
+    t.string   "neutral_effects"
+    t.string   "element"
+    t.string   "resource_costs"
+    t.string   "materials"
+    t.string   "skills_required"
+    t.string   "limitations"
+    t.string   "notes"
+    t.string   "private_notes"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
   create_table "maker_relationships", force: :cascade do |t|
     t.integer "user_id"
     t.integer "item_id"

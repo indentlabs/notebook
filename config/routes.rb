@@ -26,6 +26,7 @@ Rails.application.routes.draw do
   # Planning
   scope '/plan' do
     # Core content types
+    resources :universes
     resources :characters do
       get :autocomplete_character_name, on: :collection, as: :autocomplete_name
     end
@@ -33,12 +34,12 @@ Rails.application.routes.draw do
     resources :locations do
       get :autocomplete_location_name, on: :collection, as: :autocomplete_name
     end
-    resources :universes
 
     # Extended content types
     resources :creatures
     resources :races
     resources :religions
+    resources :magics
 
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'
