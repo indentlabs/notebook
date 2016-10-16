@@ -68,19 +68,19 @@
                   <%= render 'content/form/relation_input', f: f, attribute: attribute, relation: through_class %>
 
                 <% elsif attribute == 'archetype' %>
-                  <div class="input-field">
-                    <%= f.label attribute %><br />
+                  <div class="input-field input-select">
+                    <%= f.label attribute, class: 'active' %><br />
                     <%= f.select attribute, options_for_select(t('archetypes'), selected: f.object.archetype), include_blank: true %>
                   </div>
 
                 <% elsif attribute == 'universe_id' %>
-                  <div class="input-field">
-                    <%= f.label attribute %><br />
+                  <div class="input-field input-select">
+                    <%= f.label attribute, class: 'active' %><br />
                     <%= f.select attribute, current_user.universes.sort_by(&:name).map { |u| [u.name, u.id] }.compact, include_blank: true, selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id]) %>
                   </div>
 
                 <% elsif attribute == 'privacy' %>
-                  <div class="input-field">
+                  <div class="input-field input-select">
                     <%= f.label attribute %><br />
                     <%= f.select attribute, [['Only visible to you', 'private'], ['Visible to anyone with the URL', 'public']] %>
                     <div class="help-text">
