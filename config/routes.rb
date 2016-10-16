@@ -42,6 +42,9 @@ Rails.application.routes.draw do
     resources :magics
     resources :languages
 
+    # Content usage
+    resources :scenes
+
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'
   end

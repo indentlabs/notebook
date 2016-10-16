@@ -24,6 +24,8 @@ class Universe < ActiveRecord::Base
   has_many :magics
   has_many :languages
 
+  has_many :scenes
+
   scope :is_public, -> { where(privacy: 'public') }
 
   def content

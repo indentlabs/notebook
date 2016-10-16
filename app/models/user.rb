@@ -24,6 +24,8 @@ class User < ActiveRecord::Base
   has_many :magics
   has_many :languages
 
+  has_many :scenes
+
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
   # which is undesireable in a case like this, when we want to modify it
@@ -77,7 +79,8 @@ class User < ActiveRecord::Base
   def recent_content
     [
       characters, locations, items, universes,
-      creatures, races, religions, magics, languages
+      creatures, races, religions, magics, languages,
+      scenes
     ].flatten
       .sort_by(&:updated_at)
       .last(10)

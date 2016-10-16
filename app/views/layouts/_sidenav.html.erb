@@ -72,18 +72,35 @@
 
   <li class="divider"></li>
 
+  <%
+    [Scene].each do |extended_content_type|
+  %>
+    <li>
+      <%= link_to polymorphic_path(extended_content_type) do %>
+        <i class="material-icons <%= extended_content_type.color %>-text">
+          <%= extended_content_type.icon %>
+        </i>
+        <%= extended_content_type.name.pluralize %>
+        <span class="badge">
+          <%=
+            if @universe_scope
+              @universe_scope.send(extended_content_type.name.downcase.pluralize).count
+            else
+              current_user.send(extended_content_type.name.downcase.pluralize).count
+            end
+          %>
+        </span>
+      <% end %>
+    </li>
+  <%
+    end
+  %>
+
   <li>
     <a href="<%= locations_url %>">
       <i class="material-icons black-text">wc</i>
       Groups
       <span class="badge">29</span>
-    </a>
-  </li>
-  <li>
-    <a href="<%= items_url %>">
-      <i class="material-icons black-text">local_movies</i>
-      Scenes
-      <span class="badge">16</span>
     </a>
   </li>
 
