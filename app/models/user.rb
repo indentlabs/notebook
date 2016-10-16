@@ -6,7 +6,8 @@ class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
+         :recoverable, :rememberable, :trackable, :validatable, 
+         :omniauthable, :omniauth_providers => [:google_oauth2]
 
   # validates :name,  presence: true
   validates :email, presence: true
@@ -72,6 +73,29 @@ class User < ActiveRecord::Base
     "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
   end
 
+
+  # To find a user based on auth data from another provider
+  def self.find_by_omniauth(access_token)
+    data = access_token.info
+
+    print "find by omniauth"
+    print data.inspect
+
+    user = User.where(:email => data["email"]).first
+
+    # create if user doesn't exist
+    unless user
+      user = User.create(
+        name: data['name'],
+        email: data["email"],
+        password: Devise.friendly_token[0,20]
+      )
+    end
+
+    user
+  end
+
+
   private
 
   # Attributes that are non-public, and should be blacklisted from any public
@@ -85,4 +109,5 @@ class User < ActiveRecord::Base
       :email
     ]
   end
+
 end

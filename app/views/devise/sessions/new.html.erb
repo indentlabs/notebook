@@ -1,33 +1,36 @@
-<h2 class="center">Log in to Notebook</h2>
+<div class="login-form">
+  <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+    <div class="row">
+      <h2 class="center">Welcome back</h2>
+      <div class="col offset-l3 l6 offset-m2 m8 s12">
+        <div>
+          <div class="card">
+            <div class="card-content">
+              <%= link_to "Continue with Google", omniauth_authorize_path(resource_name, :google_oauth2), class: "login-btn google z-depth-1" %>
 
-<div class="card">
-  <div class="card-content">
-    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+              <div class="field">
+                <%= f.label :email %><br />
+                <%= f.email_field :email, autofocus: true %>
+              </div>
 
-      <div class="field">
-        <%= f.label :email %><br />
-        <%= f.email_field :email, autofocus: true %>
+              <div class="field">
+                <%= f.label :password %><br />
+                <%= f.password_field :password, autocomplete: "off" %>
+              </div>
+
+              <div class="actions center">
+                <%= f.submit "Log in", class: 'btn' %>
+                <% if devise_mapping.rememberable? -%>
+                  <span class="field" style="margin-left: 15px;">
+                    <%= f.check_box :remember_me %>
+                    <%= f.label :remember_me %>
+                  </span>
+                <% end -%>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <div class="field">
-        <%= f.label :password %><br />
-        <%= f.password_field :password, autocomplete: "off" %>
-      </div>
-
-      <div class="actions center">
-        <%= f.submit "Log in", class: 'btn' %>
-        <% if devise_mapping.rememberable? -%>
-          <span class="field" style="margin-left: 15px;">
-            <%= f.check_box :remember_me %>
-            <%= f.label :remember_me %>
-          </span>
-        <% end -%>
-
-        <p class="center">
-          <br />
-          <%= render "devise/shared/links" %>
-        </p>
-      </div>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
 </div>
