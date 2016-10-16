@@ -19,4 +19,5 @@
 //= require medium-editor
 //= require Chart.bundle
 //= require chartkick
+//= require_tree ../../../vendor/assets/javascripts
 //= require_tree .
