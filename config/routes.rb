@@ -44,6 +44,7 @@ Rails.application.routes.draw do
 
     # Content usage
     resources :scenes
+    resources :groups
 
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'

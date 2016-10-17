@@ -25,6 +25,7 @@ class Universe < ActiveRecord::Base
   has_many :languages
 
   has_many :scenes
+  has_many :groups
 
   scope :is_public, -> { where(privacy: 'public') }
 

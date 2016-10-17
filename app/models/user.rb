@@ -25,6 +25,7 @@ class User < ActiveRecord::Base
   has_many :languages
 
   has_many :scenes
+  has_many :groups
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
@@ -80,7 +81,7 @@ class User < ActiveRecord::Base
     [
       characters, locations, items, universes,
       creatures, races, religions, magics, languages,
-      scenes
+      scenes, groups
     ].flatten
       .sort_by(&:updated_at)
       .last(10)

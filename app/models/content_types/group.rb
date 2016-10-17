@@ -1,10 +1,4 @@
-##
-# = race
-# == /'reis/
-# _noun_
-#
-# 1. each of the major divisions of sentient life, having distinct physical characteristics
-class Race < ActiveRecord::Base
+class Group < ActiveRecord::Base
   validates :name, presence: true
 
   belongs_to :user
@@ -17,16 +11,23 @@ class Race < ActiveRecord::Base
   include Serendipitous::Concern
 
   # Characters
-  # relates :famous_figures, with: :racial_figure #wow wording
+  # relates :notable_figures, with: :something
+  # relates :dieties, with: :something
+
+  # Locations
+  # relates :practicing_locations, with: :something
+
+  # Items
+  # relates :artifacts, with: :something
 
   scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def self.color
-    'light-green'
+    'cyan'
   end
 
   def self.icon
-    'face'
+    'wc'
   end
 
   def self.attribute_categories
@@ -35,21 +36,17 @@ class Race < ActiveRecord::Base
         icon: 'info',
         attributes: %w(name description other_names universe_id)
       },
-      looks: {
+      hierarchy: {
         icon: 'face',
-        attributes: %w(body_shape skin_colors height weight notable_features variance clothing)
+        attributes: %w(organization_structure)
       },
-      traits: {
+      purpose: {
         icon: 'fingerprint',
-        attributes: %w(strengths weaknesses)
+        attributes: %w(motivation goal obstacles risks)
       },
-      culture: {
+      inventory: {
         icon: 'groups',
-        attributes: %w(traditions beliefs governments technologies occupations economics favorite_foods)
-      },
-      history: {
-        icon: 'info',
-        attributes: %w(notable_events)
+        attributes: %w(inventory)
       },
       notes: {
         icon: 'edit',
