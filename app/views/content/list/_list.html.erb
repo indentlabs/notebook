@@ -1,10 +1,12 @@
-<ul class="collection <%= 'with-header' if title.present? %> <%= 'hoverable' unless defined?(clean) %>" <%= "style='border: 0'".html_safe if defined?(clean) %>>
+<ul class="collection <%= 'with-header' if title.present? %>" style='border: 0'>
   <% if title.present? %>
-    <li class="collection-header"><h4><%= title %></h4></li>
+    <li class="collection-header"><h5><%= title %></h5></li>
   <% end %>
   <% content_list.each do |content| %>
     <li class="collection-item avatar">
-      <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
+      <%= link_to content do %>
+        <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
+      <% end %>
       <span class="title"><%= link_to content.name, content %></span>
       <p class="truncate">
         <%= content.description %>

@@ -84,7 +84,7 @@ class User < ActiveRecord::Base
       scenes, groups
     ].flatten
       .sort_by(&:updated_at)
-      .last(10)
+      .last(5)
       .reverse
   end
 

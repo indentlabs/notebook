@@ -8,6 +8,29 @@
 <% end %>
 
 <% if @content.any? %>
+
+  <div class="slider" style="height: 200px;">
+    <ul class="slides">
+      <li>
+        <%= image_tag "card-headers/#{content_type.pluralize}" %>
+        <img src="http://lorempixel.com/580/250/nature/1">
+        <div class="caption center-align">
+          <h3><%= content_type.titleize.pluralize %></h3>
+          <h5 class="light grey-text text-lighten-3"><%= t("content_oneliners.#{content_type}") %></h5>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $('.slider').slider({
+        height: 200,
+        indicators: false
+      });
+    });
+  </script>
+
   <h4>
     You've created <%= pluralize(@content.count, content_type) %>
     <% if @content.count > 0 %>
