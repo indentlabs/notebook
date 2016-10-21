@@ -13,6 +13,8 @@ class RacesController < ContentController
       traditions beliefs governments technologies occupations economics favorite_foods
       notable_events
       notes private_notes
-    )
+    ) + [
+      famous_figureships_attributes:    [:id, :famous_figure_id, :_destroy]
+    ]
   end
 end

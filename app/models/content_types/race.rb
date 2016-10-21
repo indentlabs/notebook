@@ -17,7 +17,7 @@ class Race < ActiveRecord::Base
   include Serendipitous::Concern
 
   # Characters
-  # relates :famous_figures, with: :racial_figure #wow wording
+  relates :famous_figures, with: :famous_figureships
 
   scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
@@ -45,7 +45,7 @@ class Race < ActiveRecord::Base
       },
       culture: {
         icon: 'groups',
-        attributes: %w(traditions beliefs governments technologies occupations economics favorite_foods)
+        attributes: %w(famous_figures traditions beliefs governments technologies occupations economics favorite_foods)
       },
       history: {
         icon: 'info',
