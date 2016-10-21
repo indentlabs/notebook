@@ -34,29 +34,21 @@ class Religion < ActiveRecord::Base
     {
       overview: {
         icon: 'info',
-        attributes: %w(name other_names universe_id)
+        attributes: %w(name description other_names universe_id)
       },
-      info: {
+      history: {
         icon: 'face',
-        attributes: %w(history typology dialectical_information register)
+        attributes: %w(origin_story)
       },
-      phonology: {
+      beliefs: {
         icon: 'fingerprint',
-        attributes: %w(phonology)
+        attributes: %w(teachings prophecies places_of_worship worship_services obligations paradise)
       },
-      grammar: {
+      traditions: {
         icon: 'groups',
-        attributes: %w(grammar)
+        attributes: %w(initiation rituals holidays)
       },
-      entities: {
-        icon: 'groups',
-        attributes: %w(numbers quantifiers)
-      },
-      # lexicon: {
-      #   icon: 'info',
-      #   attributes: %w()
-      # },
-      # spoken_by: {
+      # spread: {
       #   icon: 'info',
       #   attributes: %w()
       # },
