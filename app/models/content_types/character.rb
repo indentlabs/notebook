@@ -33,6 +33,9 @@ class Character < ActiveRecord::Base
   # Items
   relates :favorite_items, with: :ownerships, where: { favorite: true }
 
+  # Races
+  relates :races,          with: :raceships
+
   scope :is_public, -> { eager_load(:universe).where('characters.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def description
@@ -55,7 +58,7 @@ class Character < ActiveRecord::Base
       },
       looks: {
         icon: 'face',
-        attributes: %w(weight height haircolor hairstyle facialhair eyecolor race skintone bodytype identmarks)
+        attributes: %w(weight height haircolor hairstyle facialhair eyecolor skintone bodytype identmarks races)
       },
       nature: {
         icon: 'fingerprint',

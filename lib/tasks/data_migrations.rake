@@ -2,19 +2,16 @@ namespace :data_migrations do
   desc "Create a race for each user, for each of their characters with a `race` value"
 
   task create_races_from_character_races: :environment do
-    users.each do |user|
-      puts "Migrating user #{user.email.split('@').first}...""
+    User.all.each do |user|
+      puts "Migrating user #{user.email.split('@').first}..."
 
+      user.characters.where.not(race: "").each do |character|
+        race = character.race
 
-    end
+        puts "\tCreating race #{race}"
 
-    users = User.confirmed
-    puts "Going to update #{users.count} users"
-
-    ActiveRecord::Base.transaction do
-      users.each do |user|
-        user.mark_newsletter_received!
-        print "."
+        new_race = user.races.where(name: race).first_or_create
+        character.races << new_race
       end
     end
 
