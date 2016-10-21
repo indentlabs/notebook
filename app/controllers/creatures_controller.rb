@@ -11,7 +11,9 @@ class CreaturesController < ContentController
       materials preferred_habitat sounds strengths weaknesses spoils aggressiveness
       attack_method defense_method maximum_speed food_sources
       migratory_patterns reproduction herd_patterns
-      similar_animals symbolisms
-    )
+      similar_animals symbolisms privacy
+    ) + [
+      wildlifeships_attributes:     [:id, :habitat_id, :_destroy],
+    ]
   end
 end

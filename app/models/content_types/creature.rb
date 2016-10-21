@@ -19,7 +19,7 @@ class Creature < ActiveRecord::Base
   include Serendipitous::Concern
 
   # Locations
-  #relates :found_in,    with: :wildlifeship
+  relates :habitats,    with: :wildlifeships
 
   scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
@@ -43,20 +43,20 @@ class Creature < ActiveRecord::Base
       },
       traits: {
         icon: 'fingerprint',
-        attributes: %w(preferred_habitat sounds strengths weaknesses spoils)
+        attributes: %w(aggressiveness attack_method defense_method maximum_speed strengths weaknesses sounds spoils)
       },
       habitat: {
         icon: 'groups',
-        attributes: %w(aggressiveness attack_method defense_method maximum_speed food_sources migratory_patterns reproduction herd_patterns)
+        attributes: %w(preferred_habitat habitats food_sources migratory_patterns reproduction herd_patterns)
       },
       comparisons: {
         icon: 'info',
         attributes: %w(similar_animals symbolisms)
       },
-      # notes: {
-      #   icon: 'edit',
-      #   attributes: %w(notes private_notes)
-      # }
+      notes: {
+        icon: 'edit',
+        attributes: %w(notes private_notes)
+      }
     }
   end
 end
