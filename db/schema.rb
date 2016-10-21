@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161021202915) do
+ActiveRecord::Schema.define(version: 20161021211814) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -425,7 +425,6 @@ ActiveRecord::Schema.define(version: 20161021202915) do
     t.string   "old_password"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "password_digest"
     t.string   "encrypted_password",     default: "", null: false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
