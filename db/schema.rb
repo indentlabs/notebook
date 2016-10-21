@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161021220223) do
+ActiveRecord::Schema.define(version: 20161021230626) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -19,6 +19,12 @@ ActiveRecord::Schema.define(version: 20161021220223) do
     t.integer  "archenemy_id"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
+  end
+
+  create_table "artifactships", force: :cascade do |t|
+    t.integer "religion_id"
+    t.integer "artifact_id"
+    t.integer "user_id"
   end
 
   create_table "best_friendships", force: :cascade do |t|
@@ -133,6 +139,12 @@ ActiveRecord::Schema.define(version: 20161021220223) do
     t.integer "user_id"
     t.integer "item_id"
     t.integer "current_owner_id"
+  end
+
+  create_table "deityships", force: :cascade do |t|
+    t.integer "religion_id"
+    t.integer "deity_id"
+    t.integer "user_id"
   end
 
   create_table "famous_figureships", force: :cascade do |t|
@@ -377,6 +389,18 @@ ActiveRecord::Schema.define(version: 20161021220223) do
     t.string   "private_notes"
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
+  end
+
+  create_table "religious_figureships", force: :cascade do |t|
+    t.integer "religion_id"
+    t.integer "user_id"
+    t.integer "notable_figure_id"
+  end
+
+  create_table "religious_raceships", force: :cascade do |t|
+    t.integer "religion_id"
+    t.integer "race_id"
+    t.integer "user_id"
   end
 
   create_table "scenes", force: :cascade do |t|

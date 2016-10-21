@@ -11,14 +11,17 @@ class Religion < ActiveRecord::Base
   include Serendipitous::Concern
 
   # Characters
-  # relates :notable_figures, with: :something
-  # relates :dieties, with: :something
+  relates :notable_figures, with: :religious_figureships
+  relates :deities, with: :deityships
 
   # Locations
-  # relates :practicing_locations, with: :something
+  relates :practicing_locations, with: :religious_locationship
 
   # Items
-  # relates :artifacts, with: :something
+  relates :artifacts, with: :artifactships
+
+  # Races
+  relates :practicing_races, with: :religious_raceship
 
   scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
@@ -38,20 +41,20 @@ class Religion < ActiveRecord::Base
       },
       history: {
         icon: 'face',
-        attributes: %w(origin_story)
+        attributes: %w(origin_story notable_figures artifacts)
       },
       beliefs: {
         icon: 'fingerprint',
-        attributes: %w(teachings prophecies places_of_worship worship_services obligations paradise)
+        attributes: %w(deities teachings prophecies places_of_worship worship_services obligations paradise)
       },
       traditions: {
         icon: 'groups',
         attributes: %w(initiation rituals holidays)
       },
-      # spread: {
-      #   icon: 'info',
-      #   attributes: %w()
-      # },
+      spread: {
+        icon: 'info',
+        attributes: %w(practicing_locations practicing_races)
+      },
       notes: {
         icon: 'edit',
         attributes: %w(notes private_notes)
