@@ -11,7 +11,7 @@ class Magic < ActiveRecord::Base
   include Serendipitous::Concern
 
   # Characters
-  # relates :famous_figures, with: :racial_figure #wow wording
+  relates :deities, with: :magic_deityships
 
   scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
@@ -39,7 +39,7 @@ class Magic < ActiveRecord::Base
       },
       alignment: {
         icon: 'groups',
-        attributes: %w(element)
+        attributes: %w(element deities)
       },
       requirements: {
         icon: 'info',

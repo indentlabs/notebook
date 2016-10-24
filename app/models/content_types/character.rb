@@ -36,6 +36,9 @@ class Character < ActiveRecord::Base
   # Races
   relates :races,          with: :raceships
 
+  # Languages
+  relates :spoken_languages, with: :lingualisms
+
   scope :is_public, -> { eager_load(:universe).where('characters.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def description
@@ -66,7 +69,7 @@ class Character < ActiveRecord::Base
       },
       social: {
         icon: 'groups',
-        attributes: %w(best_friends archenemies religion politics occupation fave_color fave_food fave_possession fave_weapon fave_animal)
+        attributes: %w(best_friends archenemies spoken_languages religion politics occupation fave_color fave_food fave_possession fave_weapon fave_animal)
       },
       history: {
         icon: 'info',

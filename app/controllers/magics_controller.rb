@@ -10,6 +10,8 @@ class MagicsController < ContentController
       name description type_of universe_id visuals effects positive_effects
       negative_effects neutral_effects element resource_costs materials
       skills_required limitations notes private_notes
-    )
+    ) + [
+      magic_deityships_attributes: [:id, :deity_id, :_destroy]
+    ]
   end
 end
