@@ -11,14 +11,25 @@ class Group < ActiveRecord::Base
   include Serendipitous::Concern
 
   # Characters
-  # relates :notable_figures, with: :something
-  # relates :dieties, with: :something
+  relates :leaders, with: :group_leaderships
+
+  # Groups
+  relates :supergroups, with: :supergroupships
+  relates :subgroups, with: :subgroupships
+  relates :sistergroups, with: :sistergroupships
+  relates :allies, with: :group_allyships
+  relates :enemies, with: :group_enemyships
+  relates :rivals, with: :group_rivalships
+  relates :clients, with: :group_clientships
+  relates :suppliers, with: :group_supplierships
 
   # Locations
-  # relates :practicing_locations, with: :something
+  relates :headquarters, with: :headquarterships
+  relates :offices, with: :officeships
 
   # Items
-  # relates :artifacts, with: :something
+  relates :equipment, with: :group_equipmentships
+  relates :key_items, with: :key_itemships
 
   scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
@@ -38,15 +49,23 @@ class Group < ActiveRecord::Base
       },
       hierarchy: {
         icon: 'face',
-        attributes: %w(organization_structure)
+        attributes: %w(organization_structure leaders supergroups subgroups sistergroups)
+      },
+      location: {
+        icon: 'face',
+        attributes: %w(headquarters offices)
       },
       purpose: {
         icon: 'fingerprint',
         attributes: %w(motivation goal obstacles risks)
       },
+      politics: {
+        icon: 'groups',
+        attributes: %w(allies enemies rivals clients)
+      },
       inventory: {
         icon: 'groups',
-        attributes: %w(inventory)
+        attributes: %w(inventory equipment key_items suppliers)
       },
       notes: {
         icon: 'edit',

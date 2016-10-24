@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161021230626) do
+ActiveRecord::Schema.define(version: 20161024123400) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -161,6 +161,48 @@ ActiveRecord::Schema.define(version: 20161021230626) do
     t.datetime "updated_at",   null: false
   end
 
+  create_table "group_allyships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "ally_id"
+  end
+
+  create_table "group_clientships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "client_id"
+  end
+
+  create_table "group_enemyships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "enemy_id"
+  end
+
+  create_table "group_equipmentships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "equipment_id"
+  end
+
+  create_table "group_leaderships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "leader_id"
+  end
+
+  create_table "group_rivalships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "rival_id"
+  end
+
+  create_table "group_supplierships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "supplier_id"
+  end
+
   create_table "groups", force: :cascade do |t|
     t.string   "name"
     t.string   "description"
@@ -177,6 +219,12 @@ ActiveRecord::Schema.define(version: 20161021230626) do
     t.string   "private_notes"
     t.datetime "created_at",             null: false
     t.datetime "updated_at",             null: false
+  end
+
+  create_table "headquarterships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "headquarter_id"
   end
 
   create_table "items", force: :cascade do |t|
@@ -197,6 +245,12 @@ ActiveRecord::Schema.define(version: 20161021230626) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "privacy",        default: "private", null: false
+  end
+
+  create_table "key_itemships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "key_item_id"
   end
 
   create_table "languages", force: :cascade do |t|
@@ -311,6 +365,12 @@ ActiveRecord::Schema.define(version: 20161021230626) do
     t.integer "user_id"
     t.integer "location_id"
     t.integer "notable_city_id"
+  end
+
+  create_table "officeships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "office_id"
   end
 
   create_table "original_ownerships", force: :cascade do |t|
@@ -438,6 +498,24 @@ ActiveRecord::Schema.define(version: 20161021230626) do
     t.integer  "sibling_id"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
+  end
+
+  create_table "sistergroupships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "sistergroup_id"
+  end
+
+  create_table "subgroupships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "subgroup_id"
+  end
+
+  create_table "supergroupships", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "group_id"
+    t.integer "supergroup_id"
   end
 
   create_table "universes", force: :cascade do |t|
