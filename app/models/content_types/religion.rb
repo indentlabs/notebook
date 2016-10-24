@@ -15,13 +15,13 @@ class Religion < ActiveRecord::Base
   relates :deities, with: :deityships
 
   # Locations
-  relates :practicing_locations, with: :religious_locationship
+  relates :practicing_locations, with: :religious_locationships
 
   # Items
   relates :artifacts, with: :artifactships
 
   # Races
-  relates :practicing_races, with: :religious_raceship
+  relates :races, with: :religious_raceships
 
   scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
@@ -53,7 +53,7 @@ class Religion < ActiveRecord::Base
       },
       spread: {
         icon: 'info',
-        attributes: %w(practicing_locations practicing_races)
+        attributes: %w(practicing_locations races)
       },
       notes: {
         icon: 'edit',

@@ -14,7 +14,10 @@ class ReligionsController < ContentController
       notes private_notes
     ) + [
       religious_figureships_attributes:    [:id, :notable_figure_id, :_destroy],
-      deityships_attributes:               [:id, :deity_id, :_destroy]
+      deityships_attributes:               [:id, :deity_id, :_destroy],
+      religious_locationships_attributes:  [:id, :practicing_location_id, :_destroy],
+      artifactships_attributes:            [:id, :artifact_id, :_destroy],
+      religious_raceships_attributes:      [:id, :race_id, :_destroy]
     ]
   end
 end
