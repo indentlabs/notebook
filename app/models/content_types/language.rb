@@ -13,7 +13,8 @@ class Language < ActiveRecord::Base
   scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def description
-    "Language"
+    num_speakers = Lingualism.where(spoken_language_id: id).count
+    "Language spoken by #{ActionController::Base.helpers.pluralize num_speakers, 'character'}"
   end
 
   def self.color
