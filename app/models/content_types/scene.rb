@@ -11,14 +11,13 @@ class Scene < ActiveRecord::Base
   include Serendipitous::Concern
 
   # Characters
-  # relates :notable_figures, with: :something
-  # relates :dieties, with: :something
+  relates :scene_characters, with: :scene_characterships
 
   # Locations
-  # relates :practicing_locations, with: :something
+  relates :scene_locations, with: :scene_locationships
 
   # Items
-  # relates :artifacts, with: :something
+  relates :scene_items, with: :scene_itemships
 
   scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
@@ -36,10 +35,10 @@ class Scene < ActiveRecord::Base
         icon: 'info',
         attributes: %w(name summary universe_id)
       },
-      # contents: {
-      #   icon: 'face',
-      #   attributes: %w()
-      # },
+      members: {
+        icon: 'face',
+        attributes: %w(scene_characters scene_locations scene_items)
+      },
       prompts: {
         icon: 'fingerprint',
         attributes: %w(cause description results)
