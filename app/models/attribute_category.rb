@@ -1,19 +1,33 @@
 class AttributeCategory < ActiveRecord::Base
+  validates :name, presence: true
+
   belongs_to :user
   has_many   :attribute_fields
 
   include HasAttributes
   include Serendipitous::Concern
 
+  before_validation :ensure_name
+
   def self.color
     'amber'
   end
 
   def self.icon
-    'chrome_reader_mode'
+    'tab'
   end
 
   def self.content_name
     'attribute_category'
+  end
+
+  def icon
+    self['icon'] || self.class.icon
+  end
+
+  private
+
+  def ensure_name
+    self.name ||= "#{label}-#{Time.now.to_i}".underscore.gsub(' ', '_')
   end
 end

@@ -9,5 +9,9 @@ $(document).ready ->
       window.scrollTo(0, 0);
     ), 1
 
+  $('.new-attribute-field-link').click (e) ->
+    e.preventDefault()
+    $("#attribute-field-modal").openModal()
+
   $('.share').click ->
     $('#share-modal').openModal()

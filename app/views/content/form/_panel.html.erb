@@ -1,23 +1,22 @@
-<div id="<%= category.name %>_panel" class="row">
-  <% category.attribute_fields.each do |field| %>
-
-    <% # Do some dynamic resizing of columns based on how many columns there are
-       # TODO: move this into some service or something? Dunno, doesn't belong here.
+<div id="<%= category.name.gsub("'", '') %>_panel" class="row">
+  <% # Do some dynamic resizing of columns based on how many columns there are
+     # TODO: move this into some service or something? Dunno, doesn't belong here.
+    s_width = 12
+    m_width = 6
+    l_width = 4
+    if category.attribute_fields.length == 1
+      # If there's only one field on this tab, go full-width on all screen sizes
+      s_width = m_width = l_width = 12
+    elsif category.attribute_fields.length == 2
+      # If there's two fields on this tab, go half-width on medium- and large-screens
       s_width = 12
-      m_width = 6
-      l_width = 4
-      if category.attribute_fields.length == 1
-        # If there's only one field on this tab, go full-width on all screen sizes
-        s_width = m_width = l_width = 12
-      elsif category.attribute_fields.length == 2
-        # If there's two fields on this tab, go half-width on medium- and large-screens
-        s_width = 12
-        m_width = l_width = 6
-      elsif category.attribute_fields.length > 2
-        # If there's at least 3 fields, use the defaults (detailed above)
-      end
-    %>
+      m_width = l_width = 6
+    elsif category.attribute_fields.length > 2
+      # If there's at least 3 fields, use the defaults (detailed above)
+    end
+  %>
 
+  <% category.attribute_fields.each do |field| %>
     <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
 
       <% value = nil %>
@@ -32,7 +31,7 @@
         <% through_class = content.class.reflect_on_association(field.name).options[:through].to_s %>
         <%= render 'content/form/relation_input', f: f, attribute: field.name, relation: through_class %>
 
-      <% elsif attribute == 'archetype' %>
+      <% elsif field.name == 'archetype' %>
         <div class="input-field input-select">
           <%= f.label field.name, class: 'active' %><br />
           <%= f.select field.name, options_for_select(t('archetypes'), selected: f.object.archetype), include_blank: true %>
@@ -57,10 +56,7 @@
         </div>
 
       <% elsif field.name == 'entity_type' %>
-        <div class="input-field">
-          <%= f.label field.name, field.label %><br />
-          <%= f.select field.name, %w(Character Item Location Universe).map { |tf| [tf, tf.downcase] } %>
-        </div>
+        <%= f.hidden_field :entity_type, value: f.object.entity_type %>
 
       <% elsif field.name == 'privacy' %>
         <div class="input-field">

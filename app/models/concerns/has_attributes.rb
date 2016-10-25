@@ -9,13 +9,13 @@ module HasAttributes
 
     def self.attribute_categories(user = nil)
       categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
-        category = AttributeCategory.new(entity_type: self.name, name: category_name.to_s, label: details[:label], icon: details[:icon])
+        category = AttributeCategory.new(entity_type: self.content_name, name: category_name.to_s, label: details[:label], icon: details[:icon])
         category.attribute_fields << details[:attributes].map { |field| AttributeField.new(field.merge(system: true)) }
         category
       end
 
       return categories if user.nil?
-      [categories, user.attribute_categories.joins(:attribute_fields).where(['attribute_categories.entity_type = ?', content_name])].flatten.uniq
+      [categories, user.attribute_categories.where(['attribute_categories.entity_type = ?', content_name]).includes(:attribute_fields)].flatten.uniq
     end
 
     def update_custom_attributes

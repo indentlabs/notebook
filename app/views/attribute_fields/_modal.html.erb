@@ -1,0 +1,37 @@
+<div id="attribute-field-modal" class="modal">
+  <%= form_for AttributeField.new do |f| %>
+    <%= hidden_field_tag :entity_type, content.class.content_name %>
+    <div class="modal-content">
+      <h4>New attribute field</h4>
+
+      <div class="row">
+        <div class="input-field">
+          <%= f.label :attribute_category, 'Category' %><br />
+          <%= f.text_area :attribute_category, class: "materialize-textarea autocomplete" %>
+
+        </div>
+      </div>
+
+      <div class="row">
+        <%= f.text_area :label, class: "materialize-textarea", placeholder: "Field Name" %>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <%= f.submit "Create field", class: "btn waves-effect waves-green" %>
+      <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">close</a>
+    </div>
+  <% end %>
+
+  <script type="text/javascript">
+    $(function() {
+      $('#attribute_field_attribute_category').autocomplete({
+        data: {
+          <% current_user.attribute_categories.where(entity_type: content.class.content_name).each do |category| %>
+            "<%= category.label %>": null,
+          <% end %>
+        }
+      });
+    });
+  </script>
+</div>

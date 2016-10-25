@@ -8,7 +8,7 @@ module AttributesHelper
       end
     end
 
-    link = content_tag(:a, category.label, href: "##{category.name}_panel")
+    link = content_tag(:a, category.label, href: "##{category.name.gsub("'", '')}_panel")
     content_tag(:li, link, class: "tab col s3 #{is_disabled}")
   end
 end
