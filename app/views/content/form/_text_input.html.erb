@@ -1,27 +1,33 @@
 <%
-  field_id = "#{f.object.class.name.downcase}_#{attribute}"
   class_name = f.object.class.name.downcase
+  value = content.send(field.name.to_sym)
 
   # TODO: Enable autocomplete when we can actually hide the dropdown if someone tabs out of a field.
   #       Not the easiest thing in the world to do, apparently.
 %>
 
 <div class="input-field content-field">
-  <%= f.label attribute, attribute.humanize.capitalize %>
+  <%= f.label field.name, field.label %>
   <%
-    placeholder = I18n.translate "attributes.#{class_name}.#{attribute}",
+    placeholder = I18n.translate "attributes.#{class_name}.#{field.name}",
       scope: :serendipitous_questions,
       name: f.object.send('name') || "this #{class_name}",
       attribute: "test",
       default: 'Write as little or as much as you want!'
   %>
-  <%= f.text_area attribute, class: "materialize-textarea #{defined?(autocomplete) && false ? 'autocomplete' : ''}", placeholder: placeholder %>
+
+  <% if field.system? %>
+    <%= f.text_area field.name, value: value, class: "materialize-textarea #{defined?(autocomplete) && false ? 'autocomplete' : ''}", placeholder: placeholder %>
+  <% else %>
+    <%= hidden_field_tag "#{content.content_name}[custom_attributes][][name]", field.name %>
+    <%= text_area_tag "#{content.content_name}[custom_attributes][][value]", value, class: "materialize-textarea #{defined?(autocomplete) && false ? 'autocomplete' : ''}", placeholder: placeholder %>
+  <% end %>
 </div>
 
 <% if defined?(autocomplete) && false %>
   <script type="text/javascript">
     $(function() {
-      $('#<%= field_id %>').autocomplete({
+      $('#<%= "#{content.content_name}_#{field.name}" %>').autocomplete({
         data: {
           <% autocomplete.each do |autocomplete_option| %>
             "<%= autocomplete_option %>": null,

@@ -1,0 +1,113 @@
+<div id="<%= category.name %>_panel" class="row">
+  <% category.attribute_fields.each do |field| %>
+
+    <% # Do some dynamic resizing of columns based on how many columns there are
+       # TODO: move this into some service or something? Dunno, doesn't belong here.
+      s_width = 12
+      m_width = 6
+      l_width = 4
+      if category.attribute_fields.length == 1
+        # If there's only one field on this tab, go full-width on all screen sizes
+        s_width = m_width = l_width = 12
+      elsif category.attribute_fields.length == 2
+        # If there's two fields on this tab, go half-width on medium- and large-screens
+        s_width = 12
+        m_width = l_width = 6
+      elsif category.attribute_fields.length > 2
+        # If there's at least 3 fields, use the defaults (detailed above)
+      end
+    %>
+
+    <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
+
+      <% value = content.send(field.name.to_sym) %>
+      <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
+        <%# Relation-setting UI %>
+        <% through_class = content.class.reflect_on_association(field.name).options[:through].to_s %>
+        <%= render 'content/form/relation_input', f: f, attribute: field.name, relation: through_class %>
+
+      <% elsif attribute == 'archetype' %>
+        <div class="input-field input-select">
+          <%= f.label field.name, class: 'active' %><br />
+          <%= f.select field.name, options_for_select(t('archetypes'), selected: f.object.archetype), include_blank: true %>
+        </div>
+
+      <% elsif field.name == 'universe_id' %>
+        <div class="input-field">
+          <%= f.label field.name, field.label %><br />
+          <%= f.select field.name, current_user.universes.sort_by(&:name).map { |u| [u.name, u.id] }.compact, include_blank: true, selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id]) %>
+        </div>
+
+      <% elsif field.name == 'attribute_category_id' %>
+        <div class="input-field">
+          <%= f.label field.name, field.label %><br />
+          <%= f.select field.name, current_user.attribute_categories.sort_by(&:label).map { |u| [u.label, u.id] }.compact, include_blank: false, selected: (f.object.persisted? ? f.object.attribute_category_id : nil) %>
+        </div>
+
+      <% elsif field.name == 'field_type' %>
+        <div class="input-field">
+          <%= f.label field.name, field.label %><br />
+          <%= f.select field.name, ['Text Field'].map { |tf| [tf, tf.underscore] } %>
+        </div>
+
+      <% elsif field.name == 'privacy' %>
+        <div class="input-field">
+          <%= f.label field.name, field.label %><br />
+          <%= f.select field.name, [['Only visible to you', 'private'], ['Visible to anyone with the URL', 'public']] %>
+          <div class="help-text">
+            This setting applies to this universe and everything within it. If this universe is visible to others by URL, they will be able to click through and see the
+            characters, locations, and items within this universe also.
+          </div>
+        </div>
+
+      <% elsif field.name == 'private_notes' %>
+        <div class="input-field content-field">
+          <%= f.label field.name, field.label %>
+          <%= f.text_area field.name, class: "materialize-textarea", placeholder: 'Write as little or as much as you want!' %>
+          <div class="help-text">
+            Private notes are <em>always</em> visible to only you, even if content is made public and shared.
+          </div>
+        </div>
+
+      <% elsif field.name == 'item_type' %>
+        <% potential_item_types = t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +
+          t('club_types') + t('flexible_weapon_types') + t('fist_weapon_types') + t('thrown_weapon_types') +
+          t('polearm_types') + t('shortsword_types') + t('sword_types') + t('other_item_types')
+        %>
+        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: potential_item_types %>
+
+      <%# TODO: not make this so awful %>
+
+      <% elsif field.name == 'skintone' %>
+        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('skin_tones') %>
+
+      <% elsif field.name == 'race' %>
+        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('character_races') %>
+
+      <% elsif field.name == 'eyecolor' %>
+        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('eye_colors') %>
+
+      <% elsif field.name == 'haircolor' %>
+        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('hair_colors') %>
+
+      <% elsif field.name == 'hairstyle' %>
+        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('hair_styles') %>
+
+      <% elsif field.name == 'facialhair' %>
+        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('facial_hair_styles') %>
+
+      <% elsif field.name == 'bodytype' %>
+        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('body_types') %>
+
+      <% elsif field.name == 'fave_weapon' %>
+        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +
+          t('club_types') + t('flexible_weapon_types') + t('fist_weapon_types') + t('thrown_weapon_types') +
+          t('polearm_types') + t('shortsword_types') + t('sword_types') %>
+
+      <% else %>
+        <%= render 'content/form/text_input', f: f, content: content, field: field %>
+
+      <% end %>
+    </div>
+  <% end %>
+</div>

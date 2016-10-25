@@ -23,8 +23,10 @@ class ContentController < ApplicationController
 
   def show
     # TODO: Secure this with content class whitelist lel
-    @content = content_type_from_controller(self.class).find(params[:id])
+    content_type = content_type_from_controller(self.class)
+    @content = content_type.find(params[:id])
     @question = @content.question if current_user.present? and current_user == @content.user
+    @attribute_categories = current_user.attribute_categories.joins(:attribute_fields).where(['attribute_categories.entity_type = ?', content_type])
 
     respond_to do |format|
       format.html # show.html.erb
@@ -33,8 +35,9 @@ class ContentController < ApplicationController
   end
 
   def new
-    @content = content_type_from_controller(self.class)
-               .new
+    content_type = content_type_from_controller(self.class)
+    @content = content_type.new
+    @attribute_categories = current_user.attribute_categories.joins(:attribute_fields).where(['attribute_categories.entity_type = ?', content_type])
 
     respond_to do |format|
       format.html # new.html.erb
@@ -43,8 +46,9 @@ class ContentController < ApplicationController
   end
 
   def edit
-    @content = content_type_from_controller(self.class)
-               .find(params[:id])
+    content_type = content_type_from_controller(self.class)
+    @content = content_type.find(params[:id])
+    @attribute_categories = current_user.attribute_categories.joins(:attribute_fields).where(['attribute_categories.entity_type = ?', content_type])
   end
 
   def create
@@ -81,6 +85,7 @@ class ContentController < ApplicationController
 
   def initialize_object
     content_type = content_type_from_controller(self.class)
+
     @content = content_type.new(content_params).tap do |c|
       c.user_id = current_user.id
     end
