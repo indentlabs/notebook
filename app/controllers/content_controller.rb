@@ -23,7 +23,7 @@ class ContentController < ApplicationController
 
   def show
     # TODO: Secure this with content class whitelist lel
-    content_type = content_type_from_controller(self.class).find(params[:id])
+    @content = content_type_from_controller(self.class).find(params[:id])
     @question = @content.question if current_user.present? and current_user == @content.user
 
     respond_to do |format|
@@ -51,7 +51,7 @@ class ContentController < ApplicationController
     initialize_object
 
     if @content.save
-      successful_response(@content, t(:create_success, model_name: humanized_model_name))
+      successful_response(content_creation_redirect_url, t(:create_success, model_name: humanized_model_name))
     else
       failed_response('new', :unprocessable_entity)
     end
@@ -90,6 +90,11 @@ class ContentController < ApplicationController
   def content_params
     params
   end
+
+  def content_creation_redirect_url
+    @content
+  end
+
   def content_symbol
     content_type_from_controller(self.class).to_s.downcase.to_sym
   end

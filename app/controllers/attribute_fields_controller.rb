@@ -1,16 +1,5 @@
 # Controller for the Attribute model
 class AttributeFieldsController < ContentController
-
-  def create
-    initialize_object
-
-    if @content.save
-      successful_response(:back, t(:create_success, model_name: humanized_model_name))
-    else
-      failed_response('new', :unprocessable_entity)
-    end
-  end
-
   private
 
   def initialize_object
@@ -24,6 +13,10 @@ class AttributeFieldsController < ContentController
       f.user_id = current_user.id
       f.field_type = 'textearea'
     end
+  end
+
+  def content_creation_redirect_url
+    :back
   end
 
   def content_params
