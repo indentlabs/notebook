@@ -23,8 +23,7 @@ class ContentController < ApplicationController
 
   def show
     # TODO: Secure this with content class whitelist lel
-    content_type = content_type_from_controller(self.class)
-    @content = content_type.find(params[:id])
+    content_type = content_type_from_controller(self.class).find(params[:id])
     @question = @content.question if current_user.present? and current_user == @content.user
 
     respond_to do |format|
@@ -82,7 +81,6 @@ class ContentController < ApplicationController
 
   def initialize_object
     content_type = content_type_from_controller(self.class)
-
     @content = content_type.new(content_params).tap do |c|
       c.user_id = current_user.id
     end

@@ -37,7 +37,6 @@ Rails.application.routes.draw do
     resources :locations do
       get :autocomplete_location_name, on: :collection, as: :autocomplete_name
     end
-
     resources :universes
 
     # Coming Soon TM

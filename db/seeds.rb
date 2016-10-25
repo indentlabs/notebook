@@ -24,21 +24,3 @@ Item.create(name: 'Sting',
 Location.create(name: 'The Shire',
                 user: tolkien,
                 universe: middleearth)
-
-affiliation = AttributeCategory.create(name: 'affiliation',
-                                       entity_type: 'character',
-                                       user: tolkien,
-                                       label: 'Affiliation',
-                                       icon: 'verified_user')
-
-affiliation.attribute_fields.create(name: 'starting_affiliation',
-                                    user: tolkien,
-                                    universe: middleearth,
-                                    label: 'Starting Affiliation',
-                                    field_type: 'text')
-
-affiliation.attribute_fields.create(name: 'ending_affiliation',
-                                    user: tolkien,
-                                    universe: middleearth,
-                                    label: 'Ending Affiliation',
-                                    field_type: 'text')

@@ -9,7 +9,16 @@
 <% if @content.any? %>
   <h4>
     You've created <%= pluralize(@content.count, @content.content_name) %>
-    <%= new_content_button(@content) if @content.count > 0 %>
+    <% if @content.count > 0 %>
+      <small class="right">
+        <%= link_to new_polymorphic_path(@content.build), class: "btn white #{content_type_class.color}-text" do %>
+          +
+          <i class="material-icons <%= content_type_class.color %>-text">
+          <%= content_type_class.icon %>
+        </i>
+        <% end %>
+      </small>
+    <% end %>
   </h4>
 
   <%= render partial: 'content/list/list', locals: { content_list: @content } %>
