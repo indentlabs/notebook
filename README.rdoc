@@ -5,7 +5,7 @@
 {<img src="http://inch-ci.org/github/indentlabs/notebook.svg?branch=master" alt="Inline docs" />}[http://inch-ci.org/github/indentlabs/notebook]
 
 == What is notebook?
-see {live website}[http://indentapp.com]
+see {live website}[http://notebook.ai/]
 
 notebook is a set of tools for writers, game designers, and roleplayers to create magnificent universes – and everything within them.
 
@@ -44,45 +44,51 @@ Install rvm
 
     source ~/.rvm/scripts/rvm
 
-Install ruby 2.1.2
+Install ruby 2.3.1
 
-    rvm install ruby 2.1.2
+    rvm install ruby 2.3.1
 
-    rvm use 2.1.2
+    rvm use 2.3.1
 
-Install rails 4.0.1
+Install rails 4.2.5
 
-    gem install rails -v 4.0.1
+    gem install rails -v 4.2.5
 
 Install necessary libraries
 
     sudo apt-get install imagemagick libmagickwand-dev
 
+Clone the code
+
+    git clone git@github.com:indentlabs/notebook.git
+
 Install gems
 
     bundle install
+    
+Create database
+
+    rake db:create
 
 Run initial database migrations
 
     rake db:migrate
 
-Optional: To enable the uploading and editing of images (used in Locations management, etc), you will need to create a file named set_aws_credentials.rb with the following content:
-
-    [[ $_ != $0 ]] && echo "Ready to run your server!" || echo "This script needs to be sourced!"
-
-    export AWS_BUCKET="<your bucket>"
-    export AWS_ACCESS_KEY_ID="<your access key id>"
-    export AWS_SECRET_ACCESS_KEY="<your secret access key>"
-
-And then set your AWS credentials with
-
-    source set_aws_credentials.rb
-
 Finally, run the server with
 
     rails server
+    
+You should now see a copy of the site running locally at http://localhost:3000/!
 
-== Deployment to indentapp.com
+== Running the notebook stack locally with Docker
+
+- install {Docker}[https://www.docker.com/products/overview]
+- clone this git repo
+- cd into the root of this repo, and then run
+    docker-compose up
+- You should now see a copy of the site running locally at http://localhost:3000/
+
+== Deployment to notebook.ai
 
 Deployment to the live stage will only be done by approved developers, and consists of a deployment of
 
@@ -92,11 +98,11 @@ Deployment to the live stage will only be done by approved developers, and consi
 
 - run regression tests on staging environment
 
-- deploy from staging to live (viewed at indentapp.com)
+- deploy from staging to live (viewed at notebook.ai)
 
 
 == Thanks
 
 Feel free to get in touch if you have any questions, comments, or concerns! :)
 
-(c) Andrew Brown 2014
+(c) Andrew Brown 2016

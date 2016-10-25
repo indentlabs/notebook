@@ -39,7 +39,7 @@ class User < ActiveRecord::Base
   end
 
   def name
-    self[:name].blank? ? 'Anonymous author' : self[:name]
+    self[:name].blank? && self.persisted? ? 'Anonymous author' : self[:name]
   end
 
   def content

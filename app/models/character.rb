@@ -34,6 +34,8 @@ class Character < ActiveRecord::Base
   # Items
   relates :favorite_items, with: :ownerships, where: { favorite: true }
 
+  has_many :custom_attributes
+
   scope :is_public, -> { eager_load(:universe).where('characters.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def description

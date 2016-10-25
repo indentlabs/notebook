@@ -1,6 +1,9 @@
 source 'https://rubygems.org'
 
 gem 'rails', '4.2.5'
+gem 'puma', '~> 3.6.0'
+gem 'puma-heroku'
+gem 'rack-timeout'
 
 # Storage
 gem 'aws-sdk', '~> 1.50'
@@ -44,6 +47,7 @@ gem 'slack-notifier'
 group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
+  gem 'scout_apm'
 end
 
 group :test, :production do

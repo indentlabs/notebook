@@ -11,10 +11,11 @@ class CharactersController < ContentController
   def content_param_list
     [
       :universe_id, :user_id,
-      :name, :age, :role, :gender, :age, :height, :weight, :haircolor,
-      :facialhair, :eyecolor, :race, :skintone, :bodytype, :identmarks,
-      :religion, :politics, :prejudices, :occupation, :pets,
+      :name, :age, :role, :gender, :age, :archetype, :height, :weight, :haircolor,
+      :facialhair, :eyecolor, :race, :skintone, :bodytype, :identmarks, :hairstyle,
+      :religion, :politics, :prejudices, :occupation, :pets, :aliases,
       :mannerisms, :birthday, :education, :background,
+      :motivations, :flaws, :talents, :hobbies, :personality_type,
       :fave_color, :fave_food, :fave_possession, :fave_weapon, :fave_animal,
       :notes, :private_notes, :privacy,
       custom_attribute_values:     [:name, :value],

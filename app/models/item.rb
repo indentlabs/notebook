@@ -19,6 +19,7 @@ class Item < ActiveRecord::Base
 
   # Characters
   relates :original_owners,           with: :original_ownerships
+  relates :past_owners,               with: :past_ownerships
   relates :current_owners,            with: :current_ownerships
   relates :makers,                    with: :maker_relationships
 
