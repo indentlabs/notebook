@@ -32,19 +32,19 @@ class Language < ActiveRecord::Base
         attributes: %w(name other_names universe_id)
       },
       info: {
-        icon: 'face',
+        icon: 'forum',
         attributes: %w(history typology dialectical_information register)
       },
       phonology: {
-        icon: 'fingerprint',
+        icon: 'speaker_notes',
         attributes: %w(phonology)
       },
       grammar: {
-        icon: 'groups',
+        icon: 'list',
         attributes: %w(grammar)
       },
       entities: {
-        icon: 'groups',
+        icon: 'settings_input_component',
         attributes: %w(numbers quantifiers)
       },
       # lexicon: {

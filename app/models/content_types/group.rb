@@ -48,23 +48,23 @@ class Group < ActiveRecord::Base
         attributes: %w(name description other_names universe_id)
       },
       hierarchy: {
-        icon: 'face',
+        icon: 'call_split',
         attributes: %w(organization_structure leaders supergroups subgroups sistergroups)
       },
       location: {
-        icon: 'face',
+        icon: 'location_on',
         attributes: %w(headquarters offices)
       },
       purpose: {
-        icon: 'fingerprint',
+        icon: 'business',
         attributes: %w(motivation goal obstacles risks)
       },
       politics: {
-        icon: 'groups',
+        icon: 'thumbs_up_down',
         attributes: %w(allies enemies rivals clients)
       },
       inventory: {
-        icon: 'groups',
+        icon: 'shopping_cart',
         attributes: %w(inventory equipment key_items suppliers)
       },
       notes: {

@@ -22,7 +22,7 @@ class Scene < ActiveRecord::Base
   scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def self.color
-    'silver'
+    'grey'
   end
 
   def self.icon
@@ -39,8 +39,8 @@ class Scene < ActiveRecord::Base
         icon: 'face',
         attributes: %w(scene_characters scene_locations scene_items)
       },
-      prompts: {
-        icon: 'fingerprint',
+      action: {
+        icon: 'gesture',
         attributes: %w(cause description results)
       },
       notes: {

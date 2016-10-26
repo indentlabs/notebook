@@ -38,7 +38,7 @@ class Creature < ActiveRecord::Base
         attributes: %w(name description type_of other_names universe_id)
       },
       looks: {
-        icon: 'face',
+        icon: 'pets',
         attributes: %w(color shape size notable_features materials)
       },
       traits: {
@@ -46,11 +46,11 @@ class Creature < ActiveRecord::Base
         attributes: %w(aggressiveness attack_method defense_method maximum_speed strengths weaknesses sounds spoils)
       },
       habitat: {
-        icon: 'groups',
+        icon: 'location_on',
         attributes: %w(preferred_habitat habitats food_sources migratory_patterns reproduction herd_patterns)
       },
       comparisons: {
-        icon: 'info',
+        icon: 'call_split',
         attributes: %w(similar_animals symbolisms)
       },
       notes: {

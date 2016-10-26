@@ -48,7 +48,7 @@ class Race < ActiveRecord::Base
         attributes: %w(famous_figures traditions beliefs governments technologies occupations economics favorite_foods)
       },
       history: {
-        icon: 'info',
+        icon: 'import_contacts',
         attributes: %w(notable_events)
       },
       notes: {

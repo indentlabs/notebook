@@ -45,7 +45,7 @@ class Universe < ActiveRecord::Base
   end
 
   def self.icon
-    'vpn_lock'
+    'public'
   end
 
   def self.attribute_categories

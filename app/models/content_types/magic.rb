@@ -20,7 +20,7 @@ class Magic < ActiveRecord::Base
   end
 
   def self.icon
-    'flare'
+    'flash_on'
   end
 
   def self.attribute_categories
@@ -30,19 +30,19 @@ class Magic < ActiveRecord::Base
         attributes: %w(name description type_of universe_id)
       },
       appearance: {
-        icon: 'face',
+        icon: 'flash_on',
         attributes: %w(visuals effects)
       },
       effects: {
-        icon: 'fingerprint',
+        icon: 'flare',
         attributes: %w(positive_effects negative_effects neutral_effects)
       },
       alignment: {
-        icon: 'groups',
+        icon: 'polymer',
         attributes: %w(element deities)
       },
       requirements: {
-        icon: 'info',
+        icon: 'lock',
         attributes: %w(resource_costs materials skills_required limitations)
       },
       notes: {

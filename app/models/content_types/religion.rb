@@ -40,19 +40,19 @@ class Religion < ActiveRecord::Base
         attributes: %w(name description other_names universe_id)
       },
       history: {
-        icon: 'face',
+        icon: 'import_contacts',
         attributes: %w(origin_story notable_figures artifacts)
       },
       beliefs: {
-        icon: 'fingerprint',
+        icon: 'forum',
         attributes: %w(deities teachings prophecies places_of_worship worship_services obligations paradise)
       },
       traditions: {
-        icon: 'groups',
+        icon: 'account_balance',
         attributes: %w(initiation rituals holidays)
       },
       spread: {
-        icon: 'info',
+        icon: 'location_on',
         attributes: %w(practicing_locations races)
       },
       notes: {
