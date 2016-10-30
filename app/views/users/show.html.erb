@@ -16,7 +16,11 @@ content_jsonld = {
 </script>
 
 <%
-	tabs = %w(universes characters locations items)
+	tabs = %w(
+		universes
+		characters locations items
+		creatures races religions magics languages groups scenes
+	)
 
 	tab_content_list = {}
 	tabs.each do |tab|
@@ -25,21 +29,38 @@ content_jsonld = {
 %>
 
 <div class="row">
-	<div class="col s12 m3 l2">
-
+	<div class="col s3 m3 l3">
 		<div class="hoverable card">
 			<div class="card-image waves-effect waves-block waves-light">
 				<%= image_tag @user.image_url(500).html_safe, class: 'activator' %>
 			</div>
 			<div class="card-content">
-				<div class="card-title"><b><%= @user.name %></b></div>
-				<p>
+				<div class="card-title"><strong><%= @user.name %></strong></div>
+			</div>
+
+			<div class="card-reveal">
+				<span class="card-title grey-text text-darken-4">Profile Picture<i class="material-icons right">close</i></span>
+				<p>Profile pictures are powered by <%= link_to 'Gravatar', 'https://gravatar.com/', target: "_blank" %>, using the email you provided in your <%= link_to 'account settings', edit_user_registration_path %>.</p>
+				<p>For the prettiest profile, please use an avatar at least 250 pixels wide.</p>
+			</div>
+		</div>
+		<!--
+		<div class="card-action">
+			<a href="#">Author links coming soon</a>
+		</div>
+		-->
+	</div>
+
+	<div class="col s9 m9 l9">
+		<div class="hoverable card">
+			<div class="card-content">
+				<h6>
 					I'm creating universes on Notebook! I'm currently sharing the following public content:
-				</p>
+				</h6>
 				<div class="row" style="text-align: center">
 					<% tabs.each do |tab| %>
-					<div class="col s6 m12 l12">
-						<h3><%= tab_content_list[tab].length %></h3>
+					<div class="col s2 m2 l2">
+						<h3 class="<%= @user.send(tab).build.class.color %>-text"><%= tab_content_list[tab].length %></h3>
 						<h6><%= tab.singularize.pluralize(tab_content_list[tab].length) %></h6>
 					</div>
 					<% end %>
@@ -59,45 +80,46 @@ content_jsonld = {
 				<% end %>
 
 			</div>
-			<div class="card-reveal">
-				<span class="card-title grey-text text-darken-4">Profile Picture<i class="material-icons right">close</i></span>
-				<p>Profile pictures are powered by <%= link_to 'Gravatar', 'https://gravatar.com/', target: "_blank" %>, using the email you provided in your <%= link_to 'account settings', edit_user_registration_path %>.</p>
-				<p>For the prettiest profile, please use an avatar at least 250 pixels wide.</p>
-			</div>
-			<!--
-			<div class="card-action">
-				<a href="#">Author links coming soon</a>
-			</div>
-			-->
 		</div>
 	</div>
+	<div class="row">
+		<div class="card col s12 m12 l12">
+			<div>
+				<ul class="tabs">
+					<% tabs.each do |tab| %>
+						<% tab_class = tab.singularize.titleize.constantize %>
+						<li class="tab col s3" id="js-<%= tab %>-tab">
+							<%= link_to "\##{tab}", class: "#{tab_class.color}-text" do %>
+								<i class="material-icons">
+									<%= tab_class.icon %>
+								</i>
+								<span class="hide-on-med-and-down">
+									<%= tab_content_list[tab].length %>
+								</span>
+							<% end %>
+						</li>
+					<% end %>
+				</ul>
+			</div>
 
-	<div class="card col s12 m9 l10">
-		<div>
-			<ul class="tabs">
-				<% tabs.each do |tab| %>
-					<li class="tab col s3" id="js-<%= tab %>-tab"><%= link_to pluralize(tab_content_list[tab].length, tab.singularize), "\##{tab}" %></li>
-				<% end %>
-			</ul>
-		</div>
-
-		<% tabs.each do |tab| %>
-			<% if tab_content_list[tab].any? %>
-				<div id="<%= tab %>" class="col s12">
-					<%= render partial: 'content/list/list', locals: { content_list: tab_content_list[tab], title: '', clean: true } %>
-				</div>
-			<% elsif tab_content_list[tab].empty? %>
-				<% tab_class = tab.singularize.titleize.constantize %>
-				<div id="<%= tab %>" class="col s12">
-					<div class="center <%= tab_class.color %>-text" style="margin-top: 40px;">
-						<i class="material-icons" style="font-size: 500%"><%= tab_class.icon %></i>
+			<% tabs.each do |tab| %>
+				<% if tab_content_list[tab].any? %>
+					<div id="<%= tab %>" class="col s12">
+						<%= render partial: 'content/list/list', locals: { content_list: tab_content_list[tab], title: '', clean: true } %>
 					</div>
-					<p class="center">
-						It looks like <%= @user.name %> isn't sharing any public <%= tab %> yet.
-					</p>
-				</div>
+				<% elsif tab_content_list[tab].empty? %>
+					<% tab_class = tab.singularize.titleize.constantize %>
+					<div id="<%= tab %>" class="col s12">
+						<div class="center <%= tab_class.color %>-text" style="margin-top: 40px;">
+							<i class="material-icons" style="font-size: 500%"><%= tab_class.icon %></i>
+						</div>
+						<p class="center">
+							It looks like <%= @user.name %> isn't sharing any public <%= tab %> yet.
+						</p>
+					</div>
+				<% end %>
 			<% end %>
-		<% end %>
+		</div>
 	</div>
 </div>
 
