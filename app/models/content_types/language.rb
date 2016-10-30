@@ -10,7 +10,7 @@ class Language < ActiveRecord::Base
   include HasContentGroupers
   include Serendipitous::Concern
 
-  scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
+  scope :is_public, -> { eager_load(:universe).where('languages.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def description
     num_speakers = Lingualism.where(spoken_language_id: id).count

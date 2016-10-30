@@ -23,9 +23,9 @@ class User < ActiveRecord::Base
   has_many :religions
   has_many :magics
   has_many :languages
+  has_many :groups
 
   has_many :scenes
-  has_many :groups
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,

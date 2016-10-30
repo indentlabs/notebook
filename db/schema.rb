@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161024204826) do
+ActiveRecord::Schema.define(version: 20161029224722) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -219,6 +219,7 @@ ActiveRecord::Schema.define(version: 20161024204826) do
     t.string   "private_notes"
     t.datetime "created_at",             null: false
     t.datetime "updated_at",             null: false
+    t.string   "privacy"
   end
 
   create_table "headquarterships", force: :cascade do |t|
@@ -270,6 +271,7 @@ ActiveRecord::Schema.define(version: 20161024204826) do
     t.string   "private_notes"
     t.datetime "created_at",              null: false
     t.datetime "updated_at",              null: false
+    t.string   "privacy"
   end
 
   create_table "largest_cities_relationships", force: :cascade do |t|
@@ -349,6 +351,7 @@ ActiveRecord::Schema.define(version: 20161024204826) do
     t.string   "private_notes"
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false
+    t.string   "privacy"
   end
 
   create_table "maker_relationships", force: :cascade do |t|
@@ -433,6 +436,7 @@ ActiveRecord::Schema.define(version: 20161024204826) do
     t.string   "private_notes"
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false
+    t.string   "privacy"
   end
 
   create_table "raceships", force: :cascade do |t|
@@ -461,6 +465,7 @@ ActiveRecord::Schema.define(version: 20161024204826) do
     t.string   "private_notes"
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
+    t.string   "privacy"
   end
 
   create_table "religious_figureships", force: :cascade do |t|
@@ -513,6 +518,7 @@ ActiveRecord::Schema.define(version: 20161024204826) do
     t.string   "private_notes"
     t.datetime "created_at",    null: false
     t.datetime "updated_at",    null: false
+    t.string   "privacy"
   end
 
   create_table "sessions", force: :cascade do |t|

@@ -23,7 +23,7 @@ class Religion < ActiveRecord::Base
   # Races
   relates :races, with: :religious_raceships
 
-  scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
+  scope :is_public, -> { eager_load(:universe).where('religions.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def self.color
     'yellow'

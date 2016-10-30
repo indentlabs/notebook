@@ -31,7 +31,7 @@ class Group < ActiveRecord::Base
   relates :equipment, with: :group_equipmentships
   relates :key_items, with: :key_itemships
 
-  scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
+  scope :is_public, -> { eager_load(:universe).where('groups.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def self.color
     'cyan'
