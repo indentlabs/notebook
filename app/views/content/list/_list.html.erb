@@ -17,7 +17,7 @@
           <%= link_to content.universe.name, content.universe %>,
         <% end %>
         <% if current_user && current_user == content.user %>
-          <span class="tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>">
+          <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>">
             <i class="material-icons">mode_edit</i>
 
             <%
@@ -41,4 +41,61 @@
       </span>
     </li>
   <% end %>
+
+  <% if local_assigns[:show_add_another_form] && content_list.any? %>
+    <% content_type = content_list.build.class %>
+    <li class="collection-item avatar">
+      <i class="material-icons circle <%= content_type.color %>">add</i>
+
+        <div class="row">
+        <%= form_for content_type.new, remote: true do |f| %>
+          <div class="input-field col s12 m9">
+            <%= f.label "Quick-add a #{content_type.name} by name", class: 'active' %>
+            <%= f.text_field :name %>
+          </div>
+
+          <div class="col s12 m3">
+            <%= f.button 'Quick-add',
+              class: "btn submit #{content_type.color}",
+              style: 'width: 100%; margin-top: 15px;'
+            %>
+          </div>
+        <% end %>
+      </div>
+    </li>
+    <%= content_for :javascript do %>
+      console.log('Registering quick-add hook for <%= content_type.name.downcase %>');
+      $('#new_<%= content_type.name.downcase %>').on('submit', function(e, data, status, xhr) {
+        console.log('Intercepted quick-add for <%= content_type.name.downcase %>.');
+        var form = $('#new_<%= content_type.name.downcase %>');
+        var collection = $("#new_<%= content_type.name.downcase %>").closest('.collection');
+
+        collection.find('.submit').addClass('disabled');
+
+        var template = collection.find('.collection-item:last-child, .collection-item:nth-last-child(2)').first().clone();
+        template.find('.title').text(form.find('#<%= content_type.name.downcase %>_name').val());
+        template.find('.timestamp').html([
+          '<i class="material-icons">edit</i> created just now'
+        ].join(' '));
+
+        var quick_add = collection.find('li:last')
+
+        template.insertBefore(quick_add);
+      }).on('ajax:success', function(e, xhr, status, error) {
+        var collection = $("#new_<%= content_type.name.downcase %>").closest('.collection');
+        var quick_add = collection.find('li:last')
+
+        // Reset form
+        quick_add.find('#<%= content_type.name.downcase %>_name').val('');
+        collection.find('.submit').removeClass('disabled');
+
+        // template.find('.title').turn_into_a_link_to_content
+        // template.find('.timestamp').text('Created!');
+      }).on('ajax:error', function(e, xhr, status, error) {
+        console.log(status);
+        console.log(error);
+      });
+    <% end %>
+  <% end %>
+
 </ul>
