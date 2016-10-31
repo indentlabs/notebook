@@ -73,8 +73,7 @@ class ContentController < ApplicationController
     @content = content_type.find(params[:id])
     @content.destroy
 
-    url = send("#{@content.class.name.underscore.pluralize}_path")
-    successful_response(url, t(:delete_success, model_name: humanized_model_name))
+    successful_response(content_deletion_redirect_url, t(:delete_success, model_name: humanized_model_name))
   end
 
   private
@@ -89,6 +88,10 @@ class ContentController < ApplicationController
   # Override in content classes
   def content_params
     params
+  end
+
+  def content_deletion_redirect_url
+    send("#{@content.class.name.underscore.pluralize}_path")
   end
 
   def content_creation_redirect_url

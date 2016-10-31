@@ -15,6 +15,10 @@ class AttributeFieldsController < ContentController
     end
   end
 
+  def content_deletion_redirect_url
+    :back
+  end
+
   def content_creation_redirect_url
     :back
   end
