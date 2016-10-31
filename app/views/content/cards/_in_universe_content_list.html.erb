@@ -29,13 +29,13 @@
       <table class="content-table bordered">
         <tr>
           <th>Name</th>
-          <th>Description</th>
+          <th class="hide-on-small-only">Description</th>
           <th></th>
         </tr>
         <% content_list.each do |content| %>
         <tr>
           <td><%= link_to content.name, content %></td>
-          <td><%= truncate(content.description, length: 200) %></td>
+          <td class="hide-on-small-only"><%= truncate(content.description, length: 200) %></td>
           <td>
             <div class="secondary-content">
               <%= link_to edit_polymorphic_path(content) do %>
@@ -47,20 +47,28 @@
         <% end %>
       </table>
     <% elsif content_list.empty? %>
-      <div class="center">
-        <h1><i class="material-icons <%= content_type_class.color %>-text" style="font-size: 200%">
-          <%= content_type_class.icon %>
-        </i></h1>
-        <p>
-          <%= t("content_descriptions.#{content_type}") %>
-        </p>
+      <div class="row">
+        <div class="col s4">
+          <h1><i class="material-icons <%= content_type_class.color %>-text" style="font-size: 150%">
+            <%= content_type_class.icon %>
+          </i></h1>
+        </div>
+        <div class="col s8">
+          <p>
+            <%= t("content_descriptions.#{content_type}") %>
+          </p>
+          <div class="center hide-on-small-only">
+            <% button_text = content_list.any? ? "Create another #{content_type}" : "Create your first #{content_type}" %>
+            <%= link_to button_text, new_polymorphic_path(content_type), class: "btn #{content_type_class.color}" if current_user %>
+          </div>
+        </div>
+        <div class="center hide-on-med-and-up">
+          <% button_text = content_list.any? ? "Create another #{content_type}" : "Create your first #{content_type}" %>
+          <%= link_to button_text, new_polymorphic_path(content_type), class: "btn #{content_type_class.color}" if current_user %>
+        </div>
       </div>
     <% end %>
     <br />
 
-    <div class="center">
-      <% button_text = content_list.any? ? "Create another #{content_type}" : "Create your first #{content_type}" %>
-      <%= link_to button_text, new_polymorphic_path(content_type), class: "btn #{content_type_class.color}" if current_user %>
-    </div>
   </div>
 </div>
