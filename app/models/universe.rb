@@ -17,7 +17,6 @@ class Universe < ActiveRecord::Base
   has_many :characters
   has_many :items
   has_many :locations
-  has_many :attribute_fields
 
   scope :is_public, -> { where(privacy: 'public') }
 
