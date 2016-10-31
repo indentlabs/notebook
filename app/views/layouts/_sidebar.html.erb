@@ -9,9 +9,15 @@
 
 <% else %>
 
-  <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: Universe } %>
-  <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: Character } %>
-  <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: Location } %>
-  <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: Item } %>
+  <%
+    content_type_pool = [Character, Creature, Group, Item, Language, Location, Magic, Race, Religion, Scene, Universe]
+    selected_types = content_type_pool.sample(1)
+
+    selected_types.each do |type|
+  %>
+    <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: type } %>
+  <%
+    end
+  %>
 
 <% end %>
