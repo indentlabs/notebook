@@ -1,12 +1,22 @@
-<span class="btn-group input-append help-inline">
-  <button class="btn dropdown-toggle" data-toggle="dropdown">
-    <i class="icon-globe"></i><%= @selected_universe_filter || t(:all_universes) %>
-    <span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu dropdown-picker">
-    <li><a href="/plan/characters"><%= t :all_universes %></a></li>
-    <% Universe.where(user_id: session[:user]).each do |i| %>
-      <li><a href="/plan/characters/from/<%= i.name.strip %>"><%= i.name %></a></li>
+<li class="universe-selector <%= 'universe-filter-active' if @universe_scope.present? %>">
+  <%
+    if @universe_scope.present?
+      tooltip = "Limiting content to universe: #{@universe_scope.name}."
+    else
+      tooltip = "Limit content to a universe..."
+    end
+  %>
+  <a class="dropdown-button tooltipped" href="#!" data-activates="dropdown_universes" data-position="bottom" data-delay="100" data-tooltip="<%= tooltip %>">
+    <i class="material-icons">vpn_lock</i>
+  </a>
+</li>
+
+<ul id="dropdown_universes" class="dropdown-content">
+  <li><%= link_to "All universes", url_for(params.merge(:universe => :all)) %></li>
+  <% if current_user %>
+    <li class="divider"></li>
+    <% current_user.universes.sort_by(&:name).each do |universe| %>
+      <li><%= link_to universe.name, "?universe=#{universe.id}" %></li>
     <% end %>
-  </ul>
-</span>
+  <% end %>
+</ul>

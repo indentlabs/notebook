@@ -16,6 +16,7 @@ class ItemsController < ContentController
       :notes, :private_notes, :privacy,
 
       # Relations
+      custom_attribute_values:                  [:name, :value],
       original_ownerships_attributes:           [:id, :original_owner_id, :_destroy],
       current_ownerships_attributes:            [:id, :current_owner_id,  :_destroy],
       past_ownerships_attributes:               [:id, :past_owner_id,     :_destroy],

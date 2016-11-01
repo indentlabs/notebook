@@ -37,4 +37,27 @@ FactoryGirl.define do
     user
     universe
   end
+
+  factory :attribute_category do
+    sequence :name do |n|
+      "attribute_category_#{n}"
+    end
+    sequence :label do |n|
+      "Attribute Category #{n}"
+    end
+    user
+    entity_type 'character'
+  end
+
+  factory :attribute_field do
+    sequence :name do |n|
+      "attribute_category_#{n}"
+    end
+    sequence :label do |n|
+      "Attribute Category #{n}"
+    end
+    user
+    attribute_category
+    field_type 'textarea'
+  end
 end

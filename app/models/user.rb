@@ -11,10 +11,25 @@ class User < ActiveRecord::Base
   # validates :name,  presence: true
   validates :email, presence: true
 
+  # Base content types
+  has_many :universes
   has_many :characters
   has_many :items
   has_many :locations
-  has_many :universes
+
+  # Extended content types
+  has_many :creatures
+  has_many :races
+  has_many :religions
+  has_many :magics
+  has_many :languages
+  has_many :groups
+
+  has_many :scenes
+
+  has_many :attribute_fields
+  has_many :attribute_categories
+  has_many :attribute_values, class_name: 'Attribute'
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
@@ -64,6 +79,17 @@ class User < ActiveRecord::Base
       locations.is_public.length,
       universes.is_public.length
     ].sum
+  end
+
+  def recent_content
+    [
+      characters, locations, items, universes,
+      creatures, races, religions, magics, languages,
+      scenes, groups
+    ].flatten
+      .sort_by(&:updated_at)
+      .last(7)
+      .reverse
   end
 
   def image_url(size=80)

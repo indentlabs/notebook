@@ -13,18 +13,34 @@
   <%# <title> is set in _seo.html.erb %>
   <%= render 'layouts/seo' %>
   <%= render 'layouts/favicon' %>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body data-in-app="true">
 
   <%= render 'layouts/navbar' %>
+  <% if user_signed_in? %>
+    <style>
+      header, main, footer {
+        padding-left: 310px;
+      }
+
+      @media only screen and (max-width : 992px) {
+        header, main, footer {
+          padding-left: 0;
+        }
+      }
+    </style>
+    <%= render 'layouts/sidenav' %>
+  <% end %>
 
   <main>
     <div>
       <div class="row">
-        <div class="col s12 m12 <%= (current_user && current_user.content_count > 0) ? 'l9' : 'l12' %>">
+        <div class="col s12 m12 <%= (current_user && current_user.content_count == 0) ? 'l12' : 'l9' %>">
           <%= yield %>
         </div>
-        <div class="col s12 m12 <%= (current_user && current_user.content_count > 0) ? 'l3' : 'l12' %>">
+        <div class="col s12 m12 <%= (current_user && current_user.content_count == 0) ? 'l12' : 'l3' %>">
           <%= render 'layouts/sidebar' %>
         </div>
       </div>
