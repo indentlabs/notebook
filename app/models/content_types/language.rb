@@ -6,6 +6,7 @@ class Language < ActiveRecord::Base
 
   belongs_to :universe
 
+  include HasAttributes
   include HasPrivacy
   include HasContentGroupers
   include Serendipitous::Concern
@@ -25,40 +26,7 @@ class Language < ActiveRecord::Base
     'forum'
   end
 
-  def self.attribute_categories
-    {
-      overview: {
-        icon: 'info',
-        attributes: %w(name other_names universe_id)
-      },
-      info: {
-        icon: 'forum',
-        attributes: %w(history typology dialectical_information register)
-      },
-      phonology: {
-        icon: 'speaker_notes',
-        attributes: %w(phonology)
-      },
-      grammar: {
-        icon: 'list',
-        attributes: %w(grammar)
-      },
-      entities: {
-        icon: 'settings_input_component',
-        attributes: %w(numbers quantifiers)
-      },
-      # lexicon: {
-      #   icon: 'info',
-      #   attributes: %w()
-      # },
-      # spoken_by: {
-      #   icon: 'info',
-      #   attributes: %w()
-      # },
-      notes: {
-        icon: 'edit',
-        attributes: %w(notes private_notes)
-      }
-    }
+  def self.content_name
+    'language'
   end
 end

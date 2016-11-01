@@ -8,7 +8,7 @@ class RacesController < ContentController
   def content_param_list
     %i(
       name description other_names universe_id
-      body_shape skin_colors height weight notable_features variance_clothing
+      body_shape skin_colors height weight notable_features variance clothing
       strengths weaknesses
       traditions beliefs governments technologies occupations economics favorite_foods
       notable_events

@@ -12,6 +12,7 @@ class Race < ActiveRecord::Base
 
   belongs_to :universe
 
+  include HasAttributes
   include HasPrivacy
   include HasContentGroupers
   include Serendipitous::Concern
@@ -29,32 +30,7 @@ class Race < ActiveRecord::Base
     'face'
   end
 
-  def self.attribute_categories
-    {
-      overview: {
-        icon: 'info',
-        attributes: %w(name description other_names universe_id)
-      },
-      looks: {
-        icon: 'face',
-        attributes: %w(body_shape skin_colors height weight notable_features variance clothing)
-      },
-      traits: {
-        icon: 'fingerprint',
-        attributes: %w(strengths weaknesses)
-      },
-      culture: {
-        icon: 'groups',
-        attributes: %w(famous_figures traditions beliefs governments technologies occupations economics favorite_foods)
-      },
-      history: {
-        icon: 'import_contacts',
-        attributes: %w(notable_events)
-      },
-      notes: {
-        icon: 'edit',
-        attributes: %w(notes private_notes)
-      }
-    }
+  def self.content_name
+    'race'
   end
 end

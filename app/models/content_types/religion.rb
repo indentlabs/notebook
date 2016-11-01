@@ -6,6 +6,7 @@ class Religion < ActiveRecord::Base
 
   belongs_to :universe
 
+  include HasAttributes
   include HasPrivacy
   include HasContentGroupers
   include Serendipitous::Concern
@@ -33,32 +34,7 @@ class Religion < ActiveRecord::Base
     'brightness_7'
   end
 
-  def self.attribute_categories
-    {
-      overview: {
-        icon: 'info',
-        attributes: %w(name description other_names universe_id)
-      },
-      history: {
-        icon: 'import_contacts',
-        attributes: %w(origin_story notable_figures artifacts)
-      },
-      beliefs: {
-        icon: 'forum',
-        attributes: %w(deities teachings prophecies places_of_worship worship_services obligations paradise)
-      },
-      traditions: {
-        icon: 'account_balance',
-        attributes: %w(initiation rituals holidays)
-      },
-      spread: {
-        icon: 'location_on',
-        attributes: %w(practicing_locations races)
-      },
-      notes: {
-        icon: 'edit',
-        attributes: %w(notes private_notes)
-      }
-    }
+  def self.content_name
+    'religion'
   end
 end

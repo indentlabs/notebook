@@ -6,6 +6,7 @@ class Scene < ActiveRecord::Base
 
   belongs_to :universe
 
+  include HasAttributes
   include HasPrivacy
   include HasContentGroupers
   include Serendipitous::Concern
@@ -29,24 +30,7 @@ class Scene < ActiveRecord::Base
     'local_movies'
   end
 
-  def self.attribute_categories
-    {
-      overview: {
-        icon: 'info',
-        attributes: %w(name summary universe_id)
-      },
-      members: {
-        icon: 'face',
-        attributes: %w(scene_characters scene_locations scene_items)
-      },
-      action: {
-        icon: 'gesture',
-        attributes: %w(cause description results)
-      },
-      notes: {
-        icon: 'edit',
-        attributes: %w(notes private_notes)
-      }
-    }
+  def self.content_name
+    'scene'
   end
 end

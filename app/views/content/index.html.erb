@@ -1,5 +1,6 @@
 <%
   content_type_class = @content.build.class
+  content_type = content_type_class.name.downcase
 %>
 
 <% content_for :sidebar_top do %>
@@ -43,7 +44,7 @@
       </small>
     <% end %>
   </h4>
-  <%= render partial: 'content/list/list', locals: { content_list: @content.content_name, show_add_another_form: true } %>
+  <%= render partial: 'content/list/list', locals: { content_list: @content, show_add_another_form: true } %>
 
 <% elsif @content.empty? %>
 
@@ -55,7 +56,7 @@
       </i>
     </h1>
     <p>
-      <%= t("content_descriptions.#{content_type_class.name.downcase}") %>
+      <%= t("content_descriptions.#{content_type}") %>
     </p>
     <%= link_to "Create your first #{@content.content_name.humanize.downcase}", new_polymorphic_path(@content.build), class: "btn #{content_type_class.color}" %>
   </div>

@@ -6,6 +6,7 @@ class Group < ActiveRecord::Base
 
   belongs_to :universe
 
+  include HasAttributes
   include HasPrivacy
   include HasContentGroupers
   include Serendipitous::Concern
@@ -41,36 +42,7 @@ class Group < ActiveRecord::Base
     'wc'
   end
 
-  def self.attribute_categories
-    {
-      overview: {
-        icon: 'info',
-        attributes: %w(name description other_names universe_id)
-      },
-      hierarchy: {
-        icon: 'call_split',
-        attributes: %w(organization_structure leaders supergroups subgroups sistergroups)
-      },
-      location: {
-        icon: 'location_on',
-        attributes: %w(headquarters offices)
-      },
-      purpose: {
-        icon: 'business',
-        attributes: %w(motivation goal obstacles risks)
-      },
-      politics: {
-        icon: 'thumbs_up_down',
-        attributes: %w(allies enemies rivals clients)
-      },
-      inventory: {
-        icon: 'shopping_cart',
-        attributes: %w(inventory equipment key_items suppliers)
-      },
-      notes: {
-        icon: 'edit',
-        attributes: %w(notes private_notes)
-      }
-    }
+  def self.content_name
+    'group'
   end
 end

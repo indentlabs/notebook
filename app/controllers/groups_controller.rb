@@ -10,7 +10,7 @@ class GroupsController < ContentController
       name description other_names universe_id
       organization_structure
       motivation goal obstacles risks
-      inventory
+      inventory notes private_notes
     ) + [
       group_leaderships_attributes:    [:id, :leader_id, :_destroy],
       supergroupships_attributes:      [:id, :supergroup_id, :_destroy],
