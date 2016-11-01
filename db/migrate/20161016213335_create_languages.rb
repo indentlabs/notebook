@@ -1,5 +1,6 @@
 class CreateLanguages < ActiveRecord::Migration
   def change
+    drop_table :languages
     create_table :languages do |t|
       t.string :name
       t.string :other_names
