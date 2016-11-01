@@ -27,6 +27,47 @@ ActiveRecord::Schema.define(version: 20161029224722) do
     t.integer "user_id"
   end
 
+  create_table "attribute_categories", force: :cascade do |t|
+    t.integer  "user_id"
+    t.string   "entity_type"
+    t.string   "name",        null: false
+    t.string   "label",       null: false
+    t.string   "icon"
+    t.text     "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "attribute_categories", ["entity_type"], name: "index_attribute_categories_on_entity_type"
+  add_index "attribute_categories", ["name"], name: "index_attribute_categories_on_name"
+
+  create_table "attribute_fields", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "attribute_category_id",                     null: false
+    t.string   "name",                                      null: false
+    t.string   "label",                                     null: false
+    t.string   "field_type",                                null: false
+    t.text     "description"
+    t.string   "privacy",               default: "private", null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "attribute_fields", ["user_id", "name"], name: "index_attribute_fields_on_user_id_and_name"
+
+  create_table "attributes", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "attribute_field_id"
+    t.string   "entity_type",                            null: false
+    t.integer  "entity_id",                              null: false
+    t.text     "value"
+    t.string   "privacy",            default: "private", null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "attributes", ["user_id", "entity_type", "entity_id"], name: "index_attributes_on_user_id_and_entity_type_and_entity_id"
+
   create_table "best_friendships", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "character_id"

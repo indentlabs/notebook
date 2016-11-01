@@ -56,7 +56,7 @@ class ContentController < ApplicationController
     initialize_object
 
     if @content.save
-      successful_response(@content, t(:create_success, model_name: humanized_model_name))
+      successful_response(content_creation_redirect_url, t(:create_success, model_name: humanized_model_name))
     else
       failed_response('new', :unprocessable_entity)
     end
@@ -78,8 +78,7 @@ class ContentController < ApplicationController
     @content = content_type.find(params[:id])
     @content.destroy
 
-    url = send("#{@content.class.to_s.downcase.pluralize}_path")
-    successful_response(url, t(:delete_success, model_name: humanized_model_name))
+    successful_response(content_deletion_redirect_url, t(:delete_success, model_name: humanized_model_name))
   end
 
   private
@@ -95,6 +94,15 @@ class ContentController < ApplicationController
   def content_params
     params
   end
+
+  def content_deletion_redirect_url
+    send("#{@content.class.name.underscore.pluralize}_path")
+  end
+
+  def content_creation_redirect_url
+    @content
+  end
+
   def content_symbol
     content_type_from_controller(self.class).to_s.downcase.to_sym
   end

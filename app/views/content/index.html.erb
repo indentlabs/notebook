@@ -1,6 +1,5 @@
 <%
   content_type_class = @content.build.class
-  content_type = content_type_class.name.downcase
 %>
 
 <% content_for :sidebar_top do %>
@@ -32,32 +31,33 @@
   </script>
 
   <h4>
-    You've created <%= pluralize(@content.count, content_type) %>
+    You've created <%= pluralize(@content.count, @content.content_name) %>
     <% if @content.count > 0 %>
-    <small class="right">
-      <%= link_to new_polymorphic_path(@content.build), class: "btn white #{content_type_class.color}-text" do %>
-        +
-        <i class="material-icons <%= content_type_class.color %>-text">
-        <%= content_type_class.icon %>
-      </i>
-      <% end %>
-    </small>
+      <small class="right">
+        <%= link_to new_polymorphic_path(@content.build), class: "btn white #{content_type_class.color}-text" do %>
+          +
+          <i class="material-icons <%= content_type_class.color %>-text">
+          <%= content_type_class.icon %>
+        </i>
+        <% end %>
+      </small>
     <% end %>
   </h4>
-  <%= render partial: 'content/list/list', locals: { content_list: @content, show_add_another_form: true } %>
+  <%= render partial: 'content/list/list', locals: { content_list: @content.content_name, show_add_another_form: true } %>
 
 <% elsif @content.empty? %>
+
   <div class="center" style="margin-bottom: 50px;">
-    <h4>You haven't created any <%= content_type.pluralize %> yet!</h4>
+    <h4>You haven't created any <%= @content.content_name.pluralize %> yet!</h4>
     <h1>
       <i class="material-icons <%= content_type_class.color %>-text" style="font-size: 200%">
         <%= content_type_class.icon %>
       </i>
     </h1>
     <p>
-      <%= t("content_descriptions.#{content_type}") %>
+      <%= t("content_descriptions.#{content_type_class.name.downcase}") %>
     </p>
-    <%= link_to "Create your first #{content_type}", new_polymorphic_path(@content.build), class: "btn #{content_type_class.color}" %>
+    <%= link_to "Create your first #{@content.content_name.humanize.downcase}", new_polymorphic_path(@content.build), class: "btn #{content_type_class.color}" %>
   </div>
 
 <% end %>

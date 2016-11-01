@@ -14,6 +14,7 @@ class Character < ActiveRecord::Base
 
   belongs_to :universe
 
+  include HasAttributes
   include HasPrivacy
   include HasContentGroupers
   include Serendipitous::Concern
@@ -45,44 +46,15 @@ class Character < ActiveRecord::Base
     role
   end
 
+  def self.content_name
+    'character'
+  end
+
   def self.color
     'red'
   end
 
   def self.icon
     'group'
-  end
-
-  def self.attribute_categories
-    {
-      overview: {
-        icon: 'info',
-        attributes: %w(name role gender age archetype aliases universe_id)
-      },
-      looks: {
-        icon: 'face',
-        attributes: %w(weight height haircolor hairstyle facialhair eyecolor skintone bodytype identmarks races)
-      },
-      nature: {
-        icon: 'fingerprint',
-        attributes: %w(mannerisms motivations flaws prejudices talents hobbies personality_type)
-      },
-      social: {
-        icon: 'groups',
-        attributes: %w(best_friends archenemies spoken_languages religion politics occupation fave_color fave_food fave_possession fave_weapon fave_animal)
-      },
-      history: {
-        icon: 'info',
-        attributes: %w(birthday birthplaces education background)
-      },
-      family: {
-        icon: 'device_hub',
-        attributes: %w(mothers fathers spouses siblings children)
-      },
-      notes: {
-        icon: 'edit',
-        attributes: %w(notes private_notes)
-      }
-    }
   end
 end

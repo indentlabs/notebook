@@ -2,12 +2,13 @@
   <% if title.present? %>
     <li class="collection-header"><h5><%= title %></h5></li>
   <% end %>
+
   <% content_list.each do |content| %>
     <li class="collection-item avatar">
       <%= link_to content do %>
         <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
       <% end %>
-      <span class="title"><%= link_to content.name, content %></span>
+      <span class="title"><%= link_to (content.respond_to?(:label) ? content.label : content.name), content %></span>
       <p class="truncate">
         <%= content.description %>
       </p>

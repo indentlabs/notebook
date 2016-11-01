@@ -1,5 +1,6 @@
 <% if content.persisted? %>
   <%= content.name %>
 <% else %>
-  Create your new <%= content.class.to_s.downcase %>
+  <%- content_name = content.class.respond_to?(:content_name) ? content.class.content_name: content.class.to_s %>
+  Create your new <%= content_name.humanize.downcase %>
 <% end %>

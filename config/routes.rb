@@ -46,12 +46,18 @@ Rails.application.routes.draw do
     resources :scenes
     resources :groups
 
+    # Content attributes
+    resources :attributes
+    resources :attribute_categories
+    resources :attribute_fields
+
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'
   end
 
   scope 'admin' do
     get '/', to: 'admin#dashboard', as: :admin_dashboard
+    get '/attributes', to: 'admin#attributes', as: :admin_attributes
     get '/universes', to: 'admin#universes', as: :admin_universes
     get '/characters', to: 'admin#characters', as: :admin_characters
     get '/locations', to: 'admin#locations', as: :admin_locations
