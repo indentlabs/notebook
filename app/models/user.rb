@@ -59,7 +59,14 @@ class User < ActiveRecord::Base
       characters: characters,
       items: items,
       locations: locations,
-      universes: universes
+      universes: universes,
+      creatures: creatures,
+      races: races,
+      religions: religions,
+      magics: magics,
+      languages: languages,
+      scenes: scenes,
+      groups: groups
     }
   end
 
@@ -84,7 +91,14 @@ class User < ActiveRecord::Base
       characters.is_public.length,
       items.is_public.length,
       locations.is_public.length,
-      universes.is_public.length
+      universes.is_public.length,
+      creatures.is_public.length,
+      races.is_public.length,
+      religions.is_public.length,
+      magics.is_public.length,
+      languages.is_public.length,
+      scenes.is_public.length,
+      groups.is_public.length
     ].sum
   end
 

@@ -96,29 +96,29 @@ class ExportController < ApplicationController
   end
 
   def content_to_outline
-    content_types = %w(universes characters locations items)
+    content_types = current_user.content.keys
 
     text = ""
     content_types.each do |content_type|
       ar_class = current_user.send(content_type).build.class
-      attributes = ar_class.attribute_categories.flat_map { |k, v| v[:attributes] }
+      attribute_categories = ar_class.attribute_categories(current_user)
 
       text << "\n#{content_type.upcase}\n"
       current_user.send(content_type).each do |content|
         text << "  #{content.name}\n"
 
-        attributes.each do |attr|
-          value = content.send(attr)
+        attribute_categories.flat_map(&:attribute_fields).each do |attr|
+          value = content.send(attr.name)
           next if value.nil? || value.blank? || (value.respond_to?(:empty) && value.empty?)
 
           if value.is_a?(ActiveRecord::Associations::CollectionProxy)
             value = value.map(&:name).to_sentence
-          elsif attr.end_with?('_id') && value.present?
+          elsif attr.name.end_with?('_id') && value.present?
             universe = Universe.where(id: value.to_i)
             value = universe.name if universe
           end
 
-          text << "    #{attr}: #{value.split("\n").join("\n      ")}\n"
+          text << "    #{attr.label}: #{value.split("\n").join("\n      ")}\n"
         end
 
         text << "\n"
