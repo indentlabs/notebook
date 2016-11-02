@@ -72,8 +72,6 @@
         var form = $('#new_<%= content_type.name.downcase %>');
         var collection = $("#new_<%= content_type.name.downcase %>").closest('.collection');
 
-        collection.find('.submit').addClass('disabled');
-
         var template = collection.find('.collection-item:last-child, .collection-item:nth-last-child(2)').first().clone();
         template.find('.title').text(form.find('#<%= content_type.name.downcase %>_name').val());
         template.find('.timestamp').html([
@@ -83,6 +81,9 @@
 
         var quick_add = collection.find('li:last')
 
+        quick_add.find('#<%= content_type.name.downcase %>_name').attr('disabled', 'disabled');
+        quick_add.find('.submit').addClass('disabled');
+
         template.insertBefore(quick_add);
       }).on('ajax:success', function(e, xhr, status, error) {
         var collection = $("#new_<%= content_type.name.downcase %>").closest('.collection');
@@ -90,7 +91,9 @@
 
         // Reset form
         quick_add.find('#<%= content_type.name.downcase %>_name').val('');
-        collection.find('.submit').removeClass('disabled');
+        quick_add.find('#<%= content_type.name.downcase %>_name').removeAttr('disabled');
+        quick_add.find('#<%= content_type.name.downcase %>_name').focus();
+        quick_add.find('.submit').removeClass('disabled');
 
         // template.find('.title').turn_into_a_link_to_content
         // template.find('.timestamp').text('Created!');
