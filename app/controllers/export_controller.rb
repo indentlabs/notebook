@@ -21,6 +21,34 @@ class ExportController < ApplicationController
     send_data to_csv(current_user.items), filename: "items-#{Date.today}.csv"
   end
 
+  def creatures_csv
+    send_data to_csv(current_user.creatures), filename: "creatures-#{Date.today}.csv"
+  end
+
+  def races_csv
+    send_data to_csv(current_user.races), filename: "races-#{Date.today}.csv"
+  end
+
+  def religions_csv
+    send_data to_csv(current_user.religions), filename: "religions-#{Date.today}.csv"
+  end
+
+  def magics_csv
+    send_data to_csv(current_user.magics), filename: "magics-#{Date.today}.csv"
+  end
+
+  def languages_csv
+    send_data to_csv(current_user.languages), filename: "languages-#{Date.today}.csv"
+  end
+
+  def groups_csv
+    send_data to_csv(current_user.groups), filename: "groups-#{Date.today}.csv"
+  end
+
+  def scenes_csv
+    send_data to_csv(current_user.scenes), filename: "scenes-#{Date.today}.csv"
+  end
+
   def outline
     send_data content_to_outline, filename: "notebook-#{Date.today}.txt"
   end
@@ -48,18 +76,18 @@ class ExportController < ApplicationController
 
   def to_csv ar_relation
     ar_class = ar_relation.build.class
-    attributes = ar_class.attribute_categories.flat_map { |k, v| v[:attributes] }
+    attribute_categories = ar_class.attribute_categories(current_user)
 
     CSV.generate(headers: true) do |csv|
-      csv << attributes
+      csv << attribute_categories.flat_map(&:attribute_fields).map(&:label)
 
       ar_relation.each do |content|
-        csv << attributes.map do |attr|
-          value = content.send(attr)
+        csv << attribute_categories.flat_map(&:attribute_fields).map do |attr|
+          value = content.send(attr.name)
 
           if value.is_a?(ActiveRecord::Associations::CollectionProxy)
             value = value.map(&:name).to_sentence
-          elsif attr.end_with?('_id') && value.present?
+          elsif attr.name.end_with?('_id') && value.present?
             universe = Universe.where(id: value.to_i).first
             value = universe.name if universe
           end

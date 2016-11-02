@@ -66,13 +66,22 @@ Rails.application.routes.draw do
 
   scope 'export' do
     get '/', to: 'export#index', as: :notebook_export
+
+    get '/outline', to: 'export#outline', as: :notebook_outline
+    get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
+    get '/notebook.xml', to: 'export#notebook_xml', as: :notebook_xml
+
     get '/universes.csv', to: 'export#universes_csv', as: :universes_csv
     get '/characters.csv', to: 'export#characters_csv', as: :characters_csv
     get '/locations.csv', to: 'export#locations_csv', as: :locations_csv
     get '/items.csv', to: 'export#items_csv', as: :items_csv
-    get '/outline', to: 'export#outline', as: :notebook_outline
-    get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
-    get '/notebook.xml', to: 'export#notebook_xml', as: :notebook_xml
+    get '/creatures.csv', to: 'export#creatures_csv', as: :creatures_csv
+    get '/races.csv', to: 'export#races_csv', as: :races_csv
+    get '/religions.csv', to: 'export#religions_csv', as: :religions_csv
+    get '/magics.csv', to: 'export#magics_csv', as: :magics_csv
+    get '/languages.csv', to: 'export#languages_csv', as: :languages_csv
+    get '/scenes.csv', to: 'export#scenes_csv', as: :scenes_csv
+    get '/groups.csv', to: 'export#groups_csv', as: :groups_csv
   end
 
   scope '/scene/:scene_id' do
