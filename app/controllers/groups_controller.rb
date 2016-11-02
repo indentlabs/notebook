@@ -13,6 +13,7 @@ class GroupsController < ContentController
       inventory notes private_notes
     ) + [
       group_leaderships_attributes:    [:id, :leader_id, :_destroy],
+      group_memberships_attributes:    [:id, :member_id, :_destroy],
       supergroupships_attributes:      [:id, :supergroup_id, :_destroy],
       subgroupships_attributes:        [:id, :subgroup_id, :_destroy],
       sistergroupships_attributes:     [:id, :sistergroup_id, :_destroy],
@@ -21,6 +22,7 @@ class GroupsController < ContentController
       group_rivalships_attributes:     [:id, :rival_id, :_destroy],
       group_clientships_attributes:    [:id, :client_id, :_destroy],
       group_supplierships_attributes:  [:id, :supplier_id, :_destroy],
+      group_locationships_attributes:  [:id, :location_id, :_destroy],
       headquarterships_attributes:     [:id, :headquarter_id, :_destroy],
       officeships_attributes:          [:id, :office_id, :_destroy],
       group_equipmentships_attributes: [:id, :equipment_id, :_destroy],

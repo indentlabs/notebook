@@ -12,7 +12,7 @@ class CharactersController < ContentController
       :universe_id, :user_id,
       :name, :age, :role, :gender, :age, :archetype, :height, :weight, :haircolor,
       :facialhair, :eyecolor, :skintone, :bodytype, :identmarks, :hairstyle,
-      :religion, :politics, :prejudices, :occupation, :pets, :aliases, :races,
+      :religion, :politics, :prejudices, :occupation, :pets, :aliases, :race,
       :mannerisms, :birthday, :education, :background,
       :motivations, :flaws, :talents, :hobbies, :personality_type,
       :fave_color, :fave_food, :fave_possession, :fave_weapon, :fave_animal,
@@ -26,7 +26,8 @@ class CharactersController < ContentController
       archenemyship_attributes:    [:id, :archenemy_id, :_destroy],
       birthings_attributes:        [:id, :birthplace_id, :_destroy],
       childrenships_attributes:    [:id, :child_id, :_destroy],
-      lingualisms_attributes:      [:id, :spoken_language_id, :_destroy]
+      lingualisms_attributes:      [:id, :spoken_language_id, :_destroy],
+      raceships_attributes:        [:id, :race_id, :_destroy]
     ]
   end
 end

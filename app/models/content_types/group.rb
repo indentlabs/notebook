@@ -13,6 +13,7 @@ class Group < ActiveRecord::Base
 
   # Characters
   relates :leaders, with: :group_leaderships
+  relates :members, with: :group_memberships
 
   # Groups
   relates :supergroups, with: :supergroupships
@@ -25,6 +26,7 @@ class Group < ActiveRecord::Base
   relates :suppliers, with: :group_supplierships
 
   # Locations
+  relates :locations, with: :group_locationships
   relates :headquarters, with: :headquarterships
   relates :offices, with: :officeships
 
