@@ -72,23 +72,23 @@ class ExportController < ApplicationController
 
   def fill_relations ar_relation
     ar_class = ar_relation.build.class
-    attributes = ar_class.attribute_categories.flat_map { |k, v| v[:attributes] }
+    attribute_categories = ar_class.attribute_categories(current_user)
 
     ar_relation.map do |content|
       content_repr = {}
 
-      attributes.each do |attr|
-        value = content.send(attr)
+      attribute_categories.flat_map(&:attribute_fields).each do |attr|
+        value = content.send(attr.name)
         next if value.nil? || value.blank?
 
         if value.is_a?(ActiveRecord::Associations::CollectionProxy)
           value = value.map(&:name).to_sentence
-        elsif attr.end_with?('_id') && value.present?
+        elsif attr.name.end_with?('_id') && value.present?
           universe = Universe.where(id: value.to_i)
           value = universe.name if universe
         end
 
-        content_repr[attr] = value
+        content_repr[attr.label] = value
       end
 
       content_repr
