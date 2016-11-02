@@ -68,7 +68,14 @@ class User < ActiveRecord::Base
       characters.length,
       items.length,
       locations.length,
-      universes.length
+      universes.length,
+      creatures.length,
+      races.length,
+      religions.length,
+      magics.length,
+      languages.length,
+      scenes.length,
+      groups.length
     ].sum
   end
 
