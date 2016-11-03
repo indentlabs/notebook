@@ -12,6 +12,7 @@ class GroupsController < ContentController
       motivation goal obstacles risks
       inventory notes private_notes
     ) + [
+      custom_attribute_values:         [:name, :value],
       group_leaderships_attributes:    [:id, :leader_id, :_destroy],
       group_memberships_attributes:    [:id, :member_id, :_destroy],
       supergroupships_attributes:      [:id, :supergroup_id, :_destroy],

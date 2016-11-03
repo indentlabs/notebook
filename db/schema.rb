@@ -527,12 +527,6 @@ ActiveRecord::Schema.define(version: 20161102182259) do
     t.integer "notable_figure_id"
   end
 
-  create_table "religious_locationships", force: :cascade do |t|
-    t.integer "religion_id"
-    t.integer "practicing_location_id"
-    t.integer "user_id"
-  end
-
   create_table "religious_raceships", force: :cascade do |t|
     t.integer "religion_id"
     t.integer "race_id"
