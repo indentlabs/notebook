@@ -26,8 +26,6 @@ gem 'dateslices'
 
 # Javascript
 gem 'coffee-rails'
-gem 'jquery-rails'
-gem 'jquery-ui-rails'
 gem 'rails-jquery-autocomplete'
 
 # SEO
