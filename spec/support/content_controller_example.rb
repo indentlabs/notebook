@@ -31,7 +31,7 @@ shared_examples_for 'a controller for a content item' do
   describe 'GET #new' do
     before { get :new }
     it { is_expected.to respond_with(200) }
-    it { is_expected.to render_template("#{@model_name.pluralize}/new") }
+    it { is_expected.to render_template(layout: "#{@model_name.pluralize}/new", layout: "layouts/application") }
   end
 
   describe 'POST #create' do
@@ -46,7 +46,7 @@ shared_examples_for 'a controller for a content item' do
   describe 'GET #edit' do
     before { get :edit, id: model.id }
     it { is_expected.to respond_with(200) }
-    it { is_expected.to render_template("#{@model_name.pluralize}/edit") }
+    it { is_expected.to render_template(layout: "#{@model_name.pluralize}/edit", layout: "layouts/application") }
   end
 
   describe 'PUT #update' do
