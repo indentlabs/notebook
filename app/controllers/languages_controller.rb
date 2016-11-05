@@ -13,6 +13,8 @@ class LanguagesController < ContentController
       grammar
       numbers quantifiers
       notes private_notes
-    )
+    ) + [
+      custom_attribute_values:     [:name, :value]
+    ]
   end
 end

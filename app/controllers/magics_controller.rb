@@ -11,6 +11,7 @@ class MagicsController < ContentController
       negative_effects neutral_effects element resource_costs materials
       skills_required limitations notes private_notes
     ) + [
+      custom_attribute_values:     [:name, :value],
       magic_deityships_attributes: [:id, :deity_id, :_destroy]
     ]
   end

@@ -13,6 +13,7 @@ class CreaturesController < ContentController
       migratory_patterns reproduction herd_patterns
       similar_animals symbolisms privacy notes private_notes
     ) + [
+      custom_attribute_values:      [:name, :value],
       wildlifeships_attributes:     [:id, :habitat_id, :_destroy],
     ]
   end

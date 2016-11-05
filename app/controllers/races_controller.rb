@@ -14,6 +14,7 @@ class RacesController < ContentController
       notable_events
       notes private_notes
     ) + [
+      custom_attribute_values:          [:name, :value],
       famous_figureships_attributes:    [:id, :famous_figure_id, :_destroy]
     ]
   end
