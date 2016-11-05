@@ -1,6 +1,5 @@
 class CreateMagics < ActiveRecord::Migration
   def change
-    drop_table :magics
     create_table :magics do |t|
       t.string :name
       t.string :description
