@@ -13,6 +13,7 @@ class ReligionsController < ContentController
       initiation rituals holidays
       notes private_notes
     ) + [
+      custom_attribute_values:             [:name, :value],
       religious_figureships_attributes:    [:id, :notable_figure_id, :_destroy],
       deityships_attributes:               [:id, :deity_id, :_destroy],
       religious_locationships_attributes:  [:id, :practicing_location_id, :_destroy],
