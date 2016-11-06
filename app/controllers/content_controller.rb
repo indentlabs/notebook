@@ -3,8 +3,6 @@ class ContentController < ApplicationController
 
   before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy]
 
-  # TODO: put a lot of this in ContentManagementService
-
   def index
     @content = content_type_from_controller(self.class)
                .where(user_id: current_user.id)
