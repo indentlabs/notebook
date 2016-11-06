@@ -1,16 +1,16 @@
 /**
  * Mapping of the keyboard controls to functions.
- * 
+ *
  * If you'd like to add any new keyboard controls, this is the place to do it.'
  */
 
 var KEYCODES = {
 	"?" : 191,
-	"n" : 78, 
-	"c" : 67, 
-	"u" : 85, 
-	"i" : 73, 
-	"l" : 76 
+	"n" : 78,
+	"c" : 67,
+	"u" : 85,
+	"i" : 73,
+	"l" : 76
 };
 
 var default_keyboard_controls = [
@@ -20,7 +20,7 @@ var default_keyboard_controls = [
 			{ key : KEYCODES["?"], shiftKey : true, ctrlKey : false }
 		],
 		"result" : function () {
-			$("#keyboard-controls-help-modal").openModal()
+			$("#keyboard-controls-help-modal").modal('open');
 		}
 	},
 
