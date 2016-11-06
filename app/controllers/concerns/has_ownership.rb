@@ -47,7 +47,7 @@ module HasOwnership
   def redirect_path
     model = content_type_from_controller(self.class)
     # TODO: proper pluralizing here
-    "#{model.to_s.downcase}s_path"
+    "#{model.to_s.underscore}s_path"
   end
 
   def owned_by_current_user?(object)
