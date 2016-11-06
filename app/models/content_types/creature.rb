@@ -12,7 +12,7 @@ class Creature < ActiveRecord::Base
   belongs_to :user
   validates :user_id, presence: true
 
-  belongs_to :universe
+  include BelongsToUniverse
 
   include HasAttributes
   include HasPrivacy

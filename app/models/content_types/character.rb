@@ -12,7 +12,7 @@ class Character < ActiveRecord::Base
   belongs_to :user
   validates :user_id, presence: true
 
-  belongs_to :universe
+  include BelongsToUniverse
 
   include HasAttributes
   include HasPrivacy
@@ -39,8 +39,6 @@ class Character < ActiveRecord::Base
 
   # Languages
   relates :spoken_languages, with: :lingualisms
-
-  scope :is_public, -> { eager_load(:universe).where('characters.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def description
     role
