@@ -1,0 +1,1 @@
+$( -> $(".button-collapse").sideNav() )
