@@ -25,6 +25,9 @@ PlanCharacters::Application.configure do
 
   # Do not compress assets
   config.assets.compress = false
+  config.assets.compile = true
+  config.assets.debug = true
+  config.assets.digest = false
 
   # Devise default url options
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
