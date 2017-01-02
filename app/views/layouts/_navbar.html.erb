@@ -13,6 +13,16 @@
   <li><%= link_to "Sign out", destroy_user_session_path %></li>
 </ul>
 
+<ul id="login-slide" class="side-nav">
+  <li><%= link_to 'Sign in', new_user_session_path %></li>
+  <li><%= link_to 'Sign up', new_user_registration_path %></li>
+  <li class="divider"></li>
+  <li><%= link_to 'Report a problem', 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new' %></li>
+  <li><%= link_to 'Request a feature', 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new' %></li>
+  <li><%= link_to 'Leave feedback', 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new' %></li>
+  <li class="divider"></li>
+  <li><%= link_to 'Privacy policy', privacy_policy_path %></li>
+</ul>
 
 <div class="navbar-fixed">
   <nav class="light-blue">
@@ -28,27 +38,24 @@
           </a>
         </li>
         <% else %>
-          <li><%= link_to 'Sign in', new_user_session_path %></li>
-          <li><%= link_to 'Sign up', new_user_registration_path %></li>
+          <li class="hide-on-med-and-down"><%= link_to 'Sign in', new_user_session_path %></li>
+          <li class="hide-on-med-and-down"><%= link_to 'Sign up', new_user_registration_path %></li>
         <% end %>
       </ul>
-
       <ul class="left">
-        <li>
-          <a href="#" data-activates="slide-out" class="button-collapse">
-            <i class="material-icons">menu</i>
-          </a>
-        </li>
-        <li class="hide-on-med-and-down">
-          <%= link_to root_url do %>
-            <i class="material-icons">home</i>
-          <% end %>
-        </li>
+        <% if user_signed_in? %>
         <li>
           <% if current_user && current_user.universes.length > 0 %>
             <%= render partial: 'universes/picker' %>
           <% end %>
         </li>
+        <% else %>
+          <li>
+            <a href="#" data-activates="login-slide" class="button-collapse">
+              <i class="material-icons">menu</i>
+            </a>
+          </li>
+        <% end %>
       </ul>
     </div>
   </nav>
