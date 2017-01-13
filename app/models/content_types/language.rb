@@ -11,6 +11,9 @@ class Language < ActiveRecord::Base
   include HasContentGroupers
   include Serendipitous::Concern
 
+  include Authority::Abilities
+  self.authorizer_name = 'ExtendedContentAuthorizer'
+
   scope :is_public, -> { eager_load(:universe).where('languages.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def description

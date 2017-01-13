@@ -17,6 +17,9 @@ class Item < ActiveRecord::Base
   include HasContentGroupers
   include Serendipitous::Concern
 
+  include Authority::Abilities
+  self.authorizer_name = 'CoreContentAuthorizer'
+
   # Characters
   relates :original_owners,           with: :original_ownerships
   relates :past_owners,               with: :past_ownerships

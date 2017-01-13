@@ -15,6 +15,7 @@ gem 'rmagick', '2.13.4'
 # Authentication
 gem 'bcrypt'
 gem 'devise'
+gem 'authority'
 
 # Design
 gem 'material_icons'

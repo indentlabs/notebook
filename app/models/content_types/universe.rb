@@ -11,6 +11,9 @@ class Universe < ActiveRecord::Base
   include HasPrivacy
   include Serendipitous::Concern
 
+  include Authority::Abilities
+  self.authorizer_name = 'UniverseCoreContentAuthorizer'
+
   validates :name, presence: true
 
   belongs_to :user
