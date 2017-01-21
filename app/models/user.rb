@@ -14,6 +14,9 @@ class User < ActiveRecord::Base
   validates :email, presence: true
   #todo: We probably want a uniqueness constraint on email
 
+  has_many :subscriptions
+  has_many :billing_plans, through: :subscriptions
+
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
   # which is undesireable in a case like this, when we want to modify it
@@ -41,6 +44,18 @@ class User < ActiveRecord::Base
     email_md5 = Digest::MD5.hexdigest(email.downcase)
     # 80px is Gravatar's default size
     "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
+  end
+
+  def active_subscriptions
+    subscriptions
+      .where('start_date < ?', Time.now)
+      .where('end_date > ?',   Time.now)
+  end
+
+  def active_billing_plans
+    active_subscriptions
+      .map { |subscription| subscription.billing_plan }
+      .uniq
   end
 
   private
