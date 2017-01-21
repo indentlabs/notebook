@@ -5,7 +5,8 @@
 ActiveSupport::Inflector.inflections do |inflect|
   #todo: Not sure how this interacts with translation files; might just be
   #      that we need pluralizations per-language that need them
-  inflect.plural /^(magic)$/i, 'types of \1' # Pluralize "magic" to "types of magic"
+  #todo: Also, this doesn't seem to work since it also applies to the table name we look at (which is magics).
+  #inflect.plural /^(magic)$/i, 'types of \1' # Pluralize "magic" to "types of magic"
 
   # inflect.plural /^(ox)$/i, '\1en'
   # inflect.singular /^(ox)en/i, '\1'
