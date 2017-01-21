@@ -15,8 +15,8 @@
 
 # Free tier
 BillingPlan.find_or_create_by(
-  name: 'Free Plan',
-  stripe_plan_id: 'free-plan',
+  name: 'Starter',
+  stripe_plan_id: 'starter',
   monthly_cents: 0, # $0.00/mo
   available: true,
 
@@ -60,7 +60,7 @@ BillingPlan.find_or_create_by(
 
 # Standard $9/month paid tier (to be available after signup promo)
 BillingPlan.find_or_create_by(
-  name: 'Premium Plan',
+  name: 'Premium',
   stripe_plan_id: 'premium',
   monthly_cents: 900, # $9.00/mo
   available: false,
