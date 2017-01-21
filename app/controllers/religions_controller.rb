@@ -11,7 +11,7 @@ class ReligionsController < ContentController
       origin_story
       teachings prophecies places_of_worship worship_services obligations paradise
       initiation rituals holidays
-      notes private_notes
+      notes private_notes privacy
     ) + [
       custom_attribute_values:             [:name, :value],
       religious_figureships_attributes:    [:id, :notable_figure_id, :_destroy],

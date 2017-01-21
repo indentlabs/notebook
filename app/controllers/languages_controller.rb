@@ -12,7 +12,7 @@ class LanguagesController < ContentController
       phonology
       grammar
       numbers quantifiers
-      notes private_notes
+      notes private_notes privacy
     ) + [
       custom_attribute_values:     [:name, :value]
     ]

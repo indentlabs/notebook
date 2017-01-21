@@ -8,7 +8,7 @@ class GroupsController < ContentController
   def content_param_list
     %i(
       name description other_names universe_id
-      organization_structure
+      organization_structure privacy
       motivation goal obstacles risks
       inventory notes private_notes
     ) + [
