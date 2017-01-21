@@ -16,6 +16,12 @@ Rails.application.routes.draw do
   scope '/my' do
     get '/content',     to: 'main#dashboard', as: :dashboard
     get '/submissions', to: 'main#comingsoon'
+
+    # Billing
+    scope '/billing' do
+      get '/',             to: 'subscriptions#show', as: :billing
+      get '/subscription', to: 'subscriptions#new'
+    end
   end
 
   # Sessions
