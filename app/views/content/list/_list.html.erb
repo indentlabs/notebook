@@ -48,7 +48,9 @@
   <% end %>
 
   <% if local_assigns[:show_add_another_form] && content_list.any? && current_user.can_create?(content_type) %>
-    <%= render partial: 'content/list/quick_add_form', locals: { content_type: content_list.build.class } %>
+    <% unless content_type == Universe %>
+      <%= render partial: 'content/list/quick_add_form', locals: { content_type: content_list.build.class } %>
+    <% end %>
   <% end %>
 
 </ul>
