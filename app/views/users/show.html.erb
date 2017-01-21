@@ -19,127 +19,144 @@ content_jsonld = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartkick/2.1.0/chartkick.min.js" integrity="sha256-Nux9AlQvMarSN0Lk52PcKRlezOXTqHGlZRFgBJ7UXyY=" crossorigin="anonymous"></script>
 
 <%
-	tabs = %w(
-		universes
-		characters locations items
-		creatures races religions magics languages groups scenes
-	)
+  tabs = %w(
+    universes
+    characters locations items
+    creatures races religions magics languages groups scenes
+  )
 
-	tab_content_list = {}
-	tabs.each do |tab|
-		tab_content_list[tab] = @user.send(tab).is_public.sort_by { |c| c.name.downcase }
-	end
+  tab_content_list = {}
+  tabs.each do |tab|
+    tab_content_list[tab] = @user.send(tab).is_public.sort_by { |c| c.name.downcase }
+  end
+
+  tabs_with_content = tab_content_list.select {|klass, content_list| content_list.any? }.count
 %>
 
 <div class="row">
-	<div class="col s3 m3 l3">
-		<div class="hoverable card">
-			<div class="card-image waves-effect waves-block waves-light">
-				<%= image_tag @user.image_url(500).html_safe, class: 'activator' %>
-			</div>
-			<div class="card-content">
-				<div class="card-title"><strong><%= @user.name %></strong></div>
-			</div>
+  <div class="col s3 m3 l3">
+    <div class="hoverable card">
+      <div class="card-image waves-effect waves-block waves-light">
+        <%= image_tag @user.image_url(500).html_safe, class: 'activator' %>
+      </div>
+      <div class="card-content">
+        <div class="card-title"><strong><%= @user.name %></strong></div>
+      </div>
 
-			<div class="card-reveal">
-				<span class="card-title grey-text text-darken-4">Profile Picture<i class="material-icons right">close</i></span>
-				<p>Profile pictures are powered by <%= link_to 'Gravatar', 'https://gravatar.com/', target: "_blank" %>, using the email you provided in your <%= link_to 'account settings', edit_user_registration_path %>.</p>
-				<p>For the prettiest profile, please use an avatar at least 250 pixels wide.</p>
-			</div>
-		</div>
-		<!--
-		<div class="card-action">
-			<a href="#">Author links coming soon</a>
-		</div>
-		-->
-	</div>
+      <div class="card-reveal">
+        <span class="card-title grey-text text-darken-4">Profile Picture<i class="material-icons right">close</i></span>
+        <p>Profile pictures are powered by <%= link_to 'Gravatar', 'https://gravatar.com/', target: "_blank" %>, using the email you provided in your <%= link_to 'account settings', edit_user_registration_path %>.</p>
+        <p>For the prettiest profile, please use an avatar at least 250 pixels wide.</p>
+      </div>
+    </div>
 
-	<div class="col s9 m9 l9">
-		<div class="hoverable card">
-			<div class="card-content">
-				<h6>
-					I'm creating universes on Notebook! I'm currently sharing the following public content:
-				</h6>
-				<div class="row" style="text-align: center">
-					<% tabs.each do |tab| %>
-					<div class="col s2 m2 l3">
-						<h3 class="<%= @user.send(tab).build.class.color %>-text"><%= tab_content_list[tab].length %></h3>
-						<h6><%= tab.singularize.pluralize(tab_content_list[tab].length) %></h6>
-					</div>
-					<% end %>
-				</div>
+    <% if @user.public_content_count > 0 %>
+      <div class="card hoverable">
+        <div class="row">
+          <%
+            pie_chart_data = {}
+            pie_chart_colors = []
+            [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_type|
+              content_count = @user.send(content_type.name.downcase.pluralize).count
+              if content_count > 0
+                pie_chart_data[content_type.name.pluralize] = content_count
 
-				<% if @user.public_content_count > 0 %>
-				<div class="row">
-					<%= pie_chart({
-						universes: @user.universes.is_public.count,
-						characters: @user.characters.is_public.count,
-						locations: @user.locations.is_public.count,
-						items: @user.items.is_public.count
-					},
-					colors: [Universe.color, Character.color, Location.color, "yellow"],
-					) %>
-				</div>
-				<% end %>
+                # Override some colors since Chartkick doesn't support them
+                content_color = content_type.color
+                content_color = 'yellow' if content_color == 'amber'
+                content_color = '#8BC34A' if content_color == 'light-green'
 
-			</div>
-		</div>
-	</div>
-	<div class="row">
-		<div class="hoverable card col s12 m12 l12">
-			<div>
-				<ul class="tabs">
-					<% tabs.each do |tab| %>
-						<% tab_class = tab.singularize.titleize.constantize %>
-						<li class="tab col s3" id="js-<%= tab %>-tab">
-							<%= link_to "\##{tab}", class: "#{tab_class.color}-text" do %>
-								<i class="material-icons">
-									<%= tab_class.icon %>
-								</i>
-								<span class="hide-on-med-and-down">
-									<%= tab_content_list[tab].length %>
-								</span>
-							<% end %>
-						</li>
-					<% end %>
-				</ul>
-			</div>
+                pie_chart_colors << content_color
+              end
+            end
+          %>
 
-			<% tabs.each do |tab| %>
-				<% if tab_content_list[tab].any? %>
-					<div id="<%= tab %>" class="col s12">
-						<%= render partial: 'content/list/list', locals: { content_list: tab_content_list[tab], title: '', clean: true } %>
-					</div>
-				<% elsif tab_content_list[tab].empty? %>
-					<% tab_class = tab.singularize.titleize.constantize %>
-					<div id="<%= tab %>" class="col s12">
-						<div class="center <%= tab_class.color %>-text" style="margin-top: 40px;">
-							<i class="material-icons" style="font-size: 500%"><%= tab_class.icon %></i>
-						</div>
-						<p class="center">
-							It looks like <%= @user.name %> isn't sharing any public <%= tab %> yet.
-						</p>
-					</div>
-				<% end %>
-			<% end %>
-		</div>
-	</div>
+          <%= pie_chart(pie_chart_data, colors: pie_chart_colors) %>
+        </div>
+      </div>
+    <% end %>
+
+    <%#
+    <div class="card-action">
+      <a href="#">Author links coming soon</a>
+    </div>
+    %>
+  </div>
+
+  <div class="col s9 m9 l9">
+    <div class="hoverable card">
+      <div class="card-content">
+        <h6>
+          I'm creating universes on Notebook! I'm currently sharing the following public content:
+        </h6>
+        <div class="row" style="text-align: center">
+          <% tabs.each do |tab| %>
+          <div class="col s2 m2 l3">
+            <%= link_to "javascript:$('#js-#{tab}-tab').find('a').click();", class: 'black-text' do %>
+              <h3 class="<%= @user.send(tab).build.class.color %>-text"><%= tab_content_list[tab].length %></h3>
+              <h6><%= tab.singularize.pluralize(tab_content_list[tab].length) %></h6>
+            <% end %>
+          </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="hoverable card col s12 m12 l12">
+        <div>
+          <ul class="tabs">
+            <% tabs.each do |tab| %>
+              <% tab_class = tab.singularize.titleize.constantize %>
+              <li class="tab col s3" id="js-<%= tab %>-tab">
+                <%= link_to "\##{tab}", class: "#{tab_class.color}-text" do %>
+                  <i class="material-icons">
+                    <%= tab_class.icon %>
+                  </i>
+                  <span class="hide-on-med-and-down">
+                    <%= tab_content_list[tab].length %>
+                  </span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+
+        <% tabs.each do |tab| %>
+          <% if tab_content_list[tab].any? %>
+            <div id="<%= tab %>" class="col s12">
+              <%= render partial: 'content/list/list', locals: { content_list: tab_content_list[tab], title: '', clean: true } %>
+            </div>
+          <% elsif tab_content_list[tab].empty? %>
+            <% tab_class = tab.singularize.titleize.constantize %>
+            <div id="<%= tab %>" class="col s12">
+              <div class="center <%= tab_class.color %>-text" style="margin-top: 40px;">
+                <i class="material-icons" style="font-size: 500%"><%= tab_class.icon %></i>
+              </div>
+              <p class="center">
+                It looks like <%= @user.name %> isn't sharing any public <%= tab %> yet.
+              </p>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
 </div>
 
 <%
-	# Default to showing the first tab with content in it (left-first)
-	tabs.each do |tab|
-		if tab_content_list[tab].any?
-%>
+  # Default to showing the first tab with content in it (left-first)
+  tabs.each do |tab|
+    if tab_content_list[tab].any?
+      %>
 
-<script type="text/javascript">
-$(document).ready(function () {
-	$('#js-<%= tab %>-tab').find('a')[0].click();
-})
-</script>
+      <script type="text/javascript">
+      $(document).ready(function () {
+        $('#js-<%= tab %>-tab').find('a')[0].click();
+      })
+      </script>
 
-<%
-			break # Only do this for the first tab with content we see
-		end
-	end
+      <%
+      break # Only do this for the first tab with content we see
+    end
+  end
 %>
