@@ -2,14 +2,14 @@
 
 <p>
   <%# Please choose one of the following plans for your Notebook subscription. %>
-  You're currently subscribed to Notebook's <strong>Premium</strong> plan.
+  You're currently subscribed to Notebook's <strong><%= @active_billing_plan.name %></strong> plan.
   Your subscription will automatically renew for another month on February 1, 2017.
 </p>
 
 <div class="row">
   <div class="col m6">
     <div class="row">
-      <div class="card green lighten-5 s12">
+      <div class="card s12 <%= 'green lighten-5' if @active_billing_plan.stripe_plan_id == 'premium' %>">
         <div class="center">
           <br />
           <i class="material-icons" style="font-size: 250%">class</i>
@@ -28,7 +28,11 @@
           </ul>
         </div>
         <div class="row center">
-          <%= link_to 'Active Plan', new_user_registration_path, class: 'btn-large waves-effect waves-light white black-text' %>
+          <% if @active_billing_plan.stripe_plan_id == 'premium' %>
+            <%= link_to 'Plan is active', new_user_registration_path, class: 'btn-large waves-effect waves-light white black-text' %>
+          <% else %>
+            <%= link_to 'Upgrade', new_user_registration_path, class: 'btn-large waves-effect waves-light blue white-text' %>
+          <% end %>
         </div>
         <br />
       </div>
@@ -36,7 +40,7 @@
   </div>
   <div class="col m6">
     <div class="row">
-      <div class="card s12">
+      <div class="card s12 <%= 'green lighten-5' if @active_billing_plan.stripe_plan_id == 'starter' %>">
         <div class="center">
           <br />
           <i class="material-icons" style="font-size: 250%">class</i>
@@ -55,7 +59,11 @@
           </ul>
         </div>
         <div class="row center">
-          <%= link_to 'Downgrade', new_user_registration_path, class: 'btn-large waves-effect waves-light white black-text' %>
+          <% if @active_billing_plan.stripe_plan_id == 'starter' %>
+            <%= link_to 'Plan is active', new_user_registration_path, class: 'btn-large waves-effect waves-light white disabled black-text' %>
+          <% else %>
+            <%= link_to 'Downgrade', new_user_registration_path, class: 'btn-large waves-effect waves-light white black-text' %>
+          <% end %>
         </div>
         <br />
       </div>
@@ -63,6 +71,7 @@
   </div>
 </div>
 
+<%#
 <h5>Billing History</h5>
 
 <table class="bordered">
@@ -91,3 +100,4 @@
     </tr>
   </tbody>
 </table>
+%>
