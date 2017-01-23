@@ -68,7 +68,7 @@ class User < ActiveRecord::Base
       self.save
 
       # If we're creating this Customer in Stripe for the first time, we should also associate them with the free tier
-      Stripe::Subscription.create(customer: self.stripe_customer_id, plan: 'basic')
+      Stripe::Subscription.create(customer: self.stripe_customer_id, plan: 'starter')
 
       self.stripe_customer_id
     else

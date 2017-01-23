@@ -33,6 +33,14 @@ namespace :data_migrations do
     end
   end
 
+  desc "Initialize Stripe customer ID for all users without one already"
+  task initialize_stripe_customers: :environment do
+    User.where(stripe_customer_id: nil).each do |user|
+      puts "Initializing Stripe Customer for user #{user.email.split('@').first}@"
+      user.initialize_stripe_customer
+    end
+  end
+
   desc "Add a billing plan for all users that don't already have one"
   task create_default_billing_plans: :environment do
     # todo: Grab the actual promised date/time here
