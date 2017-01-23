@@ -96,4 +96,5 @@ Rails.application.configure do
 
   # Set production Stripe API key
   Stripe.api_key = ENV['STRIPE_API_KEY']
+  config.stripe_publishable_key = ENV['STRIPE_PUBLISHABLE_KEY']
 end

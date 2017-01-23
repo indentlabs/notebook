@@ -1,0 +1,97 @@
+<% unless @selected_plan.nil? %>
+  <div class="card teal lighten-3" style="padding: 20px;">
+    You are signing up for Notebook.ai's <strong><%= @selected_plan.name %></strong> plan,
+    which enables creating every type of content available.
+    On it, you will be charged <%= number_to_currency(@selected_plan.monthly_cents / 100) %>, billed monthly.
+    In order to get started, we need to collect your payment information below.
+  </div>
+<% end %>
+
+<script type="text/javascript">
+  Stripe.setPublishableKey('<%= Rails.application.config.stripe_publishable_key %>');
+
+  $(function() {
+    var $form = $('#payment-form');
+    $form.submit(function(event) {
+      // Disable the submit button to prevent repeated clicks:
+      $form.find('.submit').prop('disabled', true);
+
+      // Request a token from Stripe:
+      Stripe.card.createToken($form, stripeResponseHandler);
+
+      // Prevent the form from being submitted:
+      return false;
+    });
+
+    function stripeResponseHandler(status, response) {
+      // Grab the form:
+      var $form = $('#payment-form');
+
+      if (response.error) {
+        // Show the errors on the form:
+        $form.find('.payment-errors').text(response.error.message);
+        $form.find('.submit').prop('disabled', false); // Re-enable submission
+
+      } else {
+        // Insert the created token ID into the form so it gets submitted to the server:
+        var token = response.id;
+        $form.append($('<input type="hidden" name="stripeToken">').val(token));
+
+        // Submit the form:
+        $form.get(0).submit();
+      }
+    };
+  });
+</script>
+
+<div class="card" style="padding: 20px 10px;">
+  <form action="<%= %>" method="POST" id="payment-form">
+    <div class="row">
+      <div class="col s12">
+        <label>
+          <span>Card Number</span>
+          <input type="text" size="20" data-stripe="number">
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col s4">
+        <label>
+          <span>Expiration month (MM)</span>
+          <input type="text" size="2" data-stripe="exp_month">
+        </label>
+      </div>
+      <div class="col s4">
+        <label>
+          <span>Expiration year (YY)</span>
+          <input type="text" size="2" data-stripe="exp_year">
+        </label>
+      </div>
+      <div class="col s4">
+        <label>
+          <span>CVC<%#<span>(?)</span>%></span>
+          <input type="text" size="4" data-stripe="cvc">
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col s12">
+        <label>
+          <span>Billing Postal Code</span>
+          <input type="text" size="6" data-stripe="address_zip">
+        </label>
+      </div>
+    </div>
+
+    <div class="payment-errors red white-text center" style="margin-bottom: 10px;"></div>
+
+    <div class="center">
+      <input type="submit" class="btn btn-primary blue" value="Submit payment"><br /><br />
+
+      You will be charged <%= number_to_currency(@selected_plan.monthly_cents / 100) %> immediately, renewing monthly.<br />
+      Of course, you can cancel at any time.
+    </div>
+  </form>
+</div>

@@ -20,7 +20,12 @@ Rails.application.routes.draw do
     # Billing
     scope '/billing' do
       #get '/',             to: 'subscriptions#show', as: :billing
-      get '/subscription', to: 'subscriptions#new', as: :subscription
+      get '/subscription',       to: 'subscriptions#new', as: :subscription
+
+      get '/to/:stripe_plan_id', to: 'subscriptions#change', as: :change_subscription
+
+      get '/information',        to: 'subscriptions#information',        as: :payment_info
+      post '/information',       to: 'subscriptions#information_change', as: :process_payment_info
     end
   end
 

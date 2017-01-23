@@ -9,12 +9,13 @@
 <div class="row">
   <div class="col m6">
     <div class="row">
-      <div class="card s12 <%= 'green lighten-5' if @active_billing_plan.stripe_plan_id == 'premium' %>">
+      <div class="card s12 <%= 'green lighten-5' if @active_billing_plan.stripe_plan_id == 'early-adopters' %>">
         <div class="center">
           <br />
           <i class="material-icons" style="font-size: 250%">class</i>
           <h4>Premium</h4>
-          <h5>$9/month</h5>
+          <h6>(Early Adopters Discount)</h6>
+          <h5>$6/month</h5>
           <ul class="plan-features">
             <li>Plan <strong>unlimited</strong> universes</li>
             <li>Create the following content within your universes:</li>
@@ -28,13 +29,26 @@
           </ul>
         </div>
         <div class="row center">
-          <% if @active_billing_plan.stripe_plan_id == 'premium' %>
-            <%= link_to 'Plan is active', new_user_registration_path, class: 'btn-large waves-effect waves-light white black-text' %>
+          <% if @active_billing_plan.stripe_plan_id == 'early-adopters' %>
+            <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
           <% else %>
-            <%= link_to 'Upgrade', new_user_registration_path, class: 'btn-large waves-effect waves-light blue white-text' %>
+            <%= link_to 'Upgrade', change_subscription_path('early-adopters'), class: 'btn-large waves-effect waves-light blue white-text' %>
           <% end %>
         </div>
         <br />
+      </div>
+    </div>
+    <div class="row">
+      <div class="card blue white-text" style="padding: 15px; font-size: 110%">
+        <h5>Discount notice</h5>
+        <p>
+          For a limited time, upgrade now to lock your monthly plan at $6/month (33% off from $9/month) for
+          as long as you subscribe.
+          Thank you for being early adopters and offering worlds of great feedback!
+        </p>
+        <p>
+          Offer expires February 10, 2017.
+        </p>
       </div>
     </div>
   </div>
@@ -60,9 +74,9 @@
         </div>
         <div class="row center">
           <% if @active_billing_plan.stripe_plan_id == 'starter' %>
-            <%= link_to 'Plan is active', new_user_registration_path, class: 'btn-large waves-effect waves-light white disabled black-text' %>
+            <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white disabled black-text' %>
           <% else %>
-            <%= link_to 'Downgrade', new_user_registration_path, class: 'btn-large waves-effect waves-light white black-text' %>
+            <%= link_to 'Downgrade', change_subscription_path('starter'), class: 'btn-large waves-effect waves-light white black-text' %>
           <% end %>
         </div>
         <br />
