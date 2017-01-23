@@ -93,4 +93,7 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   default_url_options[:host] = 'www.notebook.ai'
+
+  # Set production Stripe API key
+  Stripe.api_key = ENV['STRIPE_API_KEY']
 end

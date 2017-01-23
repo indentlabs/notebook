@@ -45,7 +45,7 @@ BillingPlan.find_or_create_by(
 
 # Temporary $6/month paid tier for users that sign up before February 14
 BillingPlan.find_or_create_by(
-  name: 'Early Adopters Plan (thank you!)',
+  name: 'Early Adopters (thank you!)',
   stripe_plan_id: 'early-adopters',
   monthly_cents: 600, # $6.00/mo
   available: true,

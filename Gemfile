@@ -17,6 +17,9 @@ gem 'bcrypt'
 gem 'devise'
 gem 'authority'
 
+# Billing
+gem 'stripe'
+
 # Design
 gem 'material_icons'
 gem 'sass-rails'

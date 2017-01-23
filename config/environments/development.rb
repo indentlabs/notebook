@@ -41,4 +41,7 @@ PlanCharacters::Application.configure do
   }
 
   default_url_options[:host] = 'localhost:3000'
+
+  # Set test-mode Stripe API key
+  Stripe.api_key = "sk_test_v37uWbseyPct6PpsfjTa3y1l"
 end

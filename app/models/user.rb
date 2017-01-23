@@ -17,6 +17,8 @@ class User < ActiveRecord::Base
   has_many :subscriptions
   has_many :billing_plans, through: :subscriptions
 
+  after_create :initialize_stripe_customer
+
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
   # which is undesireable in a case like this, when we want to modify it
@@ -56,6 +58,22 @@ class User < ActiveRecord::Base
     active_subscriptions
       .map { |subscription| subscription.billing_plan }
       .uniq
+  end
+
+  def initialize_stripe_customer
+    if self.stripe_customer_id.nil?
+      customer_data = Stripe::Customer.create(email: self.email)
+
+      self.stripe_customer_id = customer_data.id
+      self.save
+
+      # If we're creating this Customer in Stripe for the first time, we should also associate them with the free tier
+      Stripe::Subscription.create(customer: self.stripe_customer_id, plan: 'basic')
+
+      self.stripe_customer_id
+    else
+      self.stripe_customer_id
+    end
   end
 
   private
