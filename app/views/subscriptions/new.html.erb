@@ -110,7 +110,7 @@
           upgrade, but you can add one at any time here.
         </p>
         <p>
-          <%= link_to "Add billing method", payment_info_path, class: 'btn' %>
+          <%= link_to "Add payment method", payment_info_path, class: 'btn' %>
         </p>
       </div>
     </div>
@@ -118,9 +118,10 @@
     <div class="col s12 m8">
       <div class="card" style="padding: 15px">
         <p>
-          We have a payment method on file for you through Stripe, but since we don't store it locally,
-          you cannot edit it. You can choose to add a new one (replacing the old), or delete the existing
-          one.
+          We have a payment method on file for you through Stripe
+          (<%= @stripe_customer.sources.data[0].brand %> ending in <%= @stripe_customer.sources.data[0].last4 %>),
+          but since we don't store it locally, you cannot edit it. You can choose to add a new one (replacing the old),
+          or delete the existing one.
         </p>
         <p>
           <%= link_to "Add new payment method", payment_info_path, class: 'btn white black-text' %>

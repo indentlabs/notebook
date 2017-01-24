@@ -69,6 +69,7 @@ class SubscriptionsController < ApplicationController
         end_date: Time.now.end_of_day + 31.days
       )
 
+      flash[:notice] = "You have been successfully upgraded to #{new_billing_plan.name}!"
       redirect_to subscription_path
     else
       # If they don't have a payment method on file, redirect them to collect one
@@ -101,18 +102,35 @@ class SubscriptionsController < ApplicationController
     raise "Invalid token" if valid_token.nil?
 
     stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
+    stripe_subscription = stripe_customer.subscriptions.data[0]
     begin
+      # Delete all existing payment methods to have our new one "replace" them
+      stripe_customer.sources.each do |payment_method|
+        payment_method.delete
+      end
+
+      # Add the new card info
       stripe_customer.sources.create(source: valid_token)
     rescue Stripe::CardError => e
       flash[:alert] = "We couldn't save your payment information because #{e.message.downcase} Please double check that your information is correct."
       return redirect_to :back
     end
 
+    notice = []
+
     # After saving the user's payment method, move them over to the associated billing plan
     new_billing_plan = BillingPlan.find_by(stripe_plan_id: params[:plan], available: true)
     if new_billing_plan
       current_user.selected_billing_plan_id = new_billing_plan.id
       current_user.save
+
+      stripe_subscription.plan = new_billing_plan.stripe_plan_id
+      begin
+        stripe_subscription.save
+      rescue Stripe::CardError => e
+        flash[:alert] = "We couldn't upgrade you to Premium because #{e.message.downcase} Please double check that your information is correct."
+        return redirect_to :back
+      end
 
       # End all currently-active subscriptions
       current_user.active_subscriptions.each do |subscription|
@@ -126,9 +144,13 @@ class SubscriptionsController < ApplicationController
         start_date: Time.now,
         end_date: Time.now.end_of_day + 31.days
       )
+
+      notice << "you have been successfully upgraded to #{new_billing_plan.name}"
     end
 
-    flash[:notice] = "Your payment method has been successfully saved."
+    notice << "Your payment method has been successfully saved"
+
+    flash[:notice] = "#{notice.to_sentence}."
     redirect_to subscription_path
   end
 
