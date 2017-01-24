@@ -30,7 +30,12 @@ class SubscriptionsController < ApplicationController
 
       # Change subscription plan if they already have a payment method on file
       stripe_subscription.plan = new_plan_id
-      stripe_subscription.save
+      begin
+        stripe_subscription.save
+      rescue Stripe::CardError => e
+        flash[:alert] = "We couldn't upgrade you to Premium because #{e.message.downcase} Please double check that your information is correct."
+        return redirect_to :back
+      end
 
       new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
       current_user.selected_billing_plan_id = new_billing_plan.id
