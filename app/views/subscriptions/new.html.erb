@@ -1,13 +1,15 @@
-<h4>Billing Plan</h4>
+<h4>Subscription Plan</h4>
 
 <p>
   <%# Please choose one of the following plans for your Notebook subscription. %>
   You're currently subscribed to Notebook's <strong><%= @active_billing_plan.name %></strong> plan.
-  Your subscription will automatically renew for another month on February 1, 2017.
+  <% unless @active_billing_plan.nil? || @active_billing_plan.stripe_plan_id == 'starter' %>
+    Your subscription will be active until <%= current_user.active_subscriptions.first.end_date.strftime('%B %d, %Y') %>, when it will automatically renew for another month.
+  <% end %>
 </p>
 
 <div class="row">
-  <div class="col m6">
+  <div class="col s12 m6">
     <div class="row">
       <div class="card s12 <%= 'green lighten-5' if @active_billing_plan.stripe_plan_id == 'early-adopters' %>">
         <div class="center">
@@ -52,7 +54,7 @@
       </div>
     </div>
   </div>
-  <div class="col m6">
+  <div class="col s12 m6">
     <div class="row">
       <div class="card s12 <%= 'green lighten-5' if @active_billing_plan.stripe_plan_id == 'starter' %>">
         <div class="center">
@@ -85,33 +87,98 @@
   </div>
 </div>
 
-<%#
-<h5>Billing History</h5>
+<h4>Payment method</h4>
 
+<div class="row">
+  <div class="col s12 m4">
+    <div class="card" style="padding: 15px;">
+      <p>
+        For your security, we don't store any of your payment information or personal information on file.
+      </p>
+      <p>
+        Instead, we rely on industry-leading payment processor Stripe to process payments and handle your
+        subscription info.
+      </p>
+    </div>
+  </div>
+
+  <% if @stripe_customer.sources.total_count == 0 %>
+    <div class="col s12 m4">
+      <div class="card" style="padding: 15px">
+        <p>
+          We don't currently have a payment method on file for you. You'll be asked to add one whenever you
+          upgrade, but you can add one at any time here.
+        </p>
+        <p>
+          <%= link_to "Add billing method", payment_info_path, class: 'btn' %>
+        </p>
+      </div>
+    </div>
+  <% else %>
+    <div class="col s12 m8">
+      <div class="card" style="padding: 15px">
+        <p>
+          We have a payment method on file for you through Stripe, but since we don't store it locally,
+          you cannot edit it. You can choose to add a new one (replacing the old), or delete the existing
+          one.
+        </p>
+        <p>
+          <%= link_to "Add new payment method", payment_info_path, class: 'btn white black-text' %>
+        </p>
+        <p>
+          <%= link_to "Delete existing payment method", payment_info_path, class: 'btn white black-text' %>
+        </p>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<h4>Billing History</h4>
 <table class="bordered">
   <thead>
     <tr>
       <th>Date</th>
       <th>Description</th>
-      <th>Status</th>
+      <th>Past Due</th>
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td>February 1, 2017 (Pending)</td>
-      <td>You will be charged $9.00 for a <strong>Premium</strong> renewal on February 1.</td>
-      <td><a href="#paymentpage">Review payment method</a></td>
-    </tr>
-    <tr>
-      <td>January 1, 2017</td>
-      <td>Automatically renewed your <strong>Premium</strong> plan until February 1, 2017.</td>
-      <td><em>Paid $9.00</em></td>
-    </tr>
-    <tr>
-      <td>December 1, 2016</td>
-      <td>Upgraded to the <strong>Premium</strong> plan.</td>
-      <td><em>Paid $9.00</em></td>
-    </tr>
+    <% @stripe_invoices.first(5).each do |invoice| %>
+      <tr>
+        <td>
+          <%= Time.at(invoice.date).strftime('%B %d, %Y %I:%M:%S %p') %>
+          <%= '(Pending)' if Time.at(invoice.date) > Time.now %>
+        </td>
+        <td>
+          <ul>
+            <% invoice.lines.data.reverse.each do |line_item| %>
+              <li>
+                <%
+                  action = line_item.amount < 0 ? 'prorated' : 'charged'
+                  if line_item.description.nil?
+                    description = [
+                      "one month of #{line_item.plan.name}, ",
+                      "from #{Time.at(line_item.period.start).strftime('%B %d')} ",
+                      "to #{Time.at(line_item.period.end).strftime('%B %d, %Y')}"
+                    ].join
+                  else
+                    description = line_item.description
+                  end
+                %>
+
+                You were <%= action %> <%= number_to_currency(line_item.amount / 100) %> for <%= description %>.
+              </li>
+            <% end %>
+          </ul>
+        </td>
+        <td>
+          <% if invoice.amount_due == 0 %>
+            All paid up!
+          <% else %>
+            <%= number_to_currency(invoice.amount_due / 100) %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
   </tbody>
 </table>
-%>

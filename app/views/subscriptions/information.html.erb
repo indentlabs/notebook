@@ -1,4 +1,8 @@
-<% unless @selected_plan.nil? %>
+<% if @selected_plan.nil? %>
+  <div class="card teal lighten-1 white-text" style="padding: 20px;">
+    Saving a payment method allows you to freely switch between Notebook.ai subscription plans with ease. Your information is stored securely in our payment processing provider, Stripe, and will not be shared with any other parties.
+  </div>
+<% else %>
   <div class="card teal lighten-3" style="padding: 20px;">
     You are signing up for Notebook.ai's <strong><%= @selected_plan.name %></strong> plan,
     which enables creating every type of content available.
@@ -88,10 +92,20 @@
     <div class="payment-errors red white-text center" style="margin-bottom: 10px;"></div>
 
     <div class="center">
-      <input type="submit" class="btn btn-primary blue" value="Submit payment"><br /><br />
+      <% if @selected_plan.nil? %>
+        <input type="submit" class="btn btn-primary blue" value="Save payment info">
 
-      You will be charged <%= number_to_currency(@selected_plan.monthly_cents / 100) %> immediately, renewing monthly.<br />
-      Of course, you can cancel at any time.
+      <% else %>
+        <input type="submit" class="btn btn-primary blue" value="Submit payment">
+
+        <p class="center">
+          You will be charged <%= number_to_currency(@selected_plan.monthly_cents / 100) %> immediately, renewing
+          monthly.
+        </p>
+        <p class="center">
+          Of course, you can cancel at any time.
+        </p>
+      <% end %>
     </div>
   </form>
 </div>
