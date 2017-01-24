@@ -17,6 +17,27 @@ class SubscriptionsController < ApplicationController
 
     raise "Invalid billing plan ID: #{new_plan_id}" unless possible_plan_ids.include? new_plan_id
 
+    # If the user is changing to Starter, go ahead and cancel any active subscriptions and do it
+    if new_plan_id == 'starter'
+      current_user.active_subscriptions.each do |subscription|
+        subscription.update(end_date: Time.now)
+      end
+
+      new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
+      current_user.selected_billing_plan_id = new_billing_plan.id
+      current_user.save
+
+      Subscription.create(
+        user: current_user,
+        billing_plan: new_billing_plan,
+        start_date: Time.now,
+        end_date: Time.now.end_of_day + 31.days
+      )
+
+      flash[:notice] = "You have been successfully downgraded to Starter." #todo proration/credit
+      return redirect_to subscription_path
+    end
+
     # Fetch current subscription
     stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
     stripe_subscription = stripe_customer.subscriptions.data[0]
@@ -68,6 +89,7 @@ class SubscriptionsController < ApplicationController
 
   def information
     @selected_plan = BillingPlan.find_by(stripe_plan_id: params['plan'], available: true)
+    @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
   end
 
   def information_change
@@ -79,7 +101,12 @@ class SubscriptionsController < ApplicationController
     raise "Invalid token" if valid_token.nil?
 
     stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
-    stripe_customer.sources.create(source: valid_token)
+    begin
+      stripe_customer.sources.create(source: valid_token)
+    rescue Stripe::CardError => e
+      flash[:alert] = "We couldn't save your payment information because #{e.message.downcase} Please double check that your information is correct."
+      return redirect_to :back
+    end
 
     # After saving the user's payment method, move them over to the associated billing plan
     new_billing_plan = BillingPlan.find_by(stripe_plan_id: params[:plan], available: true)

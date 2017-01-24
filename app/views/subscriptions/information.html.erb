@@ -99,7 +99,16 @@
       <% else %>
         <input type="submit" class="btn btn-primary blue" value="Submit payment">
 
-        <% if @selected_plan.monthly_cents > 0 %>
+        <%
+          active_plan_on_stripe = @stripe_customer.subscriptions.data.select { |sub| sub.plan.id == @selected_plan.stripe_plan_id }.first
+        %>
+        <% if active_plan_on_stripe %>
+          <p class="center">
+            Since you've already paid for a <strong><%= @selected_plan.name %></strong> plan
+            until <%= Time.at(active_plan_on_stripe.current_period_end).strftime('%B %d') %>, you will not be charged again
+            for this plan until it renews on that date.
+          </p>
+        <% elsif @selected_plan.monthly_cents > 0 %>
           <p class="center">
             You will be charged <%= number_to_currency(@selected_plan.monthly_cents / 100) %> immediately, renewing
             monthly.
