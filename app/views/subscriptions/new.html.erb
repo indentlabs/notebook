@@ -126,7 +126,7 @@
           <%= link_to "Add new payment method", payment_info_path, class: 'btn white black-text' %>
         </p>
         <p>
-          <%= link_to "Delete existing payment method", payment_info_path, class: 'btn white black-text' %>
+          <%= link_to "Delete existing payment method", delete_payment_method_path, class: 'btn white black-text' %>
         </p>
       </div>
     </div>
@@ -139,7 +139,7 @@
     <tr>
       <th>Date</th>
       <th>Description</th>
-      <th>Past Due</th>
+      <th>Amount Billed</th>
     </tr>
   </thead>
   <tbody>
@@ -172,11 +172,7 @@
           </ul>
         </td>
         <td>
-          <% if invoice.amount_due == 0 %>
-            All paid up!
-          <% else %>
-            <%= number_to_currency(invoice.amount_due / 100) %>
-          <% end %>
+          <%= number_to_currency(invoice.amount_due / 100) %>
         </td>
       </tr>
     <% end %>

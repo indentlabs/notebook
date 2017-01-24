@@ -26,6 +26,9 @@ Rails.application.routes.draw do
 
       get '/information',        to: 'subscriptions#information',        as: :payment_info
       post '/information',       to: 'subscriptions#information_change', as: :process_payment_info
+
+      # This should probably be a DELETE
+      get '/payment_method/delete', to: 'subscriptions#delete_payment_method', as: :delete_payment_method
     end
   end
 

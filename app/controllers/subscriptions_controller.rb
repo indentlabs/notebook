@@ -67,26 +67,68 @@ class SubscriptionsController < ApplicationController
   # end
 
   def information
-    @selected_plan = BillingPlan.find_by(stripe_plan_id: params['plan'])
+    @selected_plan = BillingPlan.find_by(stripe_plan_id: params['plan'], available: true)
   end
 
   def information_change
+    # No idea why current_user is nil for this endpoint (maybe CSRF isn't passing through correctly?) but
+    # calling authenticate_user! here reauths the user and sets current_user
+    authenticate_user!
+
     valid_token = params[:stripeToken]
     raise "Invalid token" if valid_token.nil?
-
-    raise current_user.inspect
 
     stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
     stripe_customer.sources.create(source: valid_token)
 
     # After saving the user's payment method, move them over to the associated billing plan
-    new_billing_plan = BillingPlan.find_by(stripe_plan_id: params[:stripe_plan_id], available: true)
-    current_user.selected_billing_plan_id = new_billing_plan.id
-    current_user.save
+    new_billing_plan = BillingPlan.find_by(stripe_plan_id: params[:plan], available: true)
+    if new_billing_plan
+      current_user.selected_billing_plan_id = new_billing_plan.id
+      current_user.save
 
+      # End all currently-active subscriptions
+      current_user.active_subscriptions.each do |subscription|
+        subscription.update(end_date: Time.now)
+      end
+
+      # And create a subscription for them for the current plan
+      Subscription.create(
+        user: current_user,
+        billing_plan: new_billing_plan,
+        start_date: Time.now,
+        end_date: Time.now.end_of_day + 31.days
+      )
+    end
+
+    flash[:notice] = "Your payment method has been successfully saved."
     redirect_to subscription_path
   end
 
-end
+  def delete_payment_method
+    stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
+    stripe_subscription = stripe_customer.subscriptions.data[0]
 
-# tok_19fCuyDtQxm4tDEkGSLIJ4Vx
+    stripe_customer.sources.each do |payment_method|
+      payment_method.delete
+    end
+
+    notice = ['Your payment method has been successfully deleted.']
+
+    if stripe_subscription.plan.id != 'starter'
+      # Cancel the user's at the end of its effective period on Stripe's end, so they don't get rebilled
+      stripe_subscription.delete(at_period_end: true)
+
+      active_billing_plan = BillingPlan.find_by(stripe_plan_id: stripe_subscription.plan.id)
+      if active_billing_plan
+        notice << "Your #{active_billing_plan.name} subscription will end on #{Time.at(stripe_subscription.current_period_end).strftime('%B %d')}."
+      end
+    end
+
+    flash[:notice] = notice.join ' '
+    redirect_to :back
+  end
+
+  def stripe_webhook
+  end
+end
