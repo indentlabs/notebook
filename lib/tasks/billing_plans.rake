@@ -16,6 +16,8 @@
 namespace :billing_plans do
   desc "Initialize all default billing plans"
   task initialize_defaults: :environment do
+    puts "Initializing all default billing plans. Starting with #{BillingPlan.count} plans."
+
     # Free tier
     BillingPlan.find_or_create_by(
       name: 'Starter',
@@ -75,5 +77,7 @@ namespace :billing_plans do
       allows_collective_content: true,
       allows_collaboration: false
     )
+
+    puts "Done. There are #{BillingPlan.count} billing plans now."
   end
 end
