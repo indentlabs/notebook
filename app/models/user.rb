@@ -17,7 +17,7 @@ class User < ActiveRecord::Base
   has_many :subscriptions
   has_many :billing_plans, through: :subscriptions
 
-  after_create :initialize_stripe_customer
+  after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
