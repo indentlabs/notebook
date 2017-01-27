@@ -1,4 +1,6 @@
 class SubscriptionsController < ApplicationController
+  protect_from_forgery except: :stripe_webhook
+
   def new
     # We only support a single billing plan right now, so just grab the first one. If they don't have an active plan,
     # we also treat them as if they have a Starter plan.
@@ -179,5 +181,6 @@ class SubscriptionsController < ApplicationController
   end
 
   def stripe_webhook
+    #todo handle webhooks
   end
 end
