@@ -25,6 +25,7 @@ class SubscriptionsController < ApplicationController
         subscription.update(end_date: Time.now)
       end
 
+      old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
       new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
       current_user.selected_billing_plan_id = new_billing_plan.id
       current_user.save
@@ -35,6 +36,8 @@ class SubscriptionsController < ApplicationController
         start_date: Time.now,
         end_date: Time.now.end_of_day + 31.days
       )
+
+      report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
 
       flash[:notice] = "You have been successfully downgraded to Starter." #todo proration/credit
       return redirect_to subscription_path
@@ -60,6 +63,7 @@ class SubscriptionsController < ApplicationController
         return redirect_to :back
       end
 
+      old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
       new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
       current_user.selected_billing_plan_id = new_billing_plan.id
       current_user.save
@@ -70,6 +74,8 @@ class SubscriptionsController < ApplicationController
         start_date: Time.now,
         end_date: Time.now.end_of_day + 31.days
       )
+
+      report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
 
       flash[:notice] = "You have been successfully upgraded to #{new_billing_plan.name}!"
       redirect_to subscription_path
@@ -123,6 +129,7 @@ class SubscriptionsController < ApplicationController
     # After saving the user's payment method, move them over to the associated billing plan
     new_billing_plan = BillingPlan.find_by(stripe_plan_id: params[:plan], available: true)
     if new_billing_plan
+      old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
       current_user.selected_billing_plan_id = new_billing_plan.id
       current_user.save
 
@@ -146,6 +153,8 @@ class SubscriptionsController < ApplicationController
         start_date: Time.now,
         end_date: Time.now.end_of_day + 31.days
       )
+
+      report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
 
       notice << "you have been successfully upgraded to #{new_billing_plan.name}"
     end
@@ -182,5 +191,28 @@ class SubscriptionsController < ApplicationController
 
   def stripe_webhook
     #todo handle webhooks
+  end
+
+  def report_subscription_change_to_slack user, from, to
+    return unless Rails.env == 'production'
+    slack_hook = ENV['SLACK_HOOK']
+    return unless slack_hook
+
+    notifier = Slack::Notifier.new slack_hook,
+      channel: '#subscriptions',
+      username: 'tristan'
+
+    if from.monthly_cents < to.monthly_cents
+      delta = ":tada: *UPGRADE* :tada:"
+    else
+      delta = ":wave: Downgrade"
+    end
+
+    notifier.ping [
+      "#{delta} for #{user.email.split('@').first}@ (##{user.id})",
+      "From: *#{from.name}* ($#{from.monthly_cents / 100}/month)",
+      "To: *#{to.name}* ($#{to.monthly_cents / 100}/month)"
+    ].join("\n")
+
   end
 end
