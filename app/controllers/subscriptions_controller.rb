@@ -25,7 +25,11 @@ class SubscriptionsController < ApplicationController
         subscription.update(end_date: Time.now)
       end
 
-      old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
+      if current_user.selected_billing_plan_id.nil?
+        old_billing_plan = BillingPlan.new(name: 'No billing plan')
+      else
+        old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
+      end
       new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
       current_user.selected_billing_plan_id = new_billing_plan.id
       current_user.save
@@ -63,7 +67,11 @@ class SubscriptionsController < ApplicationController
         return redirect_to :back
       end
 
-      old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
+      if current_user.selected_billing_plan_id.nil?
+        old_billing_plan = BillingPlan.new(name: 'No billing plan')
+      else
+        old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
+      end
       new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
       current_user.selected_billing_plan_id = new_billing_plan.id
       current_user.save
@@ -129,7 +137,11 @@ class SubscriptionsController < ApplicationController
     # After saving the user's payment method, move them over to the associated billing plan
     new_billing_plan = BillingPlan.find_by(stripe_plan_id: params[:plan], available: true)
     if new_billing_plan
-      old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
+      if current_user.selected_billing_plan_id.nil?
+        old_billing_plan = BillingPlan.new(name: 'No billing plan')
+      else
+        old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
+      end
       current_user.selected_billing_plan_id = new_billing_plan.id
       current_user.save
 
