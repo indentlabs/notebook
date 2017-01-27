@@ -9,7 +9,7 @@ class RacesController < ContentController
     %i(
       name description other_names universe_id
       body_shape skin_colors height weight notable_features variance clothing
-      strengths weaknesses
+      strengths weaknesses privacy
       traditions beliefs governments technologies occupations economics favorite_foods
       notable_events
       notes private_notes

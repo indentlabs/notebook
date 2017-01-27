@@ -9,7 +9,7 @@ class ScenesController < ContentController
     %i(
       name summary universe_id
       cause description results
-      notes private_notes
+      notes private_notes privacy
     ) + [
       custom_attribute_values:          [:name, :value],
       scene_characterships_attributes:  [:id, :scene_character_id, :_destroy],
