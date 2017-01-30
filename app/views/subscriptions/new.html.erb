@@ -50,17 +50,27 @@
       </div>
     </div>
     <div class="row">
-      <div class="card blue white-text" style="padding: 15px; font-size: 110%">
-        <h5>Discount notice</h5>
-        <p>
-          For a limited time, upgrade now to lock your monthly plan at $6/month (33% off from $9/month) for
-          as long as you subscribe.
-          Thank you for being early adopters and offering worlds of great feedback!
-        </p>
-        <p>
-          Offer expires February 10, 2017.
-        </p>
-      </div>
+      <% if @active_billing_plan.stripe_plan_id != 'early-adopters' %>
+        <div class="card blue white-text" style="padding: 15px; font-size: 110%">
+          <h5>Discount notice</h5>
+          <p>
+            For a limited time, upgrade now to lock your monthly plan at $6/month (33% off from $9/month) for
+            as long as you subscribe.
+            Thank you for being early adopters and offering worlds of great feedback!
+          </p>
+          <p>
+            Offer expires February 10, 2017.
+          </p>
+        </div>
+      <% else %>
+        <div class="card" style="padding: 15px; font-size: 110%">
+          <h5>Want to support Notebook.ai even further?</h5>
+          <p>
+            Every little bit helps! <a href="https://www.patreon.com/indentlabs">Visit us on Patreon</a> to pledge as little or as much as you'd
+            like each month, with proceeds going directly towards Notebook.ai hosting and upkeep costs. Thank you for your support!
+          </p>
+        </div>
+      <% end %>
     </div>
   </div>
   <div class="col s12 m6">
