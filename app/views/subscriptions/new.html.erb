@@ -1,7 +1,16 @@
+<p class="right">
+  <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_class| %>
+    <% can_create = current_user.can_create?(content_class) %>
+    <% edit_message = current_user.send(content_class.name.pluralize.downcase).any? && !can_create %>
+    <i class="material-icons <%= can_create ? content_class.color : 'grey' %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="You <%= can_create ? 'can' : 'cannot' %> create new <%= content_class.name.pluralize.downcase %>.<%= ' You can edit your existing ones.' if edit_message %>">
+      <%= content_class.icon %>
+    </i>
+  <% end %>
+</p>
+
 <h4>Subscription Plan</h4>
 
 <p>
-  <%# Please choose one of the following plans for your Notebook subscription. %>
   You're currently subscribed to Notebook's <strong><%= @active_billing_plan.name %></strong> plan.
   <% unless @active_billing_plan.nil? || @active_billing_plan.stripe_plan_id == 'starter' %>
     Your subscription will be active until <%= current_user.active_subscriptions.first.end_date.strftime('%B %d, %Y') %>, when it will automatically renew for another month.
