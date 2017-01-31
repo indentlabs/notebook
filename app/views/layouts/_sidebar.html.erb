@@ -27,8 +27,15 @@
   <p>
     Read about what that means for you and your notebook <a href="#" class="blue-text lighten-5">in our latest blog post</a>.
   </p>
-  <p>
-    You can sign up for a subscription by clicking "Account billing" from the dropdown menu in the top-right of any page, or by
-    <%= link_to 'clicking here', subscription_path %>.
-  </p>
+  <% if current_user && current_user.active_billing_plans.first.stripe_plan_id != 'free-for-life' %>
+    <p>
+      You can sign up for a subscription by clicking "Account billing" from the dropdown menu in the top-right of any page, or by
+      <%= link_to 'clicking here', subscription_path %>.
+    </p>
+  <% else %>
+    <p>
+      Because you signed up during Notebook.ai's October "free for life" promotion, your account will continue to be just that &mdash;
+      free for life. :)
+    </p>
+  <% end %>
 </div>
