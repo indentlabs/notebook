@@ -44,7 +44,7 @@ namespace :data_migrations do
   desc "Add a billing plan for all users that don't already have one"
   task create_default_billing_plans: :environment do
     # todo: Grab the actual promised date/time here
-    BETA_TESTERS_CUTOFF_DATE = "2016-01-01 00:00:00".to_time
+    BETA_TESTERS_CUTOFF_DATE = "2016-11-01 08:00:00".to_time # October 1 through November 1, 2016, with 8 hours wiggle room
 
     User.where(selected_billing_plan_id: nil).each do |user|
       puts "Setting default billing plan for #{user.email.split('@').first}@"
