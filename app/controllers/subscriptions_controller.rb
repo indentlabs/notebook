@@ -2,6 +2,8 @@ class SubscriptionsController < ApplicationController
   protect_from_forgery except: :stripe_webhook
 
   def new
+    return redirect_to new_user_session_path, notice: t(:no_do_permission) unless user_signed_in?
+
     # We only support a single billing plan right now, so just grab the first one. If they don't have an active plan,
     # we also treat them as if they have a Starter plan.
     @active_billing_plan = current_user.active_billing_plans.first || BillingPlan.find_by(stripe_plan_id: 'starter')
