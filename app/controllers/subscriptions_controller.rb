@@ -173,7 +173,7 @@ class SubscriptionsController < ApplicationController
 
     notice << "Your payment method has been successfully saved"
 
-    flash[:notice] = "#{notice.to_sentence}."
+    flash[:notice] = "#{notice.reverse.to_sentence}."
     redirect_to subscription_path
   end
 
