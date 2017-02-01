@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170127164644) do
+ActiveRecord::Schema.define(version: 20170201151923) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -664,9 +664,9 @@ ActiveRecord::Schema.define(version: 20170127164644) do
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
     t.string   "plan_type"
-    t.integer  "selected_billing_plan_id"
     t.string   "stripe_customer_id"
     t.boolean  "email_updates",            default: true
+    t.integer  "selected_billing_plan_id"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true
