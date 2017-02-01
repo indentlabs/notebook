@@ -1,3 +1,5 @@
+<% free_for_life_user = current_user.selected_billing_plan_id == 2 %>
+
 <p class="right hide-on-small-only">
   <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_class| %>
     <% can_create = current_user.can_create?(content_class) %>
@@ -11,9 +13,18 @@
 <h4>Subscription Plan</h4>
 
 <p>
-  You're currently subscribed to Notebook's <strong><%= @active_billing_plan.name %></strong> plan.
-  <% unless @active_billing_plan.nil? || @active_billing_plan.stripe_plan_id == 'starter' %>
-    Your subscription will be active until <%= current_user.active_subscriptions.first.end_date.strftime('%B %d, %Y') %>, when it will automatically renew for another month.
+  <% if free_for_life_user %>
+    <p style="margin-top: 20px;">
+    Thank you! You were there at Notebook.ai's beginnings, so we've gifted you <strong>a free, unlimited account for life</strong>. Subscriptions below have been disabled, because you already have everything unlocked.
+    </p>
+    <p>
+      Thank you for helping make Notebook.ai what it is today.
+    </p>
+  <% else %>
+    You're currently subscribed to Notebook's <strong><%= @active_billing_plan.name %></strong> plan.
+    <% unless @active_billing_plan.nil? || @active_billing_plan.stripe_plan_id == 'starter' %>
+      Your subscription will be active until <%= current_user.active_subscriptions.first.end_date.strftime('%B %d, %Y') %>, when it will automatically renew for another month.
+    <% end %>
   <% end %>
 </p>
 
@@ -43,14 +54,14 @@
           <% if @active_billing_plan.stripe_plan_id == 'early-adopters' %>
             <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
           <% else %>
-            <%= link_to 'Upgrade', change_subscription_path('early-adopters'), class: 'btn-large waves-effect waves-light blue white-text' %>
+            <%= link_to 'Upgrade', change_subscription_path('early-adopters'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
           <% end %>
         </div>
         <br />
       </div>
     </div>
     <div class="row">
-      <% if @active_billing_plan.stripe_plan_id != 'early-adopters' %>
+      <% if @active_billing_plan.stripe_plan_id != 'early-adopters' && !free_for_life_user %>
         <div class="card blue white-text" style="padding: 15px; font-size: 110%">
           <h5>Discount notice</h5>
           <p>
@@ -97,7 +108,7 @@
           <% if @active_billing_plan.stripe_plan_id == 'starter' %>
             <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white disabled black-text' %>
           <% else %>
-            <%= link_to 'Downgrade', change_subscription_path('starter'), class: 'btn-large waves-effect waves-light white black-text' %>
+            <%= link_to 'Downgrade', change_subscription_path('starter'), class: "btn-large waves-effect waves-light white black-text #{'disabled' if free_for_life_user}" %>
           <% end %>
         </div>
         <br />
