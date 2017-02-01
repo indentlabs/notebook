@@ -11,6 +11,9 @@ class Religion < ActiveRecord::Base
   include HasContentGroupers
   include Serendipitous::Concern
 
+  include Authority::Abilities
+  self.authorizer_name = 'ExtendedContentAuthorizer'
+
   # Characters
   relates :notable_figures, with: :religious_figureships
   relates :deities, with: :deityships

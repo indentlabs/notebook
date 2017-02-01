@@ -20,6 +20,9 @@ class Location < ActiveRecord::Base
   include HasContentGroupers
   include Serendipitous::Concern
 
+  include Authority::Abilities
+  self.authorizer_name = 'CoreContentAuthorizer'
+
   # Characters
   relates :leaders,           with: :location_leaderships
 

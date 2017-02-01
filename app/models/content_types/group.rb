@@ -11,6 +11,9 @@ class Group < ActiveRecord::Base
   include HasContentGroupers
   include Serendipitous::Concern
 
+  include Authority::Abilities
+  self.authorizer_name = 'ExtendedContentAuthorizer'
+
   # Characters
   relates :leaders, with: :group_leaderships
   relates :members, with: :group_memberships

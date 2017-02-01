@@ -35,11 +35,28 @@
     You've created <%= pluralize(@content.count, @content.content_name) %>
     <% if @content.count > 0 %>
       <small class="right">
-        <%= link_to new_polymorphic_path(@content.build), class: "btn white #{content_type_class.color}-text" do %>
-          +
-          <i class="material-icons <%= content_type_class.color %>-text">
-          <%= content_type_class.icon %>
-        </i>
+        <% if current_user.can_create? content_type_class %>
+
+          <%= link_to new_polymorphic_path(@content.build), class: "btn white #{content_type_class.color}-text" do %>
+            +
+            <i class="material-icons <%= content_type_class.color %>-text tooltipped" data-position="bottom" data-tooltip="Upgrade to Premium to create more <%= content_type_class.name.pluralize %>">
+            <%= content_type_class.icon %>
+          </i>
+          <% end %>
+
+        <% else %>
+
+          <%= link_to subscription_path, class: "btn grey lighten-3 #{content_type_class.color}-text tooltipped", data: {
+              position: 'bottom',
+              tooltip: "Upgrade to Premium to create more #{content_type_class.name.pluralize}",
+              delay: 50
+            } do %>
+            +
+            <i class="material-icons <%= content_type_class.color %>-text">
+            <%= content_type_class.icon %>
+          </i>
+          <% end %>
+
         <% end %>
       </small>
     <% end %>
@@ -58,7 +75,12 @@
     <p>
       <%= t("content_descriptions.#{content_type}") %>
     </p>
-    <%= link_to "Create your first #{@content.content_name.humanize.downcase}", new_polymorphic_path(@content.build), class: "btn #{content_type_class.color}" %>
+
+    <% if current_user.can_create? content_type_class %>
+      <%= link_to "Create your first #{@content.content_name.humanize.downcase}", new_polymorphic_path(@content.build), class: "btn #{content_type_class.color}" %>
+    <% else %>
+      <%= link_to "Upgrade to Premium to create your first #{@content.content_name.humanize.downcase}", subscription_path %>
+    <% end %>
   </div>
 
 <% end %>

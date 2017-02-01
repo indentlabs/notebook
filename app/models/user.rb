@@ -9,9 +9,15 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable
 
   include HasContent
+  include Authority::UserAbilities
 
   validates :email, presence: true
   #todo: We probably want a uniqueness constraint on email
+
+  has_many :subscriptions
+  has_many :billing_plans, through: :subscriptions
+
+  after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
@@ -40,6 +46,34 @@ class User < ActiveRecord::Base
     email_md5 = Digest::MD5.hexdigest(email.downcase)
     # 80px is Gravatar's default size
     "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
+  end
+
+  def active_subscriptions
+    subscriptions
+      .where('start_date < ?', Time.now)
+      .where('end_date > ?',   Time.now)
+  end
+
+  def active_billing_plans
+    active_subscriptions
+      .map { |subscription| subscription.billing_plan }
+      .uniq
+  end
+
+  def initialize_stripe_customer
+    if self.stripe_customer_id.nil?
+      customer_data = Stripe::Customer.create(email: self.email)
+
+      self.stripe_customer_id = customer_data.id
+      self.save
+
+      # If we're creating this Customer in Stripe for the first time, we should also associate them with the free tier
+      Stripe::Subscription.create(customer: self.stripe_customer_id, plan: 'starter')
+
+      self.stripe_customer_id
+    else
+      self.stripe_customer_id
+    end
   end
 
   private

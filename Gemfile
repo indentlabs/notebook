@@ -15,6 +15,10 @@ gem 'rmagick', '2.13.4'
 # Authentication
 gem 'bcrypt'
 gem 'devise'
+gem 'authority'
+
+# Billing
+gem 'stripe'
 
 # Design
 gem 'material_icons'
@@ -76,6 +80,7 @@ group :test do
   gem 'rails-perftest'
   gem 'rspec-prof'
   gem 'rspec-rails'
+  gem 'webmock'
   gem 'rubocop', require: false
   gem 'ruby-prof', '0.15.9'
   gem 'shoulda-matchers', '~> 3.1'

@@ -20,19 +20,33 @@ class ContentController < ApplicationController
   end
 
   def show
+    content_type = content_type_from_controller(self.class)
     # TODO: Secure this with content class whitelist lel
-    @content = content_type_from_controller(self.class).find(params[:id])
-    @question = @content.question if current_user.present? and current_user == @content.user
+    @content = content_type.find(params[:id])
 
-    respond_to do |format|
-      format.html { render 'content/show', locals: { content: @content } }
-      format.json { render json: @content }
+    if current_user.can_read? @content
+      @question = @content.question if current_user.present? and current_user == @content.user
+
+      respond_to do |format|
+        format.html { render 'content/show', locals: { content: @content } }
+        format.json { render json: @content }
+      end
+    else
+      if current_user.present?
+        return redirect_to :back
+      else
+        return redirect_to root_path
+      end
     end
   end
 
   def new
     @content = content_type_from_controller(self.class)
                .new
+
+    unless current_user.can_create?(content_type_from_controller self.class)
+      return redirect_to :back
+    end
 
     respond_to do |format|
       format.html { render 'content/new', locals: { content: @content } }
@@ -44,6 +58,10 @@ class ContentController < ApplicationController
     @content = content_type_from_controller(self.class)
                .find(params[:id])
 
+    unless @content.updatable_by? current_user
+      return redirect_to :back
+    end
+
     respond_to do |format|
       format.html { render 'content/edit', locals: { content: @content } }
       format.json { render json: @content }
@@ -52,6 +70,10 @@ class ContentController < ApplicationController
 
   def create
     initialize_object
+
+    unless current_user.can_create?(content_type_from_controller self.class)
+      return redirect_to :back
+    end
 
     if @content.save
       successful_response(content_creation_redirect_url, t(:create_success, model_name: humanized_model_name))
@@ -64,6 +86,10 @@ class ContentController < ApplicationController
     content_type = content_type_from_controller(self.class)
     @content = content_type.find(params[:id])
 
+    unless @content.updatable_by? current_user
+      return redirect_to :back
+    end
+
     if @content.update_attributes(content_params)
       successful_response(@content, t(:update_success, model_name: humanized_model_name))
     else
@@ -74,6 +100,11 @@ class ContentController < ApplicationController
   def destroy
     content_type = content_type_from_controller(self.class)
     @content = content_type.find(params[:id])
+
+    unless current_user.can_delete? @content
+      return redirect_to :back
+    end
+
     @content.destroy
 
     successful_response(content_deletion_redirect_url, t(:delete_success, model_name: humanized_model_name))

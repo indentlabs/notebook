@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161102182259) do
+ActiveRecord::Schema.define(version: 20170127164644) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -74,6 +74,20 @@ ActiveRecord::Schema.define(version: 20161102182259) do
     t.integer  "best_friend_id"
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
+  end
+
+  create_table "billing_plans", force: :cascade do |t|
+    t.string   "name"
+    t.string   "stripe_plan_id"
+    t.integer  "monthly_cents"
+    t.boolean  "available"
+    t.boolean  "allows_core_content"
+    t.boolean  "allows_extended_content"
+    t.boolean  "allows_collective_content"
+    t.boolean  "allows_collaboration"
+    t.integer  "universe_limit"
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
   end
 
   create_table "birthings", force: :cascade do |t|
@@ -601,6 +615,18 @@ ActiveRecord::Schema.define(version: 20161102182259) do
     t.integer "subgroup_id"
   end
 
+  create_table "subscriptions", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "billing_plan_id"
+    t.datetime "start_date"
+    t.datetime "end_date"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "subscriptions", ["billing_plan_id"], name: "index_subscriptions_on_billing_plan_id"
+  add_index "subscriptions", ["user_id"], name: "index_subscriptions_on_user_id"
+
   create_table "supergroupships", force: :cascade do |t|
     t.integer "user_id"
     t.integer "group_id"
@@ -624,20 +650,23 @@ ActiveRecord::Schema.define(version: 20161102182259) do
 
   create_table "users", force: :cascade do |t|
     t.string   "name"
-    t.string   "email",                               null: false
+    t.string   "email",                                   null: false
     t.string   "old_password"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "encrypted_password",     default: "", null: false
+    t.string   "encrypted_password",       default: "",   null: false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.integer  "sign_in_count",          default: 0,  null: false
+    t.integer  "sign_in_count",            default: 0,    null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
     t.string   "plan_type"
+    t.integer  "selected_billing_plan_id"
+    t.string   "stripe_customer_id"
+    t.boolean  "email_updates",            default: true
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true
