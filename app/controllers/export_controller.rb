@@ -142,7 +142,7 @@ class ExportController < ApplicationController
           if value.is_a?(ActiveRecord::Associations::CollectionProxy)
             value = value.map(&:name).to_sentence
           elsif attr.name.end_with?('_id') && value.present?
-            universe = Universe.where(id: value.to_i)
+            universe = Universe.where(id: value.to_i).first
             value = universe.name if universe
           end
 
