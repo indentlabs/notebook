@@ -7,6 +7,9 @@ class AttributeCategory < ActiveRecord::Base
   include HasAttributes
   include Serendipitous::Concern
 
+  include Authority::Abilities
+  self.authorizer_name = 'CoreContentAuthorizer'
+
   before_validation :ensure_name
 
   def self.color

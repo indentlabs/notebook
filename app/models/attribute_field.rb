@@ -8,6 +8,9 @@ class AttributeField < ActiveRecord::Base
   include HasAttributes
   include Serendipitous::Concern
 
+  include Authority::Abilities
+  self.authorizer_name = 'CoreContentAuthorizer'
+
   attr_accessor :system
 
   before_validation :ensure_name
