@@ -24,7 +24,7 @@ class ContentController < ApplicationController
     # TODO: Secure this with content class whitelist lel
     @content = content_type.find(params[:id])
 
-    if current_user.can_read? @content
+    if (current_user || User.new).can_read? @content
       @question = @content.question if current_user.present? and current_user == @content.user
 
       respond_to do |format|
@@ -44,7 +44,7 @@ class ContentController < ApplicationController
     @content = content_type_from_controller(self.class)
                .new
 
-    unless current_user.can_create?(content_type_from_controller self.class)
+    unless (current_user || User.new).can_create?(content_type_from_controller self.class)
       return redirect_to :back
     end
 
