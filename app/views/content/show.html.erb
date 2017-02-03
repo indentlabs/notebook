@@ -115,15 +115,13 @@
 
 <%# TODO: not this %>
 <% if @content.is_a? Universe %>
-  <div class="col s12 m12 l4">
-    <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: :character, content_list: @content.characters } %>
-  </div>
+  <% content_to_show = [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene] %>
 
-  <div class="col s12 m12 l4">
-    <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: :location, content_list: @content.locations } %>
-  </div>
+  <% content_to_show.each do |content_type| %>
+    <% next if @content.send(content_type.name.downcase.pluralize).empty? %>
 
-  <div class="col s12 m12 l4">
-    <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: :item, content_list: @content.items } %>
-  </div>
+    <div class="col s12 m12 l4">
+      <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: content_type.name.downcase.to_sym, content_list: @content.send(content_type.name.downcase.pluralize) } %>
+    </div>
+  <% end %>
 <% end %>
