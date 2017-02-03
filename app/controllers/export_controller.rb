@@ -84,7 +84,12 @@ class ExportController < ApplicationController
 
       ar_relation.each do |content|
         csv << attribute_categories.flat_map(&:attribute_fields).map do |attr|
-          value = content.send(attr.name)
+          begin
+            value = content.send(attr.name)
+          rescue
+            value = Attribute.where(user: current_user, attribute_field: attr, entity: content).first
+            value = value.value if value
+          end
 
           if value.is_a?(ActiveRecord::Associations::CollectionProxy)
             value = value.map(&:name).to_sentence
@@ -107,7 +112,12 @@ class ExportController < ApplicationController
       content_repr = {}
 
       attribute_categories.flat_map(&:attribute_fields).each do |attr|
-        value = content.send(attr.name)
+        begin
+          value = content.send(attr.name)
+        rescue
+          value = Attribute.where(user: current_user, attribute_field: attr, entity: content).first
+          value = value.value if value
+        end
         next if value.nil? || value.blank?
 
         if value.is_a?(ActiveRecord::Associations::CollectionProxy)
@@ -137,7 +147,12 @@ class ExportController < ApplicationController
         text << "  #{content.name}\n"
 
         attribute_categories.flat_map(&:attribute_fields).each do |attr|
-          value = content.send(attr.name)
+          begin
+            value = content.send(attr.name)
+          rescue
+            value = Attribute.where(user: current_user, attribute_field: attr, entity: content).first
+            value = value.value if value
+          end
           next if value.nil? || value.blank? || (value.respond_to?(:empty) && value.empty?)
 
           if value.is_a?(ActiveRecord::Associations::CollectionProxy)
