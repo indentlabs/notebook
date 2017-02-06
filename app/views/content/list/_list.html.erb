@@ -1,12 +1,19 @@
-<ul class="collection <%= 'with-header' if title.present? %> <%= 'hoverable' unless defined?(clean) %>" <%= "style='border: 0'".html_safe if defined?(clean) %>>
+<%
+  content_type = content_list.any? ? content_list.first.class : content_list.build.class
+%>
+
+<ul class="collection <%= 'with-header' if title.present? %>" style='border: 0'>
   <% if title.present? %>
-    <li class="collection-header"><h4><%= title %></h4></li>
+    <li class="collection-header"><h5><%= title %></h5></li>
   <% end %>
+
   <% content_list.each do |content| %>
     <li class="collection-item avatar">
-      <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
-      <span class="title"><%= link_to content.name, content %></span>
-      <p class="truncate">
+      <%= link_to content do %>
+        <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
+      <% end %>
+      <span class="title"><%= link_to (content.respond_to?(:label) ? content.label : content.name), content %></span>
+      <p class="content-description truncate">
         <%= content.description %>
       </p>
       <p class='grey-text'>
@@ -15,7 +22,7 @@
           <%= link_to content.universe.name, content.universe %>,
         <% end %>
         <% if current_user && current_user == content.user %>
-          <span class="tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>">
+          <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>">
             <i class="material-icons">mode_edit</i>
 
             <%
@@ -30,13 +37,20 @@
           </span>
         <% end %>
       </p>
-      <span class="secondary-content">
+      <span class="secondary-content hide-on-med-and-up">
         <% if current_user && current_user == content.user %>
-          <%= link_to edit_polymorphic_path(content) do %>
+          <%= link_to edit_polymorphic_path(content), class: 'js-edit-hover' do %>
             <i class="material-icons">edit</i>
           <% end %>
         <% end %>
       </span>
     </li>
   <% end %>
+
+  <% if local_assigns[:show_add_another_form] && content_list.any? && current_user.can_create?(content_type) %>
+    <% unless content_type == Universe %>
+      <%= render partial: 'content/list/quick_add_form', locals: { content_type: content_list.build.class } %>
+    <% end %>
+  <% end %>
+
 </ul>

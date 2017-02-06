@@ -19,8 +19,8 @@ module HasOwnership
   def require_ownership
     model = content_type_from_controller(self.class)
     redirect_if_not_owned model.find(params[:id]), send(redirect_path)
-  rescue
-    redirect_to '/500'
+  # rescue
+  #   redirect_to '/500' unless Rails.env.development?
   end
 
   # Unless this content is shared, ensure only the owner can do this action
@@ -47,7 +47,7 @@ module HasOwnership
   def redirect_path
     model = content_type_from_controller(self.class)
     # TODO: proper pluralizing here
-    "#{model.to_s.downcase}s_path"
+    "#{model.to_s.underscore}s_path"
   end
 
   def owned_by_current_user?(object)

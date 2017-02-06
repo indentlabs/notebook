@@ -4,6 +4,8 @@ module HasPrivacy
   extend ActiveSupport::Concern
 
   included do
+    scope :is_public, -> { eager_load(:universe).where("#{self.name.pluralize}.privacy = ? OR universes.privacy = ?", 'public', 'public') }
+
     def private_content?
       !public_content?
     end

@@ -8,25 +8,65 @@
 <% end %>
 
 <% if @content.any? %>
+
+  <div class="slider" style="height: 140px;">
+    <ul class="slides">
+      <li>
+        <%= image_tag "card-headers/#{content_type.pluralize}" %>
+        <img src="http://lorempixel.com/580/250/nature/1">
+        <div class="caption center-align">
+          <h3><%= content_type.titleize.pluralize %></h3>
+          <h5 class="light grey-text text-lighten-3"><%= t("content_oneliners.#{content_type}") %></h5>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $('.slider').slider({
+        height: 200,
+        indicators: false
+      });
+    });
+  </script>
+
   <h4>
-    You've created <%= pluralize(@content.count, content_type) %>
+    You've created <%= pluralize(@content.count, @content.content_name) %>
     <% if @content.count > 0 %>
-    <small class="right">
-      <%= link_to new_polymorphic_path(@content.build), class: "btn white #{content_type_class.color}-text" do %>
-        +
-        <i class="material-icons <%= content_type_class.color %>-text">
-        <%= content_type_class.icon %>
-      </i>
-      <% end %>
-    </small>
+      <small class="right">
+        <% if current_user.can_create? content_type_class %>
+
+          <%= link_to new_polymorphic_path(@content.build), class: "btn white #{content_type_class.color}-text" do %>
+            +
+            <i class="material-icons <%= content_type_class.color %>-text tooltipped" data-position="bottom" data-tooltip="Upgrade to Premium to create more <%= content_type_class.name.pluralize %>">
+            <%= content_type_class.icon %>
+          </i>
+          <% end %>
+
+        <% else %>
+
+          <%= link_to subscription_path, class: "btn grey lighten-3 #{content_type_class.color}-text tooltipped", data: {
+              position: 'bottom',
+              tooltip: "Upgrade to Premium to create more #{content_type_class.name.pluralize}",
+              delay: 50
+            } do %>
+            +
+            <i class="material-icons <%= content_type_class.color %>-text">
+            <%= content_type_class.icon %>
+          </i>
+          <% end %>
+
+        <% end %>
+      </small>
     <% end %>
   </h4>
-  <%= render partial: 'content/list/list', locals: { content_list: @content } %>
-  <%= link_to "Create another #{content_type}", new_polymorphic_path(@content.build), :class => 'btn' %>
+  <%= render partial: 'content/list/list', locals: { content_list: @content, show_add_another_form: true } %>
 
 <% elsif @content.empty? %>
+
   <div class="center" style="margin-bottom: 50px;">
-    <h4>You haven't created any <%= content_type.pluralize %> yet!</h4>
+    <h4>You haven't created any <%= @content.content_name.pluralize %> yet!</h4>
     <h1>
       <i class="material-icons <%= content_type_class.color %>-text" style="font-size: 200%">
         <%= content_type_class.icon %>
@@ -35,7 +75,12 @@
     <p>
       <%= t("content_descriptions.#{content_type}") %>
     </p>
-    <%= link_to "Create your first #{content_type}", new_polymorphic_path(@content.build), :class => 'btn' %>
+
+    <% if current_user.can_create? content_type_class %>
+      <%= link_to "Create your first #{@content.content_name.humanize.downcase}", new_polymorphic_path(@content.build), class: "btn #{content_type_class.color}" %>
+    <% else %>
+      <%= link_to "Upgrade to Premium to create your first #{@content.content_name.humanize.downcase}", subscription_path %>
+    <% end %>
   </div>
 
 <% end %>

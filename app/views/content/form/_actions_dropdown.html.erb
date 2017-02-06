@@ -1,17 +1,20 @@
-<% if content.persisted? %>
-  <a class='dropdown-button black-text' href='#' data-activates='options-menu' data-constrainwidth='false'>
-    <i class="material-icons">more_vert</i>
-  </a>
-<% end %>
+<a class='dropdown-button black-text' href='#' data-activates='options-menu' data-constrainwidth='false'>
+  <i class="material-icons">more_vert</i>
+</a>
 
 <ul id='options-menu' class='dropdown-content'>
-  <!-- Broken on content edit pages
-  <li><a href="#!" class="share">Share this <%= content.class.to_s.downcase %></a></li>
-  <li class="divider"></li>
-  -->
+  <li>
+    <%= link_to "Create new attribute", '#attribute-field-modal', class: 'black-text new-attribute-field-link' %>
+  </li>
+
   <% if content.persisted? %>
+    <!-- Broken on content edit pages
+    <li><a href="#!" class="share">Share this <%= content.class.to_s.downcase %></a></li>
+    <li class="divider"></li>
+    -->
+
     <li>
-      <%= link_to "Delete this #{content.class.to_s.downcase} forever", content,
+      <%= link_to "Delete this #{content.class.content_name.humanize.downcase} forever", content,
         :class => 'red-text',
         :method => :delete,
         :data => { :confirm => 'Are you sure? This action cannot be undone!' } %>

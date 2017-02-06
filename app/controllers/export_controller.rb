@@ -1,4 +1,5 @@
 class ExportController < ApplicationController
+  before_action :authenticate_user!
 
   def index
   end
@@ -19,6 +20,34 @@ class ExportController < ApplicationController
 
   def items_csv
     send_data to_csv(current_user.items), filename: "items-#{Date.today}.csv"
+  end
+
+  def creatures_csv
+    send_data to_csv(current_user.creatures), filename: "creatures-#{Date.today}.csv"
+  end
+
+  def races_csv
+    send_data to_csv(current_user.races), filename: "races-#{Date.today}.csv"
+  end
+
+  def religions_csv
+    send_data to_csv(current_user.religions), filename: "religions-#{Date.today}.csv"
+  end
+
+  def magics_csv
+    send_data to_csv(current_user.magics), filename: "magics-#{Date.today}.csv"
+  end
+
+  def languages_csv
+    send_data to_csv(current_user.languages), filename: "languages-#{Date.today}.csv"
+  end
+
+  def groups_csv
+    send_data to_csv(current_user.groups), filename: "groups-#{Date.today}.csv"
+  end
+
+  def scenes_csv
+    send_data to_csv(current_user.scenes), filename: "scenes-#{Date.today}.csv"
   end
 
   def outline
@@ -48,18 +77,23 @@ class ExportController < ApplicationController
 
   def to_csv ar_relation
     ar_class = ar_relation.build.class
-    attributes = ar_class.attribute_categories.flat_map { |k, v| v[:attributes] }
+    attribute_categories = ar_class.attribute_categories(current_user)
 
     CSV.generate(headers: true) do |csv|
-      csv << attributes
+      csv << attribute_categories.flat_map(&:attribute_fields).map(&:label)
 
       ar_relation.each do |content|
-        csv << attributes.map do |attr|
-          value = content.send(attr)
+        csv << attribute_categories.flat_map(&:attribute_fields).map do |attr|
+          begin
+            value = content.send(attr.name)
+          rescue
+            value = Attribute.where(user: current_user, attribute_field: attr, entity: content).first
+            value = value.value if value
+          end
 
           if value.is_a?(ActiveRecord::Associations::CollectionProxy)
             value = value.map(&:name).to_sentence
-          elsif attr.end_with?('_id') && value.present?
+          elsif attr.name.end_with?('_id') && value.present?
             universe = Universe.where(id: value.to_i).first
             value = universe.name if universe
           end
@@ -72,23 +106,28 @@ class ExportController < ApplicationController
 
   def fill_relations ar_relation
     ar_class = ar_relation.build.class
-    attributes = ar_class.attribute_categories.flat_map { |k, v| v[:attributes] }
+    attribute_categories = ar_class.attribute_categories(current_user)
 
     ar_relation.map do |content|
       content_repr = {}
 
-      attributes.each do |attr|
-        value = content.send(attr)
+      attribute_categories.flat_map(&:attribute_fields).each do |attr|
+        begin
+          value = content.send(attr.name)
+        rescue
+          value = Attribute.where(user: current_user, attribute_field: attr, entity: content).first
+          value = value.value if value
+        end
         next if value.nil? || value.blank?
 
         if value.is_a?(ActiveRecord::Associations::CollectionProxy)
           value = value.map(&:name).to_sentence
-        elsif attr.end_with?('_id') && value.present?
+        elsif attr.name.end_with?('_id') && value.present?
           universe = Universe.where(id: value.to_i)
           value = universe.name if universe
         end
 
-        content_repr[attr] = value
+        content_repr[attr.label] = value
       end
 
       content_repr
@@ -96,29 +135,34 @@ class ExportController < ApplicationController
   end
 
   def content_to_outline
-    content_types = %w(universes characters locations items)
+    content_types = current_user.content.keys
 
     text = ""
     content_types.each do |content_type|
       ar_class = current_user.send(content_type).build.class
-      attributes = ar_class.attribute_categories.flat_map { |k, v| v[:attributes] }
+      attribute_categories = ar_class.attribute_categories(current_user)
 
       text << "\n#{content_type.upcase}\n"
       current_user.send(content_type).each do |content|
         text << "  #{content.name}\n"
 
-        attributes.each do |attr|
-          value = content.send(attr)
+        attribute_categories.flat_map(&:attribute_fields).each do |attr|
+          begin
+            value = content.send(attr.name)
+          rescue
+            value = Attribute.where(user: current_user, attribute_field: attr, entity: content).first
+            value = value.value if value
+          end
           next if value.nil? || value.blank? || (value.respond_to?(:empty) && value.empty?)
 
           if value.is_a?(ActiveRecord::Associations::CollectionProxy)
             value = value.map(&:name).to_sentence
-          elsif attr.end_with?('_id') && value.present?
-            universe = Universe.where(id: value.to_i)
+          elsif attr.name.end_with?('_id') && value.present?
+            universe = Universe.where(id: value.to_i).first
             value = universe.name if universe
           end
 
-          text << "    #{attr}: #{value.split("\n").join("\n      ")}\n"
+          text << "    #{attr.label}: #{value.to_s.split("\n").join("\n      ")}\n"
         end
 
         text << "\n"

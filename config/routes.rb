@@ -16,6 +16,20 @@ Rails.application.routes.draw do
   scope '/my' do
     get '/content',     to: 'main#dashboard', as: :dashboard
     get '/submissions', to: 'main#comingsoon'
+
+    # Billing
+    scope '/billing' do
+      #get '/',             to: 'subscriptions#show', as: :billing
+      get '/subscription',       to: 'subscriptions#new', as: :subscription
+
+      get '/to/:stripe_plan_id', to: 'subscriptions#change', as: :change_subscription
+
+      get '/information',        to: 'subscriptions#information',        as: :payment_info
+      post '/information',       to: 'subscriptions#information_change', as: :process_payment_info
+
+      # This should probably be a DELETE
+      get '/payment_method/delete', to: 'subscriptions#delete_payment_method', as: :delete_payment_method
+    end
   end
 
   # Sessions
@@ -25,7 +39,8 @@ Rails.application.routes.draw do
 
   # Planning
   scope '/plan' do
-    # Characters
+    # Core content types
+    resources :universes
     resources :characters do
       get :autocomplete_character_name, on: :collection, as: :autocomplete_name
     end
@@ -33,7 +48,22 @@ Rails.application.routes.draw do
     resources :locations do
       get :autocomplete_location_name, on: :collection, as: :autocomplete_name
     end
-    resources :universes
+
+    # Extended content types
+    resources :creatures
+    resources :races
+    resources :religions
+    resources :magics
+    resources :languages
+
+    # Content usage
+    resources :scenes
+    resources :groups
+
+    # Content attributes
+    resources :attributes
+    resources :attribute_categories
+    resources :attribute_fields
 
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'
@@ -41,6 +71,7 @@ Rails.application.routes.draw do
 
   scope 'admin' do
     get '/', to: 'admin#dashboard', as: :admin_dashboard
+    get '/attributes', to: 'admin#attributes', as: :admin_attributes
     get '/universes', to: 'admin#universes', as: :admin_universes
     get '/characters', to: 'admin#characters', as: :admin_characters
     get '/locations', to: 'admin#locations', as: :admin_locations
@@ -49,13 +80,22 @@ Rails.application.routes.draw do
 
   scope 'export' do
     get '/', to: 'export#index', as: :notebook_export
+
+    get '/outline', to: 'export#outline', as: :notebook_outline
+    get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
+    get '/notebook.xml', to: 'export#notebook_xml', as: :notebook_xml
+
     get '/universes.csv', to: 'export#universes_csv', as: :universes_csv
     get '/characters.csv', to: 'export#characters_csv', as: :characters_csv
     get '/locations.csv', to: 'export#locations_csv', as: :locations_csv
     get '/items.csv', to: 'export#items_csv', as: :items_csv
-    get '/outline', to: 'export#outline', as: :notebook_outline
-    get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
-    get '/notebook.xml', to: 'export#notebook_xml', as: :notebook_xml
+    get '/creatures.csv', to: 'export#creatures_csv', as: :creatures_csv
+    get '/races.csv', to: 'export#races_csv', as: :races_csv
+    get '/religions.csv', to: 'export#religions_csv', as: :religions_csv
+    get '/magics.csv', to: 'export#magics_csv', as: :magics_csv
+    get '/languages.csv', to: 'export#languages_csv', as: :languages_csv
+    get '/scenes.csv', to: 'export#scenes_csv', as: :scenes_csv
+    get '/groups.csv', to: 'export#groups_csv', as: :groups_csv
   end
 
   scope '/scene/:scene_id' do

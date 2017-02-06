@@ -2,7 +2,11 @@
 <div class="content-field">
   <div class="hoverable" style="padding: 8px; margin-bottom: 1rem;">
     <div>
-      <%= f.label attribute, attribute.humanize.capitalize %>
+      <%= f.label attribute,  I18n.translate(
+        "attributes.#{f.object.class.name.downcase}.#{attribute}",
+        scope: :activerecord,
+        default: attribute.humanize.capitalize
+      ) %>
     </div>
 
     <div id="<%= relation %>">

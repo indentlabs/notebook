@@ -9,10 +9,34 @@
 
 <% else %>
 
-  <%= render 'cards/intros/universe_intro' %>
-  <%= render 'cards/intros/character_intro' %>
-  <%= render 'cards/intros/location_intro' %>
-  <%= render 'cards/intros/item_intro' %>
-  <%# todo: random selection of other content type intros %>
+  <%
+    content_type_pool = [Character, Creature, Group, Item, Language, Location, Magic, Race, Religion, Scene, Universe]
+    selected_types = content_type_pool.sample(1)
+
+    selected_types.each do |type|
+  %>
+    <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: type } %>
+  <%
+    end
+  %>
 
 <% end %>
+
+<div class="card-panel blue lighten-5 hoverable">
+  <p class="center"><strong>Subscriptions are here!</strong></p>
+  <p>
+    Read about what that means for you and your notebook <a href="https://medium.com/indent-labs/notebook-ai-adds-subscriptions-for-more-detailed-worldbuilding-54482b91c6b0#.4jeavd1l7" class="blue-text lighten-5" target="_new">in our latest blog post</a>.
+  </p>
+  <% active_billing_plans = current_user.active_billing_plans if current_user %>
+  <% if current_user && active_billing_plans.any? && active_billing_plans.first.stripe_plan_id == 'free-for-life' %>
+    <p>
+      Because you signed up during Notebook.ai's October "free for life" promotion, your account will continue to be just that &mdash;
+      free for life. :)
+    </p>
+  <% else %>
+    <p>
+      You can sign up for a subscription by clicking "Account billing" from the dropdown menu in the top-right of any page, or by
+      <%= link_to 'clicking here', subscription_path %>.
+    </p>
+  <% end %>
+</div>

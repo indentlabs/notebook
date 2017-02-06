@@ -1,4 +1,3 @@
-# Controller for the Universe model
 class UniversesController < ContentController
   private
 
@@ -13,7 +12,8 @@ class UniversesController < ContentController
       :laws_of_physics, :magic_system, :technologies,
       :history,
       :privacy,
-      :notes, :private_notes
+      :notes, :private_notes,
+      custom_attribute_values: [:name, :value]
     ]
   end
 end

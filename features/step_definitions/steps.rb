@@ -38,7 +38,7 @@ end
 When(/^I create a (character|location|item|universe)$/) do |model|
   visit new_polymorphic_path(model)
   fill_in "#{model}_name", with: 'My new content'
-  click_on "Create #{model.titlecase}"
+  click_on "Create"
   @model = model.classify.constantize.where(name: 'My new content', user: @user).first
 end
 
@@ -54,7 +54,7 @@ When(/^I change my (character|location|item|universe)\'s name$/) do |model|
   visit polymorphic_path(@model)
   click_on "Edit this #{model}"
   fill_in "#{model}_name", with: 'My changed name'
-  click_on "Update #{model.titlecase}"
+  click_on "Update"
   @model.reload
 end
 

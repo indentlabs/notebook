@@ -1,30 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <%= stylesheet_link_tag 'application' %>
-  <%= javascript_include_tag 'application' %>
-  <%= csrf_meta_tags %>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js"></script>
-
-  <%# <title> is set in _seo.html.erb %>
-  <%= render 'layouts/seo' %>
-  <%= render 'layouts/favicon' %>
+  <%= render 'layouts/common_head' %>
 </head>
-<body>
+<body data-in-app="true">
 
   <%= render 'layouts/navbar' %>
+  <% if user_signed_in? %>
+    <style>
+      header, main, footer {
+        padding-left: 310px;
+      }
+
+      @media only screen and (max-width : 992px) {
+        header, main, footer {
+          padding-left: 0;
+        }
+      }
+    </style>
+    <%= render 'layouts/sidenav' %>
+  <% end %>
 
   <main>
     <div>
       <div class="row">
-        <div class="col s12 m12 <%= (current_user && current_user.content_count > 0) ? 'l9' : 'l12' %>">
+        <div class="col s12 m12 <%= (current_user && current_user.content_count == 0) ? 'l12' : 'l9' %>">
           <%= yield %>
         </div>
-        <div class="col s12 m12 <%= (current_user && current_user.content_count > 0) ? 'l3' : 'l12' %>">
+        <div class="col s12 m12 <%= (current_user && current_user.content_count == 0) ? 'l12' : 'l3' %>">
           <%= render 'layouts/sidebar' %>
         </div>
       </div>
@@ -35,6 +38,7 @@
   </main>
 
   <%= render 'layouts/footer' %>
+  <%= render partial: 'content/keyboard_controls_help_modal' %>
 
   <script type="text/javascript">
     <%= yield :javascript %>
