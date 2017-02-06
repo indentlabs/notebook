@@ -27,6 +27,7 @@ class MainController < ApplicationController
 
       raise RetryMe if @question.nil? || @question[:question].nil? # :(
     rescue RetryMe
+      attempts += 1
       retry if attempts < 5
     end
   end
