@@ -25,7 +25,7 @@ class MainController < ApplicationController
       @content = current_user.content.values.flatten.sample
       @question = @content.question unless @content.nil?
 
-      raise RetryMe if @question.nil? || @question[:question].nil? # :(
+      raise RetryMe if @content.present? && (@question.nil? || @question[:question].nil?) # :(
     rescue RetryMe
       attempts += 1
       retry if attempts < 5
