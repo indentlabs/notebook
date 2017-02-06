@@ -65,19 +65,15 @@
   </li>
 </ul>
 
-<ul id="mobile-user-dropdown" class="dropdown-content">
-  <li><%= link_to 'Dashboard', root_url if current_user %></li>
-  <li><%= link_to 'Your author profile', current_user if current_user %></li>
-  <li><%= link_to 'Account settings', edit_user_registration_path %></li>
+<ul id="login-slide" class="side-nav">
+  <li><%= link_to 'Sign in', new_user_session_path %></li>
+  <li><%= link_to 'Sign up', new_user_registration_path %></li>
   <li class="divider"></li>
   <li><%= link_to 'Report a problem', 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new' %></li>
   <li><%= link_to 'Request a feature', 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new' %></li>
   <li><%= link_to 'Leave feedback', 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new' %></li>
   <li class="divider"></li>
-  <li><%= link_to 'Notebook downloads', notebook_export_path %></li>
   <li><%= link_to 'Privacy policy', privacy_policy_path %></li>
-  <li class="divider"></li>
-  <li><%= link_to "Sign out", destroy_user_session_path %></li>
 </ul>
 
 <div class="navbar-fixed">
@@ -85,44 +81,32 @@
     <div class="nav-wrapper">
       <%= link_to 'Notebook', root_url, class: 'brand-logo center' %>
 
-      <ul class="right hide-on-med-and-up">
+      <ul class="right">
         <% if user_signed_in? %>
         <li>
-          <a class="dropdown-button tooltipped" href="#!" data-activates="mobile-user-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your content">
-            <i class="material-icons">book</i>
+          <a class="dropdown-button tooltipped" href="#!" data-activates="desktop-user-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your content">
+            <div class="hide-on-med-and-up"><i class="material-icons">book</i></div>
+            <div class="hide-on-small-and-down"><%= current_user.name %> &nbsp; ▾</div>
           </a>
         </li>
         <% else %>
-          <li><%= link_to 'Sign in', new_user_session_path %></li>
-          <li><%= link_to 'Sign up', new_user_registration_path %></li>
-        <% end %>
-      </ul>
-      <ul class="right hide-on-small-and-down">
-        <% if user_signed_in? %>
-          <li>
-            <a class="dropdown-button tooltipped" href="#!" data-activates="desktop-user-dropdown" data-position="bottom" data-delay="100" data-tooltip="You">
-              <%= current_user.name %> &nbsp; ▾
-            </a>
-          </li>
-        <% else %>
-          <li><%= link_to 'Sign in', new_user_session_path %></li>
-          <li><%= link_to 'Sign up', new_user_registration_path %></li>
+          <li class="hide-on-med-and-down"><%= link_to 'Sign in', new_user_session_path %></li>
+          <li class="hide-on-med-and-down"><%= link_to 'Sign up', new_user_registration_path %></li>
         <% end %>
       </ul>
       <ul class="left">
+        <% if user_signed_in? %>
         <li>
-          <a href="#" data-activates="slide-out" class="button-collapse">
-            <i class="material-icons">menu</i>
-          </a>
-        </li>
-        <li class="hide-on-med-and-down">
-          <%= link_to root_url do %>
-            <i class="material-icons">home</i>
+          <% if current_user && current_user.universes.length > 0 %>
+            <%= render partial: 'universes/picker' %>
           <% end %>
         </li>
-        <li>
-        <% if current_user && current_user.universes.length > 0 %>
-          <%= render partial: 'universes/picker' %>
+        <% else %>
+          <li>
+            <a href="#" data-activates="login-slide" class="button-collapse">
+              <i class="material-icons">menu</i>
+            </a>
+          </li>
         <% end %>
       </ul>
     </div>
