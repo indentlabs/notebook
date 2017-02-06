@@ -162,7 +162,7 @@ class ExportController < ApplicationController
             value = universe.name if universe
           end
 
-          text << "    #{attr.label}: #{value.split("\n").join("\n      ")}\n"
+          text << "    #{attr.label}: #{value.to_s.split("\n").join("\n      ")}\n"
         end
 
         text << "\n"
