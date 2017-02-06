@@ -30,23 +30,6 @@
             <%= attribute_category_tab(content, category) %>
           <% end %>
         </ul>
-        <%
-          markdown = Redcarpet::Markdown.new(
-            Redcarpet::Render::HTML.new(
-              with_toc_data: true,
-              safe_links_only: true,
-              filter_html: true,
-              link_attributes: {target: '_blank'}
-            ),
-            autolink: true,
-            tables: true,
-            strikethrough: true,
-            superscript: true,
-            underline: true,
-            highlight: true,
-            footnotes: true,
-          )
-        %>
 
         <% categories.each do |category| %>
           <div id="<%= category.name.gsub("'", '') %>_panel" class="row">
@@ -87,7 +70,7 @@
                 <% else %>
                   <%# TODO: if text is > 240, truncate and add "Read more" link that opens modal %>
                   <div class="col s9 m9 l10 <%= "flow-text" unless value.to_s.length > 140 %> markdownable">
-                    <%= markdown.render(value.is_a?(Attribute) ? value.value : value).html_safe %>&nbsp;
+                    <%= Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value : value).html_safe %>&nbsp;
                   </div>
                 <% end %>
               </div>
