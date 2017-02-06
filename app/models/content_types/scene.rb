@@ -11,6 +11,9 @@ class Scene < ActiveRecord::Base
   include HasContentGroupers
   include Serendipitous::Concern
 
+  include Authority::Abilities
+  self.authorizer_name = 'CollectiveContentAuthorizer'
+
   # Characters
   relates :scene_characters, with: :scene_characterships
 

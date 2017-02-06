@@ -44,4 +44,12 @@ PlanCharacters::Application.configure do
   }
 
   default_url_options[:host] = 'localhost:3000'
+
+  # Set test-mode Stripe API key
+  Stripe.api_key = "sk_test_v37uWbseyPct6PpsfjTa3y1l"
+  config.stripe_publishable_key = 'pk_test_eXI4iyJ2gR9UOGJyJERvDlHF'
+
+  # Uncomment to test error pages
+  # config.consider_all_requests_local = false
+
 end

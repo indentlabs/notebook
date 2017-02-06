@@ -1,4 +1,5 @@
 class ExportController < ApplicationController
+  before_action :authenticate_user!
 
   def index
   end
@@ -83,7 +84,12 @@ class ExportController < ApplicationController
 
       ar_relation.each do |content|
         csv << attribute_categories.flat_map(&:attribute_fields).map do |attr|
-          value = content.send(attr.name)
+          begin
+            value = content.send(attr.name)
+          rescue
+            value = Attribute.where(user: current_user, attribute_field: attr, entity: content).first
+            value = value.value if value
+          end
 
           if value.is_a?(ActiveRecord::Associations::CollectionProxy)
             value = value.map(&:name).to_sentence
@@ -106,7 +112,12 @@ class ExportController < ApplicationController
       content_repr = {}
 
       attribute_categories.flat_map(&:attribute_fields).each do |attr|
-        value = content.send(attr.name)
+        begin
+          value = content.send(attr.name)
+        rescue
+          value = Attribute.where(user: current_user, attribute_field: attr, entity: content).first
+          value = value.value if value
+        end
         next if value.nil? || value.blank?
 
         if value.is_a?(ActiveRecord::Associations::CollectionProxy)
@@ -136,17 +147,22 @@ class ExportController < ApplicationController
         text << "  #{content.name}\n"
 
         attribute_categories.flat_map(&:attribute_fields).each do |attr|
-          value = content.send(attr.name)
+          begin
+            value = content.send(attr.name)
+          rescue
+            value = Attribute.where(user: current_user, attribute_field: attr, entity: content).first
+            value = value.value if value
+          end
           next if value.nil? || value.blank? || (value.respond_to?(:empty) && value.empty?)
 
           if value.is_a?(ActiveRecord::Associations::CollectionProxy)
             value = value.map(&:name).to_sentence
           elsif attr.name.end_with?('_id') && value.present?
-            universe = Universe.where(id: value.to_i)
+            universe = Universe.where(id: value.to_i).first
             value = universe.name if universe
           end
 
-          text << "    #{attr.label}: #{value.split("\n").join("\n      ")}\n"
+          text << "    #{attr.label}: #{value.to_s.split("\n").join("\n      ")}\n"
         end
 
         text << "\n"

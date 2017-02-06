@@ -19,6 +19,9 @@ class Character < ActiveRecord::Base
   include HasContentGroupers
   include Serendipitous::Concern
 
+  include Authority::Abilities
+  self.authorizer_name = 'CoreContentAuthorizer'
+
   # Characters
   relates :fathers,        with: :fatherships
   relates :mothers,        with: :motherships

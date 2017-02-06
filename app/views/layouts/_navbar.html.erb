@@ -1,16 +1,68 @@
-<ul id="user-dropdown" class="dropdown-content">
-  <li><%= link_to 'Dashboard', root_url if current_user %></li>
-  <li><%= link_to 'Your author profile', current_user if current_user %></li>
-  <li><%= link_to 'Account settings', edit_user_registration_path %></li>
+<ul id="desktop-user-dropdown" class="dropdown-content">
+  <% if current_user %>
+    <li>
+      <%= link_to current_user do %>
+        <i class="material-icons left">person</i>
+        Creator profile
+        <span class="badge right">&nbsp;</span>
+      <% end %>
+    </li>
+
+    <li>
+      <%= link_to subscription_path do %>
+        <i class="material-icons left">credit_card</i>
+        Account billing
+        <span class="badge right">&nbsp;</span>
+      <% end %>
+    </li>
+    <li>
+      <%= link_to edit_user_registration_path do %>
+        <i class="material-icons left">settings</i>
+        Account settings
+        <span class="badge right">&nbsp;</span>
+      <% end %>
+    </li>
+    <li class="divider"></li>
+  <% end %>
+
+  <li>
+    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new' do %>
+      <i class="material-icons left">feedback</i>
+      Report a problem
+    <% end %>
+  </li>
+  <li>
+    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new' do %>
+      <i class="material-icons left">feedback</i>
+      Request a feature
+    <% end %>
+  </li>
+  <li>
+    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new' do %>
+      <i class="material-icons left">feedback</i>
+      Leave feedback
+    <% end %>
+  </li>
   <li class="divider"></li>
-  <li><%= link_to 'Report a problem', 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new' %></li>
-  <li><%= link_to 'Request a feature', 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new' %></li>
-  <li><%= link_to 'Leave feedback', 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new' %></li>
+  <li>
+    <%= link_to notebook_export_path do %>
+      <i class="material-icons left">file_download</i>
+      Notebook downloads
+    <% end %>
+  </li>
+  <li>
+    <%= link_to privacy_policy_path do %>
+      <i class="material-icons left">verified_user</i>
+      Privacy policy
+    <% end %>
+  </li>
   <li class="divider"></li>
-  <li><%= link_to 'Notebook downloads', notebook_export_path %></li>
-  <li><%= link_to 'Privacy policy', privacy_policy_path %></li>
-  <li class="divider"></li>
-  <li><%= link_to "Sign out", destroy_user_session_path %></li>
+  <li>
+    <%= link_to destroy_user_session_path do %>
+      <i class="material-icons left">power_settings_new</i>
+      Sign out
+    <% end %>
+  </li>
 </ul>
 
 <ul id="login-slide" class="side-nav">

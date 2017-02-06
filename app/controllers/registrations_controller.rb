@@ -4,17 +4,18 @@ class RegistrationsController < Devise::RegistrationsController
   private
 
   def sign_up_params
-    params.require(:user).permit(:name, :email, :password, :password_confirmation)
+    params.require(:user).permit(:name, :email, :password, :password_confirmation, :email_updates)
   end
 
   def account_update_params
-    params.require(:user).permit(:name, :email, :password, :password_confirmation, :current_password)
+    params.require(:user).permit(:name, :email, :password, :password_confirmation, :current_password, :email_updates)
   end
 
   protected
 
   def add_account
-    if resource.persisted? # user is created successfuly
+    # If the user was created in the last 30 seconds, report it to Slack
+    if resource.persisted? && resource.created_at < Time.now - 30.seconds
       report_new_account_to_slack resource
     end
   end

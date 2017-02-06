@@ -19,6 +19,9 @@ class Creature < ActiveRecord::Base
   include HasContentGroupers
   include Serendipitous::Concern
 
+  include Authority::Abilities
+  self.authorizer_name = 'ExtendedContentAuthorizer'
+
   # Locations
   relates :habitats,    with: :wildlifeships
 

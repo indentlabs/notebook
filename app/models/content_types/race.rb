@@ -17,6 +17,9 @@ class Race < ActiveRecord::Base
   include HasContentGroupers
   include Serendipitous::Concern
 
+  include Authority::Abilities
+  self.authorizer_name = 'ExtendedContentAuthorizer'
+
   # Characters
   relates :famous_figures, with: :famous_figureships
 

@@ -15,6 +15,10 @@ gem 'rmagick', '2.13.4'
 # Authentication
 gem 'bcrypt'
 gem 'devise'
+gem 'authority'
+
+# Billing
+gem 'stripe'
 
 # Design
 gem 'material_icons'
@@ -44,6 +48,9 @@ gem 'slack-notifier'
 
 # Form enhancements
 gem 'redcarpet' #markdown formatting
+
+# Analytics
+gem 'raygun4ruby'
 
 group :production do
   gem 'rails_12factor'
@@ -76,6 +83,7 @@ group :test do
   gem 'rails-perftest'
   gem 'rspec-prof'
   gem 'rspec-rails'
+  gem 'webmock'
   gem 'rubocop', require: false
   gem 'ruby-prof', '0.15.9'
   gem 'shoulda-matchers', '~> 3.1'
