@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '4.2.5'
+gem 'rails', '4.2.7.1'
 gem 'puma', '~> 3.6.0'
 gem 'puma-heroku'
 gem 'rack-timeout'
