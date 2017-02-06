@@ -216,7 +216,9 @@ class SubscriptionsController < ApplicationController
       channel: '#subscriptions',
       username: 'tristan'
 
-    if from.monthly_cents < to.monthly_cents
+    if from.nil? || to.nil?
+      delta = ":tada: LOL :tada:"
+    elsif from.monthly_cents < to.monthly_cents
       delta = ":tada: *UPGRADE* :tada:"
     else
       delta = ":wave: Downgrade"

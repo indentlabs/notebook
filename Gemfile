@@ -36,7 +36,7 @@ gem 'rails-jquery-autocomplete'
 gem 'meta-tags'
 
 # Smarts
-# gem 'serendipitous', :path => "~/git/serendipitous-gem"
+# gem 'serendipitous', :path => "../serendipitous-gem"
 gem 'serendipitous', git: 'https://github.com/indentlabs/serendipitous-gem.git'
 
 # Editor
