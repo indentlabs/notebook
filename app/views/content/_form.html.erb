@@ -4,12 +4,29 @@
   <div class="col s12">
     <div class="card hoverable">
       <div class="card-content">
-        <div class="card-title center">
-          <span class="right">
-            <i class="material-icons <%= content.class.color %>-text"><%= content.class.icon %></i>
-            <%= render 'content/form/actions_dropdown', content: content %>
-          </span>
+        <div class="left">
+          <i class="material-icons <%= content.class.color %>-text"><%= content.class.icon %></i>
+        </div>
+        <div class="right">
+          <% if content.persisted? %>
+            <%= link_to '#',
+              class: "share tooltipped #{content.class.color}-text",
+              data: { position: 'bottom', delay: '500', tooltip: 'Share this page with others'} do
+            %>
+              <i class="material-icons">share</i>
+            <% end %>
+          <% end %>
 
+          <%= link_to '#',
+            class: "expand tooltipped #{content.class.color}-text",
+            data: { position: 'bottom', delay: '500', tooltip: 'Expand all tabs vertically'} do
+          %>
+            <i class="material-icons">format_line_spacing</i>
+          <% end %>
+
+          <%= render 'content/form/actions_dropdown', content: content %>
+        </div>
+        <div class="card-title center">
           <%= render 'content/form/title', content: content %>
         </div>
 
@@ -18,7 +35,9 @@
           <% content.class.attribute_categories(current_user).each do |category| %>
             <li class="tab">
               <a href="#<%= category.name.gsub("'", '') %>_panel">
-                <i class="material-icons hide-on-med-and-down" style="font-size: 18px; position: relative; top: 3px;"><%= category.icon %></i>
+                <i class="material-icons hide-on-med-and-down" style="font-size: 18px; position: relative; top: 3px;">
+                  <%= category.icon %>
+                </i>
                 <%= category.label %>
               </a>
             </li>

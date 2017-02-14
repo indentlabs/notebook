@@ -1,5 +1,6 @@
 $(document).ready ->
   $('.tab').click ->
+    $('.panel').hide()
     if $('.card-action a').attr('href')
       btn_href = $('.card-action a').attr('href').split('#')[0];
       tab_anchor = $(this).find('a').attr('href')
@@ -18,3 +19,7 @@ $(document).ready ->
 
   $('.share').click ->
     $('#share-modal').modal('open')
+
+  $('.expand').click ->
+    $('.tabs li').first().find('a').click()
+    $('.panel').show()
