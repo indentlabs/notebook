@@ -9,6 +9,6 @@ module AttributesHelper
     end
 
     link = content_tag(:a, category.label, href: "##{category.name.gsub("'", '')}_panel")
-    content_tag(:li, link, class: "tab #{is_disabled}")
+    content_tag(:li, link, class: "tab #{'disabled' if is_disabled}")
   end
 end
