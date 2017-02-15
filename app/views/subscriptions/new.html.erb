@@ -1,4 +1,5 @@
 <% free_for_life_user = current_user.selected_billing_plan_id == 2 %>
+<% on_premium_plan = ['early-adopters', 'premium'].include? @active_billing_plan.stripe_plan_id %>
 
 <p class="right hide-on-small-only">
   <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_class| %>
@@ -31,13 +32,12 @@
 <div class="row">
   <div class="col s12 m6">
     <div class="row">
-      <div class="card s12 <%= 'green lighten-5' if @active_billing_plan.stripe_plan_id == 'early-adopters' %>">
+      <div class="card s12 <%= 'green lighten-5' if on_premium_plan %>">
         <div class="center">
           <br />
           <i class="material-icons" style="font-size: 250%">class</i>
           <h4>Premium</h4>
-          <h6>(Early Adopters Discount)</h6>
-          <h5>$6/month</h5>
+          <h5>$9/month</h5>
           <ul class="plan-features">
             <li>Plan <strong>unlimited</strong> universes</li>
             <li>Create the following content within your universes:</li>
@@ -51,29 +51,17 @@
           </ul>
         </div>
         <div class="row center">
-          <% if @active_billing_plan.stripe_plan_id == 'early-adopters' %>
+          <% if on_premium_plan %>
             <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
           <% else %>
-            <%= link_to 'Upgrade', change_subscription_path('early-adopters'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
+            <%= link_to 'Upgrade', change_subscription_path('premium'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
           <% end %>
         </div>
         <br />
       </div>
     </div>
     <div class="row">
-      <% if @active_billing_plan.stripe_plan_id != 'early-adopters' && !free_for_life_user %>
-        <div class="card blue white-text" style="padding: 15px; font-size: 110%">
-          <h5>Discount notice</h5>
-          <p>
-            For a limited time, upgrade now to lock your monthly plan at $6/month (33% off from $9/month) for
-            as long as you subscribe.
-            Thank you for being early adopters and offering worlds of great feedback!
-          </p>
-          <p>
-            Offer expires February 14, 2017.
-          </p>
-        </div>
-      <% else %>
+      <% if on_premium_plan || free_for_life_user %>
         <div class="card" style="padding: 15px; font-size: 110%">
           <h5>Want to support Notebook.ai even further?</h5>
           <p>
