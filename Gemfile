@@ -9,8 +9,8 @@ gem 'rack-timeout'
 gem 'aws-sdk', '~> 1.50'
 
 # Image processing
-gem 'paperclip', '~> 4.2.0'
-gem 'rmagick', '2.13.4'
+gem 'paperclip'
+gem 'rmagick'
 
 # Authentication
 gem 'bcrypt'
