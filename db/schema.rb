@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170201151923) do
+ActiveRecord::Schema.define(version: 20170216211914) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -294,6 +294,21 @@ ActiveRecord::Schema.define(version: 20170201151923) do
     t.integer "group_id"
     t.integer "headquarter_id"
   end
+
+  create_table "image_uploads", force: :cascade do |t|
+    t.string   "privacy"
+    t.integer  "user_id"
+    t.string   "content_type"
+    t.integer  "content_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+    t.string   "src_file_name"
+    t.string   "src_content_type"
+    t.integer  "src_file_size"
+    t.datetime "src_updated_at"
+  end
+
+  add_index "image_uploads", ["user_id"], name: "index_image_uploads_on_user_id"
 
   create_table "items", force: :cascade do |t|
     t.string   "name",                               null: false
