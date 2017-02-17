@@ -86,10 +86,12 @@ class ContentController < ApplicationController
     content_type = content_type_from_controller(self.class)
     @content = content_type.find(params[:id])
 
-    raise params.inspect
-
     unless @content.updatable_by? current_user
       return redirect_to :back
+    end
+
+    if params.key? 'image_uploads'
+      upload_files params['image_uploads'], content_type.name, @content.id
     end
 
     if @content.update_attributes(content_params)
@@ -97,6 +99,21 @@ class ContentController < ApplicationController
     else
       failed_response('edit', :unprocessable_entity)
     end
+  end
+
+  def upload_files image_uploads_hash, content_type, content_id
+    image_uploads_hash.values.each do |image_data|
+      related_image = ImageUpload.create(
+        user: current_user,
+        content_type: content_type,
+        content_id: content_id,
+        src: image_data,
+        privacy: 'public'
+      )
+      raise [image_data, '|||', related_image].inspect
+    end
+
+    raise image_uploads_hash.values.inspect
   end
 
   def destroy

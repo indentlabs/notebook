@@ -6,7 +6,7 @@ gem 'puma-heroku'
 gem 'rack-timeout'
 
 # Storage
-gem 'aws-sdk', '~> 2.3'
+gem 'aws-sdk', '~> 1.5'
 
 # Image processing
 gem 'paperclip'
