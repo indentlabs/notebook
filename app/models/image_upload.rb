@@ -8,4 +8,8 @@ class ImageUpload < ActiveRecord::Base
   }
 
   validates_attachment_content_type :src, content_type: /\Aimage\/.*\Z/
+
+  # Point content IDs to generalized content_id for cocoon
+  alias_attribute :character_id, :content_id
+  #alias_attribute ...
 end

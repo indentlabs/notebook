@@ -1,22 +1,14 @@
-<%= f.fields_for :image_uploads do |upload_form| %>
-  <div class="input-field">
-    <%= upload_form.label 'File upload' %>
-    <%= upload_form.file_field :src %>
+<div class="nested-fields">
+  <%= f.fields_for :image_uploads do |upload_form| %>
+    <% uuid = SecureRandom.uuid %>
+    <div class="input-field">
+      <%= upload_form.label 'File upload' %>
+      <%= upload_form.file_field :src, name: "image_uploads[#{uuid}]" %>
 
 
-    <%= link_to_remove_association f do %>
-      <i class="material-icons red-text" style="position: relative; top: 10px; left: -15px;">close</i>
-    <% end %>
-  </div>
-<% end %>
-<%= f.fields_for :image_uploads do |upload_form| %>
-  <div class="input-field">
-    <%= upload_form.label 'File upload' %>
-    <%= upload_form.file_field :src %>
-
-
-    <%= link_to_remove_association f do %>
-      <i class="material-icons red-text" style="position: relative; top: 10px; left: -15px;">close</i>
-    <% end %>
-  </div>
-<% end %>
+      <%= link_to_remove_association f do %>
+        <i class="material-icons red-text" style="position: relative; top: 10px; left: -15px;">close</i>
+      <% end %>
+    </div>
+  <% end %>
+</div>
