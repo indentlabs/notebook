@@ -86,6 +86,8 @@ class ContentController < ApplicationController
     content_type = content_type_from_controller(self.class)
     @content = content_type.find(params[:id])
 
+    raise params.inspect
+
     unless @content.updatable_by? current_user
       return redirect_to :back
     end

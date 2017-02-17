@@ -65,6 +65,9 @@ Rails.application.routes.draw do
     resources :attribute_categories
     resources :attribute_fields
 
+    # Image handling
+    post '/upload/image', to: 'image_upload#process', as: :image_uploads
+
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'
   end
