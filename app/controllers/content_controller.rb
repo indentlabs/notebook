@@ -103,6 +103,9 @@ class ContentController < ApplicationController
 
   def upload_files image_uploads_hash, content_type, content_id
     image_uploads_hash.values.each do |image_data|
+
+      # todo check user bandwidth
+
       related_image = ImageUpload.create(
         user: current_user,
         content_type: content_type,
@@ -110,10 +113,7 @@ class ContentController < ApplicationController
         src: image_data,
         privacy: 'public'
       )
-      raise [image_data, '|||', related_image].inspect
     end
-
-    raise image_uploads_hash.values.inspect
   end
 
   def destroy

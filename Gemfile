@@ -10,7 +10,7 @@ gem 'aws-sdk', '~> 1.5'
 
 # Image processing
 gem 'paperclip'
-#gem 'rmagick'
+gem 'rmagick'
 
 # Authentication
 gem 'bcrypt'
