@@ -5,6 +5,7 @@ class ImageUpload < ActiveRecord::Base
     path: 'content/uploads/:style/:filename',
     styles: {
       thumb: '100x100>',
+      small: '190x190#',
       square: '280x280#',
       medium: '300x300>'
     },

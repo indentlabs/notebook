@@ -7,6 +7,7 @@ gem 'rack-timeout'
 
 # Storage
 gem 'aws-sdk', '~> 1.5'
+gem 'filesize'
 
 # Image processing
 gem 'paperclip'
