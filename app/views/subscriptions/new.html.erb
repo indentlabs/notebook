@@ -40,6 +40,7 @@
           <h5>$9/month</h5>
           <ul class="plan-features">
             <li>Plan <strong>unlimited</strong> universes</li>
+            <li>Upload up to <strong>1GB</strong> of images</li>
             <li>Create the following content within your universes:</li>
             <li>
               <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_class| %>
@@ -82,6 +83,7 @@
           <h5>$0/month</h5>
           <ul class="plan-features">
             <li>Plan up to <strong>5</strong> universes</li>
+            <li>Upload up to <strong>50MB</strong> of images</li>
             <li>Create the following content within your universes:</li>
             <li>
               <% [Character, Location, Item].each do |content_class| %>
@@ -150,6 +152,29 @@
       </div>
     </div>
   <% end %>
+</div>
+
+<h4>
+  Upload Bandwidth
+  <small class="grey-text">
+    <%= Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty %>
+  </small>
+</h4>
+<div class="row">
+  <div class="col s12">
+    <div class="card" style="padding: 15px">
+      <p>
+        You have <strong><%= Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty %></strong> of bandwidth remaining.
+      </p>
+      <p>
+        This bandwidth can be used to upload images to your content anywhere on the site. Deleting an uploaded image frees
+        up the same amount of bandwidth.
+        <% unless on_premium_plan %>
+          To get more bandwidth, upgrade to our Premium plan.
+        <% end %>
+      </p>
+    </div>
+  </div>
 </div>
 
 <h4>Billing History</h4>

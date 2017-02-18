@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170218010814) do
+ActiveRecord::Schema.define(version: 20170218022943) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -86,8 +86,9 @@ ActiveRecord::Schema.define(version: 20170218010814) do
     t.boolean  "allows_collective_content"
     t.boolean  "allows_collaboration"
     t.integer  "universe_limit"
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
+    t.datetime "created_at",                            null: false
+    t.datetime "updated_at",                            null: false
+    t.integer  "bonus_bandwidth_kb",        default: 0
   end
 
   create_table "birthings", force: :cascade do |t|
