@@ -103,8 +103,14 @@ class ContentController < ApplicationController
 
   def upload_files image_uploads_hash, content_type, content_id
     image_uploads_hash.values.each do |image_data|
+      image_size_kb = File.size(image_data.tempfile.path) / 1000.0
 
-      # todo check user bandwidth
+      if current_user.upload_bandwidth_kb < image_size_kb
+        flash[:error] = "At least one of your images failed to upload because you do not have enough upload bandwidth."
+        next
+      else
+        current_user.update(upload_bandwidth_kb: current_user.upload_bandwidth_kb - image_size_kb)
+      end
 
       related_image = ImageUpload.create(
         user: current_user,

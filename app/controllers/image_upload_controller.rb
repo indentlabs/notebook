@@ -18,13 +18,13 @@ class ImageUploadController < ApplicationController
       return
     end
 
-    reclaimed_space = image.src_file_size
+    reclaimed_space_kb = image.src_file_size / 1000.0
 
     # If the user has access to delete the image, go for it
     result = image.destroy
 
     # And credit that space back to their bandwidth
-    #todo
+    current_user.update(upload_bandwidth_kb: current_user.upload_bandwidth_kb + reclaimed_space_kb)
 
     render json: { success: result }, status: 200
   end
