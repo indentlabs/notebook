@@ -3,6 +3,8 @@
 class MainController < ApplicationController
   layout 'landing', only: [:index, :about_notebook]
 
+  class RetryMe < StandardError; end
+
   def index
     redirect_to :dashboard if user_signed_in?
   end
@@ -16,8 +18,17 @@ class MainController < ApplicationController
   def dashboard
     return redirect_to new_user_session_path unless user_signed_in?
 
-    content_type = %w(characters locations items).sample
-    @content = current_user.send(content_type).sample
-    @question = @content.question unless @content.nil?
+    # Try up to 5 times to actually fetch a question
+    attempts = 0
+
+    begin
+      @content = current_user.content.values.flatten.sample
+      @question = @content.question unless @content.nil?
+
+      raise RetryMe if @content.present? && (@question.nil? || @question[:question].nil?) # :(
+    rescue RetryMe
+      attempts += 1
+      retry if attempts < 5
+    end
   end
 end

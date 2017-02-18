@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '4.2.5'
+gem 'rails', '4.2.7.1'
 gem 'puma', '~> 3.6.0'
 gem 'puma-heroku'
 gem 'rack-timeout'
@@ -37,7 +37,7 @@ gem 'rails-jquery-autocomplete'
 gem 'meta-tags'
 
 # Smarts
-# gem 'serendipitous', :path => "~/git/serendipitous-gem"
+# gem 'serendipitous', :path => "../serendipitous-gem"
 gem 'serendipitous', git: 'https://github.com/indentlabs/serendipitous-gem.git'
 
 # Editor
@@ -56,7 +56,6 @@ gem 'raygun4ruby'
 group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
-  gem 'scout_apm'
 end
 
 group :test, :production do
