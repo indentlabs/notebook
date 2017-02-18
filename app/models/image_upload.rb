@@ -18,7 +18,14 @@ class ImageUpload < ActiveRecord::Base
 
   validates_attachment_content_type :src, content_type: /\Aimage\/.*\Z/
 
+  before_destroy :delete_s3_image
+
   # Point content IDs to generalized content_id for cocoon
   alias_attribute 'character_id', :content_id
   #alias_attribute ...
+
+  def delete_s3_image
+    # todo: put this in a task for faster delete response times
+    src.destroy
+  end
 end

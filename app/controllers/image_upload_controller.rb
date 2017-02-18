@@ -21,8 +21,7 @@ class ImageUploadController < ApplicationController
     reclaimed_space = image.src_file_size
 
     # If the user has access to delete the image, go for it
-    image.src.destroy
-    result = image.delete
+    result = image.destroy
 
     # And credit that space back to their bandwidth
     #todo
