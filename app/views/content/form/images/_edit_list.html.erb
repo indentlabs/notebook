@@ -29,6 +29,10 @@
 
 <script type="text/javascript">
 $(document).ready(function() {
+  $('a[data-remote]').on('ajax:start', function (e, data, status, xhr) {
+    $(this).closest('.row').fadeTo('slow', 0.5);
+  });
+
   $('a[data-remote]').on('ajax:success', function (e, data, status, xhr) {
     // Remove the image from the UI
     $(this).closest('.row').fadeOut().remove();
