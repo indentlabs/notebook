@@ -7,7 +7,9 @@ class ImageUpload < ActiveRecord::Base
       thumb: '100x100>',
       small: '190x190#',
       square: '280x280#',
-      medium: '300x300>'
+      medium: '300x300>',
+      large: '600x600>',
+      hero: '800x800>'
     },
     filename_cleaner: -> (filename) {
       [
