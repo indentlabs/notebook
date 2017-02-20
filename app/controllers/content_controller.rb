@@ -111,7 +111,10 @@ class ContentController < ApplicationController
       image_size_kb = File.size(image_data.tempfile.path) / 1000.0
 
       if current_user.upload_bandwidth_kb < image_size_kb
-        flash[:error] = "At least one of your images failed to upload because you do not have enough upload bandwidth."
+        flash[:alert] = [
+          "At least one of your images failed to upload because you do not have enough upload bandwidth.",
+          "<a href='#{subscription_path}' class='btn white black-text center-align'>Get more</a>"
+        ].map { |p| "<p>#{p}</p>" }.join
         next
       else
         current_user.update(upload_bandwidth_kb: current_user.upload_bandwidth_kb - image_size_kb)
