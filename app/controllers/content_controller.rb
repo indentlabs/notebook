@@ -69,13 +69,18 @@ class ContentController < ApplicationController
   end
 
   def create
+    content_type = content_type_from_controller self.class
     initialize_object
 
-    unless current_user.can_create?(content_type_from_controller self.class)
+    unless current_user.can_create?(content_type)
       return redirect_to :back
     end
 
     if @content.save
+      if params.key? 'image_uploads'
+        upload_files params['image_uploads'], content_type.name, @content.id
+      end
+
       successful_response(content_creation_redirect_url, t(:create_success, model_name: humanized_model_name))
     else
       failed_response('new', :unprocessable_entity)
