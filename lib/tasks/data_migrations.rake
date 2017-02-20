@@ -35,4 +35,37 @@ namespace :data_migrations do
       # Since no active subscriptions is equivalent to the free tier, there's no need to build Subscriptions for these users
     end
   end
+
+  desc "Add bandwidth bonuses to billing plans"
+  task billing_plan_bandwidths: :environment do
+    puts "Updating bandwidths for all billing plans"
+    BillingPlan.find_by(stripe_plan_id: 'starter').update(bonus_bandwidth_kb: 50_000)
+    BillingPlan.find_by(stripe_plan_id: 'free-for-life').update(bonus_bandwidth_kb: 250_000)
+    BillingPlan.find_by(stripe_plan_id: 'early-adopters').update(bonus_bandwidth_kb: 950_000)
+    BillingPlan.find_by(stripe_plan_id: 'premium').update(bonus_bandwidth_kb: 950_000)
+    puts "Done"
+  end
+
+  desc "Add bandwidth counts to existing users"
+  task initialize_user_bandwidths: :environment do
+    starter_id = BillingPlan.find_by(stripe_plan_id: 'starter').id
+    beta_id = BillingPlan.find_by(stripe_plan_id: 'free-for-life').id
+    premium_ids = [
+      BillingPlan.find_by(stripe_plan_id: 'early-adopters').id,
+      BillingPlan.find_by(stripe_plan_id: 'premium').id
+    ]
+
+    # Premium
+    puts "Setting premium users to 1GB"
+    puts User.where(selected_billing_plan_id: premium_ids).update_all(upload_bandwidth_kb: 1_000_000) # 1GB
+
+    # Starter
+    puts "Setting starter users to 50MB"
+    puts User.where(selected_billing_plan_id: nil).update_all(upload_bandwidth_kb: 50_000) # 50MB
+    puts User.where(selected_billing_plan_id: starter_id).update_all(upload_bandwidth_kb: 50_000) # 50MB
+
+    # Beta
+    puts "Setting beta users to 250MB"
+    puts User.where(selected_billing_plan_id: beta_id).update_all(upload_bandwidth_kb: 250_000) # 250MB
+  end
 end
