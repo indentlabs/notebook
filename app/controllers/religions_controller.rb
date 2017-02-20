@@ -7,7 +7,7 @@ class ReligionsController < ContentController
 
   def content_param_list
     %i(
-      name description other_name universe_id
+      name description other_names universe_id
       origin_story
       teachings prophecies places_of_worship worship_services obligations paradise
       initiation rituals holidays
