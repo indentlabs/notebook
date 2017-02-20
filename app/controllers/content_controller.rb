@@ -106,8 +106,8 @@ class ContentController < ApplicationController
     end
   end
 
-  def upload_files image_uploads_hash, content_type, content_id
-    image_uploads_hash.values.each do |image_data|
+  def upload_files image_uploads_list, content_type, content_id
+    image_uploads_list.each do |image_data|
       image_size_kb = File.size(image_data.tempfile.path) / 1000.0
 
       if current_user.upload_bandwidth_kb < image_size_kb
