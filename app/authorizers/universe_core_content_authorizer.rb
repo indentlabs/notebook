@@ -1,6 +1,8 @@
 class UniverseCoreContentAuthorizer < CoreContentAuthorizer
   def self.creatable_by? user
-    return true if user.selected_billing_plan_id == BillingPlan.find_by(stripe_plan_id: 'free-for-life').id
+    if BillingPlan.find_by(stripe_plan_id: 'free-for-life')
+      return true if user.selected_billing_plan_id == BillingPlan.find_by(stripe_plan_id: 'free-for-life').id
+    end
     
     user.universes.count < (user.active_billing_plans.map(&:universe_limit).max || 5)
   end
