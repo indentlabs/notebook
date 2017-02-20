@@ -27,8 +27,7 @@ class CharactersController < ContentController
       birthings_attributes:        [:id, :birthplace_id, :_destroy],
       childrenships_attributes:    [:id, :child_id, :_destroy],
       lingualisms_attributes:      [:id, :spoken_language_id, :_destroy],
-      raceships_attributes:        [:id, :race_id, :_destroy],
-      image_uploads: [:src]
+      raceships_attributes:        [:id, :race_id, :_destroy]
     ]
   end
 end

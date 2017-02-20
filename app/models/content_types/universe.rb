@@ -9,6 +9,7 @@ class Universe < ActiveRecord::Base
 
   include HasAttributes
   include HasPrivacy
+  include HasImageUploads
   include Serendipitous::Concern
 
   include Authority::Abilities
