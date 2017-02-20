@@ -65,6 +65,9 @@ Rails.application.routes.draw do
     resources :attribute_categories
     resources :attribute_fields
 
+    # Image handling
+    delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion
+
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'
   end

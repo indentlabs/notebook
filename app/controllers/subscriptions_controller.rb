@@ -34,6 +34,10 @@ class SubscriptionsController < ApplicationController
       end
       new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
       current_user.selected_billing_plan_id = new_billing_plan.id
+
+      # Remove any bonus bandwidth our old plan granted
+      current_user.upload_bandwidth_kb -= old_billing_plan.bonus_bandwidth_kb
+
       current_user.save
 
       Subscription.create(
@@ -76,6 +80,10 @@ class SubscriptionsController < ApplicationController
       end
       new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
       current_user.selected_billing_plan_id = new_billing_plan.id
+
+      # Add any bonus bandwidth our new plan grants
+      current_user.upload_bandwidth_kb += new_billing_plan.bonus_bandwidth_kb
+
       current_user.save
 
       Subscription.create(
@@ -145,6 +153,13 @@ class SubscriptionsController < ApplicationController
         old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
       end
       current_user.selected_billing_plan_id = new_billing_plan.id
+
+      # Remove any bonus bandwidth our old plan granted
+      current_user.upload_bandwidth_kb -= old_billing_plan.bonus_bandwidth_kb
+
+      # Add any bonus bandwidth our new plan grants
+      current_user.upload_bandwidth_kb += new_billing_plan.bonus_bandwidth_kb
+
       current_user.save
 
       stripe_subscription.plan = new_billing_plan.stripe_plan_id

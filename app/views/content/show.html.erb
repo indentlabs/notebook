@@ -49,6 +49,12 @@
 
         <% categories.each do |category| %>
           <div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
+            <% if category.name == 'gallery' %>
+              <div>
+                <%= render partial: 'content/form/images/gallery', locals: { content: content } %>
+              </div>
+            <% end %>
+
             <% category.attribute_fields.each do |attribute| %>
               <% next if attribute.name.start_with?("private") && @content.user != current_user %>
 

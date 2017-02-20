@@ -69,13 +69,18 @@ class ContentController < ApplicationController
   end
 
   def create
+    content_type = content_type_from_controller self.class
     initialize_object
 
-    unless current_user.can_create?(content_type_from_controller self.class)
+    unless current_user.can_create?(content_type)
       return redirect_to :back
     end
 
     if @content.save
+      if params.key? 'image_uploads'
+        upload_files params['image_uploads'], content_type.name, @content.id
+      end
+
       successful_response(content_creation_redirect_url, t(:create_success, model_name: humanized_model_name))
     else
       failed_response('new', :unprocessable_entity)
@@ -90,10 +95,38 @@ class ContentController < ApplicationController
       return redirect_to :back
     end
 
+    if params.key? 'image_uploads'
+      upload_files params['image_uploads'], content_type.name, @content.id
+    end
+
     if @content.update_attributes(content_params)
       successful_response(@content, t(:update_success, model_name: humanized_model_name))
     else
       failed_response('edit', :unprocessable_entity)
+    end
+  end
+
+  def upload_files image_uploads_list, content_type, content_id
+    image_uploads_list.each do |image_data|
+      image_size_kb = File.size(image_data.tempfile.path) / 1000.0
+
+      if current_user.upload_bandwidth_kb < image_size_kb
+        flash[:alert] = [
+          "At least one of your images failed to upload because you do not have enough upload bandwidth.",
+          "<a href='#{subscription_path}' class='btn white black-text center-align'>Get more</a>"
+        ].map { |p| "<p>#{p}</p>" }.join
+        next
+      else
+        current_user.update(upload_bandwidth_kb: current_user.upload_bandwidth_kb - image_size_kb)
+      end
+
+      related_image = ImageUpload.create(
+        user: current_user,
+        content_type: content_type,
+        content_id: content_id,
+        src: image_data,
+        privacy: 'public'
+      )
     end
   end
 

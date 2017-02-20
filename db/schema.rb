@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170201151923) do
+ActiveRecord::Schema.define(version: 20170218022943) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -86,8 +86,9 @@ ActiveRecord::Schema.define(version: 20170201151923) do
     t.boolean  "allows_collective_content"
     t.boolean  "allows_collaboration"
     t.integer  "universe_limit"
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
+    t.datetime "created_at",                            null: false
+    t.datetime "updated_at",                            null: false
+    t.integer  "bonus_bandwidth_kb",        default: 0
   end
 
   create_table "birthings", force: :cascade do |t|
@@ -294,6 +295,21 @@ ActiveRecord::Schema.define(version: 20170201151923) do
     t.integer "group_id"
     t.integer "headquarter_id"
   end
+
+  create_table "image_uploads", force: :cascade do |t|
+    t.string   "privacy"
+    t.integer  "user_id"
+    t.string   "content_type"
+    t.integer  "content_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+    t.string   "src_file_name"
+    t.string   "src_content_type"
+    t.integer  "src_file_size"
+    t.datetime "src_updated_at"
+  end
+
+  add_index "image_uploads", ["user_id"], name: "index_image_uploads_on_user_id"
 
   create_table "items", force: :cascade do |t|
     t.string   "name",                               null: false
@@ -650,15 +666,15 @@ ActiveRecord::Schema.define(version: 20170201151923) do
 
   create_table "users", force: :cascade do |t|
     t.string   "name"
-    t.string   "email",                                   null: false
+    t.string   "email",                                    null: false
     t.string   "old_password"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "encrypted_password",       default: "",   null: false
+    t.string   "encrypted_password",       default: "",    null: false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.integer  "sign_in_count",            default: 0,    null: false
+    t.integer  "sign_in_count",            default: 0,     null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
@@ -667,6 +683,7 @@ ActiveRecord::Schema.define(version: 20170201151923) do
     t.string   "stripe_customer_id"
     t.boolean  "email_updates",            default: true
     t.integer  "selected_billing_plan_id"
+    t.integer  "upload_bandwidth_kb",      default: 50000
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true

@@ -15,6 +15,7 @@ class Item < ActiveRecord::Base
   include HasAttributes
   include HasPrivacy
   include HasContentGroupers
+  include HasImageUploads
   include Serendipitous::Concern
 
   include Authority::Abilities
