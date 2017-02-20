@@ -15,8 +15,10 @@
 
 <div class="row">
   <% [:universe, :character, :location, :item, :creature, :race, :religion, :group, :magic, :language, :scene].each do |type| %>
+    <% content_list = current_user.send(type.to_s.pluralize) %>
+    <% next if !current_user.can_create?(type.to_s.capitalize.constantize) && content_list.empty? %>
     <div class="dashboard-row col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
-      <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: type, content_list: current_user.send(type.to_s.pluralize) } %>
+      <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: type, content_list: content_list } %>
     </div>
   <% end %>
 </div>
