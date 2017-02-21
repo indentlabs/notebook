@@ -1,1 +1,1 @@
-Rails.application.config.mixpanel_token = '74ab14e75a3b56773144957133233cb8'
+Rails.application.config.mixpanel_token = ENV.fetch('MIXPANEL_TOKEN', 'test')
