@@ -26,4 +26,8 @@ $(document).ready(function () {
     mixpanel.track("clicked share link");
   });
 
+  $('.universes-lock a').click(function (link) {
+    mixpanel.track("clicked universe lock link");
+  });
+
 });
