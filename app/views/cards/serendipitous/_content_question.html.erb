@@ -5,23 +5,33 @@ if question.present? &&
    content.present?
 %>
   <div class="content-question card-panel hoverable light-blue lighten-4">
-    <i class="material-icons <%= content.class.color %>-text circle right"><%= content.class.icon %></i>
-    <%= question[:question] %>
+    <div class="row">
+      <div class="col s9">
 
-    <%= form_for content do |f| %>
+        <i class="material-icons <%= content.class.color %>-text circle right"><%= content.class.icon %></i>
+        <%= question[:question] %>
 
-      <div class="input-field">
-        <%= f.text_field question[:field], class: 'content-question-input' %>
-        <%= f.label content.class.human_attribute_name(question[:field]) %>
+        <%= form_for content do |f| %>
+
+          <div class="input-field">
+            <%= f.text_field question[:field], class: 'content-question-input' %>
+            <%= f.label content.class.human_attribute_name(question[:field]) %>
+          </div>
+
+          <%# Using a plain old form.submit creates a button that only responds to a click on the button text,
+              not anywhere else on the button. %>
+          <%= button_tag(type: 'submit', class: "content-question-submit waves-effect waves-light btn #{content.class.color} right") do %>
+            Update <%= content.name.downcase %>
+          <% end %>
+          <div style="clear: both;"></div>
+        <% end %>
+
       </div>
 
-      <%# Using a plain old form.submit creates a button that only responds to a click on the button text,
-          not anywhere else on the button. %>
-      <%= button_tag(type: 'submit', class: "content-question-submit waves-effect waves-light btn #{content.class.color} right") do %>
-        Update <%= content.name.downcase %>
-      <% end %>
-      <div style="clear: both;"></div>
-    <% end %>
+      <div class="col s3">
+        <%= image_tag 'tristan/small' %>
+      </div>
+    </div>
   </div>
 <% else %>
 <!-- decided not to render serendipitous card for this question: <%= question || 'nil'%> -->
