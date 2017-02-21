@@ -18,4 +18,12 @@ $(document).ready(function () {
     mixpanel.track("answered serendipitous question", {});
   });
 
+  $('.expand').click(function (link) {
+    mixpanel.track("clicked expand-all on content");
+  });
+
+  $('.share').click(function (link) {
+    mixpanel.track("clicked share link");
+  });
+
 });
