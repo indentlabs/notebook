@@ -145,7 +145,7 @@ class ContentController < ApplicationController
       Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'uploaded image', {
         'content_type': content_type,
         'image_size_kb': image_size_kb,
-        'first five images': current_user.image_uploads <= 5
+        'first five images': current_user.image_uploads.count <= 5
       })
     end
   end
