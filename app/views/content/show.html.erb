@@ -12,37 +12,11 @@
 <% end %>
 
 <div class="row">
-
   <div class="col s9">
-
     <div class="card">
-      <div class="card-image">
+      <%= render partial: 'content/display/image_card_header' %>
 
-        <div class="slider" style="height: 140px;">
-          <ul class="slides">
-            <li>
-              <% if @content.image_uploads.any? %>
-                <% @content.image_uploads.each do |image| %>
-                  <%= image_tag image.src %>
-                <% end %>
-              <% else %>
-                <%= image_tag "card-headers/#{@content.class.name.downcase.pluralize}" %>
-              <% end %>
-              <!-- <div class="caption center-align">
-                <h3><%= 'test' %></h3>
-                <h5 class="light grey-text text-lighten-3">cool</h5>
-              </div> -->
-            </li>
-          </ul>
-        </div>
-
-        <a class="btn-floating btn-large halfway-fab waves-effect waves-light <%= content.class.color %>" style="z-index: 1000">
-          <i class="material-icons">edit</i>
-        </a>
-      </div>
       <div class="card-content">
-        <!-- <span class="card-title">Overview</span> -->
-
         <% category = content.class.attribute_categories(current_user).first %>
         <% category.attribute_fields.each do |attribute| %>
           <% next if attribute.name.start_with?("private") && @content.user != current_user %>
@@ -92,21 +66,7 @@
   </div>
 
   <div class="col s3">
-    <ul class="collection with-header">
-      <li class="collection-header center">
-        <h4><%= @content.name %></h4>
-      </li>
-
-      <% content.class.attribute_categories(current_user).each do |category| %>
-        <li class="collection-item">
-          <a href="#<%= category.name.gsub("'", '') %>_panel" class="<%= 'red-text' if category.label == 'Overview' %>">
-            <i class="material-icons left"><%= category.icon %></i>
-            <%= category.label.capitalize %>
-            <!--<span class="badge"><%= [rand(400), 100].min %>%</span>-->
-          </a>
-        </li>
-      <% end %>
-    </ul>
+    <%= render partial: 'content/display/sidelinks' %>
   </div>
 </div>
 
@@ -118,6 +78,14 @@
     });
   });
 </script>
+
+
+
+
+
+
+
+
 
 
 <% categories = content.class.attribute_categories(current_user) %>

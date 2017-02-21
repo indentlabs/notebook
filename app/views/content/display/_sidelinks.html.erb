@@ -1,0 +1,22 @@
+<ul class="collection with-header">
+  <li class="collection-header center">
+    <h4><%= @content.class.name %></h4>
+  </li>
+
+  <% @content.class.attribute_categories(current_user).each do |category| %>
+    <li class="collection-item">
+      <a href="#<%= category.name.gsub("'", '') %>_panel" class="<%= 'red-text' if category.label == 'Overview' %>">
+        <i class="material-icons left"><%= category.icon %></i>
+        <%= category.label.capitalize %>
+        <!--<span class="badge"><%= [rand(400), 100].min %>%</span>-->
+      </a>
+    </li>
+  <% end %>
+
+  <li class="collection-item">
+    <a href="#" class="green-text">
+      <i class="material-icons left">add</i>
+      Add custom fields
+    </a>
+  </li>
+</ul>
