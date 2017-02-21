@@ -27,6 +27,12 @@ class ContentController < ApplicationController
     if (current_user || User.new).can_read? @content
       @question = @content.question if current_user.present? and current_user == @content.user
 
+      Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed content', {
+        'content_type': content_type.name,
+        'content_owner': current_user.present? && current_user.id == @content.user_id,
+        'logged_in_user': current_user.present?
+      })
+
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
         format.json { render json: @content }
@@ -76,6 +82,10 @@ class ContentController < ApplicationController
       return redirect_to :back
     end
 
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
+      'content_type': content_type.name
+    })
+
     if @content.save
       if params.key? 'image_uploads'
         upload_files params['image_uploads'], content_type.name, @content.id
@@ -94,6 +104,10 @@ class ContentController < ApplicationController
     unless @content.updatable_by? current_user
       return redirect_to :back
     end
+
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'updated content', {
+      'content_type': content_type.name
+    })
 
     if params.key? 'image_uploads'
       upload_files params['image_uploads'], content_type.name, @content.id
@@ -127,6 +141,12 @@ class ContentController < ApplicationController
         src: image_data,
         privacy: 'public'
       )
+
+      Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'uploaded image', {
+        'content_type': content_type,
+        'image_size_kb': image_size_kb,
+        'first five images': current_user.image_uploads <= 5
+      })
     end
   end
 
@@ -137,6 +157,10 @@ class ContentController < ApplicationController
     unless current_user.can_delete? @content
       return redirect_to :back
     end
+
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'deleted content', {
+      'content_type': content_type.name
+    })
 
     @content.destroy
 

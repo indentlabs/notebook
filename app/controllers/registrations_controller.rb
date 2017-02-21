@@ -14,8 +14,8 @@ class RegistrationsController < Devise::RegistrationsController
   protected
 
   def add_account
-    # If the user was created in the last 30 seconds, report it to Slack
-    if resource.persisted? && resource.created_at < Time.now - 30.seconds
+    # If the user was created in the last 60 seconds, report it to Slack
+    if resource.persisted? && resource.created_at < Time.now - 60.seconds
       report_new_account_to_slack resource
     end
   end

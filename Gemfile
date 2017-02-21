@@ -52,6 +52,7 @@ gem 'redcarpet' #markdown formatting
 
 # Analytics
 gem 'raygun4ruby'
+gem 'mixpanel-ruby'
 
 group :production do
   gem 'rails_12factor'

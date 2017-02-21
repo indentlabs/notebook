@@ -4,6 +4,11 @@ class SubscriptionsController < ApplicationController
   def new
     return redirect_to new_user_session_path, notice: t(:no_do_permission) unless user_signed_in?
 
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed billing page', {
+      'current billing plan': current_user.selected_billing_plan_id,
+      'content count': current_user.content_count
+    })
+
     # We only support a single billing plan right now, so just grab the first one. If they don't have an active plan,
     # we also treat them as if they have a Starter plan.
     @active_billing_plan = current_user.active_billing_plans.first || BillingPlan.find_by(stripe_plan_id: 'starter')
@@ -117,6 +122,11 @@ class SubscriptionsController < ApplicationController
   def information
     @selected_plan = BillingPlan.find_by(stripe_plan_id: params['plan'], available: true)
     @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
+
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed payment method page', {
+      'current billing plan': current_user.selected_billing_plan_id,
+      'content count': current_user.content_count
+    })
   end
 
   def information_change
@@ -219,6 +229,7 @@ class SubscriptionsController < ApplicationController
   end
 
   def stripe_webhook
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'stripe webhook')
     #todo handle webhooks
   end
 

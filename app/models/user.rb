@@ -16,6 +16,7 @@ class User < ActiveRecord::Base
 
   has_many :subscriptions
   has_many :billing_plans, through: :subscriptions
+  has_many :image_uploads
 
   after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
 
