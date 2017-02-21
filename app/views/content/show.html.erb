@@ -17,45 +17,52 @@
       <%= render partial: 'content/display/image_card_header' %>
 
       <div class="card-content">
-        <% category = content.class.attribute_categories(current_user).first %>
-        <% category.attribute_fields.each do |attribute| %>
-          <% next if attribute.name.start_with?("private") && @content.user != current_user %>
+        <% content.class.attribute_categories(current_user).each do |category| %>
+          <div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
+            <% if category.name == 'gallery' %>
+              <div>
+                <%= render partial: 'content/form/images/gallery', locals: { content: content } %>
+              </div>
+            <% end %>
+            <% category.attribute_fields.each do |attribute| %>
+              <% next if attribute.name.start_with?("private") && @content.user != current_user %>
 
-          <% value = nil
-             if content.respond_to?(attribute.name.to_sym)
-               value = content.send(attribute.name.to_sym)
-             else
-               value = Attribute.where(user: current_user, attribute_field: attribute, entity: content).first
-             end
-          %>
-          <% next if value.blank? %>
+              <% value = nil
+                 if content.respond_to?(attribute.name.to_sym)
+                   value = content.send(attribute.name.to_sym)
+                 else
+                   value = Attribute.where(user: current_user, attribute_field: attribute, entity: content).first
+                 end
+              %>
+              <% next if value.blank? %>
 
-          <div class="row">
-            <div class="col s3 m3 l3 right-align flow-text grey-text"><%= attribute.label %></div>
-            <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
-              <% klass = value.first.class || value.build.class %>
-              <div class="col s9 m9 l9 flow-text">
-                <% value.each do |li| %>
-                  <div class="chip">
-                    <%= link_to li do %>
-                      <span class="<%= klass.color %>-text"><i class="material-icons left"><%= klass.icon %></i></span>
-                      <%= li.name %>
+              <div class="row">
+                <div class="col s3 m3 l3 right-align flow-text grey-text"><%= attribute.label %></div>
+                <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
+                  <% klass = value.first.class || value.build.class %>
+                  <div class="col s9 m9 l9 flow-text">
+                    <% value.each do |li| %>
+                      <div class="chip">
+                        <%= link_to li do %>
+                          <span class="<%= klass.color %>-text"><i class="material-icons left"><%= klass.icon %></i></span>
+                          <%= li.name %>
+                        <% end %>
+                      </div>
                     <% end %>
                   </div>
+                <% elsif attribute.name == 'attribute_category_id' %>
+                  <div class="col s9 m9 l9 flow-text">
+                    <%= link_to content.attribute_category.label, content.attribute_category if content.attribute_category %>
+                  </div>
+                <% elsif attribute.name == 'universe_id' %>
+                  <div class="col s9 m9 l9 flow-text">
+                    <%= link_to content.universe.name, content.universe if content.universe %>
+                  </div>
+                <% else %>
+                  <div class="col s9 m9 l9 <%= "flow-text" unless value.to_s.length > 140 %> markdownable">
+                    <%= Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value : value).html_safe %>&nbsp;
+                  </div>
                 <% end %>
-              </div>
-            <% elsif attribute.name == 'attribute_category_id' %>
-              <div class="col s9 m9 l9 flow-text">
-                <%= link_to content.attribute_category.label, content.attribute_category if content.attribute_category %>
-              </div>
-            <% elsif attribute.name == 'universe_id' %>
-              <div class="col s9 m9 l9 flow-text">
-                <%= link_to content.universe.name, content.universe if content.universe %>
-              </div>
-            <% else %>
-              <%# TODO: if text is > 240, truncate and add "Read more" link that opens modal %>
-              <div class="col s9 m9 l9 <%= "flow-text" unless value.to_s.length > 140 %> markdownable">
-                <%= Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value : value).html_safe %>&nbsp;
               </div>
             <% end %>
           </div>
@@ -78,119 +85,6 @@
     });
   });
 </script>
-
-
-
-
-
-
-
-
-
-
-<% categories = content.class.attribute_categories(current_user) %>
-<div class="row">
-  <div class="col s12">
-    <div class="card hoverable">
-      <div class="card-content">
-        <div class="right">
-          <%= link_to '#',
-            class: "share tooltipped #{content.class.color}-text",
-            data: { position: 'bottom', delay: '500', tooltip: 'Share this page with others'} do
-          %>
-            <i class="material-icons">share</i>
-          <% end %>
-
-          <%= link_to '#',
-            class: "expand tooltipped #{content.class.color}-text",
-            data: { position: 'bottom', delay: '500', tooltip: 'Expand all tabs vertically'} do
-          %>
-            <i class="material-icons">format_line_spacing</i>
-          <% end %>
-
-          <%= link_to polymorphic_path(content.class) do %>
-            <span class="<%= content.class.color %>-text"><i class="material-icons"><%= content.class.icon %></i></span>
-          <% end %>
-        </div>
-
-        <div class="card-title center">
-          <%= content.respond_to?(:label) ? content.label : content.name %>
-        </div>
-
-        <ul class="tabs" style="margin-bottom:30px;">
-          <% categories.each do |category| %>
-            <%= attribute_category_tab(content, category) %>
-          <% end %>
-        </ul>
-
-        <% categories.each do |category| %>
-          <div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
-            <% if category.name == 'gallery' %>
-              <div>
-                <%= render partial: 'content/form/images/gallery', locals: { content: content } %>
-              </div>
-            <% end %>
-
-            <% category.attribute_fields.each do |attribute| %>
-              <% next if attribute.name.start_with?("private") && @content.user != current_user %>
-
-              <% value = nil
-                 if content.respond_to?(attribute.name.to_sym)
-                   value = content.send(attribute.name.to_sym)
-                 else
-                   value = Attribute.where(user: current_user, attribute_field: attribute, entity: content).first
-                 end
-              %>
-              <% next if value.blank? %>
-
-              <div class="row">
-                <div class="col s3 m3 l2 right-align flow-text grey-text"><%= attribute.label %></div>
-                <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
-                  <% klass = value.first.class || value.build.class %>
-                  <div class="col s9 m9 l10 flow-text">
-                    <% value.each do |li| %>
-                      <div class="chip">
-                        <%= link_to li do %>
-                          <span class="<%= klass.color %>-text"><i class="material-icons left"><%= klass.icon %></i></span>
-                          <%= li.name %>
-                        <% end %>
-                      </div>
-                    <% end %>
-                  </div>
-                <% elsif attribute.name == 'attribute_category_id' %>
-                  <div class="col s9 m9 l10 flow-text">
-                    <%= link_to content.attribute_category.label, content.attribute_category if content.attribute_category %>
-                  </div>
-                <% elsif attribute.name == 'universe_id' %>
-                  <div class="col s9 m9 l10 flow-text">
-                    <%= link_to content.universe.name, content.universe if content.universe %>
-                  </div>
-                <% else %>
-                  <%# TODO: if text is > 240, truncate and add "Read more" link that opens modal %>
-                  <div class="col s9 m9 l10 <%= "flow-text" unless value.to_s.length > 140 %> markdownable">
-                    <%= Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value : value).html_safe %>&nbsp;
-                  </div>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
-
-      <div class="card-action center">
-        <%= yield :content_show_footer %>
-
-        <% if current_user == content.user %>
-          <%= link_to "Edit this #{content.class.to_s.downcase}", edit_polymorphic_path(@content), class: "btn #{content.class.color}" %>
-        <% elsif content.user.name.present? %>
-          <%= content.user.name %> created and maintains this universe on Notebook.ai.<br />
-          <%= link_to "See more from #{content.user.name}", content.user %>
-          <%= link_to "Create your own universe.", root_url %>
-        <% end %>
-      </div>
-    </div>
-  </div>
-</div>
 
 <%= render partial: 'content/share', locals: { shared_content: @content} %>
 

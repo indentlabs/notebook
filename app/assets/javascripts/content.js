@@ -1,4 +1,27 @@
+$(document).ready(function () {
+  $('.panel').hide();
+  $('.panel').first().show();
+
+  $('.tab a').click(function (tab) {
+    var target_panel = $(tab.target).attr('href');
+
+    $('.panel').hide();
+    $(target_panel).show();
+
+    setTimeout(function() {
+      window.scrollTo(0, 0);
+    }, 1);
+
+    $(tab.target).addClass('.red-text');
+  });
+
+});
+
+
+/*
 $(document).ready ->
+
+
   $('.tab').click ->
     $('.panel').hide()
     if $('.card-action a').attr('href')
@@ -23,3 +46,4 @@ $(document).ready ->
   $('.expand').click ->
     $('.tabs li').first().find('a').click()
     $('.panel').show()
+    */
