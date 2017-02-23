@@ -1,11 +1,12 @@
 <%
   editing = defined?(editing) && editing
-  personal_content = user_signed_in? && current_user.id == @content.user_id
+  creating = defined?(creating) && creating
+  personal_content = (user_signed_in? && current_user.id == @content.user_id) || @content.new_record?
 %>
 
 <%# Primary FAB %>
 <% if personal_content %>
-  <% if editing %>
+  <% if creating || editing %>
     <button class="btn-floating btn-large halfway-fab waves-effect waves-light <%= @content.class.color %>" type="submit" name="action" style="z-index: 500">
       <i class="material-icons">save</i>
     </button>
@@ -22,22 +23,13 @@
     style: 'z-index: 500;' do %>
     <i class="material-icons">share</i>
   <% end %>
-<% else %>
-  <%= link_to '#',
-    class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color} expand",
-    style: 'z-index: 500;' do %>
-    <i class="material-icons">format_line_spacing</i>
-  <% end %>
 <% end %>
 
-<% if @content.persisted? %>
-  <%# Hidden on new-content forms (not yet persisted) because it's moved to the primary FAB %>
-  <%= link_to '#',
-    class: "btn-floating btn-small halfway-fab waves-effect waves-light white expand",
-    style: 'z-index: 500; margin-right: 61px;' do %>
-    <%#data: { position: 'bottom', delay: '500', tooltip: 'Expand all tabs vertically'}%>
-    <i class="material-icons black-text">format_line_spacing</i>
-  <% end %>
+<%= link_to '#',
+  class: "btn-floating btn-small halfway-fab waves-effect waves-light white expand",
+  style: 'z-index: 500; margin-right: 61px;' do %>
+  <%#data: { position: 'bottom', delay: '500', tooltip: 'Expand all tabs vertically'}%>
+  <i class="material-icons black-text">format_line_spacing</i>
 <% end %>
 
 <% if personal_content && @content.persisted? %>
