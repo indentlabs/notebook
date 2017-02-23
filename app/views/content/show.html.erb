@@ -14,7 +14,10 @@
 <div class="row">
   <div class="col s9">
     <div class="card">
-      <%= render partial: 'content/display/image_card_header' %>
+      <div class="card-image">
+        <%= render partial: 'content/display/image_card_header' %>
+        <%= render partial: 'content/display/floating_action_buttons', locals: { editing: false } %>
+      </div>
 
       <div class="card-content">
         <% content.class.attribute_categories(current_user).each do |category| %>
@@ -71,6 +74,16 @@
           </div>
         <% end %>
       </div>
+
+      <% if current_user.nil? || current_user.id != @content.user_id %>
+        <div class="card-action center">
+          <p>
+            <%= @content.user.name %> created and maintains this universe on Notebook.ai.
+          </p>
+          <%= link_to "See more from #{@content.user.name}", @content.user %>
+          <%= link_to "Create your own universe", root_url %>
+        </div>
+      <% end %>
     </div>
 
   </div>
@@ -90,7 +103,7 @@
 </script>
 
 <%= render partial: 'content/share', locals: { shared_content: @content} %>
-<%= render partial: 'attribute_fields/modal', locals: { content: @content, safe_mode: true } %>
+<%= render partial: 'attribute_fields/modal', locals: { content: @content, safe_mode: true } if user_signed_in? %>
 
 <%# TODO: not this %>
 <% if @content.is_a? Universe %>
