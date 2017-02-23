@@ -12,38 +12,25 @@ $(document).ready(function () {
       window.scrollTo(0, 0);
     }, 1);
 
-    $(tab.target).addClass('.red-text');
+    $(tab.target).closest('.content-tabs').find('.tab a').removeClass('red-text');
+    $(tab.target).addClass('red-text');
+  });
+
+  $('.modal').modal();
+
+  $('.share').click(function () {
+    $('#share-modal').modal('open');
+  });
+
+  $('.expand').click(function () {
+    $('.content-tabs').find('li.tab a').addClass('red-text');
+    $('.panel').show();
+  });
+
+  $('.new-attribute-field-link').click(function (e) {
+    e.preventDefault();
+    $('#attribute-field-modal').modal('open');
   });
 
 });
 
-
-/*
-$(document).ready ->
-
-
-  $('.tab').click ->
-    $('.panel').hide()
-    if $('.card-action a').attr('href')
-      btn_href = $('.card-action a').attr('href').split('#')[0];
-      tab_anchor = $(this).find('a').attr('href')
-      $('.card-action a').attr('href', btn_href + tab_anchor);
-
-  if location.hash?
-    setTimeout ( ->
-      window.scrollTo(0, 0);
-    ), 1
-
-  $('.modal').modal();
-
-  $('.new-attribute-field-link').click (e) ->
-    e.preventDefault()
-    $("#attribute-field-modal").modal('open')
-
-  $('.share').click ->
-    $('#share-modal').modal('open')
-
-  $('.expand').click ->
-    $('.tabs li').first().find('a').click()
-    $('.panel').show()
-    */

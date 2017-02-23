@@ -4,6 +4,23 @@
   </li>
 
   <% @content.class.attribute_categories(current_user).each do |category| %>
+    <% fields = category.attribute_fields %>
+    <%
+      if category.name == 'gallery'
+        next if @content.image_uploads.empty?
+      else
+        next if fields.all? do |field|
+          if @content.respond_to?(field.name.to_sym)
+            value = @content.send(field.name.to_sym)
+          else
+            value = "custom field -- should always show"
+          end
+
+          value.blank?
+        end
+      end
+    %>
+
     <li class="collection-item tab">
       <a href="#<%= category.name.gsub("'", '') %>_panel" class="<%= 'red-text' if category.label == 'Overview' %>">
         <i class="material-icons left"><%= category.icon %></i>
@@ -14,9 +31,9 @@
   <% end %>
 
   <li class="collection-item">
-    <a href="#" class="green-text">
+    <a href="#" class="green-text new-attribute-field-link">
       <i class="material-icons left">add</i>
-      Add custom fields
+      Add custom category
     </a>
   </li>
 </ul>

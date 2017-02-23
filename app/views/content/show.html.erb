@@ -27,14 +27,17 @@
             <% category.attribute_fields.each do |attribute| %>
               <% next if attribute.name.start_with?("private") && @content.user != current_user %>
 
-              <% value = nil
-                 if content.respond_to?(attribute.name.to_sym)
-                   value = content.send(attribute.name.to_sym)
-                 else
-                   value = Attribute.where(user: current_user, attribute_field: attribute, entity: content).first
-                 end
+              <%
+                custom_field = false
+                value = nil
+                if content.respond_to?(attribute.name.to_sym)
+                  value = content.send(attribute.name.to_sym)
+                else
+                  custom_field = true
+                  value = Attribute.where(user: current_user, attribute_field: attribute, entity: content).first || ""
+                end
               %>
-              <% next if value.blank? %>
+              <% next if value.blank? && !custom_field %>
 
               <div class="row">
                 <div class="col s3 m3 l3 right-align flow-text grey-text"><%= attribute.label %></div>
@@ -87,6 +90,7 @@
 </script>
 
 <%= render partial: 'content/share', locals: { shared_content: @content} %>
+<%= render 'attribute_fields/modal', content: @content %>
 
 <%# TODO: not this %>
 <% if @content.is_a? Universe %>
