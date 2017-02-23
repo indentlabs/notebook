@@ -1,0 +1,31 @@
+<%# Usage: render partial: 'content/display/quick_reference', locals: { content: @content } %>
+
+<h4 class="reference-title">
+  <i class="material-icons <%= content.class.color %>-text"><%= content.class.icon %></i>
+  <%= content.name %>
+</h4>
+<h5><%= content.description %></h5>
+
+<% all_categories = content.class.attribute_categories(current_user) %>
+<% found_attributes = 0 %>
+
+<table class="highlight">
+<% all_categories.each do |category| %>
+  <% category.attribute_fields.each do |attribute_field| %>
+    <% break if found_attributes >= 5 %>
+
+    <% next if attribute_field.name.end_with? '_id' %>
+    <% next if attribute_field.name == 'privacy' %>
+
+    <% next unless content.respond_to? attribute_field.name %>
+    <% next unless content.send(attribute_field.name).present? %>
+    <% next if content.send(attribute_field.name).is_a?(ActiveRecord::Associations::CollectionProxy) %>
+
+    <% found_attributes += 1 %>
+    <tr>
+      <td><%= attribute_field.label %></td>
+      <td><%= content.send attribute_field.name %></td>
+    </tr>
+  <% end %>
+<% end %>
+</table>

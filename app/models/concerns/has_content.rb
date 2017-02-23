@@ -96,7 +96,7 @@ module HasContent
         scenes, groups
       ].flatten
         .sort_by(&:updated_at)
-        .last(4)
+        .last(3)
         .reverse
     end
   end

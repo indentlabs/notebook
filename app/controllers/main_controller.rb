@@ -18,7 +18,7 @@ class MainController < ApplicationController
   def dashboard
     return redirect_to new_user_session_path unless user_signed_in?
 
-    # Try up to 5 times to actually fetch a question
+    # Try up to 10 times to actually fetch a question
     attempts = 0
 
     begin
@@ -28,7 +28,7 @@ class MainController < ApplicationController
       raise RetryMe if @content.present? && (@question.nil? || @question[:question].nil?) # :(
     rescue RetryMe
       attempts += 1
-      retry if attempts < 5
+      retry if attempts < 10
     end
   end
 end
