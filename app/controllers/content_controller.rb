@@ -31,7 +31,7 @@ class ContentController < ApplicationController
         'content_type': content_type.name,
         'content_owner': current_user.present? && current_user.id == @content.user_id,
         'logged_in_user': current_user.present?
-      })
+      }) if current_user
 
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
