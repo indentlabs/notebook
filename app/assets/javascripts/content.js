@@ -8,6 +8,9 @@ $(document).ready(function () {
     $('.panel').hide();
     $(target_panel).show();
 
+    // Unset the expand button's "expanded" flag, if set
+    $('.expand').removeClass('expanded');
+
     setTimeout(function() {
       window.scrollTo(0, 0);
     }, 1);
@@ -23,8 +26,24 @@ $(document).ready(function () {
   });
 
   $('.expand').click(function () {
-    $('.content-tabs').find('li.tab a').addClass('red-text');
-    $('.panel').show();
+    if ($(this).hasClass('expanded')) {
+      $(this).removeClass('expanded');
+
+      // Reset all selected-tab styling and activate the first one
+      var all_tabs = $('.content-tabs').find('li.tab a');
+      all_tabs.removeClass('red-text');
+      all_tabs.first().addClass('red-text');
+
+      // Reset all panel visibility and show the first one
+      var all_panels = $('.panel');
+      all_panels.hide();
+      all_panels.first().show();
+
+    } else {
+      $(this).addClass('expanded');
+      $('.content-tabs').find('li.tab a').addClass('red-text');
+      $('.panel').show();
+    }
   });
 
   $('.new-attribute-field-link').click(function (e) {
