@@ -8,24 +8,33 @@
 
 <% all_categories = content.class.attribute_categories(current_user) %>
 <% found_attributes = 0 %>
+<% attributes_to_find = 5 %>
 
 <table class="highlight">
-<% all_categories.each do |category| %>
-  <% category.attribute_fields.each do |attribute_field| %>
-    <% break if found_attributes >= 5 %>
+  <% all_categories.each do |category| %>
+    <% category.attribute_fields.each do |attribute_field| %>
+      <% break if found_attributes >= attributes_to_find %>
 
-    <% next if attribute_field.name.end_with? '_id' %>
-    <% next if attribute_field.name == 'privacy' %>
+      <% next if attribute_field.name.end_with? '_id' %>
+      <% next if attribute_field.name == 'privacy' %>
+      <% next if ['name', 'description'].include? attribute_field.name %>
 
-    <% next unless content.respond_to? attribute_field.name %>
-    <% next unless content.send(attribute_field.name).present? %>
-    <% next if content.send(attribute_field.name).is_a?(ActiveRecord::Associations::CollectionProxy) %>
+      <% next unless content.respond_to? attribute_field.name %>
+      <% next unless content.send(attribute_field.name).present? %>
+      <% next if content.send(attribute_field.name).is_a?(ActiveRecord::Associations::CollectionProxy) %>
 
-    <% found_attributes += 1 %>
+      <% found_attributes += 1 %>
+      <tr>
+        <td><strong><%= attribute_field.label %></strong></td>
+        <td><%= content.send attribute_field.name %></td>
+      </tr>
+    <% end %>
+  <% end %>
+  <% if found_attributes < attributes_to_find %>
     <tr>
-      <td><%= attribute_field.label %></td>
-      <td><%= content.send attribute_field.name %></td>
+      <td class="grey-text" colspan="2">
+        More information will automatically appear here as you add it to <%= content.name %>.
+      </td>
     </tr>
   <% end %>
-<% end %>
 </table>
