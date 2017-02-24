@@ -11,10 +11,10 @@ module HasContentGroupers
       connecting_class = with
 
       has_many connecting_class
-      has_many relation, through: connecting_class
+      has_many relation, through: connecting_class, dependent: :destroy
       accepts_nested_attributes_for connecting_class, reject_if: :all_blank, allow_destroy: true
       has_many "inverse_#{connecting_class}".to_sym, class_name: "#{singularized_relation.capitalize}", foreign_key: "#{singularized_relation}_id"
-      has_many "inverse_#{relation}".to_sym, through: "inverse_#{connecting_class}".to_sym, source: name.downcase
+      has_many "inverse_#{relation}".to_sym, through: "inverse_#{connecting_class}".to_sym, source: name.downcase, dependent: :destroy
     end
   end
 end
