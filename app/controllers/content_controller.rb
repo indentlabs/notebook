@@ -27,11 +27,22 @@ class ContentController < ApplicationController
     if (current_user || User.new).can_read? @content
       @question = @content.question if current_user.present? and current_user == @content.user
 
-      Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed content', {
-        'content_type': content_type.name,
-        'content_owner': current_user.present? && current_user.id == @content.user_id,
-        'logged_in_user': current_user.present?
-      }) if current_user
+      if current_user
+        if @content.updated_at > 30.minutes.ago
+          Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed content', {
+            'content_type': content_type.name,
+            'content_owner': current_user.present? && current_user.id == @content.user_id,
+            'logged_in_user': current_user.present?
+          })
+        else
+          Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed recently-modified content', {
+            'content_type': content_type.name,
+            'content_owner': current_user.present? && current_user.id == @content.user_id,
+            'logged_in_user': current_user.present?
+          })
+        end
+      end
+
 
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
