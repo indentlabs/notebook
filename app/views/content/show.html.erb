@@ -105,7 +105,7 @@
       <div class="card-action center">
         <%= yield :content_show_footer %>
 
-        <% if current_user == content.user %>
+        <% if user_signed_in? && current_user == content.user %>
           <%= link_to "Edit this #{content.class.to_s.downcase}", edit_polymorphic_path(@content), class: "btn #{content.class.color}" %>
         <% elsif content.user.name.present? %>
           <%= content.user.name %> created and maintains this universe on Notebook.ai.<br />
