@@ -55,7 +55,7 @@
             <% end %>
 
             <% category.attribute_fields.each do |attribute| %>
-              <% next if attribute.name.start_with?("private") && @content.user != current_user %>
+              <% next if attribute.name.start_with?("private") && (current_user.nil? || @content.user != current_user) %>
 
               <% value = nil
                  if content.respond_to?(attribute.name.to_sym)
@@ -64,7 +64,7 @@
                    value = Attribute.where(user: current_user, attribute_field: attribute, entity: content).first
                  end
               %>
-              <% next if value.blank? %>
+              <%# next if value.blank? %>
 
               <div class="row">
                 <div class="col s3 m3 l2 right-align flow-text grey-text"><%= attribute.label %></div>
@@ -90,9 +90,11 @@
                   </div>
                 <% else %>
                   <%# TODO: if text is > 240, truncate and add "Read more" link that opens modal %>
-                  <div class="col s9 m9 l10 <%= "flow-text" unless value.to_s.length > 140 %> markdownable">
-                    <%= Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value : value).html_safe %>&nbsp;
-                  </div>
+                  <% unless value.blank? %>
+                    <div class="col s9 m9 l10 <%= "flow-text" unless value.to_s.length > 140 %> markdownable">
+                      <%= Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value : value).html_safe %>&nbsp;
+                    </div>
+                  <% end %>
                 <% end %>
               </div>
             <% end %>
