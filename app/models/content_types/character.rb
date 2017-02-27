@@ -37,7 +37,7 @@ class Character < ActiveRecord::Base
   relates :birthplaces,    with: :birthings
 
   # Items
-  relates :favorite_items, with: :ownerships, where: { favorite: true }
+  #relates :favorite_items, with: :ownerships, where: { favorite: true }
 
   # Races
   relates :races,          with: :raceships

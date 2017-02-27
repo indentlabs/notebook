@@ -1,13 +1,16 @@
 class Siblingship < ActiveRecord::Base
+  include HasContentLinking
+
   belongs_to :user
 
   belongs_to :character
   belongs_to :sibling, class_name: 'Character'
 
-  after_create :mutual_link
-  # after_destroy :mutual_destroy
+  def self.after_add_handler x
+    raise x.inspect
+    raise self.instance_of?(Siblingship)
+    return unless [self.sibling_id, self.character_id].all?(&:present?)
 
-  def mutual_link
     # todo: Character => link.class_name.find_by(id: link.name, user_id: self.user_id)
     related_content = Character.find_by(id: self.sibling_id, user_id: self.character.user.id)
 

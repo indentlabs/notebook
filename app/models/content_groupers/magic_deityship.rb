@@ -1,4 +1,6 @@
 class MagicDeityship < ActiveRecord::Base
+  include HasContentLinking
+
   belongs_to :user
 
   belongs_to :magic
