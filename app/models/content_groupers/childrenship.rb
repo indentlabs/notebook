@@ -8,8 +8,8 @@ class Childrenship < ActiveRecord::Base
 
   # These values are used for detecting whether a related character is a male or female
   #todo: proper gender extraction
-  MALE_VALUES   = ['male', 'm', 'man', 'guy', 'dude', 'patern', 'father']
-  FEMALE_VALUES = ['female', 'f', 'woman', 'lady', 'gal', 'dudette', 'matern', 'matriarch', 'mother']
+  MALE_VALUES   = ['male', 'male.', 'm', 'man', 'guy', 'dude', 'patern', 'father']
+  FEMALE_VALUES = ['female', 'female.', 'f', 'woman', 'lady', 'gal', 'dudette', 'matern', 'matriarch', 'mother']
 
   after_create do
     this_object  = Character.find_by(id: self.character_id)

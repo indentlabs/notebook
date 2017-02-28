@@ -3,7 +3,12 @@
 %>
 <div class="card hoverable">
   <div class="card-image waves-effect waves-block waves-light">
-    <%= image_tag "card-headers/#{content_type.to_s.pluralize}.jpg", class: 'activator' %>
+    <% images = content_list.flat_map(&:image_uploads) %>
+    <% if images.any? && rand(3) < 2 %>
+      <%= image_tag images.sample.src(:large), class: 'activator' %>
+    <% else %>
+      <%= image_tag "card-headers/#{content_type.to_s.pluralize}.jpg", class: 'activator' %>
+    <% end %>
   </div>
   <div class="card-content">
     <span class="card-title activator grey-text text-darken-4">
