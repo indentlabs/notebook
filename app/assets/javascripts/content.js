@@ -51,5 +51,7 @@ $(document).ready(function () {
     $('#attribute-field-modal').modal('open');
   });
 
+  $('.content-tabs .tab a').first().addClass('red-text');
+
 });
 

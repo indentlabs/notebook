@@ -8,7 +8,6 @@ class Siblingship < ActiveRecord::Base
   belongs_to :sibling, class_name: 'Character'
 
   after_create do
-    return unless [self.sibling_id, self.character_id].all?(&:present?)
     self.reciprocate relation: :siblingships, parent_object_ref: :character, added_object_ref: :sibling
   end
 

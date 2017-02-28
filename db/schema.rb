@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170218022943) do
+ActiveRecord::Schema.define(version: 20170228160245) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -155,6 +155,14 @@ ActiveRecord::Schema.define(version: 20170218022943) do
     t.integer "user_id"
     t.integer "character_id"
     t.integer "child_id"
+  end
+
+  create_table "creature_relationships", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "creature_id"
+    t.integer  "related_creature_id"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
   end
 
   create_table "creatures", force: :cascade do |t|

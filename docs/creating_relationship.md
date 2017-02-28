@@ -1,14 +1,14 @@
 # Example of adding a "leaders" relation to Group
 
 ## Create migration
-rails g migration CreateGroupLeaderships user_id:integer group_id:integer leader_id:integer
+rails g model GroupLeadership user_id:integer group_id:integer leader_id:integer
 
 ## Migrate
 rake db:migrate
 
 ## group.rb (containing model) changes
 relates :leaders, with: :group_leaderships
-+ add leaders to attribute_categories hash
++ add leaders to attribute_categories hash in config/attributes/group.yml
 
 ## Create content_groupers/group_leadership.rb
 class GroupLeadership < ActiveRecord::Base
