@@ -76,7 +76,6 @@ group :test do
   gem 'guard'
   gem 'guard-minitest'
   gem 'guard-rubocop'
-  gem 'pry'
   gem 'selenium-webdriver'
   gem 'simplecov', require: false
   gem 'sqlite3'
@@ -88,4 +87,8 @@ group :test do
   gem 'rubocop', require: false
   gem 'ruby-prof', '0.15.9'
   gem 'shoulda-matchers', '~> 3.1'
+end
+
+group :test, :development do
+  gem 'pry'
 end
