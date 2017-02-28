@@ -11,6 +11,7 @@
   <%= render partial: 'cards/serendipitous/content_question', locals: { question: @question, content: @content } %>
 <% end %>
 
+<% categories = @content.class.attribute_categories(@content.user) %>
 <div class="row">
   <div class="col s9">
     <div class="card">
@@ -20,7 +21,7 @@
       </div>
 
       <div class="card-content">
-        <% content.class.attribute_categories(current_user).each do |category| %>
+        <% categories.each do |category| %>
           <div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
             <% if category.name == 'gallery' %>
               <div>
@@ -28,7 +29,7 @@
               </div>
             <% end %>
             <% category.attribute_fields.each do |attribute| %>
-              <% next if attribute.name.start_with?("private") && @content.user != current_user %>
+              <% next if attribute.name.start_with?("private") && (current_user.nil? || @content.user != current_user) %>
 
               <%
                 custom_field = false
@@ -37,7 +38,7 @@
                   value = content.send(attribute.name.to_sym)
                 else
                   custom_field = true
-                  value = Attribute.where(user: current_user, attribute_field: attribute, entity: content).first || ""
+                  value = Attribute.where(user: @content.user, attribute_field: attribute, entity: content).first || ""
                 end
               %>
               <% next if value.blank? && !custom_field %>
