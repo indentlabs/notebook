@@ -11,7 +11,7 @@ class Mothership < ActiveRecord::Base
     other_object = Character.find_by(id: self.mother_id)
 
     # If this character is marked as the mother of another character, we should mark that character as a child of this character
-    other_object.childrenships.create(character: other_object, child: this_object)
+    other_object.childrenships.create(character: other_object, child: this_object) unless other_object.children.include? this_object
   end
 
   after_destroy do
