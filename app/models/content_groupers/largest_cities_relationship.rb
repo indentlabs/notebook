@@ -1,4 +1,6 @@
 class LargestCitiesRelationship < ActiveRecord::Base
+  include HasContentLinking
+
   belongs_to :user
 
   belongs_to :location

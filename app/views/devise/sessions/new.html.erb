@@ -1,33 +1,41 @@
-<h2 class="center">Log in to Notebook</h2>
+<div class="center">
+  <%= image_tag 'logos/both-small.png' %>
+</div>
 
-<div class="card">
-  <div class="card-content">
-    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+<div class="row">
+  <div class="col s12 m6 offset-m3">
+    <div class="card">
+      <div class="card-content">
+        <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
 
-      <div class="field">
-        <%= f.label :email %><br />
-        <%= f.email_field :email, autofocus: true %>
+          <h4>Log in</h4>
+
+          <div class="field">
+            <%= f.label :email %><br />
+            <%= f.email_field :email, autofocus: true %>
+          </div>
+
+          <div class="field">
+            <%= f.label :password %><br />
+            <%= f.password_field :password, autocomplete: "off" %>
+          </div>
+
+          <div class="actions center">
+            <% if devise_mapping.rememberable? -%>
+              <span class="field" style="margin-right: 30px;">
+                <%= f.check_box :remember_me %>
+                <%= f.label :remember_me %>
+              </span>
+            <% end -%>
+            <%= f.submit "Log in", class: 'btn blue' %>
+
+            <p class="center">
+              <br />
+              <%= render "devise/shared/links" %>
+            </p>
+          </div>
+        <% end %>
       </div>
-
-      <div class="field">
-        <%= f.label :password %><br />
-        <%= f.password_field :password, autocomplete: "off" %>
-      </div>
-
-      <div class="actions center">
-        <%= f.submit "Log in", class: 'btn' %>
-        <% if devise_mapping.rememberable? -%>
-          <span class="field" style="margin-left: 15px;">
-            <%= f.check_box :remember_me %>
-            <%= f.label :remember_me %>
-          </span>
-        <% end -%>
-
-        <p class="center">
-          <br />
-          <%= render "devise/shared/links" %>
-        </p>
-      </div>
-    <% end %>
+    </div>
   </div>
 </div>

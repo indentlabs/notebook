@@ -12,17 +12,22 @@
       <%= link_to content do %>
         <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
       <% end %>
-      <span class="title"><%= link_to (content.respond_to?(:label) ? content.label : content.name), content %></span>
+      <span class="title">
+        <%= link_to (content.respond_to?(:label) ? content.label : content.name), content %>
+        <small class="grey-text">
+          <% if content.respond_to?(:universe) && content.universe.present? %>
+            <i class="material-icons"><%= Universe.icon %></i>
+            <%= link_to content.universe.name, content.universe %>
+          <% end %>
+        </small>
+      </span>
       <p class="content-description truncate">
         <%= content.description %>
       </p>
       <p class='grey-text'>
-        <% if content.respond_to?(:universe) && content.universe.present? %>
-          <i class="material-icons"><%= Universe.icon %></i>
-          <%= link_to content.universe.name, content.universe %>,
-        <% end %>
+
         <% if current_user && current_user == content.user %>
-          <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>">
+          <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
             <i class="material-icons">mode_edit</i>
 
             <%

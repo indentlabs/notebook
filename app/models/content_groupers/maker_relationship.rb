@@ -1,6 +1,8 @@
 # Defines a relation from an Item to the Character that created it
 # and an inverse relationship from a Character to all items it created
 class MakerRelationship < ActiveRecord::Base
+  include HasContentLinking
+
   belongs_to :user
 
   belongs_to :item

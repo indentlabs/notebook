@@ -1,0 +1,49 @@
+<%
+  editing = defined?(editing) && editing
+  creating = defined?(creating) && creating
+  personal_content = (user_signed_in? && current_user.id == @content.user_id) || @content.new_record?
+%>
+
+<%# Primary FAB %>
+<% if personal_content %>
+  <% if creating || editing %>
+    <button class="btn-floating btn-large halfway-fab waves-effect waves-light <%= @content.class.color %>" type="submit" name="action" style="z-index: 500">
+      <i class="material-icons">save</i>
+    </button>
+  <% else %>
+    <%= link_to edit_polymorphic_path(@content),
+      class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color}",
+      style: 'z-index: 500;' do %>
+      <i class="material-icons">edit</i>
+    <% end %>
+  <% end %>
+<% elsif @content.persisted? %>
+  <%= link_to '#',
+    class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color} share",
+    style: 'z-index: 500;' do %>
+    <i class="material-icons">share</i>
+  <% end %>
+<% end %>
+
+<%= link_to '#',
+  class: "btn-floating btn-small halfway-fab waves-effect waves-light white expand",
+  style: 'z-index: 500; margin-right: 61px;' do %>
+  <%#data: { position: 'bottom', delay: '500', tooltip: 'Expand all tabs vertically'}%>
+  <i class="material-icons black-text">format_line_spacing</i>
+<% end %>
+
+<% if personal_content && @content.persisted? %>
+  <a class="btn-floating btn-small halfway-fab waves-effect waves-light white share" style="z-index: 500; margin-right: 105px;">
+    <i class="material-icons black-text">share</i>
+  </a>
+<% end %>
+
+<% if @content.persisted? && editing %>
+  <%= link_to @content,
+    class: 'btn-floating btn-small halfway-fab waves-effect waves-light white delete left',
+    style: 'z-index: 500;',
+    method: :delete,
+    data: { confirm: "Are you sure? Deleting this #{@content.class.name.downcase} cannot be undone!" } do %>
+    <i class="material-icons red-text text-lighten-2">delete</i> sip
+  <% end %>
+<% end %>

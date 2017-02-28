@@ -1,5 +1,20 @@
-<% content_for :sidebar_top do %>
-  <%= render partial: 'cards/serendipitous/content_question', locals: { question: @question, content: @content } %>
+<% if @question.present? && @question[:question].present? %>
+  <div class="row">
+    <div class="col m9 s12">
+      <%= render partial: 'cards/serendipitous/content_question', locals: { question: @question, content: @content } %>
+    </div>
+    <div class="col m3 s12">
+      <%= render 'cards/user/recent_activity' %>
+    </div>
+  </div>
+<% end %>
+
+<% if current_user.content_count.zero? && false %>
+  <div class="row">
+    <div class="col s12">
+      <!-- Get started onboarding -->
+    </div>
+  </div>
 <% end %>
 
 <%
