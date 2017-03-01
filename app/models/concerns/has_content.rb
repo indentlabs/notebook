@@ -41,6 +41,21 @@ module HasContent
       }
     end
 
+    def content_in_universe universe_id
+      {
+        characters: characters.in_universe(universe_id),
+        items:      items.in_universe(universe_id),
+        locations:  locations.in_universe(universe_id),
+        creatures:  creatures.in_universe(universe_id),
+        races:      races.in_universe(universe_id),
+        religions:  religions.in_universe(universe_id),
+        magics:     magics.in_universe(universe_id),
+        languages:  languages.in_universe(universe_id),
+        scenes:     scenes.in_universe(universe_id),
+        groups:     groups.in_universe(universe_id)
+      }
+    end
+
     def content_count
       [
         characters.length,

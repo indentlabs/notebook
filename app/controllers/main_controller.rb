@@ -22,9 +22,14 @@ class MainController < ApplicationController
     attempts = 0
 
     begin
-      @content = current_user.content.values.flatten.sample
-      @question = @content.question unless @content.nil?
+      if @universe_scope.present? && attempts < 2
+        content_pool = current_user.content_in_universe(@universe_scope).values.flatten
+      else
+        content_pool = current_user.content.values.flatten
+      end
 
+      @content = content_pool.sample
+      @question = @content.question unless @content.nil?
       raise RetryMe if @content.present? && (@question.nil? || @question[:question].nil?) # :(
     rescue RetryMe
       attempts += 1
