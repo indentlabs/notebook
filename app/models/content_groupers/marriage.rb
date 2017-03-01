@@ -16,7 +16,7 @@ class Marriage < ActiveRecord::Base
     this_object  = Character.find_by(id: self.character_id)
     other_object = Character.find_by(id: self.spouse_id)
 
-    other_object.marriages.delete this_object
+    other_object.spouses.delete this_object
   end
 
   #todo "active" marriage?
