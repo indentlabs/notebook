@@ -30,4 +30,12 @@ $(document).ready(function () {
     mixpanel.track("clicked universe lock link");
   });
 
+  $('.mp-sidebar-save').click(function (link) {
+    mixpanel.track('A/B 1a: clicked sidebar save')
+  });
+
+  $('.mp-fab-save').click(function (link) {
+    mixpanel.track('A/B 1b: clicked fab save');
+  });
+
 });
