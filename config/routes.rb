@@ -12,6 +12,13 @@ Rails.application.routes.draw do
     get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
   end
 
+  # Landing pages
+  scope '/for' do
+    get '/writers', to: 'main#for_writers', as: :writers_landing
+    get '/roleplayers', to: 'main#for_roleplayers', as: :roleplayers_landing
+    get '/designers', to: 'main#for_designers', as: :designers_landing
+  end
+
   # User-centric stuff
   scope '/my' do
     get '/content',     to: 'main#dashboard', as: :dashboard

@@ -1,7 +1,7 @@
 # Controller for top-level pages of the site that do not have
 # an associated model
 class MainController < ApplicationController
-  layout 'landing', only: [:index, :about_notebook]
+  layout 'landing', only: [:index, :about_notebook, :for_writers]
 
   class RetryMe < StandardError; end
 
@@ -35,5 +35,14 @@ class MainController < ApplicationController
       attempts += 1
       retry if attempts < 10
     end
+  end
+
+  def for_writers
+  end
+
+  def for_roleplayers
+  end
+
+  def for_designers
   end
 end
