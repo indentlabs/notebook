@@ -1,7 +1,7 @@
 # Controller for top-level pages of the site that do not have
 # an associated model
 class MainController < ApplicationController
-  layout 'landing', only: [:index, :about_notebook, :for_writers]
+  layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_designers]
 
   class RetryMe < StandardError; end
 
