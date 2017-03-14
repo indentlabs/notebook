@@ -24,7 +24,10 @@
   <% else %>
     You're currently subscribed to Notebook's <strong><%= @active_billing_plan.name %></strong> plan.
     <% unless @active_billing_plan.nil? || @active_billing_plan.stripe_plan_id == 'starter' %>
-      Your subscription will be active until <%= current_user.active_subscriptions.first.end_date.strftime('%B %d, %Y') %>, when it will automatically renew for another month.
+      <% renewal_day = current_user.active_subscriptions.first.start_date.day %>
+      While active, your subscription will automatically renew and you will be charged
+      <%= number_to_currency(@active_billing_plan.monthly_cents / 100) %>
+      on the <%= renewal_day %><%= renewal_day.ordinal %> of each month.
     <% end %>
   <% end %>
 </p>

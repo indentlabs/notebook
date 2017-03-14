@@ -49,7 +49,7 @@ class SubscriptionsController < ApplicationController
         user: current_user,
         billing_plan: new_billing_plan,
         start_date: Time.now,
-        end_date: Time.now.end_of_day + 31.days
+        end_date: Time.now.end_of_day + 5.years
       )
 
       report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
@@ -95,7 +95,7 @@ class SubscriptionsController < ApplicationController
         user: current_user,
         billing_plan: new_billing_plan,
         start_date: Time.now,
-        end_date: Time.now.end_of_day + 31.days
+        end_date: Time.now.end_of_day + 5.years
       )
 
       report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
