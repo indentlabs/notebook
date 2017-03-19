@@ -1,7 +1,7 @@
 # Controller for top-level pages of the site that do not have
 # an associated model
 class MainController < ApplicationController
-  layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_designers]
+  layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_designers, :for_friends]
 
   class RetryMe < StandardError; end
 
@@ -44,5 +44,9 @@ class MainController < ApplicationController
   end
 
   def for_designers
+  end
+
+  def for_friends
+    @subscriber_count = User.where(selected_billing_plan_id: [3, 4]).count
   end
 end

@@ -1,0 +1,347 @@
+<div id="index-banner" class="hero">
+  <div class="section no-pad-bot">
+    <div class="container">
+      <br />
+      <br />
+      <h1 class="header center blue-text">
+        Notebook.ai Community Drive
+      </h1>
+      <div class="row center">
+        <h5 class="header col s12 light">
+          Worldbuilding is better with a world of ideas.
+        </h5>
+      </div>
+      <div class="row center">
+        <%= link_to 'Invite a friend',
+                    '#share-modal',
+                    class: 'btn-large waves-effect waves-light blue lighten-1 modal-trigger' %>
+        <br />
+        <br />
+        Earn rewards for yourself <em>and</em> your friends!
+      </div>
+      <br />
+      <br />
+    </div>
+  </div>
+  <div class="hero-container">
+    <%= image_tag 'landing/community.jpg', class: 'hero-image' %>
+  </div>
+</div>
+
+<div id="share-modal" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Share Notebook.ai with friends</h4>
+    <p>A bunch of text and stuff about how to share, with referral link</p>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Let's Go!</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="section">
+
+    <div class="row">
+      <div class="col s12">
+        <div>
+          <h4>
+            Notebook.ai currently has <strong class="green-text"><%= User.where(selected_billing_plan_id: [3, 4]).count %></strong> subscribers.
+          </h4>
+
+          <p class="light flow-text">
+            Since launch, we've seen a <em>ton</em> of great feedback and feature requests &mdash; and are looking forward to making Notebook.ai
+            better and better every day.
+          </p>
+          <p class="light flow-text">
+            To fund that development (and keep my lights on while working full-time on the project), we launched subscriptions on February 1<sup>st</sup>,
+            2017. <strong>Until April 30<sup>th</sup>, Notebook.ai is hosting a community referral drive with a ton of great rewards and prizes to all users
+            who take part and refer their worldbuilding friends to Notebook.ai.</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col s12 center">
+      <style>
+        #progress-bar {
+          margin: 0;
+          width: 100%;
+          height: 40px;
+        }
+      </style>
+      <div id="progress-bar" class="tooltipped" data-position="bottom" data-tooltip="We're <%= (@subscriber_count / 250.0 * 100).round(0) %>% of the way to our goal of 250 subscribers!"></div>
+      <script type="text/javascript">
+        $(document).ready(function () {
+          var bar = new ProgressBar.Line('#progress-bar', {
+            strokeWidth: 4,
+            easing: 'easeInOut',
+            duration: 4000,
+            color: '#03A9F4',
+            trailColor: '#eee',
+            trailWidth: 1,
+            svgStyle: {width: '100%', height: '100%'},
+            from: {color: '#03A9F4'},
+            to: {color: '#4CAF50'},
+            step: (state, bar) => {
+              bar.path.setAttribute('stroke', state.color);
+            }
+          });
+
+          bar.animate(<%= (@subscriber_count / 250.0).round(2) %>);  // Number from 0.0 to 1.0
+        });
+      </script>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col s12">
+        <h4>Raffle details</h4>
+        <p class="light flow-text">
+          On May 1<sup>st</sup>, Notebook.ai will be holding a raffle to reward those with a Premium subscription and those that participated in the community drive &mdash; and more subscribers means better prizes!
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col s12 m4">
+        <div class="card">
+          <div class="card-content center">
+            <h5>Current raffle</h5>
+            <ul>
+              <li class="flow-text">$10 raffle drawing to one user</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col s12 m4">
+        <div class="card">
+          <div class="card-content center">
+            <h5>Better raffle at 25 subscribers</h5>
+            <ul>
+              <li class="flow-text">$100 raffle drawing to one user</li>
+            </ul>
+            <p>
+              With even better raffles automatically unlocking<br />at 50, 100, 150, 200, and 250 subscribers.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col s12 m4">
+        <div class="card">
+          <div class="card-content center">
+            <h5>Best raffle at 250 subscribers</h5>
+            <ul>
+              <li class="flow-text">$50 raffle drawing to five users,</li>
+              <li class="flow-text">$100 raffle drawing to ten users,</li>
+              <li class="flow-text">and</li>
+              <li class="flow-text">$500 raffle drawing to one user</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col s12">
+        <h4>Community rewards</h4>
+        <p class="light flow-text">
+          In addition to raffle rewards to individual users, we'll also be throwing in goodies for <em>everyone</em> with a Premium account at the end of the
+          community drive. And, of course, your rewards get better with every new Premium user!
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col s12 m6">
+        <div class="card">
+          <div class="card-content">
+            <h5>Upload space</h5>
+            <p>
+              Every Premium subscriber will receive an additional 1GB of upload space for every 25 subscribers at the end of the drive.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col s12 m6">
+        <div class="card">
+          <div class="card-content">
+            <h5>Server resources</h5>
+            <p>
+              When your ideas are just a click away, we'll beef up the servers behind that click to make sure it loads super fast, every time.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col s12">
+        <h4>Individual rewards</h4>
+        <p class="light flow-text">
+          For every referral you bring to Notebook.ai, you'll also be getting a bit extra just for you (and your referral). Each user you refer that signs
+          up for Premium will automatically gift you and them the following perks:
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col s12 m6">
+        <div class="card">
+          <div class="card-content center">
+            <h5>For you</h5>
+            <ul>
+              <li>+100 MB upload storage</li>
+              <li>+2 raffle entries</li>
+              <li>+2 feature votes</li>
+            </ul>
+          </div>
+        </div>
+      </div><div class="col s12 m6">
+        <div class="card">
+          <div class="card-content center">
+            <h5>For your friend</h5>
+            <ul>
+              <li>+100 MB upload storage</li>
+              <li>+1 raffle entry</li>
+              <li>+1 feature vote</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col s12">
+        <h4>Community feature vote</h4>
+        <p class="light flow-text">
+          Worldbuilding is better with a world of diverse experiences and ideas. Cast your votes on Notebook.ai's first community feature below to choose what comes next!
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col s12 m3">
+        <div class="card">
+          <div class="card-content">
+            <h5>Community Challenges</h5>
+            <p>
+              Submit your worlds to themed challenges that will push your creativity to its limits &mdash; with prizes!
+            </p>
+            <br />
+            <div class="center">
+              <%= link_to 'Vote', '#', class: 'btn blue white-text' %>
+              <br />
+              <%= link_to 'See results', '#' %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col s12 m3">
+        <div class="card">
+          <div class="card-content">
+            <h5>Universe Collaboration</h5>
+            <p>
+              Collaborate and work together with friends and coworkers in your universes &mdash; while staying in control.
+            </p>
+            <br />
+            <div class="center">
+              <%= link_to 'Vote', '#', class: 'btn blue white-text' %>
+              <br />
+              <%= link_to 'See results', '#' %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col s12 m3">
+        <div class="card">
+          <div class="card-content">
+            <h5>Forums & Chat Rooms</h5>
+            <p>
+              Discuss your worlds and ideas in great detail with other brilliant worldbuilders from all over Earth.
+            </p>
+            <br />
+            <div class="center">
+              <%= link_to 'Vote', '#', class: 'btn blue white-text' %>
+              <br />
+              <%= link_to 'See results', '#' %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col s12 m3">
+        <div class="card">
+          <div class="card-content">
+            <h5>Expert Q&A Sessions</h5>
+            <p>
+              Get any and all of your worldbuilding questions answered by experts on geography, civics, biology, and more.
+            </p>
+            <br />
+            <div class="center">
+              <%= link_to 'Vote', '#', class: 'btn blue white-text' %>
+              <br />
+              <%= link_to 'See results', '#' %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col s12 center">
+        <strong>Only <%= ('1-5-2017'.to_date - Date.today).to_i %> days remaining in the community drive.</strong>
+        <br />
+        Users with a Premium subscription will be randomly selected as raffle winners on May 1<sup>st</sup>, 2017.
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col s12">
+        <h4>Frequently asked questions</h4>
+        <ul class="collapsible" data-collapsible="expandable">
+          <li>
+            <div class="collapsible-header"><i class="material-icons">help_outline</i>Can I invite multiple friends?</div>
+            <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">help_outline</i>Can the friends I invite also invite their friends?</div>
+            <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">help_outline</i>How does the voting work?</div>
+            <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">help_outline</i>When will the raffle drawing happen?</div>
+            <div class="collapsible-body"><span>Time with timezone.</span></div>
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">help_outline</i>How can I check the drive progress?</div>
+            <div class="collapsible-body"><span>this page</span></div>
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">help_outline</i>How long does someone have to sign up for to count?</div>
+            <div class="collapsible-body"><span>at least 1 month</span></div>
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">help_outline</i>Can I be selected for the raffle twice?</div>
+            <div class="collapsible-body"><span>No</span></div>
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">help_outline</i>Have any other questions?</div>
+            <div class="collapsible-body"><span>Email.</span></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
