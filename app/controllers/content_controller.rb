@@ -43,7 +43,6 @@ class ContentController < ApplicationController
         end
       end
 
-
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
         format.json { render json: @content }

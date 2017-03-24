@@ -1,5 +1,14 @@
 # Controller for the Attribute model
 class AttributeFieldsController < ContentController
+  def destroy
+    # Delete this field as usual -- sets @content
+    super
+
+    # If the related category is now empty, delete it as well
+    related_category = @content.attribute_category
+    related_category.destroy if related_category.attribute_fields.empty?
+  end
+
   private
 
   def initialize_object
