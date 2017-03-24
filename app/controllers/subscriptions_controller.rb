@@ -250,10 +250,13 @@ class SubscriptionsController < ApplicationController
       delta = ":wave: Downgrade"
     end
 
+    total_subs_monthly = Subscription.where('start_date < ?', Time.now).where('end_date > ?', Time.now).map(&:billing_plan).sum(&:monthly_cents).to_f / 100
+
     notifier.ping [
       "#{delta} for #{user.email.split('@').first}@ (##{user.id})",
       "From: *#{from.name}* ($#{from.monthly_cents / 100}/month)",
-      "To: *#{to.name}* ($#{to.monthly_cents / 100}/month)"
+      "To: *#{to.name}* ($#{to.monthly_cents / 100}/month)",
+      "Total subscription revenue now: $#{'%.2f' % total_subs_monthly}/mo"
     ].join("\n")
 
   end
