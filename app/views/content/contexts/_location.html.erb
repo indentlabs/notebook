@@ -1,0 +1,76 @@
+<% characters = Birthing.where(birthplace_id: content.id).map(&:character).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if characters.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :character,
+      content_list: characters,
+      card_title: "#{pluralize(characters.count, 'character')} born here"
+    } %>
+  </div>
+<% end %>
+
+<% creatures = Wildlifeship.where(habitat_id: content.id).map(&:creature).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if creatures.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :creature,
+      content_list: creatures,
+      card_title: "#{pluralize(creatures.count, 'creature')} native here"
+    } %>
+  </div>
+<% end %>
+
+<% religions = ReligiousLocationship.where(practicing_location: content.id).map(&:religion).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if religions.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :religion,
+      content_list: religions,
+      card_title: "#{pluralize(religions.count, 'religion')} practiced here"
+    } %>
+  </div>
+<% end %>
+
+<% groups = Headquartership.where(headquarter_id: content.id).map(&:group).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if groups.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :group,
+      content_list: groups,
+      card_title: "#{pluralize(groups.count, 'group')} headquarters here"
+    } %>
+  </div>
+<% end %>
+
+<% groups = Officeship.where(office_id: content.id).map(&:group).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if groups.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :group,
+      content_list: groups,
+      card_title: "#{pluralize(groups.count, 'group')} office here"
+    } %>
+  </div>
+<% end %>
+
+<% groups = GroupLocationship.where(location_id: content.id).map(&:group).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if groups.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :group,
+      content_list: groups,
+      card_title: "#{pluralize(groups.count, 'group')} here"
+    } %>
+  </div>
+<% end %>
+
+<% scenes = SceneLocationship.where(scene_location_id: content.id).map(&:scene).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if scenes.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :scene,
+      content_list: scenes,
+      card_title: "#{pluralize(scenes.count, 'scene')} happens here"
+    } %>
+  </div>
+<% end %>
