@@ -12,11 +12,15 @@
   </div>
   <div class="card-content">
     <span class="card-title activator grey-text text-darken-4">
-      <%= pluralize(content_list.count, content_type.to_s) %>
+      <% if defined? card_title %>
+        <%= card_title %>
+      <% else %>
+        <%= pluralize(content_list.count, content_type.to_s) %>
+      <% end %>
       <i class="material-icons right">arrow_upward</i>
     </span>
     <p>
-      <%= link_to "Create #{content_list.empty? ? 'your first one!' : 'another'}", new_polymorphic_path(content_type) if current_user %>
+      <%= link_to "Create #{content_list.empty? ? 'your first one!' : ['another ', content_type].join}", new_polymorphic_path(content_type) if current_user %>
     </p>
   </div>
   <div class="card-reveal">

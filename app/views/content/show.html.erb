@@ -106,15 +106,10 @@
 <%= render partial: 'content/share', locals: { shared_content: @content} %>
 <%= render partial: 'attribute_fields/modal', locals: { content: @content, safe_mode: true } if user_signed_in? %>
 
-<%# TODO: not this %>
-<% if @content.is_a? Universe %>
-  <% content_to_show = [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene] %>
-
-  <% content_to_show.each do |content_type| %>
-    <% next if @content.send(content_type.name.downcase.pluralize).empty? %>
-
-    <div class="col s12 m12 l4">
-      <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: content_type.name.downcase.to_sym, content_list: @content.send(content_type.name.downcase.pluralize) } %>
-    </div>
+<div class="row">
+  <% if @content.is_a? Universe %>
+    <%= render partial: 'content/contexts/universe', locals: { content: @content } %>
+  <% elsif @content.is_a? Character %>
+    <%= render partial: 'content/contexts/character', locals: { content: @content } %>
   <% end %>
-<% end %>
+</div>

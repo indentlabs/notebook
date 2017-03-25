@@ -1,0 +1,122 @@
+<%# .joins(:item).where('items.privacy' => ['public']) also works, but doesn't include current_user check %>
+
+<% locations = LocationLeadership.where(leader_id: content.id).map(&:location).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if locations.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :location,
+      content_list: locations,
+      card_title: "Leader of #{pluralize(locations.count, 'location')}"
+    } %>
+  </div>
+<% end %>
+
+<% items = MakerRelationship.where(maker_id: content.id).map(&:item).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if items.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :item,
+      content_list: items,
+      card_title: "Made #{pluralize(items.count, 'item')}"
+    } %>
+  </div>
+<% end %>
+
+<% items = CurrentOwnership.where(current_owner_id: content.id).map(&:item).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if items.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :item,
+      content_list: items,
+      card_title: "Currently owns #{pluralize(items.count, 'item')}"
+    } %>
+  </div>
+<% end %>
+
+<% items = PastOwnership.where(past_owner_id: content.id).map(&:item).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if items.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :item,
+      content_list: items,
+      card_title: "Previously owned #{pluralize(items.count, 'item')}"
+    } %>
+  </div>
+<% end %>
+
+<% items = OriginalOwnership.where(original_owner_id: content.id).map(&:item).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if items.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :item,
+      content_list: items,
+      card_title: "Originally owned #{pluralize(items.count, 'item')}"
+    } %>
+  </div>
+<% end %>
+
+<% races = FamousFigureship.where(famous_figure_id: content.id).map(&:race).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if races.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :race,
+      content_list: races,
+      card_title: "Famous figure of #{pluralize(races.count, 'race')}"
+    } %>
+  </div>
+<% end %>
+
+<% religions = ReligiousFigureship.where(notable_figure_id: content.id).map(&:religion).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if religions.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :religion,
+      content_list: religions,
+      card_title: "Famous figure of #{pluralize(religions.count, 'religion')}"
+    } %>
+  </div>
+<% end %>
+
+<% religions = Deityship.where(deity_id: content.id).map(&:religion).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if religions.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :religion,
+      content_list: religions,
+      card_title: "Deity of #{pluralize(religions.count, 'religion')}"
+    } %>
+  </div>
+<% end %>
+
+<% groups = GroupLeadership.where(leader_id: content.id).map(&:group).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if groups.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :group,
+      content_list: groups,
+      card_title: "Leader of #{pluralize(groups.count, 'group')}"
+    } %>
+  </div>
+<% end %>
+
+<% groups = GroupMembership.where(member_id: content.id).map(&:group).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if groups.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :group,
+      content_list: groups,
+      card_title: "Member of #{pluralize(groups.count, 'group')}"
+    } %>
+  </div>
+<% end %>
+
+<% scenes = SceneCharactership.where(scene_character_id: content.id).map(&:scene).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if scenes.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :scene,
+      content_list: scenes,
+      card_title: "In #{pluralize(scenes.count, 'scene')}"
+    } %>
+  </div>
+<% end %>
