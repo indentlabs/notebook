@@ -1,0 +1,21 @@
+<% characters = Raceship.where(race_id: content.id).map(&:character).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if characters.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :character,
+      content_list: characters,
+      card_title: "#{pluralize(characters.count, 'character')} of this race"
+    } %>
+  </div>
+<% end %>
+
+<% religions = ReligiousRaceship.where(race_id: content.id).map(&:religion).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if religions.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :religion,
+      content_list: religions,
+      card_title: "Practices #{pluralize(religions.count, 'religion')}"
+    } %>
+  </div>
+<% end %>

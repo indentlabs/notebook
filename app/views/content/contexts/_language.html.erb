@@ -1,0 +1,10 @@
+<% characters = Lingualism.where(spoken_language_id: content.id).map(&:character).select { |content| content.readable_by?(current_user || User.new) } %>
+<% if characters.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: :character,
+      content_list: characters,
+      card_title: "Spoken by #{pluralize(characters.count, 'character')}"
+    } %>
+  </div>
+<% end %>
