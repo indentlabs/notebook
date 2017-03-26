@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170326164002) do
+ActiveRecord::Schema.define(version: 20170326170148) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -678,6 +678,7 @@ ActiveRecord::Schema.define(version: 20170326164002) do
     t.string   "laws_of_physics"
     t.string   "magic_system"
     t.string   "technologies"
+    t.string   "genre"
   end
 
   create_table "users", force: :cascade do |t|

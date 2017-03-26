@@ -8,7 +8,7 @@ class UniversesController < ContentController
   def content_param_list
     [
       :user_id,
-      :name, :description,
+      :name, :description, :genre,
       :laws_of_physics, :magic_system, :technologies,
       :history,
       :privacy,
