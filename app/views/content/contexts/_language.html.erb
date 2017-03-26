@@ -1,10 +1,23 @@
-<% characters = Lingualism.where(spoken_language_id: content.id).map(&:character).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if characters.any? %>
+<%=
+  render partial: 'content/contexts/relation', locals: {
+    content_type: Character,
+    content: content,
+    relation_class: Lingualism,
+    relation_class_id: :spoken_language_id,
+    relation_text: :spoken_by
+  }
+%>
+
+<% @references.each do |content_type, relations| %>
+  <% next unless relations.any? %>
   <div class="col s12 m6 l4">
-    <%= render partial: 'content/cards/in_universe_content_list', locals: {
-      content_type: :character,
-      content_list: characters,
-      card_title: "Spoken by #{pluralize(characters.count, 'character')}"
+    <%= render partial: 'content/cards/content_relation_list', locals: {
+      content_type: content_type,
+      relations:    relations,
+      card_title:   [
+        'Related to ',
+        pluralize(relations.count, "other #{content_type.to_s.singularize}")
+      ].join
     } %>
   </div>
 <% end %>
