@@ -14,7 +14,6 @@
   string_content_type  = content_type.to_s.downcase
   references_key       = string_content_type.pluralize.to_sym
   pretty_relation_text = relation_text.to_s.titleize.downcase
-  pretty_relation_text[0] = pretty_relation_text[0].upcase
 
   @references ||= {}
   @references[references_key] ||= []
@@ -28,14 +27,26 @@
 %>
 <%
   if relations.count == 1
+    pretty_relation_text.gsub!('<plural>', '')
+    pretty_relation_text.strip!
+    pretty_relation_text[0] = pretty_relation_text[0].upcase
     @references[references_key] << [pretty_relation_text, relations.first]
+
+
   elsif relations.count > 1
+    if pretty_relation_text.include? '<plural>'
+      pretty_relation_text.gsub!('<plural>', pluralize(relations.count, string_content_type))
+    else
+      pretty_relation_text = "#{pretty_relation_text} #{pluralize(relations.count, string_content_type)}"
+    end
+    pretty_relation_text[0] = pretty_relation_text[0].upcase
+
 %>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
       content_type: content_type.to_s.downcase,
       content_list: relations,
-      card_title: "#{pretty_relation_text} #{pluralize(relations.count, string_content_type)}"
+      card_title: pretty_relation_text
     } %>
   </div>
 <% end %>

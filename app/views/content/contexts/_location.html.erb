@@ -1,68 +1,61 @@
-<% characters = Birthing.where(birthplace_id: content.id).map(&:character).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if characters.any? %>
-  <div class="col s12 m6 l4">
-    <%= render partial: 'content/cards/in_universe_content_list', locals: {
-      content_type: :character,
-      content_list: characters,
-      card_title: "#{pluralize(characters.count, 'character')} born here"
-    } %>
-  </div>
-<% end %>
+<%=
+  render partial: 'content/contexts/relation', locals: {
+    content_type: Character,
+    content: content,
+    relation_class: Birthing,
+    relation_class_id: :birthplace_id,
+    relation_text: "<plural> born here" # 5 characters born here
+  }
+%>
 
-<% creatures = Wildlifeship.where(habitat_id: content.id).map(&:creature).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if creatures.any? %>
-  <div class="col s12 m6 l4">
-    <%= render partial: 'content/cards/in_universe_content_list', locals: {
-      content_type: :creature,
-      content_list: creatures,
-      card_title: "#{pluralize(creatures.count, 'creature')} native here"
-    } %>
-  </div>
-<% end %>
+<%=
+  render partial: 'content/contexts/relation', locals: {
+    content_type: Creature,
+    content: content,
+    relation_class: Wildlifeship,
+    relation_class_id: :habitat_id,
+    relation_text: "<plural> native here" # 5 creatures native here
+  }
+%>
 
-<% religions = ReligiousLocationship.where(practicing_location: content.id).map(&:religion).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if religions.any? %>
-  <div class="col s12 m6 l4">
-    <%= render partial: 'content/cards/in_universe_content_list', locals: {
-      content_type: :religion,
-      content_list: religions,
-      card_title: "#{pluralize(religions.count, 'religion')} practiced here"
-    } %>
-  </div>
-<% end %>
+<%=
+  render partial: 'content/contexts/relation', locals: {
+    content_type: Religion,
+    content: content,
+    relation_class: ReligiousLocationship,
+    relation_class_id: :practicing_location,
+    relation_text: "<plural> practiced here"
+  }
+%>
 
-<% groups = Headquartership.where(headquarter_id: content.id).map(&:group).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if groups.any? %>
-  <div class="col s12 m6 l4">
-    <%= render partial: 'content/cards/in_universe_content_list', locals: {
-      content_type: :group,
-      content_list: groups,
-      card_title: "#{pluralize(groups.count, 'group')} headquarters here"
-    } %>
-  </div>
-<% end %>
+<%=
+  render partial: 'content/contexts/relation', locals: {
+    content_type: Group,
+    content: content,
+    relation_class: Headquartership,
+    relation_class_id: :headquarter_id,
+    relation_text: "<plural> headquarters here"
+  }
+%>
 
-<% groups = Officeship.where(office_id: content.id).map(&:group).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if groups.any? %>
-  <div class="col s12 m6 l4">
-    <%= render partial: 'content/cards/in_universe_content_list', locals: {
-      content_type: :group,
-      content_list: groups,
-      card_title: "#{pluralize(groups.count, 'group')} office here"
-    } %>
-  </div>
-<% end %>
-
-<% groups = GroupLocationship.where(location_id: content.id).map(&:group).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if groups.any? %>
-  <div class="col s12 m6 l4">
-    <%= render partial: 'content/cards/in_universe_content_list', locals: {
-      content_type: :group,
-      content_list: groups,
-      card_title: "#{pluralize(groups.count, 'group')} here"
-    } %>
-  </div>
-<% end %>
+<%=
+  render partial: 'content/contexts/relation', locals: {
+    content_type: Group,
+    content: content,
+    relation_class: Officeship,
+    relation_class_id: :office_id,
+    relation_text: "<plural> office(s) here"
+  }
+%>
+<%=
+  render partial: 'content/contexts/relation', locals: {
+    content_type: Group,
+    content: content,
+    relation_class: GroupLocationship,
+    relation_class_id: :location_id,
+    relation_text: "<plural> here"
+  }
+%>
 
 <% scenes = SceneLocationship.where(scene_location_id: content.id).map(&:scene).select { |content| content.readable_by?(current_user || User.new) } %>
 <% if scenes.any? %>
@@ -71,6 +64,20 @@
       content_type: :scene,
       content_list: scenes,
       card_title: "#{pluralize(scenes.count, 'scene')} happens here"
+    } %>
+  </div>
+<% end %>
+
+<% @references.each do |content_type, relations| %>
+  <% next unless relations.any? %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/content_relation_list', locals: {
+      content_type: content_type,
+      relations:    relations,
+      card_title:   [
+        'Related to ',
+        pluralize(relations.count, "other #{content_type.to_s.singularize}")
+      ].join
     } %>
   </div>
 <% end %>
