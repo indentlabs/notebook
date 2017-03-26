@@ -24,6 +24,7 @@ Rails.application.routes.draw do
   # User-centric stuff
   scope '/my' do
     get '/content',     to: 'main#dashboard', as: :dashboard
+    get '/content/recent', to: 'main#recent_content', as: :recent_content
     get '/submissions', to: 'main#comingsoon'
 
     # Billing

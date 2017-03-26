@@ -3,7 +3,7 @@
 class MainController < ApplicationController
   layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_designers, :for_friends]
 
-  class RetryMe < StandardError; end
+  before_action :ask_question, only: [:dashboard]
 
   def index
     redirect_to :dashboard if user_signed_in?
@@ -17,7 +17,32 @@ class MainController < ApplicationController
 
   def dashboard
     return redirect_to new_user_session_path unless user_signed_in?
+  end
 
+  def recent_content
+    recent_content = current_user.content.values.flatten.compact
+
+    @recent_edits   = recent_content.sort_by(&:updated_at).last(100).reverse
+    @recent_creates = recent_content.sort_by(&:created_at).last(100).reverse
+  end
+
+  def for_writers
+  end
+
+  def for_roleplayers
+  end
+
+  def for_designers
+  end
+
+  def for_friends
+    @subscriber_count = User.where(selected_billing_plan_id: [3, 4]).count
+  end
+
+  private
+
+  class RetryMe < StandardError; end
+  def ask_question
     # Try up to 10 times to actually fetch a question
     attempts = 0
 
@@ -35,18 +60,5 @@ class MainController < ApplicationController
       attempts += 1
       retry if attempts < 10
     end
-  end
-
-  def for_writers
-  end
-
-  def for_roleplayers
-  end
-
-  def for_designers
-  end
-
-  def for_friends
-    @subscriber_count = User.where(selected_billing_plan_id: [3, 4]).count
   end
 end
