@@ -27,7 +27,7 @@
               current_user.send(klass.pluralize)
                 .in_universe(@universe_scope)
                 .sort_by(&:name)
-                .reject { |content| content.id == @content.id }
+                .reject { |content| content.class.name == klass && content.id == @content.id }
                 .map { |c| [c.name, c.id] }
                 .compact,
               include_blank: true
