@@ -1,0 +1,87 @@
+<%# Usage:
+render partial: 'content/cards/content_relation_list', locals: { content_type: :character, relations: [[:best_friend, bob], ...]}
+%>
+
+<%
+  singular_content_type = content_type.to_s.singularize
+  content_type_class = singular_content_type.titleize.constantize
+%>
+<div class="card hoverable">
+  <div class="card-image waves-effect waves-block waves-light">
+    <% images = ImageUpload.where(content_type: content_type_class.to_s, content_id: relations.map { |r| r[1].id }) %>
+    <% if images.any? && rand(3) < 2 %>
+      <%= image_tag images.sample.src(:large), class: 'activator', style: 'height: 265px' %>
+    <% else %>
+      <%= image_tag "card-headers/#{content_type.to_s.pluralize}.jpg", class: 'activator', style: 'height: 265px' %>
+    <% end %>
+  </div>
+  <div class="card-content">
+    <span class="card-title activator grey-text text-darken-4">
+      <% if defined? card_title %>
+        <%= card_title %>
+      <% else %>
+        <%= pluralize(relations.count, singular_content_type.to_s) %>
+      <% end %>
+      <i class="material-icons right">arrow_upward</i>
+    </span>
+    <p>
+      <%= link_to "Create #{relations.empty? ? 'your first one!' : ['another ', singular_content_type].join}", new_polymorphic_path(singular_content_type) if current_user %>
+    </p>
+  </div>
+  <div class="card-reveal">
+    <span class="card-title grey-text text-darken-4">
+      <% if relations.any? %>
+        <i class="material-icons <%= content_type_class.color %>-text" style="position: relative; top: 3px">
+          <%= content_type_class.icon %>
+        </i>
+      <% end %>
+      <%= content_type.to_s.titleize %>
+      <i class="material-icons right">close</i>
+    </span>
+    <% if relations.any? %>
+      <table class="content-table bordered">
+        <tr>
+          <th>Relation</th>
+          <th><%= singular_content_type.titleize %></th>
+          <th></th>
+        </tr>
+        <% relations.each do |relation, content| %>
+        <tr>
+          <td><%= relation.to_s.titleize %></td>
+          <td><%= link_to content.name, content %></td>
+          <td>
+            <div class="secondary-content">
+              <%= link_to edit_polymorphic_path(content) do %>
+                <i class="material-icons">edit</i>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    <% elsif relations.empty? %>
+      <div class="row">
+        <div class="col s4">
+          <h1><i class="material-icons <%= content_type_class.color %>-text text-lighten-2" style="font-size: 150%">
+            <%= content_type_class.icon %>
+          </i></h1>
+        </div>
+        <div class="col s8">
+          <p>
+            <%= t("content_descriptions.#{singular_content_type}") %>
+          </p>
+          <div class="center hide-on-small-only">
+            <% button_text = relations.any? ? "Create another #{singular_content_type}" : "Create one" %>
+            <%= link_to button_text, new_polymorphic_path(singular_content_type), class: "btn #{content_type_class.color}" if current_user %>
+          </div>
+        </div>
+        <div class="center hide-on-med-and-up">
+          <% button_text = relations.any? ? "Create another #{singular_content_type}" : "Create one" %>
+          <%= link_to button_text, new_polymorphic_path(singular_content_type), class: "btn #{content_type_class.color}" if current_user %>
+        </div>
+      </div>
+    <% end %>
+    <br />
+
+  </div>
+</div>

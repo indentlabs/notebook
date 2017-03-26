@@ -1,7 +1,25 @@
+<%
+  references = {
+    characters: [],
+    locations: [],
+    items: [],
+    creatures: [],
+    races: [],
+    religions: [],
+    groups: [],
+    magics: [],
+    languages: []
+  }
+%>
+
 <%# .joins(:item).where('items.privacy' => ['public']) also works, but doesn't include current_user check %>
 
 <% locations = LocationLeadership.where(leader_id: content.id).map(&:location).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if locations.any? %>
+<%
+  if locations.count == 1
+    references[:locations] << [:leader_of, locations.first]
+  elsif locations.count > 1
+%>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
       content_type: :location,
@@ -12,7 +30,11 @@
 <% end %>
 
 <% items = MakerRelationship.where(maker_id: content.id).map(&:item).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if items.any? %>
+<%
+  if items.count == 1
+    references[:items] << [:maker_of, items.first]
+  elsif items.count > 1
+%>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
       content_type: :item,
@@ -23,7 +45,11 @@
 <% end %>
 
 <% items = CurrentOwnership.where(current_owner_id: content.id).map(&:item).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if items.any? %>
+<%
+  if items.count == 1
+    references[:items] << [:currently_owns, items.first]
+  elsif items.count > 1
+%>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
       content_type: :item,
@@ -34,7 +60,11 @@
 <% end %>
 
 <% items = PastOwnership.where(past_owner_id: content.id).map(&:item).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if items.any? %>
+<%
+  if items.count == 1
+    references[:items] << [:previously_owned, items.first]
+  elsif items.count > 1
+%>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
       content_type: :item,
@@ -45,7 +75,11 @@
 <% end %>
 
 <% items = OriginalOwnership.where(original_owner_id: content.id).map(&:item).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if items.any? %>
+<%
+  if items.count == 1
+    references[:items] << [:originally_owned, items.first]
+  elsif items.count > 1
+%>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
       content_type: :item,
@@ -56,7 +90,11 @@
 <% end %>
 
 <% races = FamousFigureship.where(famous_figure_id: content.id).map(&:race).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if races.any? %>
+<%
+  if races.count == 1
+    references[:races] << [:famous_figure_of, races.first]
+  elsif races.count > 1
+%>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
       content_type: :race,
@@ -67,7 +105,11 @@
 <% end %>
 
 <% religions = ReligiousFigureship.where(notable_figure_id: content.id).map(&:religion).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if religions.any? %>
+<%
+  if religions.count == 1
+    references[:religions] << [:famous_figure_of, religions.first]
+  elsif religions.count > 1
+%>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
       content_type: :religion,
@@ -78,7 +120,11 @@
 <% end %>
 
 <% religions = Deityship.where(deity_id: content.id).map(&:religion).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if religions.any? %>
+<%
+  if religions.count == 1
+    references[:religions] << [:deity_of, religions.first]
+  elsif religions.count > 1
+%>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
       content_type: :religion,
@@ -89,7 +135,11 @@
 <% end %>
 
 <% groups = GroupLeadership.where(leader_id: content.id).map(&:group).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if groups.any? %>
+<%
+  if groups.count == 1
+    references[:groups] << [:leader_of, groups.first]
+  elsif groups.count > 1
+%>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
       content_type: :group,
@@ -100,7 +150,11 @@
 <% end %>
 
 <% groups = GroupMembership.where(member_id: content.id).map(&:group).select { |content| content.readable_by?(current_user || User.new) } %>
-<% if groups.any? %>
+<%
+  if groups.count == 1
+    references[:groups] << [:member_of, groups.first]
+  elsif groups.count > 1
+%>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
       content_type: :group,
@@ -120,3 +174,19 @@
     } %>
   </div>
 <% end %>
+
+<%
+[:characters, :locations, :items, :creatures, :races, :religions, :groups, :magics, :languages].each do |content_type|
+  if references[content_type].count > 0
+%>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/content_relation_list', locals: {
+      content_type: content_type,
+      relations:    references[content_type],
+      card_title:   "Related to #{pluralize(references[content_type].count, content_type.to_s.singularize)}"
+    } %>
+  </div>
+<%
+  end
+end
+%>
