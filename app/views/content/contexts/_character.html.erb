@@ -106,14 +106,25 @@
 
 <% @references.each do |content_type, relations| %>
   <% next unless relations.any? %>
+  <%
+  card_title = if relations.count == 1
+    [
+      relations.first.first,
+      ' ',
+      pluralize(relations.count, "#{content_type.to_s.singularize}")
+    ].join
+  else
+    [
+      'Related to ',
+      pluralize(relations.count, "other #{content_type.to_s.singularize}")
+    ].join
+  end
+  %>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/content_relation_list', locals: {
       content_type: content_type,
       relations:    relations,
-      card_title:   [
-        'Related to ',
-        pluralize(relations.count, "other #{content_type.to_s.singularize}")
-      ].join
+      card_title:   card_title
     } %>
   </div>
 <% end %>

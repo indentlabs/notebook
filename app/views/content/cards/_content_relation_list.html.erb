@@ -18,7 +18,14 @@ render partial: 'content/cards/content_relation_list', locals: { content_type: :
   <div class="card-content">
     <span class="card-title activator grey-text text-darken-4">
       <% if defined? card_title %>
-        <%= card_title %>
+        <%
+          formatted_card_title = card_title.dup
+          if formatted_card_title.include? '<plural>'
+            formatted_card_title.gsub!('<plural>', pluralize(relations.count, singular_content_type))
+          end
+          formatted_card_title[0] = formatted_card_title[0].upcase
+        %>
+        <%= formatted_card_title %>
       <% else %>
         <%= pluralize(relations.count, singular_content_type.to_s) %>
       <% end %>
@@ -46,6 +53,12 @@ render partial: 'content/cards/content_relation_list', locals: { content_type: :
           <th></th>
         </tr>
         <% relations.each do |relation, content| %>
+          <%
+            relation.gsub!('<plural>', '')
+            relation.strip!
+            relation[0] = relation[0].upcase
+          %>
+
         <tr>
           <td><%= relation.to_s %></td>
           <td><%= link_to content.name, content %></td>
