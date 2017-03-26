@@ -1,0 +1,38 @@
+<%# Usage:
+  render partial: 'content/contexts/relation', locals: {
+    content_type: Location,
+    content: some_location_to_find_leaders_of,
+    relation_class: LocationLeadership,
+    relation_class_id: :leader_id,
+    relation_text: :leader_of
+  }
+
+  Note: MODIFIES @references[content_type]
+%>
+
+<%
+  string_content_type = content_type.to_s.downcase
+  references_key      = string_content_type.pluralize.to_sym
+
+  @references ||= {}
+  @references[references_key] ||= []
+%>
+
+<%
+  relations = relation_class.where("#{relation_class_id}": content.id)
+    .map { |content| content.send(string_content_type) }
+    .select { |content| content.readable_by?(current_user || User.new) }
+%>
+<%
+  if relations.count == 1
+    @references[references_key] << [relation_text, relations.first]
+  elsif relations.count > 1
+%>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/in_universe_content_list', locals: {
+      content_type: content_type,
+      content_list: relations,
+      card_title: "#{relation_text} #{pluralize(relations.count, string_content_type)}"
+    } %>
+  </div>
+<% end %>
