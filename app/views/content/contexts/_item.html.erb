@@ -28,7 +28,7 @@
   }
 %>
 
-<% scenes = SceneItemship.where(scene_item_id: content.id).map(&:scene).select { |content| content.readable_by?(current_user || User.new) } %>
+<% scenes = SceneItemship.where(scene_item_id: content.id).map(&:scene).compact.select { |content| content && content.readable_by?(current_user || User.new) } %>
 <% if scenes.any? %>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
