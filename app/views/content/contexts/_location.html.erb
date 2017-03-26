@@ -72,7 +72,15 @@
   <% next unless relations.any? %>
   <%
   card_title = if relations.count == 1
-    relations.first.first
+    if relations.first.first.include? '<plural>'
+      relations.first.first
+    else
+      [
+        relations.first.first,
+        ' ',
+        pluralize(relations.count, "#{content_type.to_s.singularize}")
+      ].join
+    end
   else
     [
       'Related to ',
