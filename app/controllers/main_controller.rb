@@ -3,8 +3,6 @@
 class MainController < ApplicationController
   layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_designers, :for_friends]
 
-  before_action :ask_question, only: [:dashboard]
-
   def index
     redirect_to :dashboard if user_signed_in?
   end
@@ -17,6 +15,8 @@ class MainController < ApplicationController
 
   def dashboard
     return redirect_to new_user_session_path unless user_signed_in?
+
+    ask_question
   end
 
   def recent_content
