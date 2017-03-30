@@ -23,7 +23,7 @@
 <%
   relations = relation_class.where("#{relation_class_id}": content.id)
     .map { |content| content.send(string_content_type) }
-    .select { |content| content.readable_by?(current_user || User.new) }
+    .select { |content| content && content.readable_by?(current_user || User.new) }
 %>
 <%
   if relations.count == 1
