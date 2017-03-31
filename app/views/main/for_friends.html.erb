@@ -32,11 +32,60 @@
 
 <div id="share-modal" class="modal modal-fixed-footer">
   <div class="modal-content">
-    <h4>Share Notebook.ai with friends</h4>
-    <p>A bunch of text and stuff about how to share, with referral link</p>
+    <h4>
+      <i class="material-icons right blue-text">share</i>
+      Share Notebook.ai with friends
+    </h4>
+    <p>
+      Your personal referral link is below, ready to share! Whenever someone who signed up for Notebook.ai with your referral link starts a Premium subscription, you'll both get extra goodies!
+    </p>
+
+    <% if user_signed_in? %>
+      <div class="center">
+        <h5>Your referral link</h5>
+        <input type="text"
+               value="https://www.notebook.ai/users/sign_up?referral=<%= current_user.referral_code.code %>"
+               style="text-align: center"
+               onClick="this.select();" />
+      </div>
+
+      <div class="row">
+        <div class="col s12 m6">
+          <h5 class="center">Share on Facebook</h5>
+
+        </div>
+        <div class="col s12 m6">
+          <h5 class="center">Share on Twitter</h5>
+          <div>
+            <a href="https://twitter.com/share" class="twitter-share-button" data-show-count="false">Tweet</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col s12">
+        </div>
+      </div>
+
+    <% else %>
+      <div class="">
+        Sign in to get your referral code!
+      </div>
+    <% end %>
+
   </div>
   <div class="modal-footer">
-    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Let's Go!</a>
+    <div class="left" style="margin-top: 15px; margin-left: 15px;">
+      <%=
+        social_share_button_tag(
+          "Notebook.ai is ",
+
+          url: "https://www.notebook.ai/users/sign_up?referral=#{current_user.referral_code.code}",
+          'data-twitter-title' => 'Tweet text here'
+        )
+      %>
+    </div>
+    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Close</a>
   </div>
 </div>
 
@@ -207,66 +256,50 @@
       <div class="col s12 m3">
         <div class="card">
           <div class="card-content">
+            <div class="center"><i class="material-icons blue-text" style="font-size: 55px;">stars</i></div>
             <h5>Community Challenges</h5>
             <p>
               Submit your worlds to themed challenges that will push your creativity to its limits &mdash; with prizes!
             </p>
-            <br />
-            <div class="center">
-              <%= link_to 'Vote', '#', class: 'btn blue white-text' %>
-              <br />
-              <%= link_to 'See results', '#' %>
-            </div>
           </div>
         </div>
       </div>
       <div class="col s12 m3">
         <div class="card">
           <div class="card-content">
+            <div class="center"><i class="material-icons blue-text" style="font-size: 55px;">group_work</i></div>
             <h5>Universe Collaboration</h5>
             <p>
               Collaborate and work together with friends and coworkers in your universes &mdash; while staying in control.
             </p>
-            <br />
-            <div class="center">
-              <%= link_to 'Vote', '#', class: 'btn blue white-text' %>
-              <br />
-              <%= link_to 'See results', '#' %>
-            </div>
           </div>
         </div>
       </div>
       <div class="col s12 m3">
         <div class="card">
           <div class="card-content">
+            <div class="center"><i class="material-icons blue-text" style="font-size: 55px;">forum</i></div>
             <h5>Forums & Chat Rooms</h5>
             <p>
               Discuss your worlds and ideas in great detail with other brilliant worldbuilders from all over Earth.
             </p>
-            <br />
-            <div class="center">
-              <%= link_to 'Vote', '#', class: 'btn blue white-text' %>
-              <br />
-              <%= link_to 'See results', '#' %>
-            </div>
           </div>
         </div>
       </div>
       <div class="col s12 m3">
         <div class="card">
           <div class="card-content">
+            <div class="center"><i class="material-icons blue-text" style="font-size: 55px;">live_help</i></div>
             <h5>Expert Q&A Sessions</h5>
             <p>
               Get any and all of your worldbuilding questions answered by experts on geography, civics, biology, and more.
             </p>
-            <br />
-            <div class="center">
-              <%= link_to 'Vote', '#', class: 'btn blue white-text' %>
-              <br />
-              <%= link_to 'See results', '#' %>
-            </div>
           </div>
         </div>
+      </div>
+
+      <div class="col s12 center">
+        <%= link_to 'Cast your vote and see results on our voting page', '#' %>
       </div>
     </div>
   </div>
@@ -277,6 +310,10 @@
         <strong>Only <%= ('1-5-2017'.to_date - Date.today).to_i %> days remaining in the community drive.</strong>
         <br />
         Users with a Premium subscription will be randomly selected as raffle winners on May 1<sup>st</sup>, 2017.
+        <br /><br />
+        <%= link_to 'Invite a friend',
+                    '#share-modal',
+                    class: 'btn-large waves-effect waves-light blue lighten-1 modal-trigger' %>
       </div>
     </div>
   </div>
@@ -288,35 +325,51 @@
         <ul class="collapsible" data-collapsible="expandable">
           <li>
             <div class="collapsible-header"><i class="material-icons">help_outline</i>Can I invite multiple friends?</div>
-            <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+            <div class="collapsible-body"><span>
+              Absolutely! In fact, we'd love it if you did! Whenever any of your referrals sign up for a Premium subscription, both they and you will receive the extra goodies above. There's no limit to how many goodies you can get, so invite anyone and everyone you think would enjoy and/or love Notebook.ai!
+            </span></div>
           </li>
           <li>
             <div class="collapsible-header"><i class="material-icons">help_outline</i>Can the friends I invite also invite their friends?</div>
-            <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+            <div class="collapsible-body"><span>
+              Absolutely! It doesn't matter whether you were invited by a friend or signed up yourself &mdash; anyone you invite will be eligible to earn referral goodies for you and them whenever they sign up for a Premium subscription.
+            </span></div>
           </li>
           <li>
             <div class="collapsible-header"><i class="material-icons">help_outline</i>How does the voting work?</div>
-            <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+            <div class="collapsible-body"><span>
+              Until <%= (@drawing_date + 7.days).strftime('%B %-d') %>, all Premium users can cast their votes on the first community feature to be developed <%= link_to 'at our voting page', '#' %>. After that date, the feature with the most votes will win &mdash; and will be introduced with Notebook.ai's next feature update.
+            </span></div>
           </li>
           <li>
             <div class="collapsible-header"><i class="material-icons">help_outline</i>When will the raffle drawing happen?</div>
-            <div class="collapsible-body"><span>Time with timezone.</span></div>
+            <div class="collapsible-body"><span>
+              The raffle drawing will happen at noon UTC, <%= @drawing_date.strftime('%B %-d') %>.
+            </span></div>
           </li>
           <li>
             <div class="collapsible-header"><i class="material-icons">help_outline</i>How can I check the drive progress?</div>
-            <div class="collapsible-body"><span>this page</span></div>
+            <div class="collapsible-body"><span>
+              Come back to this page anytime! You'll be able to see how the drive is going, how close we are to the goal, and what the current rewards and raffle looks like. Don't forget &mdash; the more subscribers we get by <%= @drawing_date.strftime('%B %-d') %>, the better the raffle will be!
+            </span></div>
           </li>
           <li>
             <div class="collapsible-header"><i class="material-icons">help_outline</i>How long does someone have to sign up for to count?</div>
-            <div class="collapsible-body"><span>at least 1 month</span></div>
+            <div class="collapsible-body">
+              <span>Any user that signs up for a Premium subscription will count towards progress in the drive (unlocking new rewards and gifting goodies to their referrer). Premium users with an active subscription on <%= @drawing_date.strftime('%B %-d') %> will be eligible to win in the raffle.</span>
+            </div>
           </li>
           <li>
             <div class="collapsible-header"><i class="material-icons">help_outline</i>Can I be selected for the raffle twice?</div>
-            <div class="collapsible-body"><span>No</span></div>
+            <div class="collapsible-body"><span>
+              In order to give everyone a fair chance at winning something in the raffle, each user is only eligible to be drawn in the raffle at most once.
+            </span></div>
           </li>
           <li>
             <div class="collapsible-header"><i class="material-icons">help_outline</i>Have any other questions?</div>
-            <div class="collapsible-body"><span>Email.</span></div>
+            <div class="collapsible-body"><span>
+              I'm always happy to chat! Feel free to send me an email directly at an<span>d</span>re<strong></strong>w@<em></em>indent<span></span>labs<strong></strong>.c<em></em>om.
+            </span></div>
           </li>
         </ul>
       </div>

@@ -54,6 +54,9 @@ gem 'redcarpet' #markdown formatting
 gem 'raygun4ruby'
 gem 'mixpanel-ruby'
 
+# Sharing
+gem 'social-share-button'
+
 group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
