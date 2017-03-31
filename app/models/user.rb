@@ -18,7 +18,10 @@ class User < ActiveRecord::Base
   has_many :billing_plans, through: :subscriptions
   has_many :image_uploads
 
+  has_one :referral_code
+
   after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
+  after_create :initialize_referral_code
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
@@ -75,6 +78,10 @@ class User < ActiveRecord::Base
     else
       self.stripe_customer_id
     end
+  end
+
+  def initialize_referral_code
+    ReferralCode.create user: self, code: SecureRandom.uuid
   end
 
   private
