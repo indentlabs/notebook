@@ -1,6 +1,7 @@
 <% free_for_life_user = current_user.selected_billing_plan_id == 2 %>
 <% on_premium_plan = ['early-adopters', 'premium'].include? @active_billing_plan.stripe_plan_id %>
 
+<!--
 <p class="right hide-on-small-only">
   <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_class| %>
     <% can_create = current_user.can_create?(content_class) %>
@@ -10,6 +11,7 @@
     </i>
   <% end %>
 </p>
+-->
 
 <h4>Subscription Plan</h4>
 
@@ -31,6 +33,127 @@
     <% end %>
   <% end %>
 </p>
+
+<div class="row">
+  <div class="col s12">
+    <div class="card <%= 'green lighten-5' if on_premium_plan %>">
+      <div class="card-content">
+        <div class="right" style="position: relative; top: 15px;">
+          <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_class| %>
+            <i class="material-icons <%= content_class.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+              <%= content_class.icon %>
+            </i>
+          <% end %>
+        </div>
+        <h4>
+          <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">class</i>
+          Premium
+          <small class="grey-text">
+            $9/month
+          </small>
+        </h4>
+        <div class="right" style="position: relative; top: 15px;">
+          <% if on_premium_plan %>
+            <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
+          <% else %>
+            <%= link_to 'Upgrade to Premium', change_subscription_path('premium'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
+          <% end %>
+        </div>
+        <div class="row">
+          <div class="col s3">
+            <ul class="plan-features">
+              <li>
+                <i class="material-icons green-text">check</i>
+                Plan <strong>unlimited</strong> universes
+              </li>
+              <li>
+                <i class="material-icons green-text">check</i>
+                Upload up to <strong>1GB</strong> of images
+              </li>
+              <li>
+                <i class="material-icons green-text">check</i>
+                Create <strong>all 10 kinds</strong> of content
+              </li>
+            </ul>
+          </div>
+          <div class="col s3">
+            <ul class="plan-features">
+              <li>
+                <i class="material-icons green-text">add</i>
+                <%= link_to '1 raffle entry', friends_landing_path %>
+              </li>
+              <li>
+                <i class="material-icons green-text">add</i>
+                <%= link_to '1 feature vote', friends_landing_path %>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="card-action">
+        <a href="#">Browse payment options</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12">
+    <div class="card <%= 'light-blue lighten-5' unless on_premium_plan %>">
+      <div class="card-content">
+        <div class="right" style="position: relative; top: 15px;">
+          <% [Character, Location, Item].each do |content_class| %>
+            <i class="material-icons <%= content_class.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+              <%= content_class.icon %>
+            </i>
+          <% end %>
+          <% [Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_class| %>
+            <i class="material-icons grey-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Upgrade to Premium to create <%= content_class.name.pluralize %>">
+              <%= content_class.icon %>
+            </i>
+          <% end %>
+        </div>
+        <h4>
+          <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">class</i>
+          Starter
+          <small class="grey-text">
+            $0/month
+          </small>
+        </h4>
+        <div class="right" style="position: relative; top: 15px;">
+          <% unless on_premium_plan %>
+            <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
+          <% else %>
+            <%= link_to 'Upgrade to Premium', change_subscription_path('premium'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
+          <% end %>
+        </div>
+        <div class="row">
+          <div class="col s6">
+            <ul class="plan-features">
+              <li>
+                <i class="material-icons green-text">check</i>
+                Plan up to <strong>5</strong> universes
+              </li>
+              <li>
+                <i class="material-icons green-text">check</i>
+                Upload up to <strong>50MB</strong> of images
+              </li>
+              <li>
+                <i class="material-icons green-text">check</i>
+                Create characters, locations, and items
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
 
 <div class="row">
   <div class="col s12 m6">
