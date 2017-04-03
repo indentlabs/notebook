@@ -78,6 +78,36 @@ namespace :billing_plans do
       allows_collaboration: false
     )
 
+    # Standard $9/month paid tier (to be available after signup promo)
+    BillingPlan.find_or_create_by(
+      name: 'Premium (3-month bundle)',
+      stripe_plan_id: 'premium-trio',
+      monthly_cents: 833, # $8.33/mo -- $25/3mo
+      available: true,
+
+      # Content creation and other permissions:
+      universe_limit: 1000,
+      allows_core_content: true,
+      allows_extended_content: true,
+      allows_collective_content: true,
+      allows_collaboration: false
+    )
+
+    # Standard $9/month paid tier (to be available after signup promo)
+    BillingPlan.find_or_create_by(
+      name: 'Premium (annual)',
+      stripe_plan_id: 'premium-annual',
+      monthly_cents: 825, # $9.00/mo
+      available: true,
+
+      # Content creation and other permissions:
+      universe_limit: 1000,
+      allows_core_content: true,
+      allows_extended_content: true,
+      allows_collective_content: true,
+      allows_collaboration: false
+    )
+
     puts "Done. There are #{BillingPlan.count} billing plans now."
   end
 end
