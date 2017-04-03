@@ -1,4 +1,8 @@
 class UsersController < ApplicationController
+  def index
+    redirect_to new_session_path(User)
+  end
+
   def show
     @user = User.find(params[:id])
 

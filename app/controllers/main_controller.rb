@@ -38,6 +38,12 @@ class MainController < ApplicationController
   def for_friends
     @subscriber_count = User.where(selected_billing_plan_id: [3, 4]).count
     @drawing_date = 'May 15, 2017'.to_date
+
+    @subscriber_count = 54 #todo remove
+  end
+
+  def feature_voting
+
   end
 
   private
