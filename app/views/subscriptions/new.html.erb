@@ -277,16 +277,17 @@
                 but since we don't store it locally, you cannot edit it. You can choose to add a new one (replacing the old),
                 or delete the existing one.
               </p>
-              <p>
-                <%= link_to "Add new payment method", payment_info_path, class: 'btn white black-text' %>
-              </p>
-              <p>
-                <%= link_to "Delete existing payment method", delete_payment_method_path, class: 'btn white black-text' %>
-              </p>
             <% end %>
           </div>
         </div>
       </div>
+      <% if @stripe_customer.sources.total_count > 0 %>
+      <div class="card-action">
+                <%= link_to "Add new payment method", payment_info_path %>
+                <%= link_to "Delete existing payment method", delete_payment_method_path %>
+
+      </div>
+      <% end %>
     </div>
   </div>
 </div>
@@ -318,7 +319,13 @@
 
 <div class="card">
   <div class="card-content">
-    <div class="card-title">Billing history</div>
+    <div class="card-title">
+      <div class="right">
+        <% account_balance = @stripe_customer.account_balance %>
+        <%= 'Outstanding balance:' if account_balance > 0 %> <%= number_to_currency(account_balance.abs / 100.0) if account_balance != 0 %> <%= 'credit' if account_balance < 0 %>
+      </div>
+      Billing history
+    </div>
     <table class="bordered">
       <thead>
         <tr>
