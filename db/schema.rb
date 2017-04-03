@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170331001122) do
+ActiveRecord::Schema.define(version: 20170403180417) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -552,6 +552,14 @@ ActiveRecord::Schema.define(version: 20170331001122) do
   end
 
   add_index "referral_codes", ["user_id"], name: "index_referral_codes_on_user_id"
+
+  create_table "referrals", force: :cascade do |t|
+    t.integer  "referrer_id"
+    t.integer  "referred_id"
+    t.integer  "associated_code_id"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+  end
 
   create_table "religions", force: :cascade do |t|
     t.string   "name"

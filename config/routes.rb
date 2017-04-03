@@ -21,6 +21,10 @@ Rails.application.routes.draw do
     get '/friends', to: 'main#for_friends', as: :friends_landing
   end
 
+  scope '/vote' do
+    get '/community', to: 'main#feature_voting', as: :community_voting
+  end
+
   # User-centric stuff
   scope '/my' do
     get '/content',     to: 'main#dashboard', as: :dashboard
