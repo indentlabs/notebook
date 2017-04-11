@@ -19,6 +19,12 @@ class MainController < ApplicationController
     ask_question
   end
 
+  def prompts
+    return redirect_to new_user_session_path unless user_signed_in?
+
+    ask_question
+  end
+
   def recent_content
     recent_content = current_user.content.values.flatten.compact
 

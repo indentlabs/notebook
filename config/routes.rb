@@ -30,6 +30,7 @@ Rails.application.routes.draw do
     get '/content',     to: 'main#dashboard', as: :dashboard
     get '/content/recent', to: 'main#recent_content', as: :recent_content
     get '/submissions', to: 'main#comingsoon'
+    get '/prompts', to: 'main#prompts', as: :prompts
 
     # Billing
     scope '/billing' do

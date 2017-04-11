@@ -19,6 +19,10 @@ if question.present? &&
       <div id="tristan-answer">
         <%= form_for content do |f| %>
 
+          <% if defined?(redirect_path) %>
+            <%= hidden_field :override, :redirect_path, value: redirect_path %>
+          <% end %>
+
           <div class="input-field">
             <%= f.text_area question[:field], class: 'content-question-input materialize-textarea', placeholder: content.class.human_attribute_name(question[:field]) %>
           </div>

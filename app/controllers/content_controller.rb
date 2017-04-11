@@ -205,7 +205,13 @@ class ContentController < ApplicationController
 
   def successful_response(url, notice)
     respond_to do |format|
-      format.html { redirect_to url, notice: notice }
+      format.html {
+        if params.key?(:override) && params[:override].key?(:redirect_path)
+          redirect_to params[:override][:redirect_path], notice: notice
+        else
+          redirect_to url, notice: notice
+        end
+      }
       format.json { render json: @content || {}, status: :success, notice: notice }
     end
   end

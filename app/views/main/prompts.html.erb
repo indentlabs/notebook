@@ -1,0 +1,41 @@
+<% if @question.present? && @question[:question].present? %>
+  <div class="row">
+    <div class="col m9 s12">
+      <%= render partial: 'cards/serendipitous/content_question', locals: {
+      	question: @question,
+      	content: @content,
+      	redirect_path: prompts_path
+      } %>
+    </div>
+    <div class="col m3 s12">
+      <h5>Recently updated</h5>
+      <%= render 'cards/user/recent_activity' %>
+    </div>
+  </div>
+<% else %>
+  <%= image_tag 'tristan/small',
+    class: 'tooltipped tristan right',
+    data: {
+      position: 'left',
+      delay: '500',
+      tooltip: "Hey, I'm Tristan! Once you've created some pages in your digital notebook, I'll come up with some writing prompts for you!"
+    } %>
+    <h5>Writing prompts</h5>
+    <p>
+      <% if current_user.content_count.zero? %>
+        Once you've created some ideas in Notebook.ai, you can visit this page for writing prompts set in your world. They'll star your characters, in your locations, using your items, seeing your creatures, practicing your religions, and so on &mdash; so check back frequently for the latest prompts just for you!
+      <% else %>
+        It looks like your world is pretty fleshed out already, and you've answered all the questions I've come up with. Check back later and I might have a writing prompt for you, but I bet I can come up with some sooner if you
+        <% new_content = (current_user.createable_content_types - [Universe]).sample %>
+        <%= link_to new_polymorphic_path(new_content) do %>
+          create
+          <% if current_user.send(new_content.name.downcase.pluralize).any? %>
+            another
+          <% else %>
+            <%= %w(a e i o u).include?(new_content.name.downcase[0]) ? 'an' : 'a' %>
+          <% end %>
+          <%= new_content.name.downcase %>!
+        <% end %>
+      <% end %>
+    </p>
+<% end %>
