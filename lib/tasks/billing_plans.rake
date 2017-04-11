@@ -78,7 +78,7 @@ namespace :billing_plans do
       allows_collaboration: false
     )
 
-    # Standard $9/month paid tier (to be available after signup promo)
+    # Premium paid three months at a time
     BillingPlan.find_or_create_by(
       name: 'Premium (3-month bundle)',
       stripe_plan_id: 'premium-trio',
@@ -93,11 +93,11 @@ namespace :billing_plans do
       allows_collaboration: false
     )
 
-    # Standard $9/month paid tier (to be available after signup promo)
+    # Premium paid annually
     BillingPlan.find_or_create_by(
       name: 'Premium (annual)',
       stripe_plan_id: 'premium-annual',
-      monthly_cents: 825, # $9.00/mo
+      monthly_cents: 825, # $8.25/mo -- $99/year
       available: true,
 
       # Content creation and other permissions:
