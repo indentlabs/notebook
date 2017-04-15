@@ -24,6 +24,8 @@ class User < ActiveRecord::Base
     referral.referrer unless referral.nil?
   end
 
+  has_many :votes
+
   after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
   after_create :initialize_referral_code
   after_create :initialize_secure_code
