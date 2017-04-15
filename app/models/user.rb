@@ -26,6 +26,7 @@ class User < ActiveRecord::Base
 
   after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
   after_create :initialize_referral_code
+  after_create :initialize_secure_code
 
   def createable_content_types
     [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].select do |c|
@@ -92,6 +93,10 @@ class User < ActiveRecord::Base
 
   def initialize_referral_code
     ReferralCode.create user: self, code: SecureRandom.uuid
+  end
+
+  def initialize_secure_code
+    update secure_code: SecureRandom.uuid unless secure_code.present?
   end
 
   private
