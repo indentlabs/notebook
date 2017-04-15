@@ -1,7 +1,10 @@
+# rubocop:disable LineLength
+
 Rails.application.routes.draw do
   devise_for :users, :controllers => { registrations: 'registrations' }
   resources :users
-  # rubocop:disable LineLength
+
+  get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
 
   # Main pages
   root to: 'main#index'
@@ -179,6 +182,6 @@ Rails.application.routes.draw do
   scope '/market' do
     get '/', to: 'main#comingsoon'
   end
-
-  # rubocop:enable LineLength
 end
+
+# rubocop:enable LineLength
