@@ -224,8 +224,8 @@
 </div>
 
 <div class="row">
-  <div class="col s12 m6 l3 hide-on-small-only"></div>
-  <div class="col s12 m6 l9">
+  <div class="col s12 m12 l3 hide-on-small-only"></div>
+  <div class="col s12 m12 l9">
     <div class="card">
       <div class="card-content">
 
@@ -240,6 +240,68 @@
             The standard Premium membership is $9 per month. However, you can save more by choosing to pay every three months or once a year. Purchasing an annual Premium membership gets you the 12th month free!
           </p>
         <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Notebook.ai Community Drive</div>
+        <div class="row">
+          <div class="col s12">
+            <p>
+              For a limited time, we're holding a <%= link_to 'Community Drive', friends_landing_path %> for referring friends
+              to Notebook.ai. With each friend you refer that signs up for a Premium subscription, you'll gain +100 MB storage space,
+              two more entries in our upcoming raffle, and two more <%= link_to 'feature votes', community_voting_path %> to decide what
+              Notebook.ai's first community-first feature will be.
+            </p><br />
+            <div class="center">
+              <%= link_to 'See community progress', friends_landing_path, class: 'btn blue' %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col s6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Your referral code & stats</div>
+        <div class="row">
+          <div class="col s12">
+            <p>
+              Your referral link is:
+              <% share_link = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}" %>
+              <input type="text"
+                value="<%= share_link %>"
+                style="text-align: center"
+                onClick="this.select();" />
+            </p>
+            <ul>
+              <% referrals = current_user.referrals %>
+              <% converted_referrals = referrals.map(&:referree).select { |user| [2, 3, 4, 5, 6].include? user.selected_billing_plan_id } %>
+              <li><strong><%= pluralize referrals.count, 'user' %></strong> <%= referrals.count == 1 ? 'has' : 'have' %> signed up with your referral code.</li>
+              <% if converted_referrals.any? %>
+                <li>
+                  Of these, <strong><%= pluralize converted_referrals.count, 'user' %></strong> <%= converted_referrals.count == 1 ? 'has' : 'have' %> earned you both a Premium bonus!
+                </li>
+              <% else %>
+                <li>None have signed up for Premium yet, however.</li>
+              <% end %>
+              <li>You've earned <strong><%= pluralize current_user.votes.count, 'feature vote' %></strong> and have voted <%= pluralize current_user.votes.where.not(votable_id: nil).count, 'time' %>.
+                <% if current_user.votes.where(votable_id: nil).any? %>
+                  <%= link_to 'Vote now!', community_voting_path %>
+                <% else %>
+                  <%= link_to 'See votes so far.', community_voting_path %>
+                <% end %>
+              </li>
+              <li>You've earned <strong><%= pluralize current_user.raffle_entries.count, 'entry' %></strong> in <%= link_to "Notebook.ai's raffle", friends_landing_path %>, happening on May 31<sup>st</sup>, 2017.</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -93,6 +93,11 @@ class SubscriptionsController < ApplicationController
         # +1 vote if referred
         current_user.votes.create if referring_user.present?
 
+        # +1 raffle entry
+        current_user.raffle_entries.create
+        # +1 raffle entry if referred
+        current_user.raffle_entries.create if referring_user.present?
+
         if referring_user
           # +100MB
           referring_user.update upload_bandwidth_kb: referring_user.upload_bandwidth_kb + 100_000
@@ -100,6 +105,10 @@ class SubscriptionsController < ApplicationController
           # +2 votes
           referring_user.votes.create
           referring_user.votes.create
+
+          # +2 raffle entries
+          referring_user.raffle_entries.create
+          referring_user.raffle_entries.create
         end
       end
 
@@ -208,6 +217,40 @@ class SubscriptionsController < ApplicationController
       # End all currently-active subscriptions
       current_user.active_subscriptions.each do |subscription|
         subscription.update(end_date: Time.now)
+      end
+
+      # If this is the first time this user is subscribing to Premium, gift them (and their referrer, if applicable) feature votes and space
+      existing_premium_subscriptions = current_user.subscriptions.where(billing_plan_id: [2, 3, 4, 5, 6])
+      unless existing_premium_subscriptions.any?
+        referring_user = current_user.referrer
+
+        # First-time premium!
+        # +100 MB
+        current_user.update upload_bandwidth_kb: current_user.upload_bandwidth_kb + 100_000
+        current_user.reload
+
+        # +1 vote
+        current_user.votes.create
+        # +1 vote if referred
+        current_user.votes.create if referring_user.present?
+
+        # +1 raffle entry
+        current_user.raffle_entries.create
+        # +1 raffle entry if referred
+        current_user.raffle_entries.create if referring_user.present?
+
+        if referring_user
+          # +100MB
+          referring_user.update upload_bandwidth_kb: referring_user.upload_bandwidth_kb + 100_000
+
+          # +2 votes
+          referring_user.votes.create
+          referring_user.votes.create
+
+          # +2 raffle entries
+          referring_user.raffle_entries.create
+          referring_user.raffle_entries.create
+        end
       end
 
       # And create a subscription for them for the current plan

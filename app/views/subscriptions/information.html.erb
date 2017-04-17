@@ -133,10 +133,25 @@
             until <%= Time.at(active_plan_on_stripe.current_period_end).strftime('%B %d') %>, you will not be charged again
             for this plan until it renews on that date.
           </p>
-        <% elsif @selected_plan.monthly_cents > 0 %>
+        <% elsif @selected_plan.stripe_plan_id == 'premium' %>
           <p class="center">
             You will be charged <%= number_to_currency(@selected_plan.monthly_cents / 100) %> immediately, renewing
             monthly.
+          </p>
+          <p class="center">
+            Of course, you can cancel at any time.
+          </p>
+        <% elsif @selected_plan.stripe_plan_id == 'premium-trio' %>
+          <p class="center">
+            You will be charged $25.00 immediately, renewing every three months.
+          </p>
+          <p class="center">
+            Of course, you can cancel at any time.
+          </p>
+        <% elsif @selected_plan.stripe_plan_id == 'premium-annual' %>
+          <p class="center">
+            You will be charged <%= number_to_currency(@selected_plan.monthly_cents * 12 / 100) %> immediately, renewing
+            annually.
           </p>
           <p class="center">
             Of course, you can cancel at any time.
