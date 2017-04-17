@@ -64,23 +64,29 @@
       </div>
 
     <% else %>
-      <div class="">
-        Sign in to get your referral code!
+      <div class="hoverable" style="max-width: 600px; margin: 0 auto; padding: 25px; border: 1px dashed #ccc">
+        <%=
+          render partial: 'devise/sessions/form', locals: {
+            title_override: 'Log in to get your referral code'
+          }
+        %>
       </div>
     <% end %>
 
   </div>
   <div class="modal-footer">
-    <div class="left" style="margin-top: 15px; margin-left: 15px;">
-      <%=
-        social_share_button_tag(
-          "Notebook.ai is ",
+    <% if user_signed_in? %>
+      <div class="left" style="margin-top: 15px; margin-left: 15px;">
+        <%=
+          social_share_button_tag(
+            "Notebook.ai is ",
 
-          url: "https://www.notebook.ai/users/sign_up?referral=#{current_user.referral_code.code}",
-          'data-twitter-title' => 'Tweet text here'
-        )
-      %>
-    </div>
+            url: "https://www.notebook.ai/users/sign_up?referral=#{current_user.referral_code.code}",
+            'data-twitter-title' => 'Tweet text here'
+          )
+        %>
+      </div>
+    <% end %>
     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Close</a>
   </div>
 </div>

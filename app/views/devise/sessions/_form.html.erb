@@ -1,0 +1,29 @@
+<%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+
+  <h4><%= defined?(title_override) ? title_override : 'Log in' %></h4>
+
+  <div class="field">
+    <%= f.label :email %><br />
+    <%= f.email_field :email, autofocus: true %>
+  </div>
+
+  <div class="field">
+    <%= f.label :password %><br />
+    <%= f.password_field :password, autocomplete: "off" %>
+  </div>
+
+  <div class="actions center">
+    <% if devise_mapping.rememberable? -%>
+      <span class="field" style="margin-right: 30px;">
+        <%= f.check_box :remember_me %>
+        <%= f.label :remember_me %>
+      </span>
+    <% end -%>
+    <%= f.submit "Log in", class: 'btn blue' %>
+
+    <p class="center">
+      <br />
+      <%= render "devise/shared/links" %>
+    </p>
+  </div>
+<% end %>

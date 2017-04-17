@@ -46,7 +46,10 @@ class MainController < ApplicationController
     @drawing_date = 'May 31, 2017'.to_date
 
     @subscriber_count = 20 # manual override to match graphics
+
+    session["user_return_to"] = request.original_url unless user_signed_in?
   end
+  helper_method :resource_name, :resource, :devise_mapping
 
   def feature_voting
   end
@@ -73,4 +76,18 @@ class MainController < ApplicationController
       retry if attempts < 10
     end
   end
+
+
+  def resource_name
+    :user
+  end
+
+  def resource
+    @resource ||= User.new
+  end
+
+  def devise_mapping
+    @devise_mapping ||= Devise.mappings[:user]
+  end
+
 end
