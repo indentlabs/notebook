@@ -46,20 +46,41 @@
       </div>
 
       <div class="row">
-        <div class="col s12 m6">
-          <h5 class="center">Share on Facebook</h5>
-
+        <div class="col s12">
+          <h5 class="center">Share your link</h5>
         </div>
-        <div class="col s12 m6">
-          <h5 class="center">Share on Twitter</h5>
-          <div>
-            <a href="https://twitter.com/share" class="twitter-share-button" data-show-count="false">Tweet</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-          </div>
+
+        <% share_link = "https://www.notebook.ai/users/sign_up?referral=#{current_user.referral_code.code}" %>
+
+        <div class="col s12 m4 center">
+          <%= link_to "https://www.facebook.com/sharer/sharer.php?u=#{share_link}", target: '_new' do %>
+            <%= image_tag 'share/facebook.png' %>
+          <% end %>
+        </div>
+        <div class="col s12 m4 center">
+          <%= link_to "https://twitter.com/home?status=Notebook.ai%20is%20a%20game-changer%20in%20worldbuilding.%20Use%20my%20referral%20link%20and%20we'll%20both%20get%20awesome%20prizes!%20%40indentlabs%20#{share_link}", target: '_new' do %>
+            <%= image_tag 'share/twitter.png' %>
+          <% end %>
+        </div>
+        <div class="col s12 m4 center">
+          <%= link_to "https://plus.google.com/share?url=#{share_link}", target: '_new' do %>
+            <%= image_tag 'share/google.png' %>
+          <% end %>
         </div>
       </div>
 
       <div class="row">
-        <div class="col s12">
+        <div class="col s12 center">
+          <div>
+            Or, share somewhere else with one click:
+          </div>
+          <%=
+            social_share_button_tag(
+              "Notebook.ai is ",
+              url: share_link,
+              'data-twitter-title' => 'Tweet text here'
+            )
+          %>
         </div>
       </div>
 
@@ -77,14 +98,6 @@
   <div class="modal-footer">
     <% if user_signed_in? %>
       <div class="left" style="margin-top: 15px; margin-left: 15px;">
-        <%=
-          social_share_button_tag(
-            "Notebook.ai is ",
-
-            url: "https://www.notebook.ai/users/sign_up?referral=#{current_user.referral_code.code}",
-            'data-twitter-title' => 'Tweet text here'
-          )
-        %>
       </div>
     <% end %>
     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Close</a>
@@ -241,9 +254,9 @@
   <div class="section">
     <div class="row">
       <div class="col s12 center">
-        <strong>Only <%= ('1-5-2017'.to_date - Date.today).to_i %> days remaining in the community drive.</strong>
+        <strong>Only <%= (@drawing_date - Date.today).to_i %> days remaining in the community drive.</strong>
         <br />
-        Users with a Premium subscription will be randomly selected as raffle winners on May 1<sup>st</sup>, 2017.
+        Users with a Premium subscription will be randomly selected as raffle winners on May 31<sup>st</sup>, 2017.
         <br /><br />
         <%= link_to 'Invite a friend',
                     '#share-modal',
