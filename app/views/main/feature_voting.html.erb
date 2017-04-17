@@ -13,27 +13,29 @@
 <div class="row">
 
   <%
-    total_votes = current_user.votes.count
-    free_votes  = current_user.votes.where(votable_id: nil).count
-    cast_votes  = current_user.votes.where.not(votable_id: nil).count
+    if user_signed_in?
+      total_votes = current_user.votes.count
+      free_votes  = current_user.votes.where(votable_id: nil).count
+      cast_votes  = current_user.votes.where.not(votable_id: nil).count
 
-    disabled_voting_message = if cast_votes > 0
-      "You'll get an additional vote for every friend you refer that signs up for Premium."
-    else
-      "You'll get your first vote when you sign up for a Premium account."
+      disabled_voting_message = if cast_votes > 0
+        "You'll get an additional vote for every friend you refer that signs up for Premium."
+      else
+        "You'll get your first vote when you sign up for a Premium account."
+      end
     end
   %>
 
   <% Votable.all.each do |votable| %>
-    <div class="col s6">
-      <div class="hoverable card">
+    <div class="col s12 m6">
+      <div class="hoverable card" style="height: 280px;">
         <div class="card-content">
           <div class="row">
-            <div class="col s4">
+            <div class="col s12 m4">
               <div class="center"><i class="material-icons blue-text" style="font-size: 55px;"><%= votable.icon %></i></div>
               <h5 class="center"><%= votable.name %></h5>
               <p class="center">
-                <% if free_votes.zero? %>
+                <% if user_signed_in? && free_votes.zero? %>
                   <span class="tooltipped"
                         data-delay="100"
                         data-tooltip="<%= disabled_voting_message %>">
@@ -41,9 +43,9 @@
                 <%=
                   link_to 'Vote',
                     cast_vote_path(votable),
-                    class: "btn btn-primary blue #{'disabled' if free_votes.zero?}"
+                    class: "btn btn-primary blue #{'disabled' if !user_signed_in? || free_votes.zero?}"
                 %>
-                <% if free_votes.zero? %>
+                <% if user_signed_in? && free_votes.zero? %>
                   </span>
                 <% end %>
                 <br />
@@ -52,11 +54,11 @@
                 <%= pluralize votable.votes.count, 'vote' %>
               </p>
             </div>
-            <div class="col s8">
+            <div class="col s12 m8">
               <div class="spaced-paragraphs">
                 <%= votable.description.html_safe %>
               </div>
-              <% if cast_votes > 0 %>
+              <% if user_signed_in? && cast_votes > 0 %>
                 <p class="grey-text center" style="margin-top: 30px;">
                   You've voted for this feature <%= pluralize current_user.votes.where(votable: votable).count, 'time' %>.
                 </p>
