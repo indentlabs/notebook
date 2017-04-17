@@ -3,6 +3,12 @@
 class MainController < ApplicationController
   layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_designers, :for_friends]
 
+  before_action do
+    if !user_signed_in? && params[:referral]
+      session[:referral] = params[:referral]
+    end
+  end
+
   def index
     redirect_to :dashboard if user_signed_in?
   end

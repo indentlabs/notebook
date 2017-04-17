@@ -1,3 +1,9 @@
+<%
+  if user_signed_in?
+    share_link = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}"
+  end
+%>
+
 <div id="index-banner" class="hero">
   <div class="section no-pad-bot">
     <div class="container">
@@ -40,7 +46,7 @@
       <div class="center">
         <h5>Your referral link</h5>
         <input type="text"
-               value="https://www.notebook.ai/users/sign_up?referral=<%= current_user.referral_code.code %>"
+               value="<%= share_link %>"
                style="text-align: center"
                onClick="this.select();" />
       </div>
@@ -49,8 +55,6 @@
         <div class="col s12">
           <h5 class="center">Share your link</h5>
         </div>
-
-        <% share_link = "https://www.notebook.ai/users/sign_up?referral=#{current_user.referral_code.code}" %>
 
         <div class="col s12 m4 center">
           <%= link_to "https://www.facebook.com/sharer/sharer.php?u=#{share_link}", target: '_new' do %>
