@@ -19,12 +19,14 @@ class User < ActiveRecord::Base
   has_many :image_uploads
 
   has_one :referral_code
+  has_many :referrals, foreign_key: :referrer_id
   def referrer
     referral = Referral.find_by(referred_id: self.id)
     referral.referrer unless referral.nil?
   end
 
   has_many :votes
+  has_many :raffle_entries
 
   after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
   after_create :initialize_referral_code

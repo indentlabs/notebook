@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170415192437) do
+ActiveRecord::Schema.define(version: 20170417190318) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -543,6 +543,14 @@ ActiveRecord::Schema.define(version: 20170415192437) do
     t.integer "character_id"
     t.integer "race_id"
   end
+
+  create_table "raffle_entries", force: :cascade do |t|
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "raffle_entries", ["user_id"], name: "index_raffle_entries_on_user_id"
 
   create_table "referral_codes", force: :cascade do |t|
     t.integer  "user_id"
