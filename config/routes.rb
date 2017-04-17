@@ -26,6 +26,7 @@ Rails.application.routes.draw do
 
   scope '/vote' do
     get '/community', to: 'main#feature_voting', as: :community_voting
+    get '/:id', to: 'voting#vote', as: :cast_vote
   end
 
   # User-centric stuff

@@ -12,25 +12,55 @@
 </div>
 <div class="row">
 
+  <%
+    total_votes = current_user.votes.count
+    free_votes  = current_user.votes.where(votable_id: nil).count
+    cast_votes  = current_user.votes.where.not(votable_id: nil).count
+
+    disabled_voting_message = if cast_votes > 0
+      "You'll get an additional vote for every friend you refer that signs up for Premium."
+    else
+      "You'll get your first vote when you sign up for a Premium account."
+    end
+  %>
+
   <% Votable.all.each do |votable| %>
     <div class="col s6">
-      <div class="card">
+      <div class="hoverable card">
         <div class="card-content">
           <div class="row">
             <div class="col s4">
               <div class="center"><i class="material-icons blue-text" style="font-size: 55px;"><%= votable.icon %></i></div>
               <h5 class="center"><%= votable.name %></h5>
               <p class="center">
-                <%= link_to 'Vote', '#', class: 'btn btn-primary blue' %><br />
+                <% if free_votes.zero? %>
+                  <span class="tooltipped"
+                        data-delay="100"
+                        data-tooltip="<%= disabled_voting_message %>">
+                <% end %>
+                <%=
+                  link_to 'Vote',
+                    cast_vote_path(votable),
+                    class: "btn btn-primary blue #{'disabled' if free_votes.zero?}"
+                %>
+                <% if free_votes.zero? %>
+                  </span>
+                <% end %>
+                <br />
               </p>
               <p class="blue-text center" style="margin-top: 10px;">
-                <%= rand(50) %> votes
+                <%= pluralize votable.votes.count, 'vote' %>
               </p>
             </div>
             <div class="col s8">
-              <p>
-                <%= votable.description %>
-              </p>
+              <div class="spaced-paragraphs">
+                <%= votable.description.html_safe %>
+              </div>
+              <% if cast_votes > 0 %>
+                <p class="grey-text center" style="margin-top: 30px;">
+                  You've voted for this feature <%= pluralize current_user.votes.where(votable: votable).count, 'time' %>.
+                </p>
+              <% end %>
             </div>
           </div>
         </div>
@@ -39,7 +69,7 @@
   <% end %>
 
   <h5 class="center">
-    You have <span class="blue-text"><%= pluralize rand(10), 'vote' %></span> remaining.
+    You have <span class="blue-text"><%= pluralize free_votes, 'vote' %></span> remaining.
   </h5>
   <div class="center">
     <%= link_to 'Earn more by sharing Notebook.ai with your friends.', friends_landing_path %>
@@ -54,25 +84,25 @@
         <li>
           <div class="collapsible-header"><i class="material-icons">help_outline</i>When will voting be over?</div>
           <div class="collapsible-body"><span>
-            Absolutely! In fact, we'd love it if you did! Whenever any of your referrals sign up for a Premium subscription, both they and you will receive the extra goodies above. There's no limit to how many goodies you can get, so invite anyone and everyone you think would enjoy and/or love Notebook.ai!
+            Voting will end at noon UTC on May 31, 2017. At that time, the feature with the most votes will "win" and will be included in a feature release shortly after.
           </span></div>
         </li>
         <li>
           <div class="collapsible-header"><i class="material-icons">help_outline</i>How can I earn more votes?</div>
           <div class="collapsible-body"><span>
-            Absolutely! It doesn't matter whether you were invited by a friend or signed up yourself &mdash; anyone you invite will be eligible to earn referral goodies for you and them whenever they sign up for a Premium subscription.
+            When you sign up for a Premium subscription, you are given one vote to cast however you'd like. Whenever you <%= link_to 'refer a friend to Notebook.ai', friends_landing_path %> that signs up for Premium, you'll automatically be given two more feature votes (and an extra one for your friend).
           </span></div>
         </li>
         <li>
           <div class="collapsible-header"><i class="material-icons">help_outline</i>What will happen to the ideas that don't win?</div>
           <div class="collapsible-body"><span>
-            In order to give everyone a fair chance at winning something in the raffle, each user is only eligible to be drawn in the raffle at most once.
+            Based on voting, the other features will be prioritized accordingly. If two features are neck-and-neck, you can expect to see the runner-up make it into a future feature update sooner rather than later, but only the winning feature is guaranteed to be released first after voting.
           </span></div>
         </li>
         <li>
           <div class="collapsible-header"><i class="material-icons">help_outline</i>What if I have a different idea?</div>
           <div class="collapsible-body"><span>
-            In order to give everyone a fair chance at winning something in the raffle, each user is only eligible to be drawn in the raffle at most once.
+            To ensure that every idea has ample time to shine during voting, the options for this vote are closed. However, if you have other feature requests or feedback for Notebook.ai, <%= link_to "feedback is always much appreciated", 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform' %> (and may make it into future voting rounds if voting goes well!).
           </span></div>
         </li>
         <li>
