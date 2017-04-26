@@ -27,7 +27,7 @@ When a user visits the subscriptions page and clicks to downgrade to Starter:
 Since Stripe handles recurring subscriptions, we're just managing which plan they're subscribed to
 on Stripe, who handles billing on time, prorating, refunds, etc.
 
-TODO:
+# TODO
 
 - Webhooks (for failed payments, successful payments, etc) are not implemented.
 - Similarly, we should probably send an email to users after each of the above occurs.
@@ -35,3 +35,4 @@ TODO:
 - There seems to be a bug somewhere where some users Subscriptions are ending early (and just need their
   `end_date` updated to a point in the distant future), but occurrences of this may just be from
   subscriptions that started before we began setting 5-year durations by default (from 31-day durations).
+- It'd be very nice to abstract this out enough to support other payment methods like Paypal.
