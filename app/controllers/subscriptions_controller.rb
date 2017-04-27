@@ -120,8 +120,11 @@ class SubscriptionsController < ApplicationController
       new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
       current_user.selected_billing_plan_id = new_billing_plan.id
 
-      # Add any bonus bandwidth our new plan grants
-      current_user.upload_bandwidth_kb += new_billing_plan.bonus_bandwidth_kb
+      # Add any bonus bandwidth our new plan grants, unless we're moving from Premium to Premium
+      premium_ids = [3, 4, 5, 6]
+      if !premium_ids.include?(current_user.selected_billing_plan_id) && premium_ids.include? new_plan_id
+        current_user.upload_bandwidth_kb += new_billing_plan.bonus_bandwidth_kb
+      end
 
       current_user.save
 
