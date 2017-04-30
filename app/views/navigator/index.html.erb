@@ -8,27 +8,36 @@
 <ul id="navigator">
   <%# Root note: the universe %>
   <li>
-    <%= link_to @universe.name, @universe %>
+    <%= link_to "My Universes", '#' %>
 
     <ul>
-      <% @content_types.each do |content_type| %>
+      <% current_user.universes.each do |universe| %>
         <li>
-          <% content_of_this_type = @universe.send(content_type.downcase) %>
-          <%= link_to "#{content_type} (#{content_of_this_type.count})", '#' %>
+          <%= link_to universe.name, universe %>
 
-          <% if content_of_this_type.any? %>
-            <ul>
-              <% content_of_this_type.each do |content| %>
-                <li>
-                  <%= link_to content.name, content %>
+          <ul>
+            <% @content_types.each do |content_type| %>
+              <li>
+                <% content_of_this_type = universe.send(content_type.downcase) %>
+                <%= link_to "#{content_type} (#{content_of_this_type.count})", '#' %>
 
-                  <%# TODO: relationships for this content %>
-                </li>
-              <% end %>
-            </ul>
-          <% end %>
+                <% if content_of_this_type.any? %>
+                  <ul>
+                    <% content_of_this_type.each do |content| %>
+                      <li>
+                        <%= link_to content.name, content %>
+
+                        <%# TODO: relationships for this content %>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
         </li>
       <% end %>
     </ul>
+
   </li>
 </ul>
