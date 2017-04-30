@@ -1,0 +1,34 @@
+<link rel="stylesheet" type="text/css" href="/assets/js-mindmap.css" />
+<link type="text/css" rel="stylesheet" href="/assets/style.css" />
+
+<script type="text/javascript" src="/assets/raphael-min.js"></script>
+<script type="text/javascript" src="/assets/js-mindmap.js"></script>
+<script type="text/javascript" src="/assets/script.js"></script>
+
+<ul id="navigator">
+  <%# Root note: the universe %>
+  <li>
+    <%= link_to @universe.name, @universe %>
+
+    <ul>
+      <% @content_types.each do |content_type| %>
+        <li>
+          <%= link_to content_type, '#' %>
+
+          <% content_of_this_type = @universe.send(content_type.downcase) %>
+          <% if content_of_this_type.any? %>
+            <ul>
+              <% content_of_this_type.each do |content| %>
+                <li>
+                  <%= link_to content.name, content %>
+
+                  <%# TODO: relationships for this content %>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </li>
+</ul>

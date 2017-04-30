@@ -51,6 +51,11 @@ Rails.application.routes.draw do
     end
   end
 
+  # Apps
+  scope '/app' do
+    get 'navigator', to: 'navigator#index'
+  end
+
   # Sessions
   get '/login', to: 'sessions#new', as: :login
   post '/login', to: 'sessions#create', as: :login_process
