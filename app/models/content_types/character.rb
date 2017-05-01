@@ -25,22 +25,22 @@ class Character < ActiveRecord::Base
   self.authorizer_name = 'CoreContentAuthorizer'
 
   # Characters
-  relates :fathers,        with: :fatherships
-  relates :mothers,        with: :motherships
-  relates :siblings,       with: :siblingships
-  relates :spouses,        with: :marriages
-  relates :children,       with: :childrenships
-  relates :best_friends,   with: :best_friendships
-  relates :archenemies,    with: :archenemyship
+  relates :fathers,          with: :fatherships
+  relates :mothers,          with: :motherships
+  relates :siblings,         with: :siblingships
+  relates :spouses,          with: :marriages
+  relates :children,         with: :childrenships
+  relates :best_friends,     with: :best_friendships
+  relates :archenemies,      with: :archenemyship
 
   # Locations
-  relates :birthplaces,    with: :birthings
+  relates :birthplaces,      with: :birthings
 
   # Items
-  #relates :favorite_items, with: :ownerships, where: { favorite: true }
+  #relates :favorite_items,   with: :ownerships, where: { favorite: true }
 
   # Races
-  relates :races,          with: :raceships
+  relates :races,            with: :raceships
 
   # Languages
   relates :spoken_languages, with: :lingualisms

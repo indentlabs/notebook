@@ -57,6 +57,10 @@ gem 'mixpanel-ruby'
 # Sharing
 gem 'social-share-button'
 
+# Apps
+gem 'easy_translate'
+gem 'levenshtein-ffi'
+
 group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'

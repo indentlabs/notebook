@@ -54,10 +54,12 @@ Rails.application.routes.draw do
   # Apps
   scope '/app' do
     get 'navigator', to: 'navigator#index'
+    get 'babel',     to: 'lab#babel'
+    post 'babel',    to: 'lab#babel'
   end
 
   # Sessions
-  get '/login', to: 'sessions#new', as: :login
+  get '/login',  to: 'sessions#new', as: :login
   post '/login', to: 'sessions#create', as: :login_process
   get '/logout', to: 'sessions#destroy', as: :logout
 
