@@ -82,7 +82,7 @@ namespace :billing_plans do
     BillingPlan.find_or_create_by(
       name: 'Premium (3-month bundle)',
       stripe_plan_id: 'premium-trio',
-      monthly_cents: 833, # $8.33/mo -- $25/3mo
+      monthly_cents: 800, # $8.00/mo -- $24/3mo
       available: true,
 
       # Content creation and other permissions:
@@ -97,7 +97,7 @@ namespace :billing_plans do
     BillingPlan.find_or_create_by(
       name: 'Premium (annual)',
       stripe_plan_id: 'premium-annual',
-      monthly_cents: 825, # $8.25/mo -- $99/year
+      monthly_cents: 700, # $7.00/mo -- $84/year
       available: true,
 
       # Content creation and other permissions:
