@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170517152023) do
+ActiveRecord::Schema.define(version: 20170517164648) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -736,6 +736,7 @@ ActiveRecord::Schema.define(version: 20170517152023) do
     t.integer  "selected_billing_plan_id"
     t.integer  "upload_bandwidth_kb",      default: 50000
     t.string   "secure_code"
+    t.boolean  "fluid_preference"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true
