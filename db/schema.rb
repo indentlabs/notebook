@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170417190318) do
+ActiveRecord::Schema.define(version: 20170517152023) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -210,6 +210,15 @@ ActiveRecord::Schema.define(version: 20170417190318) do
     t.integer "deity_id"
     t.integer "user_id"
   end
+
+  create_table "documents", force: :cascade do |t|
+    t.integer  "user_id"
+    t.text     "body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "documents", ["user_id"], name: "index_documents_on_user_id"
 
   create_table "famous_figureships", force: :cascade do |t|
     t.integer "user_id"

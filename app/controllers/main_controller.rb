@@ -31,6 +31,10 @@ class MainController < ApplicationController
     ask_question
   end
 
+  def notes
+
+  end
+
   def recent_content
     recent_content = current_user.content.values.flatten.compact
 

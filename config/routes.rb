@@ -35,6 +35,7 @@ Rails.application.routes.draw do
     get '/content/recent', to: 'main#recent_content', as: :recent_content
     get '/submissions', to: 'main#comingsoon'
     get '/prompts', to: 'main#prompts', as: :prompts
+    get '/scratchpad', to: 'main#notes', as: :notes
 
     # Billing
     scope '/billing' do
@@ -50,6 +51,7 @@ Rails.application.routes.draw do
       get '/payment_method/delete', to: 'subscriptions#delete_payment_method', as: :delete_payment_method
     end
   end
+  resources :documents
 
   # Apps
   scope '/app' do

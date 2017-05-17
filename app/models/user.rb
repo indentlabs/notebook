@@ -28,6 +28,9 @@ class User < ActiveRecord::Base
   has_many :votes
   has_many :raffle_entries
 
+  # TODO: Swap this out with a has_many when we transition from a scratchpad to users having multiple documents
+  has_one :document
+
   after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
   after_create :initialize_referral_code
   after_create :initialize_secure_code
