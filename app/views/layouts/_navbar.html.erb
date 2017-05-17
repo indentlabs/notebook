@@ -26,6 +26,26 @@
   </li>
 </ul>
 
+<ul id="recent-content-dropdown" class="dropdown-content">
+<% if user_signed_in? %>
+  <% current_user.content.values.flatten.compact.sort_by(&:updated_at).last(10).reverse.each do |content| %>
+    <% content_class = content.class %>
+    <li>
+      <%= link_to content, class: "#{content_class.color}-text" do %>
+        <i class="material-icons left"><%= content_class.icon %></i>
+        <%= content.name %>
+      <% end %>
+    </li>
+  <% end %>
+  <% if current_user.content_count > 0 %>
+    <li class="divider"></li>
+    <li>
+      <%= link_to 'More...', recent_content_path, class: 'blue-text' %>
+    </li>
+  <% end %>
+<% end %>
+</ul>
+
 <ul id="desktop-user-dropdown" class="dropdown-content">
   <% if current_user %>
     <li>
@@ -109,6 +129,11 @@
 
       <ul class="right">
         <% if user_signed_in? %>
+        <li>
+          <a class="dropdown-button tooltipped" href="#!" data-activates="recent-content-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your recently-edited pages">
+            <i class="material-icons">recent_actors</i>
+          </a>
+        </li>
         <li>
           <a class="dropdown-button tooltipped" href="#!" data-activates="help-dropdown" data-position="bottom" data-delay="100" data-tooltip="Need help?">
             <i class="material-icons">help</i>
