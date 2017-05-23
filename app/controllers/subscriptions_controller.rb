@@ -33,7 +33,7 @@ class SubscriptionsController < ApplicationController
       end
 
       if current_user.selected_billing_plan_id.nil?
-        old_billing_plan = BillingPlan.new(name: 'No billing plan')
+        old_billing_plan = BillingPlan.new(name: 'No billing plan', monthly_cents: 0)
       else
         old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
       end
@@ -113,7 +113,7 @@ class SubscriptionsController < ApplicationController
       end
 
       if current_user.selected_billing_plan_id.nil?
-        old_billing_plan = BillingPlan.new(name: 'No billing plan')
+        old_billing_plan = BillingPlan.new(name: 'No billing plan', monthly_cents: 0)
       else
         old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
       end
@@ -195,7 +195,7 @@ class SubscriptionsController < ApplicationController
     new_billing_plan = BillingPlan.find_by(stripe_plan_id: params[:plan], available: true)
     if new_billing_plan
       if current_user.selected_billing_plan_id.nil?
-        old_billing_plan = BillingPlan.new(name: 'No billing plan')
+        old_billing_plan = BillingPlan.new(name: 'No billing plan', monthly_cents: 0)
       else
         old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
       end
@@ -317,6 +317,8 @@ class SubscriptionsController < ApplicationController
       delta = ":tada: LOL :tada:"
     elsif from.monthly_cents < to.monthly_cents
       delta = ":tada: *UPGRADE* :tada:"
+    elsif from.monthly_cents == to.monthly_cents
+      delta = ":tada: ... sidegrade ... :tada:"
     else
       delta = ":wave: Downgrade"
     end
