@@ -3,7 +3,10 @@ $(document).ready(function () {
   $('.panel').first().show();
 
   $('.tab a').click(function (tab) {
-    var target_panel = $(tab.target).attr('href');
+    // We substring(1) here to strip the # off the beginning so we can use getElementById
+    // (because we want to support slashes in category/field names, and jQuery does not).
+    var target_panel_id = $(tab.target).attr('href').substring(1);
+    var target_panel = $(document.getElementById(target_panel_id));
 
     $('.panel').hide();
     $(target_panel).show();
