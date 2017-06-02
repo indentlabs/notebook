@@ -1,4 +1,10 @@
 class LabController < ApplicationController
+  layout 'app', only: [:pinboard]
+
+  def pinboard
+
+  end
+
   def babel
     EasyTranslate.api_key = ENV['GOOGLE_TRANSLATE_API_KEY']
 

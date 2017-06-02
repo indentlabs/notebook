@@ -53,11 +53,17 @@ Rails.application.routes.draw do
   end
   resources :documents
 
-  # Apps
+  # Lab apps
   scope '/app' do
+    # Navigator
     get 'navigator', to: 'navigator#index'
+
+    # Babel
     get 'babel',     to: 'lab#babel'
     post 'babel',    to: 'lab#babel'
+
+    # Pinboard
+    get 'pinboard',  to: 'lab#pinboard'
   end
 
   # Sessions
