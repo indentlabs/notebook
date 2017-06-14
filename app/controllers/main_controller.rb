@@ -53,7 +53,7 @@ class MainController < ApplicationController
 
   def for_friends
     @subscriber_count = User.where(selected_billing_plan_id: [3, 4]).count
-    @drawing_date = 'June, 15, 2017'.to_date
+    @drawing_date = 'June 15, 2017 12:00pm'.to_date
 
     @subscriber_count = 20 # manual override to match graphics
 
