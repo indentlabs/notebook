@@ -1,6 +1,7 @@
 # rubocop:disable LineLength
 
 Rails.application.routes.draw do
+
   devise_for :users, :controllers => { registrations: 'registrations' }
   resources :users
 
@@ -105,6 +106,7 @@ Rails.application.routes.draw do
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'
   end
+  get 'search/', to: 'search#results'
 
   scope 'admin' do
     get '/', to: 'admin#dashboard', as: :admin_dashboard

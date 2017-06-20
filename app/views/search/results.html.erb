@@ -1,0 +1,37 @@
+<h3>
+  <%= @query %>
+  <small class="grey-text">
+    <%= pluralize @results.values.flatten.count, 'match' %>
+  </small>
+</h3>
+
+<ul class="collapsible popout" data-collapsible="accordion">
+  <% @results.each do |content_type, content_list| %>
+    <% next if content_list.empty? %>
+    <% content_class = content_type.to_s.singularize.capitalize.constantize %>
+
+    <li>
+      <div class="collapsible-header">
+        <i class="material-icons <%= content_class.color %>-text"><%= content_class.icon %></i>
+        <%= content_type.to_s.humanize %>
+        <span class="grey-text"><%= pluralize content_list.count, 'result' %></span>
+      </div>
+      <div class="collapsible-body">
+        <%= render partial: 'content/list/list', locals: { content_list: content_list, show_add_another_form: false } %>
+      </div>
+    </li>
+  <% end %>
+</ul>
+
+<% if @results.values.flatten.count.zero? %>
+  <div class="card-panel">
+    <p>
+      Sorry, nothing matched your search query!
+    </p>
+
+    <p>
+      Think this is a bug?
+      <%= link_to 'Please report it!', 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform' %>
+    </p>
+  </div>
+<% end %>
