@@ -10,6 +10,31 @@
     </p>
   </div>
 </div>
+
+<div class="row">
+  <div class="col s10 offset-s1">
+    <div class="card light-blue">
+        <div class="card-content white-text">
+          <span class="card-title">This round of voting has concluded.</span>
+          <p>
+            A huge thank you to everyone that participated in the community drive!
+          </p>
+          <p style="padding-top: 20px;">
+            Voting is now closed, but will return with a new round of features in the future. You can continue earning additional votes by <%= link_to 'sharing your referral code', subscription_path, class: 'blue-text text-lighten-5' %> for any upcoming feature vote rounds.
+          </p>
+          <p style="padding-top: 20px;">
+            The winner of this round is <strong>Forums & Chat Rooms</strong>! You can expect to see this feature coming in the near future. A notable runner-up is <strong>Universe Collaboration</strong>, which you can expect to see shortly thereafter. Thanks again, everyone, for voting and helping to make Notebook.ai better for everyone!
+          </p>
+          <p style="padding-top: 20px;">
+            Happy worldbuilding!
+            <br /><br />
+            - Andrew, Notebook.ai creator
+          </p>
+        </div>
+      </div>
+  </div>
+</div>
+
 <div class="row">
 
   <%
@@ -17,6 +42,9 @@
       total_votes = current_user.votes.count
       free_votes  = current_user.votes.where(votable_id: nil).count
       cast_votes  = current_user.votes.where.not(votable_id: nil).count
+
+      # Override free vote counts so no one can vote in this round anymore:
+      free_votes = 0
 
       disabled_voting_message = if cast_votes > 0
         "You'll get an additional vote for every friend you refer that signs up for Premium."
