@@ -22,127 +22,31 @@ class SubscriptionsController < ApplicationController
 
   def change
     new_plan_id = params[:stripe_plan_id]
-    possible_plan_ids = BillingPlan.where(available: true).map(&:stripe_plan_id)
+    raise "Invalid billing plan ID: #{new_plan_id}" unless SubscriptionService.available_plan?(new_plan_id)
 
-    raise "Invalid billing plan ID: #{new_plan_id}" unless possible_plan_ids.include? new_plan_id
+    # Grab the stripe object once upfront, since it's an external API call
+    stripe_customer = SubscriptionService.stripe_customer_object_for(current_user)
 
-    # If the user is changing to Starter, go ahead and cancel any active subscriptions and do it
-    if new_plan_id == 'starter'
-      current_user.active_subscriptions.each do |subscription|
-        subscription.update(end_date: Time.now)
-      end
-
-      if current_user.selected_billing_plan_id.nil?
-        old_billing_plan = BillingPlan.new(name: 'No billing plan', monthly_cents: 0)
-      else
-        old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
-      end
-      new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
-      current_user.selected_billing_plan_id = new_billing_plan.id
-
-      # Remove any bonus bandwidth our old plan granted
-      current_user.upload_bandwidth_kb -= old_billing_plan.bonus_bandwidth_kb
-
-      current_user.save
-
-      Subscription.create(
-        user: current_user,
-        billing_plan: new_billing_plan,
-        start_date: Time.now,
-        end_date: Time.now.end_of_day + 5.years
-      )
-
-      report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
-
-      flash[:notice] = "You have been successfully downgraded to Starter." #todo proration/credit
-      return redirect_to subscription_path
+    # If a user is moving to premium, make sure they have a card on file
+    if SubscriptionService.PAID_PREMIUM_PLAN_IDS.include?(new_plan_id) && !SubscriptionService.has_card_on_file_for?(stripe_customer)
+      return redirect_to payment_info_path(plan: new_plan_id)
     end
 
-    # Fetch current subscription
-    stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
-    stripe_subscription = stripe_customer.subscriptions.data[0]
+    # Make the plan transition
+    success = SubscriptionService.transition_plan(
+      user: current_user,
+      old_plan: BillingPlan.find(current_user.selected_billing_plan_id)
+      new_plan: BillingPlan.find(new_plan_id),
+      stripe_object: stripe_customer
+    )
 
-    # If the user already has a payment method on file, change their plan and add a new subscription
-    if stripe_customer.sources.total_count > 0
-      # Cancel any active subscriptions, since we're changing plans
-      current_user.active_subscriptions.each do |subscription|
-        subscription.update(end_date: Time.now)
-      end
-
-      # Change subscription plan if they already have a payment method on file
-      stripe_subscription.plan = new_plan_id
-      begin
-        stripe_subscription.save
-      rescue Stripe::CardError => e
-        flash[:alert] = "We couldn't upgrade you to Premium because #{e.message.downcase} Please double check that your information is correct."
-        return redirect_to :back
-      end
-
-      # If this is the first time this user is subscribing to Premium, gift them (and their referrer, if applicable) feature votes and space
-      existing_premium_subscriptions = current_user.subscriptions.where(billing_plan_id: [2, 3, 4, 5, 6])
-      unless existing_premium_subscriptions.any?
-        referring_user = current_user.referrer || current_user
-
-        # First-time premium!
-        # +100 MB
-        current_user.update upload_bandwidth_kb: current_user.upload_bandwidth_kb + 100_000
-        current_user.reload
-
-        # +1 vote
-        current_user.votes.create
-        # +1 vote if referred
-        current_user.votes.create if referring_user.present?
-
-        # +1 raffle entry
-        current_user.raffle_entries.create
-        # +1 raffle entry if referred
-        current_user.raffle_entries.create if referring_user.present?
-
-        if referring_user
-          # +100MB
-          referring_user.update upload_bandwidth_kb: referring_user.upload_bandwidth_kb + 100_000
-
-          # +2 votes
-          referring_user.votes.create
-          referring_user.votes.create
-
-          # +2 raffle entries
-          referring_user.raffle_entries.create
-          referring_user.raffle_entries.create
-        end
-      end
-
-      if current_user.selected_billing_plan_id.nil?
-        old_billing_plan = BillingPlan.new(name: 'No billing plan', monthly_cents: 0)
-      else
-        old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
-      end
-      new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
-      current_user.selected_billing_plan_id = new_billing_plan.id
-
-      # Add any bonus bandwidth our new plan grants, unless we're moving from Premium to Premium
-      premium_ids = [3, 4, 5, 6]
-      if !premium_ids.include?(current_user.selected_billing_plan_id) && premium_ids.include?(new_plan_id)
-        current_user.upload_bandwidth_kb += new_billing_plan.bonus_bandwidth_kb
-      end
-
-      current_user.save
-
-      Subscription.create(
-        user: current_user,
-        billing_plan: new_billing_plan,
-        start_date: Time.now,
-        end_date: Time.now.end_of_day + 5.years
-      )
-
-      report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
-
-      flash[:notice] = "You have been successfully upgraded to #{new_billing_plan.name}!"
-      redirect_to subscription_path
+    if success
+      flash[:notice] = "You have successfully changed your plan to #{new_billing_plan.name}."
     else
-      # If they don't have a payment method on file, redirect them to collect one
-      redirect_to payment_info_path(plan: new_plan_id)
+      # error-specific messages are set in SubscriptionService, so we don't need to add a flash message here
     end
+
+    redirect_to subscription_path
   end
 
   # This isn't actually needed since we change the paid plan to the free plan, but will be needed when we
@@ -194,11 +98,7 @@ class SubscriptionsController < ApplicationController
     # After saving the user's payment method, move them over to the associated billing plan
     new_billing_plan = BillingPlan.find_by(stripe_plan_id: params[:plan], available: true)
     if new_billing_plan
-      if current_user.selected_billing_plan_id.nil?
-        old_billing_plan = BillingPlan.new(name: 'No billing plan', monthly_cents: 0)
-      else
-        old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
-      end
+      old_billing_plan = SubscriptionService.current_billing_plan_for(current_user)
       current_user.selected_billing_plan_id = new_billing_plan.id
 
       # Remove any bonus bandwidth our old plan granted
@@ -218,42 +118,16 @@ class SubscriptionsController < ApplicationController
       end
 
       # End all currently-active subscriptions
-      current_user.active_subscriptions.each do |subscription|
-        subscription.update(end_date: Time.now)
-      end
+      SubscriptionService.end_all_active_subscriptions_for current_user
 
       # If this is the first time this user is subscribing to Premium, gift them (and their referrer, if applicable) feature votes and space
       existing_premium_subscriptions = current_user.subscriptions.where(billing_plan_id: [2, 3, 4, 5, 6])
-      unless existing_premium_subscriptions.any?
-        referring_user = current_user.referrer || current_user
-
-        # First-time premium!
-        # +100 MB
-        current_user.update upload_bandwidth_kb: current_user.upload_bandwidth_kb + 100_000
-        current_user.reload
-
-        # +1 vote
-        current_user.votes.create
-        # +1 vote if referred
-        current_user.votes.create if referring_user.present?
-
-        # +1 raffle entry
-        current_user.raffle_entries.create
-        # +1 raffle entry if referred
-        current_user.raffle_entries.create if referring_user.present?
-
-        if referring_user
-          # +100MB
-          referring_user.update upload_bandwidth_kb: referring_user.upload_bandwidth_kb + 100_000
-
-          # +2 votes
-          referring_user.votes.create
-          referring_user.votes.create
-
-          # +2 raffle entries
-          referring_user.raffle_entries.create
-          referring_user.raffle_entries.create
-        end
+      if existing_premium_subscriptions.none?
+        SubscriptionService.add_first_time_premium_benefits_to(current_user)
+        SubscriptionService.add_referral_benefits_to(
+          referree: current_user
+          referrer: current_user.referrer || current_user
+        )
       end
 
       # And create a subscription for them for the current plan
@@ -264,7 +138,7 @@ class SubscriptionsController < ApplicationController
         end_date: Time.now.end_of_day + 31.days
       )
 
-      report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
+      SubscriptionService.report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
 
       notice << "you have been successfully upgraded to #{new_billing_plan.name}"
     end
@@ -302,36 +176,5 @@ class SubscriptionsController < ApplicationController
   def stripe_webhook
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'stripe webhook')
     #todo handle webhooks
-  end
-
-  def report_subscription_change_to_slack user, from, to
-    return unless Rails.env == 'production'
-    slack_hook = ENV['SLACK_HOOK']
-    return unless slack_hook
-
-    notifier = Slack::Notifier.new slack_hook,
-      channel: '#subscriptions',
-      username: 'tristan'
-
-    if from.nil? || to.nil?
-      delta = ":tada: LOL :tada:"
-    elsif from.monthly_cents < to.monthly_cents
-      delta = ":tada: *UPGRADE* :tada:"
-    elsif from.monthly_cents == to.monthly_cents
-      delta = ":tada: ... sidegrade ... :tada:"
-    else
-      delta = ":wave: Downgrade"
-    end
-
-    active_subscriptions = Subscription.where('start_date < ?', Time.now).where('end_date > ?', Time.now)
-    total_subs_monthly = active_subscriptions.map(&:billing_plan).sum(&:monthly_cents).to_f / 100.0
-
-    notifier.ping [
-      "#{delta} for #{user.email.split('@').first}@ (##{user.id})",
-      "From: *#{from.name}* ($#{from.monthly_cents / 100.0}/month)",
-      "To: *#{to.name}* (#{to.stripe_plan_id}) ($#{to.monthly_cents / 100.0}/month)",
-      "#{active_subscriptions.count} subscriptions total $#{'%.2f' % total_subs_monthly}/mo"
-    ].join("\n")
-
   end
 end
