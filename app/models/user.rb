@@ -28,6 +28,8 @@ class User < ActiveRecord::Base
   has_many :votes
   has_many :raffle_entries
 
+  has_many :content_change_events
+
   # TODO: Swap this out with a has_many when we transition from a scratchpad to users having multiple documents
   has_one :document
 
