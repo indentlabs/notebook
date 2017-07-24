@@ -58,8 +58,12 @@ gem 'mixpanel-ruby'
 gem 'social-share-button'
 
 # Apps
-gem 'easy_translate'
+#gem 'easy_translate'
 gem 'levenshtein-ffi'
+
+# Forum
+gem 'thredded', '~> 0.13.2'
+gem 'rails-ujs'
 
 group :production do
   gem 'rails_12factor'
