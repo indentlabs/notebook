@@ -1,15 +1,20 @@
 <div class="nav">
   <div style="float: left">
     <%= link_to main_app.root_path do %>
-      Back to <strong>Notebook.ai</strong>
+      &lsaquo; Back to <strong>Notebook.ai</strong>
     <% end %>
   </div>
   <div style="float: right">
     <% if user_signed_in? %>
+      <!--
       Hello,
       <%= link_to thredded_current_user.thredded_display_name, current_user %>!
-      |
-      <%= link_to 'Edit username', main_app.edit_user_registration_path(thredded_current_user) %>
+      -->
+      <%= link_to 'Home', main_app.thredded_path %>
+      <% if thredded_current_user.username.blank? %>
+        |
+        <%= link_to 'Set your username', main_app.edit_user_registration_path(thredded_current_user) %>
+      <% end %>
     <% end %>
   </div>
 
