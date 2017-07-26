@@ -32,6 +32,26 @@
   </li>
 
   <li>
+    <%= link_to thredded_path do %>
+      <i class="material-icons grey-text">
+        forum
+      </i>
+      Discussions
+      <%
+        forum_notifications = Thredded::PrivateTopic
+          .for_user(current_user)
+          .unread(current_user)
+          .count
+      %>
+      <% if forum_notifications > 0 %>
+        <span class="badge new blue lighten-2" data-badge-caption="message">
+          <%= forum_notifications %>
+        </span>
+      <% end %>
+    <% end %>
+  </li>
+
+  <li>
     <%= link_to notes_path do %>
       <i class="material-icons grey-text">
         book
