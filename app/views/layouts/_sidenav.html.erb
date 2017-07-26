@@ -38,14 +38,19 @@
       </i>
       Discussions
       <%
-        forum_notifications = Thredded::PrivateTopic
+        unread_threads = Thredded::Topic
+          .followed_by(current_user)
+          .unread(current_user)
+          .count
+
+        private_messages = Thredded::PrivateTopic
           .for_user(current_user)
           .unread(current_user)
           .count
       %>
-      <% if forum_notifications > 0 %>
-        <span class="badge new blue lighten-2" data-badge-caption="message">
-          <%= forum_notifications %>
+      <% if unread_threads > 0 || private_messages > 0 %>
+        <span class="badge <%= 'blue white-text' if private_messages > 0 %>">
+          <%= unread_threads %><%= "/#{private_messages}" if private_messages > 0 %>
         </span>
       <% end %>
     <% end %>
