@@ -13,6 +13,7 @@ class User < ActiveRecord::Base
 
   validates :email, presence: true
   #todo: We probably want a uniqueness constraint on email
+  validates_uniqueness_of :username, allow_nil: true, allow_blank: true
 
   has_many :subscriptions
   has_many :billing_plans, through: :subscriptions
@@ -120,5 +121,13 @@ class User < ActiveRecord::Base
       :reset_password_token,
       :email
     ]
+  end
+
+  def forum_username
+    username = self.username.present? ? self.username : nil
+    username ||= self.name.present? ? self.name : nil
+    username ||= 'Anonymous Author'
+
+    username
   end
 end
