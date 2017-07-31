@@ -18,12 +18,19 @@ class Flora < ActiveRecord::Base
   self.authorizer_name = 'CoreContentAuthorizer'
   #self.authorizer_name = 'ExtendedContentAuthorizer'
 
+  relates :related_floras, with: :flora_relationships
+  relates :magics, with: :flora_magical_effects
+  relates :locations, with: :flora_locations
+  relates :creatures, with: :flora_eaten_by
+
+  scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
+
   def self.content_name
     'flora'
   end
 
   def self.color
-    'teal'
+    'text-lighten-3 lighten-3 teal'
   end
 
   def self.icon

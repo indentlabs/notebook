@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170731001803) do
+ActiveRecord::Schema.define(version: 20170731010449) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -246,6 +246,34 @@ ActiveRecord::Schema.define(version: 20170731001803) do
     t.datetime "updated_at",   null: false
   end
 
+  create_table "flora_eaten_bies", force: :cascade do |t|
+    t.integer  "flora_id"
+    t.integer  "creature_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  create_table "flora_locations", force: :cascade do |t|
+    t.integer  "flora_id"
+    t.integer  "location_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  create_table "flora_magical_effects", force: :cascade do |t|
+    t.integer  "flora_id"
+    t.integer  "magic_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "flora_relationships", force: :cascade do |t|
+    t.integer  "flora_id"
+    t.integer  "related_flora_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
   create_table "floras", force: :cascade do |t|
     t.string   "name"
     t.string   "description"
@@ -270,6 +298,7 @@ ActiveRecord::Schema.define(version: 20170731001803) do
     t.integer  "universe_id"
     t.string   "notes"
     t.string   "private_notes"
+    t.string   "privacy"
   end
 
   add_index "floras", ["universe_id"], name: "index_floras_on_universe_id"
@@ -630,6 +659,13 @@ ActiveRecord::Schema.define(version: 20170731001803) do
     t.integer  "associated_code_id"
     t.datetime "created_at",         null: false
     t.datetime "updated_at",         null: false
+  end
+
+  create_table "related_floras", force: :cascade do |t|
+    t.integer  "flora_id"
+    t.integer  "related_flora_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
   end
 
   create_table "religions", force: :cascade do |t|
