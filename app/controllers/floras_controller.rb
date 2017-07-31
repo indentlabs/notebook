@@ -6,7 +6,6 @@ class FlorasController < ContentController
   end
 
   def content_param_list
-    binding.pry
     %i(
       name description aliases universe_id
       order family genus
