@@ -90,6 +90,7 @@ Rails.application.routes.draw do
     resources :religions
     resources :magics
     resources :languages
+    resources :floras
 
     # Content usage
     resources :scenes

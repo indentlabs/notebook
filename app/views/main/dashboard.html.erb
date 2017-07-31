@@ -26,7 +26,7 @@
 %>
 
 <div class="row">
-  <% [:universe, :character, :location, :item, :creature, :race, :religion, :group, :magic, :language, :scene].each do |type| %>
+  <% [:universe, :character, :location, :item, :creature, :race, :religion, :group, :magic, :language, :flora, :scene].each do |type| %>
     <% content_list = current_user.send(type.to_s.pluralize) %>
     <% content_list = content_list.in_universe(@universe_scope) if (@universe_scope.present? && type != :universe) %>
     <% next if !current_user.can_create?(type.to_s.capitalize.constantize) && content_list.empty? %>
