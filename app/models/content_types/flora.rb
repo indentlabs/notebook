@@ -15,8 +15,7 @@ class Flora < ActiveRecord::Base
   include Serendipitous::Concern
 
   include Authority::Abilities
-  self.authorizer_name = 'CoreContentAuthorizer'
-  #self.authorizer_name = 'ExtendedContentAuthorizer'
+  self.authorizer_name = 'ExtendedContentAuthorizer'
 
   relates :related_floras, with: :flora_relationships
   relates :magics, with: :flora_magical_effects
