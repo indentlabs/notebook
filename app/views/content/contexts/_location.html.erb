@@ -57,6 +57,16 @@
   }
 %>
 
+<%=
+  render partial: 'content/contexts/relation', locals: {
+    content_type: Flora,
+    content: content,
+    relation_class: FloraLocation,
+    relation_class_id: :location_id,
+    relation_text: '<plural> found here'
+  }
+%>
+
 <% scenes = SceneLocationship.where(scene_location_id: content.id).map(&:scene).compact.select { |content| content && content.readable_by?(current_user || User.new) } %>
 <% if scenes.any? %>
   <div class="col s12 m6 l4">

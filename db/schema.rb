@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170712190101) do
+ActiveRecord::Schema.define(version: 20170731010449) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -245,6 +245,64 @@ ActiveRecord::Schema.define(version: 20170712190101) do
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
   end
+
+  create_table "flora_eaten_bies", force: :cascade do |t|
+    t.integer  "flora_id"
+    t.integer  "creature_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  create_table "flora_locations", force: :cascade do |t|
+    t.integer  "flora_id"
+    t.integer  "location_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  create_table "flora_magical_effects", force: :cascade do |t|
+    t.integer  "flora_id"
+    t.integer  "magic_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "flora_relationships", force: :cascade do |t|
+    t.integer  "flora_id"
+    t.integer  "related_flora_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  create_table "floras", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "aliases"
+    t.string   "order"
+    t.string   "family"
+    t.string   "genus"
+    t.string   "colorings"
+    t.string   "size"
+    t.string   "smell"
+    t.string   "taste"
+    t.string   "fruits"
+    t.string   "seeds"
+    t.string   "nuts"
+    t.string   "berries"
+    t.string   "medicinal_purposes"
+    t.string   "reproduction"
+    t.string   "seasonality"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+    t.integer  "user_id"
+    t.integer  "universe_id"
+    t.string   "notes"
+    t.string   "private_notes"
+    t.string   "privacy"
+  end
+
+  add_index "floras", ["universe_id"], name: "index_floras_on_universe_id"
+  add_index "floras", ["user_id"], name: "index_floras_on_user_id"
 
   create_table "friendly_id_slugs", force: :cascade do |t|
     t.string   "slug",                      null: false
@@ -601,6 +659,13 @@ ActiveRecord::Schema.define(version: 20170712190101) do
     t.integer  "associated_code_id"
     t.datetime "created_at",         null: false
     t.datetime "updated_at",         null: false
+  end
+
+  create_table "related_floras", force: :cascade do |t|
+    t.integer  "flora_id"
+    t.integer  "related_flora_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
   end
 
   create_table "religions", force: :cascade do |t|
@@ -1001,6 +1066,8 @@ ActiveRecord::Schema.define(version: 20170712190101) do
     t.integer  "upload_bandwidth_kb",      default: 50000
     t.string   "secure_code"
     t.boolean  "fluid_preference"
+    t.string   "username"
+    t.string   "forum_admin",              default: "f"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true

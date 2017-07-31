@@ -17,6 +17,7 @@ module HasContent
     has_many :magics
     has_many :languages
     has_many :groups
+    has_many :floras
 
     # Collective content types
     has_many :scenes
