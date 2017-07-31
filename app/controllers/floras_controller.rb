@@ -12,6 +12,7 @@ class FlorasController < ContentController
       colorings size smell taste
       fruits seeds nuts berries medicinal_purposes
       reproduction seasonality
+      privacy
       notes private_notes
     ) + [
       custom_attribute_values:           [:name, :value],
