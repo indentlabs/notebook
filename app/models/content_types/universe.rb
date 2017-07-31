@@ -31,6 +31,7 @@ class Universe < ActiveRecord::Base
   has_many :religions
   has_many :magics
   has_many :languages
+  has_many :floras
 
   has_many :scenes
   has_many :groups
