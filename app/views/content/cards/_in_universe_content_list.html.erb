@@ -30,7 +30,11 @@
           <%= content_type_class.icon %>
         </i>
       <% end %>
-      <%= content_type.to_s.pluralize %>
+      <% if defined?(@content) && @content.is_a?(Universe) && content_type != :universe %>
+        <%= link_to content_type.to_s.pluralize.titleize, send("#{content_type.to_s.pluralize}_universe_path"), class: "#{content_type_class.color}-text" %>
+      <% else %>
+        <%= content_type.to_s.pluralize.titleize %>
+      <% end %>
       <i class="material-icons right">close</i>
     </span>
     <% if content_list.any? %>
@@ -55,7 +59,14 @@
         <% end %>
       </table>
       <div class="center" style="margin-top: 30px">
-        <%= content_type.to_s.pluralize %>
+        <% if defined?(@content) && @content.is_a?(Universe) && content_type != :universe %>
+          <%= link_to "Browse #{content_type.to_s.pluralize}", send("#{content_type.to_s.pluralize}_universe_path"), class: "btn #{content_type_class.color} lighten-1" %>
+        <% else %>
+          <div class="center">
+            <% button_text = content_list.any? ? "Create another #{content_type}" : "Create one" %>
+            <%= link_to button_text, new_polymorphic_path(content_type), class: "btn #{content_type_class.color}" if current_user %>
+          </div>
+        <% end %>
       </div>
     <% elsif content_list.empty? %>
       <div class="row">
