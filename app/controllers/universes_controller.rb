@@ -8,7 +8,7 @@ class UniversesController < ContentController
       @content_type = content_type_name.to_s.singularize.capitalize.constantize
 
       @universe = Universe.find(params[:id])
-      @content_list = @universe.send(content_type_name)
+      @content_list = @universe.send(content_type_name).order(:name)
 
       render :content_list
     end
