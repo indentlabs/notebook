@@ -30,6 +30,14 @@ class User < ActiveRecord::Base
 
   has_many :content_change_events
 
+  def contributable_universes
+    # todo email confirmation needs to happy for data safety / privacy (only verified emails)
+    contributor_by_email = Contributor.where(email: self.email).pluck(:universe_id)
+    contributor_by_user = Contributor.where(user: self).pluck(:universe_id)
+
+    Universe.where(id: contributor_by_email + contributor_by_user)
+  end
+
   # TODO: Swap this out with a has_many when we transition from a scratchpad to users having multiple documents
   has_one :document
 

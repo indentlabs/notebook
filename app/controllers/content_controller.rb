@@ -123,6 +123,12 @@ class ContentController < ApplicationController
       upload_files params['image_uploads'], content_type.name, @content.id
     end
 
+    if @content.is_a?(Universe) && params.key?('contributors')
+      params[:contributors][:email].each do |email|
+        ContributorService.invite_contributor_to_universe(universe: @content, email: email)
+      end
+    end
+
     if @content.update_attributes(content_params)
       successful_response(@content, t(:update_success, model_name: humanized_model_name))
     else

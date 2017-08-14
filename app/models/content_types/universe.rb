@@ -36,6 +36,8 @@ class Universe < ActiveRecord::Base
   has_many :scenes
   has_many :groups
 
+  has_many :contributors
+
   scope :is_public, -> { where(privacy: 'public') }
 
   def content
