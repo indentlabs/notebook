@@ -16,7 +16,6 @@ class ContentAuthorizer < ApplicationAuthorizer
   end
 
   def deletable_by? user
-  	#todo: Collaboration
   	resource.user_id == user.id
   end
 end

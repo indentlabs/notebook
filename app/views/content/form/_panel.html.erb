@@ -70,8 +70,16 @@
       <% elsif field.name == 'universe_id' %>
         <div class="input-field">
           <%= f.label field.name, field.label %><br />
-          <% if current_user == f.object.user %>
-            <%= f.select field.name, current_user.universes.sort_by(&:name).map { |u| [u.name, u.id] }.compact, include_blank: true, selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id]) %>
+          <% if current_user == f.object.user || !f.object.persisted? %>
+            <%# todo not like this %>
+            <%=
+              f.select field.name,
+              (current_user.universes + current_user.contributable_universes.tap { |uar|
+                uar.map { |u| u.name += ' (contributor)' }
+              }).uniq.sort_by(&:name).map { |u| [u.name, u.id] }.compact,
+              include_blank: true,
+              selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id])
+            %>
           <% else %>
             <br />
             <%= link_to(f.object.universe.name, f.object.universe) if f.object.universe %>

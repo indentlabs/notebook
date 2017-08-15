@@ -1,6 +1,4 @@
 class ContentController < ApplicationController
-  #include HasOwnership
-
   before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy]
 
   def index
@@ -9,7 +7,7 @@ class ContentController < ApplicationController
 
     contributable_universe_ids = current_user.contributable_universes.pluck(:id)
 
-    # todo refactor all of this to just use .or() after upgrading to rails 5
+    # todo refactor all of this to just use my_content.or(contributable_content) after upgrading to rails 5
     search_clauses = ["#{table_name}.user_id = #{current_user.id}"]
     if contributable_universe_ids.any?
       search_clauses.push "#{table_name}.id = (#{contributable_universe_ids.join(',')})"          if content_type_class == Universe
