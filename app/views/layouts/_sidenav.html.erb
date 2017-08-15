@@ -59,7 +59,13 @@
             if base_content_type != Universe && @universe_scope
               @universe_scope.send(base_content_type.name.downcase.pluralize).count
             else
-              current_user.send(base_content_type.name.downcase.pluralize).count
+              content_count = current_user.send(base_content_type.name.downcase.pluralize).count
+
+              if base_content_type == Universe
+                content_count += current_user.contributable_universes.count
+              else
+                content_count += current_user.contributable_universes.flat_map { |universe| universe.send(base_content_type.name.downcase.pluralize).count }.inject(:+)
+              end
             end
           %>
         </span>

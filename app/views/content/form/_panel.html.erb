@@ -70,7 +70,7 @@
       <% elsif field.name == 'universe_id' %>
         <div class="input-field">
           <%= f.label field.name, field.label %><br />
-          <% if current_user == f.object.user || !f.object.persisted? %>
+          <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) %>
             <%# todo not like this %>
             <%=
               f.select field.name,
