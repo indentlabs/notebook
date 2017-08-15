@@ -112,13 +112,27 @@
         </div>
 
       <% elsif field.name == 'private_notes' %>
-        <div class="input-field content-field">
-          <%= f.label field.name, field.label %>
-          <%= f.text_area field.name, class: "materialize-textarea", placeholder: 'Write as little or as much as you want!' %>
-          <div class="help-text">
-            Private notes are <em>always</em> visible to only you, even if content is made public and shared.
+        <%#
+          This field is shown if and only if:
+          * A user is signed in AND
+            * That user is the owner of this universe, if it's a universe, or
+            * That user is the owner of this content's universe, if it's content
+            * That user is the owner of this content, if it's not in a universe
+        %>
+        <% if user_signed_in? && (
+             (content.is_a?(Universe) && content.user == current_user) ||
+             (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
+             (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
+           )
+        %>
+          <div class="input-field content-field">
+            <%= f.label field.name, field.label %>
+            <%= f.text_area field.name, class: "materialize-textarea", placeholder: 'Write as little or as much as you want!' %>
+            <div class="help-text">
+              Private notes are <em>always</em> visible to only you, even if content is made public and shared.
+            </div>
           </div>
-        </div>
+        <% end %>
 
       <% elsif field.name == 'item_type' %>
         <% potential_item_types = t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +
