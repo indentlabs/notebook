@@ -123,7 +123,7 @@ class ContentController < ApplicationController
       upload_files params['image_uploads'], content_type.name, @content.id
     end
 
-    if @content.is_a?(Universe) && params.key?('contributors')
+    if @content.is_a?(Universe) && params.key?('contributors') && @content.user == current_user
       params[:contributors][:email].each do |email|
         ContributorService.invite_contributor_to_universe(universe: @content, email: email)
       end
