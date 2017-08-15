@@ -1,5 +1,5 @@
 class ContentController < ApplicationController
-  include HasOwnership
+  #include HasOwnership
 
   before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy]
 
@@ -139,7 +139,15 @@ class ContentController < ApplicationController
       end
     end
 
-    if @content.update_attributes(content_params)
+    if @content.user == current_user
+      update_success = @content.update_attributes(content_params)
+    else
+      # Exclude fields only the real owner can edit
+      #todo move field list somewhere when it grows
+      update_success = @content.update_attributes(content_params.except!(:universe_id))
+    end
+
+    if update_success
       successful_response(@content, t(:update_success, model_name: humanized_model_name))
     else
       failed_response('edit', :unprocessable_entity)

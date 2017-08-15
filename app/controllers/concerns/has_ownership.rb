@@ -3,8 +3,8 @@ module HasOwnership
   extend ActiveSupport::Concern
 
   included do
-    before_action :require_ownership_or_sharing, only: [:show]
-    before_action :require_ownership, only: [:edit, :update, :destroy]
+    #before_action :require_ownership_or_sharing, only: [:show]
+    #before_action :require_ownership, only: [:edit, :update, :destroy]
   end
 
   module ClassMethods
