@@ -20,8 +20,8 @@
   <li><%= link_to "All universes", url_for(params.merge(:universe => :all)) %></li>
   <% if current_user %>
     <li class="divider"></li>
-    <% current_user.universes.sort_by(&:name).each do |universe| %>
-      <li><%= link_to universe.name, "?universe=#{universe.id}" %></li>
+    <% (current_user.universes + current_user.contributable_universes).sort_by(&:name).each do |universe| %>
+      <li><%= link_to universe.name + (universe.user == current_user ? '' : ' (contributor)'), "?universe=#{universe.id}" %></li>
     <% end %>
   <% end %>
 </ul>
