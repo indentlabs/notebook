@@ -7,7 +7,5 @@ class ContributorsController < ApplicationController
 
       #todo send "you've been removed as a contributor" email
     end
-
-    #redirect_to :back
   end
 end

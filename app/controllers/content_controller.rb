@@ -4,12 +4,22 @@ class ContentController < ApplicationController
   before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy]
 
   def index
-    @content = content_type_from_controller(self.class)
-               .where(user_id: current_user.id)
-               .order(:name)
+    content_type_class = content_type_from_controller(self.class)
+    table_name = content_type_class.name.downcase.pluralize
 
+    contributable_universe_ids = current_user.contributable_universes.pluck(:id)
+
+    # todo refactor all of this to just use .or() after upgrading to rails 5
+    search_clauses = ["#{table_name}.user_id = #{current_user.id}"]
+    if contributable_universe_ids.any?
+      search_clauses.push "#{table_name}.id = (#{contributable_universe_ids.join(',')})"          if content_type_class == Universe
+      search_clauses.push "#{table_name}.universe_id = (#{contributable_universe_ids.join(',')})" unless content_type_class == Universe
+    end
+
+    @content = content_type_class.where(search_clauses.join(' OR '))
     @content = @content.where(universe: @universe_scope) if @universe_scope.present? && @content.build.respond_to?(:universe)
-    @content ||= []
+    @content = @content.order(:name)
+
     @questioned_content = @content.sample
     @question = @questioned_content.question unless @questioned_content.nil?
 

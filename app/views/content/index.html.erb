@@ -32,7 +32,7 @@
 <% if @content.any? %>
 
   <h4>
-    You've created <%= pluralize(@content.count, @content.content_name) %>
+    Your <%= pluralize(@content.count, @content.content_name) %>
     <% if @content.count > 0 %>
       <small class="right">
         <% if current_user.can_create? content_type_class %>
@@ -82,14 +82,5 @@
       <%= link_to "Upgrade to Premium to create your first #{@content.content_name.humanize.downcase}", subscription_path %>
     <% end %>
   </div>
-
-<% end %>
-
-<% if content_type_class == Universe && current_user.contributable_universes.any? %>
-
-  <h4>
-    You're a contributor on <%= current_user.contributable_universes.count %> universes
-  </h4>
-  <%= render partial: 'content/list/list', locals: { content_list: @content, show_add_another_form: true } %>
 
 <% end %>
