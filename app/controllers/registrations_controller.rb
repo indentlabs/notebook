@@ -23,7 +23,7 @@ class RegistrationsController < Devise::RegistrationsController
   def add_account
     # Tie any universe contributor invites with this email to this user
     if resource.persisted?
-      Contributor.where(email: resource.email, user: nil).update_all(user: resource)
+      Contributor.where(email: resource.email, user_id: nil).update_all(user_id: resource.id)
     end
 
     # If the user was created in the last 60 seconds, report it to Slack

@@ -61,8 +61,10 @@
   <% end %>
 
   <% if local_assigns[:show_add_another_form] && content_list.any? && current_user.can_create?(content_type) %>
-    <% unless content_type == Universe %>
-      <%= render partial: 'content/list/quick_add_form', locals: { content_type: content_list.build.class } %>
+    <% if content_type == Character || content_type == Location || content_type == Item || current_user.on_premium_plan? %>
+      <% unless content_type == Universe %>
+        <%= render partial: 'content/list/quick_add_form', locals: { content_type: content_list.build.class } %>
+      <% end %>
     <% end %>
   <% end %>
 

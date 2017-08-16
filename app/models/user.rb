@@ -16,6 +16,10 @@ class User < ActiveRecord::Base
 
   has_many :subscriptions
   has_many :billing_plans, through: :subscriptions
+  def on_premium_plan?
+    [2, 3, 4, 5, 6].include?(self.selected_billing_plan_id)
+  end
+
   has_many :image_uploads
 
   has_one :referral_code
