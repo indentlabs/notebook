@@ -57,9 +57,9 @@ class ContentController < ApplicationController
       end
     else
       if current_user.present?
-        return redirect_to :back
+        return redirect_to :back, notice: "You don't have permission to view that content."
       else
-        return redirect_to root_path
+        return redirect_to root_path, notice: "You don't have permission to view that content."
       end
     end
   end
@@ -98,6 +98,15 @@ class ContentController < ApplicationController
 
     unless current_user.can_create?(content_type)
       return redirect_to :back
+    end
+
+    # Even if a user can create content, we want to double check that they're either on a premium account or creating content in a universe owned by someone on premium
+    unless current_user.on_premium_plan?
+      containing_universe = Universe.find(content_params[:universe_id].to_i)
+      unless content_params[:universe_id].present? && containing_universe && containing_universe.user.on_premium_plan? && current_user.contributable_universes.include?(containing_universe)
+        return redirect_to send(content_type.name.downcase.pluralize + '_path'),
+          notice: "Premium content must either be created by a user with a Premium account, or in a universe owned by a user with a Premium account."
+      end
     end
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
