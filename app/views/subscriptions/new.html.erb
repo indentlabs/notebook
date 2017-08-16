@@ -282,7 +282,7 @@
             </p>
             <ul>
               <% referrals = current_user.referrals %>
-              <% converted_referrals = referrals.map(&:referree).select { |user| [2, 3, 4, 5, 6].include? user.selected_billing_plan_id } %>
+              <% converted_referrals = referrals.map(&:referree).select(&:on_premium_plan?) %>
               <li><strong><%= pluralize referrals.count, 'user' %></strong> <%= referrals.count == 1 ? 'has' : 'have' %> signed up with your referral code.</li>
               <% if converted_referrals.any? %>
                 <li>

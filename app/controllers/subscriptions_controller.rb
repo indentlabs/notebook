@@ -79,7 +79,7 @@ class SubscriptionsController < ApplicationController
       end
 
       # If this is the first time this user is subscribing to Premium, gift them (and their referrer, if applicable) feature votes and space
-      existing_premium_subscriptions = current_user.subscriptions.where(billing_plan_id: [2, 3, 4, 5, 6])
+      existing_premium_subscriptions = current_user.subscriptions.where(billing_plan_id: BillingPlan::PREMIUM_IDS)
       unless existing_premium_subscriptions.any?
         referring_user = current_user.referrer || current_user
 
@@ -223,7 +223,7 @@ class SubscriptionsController < ApplicationController
       end
 
       # If this is the first time this user is subscribing to Premium, gift them (and their referrer, if applicable) feature votes and space
-      existing_premium_subscriptions = current_user.subscriptions.where(billing_plan_id: [2, 3, 4, 5, 6])
+      existing_premium_subscriptions = current_user.subscriptions.where(billing_plan_id: BillingPlan::PREMIUM_IDS)
       unless existing_premium_subscriptions.any?
         referring_user = current_user.referrer || current_user
 

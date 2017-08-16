@@ -41,13 +41,13 @@ class ContentController < ApplicationController
             'content_type': content_type.name,
             'content_owner': current_user.present? && current_user.id == @content.user_id,
             'logged_in_user': current_user.present?
-          })
+          }) if Rails.env == 'production'
         else
           Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed recently-modified content', {
             'content_type': content_type.name,
             'content_owner': current_user.present? && current_user.id == @content.user_id,
             'logged_in_user': current_user.present?
-          })
+          }) if Rails.env == 'production'
         end
       end
 
@@ -101,17 +101,17 @@ class ContentController < ApplicationController
     end
 
     # Even if a user can create content, we want to double check that they're either on a premium account or creating content in a universe owned by someone on premium
-    unless current_user.on_premium_plan?
-      containing_universe = Universe.find(content_params[:universe_id].to_i)
-      unless content_params[:universe_id].present? && containing_universe && containing_universe.user.on_premium_plan? && current_user.contributable_universes.include?(containing_universe)
-        return redirect_to send(content_type.name.downcase.pluralize + '_path'),
-          notice: "Premium content must either be created by a user with a Premium account, or in a universe owned by a user with a Premium account."
-      end
-    end
+    # unless current_user.on_premium_plan?
+    #   containing_universe = Universe.find(content_params[:universe_id].to_i)
+    #   unless content_params[:universe_id].present? && containing_universe && containing_universe.user.on_premium_plan? && current_user.contributable_universes.include?(containing_universe)
+    #     return redirect_to send(content_type.name.downcase.pluralize + '_path'),
+    #       notice: "Premium content must either be created by a user with a Premium account, or in a universe owned by a user with a Premium account."
+    #   end
+    # end
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
       'content_type': content_type.name
-    })
+    }) if Rails.env == 'production'
 
     if @content.save
       if params.key? 'image_uploads'
@@ -134,7 +134,7 @@ class ContentController < ApplicationController
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'updated content', {
       'content_type': content_type.name
-    })
+    }) if Rails.env == 'production'
 
     if params.key? 'image_uploads'
       upload_files params['image_uploads'], content_type.name, @content.id
@@ -187,7 +187,7 @@ class ContentController < ApplicationController
         'content_type': content_type,
         'image_size_kb': image_size_kb,
         'first five images': current_user.image_uploads.count <= 5
-      })
+      }) if Rails.env == 'production'
     end
   end
 
@@ -201,7 +201,7 @@ class ContentController < ApplicationController
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'deleted content', {
       'content_type': content_type.name
-    })
+    }) if Rails.env == 'production'
 
     @content.destroy
 
