@@ -1,24 +1,31 @@
 class ContentAuthorizer < ApplicationAuthorizer
   def readable_by? user
     [
-      resource.user_id == user.id,
-      resource.respond_to?(:privacy) && resource.privacy == 'public',
-      resource.universe.present? && resource.universe.privacy == 'public',
-      resource.universe.present? && user.contributable_universes.pluck(:id).include?(resource.universe.id)
+      PermissionService.user_owns_content?(user: user, content: resource),
+      PermissionService.content_is_public?(content: resource),
+      PermissionService.content_is_in_a_public_universe?(content: resource),
+      PermissionService.user_can_contribute_to_containing_universe?(user: user, content: resource)
     ].any?
   end
 
   def updatable_by? user
     [
-      resource.universe && user.contributable_universes.pluck(:id).include?(resource.universe.id),
-      resource.universe.nil? && resource.user_id == user.id,
+      PermissionService.user_owns_containing_universe?(user: user, content: resource),
+      PermissionService.user_can_contribute_to_containing_universe?(user: user, content: resource),
+      [
+        PermissionService.content_has_no_containing_universe?(content: resource),
+        PermissionService.user_owns_content?(user: user, content: resource)
+      ].all?
     ].any?
   end
 
   def deletable_by? user
     [
-      resource.universe && resource.universe.user == user.id,
-      resource.universe.nil? && resource.user_id == user.id
+      PermissionService.user_owns_containing_universe?(user: user, content: resource),
+      [
+        PermissionService.content_has_no_containing_universe?(content: resource),
+        PermissionService.user_owns_content?(user: user, content: resource)
+      ].all?
     ].any?
   end
 end
