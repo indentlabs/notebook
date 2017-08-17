@@ -1,6 +1,4 @@
-<%
-  content_type = content_list.any? ? content_list.first.class : content_list.build.class
-%>
+<%# Usage: render partial: 'content/list/list', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true } %>
 
 <ul class="collection <%= 'with-header' if title.present? %>" style='border: 0'>
   <% if title.present? %>
@@ -63,7 +61,7 @@
   <% if local_assigns[:show_add_another_form] && content_list.any? && current_user.can_create?(content_type) %>
     <% if content_type == Character || content_type == Location || content_type == Item || current_user.on_premium_plan? %>
       <% unless content_type == Universe %>
-        <%= render partial: 'content/list/quick_add_form', locals: { content_type: content_list.build.class } %>
+        <%= render partial: 'content/list/quick_add_form', locals: { content_type: content_type } %>
       <% end %>
     <% end %>
   <% end %>

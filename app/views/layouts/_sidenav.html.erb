@@ -59,13 +59,12 @@
             if base_content_type != Universe && @universe_scope
               @universe_scope.send(base_content_type.name.downcase.pluralize).count
             else
-              content_count = current_user.send(base_content_type.name.downcase.pluralize).count
-
-              if base_content_type == Universe
-                content_count += current_user.contributable_universes.count
-              else
-                content_count += current_user.contributable_universes.flat_map { |universe| universe.send(base_content_type.name.downcase.pluralize).count }.inject(:+)
-              end
+              pluralized_name = base_content_type.name.downcase.pluralize
+              (
+                current_user.send(pluralized_name) +
+                current_user.send("contributable_#{pluralized_name}") +
+                (base_content_type == Universe ? [] : current_user.universes.flat_map { |universe| universe.send(pluralized_name) })
+              ).uniq.count
             end
           %>
         </span>
@@ -89,7 +88,12 @@
             if @universe_scope
               @universe_scope.send(extended_content_type.name.downcase.pluralize).count
             else
-              current_user.send(extended_content_type.name.downcase.pluralize).count
+              pluralized_name = extended_content_type.name.downcase.pluralize
+              (
+                current_user.send(pluralized_name) +
+                current_user.send("contributable_#{pluralized_name}") +
+                current_user.universes.flat_map { |universe| universe.send(pluralized_name) }
+              ).uniq.count
             end
           %>
         </span>
@@ -122,7 +126,12 @@
             if @universe_scope
               @universe_scope.send(extended_content_type.name.downcase.pluralize).count
             else
-              current_user.send(extended_content_type.name.downcase.pluralize).count
+              pluralized_name = extended_content_type.name.downcase.pluralize
+              (
+                current_user.send(pluralized_name) +
+                current_user.send("contributable_#{pluralized_name}") +
+                current_user.universes.flat_map { |universe| universe.send(pluralized_name) }
+              ).uniq.count
             end
           %>
         </span>

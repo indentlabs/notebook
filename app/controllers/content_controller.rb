@@ -8,10 +8,17 @@ class ContentController < ApplicationController
     if @universe_scope.present? && @content_type_class != Universe
       @content = @universe_scope.send(pluralized_content_name)
     else
-      @content = (current_user.send(pluralized_content_name) + current_user.send("contributable_#{pluralized_content_name}")).uniq
+      @content = (
+        current_user.send(pluralized_content_name) +
+        current_user.send("contributable_#{pluralized_content_name}")
+      )
+
+      unless @content_type_class == Universe
+        @content.concat(current_user.universes.flat_map { |universe| universe.send(pluralized_content_name) })
+      end
     end
 
-    @content = @content.sort_by(&:name)
+    @content = @content.flatten.uniq.sort_by(&:name)
 
     @questioned_content = @content.sample
     @question = @questioned_content.question unless @questioned_content.nil?
