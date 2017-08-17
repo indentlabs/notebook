@@ -8,6 +8,10 @@ class PermissionService < Service
     content.user == user
   end
 
+  def self.user_owns_any_containing_universe?(user:, content:)
+    content.universe.present? && user_owns_content?(user: user, content: content.universe)
+  end
+
   def self.user_can_contribute_to_universe?(user:, universe:)
     user.contributable_universes.pluck(:id).include?(universe.id)
   end
@@ -43,7 +47,7 @@ class PermissionService < Service
 
   def self.user_can_collaborate_in_universe_that_allows_extended_content?(user:)
     user.contributable_universes.any? do |universe|
-      billing_plan_allows_extended_content?(universe.user)
+      billing_plan_allows_extended_content?(user: universe.user)
     end
   end
 
@@ -53,7 +57,7 @@ class PermissionService < Service
 
   def self.user_can_collaborate_in_universe_that_allows_collective_content?(user:)
     user.contributable_universes.any? do |universe|
-      billing_plan_allows_collective_content?(universe.user)
+      billing_plan_allows_collective_content?(user: universe.user)
     end
   end
 end

@@ -10,7 +10,7 @@ class ContentAuthorizer < ApplicationAuthorizer
 
   def updatable_by? user
     [
-      PermissionService.user_owns_containing_universe?(user: user, content: resource),
+      PermissionService.user_owns_any_containing_universe?(user: user, content: resource),
       PermissionService.user_can_contribute_to_containing_universe?(user: user, content: resource),
       [
         PermissionService.content_has_no_containing_universe?(content: resource),
@@ -21,7 +21,7 @@ class ContentAuthorizer < ApplicationAuthorizer
 
   def deletable_by? user
     [
-      PermissionService.user_owns_containing_universe?(user: user, content: resource),
+      PermissionService.user_owns_any_containing_universe?(user: user, content: resource),
       [
         PermissionService.content_has_no_containing_universe?(content: resource),
         PermissionService.user_owns_content?(user: user, content: resource)

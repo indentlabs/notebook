@@ -11,8 +11,7 @@ class User < ActiveRecord::Base
   include HasContent
   include Authority::UserAbilities
 
-  validates :email, presence: true
-  #todo: We probably want a uniqueness constraint on email
+  validates :email, presence: true, uniqueness: true
 
   has_many :subscriptions
   has_many :billing_plans, through: :subscriptions
@@ -40,6 +39,12 @@ class User < ActiveRecord::Base
     contributor_by_user = Contributor.where(user: self).pluck(:universe_id)
 
     Universe.where(id: contributor_by_email + contributor_by_user)
+  end
+  [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_type|
+    pluralized_content_type = content_type.name.downcase.pluralize
+    define_method "contributable_#{pluralized_content_type}" do
+      contributable_universes.flat_map { |universe| universe.send(pluralized_content_type) }
+    end
   end
 
   # TODO: Swap this out with a has_many when we transition from a scratchpad to users having multiple documents
