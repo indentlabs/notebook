@@ -26,6 +26,17 @@
           <span class="new badge grey white-text tooltipped" style="float: inherit; margin: 0;" data-badge-caption="contributor"
             data-position="bottom" data-delay="100" data-tooltip="You have been added as a contributor to this universe and its content."></span>
         <% end %>
+        <% if user_signed_in? && (
+            (
+              content.respond_to?(:universe) && content.universe && content.universe.user == current_user &&
+              content.user != current_user
+            ) ||
+            (content.is_a?(Universe) && content.user != current_user)
+          )
+        %>
+          <span class="new badge grey white-text tooltipped" style="float: inherit; margin: 0;" data-badge-caption="from contributor"
+            data-position="bottom" data-delay="100" data-tooltip="This content was created by a contributor to your universe."></span>
+        <% end %>
       </span>
       <p class="content-description truncate">
         <%= content.description %>
