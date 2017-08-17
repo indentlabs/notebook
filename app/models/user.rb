@@ -40,7 +40,7 @@ class User < ActiveRecord::Base
 
     Universe.where(id: contributor_by_email + contributor_by_user)
   end
-  [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_type|
+  [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene, Flora].each do |content_type|
     pluralized_content_type = content_type.name.downcase.pluralize
     define_method "contributable_#{pluralized_content_type}" do
       contributable_universes.flat_map { |universe| universe.send(pluralized_content_type) }
@@ -55,7 +55,7 @@ class User < ActiveRecord::Base
   after_create :initialize_secure_code
 
   def createable_content_types
-    [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].select do |c|
+    [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene, Flora].select do |c|
       can_create? c
     end
   end

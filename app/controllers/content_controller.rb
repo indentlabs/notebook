@@ -2,21 +2,16 @@ class ContentController < ApplicationController
   before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy]
 
   def index
-    content_type_class = content_type_from_controller(self.class)
-    table_name = content_type_class.name.downcase.pluralize
+    @content_type_class = content_type_from_controller(self.class)
+    pluralized_content_name = @content_type_class.name.downcase.pluralize
 
-    contributable_universe_ids = current_user.contributable_universes.pluck(:id)
-
-    # todo refactor all of this to just use my_content.or(contributable_content) after upgrading to rails 5
-    search_clauses = ["#{table_name}.user_id = #{current_user.id}"]
-    if contributable_universe_ids.any?
-      search_clauses.push "#{table_name}.id = (#{contributable_universe_ids.join(',')})"          if content_type_class == Universe
-      search_clauses.push "#{table_name}.universe_id = (#{contributable_universe_ids.join(',')})" unless content_type_class == Universe
+    if @universe_scope.present? && @content_type_class != Universe
+      @content = @universe_scope.send(pluralized_content_name)
+    else
+      @content = (current_user.send(pluralized_content_name) + current_user.send("contributable_#{pluralized_content_name}")).uniq
     end
 
-    @content = content_type_class.where(search_clauses.join(' OR '))
-    @content = @content.where(universe: @universe_scope) if @universe_scope.present? && @content.build.respond_to?(:universe)
-    @content = @content.order(:name)
+    @content = @content.sort_by(&:name)
 
     @questioned_content = @content.sample
     @question = @questioned_content.question unless @questioned_content.nil?
@@ -196,7 +191,7 @@ class ContentController < ApplicationController
     @content = content_type.find(params[:id])
 
     unless current_user.can_delete? @content
-      return redirect_to :back
+      return redirect_to :back, notice: "You don't have permission to do that!"
     end
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'deleted content', {
