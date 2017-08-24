@@ -213,6 +213,8 @@ Rails.application.routes.draw do
   scope '/market' do
     get '/', to: 'main#comingsoon'
   end
+
+  resources :omniauth_accounts, only: [:destroy]
 end
 
 # rubocop:enable LineLength
