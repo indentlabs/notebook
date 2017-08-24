@@ -61,6 +61,11 @@ gem 'social-share-button'
 gem 'easy_translate'
 gem 'levenshtein-ffi'
 
+# Social Logins
+gem 'omniauth-facebook'
+gem 'omniauth-twitter'
+gem 'omniauth-google-oauth2'
+
 group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
