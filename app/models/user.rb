@@ -33,7 +33,7 @@ class User < ActiveRecord::Base
 
   has_many :content_change_events
 
-  has_many :omniauth_users
+  has_many :omniauth_users, dependent: :destroy
 
   # TODO: Swap this out with a has_many when we transition from a scratchpad to users having multiple documents
   has_one :document
