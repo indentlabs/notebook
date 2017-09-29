@@ -3,10 +3,13 @@ require 'digest/md5'
 ##
 # a person using the Notebook.ai web application. Owns all other content.
 class User < ActiveRecord::Base
+  SOCIAL_SITES = [:facebook, :google_oauth2, :twitter]
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
+         :recoverable, :rememberable, :trackable, :validatable,
+         :omniauthable, omniauth_providers: SOCIAL_SITES
 
   include HasContent
   include Authority::UserAbilities
@@ -29,6 +32,8 @@ class User < ActiveRecord::Base
   has_many :raffle_entries
 
   has_many :content_change_events
+
+  has_many :omniauth_users, dependent: :destroy
 
   # TODO: Swap this out with a has_many when we transition from a scratchpad to users having multiple documents
   has_one :document
@@ -106,6 +111,18 @@ class User < ActiveRecord::Base
 
   def initialize_secure_code
     update secure_code: SecureRandom.uuid unless secure_code.present?
+  end
+
+
+  def update_without_password(params, *options)
+    if params[:password].blank?
+      params.delete(:password)
+      params.delete(:password_confirmation) if params[:password_confirmation].blank?
+    end
+
+    result = update_attributes(params, *options)
+    clean_up_passwords
+    result
   end
 
   private

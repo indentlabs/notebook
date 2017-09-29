@@ -2,7 +2,7 @@
 
 Rails.application.routes.draw do
 
-  devise_for :users, :controllers => { registrations: 'registrations' }
+  devise_for :users, controllers: { registrations: 'registrations', omniauth_callbacks: 'users/omniauth_callbacks' }
   resources :users
 
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
@@ -213,6 +213,8 @@ Rails.application.routes.draw do
   scope '/market' do
     get '/', to: 'main#comingsoon'
   end
+
+  resources :omniauth_accounts, only: [:destroy]
 end
 
 # rubocop:enable LineLength
