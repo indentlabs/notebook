@@ -7,11 +7,16 @@
     end
   %>
   <a class="dropdown-button tooltipped" href="#!" data-activates="dropdown_universes" data-position="bottom" data-delay="100" data-tooltip="<%= tooltip %>">
-    <i class="material-icons">vpn_lock</i>
+    <i class="material-icons <%= 'left' if @universe_scope.present? %>">vpn_lock</i>
+    <% if @universe_scope.present? %>
+      <div class="hide-on-small-only" style="overflow: hidden">
+        <%= @universe_scope.name.truncate(10) %>
+      </div>
+    <% end %>
   </a>
 </li>
 
-<ul id="dropdown_universes" class="dropdown-content">
+<ul id="dropdown_universes" class="dropdown-content universes-lock">
   <li><%= link_to "All universes", url_for(params.merge(:universe => :all)) %></li>
   <% if current_user %>
     <li class="divider"></li>

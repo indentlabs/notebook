@@ -9,6 +9,9 @@ class Language < ActiveRecord::Base
   include HasAttributes
   include HasPrivacy
   include HasContentGroupers
+  include HasImageUploads
+  include HasChangelog
+
   include Serendipitous::Concern
 
   include Authority::Abilities

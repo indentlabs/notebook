@@ -18,6 +18,9 @@ class Location < ActiveRecord::Base
   include HasAttributes
   include HasPrivacy
   include HasContentGroupers
+  include HasImageUploads
+  include HasChangelog
+
   include Serendipitous::Concern
 
   include Authority::Abilities
@@ -30,6 +33,9 @@ class Location < ActiveRecord::Base
   relates :capital_cities,    with: :capital_cities_relationships
   relates :largest_cities,    with: :largest_cities_relationships
   relates :notable_cities,    with: :notable_cities_relationships
+
+  # Languages
+  relates :languages,         with: :location_languageships
 
   scope :is_public, -> { eager_load(:universe).where('universes.privacy = ? OR locations.privacy = ?', 'public', 'public') }
 

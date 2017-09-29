@@ -27,6 +27,22 @@ class ContentController < ApplicationController
     if (current_user || User.new).can_read? @content
       @question = @content.question if current_user.present? and current_user == @content.user
 
+      if current_user
+        if @content.updated_at > 30.minutes.ago
+          Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed content', {
+            'content_type': content_type.name,
+            'content_owner': current_user.present? && current_user.id == @content.user_id,
+            'logged_in_user': current_user.present?
+          })
+        else
+          Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed recently-modified content', {
+            'content_type': content_type.name,
+            'content_owner': current_user.present? && current_user.id == @content.user_id,
+            'logged_in_user': current_user.present?
+          })
+        end
+      end
+
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
         format.json { render json: @content }
@@ -69,13 +85,22 @@ class ContentController < ApplicationController
   end
 
   def create
+    content_type = content_type_from_controller self.class
     initialize_object
 
-    unless current_user.can_create?(content_type_from_controller self.class)
+    unless current_user.can_create?(content_type)
       return redirect_to :back
     end
 
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
+      'content_type': content_type.name
+    })
+
     if @content.save
+      if params.key? 'image_uploads'
+        upload_files params['image_uploads'], content_type.name, @content.id
+      end
+
       successful_response(content_creation_redirect_url, t(:create_success, model_name: humanized_model_name))
     else
       failed_response('new', :unprocessable_entity)
@@ -90,10 +115,48 @@ class ContentController < ApplicationController
       return redirect_to :back
     end
 
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'updated content', {
+      'content_type': content_type.name
+    })
+
+    if params.key? 'image_uploads'
+      upload_files params['image_uploads'], content_type.name, @content.id
+    end
+
     if @content.update_attributes(content_params)
       successful_response(@content, t(:update_success, model_name: humanized_model_name))
     else
       failed_response('edit', :unprocessable_entity)
+    end
+  end
+
+  def upload_files image_uploads_list, content_type, content_id
+    image_uploads_list.each do |image_data|
+      image_size_kb = File.size(image_data.tempfile.path) / 1000.0
+
+      if current_user.upload_bandwidth_kb < image_size_kb
+        flash[:alert] = [
+          "At least one of your images failed to upload because you do not have enough upload bandwidth.",
+          "<a href='#{subscription_path}' class='btn white black-text center-align'>Get more</a>"
+        ].map { |p| "<p>#{p}</p>" }.join
+        next
+      else
+        current_user.update(upload_bandwidth_kb: current_user.upload_bandwidth_kb - image_size_kb)
+      end
+
+      related_image = ImageUpload.create(
+        user: current_user,
+        content_type: content_type,
+        content_id: content_id,
+        src: image_data,
+        privacy: 'public'
+      )
+
+      Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'uploaded image', {
+        'content_type': content_type,
+        'image_size_kb': image_size_kb,
+        'first five images': current_user.image_uploads.count <= 5
+      })
     end
   end
 
@@ -104,6 +167,10 @@ class ContentController < ApplicationController
     unless current_user.can_delete? @content
       return redirect_to :back
     end
+
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'deleted content', {
+      'content_type': content_type.name
+    })
 
     @content.destroy
 
@@ -138,7 +205,13 @@ class ContentController < ApplicationController
 
   def successful_response(url, notice)
     respond_to do |format|
-      format.html { redirect_to url, notice: notice }
+      format.html {
+        if params.key?(:override) && params[:override].key?(:redirect_path)
+          redirect_to params[:override][:redirect_path], notice: notice
+        else
+          redirect_to url, notice: notice
+        end
+      }
       format.json { render json: @content || {}, status: :success, notice: notice }
     end
   end

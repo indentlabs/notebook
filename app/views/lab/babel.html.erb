@@ -1,0 +1,51 @@
+<div class="row">
+  <div class="col s12">
+    <div class="card <%= Language.color %>">
+      <div class="card-content white-text">
+        <span class="card-title">Babel Translator</span>
+        <p>
+          Enter a word below to translate it from up to 50 different languages to English. Determine whether your name,
+          race, or concept means something already in another language.
+        </p>
+        <form method="post">
+          <div style="margin-top: 20px">
+            <input type="text" class="center" name="query" style="font-size: 26px; border-bottom: 1px solid white; background: #fefefe; color: black;" autofocus="autofocus" />
+          </div>
+          <div class="center">
+            <input type="submit" class="btn white <%= Language.color %>-text" value="Translate" />
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<% if params[:query] %>
+  <div class="row">
+      <div class="col s12">
+      <table class="highlight centered">
+        <thead>
+          <tr>
+            <th>Original word</th>
+            <th>translates in English to</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% @translations.each do |translation| %>
+            <tr class="<%= 'yellow' if Levenshtein.distance(params[:query].downcase, translation.second.downcase) > 2 %>">
+              <td><%= params[:query] %> in <%= translation.first.humanize %></td>
+              <td><%= translation.second.humanize %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% end %>
+<div class="row">
+  <div class="col s12">
+    <p class="grey-text">
+      Currently translating from <%= EasyTranslate::LANGUAGES.values.map(&:humanize).to_sentence %>.
+    </p>
+  </div>
+</div>

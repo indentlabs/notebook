@@ -2,29 +2,48 @@
   <%= form_for AttributeField.new do |f| %>
     <%= hidden_field_tag :entity_type, content.class.content_name %>
     <div class="modal-content">
-      <h4>New attribute field</h4>
+      <h4>
+        <i class="material-icons right <%= content.class.color %>-text"><%= content.class.icon %></i>
+        Create custom categories and fields
+      </h4>
 
       <div class="row">
-        <div class="input-field">
-          <%= f.label :attribute_category, 'Category' %><br />
-          <%= f.text_area :attribute_category, class: "materialize-textarea autocomplete" %>
-
+        <div class="col s12 m6">
+          <div class="input-field">
+            <%= f.label :attribute_category, 'New category' %><br />
+            <%= f.text_area :attribute_category, class: "materialize-textarea autocomplete" %>
+          </div>
+          <p class="grey-text help">
+            We find the best categories are broad and easy to add to. Examples of categories are "Appearance", "Demeanor", or "Abilities".
+            This will be added as a tab to all of your <%= content.class.name.downcase.pluralize %>.
+          </p>
+        </div>
+        <div class="col s12 m6">
+          <div class="input-field">
+            <%= f.label :label, 'Field in category' %>
+            <%= f.text_area :label, class: "materialize-textarea" %>
+            <p class="grey-text help">
+              Additionally, you can create your first field for this category here. You can add additional fields to
+              this category by resubmitting this form.
+            </p>
+            <p class="grey-text help">
+              Examples of fields may be "Height", "Age married", or "List of Adventures". Anything you want to track!
+            </p>
+          </div>
         </div>
       </div>
 
-      <div class="row">
-        <%= f.text_area :label, class: "materialize-textarea", placeholder: "Field Name" %>
-      </div>
-
+      <% unless defined?(safe_mode) && safe_mode %>
       <p class="row">
         Please save any changes before adding a field. It will refresh the page and any changes in your form
         will be lost.
       </p>
+      <% end %>
     </div>
 
     <div class="modal-footer">
-      <%= f.submit "Create field", class: "btn waves-effect waves-green" %>
-      <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">close</a>
+      <%= f.submit "Create field", class: "btn blue waves-effect waves-blue" %>
+      <a href="#!" class=" modal-action modal-close waves-effect waves-blue btn-flat">close</a>
     </div>
   <% end %>
 

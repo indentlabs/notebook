@@ -1,5 +1,12 @@
 class RegistrationsController < Devise::RegistrationsController
-  after_filter :add_account
+  after_filter :add_account, only: [:create]
+
+  def new
+    super
+    if params[:referral]
+      session[:referral] = params[:referral]
+    end
+  end
 
   private
 
@@ -8,15 +15,25 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def account_update_params
-    params.require(:user).permit(:name, :email, :password, :password_confirmation, :current_password, :email_updates)
+    params.require(:user).permit(:name, :email, :password, :password_confirmation, :current_password, :email_updates, :fluid_preference)
   end
 
   protected
 
   def add_account
-    # If the user was created in the last 30 seconds, report it to Slack
-    if resource.persisted? && resource.created_at < Time.now - 30.seconds
+    # If the user was created in the last 60 seconds, report it to Slack
+    if resource.persisted?
       report_new_account_to_slack resource
+
+      if params[:user].key? :referral_code
+        referral_code = ReferralCode.where(code: params[:user][:referral_code]).first
+
+        Referral.create(
+          referrer_id: referral_code.user.id,
+          referred_id: resource.id,
+          associated_code_id: referral_code.id
+        ) if referral_code.present?
+      end
     end
   end
 

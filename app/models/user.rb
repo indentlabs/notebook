@@ -16,8 +16,32 @@ class User < ActiveRecord::Base
 
   has_many :subscriptions
   has_many :billing_plans, through: :subscriptions
+  has_many :image_uploads
+
+  has_one :referral_code
+  has_many :referrals, foreign_key: :referrer_id
+  def referrer
+    referral = Referral.find_by(referred_id: self.id)
+    referral.referrer unless referral.nil?
+  end
+
+  has_many :votes
+  has_many :raffle_entries
+
+  has_many :content_change_events
+
+  # TODO: Swap this out with a has_many when we transition from a scratchpad to users having multiple documents
+  has_one :document
 
   after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
+  after_create :initialize_referral_code
+  after_create :initialize_secure_code
+
+  def createable_content_types
+    [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].select do |c|
+      can_create? c
+    end
+  end
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
@@ -74,6 +98,14 @@ class User < ActiveRecord::Base
     else
       self.stripe_customer_id
     end
+  end
+
+  def initialize_referral_code
+    ReferralCode.create user: self, code: SecureRandom.uuid
+  end
+
+  def initialize_secure_code
+    update secure_code: SecureRandom.uuid unless secure_code.present?
   end
 
   private

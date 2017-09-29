@@ -1,0 +1,63 @@
+<%
+  creating = defined?(creating) && creating
+  editing = defined?(editing) && editing
+%>
+
+<ul class="hoverable collection with-header content-tabs">
+  <li class="collection-header center">
+    <h4><%= @content.class.name %></h4>
+  </li>
+
+  <% if creating || editing %>
+    <li class="collection-header center">
+      <button class="btn waves-effect waves-<%= @content.class.color %> <%= @content.class.color %> mp-sidebar-save" type="submit" name="action" style="margin: 20px 0;">
+        <%= @content.new_record? ? 'Create' : 'Save Changes' %>
+      </button>
+    </li>
+  <% end %>
+
+  <% @content.class.attribute_categories(current_user).each do |category| %>
+    <% fields = category.attribute_fields %>
+    <%
+      #TODO: refactor ALL OF THIS
+      # Don't show changelog tab on create/edit form
+      next if (creating || editing) && category.name == 'changelog'
+
+      if creating || editing
+        # Show everything on create/edit forms
+      elsif category.name == 'changelog'
+        # Show changelog on show page
+      elsif category.name == 'gallery'
+        # Only show gallery tab if the content has any images
+        next if @content.image_uploads.empty?
+      else
+        # Only show other tabs if it has at least one piece of data in it, or it's a custom tab
+        next if fields.all? do |field|
+          if @content.respond_to?(field.name.to_sym)
+            value = @content.send(field.name.to_sym)
+          else
+            value = "custom field -- should always show"
+          end
+
+          value.blank?
+        end
+      end
+    %>
+
+    <li class="collection-item tab">
+      <a href="#<%= category.name.gsub("'", '') %>_panel" class="<%= 'red-text' if category.label == 'Overview' %>">
+        <i class="material-icons left"><%= category.icon %></i>
+        <%= category.label.capitalize %>
+      </a>
+    </li>
+  <% end %>
+
+  <% if user_signed_in? && current_user.id == @content.user_id %>
+    <li class="collection-item">
+      <a href="#" class="green-text new-attribute-field-link">
+        <i class="material-icons left">add</i>
+        Add custom category
+      </a>
+    </li>
+  <% end %>
+</ul>

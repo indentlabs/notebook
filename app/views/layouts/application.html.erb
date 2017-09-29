@@ -22,13 +22,17 @@
   <% end %>
 
   <main>
-    <div>
+    <div class="container<% if user_signed_in? && current_user.fluid_preference %>-fluid<% end %>">
       <div class="row">
-        <div class="col s12 m12 <%= (current_user && current_user.content_count == 0) ? 'l12' : 'l9' %>">
-          <%= yield %>
+        <div class="col s12">
+          <%# todo: move these to toasts and/or make dismissable %>
+          <%= render 'cards/ui/alert' %>
+          <%= render 'cards/ui/notice' %>
         </div>
-        <div class="col s12 m12 <%= (current_user && current_user.content_count == 0) ? 'l12' : 'l3' %>">
-          <%= render 'layouts/sidebar' %>
+      </div>
+      <div class="row">
+        <div class="col s12">
+          <%= yield %>
         </div>
       </div>
     </div>
@@ -45,6 +49,7 @@
 
     $(document).ready(function() {
       $('select').material_select();
+      $('.tooltipped').tooltip({delay: 50});
     });
   </script>
 

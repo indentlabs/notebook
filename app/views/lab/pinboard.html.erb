@@ -1,0 +1,53 @@
+<script src="/jquery.panzoom.min.js"></script>
+
+<style type="text/css">
+body {
+  height: 100vh;
+  overflow-x: hidden;
+}
+#pinboard {
+  height: 500vh;
+  width: 100%;
+  overflow-x: hidden;
+  margin-top: 50px;
+  background: #000 url('https://previews.123rf.com/images/rognar/rognar1002/rognar100200021/6443928-Large-corkboard-texture-or-background--Stock-Photo.jpg');
+}
+.card {
+  height: 160px;
+  width: 200px;
+}
+#zoom-container {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: #fff;
+  border: 1px solid #000;
+  width: 200px;
+  text-align: center;
+}
+#reset-button {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+}
+</style>
+
+<div id="pinboard">
+  <% 5.times do |x| %>
+  	<div class="card">card</div>
+  <% end %>
+</div>
+<div id="zoom-container">
+  <div>Zoom control</div>
+  <input type="range" id="zoomer" />
+</div>
+<input type="button" value="Reset" id="reset-button" class="btn white black-text" />
+
+<script type="text/javascript">
+$(".card").panzoom({
+  minScale: 0.3,
+  maxScale: 1.3,
+  $zoomRange: $("input[type='range']"),
+  $reset: $('#reset-button')
+});
+</script>

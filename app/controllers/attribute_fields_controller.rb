@@ -1,5 +1,14 @@
 # Controller for the Attribute model
 class AttributeFieldsController < ContentController
+  def destroy
+    # Delete this field as usual -- sets @content
+    super
+
+    # If the related category is now empty, delete it as well
+    related_category = @content.attribute_category
+    related_category.destroy if related_category.attribute_fields.empty?
+  end
+
   private
 
   def initialize_object
@@ -7,6 +16,10 @@ class AttributeFieldsController < ContentController
       c.entity_type = params[:entity_type]
       c.save!
     end
+
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created attribute', {
+      'content_type': params[:entity_type]
+    })
 
     @content = AttributeField.new(label: content_params[:label]).tap do |f|
       f.attribute_category_id = category.id

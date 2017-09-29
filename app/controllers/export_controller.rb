@@ -2,64 +2,88 @@ class ExportController < ApplicationController
   before_action :authenticate_user!
 
   def index
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed export page', {
+      'content count': current_user.content_count
+    })
+  end
+
+  def report_to_mixpanel format, scope
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'exported content', {
+      'export format': format,
+      'scope': scope
+    })
   end
 
   # Formats
 
   def universes_csv
+    report_to_mixpanel 'csv', 'universes'
     send_data to_csv(current_user.universes), filename: "universes-#{Date.today}.csv"
   end
 
   def characters_csv
+    report_to_mixpanel 'csv', 'characters'
     send_data to_csv(current_user.characters), filename: "characters-#{Date.today}.csv"
   end
 
   def locations_csv
+    report_to_mixpanel 'csv', 'locations'
     send_data to_csv(current_user.locations), filename: "locations-#{Date.today}.csv"
   end
 
   def items_csv
+    report_to_mixpanel 'csv', 'items'
     send_data to_csv(current_user.items), filename: "items-#{Date.today}.csv"
   end
 
   def creatures_csv
+    report_to_mixpanel 'csv', 'creatures'
     send_data to_csv(current_user.creatures), filename: "creatures-#{Date.today}.csv"
   end
 
   def races_csv
+    report_to_mixpanel 'csv', 'races'
     send_data to_csv(current_user.races), filename: "races-#{Date.today}.csv"
   end
 
   def religions_csv
+    report_to_mixpanel 'csv', 'religions'
     send_data to_csv(current_user.religions), filename: "religions-#{Date.today}.csv"
   end
 
   def magics_csv
+    report_to_mixpanel 'csv', 'magics'
     send_data to_csv(current_user.magics), filename: "magics-#{Date.today}.csv"
   end
 
   def languages_csv
+    report_to_mixpanel 'csv', 'languages'
     send_data to_csv(current_user.languages), filename: "languages-#{Date.today}.csv"
   end
 
   def groups_csv
+    report_to_mixpanel 'csv', 'groups'
     send_data to_csv(current_user.groups), filename: "groups-#{Date.today}.csv"
   end
 
   def scenes_csv
+    report_to_mixpanel 'csv', 'scenes'
     send_data to_csv(current_user.scenes), filename: "scenes-#{Date.today}.csv"
   end
 
   def outline
+    report_to_mixpanel 'outline', 'notebook'
     send_data content_to_outline, filename: "notebook-#{Date.today}.txt"
   end
 
   def notebook_json
+    report_to_mixpanel 'json', 'notebook'
     json_dump = current_user.content.map { |category, content| {"#{category}": fill_relations(content)} }.to_json
     send_data json_dump, filename: "notebook-#{Date.today}.json"
   end
 
   def notebook_xml
+    report_to_mixpanel 'xml', 'notebook'
     xml_dump = current_user.content.map { |category, content| {"#{category}": fill_relations(content)}}.to_xml
     send_data xml_dump, filename: "notebook-#{Date.today}.xml"
   end

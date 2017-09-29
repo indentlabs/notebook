@@ -17,6 +17,9 @@ class Creature < ActiveRecord::Base
   include HasAttributes
   include HasPrivacy
   include HasContentGroupers
+  include HasImageUploads
+  include HasChangelog
+
   include Serendipitous::Concern
 
   include Authority::Abilities
@@ -24,6 +27,9 @@ class Creature < ActiveRecord::Base
 
   # Locations
   relates :habitats,    with: :wildlifeships
+
+  # Creatures
+  relates :related_creatures, with: :creature_relationships
 
   scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 

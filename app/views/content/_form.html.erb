@@ -1,53 +1,19 @@
-<%= render 'content/form/errors', content: content %>
+<div style="padding: 35px 20px;">
+  <%= render 'content/form/errors', content: content %>
 
-<div class="row">
-  <div class="col s12">
-    <div class="card hoverable">
-      <div class="card-content">
-        <div class="card-title center">
-          <span class="right">
-            <i class="material-icons <%= content.class.color %>-text"><%= content.class.icon %></i>
-            <%= render 'content/form/actions_dropdown', content: content %>
-          </span>
-
-          <%= render 'content/form/title', content: content %>
-        </div>
-
-        <%# Tabs %>
-        <ul class="hoverable tabs tabs-fixed-width hide-on-small-only">
-          <% content.class.attribute_categories(current_user).each do |category| %>
-            <li class="tab">
-              <a href="#<%= category.name.gsub("'", '') %>_panel">
-                <i class="material-icons hide-on-med-and-down" style="font-size: 18px; position: relative; top: 3px;"><%= category.icon %></i>
-                <%= category.label %>
-              </a>
-            </li>
-          <% end %>
-        </ul>
-
-        <ul class="tabs hide-on-med-and-up">
-          <% content.class.attribute_categories(current_user).each do |category| %>
-            <li class="tab col s12">
-              <a href="#<%= category.name.gsub("'", '') %>_panel" class="tooltipped" data-position="bottom" data-delay="100" data-tooltip="<%= category.label %>">
-                <i class="material-icons" style="font-size: 18px; position: relative; top: 3px;"><%= category.icon %></i>
-              </a>
-            </li>
-          <% end %>
-        </ul>
-
-        <br />
-
-        <%# Content panels %>
-        <% content.class.attribute_categories(current_user).each do |category| %>
-          <%= render 'content/form/panel', category: category, f: f, content: content %>
-        <% end %>
-      </div>
-
-      <div class="card-action center">
-        <button class="btn waves-effect waves-<%= content.class.color %> <%= content.class.color %>" type="submit" name="action">
-          <%= content.new_record? ? 'Create' : 'Update' %>
-        </button>
-      </div>
-    </div>
-  </div>
+  <%# Content panels %>
+  <% content.class.attribute_categories(current_user).each do |category| %>
+    <%= render 'content/form/panel', category: category, f: f, content: content %>
+  <% end %>
 </div>
+
+<div class="card-action center grey-text">
+  Tip: You don't need to save before changing categories (on the right). Just remember to save when you're done!
+</div>
+
+<script type="text/javascript">
+// Dunno why the framework isn't applying the invalid class automatically, but lets just add it manually for now.
+$(document).ready(function () {
+  $('.field_with_errors').find('textarea, input').addClass('invalid');
+});
+</script>

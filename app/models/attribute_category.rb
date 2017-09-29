@@ -17,7 +17,7 @@ class AttributeCategory < ActiveRecord::Base
   end
 
   def self.icon
-    'tab'
+    'folder_open'
   end
 
   def self.content_name

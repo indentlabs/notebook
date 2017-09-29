@@ -1,21 +1,42 @@
+# rubocop:disable LineLength
+
 Rails.application.routes.draw do
+
   devise_for :users, :controllers => { registrations: 'registrations' }
   resources :users
-  # rubocop:disable LineLength
+
+  get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
 
   # Main pages
   root to: 'main#index'
 
   # Info pages
   scope '/about' do
-    get 'notebook', to: 'main#about_notebook', as: :about_notebook
+    #get '/notebook', to: 'main#about_notebook', as: :about_notebook
     get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
+  end
+
+  # Landing pages
+  scope '/for' do
+    get '/writers', to: 'main#for_writers', as: :writers_landing
+    get '/roleplayers', to: 'main#for_roleplayers', as: :roleplayers_landing
+    get '/designers', to: 'main#for_designers', as: :designers_landing
+
+    get '/friends', to: 'main#for_friends', as: :friends_landing
+  end
+
+  scope '/vote' do
+    get '/community', to: 'main#feature_voting', as: :community_voting
+    get '/:id', to: 'voting#vote', as: :cast_vote
   end
 
   # User-centric stuff
   scope '/my' do
     get '/content',     to: 'main#dashboard', as: :dashboard
+    get '/content/recent', to: 'main#recent_content', as: :recent_content
     get '/submissions', to: 'main#comingsoon'
+    get '/prompts', to: 'main#prompts', as: :prompts
+    get '/scratchpad', to: 'main#notes', as: :notes
 
     # Billing
     scope '/billing' do
@@ -31,16 +52,42 @@ Rails.application.routes.draw do
       get '/payment_method/delete', to: 'subscriptions#delete_payment_method', as: :delete_payment_method
     end
   end
+  resources :documents
+
+  # Lab apps
+  scope '/app' do
+    # Navigator
+    get 'navigator', to: 'navigator#index'
+
+    # Babel
+    get 'babel',     to: 'lab#babel'
+    post 'babel',    to: 'lab#babel'
+
+    # Pinboard
+    get 'pinboard',  to: 'lab#pinboard'
+  end
 
   # Sessions
-  get '/login', to: 'sessions#new', as: :login
+  get '/login',  to: 'sessions#new', as: :login
   post '/login', to: 'sessions#create', as: :login_process
   get '/logout', to: 'sessions#destroy', as: :logout
 
   # Planning
   scope '/plan' do
     # Core content types
-    resources :universes
+    resources :universes do
+      get :characters, on: :member
+      get :locations,  on: :member
+      get :items,      on: :member
+      get :creatures,  on: :member
+      get :races,      on: :member
+      get :religions,  on: :member
+      get :magics,     on: :member
+      get :languages,  on: :member
+      get :floras,     on: :member
+      get :scenes,     on: :member
+      get :groups,     on: :member
+    end
     resources :characters do
       get :autocomplete_character_name, on: :collection, as: :autocomplete_name
     end
@@ -55,6 +102,7 @@ Rails.application.routes.draw do
     resources :religions
     resources :magics
     resources :languages
+    resources :floras
 
     # Content usage
     resources :scenes
@@ -65,9 +113,13 @@ Rails.application.routes.draw do
     resources :attribute_categories
     resources :attribute_fields
 
+    # Image handling
+    delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion
+
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'
   end
+  get 'search/', to: 'search#results'
 
   scope 'admin' do
     get '/', to: 'admin#dashboard', as: :admin_dashboard
@@ -161,6 +213,6 @@ Rails.application.routes.draw do
   scope '/market' do
     get '/', to: 'main#comingsoon'
   end
-
-  # rubocop:enable LineLength
 end
+
+# rubocop:enable LineLength

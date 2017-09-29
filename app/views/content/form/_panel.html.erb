@@ -1,4 +1,29 @@
-<div id="<%= category.name.gsub("'", '') %>_panel" class="row">
+<div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
+
+  <% if category.name == 'gallery' %>
+    <div>
+      <%= render partial: 'content/form/images/edit_list', locals: { content: content } %>
+    </div>
+    <div>
+      <h5>
+        Upload more images
+        <small class="grey-text">
+          You have <%= Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty %> of bandwidth remaining.
+        </small>
+      </h5>
+    </div>
+    <div>
+      <%= render partial: 'content/form/images/upload', locals: { f: f, content: content } %>
+    </div>
+    <div>
+      <%= link_to_add_association "upload another", f,
+        :image_uploads,
+        partial: 'content/form/images/upload',
+        render_options: { locals: { f: f, content: content }}
+      %>
+    </div>
+  <% end %>
+
   <% # Do some dynamic resizing of columns based on how many columns there are
      # TODO: move this into some service or something? Dunno, doesn't belong here.
     s_width = 12
@@ -116,6 +141,18 @@
         <%= render 'content/form/text_input', f: f, content: content, field: field %>
 
       <% end %>
+
+    </div>
+  <% end %>
+
+  <% if category.attribute_fields.any? && category.attribute_fields.first.label == '' %>
+    <div style="clear: both;"></div>
+    <div style="padding: 0 20px;">
+      To add additional fields to this category,
+      <%= link_to 'click here', '#', class: 'new-attribute-field-link' %>
+      and type <%= category.label %> as the category name.
+      You can add as many fields as you like to custom categories.
+      To add multiple, simply add them one at a time.
     </div>
   <% end %>
 </div>

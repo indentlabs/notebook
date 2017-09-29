@@ -1,0 +1,49 @@
+<div class="flow-text">Changelog for <%= content.name %></div>
+
+<ul class="collection">
+  <% content.change_events.reverse.each do |change_event| %>
+    <li class="collection-item">
+      <%= (change_event.user == current_user) ? 'You' : link_to(change_event.user.name, change_event.user) %>
+      <%= change_event.action %> this <%= change_event.content_type.downcase %>
+      <span class="grey-text"><%= time_ago_in_words change_event.created_at %> ago</span>.
+
+      <table class="highlight centered changelog">
+        <thead>
+          <tr>
+              <th>Changed field</th>
+              <th>Old value</th>
+              <th>New value</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% change_event.changed_fields.each do |key, change| %>
+            <% next if change.first.blank? && change.second.blank? %>
+            <% next if %w(id created_at updated_at user user_id).include?(key) %>
+
+            <%
+              old_value = change.first.blank?  ? '(blank)' : change.first.to_s
+              new_value = change.second.blank? ? '(blank)' : change.second.to_s
+
+              # Just for clarity / ease of mind to users -- we treat blank as private, but that's not obvious to them.
+              if key == 'privacy'
+                old_value = 'private' if old_value == '(blank)'
+                new_value = 'private' if new_value == '(blank)'
+              end
+            %>
+
+            <tr>
+              <td><%= key.titleize %></td>
+              <td><%= old_value.truncate(380) %></td>
+              <td><%= new_value.truncate(380) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </li>
+  <% end %>
+  <li class="collection-item">
+    <%= content.class.name %> <%= content.name %> was created by <%= link_to content.user.name, content.user %>
+    <span class='grey-text'><%= time_ago_in_words content.created_at %> ago</span>.
+  </li>
+</ul>

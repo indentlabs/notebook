@@ -1,16 +1,17 @@
 source 'https://rubygems.org'
 
-gem 'rails', '4.2.5'
+gem 'rails', '4.2.7.1'
 gem 'puma', '~> 3.6.0'
 gem 'puma-heroku'
 gem 'rack-timeout'
 
 # Storage
-gem 'aws-sdk', '~> 1.50'
+gem 'aws-sdk', '~> 1.5'
+gem 'filesize'
 
 # Image processing
-gem 'paperclip', '~> 4.2.0'
-gem 'rmagick', '2.13.4'
+gem 'paperclip'
+gem 'rmagick'
 
 # Authentication
 gem 'bcrypt'
@@ -36,7 +37,7 @@ gem 'rails-jquery-autocomplete'
 gem 'meta-tags'
 
 # Smarts
-# gem 'serendipitous', :path => "~/git/serendipitous-gem"
+# gem 'serendipitous', :path => "../serendipitous-gem"
 gem 'serendipitous', git: 'https://github.com/indentlabs/serendipitous-gem.git'
 
 # Editor
@@ -51,11 +52,18 @@ gem 'redcarpet' #markdown formatting
 
 # Analytics
 gem 'raygun4ruby'
+gem 'mixpanel-ruby'
+
+# Sharing
+gem 'social-share-button'
+
+# Apps
+gem 'easy_translate'
+gem 'levenshtein-ffi'
 
 group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
-  gem 'scout_apm'
 end
 
 group :test, :production do
@@ -75,7 +83,6 @@ group :test do
   gem 'guard'
   gem 'guard-minitest'
   gem 'guard-rubocop'
-  gem 'pry'
   gem 'selenium-webdriver'
   gem 'simplecov', require: false
   gem 'sqlite3'
@@ -87,4 +94,8 @@ group :test do
   gem 'rubocop', require: false
   gem 'ruby-prof', '0.15.9'
   gem 'shoulda-matchers', '~> 3.1'
+end
+
+group :test, :development do
+  gem 'pry'
 end

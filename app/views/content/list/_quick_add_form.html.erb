@@ -20,7 +20,6 @@
   </div>
 </li>
 <%= content_for :javascript do %>
-  console.log('Registering quick-add hook for <%= content_type.name.downcase %>');
   $('#new_<%= content_type.name.downcase %>').on('submit', function(e, data, status, xhr) {
     console.log('Intercepted quick-add for <%= content_type.name.downcase %>.');
     var form = $('#new_<%= content_type.name.downcase %>');
@@ -54,6 +53,8 @@
 
     // template.find('.title').turn_into_a_link_to_content
     // template.find('.timestamp').text('Created!');
+
+    mixpanel.track("used quick-add", {});
   }).on('ajax:error', function(e, xhr, status, error) {
     console.log(status);
     console.log(error);

@@ -1,4 +1,6 @@
 class Lingualism < ActiveRecord::Base
+  include HasContentLinking
+
   belongs_to :user
 
   belongs_to :character

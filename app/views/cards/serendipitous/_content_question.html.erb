@@ -4,25 +4,56 @@ if question.present? &&
    question[:question].present? &&
    content.present?
 %>
-  <div class="content-question card-panel hoverable light-blue lighten-4">
-    <i class="material-icons <%= content.class.color %>-text circle right"><%= content.class.icon %></i>
-    <%= question[:question] %>
+  <div class="content-question card">
+    <div class="card-content light-blue darken-1 white-text">
+      <i class="material-icons <%= content.class.color %>-text circle right circle white"><%= content.class.icon %></i>
+      <strong><%= question[:question] %></strong>
+    </div>
+    <div class="card-tabs">
+      <ul class="tabs tabs-fixed-width">
+        <li class="tab"><a class="active" href="#tristan-answer">Quick Answer</a></li>
+        <li class="tab"><a href="#tristan-reference">Quick Reference</a></li>
+      </ul>
+    </div>
+    <div class="card-content lighten-4">
+      <div id="tristan-answer">
+        <%= form_for content do |f| %>
 
-    <%= form_for content do |f| %>
+          <% if defined?(redirect_path) %>
+            <%= hidden_field :override, :redirect_path, value: redirect_path %>
+          <% end %>
 
-      <div class="input-field">
-        <%= f.text_field question[:field], class: 'content-question-input' %>
-        <%= f.label content.class.human_attribute_name(question[:field]) %>
+          <div class="input-field">
+            <%= f.text_area question[:field], class: 'content-question-input materialize-textarea', placeholder: content.class.human_attribute_name(question[:field]) %>
+          </div>
+
+          <%# Using a plain old form.submit creates a button that only responds to a click on the button text,
+              not anywhere else on the button. %>
+          <%= button_tag(type: 'submit', class: "content-question-submit waves-effect waves-light btn #{content.class.color} right") do %>
+            Update <%= content.name.downcase %>
+          <% end %>
+          <div style="clear: both;"></div>
+        <% end %>
       </div>
-
-      <%# Using a plain old form.submit creates a button that only responds to a click on the button text,
-          not anywhere else on the button. %>
-      <%= button_tag(type: 'submit', class: "content-question-submit waves-effect waves-light btn #{content.class.color} right") do %>
-        Update <%= content.name.downcase %>
-      <% end %>
-      <div style="clear: both;"></div>
-    <% end %>
+      <div id="tristan-reference">
+        <div class="row">
+          <div class="col hide-on-small-only m3 underlap">
+            <%= image_tag 'tristan/small',
+              class: 'tooltipped tristan',
+              data: {
+                position: 'right',
+                delay: '500',
+                tooltip: "Hey, I'm Tristan! I'm happy to look up relevant information like this for you."
+              } %>
+          </div>
+          <div class="col s12 m9">
+            <%= render partial: 'content/display/quick_reference', locals: { content: content } %>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
 <% else %>
 <!-- decided not to render serendipitous card for this question: <%= question || 'nil'%> -->
 <% end %>

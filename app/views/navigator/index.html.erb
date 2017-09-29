@@ -1,0 +1,94 @@
+<link rel="stylesheet" type="text/css" href="/navigator/js-mindmap.css" />
+<link type="text/css" rel="stylesheet" href="/navigator/style.css" />
+
+<script type="text/javascript" src="/navigator/raphael-min.js"></script>
+<script type="text/javascript" src="/navigator/js-mindmap.js"></script>
+<script type="text/javascript" src="/navigator/script.js"></script>
+
+<ul id="navigator">
+  <%# Root note: the universe %>
+  <li>
+    <%= link_to "My Universes", '#' %>
+
+    <ul>
+      <% current_user.universes.each do |universe| %>
+        <li>
+          <%= link_to universe.name, universe %>
+
+          <ul>
+            <% @content_types.each do |content_type| %>
+              <li>
+                <% content_of_this_type = universe.send(content_type.downcase) %>
+                <%= link_to "#{content_type} (#{content_of_this_type.count})", '#' %>
+
+                <% if content_of_this_type.any? %>
+                  <ul>
+                    <% content_of_this_type.each do |content| %>
+                      <li>
+                        <%= link_to content.name, content %>
+
+                        <ul>
+                          <% fields = [] %>
+                          <% case content_type %>
+                          <% when 'Characters' %>
+                            <% fields = %w(
+                              fathers mothers siblings spouses children best_friends
+                              archenemies birthplaces races spoken_languages
+                            ) %>
+                          <% when 'Locations' %>
+                            <% fields = %w(
+                              leaders capital_cities largest_cities notable_cities languages
+                            ) %>
+                          <% when 'Items' %>
+                            <% fields = %w(
+                              original_owners past_owners current_owners makers
+                            ) %>
+                          <% when 'Creatures' %>
+                            <% fields = %w(habitats related_creatures) %>
+                          <% when 'Races' %>
+                            <% fields = %w(famous_figures) %>
+                          <% when 'Religions' %>
+                            <% fields = %w(notable_figures deities practicing_locations artifacts races) %>
+                          <% when 'Groups' %>
+                            <% fields = %w(
+                              leaders members supergroups subgroups sistergroups allies enemies rivals clients
+                              suppliers locations headquarters offices equipment key_items
+                            ) %>
+                          <% when 'Magics' %>
+                            <% fields = %w(deities) %>
+                          <% when 'Languages' %>
+                            <% fields = [] %>
+                          <% when 'Scenes' %>
+                            <% fields = %w(scene_characters scene_locations scene_items) %>
+                          <% end %>
+
+                          <% fields.each do |field| %>
+                            <li>
+                              <% content_of_this_relation = content.send(field) %>
+                              <%= link_to "#{field.titleize} (#{content_of_this_relation.count})", '#' %>
+
+                              <% if content_of_this_relation %>
+                                <ul>
+                                  <% content_of_this_relation.each do |relation| %>
+                                    <li><%= link_to relation.name, relation %></li>
+                                  <% end %>
+                                </ul>
+                              <% end %>
+                            </li>
+                          <% end %>
+                        </ul>
+
+                        <%# TODO: relationships for this content %>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </li>
+      <% end %>
+    </ul>
+
+  </li>
+</ul>

@@ -1,5 +1,11 @@
 <% if current_user.recent_content.count > 0 %>
-<div style="margin-top: -10px;">
-  <%= render partial: 'content/list/list', locals: { content_list: current_user.recent_content, title: 'Recent creations' } %>
+<div style="margin-top: -10px;" class="recent-activity">
+  <%=
+    render partial: 'content/list/list',
+           locals: {
+             title: defined?(title) ? title : 'Recent creations',
+             content_list: defined?(content_list) ? content_list : current_user.recent_content
+           }
+  %>
 </div>
 <% end %>

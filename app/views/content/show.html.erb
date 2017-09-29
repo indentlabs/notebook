@@ -11,62 +11,49 @@
   <%= render partial: 'cards/serendipitous/content_question', locals: { question: @question, content: @content } %>
 <% end %>
 
-<% categories = content.class.attribute_categories(current_user) %>
-
+<% categories = @content.class.attribute_categories(@content.user) %>
 <div class="row">
-  <div class="col s12">
-    <div class="card hoverable">
+  <div class="col s9">
+    <div class="hoverable card">
+      <div class="card-image">
+        <%= render partial: 'content/display/image_card_header' %>
+        <%= render partial: 'content/display/floating_action_buttons', locals: { editing: false } %>
+      </div>
+
       <div class="card-content">
-        <div class="card-title center">
-          <%= link_to polymorphic_path(content.class) do %>
-            <span class="<%= content.class.color %>-text"><i class="material-icons right"><%= content.class.icon %></i></span>
-          <% end %>
-          <a href="#" title="Share" class="share <%= content.class.color %>-text"><i class="material-icons right">share</i></a>
-          <%= content.respond_to?(:label) ? content.label : content.name %>
-        </div>
-
-        <ul class="tabs tabs-fixed-width" style="margin-bottom:30px;">
-          <% categories.each do |category| %>
-            <%= attribute_category_tab(content, category) %>
-          <% end %>
-        </ul>
-        <%
-          markdown = Redcarpet::Markdown.new(
-            Redcarpet::Render::HTML.new(
-              with_toc_data: true,
-              safe_links_only: true,
-              filter_html: true,
-              link_attributes: {target: '_blank'}
-            ),
-            autolink: true,
-            tables: true,
-            strikethrough: true,
-            superscript: true,
-            underline: true,
-            highlight: true,
-            footnotes: true,
-          )
-        %>
-
         <% categories.each do |category| %>
-          <div id="<%= category.name.gsub("'", '') %>_panel" class="row">
+          <div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
+            <% if category.name == 'gallery' %>
+              <div>
+                <%= render partial: 'content/form/images/gallery', locals: { content: content } %>
+              </div>
+            <% end %>
+            <% if category.name == 'changelog' %>
+              <div>
+                <%= render partial: 'content/display/changelog', locals: { content: content } %>
+              </div>
+            <% end %>
             <% category.attribute_fields.each do |attribute| %>
-              <% next if attribute.name.start_with?("private") && @content.user != current_user %>
+              <% next if attribute.name.start_with?("private") && (current_user.nil? || @content.user != current_user) %>
 
-              <% value = nil
-                 if content.respond_to?(attribute.name.to_sym)
-                   value = content.send(attribute.name.to_sym)
-                 else
-                   value = Attribute.where(user: current_user, attribute_field: attribute, entity: content).first
-                 end
+              <%
+                custom_field = false
+                value = nil
+                if content.respond_to?(attribute.name.to_sym)
+                  # Native fields with columns on the content table
+                  value = content.send(attribute.name.to_sym)
+                else
+                  custom_field = true
+                  value = Attribute.where(user: @content.user, attribute_field: attribute, entity: content).first || ""
+                end
               %>
-              <% next if value.blank? %>
+              <% next if value.blank? && !custom_field %>
 
               <div class="row">
-                <div class="col s3 m3 l2 right-align flow-text grey-text"><%= attribute.label %></div>
+                <div class="col s3 m3 l3 right-align flow-text grey-text"><%= attribute.label %></div>
                 <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
                   <% klass = value.first.class || value.build.class %>
-                  <div class="col s9 m9 l10 flow-text">
+                  <div class="col s9 m9 l9 flow-text">
                     <% value.each do |li| %>
                       <div class="chip">
                         <%= link_to li do %>
@@ -77,17 +64,16 @@
                     <% end %>
                   </div>
                 <% elsif attribute.name == 'attribute_category_id' %>
-                  <div class="col s9 m9 l10 flow-text">
+                  <div class="col s9 m9 l9 flow-text">
                     <%= link_to content.attribute_category.label, content.attribute_category if content.attribute_category %>
                   </div>
                 <% elsif attribute.name == 'universe_id' %>
-                  <div class="col s9 m9 l10 flow-text">
+                  <div class="col s9 m9 l9 flow-text">
                     <%= link_to content.universe.name, content.universe if content.universe %>
                   </div>
                 <% else %>
-                  <%# TODO: if text is > 240, truncate and add "Read more" link that opens modal %>
-                  <div class="col s9 m9 l10 <%= "flow-text" unless value.to_s.length > 140 %> markdownable">
-                    <%= markdown.render(value.is_a?(Attribute) ? value.value : value).html_safe %>&nbsp;
+                  <div class="col s9 m9 l9 <%= "flow-text" unless value.to_s.length > 140 %> markdownable">
+                    <%= simple_format Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value : value).html_safe %>&nbsp;
                   </div>
                 <% end %>
               </div>
@@ -96,32 +82,52 @@
         <% end %>
       </div>
 
-      <div class="card-action center">
-        <%= yield :content_show_footer %>
-
-        <% if current_user == content.user %>
-          <%= link_to "Edit this #{content.class.to_s.downcase}", edit_polymorphic_path(@content), class: "btn #{content.class.color}" %>
-        <% elsif content.user.name.present? %>
-          <%= content.user.name %> created and maintains this universe on Notebook.ai.<br />
-          <%= link_to "See more from #{content.user.name}", content.user %>
-          <%= link_to "Create your own universe.", root_url %>
-        <% end %>
-      </div>
+      <% if current_user.nil? || current_user.id != @content.user_id %>
+        <div class="card-action center">
+          <p>
+            <%= @content.user.name %> created and maintains this universe on Notebook.ai.
+          </p>
+          <%= link_to "See more from #{@content.user.name}", @content.user %>
+          <%= link_to "Create your own universe", root_url %>
+        </div>
+      <% end %>
     </div>
+
+  </div>
+
+  <div class="col s3">
+    <%= render partial: 'content/display/sidelinks' %>
   </div>
 </div>
 
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('.slider').slider({
+      height: 200,
+      indicators: false
+    });
+  });
+</script>
+
 <%= render partial: 'content/share', locals: { shared_content: @content} %>
+<%= render partial: 'attribute_fields/modal', locals: { content: @content, safe_mode: true } if user_signed_in? %>
 
-<%# TODO: not this %>
-<% if @content.is_a? Universe %>
-  <% content_to_show = [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene] %>
-
-  <% content_to_show.each do |content_type| %>
-    <% next if @content.send(content_type.name.downcase.pluralize).empty? %>
-
-    <div class="col s12 m12 l4">
-      <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: content_type.name.downcase.to_sym, content_list: @content.send(content_type.name.downcase.pluralize) } %>
-    </div>
+<div class="row">
+  <% if @content.is_a? Universe %>
+    <%= render partial: 'content/contexts/universe', locals: { content: @content } %>
+  <% elsif @content.is_a? Character %>
+    <%= render partial: 'content/contexts/character', locals: { content: @content } %>
+  <% elsif @content.is_a? Location %>
+    <%= render partial: 'content/contexts/location', locals: { content: @content } %>
+  <% elsif @content.is_a? Item %>
+    <%= render partial: 'content/contexts/item', locals: { content: @content } %>
+  <% elsif @content.is_a? Creature %>
+    <%= render partial: 'content/contexts/creature', locals: { content: @content } %>
+  <% elsif @content.is_a? Race %>
+    <%= render partial: 'content/contexts/race', locals: { content: @content } %>
+  <% elsif @content.is_a? Magic %>
+    <%= render partial: 'content/contexts/magic', locals: { content: @content } %>
+  <% elsif @content.is_a? Language %>
+    <%= render partial: 'content/contexts/language', locals: { content: @content } %>
   <% end %>
-<% end %>
+</div>

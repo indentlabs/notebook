@@ -1,13 +1,38 @@
 <% if @selected_plan.nil? %>
-  <div class="card teal lighten-1 white-text" style="padding: 20px;">
+  <% cents_due_now = 0 %>
+  <div class="card light-blue white-text" style="padding: 20px;">
     Saving a payment method allows you to freely switch between Notebook.ai subscription plans with ease. Your information is stored securely in our payment processing provider, Stripe, and will not be shared with any other parties.
   </div>
 <% else %>
-  <div class="card teal lighten-3" style="padding: 20px;">
-    You are signing up for Notebook.ai's <strong><%= @selected_plan.name %></strong> plan,
-    which enables creating every type of content available.
-    On it, you will be charged <%= number_to_currency(@selected_plan.monthly_cents / 100) %>, billed monthly.
-    In order to get started, we need to collect your payment information below.
+  <%
+    case @selected_plan.stripe_plan_id
+    when 'premium'
+      cents_due_now = 900
+      service_length = 'one month'
+      bill_frequency = 'month'
+    when 'premium-trio'
+      cents_due_now = 2400
+      service_length = 'three months'
+      bill_frequency = '3 months'
+    when 'premium-annual'
+      cents_due_now = 8400
+      service_length = 'twelve months'
+      bill_frequency = 'year'
+    end
+  %>
+
+  <div class="card light-blue lighten-3">
+    <div class="card-content">
+      <p>
+        You are signing up for Notebook.ai's <strong><%= @selected_plan.name %></strong> plan.
+
+        You will be charged <%= number_to_currency(cents_due_now / 100.0) %> now
+        for <%= service_length %> of membership, renewing every <%= bill_frequency %>.
+      </p>
+      <p>
+        In order to get started, we need to collect your payment information below.
+      </p>
+    </div>
   </div>
 <% end %>
 
@@ -108,10 +133,25 @@
             until <%= Time.at(active_plan_on_stripe.current_period_end).strftime('%B %d') %>, you will not be charged again
             for this plan until it renews on that date.
           </p>
-        <% elsif @selected_plan.monthly_cents > 0 %>
+        <% elsif @selected_plan.stripe_plan_id == 'premium' %>
           <p class="center">
             You will be charged <%= number_to_currency(@selected_plan.monthly_cents / 100) %> immediately, renewing
             monthly.
+          </p>
+          <p class="center">
+            Of course, you can cancel at any time.
+          </p>
+        <% elsif @selected_plan.stripe_plan_id == 'premium-trio' %>
+          <p class="center">
+            You will be charged $25.00 immediately, renewing every three months.
+          </p>
+          <p class="center">
+            Of course, you can cancel at any time.
+          </p>
+        <% elsif @selected_plan.stripe_plan_id == 'premium-annual' %>
+          <p class="center">
+            You will be charged <%= number_to_currency(@selected_plan.monthly_cents * 12 / 100) %> immediately, renewing
+            annually.
           </p>
           <p class="center">
             Of course, you can cancel at any time.

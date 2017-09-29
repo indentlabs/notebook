@@ -3,7 +3,7 @@
 function keyboardControlManager ( keyboardControls ) {
 	/**
 	 * Listens to the keyboard events and pushes items into the stack
-	 * 
+	 *
 	 * @param {KeyboardEvent} event
 	 */
 	function keyListener ( event ) {
@@ -26,7 +26,7 @@ function keyboardControlManager ( keyboardControls ) {
 
 		// if not modifier, continue
 		stackManager.add({
-			"key" : event.keyCode, 
+			"key" : event.keyCode,
 			"shiftKey" : event.shiftKey,
 			"ctrlKey" : event.ctrlKey
 		});
@@ -34,18 +34,18 @@ function keyboardControlManager ( keyboardControls ) {
 
 	/**
 	 * on every stack update, we compare against our keyboardControls object
-	 * 
+	 *
 	 * @param {any} keyStackArray
-	 * 
+	 *
 	 * @returns boolean;
 	 */
 	function onStackUpdate ( keyStackArray ){
 		for ( var i in keyboardControls ){
 			var kc = keyboardControls[i];
-			
+
 			if(_.isEqual(kc.input, keyStackArray)){
 				kc.result();
-				return true;	
+				return true;
 			}
 		};
 
@@ -57,11 +57,11 @@ function keyboardControlManager ( keyboardControls ) {
 }
 
 /**
- * 
- * 
+ *
+ *
  * @param {number} entryTime The time required between keypresses
  * @param {function} stackEvaluationFunction the function to evaluate the stack once it's finalized. should return TRUE if a match is found
- * 
+ *
  */
 function KeyboardControlStackManager( entryTime, stackEvaluationFunction ) {
 	var entryTime = entryTime;
@@ -71,15 +71,15 @@ function KeyboardControlStackManager( entryTime, stackEvaluationFunction ) {
 
 	/**
 	 * Adds an element to the currentStack
-	 * 
+	 *
 	 * @param {{key : number, shiftKey : boolean, ctrlKey : boolean}} standardKeyStructure
-	 * 
+	 *
 	 */
 	function add ( standardKeyStructure ) {
 		currentStack.push( standardKeyStructure );
-		if( timer ){ 
+		if( timer ){
 			clearTimeout(timer);
-			timer = undefined; 
+			timer = undefined;
 		}
 		timer = setTimeout(function () {
 			timerComplete();
@@ -88,13 +88,13 @@ function KeyboardControlStackManager( entryTime, stackEvaluationFunction ) {
 		// if it's found, clear the timer & stack
 		if(stackEvaluationFunction(currentStack)){
 			this.timerComplete();
-		} 
+		}
 	}
 
 	/**
 	 * handles the completion of the timer and clears the stack
-	 * 
-	 * 
+	 *
+	 *
 	 * @memberOf KeyboardControlStackManager
 	 */
 	function timerComplete () {

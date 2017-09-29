@@ -1,4 +1,4 @@
-PlanCharacters::Application.configure do
+Notebook::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
   # In the development environment your application's code is reloaded on
@@ -35,11 +35,11 @@ PlanCharacters::Application.configure do
   # DEVELOPMENT S3 settings for Paperclip uploads ON DEVELOPMENT
   config.paperclip_defaults = {
     storage: :s3,
-    s3_protocol: 'http',
     s3_credentials: {
-      bucket: ENV['AWS_BUCKET'],
-      access_key_id: ENV['AWS_ACCESS_KEY_ID'],
-      secret_access_key: ENV['AWS_SECRET_ACCESS_KEY']
+      bucket:            ENV.fetch('S3_BUCKET_NAME',        'notebook-content-uploads'),
+      s3_region:         ENV.fetch('AWS_REGION',            'us-east-1'),
+      access_key_id:     ENV.fetch('AWS_ACCESS_KEY_ID',     'test'),
+      secret_access_key: ENV.fetch('AWS_SECRET_ACCESS_KEY', 'test')
     }
   }
 

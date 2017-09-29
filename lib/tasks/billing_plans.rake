@@ -53,7 +53,7 @@ namespace :billing_plans do
       name: 'Early Adopters (thank you!)',
       stripe_plan_id: 'early-adopters',
       monthly_cents: 600, # $6.00/mo
-      available: true,
+      available: false,
 
       # Content creation and other permissions:
       universe_limit: 1000,
@@ -68,7 +68,37 @@ namespace :billing_plans do
       name: 'Premium',
       stripe_plan_id: 'premium',
       monthly_cents: 900, # $9.00/mo
-      available: false,
+      available: true,
+
+      # Content creation and other permissions:
+      universe_limit: 1000,
+      allows_core_content: true,
+      allows_extended_content: true,
+      allows_collective_content: true,
+      allows_collaboration: false
+    )
+
+    # Premium paid three months at a time
+    BillingPlan.find_or_create_by(
+      name: 'Premium (3-month bundle)',
+      stripe_plan_id: 'premium-trio',
+      monthly_cents: 800, # $8.00/mo -- $24/3mo
+      available: true,
+
+      # Content creation and other permissions:
+      universe_limit: 1000,
+      allows_core_content: true,
+      allows_extended_content: true,
+      allows_collective_content: true,
+      allows_collaboration: false
+    )
+
+    # Premium paid annually
+    BillingPlan.find_or_create_by(
+      name: 'Premium (annual)',
+      stripe_plan_id: 'premium-annual',
+      monthly_cents: 700, # $7.00/mo -- $84/year
+      available: true,
 
       # Content creation and other permissions:
       universe_limit: 1000,

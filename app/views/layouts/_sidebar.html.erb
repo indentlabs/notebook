@@ -1,5 +1,4 @@
-<%= render 'cards/ui/alert' %>
-<%= render 'cards/ui/notice' %>
+
 
 <% if user_signed_in? %>
 
@@ -22,21 +21,24 @@
 
 <% end %>
 
-<div class="card-panel blue lighten-5 hoverable">
-  <p class="center"><strong>Subscriptions are here!</strong></p>
+<div class="card-panel green lighten-5 hoverable">
+  <p class="center"><strong>You can now upload images!</strong></p>
   <p>
-    Read about what that means for you and your notebook <a href="https://medium.com/indent-labs/notebook-ai-adds-subscriptions-for-more-detailed-worldbuilding-54482b91c6b0#.4jeavd1l7" class="blue-text lighten-5" target="_new">in our latest blog post</a>.
+    Image uploading has been our most-requested feature since launch. Now that I'm working full-time on
+    Notebook.ai, I'm happy to say it took about a week to finish up &mdash; and now it's ready for you.
   </p>
-  <% active_billing_plans = current_user.active_billing_plans if current_user %>
-  <% if current_user && active_billing_plans.any? && active_billing_plans.first.stripe_plan_id == 'free-for-life' %>
-    <p>
-      Because you signed up during Notebook.ai's October "free for life" promotion, your account will continue to be just that &mdash;
-      free for life. :)
-    </p>
-  <% else %>
-    <p>
-      You can sign up for a subscription by clicking "Account billing" from the dropdown menu in the top-right of any page, or by
-      <%= link_to 'clicking here', subscription_path %>.
-    </p>
-  <% end %>
+  <p>
+    You can upload images to any content from the "Gallery" tab while editing it.
+  </p>
+  <p>
+    Free users have 50MB of space, and premium users have a whopping 1GB.
+    <% if current_user && current_user.selected_billing_plan_id == BillingPlan.find_by(stripe_plan_id: 'free-for-life').id %>
+      Because you were here at Notebook.ai's launch, <strong>we've quintupled your space from 50MB to 250MB. Thank you!</strong>
+    <% end %>
+  </p>
+  <p>
+    Happy worldbuilding, and
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform" target="_new">
+      don't forget to leave feedback on what feature you'd like to see next</a>!
+  </p>
 </div>

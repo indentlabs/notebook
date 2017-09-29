@@ -4,6 +4,11 @@ class SubscriptionsController < ApplicationController
   def new
     return redirect_to new_user_session_path, notice: t(:no_do_permission) unless user_signed_in?
 
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed billing page', {
+      'current billing plan': current_user.selected_billing_plan_id,
+      'content count': current_user.content_count
+    })
+
     # We only support a single billing plan right now, so just grab the first one. If they don't have an active plan,
     # we also treat them as if they have a Starter plan.
     @active_billing_plan = current_user.active_billing_plans.first || BillingPlan.find_by(stripe_plan_id: 'starter')
@@ -28,19 +33,23 @@ class SubscriptionsController < ApplicationController
       end
 
       if current_user.selected_billing_plan_id.nil?
-        old_billing_plan = BillingPlan.new(name: 'No billing plan')
+        old_billing_plan = BillingPlan.new(name: 'No billing plan', monthly_cents: 0)
       else
         old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
       end
       new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
       current_user.selected_billing_plan_id = new_billing_plan.id
+
+      # Remove any bonus bandwidth our old plan granted
+      current_user.upload_bandwidth_kb -= old_billing_plan.bonus_bandwidth_kb
+
       current_user.save
 
       Subscription.create(
         user: current_user,
         billing_plan: new_billing_plan,
         start_date: Time.now,
-        end_date: Time.now.end_of_day + 31.days
+        end_date: Time.now.end_of_day + 5.years
       )
 
       report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
@@ -69,20 +78,61 @@ class SubscriptionsController < ApplicationController
         return redirect_to :back
       end
 
+      # If this is the first time this user is subscribing to Premium, gift them (and their referrer, if applicable) feature votes and space
+      existing_premium_subscriptions = current_user.subscriptions.where(billing_plan_id: [2, 3, 4, 5, 6])
+      unless existing_premium_subscriptions.any?
+        referring_user = current_user.referrer || current_user
+
+        # First-time premium!
+        # +100 MB
+        current_user.update upload_bandwidth_kb: current_user.upload_bandwidth_kb + 100_000
+        current_user.reload
+
+        # +1 vote
+        current_user.votes.create
+        # +1 vote if referred
+        current_user.votes.create if referring_user.present?
+
+        # +1 raffle entry
+        current_user.raffle_entries.create
+        # +1 raffle entry if referred
+        current_user.raffle_entries.create if referring_user.present?
+
+        if referring_user
+          # +100MB
+          referring_user.update upload_bandwidth_kb: referring_user.upload_bandwidth_kb + 100_000
+
+          # +2 votes
+          referring_user.votes.create
+          referring_user.votes.create
+
+          # +2 raffle entries
+          referring_user.raffle_entries.create
+          referring_user.raffle_entries.create
+        end
+      end
+
       if current_user.selected_billing_plan_id.nil?
-        old_billing_plan = BillingPlan.new(name: 'No billing plan')
+        old_billing_plan = BillingPlan.new(name: 'No billing plan', monthly_cents: 0)
       else
         old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
       end
       new_billing_plan = BillingPlan.find_by(stripe_plan_id: new_plan_id, available: true)
       current_user.selected_billing_plan_id = new_billing_plan.id
+
+      # Add any bonus bandwidth our new plan grants, unless we're moving from Premium to Premium
+      premium_ids = [3, 4, 5, 6]
+      if !premium_ids.include?(current_user.selected_billing_plan_id) && premium_ids.include?(new_plan_id)
+        current_user.upload_bandwidth_kb += new_billing_plan.bonus_bandwidth_kb
+      end
+
       current_user.save
 
       Subscription.create(
         user: current_user,
         billing_plan: new_billing_plan,
         start_date: Time.now,
-        end_date: Time.now.end_of_day + 31.days
+        end_date: Time.now.end_of_day + 5.years
       )
 
       report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
@@ -109,6 +159,11 @@ class SubscriptionsController < ApplicationController
   def information
     @selected_plan = BillingPlan.find_by(stripe_plan_id: params['plan'], available: true)
     @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
+
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed payment method page', {
+      'current billing plan': current_user.selected_billing_plan_id,
+      'content count': current_user.content_count
+    })
   end
 
   def information_change
@@ -140,11 +195,18 @@ class SubscriptionsController < ApplicationController
     new_billing_plan = BillingPlan.find_by(stripe_plan_id: params[:plan], available: true)
     if new_billing_plan
       if current_user.selected_billing_plan_id.nil?
-        old_billing_plan = BillingPlan.new(name: 'No billing plan')
+        old_billing_plan = BillingPlan.new(name: 'No billing plan', monthly_cents: 0)
       else
         old_billing_plan = BillingPlan.find(current_user.selected_billing_plan_id)
       end
       current_user.selected_billing_plan_id = new_billing_plan.id
+
+      # Remove any bonus bandwidth our old plan granted
+      current_user.upload_bandwidth_kb -= old_billing_plan.bonus_bandwidth_kb
+
+      # Add any bonus bandwidth our new plan grants
+      current_user.upload_bandwidth_kb += new_billing_plan.bonus_bandwidth_kb
+
       current_user.save
 
       stripe_subscription.plan = new_billing_plan.stripe_plan_id
@@ -158,6 +220,40 @@ class SubscriptionsController < ApplicationController
       # End all currently-active subscriptions
       current_user.active_subscriptions.each do |subscription|
         subscription.update(end_date: Time.now)
+      end
+
+      # If this is the first time this user is subscribing to Premium, gift them (and their referrer, if applicable) feature votes and space
+      existing_premium_subscriptions = current_user.subscriptions.where(billing_plan_id: [2, 3, 4, 5, 6])
+      unless existing_premium_subscriptions.any?
+        referring_user = current_user.referrer || current_user
+
+        # First-time premium!
+        # +100 MB
+        current_user.update upload_bandwidth_kb: current_user.upload_bandwidth_kb + 100_000
+        current_user.reload
+
+        # +1 vote
+        current_user.votes.create
+        # +1 vote if referred
+        current_user.votes.create if referring_user.present?
+
+        # +1 raffle entry
+        current_user.raffle_entries.create
+        # +1 raffle entry if referred
+        current_user.raffle_entries.create if referring_user.present?
+
+        if referring_user
+          # +100MB
+          referring_user.update upload_bandwidth_kb: referring_user.upload_bandwidth_kb + 100_000
+
+          # +2 votes
+          referring_user.votes.create
+          referring_user.votes.create
+
+          # +2 raffle entries
+          referring_user.raffle_entries.create
+          referring_user.raffle_entries.create
+        end
       end
 
       # And create a subscription for them for the current plan
@@ -204,6 +300,7 @@ class SubscriptionsController < ApplicationController
   end
 
   def stripe_webhook
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'stripe webhook')
     #todo handle webhooks
   end
 
@@ -216,16 +313,24 @@ class SubscriptionsController < ApplicationController
       channel: '#subscriptions',
       username: 'tristan'
 
-    if from.monthly_cents < to.monthly_cents
+    if from.nil? || to.nil?
+      delta = ":tada: LOL :tada:"
+    elsif from.monthly_cents < to.monthly_cents
       delta = ":tada: *UPGRADE* :tada:"
+    elsif from.monthly_cents == to.monthly_cents
+      delta = ":tada: ... sidegrade ... :tada:"
     else
       delta = ":wave: Downgrade"
     end
 
+    active_subscriptions = Subscription.where('start_date < ?', Time.now).where('end_date > ?', Time.now)
+    total_subs_monthly = active_subscriptions.map(&:billing_plan).sum(&:monthly_cents).to_f / 100.0
+
     notifier.ping [
       "#{delta} for #{user.email.split('@').first}@ (##{user.id})",
-      "From: *#{from.name}* ($#{from.monthly_cents / 100}/month)",
-      "To: *#{to.name}* ($#{to.monthly_cents / 100}/month)"
+      "From: *#{from.name}* ($#{from.monthly_cents / 100.0}/month)",
+      "To: *#{to.name}* (#{to.stripe_plan_id}) ($#{to.monthly_cents / 100.0}/month)",
+      "#{active_subscriptions.count} subscriptions total $#{'%.2f' % total_subs_monthly}/mo"
     ].join("\n")
 
   end

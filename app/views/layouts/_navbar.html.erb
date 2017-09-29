@@ -1,3 +1,51 @@
+<ul id="help-dropdown" class="dropdown-content">
+  <li>
+    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new' do %>
+      <i class="material-icons left">feedback</i>
+      Report a problem
+    <% end %>
+  </li>
+  <li>
+    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new' do %>
+      <i class="material-icons left">feedback</i>
+      Request a feature
+    <% end %>
+  </li>
+  <li>
+    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new' do %>
+      <i class="material-icons left">feedback</i>
+      Leave feedback
+    <% end %>
+  </li>
+  <li class="divider"></li>
+  <li>
+    <%= link_to privacy_policy_path do %>
+      <i class="material-icons left">verified_user</i>
+      Privacy policy
+    <% end %>
+  </li>
+</ul>
+
+<ul id="recent-content-dropdown" class="dropdown-content">
+<% if user_signed_in? %>
+  <% current_user.content.values.flatten.compact.sort_by(&:updated_at).last(10).reverse.each do |content| %>
+    <% content_class = content.class %>
+    <li>
+      <%= link_to content, class: "#{content_class.color}-text" do %>
+        <i class="material-icons left"><%= content_class.icon %></i>
+        <%= content.name %>
+      <% end %>
+    </li>
+  <% end %>
+  <% if current_user.content_count > 0 %>
+    <li class="divider"></li>
+    <li>
+      <%= link_to 'More...', recent_content_path, class: 'blue-text' %>
+    </li>
+  <% end %>
+<% end %>
+</ul>
+
 <ul id="desktop-user-dropdown" class="dropdown-content">
   <% if current_user %>
     <li>
@@ -25,35 +73,32 @@
     <li class="divider"></li>
   <% end %>
 
+  <!--
   <li>
-    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new' do %>
-      <i class="material-icons left">feedback</i>
-      Report a problem
+    <%= link_to friends_landing_path do %>
+      <i class="material-icons left">people</i>
+      Community Drive
     <% end %>
   </li>
   <li>
-    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new' do %>
-      <i class="material-icons left">feedback</i>
-      Request a feature
+    <%= link_to community_voting_path do %>
+      <i class="material-icons left">star_outline</i>
+      Vote on features
     <% end %>
   </li>
-  <li>
-    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new' do %>
-      <i class="material-icons left">feedback</i>
-      Leave feedback
-    <% end %>
-  </li>
+
   <li class="divider"></li>
+  -->
+  <li>
+    <%= link_to prompts_path do %>
+      <i class="material-icons left">lightbulb_outline</i>
+      Worldbuilding prompts
+    <% end %>
+  </li>
   <li>
     <%= link_to notebook_export_path do %>
       <i class="material-icons left">file_download</i>
       Notebook downloads
-    <% end %>
-  </li>
-  <li>
-    <%= link_to privacy_policy_path do %>
-      <i class="material-icons left">verified_user</i>
-      Privacy policy
     <% end %>
   </li>
   <li class="divider"></li>
@@ -79,10 +124,15 @@
 <div class="navbar-fixed">
   <nav class="light-blue">
     <div class="nav-wrapper">
-      <%= link_to 'Notebook', root_url, class: 'brand-logo center' %>
+      <%= link_to 'Notebook.ai', root_url, class: 'brand-logo center' %>
 
       <ul class="right">
         <% if user_signed_in? %>
+        <li>
+          <a class="dropdown-button tooltipped" href="#!" data-activates="help-dropdown" data-position="bottom" data-delay="100" data-tooltip="Need help?">
+            <i class="material-icons">help</i>
+          </a>
+        </li>
         <li>
           <a class="dropdown-button tooltipped" href="#!" data-activates="desktop-user-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your content">
             <div class="hide-on-med-and-up"><i class="material-icons">book</i></div>
@@ -96,11 +146,21 @@
       </ul>
       <ul class="left">
         <% if user_signed_in? %>
-        <li>
-          <% if current_user && current_user.universes.length > 0 %>
-            <%= render partial: 'universes/picker' %>
-          <% end %>
-        </li>
+          <li>
+            <% if current_user && current_user.universes.length > 0 %>
+              <%= render partial: 'universes/picker' %>
+            <% end %>
+          </li>
+          <li>
+            <a class="dropdown-button tooltipped" href="#!" data-activates="recent-content-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your recently-edited pages">
+              <i class="material-icons">recent_actors</i>
+            </a>
+          </li>
+          <li>
+            <a href="#search" class="dropdown-button tooltipped" href="#!" data-tooltip="Search your notebook">
+              <i class="material-icons">search</i>
+            </a>
+          </li>
         <% else %>
           <li>
             <a href="#" data-activates="login-slide" class="button-collapse">
@@ -111,4 +171,12 @@
       </ul>
     </div>
   </nav>
+</div>
+
+<div id="search">
+  <button type="button" class="close red">×</button>
+  <%= form_tag search_path, method: :get do %>
+    <input type="search" name="q" value="" placeholder="search your notebook" />
+    <button type="submit" class="btn btn-primary blue">Search everything</button>
+  <% end %>
 </div>

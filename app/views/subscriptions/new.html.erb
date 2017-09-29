@@ -1,4 +1,6 @@
 <% free_for_life_user = current_user.selected_billing_plan_id == 2 %>
+<% on_premium_plan = ['early-adopters', 'premium', 'premium-trio', 'premium-annual'].include? @active_billing_plan.stripe_plan_id %>
+<% active_stripe_plan = @active_billing_plan.stripe_plan_id %>
 
 <p class="right hide-on-small-only">
   <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_class| %>
@@ -23,189 +25,412 @@
   <% else %>
     You're currently subscribed to Notebook's <strong><%= @active_billing_plan.name %></strong> plan.
     <% unless @active_billing_plan.nil? || @active_billing_plan.stripe_plan_id == 'starter' %>
-      Your subscription will be active until <%= current_user.active_subscriptions.first.end_date.strftime('%B %d, %Y') %>, when it will automatically renew for another month.
+      <% renewal_day = current_user.active_subscriptions.first.start_date.day %>
+      While active, your subscription will automatically renew.
+      <% if active_stripe_plan == 'premium' %>
+        You will be charged <%= number_to_currency(@active_billing_plan.monthly_cents / 100) %>
+        on the <%= renewal_day %><%= renewal_day.ordinal %> of each month.
+      <% end %>
     <% end %>
   <% end %>
 </p>
 
 <div class="row">
-  <div class="col s12 m6">
-    <div class="row">
-      <div class="card s12 <%= 'green lighten-5' if @active_billing_plan.stripe_plan_id == 'early-adopters' %>">
-        <div class="center">
-          <br />
-          <i class="material-icons" style="font-size: 250%">class</i>
-          <h4>Premium</h4>
-          <h6>(Early Adopters Discount)</h6>
-          <h5>$6/month</h5>
-          <ul class="plan-features">
-            <li>Plan <strong>unlimited</strong> universes</li>
-            <li>Create the following content within your universes:</li>
-            <li>
-              <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_class| %>
-                <i class="material-icons <%= content_class.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="<%= content_class.name.pluralize %>">
-                  <%= content_class.icon %>
-                </i>
-              <% end %>
-            </li>
-          </ul>
-        </div>
-        <div class="row center">
-          <% if @active_billing_plan.stripe_plan_id == 'early-adopters' %>
-            <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
-          <% else %>
-            <%= link_to 'Upgrade', change_subscription_path('early-adopters'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
-          <% end %>
-        </div>
-        <br />
+  <div class="col s12 m6 l3">
+    <div class="card <%= 'light-blue lighten-5' if @active_billing_plan.stripe_plan_id == 'starter' %>" style="min-height: 470px;">
+      <div class="card-content">
+        <h4 class="center">
+          <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">class</i>
+          Starter
+        </h4>
+        <h5 class="center">
+          $0/month<br /><br />
+        </h5>
+        <ul class="plan-features">
+          <li>
+            <i class="material-icons green-text">check</i>
+            Plan up to <strong>5</strong> universes
+          </li>
+          <li>
+            <i class="material-icons green-text">check</i>
+            Upload <strong>50MB</strong> of images
+          </li>
+          <li>
+            <i class="material-icons green-text">check</i>
+            Create <strong>core</strong> page types
+          </li>
+          <li class="center">
+            <% [Character, Location, Item].each do |content_class| %>
+              <i class="material-icons <%= content_class.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                <%= content_class.icon %>
+              </i>
+            <% end %>
+            <br /><br /><br />
+          </li>
+        </ul>
+      </div>
+      <div class="row center">
+        <% if @active_billing_plan.stripe_plan_id == 'starter' %>
+          <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white disabled black-text' %>
+        <% else %>
+          <%= link_to 'Downgrade', change_subscription_path('starter'), class: "btn-large waves-effect waves-light white black-text #{'disabled' if free_for_life_user}" %>
+        <% end %>
+      </div>
+      <br />
+    </div>
+  </div>
+
+  <div class="col s12 m6 l3">
+    <div class="card <%= 'light-blue lighten-5' if active_stripe_plan == 'premium' %>" style="min-height: 470px;">
+      <div class="card-content">
+        <h4 class="center">
+          <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">grade</i>
+          Premium
+        </h4>
+        <h5 class="center">
+          $9/month<br />
+          <small>billed monthly</small>
+        </h5>
+        <ul class="plan-features">
+          <li>
+            <i class="material-icons green-text">check</i>
+            Plan <strong>unlimited</strong> universes
+          </li>
+          <li>
+            <i class="material-icons green-text">check</i>
+            Upload <strong>1GB</strong> of images
+          </li>
+          <li>
+            <i class="material-icons green-text">check</i>
+            Create <strong>all 10</strong> page types
+          </li>
+          <li class="center">
+            <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each_with_index do |content_class, i| %>
+              <%= '<br />'.html_safe if i % 5 == 0 && i != 0 %>
+              <i class="material-icons <%= content_class.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                <%= content_class.icon %>
+              </i>
+            <% end %>
+          </li>
+        </ul>
+      </div>
+      <div class="row center">
+        <% if active_stripe_plan == 'premium' %>
+          <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
+        <% elsif on_premium_plan %>
+          <%= link_to 'Change Plan', change_subscription_path('premium'), class: "btn-large waves-effect waves-light white blue-text #{'disabled' if free_for_life_user}" %>
+        <% else %>
+          <%= link_to 'Upgrade', change_subscription_path('premium'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
+        <% end %>
+      </div>
+      <br />
+    </div>
+  </div>
+
+  <div class="col s12 m6 l3">
+    <div class="card <%= 'light-blue lighten-5' if active_stripe_plan == 'premium-trio' %>" style="min-height: 470px;">
+      <div class="card-content">
+        <h4 class="center">
+          <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">grade</i>
+          Premium
+        </h4>
+        <h5 class="center">
+          $8/month<br />
+          <small>billed every 3 months</small>
+        </h5>
+        <ul class="plan-features">
+          <li>
+            <i class="material-icons green-text">check</i>
+            Plan <strong>unlimited</strong> universes
+          </li>
+          <li>
+            <i class="material-icons green-text">check</i>
+            Upload <strong>1GB</strong> of images
+          </li>
+          <li>
+            <i class="material-icons green-text">check</i>
+            Create <strong>all 10</strong> page types
+          </li>
+          <li class="center">
+            <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each_with_index do |content_class, i| %>
+              <%= '<br />'.html_safe if i % 5 == 0 && i != 0 %>
+              <i class="material-icons <%= content_class.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                <%= content_class.icon %>
+              </i>
+            <% end %>
+          </li>
+        </ul>
+      </div>
+      <div class="row center">
+        <% if active_stripe_plan == 'premium-trio' %>
+          <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
+        <% elsif on_premium_plan %>
+          <%= link_to 'Change Plan', change_subscription_path('premium-trio'), class: "btn-large waves-effect waves-light white blue-text #{'disabled' if free_for_life_user}" %>
+        <% else %>
+          <%= link_to 'Upgrade', change_subscription_path('premium-trio'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
+        <% end %>
+      </div>
+      <br />
+    </div>
+  </div>
+
+  <div class="col s12 m6 l3">
+    <div class="card <%= 'light-blue lighten-5' if active_stripe_plan == 'premium-annual' %>" style="min-height: 470px;">
+      <div class="card-content">
+        <h4 class="center">
+          <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">grade</i>
+          Premium
+        </h4>
+        <h5 class="center">
+          $7/month<br />
+          <small>billed annually</small>
+        </h5>
+        <ul class="plan-features">
+          <li>
+            <i class="material-icons green-text">check</i>
+            Plan <strong>unlimited</strong> universes
+          </li>
+          <li>
+            <i class="material-icons green-text">check</i>
+            Upload <strong>1GB</strong> of images
+          </li>
+          <li>
+            <i class="material-icons green-text">check</i>
+            Create <strong>all 10</strong> page types
+          </li>
+          <li class="center">
+            <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each_with_index do |content_class, i| %>
+              <%= '<br />'.html_safe if i % 5 == 0 && i != 0 %>
+              <i class="material-icons <%= content_class.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                <%= content_class.icon %>
+              </i>
+            <% end %>
+          </li>
+        </ul>
+      </div>
+      <div class="row center">
+        <% if active_stripe_plan == 'premium-annual' %>
+          <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
+        <% elsif on_premium_plan %>
+          <%= link_to 'Change Plan', change_subscription_path('premium-annual'), class: "btn-large waves-effect waves-light white blue-text #{'disabled' if free_for_life_user}" %>
+        <% else %>
+          <%= link_to 'Upgrade', change_subscription_path('premium-annual'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
+        <% end %>
+      </div>
+      <br />
+    </div>
+  </div>
+
+</div>
+
+<div class="row">
+  <div class="col s12 m12 l3 hide-on-small-only"></div>
+  <div class="col s12 m12 l9">
+    <div class="card">
+      <div class="card-content">
+
+        <% if on_premium_plan || free_for_life_user %>
+          <div class="card-title">Want to help support Notebook.ai even further?</div>
+          <p>
+            Every little bit helps! <a href="https://www.patreon.com/indentlabs">Visit us on Patreon</a> to pledge as little or as much as you'd like each month, with proceeds going directly towards Notebook.ai hosting and upkeep costs. Thank you for your support!
+          </p>
+        <% else %>
+          <div class="card-title">Choose your way to pay</div>
+          <p>
+            The standard Premium membership is $9 per month. However, you can save more by choosing to pay every three months or once a year. Purchasing an annual Premium membership gets you the 12th month free!
+          </p>
+        <% end %>
       </div>
     </div>
-    <div class="row">
-      <% if @active_billing_plan.stripe_plan_id != 'early-adopters' && !free_for_life_user %>
-        <div class="card blue white-text" style="padding: 15px; font-size: 110%">
-          <h5>Discount notice</h5>
-          <p>
-            For a limited time, upgrade now to lock your monthly plan at $6/month (33% off from $9/month) for
-            as long as you subscribe.
-            Thank you for being early adopters and offering worlds of great feedback!
-          </p>
-          <p>
-            Offer expires February 14, 2017.
-          </p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Notebook.ai Community Drive</div>
+        <div class="row">
+          <div class="col s12">
+            <p>
+              For a limited time, we're holding a <%= link_to 'Community Drive', friends_landing_path %> for referring friends
+              to Notebook.ai. With each friend you refer that signs up for a Premium subscription, you'll gain +100 MB storage space,
+              two more entries in our upcoming raffle, and two more <%= link_to 'feature votes', community_voting_path %> to decide what
+              Notebook.ai's first community-first feature will be.
+            </p><br />
+            <div class="center">
+              <%= link_to 'See community progress', friends_landing_path, class: 'btn blue' %>
+            </div>
+          </div>
         </div>
-      <% else %>
-        <div class="card" style="padding: 15px; font-size: 110%">
-          <h5>Want to support Notebook.ai even further?</h5>
-          <p>
-            Every little bit helps! <a href="https://www.patreon.com/indentlabs">Visit us on Patreon</a> to pledge as little or as much as you'd
-            like each month, with proceeds going directly towards Notebook.ai hosting and upkeep costs. Thank you for your support!
-          </p>
+      </div>
+    </div>
+  </div>
+  <div class="col s6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Your referral code & stats</div>
+        <div class="row">
+          <div class="col s12">
+            <p>
+              Your referral link is:
+              <% share_link = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}" %>
+              <input type="text"
+                value="<%= share_link %>"
+                style="text-align: center"
+                onClick="this.select();" />
+            </p>
+            <ul>
+              <% referrals = current_user.referrals %>
+              <% converted_referrals = referrals.map(&:referree).select { |user| [2, 3, 4, 5, 6].include? user.selected_billing_plan_id } %>
+              <li><strong><%= pluralize referrals.count, 'user' %></strong> <%= referrals.count == 1 ? 'has' : 'have' %> signed up with your referral code.</li>
+              <% if converted_referrals.any? %>
+                <li>
+                  Of these, <strong><%= pluralize converted_referrals.count, 'user' %></strong> <%= converted_referrals.count == 1 ? 'has' : 'have' %> earned you both a Premium bonus!
+                </li>
+              <% else %>
+                <li>None have signed up for Premium yet, however.</li>
+              <% end %>
+              <li>You've earned <strong><%= pluralize current_user.votes.count, 'feature vote' %></strong> and have voted <%= pluralize current_user.votes.where.not(votable_id: nil).count, 'time' %>.
+                <% if current_user.votes.where(votable_id: nil).any? %>
+                  <%= link_to 'Vote now!', community_voting_path %>
+                <% else %>
+                  <%= link_to 'See votes so far.', community_voting_path %>
+                <% end %>
+              </li>
+              <li>You've earned <strong><%= pluralize current_user.raffle_entries.count, 'entry' %></strong> in <%= link_to "Notebook.ai's raffle", friends_landing_path %>, happening on June 15<sup>th</sup>, 2017.</li>
+            </ul>
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Your payment method</div>
+        <div class="row">
+          <div class="col s12 m6">
+            <p>
+              <strong>For your security, we don't store your payment information on file.</strong><br /><br />
+            </p>
+            <p>
+              Instead, we rely on industry-leading payment processor Stripe to safely and securely process payments and handle your
+              subscription info.
+            </p>
+          </div>
+          <div class="col s12 m6">
+            <% if @stripe_customer.sources.total_count == 0 %>
+              <p>
+                We don't currently have a payment method on file for you. You'll be asked to add one whenever you
+                upgrade, but you can add one at any time here.
+                <br /><br />
+              </p>
+              <p class="center">
+                <%= link_to "Add payment method", payment_info_path, class: 'btn white blue-text' %>
+              </p>
+            <% else %>
+              <p>
+                We have a payment method on file for you through Stripe
+                (<%= @stripe_customer.sources.data[0].brand %> ending in <%= @stripe_customer.sources.data[0].last4 %>),
+                but since we don't store it locally, you cannot edit it. You can choose to add a new one (replacing the old),
+                or delete the existing one.
+              </p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      <% if @stripe_customer.sources.total_count > 0 %>
+      <div class="card-action">
+                <%= link_to "Add new payment method", payment_info_path %>
+                <%= link_to "Delete existing payment method", delete_payment_method_path %>
+
+      </div>
       <% end %>
     </div>
   </div>
-  <div class="col s12 m6">
-    <div class="row">
-      <div class="card s12 <%= 'green lighten-5' if @active_billing_plan.stripe_plan_id == 'starter' %>">
-        <div class="center">
-          <br />
-          <i class="material-icons" style="font-size: 250%">class</i>
-          <h4>Starter</h4>
-          <h5>$0/month</h5>
-          <ul class="plan-features">
-            <li>Plan up to <strong>5</strong> universes</li>
-            <li>Create the following content within your universes:</li>
-            <li>
-              <% [Character, Location, Item].each do |content_class| %>
-                <i class="material-icons <%= content_class.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="<%= content_class.name.pluralize %>">
-                  <%= content_class.icon %>
-                </i>
-              <% end %>
-            </li>
-          </ul>
-        </div>
-        <div class="row center">
-          <% if @active_billing_plan.stripe_plan_id == 'starter' %>
-            <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white disabled black-text' %>
-          <% else %>
-            <%= link_to 'Downgrade', change_subscription_path('starter'), class: "btn-large waves-effect waves-light white black-text #{'disabled' if free_for_life_user}" %>
-          <% end %>
-        </div>
-        <br />
-      </div>
-    </div>
-  </div>
 </div>
-
-<h4>Payment method</h4>
 
 <div class="row">
-  <div class="col s12 m4">
-    <div class="card" style="padding: 15px;">
-      <p>
-        <strong>For your security, we don't store any of your payment information or personal information on file.</strong>
-      </p>
-      <p>
-        Instead, we rely on industry-leading payment processor Stripe to process payments and handle your
-        subscription info.
-      </p>
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">
+          Upload Bandwidth
+          <div class="right">
+            <%= (current_user.upload_bandwidth_kb) > 0 ? Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty : '-' + Filesize.from("#{current_user.upload_bandwidth_kb.abs}KB").pretty %> remaining
+          </div>
+        </div>
+        <p>
+          You have <strong><%= (current_user.upload_bandwidth_kb) > 0 ? Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty : '-' + Filesize.from("#{current_user.upload_bandwidth_kb.abs}KB").pretty %></strong> of bandwidth remaining.
+        </p>
+        <p>
+          This bandwidth can be used to upload images to your content anywhere on the site. Deleting an uploaded image frees
+          up the same amount of bandwidth.
+          <% unless on_premium_plan %>
+            To get more bandwidth, upgrade to our Premium plan.
+          <% end %>
+        </p>
+      </div>
     </div>
   </div>
-
-  <% if @stripe_customer.sources.total_count == 0 %>
-    <div class="col s12 m4">
-      <div class="card" style="padding: 15px">
-        <p>
-          We don't currently have a payment method on file for you. You'll be asked to add one whenever you
-          upgrade, but you can add one at any time here.
-        </p>
-        <p>
-          <%= link_to "Add payment method", payment_info_path, class: 'btn' %>
-        </p>
-      </div>
-    </div>
-  <% else %>
-    <div class="col s12 m8">
-      <div class="card" style="padding: 15px">
-        <p>
-          We have a payment method on file for you through Stripe
-          (<%= @stripe_customer.sources.data[0].brand %> ending in <%= @stripe_customer.sources.data[0].last4 %>),
-          but since we don't store it locally, you cannot edit it. You can choose to add a new one (replacing the old),
-          or delete the existing one.
-        </p>
-        <p>
-          <%= link_to "Add new payment method", payment_info_path, class: 'btn white black-text' %>
-        </p>
-        <p>
-          <%= link_to "Delete existing payment method", delete_payment_method_path, class: 'btn white black-text' %>
-        </p>
-      </div>
-    </div>
-  <% end %>
 </div>
 
-<h4>Billing History</h4>
-<table class="bordered">
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Description</th>
-      <th>Amount Billed</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @stripe_invoices.first(5).each do |invoice| %>
-      <tr>
-        <td>
-          <%= Time.at(invoice.date).strftime('%B %d, %Y, %I:%M:%S %p') %>
-          <%= '(Pending)' if Time.at(invoice.date) > Time.now %>
-        </td>
-        <td>
-          <ul>
-            <% invoice.lines.data.reverse.each do |line_item| %>
-              <li>
-                <%
-                  action = line_item.amount < 0 ? 'prorated' : 'charged'
-                  if line_item.description.nil?
-                    description = [
-                      "one month of #{line_item.plan.name}, ",
-                      "from #{Time.at(line_item.period.start).strftime('%B %d')} ",
-                      "to #{Time.at(line_item.period.end).strftime('%B %d, %Y')}"
-                    ].join
-                  else
-                    description = line_item.description
-                  end
-                %>
+<div class="card">
+  <div class="card-content">
+    <div class="card-title">
+      <div class="right">
+        <% account_balance = @stripe_customer.account_balance %>
+        <%= 'Outstanding balance:' if account_balance > 0 %> <%= number_to_currency(account_balance.abs / 100.0) if account_balance != 0 %> <%= 'credit' if account_balance < 0 %>
+      </div>
+      Billing history
+    </div>
+    <table class="bordered">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Amount Billed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @stripe_invoices.first(10).each do |invoice| %>
+          <tr>
+            <td>
+              <%= Time.at(invoice.date).strftime('%B %d, %Y, %I:%M:%S %p') %>
+              <%= '(Pending)' if Time.at(invoice.date) > Time.now %>
+            </td>
+            <td>
+              <ul>
+                <% invoice.lines.data.reverse.each do |line_item| %>
+                  <li>
+                    <%
+                      action = line_item.amount < 0 ? 'prorated' : 'charged'
+                      if line_item.description.nil?
+                        description = [
+                          "a #{line_item.plan.name} subscription ",
+                          "from #{Time.at(line_item.period.start).strftime('%B %d, %Y')} ",
+                          "to #{Time.at(line_item.period.end).strftime('%B %d, %Y')}"
+                        ].join
+                      else
+                        description = line_item.description
+                      end
+                    %>
 
-                You were <%= action %> <%= number_to_currency(line_item.amount / 100) %> for <%= description %>.
-              </li>
-            <% end %>
-          </ul>
-        </td>
-        <td>
-          <%= number_to_currency(invoice.amount_due / 100) %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+                    You were <%= action %> <%= number_to_currency(line_item.amount / 100) %> for <%= description %>.
+                  </li>
+                <% end %>
+              </ul>
+            </td>
+            <td>
+              <%= number_to_currency(invoice.amount_due / 100) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

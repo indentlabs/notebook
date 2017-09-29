@@ -1,0 +1,51 @@
+<%# Usage: render partial: 'content/display/quick_reference', locals: { content: @content } %>
+
+<h4 class="reference-title">
+  <i class="material-icons <%= content.class.color %>-text"><%= content.class.icon %></i>
+  <%= link_to content.name, content %>
+  <% if content.respond_to?(:universe) && content.universe %>
+    <%= link_to content.universe do %>
+      <i class="material-icons <%= Universe.color %>-text right tooltipped" data-position="left" data-delay="300" data-tooltip="<%= content.universe.name %>">
+        <%= Universe.icon %>
+      </i>
+    <% end %>
+  <% end %>
+</h4>
+<h5><%= content.description %></h5>
+
+<% all_categories = content.class.attribute_categories(current_user) %>
+<% found_attributes = 0 %>
+<% attributes_to_find = 5 %>
+
+<table class="highlight">
+  <% all_categories.each do |category| %>
+    <% category.attribute_fields.each do |attribute_field| %>
+      <% break if found_attributes >= attributes_to_find %>
+
+      <% next if attribute_field.name.end_with? '_id' %>
+      <% next if attribute_field.name == 'privacy' %>
+      <% next if ['name', 'description'].include? attribute_field.name %>
+
+      <% next unless content.respond_to? attribute_field.name %>
+      <% next unless content.send(attribute_field.name).present? %>
+      <% next if content.send(attribute_field.name).is_a?(ActiveRecord::Associations::CollectionProxy) %>
+
+      <% found_attributes += 1 %>
+      <tr>
+        <td>
+          <div style="min-width: 80px;">
+            <strong><%= attribute_field.label %></strong>
+          </div>
+        </td>
+        <td><%= content.send attribute_field.name %></td>
+      </tr>
+    <% end %>
+  <% end %>
+  <% if found_attributes < attributes_to_find %>
+    <tr>
+      <td class="grey-text" colspan="2">
+        More information will automatically appear here as you add it to <%= content.name %>.
+      </td>
+    </tr>
+  <% end %>
+</table>

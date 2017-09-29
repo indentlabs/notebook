@@ -7,7 +7,7 @@
     <div class="card-content">
 
       <div class="field">
-        <%= f.label :name %><br />
+        <%= f.label 'Your name' %><br />
         <%= f.text_field :name, autofocus: true %>
       </div>
 
@@ -32,9 +32,32 @@
       <!--
       <div class="field">
         <%= f.label :promo_code %><br />
-        <%= f.text_field :promo_code, value: 'LAUNCHPARTY - get your first two months free!', disabled: "disabled" %>
+        <%= f.text_field :promo_code, value: 'LAUNCHPARTY', disabled: "disabled" %>
       </div>
       -->
+
+      <%
+        if params.key?('referral') ||  session.key?('referral')
+          referral_code = params['referral'] || session['referral']
+          referrer = ReferralCode.where(code: referral_code).first
+          if referrer.present?
+      %>
+          <div class="row">
+            <div class="col s12 m6">
+              <div class="field">
+                <%= f.label :referral_code %><br />
+                <%= f.text_field :referral_code, value: referral_code, readonly: true %>
+              </div>
+            </div>
+            <div class="col s12 m6">
+              <%= f.label 'The following user will receive credit for referring you' %><br />
+              <%= f.text_field :referral_user, value: referrer.user.name.split('@').first, disabled: "disabled" %>
+            </div>
+          </div>
+      <%
+          end
+        end
+      %>
 
       <div class="field">
         <%= f.check_box :email_updates %>
@@ -45,7 +68,7 @@
       </div>
 
       <div class="actions center" style="margin-top: 20px;">
-        <%= f.submit "Sign up", class: 'btn' %>
+        <%= f.submit "Sign up", class: 'btn blue' %>
         <p class="center">
           <br />
           <%= render "devise/shared/links" %>

@@ -7,10 +7,11 @@ require 'csv'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module PlanCharacters
+module Notebook
   # Default application environment configurations
   class Application < Rails::Application
     config.autoload_paths += Dir[Rails.root.join('app', 'models', '{*/}')]
+    config.autoload_paths += Dir[Rails.root.join('app', 'services', '{*/}')]
 
     # Set Time.zone default to the specified zone and make Active Record auto-
     # convert to this zone. Run "rake -D time" for a list of tasks for finding

@@ -1,0 +1,48 @@
+<%=
+  render partial: 'content/contexts/relation', locals: {
+    content_type: Character,
+    content: content,
+    relation_class: Raceship,
+    relation_class_id: :race_id,
+    relation_text: "<plural> of this race"
+  }
+%>
+
+<%=
+  render partial: 'content/contexts/relation', locals: {
+    content_type: Religion,
+    content: content,
+    relation_class: ReligiousRaceship,
+    relation_class_id: :race_id,
+    relation_text: "practices"
+  }
+%>
+
+<% @references.each do |content_type, relations| %>
+  <% next unless relations.any? %>
+  <%
+  card_title = if relations.count == 1
+    if relations.first.first.include? '<plural>'
+      relations.first.first
+    else
+      [
+        relations.first.first,
+        ' ',
+        pluralize(relations.count, "#{content_type.to_s.singularize}")
+      ].join
+    end
+  else
+    [
+      'Related to ',
+      pluralize(relations.count, "other #{content_type.to_s.singularize}")
+    ].join
+  end
+  %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/content_relation_list', locals: {
+      content_type: content_type,
+      relations:    relations,
+      card_title:   card_title
+    } %>
+  </div>
+<% end %>

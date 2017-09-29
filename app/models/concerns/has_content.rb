@@ -17,6 +17,7 @@ module HasContent
     has_many :magics
     has_many :languages
     has_many :groups
+    has_many :floras
 
     # Collective content types
     has_many :scenes
@@ -41,6 +42,37 @@ module HasContent
       }
     end
 
+    def content_list
+      [
+        universes,
+        characters,
+        items,
+        locations,
+        creatures,
+        races,
+        religions,
+        magics,
+        languages,
+        scenes,
+        groups
+      ].flatten
+    end
+
+    def content_in_universe universe_id
+      {
+        characters: characters.in_universe(universe_id),
+        items:      items.in_universe(universe_id),
+        locations:  locations.in_universe(universe_id),
+        creatures:  creatures.in_universe(universe_id),
+        races:      races.in_universe(universe_id),
+        religions:  religions.in_universe(universe_id),
+        magics:     magics.in_universe(universe_id),
+        languages:  languages.in_universe(universe_id),
+        scenes:     scenes.in_universe(universe_id),
+        groups:     groups.in_universe(universe_id)
+      }
+    end
+
     def content_count
       [
         characters.length,
@@ -54,50 +86,50 @@ module HasContent
         languages.length,
         scenes.length,
         groups.length
-      ].sum
-    end
+        ].sum
+      end
 
-    def public_content
-      {
-        characters: characters.is_public,
-        items: items.is_public,
-        locations: locations.is_public,
-        universes: universes.is_public,
-        creatures: creatures.is_public,
-        races: races.is_public,
-        religions: religions.is_public,
-        magics: magics.is_public,
-        languages: languages.is_public,
-        scenes: scenes.is_public,
-        groups: groups.is_public
-      }
-    end
+      def public_content
+        {
+          characters: characters.is_public,
+          items: items.is_public,
+          locations: locations.is_public,
+          universes: universes.is_public,
+          creatures: creatures.is_public,
+          races: races.is_public,
+          religions: religions.is_public,
+          magics: magics.is_public,
+          languages: languages.is_public,
+          scenes: scenes.is_public,
+          groups: groups.is_public
+        }
+      end
 
-    def public_content_count
-      [
-        characters.is_public.length,
-        items.is_public.length,
-        locations.is_public.length,
-        universes.is_public.length,
-        creatures.is_public.length,
-        races.is_public.length,
-        religions.is_public.length,
-        magics.is_public.length,
-        languages.is_public.length,
-        scenes.is_public.length,
-        groups.is_public.length
-      ].sum
-    end
+      def public_content_count
+        [
+          characters.is_public.length,
+          items.is_public.length,
+          locations.is_public.length,
+          universes.is_public.length,
+          creatures.is_public.length,
+          races.is_public.length,
+          religions.is_public.length,
+          magics.is_public.length,
+          languages.is_public.length,
+          scenes.is_public.length,
+          groups.is_public.length
+          ].sum
+        end
 
-    def recent_content
-      [
-        characters, locations, items, universes,
-        creatures, races, religions, magics, languages,
-        scenes, groups
-      ].flatten
-        .sort_by(&:updated_at)
-        .last(7)
-        .reverse
-    end
-  end
-end
+        def recent_content
+          [
+            characters, locations, items, universes,
+            creatures, races, religions, magics, languages,
+            scenes, groups
+            ].flatten
+            .sort_by(&:updated_at)
+            .last(3)
+            .reverse
+          end
+        end
+      end

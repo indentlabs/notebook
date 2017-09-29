@@ -15,6 +15,7 @@ class CreaturesController < ContentController
     ) + [
       custom_attribute_values:      [:name, :value],
       wildlifeships_attributes:     [:id, :habitat_id, :_destroy],
+      creature_relationships_attributes: [:id, :related_creature_id, :_destroy]
     ]
   end
 end
