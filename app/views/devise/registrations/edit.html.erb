@@ -71,18 +71,20 @@
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-content">
-        <h4>Social Media Accounts</h4>
-        <%- if devise_mapping.omniauthable? %>
-          <% resource.omniauth_users.each do |omniauth_account| %>
-            <%= link_to "Disconnect #{omniauth_account.provider} (#{omniauth_account.email})", omniauth_account_path(omniauth_account.id), method: :delete %>
-            <br />
-          <% end %>
-          <%- resource_class.omniauth_providers.each do |provider| %>
-            <%= link_to "Connect with #{OmniAuth::Utils.camelize(provider)}", omniauth_authorize_path(resource_name, provider) %><br />
+    <div style="display: none">
+      <div class="card">
+        <div class="card-content">
+          <h4>Social Media Accounts</h4>
+          <%- if devise_mapping.omniauthable? %>
+            <% resource.omniauth_users.each do |omniauth_account| %>
+              <%= link_to "Disconnect #{omniauth_account.provider} (#{omniauth_account.email})", omniauth_account_path(omniauth_account.id), method: :delete %>
+              <br />
+            <% end %>
+            <%- resource_class.omniauth_providers.each do |provider| %>
+              <%= link_to "Connect with #{OmniAuth::Utils.camelize(provider)}", omniauth_authorize_path(resource_name, provider) %><br />
+            <% end -%>
           <% end -%>
-        <% end -%>
+        </div>
       </div>
     </div>
   <% end %>
