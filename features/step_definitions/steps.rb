@@ -31,6 +31,10 @@ When 'I log out' do
   visit destroy_user_session_path
 end
 
+When(/^I view the dashboard/) do
+  visit dashboard_path
+end
+
 Then 'I should see my dashboard' do
   expect(current_path).to eq(dashboard_path)
 end
