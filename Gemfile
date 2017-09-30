@@ -76,7 +76,6 @@ end
 
 group :test do
   gem 'better_errors'
-  gem 'binding_of_caller'
   gem 'capybara'
   gem 'codeclimate-test-reporter', require: false
   gem 'coveralls', require: false
