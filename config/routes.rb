@@ -75,7 +75,19 @@ Rails.application.routes.draw do
   # Planning
   scope '/plan' do
     # Core content types
-    resources :universes
+    resources :universes do
+      get :characters, on: :member
+      get :locations,  on: :member
+      get :items,      on: :member
+      get :creatures,  on: :member
+      get :races,      on: :member
+      get :religions,  on: :member
+      get :magics,     on: :member
+      get :languages,  on: :member
+      get :floras,     on: :member
+      get :scenes,     on: :member
+      get :groups,     on: :member
+    end
     resources :characters do
       get :autocomplete_character_name, on: :collection, as: :autocomplete_name
     end
@@ -90,6 +102,7 @@ Rails.application.routes.draw do
     resources :religions
     resources :magics
     resources :languages
+    resources :floras
 
     # Content usage
     resources :scenes

@@ -28,6 +28,11 @@
                 <%= render partial: 'content/form/images/gallery', locals: { content: content } %>
               </div>
             <% end %>
+            <% if category.name == 'changelog' %>
+              <div>
+                <%= render partial: 'content/display/changelog', locals: { content: content } %>
+              </div>
+            <% end %>
             <% category.attribute_fields.each do |attribute| %>
               <% next if attribute.name.start_with?("private") && (current_user.nil? || @content.user != current_user) %>
 
@@ -120,6 +125,8 @@
     <%= render partial: 'content/contexts/creature', locals: { content: @content } %>
   <% elsif @content.is_a? Race %>
     <%= render partial: 'content/contexts/race', locals: { content: @content } %>
+  <% elsif @content.is_a? Magic %>
+    <%= render partial: 'content/contexts/magic', locals: { content: @content } %>
   <% elsif @content.is_a? Language %>
     <%= render partial: 'content/contexts/language', locals: { content: @content } %>
   <% end %>

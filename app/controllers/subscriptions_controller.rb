@@ -7,7 +7,7 @@ class SubscriptionsController < ApplicationController
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed billing page', {
       'current billing plan': current_user.selected_billing_plan_id,
       'content count': current_user.content_count
-    })
+    }) if Rails.env.production?
 
     # We only support a single billing plan right now, so just grab the first one. If they don't have an active plan,
     # we also treat them as if they have a Starter plan.
@@ -67,7 +67,7 @@ class SubscriptionsController < ApplicationController
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed payment method page', {
       'current billing plan': current_user.selected_billing_plan_id,
       'content count': current_user.content_count
-    })
+    }) if Rails.env.production?
   end
 
   def information_change
@@ -174,7 +174,7 @@ class SubscriptionsController < ApplicationController
   end
 
   def stripe_webhook
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'stripe webhook')
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'stripe webhook') if Rails.env.production?
     #todo handle webhooks
   end
 end
