@@ -8,6 +8,6 @@ class UsersController < ApplicationController
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(@user.id, 'viewed profile', {
       'sharing any content': @user.public_content_count != 0
-    })
+    }) if Rails.env.production?
   end
 end
