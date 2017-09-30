@@ -52,9 +52,9 @@ end
 
 When(/^I change my (character|location|item|universe)\'s name$/) do |model|
   visit polymorphic_path(@model)
-  click_on "Edit this #{model}"
+  click_on 'edit'
   fill_in "#{model}_name", with: 'My changed name'
-  click_on "Update"
+  click_on 'save'
   @model.reload
 end
 
