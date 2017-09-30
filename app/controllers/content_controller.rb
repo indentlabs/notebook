@@ -43,13 +43,13 @@ class ContentController < ApplicationController
             'content_type': content_type.name,
             'content_owner': current_user.present? && current_user.id == @content.user_id,
             'logged_in_user': current_user.present?
-          }) if Rails.env == 'production'
+          }) if Rails.env.production?
         else
           Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed recently-modified content', {
             'content_type': content_type.name,
             'content_owner': current_user.present? && current_user.id == @content.user_id,
             'logged_in_user': current_user.present?
-          }) if Rails.env == 'production'
+          }) if Rails.env.production?
         end
       end
 
@@ -113,7 +113,7 @@ class ContentController < ApplicationController
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
       'content_type': content_type.name
-    }) if Rails.env == 'production'
+    }) if Rails.env.production?
 
     if @content.save
       if params.key? 'image_uploads'
@@ -136,7 +136,7 @@ class ContentController < ApplicationController
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'updated content', {
       'content_type': content_type.name
-    }) if Rails.env == 'production'
+    }) if Rails.env.production?
 
     if params.key? 'image_uploads'
       upload_files params['image_uploads'], content_type.name, @content.id
@@ -189,7 +189,7 @@ class ContentController < ApplicationController
         'content_type': content_type,
         'image_size_kb': image_size_kb,
         'first five images': current_user.image_uploads.count <= 5
-      }) if Rails.env == 'production'
+      }) if Rails.env.production?
     end
   end
 
@@ -203,7 +203,7 @@ class ContentController < ApplicationController
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'deleted content', {
       'content_type': content_type.name
-    }) if Rails.env == 'production'
+    }) if Rails.env.production?
 
     @content.destroy
 
