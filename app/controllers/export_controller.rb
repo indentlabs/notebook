@@ -4,14 +4,14 @@ class ExportController < ApplicationController
   def index
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed export page', {
       'content count': current_user.content_count
-    })
+    }) if Rails.env.production?
   end
 
   def report_to_mixpanel format, scope
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'exported content', {
       'export format': format,
       'scope': scope
-    })
+    }) if Rails.env.production?
   end
 
   # Formats

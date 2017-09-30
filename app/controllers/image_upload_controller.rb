@@ -28,7 +28,7 @@ class ImageUploadController < ApplicationController
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'deleted image', {
       'image_size_kb': reclaimed_space_kb
-    })
+    }) if Rails.env.production?
 
     render json: { success: result }, status: 200
   end

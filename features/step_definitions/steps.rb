@@ -31,6 +31,10 @@ When 'I log out' do
   visit destroy_user_session_path
 end
 
+When(/^I view the dashboard/) do
+  visit dashboard_path
+end
+
 Then 'I should see my dashboard' do
   expect(current_path).to eq(dashboard_path)
 end
@@ -52,9 +56,9 @@ end
 
 When(/^I change my (character|location|item|universe)\'s name$/) do |model|
   visit polymorphic_path(@model)
-  click_on "Edit this #{model}"
+  click_on 'edit'
   fill_in "#{model}_name", with: 'My changed name'
-  click_on "Update"
+  click_on 'save'
   @model.reload
 end
 
