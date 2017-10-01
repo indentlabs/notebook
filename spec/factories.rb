@@ -12,6 +12,7 @@ FactoryGirl.define do
     sequence :name do |n|
       "Universe #{n}"
     end
+    user
   end
 
   factory :character do

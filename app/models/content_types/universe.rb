@@ -18,6 +18,7 @@ class Universe < ActiveRecord::Base
   self.authorizer_name = 'UniverseCoreContentAuthorizer'
 
   validates :name, presence: true
+  validates :user_id, presence: true
 
   belongs_to :user
   # Core content types
