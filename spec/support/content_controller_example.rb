@@ -37,7 +37,8 @@ shared_examples_for 'a controller for a content item' do
   describe 'POST #create' do
     before do
       post :create, @model_name => {
-        name: model.name
+        name: model.name,
+        user: @user
       }
     end
     it { is_expected.to redirect_to(polymorphic_path(assigns(:content))) }
@@ -52,7 +53,8 @@ shared_examples_for 'a controller for a content item' do
   describe 'PUT #update' do
     before do
       put :update, id: model.id, @model_name => {
-        name: model.name
+        name: model.name,
+        user: @user
       }
     end
     it { is_expected.to redirect_to(polymorphic_path(model)) }

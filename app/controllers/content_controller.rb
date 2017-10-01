@@ -85,7 +85,7 @@ class ContentController < ApplicationController
                .find(params[:id])
 
     unless @content.updatable_by? current_user
-      return redirect_to :back
+      return redirect_to @content, notice: t(:no_do_permission)
     end
 
     respond_to do |format|
