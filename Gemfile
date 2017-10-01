@@ -61,6 +61,9 @@ gem 'social-share-button'
 gem 'easy_translate'
 gem 'levenshtein-ffi'
 
+# Tech debt & hacks
+gem 'binding_of_caller' # see has_changelog.rb
+
 group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
@@ -73,7 +76,6 @@ end
 
 group :test do
   gem 'better_errors'
-  gem 'binding_of_caller'
   gem 'capybara'
   gem 'codeclimate-test-reporter', require: false
   gem 'coveralls', require: false

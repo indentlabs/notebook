@@ -18,6 +18,7 @@ class Universe < ActiveRecord::Base
   self.authorizer_name = 'UniverseCoreContentAuthorizer'
 
   validates :name, presence: true
+  validates :user_id, presence: true
 
   belongs_to :user
   # Core content types
@@ -35,6 +36,8 @@ class Universe < ActiveRecord::Base
 
   has_many :scenes
   has_many :groups
+
+  has_many :contributors
 
   scope :is_public, -> { where(privacy: 'public') }
 

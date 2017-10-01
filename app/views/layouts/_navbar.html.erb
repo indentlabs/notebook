@@ -28,7 +28,7 @@
 
 <ul id="recent-content-dropdown" class="dropdown-content">
 <% if user_signed_in? %>
-  <% current_user.content.values.flatten.compact.sort_by(&:updated_at).last(10).reverse.each do |content| %>
+  <% current_user.content.values.reject(&:empty?).flatten.compact.sort_by(&:updated_at).last(10).reverse.each do |content| %>
     <% content_class = content.class %>
     <li>
       <%= link_to content, class: "#{content_class.color}-text" do %>
@@ -147,7 +147,7 @@
       <ul class="left">
         <% if user_signed_in? %>
           <li>
-            <% if current_user && current_user.universes.length > 0 %>
+            <% if current_user && (current_user.universes.count > 0 || current_user.contributable_universes.count > 0) %>
               <%= render partial: 'universes/picker' %>
             <% end %>
           </li>

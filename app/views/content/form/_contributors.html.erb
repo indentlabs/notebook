@@ -1,0 +1,53 @@
+<%# Usage: render partial: 'content/form/contributors', locals: { content: content } %>
+
+<p>
+  Universes can have an unlimited number of collaborators.
+</p>
+<p>
+  When a user is added as a collaborator to a universe, they are allowed to:
+
+  <ul class="browser-default">
+    <li>View all content in that universe</li>
+    <li>Create new content in that universe</li>
+    <li>Edit any content in that universe</li>
+  </ul>
+</p>
+
+<p>
+  They are NOT allowed to:
+
+  <ul class="browser-default">
+    <li>Delete anyone else's content from that universe</li>
+    <li>Change the 'universe' field on any content in that universe</li>
+    <li>Change the privacy of any content in that universe</li>
+    <li>Invite additional contributors</li>
+  </ul>
+</p>
+
+<% if content.contributors.any? %>
+  <p>
+    The following users are enabled as contributors to this universe.
+    <% if user_signed_in? && content.user == current_user %>
+      You may remove their contributor privileges at any time.
+    <% end %>
+  </p>
+
+  <%= render partial: 'content/display/contributors', locals: { content: content } %>
+<% end %>
+
+<% if user_signed_in? && content.user == current_user %>
+  <p>
+    You may also add additional contributors to this universe by inviting them by email below.
+  </p>
+
+  <div>
+    <%= render partial: 'content/form/contributors/add', locals: { f: f, content: content } %>
+  </div>
+  <div>
+    <%= link_to_add_association "invite another", f,
+      :contributors,
+      partial: 'content/form/contributors/add',
+      render_options: { locals: { f: f, content: content }}
+    %>
+  </div>
+<% end %>

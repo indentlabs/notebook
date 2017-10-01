@@ -27,8 +27,20 @@
 
 <div class="row">
   <% [:universe, :character, :location, :item, :creature, :race, :religion, :group, :magic, :language, :flora, :scene].each do |type| %>
-    <% content_list = current_user.send(type.to_s.pluralize) %>
-    <% content_list = content_list.in_universe(@universe_scope) if (@universe_scope.present? && type != :universe) %>
+    <%
+      pluralized_content_name = type.to_s.pluralize
+
+      if @universe_scope.present? && type != :universe
+        content_list = @universe_scope.send(pluralized_content_name)
+      else
+        content_list = current_user.send(pluralized_content_name) + current_user.send("contributable_#{pluralized_content_name}")
+
+        unless type == :universe
+          content_list.concat(current_user.universes.flat_map { |universe| universe.send(pluralized_content_name) })
+        end
+      end
+    %>
+
     <% next if !current_user.can_create?(type.to_s.capitalize.constantize) && content_list.empty? %>
     <div class="dashboard-row col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
       <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: type, content_list: content_list } %>

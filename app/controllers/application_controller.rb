@@ -6,7 +6,8 @@ class ApplicationController < ActionController::Base
       if params[:universe] == 'all'
         session.delete(:universe_id)
       elsif params[:universe].is_a?(String) && params[:universe].to_i.to_s == params[:universe]
-        found_universe = Universe.find_by(user: current_user, id: params[:universe])
+        found_universe = Universe.find_by(id: params[:universe])
+        found_universe = nil unless current_user.universes.include?(found_universe) || current_user.contributable_universes.include?(found_universe)
         session[:universe_id] = found_universe.id if found_universe
       end
     end
@@ -14,7 +15,8 @@ class ApplicationController < ActionController::Base
 
   before_action do
     if current_user && session[:universe_id]
-      @universe_scope = Universe.find_by(user: current_user, id: session[:universe_id])
+      @universe_scope = Universe.find_by(id: session[:universe_id])
+      @universe_scope = nil unless current_user.universes.include?(@universe_scope) || current_user.contributable_universes.include?(@universe_scope)
     else
       @universe_scope = nil
     end

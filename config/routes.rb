@@ -1,9 +1,9 @@
 # rubocop:disable LineLength
 
 Rails.application.routes.draw do
-
   devise_for :users, :controllers => { registrations: 'registrations' }
   resources :users
+  delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
 
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
 
