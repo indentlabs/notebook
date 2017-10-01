@@ -29,7 +29,7 @@ class ContributorService < Service
     )
   end
 
-  def self.send_contributor_notice_to email
+  def self.send_contributor_notice_to inviter:, email:, universe:
     CollaborationMailer.contributor_invitation(
       inviter: inviter,
       invite_email: email,
