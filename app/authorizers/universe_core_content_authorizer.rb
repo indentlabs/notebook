@@ -1,5 +1,6 @@
 class UniverseCoreContentAuthorizer < CoreContentAuthorizer
   def self.creatable_by? user
+    return true
     [
       PermissionService.user_has_fewer_owned_universes_than_plan_limit?(user: user),
       PermissionService.user_is_on_premium_plan?(user: user)
