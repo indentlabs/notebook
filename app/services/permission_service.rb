@@ -33,7 +33,7 @@ class PermissionService < Service
   end
 
   def self.user_is_on_premium_plan?(user:)
-    user.is_on_premium_plan?
+    user.on_premium_plan?
   end
 
   def self.billing_plan_allows_core_content?(user:)
@@ -61,4 +61,6 @@ class PermissionService < Service
       billing_plan_allows_collective_content?(user: universe.user)
     end
   end
+
+
 end
