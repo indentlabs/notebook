@@ -9,7 +9,7 @@ class PermissionService < Service
   end
 
   def self.user_owns_any_containing_universe?(user:, content:)
-    content.universe.present? && user_owns_content?(user: user, content: content.universe)
+    content.respond_to?(:universe) && content.universe.present? && user_owns_content?(user: user, content: content.universe)
   end
 
   def self.user_can_contribute_to_universe?(user:, universe:)
