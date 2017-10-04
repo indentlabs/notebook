@@ -38,10 +38,9 @@ Install curl
 
     sudo apt-get install curl
 
-Install rvm
+Install rvm (or your favorite ruby version manager)
 
     \curl -sSL https://get.rvm.io | bash
-
     source ~/.rvm/scripts/rvm
 
 Install ruby 2.3.1
@@ -50,13 +49,14 @@ Install ruby 2.3.1
 
     rvm use 2.3.1
 
-Install rails 4.2.5
+Install rails 4.2.7
 
-    gem install rails -v 4.2.5
+    gem install rails -v 4.2.7
 
 Install necessary libraries
 
     sudo apt-get install imagemagick libmagickwand-dev
+    sudo apt-get install libpq-dev
 
 Clone the code
 
@@ -65,7 +65,7 @@ Clone the code
 Install gems
 
     bundle install
-    
+
 Create database
 
     rake db:create
@@ -73,11 +73,13 @@ Create database
 Run initial database migrations
 
     rake db:migrate
+    rake data_migrations:create_default_billing_plans
+    rake db:seed
 
 Finally, run the server with
 
     rails server
-    
+
 You should now see a copy of the site running locally at http://localhost:3000/!
 
 == Running the notebook stack locally with Docker
