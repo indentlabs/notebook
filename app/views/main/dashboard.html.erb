@@ -36,7 +36,7 @@
         content_list = current_user.send(pluralized_content_name) + current_user.send("contributable_#{pluralized_content_name}")
 
         unless type == :universe
-          content_list.concat(current_user.universes.flat_map { |universe| universe.send(pluralized_content_name) })
+          content_list.concat(current_user.universes.flat_map { |universe| universe.send(pluralized_content_name) }).uniq!
         end
       end
     %>
