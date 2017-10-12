@@ -44,7 +44,9 @@ class User < ActiveRecord::Base
   [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene, Flora].each do |content_type|
     pluralized_content_type = content_type.name.downcase.pluralize
     define_method "contributable_#{pluralized_content_type}" do
-      contributable_universes.flat_map { |universe| universe.send(pluralized_content_type) }
+      contributable_universes.flat_map do |universe|
+        universe.send(pluralized_content_type).where.not(user_id: self.id)
+      end
     end
   end
 
