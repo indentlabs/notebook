@@ -16,6 +16,6 @@ class Siblingship < ActiveRecord::Base
     this_object  = Character.find_by(id: self.character_id)
     other_object = Character.find_by(id: self.sibling_id)
 
-    other_object.siblings.delete this_object
+    other_object.siblings.delete(this_object) unless other_object.nil?
   end
 end
