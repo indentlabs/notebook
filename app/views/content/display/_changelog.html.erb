@@ -3,6 +3,7 @@
 <ul class="collection">
   <% content.change_events.reverse.each do |change_event| %>
     <li class="collection-item">
+      <% next if change_event.user.nil? %>
       <%= (change_event.user == current_user) ? 'You' : link_to(change_event.user.name, change_event.user) %>
       <%= change_event.action %> this <%= change_event.content_type.downcase %>
       <span class="grey-text"><%= time_ago_in_words change_event.created_at %> ago</span>.
