@@ -11,8 +11,6 @@ class User < ActiveRecord::Base
   include HasContent
   include Authority::UserAbilities
 
-  validates :email, presence: true, uniqueness: true
-
   has_many :subscriptions
   has_many :billing_plans, through: :subscriptions
   def on_premium_plan?
