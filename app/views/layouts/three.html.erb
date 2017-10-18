@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <%= csrf_meta_tags %>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+
+  <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+
+  <%= stylesheet_link_tag 'application' %>
+  <%= javascript_include_tag 'application' %>
+
+  <%= render 'layouts/favicon' %>
+  <%# <title> is set in _seo.html.erb %>
+  <%= render 'layouts/seo' %>
+
+  <%= render partial: 'layouts/three/analytics/mixpanel' %>
+</head>
+<body id="app">
+  <%= render partial: 'layouts/three/components/navbar' %>
+  <%= render partial: 'layouts/three/components/content_sidebar' %>
+
+  <%= render 'layouts/navbar' %>
+  <% if user_signed_in? %>
+    <style>
+      header, main, footer {
+        padding-left: 310px;
+      }
+
+      @media only screen and (max-width : 992px) {
+        header, main, footer {
+          padding-left: 0;
+        }
+      }
+    </style>
+    <%= render 'layouts/sidenav' %>
+  <% end %>
+
+  <main>
+    <div class="container<% if user_signed_in? && current_user.fluid_preference %>-fluid<% end %>">
+      <div class="row">
+        <div class="col s12">
+          <%# todo: move these to toasts and/or make dismissable %>
+          <%= render 'cards/ui/alert' %>
+          <%= render 'cards/ui/notice' %>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s12">
+          <%= yield %>
+        </div>
+      </div>
+    </div>
+
+    <%= render 'layouts/ganalytics' %>
+
+  </main>
+
+  <%= render 'layouts/footer' %>
+  <%= render partial: 'content/keyboard_controls_help_modal' %>
+
+  <script type="text/javascript">
+    <%= yield :javascript %>
+
+    $(document).ready(function() {
+      $('select').material_select();
+      $('.tooltipped').tooltip({delay: 50});
+    });
+  </script>
+
+</body>
+</html>
