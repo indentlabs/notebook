@@ -37,7 +37,7 @@ class Universe < ActiveRecord::Base
   has_many :scenes
   has_many :groups
 
-  has_many :contributors
+  has_many :contributors, dependent: :destroy
 
   scope :is_public, -> { where(privacy: 'public') }
 
