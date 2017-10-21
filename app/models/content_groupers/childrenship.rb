@@ -39,6 +39,13 @@ class Childrenship < ActiveRecord::Base
     elsif gender == :female
       other_object.mothers.delete this_object
 
+    elsif gender.nil?
+      if other_object.fathers.include? this_object
+        other_object.fathers.delete this_object
+
+      elsif other_object.mothers.include? this_object
+        other_object.mothers.delete this_object
+      end
     end
   end
 
