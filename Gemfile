@@ -67,6 +67,8 @@ gem 'binding_of_caller' # see has_changelog.rb
 group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
+
+  gem 'newrelic_rpm'
 end
 
 group :test, :production do
