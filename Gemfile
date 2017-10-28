@@ -65,6 +65,7 @@ gem 'levenshtein-ffi'
 # Forum
 gem 'thredded', '~> 0.13.2'
 gem 'rails-ujs'
+gem 'delayed_job_active_record'
 
 # Tech debt & hacks
 gem 'binding_of_caller' # see has_changelog.rb
