@@ -1,5 +1,7 @@
 class UniverseCoreContentAuthorizer < CoreContentAuthorizer
   def self.creatable_by? user
+    return false if ENV['CONTENT_BLACKLIST'].split(',').include?(user.email)
+
     return true
     [
       PermissionService.user_has_fewer_owned_universes_than_plan_limit?(user: user),
