@@ -42,9 +42,9 @@ Thredded.avatar_url = ->(user) { Gravatar.src(user.email, 128, 'mm') }
 # and admins and moderators are determined by a flag on the users table.
 
 # The name of the moderator flag column on the users table.
-Thredded.moderator_column = :forum_admin
+Thredded.moderator_column = :forum_administrator
 # The name of the admin flag column on the users table.
-Thredded.admin_column = :forum_admin
+Thredded.admin_column = :forum_administrator
 
 # Whether posts and topics pending moderation are visible to regular users.
 Thredded.content_visible_while_pending_moderation = true
