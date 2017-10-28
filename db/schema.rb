@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171028220829) do
+ActiveRecord::Schema.define(version: 20171028221518) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -1071,7 +1071,6 @@ ActiveRecord::Schema.define(version: 20171028220829) do
     t.string   "secure_code"
     t.boolean  "fluid_preference"
     t.string   "username"
-    t.string   "forum_admin",              default: "f"
     t.boolean  "forum_administrator",      default: false, null: false
   end
 
