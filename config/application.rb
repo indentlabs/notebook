@@ -25,6 +25,9 @@ module Notebook
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
+    # Use delayed_job to process jobs
+    config.active_job.queue_adapter = :delayed_job
+
     # Filter sensitive parameters out of logs
     config.filter_parameters << :password
     config.filter_parameters << :password_confirmation
