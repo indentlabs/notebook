@@ -213,6 +213,8 @@ Rails.application.routes.draw do
   scope '/market' do
     get '/', to: 'main#comingsoon'
   end
+
+  mount Thredded::Engine => '/forum'
 end
 
 # rubocop:enable LineLength
