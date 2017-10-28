@@ -143,7 +143,7 @@ class User < ActiveRecord::Base
   end
 
   def forum_username
-    username = self.username.present? ? self.username : nil
+    username = self.username.present? ? "@#{self.username}" : nil
     username ||= self.name.present? ? self.name : nil
     username ||= 'Anonymous Author'
 
