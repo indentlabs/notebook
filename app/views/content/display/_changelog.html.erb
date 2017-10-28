@@ -3,6 +3,7 @@
 <ul class="collection">
   <% content.change_events.reverse.each do |change_event| %>
     <li class="collection-item">
+      <% next if change_event.user.nil? %>
       <%= (change_event.user == current_user) ? 'You' : link_to(change_event.user.name, change_event.user) %>
       <%= change_event.action %> this <%= change_event.content_type.downcase %>
       <span class="grey-text"><%= time_ago_in_words change_event.created_at %> ago</span>.
@@ -24,6 +25,20 @@
             <%
               old_value = change.first.blank?  ? '(blank)' : change.first.to_s
               new_value = change.second.blank? ? '(blank)' : change.second.to_s
+
+              visible_change = true
+              if key.start_with?('private')
+                visible_change = user_signed_in? && (
+                  (content.is_a?(Universe) && content.user == current_user) ||
+                  (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
+                  (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
+                )
+              end
+
+              unless visible_change
+                old_value = '(hidden)'
+                new_value = '(hidden)'
+              end
 
               # Just for clarity / ease of mind to users -- we treat blank as private, but that's not obvious to them.
               if key == 'privacy'

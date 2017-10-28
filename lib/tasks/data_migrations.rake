@@ -56,8 +56,8 @@ namespace :data_migrations do
     ]
 
     # Premium
-    puts "Setting premium users to 1GB"
-    puts User.where(selected_billing_plan_id: premium_ids).update_all(upload_bandwidth_kb: 1_000_000) # 1GB
+    puts "Setting premium users to 10GB"
+    puts User.where(selected_billing_plan_id: premium_ids).update_all(upload_bandwidth_kb: 10_000_000) # 10GB
 
     # Starter
     puts "Setting starter users to 50MB"

@@ -1,6 +1,4 @@
-<%
-  content_type = content_list.any? ? content_list.first.class : content_list.build.class
-%>
+<%# Usage: render partial: 'content/list/list', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true } %>
 
 <ul class="collection <%= 'with-header' if title.present? %>" style='border: 0'>
   <% if title.present? %>
@@ -20,13 +18,32 @@
             <%= link_to content.universe.name, content.universe %>
           <% end %>
         </small>
+        <% if user_signed_in? && (
+            (content.respond_to?(:universe) && content.universe && content.universe.user != current_user) ||
+            (content.is_a?(Universe) && content.user != current_user)
+          )
+        %>
+          <span class="new badge grey white-text tooltipped" style="float: inherit; margin: 0;" data-badge-caption="contributing"
+            data-position="bottom" data-delay="100" data-tooltip="You have been added as a contributor to this universe and its content."></span>
+        <% end %>
+        <% if user_signed_in? && (
+            (
+              content.respond_to?(:universe) && content.universe && content.universe.user == current_user &&
+              content.user != current_user
+            ) ||
+            (content.is_a?(Universe) && content.contributors.include?(current_user))
+          )
+        %>
+          <span class="new badge grey white-text tooltipped" style="float: inherit; margin: 0;" data-badge-caption="from contributor"
+            data-position="bottom" data-delay="100" data-tooltip="This content was created by a contributor to your universe."></span>
+        <% end %>
       </span>
       <p class="content-description truncate">
         <%= content.description %>
       </p>
       <p class='grey-text'>
 
-        <% if current_user && current_user == content.user %>
+        <% if user_signed_in? && content.updatable_by?(current_user) %>
           <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
             <i class="material-icons">mode_edit</i>
 
@@ -43,7 +60,7 @@
         <% end %>
       </p>
       <span class="secondary-content hide-on-med-and-up">
-        <% if current_user && current_user == content.user %>
+        <% if current_user && content.updatable_by?(current_user) %>
           <%= link_to edit_polymorphic_path(content), class: 'js-edit-hover' do %>
             <i class="material-icons">edit</i>
           <% end %>
@@ -53,8 +70,10 @@
   <% end %>
 
   <% if local_assigns[:show_add_another_form] && content_list.any? && current_user.can_create?(content_type) %>
-    <% unless content_type == Universe %>
-      <%= render partial: 'content/list/quick_add_form', locals: { content_type: content_list.build.class } %>
+    <% if content_type == Character || content_type == Location || content_type == Item || current_user.on_premium_plan? %>
+      <% unless content_type == Universe %>
+        <%= render partial: 'content/list/quick_add_form', locals: { content_type: content_type } %>
+      <% end %>
     <% end %>
   <% end %>
 

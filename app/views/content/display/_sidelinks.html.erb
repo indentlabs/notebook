@@ -27,6 +27,9 @@
         # Show everything on create/edit forms
       elsif category.name == 'changelog'
         # Show changelog on show page
+      elsif category.name == 'contributors'
+        # Show contributors on show page if there are any to show
+        next if @content.contributors.empty?
       elsif category.name == 'gallery'
         # Only show gallery tab if the content has any images
         next if @content.image_uploads.empty?
@@ -48,6 +51,9 @@
       <a href="#<%= category.name.gsub("'", '') %>_panel" class="<%= 'red-text' if category.label == 'Overview' %>">
         <i class="material-icons left"><%= category.icon %></i>
         <%= category.label.capitalize %>
+        <% if editing && category.label == 'Contributors' %>
+          <span class="new badge <%= Universe.color %>"></span>
+        <% end %>
       </a>
     </li>
   <% end %>

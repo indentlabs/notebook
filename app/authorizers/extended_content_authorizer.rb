@@ -1,5 +1,9 @@
 class ExtendedContentAuthorizer < ContentAuthorizer
   def self.creatable_by? user
-    user.active_billing_plans.any? { |plan| plan.allows_extended_content } || user.selected_billing_plan_id == 2
+  	return true
+    [
+      PermissionService.billing_plan_allows_extended_content?(user: user),
+      PermissionService.user_can_collaborate_in_universe_that_allows_extended_content?(user: user)
+    ].any?
   end
 end

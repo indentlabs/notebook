@@ -65,9 +65,14 @@ gem 'levenshtein-ffi'
 gem 'thredded', '~> 0.13.2'
 gem 'rails-ujs'
 
+# Tech debt & hacks
+gem 'binding_of_caller' # see has_changelog.rb
+
 group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
+
+  gem 'newrelic_rpm'
 end
 
 group :test, :production do
@@ -77,7 +82,6 @@ end
 
 group :test do
   gem 'better_errors'
-  gem 'binding_of_caller'
   gem 'capybara'
   gem 'codeclimate-test-reporter', require: false
   gem 'coveralls', require: false

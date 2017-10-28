@@ -11,12 +11,15 @@ class User < ActiveRecord::Base
   include HasContent
   include Authority::UserAbilities
 
-  validates :email, presence: true
-  #todo: We probably want a uniqueness constraint on email
   validates_uniqueness_of :username, allow_nil: true, allow_blank: true
 
   has_many :subscriptions
   has_many :billing_plans, through: :subscriptions
+  def on_premium_plan?
+    return true
+    BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id)
+  end
+
   has_many :image_uploads
 
   has_one :referral_code
@@ -31,6 +34,22 @@ class User < ActiveRecord::Base
 
   has_many :content_change_events
 
+  def contributable_universes
+    # todo email confirmation needs to happy for data safety / privacy (only verified emails)
+    contributor_by_email = Contributor.where(email: self.email).pluck(:universe_id)
+    contributor_by_user = Contributor.where(user: self).pluck(:universe_id)
+
+    Universe.where(id: contributor_by_email + contributor_by_user)
+  end
+  [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene, Flora].each do |content_type|
+    pluralized_content_type = content_type.name.downcase.pluralize
+    define_method "contributable_#{pluralized_content_type}" do
+      contributable_universes.flat_map do |universe|
+        universe.send(pluralized_content_type).where.not(user_id: self.id)
+      end
+    end
+  end
+
   # TODO: Swap this out with a has_many when we transition from a scratchpad to users having multiple documents
   has_one :document
 
@@ -39,7 +58,7 @@ class User < ActiveRecord::Base
   after_create :initialize_secure_code
 
   def createable_content_types
-    [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].select do |c|
+    [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene, Flora].select do |c|
       can_create? c
     end
   end

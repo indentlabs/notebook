@@ -33,8 +33,20 @@
                 <%= render partial: 'content/display/changelog', locals: { content: content } %>
               </div>
             <% end %>
+            <% if category.name == 'contributors' %>
+              <div>
+                <%= render partial: 'content/display/contributors', locals: { content: content } %>
+              </div>
+            <% end %>
             <% category.attribute_fields.each do |attribute| %>
-              <% next if attribute.name.start_with?("private") && (current_user.nil? || @content.user != current_user) %>
+              <% if attribute.name.start_with?("private") %>
+                <% next unless user_signed_in? && (
+                   (content.is_a?(Universe) && content.user == current_user) ||
+                   (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
+                   (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
+                 )
+                %>
+              <% end %>
 
               <%
                 custom_field = false
@@ -82,10 +94,10 @@
         <% end %>
       </div>
 
-      <% if current_user.nil? || current_user.id != @content.user_id %>
+      <% if current_user.nil? || current_user.id != @content.user_id && (@content.respond_to?(:universe) && @content.universe && @content.universe.user_id != current_user.id) %>
         <div class="card-action center">
           <p>
-            <%= @content.user.name %> created and maintains this universe on Notebook.ai.
+            This <%= @content.class.name.downcase %> was created by <%= @content.user.name %> on Notebook.ai<% if @content.is_a?(Universe) && @content.contributors.any? %> with <%= pluralize @content.contributors.count, 'contributor' %><% end %>.
           </p>
           <%= link_to "See more from #{@content.user.name}", @content.user %>
           <%= link_to "Create your own universe", root_url %>
