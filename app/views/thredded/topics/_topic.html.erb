@@ -1,0 +1,46 @@
+<%= content_tag :article,
+                id:    dom_id(topic),
+                class: ['thredded--topics--topic', topic_css_classes(topic)],
+                data: {topic: topic.id, messageboard: topic.messageboard_id} do %>
+  <div class="thredded--topics--posts-count"><%= topic.posts_count %></div>
+
+  <div class="thredded--topics--follow-info" title="<%= topic_follow_reason_text topic.follow_reason %>">
+    <svg class="thredded--topics--follow-icon" viewBox="0 0 116 121" role="img">
+      <% if topic.followed? %>
+        <use xlink:href="#thredded-follow-icon"></use>
+      <% else %>
+        <use xlink:href="#thredded-unfollow-icon"></use>
+      <% end %>
+    </svg>
+  </div>
+
+  <h1 class="thredded--topics--title">
+    <%= link_to topic.title, topic.path %>
+  </h1>
+
+  <% if topic.categories.any? %>
+    <ul class="thredded--topics--categories">
+      <%= render topic.categories %>
+    </ul>
+  <% end %>
+
+  <cite class="thredded--topics--updated-by">
+    <%= time_ago topic.last_post_at %>
+    <%= user_link topic.last_user %>
+  </cite>
+
+  <cite class="thredded--topics--started-by">
+    <%= time_ago topic.created_at %>
+    <%= user_link topic.user %>
+  </cite>
+
+  <% if topic.blocked? && topic.can_moderate? %>
+    <span class="thredded--topics--moderation-state thredded--alert thredded--alert-danger">
+      <%= render 'thredded/shared/content_moderation_blocked_state', moderation_record: topic.last_moderation_record %>
+    </span>
+  <% end %>
+<% end %>
+
+<% if !topic_iteration.last? && topic.sticky? && !topics[topic_counter + 1].sticky? %>
+  <%= render 'thredded/topics/sticky_topics_divider' %>
+<% end %>

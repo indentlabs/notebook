@@ -11,6 +11,8 @@ class User < ActiveRecord::Base
   include HasContent
   include Authority::UserAbilities
 
+  validates_uniqueness_of :username, allow_nil: true, allow_blank: true
+
   has_many :subscriptions
   has_many :billing_plans, through: :subscriptions
   def on_premium_plan?
@@ -138,5 +140,13 @@ class User < ActiveRecord::Base
       :reset_password_token,
       :email
     ]
+  end
+
+  def forum_username
+    username = self.username.present? ? "@#{self.username}" : nil
+    username ||= self.name.present? ? self.name : nil
+    username ||= 'Anonymous Author'
+
+    username
   end
 end
