@@ -9,7 +9,7 @@ class AttributeField < ActiveRecord::Base
   include Serendipitous::Concern
 
   include Authority::Abilities
-  self.authorizer_name = 'CoreContentAuthorizer'
+  self.authorizer_name = 'AttributeAuthorizer'
 
   attr_accessor :system
 

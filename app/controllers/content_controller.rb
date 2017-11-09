@@ -34,7 +34,7 @@ class ContentController < ApplicationController
     # TODO: Secure this with content class whitelist lel
     @content = content_type.find(params[:id])
 
-    return if ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.email)
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.email)
 
     if (current_user || User.new).can_read? @content
       @question = @content.question if current_user.present? and current_user == @content.user

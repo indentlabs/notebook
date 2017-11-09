@@ -8,7 +8,7 @@ class AttributeCategory < ActiveRecord::Base
   include Serendipitous::Concern
 
   include Authority::Abilities
-  self.authorizer_name = 'CoreContentAuthorizer'
+  self.authorizer_name = 'AttributeAuthorizer'
 
   before_validation :ensure_name
 
