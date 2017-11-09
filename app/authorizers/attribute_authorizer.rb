@@ -6,7 +6,6 @@ class AttributeAuthorizer < ApplicationAuthorizer
   end
 
   def readable_by? user
-    raise resource.inspect
     [
       PermissionService.user_owns_content?(user: user, content: resource),
       PermissionService.user_owns_any_containing_universe?(user: user, content: resource),
