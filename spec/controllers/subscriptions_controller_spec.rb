@@ -75,7 +75,7 @@ RSpec.describe SubscriptionsController, type: :controller do
     )
   end
 
-  describe "User with no plan (fallback to Starter)" do
+  describe "User with no plan (fallback to Starter) tries to upgrade" do
     it "redirects to payment method form if they don't have a payment method saved" do
       expect(@user.active_subscriptions).to eq([])
       post :change, {stripe_plan_id: 'premium'}
@@ -87,7 +87,7 @@ RSpec.describe SubscriptionsController, type: :controller do
     before do
       # Create a Starter subscription for the user
       @user.active_subscriptions.create(billing_plan: @free_plan, start_date: Time.now - 5.days, end_date: Time.now + 5.days)
-      expect(@user.active_subscriptions.map(&:billing_plan_id)).to eq([@free_plan.id])
+      @user.update(selected_billing_plan_id: @free_plan.id)
     end
 
     it "redirects to payment method form if they don't have a payment method saved" do
@@ -114,12 +114,21 @@ RSpec.describe SubscriptionsController, type: :controller do
           headers: {}
         )
 
-      #todo
-      # post :change, {stripe_plan_id: 'premium'}
-      # expect(@user.active_billing_plans).to eq([@premium_plan])
+      expect(@user.selected_billing_plan_id).to eq(@free_plan.id)
+      expect(@user.active_billing_plans).to eq([@free_plan])
+
+      post :change, {stripe_plan_id: 'premium'}
+
+      @user.reload
+      expect(@user.selected_billing_plan_id).to eq(@premium_plan.id)
+      expect(@user.active_billing_plans).to eq([@premium_plan])
     end
 
     describe "Starter Permissions" do
+      before do
+        @user.update(selected_billing_plan_id: @premium_plan.id)
+      end
+
       it "allows Starter users to create core content types" do
         expect(@user.can_create?(Character)).to eq(true)
         expect(@user.can_create?(Location)).to eq(true)
@@ -133,13 +142,12 @@ RSpec.describe SubscriptionsController, type: :controller do
         expect(@user.can_create?(Group)).to eq(false)
         expect(@user.can_create?(Magic)).to eq(false)
         expect(@user.can_create?(Language)).to eq(false)
+        expect(@user.can_create?(Flora)).to eq(false)
       end
 
       it "doesn't allow Starter users to create collective content types" do
         expect(@user.can_create?(Scene)).to eq(false)
       end
-
-      #todo allow editing existing non-core content
     end
   end
 
@@ -175,6 +183,7 @@ RSpec.describe SubscriptionsController, type: :controller do
         expect(@user.can_create?(Group)).to eq(true)
         expect(@user.can_create?(Magic)).to eq(true)
         expect(@user.can_create?(Language)).to eq(true)
+        expect(@user.can_create?(Flora)).to eq(true)
       end
 
       it "allows Premium users to create collective content types" do
