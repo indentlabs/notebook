@@ -52,6 +52,10 @@ class SubscriptionsController < ApplicationController
         end_date: Time.now.end_of_day + 5.years
       )
 
+      stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
+      stripe_subscription = stripe_customer.subscriptions.data[0]
+      stripe_subscription.save
+
       report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
 
       flash[:notice] = "You have been successfully downgraded to Starter." #todo proration/credit
