@@ -342,7 +342,7 @@ class SubscriptionsController < ApplicationController
       "#{delta} for #{user.email.split('@').first}@ (##{user.id})",
       "From: *#{from.name}* ($#{from.monthly_cents / 100.0}/month)",
       "To: *#{to.name}* (#{to.stripe_plan_id}) ($#{to.monthly_cents / 100.0}/month)",
-      "#{total_subscriptions} subscriptions total $#{'%.2f' % monthly_rev_cents}/mo"
+      "#{total_subscriptions} subscriptions total $#{'%.2f' % (monthly_rev_cents / 100)}/mo"
     ].join("\n")
 
   end
