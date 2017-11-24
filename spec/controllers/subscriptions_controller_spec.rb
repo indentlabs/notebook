@@ -60,6 +60,18 @@ RSpec.describe SubscriptionsController, type: :controller do
       allows_collaboration: true
     )
 
+    @premium_annual_plan = BillingPlan.create(
+      name: 'Premium (annual)',
+      stripe_plan_id: 'premium-annual',
+      monthly_cents: 700,
+      available: true,
+      universe_limit: 5,
+      allows_core_content: true,
+      allows_extended_content: true,
+      allows_collective_content: true,
+      allows_collaboration: true
+    )
+
     @free_plan = BillingPlan.create(
       name: 'Starter',
       stripe_plan_id: 'starter',
@@ -189,6 +201,39 @@ RSpec.describe SubscriptionsController, type: :controller do
       it "allows Premium users to create collective content types" do
         expect(@user.can_create?(Scene)).to eq(true)
       end
+    end
+  end
+
+  describe "Upload storage adjustments" do
+    before do
+      @user.active_subscriptions.create(billing_plan: @free_plan, start_date: Time.now - 5.days, end_date: Time.now + 5.days)
+      @user.update(selected_billing_plan_id: @free_plan.id)
+    end
+
+    it 'grants storage space to a user after upgrading' do
+      @user.update(upload_bandwidth_kb: 100)
+      post :change, { stripe_plan_id: 'premium' }
+      expect(@user.upload_bandwidth_kb).to eq(100 + @premium_plan.bonus_bandwidth_kb)
+    end
+
+    it 'decreases storage space for a user after downgrading' do
+      @user.update(upload_bandwidth_kb: 100)
+      post :change, { stripe_plan_id: 'starter' }
+      expect(@user.upload_bandwidth_kb).to eq(100 - @premium_plan.bonus_bandwidth_kb)
+    end
+
+    it 'does not adjust storage space when going premium --> premium' do
+      @user.update(upload_bandwidth_kb: 101)
+      @user.update(selected_billing_plan_id: @premium_plan.id)
+      post :change, { stripe_plan_id: @premium_annual_plan.stripe_plan_id }
+      expect(@user.upload_bandwidth_kb).to eq(101)
+    end
+
+    it 'does not adjust storage space if no plan change is made' do
+      @user.update(upload_bandwidth_kb: 101)
+      @user.update(selected_billing_plan_id: @premium_annual_plan.stripe_plan_id)
+      post :change, { stripe_plan_id: @premium_plan.stripe_plan_id }
+      expect(@user.upload_bandwidth_kb).to eq(101)
     end
   end
 end
