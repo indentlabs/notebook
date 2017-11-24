@@ -9,7 +9,11 @@
       <h5>
         Upload more images
         <small class="grey-text">
-          You have <%= Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty %> of bandwidth remaining.
+          <% if current_user.upload_bandwidth_kb > 0 %>
+            You have <%= Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty %> of bandwidth remaining.
+          <% else %>
+            You have no upload bandwidth remaining. Upgrade to Premium or delete some existing images for more.
+          <% end %>
         </small>
       </h5>
     </div>

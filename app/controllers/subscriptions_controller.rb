@@ -52,6 +52,12 @@ class SubscriptionsController < ApplicationController
         end_date: Time.now.end_of_day + 5.years
       )
 
+      unless Rails.env.test?
+        stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
+        stripe_subscription = stripe_customer.subscriptions.data[0]
+        stripe_subscription.save
+      end
+
       report_subscription_change_to_slack current_user, old_billing_plan, new_billing_plan
 
       flash[:notice] = "You have been successfully downgraded to Starter." #todo proration/credit
@@ -72,7 +78,7 @@ class SubscriptionsController < ApplicationController
       # Change subscription plan if they already have a payment method on file
       stripe_subscription.plan = new_plan_id
       begin
-        stripe_subscription.save
+        stripe_subscription.save unless Rails.env.test?
       rescue Stripe::CardError => e
         flash[:alert] = "We couldn't upgrade you to Premium because #{e.message.downcase} Please double check that your information is correct."
         return redirect_to :back
@@ -323,14 +329,20 @@ class SubscriptionsController < ApplicationController
       delta = ":wave: Downgrade"
     end
 
-    active_subscriptions = Subscription.where('start_date < ?', Time.now).where('end_date > ?', Time.now)
-    total_subs_monthly = active_subscriptions.map(&:billing_plan).sum(&:monthly_cents).to_f / 100.0
+    total_subscriptions = 0
+    monthly_rev_cents = 0
+    billing_plans_with_prices = BillingPlan.where.not(monthly_cents: 0).pluck(:id, :monthly_cents)
+    billing_plans_with_prices.each do |plan_id, monthly_cents|
+      users_on_this_plan  = User.where(selected_billing_plan_id: plan_id).count
+      total_subscriptions += users_on_this_plan
+      monthly_rev_cents   += monthly_cents * users_on_this_plan
+    end
 
     notifier.ping [
       "#{delta} for #{user.email.split('@').first}@ (##{user.id})",
       "From: *#{from.name}* ($#{from.monthly_cents / 100.0}/month)",
       "To: *#{to.name}* (#{to.stripe_plan_id}) ($#{to.monthly_cents / 100.0}/month)",
-      "#{active_subscriptions.count} subscriptions total $#{'%.2f' % total_subs_monthly}/mo"
+      "#{total_subscriptions} subscriptions total $#{'%.2f' % (monthly_rev_cents / 100)}/mo"
     ].join("\n")
 
   end
