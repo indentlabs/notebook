@@ -32,6 +32,31 @@
   </li>
 
   <li>
+    <%= link_to thredded_path do %>
+      <i class="material-icons grey-text">
+        forum
+      </i>
+      Discussions
+      <%
+        unread_threads = Thredded::Topic
+          .followed_by(current_user)
+          .unread(current_user)
+          .count
+
+        private_messages = Thredded::PrivateTopic
+          .for_user(current_user)
+          .unread(current_user)
+          .count
+      %>
+      <% if unread_threads > 0 || private_messages > 0 %>
+        <span class="badge <%= 'blue white-text' if private_messages > 0 %>">
+          <%= unread_threads %><%= "/#{private_messages}" if private_messages > 0 %>
+        </span>
+      <% end %>
+    <% end %>
+  </li>
+
+  <li>
     <%= link_to notes_path do %>
       <i class="material-icons grey-text">
         book
@@ -59,7 +84,12 @@
             if base_content_type != Universe && @universe_scope
               @universe_scope.send(base_content_type.name.downcase.pluralize).count
             else
-              current_user.send(base_content_type.name.downcase.pluralize).count
+              pluralized_name = base_content_type.name.downcase.pluralize
+              (
+                current_user.send(pluralized_name) +
+                current_user.send("contributable_#{pluralized_name}") +
+                (base_content_type == Universe ? [] : current_user.universes.flat_map { |universe| universe.send(pluralized_name) })
+              ).uniq.count
             end
           %>
         </span>
@@ -83,7 +113,12 @@
             if @universe_scope
               @universe_scope.send(extended_content_type.name.downcase.pluralize).count
             else
-              current_user.send(extended_content_type.name.downcase.pluralize).count
+              pluralized_name = extended_content_type.name.downcase.pluralize
+              (
+                current_user.send(pluralized_name) +
+                current_user.send("contributable_#{pluralized_name}") +
+                current_user.universes.flat_map { |universe| universe.send(pluralized_name) }
+              ).uniq.count
             end
           %>
         </span>
@@ -116,7 +151,12 @@
             if @universe_scope
               @universe_scope.send(extended_content_type.name.downcase.pluralize).count
             else
-              current_user.send(extended_content_type.name.downcase.pluralize).count
+              pluralized_name = extended_content_type.name.downcase.pluralize
+              (
+                current_user.send(pluralized_name) +
+                current_user.send("contributable_#{pluralized_name}") +
+                current_user.universes.flat_map { |universe| universe.send(pluralized_name) }
+              ).uniq.count
             end
           %>
         </span>

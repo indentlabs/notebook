@@ -1,15 +1,25 @@
 class ContentController < ApplicationController
-  include HasOwnership
-
   before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy]
 
   def index
-    @content = content_type_from_controller(self.class)
-               .where(user_id: current_user.id)
-               .order(:name)
+    @content_type_class = content_type_from_controller(self.class)
+    pluralized_content_name = @content_type_class.name.downcase.pluralize
 
-    @content = @content.where(universe: @universe_scope) if @universe_scope.present? && @content.build.respond_to?(:universe)
-    @content ||= []
+    if @universe_scope.present? && @content_type_class != Universe
+      @content = @universe_scope.send(pluralized_content_name)
+    else
+      @content = (
+        current_user.send(pluralized_content_name) +
+        current_user.send("contributable_#{pluralized_content_name}")
+      )
+
+      unless @content_type_class == Universe
+        @content.concat(current_user.universes.flat_map { |universe| universe.send(pluralized_content_name) })
+      end
+    end
+
+    @content = @content.flatten.uniq.sort_by(&:name)
+
     @questioned_content = @content.sample
     @question = @questioned_content.question unless @questioned_content.nil?
 
@@ -23,6 +33,8 @@ class ContentController < ApplicationController
     content_type = content_type_from_controller(self.class)
     # TODO: Secure this with content class whitelist lel
     @content = content_type.find(params[:id])
+
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.email)
 
     if (current_user || User.new).can_read? @content
       @question = @content.question if current_user.present? and current_user == @content.user
@@ -49,9 +61,9 @@ class ContentController < ApplicationController
       end
     else
       if current_user.present?
-        return redirect_to :back
+        return redirect_to :back, notice: "You don't have permission to view that content."
       else
-        return redirect_to root_path
+        return redirect_to root_path, notice: "You don't have permission to view that content."
       end
     end
   end
@@ -75,7 +87,7 @@ class ContentController < ApplicationController
                .find(params[:id])
 
     unless @content.updatable_by? current_user
-      return redirect_to :back
+      return redirect_to @content, notice: t(:no_do_permission)
     end
 
     respond_to do |format|
@@ -91,6 +103,15 @@ class ContentController < ApplicationController
     unless current_user.can_create?(content_type)
       return redirect_to :back
     end
+
+    # Even if a user can create content, we want to double check that they're either on a premium account or creating content in a universe owned by someone on premium
+    # unless current_user.on_premium_plan?
+    #   containing_universe = Universe.find(content_params[:universe_id].to_i)
+    #   unless content_params[:universe_id].present? && containing_universe && containing_universe.user.on_premium_plan? && current_user.contributable_universes.include?(containing_universe)
+    #     return redirect_to send(content_type.name.downcase.pluralize + '_path'),
+    #       notice: "Premium content must either be created by a user with a Premium account, or in a universe owned by a user with a Premium account."
+    #   end
+    # end
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
       'content_type': content_type.name
@@ -123,7 +144,21 @@ class ContentController < ApplicationController
       upload_files params['image_uploads'], content_type.name, @content.id
     end
 
-    if @content.update_attributes(content_params)
+    if @content.is_a?(Universe) && params.key?('contributors') && @content.user == current_user
+      params[:contributors][:email].reject(&:blank?).each do |email|
+        ContributorService.invite_contributor_to_universe(universe: @content, email: email)
+      end
+    end
+
+    if @content.user == current_user
+      update_success = @content.update_attributes(content_params)
+    else
+      # Exclude fields only the real owner can edit
+      #todo move field list somewhere when it grows
+      update_success = @content.update_attributes(content_params.except!(:universe_id))
+    end
+
+    if update_success
       successful_response(@content, t(:update_success, model_name: humanized_model_name))
     else
       failed_response('edit', :unprocessable_entity)
@@ -165,7 +200,7 @@ class ContentController < ApplicationController
     @content = content_type.find(params[:id])
 
     unless current_user.can_delete? @content
-      return redirect_to :back
+      return redirect_to :back, notice: "You don't have permission to do that!"
     end
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'deleted content', {

@@ -12,6 +12,7 @@ FactoryGirl.define do
     sequence :name do |n|
       "Universe #{n}"
     end
+    user
   end
 
   factory :character do
@@ -19,7 +20,6 @@ FactoryGirl.define do
       "Character #{n}"
     end
     user
-    universe
   end
 
   factory :location do
@@ -27,7 +27,6 @@ FactoryGirl.define do
       "Location #{n}"
     end
     user
-    universe
   end
 
   factory :item do
@@ -35,7 +34,6 @@ FactoryGirl.define do
       "Item #{n}"
     end
     user
-    universe
   end
 
   factory :attribute_category do

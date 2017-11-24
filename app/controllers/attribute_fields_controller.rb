@@ -19,7 +19,7 @@ class AttributeFieldsController < ContentController
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created attribute', {
       'content_type': params[:entity_type]
-    })
+    }) if Rails.env.production?
 
     @content = AttributeField.new(label: content_params[:label]).tap do |f|
       f.attribute_category_id = category.id

@@ -3,7 +3,7 @@
 <% active_stripe_plan = @active_billing_plan.stripe_plan_id %>
 
 <p class="right hide-on-small-only">
-  <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_class| %>
+  <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Flora, Scene].each do |content_class| %>
     <% can_create = current_user.can_create?(content_class) %>
     <% edit_message = current_user.send(content_class.name.pluralize.downcase).any? && !can_create %>
     <i class="material-icons <%= can_create ? content_class.color : 'grey' %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="You <%= can_create ? 'can' : 'cannot' %> create new <%= content_class.name.pluralize.downcase %>.<%= ' You can edit your existing ones.' if edit_message %>">
@@ -60,6 +60,9 @@
             Create <strong>core</strong> page types
           </li>
           <li class="center">
+            <i class="material-icons <%= Universe.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create up to 5 <%= Universe.name.pluralize %>">
+              <%= Universe.icon %>
+            </i>
             <% [Character, Location, Item].each do |content_class| %>
               <i class="material-icons <%= content_class.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
                 <%= content_class.icon %>
@@ -98,15 +101,15 @@
           </li>
           <li>
             <i class="material-icons green-text">check</i>
-            Upload <strong>1GB</strong> of images
+            Upload <strong>10GB</strong> of images
           </li>
           <li>
             <i class="material-icons green-text">check</i>
-            Create <strong>all 10</strong> page types
+            Create <strong>all 12</strong> page types
           </li>
           <li class="center">
-            <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each_with_index do |content_class, i| %>
-              <%= '<br />'.html_safe if i % 5 == 0 && i != 0 %>
+            <% [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Flora, Scene].each_with_index do |content_class, i| %>
+              <%= '<br />'.html_safe if i % 4 == 0 && i != 0 %>
               <i class="material-icons <%= content_class.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
                 <%= content_class.icon %>
               </i>
@@ -145,15 +148,15 @@
           </li>
           <li>
             <i class="material-icons green-text">check</i>
-            Upload <strong>1GB</strong> of images
+            Upload <strong>10GB</strong> of images
           </li>
           <li>
             <i class="material-icons green-text">check</i>
-            Create <strong>all 10</strong> page types
+            Create <strong>all 12</strong> page types
           </li>
           <li class="center">
-            <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each_with_index do |content_class, i| %>
-              <%= '<br />'.html_safe if i % 5 == 0 && i != 0 %>
+            <% [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Flora, Scene].each_with_index do |content_class, i| %>
+              <%= '<br />'.html_safe if i % 4 == 0 && i != 0 %>
               <i class="material-icons <%= content_class.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
                 <%= content_class.icon %>
               </i>
@@ -192,15 +195,15 @@
           </li>
           <li>
             <i class="material-icons green-text">check</i>
-            Upload <strong>1GB</strong> of images
+            Upload <strong>10GB</strong> of images
           </li>
           <li>
             <i class="material-icons green-text">check</i>
-            Create <strong>all 10</strong> page types
+            Create <strong>all 12</strong> page types
           </li>
           <li class="center">
-            <% [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each_with_index do |content_class, i| %>
-              <%= '<br />'.html_safe if i % 5 == 0 && i != 0 %>
+            <% [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Flora, Scene].each_with_index do |content_class, i| %>
+              <%= '<br />'.html_safe if i % 4 == 0 && i != 0 %>
               <i class="material-icons <%= content_class.color %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
                 <%= content_class.icon %>
               </i>
@@ -246,27 +249,7 @@
 </div>
 
 <div class="row">
-  <div class="col s6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Notebook.ai Community Drive</div>
-        <div class="row">
-          <div class="col s12">
-            <p>
-              For a limited time, we're holding a <%= link_to 'Community Drive', friends_landing_path %> for referring friends
-              to Notebook.ai. With each friend you refer that signs up for a Premium subscription, you'll gain +100 MB storage space,
-              two more entries in our upcoming raffle, and two more <%= link_to 'feature votes', community_voting_path %> to decide what
-              Notebook.ai's first community-first feature will be.
-            </p><br />
-            <div class="center">
-              <%= link_to 'See community progress', friends_landing_path, class: 'btn blue' %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col s6">
+  <div class="col s12">
     <div class="card">
       <div class="card-content">
         <div class="card-title">Your referral code & stats</div>
@@ -282,7 +265,7 @@
             </p>
             <ul>
               <% referrals = current_user.referrals %>
-              <% converted_referrals = referrals.map(&:referree).select { |user| [2, 3, 4, 5, 6].include? user.selected_billing_plan_id } %>
+              <% converted_referrals = referrals.map(&:referree).select(&:on_premium_plan?) %>
               <li><strong><%= pluralize referrals.count, 'user' %></strong> <%= referrals.count == 1 ? 'has' : 'have' %> signed up with your referral code.</li>
               <% if converted_referrals.any? %>
                 <li>
@@ -291,14 +274,6 @@
               <% else %>
                 <li>None have signed up for Premium yet, however.</li>
               <% end %>
-              <li>You've earned <strong><%= pluralize current_user.votes.count, 'feature vote' %></strong> and have voted <%= pluralize current_user.votes.where.not(votable_id: nil).count, 'time' %>.
-                <% if current_user.votes.where(votable_id: nil).any? %>
-                  <%= link_to 'Vote now!', community_voting_path %>
-                <% else %>
-                  <%= link_to 'See votes so far.', community_voting_path %>
-                <% end %>
-              </li>
-              <li>You've earned <strong><%= pluralize current_user.raffle_entries.count, 'entry' %></strong> in <%= link_to "Notebook.ai's raffle", friends_landing_path %>, happening on June 15<sup>th</sup>, 2017.</li>
             </ul>
           </div>
         </div>

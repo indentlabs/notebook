@@ -1,9 +1,10 @@
 # rubocop:disable LineLength
 
 Rails.application.routes.draw do
-
   devise_for :users, controllers: { registrations: 'registrations', omniauth_callbacks: 'users/omniauth_callbacks' }
   resources :users
+
+  delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
 
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
 
@@ -143,6 +144,7 @@ Rails.application.routes.draw do
     get '/items.csv', to: 'export#items_csv', as: :items_csv
     get '/creatures.csv', to: 'export#creatures_csv', as: :creatures_csv
     get '/races.csv', to: 'export#races_csv', as: :races_csv
+    get '/floras.csv', to: 'export#floras_csv', as: :floras_csv
     get '/religions.csv', to: 'export#religions_csv', as: :religions_csv
     get '/magics.csv', to: 'export#magics_csv', as: :magics_csv
     get '/languages.csv', to: 'export#languages_csv', as: :languages_csv
@@ -215,6 +217,7 @@ Rails.application.routes.draw do
   end
 
   resources :omniauth_accounts, only: [:destroy]
+  mount Thredded::Engine => '/forum'
 end
 
 # rubocop:enable LineLength

@@ -1,6 +1,5 @@
 <%
-  content_type_class = @content.build.class
-  content_type = content_type_class.name.downcase
+  content_type = @content_type_class.name.downcase
 %>
 
 <% content_for :sidebar_top do %>
@@ -32,28 +31,28 @@
 <% if @content.any? %>
 
   <h4>
-    You've created <%= pluralize(@content.count, @content.content_name) %>
+    Your <%= pluralize(@content.count, content_type) %>
     <% if @content.count > 0 %>
       <small class="right">
-        <% if current_user.can_create? content_type_class %>
+        <% if current_user.can_create? @content_type_class %>
 
-          <%= link_to new_polymorphic_path(@content.build), class: "btn white #{content_type_class.color}-text" do %>
+          <%= link_to new_polymorphic_path(@content_type_class), class: "btn white #{@content_type_class.color}-text" do %>
             +
-            <i class="material-icons <%= content_type_class.color %>-text tooltipped" data-position="bottom" data-tooltip="Create another <%= content_type_class.name %>">
-            <%= content_type_class.icon %>
+            <i class="material-icons <%= @content_type_class.color %>-text tooltipped" data-position="bottom" data-tooltip="Create another <%= @content_type_class.name %>">
+            <%= @content_type_class.icon %>
           </i>
           <% end %>
 
         <% else %>
 
-          <%= link_to subscription_path, class: "btn grey lighten-3 #{content_type_class.color}-text tooltipped", data: {
+          <%= link_to subscription_path, class: "btn grey lighten-3 #{@content_type_class.color}-text tooltipped", data: {
               position: 'bottom',
-              tooltip: "Upgrade to Premium to create more #{content_type_class.name.pluralize}",
+              tooltip: "Upgrade to Premium to create more #{@content_type_class.name.pluralize}",
               delay: 50
             } do %>
             +
-            <i class="material-icons <%= content_type_class.color %>-text">
-            <%= content_type_class.icon %>
+            <i class="material-icons <%= @content_type_class.color %>-text">
+            <%= @content_type_class.icon %>
           </i>
           <% end %>
 
@@ -61,25 +60,25 @@
       </small>
     <% end %>
   </h4>
-  <%= render partial: 'content/list/list', locals: { content_list: @content, show_add_another_form: true } %>
+  <%= render partial: 'content/list/list', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true } %>
 
 <% elsif @content.empty? %>
 
   <div class="center" style="margin: 50px 0">
-    <h4>You haven't created any <%= @content.content_name.pluralize %> yet!</h4>
+    <h4>You haven't created any <%= content_type.pluralize %> yet!</h4>
     <h1>
-      <i class="material-icons <%= content_type_class.color %>-text" style="font-size: 200%">
-        <%= content_type_class.icon %>
+      <i class="material-icons <%= @content_type_class.color %>-text" style="font-size: 200%">
+        <%= @content_type_class.icon %>
       </i>
     </h1>
     <p>
       <%= t("content_descriptions.#{content_type}") %>
     </p>
 
-    <% if current_user.can_create? content_type_class %>
-      <%= link_to "Create your first #{@content.content_name.humanize.downcase}", new_polymorphic_path(@content.build), class: "btn #{content_type_class.color}" %>
+    <% if current_user.can_create? @content_type_class %>
+      <%= link_to "Create your first #{content_type.humanize.downcase}", new_polymorphic_path(@content_type_class), class: "btn #{@content_type_class.color}" %>
     <% else %>
-      <%= link_to "Upgrade to Premium to create your first #{@content.content_name.humanize.downcase}", subscription_path %>
+      <%= link_to "Upgrade to Premium to create your first #{content_type.humanize.downcase}", subscription_path %>
     <% end %>
   </div>
 

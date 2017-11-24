@@ -1,7 +1,9 @@
 class CoreContentAuthorizer < ContentAuthorizer
   def self.creatable_by? user
-    active_billing_plans = user.active_billing_plans
+    return false if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(user.email)
 
-    active_billing_plans.empty? || active_billing_plans.any? { |plan| plan.allows_core_content }
+    [
+      PermissionService.billing_plan_allows_core_content?(user: user)
+    ].any?
   end
 end

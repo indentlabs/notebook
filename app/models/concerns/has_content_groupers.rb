@@ -22,7 +22,7 @@ module HasContentGroupers
       }                                      # }
 
       # Siblingships
-      has_many connecting_class_name
+      has_many connecting_class_name, dependent: :destroy
 
       # Siblings
       has_many relation,

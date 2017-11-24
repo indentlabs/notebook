@@ -1,0 +1,37 @@
+<div class="nav">
+  <div style="float: left">
+    <%= link_to main_app.root_path do %>
+      &lsaquo; Back to <strong>Notebook.ai</strong>
+      <span style="background: white; width: 5px; padding: 10px 0; margin: 0 10px;">&nbsp;</span>
+      <%= link_to 'Discussions Home', main_app.thredded_path %>
+    <% end %>
+  </div>
+  <div style="float: right">
+    <% if user_signed_in? %>
+      <% if thredded_current_user.username.blank? %>
+        <%= link_to 'Claim your username!', main_app.edit_user_registration_path(thredded_current_user) %>
+      <% else %>
+        Hello,
+        <%= link_to thredded_current_user.thredded_display_name, current_user %>!
+      <% end %>
+    <% end %>
+  </div>
+
+  <div style="clear: both"></div>
+</div>
+
+<style>
+.nav {
+  background: #03A9F4;
+  color: white;
+  margin: 0;
+  padding: 16px 8px;
+  box-shadow: 1px 1px 1px grey;
+}
+
+.nav a {
+  color: white;
+  text-decoration: none;
+}
+
+</style>

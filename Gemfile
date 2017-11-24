@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
+ruby "~> 2.3.0"
 
 gem 'rails', '4.2.7.1'
 gem 'puma', '~> 3.6.0'
@@ -58,7 +59,7 @@ gem 'mixpanel-ruby'
 gem 'social-share-button'
 
 # Apps
-gem 'easy_translate'
+#gem 'easy_translate'
 gem 'levenshtein-ffi'
 
 # Social Logins
@@ -66,9 +67,19 @@ gem 'omniauth-facebook'
 gem 'omniauth-twitter'
 gem 'omniauth-google-oauth2'
 
+# Forum
+gem 'thredded', '~> 0.13.2'
+gem 'rails-ujs'
+gem 'delayed_job_active_record'
+
+# Tech debt & hacks
+gem 'binding_of_caller' # see has_changelog.rb
+
 group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
+
+  gem 'newrelic_rpm'
 end
 
 group :test, :production do
@@ -78,7 +89,6 @@ end
 
 group :test do
   gem 'better_errors'
-  gem 'binding_of_caller'
   gem 'capybara'
   gem 'codeclimate-test-reporter', require: false
   gem 'coveralls', require: false

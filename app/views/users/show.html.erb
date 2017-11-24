@@ -22,7 +22,7 @@ content_jsonld = {
   tabs = %w(
     universes
     characters locations items
-    creatures races religions magics languages groups scenes
+    creatures races religions magics languages groups floras scenes
   )
 
   tab_content_list = {}
@@ -42,6 +42,12 @@ content_jsonld = {
       <div class="card-content">
         <div class="card-title"><strong><%= @user.name %></strong></div>
       </div>
+
+      <% if user_signed_in? && current_user.id == @user.id %>
+        <div class="card-action">
+          <%= link_to 'Edit your profile', edit_user_registration_path(current_user) %>
+        </div>
+      <% end %>
 
       <div class="card-reveal">
         <span class="card-title grey-text text-darken-4">Profile Picture<i class="material-icons right">close</i></span>
@@ -72,6 +78,14 @@ content_jsonld = {
           %>
 
           <%= pie_chart(pie_chart_data, colors: pie_chart_colors) %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @user.username.present? %>
+      <div class="card hoverable">
+        <div class="card-content">
+          <%= link_to 'Forums', thredded_path %> username: <%= @user.username %>
         </div>
       </div>
     <% end %>

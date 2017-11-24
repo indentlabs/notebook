@@ -46,6 +46,11 @@ class ExportController < ApplicationController
     send_data to_csv(current_user.races), filename: "races-#{Date.today}.csv"
   end
 
+  def floras_csv
+    report_to_mixpanel 'csv', 'flora'
+    send_data to_csv(current_user.floras), filename: "floras-#{Date.today}.csv"
+  end
+
   def religions_csv
     report_to_mixpanel 'csv', 'religions'
     send_data to_csv(current_user.religions), filename: "religions-#{Date.today}.csv"

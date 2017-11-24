@@ -1,12 +1,12 @@
-= notebook
+= Notebook.ai
 {<img src="https://travis-ci.org/indentlabs/notebook.png?branch=master" alt="Build Status" />}[https://travis-ci.org/indentlabs/notebook]
 {<img src="https://codeclimate.com/github/indentlabs/notebook/badges/gpa.svg" />}[https://codeclimate.com/github/indentlabs/notebook]
 {<img src="https://codeclimate.com/github/indentlabs/notebook/badges/coverage.svg" />}[https://codeclimate.com/github/indentlabs/notebook/coverage]
 {<img src="http://inch-ci.org/github/indentlabs/notebook.svg?branch=master" alt="Inline docs" />}[http://inch-ci.org/github/indentlabs/notebook]
-
-== What is notebook?
+ 
+== What is Notebook.ai?
 see {live website}[http://notebook.ai/]
-
+ 
 notebook is a set of tools for writers, game designers, and roleplayers to create magnificent universes – and everything within them.
 
 From a simple interface in your browser, on your phone, or on your tablet, you can do everything you'd ever want to do while creating your own little (or big!) world.
@@ -38,10 +38,9 @@ Install curl
 
     sudo apt-get install curl
 
-Install rvm
+Install rvm (or your favorite ruby version manager)
 
     \curl -sSL https://get.rvm.io | bash
-
     source ~/.rvm/scripts/rvm
 
 Install ruby 2.3.1
@@ -50,13 +49,14 @@ Install ruby 2.3.1
 
     rvm use 2.3.1
 
-Install rails 4.2.5
+Install rails 4.2.7
 
-    gem install rails -v 4.2.5
+    gem install rails -v 4.2.7
 
 Install necessary libraries
 
     sudo apt-get install imagemagick libmagickwand-dev
+    sudo apt-get install libpq-dev
 
 Clone the code
 
@@ -65,7 +65,7 @@ Clone the code
 Install gems
 
     bundle install
-    
+
 Create database
 
     rake db:create
@@ -73,16 +73,19 @@ Create database
 Run initial database migrations
 
     rake db:migrate
+    rake data_migrations:create_default_billing_plans
+    rake db:seed
 
 Finally, run the server with
 
     rails server
-    
+
 You should now see a copy of the site running locally at http://localhost:3000/!
 
 == Running the notebook stack locally with Docker
 
 - install {Docker}[https://www.docker.com/products/overview]
+- install {Docker Compose}[https://docs.docker.com/compose/install]
 - clone this git repo
 - cd into the root of this repo, and then run
     docker-compose up

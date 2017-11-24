@@ -1,5 +1,6 @@
 <div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
 
+  <%# todo: break this out into a partial %>
   <% if category.name == 'gallery' %>
     <div>
       <%= render partial: 'content/form/images/edit_list', locals: { content: content } %>
@@ -8,7 +9,11 @@
       <h5>
         Upload more images
         <small class="grey-text">
-          You have <%= Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty %> of bandwidth remaining.
+          <% if current_user.upload_bandwidth_kb > 0 %>
+            You have <%= Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty %> of bandwidth remaining.
+          <% else %>
+            You have no upload bandwidth remaining. Upgrade to Premium or delete some existing images for more.
+          <% end %>
         </small>
       </h5>
     </div>
@@ -22,6 +27,10 @@
         render_options: { locals: { f: f, content: content }}
       %>
     </div>
+  <% end %>
+
+  <% if category.name == 'contributors' %>
+    <%= render partial: 'content/form/contributors', locals: { f: f, content: content } %>
   <% end %>
 
   <% # Do some dynamic resizing of columns based on how many columns there are
@@ -54,7 +63,7 @@
       <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
         <%# Relation-setting UI %>
         <% through_class = content.class.reflect_on_association(field.name).options[:through].to_s %>
-        <%= render 'content/form/relation_input', f: f, attribute: field.name, relation: through_class %>
+        <%= render 'content/form/relation_input', f: f, attribute: field.name, label: field.label, relation: through_class %>
 
       <% elsif field.name == 'archetype' %>
         <div class="input-field input-select">
@@ -65,7 +74,46 @@
       <% elsif field.name == 'universe_id' %>
         <div class="input-field">
           <%= f.label field.name, field.label %><br />
-          <%= f.select field.name, current_user.universes.sort_by(&:name).map { |u| [u.name, u.id] }.compact, include_blank: true, selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id]) %>
+          <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) || f.object.universe_id.nil? %>
+            <%# todo not like this %>
+            <%
+              valid_universes = []
+              show_premium_notice = false
+
+              if content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
+                valid_universes += current_user.universes
+                valid_universes += current_user.contributable_universes
+              else
+                # Premium content
+                if current_user.on_premium_plan?
+                  valid_universes += current_user.universes
+                else
+                  show_premium_notice = true
+                end
+
+                current_user.contributable_universes.each do |potential_universe|
+                  if potential_universe.user.on_premium_plan?
+                    valid_universes += [potential_universe]
+                  end
+                end
+              end
+            %>
+            <%=
+              f.select field.name,
+              valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }.compact,
+              include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item),
+              selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id])
+            %>
+            <% if show_premium_notice %>
+              <div class="help-text">
+                <i class="material-icons" style="font-size: 90%">info</i>
+                While on a <%= link_to 'Starter plan', subscription_path %>, you can only create premium content in universes you're a contributor to.
+              </div>
+            <% end %>
+          <% else %>
+            <br />
+            <%= link_to(f.object.universe.name, f.object.universe) if f.object.universe %>
+          <% end %>
         </div>
 
       <% elsif field.name == 'attribute_category_id' %>
@@ -94,13 +142,27 @@
         </div>
 
       <% elsif field.name == 'private_notes' %>
-        <div class="input-field content-field">
-          <%= f.label field.name, field.label %>
-          <%= f.text_area field.name, class: "materialize-textarea", placeholder: 'Write as little or as much as you want!' %>
-          <div class="help-text">
-            Private notes are <em>always</em> visible to only you, even if content is made public and shared.
+        <%#
+          This field is shown if and only if:
+          * A user is signed in AND
+            * That user is the owner of this universe, if it's a universe, or
+            * That user is the owner of this content's universe, if it's content
+            * That user is the owner of this content, if it's not in a universe
+        %>
+        <% if user_signed_in? && (
+             (content.is_a?(Universe) && content.user == current_user) ||
+             (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
+             (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
+           )
+        %>
+          <div class="input-field content-field">
+            <%= f.label field.name, field.label %>
+            <%= f.text_area field.name, class: "materialize-textarea", placeholder: 'Write as little or as much as you want!' %>
+            <div class="help-text">
+              Private notes are <em>always</em> visible to only you, even if content is made public and shared.
+            </div>
           </div>
-        </div>
+        <% end %>
 
       <% elsif field.name == 'item_type' %>
         <% potential_item_types = t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +

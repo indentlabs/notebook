@@ -4,7 +4,7 @@ class Attribute < ActiveRecord::Base
   belongs_to :entity, polymorphic: true
 
   include Authority::Abilities
-  self.authorizer_name = 'CoreContentAuthorizer'
+  self.authorizer_name = 'AttributeAuthorizer'
 
   include HasPrivacy
   scope :is_public, -> { eager_load(:universe).where('universes.privacy = ? OR attributes.privacy = ?', 'public', 'public') }

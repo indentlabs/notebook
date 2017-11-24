@@ -19,7 +19,7 @@
   </li>
   <li class="divider"></li>
   <li>
-    <%= link_to privacy_policy_path do %>
+    <%= link_to main_app.privacy_policy_path do %>
       <i class="material-icons left">verified_user</i>
       Privacy policy
     <% end %>
@@ -28,7 +28,7 @@
 
 <ul id="recent-content-dropdown" class="dropdown-content">
 <% if user_signed_in? %>
-  <% current_user.content.values.flatten.compact.sort_by(&:updated_at).last(10).reverse.each do |content| %>
+  <% current_user.content.values.reject(&:empty?).flatten.compact.sort_by(&:updated_at).last(10).reverse.each do |content| %>
     <% content_class = content.class %>
     <li>
       <%= link_to content, class: "#{content_class.color}-text" do %>
@@ -57,14 +57,14 @@
     </li>
 
     <li>
-      <%= link_to subscription_path do %>
+      <%= link_to main_app.subscription_path do %>
         <i class="material-icons left">credit_card</i>
         Account billing
         <span class="badge right">&nbsp;</span>
       <% end %>
     </li>
     <li>
-      <%= link_to edit_user_registration_path do %>
+      <%= link_to main_app.edit_user_registration_path do %>
         <i class="material-icons left">settings</i>
         Account settings
         <span class="badge right">&nbsp;</span>
@@ -75,13 +75,13 @@
 
   <!--
   <li>
-    <%= link_to friends_landing_path do %>
+    <%= link_to main_app.friends_landing_path do %>
       <i class="material-icons left">people</i>
       Community Drive
     <% end %>
   </li>
   <li>
-    <%= link_to community_voting_path do %>
+    <%= link_to main_app.community_voting_path do %>
       <i class="material-icons left">star_outline</i>
       Vote on features
     <% end %>
@@ -90,20 +90,20 @@
   <li class="divider"></li>
   -->
   <li>
-    <%= link_to prompts_path do %>
+    <%= link_to main_app.prompts_path do %>
       <i class="material-icons left">lightbulb_outline</i>
       Worldbuilding prompts
     <% end %>
   </li>
   <li>
-    <%= link_to notebook_export_path do %>
+    <%= link_to main_app.notebook_export_path do %>
       <i class="material-icons left">file_download</i>
       Notebook downloads
     <% end %>
   </li>
   <li class="divider"></li>
   <li>
-    <%= link_to destroy_user_session_path do %>
+    <%= link_to main_app.destroy_user_session_path do %>
       <i class="material-icons left">power_settings_new</i>
       Sign out
     <% end %>
@@ -111,20 +111,20 @@
 </ul>
 
 <ul id="login-slide" class="side-nav">
-  <li><%= link_to 'Sign in', new_user_session_path %></li>
-  <li><%= link_to 'Sign up', new_user_registration_path %></li>
+  <li><%= link_to 'Sign in', main_app.new_user_session_path %></li>
+  <li><%= link_to 'Sign up', main_app.new_user_registration_path %></li>
   <li class="divider"></li>
   <li><%= link_to 'Report a problem', 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new' %></li>
   <li><%= link_to 'Request a feature', 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new' %></li>
   <li><%= link_to 'Leave feedback', 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new' %></li>
   <li class="divider"></li>
-  <li><%= link_to 'Privacy policy', privacy_policy_path %></li>
+  <li><%= link_to 'Privacy policy', main_app.privacy_policy_path %></li>
 </ul>
 
 <div class="navbar-fixed">
   <nav class="light-blue">
     <div class="nav-wrapper">
-      <%= link_to 'Notebook.ai', root_url, class: 'brand-logo center' %>
+      <%= link_to 'Notebook.ai', main_app.root_url, class: 'brand-logo center' %>
 
       <ul class="right">
         <% if user_signed_in? %>
@@ -140,14 +140,14 @@
           </a>
         </li>
         <% else %>
-          <li class="hide-on-med-and-down"><%= link_to 'Sign in', new_user_session_path %></li>
-          <li class="hide-on-med-and-down"><%= link_to 'Sign up', new_user_registration_path %></li>
+          <li class="hide-on-med-and-down"><%= link_to 'Sign in', main_app.new_user_session_path %></li>
+          <li class="hide-on-med-and-down"><%= link_to 'Sign up', main_app.new_user_registration_path %></li>
         <% end %>
       </ul>
       <ul class="left">
         <% if user_signed_in? %>
           <li>
-            <% if current_user && current_user.universes.length > 0 %>
+            <% if current_user && (current_user.universes.count > 0 || current_user.contributable_universes.count > 0) %>
               <%= render partial: 'universes/picker' %>
             <% end %>
           </li>
@@ -175,7 +175,7 @@
 
 <div id="search">
   <button type="button" class="close red">×</button>
-  <%= form_tag search_path, method: :get do %>
+  <%= form_tag main_app.search_path, method: :get do %>
     <input type="search" name="q" value="" placeholder="search your notebook" />
     <button type="submit" class="btn btn-primary blue">Search everything</button>
   <% end %>
