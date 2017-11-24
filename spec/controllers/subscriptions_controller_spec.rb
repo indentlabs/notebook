@@ -57,7 +57,8 @@ RSpec.describe SubscriptionsController, type: :controller do
       allows_core_content: true,
       allows_extended_content: true,
       allows_collective_content: true,
-      allows_collaboration: true
+      allows_collaboration: true,
+      bonus_bandwidth_kb: 0
     )
 
     @premium_annual_plan = BillingPlan.create(
@@ -69,7 +70,8 @@ RSpec.describe SubscriptionsController, type: :controller do
       allows_core_content: true,
       allows_extended_content: true,
       allows_collective_content: true,
-      allows_collaboration: true
+      allows_collaboration: true,
+      bonus_bandwidth_kb: 123155
     )
 
     @free_plan = BillingPlan.create(
@@ -83,7 +85,8 @@ RSpec.describe SubscriptionsController, type: :controller do
       allows_core_content: true,
       allows_extended_content: false,
       allows_collective_content: false,
-      allows_collaboration: false
+      allows_collaboration: false,
+      bonus_bandwidth_kb: 123155
     )
   end
 
