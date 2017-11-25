@@ -15,9 +15,6 @@ content_jsonld = {
 <%= content_jsonld.to_json.html_safe %> %>
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.bundle.min.js" integrity="sha256-1uH5nQ+1cUZEU9YOfMzc9rapsWyuGtvKPpvKN9xDgug=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartkick/2.1.0/chartkick.min.js" integrity="sha256-Nux9AlQvMarSN0Lk52PcKRlezOXTqHGlZRFgBJ7UXyY=" crossorigin="anonymous"></script>
-
 <div class="row">
   <div class="col s12">
     <h3><%= @user.name %></h3>
@@ -44,7 +41,8 @@ content_jsonld = {
     <% end %>
     <% if @user.username.present? %>
       <div>
-        <%= link_to 'Forums', thredded_path %> name: @<%= @user.username %>
+        <%= link_to 'Forums', thredded_path %> name: <br />
+        @<%= @user.username %>
       </div>
     <% end %>
   </div>
@@ -74,33 +72,35 @@ content_jsonld = {
   </div>
 </div>
 
-<div class="row">
-  <div class="col s12">
-    <h5 style="text-align: center">Recent activity</h5>
-    <section id="cd-timeline" class="cd-container">
-      <% @stream.each do |change_event| %>
-        <% content = change_event.content_type.constantize.find_by(id: change_event.content_id) %>
-        <% next if content.nil? %>
-        <% next unless content.readable_by?(user_signed_in? ? current_user : User.new) %>
+<% if @stream.any? %>
+  <div class="row">
+    <div class="col s12">
+      <h5 style="text-align: center">Recent activity</h5>
+      <section id="cd-timeline" class="cd-container">
+        <% @stream.each do |change_event| %>
+          <% content = change_event.content_type.constantize.find_by(id: change_event.content_id) %>
+          <% next if content.nil? %>
+          <% next unless content.readable_by?(user_signed_in? ? current_user : User.new) %>
 
-        <div class="cd-timeline-block">
-          <div class="cd-timeline-img <%= change_event.content_type.constantize.color %>">
-            <i class="material-icons white-text"><%= change_event.content_type.constantize.icon %></i>
-          </div>
+          <div class="cd-timeline-block">
+            <div class="cd-timeline-img <%= change_event.content_type.constantize.color %>">
+              <i class="material-icons white-text"><%= change_event.content_type.constantize.icon %></i>
+            </div>
 
-          <div class="cd-timeline-content card hoverable">
-            <h5>
-              <%= change_event.action.titleize %> <%= link_to content.name, content %>
-            </h5>
-            <blockquote>
-              <%= content.description %>
-            </blockquote>
-            <span class="cd-date">
-              <%= time_ago_in_words change_event.created_at %> ago
-            </span>
+            <div class="cd-timeline-content card hoverable">
+              <h5>
+                <%= change_event.action.titleize %> <%= link_to content.name, content %>
+              </h5>
+              <blockquote>
+                <%= content.description %>
+              </blockquote>
+              <span class="cd-date">
+                <%= time_ago_in_words change_event.created_at %> ago
+              </span>
+            </div>
           </div>
-        </div>
-      <% end %>
-    </section>
+        <% end %>
+      </section>
+    </div>
   </div>
-</div>
+<% end %>
