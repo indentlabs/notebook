@@ -16,7 +16,7 @@ class UsersController < ApplicationController
   end
 
   [
-    :characters, :locations, :items, :creatures, :races, :religions, :groups, :magics, :languages, :floras, :scenes
+    :characters, :locations, :items, :creatures, :races, :religions, :groups, :magics, :languages, :floras, :scenes, :universes
   ].each do |content_type_name|
     define_method content_type_name do
       @content_type = content_type_name.to_s.singularize.capitalize.constantize

@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     get :floras,     on: :member
     get :scenes,     on: :member
     get :groups,     on: :member
+    get :universes,  on: :member
   end
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
 
