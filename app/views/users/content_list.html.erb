@@ -1,0 +1,41 @@
+<% if @content_list.any? %>
+  <div class="row">
+    <div class="col s12">
+      <div class="card">
+        <div class="card-image", style="height: 260px; overflow-y: hidden;">
+          <%= image_tag "card-headers/#{@content_type.to_s.downcase.pluralize}" %>
+          <span class="card-title black lighten-3">
+            <i class="material-icons <%= @content_type.color %>-text"><%= @content_type.icon %></i>
+            <%= @content_type.to_s.capitalize.pluralize %>
+            by
+            <i class="material-icons white-text">person</i>
+            <%= link_to @user.name, @user, class: 'white-text' %>
+          </span>
+        </div>
+        <div class="card-content">
+          <%= render partial: 'content/list/list', locals: { content_list: @content_list } %>
+        </div>
+        <div class="card-action">
+          <%= link_to "Back to #{@user.name}'s profile'", @user %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <div class="center" style="margin: 50px 0">
+    <h4>
+      <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
+      <%= link_to @user.name, @user %>
+      doesn't have any public
+      <%= @content_type.name.downcase.pluralize %> yet!
+    </h4>
+    <h1>
+      <i class="material-icons <%= @content_type.color %>-text" style="font-size: 200%">
+        <%= @content_type.icon %>
+      </i>
+    </h1>
+    <p>
+      <%= t("content_descriptions.#{@content_type.name.downcase}") %>
+    </p>
+  </div>
+<% end %>

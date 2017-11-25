@@ -18,159 +18,89 @@ content_jsonld = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.bundle.min.js" integrity="sha256-1uH5nQ+1cUZEU9YOfMzc9rapsWyuGtvKPpvKN9xDgug=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartkick/2.1.0/chartkick.min.js" integrity="sha256-Nux9AlQvMarSN0Lk52PcKRlezOXTqHGlZRFgBJ7UXyY=" crossorigin="anonymous"></script>
 
-<%
-  tabs = %w(
-    universes
-    characters locations items
-    creatures races religions magics languages groups floras scenes
-  )
-
-  tab_content_list = {}
-  tabs.each do |tab|
-    tab_content_list[tab] = @user.send(tab).is_public.sort_by { |c| c.name.downcase }
-  end
-
-  tabs_with_content = tab_content_list.select {|klass, content_list| content_list.any? }.count
-%>
+<div class="row">
+  <div class="col s12">
+    <h3><%= @user.name %></h3>
+  </div>
+</div>
 
 <div class="row">
-  <div class="col s3 m3 l3">
-    <div class="hoverable card">
+  <div class="col s12 m3 l3">
+    <div class="card hoverable">
       <div class="card-image waves-effect waves-block waves-light">
-        <%= image_tag @user.image_url(500).html_safe, class: 'activator' %>
+        <%= image_tag @user.image_url(250).html_safe, class: 'activator', style: 'width: 100%' %>
       </div>
-      <div class="card-content">
-        <div class="card-title"><strong><%= @user.name %></strong></div>
-      </div>
-
-      <% if user_signed_in? && current_user.id == @user.id %>
-        <div class="card-action">
-          <%= link_to 'Edit your profile', edit_user_registration_path(current_user) %>
-        </div>
-      <% end %>
 
       <div class="card-reveal">
-        <span class="card-title grey-text text-darken-4">Profile Picture<i class="material-icons right">close</i></span>
+        <span class="card-title grey-text text-darken-4"><i class="material-icons right">close</i></span>
         <p>Profile pictures are powered by <%= link_to 'Gravatar', 'https://gravatar.com/', target: "_blank" %>, using the email you provided in your <%= link_to 'account settings', edit_user_registration_path %>.</p>
         <p>For the prettiest profile, please use an avatar at least 250 pixels wide.</p>
       </div>
     </div>
-
-    <% if @user.public_content_count > 0 %>
-      <div class="card hoverable">
-        <div class="row">
-          <%
-            pie_chart_data = {}
-            pie_chart_colors = []
-            [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene].each do |content_type|
-              content_count = @user.send(content_type.name.downcase.pluralize).is_public.count
-              if content_count > 0
-                pie_chart_data[content_type.name.pluralize] = content_count
-
-                # Override some colors since Chartkick doesn't support them
-                content_color = content_type.color
-                content_color = 'yellow' if content_color == 'amber'
-                content_color = '#8BC34A' if content_color == 'light-green'
-
-                pie_chart_colors << content_color
-              end
-            end
-          %>
-
-          <%= pie_chart(pie_chart_data, colors: pie_chart_colors) %>
-        </div>
+    <% if user_signed_in? && current_user.id == @user.id %>
+      <div>
+        <%= link_to 'Edit your profile', edit_user_registration_path(current_user) %>
       </div>
     <% end %>
-
     <% if @user.username.present? %>
-      <div class="card hoverable">
-        <div class="card-content">
-          <%= link_to 'Forums', thredded_path %> username: <%= @user.username %>
-        </div>
+      <div>
+        <%= link_to 'Forums', thredded_path %> username: <%= @user.username %>
       </div>
     <% end %>
-
-    <%#
-    <div class="card-action">
-      <a href="#">Author links coming soon</a>
-    </div>
-    %>
   </div>
 
-  <div class="col s9 m9 l9">
+  <div class="col s12 m9 l9">
     <div class="hoverable card">
       <div class="card-content">
-        <h6>
-          I'm creating universes on Notebook! I'm currently sharing the following public content:
-        </h6>
-        <div class="row" style="text-align: center">
-          <% tabs.each do |tab| %>
-          <div class="col s2 m2 l3">
-            <%= link_to "javascript:$('#js-#{tab}-tab').find('a').click();", class: 'black-text' do %>
-              <h3 class="<%= @user.send(tab).build.class.color %>-text"><%= tab_content_list[tab].length %></h3>
-              <h6><%= tab.singularize.pluralize(tab_content_list[tab].length) %></h6>
+        <% if @content.any? %>
+          <h6>
+            I'm creating universes on Notebook! I'm currently sharing the following public content:
+          </h6>
+          <div class="row" style="text-align: center">
+            <% @tabs.each do |tab| %>
+            <div class="col s2 m2 l3">
+              <%= link_to send("#{tab}_user_path"), class: 'black-text' do %>
+                <h3 class="<%= @user.send(tab).build.class.color %>-text"><%= @content[tab].length %></h3>
+                <h6><%= tab.to_s.singularize.pluralize(@content[tab].length) %></h6>
+              <% end %>
+            </div>
             <% end %>
           </div>
-          <% end %>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="hoverable card col s12 m12 l12">
-        <div>
-          <ul class="tabs">
-            <% tabs.each do |tab| %>
-              <% tab_class = tab.singularize.titleize.constantize %>
-              <li class="tab col s3" id="js-<%= tab %>-tab">
-                <%= link_to "\##{tab}", class: "#{tab_class.color}-text" do %>
-                  <i class="material-icons">
-                    <%= tab_class.icon %>
-                  </i>
-                  <span class="hide-on-med-and-down">
-                    <%= tab_content_list[tab].length %>
-                  </span>
-                <% end %>
-              </li>
-            <% end %>
-          </ul>
-        </div>
-
-        <% tabs.each do |tab| %>
-          <% if tab_content_list[tab].any? %>
-            <div id="<%= tab %>" class="col s12">
-              <%= render partial: 'content/list/list', locals: { content_list: tab_content_list[tab], title: '', clean: true } %>
-            </div>
-          <% elsif tab_content_list[tab].empty? %>
-            <% tab_class = tab.singularize.titleize.constantize %>
-            <div id="<%= tab %>" class="col s12">
-              <div class="center <%= tab_class.color %>-text" style="margin-top: 40px;">
-                <i class="material-icons" style="font-size: 500%"><%= tab_class.icon %></i>
-              </div>
-              <p class="center">
-                It looks like <%= @user.name %> isn't sharing any public <%= tab %> yet.
-              </p>
-            </div>
-          <% end %>
+        <% else %>
+          <%= @user.name %> isn't sharing any public content yet.
         <% end %>
       </div>
     </div>
   </div>
 </div>
 
-<%
-  # Default to showing the first tab with content in it (left-first)
-  tabs.each do |tab|
-    if tab_content_list[tab].any?
-      %>
+<div class="row">
+  <div class="col s12">
+    <h5 style="text-align: center">Recent activity</h5>
+    <section id="cd-timeline" class="cd-container">
+      <% @stream.each do |change_event| %>
+        <% content = change_event.content_type.constantize.find_by(id: change_event.content_id) %>
+        <% next if content.nil? %>
+        <% next unless content.readable_by?(user_signed_in? ? current_user : User.new) %>
 
-      <script type="text/javascript">
-      $(document).ready(function () {
-        $('#js-<%= tab %>-tab').find('a')[0].click();
-      })
-      </script>
+        <div class="cd-timeline-block">
+          <div class="cd-timeline-img <%= change_event.content_type.constantize.color %>">
+            <i class="material-icons white-text"><%= change_event.content_type.constantize.icon %></i>
+          </div>
 
-      <%
-      break # Only do this for the first tab with content we see
-    end
-  end
-%>
+          <div class="cd-timeline-content card hoverable">
+            <h5>
+              <%= change_event.action.titleize %> <%= link_to content.name, content %>
+            </h5>
+            <blockquote>
+              <%= content.description %>
+            </blockquote>
+            <span class="cd-date">
+              <%= time_ago_in_words change_event.created_at %> ago
+            </span>
+          </div>
+        </div>
+      <% end %>
+    </section>
+  </div>
+</div>

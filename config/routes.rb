@@ -2,7 +2,19 @@
 
 Rails.application.routes.draw do
   devise_for :users, :controllers => { registrations: 'registrations' }
-  resources :users
+  resources :users do
+    get :characters, on: :member
+    get :locations,  on: :member
+    get :items,      on: :member
+    get :creatures,  on: :member
+    get :races,      on: :member
+    get :religions,  on: :member
+    get :magics,     on: :member
+    get :languages,  on: :member
+    get :floras,     on: :member
+    get :scenes,     on: :member
+    get :groups,     on: :member
+  end
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
 
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
