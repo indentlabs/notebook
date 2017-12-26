@@ -27,4 +27,38 @@ class UsersController < ApplicationController
       render :content_list
     end
   end
+
+  def delete_my_account # :(
+    unless user_signed_in?
+      redirect_to root_path
+      return
+    end
+
+    # Make sure the user is set to Starter on Stripe so we don't keep charging them
+    stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
+    stripe_subscription = stripe_customer.subscriptions.data[0]
+    stripe_subscription.plan = 'starter'
+    stripe_subscription.save
+
+    report_user_deletion_to_slack current_user
+
+    current_user.really_destroy!
+    redirect_to root_path, notice: 'Your account has been deleted. We will miss you greatly!'
+  end
+
+  def report_user_deletion_to_slack user
+    return unless Rails.env == 'production'
+    slack_hook = ENV['SLACK_HOOK']
+    return unless slack_hook
+
+    notifier = Slack::Notifier.new slack_hook,
+      channel: '#analytics',
+      username: 'tristan'
+
+    notifier.ping [
+      ":bomb: :bomb: :bomb:",
+      "#{user.email.split('@').first}@ (##{user.id}) just deleted their account.",
+      ":bomb: :bomb: :bomb:",
+    ].join("\n")
+  end
 end

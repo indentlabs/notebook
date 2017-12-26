@@ -66,6 +66,7 @@ Rails.application.routes.draw do
     end
   end
   resources :documents
+  delete 'delete_my_account', to: 'users#delete_my_account'
 
   # Lab apps
   scope '/app' do
