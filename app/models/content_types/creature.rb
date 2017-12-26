@@ -46,4 +46,8 @@ class Creature < ActiveRecord::Base
   def self.content_name
     'creature'
   end
+
+  def deleted_at
+    nil #hack
+  end
 end

@@ -161,4 +161,8 @@ class User < ActiveRecord::Base
 
     username
   end
+
+  def deleted_at
+    nil #hack
+  end
 end

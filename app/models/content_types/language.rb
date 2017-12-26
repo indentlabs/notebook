@@ -37,4 +37,8 @@ class Language < ActiveRecord::Base
   def self.content_name
     'language'
   end
+
+  def deleted_at
+    nil #hack
+  end
 end

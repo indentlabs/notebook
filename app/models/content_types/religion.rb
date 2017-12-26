@@ -45,4 +45,8 @@ class Religion < ActiveRecord::Base
   def self.content_name
     'religion'
   end
+
+  def deleted_at
+    nil #hack
+  end
 end
