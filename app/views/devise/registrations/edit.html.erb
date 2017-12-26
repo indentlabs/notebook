@@ -2,83 +2,25 @@
   <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
     <%= devise_error_messages! %>
 
-    <div class="card">
-      <div class="card-content">
-        <h4>Personal information</h4>
-        <div class="field">
-          <%= f.label 'Name (visible on your profile and forum posts)' %><br />
-          <%= f.text_field :name, autofocus: true %>
-        </div>
-
-        <div class="field">
-          <%= f.label 'Email (always completely private)' %><br />
-          <%= f.email_field :email %>
-        </div>
-
-        <div class="field">
-          <%= f.label 'Username (users can @mention you with your username on the forums)' %><br />
-          <%= f.text_field :username %>
-        </div>
+    <div class="row">
+      <div class="col s12">
+        <ul class="tabs tabs-fixed-width">
+          <li class="tab col s3"><a class="active" href="#info">Your Info</a></li>
+          <li class="tab col s3"><a href="#preferences">Preferences</a></li>
+        </ul>
+      </div>
+      <div id="info" class="col s12">
+        <%= render partial: 'devise/registrations/panes/information', locals: { f: f } %>
+      </div>
+      <div id="preferences" class="col s12">
+        <%= render partial: 'devise/registrations/panes/preferences', locals: { f: f } %>
       </div>
     </div>
 
-    <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-      <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
-    <% end %>
-
-    <div class="card">
-      <div class="card-content">
-        <h4>Changing your password</h4>
-        <div class="field">
-          <%= f.label :password %> <em>(leave blank if you don't want to change it)</em><br />
-          <%= f.password_field :password, autocomplete: "off" %>
-        </div>
-
-        <div class="field">
-          <%= f.label :password_confirmation %><br />
-          <%= f.password_field :password_confirmation, autocomplete: "off" %>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        <h4>Your Notebook.ai design</h4>
-        <div class="field">
-          <%= f.check_box :fluid_preference %>
-          <%= f.label :fluid_preference do %>
-            I want to use <strong>full-width</strong> Notebook.ai. Great for small screens, but not so much for very large ones.
-          <% end %>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        <h4>Email preferences</h4>
-        <div class="field">
-          <%= f.check_box :email_updates %>
-          <%= f.label :email_updates do %>
-            I want to receive occasional updates by email about new Notebook.ai features.
-          <% end %>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        <h4>Identity check (required)</h4>
-        <div class="field">
-          <%= f.label :current_password %> <i>(we need your current password to confirm any changes)</i><br />
-          <%= f.password_field :current_password, autocomplete: "off" %>
-        </div>
-
-        <div class="center">
-          <div class="actions">
-            <%= f.submit "Update your account information", class: 'btn blue' %>
-            <%= link_to "Cancel", :back, class: 'btn grey' %>
-          </div>
-        </div>
+    <div class="center">
+      <div class="actions">
+        <%= f.submit "Save changes", class: 'btn blue' %>
+        <%= link_to "Cancel", :back, class: 'btn grey' %>
       </div>
     </div>
   <% end %>
