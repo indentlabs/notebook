@@ -23,6 +23,7 @@ class CharactersController < ContentController
       motherships_attributes:      [:id, :mother_id, :_destroy],
       best_friendships_attributes: [:id, :best_friend_id, :_destroy],
       marriages_attributes:        [:id, :spouse_id, :_destroy],
+      character_love_interests_attributes: [:id, :love_interest_id, :_destroy],
       archenemyship_attributes:    [:id, :archenemy_id, :_destroy],
       birthings_attributes:        [:id, :birthplace_id, :_destroy],
       childrenships_attributes:    [:id, :child_id, :_destroy],

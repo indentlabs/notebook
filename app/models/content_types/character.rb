@@ -8,7 +8,7 @@
 #    exists within a Universe.
 class Character < ActiveRecord::Base
   acts_as_paranoid
-  
+
   validates :name, presence: true
 
   belongs_to :user
@@ -35,6 +35,7 @@ class Character < ActiveRecord::Base
   relates :children,         with: :childrenships
   relates :best_friends,     with: :best_friendships
   relates :archenemies,      with: :archenemyship
+  relates :love_interests,   with: :character_love_interests
 
   # Locations
   relates :birthplaces,      with: :birthings
