@@ -3,6 +3,8 @@ require 'digest/md5'
 ##
 # a person using the Notebook.ai web application. Owns all other content.
 class User < ActiveRecord::Base
+  acts_as_paranoid
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -16,7 +18,6 @@ class User < ActiveRecord::Base
   has_many :subscriptions
   has_many :billing_plans, through: :subscriptions
   def on_premium_plan?
-    return true
     BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id)
   end
 

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171028230258) do
+ActiveRecord::Schema.define(version: 20171226203129) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -149,7 +149,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.string   "talents"
     t.string   "hobbies"
     t.string   "personality_type"
+    t.datetime "deleted_at"
   end
+
+  add_index "characters", ["deleted_at"], name: "index_characters_on_deleted_at"
 
   create_table "childrenships", force: :cascade do |t|
     t.integer "user_id"
@@ -220,7 +223,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.string   "notes"
     t.string   "private_notes"
     t.string   "privacy"
+    t.datetime "deleted_at"
   end
+
+  add_index "creatures", ["deleted_at"], name: "index_creatures_on_deleted_at"
 
   create_table "current_ownerships", force: :cascade do |t|
     t.integer "user_id"
@@ -326,8 +332,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.string   "notes"
     t.string   "private_notes"
     t.string   "privacy"
+    t.datetime "deleted_at"
   end
 
+  add_index "floras", ["deleted_at"], name: "index_floras_on_deleted_at"
   add_index "floras", ["universe_id"], name: "index_floras_on_universe_id"
   add_index "floras", ["user_id"], name: "index_floras_on_user_id"
 
@@ -415,7 +423,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.datetime "created_at",             null: false
     t.datetime "updated_at",             null: false
     t.string   "privacy"
+    t.datetime "deleted_at"
   end
+
+  add_index "groups", ["deleted_at"], name: "index_groups_on_deleted_at"
 
   create_table "headquarterships", force: :cascade do |t|
     t.integer "user_id"
@@ -456,7 +467,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "privacy",        default: "private", null: false
+    t.datetime "deleted_at"
   end
+
+  add_index "items", ["deleted_at"], name: "index_items_on_deleted_at"
 
   create_table "key_itemships", force: :cascade do |t|
     t.integer "user_id"
@@ -482,7 +496,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.datetime "created_at",              null: false
     t.datetime "updated_at",              null: false
     t.string   "privacy"
+    t.datetime "deleted_at"
   end
+
+  add_index "languages", ["deleted_at"], name: "index_languages_on_deleted_at"
 
   create_table "largest_cities_relationships", force: :cascade do |t|
     t.integer "user_id"
@@ -541,7 +558,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.string   "climate"
     t.string   "founding_story"
     t.string   "sports"
+    t.datetime "deleted_at"
   end
+
+  add_index "locations", ["deleted_at"], name: "index_locations_on_deleted_at"
 
   create_table "magic_deityships", force: :cascade do |t|
     t.integer "user_id"
@@ -570,7 +590,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false
     t.string   "privacy"
+    t.datetime "deleted_at"
   end
+
+  add_index "magics", ["deleted_at"], name: "index_magics_on_deleted_at"
 
   create_table "maker_relationships", force: :cascade do |t|
     t.integer "user_id"
@@ -605,6 +628,17 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.integer "group_id"
     t.integer "office_id"
   end
+
+  create_table "omniauth_users", force: :cascade do |t|
+    t.string   "provider"
+    t.string   "uid"
+    t.string   "email"
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "omniauth_users", ["user_id"], name: "index_omniauth_users_on_user_id"
 
   create_table "original_ownerships", force: :cascade do |t|
     t.integer "user_id"
@@ -655,7 +689,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false
     t.string   "privacy"
+    t.datetime "deleted_at"
   end
+
+  add_index "races", ["deleted_at"], name: "index_races_on_deleted_at"
 
   create_table "raceships", force: :cascade do |t|
     t.integer "user_id"
@@ -709,7 +746,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
     t.string   "privacy"
+    t.datetime "deleted_at"
   end
+
+  add_index "religions", ["deleted_at"], name: "index_religions_on_deleted_at"
 
   create_table "religious_figureships", force: :cascade do |t|
     t.integer "religion_id"
@@ -762,7 +802,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.datetime "created_at",    null: false
     t.datetime "updated_at",    null: false
     t.string   "privacy"
+    t.datetime "deleted_at"
   end
+
+  add_index "scenes", ["deleted_at"], name: "index_scenes_on_deleted_at"
 
   create_table "sessions", force: :cascade do |t|
     t.string   "username",   null: false
@@ -1062,7 +1105,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.string   "magic_system"
     t.string   "technologies"
     t.string   "genre"
+    t.datetime "deleted_at"
   end
+
+  add_index "universes", ["deleted_at"], name: "index_universes_on_deleted_at"
 
   create_table "users", force: :cascade do |t|
     t.string   "name"
@@ -1088,8 +1134,10 @@ ActiveRecord::Schema.define(version: 20171028230258) do
     t.boolean  "fluid_preference"
     t.string   "username"
     t.boolean  "forum_administrator",      default: false, null: false
+    t.datetime "deleted_at"
   end
 
+  add_index "users", ["deleted_at"], name: "index_users_on_deleted_at"
   add_index "users", ["email"], name: "index_users_on_email", unique: true
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   add_index "users", ["username"], name: "index_users_on_username", unique: true

@@ -29,6 +29,7 @@ gem 'sass-rails'
 # Quality of Life
 gem 'cocoon'
 gem 'dateslices'
+gem 'paranoia'
 
 # Javascript
 gem 'coffee-rails'
