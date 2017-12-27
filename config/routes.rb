@@ -2,6 +2,7 @@
 
 Rails.application.routes.draw do
   get 'customization/content_types'
+  post 'customization/toggle_content_type'
 
   devise_for :users, :controllers => { registrations: 'registrations' }
   resources :users do

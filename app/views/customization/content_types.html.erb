@@ -55,16 +55,24 @@
                 Always on
               </div>
             <% else %>
-              <div class="switch" style="float: right; background: white; padding: 0 10px 5px 10px; border: 1px solid #429ADF">
-                <label>
-                  Hidden
-                  <input type="checkbox"
-                    <%= 'checked' if @my_activators.include?(content_type.name) %>
-                  />
-                  <span class="lever"></span>
-                  On
-                </label>
-              </div>
+
+              <%= form_tag customization_toggle_content_type_path, method: :POST, remote: true do %>
+                <div class="switch" style="float: right; background: white; padding: 0 10px 5px 10px; border: 1px solid #429ADF">
+                  <label>
+                    Hidden
+                    <%= hidden_field_tag :content_type, content_type.name %>
+                    <%= check_box_tag :active,
+                        'on',
+                        @my_activators.include?(content_type.name),
+                        {
+                          onchange: "$(this).closest('form').submit();"
+                        }
+                    %>
+                    <span class="lever"></span>
+                    On
+                  </label>
+                </div>
+              <% end %>
             <% end %>
             <div>
               <i class="material-icons <%= content_type.color %>-text" style="position: relative; top: 3px;"><%= content_type.icon %></i>
