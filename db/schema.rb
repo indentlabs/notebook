@@ -640,17 +640,6 @@ ActiveRecord::Schema.define(version: 20171226213749) do
     t.integer "office_id"
   end
 
-  create_table "omniauth_users", force: :cascade do |t|
-    t.string   "provider"
-    t.string   "uid"
-    t.string   "email"
-    t.integer  "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  add_index "omniauth_users", ["user_id"], name: "index_omniauth_users_on_user_id"
-
   create_table "original_ownerships", force: :cascade do |t|
     t.integer "user_id"
     t.integer "item_id"

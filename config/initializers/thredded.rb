@@ -50,7 +50,7 @@ Thredded.admin_column = :forum_administrator
 Thredded.content_visible_while_pending_moderation = true
 
 # Whether users that are following a topic are listed on topic page.
-Thredded.show_topic_followers = false
+Thredded.show_topic_followers = true
 
 # This model can be customized further by overriding a handful of methods on the User model.
 # For more information, see app/models/thredded/user_extender.rb.
