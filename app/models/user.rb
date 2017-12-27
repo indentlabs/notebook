@@ -140,6 +140,14 @@ class User < ActiveRecord::Base
     result
   end
 
+  def forum_username
+    username = self.username.present? ? "@#{self.username}" : nil
+    username ||= self.name.present? ? self.name : nil
+    username ||= 'Anonymous Author'
+
+    username
+  end
+
   private
 
   # Attributes that are non-public, and should be blacklisted from any public
@@ -152,14 +160,6 @@ class User < ActiveRecord::Base
       :reset_password_token,
       :email
     ]
-  end
-
-  def forum_username
-    username = self.username.present? ? "@#{self.username}" : nil
-    username ||= self.name.present? ? self.name : nil
-    username ||= 'Anonymous Author'
-
-    username
   end
 
   def deleted_at
