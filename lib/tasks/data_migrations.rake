@@ -1,4 +1,32 @@
 namespace :data_migrations do
+  desc "Create activators for all used content types for all users"
+  task create_content_type_activators: :environment do
+    default_content_types = [
+      Universe, Character, Location, Item
+    ]
+    variable_content_types = [
+      Creature, Flora, Group, Language, Magic, Race, Religion, Scene
+    ]
+
+    User.find_each do |user|
+      puts "Creating activators for user #{user.id}" if (user.id % 1000).zero?
+
+      # These are default, but users can turn them off later
+      default_content_types.each do |content_type|
+        user.user_content_type_activators.create(content_type: content_type.name)
+      end
+
+      # Only turn these ones on if users have any existing content for them
+      variable_content_types.each do |content_type|
+        existing_content = user.send(content_type.name.downcase.pluralize).count > 0
+
+        if existing_content
+          user.user_content_type_activators.create(content_type: content_type.name)
+        end
+      end
+    end
+  end
+
   desc "Initialize Stripe customer ID for all users without one already"
   task initialize_stripe_customers: :environment do
     User.where(stripe_customer_id: nil).each do |user|
