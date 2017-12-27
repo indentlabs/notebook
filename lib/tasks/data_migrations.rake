@@ -8,12 +8,12 @@ namespace :data_migrations do
       Creature, Flora, Group, Language, Magic, Race, Religion, Scene
     ]
 
-    User.find_each do |user|
+    User.where('id > 20000').find_each do |user|
       puts "Creating activators for user #{user.id}" if (user.id % 1000).zero?
 
       # These are default, but users can turn them off later
       default_content_types.each do |content_type|
-        user.user_content_type_activators.create(content_type: content_type.name)
+        user.user_content_type_activators.find_or_create_by(content_type: content_type.name)
       end
 
       # Only turn these ones on if users have any existing content for them
@@ -21,7 +21,7 @@ namespace :data_migrations do
         existing_content = user.send(content_type.name.downcase.pluralize).count > 0
 
         if existing_content
-          user.user_content_type_activators.create(content_type: content_type.name)
+          user.user_content_type_activators.find_or_create_by(content_type: content_type.name)
         end
       end
     end
