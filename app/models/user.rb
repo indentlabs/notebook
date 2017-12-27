@@ -59,6 +59,7 @@ class User < ActiveRecord::Base
   after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
   after_create :initialize_referral_code
   after_create :initialize_secure_code
+  after_create :initialize_content_type_activators
 
   def createable_content_types
     [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene, Flora].select do |c|
@@ -124,11 +125,17 @@ class User < ActiveRecord::Base
   end
 
   def initialize_referral_code
-    ReferralCode.create user: self, code: SecureRandom.uuid
+    ReferralCode.create(user: self, code: SecureRandom.uuid)
   end
 
   def initialize_secure_code
-    update secure_code: SecureRandom.uuid unless secure_code.present?
+    update(secure_code: SecureRandom.uuid) unless secure_code.present?
+  end
+
+  def initialize_content_type_activators
+    [Universe, Character, Location, Item].each do |content_type|
+      user_content_type_activators.create(content_type: content_type.name)
+    end
   end
 
   def update_without_password(params, *options)
