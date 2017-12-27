@@ -27,6 +27,8 @@ class CustomizationController < ApplicationController
         .user_content_type_activators
         .create(content_type: toggle_content_type_params[:content_type])
     end
+
+    redirect_to customization_content_types_path
   end
 
   def verify_content_type_can_be_toggled
