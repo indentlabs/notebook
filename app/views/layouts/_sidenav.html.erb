@@ -70,101 +70,39 @@
 
   <li class="header">Your Notebook Pages</li>
 
-  <%
-    [Universe, Character, Location, Item].each do |base_content_type|
-  %>
+  <% current_user.user_content_type_activators.each do |content_type_activator| %>
+    <% content_type = content_type_activator.content_type.constantize %>
     <li>
-      <%= link_to polymorphic_path(base_content_type) do %>
-        <i class="material-icons <%= base_content_type.color %>-text">
-          <%= base_content_type.icon %>
+      <%= link_to polymorphic_path(content_type) do %>
+        <i class="material-icons <%= content_type.color %>-text">
+          <%= content_type.icon %>
         </i>
-        <%= base_content_type.name.pluralize %>
+        <%= content_type.name.pluralize %>
         <span class="badge">
           <%=
-            if base_content_type != Universe && @universe_scope
-              @universe_scope.send(base_content_type.name.downcase.pluralize).count
+            pluralized_name = content_type_activator.content_type.downcase.pluralize
+            if content_type != Universe && @universe_scope
+              @universe_scope.send(pluralized_name).count
             else
-              pluralized_name = base_content_type.name.downcase.pluralize
               (
                 current_user.send(pluralized_name) +
                 current_user.send("contributable_#{pluralized_name}") +
-                (base_content_type == Universe ? [] : current_user.universes.flat_map { |universe| universe.send(pluralized_name) })
+                (content_type == Universe ? [] : current_user.universes.flat_map { |universe| universe.send(pluralized_name) })
               ).uniq.count
             end
           %>
         </span>
       <% end %>
     </li>
-  <%
-    end
-  %>
+  <% end %>
 
-  <%
-    [Creature, Race, Religion, Group, Magic, Language, Flora].each do |extended_content_type|
-  %>
-    <li>
-      <%= link_to polymorphic_path(extended_content_type) do %>
-        <i class="material-icons <%= extended_content_type.color %>-text">
-          <%= extended_content_type.icon %>
-        </i>
-        <%= extended_content_type.name.pluralize %>
-        <span class="badge">
-          <%=
-            if @universe_scope
-              @universe_scope.send(extended_content_type.name.downcase.pluralize).count
-            else
-              pluralized_name = extended_content_type.name.downcase.pluralize
-              (
-                current_user.send(pluralized_name) +
-                current_user.send("contributable_#{pluralized_name}") +
-                current_user.universes.flat_map { |universe| universe.send(pluralized_name) }
-              ).uniq.count
-            end
-          %>
-        </span>
-      <% end %>
-    </li>
-  <%
-    end
-  %>
-
-<!--
-  <li class="divider"></li>
+  <!-- <li class="divider"></li> -->
   <li>
-    <a href="<%= items_url %>">
-      <i class="material-icons white-text">add</i>
-      Add more...
-    </a>
-  </li> -->
-
-  <%
-    [Scene].each do |extended_content_type|
-  %>
-    <li>
-      <%= link_to polymorphic_path(extended_content_type) do %>
-        <i class="material-icons <%= extended_content_type.color %>-text">
-          <%= extended_content_type.icon %>
-        </i>
-        <%= extended_content_type.name.pluralize %>
-        <span class="badge">
-          <%=
-            if @universe_scope
-              @universe_scope.send(extended_content_type.name.downcase.pluralize).count
-            else
-              pluralized_name = extended_content_type.name.downcase.pluralize
-              (
-                current_user.send(pluralized_name) +
-                current_user.send("contributable_#{pluralized_name}") +
-                current_user.universes.flat_map { |universe| universe.send(pluralized_name) }
-              ).uniq.count
-            end
-          %>
-        </span>
-      <% end %>
-    </li>
-  <%
-    end
-  %>
+    <%= link_to customization_content_types_path do %>
+      <i class="material-icons black-text">add</i>
+      Add more page types
+    <% end %>
+  </li>
 
 </ul>
 

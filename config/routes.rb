@@ -1,6 +1,8 @@
 # rubocop:disable LineLength
 
 Rails.application.routes.draw do
+  get 'customization/content_types'
+
   devise_for :users, :controllers => { registrations: 'registrations' }
   resources :users do
     get :characters, on: :member
