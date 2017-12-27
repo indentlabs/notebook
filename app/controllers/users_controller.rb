@@ -55,6 +55,6 @@ class UsersController < ApplicationController
       channel: '#analytics',
       username: 'tristan'
 
-    notifier.ping ":bomb: :bomb: :bomb: #{user.email.split('@').first}@ (##{user.id}) just deleted their account.",
+    notifier.ping ":bomb: :bomb: :bomb: #{user.email.split('@').first}@ (##{user.id}) just deleted their account."
   end
 end
