@@ -35,6 +35,8 @@ class User < ActiveRecord::Base
 
   has_many :content_change_events
 
+  has_many :user_content_type_activators
+
   def contributable_universes
     # todo email confirmation needs to happy for data safety / privacy (only verified emails)
     contributor_by_email = Contributor.where(email: self.email).pluck(:universe_id)
