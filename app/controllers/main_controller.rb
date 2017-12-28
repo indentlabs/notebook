@@ -22,6 +22,8 @@ class MainController < ApplicationController
   def dashboard
     return redirect_to new_user_session_path unless user_signed_in?
 
+    @content_types = current_user.user_content_type_activators.pluck(:content_type)
+
     ask_question
   end
 
