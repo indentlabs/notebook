@@ -44,7 +44,7 @@ class User < ActiveRecord::Base
 
     Universe.where(id: contributor_by_email + contributor_by_user)
   end
-  [Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene, Flora].each do |content_type|
+  Rails.application.config.content_types[:all_non_universe].each do |content_type|
     pluralized_content_type = content_type.name.downcase.pluralize
     define_method "contributable_#{pluralized_content_type}" do
       contributable_universes.flat_map do |universe|
@@ -62,9 +62,7 @@ class User < ActiveRecord::Base
   after_create :initialize_content_type_activators
 
   def createable_content_types
-    [Universe, Character, Location, Item, Creature, Race, Religion, Group, Magic, Language, Scene, Flora].select do |c|
-      can_create? c
-    end
+    Rails.application.config.content_types[:all].select { |c| can_create? c }
   end
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
@@ -117,11 +115,9 @@ class User < ActiveRecord::Base
 
       # If we're creating this Customer in Stripe for the first time, we should also associate them with the free tier
       Stripe::Subscription.create(customer: self.stripe_customer_id, plan: 'starter')
-
-      self.stripe_customer_id
-    else
-      self.stripe_customer_id
     end
+
+    self.stripe_customer_id
   end
 
   def initialize_referral_code
@@ -133,7 +129,9 @@ class User < ActiveRecord::Base
   end
 
   def initialize_content_type_activators
-    [Universe, Character, Location, Item].each do |content_type|
+    to_activate = Rails.application.config.content_types[:always_on] + Rails.application.config.content_types[:default_on]
+
+    to_activate.uniq.each do |content_type|
       user_content_type_activators.create(content_type: content_type.name)
     end
   end

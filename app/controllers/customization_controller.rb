@@ -2,16 +2,8 @@ class CustomizationController < ApplicationController
   before_action :verify_content_type_can_be_toggled, only: [:toggle_content_type]
 
   def content_types
-    #todo find where these were universally defined and use that instead :(
-    @all_content_types = [
-      Universe, Character, Location, Item, Creature, Race,
-      Religion, Group, Magic, Language, Scene, Flora
-    ]
-
-    @premium_content_types = [
-      Creature, Race, Religion, Group, Magic, Language, Scene, Flora
-    ]
-
+    @all_content_types = Rails.application.config.content_types[:all]
+    @premium_content_types = Rails.application.config.content_types[:premium]
     @my_activators = current_user.user_content_type_activators.pluck(:content_type)
   end
 
@@ -42,9 +34,8 @@ class CustomizationController < ApplicationController
   end
 
   def toggle_content_type_value_whitelist
-    [
-      Character, Location, Item, Creature, Race, Religion,
-      Group, Magic, Language, Scene, Flora
-    ].map(&:to_s)
+    (
+      Rails.application.config.content_types[:all] - Rails.application.config.content_types[:always_on]
+    ).map(&:name)
   end
 end

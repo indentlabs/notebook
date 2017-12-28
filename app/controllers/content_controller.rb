@@ -60,11 +60,7 @@ class ContentController < ApplicationController
         format.json { render json: @content }
       end
     else
-      if current_user.present?
-        return redirect_to root_path, notice: "You don't have permission to view that content."
-      else
-        return redirect_to root_path, notice: "You don't have permission to view that content."
-      end
+      return redirect_to root_path, notice: "You don't have permission to view that content."
     end
   end
 
