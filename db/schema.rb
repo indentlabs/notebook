@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171227180909) do
+ActiveRecord::Schema.define(version: 20171231174241) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -193,6 +193,29 @@ ActiveRecord::Schema.define(version: 20171227180909) do
 
   add_index "contributors", ["universe_id"], name: "index_contributors_on_universe_id"
   add_index "contributors", ["user_id"], name: "index_contributors_on_user_id"
+
+  create_table "countries", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "other_names"
+    t.integer  "universe_id"
+    t.string   "population"
+    t.string   "currency"
+    t.string   "laws"
+    t.string   "sports"
+    t.string   "area"
+    t.string   "crops"
+    t.string   "climate"
+    t.string   "founding_story"
+    t.string   "established_year"
+    t.string   "notable_wars"
+    t.string   "notes"
+    t.string   "private_notes"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  add_index "countries", ["universe_id"], name: "index_countries_on_universe_id"
 
   create_table "creature_relationships", force: :cascade do |t|
     t.integer  "user_id"
@@ -488,6 +511,24 @@ ActiveRecord::Schema.define(version: 20171227180909) do
     t.integer "group_id"
     t.integer "key_item_id"
   end
+
+  create_table "landmarks", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "other_names"
+    t.integer  "universe_id"
+    t.string   "size"
+    t.string   "materials"
+    t.string   "colors"
+    t.string   "creation_story"
+    t.string   "established_year"
+    t.string   "notes"
+    t.string   "private_notes"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  add_index "landmarks", ["universe_id"], name: "index_landmarks_on_universe_id"
 
   create_table "languages", force: :cascade do |t|
     t.string   "name"
@@ -1090,6 +1131,21 @@ ActiveRecord::Schema.define(version: 20171227180909) do
   end
 
   add_index "thredded_user_topic_read_states", ["user_id", "postable_id"], name: "thredded_user_topic_read_states_user_postable", unique: true
+
+  create_table "towns", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "other_names"
+    t.string   "laws"
+    t.string   "sports"
+    t.string   "politics"
+    t.string   "founding_story"
+    t.string   "established_year"
+    t.string   "notes"
+    t.string   "private_notes"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
 
   create_table "universes", force: :cascade do |t|
     t.string   "name",            null: false
