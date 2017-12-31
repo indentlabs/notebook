@@ -104,6 +104,9 @@ Rails.application.routes.draw do
       get :floras,     on: :member
       get :scenes,     on: :member
       get :groups,     on: :member
+      get :countries,  on: :member
+      get :towns,      on: :member
+      get :landmarks,  on: :member
     end
     resources :characters do
       get :autocomplete_character_name, on: :collection, as: :autocomplete_name
@@ -120,6 +123,9 @@ Rails.application.routes.draw do
     resources :magics
     resources :languages
     resources :floras
+    resources :towns
+    resources :countries
+    resources :landmarks
 
     # Content usage
     resources :scenes
@@ -166,6 +172,9 @@ Rails.application.routes.draw do
     get '/languages.csv', to: 'export#languages_csv', as: :languages_csv
     get '/scenes.csv', to: 'export#scenes_csv', as: :scenes_csv
     get '/groups.csv', to: 'export#groups_csv', as: :groups_csv
+    get '/groups.csv', to: 'export#towns_csv', as: :towns_csv
+    get '/groups.csv', to: 'export#countries_csv', as: :countries_csv
+    get '/groups.csv', to: 'export#landmarks_csv', as: :landmarks_csv
   end
 
   scope '/scene/:scene_id' do

@@ -34,6 +34,9 @@ class Universe < ActiveRecord::Base
   has_many :magics
   has_many :languages
   has_many :floras
+  has_many :towns
+  has_many :countries
+  has_many :landmarks
 
   has_many :scenes
   has_many :groups

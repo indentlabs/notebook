@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171231174241) do
+ActiveRecord::Schema.define(version: 20171231201900) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -213,9 +213,13 @@ ActiveRecord::Schema.define(version: 20171231174241) do
     t.string   "private_notes"
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false
+    t.datetime "deleted_at"
+    t.string   "privacy"
+    t.integer  "user_id"
   end
 
   add_index "countries", ["universe_id"], name: "index_countries_on_universe_id"
+  add_index "countries", ["user_id"], name: "index_countries_on_user_id"
 
   create_table "creature_relationships", force: :cascade do |t|
     t.integer  "user_id"
@@ -526,9 +530,13 @@ ActiveRecord::Schema.define(version: 20171231174241) do
     t.string   "private_notes"
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false
+    t.datetime "deleted_at"
+    t.string   "privacy"
+    t.integer  "user_id"
   end
 
   add_index "landmarks", ["universe_id"], name: "index_landmarks_on_universe_id"
+  add_index "landmarks", ["user_id"], name: "index_landmarks_on_user_id"
 
   create_table "languages", force: :cascade do |t|
     t.string   "name"
@@ -1145,7 +1153,14 @@ ActiveRecord::Schema.define(version: 20171231174241) do
     t.string   "private_notes"
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false
+    t.integer  "universe_id"
+    t.datetime "deleted_at"
+    t.string   "privacy"
+    t.integer  "user_id"
   end
+
+  add_index "towns", ["universe_id"], name: "index_towns_on_universe_id"
+  add_index "towns", ["user_id"], name: "index_towns_on_user_id"
 
   create_table "universes", force: :cascade do |t|
     t.string   "name",            null: false

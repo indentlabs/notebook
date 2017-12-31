@@ -71,6 +71,21 @@ class ExportController < ApplicationController
     send_data to_csv(current_user.groups), filename: "groups-#{Date.today}.csv"
   end
 
+  def towns_csv
+    report_to_mixpanel 'csv', 'towns'
+    send_data to_csv(current_user.towns), filename: "towns-#{Date.today}.csv"
+  end
+
+  def landmarks_csv
+    report_to_mixpanel 'csv', 'landmarks'
+    send_data to_csv(current_user.landmarks), filename: "landmarks-#{Date.today}.csv"
+  end
+
+  def countries_csv
+    report_to_mixpanel 'csv', 'countries'
+    send_data to_csv(current_user.countries), filename: "countries-#{Date.today}.csv"
+  end
+
   def scenes_csv
     report_to_mixpanel 'csv', 'scenes'
     send_data to_csv(current_user.scenes), filename: "scenes-#{Date.today}.csv"

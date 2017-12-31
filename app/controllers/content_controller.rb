@@ -100,6 +100,7 @@ class ContentController < ApplicationController
       return redirect_to :back
     end
 
+    #todo: why is this commented out?
     # Even if a user can create content, we want to double check that they're either on a premium account or creating content in a universe owned by someone on premium
     # unless current_user.on_premium_plan?
     #   containing_universe = Universe.find(content_params[:universe_id].to_i)
@@ -217,9 +218,13 @@ class ContentController < ApplicationController
     end
   end
 
-  # Override in content classes
   def content_params
-    params
+    content_class = content_type_from_controller(self.class)
+      .name
+      .downcase
+      .to_sym
+
+    params.require(content_class).permit(content_param_list)
   end
 
   def content_deletion_redirect_url
