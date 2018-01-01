@@ -27,8 +27,6 @@ class Town < ActiveRecord::Base
   relates :countries, with: :town_countries
   relates :nearby_landmarks, with: :town_nearby_landmarks
 
-  scope :is_public, -> { eager_load(:universe).where('towns.privacy = ? OR universes.privacy = ?', 'public', 'public') }
-
   def self.content_name
     'town'
   end

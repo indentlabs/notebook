@@ -27,8 +27,6 @@ class Country < ActiveRecord::Base
   relates :creatures, with: :country_creatures
   relates :floras, with: :country_floras
 
-  scope :is_public, -> { eager_load(:universe).where('countries.privacy = ? OR universes.privacy = ?', 'public', 'public') }
-
   def self.content_name
     'country'
   end

@@ -19,8 +19,6 @@ class Landmark < ActiveRecord::Base
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
-  scope :is_public, -> { eager_load(:universe).where('landmark.privacy = ? OR universes.privacy = ?', 'public', 'public') }
-
   relates :nearby_towns, with: :landmark_nearby_towns
   relates :countries, with: :landmark_countries
   relates :floras, with: :landmark_floras
