@@ -2,7 +2,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
 
   before_action do
-    if params[:universe].present?
+    if params[:universe].present? && user_signed_in?
       if params[:universe] == 'all'
         session.delete(:universe_id)
       elsif params[:universe].is_a?(String) && params[:universe].to_i.to_s == params[:universe]

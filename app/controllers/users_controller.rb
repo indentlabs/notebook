@@ -15,6 +15,7 @@ class UsersController < ApplicationController
     }) if Rails.env.production?
   end
 
+  #todo use the new constants here
   [
     :characters, :locations, :items, :creatures, :races, :religions, :groups, :magics, :languages, :floras, :scenes, :countries, :towns, :landmarks, :universes
   ].each do |content_type_name|
