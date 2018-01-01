@@ -22,6 +22,7 @@ Checklist to create a new content type:
   - `resources :characters` in /plan scope
   - `get :characters, on: :member` in :universes resource
   - csv routes under /export scope
+  - user-center routes under users resource
 
 - Add the content class to initializers/content_types.rb
   - most likely to :all, :available, and :free/:premium

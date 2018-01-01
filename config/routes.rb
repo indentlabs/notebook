@@ -15,6 +15,9 @@ Rails.application.routes.draw do
     get :magics,     on: :member
     get :languages,  on: :member
     get :floras,     on: :member
+    get :towns,      on: :member
+    get :countries,  on: :member
+    get :landmarks,  on: :member
     get :scenes,     on: :member
     get :groups,     on: :member
     get :universes,  on: :member
