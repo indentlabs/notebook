@@ -19,6 +19,14 @@ class Town < ActiveRecord::Base
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
+  relates :citizens, with: :town_citizens
+  relates :floras, with: :town_floras
+  relates :creatures, with: :town_creatures
+  relates :groups, with: :town_groups
+  relates :languages, with: :town_languages
+  relates :countries, with: :town_countries
+  relates :nearby_landmarks, with: :town_nearby_landmarks
+
   scope :is_public, -> { eager_load(:universe).where('towns.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def self.content_name

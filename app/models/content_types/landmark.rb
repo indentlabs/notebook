@@ -21,6 +21,11 @@ class Landmark < ActiveRecord::Base
 
   scope :is_public, -> { eager_load(:universe).where('landmark.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
+  relates :nearby_towns, with: :landmark_nearby_towns
+  relates :countries, with: :landmark_countries
+  relates :floras, with: :landmark_floras
+  relates :creatures, with: :landmark_creatures
+
   def self.content_name
     'landmark'
   end

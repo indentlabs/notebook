@@ -9,7 +9,14 @@ class CountriesController < ContentController
       :area, :crops, :climate,
       :founding_story, :established_year, :notable_wars,
       :notes, :private_notes,
-      :privacy
+      :privacy,
+      country_towns_attributes:     [:id, :town_id, :_destroy],
+      country_locations_attributes: [:id, :location_id, :_destroy],
+      country_languages_attributes: [:id, :language_id, :_destroy],
+      country_religions_attributes: [:id, :religion_id, :_destroy],
+      country_landmarks_attributes: [:id, :landmark_id, :_destroy],
+      country_creatures_attributes: [:id, :creature_id, :_destroy],
+      country_floras_attributes:    [:id, :flora_id, :_destroy]
     ]
   end
 end

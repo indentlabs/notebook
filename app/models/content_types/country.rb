@@ -19,6 +19,14 @@ class Country < ActiveRecord::Base
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
+  relates :towns, with: :country_towns
+  relates :locations, with: :country_locations
+  relates :languages, with: :country_languages
+  relates :religions, with: :country_religions
+  relates :landmarks, with: :country_landmarks
+  relates :creatures, with: :country_creatures
+  relates :floras, with: :country_floras
+
   scope :is_public, -> { eager_load(:universe).where('countries.privacy = ? OR universes.privacy = ?', 'public', 'public') }
 
   def self.content_name
@@ -32,8 +40,4 @@ class Country < ActiveRecord::Base
   def self.icon
     'explore'
   end
-
-  # def deleted_at
-  #   nil #hack
-  # end
 end

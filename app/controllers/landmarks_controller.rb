@@ -8,7 +8,11 @@ class LandmarksController < ContentController
       :size, :materials, :colors,
       :creation_story, :established_year,
       :notes, :private_notes,
-      :privacy
+      :privacy,
+      landmark_nearby_towns_attributes: [:id, :nearby_town_id, :_destroy],
+      landmark_countries_attributes:    [:id, :country_id, :_destroy],
+      landmark_floras_attributes:       [:id, :flora_id, :_destroy],
+      landmark_creatures_attributes:    [:id, :creature_id, :_destroy]
     ]
   end
 end
