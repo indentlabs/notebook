@@ -142,6 +142,10 @@ class User < ActiveRecord::Base
       params.delete(:password_confirmation) if params[:password_confirmation].blank?
     end
 
+    if params[:username].blank?
+      params.delete(:username)
+    end
+
     result = update_attributes(params, *options)
     clean_up_passwords
     result
