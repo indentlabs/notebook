@@ -62,7 +62,7 @@ class User < ActiveRecord::Base
       contributable_universe_ids = contributable_universes.pluck(:id)
 
       content_type.where("""
-        universe_id IN (#{(my_universe_ids + contributable_universe_ids).uniq.join(',')})
+        universe_id IN (#{(my_universe_ids + contributable_universe_ids + [0]).uniq.join(',')})
           OR
         (universe_id IS NULL AND user_id = #{self.id.to_i})
       """)
