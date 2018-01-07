@@ -24,7 +24,7 @@
         <div class="col s10">
           <%=
             f.select "#{attribute}_id",
-              current_user.send(klass.pluralize)
+              current_user.send("linkable_#{klass.pluralize}")
                 .in_universe(@universe_scope)
                 .sort_by(&:name)
                 .reject { |content| content.class.name == klass && content.id == @content.id }
