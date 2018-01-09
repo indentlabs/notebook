@@ -245,6 +245,7 @@ Rails.application.routes.draw do
   end
 
   mount Thredded::Engine => '/forum'
+  mount StripeEvent::Engine, at: '/webhooks/stripe'
 end
 
 # rubocop:enable LineLength

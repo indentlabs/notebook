@@ -21,6 +21,7 @@ gem 'authority'
 
 # Billing
 gem 'stripe'
+gem 'stripe_event'
 
 # Design
 gem 'material_icons'
