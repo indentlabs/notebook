@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171231235747) do
+ActiveRecord::Schema.define(version: 20180107183433) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -1006,6 +1006,13 @@ ActiveRecord::Schema.define(version: 20171231235747) do
     t.integer "user_id"
     t.integer "group_id"
     t.integer "sistergroup_id"
+  end
+
+  create_table "stripe_event_logs", force: :cascade do |t|
+    t.string   "event_id"
+    t.string   "event_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "subgroupships", force: :cascade do |t|
