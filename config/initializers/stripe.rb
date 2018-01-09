@@ -1,12 +1,12 @@
 StripeEvent.configure do |events|
   events.subscribe 'invoice.payment_succeeded' do |event|
     StripeEventLog.create(event_id: event.id, event_type: event.type)
-    StripeInvoiceEvents.new(event).payment_succeeded
+    #StripeInvoiceEvents.new(event).payment_succeeded
   end
 
   events.subscribe 'invoice.payment_failed' do |event|
     StripeEventLog.create(event_id: event.id, event_type: event.type)
-    StripeInvoiceEvents.new(event).payment_failed
+    #StripeInvoiceEvents.new(event).payment_failed
   end
 
   events.subscribe 'account.updated' do |event|
