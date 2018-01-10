@@ -9,6 +9,7 @@ class TownsController < ContentController
       :founding_story, :established_year,
       :notes, :private_notes,
       :privacy,
+      custom_attribute_values:          [:name, :value],
       town_citizens_attributes:         [:id, :citizen_id, :_destroy],
       town_floras_attributes:           [:id, :flora_id, :_destroy],
       town_creatures_attributes:        [:id, :creature_id, :_destroy],

@@ -10,6 +10,7 @@ class CountriesController < ContentController
       :founding_story, :established_year, :notable_wars,
       :notes, :private_notes,
       :privacy,
+      custom_attribute_values:      [:name, :value],
       country_towns_attributes:     [:id, :town_id, :_destroy],
       country_locations_attributes: [:id, :location_id, :_destroy],
       country_languages_attributes: [:id, :language_id, :_destroy],

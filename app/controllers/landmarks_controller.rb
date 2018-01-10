@@ -9,6 +9,7 @@ class LandmarksController < ContentController
       :creation_story, :established_year,
       :notes, :private_notes,
       :privacy,
+      custom_attribute_values:          [:name, :value],
       landmark_nearby_towns_attributes: [:id, :nearby_town_id, :_destroy],
       landmark_countries_attributes:    [:id, :country_id, :_destroy],
       landmark_floras_attributes:       [:id, :flora_id, :_destroy],
