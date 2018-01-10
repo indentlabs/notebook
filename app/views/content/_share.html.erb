@@ -19,16 +19,33 @@
       </div>
 
       <% if ((shared_content.respond_to? :universe) && shared_content.universe.present?) %>
-      <div class="row">
-        <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content.universe } %>
-      </div>
+        <div class="row">
+          <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content.universe } %>
+        </div>
       <% end %>
 
       <% if shared_content.respond_to? :privacy %>
-      <div class="row">
-        <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content } %>
-      </div>
+        <div class="row">
+          <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content } %>
+        </div>
       <% end %>
+
+      <% if shared_content.is_a?(Universe) %>
+        <div class="row">
+          <p class="col s12">
+            Sharing this universe will allow all pages within it to also be viewed.
+            If you'd like to share specific pages, you should share those pages directly instead.
+          </p>
+        </div>
+      <% end %>
+
+      <div class="row">
+        <p class="col s12" style='text-align: center'>
+          <%= link_to 'https://medium.com/indent-labs/privacy-on-notebook-ai-how-it-works-c23a59faeae2', class: 'btn btn-small blue lighten-1', target: '_new' do %>
+            Click here to learn more about sharing pages on Notebook.ai
+          <% end %>
+        </p>
+      </div>
 
     <% else %>
 

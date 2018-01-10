@@ -45,6 +45,7 @@ class Universe < ActiveRecord::Base
 
   scope :is_public, -> { where(privacy: 'public') }
 
+  # todo is this used?
   def content
     [
       characters, locations, items,
