@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180107183433) do
+ActiveRecord::Schema.define(version: 20180112043008) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -1435,6 +1435,7 @@ ActiveRecord::Schema.define(version: 20180107183433) do
     t.string   "username"
     t.boolean  "forum_administrator",      default: false, null: false
     t.datetime "deleted_at"
+    t.boolean  "site_administrator",       default: false
   end
 
   add_index "users", ["deleted_at"], name: "index_users_on_deleted_at"
