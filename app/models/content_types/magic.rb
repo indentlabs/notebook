@@ -22,8 +22,6 @@ class Magic < ActiveRecord::Base
   # Characters
   relates :deities, with: :magic_deityships
 
-  scope :is_public, -> { eager_load(:universe).where('magics.privacy = ? OR universes.privacy = ?', 'public', 'public') }
-
   def self.color
     'orange'
   end

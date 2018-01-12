@@ -39,8 +39,6 @@ class Location < ActiveRecord::Base
   # Languages
   relates :languages,         with: :location_languageships
 
-  scope :is_public, -> { eager_load(:universe).where('universes.privacy = ? OR locations.privacy = ?', 'public', 'public') }
-
   def self.icon
     'terrain'
   end

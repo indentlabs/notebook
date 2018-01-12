@@ -28,8 +28,6 @@ class Race < ActiveRecord::Base
   # Characters
   relates :famous_figures, with: :famous_figureships
 
-  scope :is_public, -> { eager_load(:universe).where('races.privacy = ? OR universes.privacy = ?', 'public', 'public') }
-
   def self.color
     'light-green'
   end

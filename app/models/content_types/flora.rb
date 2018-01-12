@@ -24,8 +24,6 @@ class Flora < ActiveRecord::Base
   relates :locations, with: :flora_locations
   relates :creatures, with: :flora_eaten_by
 
-  scope :is_public, -> { eager_load(:universe).where('floras.privacy = ? OR universes.privacy = ?', 'public', 'public') }
-
   def self.content_name
     'flora'
   end

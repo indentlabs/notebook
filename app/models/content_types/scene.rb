@@ -28,8 +28,6 @@ class Scene < ActiveRecord::Base
   # Items
   relates :scene_items, with: :scene_itemships
 
-  scope :is_public, -> { eager_load(:universe).where('scenes.privacy = ? OR universes.privacy = ?', 'public', 'public') }
-
   def self.color
     'grey'
   end
