@@ -11,7 +11,9 @@ class AdminController < ApplicationController
     type_whitelist = Rails.application.config.content_types[:all].map(&:name)
 
     type = params[:type]
-    return redirect_to root_path unless type_whitelist.include? type
+    unless type_whitelist.include? type
+      return
+    end
 
     @content_type = type.constantize
     @relation_name = type.downcase.pluralize.to_sym
