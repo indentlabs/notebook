@@ -149,11 +149,9 @@ Rails.application.routes.draw do
 
   scope 'admin' do
     get '/', to: 'admin#dashboard', as: :admin_dashboard
+    get '/content_type/:type', to: 'admin#content_type', as: :admin_content_type
+
     get '/attributes', to: 'admin#attributes', as: :admin_attributes
-    get '/universes', to: 'admin#universes', as: :admin_universes
-    get '/characters', to: 'admin#characters', as: :admin_characters
-    get '/locations', to: 'admin#locations', as: :admin_locations
-    get '/items', to: 'admin#items', as: :admin_items
   end
 
   scope 'export' do

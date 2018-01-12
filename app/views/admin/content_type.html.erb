@@ -1,0 +1,99 @@
+<div class="row">
+	<div class="col s12">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					All-time creations
+				</div>
+				<%= area_chart @content_type.group_by_day(:created_at) %>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col s6">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					7-day creations
+				</div>
+				<%= area_chart @content_type.where('created_at > ?', DateTime.now - 7.days).group_by_day(:created_at) %>
+			</div>
+		</div>
+	</div>
+
+	<div class="col s6">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					30-day creations
+				</div>
+				<%= area_chart @content_type.where('created_at > ?', DateTime.now - 30.days).group_by_day(:created_at) %>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col s4">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">
+          <%= @content_type.name.pluralize %> per user
+        </div>
+		    <%= column_chart User.joins(@relation_name).group(:user_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
+      </div>
+    </div>
+	</div>
+  <% unless @content_type == Universe %>
+  	<div class="col s4">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-title">
+            <%= @content_type.name.pluralize %> per universe
+          </div>
+          <%= column_chart Universe.joins(@relation_name).group(:universe_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
+        </div>
+      </div>
+  	</div>
+  <% end %>
+	<div class="col s4">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">
+          <%= @content_type.name %> privacy
+        </div>
+        <%= pie_chart @content_type.where.not(privacy: "").group(:privacy).count() %>
+      </div>
+    </div>
+	</div>
+</div>
+
+<div class="row">
+  <% @content_type.attribute_categories(User.new).each do |category| %>
+    <% next if ['Changelog', 'Gallery', 'Notes', 'Settings', 'Contributors'].include?(category.label) %>
+    <div class="col s4">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-title">
+            <%= category.label %>
+          </div>
+
+          <% category.attribute_fields.each do |attribute| %>
+            <% column = attribute.label.underscore.gsub(' ', '_').to_sym %>
+            <% next unless @content_type.columns.map(&:name).include? column.to_s %>
+
+            <%= attribute.label %>
+            <%=
+              begin
+                bar_chart @content_type.where.not("#{column}": "").group(column).order('count_all desc').limit(5).count()
+              rescue
+              end
+            %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

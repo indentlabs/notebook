@@ -1,25 +1,59 @@
-<h1>User signups</h1>
-<%= area_chart User.group_by_day(:created_at) %>
-
 <div class="row">
-	<div class="col s6">
-		<h2>Universes per user</h1>
-		<%= column_chart User.joins(:universes).group(:user_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
+	<div class="col s12">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					All-time signups
+				</div>
+				<%= area_chart User.group_by_day(:created_at) %>
+			</div>
+		</div>
 	</div>
-	<div class="col s6">
-		<h2>Characters per user</h1>
-		<%= column_chart User.joins(:characters).group(:universe_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
-	</div>
-
 </div>
 
 <div class="row">
 	<div class="col s6">
-		<h2>Locations per user</h1>
-		<%= column_chart User.joins(:locations).group(:user_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					7-day signups
+				</div>
+				<%= area_chart User.where('created_at > ?', DateTime.now - 7.days).group_by_day(:created_at) %>
+			</div>
+		</div>
 	</div>
+
 	<div class="col s6">
-		<h2>Items per universe</h1>
-		<%= column_chart Universe.joins(:items).group(:universe_id).count().group_by { |n| n.last }.each_with_object({}) { |(content_count, ids), h| h[content_count] = ids.count } %>
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					30-day signups
+				</div>
+				<%= area_chart User.where('created_at > ?', DateTime.now - 30.days).group_by_day(:created_at) %>
+			</div>
+		</div>
 	</div>
+</div>
+
+<div class="row">
+	<% Rails.application.config.content_types[:all].each do |content_type| %>
+		<div class="col s6">
+			<div class="card">
+				<div class="card-content">
+					<div class="card-title">
+						<%= content_type.name.pluralize %> per user
+					</div>
+					<%=
+						column_chart User.joins(content_type.name.downcase.pluralize.to_sym)
+							.group(:user_id)
+							.count()
+							.group_by(&:last)
+							.each_with_object({}) { |(content_count, ids), h|
+								h[content_count] = ids.count
+							}
+					%>
+				</div>
+			</div>
+		</div>
+	<% end %>
 </div>
