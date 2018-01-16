@@ -25,7 +25,7 @@ class ApplicationController < ActionController::Base
   before_action do
     @page_title ||= ''
     @page_keywords ||= %w[writing author nanowrimo novel character fiction fantasy universe creative dnd roleplay larp game design]
-    @page_description ||= 'Notebook is a set of tools for writers, game designers, and roleplayers to create magnificent universes — and everything within them.'
+    @page_description ||= 'Notebook.ai is a set of tools for writers, game designers, and roleplayers to create magnificent universes — and everything within them.'
   end
 
   before_action do

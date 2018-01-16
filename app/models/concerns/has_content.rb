@@ -142,14 +142,15 @@ module HasContent
       ].sum
     end
 
-    def recent_content
-      [
-        characters, locations, items, universes,
-        creatures, races, religions, magics, languages,
-        scenes, groups, towns, countries, landmarks
-      ].flatten
-      .sort_by(&:updated_at)
-      .last(3)
+    def recent_content_list
+      content_types = Rails.application.config.content_types[:all]
+
+      content_types.flat_map { |klass|
+        klass.where(user_id: id)
+             .order(updated_at: :desc)
+             .limit(10)
+      }.sort_by(&:updated_at)
+      .last(10)
       .reverse
     end
   end
