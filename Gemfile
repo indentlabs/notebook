@@ -111,7 +111,3 @@ end
 group :test, :development do
   gem 'pry'
 end
-
-group :development do
-  gem 'bullet'
-end
