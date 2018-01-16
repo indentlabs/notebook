@@ -30,7 +30,7 @@ module HasContent
     has_many :attribute_values, class_name: 'Attribute'
 
     def content
-      {
+      @user_content ||= {
         characters: characters,
         items: items,
         locations: locations,
@@ -49,7 +49,7 @@ module HasContent
     end
 
     def content_list
-      [
+      @user_content_list ||= [
         universes,
         characters,
         items,
@@ -68,7 +68,7 @@ module HasContent
     end
 
     def content_in_universe universe_id
-      {
+      @user_content_in_universe ||= {
         characters: characters.in_universe(universe_id),
         items:      items.in_universe(universe_id),
         locations:  locations.in_universe(universe_id),
@@ -86,7 +86,7 @@ module HasContent
     end
 
     def content_count
-      [
+      @user_content_count ||= [
         characters.length,
         items.length,
         locations.length,
@@ -145,7 +145,7 @@ module HasContent
     def recent_content_list
       content_types = Rails.application.config.content_types[:all]
 
-      content_types.flat_map { |klass|
+      @user_recent_content_list ||= content_types.flat_map { |klass|
         klass.where(user_id: id)
              .order(updated_at: :desc)
              .limit(10)

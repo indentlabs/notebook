@@ -38,11 +38,14 @@ class User < ActiveRecord::Base
   has_many :user_content_type_activators
 
   def contributable_universes
-    # todo email confirmation needs to happy for data safety / privacy (only verified emails)
-    contributor_by_email = Contributor.where(email: self.email).pluck(:universe_id)
-    contributor_by_user = Contributor.where(user: self).pluck(:universe_id)
 
-    Universe.where(id: contributor_by_email + contributor_by_user)
+    @user_contributable_universes ||= begin
+      # todo email confirmation needs to happy for data safety / privacy (only verified emails)
+      contributor_by_email = Contributor.where(email: self.email).pluck(:universe_id)
+      contributor_by_user = Contributor.where(user: self).pluck(:universe_id)
+
+      Universe.where(id: contributor_by_email + contributor_by_user)
+    end
   end
   #TODO: rename this to #{content_type}_shared_with_me and only return contributable content that others own
   Rails.application.config.content_types[:all_non_universe].each do |content_type|
