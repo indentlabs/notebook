@@ -30,3 +30,19 @@ namespace :datafill do
     puts "Done."
   end
 end
+
+namespace :load do
+  desc "Heavy load of content"
+  task heavy: :environment do
+    owner = User.last
+    puts "Using user #{owner.email}"
+
+    Rails.application.config.content_types[:all].each do |content_type|
+      puts "Populating #{content_type}"
+      5_000.times do
+        c = content_type.create(user: owner, name: rand.to_s)
+        c.change_events.update_all(user_id: owner.id)
+      end
+    end
+  end
+end
