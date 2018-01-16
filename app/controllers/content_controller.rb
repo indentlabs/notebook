@@ -14,7 +14,8 @@ class ContentController < ApplicationController
       )
 
       unless @content_type_class == Universe
-        @content.concat(current_user.universes.flat_map { |universe| universe.send(pluralized_content_name) })
+        my_universe_ids = current_user.universes.pluck(:id)
+        @content.concat(@content_type_class.where(universe_id: my_universe_ids))
       end
     end
 
