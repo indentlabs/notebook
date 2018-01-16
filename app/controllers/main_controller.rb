@@ -38,10 +38,23 @@ class MainController < ApplicationController
   end
 
   def recent_content
-    recent_content = current_user.content.values.flatten.compact
+    content_types = Rails.application.config.content_types[:all]
 
-    @recent_edits   = recent_content.sort_by(&:updated_at).last(100).reverse
-    @recent_creates = recent_content.sort_by(&:created_at).last(100).reverse
+    @recent_edits = content_types.flat_map { |klass|
+      klass.where(user_id: current_user.id)
+           .order(updated_at: :desc)
+           .limit(100)
+    }.sort_by(&:updated_at)
+    .last(100)
+    .reverse
+
+    @recent_creates = content_types.flat_map { |klass|
+      klass.where(user_id: current_user.id)
+           .order(created_at: :desc)
+           .limit(100)
+    }.sort_by(&:created_at)
+    .last(100)
+    .reverse
   end
 
   def for_writers
