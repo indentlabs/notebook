@@ -3,7 +3,7 @@
 %>
 <div class="card hoverable">
   <div class="card-image waves-effect waves-block waves-light">
-    <% images = content_list.flat_map(&:image_uploads) %>
+    <% images = [] # content_list.flat_map(&:image_uploads) #todo reinstate this with optimizations %>
     <% if images.any? && rand(3) < 2 %>
       <%= image_tag images.sample.src(:large), class: 'activator', style: 'height: 265px' %>
     <% else %>
@@ -64,7 +64,7 @@
         <% else %>
           <div class="center">
             <% button_text = content_list.any? ? "Create another #{content_type}" : "Create one" %>
-            <%= link_to button_text, new_polymorphic_path(content_type), class: "btn #{content_type_class.color}" if current_user %>
+            <%= link_to button_text, new_polymorphic_path(content_type), class: "btn #{content_type_class.color}" if user_signed_in? %>
           </div>
         <% end %>
       </div>
@@ -81,12 +81,12 @@
           </p>
           <div class="center hide-on-small-only">
             <% button_text = content_list.any? ? "Create another #{content_type}" : "Create one" %>
-            <%= link_to button_text, new_polymorphic_path(content_type), class: "btn #{content_type_class.color}" if current_user %>
+            <%= link_to button_text, new_polymorphic_path(content_type), class: "btn #{content_type_class.color}" if user_signed_in? %>
           </div>
         </div>
         <div class="center hide-on-med-and-up">
           <% button_text = content_list.any? ? "Create another #{content_type}" : "Create one" %>
-          <%= link_to button_text, new_polymorphic_path(content_type), class: "btn #{content_type_class.color}" if current_user %>
+          <%= link_to button_text, new_polymorphic_path(content_type), class: "btn #{content_type_class.color}" if user_signed_in? %>
         </div>
       </div>
     <% end %>
