@@ -1,5 +1,10 @@
 <%
   content_type_class = content_type.to_s.titleize.constantize
+
+  if content_list.count > 100
+    content_list = content_list.first(100)
+    card_title ||= "100+ #{content_type.to_s.pluralize}"
+  end
 %>
 <div class="card hoverable">
   <div class="card-image waves-effect waves-block waves-light">
@@ -20,7 +25,7 @@
       <i class="material-icons right">arrow_upward</i>
     </span>
     <p>
-      <%= link_to "Create #{content_list.empty? ? 'your first one!' : ['another ', content_type].join}", new_polymorphic_path(content_type) if current_user %>
+      <%= link_to "Create #{content_list.empty? ? 'your first one!' : ['another ', content_type].join}", new_polymorphic_path(content_type) if user_signed_in? %>
     </p>
   </div>
   <div class="card-reveal">
