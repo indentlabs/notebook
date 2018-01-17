@@ -22,6 +22,29 @@
   <% end %>
 
   <main>
+
+    <% if user_signed_in? %>
+    <div class="row">
+      <div class="col s12">
+        <div class="card red lighten-2 white-text">
+          <div class="card-content">
+            <div class="card-title">
+              Upcoming site maintenance
+            </div>
+            Notebook.ai will be undergoing scheduled maintenance in
+            <%= distance_of_time_in_words(DateTime.now, '5:00 pm utc Jan 17 2018'.to_datetime) %>
+            (at 5:00pm UTC) to increase page load times.
+            Please be aware that creating/editing pages during this time <em>will not</em> work.
+            The downtime will last approximately 10 minutes, and this banner will be removed as soon as it's complete.
+            <%= link_to 'https://www.notebook.ai/forum/announcements/upcoming-5-10-minutes-downtime-important-database-upgrades', class: 'blue-text text-lighten-4' do %>
+              More information here.
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% end %>
+
     <div class="container<% if user_signed_in? && current_user.fluid_preference %>-fluid<% end %>">
       <div class="row">
         <div class="col s12">
