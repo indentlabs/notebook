@@ -242,6 +242,9 @@ Rails.application.routes.draw do
     get '/', to: 'main#comingsoon'
   end
 
+  get '/forum', to: 'emergency#temporarily_disabled'
+  get '/forum/:wildcard', to: 'emergency#temporarily_disabled'
+  get '/forum/:wildcard/:another', to: 'emergency#temporarily_disabled'
   mount Thredded::Engine => '/forum'
   mount StripeEvent::Engine, at: '/webhooks/stripe'
 end
