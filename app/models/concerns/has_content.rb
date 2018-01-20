@@ -142,16 +142,16 @@ module HasContent
       ].sum
     end
 
-    # def recent_content_list
-    #   content_types = Rails.application.config.content_types[:all]
-    # 
-    #   @user_recent_content_list ||= content_types.flat_map { |klass|
-    #     klass.where(user_id: id)
-    #          .order(updated_at: :desc)
-    #          .limit(10)
-    #   }.sort_by(&:updated_at)
-    #   .last(10)
-    #   .reverse
-    # end
+    def recent_content_list
+      content_types = Rails.application.config.content_types[:all]
+
+      @user_recent_content_list ||= content_types.flat_map { |klass|
+        klass.where(user_id: id)
+             .order(updated_at: :desc)
+             .limit(10)
+      }.sort_by(&:updated_at)
+      .last(10)
+      .reverse
+    end
   end
 end
