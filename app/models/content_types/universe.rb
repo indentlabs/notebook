@@ -6,7 +6,7 @@
 #
 #    contains all canonically-related content created by Users
 class Universe < ActiveRecord::Base
-  acts_as_paranoid
+  #acts_as_paranoid
 
   include HasAttributes
   include HasPrivacy
