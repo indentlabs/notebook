@@ -84,11 +84,12 @@
             if content_type != Universe && @universe_scope
               @universe_scope.send(pluralized_name).count
             else
-              (
-                current_user.send(pluralized_name) +
-                current_user.send("contributable_#{pluralized_name}") +
-                (content_type == Universe ? [] : content_type.where(universe_id: current_user.universes.pluck(:id)))
-              ).uniq.count
+              # (
+              #   current_user.send(pluralized_name) +
+              #   current_user.send("contributable_#{pluralized_name}") +
+              #   (content_type == Universe ? [] : content_type.where(universe_id: current_user.universes.pluck(:id)))
+              # ).uniq.count
+              current_user.send(pluralized_name).count
             end
           %>
         </span>
