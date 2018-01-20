@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180120031750) do
+ActiveRecord::Schema.define(version: 20180120032146) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -165,6 +165,7 @@ ActiveRecord::Schema.define(version: 20180120031750) do
 
   add_index "characters", ["deleted_at"], name: "index_characters_on_deleted_at"
   add_index "characters", ["universe_id"], name: "index_characters_on_universe_id"
+  add_index "characters", ["user_id"], name: "index_characters_on_user_id"
 
   create_table "childrenships", force: :cascade do |t|
     t.integer "user_id"
@@ -351,6 +352,7 @@ ActiveRecord::Schema.define(version: 20180120031750) do
   end
 
   add_index "creatures", ["deleted_at"], name: "index_creatures_on_deleted_at"
+  add_index "creatures", ["user_id"], name: "index_creatures_on_user_id"
 
   create_table "current_ownerships", force: :cascade do |t|
     t.integer "user_id"
@@ -551,6 +553,7 @@ ActiveRecord::Schema.define(version: 20180120031750) do
   end
 
   add_index "groups", ["deleted_at"], name: "index_groups_on_deleted_at"
+  add_index "groups", ["user_id"], name: "index_groups_on_user_id"
 
   create_table "headquarterships", force: :cascade do |t|
     t.integer "user_id"
@@ -571,6 +574,7 @@ ActiveRecord::Schema.define(version: 20180120031750) do
     t.datetime "src_updated_at"
   end
 
+  add_index "image_uploads", ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
   add_index "image_uploads", ["user_id"], name: "index_image_uploads_on_user_id"
 
   create_table "items", force: :cascade do |t|
@@ -595,6 +599,7 @@ ActiveRecord::Schema.define(version: 20180120031750) do
   end
 
   add_index "items", ["deleted_at"], name: "index_items_on_deleted_at"
+  add_index "items", ["user_id"], name: "index_items_on_user_id"
 
   create_table "key_itemships", force: :cascade do |t|
     t.integer "user_id"
@@ -693,6 +698,7 @@ ActiveRecord::Schema.define(version: 20180120031750) do
   end
 
   add_index "languages", ["deleted_at"], name: "index_languages_on_deleted_at"
+  add_index "languages", ["user_id"], name: "index_languages_on_user_id"
 
   create_table "largest_cities_relationships", force: :cascade do |t|
     t.integer "user_id"
@@ -755,6 +761,7 @@ ActiveRecord::Schema.define(version: 20180120031750) do
   end
 
   add_index "locations", ["deleted_at"], name: "index_locations_on_deleted_at"
+  add_index "locations", ["user_id"], name: "index_locations_on_user_id"
 
   create_table "magic_deityships", force: :cascade do |t|
     t.integer "user_id"
@@ -787,6 +794,7 @@ ActiveRecord::Schema.define(version: 20180120031750) do
   end
 
   add_index "magics", ["deleted_at"], name: "index_magics_on_deleted_at"
+  add_index "magics", ["user_id"], name: "index_magics_on_user_id"
 
   create_table "maker_relationships", force: :cascade do |t|
     t.integer "user_id"
@@ -932,6 +940,7 @@ ActiveRecord::Schema.define(version: 20180120031750) do
   end
 
   add_index "religions", ["deleted_at"], name: "index_religions_on_deleted_at"
+  add_index "religions", ["user_id"], name: "index_religions_on_user_id"
 
   create_table "religious_figureships", force: :cascade do |t|
     t.integer "religion_id"
@@ -988,6 +997,7 @@ ActiveRecord::Schema.define(version: 20180120031750) do
   end
 
   add_index "scenes", ["deleted_at"], name: "index_scenes_on_deleted_at"
+  add_index "scenes", ["user_id"], name: "index_scenes_on_user_id"
 
   create_table "sessions", force: :cascade do |t|
     t.string   "username",   null: false
@@ -1402,6 +1412,7 @@ ActiveRecord::Schema.define(version: 20180120031750) do
   end
 
   add_index "universes", ["deleted_at"], name: "index_universes_on_deleted_at"
+  add_index "universes", ["user_id"], name: "index_universes_on_user_id"
 
   create_table "user_content_type_activators", force: :cascade do |t|
     t.integer  "user_id"
