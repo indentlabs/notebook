@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180120032146) do
+ActiveRecord::Schema.define(version: 20180120033402) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -352,6 +352,7 @@ ActiveRecord::Schema.define(version: 20180120032146) do
   end
 
   add_index "creatures", ["deleted_at"], name: "index_creatures_on_deleted_at"
+  add_index "creatures", ["universe_id"], name: "index_creatures_on_universe_id"
   add_index "creatures", ["user_id"], name: "index_creatures_on_user_id"
 
   create_table "current_ownerships", force: :cascade do |t|
@@ -553,6 +554,7 @@ ActiveRecord::Schema.define(version: 20180120032146) do
   end
 
   add_index "groups", ["deleted_at"], name: "index_groups_on_deleted_at"
+  add_index "groups", ["universe_id"], name: "index_groups_on_universe_id"
   add_index "groups", ["user_id"], name: "index_groups_on_user_id"
 
   create_table "headquarterships", force: :cascade do |t|
@@ -599,6 +601,7 @@ ActiveRecord::Schema.define(version: 20180120032146) do
   end
 
   add_index "items", ["deleted_at"], name: "index_items_on_deleted_at"
+  add_index "items", ["universe_id"], name: "index_items_on_universe_id"
   add_index "items", ["user_id"], name: "index_items_on_user_id"
 
   create_table "key_itemships", force: :cascade do |t|
@@ -698,6 +701,7 @@ ActiveRecord::Schema.define(version: 20180120032146) do
   end
 
   add_index "languages", ["deleted_at"], name: "index_languages_on_deleted_at"
+  add_index "languages", ["universe_id"], name: "index_languages_on_universe_id"
   add_index "languages", ["user_id"], name: "index_languages_on_user_id"
 
   create_table "largest_cities_relationships", force: :cascade do |t|
@@ -761,6 +765,7 @@ ActiveRecord::Schema.define(version: 20180120032146) do
   end
 
   add_index "locations", ["deleted_at"], name: "index_locations_on_deleted_at"
+  add_index "locations", ["universe_id"], name: "index_locations_on_universe_id"
   add_index "locations", ["user_id"], name: "index_locations_on_user_id"
 
   create_table "magic_deityships", force: :cascade do |t|
@@ -794,6 +799,7 @@ ActiveRecord::Schema.define(version: 20180120032146) do
   end
 
   add_index "magics", ["deleted_at"], name: "index_magics_on_deleted_at"
+  add_index "magics", ["universe_id"], name: "index_magics_on_universe_id"
   add_index "magics", ["user_id"], name: "index_magics_on_user_id"
 
   create_table "maker_relationships", force: :cascade do |t|
@@ -940,6 +946,7 @@ ActiveRecord::Schema.define(version: 20180120032146) do
   end
 
   add_index "religions", ["deleted_at"], name: "index_religions_on_deleted_at"
+  add_index "religions", ["universe_id"], name: "index_religions_on_universe_id"
   add_index "religions", ["user_id"], name: "index_religions_on_user_id"
 
   create_table "religious_figureships", force: :cascade do |t|
@@ -997,6 +1004,7 @@ ActiveRecord::Schema.define(version: 20180120032146) do
   end
 
   add_index "scenes", ["deleted_at"], name: "index_scenes_on_deleted_at"
+  add_index "scenes", ["universe_id"], name: "index_scenes_on_universe_id"
   add_index "scenes", ["user_id"], name: "index_scenes_on_user_id"
 
   create_table "sessions", force: :cascade do |t|
