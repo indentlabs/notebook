@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180112043008) do
+ActiveRecord::Schema.define(version: 20180120010225) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -164,6 +164,7 @@ ActiveRecord::Schema.define(version: 20180112043008) do
   end
 
   add_index "characters", ["deleted_at"], name: "index_characters_on_deleted_at"
+  add_index "characters", ["universe_id"], name: "index_characters_on_universe_id"
 
   create_table "childrenships", force: :cascade do |t|
     t.integer "user_id"
