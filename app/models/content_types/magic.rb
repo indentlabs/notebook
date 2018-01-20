@@ -33,8 +33,4 @@ class Magic < ActiveRecord::Base
   def self.content_name
     'magic'
   end
-
-  def deleted_at
-    nil #hack
-  end
 end

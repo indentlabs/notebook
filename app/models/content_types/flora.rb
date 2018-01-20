@@ -35,8 +35,4 @@ class Flora < ActiveRecord::Base
   def self.icon
     'local_florist'
   end
-
-  def deleted_at
-    nil #hack
-  end
 end

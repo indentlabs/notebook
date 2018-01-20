@@ -39,8 +39,4 @@ class Race < ActiveRecord::Base
   def self.content_name
     'race'
   end
-
-  def deleted_at
-    nil #hack
-  end
 end

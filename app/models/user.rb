@@ -191,8 +191,4 @@ class User < ActiveRecord::Base
       :email
     ]
   end
-
-  def deleted_at
-    nil #hack
-  end
 end

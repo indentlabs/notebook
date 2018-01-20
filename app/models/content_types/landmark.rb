@@ -35,8 +35,4 @@ class Landmark < ActiveRecord::Base
   def self.icon
     'location_on'
   end
-
-  # def deleted_at
-  #   nil #hack
-  # end
 end

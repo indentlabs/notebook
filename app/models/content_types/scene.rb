@@ -39,8 +39,4 @@ class Scene < ActiveRecord::Base
   def self.content_name
     'scene'
   end
-
-  def deleted_at
-    nil #hack
-  end
 end

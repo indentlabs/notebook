@@ -42,8 +42,4 @@ class Item < ActiveRecord::Base
   def self.content_name
     'item'
   end
-
-  def deleted_at
-    nil #hack
-  end
 end

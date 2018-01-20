@@ -38,8 +38,4 @@ class Town < ActiveRecord::Base
   def self.icon
     'location_city'
   end
-
-  # def deleted_at
-  #   nil #hack
-  # end
 end

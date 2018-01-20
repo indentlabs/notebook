@@ -64,8 +64,4 @@ class Character < ActiveRecord::Base
   def self.icon
     'group'
   end
-
-  def deleted_at
-    nil #hack
-  end
 end

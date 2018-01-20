@@ -50,8 +50,4 @@ class Location < ActiveRecord::Base
   def self.content_name
     'location'
   end
-
-  def deleted_at
-    nil #hack
-  end
 end

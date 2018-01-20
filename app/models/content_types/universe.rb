@@ -68,8 +68,4 @@ class Universe < ActiveRecord::Base
   def self.content_name
     'universe'
   end
-
-  def deleted_at
-    nil #hack
-  end
 end
