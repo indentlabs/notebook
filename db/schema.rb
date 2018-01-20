@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180120010225) do
+ActiveRecord::Schema.define(version: 20180120031750) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -182,6 +182,7 @@ ActiveRecord::Schema.define(version: 20180120010225) do
     t.datetime "updated_at",     null: false
   end
 
+  add_index "content_change_events", ["content_id", "content_type"], name: "index_content_change_events_on_content_id_and_content_type"
   add_index "content_change_events", ["user_id"], name: "index_content_change_events_on_user_id"
 
   create_table "contributors", force: :cascade do |t|
