@@ -7,7 +7,7 @@
 #
 #    exists within a Universe.
 class Creature < ActiveRecord::Base
-  #acts_as_paranoid
+  acts_as_paranoid
 
   validates :name, presence: true
 
