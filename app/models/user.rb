@@ -3,7 +3,7 @@ require 'digest/md5'
 ##
 # a person using the Notebook.ai web application. Owns all other content.
 class User < ActiveRecord::Base
-  #acts_as_paranoid
+  acts_as_paranoid
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
