@@ -26,7 +26,7 @@ class ContributorService < Service
       inviter: inviter,
       invite_email: email,
       universe: universe
-    )
+    ).deliver_now!
   end
 
   def self.send_contributor_notice_to inviter:, email:, universe:
@@ -34,6 +34,6 @@ class ContributorService < Service
       inviter: inviter,
       invite_email: email,
       universe: universe
-    )
+    ).deliver_now!
   end
 end
