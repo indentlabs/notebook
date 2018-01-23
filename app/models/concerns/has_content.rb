@@ -48,7 +48,7 @@ module HasContent
     def content_in_universe universe_id
       @user_content_in_universe ||= begin
         content_value = {}
-        Rails.application.config.content_types[:all].each do |type|
+        Rails.application.config.content_types[:all_non_universe].each do |type|
           relation = type.name.downcase.pluralize.to_sym # :characters
           content_value[relation] = send(relation).in_universe(universe_id)
         end
