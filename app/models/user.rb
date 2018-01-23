@@ -15,7 +15,7 @@ class User < ActiveRecord::Base
 
   validates_uniqueness_of :username, allow_nil: true, allow_blank: true
 
-  has_many :subscriptions
+  has_many :subscriptions,                dependent: :destroy
   has_many :billing_plans, through: :subscriptions
   def on_premium_plan?
     BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id)
@@ -24,25 +24,23 @@ class User < ActiveRecord::Base
   has_many :image_uploads
 
   has_one :referral_code
-  has_many :referrals, foreign_key: :referrer_id
+  has_many :referrals, foreign_key: :referrer_id, dependent: :destroy
   def referrer
     referral = Referral.find_by(referred_id: self.id)
     referral.referrer unless referral.nil?
   end
 
-  has_many :votes
-  has_many :raffle_entries
-
-  has_many :content_change_events
-
-  has_many :user_content_type_activators
+  has_many :votes,                        dependent: :destroy
+  has_many :raffle_entries,               dependent: :destroy
+  has_many :content_change_events,        dependent: :destroy
+  has_many :user_content_type_activators, dependent: :destroy
 
   def contributable_universes
 
     @user_contributable_universes ||= begin
       # todo email confirmation needs to happy for data safety / privacy (only verified emails)
       contributor_by_email = Contributor.where(email: self.email).pluck(:universe_id)
-      contributor_by_user = Contributor.where(user: self).pluck(:universe_id)
+      contributor_by_user  = Contributor.where(user: self).pluck(:universe_id)
 
       Universe.where(id: contributor_by_email + contributor_by_user)
     end
@@ -73,7 +71,7 @@ class User < ActiveRecord::Base
   end
 
   # TODO: Swap this out with a has_many when we transition from a scratchpad to users having multiple documents
-  has_one :document
+  has_one :document, dependent: :destroy
 
   after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
   after_create :initialize_referral_code
