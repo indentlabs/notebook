@@ -1,4 +1,5 @@
 module AttributesHelper
+  #todo this might not actually be used anymore
   def attribute_category_tab(content, category)
     is_disabled = category.attribute_fields.any? do |field|
       if content.respond_to?(field.name.to_sym)

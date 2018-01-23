@@ -1,2 +1,0 @@
-module LabHelper
-end
