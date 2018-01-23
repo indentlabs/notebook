@@ -22,6 +22,7 @@ Rails.application.routes.draw do
     get :groups,     on: :member
     get :universes,  on: :member
   end
+
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
 
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
@@ -173,9 +174,9 @@ Rails.application.routes.draw do
     get '/languages.csv', to: 'export#languages_csv', as: :languages_csv
     get '/scenes.csv', to: 'export#scenes_csv', as: :scenes_csv
     get '/groups.csv', to: 'export#groups_csv', as: :groups_csv
-    get '/groups.csv', to: 'export#towns_csv', as: :towns_csv
-    get '/groups.csv', to: 'export#countries_csv', as: :countries_csv
-    get '/groups.csv', to: 'export#landmarks_csv', as: :landmarks_csv
+    get '/towns.csv', to: 'export#towns_csv', as: :towns_csv
+    get '/countries.csv', to: 'export#countries_csv', as: :countries_csv
+    get '/landmarks.csv', to: 'export#landmarks_csv', as: :landmarks_csv
   end
 
   scope '/scene/:scene_id' do
