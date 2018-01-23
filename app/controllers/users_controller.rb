@@ -15,13 +15,10 @@ class UsersController < ApplicationController
     }) if Rails.env.production?
   end
 
-  #todo use the new constants here
-  [
-    :characters, :locations, :items, :creatures, :races, :religions, :groups, :magics, :languages, :floras, :scenes, :countries, :towns, :landmarks, :universes
-  ].each do |content_type_name|
+  Rails.application.config.content_types[:all].each do |content_type|
+    content_type_name = content_type.name.downcase.pluralize.to_sym # :characters, :items, etc
     define_method content_type_name do
-      @content_type = content_type_name.to_s.singularize.capitalize.constantize
-
+      @content_type = content_type
       @user = User.find(params[:id])
       @content_list = @user.send(content_type_name).is_public.order(:name)
 
