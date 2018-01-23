@@ -9,26 +9,29 @@ class StripeInvoiceEvents
 
   def payment_succeeded
     return unless user.present?
-    InvoicesMailer.dispatch_invoice(user.id)
+    # Stripe sends receipts currently, so we don't need to.
+    #InvoicesMailer.dispatch_invoice(user.id).deliver_now!
   end
 
 
   def payment_failed
     return unless user.present?
-    InvoicesMailer.problem_with_payment(user.id)
+    # todo style email
+    #InvoicesMailer.problem_with_payment(user.id).deliver_now!
     if stripe_invoice.next_payment_attempt.blank?
       user.update(selected_billing_plan_id: 1)
-      InvoicesMailer.downgraded_to_starter(user.id)
+      # todo style email
+      #InvoicesMailer.downgraded_to_starter(user.id).deliver_now!
     end
   end
 
   private
 
-    def stripe_customer
-      stripe_invoice.customer
-    end
+  def stripe_customer
+    stripe_invoice.customer
+  end
 
-    def stripe_invoice
-      event.data.object
-    end
+  def stripe_invoice
+    event.data.object
+  end
 end
