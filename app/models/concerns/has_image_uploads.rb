@@ -5,6 +5,8 @@ module HasImageUploads
 
   included do
     has_many :image_uploads
+    # todo: dependent: :destroy
+    # todo: destroy from s3 on destroy
 
     def image_uploads
       ImageUpload.where(

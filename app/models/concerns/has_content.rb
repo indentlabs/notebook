@@ -4,144 +4,96 @@ module HasContent
   extend ActiveSupport::Concern
 
   included do
-    # Base content types
-    has_many :universes
-    has_many :characters
-    has_many :items
-    has_many :locations
+    Rails.application.config.content_types[:all].each do |content_type|
+      content_type_sym = content_type.name.downcase.pluralize.to_sym # :characters
 
-    # Extended content types
-    has_many :creatures
-    has_many :races
-    has_many :religions
-    has_many :magics
-    has_many :languages
-    has_many :groups
-    has_many :floras
-    has_many :towns
-    has_many :countries
-    has_many :landmarks
-
-    # Collective content types
-    has_many :scenes
+      #has_many :characters, :locations, etc
+      has_many content_type_sym, dependent: :destroy
+    end
 
     has_many :attribute_fields
     has_many :attribute_categories
     has_many :attribute_values, class_name: 'Attribute'
 
+    # {
+    #   characters: [...],
+    #   locations:  [...]
+    # }
     def content
-      @user_content ||= {
-        characters: characters,
-        items: items,
-        locations: locations,
-        universes: universes,
-        creatures: creatures,
-        races: races,
-        religions: religions,
-        magics: magics,
-        languages: languages,
-        scenes: scenes,
-        groups: groups,
-        towns: towns,
-        countries: countries,
-        landmarks: landmarks
-      }
+      @user_content ||= begin
+        content_value = {}
+        Rails.application.config.content_types[:all].each do |type|
+          relation = type.name.downcase.pluralize.to_sym # :characters
+          content_value[relation] = send(relation)
+        end
+
+        content_value
+      end
     end
 
+    # [..., ...]
     def content_list
-      @user_content_list ||= [
-        universes,
-        characters,
-        items,
-        locations,
-        creatures,
-        races,
-        religions,
-        magics,
-        languages,
-        scenes,
-        groups,
-        towns,
-        countries,
-        landmarks
-      ].flatten
+      @user_content_list ||= begin
+        Rails.application.config.content_types[:all].map do |type|
+          relation = type.name.downcase.pluralize.to_sym # :characters
+          send(relation)
+        end
+      end.flatten
     end
 
+    # {
+    #   characters: [...],
+    #   locations:  [...]
+    # }
     def content_in_universe universe_id
-      @user_content_in_universe ||= {
-        characters: characters.in_universe(universe_id),
-        items:      items.in_universe(universe_id),
-        locations:  locations.in_universe(universe_id),
-        creatures:  creatures.in_universe(universe_id),
-        races:      races.in_universe(universe_id),
-        religions:  religions.in_universe(universe_id),
-        magics:     magics.in_universe(universe_id),
-        languages:  languages.in_universe(universe_id),
-        scenes:     scenes.in_universe(universe_id),
-        groups:     groups.in_universe(universe_id),
-        towns:      towns.in_universe(universe_id),
-        landmarks:  landmarks.in_universe(universe_id),
-        countries:  countries.in_universe(universe_id)
-      }
+      @user_content_in_universe ||= begin
+        content_value = {}
+        Rails.application.config.content_types[:all].each do |type|
+          relation = type.name.downcase.pluralize.to_sym # :characters
+          content_value[relation] = send(relation).in_universe(universe_id)
+        end
+
+        content_value
+      end
     end
 
+    # 5
     def content_count
-      @user_content_count ||= [
-        characters.length,
-        items.length,
-        locations.length,
-        universes.length,
-        creatures.length,
-        races.length,
-        religions.length,
-        magics.length,
-        languages.length,
-        scenes.length,
-        groups.length,
-        towns.length,
-        landmarks.length,
-        countries.length
-      ].sum
+      @user_content_count ||= begin
+        Rails.application.config.content_types[:all].map do |type|
+          relation = type.name.downcase.pluralize.to_sym # :characters
+          send(relation).count
+        end.sum
+      end
     end
 
+    # {
+    #  characters: [...],
+    #  locations:  [...],
+    # }
     def public_content
-      {
-        characters: characters.is_public,
-        items: items.is_public,
-        locations: locations.is_public,
-        universes: universes.is_public,
-        creatures: creatures.is_public,
-        races: races.is_public,
-        religions: religions.is_public,
-        magics: magics.is_public,
-        languages: languages.is_public,
-        scenes: scenes.is_public,
-        groups: groups.is_public,
-        towns: towns.is_public,
-        countries: countries.is_public,
-        landmarks: landmarks.is_public
-      }
+      @user_public_content ||= begin
+        content_value = {}
+        Rails.application.config.content_types[:all].each do |type|
+          relation = type.name.downcase.pluralize.to_sym # :characters
+          content_value[relation] = send(relation).is_public
+        end
+
+        content_value
+      end
     end
 
+    # 8
     def public_content_count
-      [
-        characters.is_public.length,
-        items.is_public.length,
-        locations.is_public.length,
-        universes.is_public.length,
-        creatures.is_public.length,
-        races.is_public.length,
-        religions.is_public.length,
-        magics.is_public.length,
-        languages.is_public.length,
-        scenes.is_public.length,
-        groups.is_public.length,
-        towns.is_public.length,
-        countries.is_public.length,
-        landmarks.is_public.length
-      ].sum
+      @user_content_count ||= begin
+        Rails.application.config.content_types[:all].map do |type|
+          relation = type.name.downcase.pluralize.to_sym # :characters
+          send(relation).is_public.count
+        end.sum
+      end
     end
 
+    # [..., ..., ...]
     def recent_content_list
       content_types = Rails.application.config.content_types[:all]
 

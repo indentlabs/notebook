@@ -33,8 +33,6 @@ class Creature < ActiveRecord::Base
   # Creatures
   relates :related_creatures, with: :creature_relationships
 
-  scope :is_public, -> { eager_load(:universe).where('creatures.privacy = ? OR universes.privacy = ?', 'public', 'public') }
-
   def self.color
     'brown'
   end
