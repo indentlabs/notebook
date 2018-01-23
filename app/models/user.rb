@@ -23,7 +23,7 @@ class User < ActiveRecord::Base
 
   has_many :image_uploads
 
-  has_one :referral_code
+  has_one :referral_code, dependent: :destroy
   has_many :referrals, foreign_key: :referrer_id, dependent: :destroy
   def referrer
     referral = Referral.find_by(referred_id: self.id)
