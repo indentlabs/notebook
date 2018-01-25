@@ -1,12 +1,12 @@
 class ContributorService < Service
   def self.invite_contributor_to_universe universe:, email:
     # First, look up whether a user already exists for this invite
-    related_user = User.find_by(email: email)
+    related_user = User.find_by(email: email.downcase)
 
     # Create the Contributor object with or without a user
     Contributor.create(
       universe: universe,
-      email: email,
+      email: email.downcase,
       user: related_user
     )
 

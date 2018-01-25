@@ -144,7 +144,7 @@ class ContentController < ApplicationController
 
     if @content.is_a?(Universe) && params.key?('contributors') && @content.user == current_user
       params[:contributors][:email].reject(&:blank?).each do |email|
-        ContributorService.invite_contributor_to_universe(universe: @content, email: email)
+        ContributorService.invite_contributor_to_universe(universe: @content, email: email.downcase)
       end
     end
 
