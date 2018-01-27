@@ -22,24 +22,9 @@ class Universe < ActiveRecord::Base
   validates :user_id, presence: true
 
   belongs_to :user
-  # Core content types
-  has_many :characters
-  has_many :items
-  has_many :locations
-
-  # Extended content types
-  has_many :creatures
-  has_many :races
-  has_many :religions
-  has_many :magics
-  has_many :languages
-  has_many :floras
-  has_many :towns
-  has_many :countries
-  has_many :landmarks
-
-  has_many :scenes
-  has_many :groups
+  Rails.application.config.content_types[:all_non_universe].each do |content_type|
+    has_many content_types.name.downcase.pluralize.to_sym
+  end
 
   has_many :contributors, dependent: :destroy
 

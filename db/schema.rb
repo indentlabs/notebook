@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180120033402) do
+ActiveRecord::Schema.define(version: 20180127055730) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -856,6 +856,38 @@ ActiveRecord::Schema.define(version: 20180120033402) do
     t.integer "item_id"
     t.integer "past_owner_id"
   end
+
+  create_table "planets", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "size"
+    t.string   "surface"
+    t.string   "landmarks"
+    t.string   "climate"
+    t.string   "weather"
+    t.string   "water_content"
+    t.string   "natural_resources"
+    t.string   "length_of_day"
+    t.string   "length_of_night"
+    t.string   "calendar_system"
+    t.string   "population"
+    t.string   "moons"
+    t.string   "orbit"
+    t.string   "visible_constellations"
+    t.string   "first_inhabitants_story"
+    t.string   "world_history"
+    t.string   "public_notes"
+    t.string   "private_notes"
+    t.string   "privacy"
+    t.integer  "universe_id"
+    t.integer  "user_id"
+    t.datetime "deleted_at"
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+  end
+
+  add_index "planets", ["universe_id"], name: "index_planets_on_universe_id"
+  add_index "planets", ["user_id"], name: "index_planets_on_user_id"
 
   create_table "races", force: :cascade do |t|
     t.string   "name"

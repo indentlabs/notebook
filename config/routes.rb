@@ -21,6 +21,7 @@ Rails.application.routes.draw do
     get :scenes,     on: :member
     get :groups,     on: :member
     get :universes,  on: :member
+    #<users_page_types>
   end
 
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
@@ -111,6 +112,7 @@ Rails.application.routes.draw do
       get :countries,  on: :member
       get :towns,      on: :member
       get :landmarks,  on: :member
+      #<universes_page_types>
     end
     resources :characters do
       get :autocomplete_character_name, on: :collection, as: :autocomplete_name
@@ -130,10 +132,9 @@ Rails.application.routes.draw do
     resources :towns
     resources :countries
     resources :landmarks
-
-    # Content usage
     resources :scenes
     resources :groups
+    #<page_type_resources>
 
     # Content attributes
     resources :attributes
@@ -177,6 +178,7 @@ Rails.application.routes.draw do
     get '/towns.csv', to: 'export#towns_csv', as: :towns_csv
     get '/countries.csv', to: 'export#countries_csv', as: :countries_csv
     get '/landmarks.csv', to: 'export#landmarks_csv', as: :landmarks_csv
+    #<export_page_types>
   end
 
   scope '/scene/:scene_id' do
