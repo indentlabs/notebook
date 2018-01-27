@@ -1,10 +1,6 @@
 class CreaturesController < ContentController
   private
 
-  def content_params
-    params.require(:creature).permit(content_param_list)
-  end
-
   def content_param_list
     %i(
       name description type_of other_names universe_id color shape size notable_features

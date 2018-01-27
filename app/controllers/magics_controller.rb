@@ -1,10 +1,6 @@
 class MagicsController < ContentController
   private
 
-  def content_params
-    params.require(:magic).permit(content_param_list)
-  end
-
   def content_param_list
     %i(
       name description type_of universe_id visuals effects positive_effects
