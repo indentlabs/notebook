@@ -15,96 +15,9 @@ class ExportController < ApplicationController
     }) if Rails.env.production?
   end
 
-  # Formats
-
-  # TODO use this instead of all of the below
-  def csv
+  def csv # params[:model] needed
     report_to_mixpanel 'csv', @pluralized_model
     send_data to_csv(current_user.send(@pluralized_model)), filename: "#{@pluralized_model}-#{Date.today}.csv"
-  end
-
-  def whitelist_pluralized_model
-    @pluralized_model = params[:model]
-
-    unless Rails.application.config.content_types[:all].map { |p| p.name.downcase.pluralize }.include?(@pluralized_model)
-      redirect_to root_path, notice: "You don't have permission to do that!"
-      return false
-    end
-  end
-
-  def universes_csv
-    report_to_mixpanel 'csv', 'universes'
-    send_data to_csv(current_user.universes), filename: "universes-#{Date.today}.csv"
-  end
-
-  def characters_csv
-    report_to_mixpanel 'csv', 'characters'
-    send_data to_csv(current_user.characters), filename: "characters-#{Date.today}.csv"
-  end
-
-  def locations_csv
-    report_to_mixpanel 'csv', 'locations'
-    send_data to_csv(current_user.locations), filename: "locations-#{Date.today}.csv"
-  end
-
-  def items_csv
-    report_to_mixpanel 'csv', 'items'
-    send_data to_csv(current_user.items), filename: "items-#{Date.today}.csv"
-  end
-
-  def creatures_csv
-    report_to_mixpanel 'csv', 'creatures'
-    send_data to_csv(current_user.creatures), filename: "creatures-#{Date.today}.csv"
-  end
-
-  def races_csv
-    report_to_mixpanel 'csv', 'races'
-    send_data to_csv(current_user.races), filename: "races-#{Date.today}.csv"
-  end
-
-  def floras_csv
-    report_to_mixpanel 'csv', 'flora'
-    send_data to_csv(current_user.floras), filename: "floras-#{Date.today}.csv"
-  end
-
-  def religions_csv
-    report_to_mixpanel 'csv', 'religions'
-    send_data to_csv(current_user.religions), filename: "religions-#{Date.today}.csv"
-  end
-
-  def magics_csv
-    report_to_mixpanel 'csv', 'magics'
-    send_data to_csv(current_user.magics), filename: "magics-#{Date.today}.csv"
-  end
-
-  def languages_csv
-    report_to_mixpanel 'csv', 'languages'
-    send_data to_csv(current_user.languages), filename: "languages-#{Date.today}.csv"
-  end
-
-  def groups_csv
-    report_to_mixpanel 'csv', 'groups'
-    send_data to_csv(current_user.groups), filename: "groups-#{Date.today}.csv"
-  end
-
-  def towns_csv
-    report_to_mixpanel 'csv', 'towns'
-    send_data to_csv(current_user.towns), filename: "towns-#{Date.today}.csv"
-  end
-
-  def landmarks_csv
-    report_to_mixpanel 'csv', 'landmarks'
-    send_data to_csv(current_user.landmarks), filename: "landmarks-#{Date.today}.csv"
-  end
-
-  def countries_csv
-    report_to_mixpanel 'csv', 'countries'
-    send_data to_csv(current_user.countries), filename: "countries-#{Date.today}.csv"
-  end
-
-  def scenes_csv
-    report_to_mixpanel 'csv', 'scenes'
-    send_data to_csv(current_user.scenes), filename: "scenes-#{Date.today}.csv"
   end
 
   def outline
@@ -134,6 +47,16 @@ class ExportController < ApplicationController
   end
 
   private
+
+  def whitelist_pluralized_model
+    @pluralized_model = params[:model]
+    valid_models_to_export = Rails.application.config.content_types[:all].map { |p| p.name.downcase.pluralize }
+
+    unless valid_models_to_export.include?(@pluralized_model)
+      redirect_to root_path, notice: "You don't have permission to do that!"
+      return false
+    end
+  end
 
   def to_csv ar_relation
     ar_class = ar_relation.build.class
