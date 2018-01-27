@@ -29,7 +29,9 @@ class Universe < ActiveRecord::Base
   has_many :characters
   has_many :countries
   has_many :creatures
+  has_many :deities
   has_many :floras
+  has_many :governments
   has_many :groups
   has_many :items
   has_many :landmarks
@@ -40,6 +42,7 @@ class Universe < ActiveRecord::Base
   has_many :races
   has_many :religions
   has_many :scenes
+  has_many :technologies
   has_many :towns
 
   has_many :contributors, dependent: :destroy
