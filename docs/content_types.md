@@ -10,6 +10,8 @@ Checklist to create a new content type:
 
 - Run `rake page_type:create` and type "Planet" at the prompt
 
+<-- am here
+
 - Edit app/models/content_types/planet.rb to define color and icon
 
 - Add has_many :planets to universe.rb

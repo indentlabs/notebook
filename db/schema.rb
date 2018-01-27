@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180127055730) do
+ActiveRecord::Schema.define(version: 20180127202120) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -360,6 +360,36 @@ ActiveRecord::Schema.define(version: 20180127055730) do
     t.integer "item_id"
     t.integer "current_owner_id"
   end
+
+  create_table "deities", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "other_names"
+    t.string   "physical_description"
+    t.string   "height"
+    t.string   "weight"
+    t.string   "symbols"
+    t.string   "elements"
+    t.string   "strengths"
+    t.string   "weaknesses"
+    t.string   "prayers"
+    t.string   "rituals"
+    t.string   "human_interaction"
+    t.string   "notable_events"
+    t.string   "family_history"
+    t.string   "life_story"
+    t.string   "notes"
+    t.string   "private_notes"
+    t.string   "privacy"
+    t.integer  "user_id"
+    t.integer  "universe_id"
+    t.datetime "deleted_at"
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+  end
+
+  add_index "deities", ["universe_id"], name: "index_deities_on_universe_id"
+  add_index "deities", ["user_id"], name: "index_deities_on_user_id"
 
   create_table "deityships", force: :cascade do |t|
     t.integer "religion_id"
@@ -876,7 +906,6 @@ ActiveRecord::Schema.define(version: 20180127055730) do
     t.string   "visible_constellations"
     t.string   "first_inhabitants_story"
     t.string   "world_history"
-    t.string   "public_notes"
     t.string   "private_notes"
     t.string   "privacy"
     t.integer  "universe_id"
@@ -884,6 +913,7 @@ ActiveRecord::Schema.define(version: 20180127055730) do
     t.datetime "deleted_at"
     t.datetime "created_at",              null: false
     t.datetime "updated_at",              null: false
+    t.string   "notes"
   end
 
   add_index "planets", ["universe_id"], name: "index_planets_on_universe_id"
@@ -1090,6 +1120,35 @@ ActiveRecord::Schema.define(version: 20180127055730) do
     t.integer "group_id"
     t.integer "supergroup_id"
   end
+
+  create_table "technologies", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "other_names"
+    t.string   "materials"
+    t.string   "manufacturing_process"
+    t.string   "sales_process"
+    t.string   "cost"
+    t.string   "rarity"
+    t.string   "purpose"
+    t.string   "how_it_works"
+    t.string   "resources_used"
+    t.string   "physical_description"
+    t.string   "size"
+    t.string   "weight"
+    t.string   "colors"
+    t.string   "notes"
+    t.string   "private_notes"
+    t.string   "privacy"
+    t.integer  "user_id"
+    t.integer  "universe_id"
+    t.datetime "deleted_at"
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+  end
+
+  add_index "technologies", ["universe_id"], name: "index_technologies_on_universe_id"
+  add_index "technologies", ["user_id"], name: "index_technologies_on_user_id"
 
   create_table "thredded_categories", force: :cascade do |t|
     t.integer  "messageboard_id",             null: false
