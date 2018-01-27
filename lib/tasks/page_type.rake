@@ -17,7 +17,7 @@ namespace :page_type do
 
     # Move model from models/ to models/content_types/
     # (we write the file in the next step; this just removes the original)
-    puts "Removing current model -- DESTRUCTIVE!"
+    puts "Removing base model at models/#{page_type.downcase}.rb"
     `rm app/models/#{page_type.downcase}.rb`
 
     # Add concerns to new model
@@ -66,7 +66,7 @@ class #{page_type.pluralize}Controller < ContentController
 
   def content_param_list
     [
-      #{editable_fields.join(', ')}
+      #{editable_fields.map { |f| ":#{f}" }.join(', ')}
     ] + [ #<relations>
 
     ]
@@ -74,7 +74,7 @@ class #{page_type.pluralize}Controller < ContentController
 end
     """
     File.open("app/controllers/#{page_type.downcase.pluralize}_controller.rb", 'w+') do |file|
-      file.write(class_definition)
+      file.write(controller_definition)
     end
 
     puts "Writing routes"

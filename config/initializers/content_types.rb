@@ -2,7 +2,7 @@ Rails.application.config.content_types = {
   # The complete list of all content types
   all: [
     Universe, Character, Location, Item, Creature, Flora, Group, Language,
-    Magic, Race, Religion, Scene, Town, Country, Landmark
+    Magic, Race, Religion, Scene, Town, Country, Landmark, Planet
   ],
 
   # These content types are always on for all users, and cannot be toggled off
@@ -14,7 +14,7 @@ Rails.application.config.content_types = {
   # These content types are available to be turned on
   available: [
     Creature, Flora, Group, Language, Magic, Race, Religion, Scene,
-    Town, Country, Landmark
+    Town, Country, Landmark, Planet
   ],
 
   # These content types can be created by any user
@@ -23,7 +23,7 @@ Rails.application.config.content_types = {
   # These content types require a premium subscription to create
   premium: [
     Creature, Flora, Group, Language, Magic, Race, Religion, Scene, Town,
-    Country, Landmark
+    Country, Landmark, Planet
   ]
 }
 

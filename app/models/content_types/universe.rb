@@ -22,6 +22,7 @@ class Universe < ActiveRecord::Base
   validates :user_id, presence: true
 
   belongs_to :user
+  # The following doesn't work because we reference Universe when setting up this config
   # Rails.application.config.content_types[:all_non_universe].each do |content_type|
   #   has_many content_types.name.downcase.pluralize.to_sym
   # end

@@ -1,32 +1,13 @@
 
-class Planet < ActiveRecord::Base
-  acts_as_paranoid
+class PlanetsController < ContentController
+  private
 
-  belongs_to :user
-  validates :name, presence: true
-  validates :user_id, presence: true
+  def content_param_list
+    [
+      :name, :description, :size, :surface, :landmarks, :climate, :weather, :water_content, :natural_resources, :length_of_day, :length_of_night, :calendar_system, :population, :moons, :orbit, :visible_constellations, :first_inhabitants_story, :world_history, :public_notes, :private_notes, :privacy, :universe_id
+    ] + [ #<relations>
 
-  include BelongsToUniverse
-  include HasAttributes
-  include HasPrivacy
-  include HasContentGroupers
-  include HasImageUploads
-  include HasChangelog
-  include Serendipitous::Concern
-
-  include Authority::Abilities
-  self.authorizer_name = 'ExtendedContentAuthorizer'
-
-  def self.color
-    'black'
-  end
-
-  def self.icon
-    'info'
-  end
-
-  def self.content_name
-    'planet'
+    ]
   end
 end
     
