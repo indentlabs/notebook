@@ -24,6 +24,7 @@ Rails.application.routes.draw do
     get :planets, on: :member
     get :technologies, on: :member
     get :deities, on: :member
+    get :governments, on: :member
     #<users_page_types>
   end
 
@@ -118,6 +119,7 @@ Rails.application.routes.draw do
       get :planets, on: :member
     get :technologies, on: :member
     get :deities, on: :member
+    get :governments, on: :member
     #<universes_page_types>
     end
     resources :characters do
@@ -143,6 +145,7 @@ Rails.application.routes.draw do
     resources :planets
     resources :technologies
     resources :deities
+    resources :governments
     #<page_type_resources>
 
     # Content attributes

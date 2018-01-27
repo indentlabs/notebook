@@ -10,6 +10,7 @@ namespace :page_type do
       exit
     end
 
+    puts "Migrating database"
     `rake db:migrate`
 
     editable_fields = klass.columns.map(&:name) - %w(id deleted_at created_at updated_at user_id)

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180127202120) do
+ActiveRecord::Schema.define(version: 20180127203130) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -508,6 +508,45 @@ ActiveRecord::Schema.define(version: 20180127202120) do
   add_index "friendly_id_slugs", ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type"
   add_index "friendly_id_slugs", ["sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_id"
   add_index "friendly_id_slugs", ["sluggable_type"], name: "index_friendly_id_slugs_on_sluggable_type"
+
+  create_table "governments", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "type_of_government"
+    t.string   "power_structure"
+    t.string   "power_source"
+    t.string   "checks_and_balances"
+    t.string   "sociopolitical"
+    t.string   "socioeconomical"
+    t.string   "geocultural"
+    t.string   "laws"
+    t.string   "immigration"
+    t.string   "privacy_ideologies"
+    t.string   "electoral_process"
+    t.string   "term_lengths"
+    t.string   "criminal_system"
+    t.string   "approval_ratings"
+    t.string   "military"
+    t.string   "navy"
+    t.string   "airforce"
+    t.string   "space_program"
+    t.string   "international_relations"
+    t.string   "civilian_life"
+    t.string   "founding_story"
+    t.string   "flag_design_story"
+    t.string   "notable_wars"
+    t.string   "notes"
+    t.string   "private_notes"
+    t.string   "privacy"
+    t.integer  "user_id"
+    t.integer  "universe_id"
+    t.datetime "deleted_at"
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+  end
+
+  add_index "governments", ["universe_id"], name: "index_governments_on_universe_id"
+  add_index "governments", ["user_id"], name: "index_governments_on_user_id"
 
   create_table "group_allyships", force: :cascade do |t|
     t.integer "user_id"
