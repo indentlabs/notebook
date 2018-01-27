@@ -12,6 +12,8 @@ Checklist to create a new content type:
 
 - Edit app/models/content_types/planet.rb to define color and icon
 
+- Add has_many :planets to universe.rb
+
 - Add the content class to initializers/content_types.rb
   - most likely to :all, :available, and :free/:premium
 
@@ -26,11 +28,6 @@ Checklist to create a new content type:
   - add questions for each field to serendipitous_questions
   - add line for each to content_oneliners
   - add content_descriptions (of relatively the same size)
-
-- Add hooks to ExportController
-  - Add links to export/index.html.erb
-- Add links to `content` and `content_list` and `content_in_universe` and everything else in HasContent concern
-  - this totally needs refactored
 
 - Give it a shot through the UI! :)
   - fill in each field to make sure all fields are working/permitted

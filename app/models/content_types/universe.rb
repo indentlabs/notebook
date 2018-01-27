@@ -22,9 +22,24 @@ class Universe < ActiveRecord::Base
   validates :user_id, presence: true
 
   belongs_to :user
-  Rails.application.config.content_types[:all_non_universe].each do |content_type|
-    has_many content_types.name.downcase.pluralize.to_sym
-  end
+  # Rails.application.config.content_types[:all_non_universe].each do |content_type|
+  #   has_many content_types.name.downcase.pluralize.to_sym
+  # end
+  has_many :characters
+  has_many :countries
+  has_many :creatures
+  has_many :floras
+  has_many :groups
+  has_many :items
+  has_many :landmarks
+  has_many :languages
+  has_many :locations
+  has_many :magics
+  has_many :planets
+  has_many :races
+  has_many :religions
+  has_many :scenes
+  has_many :towns
 
   has_many :contributors, dependent: :destroy
 

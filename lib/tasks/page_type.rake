@@ -73,7 +73,7 @@ class #{page_type.pluralize}Controller < ContentController
   end
 end
     """
-    File.open("app/controllers/#{page_type.downcase.pluralize}_controller.rb", 'w') do |file|
+    File.open("app/controllers/#{page_type.downcase.pluralize}_controller.rb", 'w+') do |file|
       file.write(class_definition)
     end
 
@@ -83,7 +83,6 @@ end
     # Swap new routes in
     routes.gsub!(/#<users_page_types>/, "get :#{page_type.downcase.pluralize}, on: :member\n    #<users_page_types>")
     routes.gsub!(/#<universes_page_types>/, "get :#{page_type.downcase.pluralize}, on: :member\n    #<universes_page_types>")
-    routes.gsub!(/#<export_page_types>/, "get /#{page_type.downcase.pluralize}.csv, to: 'export#{page_type.downcase.pluralize}_csv', as: :#{page_type.downcase.pluralize}_csv\n    #<export_page_types>")
     routes.gsub!(/#<page_type_resources>/, "resources :#{page_type.downcase.pluralize}\n    #<page_type_resources>")
 
     # Write new routes back to file
@@ -118,7 +117,7 @@ end
       :description: Private notes are <em>always</em> visible to only you, even if content is made public and shared.
     """
 
-    File.open("config/attribuets/#{page_type.downcase}.yml", 'w') do |file|
+    File.open("config/attributes/#{page_type.downcase}.yml", 'w+') do |file|
       file.write(attributes_template)
     end
 

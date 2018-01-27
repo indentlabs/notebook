@@ -1,5 +1,6 @@
 class ExportController < ApplicationController
   before_action :authenticate_user!
+  before_action :whitelist_pluralized_model, only: [:csv]
 
   def index
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed export page', {
@@ -15,6 +16,21 @@ class ExportController < ApplicationController
   end
 
   # Formats
+
+  # TODO use this instead of all of the below
+  def csv
+    report_to_mixpanel 'csv', @pluralized_model
+    send_data to_csv(current_user.send(@pluralized_model)), filename: "#{@pluralized_model}-#{Date.today}.csv"
+  end
+
+  def whitelist_pluralized_model
+    @pluralized_model = params[:model]
+
+    unless Rails.application.config.content_types[:all].map { |p| p.name.downcase.pluralize }.include?(@pluralized_model)
+      redirect_to root_path, notice: "You don't have permission to do that!"
+      return false
+    end
+  end
 
   def universes_csv
     report_to_mixpanel 'csv', 'universes'

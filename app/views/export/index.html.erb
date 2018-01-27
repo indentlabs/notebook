@@ -27,23 +27,12 @@
         </div>
         <div class="card-body">
           <ul>
-            <li><%= link_to "universes.csv", universes_csv_path %></li>
-            <li><%= link_to "characters.csv", characters_csv_path %></li>
-            <li><%= link_to "locations.csv", locations_csv_path %></li>
-            <li><%= link_to "items.csv", items_csv_path %></li>
-
-            <li><%= link_to "creatures.csv", creatures_csv_path %></li>
-            <li><%= link_to "races.csv", races_csv_path %></li>
-            <li><%= link_to "religions.csv", religions_csv_path %></li>
-            <li><%= link_to "magics.csv", magics_csv_path %></li>
-            <li><%= link_to "languages.csv", languages_csv_path %></li>
-            <li><%= link_to "groups.csv", groups_csv_path %></li>
-            <li><%= link_to "floras.csv", floras_csv_path %></li>
-            <li><%= link_to "towns.csv", towns_csv_path %></li>
-            <li><%= link_to "countries.csv", countries_csv_path %></li>
-            <li><%= link_to "landmarks.csv", landmarks_csv_path %></li>
-
-            <li><%= link_to "scenes.csv", scenes_csv_path %></li>
+            <% Rails.application.config.content_types[:all].each do |page_type| %>
+              <li>
+                <%= link_to "#{page_type.name.downcase.pluralize}.csv",
+                            notebook_csv_path(model: page_type.name.downcase.pluralize) %>
+              </li>
+            <% end %>
           </ul>
         </div>
       </div>

@@ -21,6 +21,7 @@ Rails.application.routes.draw do
     get :scenes,     on: :member
     get :groups,     on: :member
     get :universes,  on: :member
+    get :planets, on: :member
     #<users_page_types>
   end
 
@@ -112,7 +113,8 @@ Rails.application.routes.draw do
       get :countries,  on: :member
       get :towns,      on: :member
       get :landmarks,  on: :member
-      #<universes_page_types>
+      get :planets, on: :member
+    #<universes_page_types>
     end
     resources :characters do
       get :autocomplete_character_name, on: :collection, as: :autocomplete_name
@@ -134,6 +136,7 @@ Rails.application.routes.draw do
     resources :landmarks
     resources :scenes
     resources :groups
+    resources :planets
     #<page_type_resources>
 
     # Content attributes
@@ -162,23 +165,7 @@ Rails.application.routes.draw do
     get '/outline', to: 'export#outline', as: :notebook_outline
     get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
     get '/notebook.xml', to: 'export#notebook_xml', as: :notebook_xml
-
-    get '/universes.csv', to: 'export#universes_csv', as: :universes_csv
-    get '/characters.csv', to: 'export#characters_csv', as: :characters_csv
-    get '/locations.csv', to: 'export#locations_csv', as: :locations_csv
-    get '/items.csv', to: 'export#items_csv', as: :items_csv
-    get '/creatures.csv', to: 'export#creatures_csv', as: :creatures_csv
-    get '/races.csv', to: 'export#races_csv', as: :races_csv
-    get '/floras.csv', to: 'export#floras_csv', as: :floras_csv
-    get '/religions.csv', to: 'export#religions_csv', as: :religions_csv
-    get '/magics.csv', to: 'export#magics_csv', as: :magics_csv
-    get '/languages.csv', to: 'export#languages_csv', as: :languages_csv
-    get '/scenes.csv', to: 'export#scenes_csv', as: :scenes_csv
-    get '/groups.csv', to: 'export#groups_csv', as: :groups_csv
-    get '/towns.csv', to: 'export#towns_csv', as: :towns_csv
-    get '/countries.csv', to: 'export#countries_csv', as: :countries_csv
-    get '/landmarks.csv', to: 'export#landmarks_csv', as: :landmarks_csv
-    #<export_page_types>
+    get '/:model.csv', to: 'export#csv', as: :notebook_csv
   end
 
   scope '/scene/:scene_id' do
