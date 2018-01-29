@@ -64,7 +64,7 @@ class Universe < ActiveRecord::Base
   end
 
   def self.icon
-    'public'
+    'language'
   end
 
   def self.content_name

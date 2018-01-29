@@ -18,15 +18,14 @@ class Deity < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'black'
+    'text-lighten-1 grey'
   end
 
   def self.icon
-    'info'
+    'ac_unit'
   end
 
   def self.content_name
     'deity'
   end
 end
-    

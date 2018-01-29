@@ -18,15 +18,14 @@ class Planet < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'black'
+    'text-lighten-2 blue'
   end
 
   def self.icon
-    'info'
+    'public'
   end
 
   def self.content_name
     'planet'
   end
 end
-    

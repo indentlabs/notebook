@@ -18,15 +18,14 @@ class Government < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'black'
+    'darken-2 green'
   end
 
   def self.icon
-    'info'
+    'account_balance'
   end
 
   def self.content_name
     'government'
   end
 end
-    

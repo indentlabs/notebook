@@ -18,15 +18,14 @@ class Technology < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'black'
+    'text-darken-2 red'
   end
 
   def self.icon
-    'info'
+    'router'
   end
 
   def self.content_name
     'technology'
   end
 end
-    
