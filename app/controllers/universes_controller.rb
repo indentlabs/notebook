@@ -24,7 +24,7 @@ class UniversesController < ContentController
     [
       :user_id,
       :name, :description, :genre,
-      :laws_of_physics, :magic_system, :technologies,
+      :laws_of_physics, :magic_system, :technology,
       :history,
       :privacy,
       :notes, :private_notes,

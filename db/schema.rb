@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180127203130) do
+ActiveRecord::Schema.define(version: 20180129033131) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -1544,7 +1544,7 @@ ActiveRecord::Schema.define(version: 20180127203130) do
     t.datetime "updated_at"
     t.string   "laws_of_physics"
     t.string   "magic_system"
-    t.string   "technologies"
+    t.string   "technology"
     t.string   "genre"
     t.datetime "deleted_at"
   end
