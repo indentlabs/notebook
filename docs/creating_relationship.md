@@ -1,7 +1,7 @@
 # Example of adding a "leaders" relation to Group
 
 ## Create migration
-- rails g model GroupLeadership user_id:integer group_id:integer leader_id:integer
+- rails g model GroupLeadership user:references group:references leader_id:integer
 - move model to models/content_groupers
 
 ## Migrate

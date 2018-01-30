@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180129033131) do
+ActiveRecord::Schema.define(version: 20180130233539) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -926,12 +926,154 @@ ActiveRecord::Schema.define(version: 20180129033131) do
     t.integer "past_owner_id"
   end
 
+  create_table "planet_countries", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "country_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "planet_countries", ["country_id"], name: "index_planet_countries_on_country_id"
+  add_index "planet_countries", ["planet_id"], name: "index_planet_countries_on_planet_id"
+  add_index "planet_countries", ["user_id"], name: "index_planet_countries_on_user_id"
+
+  create_table "planet_creatures", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "creature_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "planet_creatures", ["creature_id"], name: "index_planet_creatures_on_creature_id"
+  add_index "planet_creatures", ["planet_id"], name: "index_planet_creatures_on_planet_id"
+  add_index "planet_creatures", ["user_id"], name: "index_planet_creatures_on_user_id"
+
+  create_table "planet_deities", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "deity_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "planet_deities", ["deity_id"], name: "index_planet_deities_on_deity_id"
+  add_index "planet_deities", ["planet_id"], name: "index_planet_deities_on_planet_id"
+  add_index "planet_deities", ["user_id"], name: "index_planet_deities_on_user_id"
+
+  create_table "planet_floras", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "flora_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "planet_floras", ["flora_id"], name: "index_planet_floras_on_flora_id"
+  add_index "planet_floras", ["planet_id"], name: "index_planet_floras_on_planet_id"
+  add_index "planet_floras", ["user_id"], name: "index_planet_floras_on_user_id"
+
+  create_table "planet_groups", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "group_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "planet_groups", ["group_id"], name: "index_planet_groups_on_group_id"
+  add_index "planet_groups", ["planet_id"], name: "index_planet_groups_on_planet_id"
+  add_index "planet_groups", ["user_id"], name: "index_planet_groups_on_user_id"
+
+  create_table "planet_landmarks", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "landmark_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "planet_landmarks", ["landmark_id"], name: "index_planet_landmarks_on_landmark_id"
+  add_index "planet_landmarks", ["planet_id"], name: "index_planet_landmarks_on_planet_id"
+  add_index "planet_landmarks", ["user_id"], name: "index_planet_landmarks_on_user_id"
+
+  create_table "planet_languages", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "language_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "planet_languages", ["language_id"], name: "index_planet_languages_on_language_id"
+  add_index "planet_languages", ["planet_id"], name: "index_planet_languages_on_planet_id"
+  add_index "planet_languages", ["user_id"], name: "index_planet_languages_on_user_id"
+
+  create_table "planet_locations", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "location_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "planet_locations", ["location_id"], name: "index_planet_locations_on_location_id"
+  add_index "planet_locations", ["planet_id"], name: "index_planet_locations_on_planet_id"
+  add_index "planet_locations", ["user_id"], name: "index_planet_locations_on_user_id"
+
+  create_table "planet_nearby_planets", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "nearby_planet_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  add_index "planet_nearby_planets", ["planet_id"], name: "index_planet_nearby_planets_on_planet_id"
+  add_index "planet_nearby_planets", ["user_id"], name: "index_planet_nearby_planets_on_user_id"
+
+  create_table "planet_races", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "race_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "planet_races", ["planet_id"], name: "index_planet_races_on_planet_id"
+  add_index "planet_races", ["race_id"], name: "index_planet_races_on_race_id"
+  add_index "planet_races", ["user_id"], name: "index_planet_races_on_user_id"
+
+  create_table "planet_religions", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "religion_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "planet_religions", ["planet_id"], name: "index_planet_religions_on_planet_id"
+  add_index "planet_religions", ["religion_id"], name: "index_planet_religions_on_religion_id"
+  add_index "planet_religions", ["user_id"], name: "index_planet_religions_on_user_id"
+
+  create_table "planet_towns", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "town_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "planet_towns", ["planet_id"], name: "index_planet_towns_on_planet_id"
+  add_index "planet_towns", ["town_id"], name: "index_planet_towns_on_town_id"
+  add_index "planet_towns", ["user_id"], name: "index_planet_towns_on_user_id"
+
   create_table "planets", force: :cascade do |t|
     t.string   "name"
     t.string   "description"
     t.string   "size"
     t.string   "surface"
-    t.string   "landmarks"
     t.string   "climate"
     t.string   "weather"
     t.string   "water_content"
