@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180130234420) do
+ActiveRecord::Schema.define(version: 20180130234531) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -654,6 +654,76 @@ ActiveRecord::Schema.define(version: 20180130234420) do
   add_index "friendly_id_slugs", ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type"
   add_index "friendly_id_slugs", ["sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_id"
   add_index "friendly_id_slugs", ["sluggable_type"], name: "index_friendly_id_slugs_on_sluggable_type"
+
+  create_table "government_creatures", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "government_id"
+    t.integer  "creature_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "government_creatures", ["creature_id"], name: "index_government_creatures_on_creature_id"
+  add_index "government_creatures", ["government_id"], name: "index_government_creatures_on_government_id"
+  add_index "government_creatures", ["user_id"], name: "index_government_creatures_on_user_id"
+
+  create_table "government_groups", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "government_id"
+    t.integer  "group_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "government_groups", ["government_id"], name: "index_government_groups_on_government_id"
+  add_index "government_groups", ["group_id"], name: "index_government_groups_on_group_id"
+  add_index "government_groups", ["user_id"], name: "index_government_groups_on_user_id"
+
+  create_table "government_items", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "government_id"
+    t.integer  "item_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "government_items", ["government_id"], name: "index_government_items_on_government_id"
+  add_index "government_items", ["item_id"], name: "index_government_items_on_item_id"
+  add_index "government_items", ["user_id"], name: "index_government_items_on_user_id"
+
+  create_table "government_leaders", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "government_id"
+    t.integer  "leader_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "government_leaders", ["government_id"], name: "index_government_leaders_on_government_id"
+  add_index "government_leaders", ["user_id"], name: "index_government_leaders_on_user_id"
+
+  create_table "government_political_figures", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "government_id"
+    t.integer  "political_figure_id"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+  end
+
+  add_index "government_political_figures", ["government_id"], name: "index_government_political_figures_on_government_id"
+  add_index "government_political_figures", ["user_id"], name: "index_government_political_figures_on_user_id"
+
+  create_table "government_technologies", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "government_id"
+    t.integer  "technology_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "government_technologies", ["government_id"], name: "index_government_technologies_on_government_id"
+  add_index "government_technologies", ["technology_id"], name: "index_government_technologies_on_technology_id"
+  add_index "government_technologies", ["user_id"], name: "index_government_technologies_on_user_id"
 
   create_table "governments", force: :cascade do |t|
     t.string   "name"
