@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180130233928) do
+ActiveRecord::Schema.define(version: 20180130234420) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -390,6 +390,152 @@ ActiveRecord::Schema.define(version: 20180130233928) do
 
   add_index "deities", ["universe_id"], name: "index_deities_on_universe_id"
   add_index "deities", ["user_id"], name: "index_deities_on_user_id"
+
+  create_table "deity_abilities", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "ability_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "deity_abilities", ["deity_id"], name: "index_deity_abilities_on_deity_id"
+  add_index "deity_abilities", ["user_id"], name: "index_deity_abilities_on_user_id"
+
+  create_table "deity_character_children", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "character_child_id"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+  end
+
+  add_index "deity_character_children", ["deity_id"], name: "index_deity_character_children_on_deity_id"
+  add_index "deity_character_children", ["user_id"], name: "index_deity_character_children_on_user_id"
+
+  create_table "deity_character_parents", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "character_parent_id"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+  end
+
+  add_index "deity_character_parents", ["deity_id"], name: "index_deity_character_parents_on_deity_id"
+  add_index "deity_character_parents", ["user_id"], name: "index_deity_character_parents_on_user_id"
+
+  create_table "deity_character_partners", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "character_partner_id"
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+  end
+
+  add_index "deity_character_partners", ["deity_id"], name: "index_deity_character_partners_on_deity_id"
+  add_index "deity_character_partners", ["user_id"], name: "index_deity_character_partners_on_user_id"
+
+  create_table "deity_creatures", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "creature_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "deity_creatures", ["creature_id"], name: "index_deity_creatures_on_creature_id"
+  add_index "deity_creatures", ["deity_id"], name: "index_deity_creatures_on_deity_id"
+  add_index "deity_creatures", ["user_id"], name: "index_deity_creatures_on_user_id"
+
+  create_table "deity_deity_children", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "deity_child_id"
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
+  end
+
+  add_index "deity_deity_children", ["deity_id"], name: "index_deity_deity_children_on_deity_id"
+  add_index "deity_deity_children", ["user_id"], name: "index_deity_deity_children_on_user_id"
+
+  create_table "deity_deity_parents", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "deity_parent_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "deity_deity_parents", ["deity_id"], name: "index_deity_deity_parents_on_deity_id"
+  add_index "deity_deity_parents", ["user_id"], name: "index_deity_deity_parents_on_user_id"
+
+  create_table "deity_deity_partners", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "deity_partner_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  add_index "deity_deity_partners", ["deity_id"], name: "index_deity_deity_partners_on_deity_id"
+  add_index "deity_deity_partners", ["user_id"], name: "index_deity_deity_partners_on_user_id"
+
+  create_table "deity_floras", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "flora_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "deity_floras", ["deity_id"], name: "index_deity_floras_on_deity_id"
+  add_index "deity_floras", ["flora_id"], name: "index_deity_floras_on_flora_id"
+  add_index "deity_floras", ["user_id"], name: "index_deity_floras_on_user_id"
+
+  create_table "deity_related_landmarks", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "related_landmark_id"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+  end
+
+  add_index "deity_related_landmarks", ["deity_id"], name: "index_deity_related_landmarks_on_deity_id"
+  add_index "deity_related_landmarks", ["user_id"], name: "index_deity_related_landmarks_on_user_id"
+
+  create_table "deity_related_towns", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "related_town_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "deity_related_towns", ["deity_id"], name: "index_deity_related_towns_on_deity_id"
+  add_index "deity_related_towns", ["user_id"], name: "index_deity_related_towns_on_user_id"
+
+  create_table "deity_relics", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "relic_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "deity_relics", ["deity_id"], name: "index_deity_relics_on_deity_id"
+  add_index "deity_relics", ["user_id"], name: "index_deity_relics_on_user_id"
+
+  create_table "deity_religions", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "religion_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "deity_religions", ["deity_id"], name: "index_deity_religions_on_deity_id"
+  add_index "deity_religions", ["religion_id"], name: "index_deity_religions_on_religion_id"
+  add_index "deity_religions", ["user_id"], name: "index_deity_religions_on_user_id"
 
   create_table "deityships", force: :cascade do |t|
     t.integer "religion_id"
