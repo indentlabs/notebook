@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180130233539) do
+ActiveRecord::Schema.define(version: 20180130233928) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -1330,6 +1330,123 @@ ActiveRecord::Schema.define(version: 20180130233539) do
 
   add_index "technologies", ["universe_id"], name: "index_technologies_on_universe_id"
   add_index "technologies", ["user_id"], name: "index_technologies_on_user_id"
+
+  create_table "technology_characters", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "character_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_characters", ["character_id"], name: "index_technology_characters_on_character_id"
+  add_index "technology_characters", ["technology_id"], name: "index_technology_characters_on_technology_id"
+  add_index "technology_characters", ["user_id"], name: "index_technology_characters_on_user_id"
+
+  create_table "technology_child_technologies", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "child_technology_id"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+  end
+
+  add_index "technology_child_technologies", ["technology_id"], name: "index_technology_child_technologies_on_technology_id"
+  add_index "technology_child_technologies", ["user_id"], name: "index_technology_child_technologies_on_user_id"
+
+  create_table "technology_countries", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "country_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_countries", ["country_id"], name: "index_technology_countries_on_country_id"
+  add_index "technology_countries", ["technology_id"], name: "index_technology_countries_on_technology_id"
+  add_index "technology_countries", ["user_id"], name: "index_technology_countries_on_user_id"
+
+  create_table "technology_creatures", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "creature_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_creatures", ["creature_id"], name: "index_technology_creatures_on_creature_id"
+  add_index "technology_creatures", ["technology_id"], name: "index_technology_creatures_on_technology_id"
+  add_index "technology_creatures", ["user_id"], name: "index_technology_creatures_on_user_id"
+
+  create_table "technology_groups", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "group_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_groups", ["group_id"], name: "index_technology_groups_on_group_id"
+  add_index "technology_groups", ["technology_id"], name: "index_technology_groups_on_technology_id"
+  add_index "technology_groups", ["user_id"], name: "index_technology_groups_on_user_id"
+
+  create_table "technology_magics", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "magic_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_magics", ["magic_id"], name: "index_technology_magics_on_magic_id"
+  add_index "technology_magics", ["technology_id"], name: "index_technology_magics_on_technology_id"
+  add_index "technology_magics", ["user_id"], name: "index_technology_magics_on_user_id"
+
+  create_table "technology_parent_technologies", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "parent_technology_id"
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+  end
+
+  add_index "technology_parent_technologies", ["technology_id"], name: "index_technology_parent_technologies_on_technology_id"
+  add_index "technology_parent_technologies", ["user_id"], name: "index_technology_parent_technologies_on_user_id"
+
+  create_table "technology_planets", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "planet_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_planets", ["planet_id"], name: "index_technology_planets_on_planet_id"
+  add_index "technology_planets", ["technology_id"], name: "index_technology_planets_on_technology_id"
+  add_index "technology_planets", ["user_id"], name: "index_technology_planets_on_user_id"
+
+  create_table "technology_related_technologies", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "related_technology_id"
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+  end
+
+  add_index "technology_related_technologies", ["technology_id"], name: "index_technology_related_technologies_on_technology_id"
+  add_index "technology_related_technologies", ["user_id"], name: "index_technology_related_technologies_on_user_id"
+
+  create_table "technology_towns", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "town_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_towns", ["technology_id"], name: "index_technology_towns_on_technology_id"
+  add_index "technology_towns", ["town_id"], name: "index_technology_towns_on_town_id"
+  add_index "technology_towns", ["user_id"], name: "index_technology_towns_on_user_id"
 
   create_table "thredded_categories", force: :cascade do |t|
     t.integer  "messageboard_id",             null: false
