@@ -1,0 +1,49 @@
+<%
+  relations = Rails.application.config.content_relations[content.class.name]
+
+  relations   ||= []
+  @references ||= {}
+%>
+
+<% relations.each do |name, params| %>
+  <%=
+    render partial: 'content/contexts/relation', locals: {
+      content_type:      content.class,
+      content:           content,
+      relation_class:    params[:related_class],
+      inverse_class:     params[:inverse_class],
+      relation_class_id: "#{name.to_s.singularize}_id",
+      relation_text:     params[:relation_text],
+      through_relation:  params[:through_relation]
+    }
+  %>
+<% end %>
+
+<% @references.each do |content_type, relations| %>
+  <% next unless relations.any? %>
+  <%
+  card_title = if relations.count == 1
+    if relations.first.first.include? '<plural>'
+      relations.first.first
+    else
+      [
+        relations.first.first,
+        ' of ',
+        pluralize(relations.count, "#{content_type.to_s.singularize}")
+      ].join
+    end
+  else
+    [
+      'Related to ',
+      pluralize(relations.count, "#{content_type.to_s.singularize}")
+    ].join
+  end
+  %>
+  <div class="col s12 m6 l4">
+    <%= render partial: 'content/cards/content_relation_list', locals: {
+      content_type: content_type,
+      relations:    relations,
+      card_title:   card_title
+    } %>
+  </div>
+<% end %>

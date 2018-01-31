@@ -4,8 +4,6 @@ module HasContentGroupers
   extend ActiveSupport::Concern
 
   included do
-    @@relations = {}
-
     # Example:
     #   relates :siblings, with: :siblingships, where: { alive: true }, type: :two_way
     #   Defines :siblings and :siblingships relations, their inverses, and accepts_nested_attributes for siblingships
@@ -14,12 +12,32 @@ module HasContentGroupers
       connecting_class      = with.to_s.singularize.camelize.constantize
       connecting_class_name = with
 
-      # Store all added relations on the class model, so we can dynamically fetch them all whenever needed.
-      # e.g. Character.class_variable_get(:@@relations) => [:mothers, :fathers, :siblings, ...]
-      @@relations[relation] = {              # @@relations[:siblings] = {
-        with:          with,                 #   with:          :siblingships,
-        related_class: connecting_class      #   related_class: Siblingship
-      }                                      # }
+      # Fetch the connecting class's through class (e.g. Character for sibling_id).
+      # If there isn't one defined, it means it already maps to a model (e.g. race_id),
+      # so we can use the name as the class as well.
+      belongs_to_relations = connecting_class.reflect_on_all_associations(:belongs_to)
+      through_relation = belongs_to_relations.detect do |relation| # sibling
+        relation.name.to_s == singularized_relation
+      end
+      if through_relation.options.key?(:class_name)
+        through_relation_class = through_relation.options[:class_name] # Character
+      else
+        through_relation_class = through_relation.name.to_s.titleize # Character
+      end
+
+      # Store all added relations on the config object, so we can dynamically
+      # fetch them all whenever needed. These are used to find all relations
+      # where a particular page is the target of a content_grouper, rather than
+      # the parent (e.g. one of its has_many's).
+      Rails.application.config.content_relations[through_relation_class] ||= {}
+      Rails.application.config.content_relations[through_relation_class][connecting_class.name] = \
+        {                                         # ['Character'][:siblings] = {
+          with:          with,                    #   with:          :siblingships,
+          related_class: connecting_class,        #   related_class: Siblingship,
+          inverse_class: name,                    #   inverse_class: 'Character',
+          relation_text: singularized_relation,   #   relation_text: "Sibling"
+          through_relation: singularized_relation #   through_relation: 'Sibling'
+        }                                         # }
 
       # Siblingships
       has_many connecting_class_name, dependent: :destroy

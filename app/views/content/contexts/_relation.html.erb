@@ -3,15 +3,16 @@
     content_type: Location,
     content: some_location_to_find_leaders_of,
     relation_class: LocationLeadership,
-    relation_class_id: :leader_id,
-    relation_text: :leader_of
+    relation_class_id: :leadership_id,
+    relation_text: :leader_of,
+    through_relation: 'Leader'
   }
 
   Note: Initializes/appends to @references[content_type]
 %>
 
 <%
-  string_content_type  = content_type.to_s.downcase
+  string_content_type  = inverse_class.downcase
   references_key       = string_content_type.pluralize.to_sym
   pretty_relation_text = relation_text.to_s.titleize.downcase
 
@@ -21,8 +22,8 @@
 
 <%# .joins(:item).where('items.privacy' => ['public']) also works, but doesn't include current_user check %>
 <%
-  relations = relation_class.where("#{relation_class_id}": content.id)
-    .map { |content| content.send(string_content_type) }
+  relations = relation_class.where("#{through_relation.downcase}_id": content.id)
+    .map    { |content| content.send(inverse_class.downcase) }
     .select { |content| content && content.readable_by?(current_user || User.new) }
 %>
 <%
@@ -32,19 +33,17 @@
     # pretty_relation_text[0] = pretty_relation_text[0].upcase
     @references[references_key] << [pretty_relation_text, relations.first]
 
-
   elsif relations.count > 1
     if pretty_relation_text.include? '<plural>'
       pretty_relation_text.gsub!('<plural>', pluralize(relations.count, string_content_type))
     else
-      pretty_relation_text = "#{pretty_relation_text} #{pluralize(relations.count, string_content_type)}"
+      pretty_relation_text = "#{pretty_relation_text} of #{pluralize(relations.count, string_content_type)}"
     end
     pretty_relation_text[0] = pretty_relation_text[0].upcase
-
 %>
   <div class="col s12 m6 l4">
     <%= render partial: 'content/cards/in_universe_content_list', locals: {
-      content_type: content_type.to_s.downcase,
+      content_type: inverse_class.downcase,
       content_list: relations,
       card_title: pretty_relation_text
     } %>
