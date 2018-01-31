@@ -19,11 +19,8 @@ class Group < ActiveRecord::Base
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
-  # Characters
   relates :leaders, with: :group_leaderships
   relates :members, with: :group_memberships
-
-  # Groups
   relates :supergroups, with: :supergroupships
   relates :subgroups, with: :subgroupships
   relates :sistergroups, with: :sistergroupships
@@ -32,15 +29,12 @@ class Group < ActiveRecord::Base
   relates :rivals, with: :group_rivalships
   relates :clients, with: :group_clientships
   relates :suppliers, with: :group_supplierships
-
-  # Locations
   relates :locations, with: :group_locationships
   relates :headquarters, with: :headquarterships
   relates :offices, with: :officeships
-
-  # Items
   relates :equipment, with: :group_equipmentships
   relates :key_items, with: :key_itemships
+  relates :creatures, with: :group_creatures
 
   def self.color
     'cyan'

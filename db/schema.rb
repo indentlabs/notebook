@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180131061902) do
+ActiveRecord::Schema.define(version: 20180131063532) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -127,6 +127,17 @@ ActiveRecord::Schema.define(version: 20180131061902) do
   add_index "character_companions", ["character_id"], name: "index_character_companions_on_character_id"
   add_index "character_companions", ["user_id"], name: "index_character_companions_on_user_id"
 
+  create_table "character_enemies", force: :cascade do |t|
+    t.integer  "character_id"
+    t.integer  "enemy_id"
+    t.integer  "user_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_enemies", ["character_id"], name: "index_character_enemies_on_character_id"
+  add_index "character_enemies", ["user_id"], name: "index_character_enemies_on_user_id"
+
   create_table "character_floras", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "character_id"
@@ -172,6 +183,18 @@ ActiveRecord::Schema.define(version: 20180131061902) do
 
   add_index "character_love_interests", ["character_id"], name: "index_character_love_interests_on_character_id"
   add_index "character_love_interests", ["user_id"], name: "index_character_love_interests_on_user_id"
+
+  create_table "character_magics", force: :cascade do |t|
+    t.integer  "character_id"
+    t.integer  "magic_id"
+    t.integer  "user_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_magics", ["character_id"], name: "index_character_magics_on_character_id"
+  add_index "character_magics", ["magic_id"], name: "index_character_magics_on_magic_id"
+  add_index "character_magics", ["user_id"], name: "index_character_magics_on_user_id"
 
   create_table "character_technologies", force: :cascade do |t|
     t.integer  "user_id"
@@ -316,6 +339,18 @@ ActiveRecord::Schema.define(version: 20180131061902) do
   add_index "country_floras", ["country_id"], name: "index_country_floras_on_country_id"
   add_index "country_floras", ["flora_id"], name: "index_country_floras_on_flora_id"
   add_index "country_floras", ["user_id"], name: "index_country_floras_on_user_id"
+
+  create_table "country_governments", force: :cascade do |t|
+    t.integer  "country_id"
+    t.integer  "government_id"
+    t.integer  "user_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "country_governments", ["country_id"], name: "index_country_governments_on_country_id"
+  add_index "country_governments", ["government_id"], name: "index_country_governments_on_government_id"
+  add_index "country_governments", ["user_id"], name: "index_country_governments_on_user_id"
 
   create_table "country_landmarks", force: :cascade do |t|
     t.integer  "user_id"
@@ -844,6 +879,18 @@ ActiveRecord::Schema.define(version: 20180131061902) do
     t.integer "group_id"
     t.integer "client_id"
   end
+
+  create_table "group_creatures", force: :cascade do |t|
+    t.integer  "group_id"
+    t.integer  "creature_id"
+    t.integer  "user_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "group_creatures", ["creature_id"], name: "index_group_creatures_on_creature_id"
+  add_index "group_creatures", ["group_id"], name: "index_group_creatures_on_group_id"
+  add_index "group_creatures", ["user_id"], name: "index_group_creatures_on_user_id"
 
   create_table "group_enemyships", force: :cascade do |t|
     t.integer "user_id"

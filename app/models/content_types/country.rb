@@ -25,7 +25,8 @@ class Country < ActiveRecord::Base
   relates :religions, with: :country_religions
   relates :landmarks, with: :country_landmarks
   relates :creatures, with: :country_creatures
-  relates :floras, with: :country_floras
+  relates :floras,    with: :country_floras
+  relates :governments, with: :country_governments
 
   def self.content_name
     'country'

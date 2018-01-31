@@ -17,7 +17,8 @@ class CountriesController < ContentController
       country_religions_attributes: [:id, :religion_id, :_destroy],
       country_landmarks_attributes: [:id, :landmark_id, :_destroy],
       country_creatures_attributes: [:id, :creature_id, :_destroy],
-      country_floras_attributes:    [:id, :flora_id, :_destroy]
+      country_floras_attributes:    [:id, :flora_id, :_destroy],
+      country_governments_attributes: [:id, :government_id, :_destroy]
     ]
   end
 end

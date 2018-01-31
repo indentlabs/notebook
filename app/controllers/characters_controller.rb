@@ -34,7 +34,9 @@ class CharactersController < ContentController
       character_floras_attributes: [:id, :flora_id, :_destroy],
       character_friends_attributes: [:id, :friend_id, :_destroy],
       character_companions_attributes: [:id, :companion_id, :_destroy],
-      character_birthtowns_attributes: [:id, :birthtown_id, :_destroy]
+      character_birthtowns_attributes: [:id, :birthtown_id, :_destroy],
+      character_magics_attributes:  [:id, :magic_id, :_destroy],
+      character_enemies_attributes:  [:id, :enemy_id, :_destroy]
     ]
   end
 end

@@ -44,6 +44,8 @@ class Character < ActiveRecord::Base
   relates :friends,          with: :character_friends
   relates :companions,       with: :character_companions
   relates :birthtowns,       with: :character_birthtowns
+  relates :magics,           with: :character_magics
+  relates :enemies,          with: :character_enemies
 
   def description
     role

@@ -28,6 +28,7 @@ class GroupsController < ContentController
       officeships_attributes:          [:id, :office_id, :_destroy],
       group_equipmentships_attributes: [:id, :equipment_id, :_destroy],
       key_itemships_attributes:        [:id, :key_item_id, :_destroy],
+      group_creatures_attributes:      [:id, :creature_id, :_destroy]
     ]
   end
 end
