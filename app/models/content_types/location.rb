@@ -29,16 +29,15 @@ class Location < ActiveRecord::Base
   include Authority::Abilities
   self.authorizer_name = 'CoreContentAuthorizer'
 
-  # Characters
   relates :leaders,           with: :location_leaderships
-
-  # Locations
   relates :capital_cities,    with: :capital_cities_relationships
   relates :largest_cities,    with: :largest_cities_relationships
   relates :notable_cities,    with: :notable_cities_relationships
-
-  # Languages
   relates :languages,         with: :location_languageships
+  relates :capital_towns,     with: :location_capital_towns
+  relates :largest_towns,     with: :location_largest_towns
+  relates :notable_towns,     with: :location_notable_towns
+  relates :landmarks,         with: :location_landmarks
 
   def self.icon
     'terrain'

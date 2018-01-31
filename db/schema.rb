@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180131060014) do
+ActiveRecord::Schema.define(version: 20180131061726) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -1070,6 +1070,29 @@ ActiveRecord::Schema.define(version: 20180131060014) do
     t.integer "spoken_language_id"
   end
 
+  create_table "location_capital_towns", force: :cascade do |t|
+    t.integer  "location_id"
+    t.integer  "capital_town_id"
+    t.integer  "user_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "location_capital_towns", ["location_id"], name: "index_location_capital_towns_on_location_id"
+  add_index "location_capital_towns", ["user_id"], name: "index_location_capital_towns_on_user_id"
+
+  create_table "location_landmarks", force: :cascade do |t|
+    t.integer  "location_id"
+    t.integer  "landmark_id"
+    t.integer  "user_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "location_landmarks", ["landmark_id"], name: "index_location_landmarks_on_landmark_id"
+  add_index "location_landmarks", ["location_id"], name: "index_location_landmarks_on_location_id"
+  add_index "location_landmarks", ["user_id"], name: "index_location_landmarks_on_user_id"
+
   create_table "location_languageships", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "location_id"
@@ -1078,11 +1101,33 @@ ActiveRecord::Schema.define(version: 20180131060014) do
     t.datetime "updated_at",  null: false
   end
 
+  create_table "location_largest_towns", force: :cascade do |t|
+    t.integer  "location_id"
+    t.integer  "largest_town_id"
+    t.integer  "user_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "location_largest_towns", ["location_id"], name: "index_location_largest_towns_on_location_id"
+  add_index "location_largest_towns", ["user_id"], name: "index_location_largest_towns_on_user_id"
+
   create_table "location_leaderships", force: :cascade do |t|
     t.integer "user_id"
     t.integer "location_id"
     t.integer "leader_id"
   end
+
+  create_table "location_notable_towns", force: :cascade do |t|
+    t.integer  "location_id"
+    t.integer  "notable_town_id"
+    t.integer  "user_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "location_notable_towns", ["location_id"], name: "index_location_notable_towns_on_location_id"
+  add_index "location_notable_towns", ["user_id"], name: "index_location_notable_towns_on_user_id"
 
   create_table "locations", force: :cascade do |t|
     t.string   "name",                                 null: false
