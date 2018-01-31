@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180131061726) do
+ActiveRecord::Schema.define(version: 20180131061902) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -932,6 +932,18 @@ ActiveRecord::Schema.define(version: 20180131061726) do
 
   add_index "image_uploads", ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
   add_index "image_uploads", ["user_id"], name: "index_image_uploads_on_user_id"
+
+  create_table "item_magics", force: :cascade do |t|
+    t.integer  "item_id"
+    t.integer  "magic_id"
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "item_magics", ["item_id"], name: "index_item_magics_on_item_id"
+  add_index "item_magics", ["magic_id"], name: "index_item_magics_on_magic_id"
+  add_index "item_magics", ["user_id"], name: "index_item_magics_on_user_id"
 
   create_table "items", force: :cascade do |t|
     t.string   "name",                               null: false
