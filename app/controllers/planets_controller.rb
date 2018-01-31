@@ -9,7 +9,11 @@ class PlanetsController < ContentController
       :calendar_system, :population, :moons, :orbit, :visible_constellations,
       :first_inhabitants_story, :world_history, :public_notes, :private_notes,
       :privacy, :universe_id
-    ] + [ #<relations>
+    ] + [
+      #todo refactor all models to use:
+      # self.class.relates.map do |relation|
+      #   #{with_relation}_attributes: [:id, :#{relates_relation.singularize}_id, :_destroy]
+      # end
       planet_countries_attributes: [:id, :country_id, :_destroy],
       planet_locations_attributes: [:id, :location_id, :_destroy],
       planet_landmarks_attributes: [:id, :landmark_id, :_destroy],
