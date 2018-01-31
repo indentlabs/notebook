@@ -8,6 +8,7 @@ class CreaturesController < ContentController
       attack_method defense_method maximum_speed food_sources
       migratory_patterns reproduction herd_patterns
       similar_animals symbolisms privacy notes private_notes
+      phylum class_string order family genus species
     ) + [
       custom_attribute_values:      [:name, :value],
       wildlifeships_attributes:     [:id, :habitat_id, :_destroy],
