@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180130234531) do
+ActiveRecord::Schema.define(version: 20180131060014) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -105,6 +105,63 @@ ActiveRecord::Schema.define(version: 20180130234531) do
     t.integer "capital_city_id"
   end
 
+  create_table "character_birthtowns", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "birthtown_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_birthtowns", ["character_id"], name: "index_character_birthtowns_on_character_id"
+  add_index "character_birthtowns", ["user_id"], name: "index_character_birthtowns_on_user_id"
+
+  create_table "character_companions", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "companion_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_companions", ["character_id"], name: "index_character_companions_on_character_id"
+  add_index "character_companions", ["user_id"], name: "index_character_companions_on_user_id"
+
+  create_table "character_floras", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "flora_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_floras", ["character_id"], name: "index_character_floras_on_character_id"
+  add_index "character_floras", ["flora_id"], name: "index_character_floras_on_flora_id"
+  add_index "character_floras", ["user_id"], name: "index_character_floras_on_user_id"
+
+  create_table "character_friends", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "friend_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_friends", ["character_id"], name: "index_character_friends_on_character_id"
+  add_index "character_friends", ["user_id"], name: "index_character_friends_on_user_id"
+
+  create_table "character_items", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "item_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_items", ["character_id"], name: "index_character_items_on_character_id"
+  add_index "character_items", ["item_id"], name: "index_character_items_on_item_id"
+  add_index "character_items", ["user_id"], name: "index_character_items_on_user_id"
+
   create_table "character_love_interests", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "character_id"
@@ -115,6 +172,18 @@ ActiveRecord::Schema.define(version: 20180130234531) do
 
   add_index "character_love_interests", ["character_id"], name: "index_character_love_interests_on_character_id"
   add_index "character_love_interests", ["user_id"], name: "index_character_love_interests_on_user_id"
+
+  create_table "character_technologies", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "technology_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "character_technologies", ["character_id"], name: "index_character_technologies_on_character_id"
+  add_index "character_technologies", ["technology_id"], name: "index_character_technologies_on_technology_id"
+  add_index "character_technologies", ["user_id"], name: "index_character_technologies_on_user_id"
 
   create_table "characters", force: :cascade do |t|
     t.string   "name",             null: false
