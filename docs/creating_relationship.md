@@ -16,7 +16,7 @@ class GroupLeadership < ActiveRecord::Base
   belongs_to :user
 
   belongs_to :group
-  belongs_to :leader, class_name: 'Character'
+  belongs_to :leader, class_name: Character.name
 end
 
 ## Add attributes to whitelist in groups_controller.rb
