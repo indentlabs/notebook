@@ -1,4 +1,3 @@
-
 class Planet < ActiveRecord::Base
   acts_as_paranoid
 
@@ -16,6 +15,19 @@ class Planet < ActiveRecord::Base
 
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
+
+  relates :countries,      with: :planet_countries
+  relates :locations,      with: :planet_locations
+  relates :landmarks,      with: :planet_landmarks
+  relates :races,          with: :planet_races
+  relates :floras,         with: :planet_floras
+  relates :creatures,      with: :planet_creatures
+  relates :religions,      with: :planet_religions
+  relates :deities,        with: :planet_deities
+  relates :groups,         with: :planet_groups
+  relates :languages,      with: :planet_languages
+  relates :towns,          with: :planet_towns
+  relates :nearby_planets, with: :planet_nearby_planets
 
   def self.color
     'text-lighten-2 blue'

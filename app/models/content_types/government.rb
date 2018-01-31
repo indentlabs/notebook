@@ -1,4 +1,3 @@
-
 class Government < ActiveRecord::Base
   acts_as_paranoid
 
@@ -16,6 +15,13 @@ class Government < ActiveRecord::Base
 
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
+
+  relates :leaders,           with: :government_leaders
+  relates :groups,            with: :government_groups
+  relates :political_figures, with: :government_political_figures
+  relates :items,             with: :government_items
+  relates :technologies,      with: :government_technologies
+  relates :creatures,         with: :government_creatures
 
   def self.color
     'darken-2 green'
