@@ -10,7 +10,7 @@ class FlorasController < ContentController
       name description aliases universe_id
       order family genus
       colorings size smell taste
-      fruits seeds nuts berries medicinal_purposes
+      fruits seeds nuts berries medicinal_purposes material_uses
       reproduction seasonality
       privacy
       notes private_notes

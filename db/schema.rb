@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180131064051) do
+ActiveRecord::Schema.define(version: 20180131064902) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -746,6 +746,7 @@ ActiveRecord::Schema.define(version: 20180131064051) do
     t.string   "private_notes"
     t.string   "privacy"
     t.datetime "deleted_at"
+    t.string   "material_uses"
   end
 
   add_index "floras", ["deleted_at"], name: "index_floras_on_deleted_at"
