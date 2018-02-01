@@ -4,7 +4,7 @@ class Supergroupship < ActiveRecord::Base
   belongs_to :user
 
   belongs_to :group
-  belongs_to :supergroup, class_name: 'Group'
+  belongs_to :supergroup, class_name: Group.name
 
   after_create do
     this_object  = Group.find_by(id: self.group_id)
