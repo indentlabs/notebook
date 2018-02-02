@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180131064902) do
+ActiveRecord::Schema.define(version: 20180202055822) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -545,6 +545,17 @@ ActiveRecord::Schema.define(version: 20180131064902) do
   add_index "deity_character_partners", ["deity_id"], name: "index_deity_character_partners_on_deity_id"
   add_index "deity_character_partners", ["user_id"], name: "index_deity_character_partners_on_user_id"
 
+  create_table "deity_character_siblings", force: :cascade do |t|
+    t.integer  "deity_id"
+    t.integer  "character_sibling_id"
+    t.integer  "user_id"
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+  end
+
+  add_index "deity_character_siblings", ["deity_id"], name: "index_deity_character_siblings_on_deity_id"
+  add_index "deity_character_siblings", ["user_id"], name: "index_deity_character_siblings_on_user_id"
+
   create_table "deity_creatures", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "deity_id"
@@ -589,6 +600,17 @@ ActiveRecord::Schema.define(version: 20180131064902) do
 
   add_index "deity_deity_partners", ["deity_id"], name: "index_deity_deity_partners_on_deity_id"
   add_index "deity_deity_partners", ["user_id"], name: "index_deity_deity_partners_on_user_id"
+
+  create_table "deity_deity_siblings", force: :cascade do |t|
+    t.integer  "deity_id"
+    t.integer  "deity_sibling_id"
+    t.integer  "user_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  add_index "deity_deity_siblings", ["deity_id"], name: "index_deity_deity_siblings_on_deity_id"
+  add_index "deity_deity_siblings", ["user_id"], name: "index_deity_deity_siblings_on_user_id"
 
   create_table "deity_floras", force: :cascade do |t|
     t.integer  "user_id"

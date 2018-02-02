@@ -19,9 +19,11 @@ class Deity < ActiveRecord::Base
   relates :character_parents,  with: :deity_character_parents
   relates :character_partners, with: :deity_character_partners
   relates :character_children, with: :deity_character_children
+  relates :character_siblings, with: :deity_character_siblings
   relates :deity_parents,      with: :deity_deity_parents
   relates :deity_partners,     with: :deity_deity_partners
   relates :deity_children,     with: :deity_deity_children
+  relates :deity_siblings,     with: :deity_deity_siblings
   relates :creatures,          with: :deity_creatures
   relates :floras,             with: :deity_floras
   relates :religions,          with: :deity_religions
@@ -31,7 +33,7 @@ class Deity < ActiveRecord::Base
   relates :related_landmarks,  with: :deity_related_landmarks
 
   def self.color
-    'text-lighten-1 grey'
+    'text-lighten-4 blue'
   end
 
   def self.icon
