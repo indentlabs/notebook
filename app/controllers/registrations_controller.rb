@@ -32,8 +32,6 @@ class RegistrationsController < Devise::RegistrationsController
 
     # If the user was created in the last 60 seconds, report it to Slack
     if resource.persisted?
-      report_new_account_to_slack resource
-
       if params[:user].key? :referral_code
         referral_code = ReferralCode.where(code: params[:user][:referral_code]).first
 
