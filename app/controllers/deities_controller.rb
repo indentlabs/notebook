@@ -19,6 +19,7 @@ class DeitiesController < ContentController
       deity_deity_siblings_attributes: [:id, :deity_sibling_id, :_destroy],
       deity_creatures_attributes: [:id, :creature_id, :_destroy],
       deity_floras_attributes: [:id, :flora_id, :_destroy],
+      deity_races_attributes: [:id, :race_id, :_destroy],
       deity_religions_attributes: [:id, :religion_id, :_destroy],
       deity_relics_attributes: [:id, :relic_id, :_destroy],
       deity_abilities_attributes: [:id, :ability_id, :_destroy],

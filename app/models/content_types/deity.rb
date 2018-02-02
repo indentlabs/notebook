@@ -26,6 +26,7 @@ class Deity < ActiveRecord::Base
   relates :deity_siblings,     with: :deity_deity_siblings
   relates :creatures,          with: :deity_creatures
   relates :floras,             with: :deity_floras
+  relates :races,              with: :deity_races
   relates :religions,          with: :deity_religions
   relates :relics,             with: :deity_relics
   relates :abilities,          with: :deity_abilities

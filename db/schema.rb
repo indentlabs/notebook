@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180202055822) do
+ActiveRecord::Schema.define(version: 20180202064238) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -623,6 +623,18 @@ ActiveRecord::Schema.define(version: 20180202055822) do
   add_index "deity_floras", ["deity_id"], name: "index_deity_floras_on_deity_id"
   add_index "deity_floras", ["flora_id"], name: "index_deity_floras_on_flora_id"
   add_index "deity_floras", ["user_id"], name: "index_deity_floras_on_user_id"
+
+  create_table "deity_races", force: :cascade do |t|
+    t.integer  "deity_id"
+    t.integer  "race_id"
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "deity_races", ["deity_id"], name: "index_deity_races_on_deity_id"
+  add_index "deity_races", ["race_id"], name: "index_deity_races_on_race_id"
+  add_index "deity_races", ["user_id"], name: "index_deity_races_on_user_id"
 
   create_table "deity_related_landmarks", force: :cascade do |t|
     t.integer  "user_id"
