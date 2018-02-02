@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180120033402) do
+ActiveRecord::Schema.define(version: 20180131064902) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -105,6 +105,74 @@ ActiveRecord::Schema.define(version: 20180120033402) do
     t.integer "capital_city_id"
   end
 
+  create_table "character_birthtowns", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "birthtown_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_birthtowns", ["character_id"], name: "index_character_birthtowns_on_character_id"
+  add_index "character_birthtowns", ["user_id"], name: "index_character_birthtowns_on_user_id"
+
+  create_table "character_companions", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "companion_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_companions", ["character_id"], name: "index_character_companions_on_character_id"
+  add_index "character_companions", ["user_id"], name: "index_character_companions_on_user_id"
+
+  create_table "character_enemies", force: :cascade do |t|
+    t.integer  "character_id"
+    t.integer  "enemy_id"
+    t.integer  "user_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_enemies", ["character_id"], name: "index_character_enemies_on_character_id"
+  add_index "character_enemies", ["user_id"], name: "index_character_enemies_on_user_id"
+
+  create_table "character_floras", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "flora_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_floras", ["character_id"], name: "index_character_floras_on_character_id"
+  add_index "character_floras", ["flora_id"], name: "index_character_floras_on_flora_id"
+  add_index "character_floras", ["user_id"], name: "index_character_floras_on_user_id"
+
+  create_table "character_friends", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "friend_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_friends", ["character_id"], name: "index_character_friends_on_character_id"
+  add_index "character_friends", ["user_id"], name: "index_character_friends_on_user_id"
+
+  create_table "character_items", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "item_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_items", ["character_id"], name: "index_character_items_on_character_id"
+  add_index "character_items", ["item_id"], name: "index_character_items_on_item_id"
+  add_index "character_items", ["user_id"], name: "index_character_items_on_user_id"
+
   create_table "character_love_interests", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "character_id"
@@ -115,6 +183,30 @@ ActiveRecord::Schema.define(version: 20180120033402) do
 
   add_index "character_love_interests", ["character_id"], name: "index_character_love_interests_on_character_id"
   add_index "character_love_interests", ["user_id"], name: "index_character_love_interests_on_user_id"
+
+  create_table "character_magics", force: :cascade do |t|
+    t.integer  "character_id"
+    t.integer  "magic_id"
+    t.integer  "user_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "character_magics", ["character_id"], name: "index_character_magics_on_character_id"
+  add_index "character_magics", ["magic_id"], name: "index_character_magics_on_magic_id"
+  add_index "character_magics", ["user_id"], name: "index_character_magics_on_user_id"
+
+  create_table "character_technologies", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.integer  "technology_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "character_technologies", ["character_id"], name: "index_character_technologies_on_character_id"
+  add_index "character_technologies", ["technology_id"], name: "index_character_technologies_on_technology_id"
+  add_index "character_technologies", ["user_id"], name: "index_character_technologies_on_user_id"
 
   create_table "characters", force: :cascade do |t|
     t.string   "name",             null: false
@@ -248,6 +340,18 @@ ActiveRecord::Schema.define(version: 20180120033402) do
   add_index "country_floras", ["flora_id"], name: "index_country_floras_on_flora_id"
   add_index "country_floras", ["user_id"], name: "index_country_floras_on_user_id"
 
+  create_table "country_governments", force: :cascade do |t|
+    t.integer  "country_id"
+    t.integer  "government_id"
+    t.integer  "user_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "country_governments", ["country_id"], name: "index_country_governments_on_country_id"
+  add_index "country_governments", ["government_id"], name: "index_country_governments_on_government_id"
+  add_index "country_governments", ["user_id"], name: "index_country_governments_on_user_id"
+
   create_table "country_landmarks", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "country_id"
@@ -349,6 +453,12 @@ ActiveRecord::Schema.define(version: 20180120033402) do
     t.string   "private_notes"
     t.string   "privacy"
     t.datetime "deleted_at"
+    t.string   "phylum"
+    t.string   "class_string"
+    t.string   "order"
+    t.string   "family"
+    t.string   "genus"
+    t.string   "species"
   end
 
   add_index "creatures", ["deleted_at"], name: "index_creatures_on_deleted_at"
@@ -360,6 +470,182 @@ ActiveRecord::Schema.define(version: 20180120033402) do
     t.integer "item_id"
     t.integer "current_owner_id"
   end
+
+  create_table "deities", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "other_names"
+    t.string   "physical_description"
+    t.string   "height"
+    t.string   "weight"
+    t.string   "symbols"
+    t.string   "elements"
+    t.string   "strengths"
+    t.string   "weaknesses"
+    t.string   "prayers"
+    t.string   "rituals"
+    t.string   "human_interaction"
+    t.string   "notable_events"
+    t.string   "family_history"
+    t.string   "life_story"
+    t.string   "notes"
+    t.string   "private_notes"
+    t.string   "privacy"
+    t.integer  "user_id"
+    t.integer  "universe_id"
+    t.datetime "deleted_at"
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+  end
+
+  add_index "deities", ["universe_id"], name: "index_deities_on_universe_id"
+  add_index "deities", ["user_id"], name: "index_deities_on_user_id"
+
+  create_table "deity_abilities", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "ability_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "deity_abilities", ["deity_id"], name: "index_deity_abilities_on_deity_id"
+  add_index "deity_abilities", ["user_id"], name: "index_deity_abilities_on_user_id"
+
+  create_table "deity_character_children", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "character_child_id"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+  end
+
+  add_index "deity_character_children", ["deity_id"], name: "index_deity_character_children_on_deity_id"
+  add_index "deity_character_children", ["user_id"], name: "index_deity_character_children_on_user_id"
+
+  create_table "deity_character_parents", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "character_parent_id"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+  end
+
+  add_index "deity_character_parents", ["deity_id"], name: "index_deity_character_parents_on_deity_id"
+  add_index "deity_character_parents", ["user_id"], name: "index_deity_character_parents_on_user_id"
+
+  create_table "deity_character_partners", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "character_partner_id"
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+  end
+
+  add_index "deity_character_partners", ["deity_id"], name: "index_deity_character_partners_on_deity_id"
+  add_index "deity_character_partners", ["user_id"], name: "index_deity_character_partners_on_user_id"
+
+  create_table "deity_creatures", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "creature_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "deity_creatures", ["creature_id"], name: "index_deity_creatures_on_creature_id"
+  add_index "deity_creatures", ["deity_id"], name: "index_deity_creatures_on_deity_id"
+  add_index "deity_creatures", ["user_id"], name: "index_deity_creatures_on_user_id"
+
+  create_table "deity_deity_children", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "deity_child_id"
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
+  end
+
+  add_index "deity_deity_children", ["deity_id"], name: "index_deity_deity_children_on_deity_id"
+  add_index "deity_deity_children", ["user_id"], name: "index_deity_deity_children_on_user_id"
+
+  create_table "deity_deity_parents", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "deity_parent_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "deity_deity_parents", ["deity_id"], name: "index_deity_deity_parents_on_deity_id"
+  add_index "deity_deity_parents", ["user_id"], name: "index_deity_deity_parents_on_user_id"
+
+  create_table "deity_deity_partners", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "deity_partner_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  add_index "deity_deity_partners", ["deity_id"], name: "index_deity_deity_partners_on_deity_id"
+  add_index "deity_deity_partners", ["user_id"], name: "index_deity_deity_partners_on_user_id"
+
+  create_table "deity_floras", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "flora_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "deity_floras", ["deity_id"], name: "index_deity_floras_on_deity_id"
+  add_index "deity_floras", ["flora_id"], name: "index_deity_floras_on_flora_id"
+  add_index "deity_floras", ["user_id"], name: "index_deity_floras_on_user_id"
+
+  create_table "deity_related_landmarks", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "related_landmark_id"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+  end
+
+  add_index "deity_related_landmarks", ["deity_id"], name: "index_deity_related_landmarks_on_deity_id"
+  add_index "deity_related_landmarks", ["user_id"], name: "index_deity_related_landmarks_on_user_id"
+
+  create_table "deity_related_towns", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "related_town_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "deity_related_towns", ["deity_id"], name: "index_deity_related_towns_on_deity_id"
+  add_index "deity_related_towns", ["user_id"], name: "index_deity_related_towns_on_user_id"
+
+  create_table "deity_relics", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "relic_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "deity_relics", ["deity_id"], name: "index_deity_relics_on_deity_id"
+  add_index "deity_relics", ["user_id"], name: "index_deity_relics_on_user_id"
+
+  create_table "deity_religions", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "deity_id"
+    t.integer  "religion_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "deity_religions", ["deity_id"], name: "index_deity_religions_on_deity_id"
+  add_index "deity_religions", ["religion_id"], name: "index_deity_religions_on_religion_id"
+  add_index "deity_religions", ["user_id"], name: "index_deity_religions_on_user_id"
 
   create_table "deityships", force: :cascade do |t|
     t.integer "religion_id"
@@ -460,6 +746,7 @@ ActiveRecord::Schema.define(version: 20180120033402) do
     t.string   "private_notes"
     t.string   "privacy"
     t.datetime "deleted_at"
+    t.string   "material_uses"
   end
 
   add_index "floras", ["deleted_at"], name: "index_floras_on_deleted_at"
@@ -479,6 +766,115 @@ ActiveRecord::Schema.define(version: 20180120033402) do
   add_index "friendly_id_slugs", ["sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_id"
   add_index "friendly_id_slugs", ["sluggable_type"], name: "index_friendly_id_slugs_on_sluggable_type"
 
+  create_table "government_creatures", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "government_id"
+    t.integer  "creature_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "government_creatures", ["creature_id"], name: "index_government_creatures_on_creature_id"
+  add_index "government_creatures", ["government_id"], name: "index_government_creatures_on_government_id"
+  add_index "government_creatures", ["user_id"], name: "index_government_creatures_on_user_id"
+
+  create_table "government_groups", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "government_id"
+    t.integer  "group_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "government_groups", ["government_id"], name: "index_government_groups_on_government_id"
+  add_index "government_groups", ["group_id"], name: "index_government_groups_on_group_id"
+  add_index "government_groups", ["user_id"], name: "index_government_groups_on_user_id"
+
+  create_table "government_items", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "government_id"
+    t.integer  "item_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "government_items", ["government_id"], name: "index_government_items_on_government_id"
+  add_index "government_items", ["item_id"], name: "index_government_items_on_item_id"
+  add_index "government_items", ["user_id"], name: "index_government_items_on_user_id"
+
+  create_table "government_leaders", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "government_id"
+    t.integer  "leader_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "government_leaders", ["government_id"], name: "index_government_leaders_on_government_id"
+  add_index "government_leaders", ["user_id"], name: "index_government_leaders_on_user_id"
+
+  create_table "government_political_figures", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "government_id"
+    t.integer  "political_figure_id"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+  end
+
+  add_index "government_political_figures", ["government_id"], name: "index_government_political_figures_on_government_id"
+  add_index "government_political_figures", ["user_id"], name: "index_government_political_figures_on_user_id"
+
+  create_table "government_technologies", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "government_id"
+    t.integer  "technology_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "government_technologies", ["government_id"], name: "index_government_technologies_on_government_id"
+  add_index "government_technologies", ["technology_id"], name: "index_government_technologies_on_technology_id"
+  add_index "government_technologies", ["user_id"], name: "index_government_technologies_on_user_id"
+
+  create_table "governments", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "type_of_government"
+    t.string   "power_structure"
+    t.string   "power_source"
+    t.string   "checks_and_balances"
+    t.string   "sociopolitical"
+    t.string   "socioeconomical"
+    t.string   "geocultural"
+    t.string   "laws"
+    t.string   "immigration"
+    t.string   "privacy_ideologies"
+    t.string   "electoral_process"
+    t.string   "term_lengths"
+    t.string   "criminal_system"
+    t.string   "approval_ratings"
+    t.string   "military"
+    t.string   "navy"
+    t.string   "airforce"
+    t.string   "space_program"
+    t.string   "international_relations"
+    t.string   "civilian_life"
+    t.string   "founding_story"
+    t.string   "flag_design_story"
+    t.string   "notable_wars"
+    t.string   "notes"
+    t.string   "private_notes"
+    t.string   "privacy"
+    t.integer  "user_id"
+    t.integer  "universe_id"
+    t.datetime "deleted_at"
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+  end
+
+  add_index "governments", ["universe_id"], name: "index_governments_on_universe_id"
+  add_index "governments", ["user_id"], name: "index_governments_on_user_id"
+
   create_table "group_allyships", force: :cascade do |t|
     t.integer "user_id"
     t.integer "group_id"
@@ -490,6 +886,18 @@ ActiveRecord::Schema.define(version: 20180120033402) do
     t.integer "group_id"
     t.integer "client_id"
   end
+
+  create_table "group_creatures", force: :cascade do |t|
+    t.integer  "group_id"
+    t.integer  "creature_id"
+    t.integer  "user_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "group_creatures", ["creature_id"], name: "index_group_creatures_on_creature_id"
+  add_index "group_creatures", ["group_id"], name: "index_group_creatures_on_group_id"
+  add_index "group_creatures", ["user_id"], name: "index_group_creatures_on_user_id"
 
   create_table "group_enemyships", force: :cascade do |t|
     t.integer "user_id"
@@ -578,6 +986,18 @@ ActiveRecord::Schema.define(version: 20180120033402) do
 
   add_index "image_uploads", ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
   add_index "image_uploads", ["user_id"], name: "index_image_uploads_on_user_id"
+
+  create_table "item_magics", force: :cascade do |t|
+    t.integer  "item_id"
+    t.integer  "magic_id"
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "item_magics", ["item_id"], name: "index_item_magics_on_item_id"
+  add_index "item_magics", ["magic_id"], name: "index_item_magics_on_magic_id"
+  add_index "item_magics", ["user_id"], name: "index_item_magics_on_user_id"
 
   create_table "items", force: :cascade do |t|
     t.string   "name",                               null: false
@@ -716,6 +1136,29 @@ ActiveRecord::Schema.define(version: 20180120033402) do
     t.integer "spoken_language_id"
   end
 
+  create_table "location_capital_towns", force: :cascade do |t|
+    t.integer  "location_id"
+    t.integer  "capital_town_id"
+    t.integer  "user_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "location_capital_towns", ["location_id"], name: "index_location_capital_towns_on_location_id"
+  add_index "location_capital_towns", ["user_id"], name: "index_location_capital_towns_on_user_id"
+
+  create_table "location_landmarks", force: :cascade do |t|
+    t.integer  "location_id"
+    t.integer  "landmark_id"
+    t.integer  "user_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "location_landmarks", ["landmark_id"], name: "index_location_landmarks_on_landmark_id"
+  add_index "location_landmarks", ["location_id"], name: "index_location_landmarks_on_location_id"
+  add_index "location_landmarks", ["user_id"], name: "index_location_landmarks_on_user_id"
+
   create_table "location_languageships", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "location_id"
@@ -724,11 +1167,33 @@ ActiveRecord::Schema.define(version: 20180120033402) do
     t.datetime "updated_at",  null: false
   end
 
+  create_table "location_largest_towns", force: :cascade do |t|
+    t.integer  "location_id"
+    t.integer  "largest_town_id"
+    t.integer  "user_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "location_largest_towns", ["location_id"], name: "index_location_largest_towns_on_location_id"
+  add_index "location_largest_towns", ["user_id"], name: "index_location_largest_towns_on_user_id"
+
   create_table "location_leaderships", force: :cascade do |t|
     t.integer "user_id"
     t.integer "location_id"
     t.integer "leader_id"
   end
+
+  create_table "location_notable_towns", force: :cascade do |t|
+    t.integer  "location_id"
+    t.integer  "notable_town_id"
+    t.integer  "user_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "location_notable_towns", ["location_id"], name: "index_location_notable_towns_on_location_id"
+  add_index "location_notable_towns", ["user_id"], name: "index_location_notable_towns_on_user_id"
 
   create_table "locations", force: :cascade do |t|
     t.string   "name",                                 null: false
@@ -856,6 +1321,180 @@ ActiveRecord::Schema.define(version: 20180120033402) do
     t.integer "item_id"
     t.integer "past_owner_id"
   end
+
+  create_table "planet_countries", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "country_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "planet_countries", ["country_id"], name: "index_planet_countries_on_country_id"
+  add_index "planet_countries", ["planet_id"], name: "index_planet_countries_on_planet_id"
+  add_index "planet_countries", ["user_id"], name: "index_planet_countries_on_user_id"
+
+  create_table "planet_creatures", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "creature_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "planet_creatures", ["creature_id"], name: "index_planet_creatures_on_creature_id"
+  add_index "planet_creatures", ["planet_id"], name: "index_planet_creatures_on_planet_id"
+  add_index "planet_creatures", ["user_id"], name: "index_planet_creatures_on_user_id"
+
+  create_table "planet_deities", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "deity_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "planet_deities", ["deity_id"], name: "index_planet_deities_on_deity_id"
+  add_index "planet_deities", ["planet_id"], name: "index_planet_deities_on_planet_id"
+  add_index "planet_deities", ["user_id"], name: "index_planet_deities_on_user_id"
+
+  create_table "planet_floras", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "flora_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "planet_floras", ["flora_id"], name: "index_planet_floras_on_flora_id"
+  add_index "planet_floras", ["planet_id"], name: "index_planet_floras_on_planet_id"
+  add_index "planet_floras", ["user_id"], name: "index_planet_floras_on_user_id"
+
+  create_table "planet_groups", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "group_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "planet_groups", ["group_id"], name: "index_planet_groups_on_group_id"
+  add_index "planet_groups", ["planet_id"], name: "index_planet_groups_on_planet_id"
+  add_index "planet_groups", ["user_id"], name: "index_planet_groups_on_user_id"
+
+  create_table "planet_landmarks", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "landmark_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "planet_landmarks", ["landmark_id"], name: "index_planet_landmarks_on_landmark_id"
+  add_index "planet_landmarks", ["planet_id"], name: "index_planet_landmarks_on_planet_id"
+  add_index "planet_landmarks", ["user_id"], name: "index_planet_landmarks_on_user_id"
+
+  create_table "planet_languages", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "language_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "planet_languages", ["language_id"], name: "index_planet_languages_on_language_id"
+  add_index "planet_languages", ["planet_id"], name: "index_planet_languages_on_planet_id"
+  add_index "planet_languages", ["user_id"], name: "index_planet_languages_on_user_id"
+
+  create_table "planet_locations", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "location_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "planet_locations", ["location_id"], name: "index_planet_locations_on_location_id"
+  add_index "planet_locations", ["planet_id"], name: "index_planet_locations_on_planet_id"
+  add_index "planet_locations", ["user_id"], name: "index_planet_locations_on_user_id"
+
+  create_table "planet_nearby_planets", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "nearby_planet_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  add_index "planet_nearby_planets", ["planet_id"], name: "index_planet_nearby_planets_on_planet_id"
+  add_index "planet_nearby_planets", ["user_id"], name: "index_planet_nearby_planets_on_user_id"
+
+  create_table "planet_races", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "race_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "planet_races", ["planet_id"], name: "index_planet_races_on_planet_id"
+  add_index "planet_races", ["race_id"], name: "index_planet_races_on_race_id"
+  add_index "planet_races", ["user_id"], name: "index_planet_races_on_user_id"
+
+  create_table "planet_religions", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "religion_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "planet_religions", ["planet_id"], name: "index_planet_religions_on_planet_id"
+  add_index "planet_religions", ["religion_id"], name: "index_planet_religions_on_religion_id"
+  add_index "planet_religions", ["user_id"], name: "index_planet_religions_on_user_id"
+
+  create_table "planet_towns", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "planet_id"
+    t.integer  "town_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "planet_towns", ["planet_id"], name: "index_planet_towns_on_planet_id"
+  add_index "planet_towns", ["town_id"], name: "index_planet_towns_on_town_id"
+  add_index "planet_towns", ["user_id"], name: "index_planet_towns_on_user_id"
+
+  create_table "planets", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "size"
+    t.string   "surface"
+    t.string   "climate"
+    t.string   "weather"
+    t.string   "water_content"
+    t.string   "natural_resources"
+    t.string   "length_of_day"
+    t.string   "length_of_night"
+    t.string   "calendar_system"
+    t.string   "population"
+    t.string   "moons"
+    t.string   "orbit"
+    t.string   "visible_constellations"
+    t.string   "first_inhabitants_story"
+    t.string   "world_history"
+    t.string   "private_notes"
+    t.string   "privacy"
+    t.integer  "universe_id"
+    t.integer  "user_id"
+    t.datetime "deleted_at"
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+    t.string   "notes"
+  end
+
+  add_index "planets", ["universe_id"], name: "index_planets_on_universe_id"
+  add_index "planets", ["user_id"], name: "index_planets_on_user_id"
 
   create_table "races", force: :cascade do |t|
     t.string   "name"
@@ -1058,6 +1697,152 @@ ActiveRecord::Schema.define(version: 20180120033402) do
     t.integer "group_id"
     t.integer "supergroup_id"
   end
+
+  create_table "technologies", force: :cascade do |t|
+    t.string   "name"
+    t.string   "description"
+    t.string   "other_names"
+    t.string   "materials"
+    t.string   "manufacturing_process"
+    t.string   "sales_process"
+    t.string   "cost"
+    t.string   "rarity"
+    t.string   "purpose"
+    t.string   "how_it_works"
+    t.string   "resources_used"
+    t.string   "physical_description"
+    t.string   "size"
+    t.string   "weight"
+    t.string   "colors"
+    t.string   "notes"
+    t.string   "private_notes"
+    t.string   "privacy"
+    t.integer  "user_id"
+    t.integer  "universe_id"
+    t.datetime "deleted_at"
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+  end
+
+  add_index "technologies", ["universe_id"], name: "index_technologies_on_universe_id"
+  add_index "technologies", ["user_id"], name: "index_technologies_on_user_id"
+
+  create_table "technology_characters", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "character_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_characters", ["character_id"], name: "index_technology_characters_on_character_id"
+  add_index "technology_characters", ["technology_id"], name: "index_technology_characters_on_technology_id"
+  add_index "technology_characters", ["user_id"], name: "index_technology_characters_on_user_id"
+
+  create_table "technology_child_technologies", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "child_technology_id"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+  end
+
+  add_index "technology_child_technologies", ["technology_id"], name: "index_technology_child_technologies_on_technology_id"
+  add_index "technology_child_technologies", ["user_id"], name: "index_technology_child_technologies_on_user_id"
+
+  create_table "technology_countries", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "country_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_countries", ["country_id"], name: "index_technology_countries_on_country_id"
+  add_index "technology_countries", ["technology_id"], name: "index_technology_countries_on_technology_id"
+  add_index "technology_countries", ["user_id"], name: "index_technology_countries_on_user_id"
+
+  create_table "technology_creatures", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "creature_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_creatures", ["creature_id"], name: "index_technology_creatures_on_creature_id"
+  add_index "technology_creatures", ["technology_id"], name: "index_technology_creatures_on_technology_id"
+  add_index "technology_creatures", ["user_id"], name: "index_technology_creatures_on_user_id"
+
+  create_table "technology_groups", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "group_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_groups", ["group_id"], name: "index_technology_groups_on_group_id"
+  add_index "technology_groups", ["technology_id"], name: "index_technology_groups_on_technology_id"
+  add_index "technology_groups", ["user_id"], name: "index_technology_groups_on_user_id"
+
+  create_table "technology_magics", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "magic_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_magics", ["magic_id"], name: "index_technology_magics_on_magic_id"
+  add_index "technology_magics", ["technology_id"], name: "index_technology_magics_on_technology_id"
+  add_index "technology_magics", ["user_id"], name: "index_technology_magics_on_user_id"
+
+  create_table "technology_parent_technologies", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "parent_technology_id"
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+  end
+
+  add_index "technology_parent_technologies", ["technology_id"], name: "index_technology_parent_technologies_on_technology_id"
+  add_index "technology_parent_technologies", ["user_id"], name: "index_technology_parent_technologies_on_user_id"
+
+  create_table "technology_planets", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "planet_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_planets", ["planet_id"], name: "index_technology_planets_on_planet_id"
+  add_index "technology_planets", ["technology_id"], name: "index_technology_planets_on_technology_id"
+  add_index "technology_planets", ["user_id"], name: "index_technology_planets_on_user_id"
+
+  create_table "technology_related_technologies", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "related_technology_id"
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+  end
+
+  add_index "technology_related_technologies", ["technology_id"], name: "index_technology_related_technologies_on_technology_id"
+  add_index "technology_related_technologies", ["user_id"], name: "index_technology_related_technologies_on_user_id"
+
+  create_table "technology_towns", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "technology_id"
+    t.integer  "town_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "technology_towns", ["technology_id"], name: "index_technology_towns_on_technology_id"
+  add_index "technology_towns", ["town_id"], name: "index_technology_towns_on_town_id"
+  add_index "technology_towns", ["user_id"], name: "index_technology_towns_on_user_id"
 
   create_table "thredded_categories", force: :cascade do |t|
     t.integer  "messageboard_id",             null: false
@@ -1414,7 +2199,7 @@ ActiveRecord::Schema.define(version: 20180120033402) do
     t.datetime "updated_at"
     t.string   "laws_of_physics"
     t.string   "magic_system"
-    t.string   "technologies"
+    t.string   "technology"
     t.string   "genre"
     t.datetime "deleted_at"
   end

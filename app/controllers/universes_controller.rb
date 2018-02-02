@@ -1,14 +1,20 @@
 class UniversesController < ContentController
 
   # TODO: pull list of content types out from some centralized list somewhere
-  [
-    :characters, :locations, :items, :creatures, :races, :religions, :groups, :magics, :languages, :floras, :scenes
-  ].each do |content_type_name|
+  Rails.application.config.content_types[:all_non_universe].each do |content_type|
+    content_type_name = content_type.name.downcase.pluralize.to_sym
     define_method content_type_name do
       @content_type = content_type_name.to_s.singularize.capitalize.constantize
 
       @universe = Universe.find(params[:id])
-      @content_list = @universe.send(content_type_name).is_public.order(:name)
+      @content_list = @universe.send(content_type_name)
+
+      # todo just use current_user.can_view?(@universe) and/or individual filtering
+      unless user_signed_in? && (current_user == @universe.user || Contributor.exists?(user_id: current_user.id, universe_id: @universe.id))
+        @content_list = @content_list.is_public
+      end
+
+      @content_list = @content_list.order(:name)
 
       render :content_list
     end
@@ -24,7 +30,7 @@ class UniversesController < ContentController
     [
       :user_id,
       :name, :description, :genre,
-      :laws_of_physics, :magic_system, :technologies,
+      :laws_of_physics, :magic_system, :technology,
       :history,
       :privacy,
       :notes, :private_notes,

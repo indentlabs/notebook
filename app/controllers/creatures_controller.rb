@@ -1,10 +1,6 @@
 class CreaturesController < ContentController
   private
 
-  def content_params
-    params.require(:creature).permit(content_param_list)
-  end
-
   def content_param_list
     %i(
       name description type_of other_names universe_id color shape size notable_features
@@ -12,6 +8,7 @@ class CreaturesController < ContentController
       attack_method defense_method maximum_speed food_sources
       migratory_patterns reproduction herd_patterns
       similar_animals symbolisms privacy notes private_notes
+      phylum class_string order family genus species
     ) + [
       custom_attribute_values:      [:name, :value],
       wildlifeships_attributes:     [:id, :habitat_id, :_destroy],

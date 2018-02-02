@@ -21,6 +21,7 @@ class ItemsController < ContentController
       current_ownerships_attributes:            [:id, :current_owner_id,  :_destroy],
       past_ownerships_attributes:               [:id, :past_owner_id,     :_destroy],
       maker_relationships_attributes:           [:id, :maker_id,          :_destroy],
+      item_magics_attributes:                   [:id, :magic_id,          :_destroy],
     ]
   end
 end

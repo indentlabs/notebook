@@ -27,7 +27,6 @@ class Character < ActiveRecord::Base
   include Authority::Abilities
   self.authorizer_name = 'CoreContentAuthorizer'
 
-  # Characters
   relates :fathers,          with: :fatherships
   relates :mothers,          with: :motherships
   relates :siblings,         with: :siblingships
@@ -36,18 +35,17 @@ class Character < ActiveRecord::Base
   relates :best_friends,     with: :best_friendships
   relates :archenemies,      with: :archenemyship
   relates :love_interests,   with: :character_love_interests
-
-  # Locations
   relates :birthplaces,      with: :birthings
-
-  # Items
-  #relates :favorite_items,   with: :ownerships, where: { favorite: true }
-
-  # Races
   relates :races,            with: :raceships
-
-  # Languages
   relates :spoken_languages, with: :lingualisms
+  relates :items,            with: :character_items
+  relates :technologies,     with: :character_technologies
+  relates :floras,           with: :character_floras
+  relates :friends,          with: :character_friends
+  relates :companions,       with: :character_companions
+  relates :birthtowns,       with: :character_birthtowns
+  relates :magics,           with: :character_magics
+  relates :enemies,          with: :character_enemies
 
   def description
     role

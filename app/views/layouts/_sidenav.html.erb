@@ -70,24 +70,29 @@
 
   <li class="header">Your Notebook Pages</li>
 
-  <% current_user.user_content_type_activators.reverse.each do |content_type_activator| %>
-    <% content_type = content_type_activator.content_type.constantize %>
+  <%
+    (
+      Rails.application.config.content_types[:all].map(&:name) &
+        current_user.user_content_type_activators.pluck(:content_type)
+    ).each do |content_type|
+  %>
+    <% content_type_klass = content_type.constantize %>
     <li>
-      <%= link_to main_app.polymorphic_path(content_type) do %>
-        <i class="material-icons <%= content_type.color %>-text">
-          <%= content_type.icon %>
+      <%= link_to main_app.polymorphic_path(content_type_klass) do %>
+        <i class="material-icons <%= content_type_klass.color %>-text">
+          <%= content_type_klass.icon %>
         </i>
-        <%= content_type.name.pluralize %>
+        <%= content_type.pluralize %>
         <span class="badge">
           <%=
-            pluralized_name = content_type_activator.content_type.downcase.pluralize
-            if content_type != Universe && @universe_scope
+            pluralized_name = content_type.downcase.pluralize
+            if content_type_klass != Universe && @universe_scope
               @universe_scope.send(pluralized_name).count
             else
               (
                 current_user.send(pluralized_name) +
                 current_user.send("contributable_#{pluralized_name}") +
-                (content_type == Universe ? [] : content_type.where(universe_id: current_user.universes.pluck(:id)))
+                (content_type_klass == Universe ? [] : content_type_klass.where(universe_id: current_user.universes.pluck(:id)))
               ).uniq.count
             end
           %>

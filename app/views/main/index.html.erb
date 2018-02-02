@@ -223,7 +223,13 @@
     <div class="section">
       <div class="row">
         <%
-          content_type_pool = [Universe, Scene, Group, Creature, Magic, Language, Race, Religion, Flora]
+          content_type_pool = [
+            Universe, Scene, Group,
+            Creature, Magic, Language,
+            Race, Religion, Deity,
+            Technology, Government, Flora,
+            Country, Town, Landmark
+          ]
         %>
 
         <% content_type_pool.each do |content_type| %>
@@ -271,11 +277,18 @@
                       </a></em></small>
                     </span>
                     <ul class="plan-features">
-                      <li><%= t('marketing.landing_page.pricing.starter_plan.universes_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.starter_plan.upload_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.starter_plan.characters_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.starter_plan.locations_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.starter_plan.items_html') %></li>
+                      <% Rails.application.config.content_types[:free].each do |content_type| %>
+                        <li>
+                          <i class="material-icons <%= content_type.color %>-text">
+                            <%= content_type.icon %>
+                          </i>
+                          <%= t("marketing.landing_page.pricing.starter_plan.#{content_type.name.downcase.pluralize}_html") %>
+                        </li>
+                      <% end %>
+                      <li>
+                        <i class="material-icons black-text">cloud_upload</i>
+                        <%= t('marketing.landing_page.pricing.starter_plan.upload_html') %>
+                      </li>
                     </ul>
                     <div class="row center">
                       <%= link_to t('marketing.landing_page.pricing.cta.button'),
@@ -300,20 +313,18 @@
                       </em></small>
                     </span>
                     <ul class="plan-features">
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.universes_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.upload_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.characters_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.locations_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.items_html') %></li>
-
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.creatures_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.groups_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.languages_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.magics_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.races_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.religions_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.floras_html') %></li>
-                      <li><%= t('marketing.landing_page.pricing.premium_plan.scenes_html') %></li>
+                      <% Rails.application.config.content_types[:all].each do |content_type| %>
+                        <li>
+                          <i class="material-icons <%= content_type.color %>-text">
+                            <%= content_type.icon %>
+                          </i>
+                          <%= t("marketing.landing_page.pricing.premium_plan.#{content_type.name.downcase.pluralize}_html") %>
+                        </li>
+                      <% end %>
+                      <li>
+                        <i class="material-icons black-text">cloud_upload</i>
+                        <%= t('marketing.landing_page.pricing.premium_plan.upload_html') %>
+                      </li>
                     </ul>
                     <div class="row center">
                       <%= link_to t('marketing.landing_page.pricing.cta.button'),

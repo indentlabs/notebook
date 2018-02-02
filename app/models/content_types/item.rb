@@ -30,6 +30,7 @@ class Item < ActiveRecord::Base
   relates :past_owners,               with: :past_ownerships
   relates :current_owners,            with: :current_ownerships
   relates :makers,                    with: :maker_relationships
+  relates :magics,                    with: :item_magics
 
   def self.color
     'amber'

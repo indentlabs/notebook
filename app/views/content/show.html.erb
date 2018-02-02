@@ -125,21 +125,9 @@
 <%= render partial: 'attribute_fields/modal', locals: { content: @content, safe_mode: true } if user_signed_in? %>
 
 <div class="row">
-  <% if @content.is_a? Universe %>
+  <% if @content.is_a?(Universe) %>
     <%= render partial: 'content/contexts/universe', locals: { content: @content } %>
-  <% elsif @content.is_a? Character %>
-    <%= render partial: 'content/contexts/character', locals: { content: @content } %>
-  <% elsif @content.is_a? Location %>
-    <%= render partial: 'content/contexts/location', locals: { content: @content } %>
-  <% elsif @content.is_a? Item %>
-    <%= render partial: 'content/contexts/item', locals: { content: @content } %>
-  <% elsif @content.is_a? Creature %>
-    <%= render partial: 'content/contexts/creature', locals: { content: @content } %>
-  <% elsif @content.is_a? Race %>
-    <%= render partial: 'content/contexts/race', locals: { content: @content } %>
-  <% elsif @content.is_a? Magic %>
-    <%= render partial: 'content/contexts/magic', locals: { content: @content } %>
-  <% elsif @content.is_a? Language %>
-    <%= render partial: 'content/contexts/language', locals: { content: @content } %>
+  <% else %>
+    <%= render partial: "content/contexts/dynamic", locals: { content: @content } %>
   <% end %>
 </div>

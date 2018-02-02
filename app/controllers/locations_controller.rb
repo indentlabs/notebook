@@ -23,7 +23,11 @@ class LocationsController < ContentController
       capital_cities_relationships_attributes:   [:id, :capital_city_id, :_destroy],
       largest_cities_relationships_attributes:   [:id, :largest_city_id, :_destroy],
       notable_cities_relationships_attributes:   [:id, :notable_city_id, :_destroy],
-      location_languageships_attributes:         [:id, :language_id,     :_destroy]
+      location_languageships_attributes:         [:id, :language_id,     :_destroy],
+      location_capital_towns_attributes:         [:id, :capital_town_id, :_destroy],
+      location_largest_towns_attributes:         [:id, :largest_town_id, :_destroy],
+      location_notable_towns_attributes:         [:id, :notable_town_id, :_destroy],
+      location_landmarks_attributes:             [:id, :landmark_id, :_destroy]
     ]
   end
 end

@@ -14,8 +14,9 @@
         <%= render 'content/form/groupship_fields', f: builder, attribute: attribute.singularize, parent: f.object %>
       <% end %>
       <div class="links">
-        <% color = f.object.send(attribute).build.class.color %>
-        <%= link_to_add_association "add #{attribute.to_s.singularize.humanize}", f, relation,
+        <% model_class = f.object.send(attribute).build.class %>
+        <% color = model_class.color %>
+        <%= link_to_add_association "link #{model_class.name.downcase}", f, relation,
             class: "btn #{color}",
             partial: 'content/form/groupship_fields',
             render_options: { locals: {

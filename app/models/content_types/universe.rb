@@ -22,24 +22,28 @@ class Universe < ActiveRecord::Base
   validates :user_id, presence: true
 
   belongs_to :user
-  # Core content types
+  # The following doesn't work because we reference Universe when setting up this config
+  # Rails.application.config.content_types[:all_non_universe].each do |content_type|
+  #   has_many content_types.name.downcase.pluralize.to_sym
+  # end
   has_many :characters
-  has_many :items
-  has_many :locations
-
-  # Extended content types
+  has_many :countries
   has_many :creatures
+  has_many :deities
+  has_many :floras
+  has_many :governments
+  has_many :groups
+  has_many :items
+  has_many :landmarks
+  has_many :languages
+  has_many :locations
+  has_many :magics
+  has_many :planets
   has_many :races
   has_many :religions
-  has_many :magics
-  has_many :languages
-  has_many :floras
-  has_many :towns
-  has_many :countries
-  has_many :landmarks
-
   has_many :scenes
-  has_many :groups
+  has_many :technologies
+  has_many :towns
 
   has_many :contributors, dependent: :destroy
 
@@ -60,7 +64,7 @@ class Universe < ActiveRecord::Base
   end
 
   def self.icon
-    'public'
+    'language'
   end
 
   def self.content_name

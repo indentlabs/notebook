@@ -28,7 +28,15 @@ class CharactersController < ContentController
       birthings_attributes:        [:id, :birthplace_id, :_destroy],
       childrenships_attributes:    [:id, :child_id, :_destroy],
       lingualisms_attributes:      [:id, :spoken_language_id, :_destroy],
-      raceships_attributes:        [:id, :race_id, :_destroy]
+      raceships_attributes:        [:id, :race_id, :_destroy],
+      character_items_attributes:  [:id, :item_id, :_destroy],
+      character_technologies_attributes: [:id, :technology_id, :_destroy],
+      character_floras_attributes: [:id, :flora_id, :_destroy],
+      character_friends_attributes: [:id, :friend_id, :_destroy],
+      character_companions_attributes: [:id, :companion_id, :_destroy],
+      character_birthtowns_attributes: [:id, :birthtown_id, :_destroy],
+      character_magics_attributes:  [:id, :magic_id, :_destroy],
+      character_enemies_attributes:  [:id, :enemy_id, :_destroy]
     ]
   end
 end
