@@ -65,7 +65,7 @@ gem 'social-share-button'
 gem 'levenshtein-ffi'
 
 # Forum
-gem 'thredded', '~> 0.13.2'
+gem 'thredded'
 gem 'rails-ujs'
 gem 'delayed_job_active_record'
 
