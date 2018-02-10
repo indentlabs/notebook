@@ -1917,16 +1917,17 @@ ActiveRecord::Schema.define(version: 20180202064238) do
   add_index "thredded_messageboard_users", ["thredded_messageboard_id", "thredded_user_detail_id"], name: "index_thredded_messageboard_users_primary"
 
   create_table "thredded_messageboards", force: :cascade do |t|
-    t.string   "name",                  limit: 191,             null: false
+    t.string   "name",                  limit: 191,                 null: false
     t.string   "slug",                  limit: 191
     t.text     "description"
     t.integer  "topics_count",                      default: 0
     t.integer  "posts_count",                       default: 0
-    t.integer  "position",                                      null: false
+    t.integer  "position",                                          null: false
     t.integer  "last_topic_id"
     t.integer  "messageboard_group_id"
-    t.datetime "created_at",                                    null: false
-    t.datetime "updated_at",                                    null: false
+    t.datetime "created_at",                                        null: false
+    t.datetime "updated_at",                                        null: false
+    t.boolean  "locked",                            default: false, null: false
   end
 
   add_index "thredded_messageboards", ["messageboard_group_id"], name: "index_thredded_messageboards_on_messageboard_group_id"
@@ -2058,7 +2059,7 @@ ActiveRecord::Schema.define(version: 20180202064238) do
 
   add_index "thredded_user_details", ["latest_activity_at"], name: "index_thredded_user_details_on_latest_activity_at"
   add_index "thredded_user_details", ["moderation_state", "moderation_state_changed_at"], name: "index_thredded_user_details_for_moderations"
-  add_index "thredded_user_details", ["user_id"], name: "index_thredded_user_details_on_user_id"
+  add_index "thredded_user_details", ["user_id"], name: "index_thredded_user_details_on_user_id", unique: true
 
   create_table "thredded_user_messageboard_preferences", force: :cascade do |t|
     t.integer  "user_id",                                  null: false
@@ -2088,7 +2089,7 @@ ActiveRecord::Schema.define(version: 20180202064238) do
     t.datetime "updated_at",                               null: false
   end
 
-  add_index "thredded_user_preferences", ["user_id"], name: "index_thredded_user_preferences_on_user_id"
+  add_index "thredded_user_preferences", ["user_id"], name: "index_thredded_user_preferences_on_user_id", unique: true
 
   create_table "thredded_user_private_topic_read_states", force: :cascade do |t|
     t.integer  "user_id",                 null: false
