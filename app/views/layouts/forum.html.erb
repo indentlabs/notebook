@@ -1,23 +1,73 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title><%= yield :thredded_page_title %> | Notebook.ai</title>
-    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
-    <%= stylesheet_link_tag 'thredded', 'data-turbolinks-track': 'reload' %>
-    <%= csrf_meta_tag %>
-    <%= javascript_include_tag 'thredded',
-                               async: !Rails.application.config.assets.debug,
-                               defer: true,
-                               'data-turbolinks-track': 'reload'%>
-    <%== Gravatar.prefetch_dns %>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  </head>
-  <body>
+<html lang="en">
+<head>
+  <%= stylesheet_link_tag 'application' %>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
-    <%= render 'thredded/shared/nav/bar' %>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ujs/1.2.2/rails.min.js" integrity="sha256-BbyWhCn0G+F6xbWJ2pcI5LnnpsnpSzyjJNVtl7ABp+M=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.6/lodash.min.js" integrity="sha256-BWnUqM2wJJk2qUy9kUxldWF2drzn2awHUNcmMy87bDQ=" crossorigin="anonymous"></script>
 
-    <%= yield %>
+  <%= render 'layouts/favicon' %>
+  <%= render 'layouts/seo' %>
+
+  <title><%= yield :thredded_page_title %> | Notebook.ai</title>
+
+  <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+  <%= stylesheet_link_tag 'thredded', 'data-turbolinks-track': 'reload' %>
+  <%= csrf_meta_tag %>
+  <%= javascript_include_tag 'thredded',
+                             async: !Rails.application.config.assets.debug,
+                             defer: true,
+                             'data-turbolinks-track': 'reload'%>
+  <%== Gravatar.prefetch_dns %>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+</head>
+<body data-in-app="true">
+
+  <%= render 'layouts/navbar' %>
+  <% if user_signed_in? %>
+    <style>
+      .container-fluid, footer {
+        padding-left: 310px;
+      }
+
+      @media only screen and (max-width : 992px) {
+        .container-fluid, footer {
+          padding-left: 0;
+        }
+      }
+    </style>
+    <%= render 'layouts/sidenav' %>
+  <% end %>
+
+  <main>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col s12">
+          <%= yield %>
+        </div>
+      </div>
+    </div>
 
     <%= render 'layouts/ganalytics' %>
-  </body>
+  </main>
+
+  <!-- Materialize/Thredded conflicts: override favoring Thredded -->
+  <style type="text/css">
+    [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+      opacity: 100 !important;
+      position: inherit !important;
+    }
+    label {
+      color: #222222 !important;
+    }
+  </style>
+
+  <%# render 'layouts/footer' %>
+</body>
 </html>
