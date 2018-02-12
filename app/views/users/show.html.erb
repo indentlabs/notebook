@@ -1,23 +1,35 @@
 <script type="application/ld+json">
-<%
-set_meta_tags title: @user.name,
-description: "#{@user.name}’s profile on notebook.ai",
-image_src: @user.image_url(120)
+  <%
+    set_meta_tags title: @user.name,
+    description: "#{@user.name}’s profile on Notebook.ai",
+    image_src: @user.image_url(120)
 
-content_jsonld = {
-  '@id': user_url,
-  '@type': 'http://schema.org/Person',
-  'http://schema.org/name': @user.name,
-  'http://schema.org/description': "#{@user.name}’s profile on notebook.ai",
-  'https://schema.org/image': @user.image_url(120)
-}
-%>
-<%= content_jsonld.to_json.html_safe %> %>
+    content_jsonld = {
+      '@id': user_url,
+      '@type': 'http://schema.org/Person',
+      'http://schema.org/name': @user.name,
+      'http://schema.org/description': "#{@user.name}’s profile on notebook.ai",
+      'https://schema.org/image': @user.image_url(120)
+    }
+  %>
+  <%= content_jsonld.to_json.html_safe %> %>
 </script>
 
 <div class="row">
   <div class="col s12">
-    <h3><%= @user.name %></h3>
+    <h3>
+      <% if user_signed_in? && current_user.id == @user.id %>
+        <span style="float: right; font-size: 50%; margin-top: 0;" class="card">
+          <%= link_to 'Edit your profile', edit_user_registration_path(current_user), style: 'padding: 0 10px;', class: 'waves-effect' %>
+        </span>
+      <% end %>
+      <%= @user.name %>
+      <% if @user.username.present? %>
+        <small class="grey-text">
+          <%= link_to "@#{@user.username}", thredded_path %>
+        </small>
+      <% end %>
+    </h3>
   </div>
 </div>
 
@@ -28,79 +40,85 @@ content_jsonld = {
         <%= image_tag @user.image_url(250).html_safe, class: 'activator', style: 'width: 100%' %>
       </div>
 
-      <div class="card-reveal">
-        <span class="card-title grey-text text-darken-4"><i class="material-icons right">close</i></span>
-        <p>Profile pictures are powered by <%= link_to 'Gravatar', 'https://gravatar.com/', target: "_blank" %>, using the email you provided in your <%= link_to 'account settings', edit_user_registration_path %>.</p>
-        <p>For the prettiest profile, please use an avatar at least 250 pixels wide.</p>
-      </div>
+      <% if user_signed_in? && current_user == @user %>
+        <div class="card-reveal">
+          <span class="card-title grey-text text-darken-4"><i class="material-icons right">close</i></span>
+          <p>Profile pictures are powered by <%= link_to 'Gravatar', 'https://gravatar.com/', target: "_blank" %>, using the email you provided in your <%= link_to 'account settings', edit_user_registration_path %>.</p>
+          <p>For the prettiest profile, please use an avatar at least 250 pixels wide.</p>
+        </div>
+      <% end %>
     </div>
-    <% if user_signed_in? && current_user.id == @user.id %>
-      <div>
-        <%= link_to 'Edit your profile', edit_user_registration_path(current_user) %>
-      </div>
-    <% end %>
-    <% if @user.username.present? %>
-      <div>
-        <%= link_to 'Forums', thredded_path %> name: <br />
-        @<%= @user.username %>
-      </div>
-    <% end %>
+
+    <% if @content.any? %>
+      <div class="collection with-header hoverable">
+        <div class="collection-header blue lighten-1 white-text">
+          <div style="padding: 5px 10px">
+            Public pages
+          </div>
+        </div>
+        <% @tabs.each do |tab| %>
+          <% content_type_class = @user.send(tab).build.class %>
+          <%= link_to send("#{tab}_user_path"), class: "collection-item #{content_type_class.color}-text" do %>
+            <%= pluralize @content[tab].length, tab.to_s.singularize %>
+            <span class="secondary-content">
+              <i class="material-icons <%= content_type_class.color %>-text"><%= content_type_class.icon %></i>
+            </span>
+          <% end %>
+        <% end %>
+       </div>
+     <% end %>
   </div>
 
   <div class="col s12 m9 l9">
-    <div class="hoverable card">
-      <div class="card-content">
-        <% if @content.any? %>
-          <h6>
-            I'm creating universes on Notebook! I'm currently sharing the following public content:
-          </h6>
-          <div class="row" style="text-align: center">
-            <% @tabs.each do |tab| %>
-            <div class="col s2 m2 l3">
-              <%= link_to send("#{tab}_user_path"), class: 'black-text' do %>
-                <h3 class="<%= @user.send(tab).build.class.color %>-text"><%= @content[tab].length %></h3>
-                <h6><%= tab.to_s.singularize.pluralize(@content[tab].length) %></h6>
-              <% end %>
-            </div>
+    <% if @stream.any? %>
+      <div class="row">
+        <div class="col s12">
+          <h5 style="text-align: center">Recent activity</h5>
+          <section id="cd-timeline" class="cd-container timeline-container">
+            <% @stream.each do |change_event| %>
+              <% content_type_class = change_event.content_type.constantize %>
+              <% content = content_type_class.find_by(id: change_event.content_id) %>
+              <% next if content.nil? %>
+              <% next unless content.readable_by?(user_signed_in? ? current_user : User.new) %>
+
+              <div class="cd-timeline-block">
+                <div class="cd-timeline-img <%= content_type_class.color %>">
+                  <i class="material-icons white-text"><%= content_type_class.icon %></i>
+                </div>
+
+                <div class="cd-timeline-content card hoverable">
+                  <div class="card-content <%= content_type_class.color %> grey-text text-lighten-2">
+                    <%= link_to content.name, content, class: 'white-text' %>
+                  </div>
+                  <% if content.description.present? %>
+                    <div class="card-content">
+                      <%= truncate content.description %>
+                    </div>
+                  <% end %>
+                  <% if content.respond_to?(:universe_id) && content.universe_id.present? %>
+                    <div class="card-content">
+                      <i class="material-icons <%= Universe.color %>-text" style="font-size: 100%; position: relative; top: 2px">
+                        <%= Universe.icon %>
+                      </i>
+                      <%= link_to content.universe.name, content.universe %>
+                    </div>
+                  <% end %>
+                  <div class="card-content grey lighten-3 grey-text text-darken-1">
+                    <i class="material-icons" style="font-size: 100%; position: relative; top: 2px">access_time</i>
+                    <%= change_event.action %>
+                    <%= time_ago_in_words change_event.created_at %> ago
+                  </div>
+                  <span class="cd-date">
+                    <!-- offset text -->
+                  </span>
+                </div>
+              </div>
             <% end %>
-          </div>
-        <% else %>
-          <%= @user.name %> isn't sharing any public content yet.
-        <% end %>
+          </section>
+        </div>
       </div>
-    </div>
+    <% else %>
+      It seems <%= @user.name %> isn't sharing any public activity.
+    <% end %>
   </div>
 </div>
-
-<% if @stream.any? %>
-  <div class="row">
-    <div class="col s12">
-      <h5 style="text-align: center">Recent activity</h5>
-      <section id="cd-timeline" class="cd-container timeline-container">
-        <% @stream.each do |change_event| %>
-          <% content = change_event.content_type.constantize.find_by(id: change_event.content_id) %>
-          <% next if content.nil? %>
-          <% next unless content.readable_by?(user_signed_in? ? current_user : User.new) %>
-
-          <div class="cd-timeline-block">
-            <div class="cd-timeline-img <%= change_event.content_type.constantize.color %>">
-              <i class="material-icons white-text"><%= change_event.content_type.constantize.icon %></i>
-            </div>
-
-            <div class="cd-timeline-content card hoverable">
-              <h5>
-                <%= change_event.action.titleize %> <%= link_to content.name, content %>
-              </h5>
-              <blockquote>
-                <%= content.description %>
-              </blockquote>
-              <span class="cd-date">
-                <%= time_ago_in_words change_event.created_at %> ago
-              </span>
-            </div>
-          </div>
-        <% end %>
-      </section>
-    </div>
-  </div>
-<% end %>
