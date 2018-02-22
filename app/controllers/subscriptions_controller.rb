@@ -68,6 +68,11 @@ class SubscriptionsController < ApplicationController
     stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
     stripe_subscription = stripe_customer.subscriptions.data[0]
 
+    if stripe_subscription.nil?
+      Stripe::Subscription.create(customer: current_user.stripe_customer_id, plan: 'starter')
+      stripe_subscription = stripe_customer.subscriptions.data[0]
+    end
+
     # If the user already has a payment method on file, change their plan and add a new subscription
     if stripe_customer.sources.total_count > 0
       # Cancel any active subscriptions, since we're changing plans
