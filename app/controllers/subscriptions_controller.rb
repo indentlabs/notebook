@@ -81,9 +81,17 @@ class SubscriptionsController < ApplicationController
       return redirect_to :back
     end
 
-    move_user_to_plan_requested(params[:plan])
+    new_plan_id = params[:plan]
+    result = move_user_to_plan_requested(new_plan_id)
 
-    redirect_to(subscription_path, notice: 'Your payment method has been successfully changed.')
+    if result == :payment_method_needed
+      redirect_to payment_info_path(plan: new_plan_id)
+    elsif result == :failed_card
+      return
+    else
+      redirect_to(subscription_path, notice: 'Your plan was successfully changed.')
+    end
+
   end
 
   def delete_payment_method
