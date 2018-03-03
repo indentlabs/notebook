@@ -1,9 +1,8 @@
 class SubscriptionsController < ApplicationController
+  before_action :authenticate_user!
   protect_from_forgery except: :stripe_webhook
 
   def new
-    return redirect_to new_user_session_path, notice: t(:no_do_permission) unless user_signed_in?
-
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed billing page', {
       'current billing plan': current_user.selected_billing_plan_id,
       'content count': current_user.content_count
@@ -178,10 +177,6 @@ class SubscriptionsController < ApplicationController
   end
 
   def information_change
-    # No idea why current_user is nil for this endpoint (maybe CSRF isn't passing through correctly?) but
-    # calling authenticate_user! here reauths the user and sets current_user
-    authenticate_user!
-
     valid_token = params[:stripeToken]
     raise "Invalid token" if valid_token.nil?
 
