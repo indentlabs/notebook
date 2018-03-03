@@ -22,10 +22,10 @@ class MainController < ApplicationController
   def dashboard
     return redirect_to new_user_session_path unless user_signed_in?
 
-    if user_signed_in? && current_user.universes.count > 1 && @universe_scope.nil?
-      redirect_to universes_path
-      return
-    end
+    # if user_signed_in? && current_user.universes.count > 1 && @universe_scope.nil?
+    #   redirect_to universes_path
+    #   return
+    # end
 
     @content_types = (
       Rails.application.config.content_types[:all].map(&:name) & # Use config to dictate order
