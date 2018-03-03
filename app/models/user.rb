@@ -36,7 +36,6 @@ class User < ActiveRecord::Base
   has_many :user_content_type_activators, dependent: :destroy
 
   def contributable_universes
-
     @user_contributable_universes ||= begin
       # todo email confirmation needs to happy for data safety / privacy (only verified emails)
       contributor_by_email = Contributor.where(email: self.email).pluck(:universe_id)
