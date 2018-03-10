@@ -57,6 +57,22 @@ module HasContent
       end
     end
 
+    # {
+    #   characters: [...],
+    #   locations:  [...]
+    # }
+    def content_without_universe
+      @user_content_without_universe ||= begin
+        content_value = {}
+        Rails.application.config.content_types[:all_non_universe].each do |type|
+          relation = type.name.downcase.pluralize.to_sym # :characters
+          content_value[relation] = send(relation).where(universe_id: nil)
+        end
+
+        content_value
+      end
+    end
+
     # 5
     def content_count
       @user_content_count ||= begin

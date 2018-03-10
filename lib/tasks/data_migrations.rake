@@ -27,6 +27,33 @@ namespace :data_migrations do
     end
   end
 
+  desc "Migrate to the new attributes system"
+  task migrate_all_users_to_new_attributes: :environment do
+    User.find_each do |user|
+      puts "Migrating user #{user.id}"
+
+      # If this user has any content with no universe, create a universe and put
+      # that content in it.
+      orphan_content = user.content_without_universe
+      if orphan_content.values.flatten.compact.any?
+        universe = user.universes.create(name: 'Untitled')
+
+        orphan_content.each do |klass, orphan_list|
+          orphan_list.update_all(universe_id: universe.id)
+        end
+      end
+
+      # Now that the user is guaranteed to have at least one universe, we want to
+      # create default categories/fields for each of their universes.
+      user.universes.each do |universe|
+        content_classes = Rails.application.config.content_types[:all_non_universe]
+        content_classes.each do |content_class|
+          content_class.create_default_page_categories_and_fields!(universe)
+        end
+      end
+    end
+  end
+
   desc "Initialize Stripe customer ID for all users without one already"
   task initialize_stripe_customers: :environment do
     User.where(stripe_customer_id: nil).each do |user|

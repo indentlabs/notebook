@@ -1352,28 +1352,25 @@ ActiveRecord::Schema.define(version: 20180310054320) do
 
   create_table "page_categories", force: :cascade do |t|
     t.string   "label"
-    t.integer  "user_id"
     t.integer  "universe_id"
     t.string   "content_type"
+    t.string   "icon"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
   end
 
   add_index "page_categories", ["universe_id"], name: "index_page_categories_on_universe_id"
-  add_index "page_categories", ["user_id"], name: "index_page_categories_on_user_id"
 
   create_table "page_fields", force: :cascade do |t|
     t.string   "label"
-    t.integer  "user_id"
     t.integer  "page_category_id"
-    t.string   "field_type"
+    t.string   "field_type",       default: "textarea"
     t.text     "value"
-    t.datetime "created_at",       null: false
-    t.datetime "updated_at",       null: false
+    t.datetime "created_at",                            null: false
+    t.datetime "updated_at",                            null: false
   end
 
   add_index "page_fields", ["page_category_id"], name: "index_page_fields_on_page_category_id"
-  add_index "page_fields", ["user_id"], name: "index_page_fields_on_user_id"
 
   create_table "past_ownerships", force: :cascade do |t|
     t.integer "user_id"

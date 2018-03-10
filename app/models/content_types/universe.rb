@@ -55,6 +55,13 @@ class Universe < ActiveRecord::Base
     end
   end
 
+  after_create do
+    content_classes = Rails.application.config.content_types[:all_non_universe]
+    content_classes.each do |content_class|
+      content_class.create_default_page_categories_and_fields!(self)
+    end
+  end
+
   def content_count
     content.count
   end
