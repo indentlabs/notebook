@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180310054320) do
+ActiveRecord::Schema.define(version: 20180310070120) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -1361,11 +1361,22 @@ ActiveRecord::Schema.define(version: 20180310054320) do
 
   add_index "page_categories", ["universe_id"], name: "index_page_categories_on_universe_id"
 
+  create_table "page_field_values", force: :cascade do |t|
+    t.integer  "page_field_id"
+    t.integer  "page_id"
+    t.text     "value"
+    t.integer  "user_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "page_field_values", ["page_field_id"], name: "index_page_field_values_on_page_field_id"
+  add_index "page_field_values", ["user_id"], name: "index_page_field_values_on_user_id"
+
   create_table "page_fields", force: :cascade do |t|
     t.string   "label"
     t.integer  "page_category_id"
     t.string   "field_type",       default: "textarea"
-    t.text     "value"
     t.datetime "created_at",                            null: false
     t.datetime "updated_at",                            null: false
   end

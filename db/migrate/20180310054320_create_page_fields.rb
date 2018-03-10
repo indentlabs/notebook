@@ -4,7 +4,6 @@ class CreatePageFields < ActiveRecord::Migration
       t.string :label
       t.references :page_category, index: true, foreign_key: true
       t.string :field_type, default: 'textarea'
-      t.text :value
 
       t.timestamps null: false
     end

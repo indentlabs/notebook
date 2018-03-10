@@ -35,7 +35,9 @@ module HasAttributes
         )
 
         category_data[:attributes].each do |field_data|
-          category.page_fields.create(label: field_data[:label])
+          category.page_fields.create(
+            label: field_data[:label]
+          )
         end
       end
     end

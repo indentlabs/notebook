@@ -50,6 +50,22 @@ namespace :data_migrations do
         content_classes.each do |content_class|
           content_class.create_default_page_categories_and_fields!(universe)
         end
+
+        # We also want to migrate over any custom categories/attributes they've made
+        user.attribute_categories.each do |custom_category|
+          category = universe.page_categories.create(
+            label: custom_category.label,
+            icon: nil,
+            content_type: custom_category.entity_type.titleize
+          )
+
+          # And its fields...
+          custom_category.attribute_fields.each do |custom_field|
+            category.page_fields.create(
+              label: custom_field.label
+            )
+          end
+        end
       end
     end
   end
