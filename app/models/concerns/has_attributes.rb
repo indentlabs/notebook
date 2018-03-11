@@ -11,7 +11,7 @@ module HasAttributes
     def self.create_default_page_categories_and_fields!(universe)
       class_name = self.name
 
-      defaults = YAML.load_file(Rails.root.join('config', 'attributes', "#{class_name}.yml"))
+      defaults = YAML.load_file(Rails.root.join('config', 'attributes', "#{class_name.downcase}.yml"))
       defaults.each do |category_name, category_data|
         # [2] pry(Character)> defaults.keys
         # => [:overview, :looks, :nature, :social, :history, :family, :inventory, :gallery, :changelog, :notes]
