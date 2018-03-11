@@ -29,31 +29,119 @@ namespace :data_migrations do
 
   desc "Migrate to the new attributes system"
   task migrate_all_users_to_new_attributes: :environment do
-    User.find_each do |user|
-      puts "Migrating user #{user.id}"
+    # Create the default page categories/fields for all users for no-universe content
+    Rails.application.config.content_types[:all_non_universe].each do |content_class|
+      content_class.create_default_page_categories_and_fields!(nil)
+    end
 
-      # If this user has any content with no universe, create a universe and put
-      # that content in it.
+    User.find_each do |user|
+      puts "Migrating user #{user.id}" #if (user.id % 1000).zero?
+
+      # If this user has any content with no universe AND has created any custom
+      # fields, create a universe and put all non-universed content in it.
       orphan_content = user.content_without_universe
-      if orphan_content.values.flatten.compact.any?
+      if orphan_content.values.flatten.compact.any? && user.attribute_fields.any?
         universe = user.universes.create(name: 'Untitled')
+        puts "  Created universe #{universe.id}"
 
         orphan_content.each do |klass, orphan_list|
           orphan_list.update_all(universe_id: universe.id)
         end
       end
 
+      # Lets recapture any orphan content that's still not a universe, and assign
+      # PageFieldValues for their existing (default) fields.
+      orphan_content = user.content_without_universe
+      orphan_content.each do |content_class, content_list|
+        content_class_name = content_class.to_s.singularize
+        content_class = content_class_name.titleize.constantize
+
+        # Build a lookup table so we can translate a human-readable label back to the model column
+        # it's stored in.
+        class_schema = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_class_name}.yml"))
+        field_column_by_label_lookup = {}
+        class_schema.flat_map { |category, data| data[:attributes] }
+          .each do |field|
+            next if field.nil?
+            next unless field[:label].present? && field[:name].present?
+            field_column_by_label_lookup[field[:label]] = field[:name]
+          end
+
+        # Grab the human-readable list of attributes we want to fill data into
+        fields_to_fill = PageCategory.where(universe: nil).where(content_type: content_class.name).flat_map(&:page_fields)
+
+        content_list.each do |content|
+          fields_to_fill.each do |field|
+            field_column = field_column_by_label_lookup[field.label]
+
+            # Custom attributes don't need copied over this way, and they're not gonna show up in the lookup table
+            next if field_column.nil?
+
+            field_value = content.send(field_column)
+
+            PageFieldValue.find_or_create_by(
+              page_field_id: field.id,
+              page_id: content.id,
+              value: field_value,
+              user: content.user
+            )
+          end
+        end
+      end
+
       # Now that the user is guaranteed to have at least one universe, we want to
       # create default categories/fields for each of their universes.
       user.universes.each do |universe|
+        puts "  Migrating universe #{universe.id}"
         content_classes = Rails.application.config.content_types[:all_non_universe]
         content_classes.each do |content_class|
           content_class.create_default_page_categories_and_fields!(universe)
         end
 
+        # For these default page categories and fields, we want to move over the
+        # values we have currently stuck on models for "core" fields.
+        content_classes.each do |content_class|
+          content_class_name = content_class.name.downcase
+          content_of_this_class = universe.send(content_class_name.pluralize)
+          content_of_this_class.each do |content|
+
+            # Build a lookup table so we can translate a human-readable label back to the model column
+            # it's stored in.
+            class_schema = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_class_name}.yml"))
+            field_column_by_label_lookup = {}
+            class_schema.flat_map { |category, data| data[:attributes] }
+              .each do |field|
+                next if field.nil?
+                next unless field[:label].present? && field[:name].present?
+                field_column_by_label_lookup[field[:label]] = field[:name]
+              end
+
+            # Grab the human-readable list of attributes we want to fill data into
+            fields_to_fill = universe.page_categories.where(content_type: content_class.name).flat_map(&:page_fields)
+
+            fields_to_fill.each do |field|
+              field_column = field_column_by_label_lookup[field.label]
+
+              # Custom attributes don't need copied over this way, and they're not gonna show up in the lookup table
+              next if field_column.nil?
+
+              field_value = content.send(field_column)
+
+              PageFieldValue.find_or_create_by(
+                page_field_id: field.id,
+                page_id: content.id,
+                value: field_value,
+                user: content.user
+              )
+            end
+          end
+        end
+
+        # TBD LINKS
+
         # We also want to migrate over any custom categories/attributes they've made
         user.attribute_categories.each do |custom_category|
-          category = universe.page_categories.create(
+          category = universe.page_categories.find_or_create_by(
             label: custom_category.label,
             icon: nil,
             content_type: custom_category.entity_type.titleize
@@ -61,9 +149,18 @@ namespace :data_migrations do
 
           # And its fields...
           custom_category.attribute_fields.each do |custom_field|
-            category.page_fields.create(
+            field = category.page_fields.find_or_create_by(
               label: custom_field.label
             )
+
+            # And their values...
+            custom_field.attribute_values.each do |custom_field_value|
+              field.page_field_values.find_or_create_by(
+                page_id: custom_field_value.entity_id,
+                value: custom_field_value.value,
+                user: universe.user
+              )
+            end
           end
         end
       end

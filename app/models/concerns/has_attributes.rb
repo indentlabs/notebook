@@ -27,15 +27,21 @@ module HasAttributes
         #    {:name=>"universe_id", :label=>"Universe"}]}
         next unless category_data[:attributes].present?
 
-        category = PageCategory.create(
+        category = PageCategory.find_or_create_by(
           label: category_data[:label],
           icon: category_data[:icon],
-          universe_id: universe.id,
+          universe: universe,
           content_type: class_name
         )
 
         category_data[:attributes].each do |field_data|
-          category.page_fields.create(
+          # We're keeping these two fields on the model
+          next if [:name, :privacy].include?(field_data[:name])
+
+          # We don't want to include links quite yet
+          next if field_data[:name].end_with?('_id')
+
+          category.page_fields.find_or_create_by(
             label: field_data[:label]
           )
         end
