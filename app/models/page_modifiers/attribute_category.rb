@@ -12,6 +12,26 @@ class AttributeCategory < ActiveRecord::Base
 
   before_validation :ensure_name
 
+  after_create do
+    # Create a mirrored PageCategory
+    PageCategory.create(
+      label: self.label,
+      universe: nil,
+      content_type: self.entity_type.titleize
+    )
+  end
+
+  after_destroy do
+    # Destroy the mirrored PageCategory
+    category = PageCategory.find_by(
+      label: self.label,
+      universe: nil,
+      content_type: self.entity_type.titleize
+    )
+
+    category.destroy if category
+  end
+
   def self.color
     'amber'
   end

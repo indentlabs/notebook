@@ -13,6 +13,16 @@ class AttributeField < ActiveRecord::Base
 
   attr_accessor :system
 
+  before_create do
+    # Create mirrored PageField
+
+  end
+
+  after_destroy do
+    # Destroy mirrored PageField
+
+  end
+
   before_validation :ensure_name
 
   scope :is_public, -> { eager_load(:universe).where('universes.privacy = ? OR attribute_fields.privacy = ?', 'public', 'public') }
