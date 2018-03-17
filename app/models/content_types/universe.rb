@@ -47,6 +47,10 @@ class Universe < ActiveRecord::Base
 
   has_many :contributors, dependent: :destroy
 
+  # V2 woo woo!
+  has_many :page_categories, dependent: :destroy
+  has_many :page_fields, through: :page_categories
+
   scope :is_public, -> { where(privacy: 'public') }
 
   after_destroy do

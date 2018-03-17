@@ -4,10 +4,6 @@ module HasAttributes
   extend ActiveSupport::Concern
 
   included do
-    # V2 woo woo!
-    has_many :page_categories, dependent: :destroy
-    has_many :page_fields, through: :page_categories
-
     def self.create_default_page_categories_and_fields!(universe)
       class_name = self.name
 
