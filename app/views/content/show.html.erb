@@ -85,7 +85,13 @@
                   </div>
                 <% else %>
                   <div class="col s9 m9 l9 <%= "flow-text" unless value.to_s.length > 140 %> markdownable">
-                    <%= simple_format Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value : value).html_safe %>&nbsp;
+                    <%# this ternary can be removed when all fields are pagefields %>
+                    <%=
+                      ContentFormatterService.show(
+                        text: value.is_a?(Attribute) ? value.value : value,
+                        viewing_user: current_user
+                      )
+                      %>&nbsp;
                   </div>
                 <% end %>
               </div>
