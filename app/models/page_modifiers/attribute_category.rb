@@ -1,3 +1,13 @@
+#<AttributeCategory
+#  id: nil,
+#  user_id: nil,
+#  entity_type: nil,
+#  name: nil,
+#  label: nil,
+#  icon: nil,
+#  description: nil,
+#  created_at: nil,
+#  updated_at: nil>
 class AttributeCategory < ActiveRecord::Base
   validates :name, presence: true
 
@@ -17,19 +27,24 @@ class AttributeCategory < ActiveRecord::Base
     PageCategory.create(
       label: self.label,
       universe: nil,
-      content_type: self.entity_type.titleize
+      content_type: self.entity_type.titleize,
+      user: self.user
     )
   end
 
   after_destroy do
     # Destroy the mirrored PageCategory
-    category = PageCategory.find_by(
+    category = mirrored_page_category
+    category.destroy if category
+  end
+
+  def mirrored_page_category
+    PageCategory.find_by(
       label: self.label,
       universe: nil,
+      user: self.user,
       content_type: self.entity_type.titleize
     )
-
-    category.destroy if category
   end
 
   def self.color

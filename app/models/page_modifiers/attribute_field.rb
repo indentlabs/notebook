@@ -1,3 +1,14 @@
+#<AttributeField
+#  id: nil,
+#  user_id: nil,
+#  attribute_category_id: nil,
+#  name: nil,
+#  label: nil,
+#  field_type: nil,
+#  description: nil,
+#  privacy: "private",
+#  created_at: nil,
+#  updated_at: nil>
 class AttributeField < ActiveRecord::Base
   validates :name, presence: true
 
@@ -13,14 +24,27 @@ class AttributeField < ActiveRecord::Base
 
   attr_accessor :system
 
-  before_create do
-    # Create mirrored PageField
-
+  after_create do
+    # Create a mirrored PageField
+    PageField.create(
+      label: self.label,
+      page_category: self.attribute_category.mirrored_page_category,
+      field_type: 'textarea'
+    )
   end
 
   after_destroy do
-    # Destroy mirrored PageField
+    # Destroy the mirrored PageField
+    field = mirrored_page_field
+    field.destroy if field
+  end
 
+  def mirrored_page_field
+    PageField.find_by(
+      label: self.label,
+      page_category: self.attribute_category.mirrored_page_category,
+      field_type: 'textarea'
+    )
   end
 
   before_validation :ensure_name

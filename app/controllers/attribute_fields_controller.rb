@@ -24,7 +24,7 @@ class AttributeFieldsController < ContentController
     @content = AttributeField.new(label: content_params[:label]).tap do |f|
       f.attribute_category_id = category.id
       f.user_id = current_user.id
-      f.field_type = 'textearea'
+      f.field_type = 'textearea' # todo fix this typo but also migrate all data for it
     end
   end
 
