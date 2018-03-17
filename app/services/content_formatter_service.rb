@@ -13,7 +13,9 @@ class ContentFormatterService < Service
   TOKEN_REGEX = /\[\[([^\-]+)\-([^\]])+\]\]/
 
   # Only allow linking to content type classes
-  VALID_LINK_CLASSES = Rails.application.config.content_types[:all]
+  # todo: we shouldn't have to map name here, but apparently rails is having a little difficulty
+  # https://s3.amazonaws.com/raw.paste.esk.io/Llb%2F64DJHK?versionId=19Lb_TtukDbo1J_IoCpkr.d.pwpW_vmH
+  VALID_LINK_CLASSES = Rails.application.config.content_types[:all].map(&:name)
 
   def self.show(text:, viewing_user: User.new)
     # We want to evaluate markdown first, because the markdown engine also happens
@@ -49,10 +51,10 @@ class ContentFormatterService < Service
   end
 
   def self.replacement_for_token(token, viewing_user)
-    #return unknown_link_template(token) unless token.key?(:content_type) && token.key?(:content_id)
+    return unknown_link_template(token) unless token.key?(:content_type) && token.key?(:content_id)
 
     content_class = token[:content_type].titleize.constantize
-    #return unknown_link_template(token) unless VALID_LINK_CLASSES.include?(content_class)
+    return unknown_link_template(token) unless VALID_LINK_CLASSES.include?(content_class.name)
 
     content_id    = token[:content_id].to_i
     content_model = content_class.find_by(id: content_id)
