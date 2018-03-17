@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180317173421) do
+ActiveRecord::Schema.define(version: 20180317175218) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -1360,6 +1360,7 @@ ActiveRecord::Schema.define(version: 20180317173421) do
     t.integer  "user_id"
   end
 
+  add_index "page_categories", ["universe_id", "content_type"], name: "index_page_categories_on_universe_id_and_content_type"
   add_index "page_categories", ["universe_id"], name: "index_page_categories_on_universe_id"
   add_index "page_categories", ["user_id"], name: "index_page_categories_on_user_id"
 
