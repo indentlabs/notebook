@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180317175218) do
+ActiveRecord::Schema.define(version: 20180317182649) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -1371,6 +1371,7 @@ ActiveRecord::Schema.define(version: 20180317175218) do
     t.integer  "user_id"
     t.datetime "created_at",    null: false
     t.datetime "updated_at",    null: false
+    t.datetime "deleted_at"
   end
 
   add_index "page_field_values", ["page_field_id"], name: "index_page_field_values_on_page_field_id"

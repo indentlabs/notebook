@@ -28,16 +28,19 @@ class Attribute < ActiveRecord::Base
     )
   end
 
+  after_update do
+    mirrored_page_field_value.update(value: self.value)
+  end
+
   after_destroy do
     # Destroy the mirrored PageFieldValue
-    value = mirrored_page_field
+    value = mirrored_page_field_value
     value.destroy if value
   end
 
   def mirrored_page_field_value
     PageFieldValue.find_by(
       page_field: self.attribute_field.mirrored_page_field,
-      value: self.value,
       user: self.user
     )
   end
