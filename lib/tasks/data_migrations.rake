@@ -137,8 +137,6 @@ namespace :data_migrations do
           end
         end
 
-        # TBD LINKS
-
         # We also want to migrate over any custom categories/attributes they've made
         user.attribute_categories.each do |custom_category|
           category = universe.page_categories.find_or_create_by(
@@ -164,6 +162,57 @@ namespace :data_migrations do
           end
         end
       end
+    end
+  end
+
+  desc "Link transition to new attributes"
+  task migrate_links_to_new_attributes: :environment do
+    classes = Rails.application.config.content_relations
+    classes.each do |content_class|
+      puts "Migrating #{content_class} links"
+
+      class_schema = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_class.downcase}.yml"))
+      field_category_by_name_lookup = {}
+      field_column_by_label_lookup = {}
+      class_schema.flat_map do |category, data|
+        data[:attributes]
+        [category, data[:attributes]]
+      end.each do |category, field|
+        next if field.nil?
+        next unless field[:label].present? && field[:name].present?
+        field_category_by_name_lookup[field[:name]] = category     # _[:fathers] = Family
+        field_column_by_label_lookup[field[:label]] = field[:name] # _[:father]  =
+      end
+
+      relations = Rails.application.config.content_relations[content_class]
+      relations.each do |relation, relation_data|
+        # irb(main):009:0> Rails.application.config.content_relations['Character']['Fathership']
+        # => {:with=>:fatherships,
+        #     :related_class=>Fathership (call 'Fathership.connection' to establish a connection),
+        #     :inverse_class=>"Character",
+        #     :relation_text=>"father",
+        #     :through_relation=>"father"}
+        field_name = relation_data[:through_relation].pluralize # fathers
+
+        User.all.find_each do |user|
+          user.universes.each do |universe|
+            # Find the category this goes in
+            page_category = PageCategory.find_or_create_by(
+              content_type: content_class,
+              label: field_category_by_name_lookup[field_name]
+            )
+
+            # Find the field
+            # Get the field value
+            # Update it
+          end
+
+          # do the same for universe=nil
+        end
+
+
+      end
+
     end
   end
 
