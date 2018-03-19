@@ -1,7 +1,7 @@
 class ContentFormatterService < Service
   extend ActionView::Helpers::UrlHelper # link_to, *_url, *_path
   extend ActionView::Helpers::TagHelper # content_tag (used by link_to under the hood)
-
+  extend ActionView::Context            # content_tag
 
   include Rails.application.routes.url_helpers
   default_url_options[:host] = 'localhost'
@@ -53,7 +53,11 @@ class ContentFormatterService < Service
   def self.replacement_for_token(token, viewing_user)
     return unknown_link_template(token) unless token.key?(:content_type) && token.key?(:content_id)
 
-    content_class = token[:content_type].titleize.constantize
+    begin
+      content_class = token[:content_type].titleize.constantize
+    rescue
+      return unknown_link_template(token)
+    end
     return unknown_link_template(token) unless VALID_LINK_CLASSES.include?(content_class.name)
 
     content_id    = token[:content_id].to_i
@@ -68,15 +72,33 @@ class ContentFormatterService < Service
   end
 
   def self.link_template(content_model)
-    link_to(content_model.name, link_for(content_model), class: "content_link #{content_model.class}-link")
+    chip_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: "content_link #{content_model.class}-link") }
   end
 
   def self.private_link_template(content_model)
-    link_to(content_model.name, '#', class: 'content_link disabled')
+    chip_template(content_model.class) { link_to(content_model.name, '#', class: 'content_link disabled') }
   end
 
   def self.unknown_link_template(attempted_key)
-    link_to(attempted_key[:matched_string], '#', class: 'content_link disabled')
+    attempted_key[:matched_string]
+  end
+
+  #todo maybe just move this to a partial?
+  def self.chip_template(class_model=nil)
+    content_tag(:span, class: 'chip') do
+      body = ''
+      if class_model
+        body += content_tag(:span, class: class_model ? "#{class_model.color}-text" : '') do
+          # todo tooltip the class icon
+          content_tag(:i, class: 'material-icons left', style: 'position: relative; top: 3px;') do
+            class_model.icon
+          end
+        end
+      end
+      body += yield
+
+      body.html_safe
+    end
   end
 
   # This is a hack until I figure out how to include polymorphic paths in a service model.
