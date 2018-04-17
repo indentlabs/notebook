@@ -1,4 +1,31 @@
 <div class="row">
+	<div class="col s3">
+		<div class="blue card white-text center-align">
+			<h1><%= @content_type.count %></h1>
+			total all time
+		</div>
+	</div>
+	<div class="col s3">
+		<div class="card center-align">
+			<h1><%= @content_type.where('created_at > ? ', DateTime.now.beginning_of_month).count %></h1>
+			total this month
+		</div>
+	</div>
+	<div class="col s3">
+		<div class="card center-align">
+			<h1><%= @content_type.where('created_at > ? ', DateTime.now.beginning_of_week).count %></h1>
+			total this week
+		</div>
+	</div>
+	<div class="col s3">
+		<div class="card center-align">
+			<h1><%= @content_type.where('created_at > ? ', DateTime.now.beginning_of_day).count %></h1>
+			total today
+		</div>
+	</div>
+</div>
+
+<div class="row">
 	<div class="col s12">
 		<div class="card">
 			<div class="card-content">
