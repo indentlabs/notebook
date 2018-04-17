@@ -12,7 +12,8 @@ class UniverseCoreContentAuthorizer < CoreContentAuthorizer
     [
       PermissionService.content_is_public?(content: resource),
       PermissionService.user_owns_content?(user: user, content: resource),
-      PermissionService.user_can_contribute_to_universe?(user: user, universe: resource)
+      PermissionService.user_can_contribute_to_universe?(user: user, universe: resource),
+      PermissionService.is_global_admin?(user: user)
     ].any?
   end
 
