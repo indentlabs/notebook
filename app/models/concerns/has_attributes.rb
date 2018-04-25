@@ -34,7 +34,7 @@ module HasAttributes
           # We're keeping these two fields on the model
           next if [:name, :privacy].include?(field_data[:name])
 
-          # We don't want to include links quite yet
+          # We don't want to include real links quite yet
           next if field_data[:name].end_with?('_id')
 
           category.page_fields.find_or_create_by(
@@ -44,8 +44,7 @@ module HasAttributes
       end
     end
 
-
-
+    # TODO remove below this line after releasing pagecategories/pagefields
 
     attr_accessor :custom_attribute_values
     after_save :update_custom_attributes
