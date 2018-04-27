@@ -21,13 +21,21 @@ namespace :attributes do
 
         # For each field
         relation_fields.each do |relation_field_data|
-          relation_target_class = relation_field_data[:inverse_class]           # Character
-          relation_accessor = relation_field_data[:through_relation].pluralize  # fathers
-          puts "  relation = #{relation_accessor}"
+          joining_class                 = relation_field_data[:related_class]               # Siblingships
+          related_object_reference      = relation_field_data[:through_relation]            # sibling
+          joining_class_parent_accessor = relation_field_data[:inverse_class].to_s.downcase # character
+          relation_accessor             = relation_field_data[:through_relation].pluralize  # siblings
+          puts "  #{joining_class.name}"
 
-          unless content_page.respond_to?(relation_accessor)
-            puts "    Skipping!"
+          # Get the joining class instances
+          joining_class_models = joining_class.where({"#{joining_class_parent_accessor}": content_page})
+
+          if joining_class_models.empty?
+            puts "    Skipping! (empty)"
             next
+          else
+            puts "    Migrating #{joining_class_models.count} values"
+            #TODO remove this so we don't requery
           end
 
           # Create the field if it doesn't exist
@@ -37,12 +45,9 @@ namespace :attributes do
           )
           raise "No field associated with label=#{relation_accessor} / class=#{relation_target_class.name}" if field_to_add_data_to.nil?
 
-          field_value = content_page.send(relation_accessor)
-
-          binding.pry
-          field_value.map! { |related_object|
+          field_value = joining_class_models.map { |related_object|
             "[[#{related_object.class.name.downcase}-#{related_object.id}]]"
-          }.join("\n") unless field_value.nil?
+          }.join("\n")
 
           field_to_add_data_to.page_field_values.find_or_create_by(
             value: field_value,
