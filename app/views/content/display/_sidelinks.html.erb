@@ -16,10 +16,12 @@
     </li>
   <% end %>
 
-  <% @content.class.attribute_categories(@content.user).each do |category| %>
-    <% fields = category.attribute_fields %>
+  <% @content.page_categories.each do |category| %>
+    <% fields = category.page_fields %>
+    <% field_ids_with_values = PageFieldValue.where.not(value: "").where(page_field_id: fields.pluck(:id)) %>
     <%
       #TODO: refactor ALL OF THIS
+
       # Don't show changelog tab on create/edit form
       next if (creating || editing) && category.name == 'changelog'
 
@@ -35,29 +37,20 @@
         next if @content.image_uploads.empty?
       else
         # Only show other tabs if it has at least one piece of data in it, or it's a custom tab
-        next if fields.all? do |field|
-          if @content.respond_to?(field.name.to_sym)
-            value = @content.send(field.name.to_sym)
-          else
-            value = "custom field -- should always show"
-          end
-
-          value.blank?
-        end
+        next if field_ids_with_values.empty?
       end
     %>
 
     <li class="collection-item tab">
-      <a href="#<%= category.name.gsub("'", '') %>_panel" class="<%= 'red-text' if category.label == 'Overview' %>">
+      <% #todo red-text if #tab is equal %>
+      <a href="#<%= category.name %>_panel" class="<%= 'red-text' if category.label == 'Overview' %>">
         <i class="material-icons left"><%= category.icon %></i>
         <%= category.label.capitalize.presence || '(blank)' %>
-        <% if editing && category.label == 'Contributors' %>
-          <span class="new badge <%= Universe.color %>"></span>
-        <% end %>
       </a>
     </li>
   <% end %>
 
+  <%# todo use universe permissions %>
   <% if user_signed_in? && current_user.id == @content.user_id %>
     <li class="collection-item">
       <a href="#" class="green-text new-attribute-field-link">

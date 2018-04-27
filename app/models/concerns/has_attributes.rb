@@ -44,6 +44,21 @@ module HasAttributes
       end
     end
 
+    def page_categories
+      if self.is_a?(Universe)
+        PageCategory.where(universe_id: self.id)
+      elsif self.respond_to?(:universe) && self.universe.present?
+        PageCategory.where(universe_id: self.universe.id)
+      elsif self.respond_to?(:universe) && self.universe.nil?
+        PageCategory.where(universe_id: nil)
+      end
+    end
+
+    def page_fields
+      page_category_ids = page_categories.pluck(:id)
+      PageField.where(page_category_id: page_category_ids)
+    end
+
     # TODO remove below this line after releasing pagecategories/pagefields
 
     attr_accessor :custom_attribute_values
