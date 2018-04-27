@@ -37,9 +37,12 @@ namespace :attributes do
           )
           raise "No field associated with label=#{relation_accessor} / class=#{relation_target_class.name}" if field_to_add_data_to.nil?
 
-          field_value = content_page.send(relation_accessor).map { |related_object|
+          field_value = content_page.send(relation_accessor)
+
+          binding.pry
+          field_value.map! { |related_object|
             "[[#{related_object.class.name.downcase}-#{related_object.id}]]"
-          }.join("\n")
+          }.join("\n") unless field_value.nil?
 
           field_to_add_data_to.page_field_values.find_or_create_by(
             value: field_value,
