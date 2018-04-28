@@ -150,7 +150,7 @@ namespace :data_migrations do
         user.attribute_categories.each do |custom_category|
           category = universe.page_categories.find_or_create_by(
             label: custom_category.label,
-            icon: nil,
+            icon: 'note_add',
             content_type: custom_category.entity_type.titleize
           )
 
