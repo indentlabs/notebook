@@ -45,13 +45,15 @@ module HasAttributes
     end
 
     def page_categories
-      if self.is_a?(Universe)
-        PageCategory.where(universe_id: self.id)
+      queryable_universe_id = if self.is_a?(Universe)
+        self.id
       elsif self.respond_to?(:universe) && self.universe.present?
-        PageCategory.where(universe_id: self.universe.id)
+        self.universe.id
       elsif self.respond_to?(:universe) && self.universe.nil?
-        PageCategory.where(universe_id: nil)
+        nil
       end
+
+      PageCategory.where(universe_id: queryable_universe_id, content_type: self.class.name)
     end
 
     def page_fields
