@@ -34,7 +34,7 @@ module HasAttributes
           # We're keeping these two fields on the model
           next if [:name, :privacy].include?(field_data[:name])
 
-          # We don't want to include links quite yet
+          # We don't want to include real links quite yet
           next if field_data[:name].end_with?('_id')
 
           category.page_fields.find_or_create_by(
@@ -44,8 +44,24 @@ module HasAttributes
       end
     end
 
+    def page_categories
+      queryable_universe_id = if self.is_a?(Universe)
+        self.id
+      elsif self.respond_to?(:universe) && self.universe.present?
+        self.universe.id
+      elsif self.respond_to?(:universe) && self.universe.nil?
+        nil
+      end
 
+      PageCategory.where(universe_id: queryable_universe_id, content_type: self.class.name)
+    end
 
+    def page_fields
+      page_category_ids = page_categories.pluck(:id)
+      PageField.where(page_category_id: page_category_ids)
+    end
+
+    # TODO remove below this line after releasing pagecategories/pagefields
 
     attr_accessor :custom_attribute_values
     after_save :update_custom_attributes

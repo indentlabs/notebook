@@ -1,0 +1,48 @@
+<%
+  content_name = f.object.class.content_name
+
+  field_id = "#{content_name}_#{field.name}"
+  value = nil
+  if f.object.respond_to?(field.name.to_sym)
+    value = f.object.send(field.name.to_sym)
+  else
+    value = Attribute.where(user: current_user, attribute_field: field, entity: f.object).first
+  end
+
+  # TODO: Enable autocomplete when we can actually hide the dropdown if someone tabs out of a field.
+  #       Not the easiest thing in the world to do, apparently.
+%>
+
+<div class="input-field content-field">
+  <%= f.label field.label.present? ? field.label : ' ' %>
+  <%
+    placeholder = I18n.translate "attributes.#{content_name}.#{field.name}",
+      scope: :serendipitous_questions,
+      name: f.object.send('name') || "this #{content_name}",
+      attribute: "test",
+      default: 'Write as little or as much as you want!'
+  %>
+
+  <% if field.system? %>
+    <%= f.text_area field.name, value: value, class: "materialize-textarea #{defined?(autocomplete) && false ? 'autocomplete' : ''}", placeholder: placeholder %>
+  <% else %>
+    <%= hidden_field_tag "#{content_name}[custom_attribute_values][][name]", field.name %>
+    <%= text_area_tag "#{content_name}[custom_attribute_values][][value]", value && value.value, class: "materialize-textarea #{defined?(autocomplete) && false ? 'autocomplete' : ''}", placeholder: placeholder %>
+    <%= render 'content/form/attribute_field_dropdown', field: field %>
+  <% end %>
+</div>
+
+<% if defined?(autocomplete) && false %>
+  <script type="text/javascript">
+    $(function() {
+      $('#<%= "#{content_name}_#{field.name}" %>').autocomplete({
+        limit: 5,
+        data: {
+          <% autocomplete.each do |autocomplete_option| %>
+            "<%= autocomplete_option %>": null,
+          <% end %>
+        }
+      });
+    });
+  </script>
+<% end %>

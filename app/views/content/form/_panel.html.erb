@@ -37,7 +37,7 @@
      # TODO: move this into some service or something? Dunno, doesn't belong here.
     s_width = 12
     m_width = 6
-    l_width = 4
+    l_width = 6
     if category.attribute_fields.length == 1
       # If there's only one field on this tab, go full-width on all screen sizes
       s_width = m_width = l_width = 12
@@ -52,15 +52,10 @@
 
   <% category.attribute_fields.each do |field| %>
     <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
-
-      <% value = nil %>
-      <% if content.respond_to?(field.name.to_sym) %>
-        <% value = content.send(field.name.to_sym) %>
-      <% else %>
-        <% value = Attribute.where(user: current_user, entity: content) %>
-      <% end %>
+      <% value = Attribute.where(user: current_user, entity: content) %>
 
       <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
+        <%# TODO rip all this out %>
         <%# Relation-setting UI %>
         <% through_class = content.class.reflect_on_association(field.name).options[:through].to_s %>
         <%= render 'content/form/relation_input', f: f, attribute: field.name, label: field.label, relation: through_class %>
@@ -200,7 +195,7 @@
           t('polearm_types') + t('shortsword_types') + t('sword_types') %>
 
       <% else %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field %>
 
       <% end %>
 
