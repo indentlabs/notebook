@@ -132,7 +132,7 @@ namespace :data_migrations do
               # Transform links into bulleted lists of new links
               if field_value.is_a?(ActiveRecord::Associations::CollectionProxy)
                 field_value = field_value.map { |related_object|
-                  "* [[#{related_object.class.name.downcase}-#{related_object.id}]]"
+                  "[[#{related_object.class.name.downcase}-#{related_object.id}]]"
                 }.join("\n")
               end
 
