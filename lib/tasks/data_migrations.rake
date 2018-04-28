@@ -29,6 +29,8 @@ namespace :data_migrations do
 
   desc "Migrate to the new attributes system"
   task migrate_all_users_to_new_attributes: :environment do
+    require 'pry'
+
     # Create the default page categories/fields for all users for no-universe content
     Rails.application.config.content_types[:all_non_universe].each do |content_class|
       content_class.create_default_page_categories_and_fields!(nil)
@@ -127,6 +129,13 @@ namespace :data_migrations do
 
               field_value = content.send(field_column)
 
+              # Transform links into bulleted lists of new links
+              if field_value.is_a?(ActiveRecord::Associations::CollectionProxy)
+                field_value = field_value.map { |related_object|
+                  "* [[#{related_object.class.name.downcase}-#{related_object.id}]]"
+                }.join("\n")
+              end
+
               PageFieldValue.find_or_create_by(
                 page_field_id: field.id,
                 page_id: content.id,
@@ -136,8 +145,6 @@ namespace :data_migrations do
             end
           end
         end
-
-        # TBD LINKS
 
         # We also want to migrate over any custom categories/attributes they've made
         user.attribute_categories.each do |custom_category|
