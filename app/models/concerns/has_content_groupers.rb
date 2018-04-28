@@ -40,25 +40,25 @@ module HasContentGroupers
         }                                         # }
 
       # Siblingships
-      has_many connecting_class_name, dependent: :destroy
+#      has_many connecting_class_name, dependent: :destroy
 
       # Siblings
-      has_many relation,
-        through: connecting_class_name
+#      has_many relation,
+#        through: connecting_class_name
 
       # inverse_siblingships
-      has_many "inverse_#{connecting_class_name}".to_sym,
-        class_name: "#{singularized_relation.capitalize}",
-        foreign_key: "#{singularized_relation}_id"
+#      has_many "inverse_#{connecting_class_name}".to_sym,
+#        class_name: "#{singularized_relation.capitalize}",
+#        foreign_key: "#{singularized_relation}_id"
 
       # inverse_siblings
-      has_many "inverse_#{relation}".to_sym,
-        through: "inverse_#{connecting_class_name}".to_sym,
-        source: name.downcase
+#      has_many "inverse_#{relation}".to_sym,
+#        through: "inverse_#{connecting_class_name}".to_sym,
+#        source: name.downcase
 
-      accepts_nested_attributes_for connecting_class_name,
-        reject_if: :all_blank,
-        allow_destroy: true
+#      accepts_nested_attributes_for connecting_class_name,
+#        reject_if: :all_blank,
+#        allow_destroy: true
     end
   end
 end

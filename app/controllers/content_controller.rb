@@ -39,6 +39,7 @@ class ContentController < ApplicationController
 
     if (current_user || User.new).can_read? @content
       @question = @content.question if current_user.present? and current_user == @content.user
+      @categories = @content.page_categories
 
       if current_user
         if @content.updated_at > 30.minutes.ago

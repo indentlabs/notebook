@@ -47,11 +47,22 @@ class Universe < ActiveRecord::Base
 
   has_many :contributors, dependent: :destroy
 
+  # V2 woo woo!
+  has_many :page_categories, dependent: :destroy
+  has_many :page_fields, through: :page_categories
+
   scope :is_public, -> { where(privacy: 'public') }
 
   after_destroy do
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       content_type.where(universe_id: self.id).update_all(universe_id: nil)
+    end
+  end
+
+  after_create do
+    content_classes = Rails.application.config.content_types[:all_non_universe]
+    content_classes.each do |content_class|
+      content_class.create_default_page_categories_and_fields!(self)
     end
   end
 

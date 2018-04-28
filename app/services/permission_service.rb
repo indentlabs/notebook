@@ -62,5 +62,7 @@ class PermissionService < Service
     end
   end
 
-
+  def self.is_global_admin?(user:)
+    user.site_administrator == true
+  end
 end

@@ -7,11 +7,6 @@
 <% set_meta_tags title: content.name, description: content.description %>
 <%# TODO: Check if <content type>/_meta exists and render it here if so %>
 
-<% content_for :sidebar_top do %>
-  <%= render partial: 'cards/serendipitous/content_question', locals: { question: @question, content: @content } %>
-<% end %>
-
-<% categories = @content.class.attribute_categories(@content.user) %>
 <div class="row">
   <div class="col s9">
     <div class="hoverable card">
@@ -21,25 +16,11 @@
       </div>
 
       <div class="card-content">
-        <% categories.each do |category| %>
-          <div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
-            <% if category.name == 'gallery' %>
-              <div>
-                <%= render partial: 'content/form/images/gallery', locals: { content: content } %>
-              </div>
-            <% end %>
-            <% if category.name == 'changelog' %>
-              <div>
-                <%= render partial: 'content/display/changelog', locals: { content: content } %>
-              </div>
-            <% end %>
-            <% if category.name == 'contributors' %>
-              <div>
-                <%= render partial: 'content/display/contributors', locals: { content: content } %>
-              </div>
-            <% end %>
-            <% category.attribute_fields.each do |attribute| %>
-              <% if attribute.name.start_with?("private") %>
+        <% @categories.each do |category| %>
+          <div id="<%= category.name %>_panel" class="row panel">
+            <% category.page_fields.each do |page_field| %>
+              <% if page_field.name.start_with?("private_") %>
+                <% # todo use permissions here %>
                 <% next unless user_signed_in? && (
                    (content.is_a?(Universe) && content.user == current_user) ||
                    (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
@@ -49,48 +30,52 @@
               <% end %>
 
               <%
-                custom_field = false
-                value = nil
-                if content.respond_to?(attribute.name.to_sym)
-                  # Native fields with columns on the content table
-                  value = content.send(attribute.name.to_sym)
-                else
-                  custom_field = true
-                  value = Attribute.where(user: @content.user, attribute_field: attribute, entity: content).first || ""
-                end
+                page_field_value = page_field.page_field_values.find_or_create_by(page_id: @content.id)
+                next if page_field_value.value.blank?
+                value = page_field_value.value
               %>
-              <% next if value.blank? && !custom_field %>
 
               <div class="row">
-                <div class="col s3 m3 l3 right-align flow-text grey-text"><%= attribute.label %></div>
-                <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
-                  <% klass = value.first.class || value.build.class %>
-                  <div class="col s9 m9 l9 flow-text">
-                    <% value.each do |li| %>
-                      <div class="chip">
-                        <%= link_to li do %>
-                          <span class="<%= klass.color %>-text"><i class="material-icons left"><%= klass.icon %></i></span>
-                          <%= li.name %>
-                        <% end %>
-                      </div>
-                    <% end %>
-                  </div>
-                <% elsif attribute.name == 'attribute_category_id' %>
-                  <div class="col s9 m9 l9 flow-text">
-                    <%= link_to content.attribute_category.label, content.attribute_category if content.attribute_category %>
-                  </div>
-                <% elsif attribute.name == 'universe_id' %>
-                  <div class="col s9 m9 l9 flow-text">
+                <div class="col s3 m3 l3 right-align grey-text">
+                  <%= page_field.label %>
+                </div>
+                <% if page_field.name == 'universe_id' %>
+                  <div class="col s9 m9 l9">
                     <%= link_to content.universe.name, content.universe if content.universe %>
                   </div>
                 <% else %>
-                  <div class="col s9 m9 l9 <%= "flow-text" unless value.to_s.length > 140 %> markdownable">
-                    <%= simple_format Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value : value).html_safe %>&nbsp;
+                  <div class="col s9 m9 l9 markdownable">
+                    <%=
+                      ContentFormatterService.show(
+                        text: value,
+                        viewing_user: current_user
+                      )
+                      %>&nbsp;
                   </div>
                 <% end %>
               </div>
             <% end %>
           </div>
+
+          <div id="gallery_panel" class="row panel">
+            <div>
+              <%= render partial: 'content/form/images/gallery', locals: { content: content } %>
+            </div>
+          </div>
+
+          <div id="changelog_panel" class="row panel">
+            <div>
+              <%= render partial: 'content/display/changelog', locals: { content: content } %>
+            </div>
+          </div>
+
+          <% if @content.is_a?(Universe) %>
+            <div id="contributors_panel" class="row panel">
+              <div>
+                <%= render partial: 'content/display/contributors', locals: { content: content } %>
+              </div>
+            </div>
+          <% end %>
         <% end %>
       </div>
 
@@ -127,7 +112,5 @@
 <div class="row">
   <% if @content.is_a?(Universe) %>
     <%= render partial: 'content/contexts/universe', locals: { content: @content } %>
-  <% else %>
-    <%= render partial: "content/contexts/dynamic", locals: { content: @content } %>
   <% end %>
 </div>

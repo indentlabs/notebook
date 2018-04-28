@@ -4,6 +4,65 @@ module HasAttributes
   extend ActiveSupport::Concern
 
   included do
+    def self.create_default_page_categories_and_fields!(universe)
+      class_name = self.name
+
+      defaults = YAML.load_file(Rails.root.join('config', 'attributes', "#{class_name.downcase}.yml"))
+      defaults.each do |category_name, category_data|
+        # [2] pry(Character)> defaults.keys
+        # => [:overview, :looks, :nature, :social, :history, :family, :inventory, :gallery, :changelog, :notes]
+        # [3] pry(Character)> defaults[:overview]
+        # => {:label=>"Overview",
+        #  :icon=>"info",
+        #  :attributes=>
+        #   [{:name=>"name", :label=>"Name"},
+        #    {:name=>"role", :label=>"Role"},
+        #    {:name=>"aliases", :label=>"Other names"},
+        #    {:name=>"gender", :label=>"Gender"},
+        #    {:name=>"age", :label=>"Age"},
+        #    {:name=>"universe_id", :label=>"Universe"}]}
+        next unless category_data[:attributes].present?
+
+        category = PageCategory.find_or_create_by(
+          label: category_data[:label],
+          icon: category_data[:icon],
+          universe: universe,
+          content_type: class_name
+        )
+
+        category_data[:attributes].each do |field_data|
+          # We're keeping these two fields on the model
+          next if [:name, :privacy].include?(field_data[:name])
+
+          # We don't want to include real links quite yet
+          next if field_data[:name].end_with?('_id')
+
+          category.page_fields.find_or_create_by(
+            label: field_data[:label]
+          )
+        end
+      end
+    end
+
+    def page_categories
+      queryable_universe_id = if self.is_a?(Universe)
+        self.id
+      elsif self.respond_to?(:universe) && self.universe.present?
+        self.universe.id
+      elsif self.respond_to?(:universe) && self.universe.nil?
+        nil
+      end
+
+      PageCategory.where(universe_id: queryable_universe_id, content_type: self.class.name)
+    end
+
+    def page_fields
+      page_category_ids = page_categories.pluck(:id)
+      PageField.where(page_category_id: page_category_ids)
+    end
+
+    # TODO remove below this line after releasing pagecategories/pagefields
+
     attr_accessor :custom_attribute_values
     after_save :update_custom_attributes
 
