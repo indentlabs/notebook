@@ -45,7 +45,11 @@
     <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
       <% value = field.page_field_values.find_by(page_id: @content.id) %>
 
-      <% if field.name == 'privacy' %>
+      <% if field.name == 'name' %>
+        <%= f.label field.name, field.label %><br />
+        <%= text_area_tag "#{@content.class.content_name}[name]", content.name, class: "materialize-textarea", placeholder: 'Some name' %>
+
+      <% elsif field.name == 'privacy' %>
         <div class="input-field">
           <%= f.label field.name, field.label %><br />
           <%= f.select field.name, [['Only visible to you', 'private'], ['Visible to anyone with the URL', 'public']] %>

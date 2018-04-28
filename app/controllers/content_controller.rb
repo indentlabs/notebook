@@ -121,6 +121,23 @@ class ContentController < ApplicationController
         upload_files params['image_uploads'], content_type.name, @content.id
       end
 
+      # todo abstract this (and the block in #update) to their own methods
+      field_params.each do |field_id, field_value|
+        field = PageField.find(field_id)
+        existing_value = field.page_field_values.find_by(page_id: @content.id)
+        next if existing_value && existing_value.value == field_value
+
+        if existing_value
+          existing_value.update(value: field_value)
+        else
+          field.page_field_values.create(
+            page_id: @content.id,
+            value:   field_value,
+            user_id: current_user.id
+          )
+        end
+      end
+
       successful_response(content_creation_redirect_url, t(:create_success, model_name: humanized_model_name))
     else
       failed_response('new', :unprocessable_entity)
@@ -149,12 +166,34 @@ class ContentController < ApplicationController
       end
     end
 
-    if @content.user != current_user
-      # exclude universe_id from content_params
+    # Update name and universe id
+    if @content.user == current_user
+      update_success = @content.update_attributes(content_params)
+    else
+      # Exclude fields only the real owner can edit
+      update_success = @content.update_attributes(content_params.except!(:universe_id))
     end
 
-    # UH WE NEED TO MAKE SURE WE'RE SETTING USER_ID ON THIS AND CHECKING IT
-    update_success = PageFieldValue.update(content_params.keys, content_params.values.map { |new| { value: new }})
+    # UH WE NEED TO MAKE SURE WE'RE CHECKING FIELD PERMISSIONS HERE
+    if update_success
+      #this_universes_category_ids = <filter with this on pagefield query>
+
+      field_params.each do |field_id, field_value|
+        field = PageField.find(field_id)
+        existing_value = field.page_field_values.find_by(page_id: @content.id)
+        next if existing_value && existing_value.value == field_value
+
+        if existing_value
+          existing_value.update(value: field_value)
+        else
+          field.page_field_values.create(
+            page_id: @content.id,
+            value:   field_value,
+            user_id: current_user.id
+          )
+        end
+      end
+    end
 
     if update_success
       successful_response(@content, t(:update_success, model_name: humanized_model_name))
@@ -225,7 +264,11 @@ class ContentController < ApplicationController
       .downcase
       .to_sym
 
-    params.require(content_class).require(:field)
+    params.require(content_class).permit(:name, :universe_id)
+  end
+
+  def field_params
+    params.require(:fields)
     # => { "4066"=>"No universe character",
     #      "4067"=>"test role",
     #      "4068"=>"zippy",
