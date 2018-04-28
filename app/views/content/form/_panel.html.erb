@@ -1,4 +1,4 @@
-<div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
+<div id="<%= category.name %>_panel" class="row panel">
 
   <%# todo: break this out into a partial %>
   <% if category.name == 'gallery' %>
@@ -33,100 +33,19 @@
     <%= render partial: 'content/form/contributors', locals: { f: f, content: content } %>
   <% end %>
 
-  <% # Do some dynamic resizing of columns based on how many columns there are
-     # TODO: move this into some service or something? Dunno, doesn't belong here.
+  <%
+    # Do some dynamic resizing of columns based on how many columns there are
+    # TODO: move this into some service or something? Dunno, doesn't belong here.
     s_width = 12
-    m_width = 6
-    l_width = 6
-    if category.attribute_fields.length == 1
-      # If there's only one field on this tab, go full-width on all screen sizes
-      s_width = m_width = l_width = 12
-    elsif category.attribute_fields.length == 2
-      # If there's two fields on this tab, go half-width on medium- and large-screens
-      s_width = 12
-      m_width = l_width = 6
-    elsif category.attribute_fields.length > 2
-      # If there's at least 3 fields, use the defaults (detailed above)
-    end
+    m_width = 12
+    l_width = 12
   %>
 
-  <% category.attribute_fields.each do |field| %>
+  <% category.page_fields.each do |field| %>
     <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
-      <% value = Attribute.where(user: current_user, entity: content) %>
+      <% value = field.page_field_values.find_by(page_id: @content.id) %>
 
-      <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
-        <%# TODO rip all this out %>
-        <%# Relation-setting UI %>
-        <% through_class = content.class.reflect_on_association(field.name).options[:through].to_s %>
-        <%= render 'content/form/relation_input', f: f, attribute: field.name, label: field.label, relation: through_class %>
-
-      <% elsif field.name == 'archetype' %>
-        <div class="input-field input-select">
-          <%= f.label field.name, class: 'active' %><br />
-          <%= f.select field.name, options_for_select(t('archetypes'), selected: f.object.archetype), include_blank: true %>
-        </div>
-
-      <% elsif field.name == 'universe_id' %>
-        <div class="input-field">
-          <%= f.label field.name, field.label %><br />
-          <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) || f.object.universe_id.nil? %>
-            <%# todo not like this %>
-            <%
-              valid_universes = []
-              show_premium_notice = false
-
-              if content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
-                valid_universes += current_user.universes
-                valid_universes += current_user.contributable_universes
-              else
-                # Premium content
-                if current_user.on_premium_plan?
-                  valid_universes += current_user.universes
-                else
-                  show_premium_notice = true
-                end
-
-                current_user.contributable_universes.each do |potential_universe|
-                  if potential_universe.user.on_premium_plan?
-                    valid_universes += [potential_universe]
-                  end
-                end
-              end
-            %>
-            <%=
-              f.select field.name,
-              valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }.compact,
-              include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item),
-              selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id])
-            %>
-            <% if show_premium_notice %>
-              <div class="help-text">
-                <i class="material-icons" style="font-size: 90%">info</i>
-                While on a <%= link_to 'Starter plan', subscription_path %>, you can only create premium content in universes you're a contributor to.
-              </div>
-            <% end %>
-          <% else %>
-            <br />
-            <%= link_to(f.object.universe.name, f.object.universe) if f.object.universe %>
-          <% end %>
-        </div>
-
-      <% elsif field.name == 'attribute_category_id' %>
-        <div class="input-field">
-          <%= f.label field.name, field.label %><br />
-          <%= f.select field.name, current_user.attribute_categories.sort_by(&:label).map { |u| [u.label, u.id] }.compact, include_blank: false, selected: (f.object.persisted? ? f.object.attribute_category_id : nil) %>
-        </div>
-
-      <% elsif field.name == 'field_type' %>
-        <div class="input-field">
-          <%= f.label field.name, field.label %><br />
-          <%= f.select field.name, ['Text Field'].map { |tf| [tf, tf.underscore] } %>
-        </div>
-
-      <% elsif field.name == 'entity_type' %>
-        <%= f.hidden_field :entity_type, value: f.object.entity_type %>
-
-      <% elsif field.name == 'privacy' %>
+      <% if field.name == 'privacy' %>
         <div class="input-field">
           <%= f.label field.name, field.label %><br />
           <%= f.select field.name, [['Only visible to you', 'private'], ['Visible to anyone with the URL', 'public']] %>
@@ -144,6 +63,7 @@
             * That user is the owner of this content's universe, if it's content
             * That user is the owner of this content, if it's not in a universe
         %>
+        <%# todo use permission services here %>
         <% if user_signed_in? && (
              (content.is_a?(Universe) && content.user == current_user) ||
              (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
