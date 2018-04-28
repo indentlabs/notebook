@@ -29,7 +29,9 @@ class Attribute < ActiveRecord::Base
   end
 
   after_update do
-    mirrored_page_field_value.update(value: self.value)
+    # Since we're just immediately swapping over to pagefieldvalues there's no need to do this mirroring anymore
+    #TODO remove this entire class once we're live
+    #mirrored_page_field_value.update(value: self.value)
   end
 
   after_destroy do
