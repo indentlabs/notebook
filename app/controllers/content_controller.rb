@@ -149,13 +149,12 @@ class ContentController < ApplicationController
       end
     end
 
-    if @content.user == current_user
-      update_success = @content.update_attributes(content_params)
-    else
-      # Exclude fields only the real owner can edit
-      #todo move field list somewhere when it grows
-      update_success = @content.update_attributes(content_params.except!(:universe_id))
+    if @content.user != current_user
+      # exclude universe_id from content_params
     end
+
+    # UH WE NEED TO MAKE SURE WE'RE SETTING USER_ID ON THIS AND CHECKING IT
+    update_success = PageFieldValue.update(content_params.keys, content_params.values.map { |new| { value: new }})
 
     if update_success
       successful_response(@content, t(:update_success, model_name: humanized_model_name))
@@ -226,7 +225,13 @@ class ContentController < ApplicationController
       .downcase
       .to_sym
 
-    params.require(content_class).permit(content_param_list)
+    params.require(content_class).require(:field)
+    # => { "4066"=>"No universe character",
+    #      "4067"=>"test role",
+    #      "4068"=>"zippy",
+    #      ...
+    #      "4072"=>"",
+    #    }
   end
 
   def content_deletion_redirect_url

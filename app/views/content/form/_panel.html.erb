@@ -70,12 +70,9 @@
              (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
            )
         %>
-          <div class="input-field content-field">
-            <%= f.label field.name, field.label %>
-            <%= f.text_area field.name, class: "materialize-textarea", placeholder: 'Write as little or as much as you want!' %>
-            <div class="help-text">
-              Private notes are <em>always</em> visible to only you, even if content is made public and shared.
-            </div>
+          <%= render 'content/form/rich_text_input', f: f, content: content, field: field %>
+          <div class="help-text">
+            Private notes are <em>always</em> visible to only you, even if content is made public and shared.
           </div>
         <% end %>
 
@@ -84,33 +81,33 @@
           t('club_types') + t('flexible_weapon_types') + t('fist_weapon_types') + t('thrown_weapon_types') +
           t('polearm_types') + t('shortsword_types') + t('sword_types') + t('other_item_types')
         %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: potential_item_types %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: potential_item_types %>
 
       <%# TODO: not make this so awful %>
 
       <% elsif field.name == 'skintone' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('skin_tones') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('skin_tones') %>
 
       <% elsif field.name == 'race' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('character_races') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('character_races') %>
 
       <% elsif field.name == 'eyecolor' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('eye_colors') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('eye_colors') %>
 
       <% elsif field.name == 'haircolor' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('hair_colors') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('hair_colors') %>
 
       <% elsif field.name == 'hairstyle' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('hair_styles') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('hair_styles') %>
 
       <% elsif field.name == 'facialhair' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('facial_hair_styles') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('facial_hair_styles') %>
 
       <% elsif field.name == 'bodytype' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('body_types') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('body_types') %>
 
       <% elsif field.name == 'fave_weapon' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +
           t('club_types') + t('flexible_weapon_types') + t('fist_weapon_types') + t('thrown_weapon_types') +
           t('polearm_types') + t('shortsword_types') + t('sword_types') %>
 
@@ -122,13 +119,14 @@
     </div>
   <% end %>
 
-  <% if category.attribute_fields.any? && category.attribute_fields.first.label == '' %>
+  <% if content.is_a?(Universe) || (content.respond_to?(:universe) && content.universe.present?) %>
     <div style="clear: both;"></div>
     <div style="padding: 0 20px;">
       To add additional fields to this category,
       <%= link_to 'click here', '#', class: 'new-attribute-field-link' %>
       and type <%= category.label %> as the category name.
-      You can add as many fields as you like to custom categories.
+      You can add as many fields as you like.
+      Fields will attach to all <%= content.class.name.downcase.pluralize %> in this universe.
       To add multiple, simply add them one at a time.
     </div>
   <% end %>
