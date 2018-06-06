@@ -32,7 +32,7 @@ namespace :data_migrations do
     require 'pry'
 
     # Create the default page categories/fields for all users for no-universe content
-    Rails.application.config.content_types[:all_non_universe].each do |content_class|
+    Rails.application.config.content_types[:all].each do |content_class|
       content_class.create_default_page_categories_and_fields!(nil)
     end
 
@@ -95,6 +95,9 @@ namespace :data_migrations do
       # create default categories/fields for each of their universes.
       user.universes.each do |universe|
         puts "  Migrating universe #{universe.id}"
+        Universe.create_default_page_categories_and_fields!(universe)
+
+        puts "  Migrating pags in universe #{universe.id}"
         content_classes = Rails.application.config.content_types[:all_non_universe]
         content_classes.each do |content_class|
           content_class.create_default_page_categories_and_fields!(universe)

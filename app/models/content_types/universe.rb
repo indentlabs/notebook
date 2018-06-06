@@ -60,6 +60,7 @@ class Universe < ActiveRecord::Base
   end
 
   after_create do
+    Universe.create_default_page_categories_and_fields!(self)
     content_classes = Rails.application.config.content_types[:all_non_universe]
     content_classes.each do |content_class|
       content_class.create_default_page_categories_and_fields!(self)

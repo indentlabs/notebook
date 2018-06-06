@@ -9,6 +9,8 @@ module HasAttributes
 
       defaults = YAML.load_file(Rails.root.join('config', 'attributes', "#{class_name.downcase}.yml"))
       defaults.each do |category_name, category_data|
+        puts "Creating default page categories for #{category_name}"
+
         # [2] pry(Character)> defaults.keys
         # => [:overview, :looks, :nature, :social, :history, :family, :inventory, :gallery, :changelog, :notes]
         # [3] pry(Character)> defaults[:overview]

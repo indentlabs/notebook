@@ -121,6 +121,9 @@ class ContentController < ApplicationController
         upload_files params['image_uploads'], content_type.name, @content.id
       end
 
+      require 'pry'
+      binding.pry
+
       # todo abstract this (and the block in #update) to their own methods
       field_params.each do |field_id, field_value|
         field = PageField.find(field_id)
