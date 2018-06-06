@@ -1,33 +1,46 @@
 <%
   content_type_class = content_type.to_s.titleize.constantize
 %>
-<div class="card hoverable">
+<div class="card">
   <div class="card-image">
-    <% images = content_list.flat_map(&:image_uploads) #todo reinstate this with optimizations %>
+    <% images = ImageUpload.where(content_type: content_type_class.name, content_id: content_list.map(&:id)) %>
     <% if images.any? && rand(3) < 2 %>
       <%= image_tag images.sample.src(:large), class: 'activator', style: 'height: 265px' %>
     <% else %>
       <%= image_tag "card-headers/#{content_type.to_s.pluralize}.jpg", class: 'activator', style: 'height: 265px' %>
     <% end %>
-    <span class="card-title">
+
+    <span class="card-title" style="text-shadow: 1px 1px #000000;">
       <% if defined?(card_title) && !card_title.blank? %>
         <%= card_title %>
       <% else %>
         <%= pluralize(content_list.count, content_type.to_s) %>
       <% end %>
     </span>
+
     <% if user_signed_in? %>
-      <%= link_to new_polymorphic_path(content_type), class: "btn-floating btn-large halfway-fab waves-effect waves-light #{content_type_class.color}" do %>
+      <%= link_to new_polymorphic_path(content_type), class: "btn-floating btn-large halfway-fab waves-effect waves-light #{content_type_class.color} tooltipped",
+        data: { tooltip: "Create a #{content_type}" } do %>
         <i class="material-icons">add</i>
       <% end %>
 
-      <%= link_to polymorphic_path(content_type_class), class: "btn-floating halfway-fab waves-effect waves-light grey black-text", style: "right: 90px" do %>
+      <%
+        if defined?(@content) && @content.is_a?(Universe) && content_type != :universe && content_type.to_s.downcase != 'universe'
+          view_all_path = send("#{content_type.to_s.pluralize}_universe_path", { id: @content.id })
+        else
+          view_all_path = polymorphic_path(content_type_class)
+        end
+      %>
+      <%= link_to view_all_path, class: "btn-floating halfway-fab waves-effect waves-light grey black-text tooltipped", style: "right: 90px",
+        data: { tooltip: "View all #{content_type.to_s.pluralize}" } do
+      %>
         <i class="material-icons">reorder</i>
       <% end %>
     <% end %>
   </div>
-  <div class="card-content">
-  </div>
+
+  <div class="card-content"></div>
+
   <div class="card-reveal">
     <span class="card-title grey-text text-darken-4">
       <% if content_list.any? %>
@@ -35,11 +48,13 @@
           <%= content_type_class.icon %>
         </i>
       <% end %>
+
       <% if defined?(@content) && @content.is_a?(Universe) && content_type != :universe && content_type.to_s.downcase != 'universe' %>
         <%= link_to content_type.to_s.pluralize.titleize, send("#{content_type.to_s.pluralize}_universe_path", { id: @content.id }), class: "#{content_type_class.color}-text" %>
       <% else %>
         <%= content_type.to_s.pluralize.titleize %>
       <% end %>
+
       <i class="material-icons right">close</i>
     </span>
     <% if content_list.any? %>
