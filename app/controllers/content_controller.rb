@@ -39,6 +39,7 @@ class ContentController < ApplicationController
 
     if (current_user || User.new).can_read? @content
       @question = @content.question if current_user.present? and current_user == @content.user
+      @categories = @content.page_categories
 
       if current_user
         if @content.updated_at > 30.minutes.ago
@@ -120,6 +121,26 @@ class ContentController < ApplicationController
         upload_files params['image_uploads'], content_type.name, @content.id
       end
 
+      require 'pry'
+      binding.pry
+
+      # todo abstract this (and the block in #update) to their own methods
+      field_params.each do |field_id, field_value|
+        field = PageField.find(field_id)
+        existing_value = field.page_field_values.find_by(page_id: @content.id)
+        next if existing_value && existing_value.value == field_value
+
+        if existing_value
+          existing_value.update(value: field_value)
+        else
+          field.page_field_values.create(
+            page_id: @content.id,
+            value:   field_value,
+            user_id: current_user.id
+          )
+        end
+      end
+
       successful_response(content_creation_redirect_url, t(:create_success, model_name: humanized_model_name))
     else
       failed_response('new', :unprocessable_entity)
@@ -148,12 +169,33 @@ class ContentController < ApplicationController
       end
     end
 
+    # Update name and universe id
     if @content.user == current_user
       update_success = @content.update_attributes(content_params)
     else
       # Exclude fields only the real owner can edit
-      #todo move field list somewhere when it grows
       update_success = @content.update_attributes(content_params.except!(:universe_id))
+    end
+
+    # UH WE NEED TO MAKE SURE WE'RE CHECKING FIELD PERMISSIONS HERE
+    if update_success
+      #this_universes_category_ids = <filter with this on pagefield query>
+
+      field_params.each do |field_id, field_value|
+        field = PageField.find(field_id)
+        existing_value = field.page_field_values.find_by(page_id: @content.id)
+        next if existing_value && existing_value.value == field_value
+
+        if existing_value
+          existing_value.update(value: field_value)
+        else
+          field.page_field_values.create(
+            page_id: @content.id,
+            value:   field_value,
+            user_id: current_user.id
+          )
+        end
+      end
     end
 
     if update_success
@@ -225,7 +267,17 @@ class ContentController < ApplicationController
       .downcase
       .to_sym
 
-    params.require(content_class).permit(content_param_list)
+    params.require(content_class).permit(:name, :universe_id)
+  end
+
+  def field_params
+    params.require(:fields)
+    # => { "4066"=>"No universe character",
+    #      "4067"=>"test role",
+    #      "4068"=>"zippy",
+    #      ...
+    #      "4072"=>"",
+    #    }
   end
 
   def content_deletion_redirect_url

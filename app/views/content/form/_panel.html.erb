@@ -1,4 +1,4 @@
-<div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
+<div id="<%= category.name %>_panel" class="row panel">
 
   <%# todo: break this out into a partial %>
   <% if category.name == 'gallery' %>
@@ -33,103 +33,21 @@
     <%= render partial: 'content/form/contributors', locals: { f: f, content: content } %>
   <% end %>
 
-  <% # Do some dynamic resizing of columns based on how many columns there are
-     # TODO: move this into some service or something? Dunno, doesn't belong here.
+  <%
+    # Do some dynamic resizing of columns based on how many columns there are
+    # TODO: move this into some service or something? Dunno, doesn't belong here.
     s_width = 12
-    m_width = 6
-    l_width = 4
-    if category.attribute_fields.length == 1
-      # If there's only one field on this tab, go full-width on all screen sizes
-      s_width = m_width = l_width = 12
-    elsif category.attribute_fields.length == 2
-      # If there's two fields on this tab, go half-width on medium- and large-screens
-      s_width = 12
-      m_width = l_width = 6
-    elsif category.attribute_fields.length > 2
-      # If there's at least 3 fields, use the defaults (detailed above)
-    end
+    m_width = 12
+    l_width = 12
   %>
 
-  <% category.attribute_fields.each do |field| %>
+  <% category.page_fields.each do |field| %>
     <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
+      <% value = field.page_field_values.find_by(page_id: @content.id) %>
 
-      <% value = nil %>
-      <% if content.respond_to?(field.name.to_sym) %>
-        <% value = content.send(field.name.to_sym) %>
-      <% else %>
-        <% value = Attribute.where(user: current_user, entity: content) %>
-      <% end %>
-
-      <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
-        <%# Relation-setting UI %>
-        <% through_class = content.class.reflect_on_association(field.name).options[:through].to_s %>
-        <%= render 'content/form/relation_input', f: f, attribute: field.name, label: field.label, relation: through_class %>
-
-      <% elsif field.name == 'archetype' %>
-        <div class="input-field input-select">
-          <%= f.label field.name, class: 'active' %><br />
-          <%= f.select field.name, options_for_select(t('archetypes'), selected: f.object.archetype), include_blank: true %>
-        </div>
-
-      <% elsif field.name == 'universe_id' %>
-        <div class="input-field">
-          <%= f.label field.name, field.label %><br />
-          <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) || f.object.universe_id.nil? %>
-            <%# todo not like this %>
-            <%
-              valid_universes = []
-              show_premium_notice = false
-
-              if content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
-                valid_universes += current_user.universes
-                valid_universes += current_user.contributable_universes
-              else
-                # Premium content
-                if current_user.on_premium_plan?
-                  valid_universes += current_user.universes
-                else
-                  show_premium_notice = true
-                end
-
-                current_user.contributable_universes.each do |potential_universe|
-                  if potential_universe.user.on_premium_plan?
-                    valid_universes += [potential_universe]
-                  end
-                end
-              end
-            %>
-            <%=
-              f.select field.name,
-              valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }.compact,
-              include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item),
-              selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id])
-            %>
-            <% if show_premium_notice %>
-              <div class="help-text">
-                <i class="material-icons" style="font-size: 90%">info</i>
-                While on a <%= link_to 'Starter plan', subscription_path %>, you can only create premium content in universes you're a contributor to.
-              </div>
-            <% end %>
-          <% else %>
-            <br />
-            <%= link_to(f.object.universe.name, f.object.universe) if f.object.universe %>
-          <% end %>
-        </div>
-
-      <% elsif field.name == 'attribute_category_id' %>
-        <div class="input-field">
-          <%= f.label field.name, field.label %><br />
-          <%= f.select field.name, current_user.attribute_categories.sort_by(&:label).map { |u| [u.label, u.id] }.compact, include_blank: false, selected: (f.object.persisted? ? f.object.attribute_category_id : nil) %>
-        </div>
-
-      <% elsif field.name == 'field_type' %>
-        <div class="input-field">
-          <%= f.label field.name, field.label %><br />
-          <%= f.select field.name, ['Text Field'].map { |tf| [tf, tf.underscore] } %>
-        </div>
-
-      <% elsif field.name == 'entity_type' %>
-        <%= f.hidden_field :entity_type, value: f.object.entity_type %>
+      <% if field.name == 'name' %>
+        <%= f.label field.name, field.label %><br />
+        <%= text_area_tag "#{@content.class.content_name}[name]", content.name, class: "materialize-textarea", placeholder: 'Some name' %>
 
       <% elsif field.name == 'privacy' %>
         <div class="input-field">
@@ -149,18 +67,16 @@
             * That user is the owner of this content's universe, if it's content
             * That user is the owner of this content, if it's not in a universe
         %>
+        <%# todo use permission services here %>
         <% if user_signed_in? && (
              (content.is_a?(Universe) && content.user == current_user) ||
              (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
              (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
            )
         %>
-          <div class="input-field content-field">
-            <%= f.label field.name, field.label %>
-            <%= f.text_area field.name, class: "materialize-textarea", placeholder: 'Write as little or as much as you want!' %>
-            <div class="help-text">
-              Private notes are <em>always</em> visible to only you, even if content is made public and shared.
-            </div>
+          <%= render 'content/form/rich_text_input', f: f, content: content, field: field %>
+          <div class="help-text">
+            Private notes are <em>always</em> visible to only you, even if content is made public and shared.
           </div>
         <% end %>
 
@@ -169,51 +85,52 @@
           t('club_types') + t('flexible_weapon_types') + t('fist_weapon_types') + t('thrown_weapon_types') +
           t('polearm_types') + t('shortsword_types') + t('sword_types') + t('other_item_types')
         %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: potential_item_types %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: potential_item_types %>
 
       <%# TODO: not make this so awful %>
 
       <% elsif field.name == 'skintone' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('skin_tones') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('skin_tones') %>
 
       <% elsif field.name == 'race' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('character_races') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('character_races') %>
 
       <% elsif field.name == 'eyecolor' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('eye_colors') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('eye_colors') %>
 
       <% elsif field.name == 'haircolor' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('hair_colors') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('hair_colors') %>
 
       <% elsif field.name == 'hairstyle' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('hair_styles') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('hair_styles') %>
 
       <% elsif field.name == 'facialhair' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('facial_hair_styles') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('facial_hair_styles') %>
 
       <% elsif field.name == 'bodytype' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('body_types') %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('body_types') %>
 
       <% elsif field.name == 'fave_weapon' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +
           t('club_types') + t('flexible_weapon_types') + t('fist_weapon_types') + t('thrown_weapon_types') +
           t('polearm_types') + t('shortsword_types') + t('sword_types') %>
 
       <% else %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field %>
 
       <% end %>
 
     </div>
   <% end %>
 
-  <% if category.attribute_fields.any? && category.attribute_fields.first.label == '' %>
+  <% if content.is_a?(Universe) || (content.respond_to?(:universe) && content.universe.present?) %>
     <div style="clear: both;"></div>
     <div style="padding: 0 20px;">
       To add additional fields to this category,
       <%= link_to 'click here', '#', class: 'new-attribute-field-link' %>
       and type <%= category.label %> as the category name.
-      You can add as many fields as you like to custom categories.
+      You can add as many fields as you like.
+      Fields will attach to all <%= content.class.name.downcase.pluralize %> in this universe.
       To add multiple, simply add them one at a time.
     </div>
   <% end %>
