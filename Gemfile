@@ -90,7 +90,7 @@ group :test do
   gem 'coveralls', require: false
   gem 'cucumber-rails', require: false
   gem 'database_cleaner'
-  gem 'factory_girl_rails'
+  gem 'factory_bot_rails'
   gem 'guard'
   gem 'guard-minitest'
   gem 'guard-rubocop'
