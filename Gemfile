@@ -80,7 +80,7 @@ end
 
 group :test, :production do
   gem 'therubyracer', platforms: :ruby
-  gem 'pg'
+  gem 'pg', '~> 0.18'
 end
 
 group :test do
