@@ -1,8 +1,8 @@
 source 'https://rubygems.org'
-ruby "~> 2.3.0"
+ruby "~> 2.5"
 
 gem 'rails', '~> 4.2'
-gem 'puma', '~> 3.6.0'
+gem 'puma', '~> 3.7'
 gem 'puma-heroku'
 gem 'rack-timeout'
 
@@ -73,14 +73,13 @@ gem 'delayed_job_active_record'
 gem 'binding_of_caller' # see has_changelog.rb
 
 group :production do
+  gem 'pg'
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
-
   gem 'newrelic_rpm'
 end
 
 group :test, :production do
-  gem 'pg'
   gem 'therubyracer', platforms: :ruby
 end
 
