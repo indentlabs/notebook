@@ -46,6 +46,24 @@
 <% end %>
 </ul>
 
+<div id="search-modal" class="modal">
+  <div class="modal-content">
+    <h4>Your handy pagefinder</h4>
+    <p>
+      Type anything you want below. It'll match page names (like the names of your characters, locations, and so on), but also
+      anything you've typed in any of those pages' fields as well. For example, searching "bald" will show you all your characters
+      that you've entered "bald" in for their hair style.
+    </p>
+    <%= form_tag main_app.search_path, method: :get do %>
+      <input type="search" name="q" value="" placeholder="search your notebook" />
+      <button type="submit" class="btn btn-primary blue">Search everything</button>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+  </div>
+</div>
+
 <ul id="desktop-user-dropdown" class="dropdown-content">
   <% if current_user %>
     <li>
@@ -140,7 +158,7 @@
             </a>
           </li>
           <li>
-            <a href="#search" class="dropdown-trigger tooltipped" href="#!" data-tooltip="Search your notebook">
+            <a class="waves-effect waves-light modal-trigger tooltipped" href="#search-modal" data-tooltip="Search your notebook">
               <i class="material-icons">search</i>
             </a>
           </li>
@@ -156,13 +174,6 @@
   </nav>
 </div>
 
-<div id="search">
-  <button type="button" class="close red">×</button>
-  <%= form_tag main_app.search_path, method: :get do %>
-    <input type="search" name="q" value="" placeholder="search your notebook" />
-    <button type="submit" class="btn btn-primary blue">Search everything</button>
-  <% end %>
-</div>
 
 <script style="text/javascript">
 $(".dropdown-trigger").dropdown();
