@@ -8,9 +8,6 @@
   else
     value = Attribute.where(user: current_user, attribute_field: field, entity: f.object).first
   end
-
-  # TODO: Enable autocomplete when we can actually hide the dropdown if someone tabs out of a field.
-  #       Not the easiest thing in the world to do, apparently.
 %>
 
 <div class="input-field content-field">
@@ -24,25 +21,29 @@
   %>
 
   <% if field.system? %>
-    <%= f.text_area field.name, value: value, class: "materialize-textarea #{defined?(autocomplete) && false ? 'autocomplete' : ''}", placeholder: placeholder %>
+    <%= f.text_area field.name, value: value, class: "materialize-textarea #{'autocomplete' if defined?(autocomplete)}", placeholder: placeholder %>
   <% else %>
     <%= hidden_field_tag "#{content_name}[custom_attribute_values][][name]", field.name %>
-    <%= text_area_tag "#{content_name}[custom_attribute_values][][value]", value && value.value, class: "materialize-textarea #{defined?(autocomplete) && false ? 'autocomplete' : ''}", placeholder: placeholder %>
+    <%= text_area_tag "#{content_name}[custom_attribute_values][][value]", value && value.value, class: "materialize-textarea #{defined?(autocomplete) ? 'autocomplete' : ''}", placeholder: placeholder %>
     <%= render 'content/form/attribute_field_dropdown', field: field %>
   <% end %>
 </div>
 
-<% if defined?(autocomplete) && false %>
-  <script type="text/javascript">
+<% if defined?(autocomplete) %>
+  <% content_for :javascript do %>
     $(function() {
-      $('#<%= "#{content_name}_#{field.name}" %>').autocomplete({
-        limit: 5,
-        data: {
-          <% autocomplete.each do |autocomplete_option| %>
-            "<%= autocomplete_option %>": null,
-          <% end %>
-        }
-      });
+      // This setTimeout is an unfortunate hack to ensure this runs after initializing materialize
+      setTimeout(function() {
+        console.log("Initializing autocomplete for #<%= "#{content_name}_#{field.name}" %>");
+        $('#<%= "#{content_name}_#{field.name}" %>').autocomplete({
+          limit: 5,
+          data: {
+            <% autocomplete.each do |autocomplete_option| %>
+              "<%= autocomplete_option %>": null,
+            <% end %>
+          }
+        });
+      }, 1000);
     });
-  </script>
+  <% end %>
 <% end %>
