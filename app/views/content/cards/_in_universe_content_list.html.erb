@@ -1,32 +1,42 @@
 <%
   content_type_class = content_type.to_s.titleize.constantize
-
-  if content_list.count > 100
-    content_list = content_list.first(100)
-    card_title ||= "100+ #{content_type.to_s.pluralize}"
-  end
 %>
 <div class="card hoverable">
-  <div class="card-image waves-effect waves-block waves-light">
-    <% images = [] # content_list.flat_map(&:image_uploads) #todo reinstate this with optimizations %>
+  <div class="card-image">
+    <% images = ImageUpload.where(content_type: content_type.to_s.titleize, content_id: content_list.map(&:id)) %>
     <% if images.any? && rand(3) < 2 %>
       <%= image_tag images.sample.src(:large), class: 'activator', style: 'height: 265px' %>
     <% else %>
       <%= image_tag "card-headers/#{content_type.to_s.pluralize}.jpg", class: 'activator', style: 'height: 265px' %>
     <% end %>
-  </div>
-  <div class="card-content">
-    <span class="card-title activator grey-text text-darken-4">
+    <span class="card-title" style="text-shadow: 1px 1px #000000">
       <% if defined?(card_title) && !card_title.blank? %>
         <%= card_title %>
       <% else %>
         <%= pluralize(content_list.count, content_type.to_s) %>
       <% end %>
-      <i class="material-icons right">arrow_upward</i>
     </span>
-    <p>
-      <%= link_to "Create #{content_list.empty? ? 'your first one!' : ['another ', content_type].join}", new_polymorphic_path(content_type) if user_signed_in? %>
-    </p>
+    <% if user_signed_in? %>
+      <%= link_to new_polymorphic_path(content_type), class: "btn-floating btn-large halfway-fab waves-effect waves-light #{content_type_class.color} tooltipped",
+        data: {
+          position: 'bottom',
+          tooltip: "Create a #{content_type.to_s}",
+          enterDelay: 50
+        } do %>
+        <i class="material-icons">add</i>
+      <% end %>
+
+      <%= link_to polymorphic_path(content_type_class), class: "btn-floating halfway-fab waves-effect waves-light grey black-text tooltipped", style: "right: 90px",
+        data: {
+          position: 'bottom',
+          tooltip: "View all #{content_type.to_s.pluralize}",
+          enterDelay: 50
+        } do %>
+        <i class="material-icons">reorder</i>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="card-content">
   </div>
   <div class="card-reveal">
     <span class="card-title grey-text text-darken-4">

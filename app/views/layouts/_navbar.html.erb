@@ -46,6 +46,24 @@
 <% end %>
 </ul>
 
+<div id="search-modal" class="modal">
+  <div class="modal-content">
+    <h4>Your handy pagefinder</h4>
+    <p>
+      Type anything you want below. It'll match page names (like the names of your characters, locations, and so on), but also
+      anything you've typed in any of those pages' fields as well. For example, searching "bald" will show you all your characters
+      that you've entered "bald" in for their hair style.
+    </p>
+    <%= form_tag main_app.search_path, method: :get do %>
+      <input type="search" name="q" value="" placeholder="search your notebook" />
+      <button type="submit" class="btn btn-primary blue">Search everything</button>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+  </div>
+</div>
+
 <ul id="desktop-user-dropdown" class="dropdown-content">
   <% if current_user %>
     <li>
@@ -72,23 +90,6 @@
     </li>
     <li class="divider"></li>
   <% end %>
-
-  <!--
-  <li>
-    <%= link_to main_app.friends_landing_path do %>
-      <i class="material-icons left">people</i>
-      Community Drive
-    <% end %>
-  </li>
-  <li>
-    <%= link_to main_app.community_voting_path do %>
-      <i class="material-icons left">star_outline</i>
-      Vote on features
-    <% end %>
-  </li>
-
-  <li class="divider"></li>
-  -->
   <li>
     <%= link_to main_app.prompts_path do %>
       <i class="material-icons left">lightbulb_outline</i>
@@ -110,7 +111,7 @@
   </li>
 </ul>
 
-<ul id="login-slide" class="side-nav">
+<ul id="login-slide" class="sidenav">
   <li><%= link_to 'Sign in', main_app.new_user_session_path %></li>
   <li><%= link_to 'Sign up', main_app.new_user_registration_path %></li>
   <li class="divider"></li>
@@ -129,12 +130,12 @@
       <ul class="right">
         <% if user_signed_in? %>
         <li>
-          <a class="dropdown-button tooltipped" href="#!" data-activates="help-dropdown" data-position="bottom" data-delay="100" data-tooltip="Need help?">
+          <a class="dropdown-trigger tooltipped" href="#!" data-target="help-dropdown" data-position="bottom" data-delay="100" data-tooltip="Need help?">
             <i class="material-icons">help</i>
           </a>
         </li>
         <li>
-          <a class="dropdown-button tooltipped" href="#!" data-activates="desktop-user-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your content">
+          <a class="dropdown-trigger tooltipped" href="#!" data-target="desktop-user-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your content">
             <div class="hide-on-med-and-up"><i class="material-icons">book</i></div>
             <div class="hide-on-small-and-down"><%= current_user.name %> &nbsp; ▾</div>
           </a>
@@ -152,18 +153,18 @@
             <% end %>
           </li>
           <li>
-            <a class="dropdown-button tooltipped" href="#!" data-activates="recent-content-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your recently-edited pages">
+            <a class="dropdown-trigger tooltipped" href="#!" data-target="recent-content-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your recently-edited pages">
               <i class="material-icons">recent_actors</i>
             </a>
           </li>
           <li>
-            <a href="#search" class="dropdown-button tooltipped" href="#!" data-tooltip="Search your notebook">
+            <a class="waves-effect waves-light modal-trigger tooltipped" href="#search-modal" data-tooltip="Search your notebook">
               <i class="material-icons">search</i>
             </a>
           </li>
         <% else %>
           <li>
-            <a href="#" data-activates="login-slide" class="button-collapse">
+            <a href="#" data-target="login-slide" class="button-collapse">
               <i class="material-icons">menu</i>
             </a>
           </li>
@@ -173,10 +174,7 @@
   </nav>
 </div>
 
-<div id="search">
-  <button type="button" class="close red">×</button>
-  <%= form_tag main_app.search_path, method: :get do %>
-    <input type="search" name="q" value="" placeholder="search your notebook" />
-    <button type="submit" class="btn btn-primary blue">Search everything</button>
-  <% end %>
-</div>
+
+<script style="text/javascript">
+$(".dropdown-trigger").dropdown();
+</script>
