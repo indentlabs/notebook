@@ -1,4 +1,4 @@
-<ul id="slide-out" class="side-nav fixed">
+<ul id="slide-out" class="sidenav sidenav-fixed">
 
   <!--
   <li class="content-search">
@@ -78,7 +78,11 @@
   %>
     <% content_type_klass = content_type.constantize %>
     <li>
-      <%= link_to main_app.polymorphic_path(content_type_klass) do %>
+      <%#
+        todo define missing colors using the "Custom colors" section article
+        https://materializecss.com/waves.html#!
+      %>
+      <%= link_to main_app.polymorphic_path(content_type_klass), class: "white waves-effect waves-#{content_type_klass.color.split(' ').last}" do %>
         <i class="material-icons <%= content_type_klass.color %>-text">
           <%= content_type_klass.icon %>
         </i>
@@ -114,6 +118,6 @@
 
 <script type="text/javascript">
 $(document).ready(function () {
-  $(".button-collapse").sideNav();
+  $('.sidenav').sidenav();
 })
 </script>

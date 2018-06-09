@@ -164,44 +164,12 @@
           </div>
         <% end %>
 
-      <% elsif field.name == 'item_type' %>
-        <% potential_item_types = t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +
-          t('club_types') + t('flexible_weapon_types') + t('fist_weapon_types') + t('thrown_weapon_types') +
-          t('polearm_types') + t('shortsword_types') + t('sword_types') + t('other_item_types')
-        %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: potential_item_types %>
-
-      <%# TODO: not make this so awful %>
-
-      <% elsif field.name == 'skintone' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('skin_tones') %>
-
-      <% elsif field.name == 'race' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('character_races') %>
-
-      <% elsif field.name == 'eyecolor' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('eye_colors') %>
-
-      <% elsif field.name == 'haircolor' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('hair_colors') %>
-
-      <% elsif field.name == 'hairstyle' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('hair_styles') %>
-
-      <% elsif field.name == 'facialhair' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('facial_hair_styles') %>
-
-      <% elsif field.name == 'bodytype' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('body_types') %>
-
-      <% elsif field.name == 'fave_weapon' %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +
-          t('club_types') + t('flexible_weapon_types') + t('fist_weapon_types') + t('thrown_weapon_types') +
-          t('polearm_types') + t('shortsword_types') + t('sword_types') %>
-
       <% else %>
-        <%= render 'content/form/text_input', f: f, content: content, field: field %>
-
+        <% if AutocompleteService.autocompleteable?(field.name) %>
+          <%= render 'content/form/text_input', f: f, content: content, field: field, autocomplete: AutocompleteService.for(field.name) %>
+        <% else %>
+          <%= render 'content/form/text_input', f: f, content: content, field: field %>
+        <% end %>
       <% end %>
 
     </div>
