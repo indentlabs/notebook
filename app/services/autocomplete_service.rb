@@ -1,6 +1,6 @@
 class AutocompleteService < Service
   # TODO not make this giant case so awful
-  # TODO move the literal arrays into translation file
+  # TODO move the literal arrays into Generators that use the translation file
 
   # Adding a field name to this switch/case will enable autocompleting
   # for that field across any page type.
