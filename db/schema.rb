@@ -1879,12 +1879,12 @@ ActiveRecord::Schema.define(version: 20180202064238) do
   add_index "technology_towns", ["user_id"], name: "index_technology_towns_on_user_id"
 
   create_table "thredded_categories", force: :cascade do |t|
-    t.integer  "messageboard_id",             null: false
-    t.string   "name",            limit: 191, null: false
-    t.string   "description",     limit: 255
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
-    t.string   "slug",            limit: 191, null: false
+    t.integer  "messageboard_id", null: false
+    t.text     "name",            null: false
+    t.text     "description"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+    t.text     "slug",            null: false
   end
 
   add_index "thredded_categories", ["messageboard_id", "slug"], name: "index_thredded_categories_on_messageboard_id_and_slug", unique: true
@@ -1914,24 +1914,24 @@ ActiveRecord::Schema.define(version: 20180202064238) do
   end
 
   add_index "thredded_messageboard_users", ["thredded_messageboard_id", "last_seen_at"], name: "index_thredded_messageboard_users_for_recently_active"
-  add_index "thredded_messageboard_users", ["thredded_messageboard_id", "thredded_user_detail_id"], name: "index_thredded_messageboard_users_primary"
+  add_index "thredded_messageboard_users", ["thredded_messageboard_id", "thredded_user_detail_id"], name: "index_thredded_messageboard_users_primary", unique: true
 
   create_table "thredded_messageboards", force: :cascade do |t|
-    t.string   "name",                  limit: 191,                 null: false
-    t.string   "slug",                  limit: 191
+    t.text     "name",                                  null: false
+    t.text     "slug"
     t.text     "description"
-    t.integer  "topics_count",                      default: 0
-    t.integer  "posts_count",                       default: 0
-    t.integer  "position",                                          null: false
+    t.integer  "topics_count",          default: 0
+    t.integer  "posts_count",           default: 0
+    t.integer  "position",                              null: false
     t.integer  "last_topic_id"
     t.integer  "messageboard_group_id"
-    t.datetime "created_at",                                        null: false
-    t.datetime "updated_at",                                        null: false
-    t.boolean  "locked",                            default: false, null: false
+    t.datetime "created_at",                            null: false
+    t.datetime "updated_at",                            null: false
+    t.boolean  "locked",                default: false, null: false
   end
 
   add_index "thredded_messageboards", ["messageboard_group_id"], name: "index_thredded_messageboards_on_messageboard_group_id"
-  add_index "thredded_messageboards", ["slug"], name: "index_thredded_messageboards_on_slug"
+  add_index "thredded_messageboards", ["slug"], name: "index_thredded_messageboards_on_slug", unique: true
 
   create_table "thredded_notifications_for_followed_topics", force: :cascade do |t|
     t.integer "user_id",                                null: false
@@ -1966,8 +1966,7 @@ ActiveRecord::Schema.define(version: 20180202064238) do
   create_table "thredded_posts", force: :cascade do |t|
     t.integer  "user_id"
     t.text     "content",          limit: 65535
-    t.string   "ip",               limit: 255
-    t.string   "source",           limit: 255,   default: "web"
+    t.string   "source",           limit: 191,   default: "web"
     t.integer  "postable_id",                                    null: false
     t.integer  "messageboard_id",                                null: false
     t.integer  "moderation_state",                               null: false
@@ -1984,25 +1983,27 @@ ActiveRecord::Schema.define(version: 20180202064238) do
     t.integer  "user_id"
     t.text     "content",     limit: 65535
     t.integer  "postable_id",               null: false
-    t.string   "ip",          limit: 255
     t.datetime "created_at",                null: false
     t.datetime "updated_at",                null: false
   end
 
+  add_index "thredded_private_posts", ["postable_id", "created_at"], name: "index_thredded_private_posts_on_postable_id_and_created_at"
+
   create_table "thredded_private_topics", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "last_user_id"
-    t.string   "title",        limit: 255,             null: false
-    t.string   "slug",         limit: 191,             null: false
-    t.integer  "posts_count",              default: 0
-    t.string   "hash_id",      limit: 191,             null: false
+    t.text     "title",                               null: false
+    t.text     "slug",                                null: false
+    t.integer  "posts_count",             default: 0
+    t.string   "hash_id",      limit: 20,             null: false
     t.datetime "last_post_at"
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
   end
 
   add_index "thredded_private_topics", ["hash_id"], name: "index_thredded_private_topics_on_hash_id"
-  add_index "thredded_private_topics", ["slug"], name: "index_thredded_private_topics_on_slug"
+  add_index "thredded_private_topics", ["last_post_at"], name: "index_thredded_private_topics_on_last_post_at"
+  add_index "thredded_private_topics", ["slug"], name: "index_thredded_private_topics_on_slug", unique: true
 
   create_table "thredded_private_users", force: :cascade do |t|
     t.integer  "private_topic_id"
@@ -2025,21 +2026,21 @@ ActiveRecord::Schema.define(version: 20180202064238) do
   create_table "thredded_topics", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "last_user_id"
-    t.string   "title",            limit: 255,                 null: false
-    t.string   "slug",             limit: 191,                 null: false
-    t.integer  "messageboard_id",                              null: false
-    t.integer  "posts_count",                  default: 0,     null: false
-    t.boolean  "sticky",                       default: false, null: false
-    t.boolean  "locked",                       default: false, null: false
-    t.string   "hash_id",          limit: 191,                 null: false
-    t.string   "type",             limit: 191
-    t.integer  "moderation_state",                             null: false
+    t.text     "title",                                       null: false
+    t.text     "slug",                                        null: false
+    t.integer  "messageboard_id",                             null: false
+    t.integer  "posts_count",                 default: 0,     null: false
+    t.boolean  "sticky",                      default: false, null: false
+    t.boolean  "locked",                      default: false, null: false
+    t.string   "hash_id",          limit: 20,                 null: false
+    t.integer  "moderation_state",                            null: false
     t.datetime "last_post_at"
-    t.datetime "created_at",                                   null: false
-    t.datetime "updated_at",                                   null: false
+    t.datetime "created_at",                                  null: false
+    t.datetime "updated_at",                                  null: false
   end
 
   add_index "thredded_topics", ["hash_id"], name: "index_thredded_topics_on_hash_id"
+  add_index "thredded_topics", ["last_post_at"], name: "index_thredded_topics_on_last_post_at"
   add_index "thredded_topics", ["messageboard_id"], name: "index_thredded_topics_on_messageboard_id"
   add_index "thredded_topics", ["moderation_state", "sticky", "updated_at"], name: "index_thredded_topics_for_display"
   add_index "thredded_topics", ["slug"], name: "index_thredded_topics_on_slug", unique: true
@@ -2092,10 +2093,9 @@ ActiveRecord::Schema.define(version: 20180202064238) do
   add_index "thredded_user_preferences", ["user_id"], name: "index_thredded_user_preferences_on_user_id", unique: true
 
   create_table "thredded_user_private_topic_read_states", force: :cascade do |t|
-    t.integer  "user_id",                 null: false
-    t.integer  "postable_id",             null: false
-    t.integer  "page",        default: 1, null: false
-    t.datetime "read_at",                 null: false
+    t.integer  "user_id",     null: false
+    t.integer  "postable_id", null: false
+    t.datetime "read_at",     null: false
   end
 
   add_index "thredded_user_private_topic_read_states", ["user_id", "postable_id"], name: "thredded_user_private_topic_read_states_user_postable", unique: true
@@ -2110,10 +2110,9 @@ ActiveRecord::Schema.define(version: 20180202064238) do
   add_index "thredded_user_topic_follows", ["user_id", "topic_id"], name: "thredded_user_topic_follows_user_topic", unique: true
 
   create_table "thredded_user_topic_read_states", force: :cascade do |t|
-    t.integer  "user_id",                 null: false
-    t.integer  "postable_id",             null: false
-    t.integer  "page",        default: 1, null: false
-    t.datetime "read_at",                 null: false
+    t.integer  "user_id",     null: false
+    t.integer  "postable_id", null: false
+    t.datetime "read_at",     null: false
   end
 
   add_index "thredded_user_topic_read_states", ["user_id", "postable_id"], name: "thredded_user_topic_read_states_user_postable", unique: true
