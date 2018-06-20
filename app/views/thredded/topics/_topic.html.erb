@@ -4,9 +4,7 @@
                 data: {topic: topic.id, messageboard: topic.messageboard_id} do %>
   <div class="thredded--topics--posts-count"><%= topic.posts_count %></div>
 
-  <div class="thredded--topics--follow-info tooltipped"
-    data-tooltip="<%= topic_follow_reason_text topic.follow_reason %>"
-    data-position="down">
+  <div class="thredded--topics--follow-info" title="<%= topic_follow_reason_text topic.follow_reason %>">
     <svg class="thredded--topics--follow-icon" viewBox="0 0 116 121" role="img">
       <% if topic.followed? %>
         <use xlink:href="#thredded-follow-icon"></use>
@@ -17,19 +15,6 @@
   </div>
 
   <h1 class="thredded--topics--title">
-    <% if user_signed_in? %>
-      <%
-        @current_user_unread_and_followed_topics ||= Thredded::Topic.unread_followed_by(current_user).pluck(:id)
-
-        if @current_user_unread_and_followed_topics.include?(topic.id)
-      %>
-        <i class="material-icons amber-text tooltipped" style="font-size: 0.9em"
-          data-tooltip="You are following this thread and there are unread replies."
-          data-position="right">
-          notifications_active
-        </i>
-      <% end %>
-    <% end %>
     <%= link_to topic.title, topic.path %>
   </h1>
 
@@ -56,6 +41,7 @@
   <% end %>
 <% end %>
 
-<% if !topic_iteration.last? && topic.sticky? && !topics[topic_counter + 1].sticky? %>
+<% if local_assigns[:sticky_topics_divider] &&
+    !topic_iteration.last? && topic.sticky? && !topics[topic_counter + 1].sticky? %>
   <%= render 'thredded/topics/sticky_topics_divider' %>
 <% end %>
