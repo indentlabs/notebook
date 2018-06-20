@@ -1,3 +1,11 @@
+<%
+  unread_posts_count = if user_signed_in?
+    messageboard.topics.unread(current_user).count
+  else
+    messageboard.topics_count
+  end
+%>
+
 <div class="thredded--messageboard--meta">
   <% if messageboard.locked? %>
     <span class="thredded--messageboard--meta--locked"
@@ -8,7 +16,7 @@
   <h3 class="thredded--messageboard--meta--counts">
     <%= t 'thredded.messageboard.topics_and_posts_counts',
           topics_count: number_with_delimiter(messageboard.topics_count),
-          posts_unread: number_with_delimiter(messageboard.posts_count)
+          posts_unread: number_with_delimiter(unread_posts_count)
     %>
   </h3>
 </div>

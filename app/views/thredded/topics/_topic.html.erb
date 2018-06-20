@@ -15,6 +15,18 @@
   </div>
 
   <h1 class="thredded--topics--title">
+    <% if user_signed_in? %>
+      <%
+        @current_user_unread_and_followed_topics ||= Thredded::Topic.unread_followed_by(current_user).pluck(:id)
+        if @current_user_unread_and_followed_topics.include?(topic.id)
+      %>
+        <i class="material-icons amber-text tooltipped" style="font-size: 0.9em"
+          data-tooltip="You are following this thread and there are unread replies."
+          data-position="right">
+          notifications_active
+        </i>
+      <% end %>
+    <% end %>
     <%= link_to topic.title, topic.path %>
   </h1>
 
