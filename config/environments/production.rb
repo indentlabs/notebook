@@ -76,4 +76,31 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+
+  # Devise default url options
+  config.action_mailer.default_url_options = { host: 'www.notebook.ai', port: 80 }
+  ActionMailer::Base.smtp_settings = {
+    :address        => "smtp.sendgrid.net",
+    :port           => 587,
+    :authentication => :plain,
+    :user_name      => ENV['SENDGRID_USERNAME'],
+    :password       => ENV['SENDGRID_PASSWORD'],
+    :domain         => ENV['SENDGRID_DOMAIN'],
+    :enable_starttls_auto => true
+  }
+
+  # S3 settings for Paperclip uploads
+  config.paperclip_defaults = {
+    storage: :s3,
+    s3_credentials: {
+      bucket:            ENV.fetch('S3_BUCKET_NAME',        'notebook-content-uploads'),
+      s3_region:         ENV.fetch('AWS_REGION',            'us-east-1'),
+      access_key_id:     ENV.fetch('AWS_ACCESS_KEY_ID'),
+      secret_access_key: ENV.fetch('AWS_SECRET_ACCESS_KEY')
+    }
+  }
+
+  # Set production Stripe API key
+  Stripe.api_key = ENV['STRIPE_API_KEY']
+  config.stripe_publishable_key = ENV['STRIPE_PUBLISHABLE_KEY']
 end

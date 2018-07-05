@@ -39,4 +39,8 @@ Rails.application.configure do
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
+
+  # Set test-mode Stripe API key
+  Stripe.api_key = "We-don't-want-to-actually-hit-Stripe-from-tests"
+  config.stripe_publishable_key = 'pk_test_eXI4iyJ2gR9UOGJyJERvDlHF'
 end

@@ -70,6 +70,9 @@ gem 'thredded'
 gem 'rails-ujs'
 gem 'delayed_job_active_record'
 
+# Exports
+gem 'csv'
+
 # Tech debt & hacks
 gem 'binding_of_caller' # see has_changelog.rb
 
