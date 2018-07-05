@@ -9,7 +9,7 @@ RSpec.describe WriteController, type: :controller do
 
       sign_in @user
 
-      get :editor, scene_id: 1
+      get :editor, params: { scene_id: 1 }
     end
 
     it { is_expected.to respond_with(200) }

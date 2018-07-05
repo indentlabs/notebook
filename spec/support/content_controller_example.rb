@@ -36,32 +36,32 @@ shared_examples_for 'a controller for a content item' do
 
   describe 'POST #create' do
     before do
-      post :create, @model_name => {
+      post :create, params: { @model_name => {
         name: model.name,
         user: @user
-      }
+      } }
     end
     it { is_expected.to redirect_to(polymorphic_path(assigns(:content))) }
   end
 
   describe 'GET #edit' do
-    before { get :edit, id: model.id }
+    before { get :edit, params: { id: model.id } }
     it { is_expected.to respond_with(200) }
     it { is_expected.to render_template(locals: "#{@model_name.pluralize}/edit", layout: :application) }
   end
 
   describe 'PUT #update' do
     before do
-      put :update, id: model.id, @model_name => {
+      put :update, params: { id: model.id, @model_name => {
         name: model.name,
         user: @user
-      }
+      } }
     end
     it { is_expected.to redirect_to(polymorphic_path(model)) }
   end
 
   describe 'DELETE #destroy' do
-    before { delete :destroy, id: model.id }
+    before { delete :destroy, params: { id: model.id } }
     it { is_expected.to redirect_to(polymorphic_path(@model_class)) }
 
     describe 'the destroyed model' do
