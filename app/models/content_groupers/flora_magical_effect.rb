@@ -1,4 +1,4 @@
-class FloraMagicalEffect < ActiveRecord
+class FloraMagicalEffect < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

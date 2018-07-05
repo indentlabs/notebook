@@ -1,4 +1,4 @@
-class GroupEquipmentship < ActiveRecord
+class GroupEquipmentship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

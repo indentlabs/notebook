@@ -1,4 +1,4 @@
-class CountryLanguage < ActiveRecord
+class CountryLanguage < ApplicationRecord
   belongs_to :user
   belongs_to :country
   belongs_to :language

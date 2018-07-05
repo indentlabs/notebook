@@ -1,4 +1,4 @@
-class Town < ActiveRecord
+class Town < ApplicationRecord
   acts_as_paranoid
 
   validates :name, presence: true

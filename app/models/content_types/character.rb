@@ -6,7 +6,7 @@
 # 1. a person in a User's story.
 #
 #    exists within a Universe.
-class Character < ActiveRecord
+class Character < ApplicationRecord
   acts_as_paranoid
 
   validates :name, presence: true

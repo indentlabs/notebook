@@ -1,4 +1,4 @@
-class FloraRelationship < ActiveRecord
+class FloraRelationship < ApplicationRecord
   include HasContentLinking
   LINK_TYPE = :two_way
 

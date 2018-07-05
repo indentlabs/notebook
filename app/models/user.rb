@@ -2,7 +2,7 @@ require 'digest/md5'
 
 ##
 # a person using the Notebook.ai web application. Owns all other content.
-class User < ActiveRecord
+class User < ApplicationRecord
   acts_as_paranoid
 
   # Include default devise modules. Others available are:

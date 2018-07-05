@@ -1,4 +1,4 @@
-class Raceship < ActiveRecord
+class Raceship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

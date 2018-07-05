@@ -1,4 +1,4 @@
-class CountryLocation < ActiveRecord
+class CountryLocation < ApplicationRecord
   belongs_to :user
   belongs_to :country
   belongs_to :location

@@ -1,4 +1,4 @@
-class Supergroupship < ActiveRecord
+class Supergroupship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

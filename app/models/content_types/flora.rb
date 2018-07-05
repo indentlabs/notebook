@@ -1,4 +1,4 @@
-class Flora < ActiveRecord
+class Flora < ApplicationRecord
   acts_as_paranoid
 
   validates :name, presence: true

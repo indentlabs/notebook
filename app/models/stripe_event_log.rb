@@ -1,2 +1,2 @@
-class StripeEventLog < ActiveRecord
+class StripeEventLog < ApplicationRecord
 end

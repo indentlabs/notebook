@@ -1,4 +1,4 @@
-class Attribute < ActiveRecord
+class Attribute < ApplicationRecord
   belongs_to :user
   belongs_to :attribute_field
   belongs_to :entity, polymorphic: true

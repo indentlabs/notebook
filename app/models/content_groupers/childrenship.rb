@@ -1,4 +1,4 @@
-class Childrenship < ActiveRecord
+class Childrenship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

@@ -1,4 +1,4 @@
-class AttributeCategory < ActiveRecord
+class AttributeCategory < ApplicationRecord
   validates :name, presence: true
 
   belongs_to :user

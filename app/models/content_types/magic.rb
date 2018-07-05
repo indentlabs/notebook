@@ -1,4 +1,4 @@
-class Magic < ActiveRecord
+class Magic < ApplicationRecord
   acts_as_paranoid
 
   validates :name, presence: true

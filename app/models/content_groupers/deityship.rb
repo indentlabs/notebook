@@ -1,4 +1,4 @@
-class Deityship < ActiveRecord
+class Deityship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

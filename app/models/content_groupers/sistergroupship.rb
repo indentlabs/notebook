@@ -1,4 +1,4 @@
-class Sistergroupship < ActiveRecord
+class Sistergroupship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

@@ -1,4 +1,4 @@
-class Referral < ActiveRecord
+class Referral < ApplicationRecord
   def referrer
     User.find_by(id: self.referrer_id)
   end

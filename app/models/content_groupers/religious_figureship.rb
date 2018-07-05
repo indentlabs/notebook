@@ -1,4 +1,4 @@
-class ReligiousFigureship < ActiveRecord
+class ReligiousFigureship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user
