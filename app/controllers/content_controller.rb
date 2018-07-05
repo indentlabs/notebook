@@ -19,7 +19,7 @@ class ContentController < ApplicationController
       end
     end
 
-    @content = @content.flatten.uniq.sort_by(&:name)
+    @content = @content.to_a.flatten.uniq.sort_by(&:name)
 
     @questioned_content = @content.sample
     @question = @questioned_content.question unless @questioned_content.nil?
