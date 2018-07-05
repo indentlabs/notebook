@@ -1,4 +1,4 @@
-class Siblingship < ActiveRecord::Base
+class Siblingship < ActiveRecord
   include HasContentLinking
   LINK_TYPE = :two_way
 

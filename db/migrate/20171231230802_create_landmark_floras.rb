@@ -1,4 +1,4 @@
-class CreateLandmarkFloras < ActiveRecord::Migration
+class CreateLandmarkFloras < ActiveRecord::Migration[4.2]
   def change
     create_table :landmark_floras do |t|
       t.references :user, index: true, foreign_key: true

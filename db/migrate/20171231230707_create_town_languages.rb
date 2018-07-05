@@ -1,4 +1,4 @@
-class CreateTownLanguages < ActiveRecord::Migration
+class CreateTownLanguages < ActiveRecord::Migration[4.2]
   def change
     create_table :town_languages do |t|
       t.references :user, index: true, foreign_key: true

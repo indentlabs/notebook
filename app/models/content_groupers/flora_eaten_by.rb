@@ -1,4 +1,4 @@
-class FloraEatenBy < ActiveRecord::Base
+class FloraEatenBy < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

@@ -1,4 +1,4 @@
-class CreateDeityDeityParents < ActiveRecord::Migration
+class CreateDeityDeityParents < ActiveRecord::Migration[4.2]
   def change
     create_table :deity_deity_parents do |t|
       t.references :user, index: true, foreign_key: true

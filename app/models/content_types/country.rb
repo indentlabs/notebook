@@ -1,4 +1,4 @@
-class Country < ActiveRecord::Base
+class Country < ActiveRecord
   acts_as_paranoid
 
   validates :name, presence: true

@@ -1,4 +1,4 @@
-class LargestCitiesRelationship < ActiveRecord::Base
+class LargestCitiesRelationship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

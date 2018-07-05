@@ -1,4 +1,4 @@
-class Birthing < ActiveRecord::Base
+class Birthing < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

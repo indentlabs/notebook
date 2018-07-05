@@ -1,4 +1,4 @@
-class CreateSceneCharacterships < ActiveRecord::Migration
+class CreateSceneCharacterships < ActiveRecord::Migration[4.2]
   def change
     create_table :scene_characterships do |t|
       t.integer :user_id

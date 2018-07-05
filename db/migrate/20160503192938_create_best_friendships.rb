@@ -1,4 +1,4 @@
-class CreateBestFriendships < ActiveRecord::Migration
+class CreateBestFriendships < ActiveRecord::Migration[4.2]
   def change
     create_table :best_friendships do |t|
       t.integer :user_id

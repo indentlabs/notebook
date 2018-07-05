@@ -1,4 +1,4 @@
-class CreateItemMagics < ActiveRecord::Migration
+class CreateItemMagics < ActiveRecord::Migration[4.2]
   def change
     create_table :item_magics do |t|
       t.references :item, index: true, foreign_key: true

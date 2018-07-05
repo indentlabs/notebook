@@ -6,7 +6,7 @@
 # 1. a particular place or position
 #
 #    exists within a Universe
-class Location < ActiveRecord::Base
+class Location < ActiveRecord
   acts_as_paranoid
 
   # todo: clear these -- not used anymore

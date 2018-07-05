@@ -1,3 +1,3 @@
-class Document < ActiveRecord::Base
+class Document < ActiveRecord
   belongs_to :user
 end

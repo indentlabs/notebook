@@ -1,4 +1,4 @@
-class CreateFloras < ActiveRecord::Migration
+class CreateFloras < ActiveRecord::Migration[4.2]
   def change
     create_table :floras do |t|
       t.string :name

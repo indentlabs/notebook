@@ -1,4 +1,4 @@
-class GroupSuppliership < ActiveRecord::Base
+class GroupSuppliership < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

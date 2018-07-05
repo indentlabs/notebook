@@ -1,4 +1,4 @@
-class CreateGroupEquipmentships < ActiveRecord::Migration
+class CreateGroupEquipmentships < ActiveRecord::Migration[4.2]
   def change
     create_table :group_equipmentships do |t|
       t.integer :user_id

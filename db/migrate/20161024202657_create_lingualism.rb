@@ -1,4 +1,4 @@
-class CreateLingualism < ActiveRecord::Migration
+class CreateLingualism < ActiveRecord::Migration[4.2]
   def change
     create_table :lingualisms do |t|
       t.integer :user_id

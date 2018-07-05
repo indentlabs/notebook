@@ -1,4 +1,4 @@
-class CreateVotables < ActiveRecord::Migration
+class CreateVotables < ActiveRecord::Migration[4.2]
   def change
     create_table :votables do |t|
       t.string :name

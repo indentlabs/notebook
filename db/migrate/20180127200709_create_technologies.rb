@@ -1,4 +1,4 @@
-class CreateTechnologies < ActiveRecord::Migration
+class CreateTechnologies < ActiveRecord::Migration[4.2]
   def change
     create_table :technologies do |t|
       t.string :name

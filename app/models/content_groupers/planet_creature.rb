@@ -1,4 +1,4 @@
-class PlanetCreature < ActiveRecord::Base
+class PlanetCreature < ActiveRecord
   belongs_to :user
   belongs_to :planet
   belongs_to :creature

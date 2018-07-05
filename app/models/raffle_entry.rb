@@ -1,3 +1,3 @@
-class RaffleEntry < ActiveRecord::Base
+class RaffleEntry < ActiveRecord
   belongs_to :user
 end

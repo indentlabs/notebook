@@ -1,4 +1,4 @@
-class PlanetNearbyPlanet < ActiveRecord::Base
+class PlanetNearbyPlanet < ActiveRecord
   include HasContentLinking
   LINK_TYPE = :two_way
 

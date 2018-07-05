@@ -6,7 +6,7 @@
 # 1. an animal, plant, or other wildlife occuring in a user's story
 #
 #    exists within a Universe.
-class Creature < ActiveRecord::Base
+class Creature < ActiveRecord
   acts_as_paranoid
 
   validates :name, presence: true

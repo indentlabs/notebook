@@ -1,4 +1,4 @@
-class CreateCurrentOwnership < ActiveRecord::Migration
+class CreateCurrentOwnership < ActiveRecord::Migration[4.2]
   def change
     create_table :current_ownerships do |t|
       t.integer :user_id

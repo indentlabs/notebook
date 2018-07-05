@@ -1,4 +1,4 @@
-class AddPrivacyToTowns < ActiveRecord::Migration
+class AddPrivacyToTowns < ActiveRecord::Migration[4.2]
   def change
     add_column :towns, :privacy, :string
   end

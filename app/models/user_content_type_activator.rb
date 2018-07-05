@@ -1,3 +1,3 @@
-class UserContentTypeActivator < ActiveRecord::Base
+class UserContentTypeActivator < ActiveRecord
   belongs_to :user
 end

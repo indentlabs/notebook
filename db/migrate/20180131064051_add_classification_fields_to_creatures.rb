@@ -1,4 +1,4 @@
-class AddClassificationFieldsToCreatures < ActiveRecord::Migration
+class AddClassificationFieldsToCreatures < ActiveRecord::Migration[4.2]
   def change
     add_column :creatures, :phylum, :string
     add_column :creatures, :class_string, :string

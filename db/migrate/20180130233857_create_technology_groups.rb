@@ -1,4 +1,4 @@
-class CreateTechnologyGroups < ActiveRecord::Migration
+class CreateTechnologyGroups < ActiveRecord::Migration[4.2]
   def change
     create_table :technology_groups do |t|
       t.references :user, index: true, foreign_key: true

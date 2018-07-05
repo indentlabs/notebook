@@ -1,4 +1,4 @@
-class CreateCharacterEnemies < ActiveRecord::Migration
+class CreateCharacterEnemies < ActiveRecord::Migration[4.2]
   def change
     create_table :character_enemies do |t|
       t.references :character, index: true, foreign_key: true

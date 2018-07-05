@@ -1,4 +1,4 @@
-class AttributeField < ActiveRecord::Base
+class AttributeField < ActiveRecord
   validates :name, presence: true
 
   belongs_to :user

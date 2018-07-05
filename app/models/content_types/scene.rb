@@ -1,4 +1,4 @@
-class Scene < ActiveRecord::Base
+class Scene < ActiveRecord
   acts_as_paranoid
 
   validates :name, presence: true

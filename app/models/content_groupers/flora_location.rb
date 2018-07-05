@@ -1,4 +1,4 @@
-class FloraLocation < ActiveRecord::Base
+class FloraLocation < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

@@ -1,4 +1,4 @@
-class Language < ActiveRecord::Base
+class Language < ActiveRecord
   acts_as_paranoid
 
   validates :name, presence: true

@@ -1,4 +1,4 @@
-class CreateCreatureRelationships < ActiveRecord::Migration
+class CreateCreatureRelationships < ActiveRecord::Migration[4.2]
   def change
     create_table :creature_relationships do |t|
       t.integer :user_id

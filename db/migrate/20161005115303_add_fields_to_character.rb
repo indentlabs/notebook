@@ -1,4 +1,4 @@
-class AddFieldsToCharacter < ActiveRecord::Migration
+class AddFieldsToCharacter < ActiveRecord::Migration[4.2]
   def change
     add_column :characters, :aliases, :string
     add_column :characters, :motivations, :string

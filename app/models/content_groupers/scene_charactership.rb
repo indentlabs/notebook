@@ -1,4 +1,4 @@
-class SceneCharactership < ActiveRecord::Base
+class SceneCharactership < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

@@ -6,7 +6,7 @@
 # 1. the necessary items for a particular purpose.
 #
 #    exists within a Universe.
-class Item < ActiveRecord::Base
+class Item < ActiveRecord
   acts_as_paranoid
 
   validates :name, presence: true

@@ -1,4 +1,4 @@
-class Religion < ActiveRecord::Base
+class Religion < ActiveRecord
   acts_as_paranoid
 
   validates :name, presence: true

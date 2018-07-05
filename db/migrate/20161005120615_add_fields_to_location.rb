@@ -1,4 +1,4 @@
-class AddFieldsToLocation < ActiveRecord::Migration
+class AddFieldsToLocation < ActiveRecord::Migration[4.2]
   def change
     add_column :locations, :laws, :string
     add_column :locations, :climate, :string

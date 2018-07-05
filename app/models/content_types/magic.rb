@@ -1,4 +1,4 @@
-class Magic < ActiveRecord::Base
+class Magic < ActiveRecord
   acts_as_paranoid
 
   validates :name, presence: true

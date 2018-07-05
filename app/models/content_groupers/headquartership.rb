@@ -1,4 +1,4 @@
-class Headquartership < ActiveRecord::Base
+class Headquartership < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

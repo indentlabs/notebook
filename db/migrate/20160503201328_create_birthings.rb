@@ -1,4 +1,4 @@
-class CreateBirthings < ActiveRecord::Migration
+class CreateBirthings < ActiveRecord::Migration[4.2]
   def change
     create_table :birthings do |t|
       t.integer :character_id

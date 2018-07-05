@@ -1,6 +1,6 @@
 # Defines a relation between a location and any notable cities within it,
 # and a reverse relation for all locations in which a given location is notable within.
-class NotableCitiesRelationship < ActiveRecord::Base
+class NotableCitiesRelationship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

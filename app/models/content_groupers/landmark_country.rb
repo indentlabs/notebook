@@ -1,4 +1,4 @@
-class LandmarkCountry < ActiveRecord::Base
+class LandmarkCountry < ActiveRecord
   belongs_to :user
   belongs_to :landmark
   belongs_to :country

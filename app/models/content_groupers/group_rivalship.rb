@@ -1,4 +1,4 @@
-class GroupRivalship < ActiveRecord::Base
+class GroupRivalship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

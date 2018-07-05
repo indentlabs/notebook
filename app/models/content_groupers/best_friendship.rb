@@ -1,4 +1,4 @@
-class BestFriendship < ActiveRecord::Base
+class BestFriendship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

@@ -1,4 +1,4 @@
-class TechnologyParentTechnology < ActiveRecord::Base
+class TechnologyParentTechnology < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

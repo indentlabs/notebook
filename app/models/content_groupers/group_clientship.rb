@@ -1,4 +1,4 @@
-class GroupClientship < ActiveRecord::Base
+class GroupClientship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

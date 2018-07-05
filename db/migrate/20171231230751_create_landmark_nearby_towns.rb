@@ -1,4 +1,4 @@
-class CreateLandmarkNearbyTowns < ActiveRecord::Migration
+class CreateLandmarkNearbyTowns < ActiveRecord::Migration[4.2]
   def change
     create_table :landmark_nearby_towns do |t|
       t.references :user, index: true, foreign_key: true

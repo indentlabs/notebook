@@ -1,4 +1,4 @@
-class AddUniverseIndices < ActiveRecord::Migration
+class AddUniverseIndices < ActiveRecord::Migration[4.2]
   def change
     add_index :magics, :universe_id
     add_index :scenes, :universe_id

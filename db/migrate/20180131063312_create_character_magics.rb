@@ -1,4 +1,4 @@
-class CreateCharacterMagics < ActiveRecord::Migration
+class CreateCharacterMagics < ActiveRecord::Migration[4.2]
   def change
     create_table :character_magics do |t|
       t.references :character, index: true, foreign_key: true

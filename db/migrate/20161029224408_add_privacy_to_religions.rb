@@ -1,4 +1,4 @@
-class AddPrivacyToReligions < ActiveRecord::Migration
+class AddPrivacyToReligions < ActiveRecord::Migration[4.2]
   def change
     add_column :religions, :privacy, :string
   end

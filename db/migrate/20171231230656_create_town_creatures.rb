@@ -1,4 +1,4 @@
-class CreateTownCreatures < ActiveRecord::Migration
+class CreateTownCreatures < ActiveRecord::Migration[4.2]
   def change
     create_table :town_creatures do |t|
       t.references :user, index: true, foreign_key: true

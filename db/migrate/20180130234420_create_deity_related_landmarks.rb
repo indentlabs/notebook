@@ -1,4 +1,4 @@
-class CreateDeityRelatedLandmarks < ActiveRecord::Migration
+class CreateDeityRelatedLandmarks < ActiveRecord::Migration[4.2]
   def change
     create_table :deity_related_landmarks do |t|
       t.references :user, index: true, foreign_key: true

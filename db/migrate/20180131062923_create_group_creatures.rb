@@ -1,4 +1,4 @@
-class CreateGroupCreatures < ActiveRecord::Migration
+class CreateGroupCreatures < ActiveRecord::Migration[4.2]
   def change
     create_table :group_creatures do |t|
       t.references :group, index: true, foreign_key: true

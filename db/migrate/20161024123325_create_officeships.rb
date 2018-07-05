@@ -1,4 +1,4 @@
-class CreateOfficeships < ActiveRecord::Migration
+class CreateOfficeships < ActiveRecord::Migration[4.2]
   def change
     create_table :officeships do |t|
       t.integer :user_id

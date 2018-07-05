@@ -1,4 +1,4 @@
-class Group < ActiveRecord::Base
+class Group < ActiveRecord
   acts_as_paranoid
 
   validates :name, presence: true

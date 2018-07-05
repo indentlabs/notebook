@@ -1,4 +1,4 @@
-class CreateHeadquarterships < ActiveRecord::Migration
+class CreateHeadquarterships < ActiveRecord::Migration[4.2]
   def change
     create_table :headquarterships do |t|
       t.integer :user_id

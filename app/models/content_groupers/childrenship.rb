@@ -1,4 +1,4 @@
-class Childrenship < ActiveRecord::Base
+class Childrenship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

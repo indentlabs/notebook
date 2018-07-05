@@ -1,4 +1,4 @@
-class SceneLocationship < ActiveRecord::Base
+class SceneLocationship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

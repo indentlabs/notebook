@@ -1,4 +1,4 @@
-class CreateImageUploads < ActiveRecord::Migration
+class CreateImageUploads < ActiveRecord::Migration[4.2]
   def change
     create_table :image_uploads do |t|
       t.string :privacy

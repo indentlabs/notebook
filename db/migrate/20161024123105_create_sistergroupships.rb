@@ -1,4 +1,4 @@
-class CreateSistergroupships < ActiveRecord::Migration
+class CreateSistergroupships < ActiveRecord::Migration[4.2]
   def change
     create_table :sistergroupships do |t|
       t.integer :user_id

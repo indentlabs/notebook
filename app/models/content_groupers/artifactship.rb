@@ -1,4 +1,4 @@
-class Artifactship < ActiveRecord::Base
+class Artifactship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

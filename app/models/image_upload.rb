@@ -1,4 +1,4 @@
-class ImageUpload < ActiveRecord::Base
+class ImageUpload < ActiveRecord
   belongs_to :user
 
   has_attached_file :src,

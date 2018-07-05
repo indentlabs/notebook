@@ -1,4 +1,4 @@
-class Planet < ActiveRecord::Base
+class Planet < ActiveRecord
   acts_as_paranoid
 
   belongs_to :user

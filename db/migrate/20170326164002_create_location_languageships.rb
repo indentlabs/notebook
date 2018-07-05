@@ -1,4 +1,4 @@
-class CreateLocationLanguageships < ActiveRecord::Migration
+class CreateLocationLanguageships < ActiveRecord::Migration[4.2]
   def change
     create_table :location_languageships do |t|
       t.integer :user_id

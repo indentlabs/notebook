@@ -1,4 +1,4 @@
-class CreateContentChangeEvents < ActiveRecord::Migration
+class CreateContentChangeEvents < ActiveRecord::Migration[4.2]
   def change
     create_table :content_change_events do |t|
       t.references :user, index: true, foreign_key: true

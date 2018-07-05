@@ -1,4 +1,4 @@
-class GroupEquipmentship < ActiveRecord::Base
+class GroupEquipmentship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

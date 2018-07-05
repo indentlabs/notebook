@@ -1,4 +1,4 @@
-class Officeship < ActiveRecord::Base
+class Officeship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

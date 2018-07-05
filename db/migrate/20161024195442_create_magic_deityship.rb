@@ -1,4 +1,4 @@
-class CreateMagicDeityship < ActiveRecord::Migration
+class CreateMagicDeityship < ActiveRecord::Migration[4.2]
   def change
     create_table :magic_deityships do |t|
       t.integer :user_id

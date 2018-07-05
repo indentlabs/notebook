@@ -5,7 +5,7 @@
 # 1. a particular sphere of activity, interest, or experience
 #
 #    contains all canonically-related content created by Users
-class Universe < ActiveRecord::Base
+class Universe < ActiveRecord
   acts_as_paranoid
 
   include HasAttributes

@@ -1,4 +1,4 @@
-class GroupAllyship < ActiveRecord::Base
+class GroupAllyship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

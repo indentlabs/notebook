@@ -1,4 +1,4 @@
-class CreateTechnologyPlanets < ActiveRecord::Migration
+class CreateTechnologyPlanets < ActiveRecord::Migration[4.2]
   def change
     create_table :technology_planets do |t|
       t.references :user, index: true, foreign_key: true

@@ -1,4 +1,4 @@
-class AttributeCategory < ActiveRecord::Base
+class AttributeCategory < ActiveRecord
   validates :name, presence: true
 
   belongs_to :user

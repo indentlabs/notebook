@@ -1,4 +1,4 @@
-class CreateGovernmentPoliticalFigures < ActiveRecord::Migration
+class CreateGovernmentPoliticalFigures < ActiveRecord::Migration[4.2]
   def change
     create_table :government_political_figures do |t|
       t.references :user, index: true, foreign_key: true

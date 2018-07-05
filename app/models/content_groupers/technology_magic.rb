@@ -1,4 +1,4 @@
-class TechnologyMagic < ActiveRecord::Base
+class TechnologyMagic < ActiveRecord
   belongs_to :user
   belongs_to :technology
   belongs_to :magic

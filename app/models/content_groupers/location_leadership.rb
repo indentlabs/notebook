@@ -1,4 +1,4 @@
-class LocationLeadership < ActiveRecord::Base
+class LocationLeadership < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

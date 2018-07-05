@@ -1,4 +1,4 @@
-class GroupLocationship < ActiveRecord::Base
+class GroupLocationship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

@@ -1,4 +1,4 @@
-class CharacterLoveInterest < ActiveRecord::Base
+class CharacterLoveInterest < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

@@ -1,2 +1,2 @@
-class StripeEventLog < ActiveRecord::Base
+class StripeEventLog < ActiveRecord
 end

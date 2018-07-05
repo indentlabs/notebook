@@ -1,4 +1,4 @@
-class ReligiousLocationship < ActiveRecord::Base
+class ReligiousLocationship < ActiveRecord
   include HasContentLinking
 
   belongs_to :user

@@ -1,4 +1,4 @@
-class LandmarkNearbyTown < ActiveRecord::Base
+class LandmarkNearbyTown < ActiveRecord
   belongs_to :user
 
   belongs_to :landmark

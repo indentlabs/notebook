@@ -1,4 +1,4 @@
-class CreateArchenemyships < ActiveRecord::Migration
+class CreateArchenemyships < ActiveRecord::Migration[4.2]
   def change
     create_table :archenemyships do |t|
       t.integer :user_id

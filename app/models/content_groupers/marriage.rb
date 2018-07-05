@@ -1,4 +1,4 @@
-class Marriage < ActiveRecord::Base
+class Marriage < ActiveRecord
   include HasContentLinking
   LINK_TYPE = :two_way
 

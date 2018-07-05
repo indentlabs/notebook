@@ -1,4 +1,4 @@
-class CreatePastOwnership < ActiveRecord::Migration
+class CreatePastOwnership < ActiveRecord::Migration[4.2]
   def change
     create_table :past_ownerships do |t|
       t.integer :user_id

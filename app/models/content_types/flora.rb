@@ -1,4 +1,4 @@
-class Flora < ActiveRecord::Base
+class Flora < ActiveRecord
   acts_as_paranoid
 
   validates :name, presence: true

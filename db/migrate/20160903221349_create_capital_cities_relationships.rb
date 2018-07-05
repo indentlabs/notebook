@@ -1,4 +1,4 @@
-class CreateCapitalCitiesRelationships < ActiveRecord::Migration
+class CreateCapitalCitiesRelationships < ActiveRecord::Migration[4.2]
   def change
     create_table :capital_cities_relationships do |t|
       t.integer :user_id
