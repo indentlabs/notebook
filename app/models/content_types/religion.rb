@@ -32,6 +32,9 @@ class Religion < ActiveRecord::Base
   # Races
   relates :races, with: :religious_raceships
 
+  # Deities
+  relates :deities, with: :religion_deities
+
   def self.color
     'yellow'
   end
