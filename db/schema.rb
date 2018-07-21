@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180620012919) do
+ActiveRecord::Schema.define(version: 20180715184447) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer  "user_id"
@@ -1350,6 +1350,43 @@ ActiveRecord::Schema.define(version: 20180620012919) do
     t.datetime "updated_at",   null: false
   end
 
+  create_table "page_categories", force: :cascade do |t|
+    t.string   "label"
+    t.integer  "universe_id"
+    t.string   "content_type"
+    t.string   "icon"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+    t.integer  "user_id"
+  end
+
+  add_index "page_categories", ["universe_id", "content_type"], name: "index_page_categories_on_universe_id_and_content_type"
+  add_index "page_categories", ["universe_id"], name: "index_page_categories_on_universe_id"
+  add_index "page_categories", ["user_id"], name: "index_page_categories_on_user_id"
+
+  create_table "page_field_values", force: :cascade do |t|
+    t.integer  "page_field_id"
+    t.integer  "page_id"
+    t.text     "value"
+    t.integer  "user_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+    t.datetime "deleted_at"
+  end
+
+  add_index "page_field_values", ["page_field_id"], name: "index_page_field_values_on_page_field_id"
+  add_index "page_field_values", ["user_id"], name: "index_page_field_values_on_user_id"
+
+  create_table "page_fields", force: :cascade do |t|
+    t.string   "label"
+    t.integer  "page_category_id"
+    t.string   "field_type",       default: "textarea"
+    t.datetime "created_at",                            null: false
+    t.datetime "updated_at",                            null: false
+  end
+
+  add_index "page_fields", ["page_category_id"], name: "index_page_fields_on_page_category_id"
+
   create_table "past_ownerships", force: :cascade do |t|
     t.integer "user_id"
     t.integer "item_id"
@@ -1593,6 +1630,18 @@ ActiveRecord::Schema.define(version: 20180620012919) do
     t.datetime "created_at",         null: false
     t.datetime "updated_at",         null: false
   end
+
+  create_table "religion_deities", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "religion_id"
+    t.integer  "deity_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "religion_deities", ["deity_id"], name: "index_religion_deities_on_deity_id"
+  add_index "religion_deities", ["religion_id"], name: "index_religion_deities_on_religion_id"
+  add_index "religion_deities", ["user_id"], name: "index_religion_deities_on_user_id"
 
   create_table "religions", force: :cascade do |t|
     t.string   "name"

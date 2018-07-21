@@ -21,7 +21,7 @@ class Religion < ActiveRecord::Base
 
   # Characters
   relates :notable_figures, with: :religious_figureships
-  relates :deities, with: :deityships
+  relates :deity_characters, with: :deityships
 
   # Locations
   relates :practicing_locations, with: :religious_locationships
@@ -31,6 +31,9 @@ class Religion < ActiveRecord::Base
 
   # Races
   relates :races, with: :religious_raceships
+
+  # Deities
+  relates :deities, with: :religion_deities
 
   def self.color
     'yellow'

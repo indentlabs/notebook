@@ -12,12 +12,22 @@ module HasContentGroupers
       connecting_class      = with.to_s.singularize.camelize.constantize
       connecting_class_name = with
 
+      if relation == :deity_characters
+        # sadface, SADFACE
+        singularized_relation = :deity
+      end
+
       # Fetch the connecting class's through class (e.g. Character for sibling_id).
       # If there isn't one defined, it means it already maps to a model (e.g. race_id),
       # so we can use the name as the class as well.
       belongs_to_relations = connecting_class.reflect_on_all_associations(:belongs_to)
       through_relation = belongs_to_relations.detect do |relation| # sibling
-        relation.name.to_s == singularized_relation
+        # sadface
+        if relation.name == :deity_character && singularized_relation == :deity
+          true
+        else
+          relation.name.to_s == singularized_relation
+        end
       end
       if through_relation.options.key?(:class_name)
         through_relation_class = through_relation.options[:class_name] # Character
