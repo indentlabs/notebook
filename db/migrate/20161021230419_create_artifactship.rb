@@ -1,4 +1,4 @@
-class CreateArtifactship < ActiveRecord::Migration
+class CreateArtifactship < ActiveRecord::Migration[4.2]
   def change
     create_table :artifactships do |t|
       t.integer :religion_id

@@ -1,4 +1,4 @@
-class CreateReligiousLocationships < ActiveRecord::Migration
+class CreateReligiousLocationships < ActiveRecord::Migration[4.2]
   def change
     create_table :religious_locationships do |t|
       t.integer :religion_id

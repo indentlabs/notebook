@@ -1,4 +1,4 @@
-class CreateCountryGovernments < ActiveRecord::Migration
+class CreateCountryGovernments < ActiveRecord::Migration[4.2]
   def change
     create_table :country_governments do |t|
       t.references :country, index: true, foreign_key: true

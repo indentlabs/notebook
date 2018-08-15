@@ -1,4 +1,4 @@
-class Wildlifeship < ActiveRecord::Base
+class Wildlifeship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

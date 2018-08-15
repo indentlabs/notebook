@@ -1,4 +1,4 @@
-class LocationLanguageship < ActiveRecord::Base
+class LocationLanguageship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

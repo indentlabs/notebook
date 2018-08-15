@@ -1,4 +1,4 @@
-class DeityCharacterSibling < ActiveRecord::Base
+class DeityCharacterSibling < ApplicationRecord
   include HasContentLinking
 
   belongs_to :deity

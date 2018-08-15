@@ -1,4 +1,4 @@
-class CreateLocationCapitalTowns < ActiveRecord::Migration
+class CreateLocationCapitalTowns < ActiveRecord::Migration[4.2]
   def change
     create_table :location_capital_towns do |t|
       t.references :location, index: true, foreign_key: true

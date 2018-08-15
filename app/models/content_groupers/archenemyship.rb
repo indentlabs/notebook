@@ -1,4 +1,4 @@
-class Archenemyship < ActiveRecord::Base
+class Archenemyship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

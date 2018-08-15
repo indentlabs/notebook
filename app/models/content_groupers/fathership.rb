@@ -1,4 +1,4 @@
-class Fathership < ActiveRecord::Base
+class Fathership < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

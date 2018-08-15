@@ -1,4 +1,4 @@
-class Lingualism < ActiveRecord::Base
+class Lingualism < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

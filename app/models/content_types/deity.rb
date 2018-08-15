@@ -1,4 +1,4 @@
-class Deity < ActiveRecord::Base
+class Deity < ApplicationRecord
   acts_as_paranoid
 
   belongs_to :user

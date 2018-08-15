@@ -1,4 +1,4 @@
-class CreateModels < ActiveRecord::Migration
+class CreateModels < ActiveRecord::Migration[4.2]
   def change
     create_table :characters do |t|
       t.string :name, null: false

@@ -1,4 +1,4 @@
-class Landmark < ActiveRecord::Base
+class Landmark < ApplicationRecord
   acts_as_paranoid
 
   validates :name, presence: true

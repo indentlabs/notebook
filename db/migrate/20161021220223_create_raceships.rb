@@ -1,4 +1,4 @@
-class CreateRaceships < ActiveRecord::Migration
+class CreateRaceships < ActiveRecord::Migration[4.2]
   def change
     create_table :raceships do |t|
       t.integer :user_id

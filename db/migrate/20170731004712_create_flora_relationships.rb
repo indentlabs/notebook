@@ -1,4 +1,4 @@
-class CreateFloraRelationships < ActiveRecord::Migration
+class CreateFloraRelationships < ActiveRecord::Migration[4.2]
   def change
     create_table :flora_relationships do |t|
       t.integer :flora_id

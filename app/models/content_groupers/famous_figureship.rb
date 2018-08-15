@@ -1,4 +1,4 @@
-class FamousFigureship < ActiveRecord::Base
+class FamousFigureship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

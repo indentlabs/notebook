@@ -1,4 +1,4 @@
-class CreateRaffleEntries < ActiveRecord::Migration
+class CreateRaffleEntries < ActiveRecord::Migration[4.2]
   def change
     create_table :raffle_entries do |t|
       t.references :user, index: true, foreign_key: true

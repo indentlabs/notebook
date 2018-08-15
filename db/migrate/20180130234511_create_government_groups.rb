@@ -1,4 +1,4 @@
-class CreateGovernmentGroups < ActiveRecord::Migration
+class CreateGovernmentGroups < ActiveRecord::Migration[4.2]
   def change
     create_table :government_groups do |t|
       t.references :user, index: true, foreign_key: true

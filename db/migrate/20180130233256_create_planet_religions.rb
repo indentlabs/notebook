@@ -1,4 +1,4 @@
-class CreatePlanetReligions < ActiveRecord::Migration
+class CreatePlanetReligions < ActiveRecord::Migration[4.2]
   def change
     create_table :planet_religions do |t|
       t.references :user, index: true, foreign_key: true

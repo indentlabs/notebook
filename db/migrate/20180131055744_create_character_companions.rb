@@ -1,4 +1,4 @@
-class CreateCharacterCompanions < ActiveRecord::Migration
+class CreateCharacterCompanions < ActiveRecord::Migration[4.2]
   def change
     create_table :character_companions do |t|
       t.references :user, index: true, foreign_key: true

@@ -4,7 +4,7 @@
 # _noun_
 #
 # 1. each of the major divisions of sentient life, having distinct physical characteristics
-class Race < ActiveRecord::Base
+class Race < ApplicationRecord
   acts_as_paranoid
 
   validates :name, presence: true

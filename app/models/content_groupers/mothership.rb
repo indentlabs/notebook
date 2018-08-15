@@ -1,4 +1,4 @@
-class Mothership < ActiveRecord::Base
+class Mothership < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

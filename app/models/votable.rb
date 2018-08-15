@@ -1,3 +1,3 @@
-class Votable < ActiveRecord::Base
+class Votable < ApplicationRecord
   has_many :votes
 end

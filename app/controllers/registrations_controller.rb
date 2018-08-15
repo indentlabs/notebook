@@ -1,5 +1,5 @@
 class RegistrationsController < Devise::RegistrationsController
-  after_filter :add_account, only: [:create]
+  after_action :add_account, only: [:create]
 
   def new
     super

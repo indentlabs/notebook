@@ -1,4 +1,4 @@
-class SceneItemship < ActiveRecord::Base
+class SceneItemship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

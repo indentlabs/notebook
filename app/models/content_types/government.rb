@@ -1,4 +1,4 @@
-class Government < ActiveRecord::Base
+class Government < ApplicationRecord
   acts_as_paranoid
 
   belongs_to :user

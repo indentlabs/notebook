@@ -1,4 +1,4 @@
-class CreateCountryLandmarks < ActiveRecord::Migration
+class CreateCountryLandmarks < ActiveRecord::Migration[4.2]
   def change
     create_table :country_landmarks do |t|
       t.references :user, index: true, foreign_key: true

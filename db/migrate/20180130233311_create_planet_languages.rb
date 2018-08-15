@@ -1,4 +1,4 @@
-class CreatePlanetLanguages < ActiveRecord::Migration
+class CreatePlanetLanguages < ActiveRecord::Migration[4.2]
   def change
     create_table :planet_languages do |t|
       t.references :user, index: true, foreign_key: true

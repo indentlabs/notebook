@@ -1,4 +1,4 @@
-class CreateDeities < ActiveRecord::Migration
+class CreateDeities < ActiveRecord::Migration[4.2]
   def change
     create_table :deities do |t|
       t.string :name

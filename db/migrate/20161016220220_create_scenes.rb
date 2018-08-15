@@ -1,4 +1,4 @@
-class CreateScenes < ActiveRecord::Migration
+class CreateScenes < ActiveRecord::Migration[4.2]
   def change
     create_table :scenes do |t|
       t.integer :scene_number

@@ -1,4 +1,4 @@
-class CreatePlanets < ActiveRecord::Migration
+class CreatePlanets < ActiveRecord::Migration[4.2]
   def change
     create_table :planets do |t|
       t.string :name

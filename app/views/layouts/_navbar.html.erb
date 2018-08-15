@@ -152,16 +152,18 @@
       </ul>
       <ul class="left">
         <% if user_signed_in? %>
-          <li>
-            <% if current_user && (current_user.universes.count > 0 || current_user.contributable_universes.count > 0) %>
+          <% if current_user && (current_user.universes.count > 0 || current_user.contributable_universes.count > 0) %>
+            <li>
               <%= render partial: 'universes/picker' %>
-            <% end %>
-          </li>
-          <li>
-            <a class="dropdown-trigger tooltipped" href="#!" data-target="recent-content-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your recently-edited pages">
-              <i class="material-icons">recent_actors</i>
-            </a>
-          </li>
+            </li>
+          <% end %>
+          <% if current_user.recent_content_list.any? %>
+            <li>
+              <a class="dropdown-trigger tooltipped" href="#!" data-target="recent-content-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your recently-edited pages">
+                <i class="material-icons">recent_actors</i>
+              </a>
+            </li>
+          <% end %>
           <li>
             <a class="waves-effect waves-light modal-trigger tooltipped" href="#search-modal" data-tooltip="Search your notebook">
               <i class="material-icons">search</i>

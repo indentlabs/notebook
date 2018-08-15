@@ -1,55 +1,45 @@
-Notebook::Application.configure do
-  # Settings specified here will take precedence over those in config/application.rb
+Rails.application.configure do
+  # Settings specified here will take precedence over those in config/application.rb.
 
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
   config.cache_classes = false
 
-  # Log error messages when you accidentally call methods on nil.
-  config.whiny_nils = true
-
-  # Show full error reports and disable caching
-  config.consider_all_requests_local       = true
-  config.action_controller.perform_caching = false
+  # Do not eager load code on boot.
   config.eager_load = false
 
-  # Don't care if the mailer can't send
+  # Show full error reports and disable caching.
+  config.consider_all_requests_local       = true
+  config.action_controller.perform_caching = false
+
+  # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
 
-  # Print deprecation notices to the Rails logger
+  # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
-  # Only use best-standards-support built into browsers
-  config.action_dispatch.best_standards_support = :builtin
+  # Raise an error on page load if there are pending migrations.
+  config.active_record.migration_error = :page_load
 
-  # Do not compress assets
-  config.assets.compress = false
-  config.assets.compile = true
+  # Debug mode disables concatenation and preprocessing of assets.
+  # This option may cause significant delays in view rendering with a large
+  # number of complex assets.
   config.assets.debug = true
-  config.assets.digest = false
 
-  # Devise default url options
-  config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+  # Asset digests allow you to set far-future HTTP expiration dates on all assets,
+  # yet still be able to expire them through the digest params.
+  config.assets.digest = true
 
-  # DEVELOPMENT S3 settings for Paperclip uploads ON DEVELOPMENT
-  config.paperclip_defaults = {
-    storage: :s3,
-    s3_credentials: {
-      bucket:            ENV.fetch('S3_BUCKET_NAME',        'notebook-content-uploads'),
-      s3_region:         ENV.fetch('AWS_REGION',            'us-east-1'),
-      access_key_id:     ENV.fetch('AWS_ACCESS_KEY_ID',     'test'),
-      secret_access_key: ENV.fetch('AWS_SECRET_ACCESS_KEY', 'test')
-    }
-  }
+  # Adds additional error checking when serving assets at runtime.
+  # Checks for improperly declared sprockets dependencies.
+  # Raises helpful error messages.
+  config.assets.raise_runtime_errors = true
 
-  default_url_options[:host] = 'localhost:3000'
+  # Raises error for missing translations
+  # config.action_view.raise_on_missing_translations = true
 
   # Set test-mode Stripe API key
   Stripe.api_key = "sk_test_v37uWbseyPct6PpsfjTa3y1l"
   config.stripe_publishable_key = 'pk_test_eXI4iyJ2gR9UOGJyJERvDlHF'
-
-  # Uncomment to test error pages
-  # config.consider_all_requests_local = false
-
 end

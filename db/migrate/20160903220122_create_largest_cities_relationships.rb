@@ -1,4 +1,4 @@
-class CreateLargestCitiesRelationships < ActiveRecord::Migration
+class CreateLargestCitiesRelationships < ActiveRecord::Migration[4.2]
   def change
     create_table :largest_cities_relationships do |t|
       t.integer :user_id

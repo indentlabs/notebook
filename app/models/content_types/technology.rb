@@ -1,4 +1,4 @@
-class Technology < ActiveRecord::Base
+class Technology < ApplicationRecord
   acts_as_paranoid
 
   belongs_to :user

@@ -1,4 +1,4 @@
-class CreateFamousFigureship < ActiveRecord::Migration
+class CreateFamousFigureship < ActiveRecord::Migration[4.2]
   def change
     create_table :famous_figureships do |t|
       t.integer :user_id

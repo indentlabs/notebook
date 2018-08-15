@@ -1,4 +1,4 @@
-class AddMoreIndices < ActiveRecord::Migration
+class AddMoreIndices < ActiveRecord::Migration[4.2]
   def change
     add_index :characters, :user_id
     add_index :universes, :user_id

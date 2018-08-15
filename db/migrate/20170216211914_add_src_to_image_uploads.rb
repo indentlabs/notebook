@@ -1,4 +1,4 @@
-class AddSrcToImageUploads < ActiveRecord::Migration
+class AddSrcToImageUploads < ActiveRecord::Migration[4.2]
   def self.up
   	add_attachment :image_uploads, :src
   end

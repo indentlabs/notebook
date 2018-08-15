@@ -1,4 +1,4 @@
-class KeyItemship < ActiveRecord::Base
+class KeyItemship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

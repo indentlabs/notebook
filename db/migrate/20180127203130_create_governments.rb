@@ -1,4 +1,4 @@
-class CreateGovernments < ActiveRecord::Migration
+class CreateGovernments < ActiveRecord::Migration[4.2]
   def change
     create_table :governments do |t|
       t.string :name

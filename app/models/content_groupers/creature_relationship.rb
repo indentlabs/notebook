@@ -1,4 +1,4 @@
-class CreatureRelationship < ActiveRecord::Base
+class CreatureRelationship < ApplicationRecord
   include HasContentLinking
   LINK_TYPE = :two_way
 

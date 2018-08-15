@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 ruby "~> 2.5"
 
-gem 'rails', '~> 4.2'
+gem 'rails', '~> 5.2'
 gem 'puma', '~> 3.7'
 gem 'puma-heroku'
 gem 'rack-timeout'
@@ -70,6 +70,9 @@ gem 'thredded'
 gem 'rails-ujs'
 gem 'delayed_job_active_record'
 
+# Exports
+gem 'csv'
+
 # Tech debt & hacks
 gem 'binding_of_caller' # see has_changelog.rb
 
@@ -110,6 +113,7 @@ group :test do
   gem 'rubocop', require: false
   gem 'ruby-prof', '0.15.9'
   gem 'shoulda-matchers', '~> 3.1'
+  gem 'rails-controller-testing'
 end
 
 group :test, :development do

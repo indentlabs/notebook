@@ -1,4 +1,4 @@
-class GroupLeadership < ActiveRecord::Base
+class GroupLeadership < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

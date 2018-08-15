@@ -1,4 +1,4 @@
-class CreateReligions < ActiveRecord::Migration
+class CreateReligions < ActiveRecord::Migration[4.2]
   def change
     create_table :religions do |t|
       t.string :name

@@ -1,4 +1,4 @@
-class CountryTown < ActiveRecord::Base
+class CountryTown < ApplicationRecord
   belongs_to :user
   belongs_to :country
   belongs_to :town

@@ -1,4 +1,4 @@
-class PlanetFlora < ActiveRecord::Base
+class PlanetFlora < ApplicationRecord
   belongs_to :user
   belongs_to :planet
   belongs_to :flora

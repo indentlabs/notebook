@@ -1,4 +1,4 @@
-class CreateLocationLandmarks < ActiveRecord::Migration
+class CreateLocationLandmarks < ActiveRecord::Migration[4.2]
   def change
     create_table :location_landmarks do |t|
       t.references :location, index: true, foreign_key: true

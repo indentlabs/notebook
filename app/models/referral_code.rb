@@ -1,3 +1,3 @@
-class ReferralCode < ActiveRecord::Base
+class ReferralCode < ApplicationRecord
   belongs_to :user
 end

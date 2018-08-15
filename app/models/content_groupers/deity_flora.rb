@@ -1,4 +1,4 @@
-class DeityFlora < ActiveRecord::Base
+class DeityFlora < ApplicationRecord
   belongs_to :user
   belongs_to :deity
   belongs_to :flora

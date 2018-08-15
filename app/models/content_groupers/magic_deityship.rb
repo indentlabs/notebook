@@ -1,4 +1,4 @@
-class MagicDeityship < ActiveRecord::Base
+class MagicDeityship < ApplicationRecord
   include HasContentLinking
 
   belongs_to :user

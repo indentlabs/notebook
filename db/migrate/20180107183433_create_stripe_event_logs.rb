@@ -1,4 +1,4 @@
-class CreateStripeEventLogs < ActiveRecord::Migration
+class CreateStripeEventLogs < ActiveRecord::Migration[4.2]
   def change
     create_table :stripe_event_logs do |t|
       t.string :event_id

@@ -93,7 +93,7 @@ RSpec.describe SubscriptionsController, type: :controller do
   describe "User with no plan (fallback to Starter) tries to upgrade" do
     it "redirects to payment method form if they don't have a payment method saved" do
       expect(@user.active_subscriptions).to eq([])
-      post :change, {stripe_plan_id: 'premium'}
+      post :change, params: { stripe_plan_id: 'premium' }
       expect(subject).to redirect_to action: :information, plan: 'premium'
     end
   end
@@ -106,7 +106,7 @@ RSpec.describe SubscriptionsController, type: :controller do
     end
 
     it "redirects to payment method form if they don't have a payment method saved" do
-      post :change, {stripe_plan_id: 'premium'}
+      post :change, params: { stripe_plan_id: 'premium' }
       expect(subject).to redirect_to action: :information, plan: 'premium'
     end
 
@@ -132,7 +132,7 @@ RSpec.describe SubscriptionsController, type: :controller do
       expect(@user.selected_billing_plan_id).to eq(@free_plan.id)
       expect(@user.active_billing_plans).to eq([@free_plan])
 
-      post :change, {stripe_plan_id: 'premium'}
+      post :change, params: { stripe_plan_id: 'premium' }
 
       @user.reload
       expect(@user.selected_billing_plan_id).to eq(@premium_plan.id)
@@ -176,7 +176,7 @@ RSpec.describe SubscriptionsController, type: :controller do
     it "allows downgrading to Starter" do
 
       # Downgrade to Starter
-      post :change, { stripe_plan_id: 'starter' }
+      post :change, params: { stripe_plan_id: 'starter' }
 
       @user.reload
       expect(@user.selected_billing_plan_id).to eq(@free_plan.id)
@@ -215,27 +215,27 @@ RSpec.describe SubscriptionsController, type: :controller do
 
     it 'grants storage space to a user after upgrading' do
       @user.update(upload_bandwidth_kb: 100)
-      post :change, { stripe_plan_id: 'premium' }
+      post :change, params: { stripe_plan_id: 'premium' }
       expect(@user.upload_bandwidth_kb).to eq(100 + @premium_plan.bonus_bandwidth_kb)
     end
 
     it 'decreases storage space for a user after downgrading' do
       @user.update(upload_bandwidth_kb: 100)
-      post :change, { stripe_plan_id: 'starter' }
+      post :change, params: { stripe_plan_id: 'starter' }
       expect(@user.upload_bandwidth_kb).to eq(100 - @premium_plan.bonus_bandwidth_kb)
     end
 
     it 'does not adjust storage space when going premium --> premium' do
       @user.update(upload_bandwidth_kb: 101)
       @user.update(selected_billing_plan_id: @premium_plan.id)
-      post :change, { stripe_plan_id: @premium_annual_plan.stripe_plan_id }
+      post :change, params: { stripe_plan_id: @premium_annual_plan.stripe_plan_id }
       expect(@user.upload_bandwidth_kb).to eq(101)
     end
 
     it 'does not adjust storage space if no plan change is made' do
       @user.update(upload_bandwidth_kb: 101)
       @user.update(selected_billing_plan_id: @premium_annual_plan.stripe_plan_id)
-      post :change, { stripe_plan_id: @premium_plan.stripe_plan_id }
+      post :change, params: { stripe_plan_id: @premium_plan.stripe_plan_id }
       expect(@user.upload_bandwidth_kb).to eq(101)
     end
   end

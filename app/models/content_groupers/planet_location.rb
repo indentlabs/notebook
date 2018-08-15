@@ -1,4 +1,4 @@
-class PlanetLocation < ActiveRecord::Base
+class PlanetLocation < ApplicationRecord
   belongs_to :user
   belongs_to :planet
   belongs_to :location
