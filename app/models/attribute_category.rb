@@ -28,6 +28,10 @@ class AttributeCategory < ApplicationRecord
     self['icon'] || self.class.icon
   end
 
+  def entity_class
+    entity_type.titleize.constantize
+  end
+
   private
 
   def ensure_name

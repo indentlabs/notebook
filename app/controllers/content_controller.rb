@@ -210,7 +210,20 @@ class ContentController < ApplicationController
     successful_response(content_deletion_redirect_url, t(:delete_success, model_name: humanized_model_name))
   end
 
+  def attributes
+    @content_type = params[:content_type]
+    # todo make this a before_action load_content_type
+    unless valid_content_types.map { |c| c.name.downcase }.include?(@content_type)
+      raise "Invalid content type on attributes customization page: #{@content_type}"
+    end
+    @content_type_class = @content_type.titleize.constantize
+  end
+
   private
+
+  def valid_content_types
+    Rails.application.config.content_types[:all]
+  end
 
   def initialize_object
     content_type = content_type_from_controller(self.class)

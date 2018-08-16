@@ -1,0 +1,43 @@
+<div><%= @content_type.titleize %></div>
+
+<ul class="collapsible">
+  <li class="active">
+    <div class="collapsible-header"><i class="material-icons">info</i>General <%= @content_type.titleize %> settings</div>
+    <div class="collapsible-body">
+      <span>More settings are coming soon. In the meantime, you can customize your global <%= @content_type %> page attributes by clicking a category below.</span>
+    </div>
+  </li>
+  <% @content_type_class.attribute_categories(current_user).each do |attribute_category| %>
+    <% next if ['Settings', 'Contributors', 'Gallery', 'Changelog'].include? attribute_category.label %>
+    <li>
+      <div class="collapsible-header">
+        <i class="material-icons"><%= attribute_category.icon  %></i><%= attribute_category.label %>
+      </div>
+      <div class="collapsible-body">
+        <div class="row">
+          <div class="col">
+            <%= link_to 'Hide this section', '#' %>
+          </div>
+        </div>
+
+        <h4>Fields</h4>
+        <ul class="collapsible">
+          <% attribute_category.attribute_fields.each do |attribute_field| %>
+            <li>
+              <div class="collapsible-header"><i class="material-icons">text_fields</i><%= attribute_field.label %></div>
+              <div class="collapsible-body">
+                <%= link_to 'Hide this field', '#' %>
+              </div>
+            </li>
+          <% end %>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">add</i>Add another field</div>
+            <div class="collapsible-body">
+              <span>Lorem ipsum dolor sit amet.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </li>
+  <% end %>
+ </ul>

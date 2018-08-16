@@ -156,6 +156,8 @@ Rails.application.routes.draw do
     # Image handling
     delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion
 
+    get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
+
     # Coming Soon TM
     get '/plots',     to: 'main#comingsoon'
   end

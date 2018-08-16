@@ -33,7 +33,12 @@ class AttributeFieldsController < ContentController
   end
 
   def content_creation_redirect_url
-    :back
+    if @content.present?
+      category = @content.attribute_category
+      attribute_customization_path(content_type: category.entity_type)
+    else
+      :back
+    end
   end
 
   def content_params
