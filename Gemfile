@@ -16,7 +16,6 @@ gem 'paperclip'
 gem 'rmagick'
 
 # Authentication
-gem 'bcrypt'
 gem 'devise'
 gem 'authority'
 
@@ -95,7 +94,6 @@ group :test do
   gem 'better_errors'
   gem 'capybara'
   gem 'codeclimate-test-reporter', require: false
-  gem 'coveralls', require: false
   gem 'cucumber-rails', require: false
   gem 'database_cleaner'
   gem 'factory_bot_rails'

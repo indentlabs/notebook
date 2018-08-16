@@ -1,5 +1,3 @@
-require 'digest/md5'
-
 ##
 # a person using the Notebook.ai web application. Owns all other content.
 class User < ApplicationRecord
@@ -105,6 +103,8 @@ class User < ApplicationRecord
   end
 
   def image_url(size=80)
+    require 'digest/md5'
+
     email_md5 = Digest::MD5.hexdigest(email.downcase)
     # 80px is Gravatar's default size
     "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
