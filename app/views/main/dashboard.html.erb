@@ -34,4 +34,10 @@
       <%= render partial: 'content/cards/in_universe_content_list', locals: { content_type: content_type.downcase, content_list: content_list } %>
     </div>
   <% end %>
+
+  <% if @content_types.length < 5 && current_user.active_subscriptions.any? %>
+    <div class="dashboard-row col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
+      <%= render partial: 'content/cards/activate_premium_pages_cta' %>
+    </div>
+  <% end %>
 </div>
