@@ -153,7 +153,7 @@ class ContentController < ApplicationController
     else
       # Exclude fields only the real owner can edit
       #todo move field list somewhere when it grows
-      update_success = @content.update_attributes(content_params.except!(:universe_id))
+      update_success = @content.update_attributes(content_params.except(:universe_id))
     end
 
     if update_success
