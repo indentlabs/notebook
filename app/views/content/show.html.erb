@@ -7,10 +7,6 @@
 <% set_meta_tags title: content.name, description: content.description %>
 <%# TODO: Check if <content type>/_meta exists and render it here if so %>
 
-<% content_for :sidebar_top do %>
-  <%= render partial: 'cards/serendipitous/content_question', locals: { question: @question, content: @content } %>
-<% end %>
-
 <% categories = @content.class.attribute_categories(@content.user) %>
 <div class="row">
   <div class="col s9">
@@ -38,7 +34,7 @@
                 <%= render partial: 'content/display/contributors', locals: { content: content } %>
               </div>
             <% end %>
-            <% category.attribute_fields.each do |attribute| %>
+            <% category.attribute_fields.where(hidden: [false, nil]).each do |attribute| %>
               <% if attribute.name.start_with?("private") %>
                 <% next unless user_signed_in? && (
                    (content.is_a?(Universe) && content.user == current_user) ||

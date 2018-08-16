@@ -101,21 +101,19 @@ class ContentController < ApplicationController
       return redirect_to :back
     end
 
-    #todo: why is this commented out?
-    # Even if a user can create content, we want to double check that they're either on a premium account or creating content in a universe owned by someone on premium
-    # unless current_user.on_premium_plan?
-    #   containing_universe = Universe.find(content_params[:universe_id].to_i)
-    #   unless content_params[:universe_id].present? && containing_universe && containing_universe.user.on_premium_plan? && current_user.contributable_universes.include?(containing_universe)
-    #     return redirect_to send(content_type.name.downcase.pluralize + '_path'),
-    #       notice: "Premium content must either be created by a user with a Premium account, or in a universe owned by a user with a Premium account."
-    #   end
-    # end
+    #  Don't set name fields on content that doesn't have a name field
+    #todo abstract this (and the one in update) to a function
+    unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name)
+      @content.name = @content.name_field_value
+    end
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
       'content_type': content_type.name
     }) if Rails.env.production?
 
+    @content.user = current_user
     if @content.save
+      @content.update(name: @content.name_field_value)
       if params.key? 'image_uploads'
         upload_files params['image_uploads'], content_type.name, @content.id
       end
@@ -130,7 +128,7 @@ class ContentController < ApplicationController
     content_type = content_type_from_controller(self.class)
     @content = content_type.find(params[:id])
 
-    unless @content.updatable_by? current_user
+    unless @content.updatable_by?(current_user)
       return redirect_to :back
     end
 
@@ -148,6 +146,10 @@ class ContentController < ApplicationController
       end
     end
 
+    #  Don't set name fields on content that doesn't have a name field
+    unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name)
+      @content.name = @content.name_field_value
+    end
     if @content.user == current_user
       update_success = @content.update_attributes(content_params)
     else
@@ -246,7 +248,7 @@ class ContentController < ApplicationController
   end
 
   def content_creation_redirect_url
-    @content
+    params[:redirect_override].presence || @content
   end
 
   def content_symbol

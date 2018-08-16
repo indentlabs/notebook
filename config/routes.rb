@@ -149,9 +149,9 @@ Rails.application.routes.draw do
     #<page_type_resources>
 
     # Content attributes
-    resources :attributes
-    resources :attribute_categories
-    resources :attribute_fields
+    resources :attributes, except: [:show]
+    resources :attribute_categories, except: [:show]
+    resources :attribute_fields, except: [:show]
 
     # Image handling
     delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion

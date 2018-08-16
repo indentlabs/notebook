@@ -5,6 +5,8 @@ class AttributeField < ApplicationRecord
   belongs_to :attribute_category
   has_many :attribute_values, class_name: 'Attribute'
 
+  validates_presence_of :user_id
+
   include HasAttributes
   include Serendipitous::Concern
 

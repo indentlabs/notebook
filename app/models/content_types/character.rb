@@ -9,8 +9,6 @@
 class Character < ApplicationRecord
   acts_as_paranoid
 
-  validates :name, presence: true
-
   belongs_to :user
   validates :user_id, presence: true
 

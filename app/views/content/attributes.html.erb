@@ -1,43 +1,116 @@
-<div><%= @content_type.titleize %></div>
+<div class="slider" style="height: 140px;">
+  <ul class="slides">
+    <li>
+      <%= image_tag "card-headers/#{@content_type.pluralize}" %>
+      <div class="caption center-align">
+        <h3><%= @content_type.titleize.pluralize %></h3>
+        <h5 class="light grey-text text-lighten-3"><%= t("content_oneliners.#{@content_type}") %></h5>
+      </div>
+    </li>
+  </ul>
+</div>
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('.slider').slider({
+      height: 200,
+      indicators: false
+    });
+  });
+</script>
 
 <ul class="collapsible">
   <li class="active">
-    <div class="collapsible-header"><i class="material-icons">info</i>General <%= @content_type.titleize %> settings</div>
+    <div class="collapsible-header">
+      <i class="material-icons <%= @content_type_class.color %>-text"><%= @content_type_class.icon %></i>
+      General <%= @content_type.titleize %> settings
+    </div>
     <div class="collapsible-body">
       <span>More settings are coming soon. In the meantime, you can customize your global <%= @content_type %> page attributes by clicking a category below.</span>
     </div>
   </li>
-  <% @content_type_class.attribute_categories(current_user).each do |attribute_category| %>
+  <% @content_type_class.attribute_categories(current_user, show_hidden: true).each do |attribute_category| %>
     <% next if ['Settings', 'Contributors', 'Gallery', 'Changelog'].include? attribute_category.label %>
+    <% hidden_category = !!attribute_category.hidden %>
     <li>
       <div class="collapsible-header">
         <i class="material-icons"><%= attribute_category.icon  %></i><%= attribute_category.label %>
+        <% if hidden_category %>
+          <span class="grey-text">&mdash;hidden</span>
+        <% end %>
       </div>
       <div class="collapsible-body">
         <div class="row">
           <div class="col">
-            <%= link_to 'Hide this section', '#' %>
+            <%= form_for(attribute_category, method: :put) do |f| %>
+              <%= f.hidden_field :hidden, value: !hidden_category %><%# flip the bit %>
+              <%= f.submit (hidden_category ? 'Show' : 'Hide') + ' this section' %>
+            <% end %>
           </div>
         </div>
 
-        <h4>Fields</h4>
-        <ul class="collapsible">
-          <% attribute_category.attribute_fields.each do |attribute_field| %>
+        <%# Only show the fields in this category if it's visible / not hidden %>
+        <% unless hidden_category %>
+          <h4>Fields</h4>
+          <ul class="collapsible">
+            <% attribute_category.attribute_fields.each do |attribute_field| %>
+              <% hidden_field = !!attribute_field.hidden %>
+              <li>
+                <div class="collapsible-header">
+                  <i class="material-icons">text_fields</i>
+                  <%= attribute_field.label %>
+                  <% if hidden_field %>
+                    <span class="grey-text">&mdash;hidden</span>
+                  <% end %>
+                </div>
+                <div class="collapsible-body">
+                  <%= form_for(attribute_field, method: :put) do |f| %>
+                    <%= f.hidden_field :hidden, value: !hidden_field %>
+                    <%= f.submit (hidden_field ? 'Show' : 'Hide') + ' this field' %>
+                  <% end %>
+                </div>
+              </li>
+            <% end %>
             <li>
-              <div class="collapsible-header"><i class="material-icons">text_fields</i><%= attribute_field.label %></div>
+              <div class="collapsible-header"><i class="material-icons">add</i>Add another field to this section</div>
               <div class="collapsible-body">
-                <%= link_to 'Hide this field', '#' %>
+                <%= form_for(attribute_category.attribute_fields.build, method: :post) do |f| %>
+                  <%# todo the following line shouldn't be necessary %>
+                  <%= f.hidden_field :attribute_category_id, value: attribute_category.id %>
+                  <div class="row">
+                    <div class="input-field col s12">
+                      <%= f.text_area :label, class: 'materialize-textarea' %>
+                      <%= f.label :label, 'Field label' %>
+                    </div>
+                    <div class="input-field col s12">
+                      <%= f.submit 'Add new field', class: "btn #{@content_type_class.color}" %>
+                    </div>
+                  </div>
+                <% end %>
               </div>
             </li>
-          <% end %>
-          <li>
-            <div class="collapsible-header"><i class="material-icons">add</i>Add another field</div>
-            <div class="collapsible-body">
-              <span>Lorem ipsum dolor sit amet.</span>
-            </div>
-          </li>
-        </ul>
+          </ul>
+        <% end %>
       </div>
     </li>
   <% end %>
+  <li>
+    <div class="collapsible-header">
+      <i class="material-icons <%= @content_type_class.color %>-text">add</i>
+      Add another category
+    </div>
+    <div class="collapsible-body">
+      <%= form_for(current_user.attribute_categories.build, method: :post) do |f| %>
+        <%= f.hidden_field :entity_type, value: @content_type %>
+        <div class="row">
+          <div class="input-field col s12">
+            <%= f.text_area :label, class: 'materialize-textarea' %>
+            <%= f.label :label, 'Field label' %>
+          </div>
+          <div class="input-field col s12">
+            <%= f.submit 'Add new category', class: "btn #{@content_type_class.color}" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </li>
  </ul>

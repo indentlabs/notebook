@@ -25,6 +25,7 @@ class PermissionService < Service
   end
 
   def self.user_can_contribute_to_containing_universe?(user:, content:)
+    return true if content.is_a?(AttributeCategory) || content.is_a?(AttributeField) #todo audit this
     content.universe.present? && user.contributable_universes.pluck(:id).include?(content.universe.id)
   end
 

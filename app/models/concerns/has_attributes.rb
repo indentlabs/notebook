@@ -7,26 +7,89 @@ module HasAttributes
     attr_accessor :custom_attribute_values
     after_save :update_custom_attributes
 
-    def self.attribute_categories(user = nil)
+    def self.attribute_categories(user, show_hidden: false)
+      return [] if ['attribute_category', 'attribute_field'].include?(content_name)
+
+      # Always include  the flatfile categories (but create AR versions if they don't exist)
       categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
-        category = AttributeCategory.new(entity_type: self.content_name, name: category_name.to_s, label: details[:label], icon: details[:icon])
-        category.attribute_fields << details[:attributes].map { |field| AttributeField.new(field.merge(system: true)) } if details.key? :attributes
-        category
+        category = AttributeCategory.find_or_initialize_by(
+          entity_type: self.content_name,
+          name: category_name.to_s,
+          label: details[:label],
+          icon: details[:icon],
+          user: user
+        )
+        category.save if user
+
+        category.attribute_fields << details[:attributes].map do |field|
+          af_field = AttributeField.find_or_initialize_by(
+            attribute_category_id: category.reload.id,
+            label: field[:label],
+            user: user,
+            field_type: field_type_for(category, field)
+          )
+          af_field.save if user
+          af_field
+        end if details.key?(:attributes)
+
+        if show_hidden
+          category
+        else
+          !!category.hidden ? nil : category
+        end
+      end.compact
+
+      if categories.first&.user&.present?
+        categories.first.user.attribute_categories.where(entity_type: self.content_name, hidden: [false, nil])
+      else
+        categories
       end
 
-      return categories if user.nil?
-      [categories, user.attribute_categories.where(['attribute_categories.entity_type = ?', content_name]).joins(:attribute_fields)].flatten.uniq
+      #[categories, user.attribute_categories.where(['attribute_categories.entity_type = ?', content_name]).joins(:attribute_fields)].flatten.uniq
     end
 
     def update_custom_attributes
       (self.custom_attribute_values || []).each do |attribute|
-        field = user.attribute_fields.find_by_name(attribute[:name])
+        field = AttributeField.find_by(name: attribute[:name])
         next if field.nil?
 
-        user.attribute_values.where(entity: self, attribute_field_id: field.id).first_or_initialize.tap do |field|
-          field.value = attribute[:value]
-          field.save!
-        end
+        d = field.attribute_values.find_or_initialize_by(
+          attribute_field_id: field.id,
+          entity_type: self.class.name,
+          entity_id: self.id,
+          user: user
+        )
+        d.value = attribute[:value]
+        d.save!
+      end
+    end
+
+    def name_field
+      category_ids = AttributeCategory.where(
+        user_id: user.id,
+        entity_type: self.class.name.downcase
+      ).pluck(:id)
+
+      # Todo these two queries should be able to be joined into one
+      name_field = AttributeField.find_by(
+        user_id: user.id,
+        attribute_category_id: category_ids,
+        field_type: 'name'
+      )
+    end
+
+    def name_field_value
+      name_field_cache = name_field
+      return self.name if name_field_cache.nil?
+
+      name_field_cache.attribute_values.detect { |v| v.entity_id == self.id }&.value.presence || self.name.presence || "Untitled #{self.class.name}"
+    end
+
+    def self.field_type_for(category, field)
+      if field[:label] == 'Name' && category.name == 'overview'
+        "name"
+      else
+        "textarea"
       end
     end
   end

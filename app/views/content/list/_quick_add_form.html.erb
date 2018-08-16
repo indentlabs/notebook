@@ -1,17 +1,17 @@
 <%# Usage: render partial: 'content/list/quick_add_form', locals: { content_type: Character } %>
 <li class="collection-item avatar">
   <i class="material-icons circle <%= content_type.color %>">add</i>
-
     <div class="row">
-    <%= form_for content_type.new, remote: true do |f| %>
+    <%= form_for content = content_type.new(user: current_user) do |f| %>
       <div class="input-field col s12 m9">
         <%= f.label "Quick-add a #{content_type.name} by name", class: 'active' %>
-        <%= f.text_field :name, required: true %>
+        <%= render 'content/form/text_input', f: f, content: content, field: content.name_field, show_label: false %>
       </div>
       <%= f.hidden_field :universe_id, value: (@universe_scope ? @universe_scope.id : nil) %>
+      <%= hidden_field_tag :redirect_override, polymorphic_path(content_type) %>
 
       <div class="col s12 m3">
-        <%= f.button 'Quick-add',
+        <%= f.submit 'Quick-add',
           class: "btn submit #{content_type.color}",
           style: 'width: 100%; margin-top: 15px;'
         %>
@@ -19,44 +19,3 @@
     <% end %>
   </div>
 </li>
-<%= content_for :javascript do %>
-  $('#new_<%= content_type.name.downcase %>').on('submit', function(e, data, status, xhr) {
-    console.log('Intercepted quick-add for <%= content_type.name.downcase %>.');
-    var form = $('#new_<%= content_type.name.downcase %>');
-    var collection = $("#new_<%= content_type.name.downcase %>").closest('.collection');
-
-    var template = collection.find('.collection-item:last-child, .collection-item:nth-last-child(2)').first().clone();
-    template.find('.title').text(form.find('#<%= content_type.name.downcase %>_name').val());
-    template.find('.timestamp').html([
-      '<i class="material-icons">edit</i> created just now'
-    ].join(' '));
-    // todo: clear universe line
-    // todo: un-link icon as well
-    template.find('.js-edit-hover').html('');
-    template.find('.content-description').html('');
-
-    var quick_add = collection.find('li:last')
-
-    //quick_add.find('#<%= content_type.name.downcase %>_name').attr('disabled', 'disabled');
-    quick_add.find('.submit').addClass('disabled');
-
-    template.insertBefore(quick_add);
-  }).on('ajax:success', function(e, xhr, status, error) {
-    var collection = $("#new_<%= content_type.name.downcase %>").closest('.collection');
-    var quick_add = collection.find('li:last')
-
-    // Reset form
-    quick_add.find('#<%= content_type.name.downcase %>_name').val('');
-    //quick_add.find('#<%= content_type.name.downcase %>_name').removeAttr('disabled');
-    //quick_add.find('#<%= content_type.name.downcase %>_name').focus();
-    quick_add.find('.submit').removeClass('disabled');
-
-    // template.find('.title').turn_into_a_link_to_content
-    // template.find('.timestamp').text('Created!');
-
-    mixpanel.track("used quick-add", {});
-  }).on('ajax:error', function(e, xhr, status, error) {
-    console.log(status);
-    console.log(error);
-  });
-<% end %>

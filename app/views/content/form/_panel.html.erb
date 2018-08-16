@@ -50,7 +50,7 @@
     end
   %>
 
-  <% category.attribute_fields.each do |field| %>
+  <% category.attribute_fields.where(hidden: [false, nil]).each do |field| %>
     <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
 
       <% value = nil %>
@@ -100,9 +100,9 @@
             %>
             <%=
               f.select field.name,
-              valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }.compact,
-              include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item),
-              selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id])
+                valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }.compact,
+                include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item),
+                selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id])
             %>
             <% if show_premium_notice %>
               <div class="help-text">

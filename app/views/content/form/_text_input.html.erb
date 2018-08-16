@@ -11,12 +11,14 @@
 %>
 
 <div class="input-field content-field">
-  <%= f.label field do %>
-    <%= field.label.present? ? field.label : ' ' %>
-    <% if defined?(autocomplete) %>
-      <i class="material-icons grey-text lighten-2 tooltipped" style="font-size: 100%" data-tooltip="This field may suggest some ideas for you when you start typing." data-position="right">
-        offline_bolt
-      </i>
+  <% unless defined?(show_label) && !show_label %>
+    <%= f.label field do %>
+      <%= field.label.present? ? field.label : ' ' %>
+      <% if defined?(autocomplete) %>
+        <i class="material-icons grey-text lighten-2 tooltipped" style="font-size: 100%" data-tooltip="This field may suggest some ideas for you when you start typing." data-position="right">
+          offline_bolt
+        </i>
+      <% end %>
     <% end %>
   <% end %>
   <%
@@ -27,11 +29,9 @@
       default: 'Write as little or as much as you want!'
   %>
 
-  <% if field.system? %>
-    <%= f.text_area field.name, value: value, class: "materialize-textarea #{'autocomplete' if defined?(autocomplete)}", placeholder: placeholder %>
-  <% else %>
-    <%= hidden_field_tag "#{content_name}[custom_attribute_values][][name]", field.name %>
-    <%= text_area_tag "#{content_name}[custom_attribute_values][][value]", value && value.value, class: "materialize-textarea #{'autocomplete' if defined?(autocomplete)}", placeholder: placeholder %>
+  <%= hidden_field_tag "#{content_name}[custom_attribute_values][][name]", field.name %>
+  <%= text_area_tag "#{content_name}[custom_attribute_values][][value]", value && value.value, class: "materialize-textarea #{'autocomplete' if defined?(autocomplete)}", placeholder: placeholder %>
+  <% unless field.field_type == 'name' %>
     <%= render 'content/form/attribute_field_dropdown', field: field %>
   <% end %>
 </div>
