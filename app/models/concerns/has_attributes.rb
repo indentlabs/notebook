@@ -40,7 +40,8 @@ module HasAttributes
       end.compact
 
       if categories.first&.user&.present?
-        categories.first.user.attribute_categories.where(entity_type: self.content_name, hidden: [false, nil])
+        acceptable_hidden_values = show_hidden ? [true, false, nil] : [false, nil]
+        categories.first.user.attribute_categories.where(entity_type: self.content_name, hidden: acceptable_hidden_values)
       else
         categories
       end
