@@ -12,7 +12,7 @@ module HasAttributes
 
       # Always include  the flatfile categories (but create AR versions if they don't exist)
       categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
-        category = AttributeCategory.find_or_initialize_by(
+        category = AttributeCategory.with_deleted.find_or_initialize_by(
           entity_type: self.content_name,
           name: category_name.to_s,
           label: details[:label],
@@ -22,7 +22,7 @@ module HasAttributes
         category.save if user
 
         category.attribute_fields << details[:attributes].map do |field|
-          af_field = AttributeField.find_or_initialize_by(
+          af_field = AttributeField.with_deleted.find_or_initialize_by(
             attribute_category_id: category.reload.id,
             label: field[:label],
             user: user,
@@ -45,6 +45,7 @@ module HasAttributes
         categories
       end
 
+      # todo make sure we don't need this? :)
       #[categories, user.attribute_categories.where(['attribute_categories.entity_type = ?', content_name]).joins(:attribute_fields)].flatten.uniq
     end
 
@@ -88,6 +89,8 @@ module HasAttributes
     def self.field_type_for(category, field)
       if field[:label] == 'Name' && category.name == 'overview'
         "name"
+      elsif field[:label] == 'Universe' && category.name == 'overview'
+        "universe"
       else
         "textarea"
       end

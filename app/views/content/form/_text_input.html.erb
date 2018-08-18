@@ -31,7 +31,7 @@
 
   <%= hidden_field_tag "#{content_name}[custom_attribute_values][][name]", field.name %>
   <%= text_area_tag "#{content_name}[custom_attribute_values][][value]", value && value.value, class: "materialize-textarea #{'autocomplete' if defined?(autocomplete)}", placeholder: placeholder %>
-  <% unless field.field_type == 'name' %>
+  <% unless field.name_field? || field.universe_field? %>
     <%= render 'content/form/attribute_field_dropdown', field: field %>
   <% end %>
 </div>

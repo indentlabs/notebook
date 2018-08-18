@@ -1,4 +1,6 @@
 class AttributeField < ApplicationRecord
+  acts_as_paranoid
+  
   validates :name, presence: true
 
   belongs_to :user
@@ -27,6 +29,20 @@ class AttributeField < ApplicationRecord
     'text_fields'
   end
 
+  # Icon used for a specific attribute field
+  def icon
+    case self.field_type
+    when 'name'
+      'fingerprint'
+    when 'textarea'
+      'text_fields'
+    when 'universe'
+      'vpn_lock'
+    else
+      'text_fields'
+    end
+  end
+
   def self.content_name
     'attribute'
   end
@@ -41,6 +57,14 @@ class AttributeField < ApplicationRecord
 
   def system?
     !!self.system
+  end
+
+  def name_field?
+    self.field_type == 'name'
+  end
+
+  def universe_field?
+    self.field_type == 'universe'
   end
 
   private

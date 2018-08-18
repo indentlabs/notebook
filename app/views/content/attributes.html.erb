@@ -56,7 +56,7 @@
               <% hidden_field = !!attribute_field.hidden %>
               <li>
                 <div class="collapsible-header">
-                  <i class="material-icons">text_fields</i>
+                  <i class="material-icons"><%= attribute_field.icon %></i>
                   <%= attribute_field.label %>
                   <% if hidden_field %>
                     <span class="grey-text">&mdash;hidden</span>
@@ -65,7 +65,23 @@
                 <div class="collapsible-body">
                   <%= form_for(attribute_field, method: :put) do |f| %>
                     <%= f.hidden_field :hidden, value: !hidden_field %>
-                    <%= f.submit (hidden_field ? 'Show' : 'Hide') + ' this field' %>
+                    <%= f.submit (hidden_field ? 'Show' : 'Hide') + ' this field', class: 'btn white black-text' %>
+                  <% end %>
+
+                  <% if attribute_field.name_field? || attribute_field.universe_field? %>
+                    <div>
+                      This field cannot be deleted.
+                    </div>
+                  <% else %>
+                    <div style="margin-top: 10px;">
+                      <%= link_to "Delete this field and all of its answers from every #{@content_type} page",
+                        attribute_field,
+                        :class => 'red btn black-text',
+                        :method => :delete,
+                        :data => {
+                          :confirm => "Are you sure? This action cannot be undone! If you have answered this field on ANY #{@content_type} page, your annswer WILL BE DELETED."
+                        } %>
+                    </div>
                   <% end %>
                 </div>
               </li>

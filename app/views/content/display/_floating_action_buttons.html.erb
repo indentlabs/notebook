@@ -25,15 +25,22 @@
   <% end %>
 <% end %>
 
+<%= link_to attribute_customization_path(content_type: @content.class.name.downcase),
+  class: "btn-floating btn-small halfway-fab waves-effect waves-light white lighten-3 tooltipped",
+  style: 'z-index: 500; margin-right: 64px;',
+  data: { position: 'bottom', enterDelay: '500', tooltip: "Configure the categories and fields #{@content.class.name.downcase.pluralize} use" } do %>
+  <i class="material-icons black-text">tune</i>
+<% end %>
+
 <%= link_to '#',
-  class: "btn-floating btn-small halfway-fab waves-effect waves-light white expand",
-  style: 'z-index: 500; margin-right: 61px;' do %>
-  <%#data: { position: 'bottom', enterDelay: '500', tooltip: 'Expand all tabs vertically'}%>
+  class: "btn-floating btn-small halfway-fab waves-effect waves-light white expand tooltipped",
+  style: 'z-index: 500; margin-right: 105px;',
+  data: { position: 'bottom', enterDelay: '500', tooltip: 'Expand all tabs vertically'} do %>
   <i class="material-icons black-text">format_line_spacing</i>
 <% end %>
 
 <% if personal_content && @content.persisted? %>
-  <a class="btn-floating btn-small halfway-fab waves-effect waves-light white share" style="z-index: 500; margin-right: 105px;">
+  <a class="btn-floating btn-small halfway-fab waves-effect waves-light white share" style="z-index: 500; margin-right: 146px;">
     <i class="material-icons black-text">share</i>
   </a>
 <% end %>
@@ -47,3 +54,9 @@
     <i class="material-icons red-text text-lighten-2">delete</i>
   <% end %>
 <% end %>
+
+<script type="text/javascript">
+$(document).ready(function(){
+  $('.tooltipped').tooltip();
+});
+</script>
