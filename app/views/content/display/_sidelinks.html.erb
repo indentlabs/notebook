@@ -34,15 +34,9 @@
         # Only show gallery tab if the content has any images
         next if @content.image_uploads.empty?
       else
-        # Only show other tabs if it has at least one piece of data in it, or it's a custom tab
-        next if fields.all? do |field|
-          if @content.respond_to?(field.name.to_sym)
-            value = @content.send(field.name.to_sym)
-          else
-            value = "custom field -- should always show"
-          end
-
-          value.blank?
+        # Only show other tabs if it has at least one piece of data in it
+        next unless fields.any? do |field|
+          field.attribute_values.where(entity_id: @content.id).any? { |av| av.value.present? }
         end
       end
     %>
