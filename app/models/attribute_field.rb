@@ -1,6 +1,6 @@
 class AttributeField < ApplicationRecord
   acts_as_paranoid
-  
+
   validates :name, presence: true
 
   belongs_to :user
@@ -34,10 +34,12 @@ class AttributeField < ApplicationRecord
     case self.field_type
     when 'name'
       'fingerprint'
+    when 'link'
+      'link'
+    when 'universe'
+      Universe.icon
     when 'textarea'
       'text_fields'
-    when 'universe'
-      'vpn_lock'
     else
       'text_fields'
     end

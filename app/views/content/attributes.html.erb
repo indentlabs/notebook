@@ -25,7 +25,13 @@
       General <%= @content_type.titleize %> settings
     </div>
     <div class="collapsible-body">
-      <span>More settings are coming soon. In the meantime, you can customize your global <%= @content_type %> page attributes by clicking a category below.</span>
+      <p>
+        More <%= @content_type  %>-specific settings are coming soon. In the meantime, you can customize your <%= @content_type %> categories
+        and fields by clicking a category below. Changes will be applied to all existing <%=  @content_type %> pages as well as pages not-yet-created.
+      </p>
+      <p>
+        And don't forget, you can always toggle entire pages on or off by <%= link_to 'customizing your pages', customization_content_types_path %>!
+      </p>
     </div>
   </li>
   <% @content_type_class.attribute_categories(current_user, show_hidden: true).each do |attribute_category| %>
@@ -33,7 +39,7 @@
     <% hidden_category = !!attribute_category.hidden %>
     <li>
       <div class="collapsible-header">
-        <i class="material-icons"><%= attribute_category.icon  %></i><%= attribute_category.label %>
+        <i class="material-icons"><%= attribute_category.icon %></i><%= attribute_category.label %>
         <% if hidden_category %>
           <span class="grey-text">&mdash;hidden</span>
         <% end %>
@@ -43,7 +49,7 @@
           <div class="col">
             <%= form_for(attribute_category, method: :put) do |f| %>
               <%= f.hidden_field :hidden, value: !hidden_category %><%# flip the bit %>
-              <%= f.submit (hidden_category ? 'Show' : 'Hide') + ' this section' %>
+              <%= f.submit (hidden_category ? 'Show' : 'Hide') + ' this category', class: 'btn white black-text' %>
             <% end %>
           </div>
         </div>
@@ -63,26 +69,50 @@
                   <% end %>
                 </div>
                 <div class="collapsible-body">
-                  <%= form_for(attribute_field, method: :put) do |f| %>
-                    <%= f.hidden_field :hidden, value: !hidden_field %>
-                    <%= f.submit (hidden_field ? 'Show' : 'Hide') + ' this field', class: 'btn white black-text' %>
+                  <% if attribute_field.field_type == 'link' %>
+                    <div class="row">
+                      <div class="col s12">
+                        <% klass = @content_type_class.new.send(attribute_field.old_column_source).klass %>
+                        <% klass_name = klass.name %>
+                        <div class="card-panel <%= klass.color %>">
+                          <div class="valign-wrapper white">
+                            <i class="material-icons" style="margin: 0 10px;">link</i>
+                            Links to: <%= link_to klass_name, attribute_customization_path(content_type: klass_name.downcase), style: 'padding: 3px 10px' %>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   <% end %>
 
-                  <% if attribute_field.name_field? || attribute_field.universe_field? %>
-                    <div>
-                      This field cannot be deleted.
+                  <div class="row">
+                    <div class="col s12 m6">
+                      <%= form_for(attribute_field, method: :put, class: 'inline') do |f| %>
+                        <%= f.hidden_field :hidden, value: !hidden_field %>
+                        <%= f.submit (hidden_field ? 'Show' : 'Hide') + ' this field', class: 'btn white black-text' %>
+                      <% end %>
                     </div>
-                  <% else %>
-                    <div style="margin-top: 10px;">
-                      <%= link_to "Delete this field and all of its answers from every #{@content_type} page",
-                        attribute_field,
-                        :class => 'red btn black-text',
-                        :method => :delete,
-                        :data => {
-                          :confirm => "Are you sure? This action cannot be undone! If you have answered this field on ANY #{@content_type} page, your annswer WILL BE DELETED."
-                        } %>
+                    <div class="col s12 m6">
+                      <% if attribute_field.name_field? || attribute_field.universe_field? %>
+                        <div>
+                          This field cannot be deleted.
+                        </div>
+                      <% else %>
+                        <div>
+                          <%= link_to "Delete this field and answers",
+                            attribute_field,
+                            :class => 'red btn black-text',
+                            :method => :delete,
+                            :data => {
+                              :confirm => "Are you sure? This action cannot be undone! If you have answered this field on ANY #{@content_type} page, your annswer WILL BE DELETED."
+                            } %>
+                        </div>
+                        <div class="red-text text-darken-3">
+                          This will delete this field <strong>and</strong> its answers to <strong>every <%= @content_type %> page you've created</strong>.
+                          It cannot be undone! If you want to save your answers, you should hide this field instead.
+                        </div>
+                      <% end %>
                     </div>
-                  <% end %>
+                  </div>
                 </div>
               </li>
             <% end %>

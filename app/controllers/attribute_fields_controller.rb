@@ -14,7 +14,7 @@ class AttributeFieldsController < ContentController
 
   def initialize_object
     @content = AttributeField.find_or_initialize_by(content_params)
-    @content.field_type = 'textarea'
+    @content.field_type = 'text_area'
 
     if @content.attribute_category_id.nil?
       category = current_user.attribute_categories.where(label: content_params[:attribute_category] || content_params[:label]).first_or_initialize.tap do |c|

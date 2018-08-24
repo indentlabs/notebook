@@ -7,6 +7,9 @@ class ContentController < ApplicationController
     @content_type_class = content_type_from_controller(self.class)
     pluralized_content_name = @content_type_class.name.downcase.pluralize
 
+    # Create the default fields for this user if they don't have any already
+    @content_type_class.attribute_categories(current_user)
+
     if @universe_scope.present? && @content_type_class != Universe
       @content = @universe_scope.send(pluralized_content_name)
     else
@@ -25,9 +28,6 @@ class ContentController < ApplicationController
 
     @questioned_content = @content.sample
     @question = @questioned_content.question unless @questioned_content.nil?
-
-    # Create the default fields for this user if they don't have any already
-    @content_type_class.attribute_categories(current_user)
 
     respond_to do |format|
       format.html { render 'content/index' }
@@ -234,7 +234,8 @@ class ContentController < ApplicationController
     # Ensure the default attributes are created before  using them
     @content.class.attribute_categories(current_user)
     attribute_categories = @content.class.attribute_categories(current_user)
-    attribute_fields = attribute_categories.flat_map(&:attribute_fields)
+    attribute_fields = AttributeField.where(attribute_category_id: attribute_categories.map(&:id))
+    #attribute_fields = attribute_categories.flat_map(&:attribute_fields)
 
     attribute_fields.each do |attribute_field|
       next unless attribute_field.old_column_source.present?
@@ -244,15 +245,26 @@ class ContentController < ApplicationController
         .where(entity_id: @content.id)
         .first
 
-      if existing_value
-        existing_value.update(value: @content.send(attribute_field.old_column_source))
+      # If a user has touched this attribute's value since we've created it,
+      # we don't want to touch it again.
+      if existing_value && existing_value.created_at != existing_value.updated_at
+        next
+      end
+
+      attribute_value = if attribute_field.field_type == 'link'
+        ""
       else
-        raise "no"
+        @content.send(attribute_field.old_column_source)
+      end
+
+      if existing_value
+        existing_value.update(value: attribute_value)
+      else
         attribute_field.attribute_values.create(
           user_id: current_user.id,
           entity_type: @content.class.name,
           entity_id: @content.id,
-          value: @content.send(attribute_field.old_column_source),
+          value: attribute_value,
           privacy: 'private' # todo just make this the default for the column instead
         )
       end

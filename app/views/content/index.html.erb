@@ -23,12 +23,10 @@
   });
 </script>
 
-<%= link_to 'Customize attributes', attribute_customization_path(content_type: content_type) %>
-
 <% if @content.any? %>
   <h4>
     Your <%= pluralize(@content.count, content_type) %>
-    <%= render partial: 'content/list/create_button', locals: { } %>
+    <%= render partial: 'content/list/actions', locals: { } %>
   </h4>
   <%= render partial: 'content/list/list', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true } %>
 
@@ -50,6 +48,20 @@
     <% else %>
       <%= link_to "Upgrade to Premium to create your first #{content_type.humanize.downcase}", subscription_path %>
     <% end %>
+
+    <p class="grey-text" style="padding-top: 20px;">
+      <% 5.times { %><i class="material-icons"><%= @content_type_class.icon %></i>&nbsp;&nbsp;&nbsp;&nbsp;<%}%>
+    </p>
+
+    <p style="padding-top: 20px">
+      You can now customize your <%= @content_type %> page, too!
+    </p>
+
+    <%=
+      link_to "Customize your #{@content_type_class.name} template",
+        attribute_customization_path(@content_type_class.name.downcase),
+        class: "btn #{@content_type_class.color}"
+    %>
   </div>
 
 <% end %>

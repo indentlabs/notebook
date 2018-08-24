@@ -123,15 +123,18 @@
             </div>
           </div>
         </div>
-        <% if content_type.where(user: current_user).any? %>
-          <div class="card-action">
-            <%= link_to polymorphic_path(content_type) do %>
-              You have
-              <%= pluralize content_type.where(user: current_user).count,
-                            content_type.name.downcase %>.
-            <% end %>
-          </div>
-        <% end %>
+        <div class="card-action">
+          <% if content_type.where(user: current_user).any? %>
+              <%= link_to polymorphic_path(content_type) do %>
+                You have
+                <%= pluralize content_type.where(user: current_user).count,
+                              content_type.name.downcase %>
+              <% end %>
+          <% end %>
+          <%= link_to attribute_customization_path(content_type.name.downcase) do %>
+            Customize page
+          <% end %>
+        </div>
       </div>
     </div>
   <% end %>

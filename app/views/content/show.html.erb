@@ -45,22 +45,37 @@
               <% end %>
 
               <%
-                custom_field = false
-                value = nil
-                if content.respond_to?(attribute.name.to_sym)
-                  # Native fields with columns on the content table
-                  value = content.send(attribute.name.to_sym)
-                else
-                  custom_field = true
-                  value = Attribute.where(user: @content.user, attribute_field: attribute, entity: content).first || ""
+                value = case attribute.field_type
+                  when 'universe'
+                    content.universe_id.present? ? content.universe.name : nil
+                  when 'link', 'name', 'text_area'
+                    existing_attribute = attribute.attribute_values.find_by(entity_id: content.id)
+
+                    if existing_attribute
+                      existing_attribute.value
+                    else
+                      # We should always have an attribute by now, but just in case we don't
+                      # there's a bit of a safety net here. todo remove it.
+                      if content.respond_to?(attribute.old_column_source.to_sym)
+                        content.send(attribute.old_column_source.to_sym)
+                      else
+                        ""
+                      end
+                    end
+                  else
+                    raise attribute.field_type.inspect
                 end
               %>
-              <% next if value.blank? && !custom_field %>
+              <% next if value.blank? %>
 
               <div class="row">
                 <div class="col s3 m3 l3 right-align flow-text grey-text"><%= attribute.label %></div>
-                <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
-                  <% klass = value.first.class || value.build.class %>
+                <% if attribute.field_type == 'universe' %>
+                  <div class="col s9 m9 l9 flow-text">
+                    <%= link_to content.universe.name, content.universe if content.universe %>
+                  </div>
+                <% elsif attribute.field_type == 'link' %>
+                  <% klass = content.send(attribute.old_column_source).klass %>
                   <div class="col s9 m9 l9 flow-text">
                     <% value.each do |li| %>
                       <div class="chip">
@@ -71,18 +86,16 @@
                       </div>
                     <% end %>
                   </div>
-                <% elsif attribute.name == 'attribute_category_id' %>
-                  <div class="col s9 m9 l9 flow-text">
-                    <%= link_to content.attribute_category.label, content.attribute_category if content.attribute_category %>
-                  </div>
-                <% elsif attribute.name == 'universe_id' %>
-                  <div class="col s9 m9 l9 flow-text">
-                    <%= link_to content.universe.name, content.universe if content.universe %>
-                  </div>
                 <% else %>
-                  <div class="col s9 m9 l9 markdownable">
-                    <%= simple_format Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value : value).html_safe %>&nbsp;
-                  </div>
+                  <% if attribute.name == 'attribute_category_id' %>
+                    <div class="col s9 m9 l9 flow-text">
+                      <%= link_to content.attribute_category.label, content.attribute_category if content.attribute_category %>
+                    </div>
+                  <% else %>
+                    <div class="col s9 m9 l9 markdownable">
+                      <%= simple_format Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value.presence || '' : value).html_safe %>&nbsp;
+                    </div>
+                  <% end %>
                 <% end %>
               </div>
             <% end %>

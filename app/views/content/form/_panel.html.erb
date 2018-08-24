@@ -1,5 +1,4 @@
 <div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
-
   <%# todo: break this out into a partial %>
   <% if category.name == 'gallery' %>
     <div>
@@ -60,18 +59,12 @@
         <% value = Attribute.where(user: current_user, entity: content) %>
       <% end %>
 
-      <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
+      <% if field.field_type == 'link' %>
         <%# Relation-setting UI %>
-        <% through_class = content.class.reflect_on_association(field.name).options[:through].to_s %>
-        <%= render 'content/form/relation_input', f: f, attribute: field.name, label: field.label, relation: through_class %>
+        <% through_class = content.class.reflect_on_association(field.old_column_source).options[:through].to_s %>
+        <%= render 'content/form/relation_input', f: f, attribute: field.old_column_source, label: field.label, relation: through_class %>
 
-      <% elsif field.name == 'archetype' %>
-        <div class="input-field input-select">
-          <%= f.label field.name, class: 'active' %><br />
-          <%= f.select field.name, options_for_select(t('archetypes'), selected: f.object.archetype), include_blank: true %>
-        </div>
-
-      <% elsif field.name == 'universe_id' %>
+      <% elsif field.field_type == 'universe' %>
         <div class="input-field">
           <%= f.label field.name, field.label %><br />
           <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) || f.object.universe_id.nil? %>
@@ -114,6 +107,12 @@
             <br />
             <%= link_to(f.object.universe.name, f.object.universe) if f.object.universe %>
           <% end %>
+        </div>
+
+      <% elsif field.name == 'archetype' %>
+        <div class="input-field input-select">
+          <%= f.label field.name, class: 'active' %><br />
+          <%= f.select field.name, options_for_select(t('archetypes'), selected: f.object.archetype), include_blank: true %>
         </div>
 
       <% elsif field.name == 'attribute_category_id' %>

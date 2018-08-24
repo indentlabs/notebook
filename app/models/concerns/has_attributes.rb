@@ -19,7 +19,7 @@ module HasAttributes
           icon: details[:icon],
           user: user
         )
-        category.save if user
+        category.save! if user
 
         category.attribute_fields << details[:attributes].map do |field|
           af_field = AttributeField.with_deleted.find_or_initialize_by(
@@ -27,9 +27,9 @@ module HasAttributes
             label: field[:label],
             old_column_source: field[:name],
             user: user,
-            field_type: field_type_for(category, field)
+            field_type: field[:field_type].presence || "text_area"
           )
-          af_field.save if user
+          af_field.save! if user
           af_field
         end if details.key?(:attributes)
 
