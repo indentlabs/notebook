@@ -1,5 +1,7 @@
 class ContentController < ApplicationController
+  # todo before_action :load_content to set @content
   before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy]
+  before_action :migrate_old_style_field_values, only: [:show, :edit]
 
   def index
     @content_type_class = content_type_from_controller(self.class)
@@ -23,6 +25,9 @@ class ContentController < ApplicationController
 
     @questioned_content = @content.sample
     @question = @questioned_content.question unless @questioned_content.nil?
+
+    # Create the default fields for this user if they don't have any already
+    @content_type_class.attribute_categories(current_user)
 
     respond_to do |format|
       format.html { render 'content/index' }
@@ -222,6 +227,37 @@ class ContentController < ApplicationController
   end
 
   private
+
+  def migrate_old_style_field_values
+    @content = content_type_from_controller(self.class).find(params[:id])
+
+    # Ensure the default attributes are created before  using them
+    @content.class.attribute_categories(current_user)
+    attribute_categories = @content.class.attribute_categories(current_user)
+    attribute_fields = attribute_categories.flat_map(&:attribute_fields)
+
+    attribute_fields.each do |attribute_field|
+      next unless attribute_field.old_column_source.present?
+
+      existing_value = attribute_field
+        .attribute_values
+        .where(entity_id: @content.id)
+        .first
+
+      if existing_value
+        existing_value.update(value: @content.send(attribute_field.old_column_source))
+      else
+        raise "no"
+        attribute_field.attribute_values.create(
+          user_id: current_user.id,
+          entity_type: @content.class.name,
+          entity_id: @content.id,
+          value: @content.send(attribute_field.old_column_source),
+          privacy: 'private' # todo just make this the default for the column instead
+        )
+      end
+    end
+  end
 
   def valid_content_types
     Rails.application.config.content_types[:all]

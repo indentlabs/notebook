@@ -25,6 +25,7 @@ module HasAttributes
           af_field = AttributeField.with_deleted.find_or_initialize_by(
             attribute_category_id: category.reload.id,
             label: field[:label],
+            old_column_source: field[:name],
             user: user,
             field_type: field_type_for(category, field)
           )

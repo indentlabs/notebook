@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_18_213858) do
+ActiveRecord::Schema.define(version: 2018_08_24_051228) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer "user_id"
@@ -53,6 +53,7 @@ ActiveRecord::Schema.define(version: 2018_08_18_213858) do
     t.datetime "updated_at"
     t.boolean "hidden"
     t.datetime "deleted_at"
+    t.string "old_column_source"
     t.index ["user_id", "name"], name: "index_attribute_fields_on_user_id_and_name"
   end
 
@@ -1284,40 +1285,6 @@ ActiveRecord::Schema.define(version: 2018_08_18_213858) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "page_categories", force: :cascade do |t|
-    t.string "label"
-    t.integer "universe_id"
-    t.string "content_type"
-    t.string "icon"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "user_id"
-    t.index ["universe_id", "content_type"], name: "index_page_categories_on_universe_id_and_content_type"
-    t.index ["universe_id"], name: "index_page_categories_on_universe_id"
-    t.index ["user_id"], name: "index_page_categories_on_user_id"
-  end
-
-  create_table "page_field_values", force: :cascade do |t|
-    t.integer "page_field_id"
-    t.integer "page_id"
-    t.text "value"
-    t.integer "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-    t.index ["page_field_id"], name: "index_page_field_values_on_page_field_id"
-    t.index ["user_id"], name: "index_page_field_values_on_user_id"
-  end
-
-  create_table "page_fields", force: :cascade do |t|
-    t.string "label"
-    t.integer "page_category_id"
-    t.string "field_type", default: "textarea"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["page_category_id"], name: "index_page_fields_on_page_category_id"
-  end
-
   create_table "past_ownerships", force: :cascade do |t|
     t.integer "user_id"
     t.integer "item_id"
@@ -1902,7 +1869,7 @@ ActiveRecord::Schema.define(version: 2018_08_18_213858) do
     t.integer "moderation_state", null: false
     t.integer "previous_moderation_state", null: false
     t.datetime "created_at", null: false
-    t.index ["messageboard_id", "created_at"], name: "index_thredded_moderation_records_for_display"
+    t.index ["messageboard_id", "created_at"], name: "index_thredded_moderation_records_for_display", order: { created_at: :desc }
   end
 
   create_table "thredded_posts", force: :cascade do |t|
@@ -1916,6 +1883,7 @@ ActiveRecord::Schema.define(version: 2018_08_18_213858) do
     t.datetime "updated_at", null: false
     t.index ["messageboard_id"], name: "index_thredded_posts_on_messageboard_id"
     t.index ["moderation_state", "updated_at"], name: "index_thredded_posts_for_display"
+    t.index ["postable_id"], name: "index_thredded_posts_on_postable_id"
     t.index ["postable_id"], name: "index_thredded_posts_on_postable_id_and_postable_type"
     t.index ["user_id"], name: "index_thredded_posts_on_user_id"
   end
@@ -1993,7 +1961,7 @@ ActiveRecord::Schema.define(version: 2018_08_18_213858) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["latest_activity_at"], name: "index_thredded_user_details_on_latest_activity_at"
-    t.index ["moderation_state", "moderation_state_changed_at"], name: "index_thredded_user_details_for_moderations"
+    t.index ["moderation_state", "moderation_state_changed_at"], name: "index_thredded_user_details_for_moderations", order: { moderation_state_changed_at: :desc }
     t.index ["user_id"], name: "index_thredded_user_details_on_user_id", unique: true
   end
 
