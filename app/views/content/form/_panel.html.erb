@@ -91,11 +91,17 @@
                 end
               end
             %>
+
+            <% universe_attribute = Attribute.find_by(user: current_user, attribute_field: field, entity: f.object) %>
+            <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field.name %>
             <%=
-              f.select field.name,
-                valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }.compact,
-                include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item),
-                selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id])
+              @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
+              select_tag "#{content.class.name.downcase}[custom_attribute_values][][value]",
+                options_for_select(
+                  @universe_dropdown_options.compact,
+                  @universe_dropdown_options.map(&:second).index(content.universe_field_value.try(:id))
+                ),
+                include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
             %>
             <% if show_premium_notice %>
               <div class="help-text">
@@ -146,8 +152,9 @@
         %>
           <div class="input-field content-field">
             <%= f.label field.name, field.label %>
+            <% attribute = Attribute.find_by(user: current_user, attribute_field: field, entity: f.object) %>
             <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field.name %>
-            <%= text_area_tag "#{content.class.name.downcase}[custom_attribute_values][][value]", Attribute.find_by(user: current_user, attribute_field: field, entity: f.object).value,
+            <%= text_area_tag "#{content.class.name.downcase}[custom_attribute_values][][value]", attribute.present? ? attribute.value :  "",
                   class: "materialize-textarea",
                   placeholder: 'Write as little or as much as you want!' %>
             <div class="help-text">

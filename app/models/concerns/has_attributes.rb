@@ -82,11 +82,40 @@ module HasAttributes
       )
     end
 
+    def universe_field
+      category_ids = AttributeCategory.where(
+        user_id: user_id,
+        entity_type: self.class.name.downcase
+      ).pluck(:id)
+
+      # Todo these two queries should be able to be joined into one
+      name_field = AttributeField.find_by(
+        user_id: user_id,
+        attribute_category_id: category_ids,
+        field_type: 'universe'
+      )
+    end
+
     def name_field_value
       name_field_cache = name_field
       return self.name if name_field_cache.nil?
 
       name_field_cache.attribute_values.detect { |v| v.entity_id == self.id }&.value.presence || self.name.presence || "Untitled #{self.class.name}"
+    end
+
+    def universe_field_value
+      universe_field_cache = universe_field
+      return self.universe_id if universe_field_cache.nil?
+
+      universe_id = universe_field_cache.attribute_values.detect do |v|
+        v.entity_id == self.id
+      end&.value.presence || self.universe_id.presence || nil
+
+      if universe_id
+        Universe.find(universe_id)
+      else
+        nil
+      end
     end
 
     def self.field_type_for(category, field)

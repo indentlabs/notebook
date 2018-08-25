@@ -117,8 +117,13 @@ class ContentController < ApplicationController
     }) if Rails.env.production?
 
     @content.user = current_user
-    if @content.save
-      @content.update(name: @content.name_field_value)
+    @content.name = "Untitled" # todo is this overriding the above?
+    if @content.update_attributes(content_params)
+      @content.update(
+        name: @content.name_field_value,
+        universe: @content.universe_field_value
+      ) # Cache the name/universe also (todo stick this in the same save as above)
+
       if params.key? 'image_uploads'
         upload_files params['image_uploads'], content_type.name, @content.id
       end
@@ -151,12 +156,14 @@ class ContentController < ApplicationController
       end
     end
 
-    #  Don't set name fields on content that doesn't have a name field
-    unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name)
-      @content.name = @content.name_field_value
-    end
     if @content.user == current_user
       update_success = @content.update_attributes(content_params)
+      #  Don't set name fields on content that doesn't have a name field
+      unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name)
+        @content.name = @content.name_field_value
+        @content.universe_id = @content.universe_field_value
+        @content.save
+      end
     else
       # Exclude fields only the real owner can edit
       #todo move field list somewhere when it grows
@@ -240,10 +247,7 @@ class ContentController < ApplicationController
     attribute_fields.each do |attribute_field|
       next unless attribute_field.old_column_source.present?
 
-      existing_value = attribute_field
-        .attribute_values
-        .where(entity_id: @content.id)
-        .first
+      existing_value = attribute_field.attribute_values.where(entity_id: @content.id).first
 
       # If a user has touched this attribute's value since we've created it,
       # we don't want to touch it again.
@@ -251,22 +255,35 @@ class ContentController < ApplicationController
         next
       end
 
+      delete_model_source_value = false
       attribute_value = if attribute_field.field_type == 'link'
-        ""
-      else
-        @content.send(attribute_field.old_column_source)
+        nil
+      else # text field
+        value_from_model = @content.send(attribute_field.old_column_source)
+        if value_from_model.present?
+          delete_model_source_value = true
+          value_from_model
+        else
+          nil
+        end
       end
 
-      if existing_value
-        existing_value.update(value: attribute_value)
-      else
-        attribute_field.attribute_values.create(
-          user_id: current_user.id,
-          entity_type: @content.class.name,
-          entity_id: @content.id,
-          value: attribute_value,
-          privacy: 'private' # todo just make this the default for the column instead
-        )
+      unless attribute_value.nil?
+        if existing_value
+          existing_value.update!(value: attribute_value)
+        else
+          attribute_field.attribute_values.create!(
+            user_id: current_user.id,
+            entity_type: @content.class.name,
+            entity_id: @content.id,
+            value: attribute_value,
+            privacy: 'private' # todo just make this the default for the column instead
+          )
+        end
+      end
+
+      if delete_model_source_value && attribute_field.old_column_source.present? && attribute_field.field_type != 'name' && @content.send(attribute_field.old_column_source).present?
+        @content.update_attribute(attribute_field.old_column_source, nil)
       end
     end
   end

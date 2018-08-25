@@ -4,7 +4,7 @@ class AttributeCategory < ApplicationRecord
   validates :name, presence: true
 
   belongs_to :user
-  has_many   :attribute_fields
+  has_many   :attribute_fields, dependent: :destroy
 
   include HasAttributes
   include Serendipitous::Concern

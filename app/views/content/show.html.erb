@@ -47,7 +47,7 @@
               <%
                 value = case attribute.field_type
                   when 'universe'
-                    content.universe_id.present? ? content.universe.name : nil
+                    Universe.find_by(id: content.universe_field_value)
                   when 'link', 'name', 'text_area'
                     existing_attribute = attribute.attribute_values.find_by(entity_id: content.id)
 
@@ -72,7 +72,7 @@
                 <div class="col s3 m3 l3 right-align flow-text grey-text"><%= attribute.label %></div>
                 <% if attribute.field_type == 'universe' %>
                   <div class="col s9 m9 l9 flow-text">
-                    <%= link_to content.universe.name, content.universe if content.universe %>
+                    <%= link_to value.name, value if value.is_a?(Universe) %>
                   </div>
                 <% elsif attribute.field_type == 'link' %>
                   <% klass = content.send(attribute.old_column_source).klass %>
