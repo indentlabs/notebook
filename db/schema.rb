@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_24_051228) do
+ActiveRecord::Schema.define(version: 2018_08_25_000628) do
 
   create_table "archenemyships", force: :cascade do |t|
     t.integer "user_id"
@@ -39,6 +39,7 @@ ActiveRecord::Schema.define(version: 2018_08_24_051228) do
     t.datetime "deleted_at"
     t.index ["entity_type"], name: "index_attribute_categories_on_entity_type"
     t.index ["name"], name: "index_attribute_categories_on_name"
+    t.index ["user_id"], name: "index_attribute_categories_on_user_id"
   end
 
   create_table "attribute_fields", force: :cascade do |t|
@@ -54,7 +55,11 @@ ActiveRecord::Schema.define(version: 2018_08_24_051228) do
     t.boolean "hidden"
     t.datetime "deleted_at"
     t.string "old_column_source"
+    t.index ["user_id", "attribute_category_id"], name: "index_attribute_fields_on_user_id_and_attribute_category_id"
+    t.index ["user_id", "field_type"], name: "index_attribute_fields_on_user_id_and_field_type"
     t.index ["user_id", "name"], name: "index_attribute_fields_on_user_id_and_name"
+    t.index ["user_id", "old_column_source"], name: "index_attribute_fields_on_user_id_and_old_column_source"
+    t.index ["user_id"], name: "index_attribute_fields_on_user_id"
   end
 
   create_table "attributes", force: :cascade do |t|
@@ -67,7 +72,10 @@ ActiveRecord::Schema.define(version: 2018_08_24_051228) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.datetime "deleted_at"
+    t.index ["entity_type", "entity_id"], name: "index_attributes_on_entity_type_and_entity_id"
+    t.index ["user_id", "attribute_field_id"], name: "index_attributes_on_user_id_and_attribute_field_id"
     t.index ["user_id", "entity_type", "entity_id"], name: "index_attributes_on_user_id_and_entity_type_and_entity_id"
+    t.index ["user_id"], name: "index_attributes_on_user_id"
   end
 
   create_table "best_friendships", force: :cascade do |t|

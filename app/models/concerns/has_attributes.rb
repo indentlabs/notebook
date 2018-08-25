@@ -19,8 +19,9 @@ module HasAttributes
           icon: details[:icon],
           user: user
         )
-        category.save! if user
+        next unless user
 
+        category.save
         category.attribute_fields << details[:attributes].map do |field|
           af_field = AttributeField.with_deleted.find_or_initialize_by(
             attribute_category_id: category.reload.id,

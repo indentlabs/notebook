@@ -5,7 +5,7 @@ class AttributeField < ApplicationRecord
 
   belongs_to :user
   belongs_to :attribute_category
-  has_many :attribute_values, class_name: 'Attribute'
+  has_many :attribute_values, class_name: 'Attribute', dependent: :destroy
 
   validates_presence_of :user_id
 
@@ -18,8 +18,6 @@ class AttributeField < ApplicationRecord
   attr_accessor :system
 
   before_validation :ensure_name
-
-  scope :is_public, -> { eager_load(:universe).where('universes.privacy = ? OR attribute_fields.privacy = ?', 'public', 'public') }
 
   def self.color
     'amber'
