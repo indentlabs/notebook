@@ -4,8 +4,21 @@ module HasChangelog
   extend ActiveSupport::Concern
 
   included do
-    def change_events
-      ContentChangeEvent.where(content_id: id, content_type: self.class.name).order(:id)
+    def content_change_events
+      ContentChangeEvent.where(
+        content_id: id,
+        content_type: self.class.name
+      ).order(:id)
+    end
+
+    def attribute_change_events
+      ContentChangeEvent.where(
+        content_id: Attribute.where(
+          entity_type: self.class.name,
+          entity_id: id
+        ),
+        content_type: "Attribute"
+      ).order(:id).last(100)
     end
 
     after_create do
@@ -15,10 +28,10 @@ module HasChangelog
         content_id:     id,
         content_type:   self.class.name,
         action:         :created
-      )
+      ) if changes.any?
     end
 
-    after_update do
+    before_update do
       # todo how to get current_user?
       ContentChangeEvent.create(
         user:           find_current_user,

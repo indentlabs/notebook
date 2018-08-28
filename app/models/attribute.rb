@@ -5,6 +5,8 @@ class Attribute < ApplicationRecord
   belongs_to :attribute_field
   belongs_to :entity, polymorphic: true
 
+  include HasChangelog
+
   include Authority::Abilities
   self.authorizer_name = 'AttributeAuthorizer'
 
