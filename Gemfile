@@ -77,6 +77,7 @@ gem 'binding_of_caller' # see has_changelog.rb
 
 group :development do
   gem 'web-console'
+  gem 'bullet'
 end
 
 group :production do

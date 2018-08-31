@@ -76,7 +76,13 @@
           <h5 style="text-align: center">Recent activity</h5>
           <section id="cd-timeline" class="cd-container timeline-container">
             <% @stream.each do |change_event| %>
-              <% content_type_class = change_event.content_type.constantize %>
+              <%
+                if change_event.content_type == 'Attribute'
+                  content_type_class = change_event.content.entity_type.constantize
+                else
+                  content_type_class = change_event.content_type.constantize
+                end
+              %>
               <% content = content_type_class.find_by(id: change_event.content_id) %>
               <% next if content.nil? %>
               <% next unless content.readable_by?(user_signed_in? ? current_user : User.new) %>
@@ -95,7 +101,7 @@
                       <%= truncate(content.description, length: 300) %>
                     </div>
                   <% end %>
-                  <% if content.respond_to?(:universe_id) && content.universe_id.present? %>
+                  <% if content.respond_to?(:universe_id) && content.universe_id.present? && content.universe_id > 0 %>
                     <div class="card-content">
                       <i class="material-icons <%= Universe.color %>-text" style="font-size: 100%; position: relative; top: 2px">
                         <%= Universe.icon %>
