@@ -4,6 +4,8 @@ module HasChangelog
   extend ActiveSupport::Concern
 
   included do
+    attr_accessor :disable_changelog_this_request
+
     def content_change_events
       ContentChangeEvent.where(
         content_id: id,
@@ -28,7 +30,7 @@ module HasChangelog
         content_id:     id,
         content_type:   self.class.name,
         action:         :created
-      ) if changes.any?
+      ) if changes.any? && !!disable_changelog_this_request
     end
 
     before_update do
@@ -39,7 +41,7 @@ module HasChangelog
         content_id:     id,
         content_type:   self.class.name,
         action:         :updated
-      ) if changes.any?
+      ) if changes.any? && !!disable_changelog_this_request
     end
 
     before_destroy do
@@ -49,7 +51,7 @@ module HasChangelog
         content_id:     id,
         content_type:   self.class.name,
         action:         :deleted
-      )
+      ) if !!disable_changelog_this_request
     end
 
     private

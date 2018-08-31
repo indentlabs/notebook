@@ -270,21 +270,30 @@ class ContentController < ApplicationController
 
       unless attribute_value.nil?
         if existing_value
+          existing_value.disable_changelog_this_request = true
           existing_value.update!(value: attribute_value)
+          existing_value.disable_changelog_this_request = false
         else
-          attribute_field.attribute_values.create!(
+          new_value = attribute_field.attribute_values.new(
             user_id: current_user.id,
             entity_type: @content.class.name,
             entity_id: @content.id,
             value: attribute_value,
             privacy: 'private' # todo just make this the default for the column instead
           )
+
+          new_value.disable_changelog_this_request = true
+          new_value.save!
+          new_value.disable_changelog_this_request = true
         end
       end
 
-      if delete_model_source_value && attribute_field.old_column_source.present? && attribute_field.field_type != 'name' && @content.send(attribute_field.old_column_source).present?
-        @content.update_attribute(attribute_field.old_column_source, nil)
-      end
+      # Lets leave these columns alone for now so 1) we don't have to mess with disabling changelogs, and 2) why not be safe?
+      # if delete_model_source_value && attribute_field.old_column_source.present? && attribute_field.field_type != 'name' && @content.send(attribute_field.old_column_source).present?
+      #   @content.disable_changelog_this_request = true
+      #   @content.update_attribute(attribute_field.old_column_source, nil)
+      #   @content.disable_changelog_this_request = false
+      # end
     end
   end
 

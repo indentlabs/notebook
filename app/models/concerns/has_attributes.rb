@@ -31,7 +31,7 @@ module HasAttributes
             user: user,
             field_type: field[:field_type].presence || "text_area"
           )
-          af_field.save! if user
+          af_field.save if user
           af_field
         end if details.key?(:attributes)
 
