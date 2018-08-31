@@ -17,7 +17,8 @@ module HasAttributes
           name: category_name.to_s,
           label: details[:label],
           icon: details[:icon],
-          user: user
+          user: user,
+          created_at: "January 1, 1970".to_datetime
         )
         next unless user
 
@@ -43,7 +44,7 @@ module HasAttributes
 
       if categories.first&.user&.present?
         acceptable_hidden_values = show_hidden ? [true, false, nil] : [false, nil]
-        categories.first.user.attribute_categories.where(entity_type: self.content_name, hidden: acceptable_hidden_values)
+        categories.first.user.attribute_categories.where(entity_type: self.content_name, hidden: acceptable_hidden_values).order('created_at, id')
       else
         categories
       end
