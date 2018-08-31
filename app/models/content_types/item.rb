@@ -32,6 +32,10 @@ class Item < ApplicationRecord
   relates :makers,                    with: :maker_relationships
   relates :magics,                    with: :item_magics
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.color
     'amber'
   end

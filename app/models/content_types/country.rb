@@ -28,6 +28,10 @@ class Country < ApplicationRecord
   relates :floras,    with: :country_floras
   relates :governments, with: :country_governments
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.content_name
     'country'
   end

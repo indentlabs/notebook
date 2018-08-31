@@ -39,6 +39,10 @@ class Location < ApplicationRecord
   relates :notable_towns,     with: :location_notable_towns
   relates :landmarks,         with: :location_landmarks
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.icon
     'terrain'
   end

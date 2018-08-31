@@ -27,6 +27,10 @@ class Town < ApplicationRecord
   relates :countries, with: :town_countries
   relates :nearby_landmarks, with: :town_nearby_landmarks
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.content_name
     'town'
   end

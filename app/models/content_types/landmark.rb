@@ -24,6 +24,10 @@ class Landmark < ApplicationRecord
   relates :floras, with: :landmark_floras
   relates :creatures, with: :landmark_creatures
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.content_name
     'landmark'
   end

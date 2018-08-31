@@ -29,6 +29,10 @@ class Planet < ApplicationRecord
   relates :towns,          with: :planet_towns
   relates :nearby_planets, with: :planet_nearby_planets
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.color
     'text-lighten-2 blue'
   end

@@ -55,6 +55,10 @@ class Universe < ApplicationRecord
     end
   end
 
+  def description
+    overview_field_value('Description')
+  end
+
   def content_count
     content.count
   end

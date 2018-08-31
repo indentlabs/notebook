@@ -27,6 +27,10 @@ class Technology < ApplicationRecord
   relates :child_technologies,   with: :technology_child_technologies
   relates :related_technologies, with: :technology_related_technologies
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.color
     'text-darken-2 red'
   end
