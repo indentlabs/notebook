@@ -46,7 +46,7 @@ class Character < ApplicationRecord
   relates :enemies,          with: :character_enemies
 
   def description
-    role
+    overview_field_value('Role')
   end
 
   def self.content_name

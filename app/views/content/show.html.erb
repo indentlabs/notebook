@@ -56,7 +56,7 @@
                     else
                       # We should always have an attribute by now, but just in case we don't
                       # there's a bit of a safety net here. todo remove it.
-                      if content.respond_to?(attribute.old_column_source.to_sym)
+                      if attribute.old_column_source.present? && content.respond_to?(attribute.old_column_source.to_sym)
                         content.send(attribute.old_column_source.to_sym)
                       else
                         ""

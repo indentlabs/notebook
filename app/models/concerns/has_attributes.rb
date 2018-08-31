@@ -119,6 +119,42 @@ module HasAttributes
       end
     end
 
+    def overview_field(label)
+      category_ids = AttributeCategory.where(
+        user_id: user.id,
+        entity_type: self.class.name.downcase
+      ).pluck(:id)
+
+      # Todo these two queries should be able to be joined into one
+      field = AttributeField.find_by(
+        user_id: user.id,
+        attribute_category_id: category_ids,
+        label: label
+      )
+    end
+
+    def overview_field_value(label)
+      field_cache = overview_field(label)
+      return nil if field_cache.nil?
+
+      field_cache.attribute_values.detect { |v| v.entity_id == self.id }&.value.presence || (self.respond_to?(label.downcase) ? self.send(label.downcase) : nil)
+    end
+
+    def universe_field_value
+      universe_field_cache = universe_field
+      return self.universe_id if universe_field_cache.nil?
+
+      universe_id = universe_field_cache.attribute_values.detect do |v|
+        v.entity_id == self.id
+      end&.value.presence || self.universe_id.presence || nil
+
+      if universe_id
+        Universe.find(universe_id)
+      else
+        nil
+      end
+    end
+
     def self.field_type_for(category, field)
       if field[:label] == 'Name' && category.name == 'overview'
         "name"
