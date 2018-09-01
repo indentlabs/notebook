@@ -69,13 +69,13 @@ module HasAttributes
 
     def name_field
       category_ids = AttributeCategory.where(
-        user_id: user.id,
+        user_id: user_id,
         entity_type: self.class.name.downcase
       ).pluck(:id)
 
       # Todo these two queries should be able to be joined into one
       name_field = AttributeField.find_by(
-        user_id: user.id,
+        user_id: user_id,
         attribute_category_id: category_ids,
         field_type: 'name'
       )
@@ -119,13 +119,13 @@ module HasAttributes
 
     def overview_field(label)
       category_ids = AttributeCategory.where(
-        user_id: user.id,
+        user_id: user_id,
         entity_type: self.class.name.downcase
       ).pluck(:id)
 
       # Todo these two queries should be able to be joined into one
       field = AttributeField.find_by(
-        user_id: user.id,
+        user_id: user_id,
         attribute_category_id: category_ids,
         label: label
       )

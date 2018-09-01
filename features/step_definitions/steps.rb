@@ -41,7 +41,7 @@ end
 
 When(/^I create a (character|location|item|universe)$/) do |model|
   visit new_polymorphic_path(model)
-  fill_in "#{model}_name", with: 'My new content'
+  fill_in("#{model}_custom_attribute_values__value", with: 'My new content', match: :first)
   click_on "Create"
   @model = model.classify.constantize.where(name: 'My new content', user: @user).first
 end
@@ -57,7 +57,7 @@ end
 When(/^I change my (character|location|item|universe)\'s name$/) do |model|
   visit polymorphic_path(@model)
   click_on 'edit'
-  fill_in "#{model}_name", with: 'My changed name'
+  fill_in("#{model}_custom_attribute_values__value", with: "My changed name", match: :first)
   click_on 'save'
   @model.reload
 end
@@ -67,7 +67,7 @@ When(/^I view that (character|location|item|universe)$/) do |_model|
 end
 
 Then(/^that new name should be saved$/) do
-  expect(@model.name).to eq('My changed name')
+  expect(@model.name_field_value).to eq('My changed name')
 end
 
 When 'I answer the Serendipitous question' do
