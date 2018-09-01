@@ -20,18 +20,16 @@ module HasAttributes
           user: user,
           created_at: "January 1, 1970".to_datetime
         )
-        next unless user
 
-        category.save
+        category.save! if user
         category.attribute_fields << details[:attributes].map do |field|
-          af_field = AttributeField.with_deleted.find_or_initialize_by(
-            attribute_category_id: category.reload.id,
+          af_field = category.attribute_fields.with_deleted.find_or_initialize_by(
             label: field[:label],
             old_column_source: field[:name],
             user: user,
             field_type: field[:field_type].presence || "text_area"
           )
-          af_field.save if user
+          af_field.save! if user
           af_field
         end if details.key?(:attributes)
 
@@ -137,7 +135,7 @@ module HasAttributes
       field_cache = overview_field(label)
       return nil if field_cache.nil?
 
-      field_cache.attribute_values.detect { |v| v.entity_id == self.id }&.value.presence || (self.respond_to?(label.downcase) ? self.send(label.downcase) : nil)
+      field_cache.attribute_values.detect { |v| v.entity_id == self.id }&.value.presence || (self.respond_to?(label.downcase) ? self.read_attribute(label.downcase) : nil)
     end
 
     def universe_field_value
