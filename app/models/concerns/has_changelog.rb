@@ -13,47 +13,53 @@ module HasChangelog
       ).order(:id)
     end
 
-    def attribute_change_events
+    def attribute_change_events(limit=100)
       ContentChangeEvent.where(
         content_id: Attribute.where(
           entity_type: self.class.name,
           entity_id: id
         ),
         content_type: "Attribute"
-      ).order(:id).last(100)
+      ).order(:id).last(limit)
     end
 
     after_create do
-      changes = {"value"=>[nil, value]} if changes.nil? && self.is_a?(Attribute)
+      if self.is_a?(Attribute)
+        changes = {"value"=>[nil, value]} if changes.nil?
 
-      ContentChangeEvent.create(
-        user:           find_current_user,
-        changed_fields: changes,
-        content_id:     id,
-        content_type:   self.class.name,
-        action:         :created
-      ) if changes.present? && changes.any? && !disable_changelog_this_request
+        ContentChangeEvent.create(
+          user:           find_current_user,
+          changed_fields: changes,
+          content_id:     id,
+          content_type:   self.class.name,
+          action:         :created
+        ) if changes.any? && !disable_changelog_this_request
+      end
     end
 
     before_update do
-      # todo how to get current_user?
-      ContentChangeEvent.create(
-        user:           find_current_user,
-        changed_fields: changes,
-        content_id:     id,
-        content_type:   self.class.name,
-        action:         :updated
-      ) if changes.any? && !disable_changelog_this_request
+      if self.is_a?(Attribute)
+        # todo how to get current_user?
+        ContentChangeEvent.create(
+          user:           find_current_user,
+          changed_fields: changes,
+          content_id:     id,
+          content_type:   self.class.name,
+          action:         :updated
+        ) if changes.any? && !disable_changelog_this_request
+      end
     end
 
     before_destroy do
-      ContentChangeEvent.create(
-        user:           find_current_user,
-        changed_fields: changes,
-        content_id:     id,
-        content_type:   self.class.name,
-        action:         :deleted
-      ) if !disable_changelog_this_request
+      if self.is_a?(Attribute)
+        ContentChangeEvent.create(
+          user:           find_current_user,
+          changed_fields: changes,
+          content_id:     id,
+          content_type:   self.class.name,
+          action:         :deleted
+        ) if !disable_changelog_this_request
+      end
     end
 
     private
