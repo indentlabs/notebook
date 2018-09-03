@@ -30,7 +30,7 @@ module HasChangelog
         content_id:     id,
         content_type:   self.class.name,
         action:         :created
-      ) if changes.any? && !!disable_changelog_this_request
+      ) if changes.any? && !disable_changelog_this_request
     end
 
     before_update do
@@ -41,7 +41,7 @@ module HasChangelog
         content_id:     id,
         content_type:   self.class.name,
         action:         :updated
-      ) if changes.any? && !!disable_changelog_this_request
+      ) if changes.any? && !disable_changelog_this_request
     end
 
     before_destroy do
@@ -51,7 +51,7 @@ module HasChangelog
         content_id:     id,
         content_type:   self.class.name,
         action:         :deleted
-      ) if !!disable_changelog_this_request
+      ) if !disable_changelog_this_request
     end
 
     private
