@@ -2,23 +2,23 @@
 <div class="flow-text">Changelog for <%= content.name %></div>
 
 <ul class="collection">
-  <% content.attribute_change_events.reverse.each do |change_event| %>
-    <li class="collection-item">
-      <% next if change_event.user.nil? %>
-      <%= (change_event.user == current_user) ? 'You' : link_to(change_event.user.name, change_event.user) %>
-      <%= change_event.action %> this <%= change_event.content_type.downcase %>
-      <span class="grey-text"><%= time_ago_in_words change_event.created_at %> ago</span>.
-
-      <table class="highlight centered changelog">
+  <li class="collection-item">
+    <table class="highlight centered changelog">
+      <% if content.attribute_change_events.any? %>
         <thead>
           <tr>
-              <th>Changed field</th>
-              <th>Old value</th>
-              <th>New value</th>
+            <th>Who</th>
+            <th>Field</th>
+            <th>Old value</th>
+            <th>New value</th>
+            <th>When</th>
           </tr>
         </thead>
+      <% end %>
 
-        <tbody>
+      <tbody>
+        <% content.attribute_change_events.reverse.each do |change_event| %>
+          <% next if change_event.user.nil? %>
           <% change_event.changed_fields.each do |field_key, change| %>
             <%# todo this probably needs dope optimization %>
             <% key = change_event.content.attribute_field.label %>
@@ -51,15 +51,20 @@
             %>
 
             <tr>
+              <td>
+                <%= (change_event.user == current_user) ? 'You' : link_to(change_event.user.name, change_event.user) %>
+                <%= change_event.action %>
+              </td>
               <td><%= key.titleize %></td>
               <td><%= old_value.truncate(380) %></td>
               <td><%= new_value.truncate(380) %></td>
+              <td><span class="grey-text"><%= time_ago_in_words change_event.created_at %> ago</span></td>
             </tr>
           <% end %>
-        </tbody>
-      </table>
-    </li>
-  <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </li>
   <% content.content_change_events.reverse.each do |change_event| %>
     <li class="collection-item">
       <% next if change_event.user.nil? %>

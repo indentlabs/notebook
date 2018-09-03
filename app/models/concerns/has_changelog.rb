@@ -24,13 +24,15 @@ module HasChangelog
     end
 
     after_create do
+      changes = {"value"=>[nil, value]} if changes.nil? && self.is_a?(Attribute)
+
       ContentChangeEvent.create(
         user:           find_current_user,
         changed_fields: changes,
         content_id:     id,
         content_type:   self.class.name,
         action:         :created
-      ) if changes.any? && !disable_changelog_this_request
+      ) if changes.present? && changes.any? && !disable_changelog_this_request
     end
 
     before_update do
