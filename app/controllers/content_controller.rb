@@ -122,7 +122,8 @@ class ContentController < ApplicationController
       @content.update(
         name: @content.name_field_value,
         universe: @content.universe_field_value
-      ) # Cache the name/universe also (todo stick this in the same save as above)
+      ) unless [AttributeCategory, AttributeField].include?(@content.class)
+      # Cache the name/universe also (todo stick this in the same save as above)
 
       if params.key? 'image_uploads'
         upload_files params['image_uploads'], content_type.name, @content.id
