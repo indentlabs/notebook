@@ -46,7 +46,17 @@
       </div>
       <div class="collapsible-body">
         <div class="row">
-          <div class="col">
+          <div class="col s12 m6">
+            <%= form_for(attribute_category, method: :put) do |f| %>
+              <div class="input-field input-group iconpicker-container">
+                <i class="material-icons prefix"><%= attribute_category.icon %></i>
+                <%= f.label :label, 'Icon code' %>
+                <%= f.text_field :icon, class: 'form-control iconpicker-element iconpicker-input', data: { placement: 'bottom' } %>
+              </div>
+              <%= f.submit 'Save icon', class: 'btn white black-text' %>
+            <% end %>
+          </div>
+          <div class="col s12 m6">
             <%= form_for(attribute_category, method: :put) do |f| %>
               <%= f.hidden_field :hidden, value: !hidden_category %><%# flip the bit %>
               <%= f.submit (hidden_category ? 'Show' : 'Hide') + ' this category', class: 'btn white black-text' %>
@@ -160,3 +170,17 @@
     </div>
   </li>
  </ul>
+
+
+ <script type="text/javascript">
+   $('.iconpicker-input').iconpicker({
+     icons: [
+       <% MATERIAL_ICONS.each do |icon_name| %>
+        { title: "<%= icon_name %>", searchTerms: ["<%= icon_name %>"] },
+       <% end %>
+     ], // list of icon objects [{title:String, searchTerms:String}]. By default, all Font Awesome icons are included.
+     fullClassFormatter: function (val) {
+       return 'material-icons ' + val;
+     }}
+   );
+ </script>

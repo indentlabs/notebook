@@ -18,6 +18,10 @@ class AttributeCategory < ApplicationRecord
     'amber'
   end
 
+  def icon
+    icon_override || self.class.icon
+  end
+
   def self.icon
     'folder_open'
   end

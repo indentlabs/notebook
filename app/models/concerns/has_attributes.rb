@@ -16,10 +16,11 @@ module HasAttributes
           entity_type: self.content_name,
           name: category_name.to_s,
           label: details[:label],
-          icon: details[:icon],
           user: user,
           created_at: "January 1, 1970".to_datetime
         )
+        # Default new categories to the default icon
+        category.icon = details[:icon] unless category.persisted?
 
         category.save! if user
         category.attribute_fields << details[:attributes].map do |field|
