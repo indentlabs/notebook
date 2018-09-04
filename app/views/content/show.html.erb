@@ -34,7 +34,28 @@
                 <%= render partial: 'content/display/contributors', locals: { content: content } %>
               </div>
             <% end %>
-            <% category.attribute_fields.where(hidden: [false, nil]).each do |attribute| %>
+            <% category.attribute_fields.where(hidden: [false, nil]).sort do |a, b|
+                a_value = case a.field_type
+                when 'name'
+                  0
+                when 'universe'
+                  1
+                else
+                  2
+                end
+
+                b_value = case b.field_type
+                when 'name'
+                  0
+                when 'universe'
+                  1
+                else
+                  2
+                end
+
+                a_value <=> b_value
+              end.each do |attribute| %>
+              <%# todo not this %>
               <% if attribute.name.start_with?("private") %>
                 <% next unless user_signed_in? && (
                    (content.is_a?(Universe) && content.user == current_user) ||

@@ -51,7 +51,28 @@
             <div class="col s12">
               <h5>Customize fields</h5>
               <ul class="collapsible">
-                <% attribute_category.attribute_fields.each do |attribute_field| %>
+                <% attribute_category.attribute_fields.sort do |a, b|
+                    a_value = case a.field_type
+                    when 'name'
+                      0
+                    when 'universe'
+                      1
+                    else
+                      2
+                    end
+
+                    b_value = case b.field_type
+                    when 'name'
+                      0
+                    when 'universe'
+                      1
+                    else
+                      2
+                    end
+
+                    a_value <=> b_value
+                  end.each do |attribute_field| %>
+                  <%# todo not this %>
                   <% hidden_field = !!attribute_field.hidden %>
                   <li>
                     <div class="collapsible-header">
