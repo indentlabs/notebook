@@ -3,11 +3,13 @@
   categories_for_this_type = AttributeCategory.where(
     user:        current_user,
     entity_type: content.class.name.downcase,
+    hidden:      [nil, false]
   )
 
   fields_for_these_categories = AttributeField.where(
     user:        current_user,
     field_type:  ["textarea", "text_area", "textearea"],
+    hidden:      [nil, false],
     attribute_category_id: categories_for_this_type.pluck(:id)
   )
 
@@ -17,66 +19,92 @@
     value:       ["", nil],
     attribute_field_id: fields_for_these_categories.pluck(:id)
   )
-  return unless empty_attribute_value.present?
 
-  associated_attribute_field = empty_attribute_value.attribute_field
-  return if associated_attribute_field.hidden?
-  return if associated_attribute_field.attribute_category.hidden?
-  return if associated_attribute_field.field_type != 'text_area'
+  associated_attribute_field = empty_attribute_value.attribute_field if empty_attribute_value.present?
 %>
 
-<div class="content-question card">
-  <div class="card-content light-blue darken-1 white-text">
-    <i class="material-icons <%= content.class.color %>-text circle right circle white"><%= content.class.icon %></i>
-    <strong>
-      <%=
-        t(
-          "serendipitous_questions.attributes.#{content.class.name.downcase}.#{associated_attribute_field.label.downcase}",
-          name:    content.name_field_value,
-          default: "What is #{content.name_field_value}'s #{associated_attribute_field.label.downcase}?"
-        )
-      %>
-    </strong>
-  </div>
-  <div class="card-tabs">
-    <ul class="tabs tabs-fixed-width">
-      <li class="tab"><a class="active" href="#tristan-answer">Quick Answer</a></li>
-      <li class="tab"><a href="#tristan-reference">Quick Reference</a></li>
-    </ul>
-  </div>
-  <div class="card-content lighten-4">
-    <div id="tristan-answer">
-      <%= form_for content do |f| %>
-        <%= hidden_field(:override, :redirect_path, value: redirect_path) if defined?(redirect_path) %>
-
+<% if empty_attribute_value.present? %>
+  <div class="content-question card">
+    <div class="card-content light-blue darken-1 white-text">
+      <i class="material-icons <%= content.class.color %>-text circle right circle white"><%= content.class.icon %></i>
+      <strong>
         <%=
-          render 'content/form/text_input',
-            f: f,
-            content: content,
-            field: associated_attribute_field
+          t(
+            "serendipitous_questions.attributes.#{content.class.name.downcase}.#{associated_attribute_field.label.downcase}",
+            name:    content.name_field_value,
+            default: "What is #{content.name_field_value}'s #{associated_attribute_field.label.downcase}?"
+          )
         %>
-
-        <%= button_tag(type: 'submit', class: "content-question-submit waves-effect waves-light btn #{content.class.color} right") do %>
-          Update <%= content.name.downcase %>
-        <% end %>
-        <div style="clear: both;"></div>
-      <% end %>
+      </strong>
     </div>
-    <div id="tristan-reference">
-      <div class="row">
-        <div class="col hide-on-small-only m3 underlap">
-          <%= image_tag 'tristan/small',
-            class: 'tooltipped tristan',
-            data: {
-              position: 'right',
-              enterDelay: '500',
-              tooltip: "Hey, I'm Tristan! I'm happy to look up relevant information like this for you."
-            } %>
-        </div>
-        <div class="col s12 m9">
-          <%= render partial: 'content/display/quick_reference', locals: { content: content } %>
+    <div class="card-tabs">
+      <ul class="tabs tabs-fixed-width">
+        <li class="tab"><a class="active" href="#tristan-answer">Quick Answer</a></li>
+        <li class="tab"><a href="#tristan-reference">Quick Reference</a></li>
+      </ul>
+    </div>
+    <div class="card-content lighten-4">
+      <div id="tristan-answer">
+        <%= form_for content do |f| %>
+          <%= hidden_field(:override, :redirect_path, value: redirect_path) if defined?(redirect_path) %>
+
+          <%=
+            render 'content/form/text_input',
+              f: f,
+              content: content,
+              field: associated_attribute_field
+          %>
+
+          <%= button_tag(type: 'submit', class: "content-question-submit waves-effect waves-light btn #{content.class.color} right") do %>
+            Update <%= content.name.downcase %>
+          <% end %>
+          <div style="clear: both;"></div>
+        <% end %>
+      </div>
+      <div id="tristan-reference">
+        <div class="row">
+          <div class="col hide-on-small-only m3 underlap">
+            <%= image_tag 'tristan/small',
+              class: 'tooltipped tristan',
+              data: {
+                position: 'right',
+                enterDelay: '500',
+                tooltip: "Hey, I'm Tristan! I'm happy to look up relevant information like this for you."
+              } %>
+          </div>
+          <div class="col s12 m9">
+            <%= render partial: 'content/display/quick_reference', locals: { content: content } %>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+<% elsif defined?(show_empty_prompt) && show_empty_prompt %>
+  <div class="row">
+    <div class="col s12 m9">
+      <h5>Hey! It looks like I don't have any more prompts for you right now. I'll get to work coming up with some!</h5>
+      <p>In the meantime, I'll get a big boost of prompts if you create more pages I can think about! You can also check back later and I might have more prompts for your current pages.</p>
+      <% new_content_types = (current_user.createable_content_types - [Universe]) %>
+      <% new_content_types.each do |content_type| %>
+        <%= link_to new_polymorphic_path(content_type), class: "btn #{content_type.color} black-text", style: 'margin: 14px;' do %>
+          create
+          <% if current_user.send(content_type.name.downcase.pluralize).any? %>
+            another
+          <% else %>
+            <%= %w(a e i o).include?(content_type.name.downcase[0]) ? 'an' : 'a' %>
+          <% end %>
+          <%= content_type.name.downcase %>
+        <% end %>
+      <% end %>
+    </div>
+    <div class="col hide-on-small-only m3">
+      <%= image_tag 'tristan/small',
+        class: 'tooltipped tristan',
+        data: {
+          position: 'right',
+          enterDelay: '500',
+          tooltip: "Hey, I'm Tristan! I'm happy to look up relevant information like this for you."
+        } %>
+    </div>
+  </div>
+<% end %>
