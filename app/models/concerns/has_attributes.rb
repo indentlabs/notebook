@@ -105,6 +105,7 @@ module HasAttributes
 
     def universe_field_value
       universe_field_cache = universe_field
+      return nil unless self.respond_to?(:universe_id)
       return self.universe_id if universe_field_cache.nil?
 
       universe_id = universe_field_cache.attribute_values.detect do |v|
@@ -137,21 +138,6 @@ module HasAttributes
       return nil if field_cache.nil?
 
       field_cache.attribute_values.detect { |v| v.entity_id == self.id }&.value.presence || (self.respond_to?(label.downcase) ? self.read_attribute(label.downcase) : nil)
-    end
-
-    def universe_field_value
-      universe_field_cache = universe_field
-      return self.universe_id if universe_field_cache.nil?
-
-      universe_id = universe_field_cache.attribute_values.detect do |v|
-        v.entity_id == self.id
-      end&.value.presence || self.universe_id.presence || nil
-
-      if universe_id
-        Universe.find(universe_id)
-      else
-        nil
-      end
     end
 
     def self.field_type_for(category, field)

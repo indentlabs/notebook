@@ -118,10 +118,11 @@ class ContentController < ApplicationController
 
     @content.user = current_user
     if @content.update_attributes(content_params)
-      @content.update(
-        name: @content.name_field_value,
-        universe: @content.universe_field_value
-      ) unless [AttributeCategory, AttributeField].include?(@content.class)
+      cache_params = {}
+      cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField].include?(@content.class)
+      cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
+
+      @content.update(cache_params) if cache_params.any?
       # Cache the name/universe also (todo stick this in the same save as above)
 
       if params.key? 'image_uploads'
