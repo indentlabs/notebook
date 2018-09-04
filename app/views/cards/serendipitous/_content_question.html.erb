@@ -1,59 +1,82 @@
 <%
-if question.present? &&
-   question[:field].present? &&
-   question[:question].present? &&
-   content.present?
+  # Partial locals: `content` to ask a question about
+  categories_for_this_type = AttributeCategory.where(
+    user:        current_user,
+    entity_type: content.class.name.downcase,
+  )
+
+  fields_for_these_categories = AttributeField.where(
+    user:        current_user,
+    field_type:  ["textarea", "text_area", "textearea"],
+    attribute_category_id: categories_for_this_type.pluck(:id)
+  )
+
+  empty_attribute_value = Attribute.find_by(
+    entity_type: content.class.name,
+    entity_id:   content.id,
+    value:       ["", nil],
+    attribute_field_id: fields_for_these_categories.pluck(:id)
+  )
+  return unless empty_attribute_value.present?
+
+  associated_attribute_field = empty_attribute_value.attribute_field
+  return if associated_attribute_field.hidden?
+  return if associated_attribute_field.attribute_category.hidden?
+  return if associated_attribute_field.field_type != 'text_area'
 %>
-  <div class="content-question card">
-    <div class="card-content light-blue darken-1 white-text">
-      <i class="material-icons <%= content.class.color %>-text circle right circle white"><%= content.class.icon %></i>
-      <strong><%= question[:question] %></strong>
-    </div>
-    <div class="card-tabs">
-      <ul class="tabs tabs-fixed-width">
-        <li class="tab"><a class="active" href="#tristan-answer">Quick Answer</a></li>
-        <li class="tab"><a href="#tristan-reference">Quick Reference</a></li>
-      </ul>
-    </div>
-    <div class="card-content lighten-4">
-      <div id="tristan-answer">
-        <%= form_for content do |f| %>
 
-          <% if defined?(redirect_path) %>
-            <%= hidden_field :override, :redirect_path, value: redirect_path %>
-          <% end %>
+<div class="content-question card">
+  <div class="card-content light-blue darken-1 white-text">
+    <i class="material-icons <%= content.class.color %>-text circle right circle white"><%= content.class.icon %></i>
+    <strong>
+      <%=
+        t(
+          "serendipitous_questions.attributes.#{content.class.name.downcase}.#{associated_attribute_field.label.downcase}",
+          name:    content.name_field_value,
+          default: "What is #{content.name_field_value}'s #{associated_attribute_field.label.downcase}?"
+        )
+      %>
+    </strong>
+  </div>
+  <div class="card-tabs">
+    <ul class="tabs tabs-fixed-width">
+      <li class="tab"><a class="active" href="#tristan-answer">Quick Answer</a></li>
+      <li class="tab"><a href="#tristan-reference">Quick Reference</a></li>
+    </ul>
+  </div>
+  <div class="card-content lighten-4">
+    <div id="tristan-answer">
+      <%= form_for content do |f| %>
+        <%= hidden_field(:override, :redirect_path, value: redirect_path) if defined?(redirect_path) %>
 
-          <div class="input-field">
-            <%= f.text_area question[:field], class: 'content-question-input materialize-textarea', placeholder: content.class.human_attribute_name(question[:field]) %>
-          </div>
+        <%=
+          render 'content/form/text_input',
+            f: f,
+            content: content,
+            field: associated_attribute_field
+        %>
 
-          <%# Using a plain old form.submit creates a button that only responds to a click on the button text,
-              not anywhere else on the button. %>
-          <%= button_tag(type: 'submit', class: "content-question-submit waves-effect waves-light btn #{content.class.color} right") do %>
-            Update <%= content.name.downcase %>
-          <% end %>
-          <div style="clear: both;"></div>
+        <%= button_tag(type: 'submit', class: "content-question-submit waves-effect waves-light btn #{content.class.color} right") do %>
+          Update <%= content.name.downcase %>
         <% end %>
-      </div>
-      <div id="tristan-reference">
-        <div class="row">
-          <div class="col hide-on-small-only m3 underlap">
-            <%= image_tag 'tristan/small',
-              class: 'tooltipped tristan',
-              data: {
-                position: 'right',
-                enterDelay: '500',
-                tooltip: "Hey, I'm Tristan! I'm happy to look up relevant information like this for you."
-              } %>
-          </div>
-          <div class="col s12 m9">
-            <%= render partial: 'content/display/quick_reference', locals: { content: content } %>
-          </div>
+        <div style="clear: both;"></div>
+      <% end %>
+    </div>
+    <div id="tristan-reference">
+      <div class="row">
+        <div class="col hide-on-small-only m3 underlap">
+          <%= image_tag 'tristan/small',
+            class: 'tooltipped tristan',
+            data: {
+              position: 'right',
+              enterDelay: '500',
+              tooltip: "Hey, I'm Tristan! I'm happy to look up relevant information like this for you."
+            } %>
+        </div>
+        <div class="col s12 m9">
+          <%= render partial: 'content/display/quick_reference', locals: { content: content } %>
         </div>
       </div>
     </div>
   </div>
-
-<% else %>
-<!-- decided not to render serendipitous card for this question: <%= question || 'nil'%> -->
-<% end %>
+</div>
