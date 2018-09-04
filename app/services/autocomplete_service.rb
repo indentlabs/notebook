@@ -66,6 +66,7 @@ class AutocompleteService < Service
   end
 
   def self.autocompleteable?(field_name)
+    return false
     self.for(field_name).any?
   end
 

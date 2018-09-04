@@ -14,7 +14,7 @@
   <% unless defined?(show_label) && !show_label %>
     <%= f.label field do %>
       <%= field.label.present? ? field.label : ' ' %>
-      <% if defined?(autocomplete) %>
+      <% if defined?(autocomplete) && autocomplete %>
         <i class="material-icons grey-text lighten-2 tooltipped" style="font-size: 100%" data-tooltip="This field may suggest some ideas for you when you start typing." data-position="right">
           offline_bolt
         </i>
@@ -29,15 +29,16 @@
   %>
 
   <%= hidden_field_tag "#{content_name}[custom_attribute_values][][name]", field.name %>
-  <%= text_area_tag "#{content_name}[custom_attribute_values][][value]", value && value.value, class: "materialize-textarea #{'autocomplete' if defined?(autocomplete)}", placeholder: placeholder %>
+  <%= text_area_tag "#{content_name}[custom_attribute_values][][value]", value && value.value, class: "materialize-textarea #{'autocomplete' if defined?(autocomplete) && autocomplete}", placeholder: placeholder %>
   <% unless field.name_field? || field.universe_field? %>
     <%= render 'content/form/attribute_field_dropdown', field: field %>
   <% end %>
 </div>
 
-<% if defined?(autocomplete) %>
-  <% content_for :javascript do %>
-    $(function() {
+<% if defined?(autocomplete) && autocomplete %>
+  <%# todo re-enable this %>
+  <%# content_for :javascript do %>
+    <!-- $(function() {
       // This setTimeout is an unfortunate hack to ensure this runs after initializing materialize
       setTimeout(function() {
         console.log("Initializing autocomplete for #<%= "#{content_name}_#{field.name}" %>");
@@ -50,6 +51,6 @@
           }
         });
       }, 1000);
-    });
-  <% end %>
+    }); -->
+  <%# end %>
 <% end %>
