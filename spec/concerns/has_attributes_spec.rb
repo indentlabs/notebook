@@ -19,7 +19,7 @@ describe HasAttributes do
 
     context 'with a user' do
       it 'returns an array of AttributeCategory' do
-        expect(categories).to be_a_kind_of(Array)
+        expect(categories).to be_a_kind_of(ActiveRecord::AssociationRelation)
         expect(categories.first).to be_a_kind_of(AttributeCategory)
       end
 
@@ -28,13 +28,6 @@ describe HasAttributes do
 
         it 'includes custom attribute categories' do
           expect(categories).to include(category)
-        end
-      end
-
-      context 'without any attributes' do
-        # This is to prevent empty categories from displaying blank panels
-        it 'does not include the custom attribute category' do
-          expect(categories).to_not include(category)
         end
       end
     end

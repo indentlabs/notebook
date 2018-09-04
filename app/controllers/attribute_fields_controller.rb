@@ -1,5 +1,6 @@
 # Controller for the Attribute model
 class AttributeFieldsController < ContentController
+
   def destroy
     # Delete this field as usual -- sets @content
     super
@@ -12,20 +13,20 @@ class AttributeFieldsController < ContentController
   private
 
   def initialize_object
-    category = current_user.attribute_categories.where(label: content_params[:attribute_category]).first_or_initialize.tap do |c|
-      c.entity_type = params[:entity_type]
-      c.save!
+    @content = AttributeField.find_or_initialize_by(content_params)
+    @content.field_type = 'text_area'
+
+    if @content.attribute_category_id.nil?
+      category = current_user.attribute_categories.where(label: content_params[:attribute_category] || content_params[:label]).first_or_initialize.tap do |c|
+        c.entity_type = params[:entity_type] || content_params[:entity_type]
+        c.save!
+      end
+      @content.attribute_category_id = category.id
     end
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created attribute', {
       'content_type': params[:entity_type]
     }) if Rails.env.production?
-
-    @content = AttributeField.new(label: content_params[:label]).tap do |f|
-      f.attribute_category_id = category.id
-      f.user_id = current_user.id
-      f.field_type = 'textearea'
-    end
   end
 
   def content_deletion_redirect_url
@@ -33,7 +34,19 @@ class AttributeFieldsController < ContentController
   end
 
   def content_creation_redirect_url
-    :back
+    if @content.present?
+      category = @content.attribute_category
+      attribute_customization_path(content_type: category.entity_type)
+    else
+      :back
+    end
+  end
+
+  def successful_response(url, notice)
+    respond_to do |format|
+      format.html { redirect_to attribute_customization_path(content_type: @content.attribute_category.entity_type), notice: notice }
+      format.json { render json: @content || {}, status: :success, notice: notice }
+    end
   end
 
   def content_params
@@ -45,7 +58,9 @@ class AttributeFieldsController < ContentController
       :universe_id, :user_id,
       :attribute_category,
       :name, :field_type,
-      :label, :description
+      :label, :description,
+      :entity_type, :attribute_category_id,
+      :hidden
     ]
   end
 end

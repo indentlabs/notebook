@@ -47,6 +47,9 @@ $(document).ready(function () {
       $('.content-tabs').find('li.tab a').addClass('red-text');
       $('.panel').show();
     }
+
+    //  Hide all visible tooltips (because this doesn't trigger mouseout :( )
+    $('.material-tooltip').css('visibility', 'hidden');
   });
 
   $('.new-attribute-field-link').click(function (e) {
@@ -57,4 +60,3 @@ $(document).ready(function () {
   $('.content-tabs .tab a').first().addClass('red-text');
 
 });
-

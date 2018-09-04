@@ -1,9 +1,13 @@
 class AttributeField < ApplicationRecord
+  acts_as_paranoid
+
   validates :name, presence: true
 
   belongs_to :user
   belongs_to :attribute_category
-  has_many :attribute_values, class_name: 'Attribute'
+  has_many :attribute_values, class_name: 'Attribute', dependent: :destroy
+
+  validates_presence_of :user_id
 
   include HasAttributes
   include Serendipitous::Concern
@@ -15,14 +19,28 @@ class AttributeField < ApplicationRecord
 
   before_validation :ensure_name
 
-  scope :is_public, -> { eager_load(:universe).where('universes.privacy = ? OR attribute_fields.privacy = ?', 'public', 'public') }
-
   def self.color
     'amber'
   end
 
   def self.icon
     'text_fields'
+  end
+
+  # Icon used for a specific attribute field
+  def icon
+    case self.field_type
+    when 'name'
+      'fingerprint'
+    when 'link'
+      'link'
+    when 'universe'
+      Universe.icon
+    when 'textarea'
+      'text_fields'
+    else
+      'text_fields'
+    end
   end
 
   def self.content_name
@@ -39,6 +57,14 @@ class AttributeField < ApplicationRecord
 
   def system?
     !!self.system
+  end
+
+  def name_field?
+    self.field_type == 'name'
+  end
+
+  def universe_field?
+    self.field_type == 'universe'
   end
 
   private

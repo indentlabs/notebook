@@ -28,6 +28,10 @@ class Scene < ApplicationRecord
   # Items
   relates :scene_items, with: :scene_itemships
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.color
     'grey'
   end

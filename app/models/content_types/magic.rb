@@ -22,6 +22,10 @@ class Magic < ApplicationRecord
   # Characters
   relates :deities, with: :magic_deityships
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.color
     'orange'
   end

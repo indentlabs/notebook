@@ -28,6 +28,10 @@ class Race < ApplicationRecord
   # Characters
   relates :famous_figures, with: :famous_figureships
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.color
     'light-green'
   end

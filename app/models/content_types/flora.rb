@@ -24,6 +24,10 @@ class Flora < ApplicationRecord
   relates :locations, with: :flora_locations
   relates :creatures, with: :flora_eaten_by
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.content_name
     'flora'
   end

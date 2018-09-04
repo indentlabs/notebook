@@ -35,6 +35,10 @@ class Religion < ApplicationRecord
   # Deities
   relates :deities, with: :religion_deities
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.color
     'yellow'
   end

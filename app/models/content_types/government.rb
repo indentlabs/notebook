@@ -23,6 +23,10 @@ class Government < ApplicationRecord
   relates :technologies,      with: :government_technologies
   relates :creatures,         with: :government_creatures
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.color
     'darken-2 green'
   end

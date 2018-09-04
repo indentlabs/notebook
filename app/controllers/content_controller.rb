@@ -1,9 +1,14 @@
 class ContentController < ApplicationController
+  # todo before_action :load_content to set @content
   before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy]
+  before_action :migrate_old_style_field_values, only: [:show, :edit]
 
   def index
     @content_type_class = content_type_from_controller(self.class)
     pluralized_content_name = @content_type_class.name.downcase.pluralize
+
+    # Create the default fields for this user if they don't have any already
+    @content_type_class.attribute_categories(current_user)
 
     if @universe_scope.present? && @content_type_class != Universe
       @content = @universe_scope.send(pluralized_content_name)
@@ -101,21 +106,24 @@ class ContentController < ApplicationController
       return redirect_to :back
     end
 
-    #todo: why is this commented out?
-    # Even if a user can create content, we want to double check that they're either on a premium account or creating content in a universe owned by someone on premium
-    # unless current_user.on_premium_plan?
-    #   containing_universe = Universe.find(content_params[:universe_id].to_i)
-    #   unless content_params[:universe_id].present? && containing_universe && containing_universe.user.on_premium_plan? && current_user.contributable_universes.include?(containing_universe)
-    #     return redirect_to send(content_type.name.downcase.pluralize + '_path'),
-    #       notice: "Premium content must either be created by a user with a Premium account, or in a universe owned by a user with a Premium account."
-    #   end
-    # end
+    #  Don't set name fields on content that doesn't have a name field
+    #todo abstract this (and the one in update) to a function
+    unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name)
+      @content.name = @content.name_field_value || "Untitled"
+    end
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
       'content_type': content_type.name
     }) if Rails.env.production?
 
-    if @content.save
+    @content.user = current_user
+    if @content.update_attributes(content_params)
+      @content.update(
+        name: @content.name_field_value,
+        universe: @content.universe_field_value
+      ) unless [AttributeCategory, AttributeField].include?(@content.class)
+      # Cache the name/universe also (todo stick this in the same save as above)
+
       if params.key? 'image_uploads'
         upload_files params['image_uploads'], content_type.name, @content.id
       end
@@ -130,7 +138,7 @@ class ContentController < ApplicationController
     content_type = content_type_from_controller(self.class)
     @content = content_type.find(params[:id])
 
-    unless @content.updatable_by? current_user
+    unless @content.updatable_by?(current_user)
       return redirect_to :back
     end
 
@@ -150,6 +158,12 @@ class ContentController < ApplicationController
 
     if @content.user == current_user
       update_success = @content.update_attributes(content_params)
+      #  Don't set name fields on content that doesn't have a name field
+      unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name)
+        @content.name = @content.name_field_value
+        @content.universe_id = @content.universe_field_value
+        @content.save
+      end
     else
       # Exclude fields only the real owner can edit
       #todo move field list somewhere when it grows
@@ -210,7 +224,82 @@ class ContentController < ApplicationController
     successful_response(content_deletion_redirect_url, t(:delete_success, model_name: humanized_model_name))
   end
 
+  def attributes
+    @content_type = params[:content_type]
+    # todo make this a before_action load_content_type
+    unless valid_content_types.map { |c| c.name.downcase }.include?(@content_type)
+      raise "Invalid content type on attributes customization page: #{@content_type}"
+    end
+    @content_type_class = @content_type.titleize.constantize
+  end
+
   private
+
+  def migrate_old_style_field_values
+    @content = content_type_from_controller(self.class).find(params[:id])
+
+    # Ensure the default attributes are created before  using them
+    @content.class.attribute_categories(current_user)
+    attribute_categories = @content.class.attribute_categories(current_user)
+    attribute_fields = AttributeField.where(attribute_category_id: attribute_categories.map(&:id))
+    #attribute_fields = attribute_categories.flat_map(&:attribute_fields)
+
+    attribute_fields.each do |attribute_field|
+      next unless attribute_field.old_column_source.present?
+
+      existing_value = attribute_field.attribute_values.where(entity_id: @content.id).first
+
+      # If a user has touched this attribute's value since we've created it,
+      # we don't want to touch it again.
+      if existing_value && existing_value.created_at != existing_value.updated_at
+        next
+      end
+
+      delete_model_source_value = false
+      attribute_value = if attribute_field.field_type == 'link'
+        nil
+      else # text field
+        value_from_model = @content.send(attribute_field.old_column_source)
+        if value_from_model.present?
+          delete_model_source_value = true
+          value_from_model
+        else
+          nil
+        end
+      end
+
+      unless attribute_value.nil?
+        if existing_value
+          existing_value.disable_changelog_this_request = true
+          existing_value.update!(value: attribute_value)
+          existing_value.disable_changelog_this_request = false
+        else
+          new_value = attribute_field.attribute_values.new(
+            user_id: current_user.id,
+            entity_type: @content.class.name,
+            entity_id: @content.id,
+            value: attribute_value,
+            privacy: 'private' # todo just make this the default for the column instead
+          )
+
+          new_value.disable_changelog_this_request = true
+          new_value.save!
+          new_value.disable_changelog_this_request = true
+        end
+      end
+
+      # Lets leave these columns alone for now so 1) we don't have to mess with disabling changelogs, and 2) why not be safe?
+      # if delete_model_source_value && attribute_field.old_column_source.present? && attribute_field.field_type != 'name' && @content.send(attribute_field.old_column_source).present?
+      #   @content.disable_changelog_this_request = true
+      #   @content.update_attribute(attribute_field.old_column_source, nil)
+      #   @content.disable_changelog_this_request = false
+      # end
+    end
+  end
+
+  def valid_content_types
+    Rails.application.config.content_types[:all]
+  end
 
   def initialize_object
     content_type = content_type_from_controller(self.class)
@@ -233,7 +322,7 @@ class ContentController < ApplicationController
   end
 
   def content_creation_redirect_url
-    @content
+    params[:redirect_override].presence || @content
   end
 
   def content_symbol

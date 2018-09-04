@@ -2,10 +2,6 @@
 class ItemsController < ContentController
   private
 
-  def content_params
-    params.require(:item).permit(content_param_list)
-  end
-
   def content_param_list
     [
       :universe_id, :user_id,

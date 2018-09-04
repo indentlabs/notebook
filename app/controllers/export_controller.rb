@@ -59,6 +59,7 @@ class ExportController < ApplicationController
   end
 
   def to_csv ar_relation
+    # todo change this and (ALL `.build.class` to `.klass`)
     ar_class = ar_relation.build.class
     attribute_categories = ar_class.attribute_categories(current_user)
 

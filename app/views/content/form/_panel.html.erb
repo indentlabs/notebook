@@ -1,5 +1,4 @@
 <div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
-
   <%# todo: break this out into a partial %>
   <% if category.name == 'gallery' %>
     <div>
@@ -50,7 +49,7 @@
     end
   %>
 
-  <% category.attribute_fields.each do |field| %>
+  <% category.attribute_fields.where(hidden: [false, nil]).each do |field| %>
     <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
 
       <% value = nil %>
@@ -60,18 +59,12 @@
         <% value = Attribute.where(user: current_user, entity: content) %>
       <% end %>
 
-      <% if value.is_a?(ActiveRecord::Associations::CollectionProxy) %>
+      <% if field.field_type == 'link' %>
         <%# Relation-setting UI %>
-        <% through_class = content.class.reflect_on_association(field.name).options[:through].to_s %>
-        <%= render 'content/form/relation_input', f: f, attribute: field.name, label: field.label, relation: through_class %>
+        <% through_class = content.class.reflect_on_association(field.old_column_source).options[:through].to_s %>
+        <%= render 'content/form/relation_input', f: f, attribute: field.old_column_source, label: field.label, relation: through_class %>
 
-      <% elsif field.name == 'archetype' %>
-        <div class="input-field input-select">
-          <%= f.label field.name, class: 'active' %><br />
-          <%= f.select field.name, options_for_select(t('archetypes'), selected: f.object.archetype), include_blank: true %>
-        </div>
-
-      <% elsif field.name == 'universe_id' %>
+      <% elsif field.field_type == 'universe' %>
         <div class="input-field">
           <%= f.label field.name, field.label %><br />
           <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) || f.object.universe_id.nil? %>
@@ -98,11 +91,17 @@
                 end
               end
             %>
+
+            <% universe_attribute = Attribute.find_by(user: current_user, attribute_field: field, entity: f.object) %>
+            <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field.name %>
             <%=
-              f.select field.name,
-              valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }.compact,
-              include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item),
-              selected: (f.object.persisted? ? f.object.universe_id : session[:universe_id])
+              @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
+              select_tag "#{content.class.name.downcase}[custom_attribute_values][][value]",
+                options_for_select(
+                  @universe_dropdown_options.compact,
+                  @universe_dropdown_options.map(&:second).index(content.universe_field_value.try(:id))
+                ),
+                include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
             %>
             <% if show_premium_notice %>
               <div class="help-text">
@@ -116,6 +115,12 @@
           <% end %>
         </div>
 
+      <% elsif field.name == 'archetype' %>
+        <div class="input-field input-select">
+          <%= f.label field.name, class: 'active' %><br />
+          <%= f.select field.name, options_for_select(t('archetypes'), selected: f.object.archetype), include_blank: true %>
+        </div>
+
       <% elsif field.name == 'attribute_category_id' %>
         <div class="input-field">
           <%= f.label field.name, field.label %><br />
@@ -123,6 +128,7 @@
         </div>
 
       <% elsif field.name == 'field_type' %>
+        <%# todo doubt this is used anymore -- also the other else statements here %>
         <div class="input-field">
           <%= f.label field.name, field.label %><br />
           <%= f.select field.name, ['Text Field'].map { |tf| [tf, tf.underscore] } %>
@@ -131,17 +137,7 @@
       <% elsif field.name == 'entity_type' %>
         <%= f.hidden_field :entity_type, value: f.object.entity_type %>
 
-      <% elsif field.name == 'privacy' %>
-        <div class="input-field">
-          <%= f.label field.name, field.label %><br />
-          <%= f.select field.name, [['Only visible to you', 'private'], ['Visible to anyone with the URL', 'public']] %>
-          <div class="help-text">
-            This setting applies to this universe and everything within it. If this universe is visible to others by URL, they will be able to click through and see the
-            characters, locations, and items within this universe also.
-          </div>
-        </div>
-
-      <% elsif field.name == 'private_notes' %>
+      <% elsif field.label.start_with?('Private') %>
         <%#
           This field is shown if and only if:
           * A user is signed in AND
@@ -157,7 +153,11 @@
         %>
           <div class="input-field content-field">
             <%= f.label field.name, field.label %>
-            <%= f.text_area field.name, class: "materialize-textarea", placeholder: 'Write as little or as much as you want!' %>
+            <% attribute = Attribute.find_by(user: current_user, attribute_field: field, entity: f.object) %>
+            <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field.name %>
+            <%= text_area_tag "#{content.class.name.downcase}[custom_attribute_values][][value]", attribute.present? ? attribute.value :  "",
+                  class: "materialize-textarea",
+                  placeholder: 'Write as little or as much as you want!' %>
             <div class="help-text">
               Private notes are <em>always</em> visible to only you, even if content is made public and shared.
             </div>
@@ -172,17 +172,6 @@
         <% end %>
       <% end %>
 
-    </div>
-  <% end %>
-
-  <% if category.attribute_fields.any? && category.attribute_fields.first.label == '' %>
-    <div style="clear: both;"></div>
-    <div style="padding: 0 20px;">
-      To add additional fields to this category,
-      <%= link_to 'click here', '#', class: 'new-attribute-field-link' %>
-      and type <%= category.label %> as the category name.
-      You can add as many fields as you like to custom categories.
-      To add multiple, simply add them one at a time.
     </div>
   <% end %>
 </div>

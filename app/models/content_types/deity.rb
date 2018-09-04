@@ -33,6 +33,10 @@ class Deity < ApplicationRecord
   relates :related_towns,      with: :deity_related_towns
   relates :related_landmarks,  with: :deity_related_landmarks
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.color
     'text-lighten-4 blue'
   end

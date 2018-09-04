@@ -9,8 +9,6 @@
 class Character < ApplicationRecord
   acts_as_paranoid
 
-  validates :name, presence: true
-
   belongs_to :user
   validates :user_id, presence: true
 
@@ -48,7 +46,7 @@ class Character < ApplicationRecord
   relates :enemies,          with: :character_enemies
 
   def description
-    role
+    overview_field_value('Role')
   end
 
   def self.content_name

@@ -1,8 +1,10 @@
 class AttributeCategory < ApplicationRecord
+  acts_as_paranoid
+
   validates :name, presence: true
 
   belongs_to :user
-  has_many   :attribute_fields
+  has_many   :attribute_fields, dependent: :destroy
 
   include HasAttributes
   include Serendipitous::Concern
@@ -16,6 +18,10 @@ class AttributeCategory < ApplicationRecord
     'amber'
   end
 
+  def icon
+    icon_override || self.class.icon
+  end
+
   def self.icon
     'folder_open'
   end
@@ -26,6 +32,10 @@ class AttributeCategory < ApplicationRecord
 
   def icon
     self['icon'] || self.class.icon
+  end
+
+  def entity_class
+    entity_type.titleize.constantize
   end
 
   private

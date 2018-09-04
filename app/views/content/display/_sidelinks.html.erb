@@ -16,7 +16,7 @@
     </li>
   <% end %>
 
-  <% @content.class.attribute_categories(@content.user).each do |category| %>
+  <% @content.class.attribute_categories(creating ? current_user : @content.user).each do |category| %>
     <% fields = category.attribute_fields %>
     <%
       #TODO: refactor ALL OF THIS
@@ -34,18 +34,13 @@
         # Only show gallery tab if the content has any images
         next if @content.image_uploads.empty?
       else
-        # Only show other tabs if it has at least one piece of data in it, or it's a custom tab
-        next if fields.all? do |field|
-          if @content.respond_to?(field.name.to_sym)
-            value = @content.send(field.name.to_sym)
-          else
-            value = "custom field -- should always show"
-          end
-
-          value.blank?
+        # Only show other tabs if it has at least one piece of data in it
+        next unless fields.any? do |field|
+          field.attribute_values.where(entity_id: @content.id).any? { |av| av.value.present? }
         end
       end
     %>
+    <%# for debugging: fields.map { |field| field.attribute_values.where(entity_id: @content.id).map { |av| av.value } }.uniq %>
 
     <li class="collection-item tab">
       <a href="#<%= category.name.gsub("'", '') %>_panel" class="<%= 'red-text' if category.label == 'Overview' %>">
@@ -59,11 +54,11 @@
   <% end %>
 
   <% if user_signed_in? && current_user.id == @content.user_id %>
-    <li class="collection-item">
-      <a href="#" class="green-text new-attribute-field-link">
-        <i class="material-icons left">add</i>
-        Add custom category
-      </a>
+    <li class="collection-item fake-tab">
+      <%= link_to attribute_customization_path(content_type: @content.class.name.downcase), class: 'green-text' do %>
+        <i class="material-icons left">tune</i>
+        Configure <%= @content.class.name.downcase %> fields
+      <% end %>
     </li>
   <% end %>
 </ul>

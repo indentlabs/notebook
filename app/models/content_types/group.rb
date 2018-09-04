@@ -36,6 +36,10 @@ class Group < ApplicationRecord
   relates :key_items, with: :key_itemships
   relates :creatures, with: :group_creatures
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.color
     'cyan'
   end

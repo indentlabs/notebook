@@ -1,0 +1,207 @@
+<div class="slider" style="height: 140px;">
+  <ul class="slides">
+    <li>
+      <%= image_tag "card-headers/#{@content_type.pluralize}" %>
+      <div class="caption center-align">
+        <h3><%= @content_type.titleize.pluralize %></h3>
+        <h5 class="light grey-text text-lighten-3"><%= t("content_oneliners.#{@content_type}") %></h5>
+      </div>
+    </li>
+  </ul>
+</div>
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('.slider').slider({
+      height: 200,
+      indicators: false
+    });
+  });
+</script>
+
+<ul class="collapsible">
+  <li class="active">
+    <div class="collapsible-header">
+      <i class="material-icons <%= @content_type_class.color %>-text"><%= @content_type_class.icon %></i>
+      General <%= @content_type.titleize %> settings
+    </div>
+    <div class="collapsible-body">
+      <p>
+        More <%= @content_type  %>-specific settings are coming soon. In the meantime, you can customize your <%= @content_type %> categories
+        and fields by clicking a category below. Changes will be applied to all existing <%=  @content_type %> pages as well as pages not-yet-created.
+      </p>
+      <p>
+        And don't forget, you can always toggle entire pages on or off by <%= link_to 'customizing your pages', customization_content_types_path %>!
+      </p>
+    </div>
+  </li>
+  <% @content_type_class.attribute_categories(current_user, show_hidden: true).each do |attribute_category| %>
+    <% next if ['Settings', 'Contributors', 'Gallery', 'Changelog'].include? attribute_category.label %>
+    <% hidden_category = !!attribute_category.hidden %>
+    <li>
+      <div class="collapsible-header">
+        <i class="material-icons"><%= attribute_category.icon %></i><%= attribute_category.label %>
+        <% if hidden_category %>
+          <span class="grey-text">&mdash;hidden</span>
+        <% end %>
+      </div>
+      <div class="collapsible-body">
+        <%# Only show the fields in this category if it's visible / not hidden %>
+        <% unless hidden_category %>
+          <div class="row">
+            <div class="col s12">
+              <h5>Customize fields</h5>
+              <ul class="collapsible">
+                <% attribute_category.attribute_fields.each do |attribute_field| %>
+                  <% hidden_field = !!attribute_field.hidden %>
+                  <li>
+                    <div class="collapsible-header">
+                      <i class="material-icons"><%= attribute_field.icon %></i>
+                      <%= attribute_field.label %>
+                      <% if hidden_field %>
+                        <span class="grey-text">&mdash;hidden</span>
+                      <% end %>
+                    </div>
+                    <div class="collapsible-body">
+                      <% if attribute_field.field_type == 'link' %>
+                        <div class="row">
+                          <div class="col s12">
+                            <% klass = @content_type_class.new.send(attribute_field.old_column_source).klass %>
+                            <% klass_name = klass.name %>
+                            <div class="card-panel <%= klass.color %>">
+                              <div class="valign-wrapper white">
+                                <i class="material-icons" style="margin: 0 10px;">link</i>
+                                Links to: <%= link_to klass_name, attribute_customization_path(content_type: klass_name.downcase), style: 'padding: 3px 10px' %>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      <% end %>
+
+                      <div class="row">
+                        <div class="col s12 m6">
+                          <%= form_for(attribute_field, method: :put, class: 'inline') do |f| %>
+                            <%= f.hidden_field :hidden, value: !hidden_field %>
+                            <%= f.submit (hidden_field ? 'Show' : 'Hide') + ' this field', class: 'btn white black-text' %>
+                          <% end %>
+                        </div>
+                        <div class="col s12 m6">
+                          <% if attribute_field.name_field? || attribute_field.universe_field? %>
+                            <div>
+                              This field cannot be deleted.
+                            </div>
+                          <% else %>
+                            <div>
+                              <%= link_to "Delete this field and answers",
+                                attribute_field,
+                                :class => 'red btn black-text',
+                                :method => :delete,
+                                :data => {
+                                  :confirm => "Are you sure? This action cannot be undone! If you have answered this field on ANY #{@content_type} page, your annswer WILL BE DELETED."
+                                } %>
+                            </div>
+                            <div class="red-text text-darken-3">
+                              This will delete this field <strong>and</strong> its answers to <strong>every <%= @content_type %> page you've created</strong>.
+                              It cannot be undone! If you want to save your answers, you should hide this field instead.
+                            </div>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                <% end %>
+                <li>
+                  <div class="collapsible-header"><i class="material-icons">add</i>Add another field to this section</div>
+                  <div class="collapsible-body">
+                    <%= form_for(attribute_category.attribute_fields.build, method: :post) do |f| %>
+                      <%# todo the following line shouldn't be necessary %>
+                      <%= f.hidden_field :attribute_category_id, value: attribute_category.id %>
+                      <div class="row">
+                        <div class="input-field col s12">
+                          <%= f.text_area :label, class: 'materialize-textarea' %>
+                          <%= f.label :label, 'Field label' %>
+                        </div>
+                        <div class="input-field col s12">
+                          <%= f.submit 'Add new field', class: "btn #{@content_type_class.color}" %>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col s12">
+              <h5>Customize category icon</h5>
+              <p class="grey-text text-darken-2">
+                You can now choose one of over 300 icons to use as the icon for this category. Use the icon picker below to find the perfect icon for you, and
+                use the code to quickly find it again or share it with others.
+              </p>
+              <%= form_for(attribute_category, method: :put) do |f| %>
+                <div class="input-field input-group iconpicker-container">
+                  <i class="material-icons prefix"><%= attribute_category.icon %></i>
+                  <%= f.label :label, 'Icon code' %>
+                  <%= f.text_field :icon, class: 'form-control iconpicker-element iconpicker-input', data: { placement: 'bottom' } %>
+                </div>
+                <%= f.submit 'Save icon', class: 'btn white black-text' %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="row">
+          <div class="col s12">
+            <h5>Show/hide this category</h5>
+            <p class="grey-text text-darken-2">
+              You can also choose to hide or show this entire category. When hiding, any existing answers you have to fields in this category will also be hidden, but not deleted.
+              You can recover them by un-hiding this category at any time.
+            </p>
+            <%= form_for(attribute_category, method: :put) do |f| %>
+              <%= f.hidden_field :hidden, value: !hidden_category %><%# flip the bit %>
+              <%= f.submit (hidden_category ? 'Show' : 'Hide') + ' this category', class: 'btn white black-text' %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </li>
+  <% end %>
+  <li>
+    <div class="collapsible-header">
+      <i class="material-icons <%= @content_type_class.color %>-text">add</i>
+      Add another category
+    </div>
+    <div class="collapsible-body">
+      <%= form_for(current_user.attribute_categories.build, method: :post) do |f| %>
+        <%= f.hidden_field :entity_type, value: @content_type %>
+        <div class="row">
+          <div class="input-field col s12">
+            <%= f.text_area :label, class: 'materialize-textarea' %>
+            <%= f.label :label, 'Category label' %>
+          </div>
+          <div class="input-field col s12">
+            <%= f.submit 'Add new category', class: "btn #{@content_type_class.color}" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </li>
+ </ul>
+
+
+ <script type="text/javascript">
+   $('.iconpicker-input').iconpicker({
+     icons: [
+       <% MATERIAL_ICONS.each do |icon_name| %>
+        { title: "<%= icon_name %>", searchTerms: ["<%= icon_name %>"] },
+       <% end %>
+     ], // list of icon objects [{title:String, searchTerms:String}]. By default, all Font Awesome icons are included.
+     fullClassFormatter: function (val) {
+       return 'material-icons ' + val;
+     }}
+   );
+   $(document).on('click','.iconpicker-item',function(e){
+     e.preventDefault();
+     return false;
+   });
+ </script>

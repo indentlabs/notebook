@@ -33,6 +33,10 @@ class Creature < ApplicationRecord
   # Creatures
   relates :related_creatures, with: :creature_relationships
 
+  def description
+    overview_field_value('Description')
+  end
+
   def self.color
     'brown'
   end

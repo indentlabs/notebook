@@ -13,7 +13,7 @@ module HasContent
 
     has_many :attribute_fields
     has_many :attribute_categories
-    has_many :attribute_values, class_name: 'Attribute'
+    has_many :attribute_values, class_name: 'Attribute', dependent: :destroy
 
     # {
     #   characters: [...],

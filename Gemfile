@@ -16,7 +16,6 @@ gem 'paperclip'
 gem 'rmagick'
 
 # Authentication
-gem 'bcrypt'
 gem 'devise'
 gem 'authority'
 
@@ -78,6 +77,8 @@ gem 'binding_of_caller' # see has_changelog.rb
 
 group :development do
   gem 'web-console'
+  gem 'bullet'
+  gem 'pry'
 end
 
 group :production do
@@ -95,7 +96,6 @@ group :test do
   gem 'better_errors'
   gem 'capybara'
   gem 'codeclimate-test-reporter', require: false
-  gem 'coveralls', require: false
   gem 'cucumber-rails', require: false
   gem 'database_cleaner'
   gem 'factory_bot_rails'
