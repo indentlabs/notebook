@@ -113,7 +113,7 @@ module HasAttributes
       end&.value.presence || self.universe_id.presence || nil
 
       if universe_id
-        Universe.find(universe_id)
+        Universe.find(universe_id.to_i)
       else
         nil
       end
