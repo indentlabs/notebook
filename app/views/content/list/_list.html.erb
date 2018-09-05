@@ -13,10 +13,18 @@
       <span class="title">
         <%= link_to (content.respond_to?(:label) ? content.label : content.name_field_value), content %>
         <small class="grey-text">
-          <% if content.universe_field_value.present? %>
+          <% universe_field_value = content.universe_field_value %>
+          <% if universe_field_value.present? %>
             <i class="material-icons"><%= Universe.icon %></i>
-            <%# todo remove this try %>
-            <%= link_to content.universe_field_value.try(:name_field_value), content.universe_field_value %>
+            <%# todo remove this hack %>
+            <%
+              if universe_field_value.is_a?(Integer)
+                universe_field_value = Universe.find_by(id: universe_field_value, user: content.user)
+              end
+            %>
+            <% if universe_field_value %>
+              <%= link_to universe_field_value.try(:name_field_value), universe_field_value %>
+            <% end %>
           <% end %>
         </small>
         <% if user_signed_in? && (
