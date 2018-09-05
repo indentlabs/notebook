@@ -88,6 +88,7 @@
       <% elsif field.field_type == 'universe' %>
         <div class="input-field">
           <%= f.label field.name, field.label %><br />
+
           <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) || f.object.universe_id.nil? %>
             <%# todo not like this %>
             <%
@@ -111,6 +112,7 @@
                   end
                 end
               end
+
             %>
 
             <% universe_attribute = Attribute.find_by(user: current_user, attribute_field: field, entity: f.object) %>
@@ -120,7 +122,7 @@
               select_tag "#{content.class.name.downcase}[custom_attribute_values][][value]",
                 options_for_select(
                   @universe_dropdown_options.compact,
-                  @universe_dropdown_options.map(&:second).index(content.universe_field_value.try(:id))
+                  content.universe_field_value.try(:id)
                 ),
                 include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
             %>
