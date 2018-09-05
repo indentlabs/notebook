@@ -9,7 +9,7 @@ class PermissionService < Service
   end
 
   def self.user_owns_any_containing_universe?(user:, content:)
-    content.respond_to?(:universe) && content.universe_field_value.present? && user_owns_content?(user: user, content: content.universe_field_value)
+    content.respond_to?(:universe) && content.universe.present? && user_owns_content?(user: user, content: content.universe)
   end
 
   def self.user_can_contribute_to_universe?(user:, universe:)
@@ -26,11 +26,11 @@ class PermissionService < Service
 
   def self.user_can_contribute_to_containing_universe?(user:, content:)
     return true if [AttributeCategory, AttributeField, Attribute].include?(content.class) #todo audit this
-    content.universe_field_value.present? && user.contributable_universes.pluck(:id).include?(content.universe_field_value)
+    content.universe.present? && user.contributable_universes.pluck(:id).include?(content.universe.id)
   end
 
   def self.content_has_no_containing_universe?(content:)
-    content.universe_field_value.nil?
+    content.universe.nil?
   end
 
   def self.user_is_on_premium_plan?(user:)
