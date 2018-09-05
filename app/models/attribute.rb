@@ -12,4 +12,10 @@ class Attribute < ApplicationRecord
 
   include HasPrivacy
   scope :is_public, -> { eager_load(:universe).where('universes.privacy = ? OR attributes.privacy = ?', 'public', 'public') }
+
+  after_save do
+    if self.attribute_field.field_type == 'universe' && self.value.present?
+      entity.update(universe_id: self.value.to_i)
+    end
+  end
 end
