@@ -116,8 +116,7 @@ class ContentController < ApplicationController
       'content_type': content_type.name
     }) if Rails.env.production?
 
-    # todo look at this code smell for collab
-    @content.user = current_user
+    @content.user = current_user if @content.user_id.nil?
     if @content.update_attributes(content_params)
       cache_params = {}
       cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField].include?(@content.class)
