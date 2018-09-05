@@ -25,7 +25,8 @@ class PlanetsController < ContentController
       planet_groups_attributes: [:id, :group_id, :_destroy],
       planet_languages_attributes: [:id, :language_id, :_destroy],
       planet_towns_attributes: [:id, :town_id, :_destroy],
-      planet_nearby_planets_attributes: [:id, :nearby_planet_id, :_destroy]
+      planet_nearby_planets_attributes: [:id, :nearby_planet_id, :_destroy],
+      custom_attribute_values:     [:name, :value]
     ]
   end
 end

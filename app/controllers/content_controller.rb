@@ -108,7 +108,7 @@ class ContentController < ApplicationController
 
     #  Don't set name fields on content that doesn't have a name field
     #todo abstract this (and the one in update) to a function
-    unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name)
+    unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name) && [nil, ''].include?(@content.name)
       @content.name = @content.name_field_value || "Untitled"
     end
 
@@ -116,6 +116,7 @@ class ContentController < ApplicationController
       'content_type': content_type.name
     }) if Rails.env.production?
 
+    # todo look at this code smell for collab
     @content.user = current_user
     if @content.update_attributes(content_params)
       cache_params = {}

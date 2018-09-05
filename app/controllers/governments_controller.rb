@@ -17,7 +17,8 @@ class GovernmentsController < ContentController
       government_political_figures_attributes: [:id, :political_figure_id, :_destroy],
       government_items_attributes: [:id, :item_id, :_destroy],
       government_technologies_attributes: [:id, :technology_id, :_destroy],
-      government_creatures_attributes: [:id, :creature_id, :_destroy]
+      government_creatures_attributes: [:id, :creature_id, :_destroy],
+      custom_attribute_values:     [:name, :value]
     ]
   end
 end

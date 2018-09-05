@@ -24,7 +24,8 @@ class DeitiesController < ContentController
       deity_relics_attributes: [:id, :relic_id, :_destroy],
       deity_abilities_attributes: [:id, :ability_id, :_destroy],
       deity_related_towns_attributes: [:id, :related_town_id, :_destroy],
-      deity_related_landmarks_attributes: [:id, :related_landmark_id, :_destroy]
+      deity_related_landmarks_attributes: [:id, :related_landmark_id, :_destroy],
+      custom_attribute_values:     [:name, :value]
     ]
   end
 end

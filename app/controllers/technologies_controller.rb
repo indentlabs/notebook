@@ -18,7 +18,8 @@ class TechnologiesController < ContentController
       technology_magics_attributes: [:id, :magic_id, :_destroy],
       technology_parent_technologies_attributes: [:id, :parent_technology_id, :_destroy],
       technology_child_technologies_attributes: [:id, :child_technology_id, :_destroy],
-      technology_related_technologies_attributes: [:id, :related_technology_id, :_destroy]
+      technology_related_technologies_attributes: [:id, :related_technology_id, :_destroy],
+      custom_attribute_values:     [:name, :value]
     ]
   end
 end

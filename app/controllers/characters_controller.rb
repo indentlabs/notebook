@@ -10,6 +10,9 @@ class CharactersController < ContentController
   def content_param_list
     [
       #todo remove all these (for all pages) now that we use custom attributes for them all (minus links)
+      # all but
+      #custom_attribute_values:     [:name, :value],
+      
       :universe_id, :user_id,
       :name, :age, :role, :gender, :age, :archetype, :height, :weight, :haircolor,
       :facialhair, :eyecolor, :skintone, :bodytype, :identmarks, :hairstyle,
