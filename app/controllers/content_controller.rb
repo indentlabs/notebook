@@ -109,7 +109,7 @@ class ContentController < ApplicationController
     #  Don't set name fields on content that doesn't have a name field
     #todo abstract this (and the one in update) to a function
     unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name) && [nil, ''].include?(@content.name)
-      @content.name = @content.name_field_value || "Untitled"
+      @content.name = @content.name_field_value || "Untitled" if @content.name.nil? || @content.name == ""
     end
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
@@ -165,7 +165,7 @@ class ContentController < ApplicationController
       cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField, Attribute].include?(@content.class)
       cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
 
-      @content.update(cache_params) if cache_params.any?
+      @content.update(cache_params) if cache_params.any? && update_success
     else
       # Exclude fields only the real owner can edit
       #todo move field list somewhere when it grows
