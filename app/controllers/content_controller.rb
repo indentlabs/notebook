@@ -131,7 +131,7 @@ class ContentController < ApplicationController
 
       successful_response(content_creation_redirect_url, t(:create_success, model_name: humanized_model_name))
     else
-      failed_response('new', :unprocessable_entity)
+      failed_response('new', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.map(&:messages).to_sentence)
     end
   end
 
@@ -159,7 +159,6 @@ class ContentController < ApplicationController
 
     if @content.user == current_user
       update_success = @content.update_attributes(content_params)
-      #  Don't set name fields on content that doesn't have a name field
 
       cache_params = {}
       cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField, Attribute].include?(@content.class)
@@ -175,7 +174,7 @@ class ContentController < ApplicationController
     if update_success
       successful_response(@content, t(:update_success, model_name: humanized_model_name))
     else
-      failed_response('edit', :unprocessable_entity)
+      failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.map(&:messages).to_sentence)
     end
   end
 
@@ -340,13 +339,14 @@ class ContentController < ApplicationController
           redirect_to url, notice: notice
         end
       }
-      format.json { render json: @content || {}, status: :success, notice: notice }
+      format.json { render json: @content || {}, status: :success }
     end
   end
 
-  def failed_response(action, status)
+  def failed_response(action, status, notice=nil)
+    flash.now[:notice] = notice if notice
     respond_to do |format|
-      format.html { render action: action }
+      format.html { render action: action, notice: notice }
       format.json { render json: @content.errors, status: status }
     end
   end
