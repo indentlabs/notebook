@@ -11,7 +11,6 @@ class Attribute < ApplicationRecord
   self.authorizer_name = 'AttributeAuthorizer'
 
   include HasPrivacy
-  scope :is_public, -> { eager_load(:universe).where('universes.privacy = ? OR attributes.privacy = ?', 'public', 'public') }
 
   after_save do
     if self.attribute_field.field_type == 'universe' && self.value.present?

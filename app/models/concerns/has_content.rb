@@ -74,6 +74,7 @@ module HasContent
     def public_content
       @user_public_content ||= begin
         content_value = {}
+
         Rails.application.config.content_types[:all].each do |type|
           relation = type.name.downcase.pluralize.to_sym # :characters
           content_value[relation] = send(relation).is_public

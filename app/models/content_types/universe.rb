@@ -47,8 +47,6 @@ class Universe < ApplicationRecord
 
   has_many :contributors, dependent: :destroy
 
-  scope :is_public, -> { where(privacy: 'public') }
-
   after_destroy do
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       content_type.where(universe_id: self.id).update_all(universe_id: nil)
