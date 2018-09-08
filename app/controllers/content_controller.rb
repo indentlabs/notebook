@@ -105,7 +105,7 @@ class ContentController < ApplicationController
 
     #  Don't set name fields on content that doesn't have a name field
     #todo abstract this (and the one in update) to a function
-    unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name) && [nil, ''].include?(@content.name)
+    unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name)
       @content.name ||= @content.name_field_value || "Untitled"
     end
 
