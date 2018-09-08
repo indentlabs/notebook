@@ -74,8 +74,9 @@ class ContentController < ApplicationController
     @content = content_type_from_controller(self.class)
                .new
 
+    # todo this is a good spot to audit to disable and see if create permissions are ok also
     unless (current_user || User.new).can_create?(content_type_from_controller self.class)
-      return redirect_to :back
+      return redirect_back fallback_location: root_path
     end
 
     respond_to do |format|
@@ -103,7 +104,8 @@ class ContentController < ApplicationController
     initialize_object
 
     unless current_user.can_create?(content_type)
-      return redirect_to :back
+      # todo set flash[:notice] about premium
+      return redirect_back fallback_location: root_path
     end
 
     #  Don't set name fields on content that doesn't have a name field
@@ -140,7 +142,9 @@ class ContentController < ApplicationController
     @content = content_type.find(params[:id])
 
     unless @content.updatable_by?(current_user)
-      return redirect_to :back
+      # todo flash error instead? (shows up 2x currently)
+      flash[:notice] = "You don't have permission to edit that!"
+      return redirect_back fallback_location: @content
     end
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'updated content', {
