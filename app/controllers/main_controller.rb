@@ -91,23 +91,13 @@ class MainController < ApplicationController
 
   class RetryMe < StandardError; end
   def ask_question
-    # Try up to 10 times to actually fetch a question
-    attempts = 0
-
-    begin
-      if @universe_scope.present? && attempts < 2
-        content_pool = current_user.content_in_universe(@universe_scope).values.flatten
-      else
-        content_pool = current_user.content.values.flatten
-      end
-
-      @content = content_pool.sample
-      @question = @content.question unless @content.nil?
-      raise RetryMe if @content.present? && (@question.nil? || @question[:question].nil?) # :(
-    rescue RetryMe
-      attempts += 1
-      retry if attempts < 10
+    if @universe_scope.present? && attempts < 2
+      content_pool = current_user.content_in_universe(@universe_scope).values.flatten
+    else
+      content_pool = current_user.content.values.flatten
     end
+
+    @content = content_pool.sample
   end
 
 

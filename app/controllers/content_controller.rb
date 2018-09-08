@@ -26,9 +26,6 @@ class ContentController < ApplicationController
 
     @content = @content.to_a.flatten.uniq.sort_by(&:name)
 
-    @questioned_content = @content.sample
-    @question = @questioned_content.question unless @questioned_content.nil?
-
     respond_to do |format|
       format.html { render 'content/index' }
       format.json { render json: @content }
@@ -43,8 +40,6 @@ class ContentController < ApplicationController
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.email)
 
     if (current_user || User.new).can_read? @content
-      @question = @content.question if current_user.present? and current_user == @content.user
-
       if current_user
         if @content.updated_at > 30.minutes.ago
           Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed content', {
