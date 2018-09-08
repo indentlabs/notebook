@@ -4,34 +4,21 @@ class AutocompleteService < Service
 
   # Adding a field name to this switch/case will enable autocompleting
   # for that field across any page type.
+  # DEPRECATED -- todo remove
   def self.for_field_name(field_name)
     case field_name
-    when 'bodytype'
-      t('body_types')
     when 'education'
       %w(None Elementary Highschool College Graduate Diploma Advanced Homeschooled PhD GED Self-taught Highly-educated)
-    when 'eyecolor'
-      t('eye_colors')
-    when 'facialhair'
-      t('facial_hair_styles')
     when 'fave_animal'
       %w(Cats Dogs Wolves Foxes Horses Lions Birds Tigers Deer Dragons Owls Snakes Bears Horses Rabbits Ravens Pandas Eagles Dolphins Bunnies Rabbits Hawks Panthers Elephants Giraffes Turtles Crwos Cheetahs Doves Fish Phoenix Penguins Otters Sharks Butterflies Caterpillars Koalas Puppies Kittens Falcons Bats Sheep Lizards Monkeys Squirrels Unicorns Lynx Humans Sloths)
     when 'fave_color'
       %w(Blue Green Red Purple Black Yellow Pink Orange White Gold Grey Silver Brown Teal Violet Lavender Maroon Navy Crimson Magenta Indigo Burgundy Turquoise Cyan Aqua Scarlet Pitch Peach)
     when 'fave_food'
       %w(Pizza Sushi Steak Pasta Chocolate Apples Chicken Spaghetti Tacos Meat Fish Strawberries Cake Salad Ramen Pancakes Burgers Bread Sweets Lasagna Salmon Coffee Hamburgers Cookies Rice Noodes Curry Waffles Oranges Seafood Lobsters Fries Bacon Cheese Shrimp Pie Peaches Soup Cheesecake Popcorn Fruit Cupcakes Grapes Venison Candy Berries Stew Potatoes Tea Lamb Watermelon Nachos Chinese Pork Donuts Italian Mexican)
-    when 'fave_weapon'
-      t('weapon_types') + t('shield_types') + t('axe_types') + t('bow_types') +
-      t('club_types') + t('flexible_weapon_types') + t('fist_weapon_types') + t('thrown_weapon_types') +
-      t('polearm_types') + t('shortsword_types') + t('sword_types')
     when 'flaws'
       %w(Stubbornness Naivety Prideful Impulsiveness Selfishness Arrogance Recklessness Clumsiness Anger Self-control Anxiety Shiness Insecurities Overprotectiveness Paranoia Pridefulness Perfectionism Bossiness Manipulative Cockiness Laziness Greedy Forgetful Gullible Depression Loyalty Bluntness Hubris Sensitivity Alcoholicism Addictions Cowardly Childish Overconfident Untrusting Anxious Headstrong Rude Oblivious Jealous Proud Hot-headed Secretive Liar)
     when 'gender'
       %w(Male Female Agender Masculino Nonbinary Genderfluid He/Him She/Her Genderless They/Them Unknown Masculine Feminine)
-    when 'hairstyle'
-      t('hair_styles')
-    when 'haircolor'
-      t('hair_colors')
     when 'hobbies'
       %w(Reading Drawing Cooking Gardening Painting Writing Singing Art Dancing Music Hunting Photography Baking Training Running Swimming Diving Knitting Sewing Archery Horsebackriding Reading Sports Sleeping Football Drinking Chess Gaming Basketball Reading Piano Drawing Tinkering Electronics Programming Killing Guitar Running Murder Altruism Volunteering Exploring Adventuring Baseball Magic Flying Boxing Stealing Gambling Painting Whittling Poetry Fighting Quidditch Shopping Violin Stargazing Science)
     when 'identmarks'
@@ -50,14 +37,10 @@ class AutocompleteService < Service
       %w(INTJ INTP ENTJ ENTP INFJ INFP ENFJ ENFP ISTJ ISFJ ESTJ ESFJ ISTP ISFP ESTP ESFP Architect Logician Commander Debater Advocate Mediator Protagonist Campaigner Logistician Defender Executive Consul Virtuoso Adventuer Entrepreneur Entertainer Introverted Extroverted)
     when 'politics'
       %w(Liberal Democrat Republican Conservative Monarchy Anarchist Neutral Independent Central Left Right Rebel Socialist Communist Moderate Apolitical Progressive Labour Undecided)
-    when 'race'
-      t('character_races')
     when 'religion'
       %w(Atheist Christian Catholic Agnostic Jewish Muslim Judaism Islam Pagan Wiccan Protestant Quaker Satanism Buddhism Baptist Shinto Hinduism Lutheran Mormon Spiritual Polytheism Magic)
     when 'role'
       ['Protagonist', 'Antagonist', 'Main character', 'Supporting character', 'Side character', 'Hero', 'Enemy', 'Wise Old Man', 'Secondary Character', 'Love interest', 'Minor character', 'Villain', 'NPC', 'Ally', 'Father', 'Mother', 'Best friend', 'Background character', 'Companion', 'Deity', 'Healer', 'Warrior', 'Witch', 'Assassin', 'Superhero', 'Brother', 'Sister']
-    when 'skintone'
-      t('skin_tones')
     when 'talents'
       %w(Singing Dancing Magic Drawing Cooking Reading Art Painting Sketching Fighting Writing Listening Archery Blacksmithery Music Healing Piano Guitar Baking Acting Sports Swordfighting Weaponry Manipulation Photography Hunting Survival Running Lying Speaking Persuasion Gardening Shapeshifting Strength Soccer Basketball Chemistry Biology Science Stealth Memory Violin Necromancy Recall Jumping Hopskotch Smoothtalking)
     else
@@ -69,8 +52,24 @@ class AutocompleteService < Service
     # for that field across any page type.
   def self.for_field_label(field_label)
     case field_label.downcase
-    when 'eye color', 'eyecolor'
+    when 'eye color', 'eyecolor', 'eyecolour', 'eye colour'
       t('eye_colors')
+    when 'bodytype', 'body type'
+      t('body_types')
+    when 'facialhair', 'facial hair'
+      t('facial_hair_styles')
+    when 'fave weapon', 'weapon', 'favorite weapon', 'favourite weapon'
+      t('weapon_types')  + t('shield_types')          + t('axe_types')         + t('bow_types') +
+      t('club_types')    + t('flexible_weapon_types') + t('fist_weapon_types') + t('thrown_weapon_types') +
+      t('polearm_types') + t('shortsword_types')      + t('sword_types')
+    when 'hairstyle', 'hair style'
+      t('hair_styles')
+    when 'haircolor', 'hair color', 'haircolour', 'hair colour'
+      t('hair_colors')
+    when 'race'
+      t('character_races')
+    when 'skintone', 'skin tone', 'skin'
+      t('skin_tones')
     else
       []
     end.uniq

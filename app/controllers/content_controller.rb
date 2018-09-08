@@ -157,6 +157,7 @@ class ContentController < ApplicationController
     end
 
     if @content.user == current_user
+      # todo this needs some extra validation probably to ensure each attribute is one associated with this page
       update_success = @content.update_attributes(content_params)
 
       cache_params = {}
