@@ -91,7 +91,7 @@ class MainController < ApplicationController
 
   class RetryMe < StandardError; end
   def ask_question
-    if @universe_scope.present? && attempts < 2
+    if @universe_scope.present?
       content_pool = current_user.content_in_universe(@universe_scope).values.flatten
     else
       content_pool = current_user.content.values.flatten
