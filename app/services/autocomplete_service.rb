@@ -4,7 +4,7 @@ class AutocompleteService < Service
 
   # Adding a field name to this switch/case will enable autocompleting
   # for that field across any page type.
-  def self.for(field_name)
+  def self.for_field_name(field_name)
     case field_name
     when 'bodytype'
       t('body_types')
@@ -65,9 +65,19 @@ class AutocompleteService < Service
     end.uniq
   end
 
-  def self.autocompleteable?(field_name)
-    return false
-    self.for(field_name).any?
+    # Adding a field label to this switch/case will enable autocompleting
+    # for that field across any page type.
+  def self.for_field_label(field_label)
+    case field_label.downcase
+    when 'eye color', 'eyecolor'
+      t('eye_colors')
+    else
+      []
+    end.uniq
+  end
+
+  def self.autocompleteable?(field_label)
+    self.for_field_label(field_label).any?
   end
 
   # helper method so we don't have to I18n every time

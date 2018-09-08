@@ -146,8 +146,8 @@ class ContentController < ApplicationController
       'content_type': content_type.name
     }) if Rails.env.production?
 
-    if params.key? 'image_uploads'
-      upload_files params['image_uploads'], content_type.name, @content.id
+    if params.key?('image_uploads')
+      upload_files(params['image_uploads'], content_type.name, @content.id)
     end
 
     if @content.is_a?(Universe) && params.key?('contributors') && @content.user == current_user
