@@ -106,7 +106,7 @@ class ContentController < ApplicationController
     #  Don't set name fields on content that doesn't have a name field
     #todo abstract this (and the one in update) to a function
     unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name) && [nil, ''].include?(@content.name)
-      @content.name = @content.name_field_value || "Untitled" if @content.name.nil? || @content.name == ""
+      @content.name ||= @content.name_field_value || "Untitled"
     end
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
