@@ -4,11 +4,10 @@ class UsersController < ApplicationController
   end
 
   def show
-    @user = User.find(params[:id])
-
+    @user    = User.find(params[:id])
     @content = @user.public_content.select { |type, list| list.any? }
-    @tabs = @content.keys
-    @stream = ContentChangeEvent.where(user_id: @user.id).order('id desc').limit(100)
+    @tabs    = @content.keys
+    @stream  = ContentChangeEvent.where(user_id: @user.id).order('id desc').limit(100)
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(@user.id, 'viewed profile', {
       'sharing any content': @user.public_content_count != 0

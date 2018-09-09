@@ -79,11 +79,12 @@
               <%
                 if change_event.content_type == 'Attribute'
                   content_type_class = change_event.content.entity_type.constantize
+                  content            = content_type_class.find_by(id: change_event.content.entity_id)
                 else
                   content_type_class = change_event.content_type.constantize
+                  content            = content_type_class.find_by(id: change_event.content_id)
                 end
               %>
-              <% content = content_type_class.find_by(id: change_event.content_id) %>
               <% next if content.nil? %>
               <% next unless content.readable_by?(user_signed_in? ? current_user : User.new) %>
 
