@@ -37,7 +37,8 @@ class ContentController < ApplicationController
     # TODO: Secure this with content class whitelist lel
     @content = content_type.find(params[:id])
 
-    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.email)
+    return if @content.user.nil? # deleted user's content
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
 
     if (current_user || User.new).can_read? @content
       if current_user
