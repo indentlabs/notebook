@@ -1,3 +1,5 @@
+include Rails.application.routes.url_helpers
+
 class ContributorService < Service
   def self.invite_contributor_to_universe universe:, email:
     # First, look up whether a user already exists for this invite
@@ -26,7 +28,7 @@ class ContributorService < Service
       inviter: inviter,
       invite_email: email,
       universe: universe
-    ).deliver_now!
+    ).deliver_now! if Rails.env.production?
   end
 
   def self.send_contributor_notice_to inviter:, email:, universe:
@@ -34,6 +36,6 @@ class ContributorService < Service
       inviter: inviter,
       invite_email: email,
       universe: universe
-    ).deliver_now!
+    ).deliver_now! if Rails.env.production?
   end
 end
