@@ -78,7 +78,7 @@ class SubscriptionsController < ApplicationController
       stripe_customer.sources.create(source: valid_token)
     rescue Stripe::CardError => e
       flash[:alert] = "We couldn't save your payment information because #{e.message.downcase} Please double check that your information is correct."
-      return redirect_to :back
+      return redirect_back fallback_location: payment_info_path
     end
 
     new_plan_id = params[:plan]
@@ -115,12 +115,12 @@ class SubscriptionsController < ApplicationController
     end
 
     flash[:notice] = notice.join ' '
-    redirect_to :back
+    redirect_back fallback_location: subscription_path
   end
 
   def stripe_webhook
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'stripe webhook') if Rails.env.production?
-    #todo handle webhooks
+    #todo handle webhooks :(
   end
 
   private

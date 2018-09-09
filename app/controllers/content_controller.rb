@@ -71,7 +71,7 @@ class ContentController < ApplicationController
 
     # todo this is a good spot to audit to disable and see if create permissions are ok also
     unless (current_user || User.new).can_create?(content_type_from_controller self.class)
-      return redirect_back fallback_location: root_path
+      return redirect_back(fallback_location: root_path)
     end
 
     respond_to do |format|
