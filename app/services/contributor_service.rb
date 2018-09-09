@@ -1,5 +1,3 @@
-include Rails.application.routes.url_helpers
-
 class ContributorService < Service
   def self.invite_contributor_to_universe universe:, email:
     # First, look up whether a user already exists for this invite
