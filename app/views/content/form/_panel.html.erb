@@ -132,28 +132,6 @@
           <% end %>
         </div>
 
-      <% elsif field.name == 'archetype' %>
-        <div class="input-field input-select">
-          <%= f.label field.name, class: 'active' %><br />
-          <%= f.select field.name, options_for_select(t('archetypes'), selected: f.object.archetype), include_blank: true %>
-        </div>
-
-      <% elsif field.name == 'attribute_category_id' %>
-        <div class="input-field">
-          <%= f.label field.name, field.label %><br />
-          <%= f.select field.name, current_user.attribute_categories.sort_by(&:label).map { |u| [u.label, u.id] }.compact, include_blank: false, selected: (f.object.persisted? ? f.object.attribute_category_id : nil) %>
-        </div>
-
-      <% elsif field.name == 'field_type' %>
-        <%# todo doubt this is used anymore -- also the other else statements here %>
-        <div class="input-field">
-          <%= f.label field.name, field.label %><br />
-          <%= f.select field.name, ['Text Field'].map { |tf| [tf, tf.underscore] } %>
-        </div>
-
-      <% elsif field.name == 'entity_type' %>
-        <%= f.hidden_field :entity_type, value: f.object.entity_type %>
-
       <% elsif field.label.start_with?('Private') %>
         <%#
           This field is shown if and only if:
