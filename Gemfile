@@ -75,10 +75,14 @@ gem 'csv'
 # Tech debt & hacks
 gem 'binding_of_caller' # see has_changelog.rb
 
+group :test, :development do
+  gem 'pry'
+  gem 'sqlite3'
+end
+
 group :development do
   gem 'web-console'
-  gem 'bullet'
-  gem 'pry'
+  gem 'bullet', '>= 5.4'
 end
 
 group :production do
@@ -104,7 +108,6 @@ group :test do
   gem 'guard-rubocop'
   gem 'selenium-webdriver'
   gem 'simplecov', require: false
-  gem 'sqlite3'
   gem 'tzinfo-data' # addresses a bug when working on Windows
   gem 'rails-perftest'
   gem 'rspec-prof'
@@ -114,8 +117,4 @@ group :test do
   gem 'ruby-prof', '0.15.9'
   gem 'shoulda-matchers', '~> 3.1'
   gem 'rails-controller-testing'
-end
-
-group :test, :development do
-  gem 'pry'
 end

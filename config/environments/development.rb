@@ -21,7 +21,7 @@ Rails.application.configure do
 
   # Raise an error on page load if there are pending migrations.
   config.active_record.migration_error = :page_load
-  
+
   config.active_record.sqlite3.represent_boolean_as_integer = true
 
   # Debug mode disables concatenation and preprocessing of assets.
@@ -44,4 +44,21 @@ Rails.application.configure do
   # Set test-mode Stripe API key
   Stripe.api_key = "sk_test_v37uWbseyPct6PpsfjTa3y1l"
   config.stripe_publishable_key = 'pk_test_eXI4iyJ2gR9UOGJyJERvDlHF'
+
+  Bullet.enable = true
+  # Bullet.sentry = true
+  Bullet.alert = true
+  Bullet.bullet_logger = true
+  Bullet.console = true
+  # Bullet.growl = true
+  # Bullet.xmpp = { :account  => 'bullets_account@jabber.org',
+  #                 :password => 'bullets_password_for_jabber',
+  #                 :receiver => 'your_account@jabber.org',
+  #                 :show_online_status => true }
+  Bullet.rails_logger = true
+  # Bullet.honeybadger = true
+  # Bullet.bugsnag = true
+  # Bullet.airbrake = true
+  # Bullet.rollbar = true
+  Bullet.add_footer = true
 end
