@@ -100,7 +100,6 @@ class MainController < ApplicationController
     @content = content_pool.sample
   end
 
-
   def resource_name
     :user
   end

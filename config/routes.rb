@@ -168,6 +168,7 @@ Rails.application.routes.draw do
     get '/content_type/:type', to: 'admin#content_type', as: :admin_content_type
 
     get '/attributes', to: 'admin#attributes', as: :admin_attributes
+    get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
   end
 
   scope 'export' do
