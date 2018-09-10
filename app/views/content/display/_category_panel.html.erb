@@ -5,21 +5,15 @@
 
   <% category.attribute_fields.where(hidden: [false, nil]).eager_load(:attribute_values).sort do |a, b|
       a_value = case a.field_type
-      when 'name'
-        0
-      when 'universe'
-        1
-      else # link, textarea
-        2
+        when 'name'     then 0
+        when 'universe' then 1
+        else                 2
       end
 
       b_value = case b.field_type
-      when 'name'
-        0
-      when 'universe'
-        1
-      else
-        2
+        when 'name'     then 0
+        when 'universe' then 1
+        else                 2
       end
 
       a_value <=> b_value
@@ -59,11 +53,15 @@
     <% next if value.blank? %>
 
     <div class="row">
-      <div class="col s3 m3 l3 right-align flow-text grey-text"><%= attribute.label %></div>
+      <div class="col s3 m3 l3 right-align flow-text grey-text">
+        <%= attribute.label %>
+      </div>
+
       <% if attribute.field_type == 'universe' %>
         <div class="col s9 m9 l9 flow-text">
-          <%= link_to value.name, value if value.is_a?(Universe) %>
+          <%= link_to value.name_field_value, value if value.is_a?(Universe) %>
         </div>
+
       <% elsif attribute.field_type == 'link' %>
         <% klass = content.send(attribute.old_column_source).klass %>
         <div class="col s9 m9 l9 flow-text">
@@ -80,16 +78,13 @@
             </div>
           <% end %>
         </div>
-      <% else %>
-        <% if attribute.name == 'attribute_category_id' %>
-          <div class="col s9 m9 l9 flow-text">
-            <%= link_to content.attribute_category.label, content.attribute_category if content.attribute_category %>
-          </div>
-        <% else %>
-          <div class="col s9 m9 l9 markdownable">
-            <%= simple_format Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value.presence || '' : value).html_safe %>&nbsp;
-          </div>
-        <% end %>
+
+      <% else # field_type == text %>
+        <div class="col s9 m9 l9 markdownable">
+          <%=
+            simple_format(Rails.application.config.markdown.render(value.presence || '').html_safe)
+          %>&nbsp;
+        </div>
       <% end %>
     </div>
   <% end %>
