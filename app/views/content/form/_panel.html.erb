@@ -37,14 +37,15 @@
     s_width = 12
     m_width = 6
     l_width = 4
-    if category.attribute_fields.length == 1
+    attribute_fields_length = category.attribute_fields.length
+    if attribute_fields_length == 1
       # If there's only one field on this tab, go full-width on all screen sizes
       s_width = m_width = l_width = 12
-    elsif category.attribute_fields.length == 2
+    elsif attribute_fields_length == 2
       # If there's two fields on this tab, go half-width on medium- and large-screens
       s_width = 12
       m_width = l_width = 6
-    elsif category.attribute_fields.length > 2
+    elsif attribute_fields_length > 2
       # If there's at least 3 fields, use the defaults (detailed above)
     end
   %>
@@ -72,13 +73,6 @@
     end.each do |field| %>
     <%# todo definitely not this %>
     <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
-
-      <% value = nil %>
-      <% if content.respond_to?(field.name.to_sym) %>
-        <% value = content.send(field.name.to_sym) %>
-      <% else %>
-        <% value = Attribute.where(user: @content.user, entity: content) %>
-      <% end %>
 
       <% if field.field_type == 'link' %>
         <%# Relation-setting UI %>
