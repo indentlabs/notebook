@@ -239,47 +239,7 @@ class ContentController < ApplicationController
 
   def migrate_old_style_field_values
     content ||= content_type_from_controller(self.class).find(params[:id])
-
-    # todo we might be able to do this in a single left outer join
-    attribute_categories = content.class.attribute_categories(content.user)
-    attribute_fields     = AttributeField.where(attribute_category_id: attribute_categories.pluck(:id))
-                                         .where.not(field_type: 'link')
-                                         .where.not(old_column_source: [nil, ""])
-                                         .eager_load(:attribute_values)
-
-    attribute_fields.each do |attribute_field|
-      existing_value = attribute_field.attribute_values.find_by(
-        entity_id:   content.id,
-        entity_type: content.class.name
-      )
-
-      # If a user has touched this attribute's value since we've created it,
-      # we don't want to touch it again.
-      if existing_value && existing_value.created_at != existing_value.updated_at
-        next
-      end
-
-      value_from_model = content.send(attribute_field.old_column_source)
-      if value_from_model.present? && value_from_model != existing_value.value
-        if existing_value
-          existing_value.disable_changelog_this_request = true
-          existing_value.update!(value: value_from_model)
-          existing_value.disable_changelog_this_request = false
-        else
-          new_value = attribute_field.value_from_model.new(
-            user_id:     current_user.id,
-            entity_type: content.class.name,
-            entity_id:   content.id,
-            value:       value_from_model,
-            privacy:     'private' # todo just make this the default for the column instead
-          )
-
-          new_value.disable_changelog_this_request = true
-          new_value.save!
-          new_value.disable_changelog_this_request = true
-        end
-      end
-    end
+    TemporaryFieldMigrationService.migrate_fields_for_content(content)
   end
 
   def valid_content_types
