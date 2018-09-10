@@ -1,129 +1,131 @@
 <%# todo full-page changelog with all events %>
-<div class="flow-text">Changelog for <%= content.name %></div>
+<div>
+  <div class="flow-text">Changelog for <%= content.name %></div>
 
-<ul class="collection">
-  <li class="collection-item">
-    <table class="highlight centered changelog">
-      <% if content.attribute_change_events.any? %>
-        <thead>
-          <tr>
-            <th>Who</th>
-            <th>Field</th>
-            <th>Old value</th>
-            <th>New value</th>
-            <th>When</th>
-          </tr>
-        </thead>
-      <% end %>
-
-      <tbody>
-        <% content.attribute_change_events.reverse.each do |change_event| %>
-          <% next if change_event.user.nil? %>
-          <% change_event.changed_fields.each do |field_key, change| %>
-            <%# todo this probably needs dope optimization %>
-            <% key = change_event.content.attribute_field.label %>
-            <% next if change.first.blank? && change.second.blank? %>
-            <% next if %w(id created_at updated_at user user_id).include?(field_key) %>
-
-            <%
-              old_value = change.first.blank?  ? '(blank)' : change.first.to_s
-              new_value = change.second.blank? ? '(blank)' : change.second.to_s
-
-              visible_change = true
-              if key.start_with?('Private') # todo actual privacy flag on attributes
-                visible_change = user_signed_in? && (
-                  (content.is_a?(Universe) && content.user == current_user) ||
-                  (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
-                  (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
-                )
-              end
-
-              unless visible_change
-                old_value = '(hidden)'
-                new_value = '(hidden)'
-              end
-
-              # Just for clarity / ease of mind to users -- we treat blank as private, but that's not obvious to them.
-              if key == 'privacy'
-                old_value = 'private' if old_value == '(blank)'
-                new_value = 'private' if new_value == '(blank)'
-              end
-            %>
-
-            <tr>
-              <td>
-                <%= (change_event.user == current_user) ? 'You' : link_to(change_event.user.name, change_event.user) %>
-                <%= change_event.action %>
-              </td>
-              <td><%= key.titleize %></td>
-              <td><%= old_value.truncate(380) %></td>
-              <td><%= new_value.truncate(380) %></td>
-              <td><span class="grey-text"><%= time_ago_in_words change_event.created_at %> ago</span></td>
-            </tr>
-          <% end %>
-        <% end %>
-      </tbody>
-    </table>
-  </li>
-  <% content.content_change_events.reverse.each do |change_event| %>
-    <% next if change_event.user.nil? %>
-    <% next unless change_event.changed_fields.any? %>
+  <ul class="collection">
     <li class="collection-item">
-      <%= (change_event.user == current_user) ? 'You' : link_to(change_event.user.name, change_event.user) %>
-      <%= change_event.action %> this <%= change_event.content_type.downcase %>
-      <span class="grey-text"><%= time_ago_in_words change_event.created_at %> ago</span>.
-
       <table class="highlight centered changelog">
-        <thead>
-          <tr>
-              <th>Changed field</th>
+        <% if content.attribute_change_events.any? %>
+          <thead>
+            <tr>
+              <th>Who</th>
+              <th>Field</th>
               <th>Old value</th>
               <th>New value</th>
-          </tr>
-        </thead>
+              <th>When</th>
+            </tr>
+          </thead>
+        <% end %>
 
         <tbody>
-          <% change_event.changed_fields.each do |key, change| %>
-            <% next if change.first.blank? && change.second.blank? %>
-            <% next if %w(id created_at updated_at user user_id).include?(key) %>
+          <% content.attribute_change_events.reverse.each do |change_event| %>
+            <% next if change_event.user.nil? %>
+            <% change_event.changed_fields.each do |field_key, change| %>
+              <%# todo this probably needs dope optimization %>
+              <% key = change_event.content.attribute_field.label %>
+              <% next if change.first.blank? && change.second.blank? %>
+              <% next if %w(id created_at updated_at user user_id).include?(field_key) %>
 
-            <%
-              old_value = change.first.blank?  ? '(blank)' : change.first.to_s
-              new_value = change.second.blank? ? '(blank)' : change.second.to_s
+              <%
+                old_value = change.first.blank?  ? '(blank)' : change.first.to_s
+                new_value = change.second.blank? ? '(blank)' : change.second.to_s
 
-              visible_change = true
-              if key.start_with?('private')
-                visible_change = user_signed_in? && (
-                  (content.is_a?(Universe) && content.user == current_user) ||
-                  (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
-                  (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
-                )
-              end
+                visible_change = true
+                if key.start_with?('Private') # todo actual privacy flag on attributes
+                  visible_change = user_signed_in? && (
+                    (content.is_a?(Universe) && content.user == current_user) ||
+                    (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
+                    (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
+                  )
+                end
 
-              unless visible_change
-                old_value = '(hidden)'
-                new_value = '(hidden)'
-              end
+                unless visible_change
+                  old_value = '(hidden)'
+                  new_value = '(hidden)'
+                end
 
-              # Just for clarity / ease of mind to users -- we treat blank as private, but that's not obvious to them.
-              if key == 'privacy'
-                old_value = 'private' if old_value == '(blank)'
-                new_value = 'private' if new_value == '(blank)'
-              end
-            %>
+                # Just for clarity / ease of mind to users -- we treat blank as private, but that's not obvious to them.
+                if key == 'privacy'
+                  old_value = 'private' if old_value == '(blank)'
+                  new_value = 'private' if new_value == '(blank)'
+                end
+              %>
 
-            <tr>
-              <td><%= key.titleize %></td>
-              <td><%= old_value.truncate(380) %></td>
-              <td><%= new_value.truncate(380) %></td>
-            </tr>
+              <tr>
+                <td>
+                  <%= (change_event.user == current_user) ? 'You' : link_to(change_event.user.name, change_event.user) %>
+                  <%= change_event.action %>
+                </td>
+                <td><%= key.titleize %></td>
+                <td><%= old_value.truncate(380) %></td>
+                <td><%= new_value.truncate(380) %></td>
+                <td><span class="grey-text"><%= time_ago_in_words change_event.created_at %> ago</span></td>
+              </tr>
+            <% end %>
           <% end %>
         </tbody>
       </table>
     </li>
-  <% end %>
-  <li class="collection-item">
-    <%= content.class.name %> <%= content.name %> was created by <%= link_to content.user.name, content.user %>
-    <span class='grey-text'><%= time_ago_in_words content.created_at %> ago</span>.
-  </li>
-</ul>
+    <% content.content_change_events.reverse.each do |change_event| %>
+      <% next if change_event.user.nil? %>
+      <% next unless change_event.changed_fields.any? %>
+      <li class="collection-item">
+        <%= (change_event.user == current_user) ? 'You' : link_to(change_event.user.name, change_event.user) %>
+        <%= change_event.action %> this <%= change_event.content_type.downcase %>
+        <span class="grey-text"><%= time_ago_in_words change_event.created_at %> ago</span>.
+
+        <table class="highlight centered changelog">
+          <thead>
+            <tr>
+                <th>Changed field</th>
+                <th>Old value</th>
+                <th>New value</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% change_event.changed_fields.each do |key, change| %>
+              <% next if change.first.blank? && change.second.blank? %>
+              <% next if %w(id created_at updated_at user user_id).include?(key) %>
+
+              <%
+                old_value = change.first.blank?  ? '(blank)' : change.first.to_s
+                new_value = change.second.blank? ? '(blank)' : change.second.to_s
+
+                visible_change = true
+                if key.start_with?('private')
+                  visible_change = user_signed_in? && (
+                    (content.is_a?(Universe) && content.user == current_user) ||
+                    (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
+                    (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
+                  )
+                end
+
+                unless visible_change
+                  old_value = '(hidden)'
+                  new_value = '(hidden)'
+                end
+
+                # Just for clarity / ease of mind to users -- we treat blank as private, but that's not obvious to them.
+                if key == 'privacy'
+                  old_value = 'private' if old_value == '(blank)'
+                  new_value = 'private' if new_value == '(blank)'
+                end
+              %>
+
+              <tr>
+                <td><%= key.titleize %></td>
+                <td><%= old_value.truncate(380) %></td>
+                <td><%= new_value.truncate(380) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </li>
+    <% end %>
+    <li class="collection-item">
+      <%= content.class.name %> <%= content.name %> was created by <%= link_to content.user.name, content.user %>
+      <span class='grey-text'><%= time_ago_in_words content.created_at %> ago</span>.
+    </li>
+  </ul>
+</div>

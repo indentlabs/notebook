@@ -13,7 +13,7 @@ class TemporaryFieldMigrationService < Service
       attribute_field_id: attribute_fields.pluck(:id),
       entity_id:          content_model.id,
       entity_type:        content_model.class.name
-    ).count
+    ).uniq.count
     if attribute_fields.count == existing_attribute_values_count
       return # hurrah!
     end

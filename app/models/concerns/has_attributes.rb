@@ -9,6 +9,7 @@ module HasAttributes
 
     def self.attribute_categories(user, show_hidden: false)
       return [] if ['attribute_category', 'attribute_field'].include?(content_name)
+      return @cached_attribute_categories_for_this_content if @cached_attribute_categories_for_this_content
 
       # Always include  the flatfile categories (but create AR versions if they don't exist)
       categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
@@ -41,20 +42,20 @@ module HasAttributes
         end
       end.compact
 
-      if categories.first&.user&.present?
-        acceptable_hidden_values = show_hidden ? [true, false, nil] : [false, nil]
-        categories
-          .first
-          .user
-          .attribute_categories.where(entity_type: self.content_name, hidden: acceptable_hidden_values)
-          .eager_load(:attribute_fields) # .eager_load(attribute_fields: :attribute_values)
-          .order('attribute_categories.created_at, attribute_categories.id')
-      else
-        categories
+      # Cache the result in case we call this function multiple times this request
+      @cached_attribute_categories_for_this_content ||= begin
+        if categories.first&.user&.present?
+          acceptable_hidden_values = show_hidden ? [true, false, nil] : [false, nil]
+          categories
+            .first
+            .user
+            .attribute_categories.where(entity_type: self.content_name, hidden: acceptable_hidden_values)
+            .eager_load(attribute_fields: :attribute_values) # .eager_load(:attribute_fields)
+            .order('attribute_categories.created_at, attribute_categories.id')
+        else
+          categories
+        end
       end
-
-      # todo make sure we don't need this? :)
-      #[categories, user.attribute_categories.where(['attribute_categories.entity_type = ?', content_name]).joins(:attribute_fields)].flatten.uniq
     end
 
     def update_custom_attributes
