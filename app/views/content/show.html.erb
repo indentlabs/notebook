@@ -34,7 +34,7 @@
                 <%= render partial: 'content/display/contributors', locals: { content: content } %>
               </div>
             <% end %>
-            <% category.attribute_fields.where(hidden: [false, nil]).sort do |a, b|
+            <% category.attribute_fields.includes(:attribute_values).where(hidden: [false, nil]).sort do |a, b|
                 a_value = case a.field_type
                 when 'name'
                   0
