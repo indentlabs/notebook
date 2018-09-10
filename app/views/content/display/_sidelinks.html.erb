@@ -1,6 +1,12 @@
 <%
   creating = defined?(creating) && creating
   editing = defined?(editing) && editing
+
+  categories = if defined?(categories_cache)
+    categories_cache
+  else
+    @content.class.attribute_categories(creating ? current_user : @content.user)
+  end
 %>
 
 <ul class="hoverable collection with-header content-tabs">
@@ -16,7 +22,7 @@
     </li>
   <% end %>
 
-  <% @content.class.attribute_categories(creating ? current_user : @content.user).each do |category| %>
+  <% categories.each do |category| %>
     <% fields = category.attribute_fields %>
     <%
       #TODO: refactor ALL OF THIS
