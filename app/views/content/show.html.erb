@@ -18,127 +18,17 @@
 
       <div class="card-content">
         <% categories.each do |category| %>
-          <div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
-            <% if category.name == 'gallery' %>
-              <div>
-                <%= render partial: 'content/form/images/gallery', locals: { content: content } %>
-              </div>
-            <% end %>
-            <% if category.name == 'changelog' %>
-              <div>
-                <%= render partial: 'content/display/changelog', locals: { content: content } %>
-              </div>
-            <% end %>
-            <% if category.name == 'contributors' %>
-              <div>
-                <%= render partial: 'content/display/contributors', locals: { content: content } %>
-              </div>
-            <% end %>
-            <% category.attribute_fields.includes(:attribute_values).where(hidden: [false, nil]).sort do |a, b|
-                a_value = case a.field_type
-                when 'name'
-                  0
-                when 'universe'
-                  1
-                else
-                  2
-                end
-
-                b_value = case b.field_type
-                when 'name'
-                  0
-                when 'universe'
-                  1
-                else
-                  2
-                end
-
-                a_value <=> b_value
-              end.each do |attribute| %>
-              <%# todo not this %>
-              <% if attribute.name.start_with?("private") %>
-                <% next unless user_signed_in? && (
-                   (content.is_a?(Universe) && content.user == current_user) ||
-                   (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
-                   (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
-                 )
-                %>
-              <% end %>
-
-              <%
-                value = case attribute.field_type
-                  when 'universe'
-                    Universe.find_by(id: content.universe_field_value)
-                  when 'link', 'name', 'text_area', 'textearea' # todo update all textearea --> text_area in prod data
-                    existing_attribute = attribute.attribute_values.find_by(entity_id: content.id, entity_type: content.class.name)
-
-                    if existing_attribute
-                      existing_attribute.value
-                    else
-                      # We should always have an attribute by now, but just in case we don't
-                      # there's a bit of a safety net here. todo remove it.
-                      if attribute.old_column_source.present? && content.respond_to?(attribute.old_column_source.to_sym)
-                        content.send(attribute.old_column_source.to_sym)
-                      else
-                        ""
-                      end
-                    end
-                  else
-                    raise attribute.field_type.inspect
-                end
-              %>
-              <% next if value.blank? %>
-
-              <div class="row">
-                <div class="col s3 m3 l3 right-align flow-text grey-text"><%= attribute.label %></div>
-                <% if attribute.field_type == 'universe' %>
-                  <div class="col s9 m9 l9 flow-text">
-                    <%= link_to value.name, value if value.is_a?(Universe) %>
-                  </div>
-                <% elsif attribute.field_type == 'link' %>
-                  <% klass = content.send(attribute.old_column_source).klass %>
-                  <div class="col s9 m9 l9 flow-text">
-                    <% value.each do |li| %>
-                      <div class="chip">
-                        <%= link_to li do %>
-                          <span class="<%= klass.color %>-text"><i class="material-icons left"><%= klass.icon %></i></span>
-                          <%= li.name %>
-                        <% end %>
-                      </div>
-                    <% end %>
-                  </div>
-                <% else %>
-                  <% if attribute.name == 'attribute_category_id' %>
-                    <div class="col s9 m9 l9 flow-text">
-                      <%= link_to content.attribute_category.label, content.attribute_category if content.attribute_category %>
-                    </div>
-                  <% else %>
-                    <div class="col s9 m9 l9 markdownable">
-                      <%= simple_format Rails.application.config.markdown.render(value.is_a?(Attribute) ? value.value.presence || '' : value).html_safe %>&nbsp;
-                    </div>
-                  <% end %>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
+          <%# render partial: 'content/display/category_panel', locals: { content: content, category: category } %>
         <% end %>
       </div>
 
-      <% if current_user.nil? || current_user.id != @content.user_id && (@content.respond_to?(:universe) && @content.universe && @content.universe.user_id != current_user.id) %>
-        <div class="card-action center">
-          <p>
-            This <%= @content.class.name.downcase %> was created by <%= @content.user.name %> on Notebook.ai<% if @content.is_a?(Universe) && @content.contributors.any? %> with <%= pluralize @content.contributors.count, 'contributor' %><% end %>.
-          </p>
-          <%= link_to "See more from #{@content.user.name}", @content.user %>
-          <%= link_to "Create your own universe", root_url %>
-        </div>
-      <% end %>
+      <%# render partial: 'content/display/visitor_cta', locals: { content: @content } %>
     </div>
 
   </div>
 
   <div class="col s3">
-    <%= render partial: 'content/display/sidelinks', locals: { categories_cache: categories } %>
+    <%# render partial: 'content/display/sidelinks', locals: { categories_cache: categories } %>
   </div>
 </div>
 

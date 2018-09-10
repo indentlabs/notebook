@@ -34,13 +34,13 @@ class ContentController < ApplicationController
 
   def show
     content_type = content_type_from_controller(self.class)
-    # TODO: Secure this with content class whitelist lel
+    return redirect_to root_path unless valid_content_types.map(&:name).include?(content_type.name)
     @content = content_type.find(params[:id])
 
     return redirect_to(root_path) if @content.user.nil? # deleted user's content
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
 
-    if (current_user || User.new).can_read? @content
+    if (current_user || User.new).can_read?(@content)
       if current_user
         if @content.updated_at > 30.minutes.ago
           Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed content', {
@@ -238,18 +238,20 @@ class ContentController < ApplicationController
   private
 
   def migrate_old_style_field_values
-    @content = content_type_from_controller(self.class).find(params[:id])
+    content ||= content_type_from_controller(self.class).find(params[:id])
 
-    # Ensure the default attributes are created before  using them
-    @content.class.attribute_categories(current_user)
-    attribute_categories = @content.class.attribute_categories(current_user)
-    attribute_fields = AttributeField.where(attribute_category_id: attribute_categories.map(&:id))
-    #attribute_fields = attribute_categories.flat_map(&:attribute_fields)
+    # todo we might be able to do this in a single left outer join
+    attribute_categories = content.class.attribute_categories(content.user)
+    attribute_fields     = AttributeField.where(attribute_category_id: attribute_categories.pluck(:id))
+                                         .where.not(field_type: 'link')
+                                         .where.not(old_column_source: [nil, ""])
+                                         .eager_load(:attribute_values)
 
     attribute_fields.each do |attribute_field|
-      next unless attribute_field.old_column_source.present?
-
-      existing_value = attribute_field.attribute_values.where(entity_id: @content.id).first
+      existing_value = attribute_field.attribute_values.find_by(
+        entity_id:   content.id,
+        entity_type: content.class.name
+      )
 
       # If a user has touched this attribute's value since we've created it,
       # we don't want to touch it again.
@@ -257,31 +259,19 @@ class ContentController < ApplicationController
         next
       end
 
-      delete_model_source_value = false
-      attribute_value = if attribute_field.field_type == 'link'
-        nil
-      else # text field
-        value_from_model = @content.send(attribute_field.old_column_source)
-        if value_from_model.present?
-          delete_model_source_value = true
-          value_from_model
-        else
-          nil
-        end
-      end
-
-      unless attribute_value.nil?
+      value_from_model = content.send(attribute_field.old_column_source)
+      if value_from_model.present? && value_from_model != existing_value.value
         if existing_value
           existing_value.disable_changelog_this_request = true
-          existing_value.update!(value: attribute_value)
+          existing_value.update!(value: value_from_model)
           existing_value.disable_changelog_this_request = false
         else
-          new_value = attribute_field.attribute_values.new(
-            user_id: current_user.id,
-            entity_type: @content.class.name,
-            entity_id: @content.id,
-            value: attribute_value,
-            privacy: 'private' # todo just make this the default for the column instead
+          new_value = attribute_field.value_from_model.new(
+            user_id:     current_user.id,
+            entity_type: content.class.name,
+            entity_id:   content.id,
+            value:       value_from_model,
+            privacy:     'private' # todo just make this the default for the column instead
           )
 
           new_value.disable_changelog_this_request = true
@@ -289,13 +279,6 @@ class ContentController < ApplicationController
           new_value.disable_changelog_this_request = true
         end
       end
-
-      # Lets leave these columns alone for now so 1) we don't have to mess with disabling changelogs, and 2) why not be safe?
-      # if delete_model_source_value && attribute_field.old_column_source.present? && attribute_field.field_type != 'name' && @content.send(attribute_field.old_column_source).present?
-      #   @content.disable_changelog_this_request = true
-      #   @content.update_attribute(attribute_field.old_column_source, nil)
-      #   @content.disable_changelog_this_request = false
-      # end
     end
   end
 
