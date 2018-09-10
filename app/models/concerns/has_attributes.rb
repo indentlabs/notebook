@@ -102,6 +102,20 @@ module HasAttributes
       )
     end
 
+    def overview_field(label)
+      category_ids = AttributeCategory.where(
+        user_id: user_id,
+        entity_type: self.class.name.downcase
+      ).pluck(:id)
+
+      # Todo these two queries should be able to be joined into one
+      field = AttributeField.find_by(
+        user_id: user_id,
+        attribute_category_id: category_ids,
+        label: label
+      )
+    end
+
     def name_field_value
       name_field_cache = name_field
       return self.name if name_field_cache.nil?
@@ -123,20 +137,6 @@ module HasAttributes
       else
         nil
       end
-    end
-
-    def overview_field(label)
-      category_ids = AttributeCategory.where(
-        user_id: user_id,
-        entity_type: self.class.name.downcase
-      ).pluck(:id)
-
-      # Todo these two queries should be able to be joined into one
-      field = AttributeField.find_by(
-        user_id: user_id,
-        attribute_category_id: category_ids,
-        label: label
-      )
     end
 
     def overview_field_value(label)

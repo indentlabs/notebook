@@ -1,23 +1,23 @@
 <%
   creating = defined?(creating) && creating
-  editing = defined?(editing) && editing
+  editing  = defined?(editing)  && editing
 
   categories = if defined?(categories_cache)
     categories_cache
   else
-    @content.class.attribute_categories(creating ? current_user : @content.user)
+    content.class.attribute_categories(creating ? current_user : content.user).includes(:attribute_fields)
   end
 %>
 
 <ul class="hoverable collection with-header content-tabs">
   <li class="collection-header center">
-    <h4><%= @content.class.name %></h4>
+    <h4><%= content.class.name %></h4>
   </li>
 
   <% if creating || editing %>
     <li class="collection-header center">
-      <button class="btn waves-effect waves-<%= @content.class.color %> <%= @content.class.color %> mp-sidebar-save" type="submit" name="action" style="margin: 20px 0;">
-        <%= @content.new_record? ? 'Create' : 'Save Changes' %>
+      <button class="btn waves-effect waves-<%= content.class.color %> <%= content.class.color %> mp-sidebar-save" type="submit" name="action" style="margin: 20px 0;">
+        <%= content.new_record? ? 'Create' : 'Save Changes' %>
       </button>
     </li>
   <% end %>
@@ -26,6 +26,7 @@
     <% fields = category.attribute_fields %>
     <%
       #TODO: refactor ALL OF THIS
+
       # Don't show changelog tab on create/edit form
       next if (creating || editing) && category.name == 'changelog'
 
@@ -35,22 +36,22 @@
         # Show changelog on show page
       elsif category.name == 'contributors'
         # Show contributors on show page if there are any to show
-        next if @content.contributors.empty?
+        next if content.contributors.empty?
       elsif category.name == 'gallery'
         # Only show gallery tab if the content has any images
-        next if @content.image_uploads.empty?
+        next if content.image_uploads.empty?
       else
         # Only show other tabs if it has at least one piece of data in it
         next unless fields.any? do |field|
           (
             # This is a link field AND it has existing links
-            field.field_type == 'link' && field.old_column_source.present? && @content.send(field.old_column_source).any?
-          ) || field.attribute_values.where(entity_id: @content.id).any? { |av| av.value.present? }
+            field.field_type == 'link' && field.old_column_source.present? && content.send(field.old_column_source).any?
+          ) || field.attribute_values.where(entity_id: content.id, entity_type: content.class.name).any? { |av| av.value.present? }
             # or: this is a text field with text in it
         end
       end
     %>
-    <%# for debugging: fields.map { |field| field.attribute_values.where(entity_id: @content.id).map { |av| av.value } }.uniq %>
+    <%# for debugging: fields.map { |field| field.attribute_values.where(entity_id: content.id).map { |av| av.value } }.uniq %>
 
     <li class="collection-item tab">
       <a href="#<%= category.name.gsub("'", '') %>_panel" class="<%= 'red-text' if category.label == 'Overview' %>">
@@ -63,11 +64,11 @@
     </li>
   <% end %>
 
-  <% if user_signed_in? && current_user.id == @content.user_id %>
+  <% if user_signed_in? && current_user.id == content.user_id %>
     <li class="collection-item fake-tab">
-      <%= link_to attribute_customization_path(content_type: @content.class.name.downcase), class: 'green-text' do %>
+      <%= link_to attribute_customization_path(content_type: content.class.name.downcase), class: 'green-text' do %>
         <i class="material-icons left">tune</i>
-        Configure <%= @content.class.name.downcase %> fields
+        Configure <%= content.class.name.downcase %> fields
       <% end %>
     </li>
   <% end %>

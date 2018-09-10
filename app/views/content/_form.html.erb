@@ -2,7 +2,7 @@
   <%= render 'content/form/errors', content: content %>
 
   <%# Content panels %>
-  <% content.class.attribute_categories(@content.persisted? ? @content.user : current_user).each do |category| %>
+  <% content.class.attribute_categories(@content.persisted? ? @content.user : current_user).includes(:attribute_fields).each do |category| %>
     <%= render 'content/form/panel', category: category, f: f, content: content %>
   <% end %>
 </div>
@@ -11,9 +11,7 @@
   Tip: You don't need to save before changing categories (on the right). Just remember to save when you're done!
 </div>
 
-<script type="text/javascript">
-// Dunno why the framework isn't applying the invalid class automatically, but lets just add it manually for now.
-$(document).ready(function () {
+<%= content_for :javascript do %>
+  // todo hack this might be fixed with the latest materialize -- we should check
   $('.field_with_errors').find('textarea, input').addClass('invalid');
-});
-</script>
+<% end %>
