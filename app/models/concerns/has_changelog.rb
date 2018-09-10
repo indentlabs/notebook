@@ -10,7 +10,7 @@ module HasChangelog
       ContentChangeEvent.where(
         content_id: id,
         content_type: self.class.name
-      ).order(:id)
+      ).includes(:user).order(:id)
     end
 
     def attribute_change_events(limit=100)
@@ -20,7 +20,7 @@ module HasChangelog
           entity_id: id
         ),
         content_type: "Attribute"
-      ).order(:id).last(limit)
+      ).includes(:user).order(:id).last(limit)
     end
 
     after_create do
