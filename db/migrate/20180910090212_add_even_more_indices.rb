@@ -42,7 +42,6 @@ class AddEvenMoreIndices < ActiveRecord::Migration[5.2]
     add_index(:technologies, [:deleted_at, :user_id])
     add_index(:towns, [:deleted_at, :user_id])
 
-    add_index(:universes, [:deleted_at, :universe_id])
     add_index(:characters, [:deleted_at, :universe_id])
     add_index(:locations, [:deleted_at, :universe_id])
     add_index(:items, [:deleted_at, :universe_id])
