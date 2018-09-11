@@ -72,6 +72,7 @@ module HasAttributes
           user: self.user,
           attribute_categories: { entity_type: self.class.name.downcase }
         )
+        #next if field.nil?
         raise "unknown field for attribute: #{attribute.inspect}" if field.nil?
 
         d = field.attribute_values.find_or_initialize_by(
