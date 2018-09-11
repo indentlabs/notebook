@@ -51,7 +51,6 @@ module HasAttributes
             .user
             .attribute_categories
               .where(entity_type: self.content_name, hidden: acceptable_hidden_values)
-              .includes(:attribute_fields)
               .order('attribute_categories.created_at, attribute_categories.id')
 
             # We need to do something like this, but... not this.
