@@ -39,6 +39,7 @@ class TemporaryFieldMigrationService < Service
           existing_value.update!(value: value_from_model)
           existing_value.disable_changelog_this_request = false
         else
+          next unless user
           new_value = attribute_field.attribute_values.new(
             user_id:     user.id,
             entity_type: content_model.class.name,
