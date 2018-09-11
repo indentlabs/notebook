@@ -9,6 +9,7 @@ module HasAttributes
 
     def self.attribute_categories(user, show_hidden: false)
       return [] if ['attribute_category', 'attribute_field'].include?(content_name)
+      # This doesn't work the way I think it does
       #return @cached_attribute_categories_for_this_content if @cached_attribute_categories_for_this_content
 
       # Always include  the flatfile categories (but create AR versions if they don't exist)
