@@ -44,7 +44,8 @@ class PermissionService < Service
 
   def self.billing_plan_allows_extended_content?(user:)
     # todo remove second clause will billing plans are fixed
-    user.active_billing_plans.any?(&:allows_extended_content) || BillingPlan::PREMIUM_IDS.include?(user.selected_billing_plan_id)
+    #user.active_billing_plans.any?(&:allows_extended_content) ||
+    BillingPlan::PREMIUM_IDS.include?(user.selected_billing_plan_id)
   end
 
   def self.user_can_collaborate_in_universe_that_allows_extended_content?(user:)
@@ -54,7 +55,8 @@ class PermissionService < Service
   end
 
   def self.billing_plan_allows_collective_content?(user:)
-    user.active_billing_plans.any?(&:allows_collective_content) || BillingPlan::PREMIUM_IDS.include?(user.selected_billing_plan_id)
+    #user.active_billing_plans.any?(&:allows_collective_content) || 
+    BillingPlan::PREMIUM_IDS.include?(user.selected_billing_plan_id)
   end
 
   def self.user_can_collaborate_in_universe_that_allows_collective_content?(user:)
