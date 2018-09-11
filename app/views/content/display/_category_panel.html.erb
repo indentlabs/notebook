@@ -37,7 +37,7 @@
           attribute.attribute_values.find_by(
             entity_id:   content.id,
             entity_type: content.class.name
-          ).value
+          ).try(:value).presence || ''
 
         when 'link'
           if attribute.old_column_source.present? && content.respond_to?(attribute.old_column_source.to_sym)
