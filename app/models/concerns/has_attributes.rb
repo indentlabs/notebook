@@ -44,7 +44,7 @@ module HasAttributes
       end.compact
 
       # Cache the result in case we call this function multiple times this request
-      @cached_attribute_categories_for_this_content ||= begin
+      @cached_attribute_categories_for_this_content = begin
         if categories.first&.user&.present?
           acceptable_hidden_values = show_hidden ? [true, false, nil] : [false, nil]
           categories
