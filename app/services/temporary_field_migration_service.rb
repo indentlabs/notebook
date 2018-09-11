@@ -1,6 +1,6 @@
 class TemporaryFieldMigrationService < Service
   def self.migrate_fields_for_content(content_model, user)
-    return unless user.present?
+    return unless content_model.present? && user.present?
 
     # todo we might be able to do this in a single left outer join
     attribute_categories = content_model.class.attribute_categories(content_model.user)
