@@ -23,7 +23,7 @@ module HasAttributes
         # Default new categories to the default icon
         category.icon = details[:icon] unless category.persisted?
 
-        category.save! if user
+        category.save! if user && category.new_record?
         category.attribute_fields << details[:attributes].map do |field|
           af_field = category.attribute_fields.with_deleted.find_or_initialize_by(
             label: field[:label],
@@ -31,7 +31,7 @@ module HasAttributes
             user: user,
             field_type: field[:field_type].presence || "text_area"
           )
-          af_field.save! if user
+          af_field.save! if user && af_field.new_record?
           af_field
         end if details.key?(:attributes)
 
