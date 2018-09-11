@@ -239,7 +239,7 @@ class ContentController < ApplicationController
 
   def migrate_old_style_field_values
     content ||= content_type_from_controller(self.class).find(params[:id])
-    TemporaryFieldMigrationService.migrate_fields_for_content(content)
+    TemporaryFieldMigrationService.migrate_fields_for_content(content, current_user)
   end
 
   def valid_content_types

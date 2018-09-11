@@ -1,5 +1,5 @@
 class TemporaryFieldMigrationService < Service
-  def self.migrate_fields_for_content(content_model)
+  def self.migrate_fields_for_content(content_model, user)
     # todo we might be able to do this in a single left outer join
     attribute_categories = content_model.class.attribute_categories(content_model.user)
     attribute_fields     = AttributeField.where(attribute_category_id: attribute_categories.pluck(:id))
@@ -33,14 +33,14 @@ class TemporaryFieldMigrationService < Service
       end
 
       value_from_model = content_model.send(attribute_field.old_column_source)
-      if value_from_model.present? && value_from_model != existing_value.value
+      if value_from_model.present? && value_from_model != existing_value.try(:value)
         if existing_value
           existing_value.disable_changelog_this_request = true
           existing_value.update!(value: value_from_model)
           existing_value.disable_changelog_this_request = false
         else
           new_value = attribute_field.attribute_values.new(
-            user_id:     current_user.id,
+            user_id:     user.id,
             entity_type: content_model.class.name,
             entity_id:   content_model.id,
             value:       value_from_model,
