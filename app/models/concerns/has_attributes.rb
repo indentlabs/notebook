@@ -44,7 +44,7 @@ module HasAttributes
       end.compact
 
       # Cache the result in case we call this function multiple times this request
-      @cached_attribute_categories_for_this_content = begin
+      @cached_attribute_categories_for_this_content ||= begin
         if categories.first&.user&.present?
           acceptable_hidden_values = show_hidden ? [true, false, nil] : [false, nil]
           categories
@@ -52,6 +52,7 @@ module HasAttributes
             .user
             .attribute_categories
               .where(entity_type: self.content_name, hidden: acceptable_hidden_values)
+              .eager_load(attribute_fields: :attribute_values)
               .order('attribute_categories.created_at, attribute_categories.id')
 
             # We need to do something like this, but... not this.
