@@ -49,13 +49,16 @@ module HasAttributes
           categories
             .first
             .user
-            .attribute_categories.where(entity_type: self.content_name, hidden: acceptable_hidden_values)
-            .eager_load(attribute_fields: :attribute_values) # .eager_load(:attribute_fields)
-            .order('attribute_categories.created_at, attribute_categories.id')
+            .attribute_categories
+              .where(entity_type: self.content_name, hidden: acceptable_hidden_values)
+              .eager_load(attribute_fields: :attribute_values) # .eager_load(:attribute_fields)
+              .order('attribute_categories.created_at, attribute_categories.id')
         else
           categories
         end
       end
+
+      @cached_attribute_categories_for_this_content
     end
 
     def update_custom_attributes

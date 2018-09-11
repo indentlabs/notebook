@@ -35,7 +35,7 @@ class AdminController < ApplicationController
     # Do not allow masquerading in production, even for admins.
     return unless Rails.env.development?
 
-    masqueree = User.find(params[:user_id])
+    masqueree = User.find_by(id: params[:user_id])
     sign_in masqueree
     redirect_to root_path
   end
