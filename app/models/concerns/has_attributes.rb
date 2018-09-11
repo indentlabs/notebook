@@ -9,7 +9,7 @@ module HasAttributes
 
     def self.attribute_categories(user, show_hidden: false)
       return [] if ['attribute_category', 'attribute_field'].include?(content_name)
-      return @cached_attribute_categories_for_this_content if @cached_attribute_categories_for_this_content
+      #return @cached_attribute_categories_for_this_content if @cached_attribute_categories_for_this_content
 
       # Always include  the flatfile categories (but create AR versions if they don't exist)
       categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
@@ -43,7 +43,7 @@ module HasAttributes
       end.compact
 
       # Cache the result in case we call this function multiple times this request
-      @cached_attribute_categories_for_this_content ||= begin
+      @cached_attribute_categories_for_this_content = begin
         if categories.first&.user&.present?
           acceptable_hidden_values = show_hidden ? [true, false, nil] : [false, nil]
           categories
