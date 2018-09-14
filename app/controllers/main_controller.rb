@@ -89,15 +89,16 @@ class MainController < ApplicationController
 
   private
 
-  class RetryMe < StandardError; end
   def ask_question
-    if @universe_scope.present?
-      content_pool = current_user.content_in_universe(@universe_scope).values.flatten
-    else
-      content_pool = current_user.content.values.flatten
-    end
+    Rails.application.config.content_types[:all].shuffle.each do |content_type|
+      if @universe_scope.present?
+        @content = content_type.where(user: current_user, universe: @universe_scope).sample
+      else
+        @content = content_type.where(user: current_user).sample
+      end
 
-    @content = content_pool.sample
+      return if @content.present?
+    end
   end
 
   def resource_name

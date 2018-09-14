@@ -34,11 +34,11 @@ module HasContent
     # [..., ...]
     def content_list
       @user_content_list ||= begin
-        Rails.application.config.content_types[:all].map do |type|
+        Rails.application.config.content_types[:all].flat_map do |type|
           relation = type.name.downcase.pluralize.to_sym # :characters
           send(relation)
         end
-      end.flatten
+      end
     end
 
     # {
