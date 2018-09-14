@@ -80,11 +80,6 @@ group :test, :development do
   gem 'sqlite3'
 end
 
-group :development do
-  gem 'web-console'
-  gem 'bullet', '>= 5.4'
-end
-
 group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
@@ -117,4 +112,13 @@ group :test do
   gem 'ruby-prof', '0.15.9'
   gem 'shoulda-matchers', '~> 3.1'
   gem 'rails-controller-testing'
+end
+
+group :development do
+  gem 'web-console'
+  gem 'bullet', '>= 5.4'
+  gem 'rack-mini-profiler'
+  gem 'memory_profiler'
+  gem 'flamegraph'
+  gem 'stackprof'
 end
