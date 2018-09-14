@@ -1,13 +1,15 @@
 <%
-  content_type_class = content_type.to_s.titleize.constantize
+  content_type_name  = content_type.to_s.titleize                # "Character"
+  content_type_class = content_type_name.constantize             # Character
+  content_type_pluralized = content_type_name.downcase.pluralize # characters
 %>
 <div class="card hoverable">
   <div class="card-image">
-    <% images = ImageUpload.where(content_type: content_type.to_s.titleize, content_id: content_list.map(&:id)) %>
+    <% images = ImageUpload.where(content_type: content_type_name, content_id: content_list.map(&:id)) %>
     <% if images.any? && rand(3) < 2 %>
       <%= image_tag images.sample.src(:large), class: 'activator', style: 'height: 265px' %>
     <% else %>
-      <%= image_tag "card-headers/#{content_type.to_s.pluralize}.jpg", class: 'activator', style: 'height: 265px' %>
+      <%= image_tag "card-headers/#{content_type_pluralized}.jpg", class: 'activator', style: 'height: 265px' %>
     <% end %>
     <span class="card-title" style="text-shadow: 1px 1px #000000">
       <% if defined?(card_title) && !card_title.blank? %>
@@ -29,7 +31,7 @@
       <%= link_to polymorphic_path(content_type_class), class: "btn-floating halfway-fab waves-effect waves-light grey black-text tooltipped", style: "right: 90px",
         data: {
           position: 'bottom',
-          tooltip: "View all #{content_type.to_s.pluralize}",
+          tooltip: "View all #{content_type_pluralized}",
           enterDelay: 50
         } do %>
         <i class="material-icons">reorder</i>
@@ -46,9 +48,9 @@
         </i>
       <% end %>
       <% if defined?(@content) && @content.is_a?(Universe) && content_type != :universe && content_type.to_s.downcase != 'universe' %>
-        <%= link_to content_type.to_s.pluralize.titleize, send("#{content_type.to_s.pluralize}_universe_path", { id: @content.id }), class: "#{content_type_class.color}-text" %>
+        <%= link_to content_type_pluralized.titleize, send("#{content_type_pluralized}_universe_path", { id: @content.id }), class: "#{content_type_class.color}-text" %>
       <% else %>
-        <%= content_type.to_s.pluralize.titleize %>
+        <%= content_type_pluralized.titleize %>
       <% end %>
       <i class="material-icons right">close</i>
     </span>
@@ -75,7 +77,7 @@
       </table>
       <div class="center" style="margin-top: 30px">
         <% if defined?(@content) && @content.is_a?(Universe) && content_type != :universe && content_type.to_s.downcase != 'universe' %>
-          <%= link_to "Browse #{content_type.to_s.pluralize}", send("#{content_type.to_s.pluralize}_universe_path", { id: @content.id }), class: "btn #{content_type_class.color} lighten-1" %>
+          <%= link_to "Browse #{content_type_pluralized}", send("#{content_type_pluralized}_universe_path", { id: @content.id }), class: "btn #{content_type_class.color} lighten-1" %>
         <% else %>
           <div class="center">
             <% button_text = content_list.any? ? "Create another #{content_type}" : "Create one" %>

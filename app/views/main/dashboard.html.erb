@@ -13,6 +13,7 @@
 %>
 
 <div class="row">
+  <% current_user_universe_ids = current_user.universes.pluck(:id) %>
   <% @content_types.each do |content_type| %>
     <%
       pluralized_content_name = content_type.downcase.pluralize
@@ -23,7 +24,7 @@
         content_list = current_user.send(pluralized_content_name) + current_user.send("contributable_#{pluralized_content_name}")
 
         unless content_type == 'Universe'
-          content_list.concat(content_type.constantize.where(universe_id: current_user.universes.pluck(:id)))
+          content_list.concat(content_type.constantize.where(universe_id: current_user_universe_ids))
         end
       end
 
