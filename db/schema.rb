@@ -2192,7 +2192,6 @@ ActiveRecord::Schema.define(version: 2018_09_10_090212) do
     t.datetime "deleted_at"
     t.index ["deleted_at", "id"], name: "index_universes_on_deleted_at_and_id"
     t.index ["deleted_at", "user_id"], name: "index_universes_on_deleted_at_and_user_id"
-    t.index ["deleted_at", nil], name: "index_universes_on_deleted_at_and_universe_id"
     t.index ["deleted_at"], name: "index_universes_on_deleted_at"
     t.index ["user_id"], name: "index_universes_on_user_id"
   end

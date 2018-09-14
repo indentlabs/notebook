@@ -117,9 +117,8 @@ class User < ApplicationRecord
   end
 
   def active_billing_plans
-    active_subscriptions
-      .map { |subscription| subscription.billing_plan }
-      .uniq
+    billing_plan_ids = active_subscriptions.pluck(:billing_plan_id)
+    BillingPlan.where(id: billing_plan_ids).uniq
   end
 
   def initialize_stripe_customer
