@@ -33,6 +33,8 @@ class User < ApplicationRecord
   has_many :content_change_events,        dependent: :destroy
   has_many :user_content_type_activators, dependent: :destroy
 
+  has_many :api_keys,                     dependent: :destroy
+
   def contributable_universes
     @user_contributable_universes ||= begin
       # todo email confirmation needs to happy for data safety / privacy (only verified emails)
@@ -172,6 +174,13 @@ class User < ApplicationRecord
     username ||= 'Anonymous Author'
 
     username
+  end
+
+  def self.from_api_key(key)
+    found_key = ApiKey.includes(:user).find_by(key: key)
+    return nil unless found_key.present?
+
+    found_key.user
   end
 
   private
