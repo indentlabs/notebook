@@ -10,7 +10,7 @@ class MainController < ApplicationController
   end
 
   def index
-    redirect_to :dashboard if user_signed_in?
+    redirect_to(:dashboard) if user_signed_in?
   end
 
   def about_notebook
@@ -22,27 +22,22 @@ class MainController < ApplicationController
   def dashboard
     return redirect_to new_user_session_path unless user_signed_in?
 
-    # if user_signed_in? && current_user.universes.count > 1 && @universe_scope.nil?
-    #   redirect_to universes_path
-    #   return
-    # end
-
     @content_types = (
       Rails.application.config.content_types[:all].map(&:name) & # Use config to dictate order
       current_user.user_content_type_activators.pluck(:content_type)
     )
 
-    ask_question
+    set_random_content # for questions
   end
 
   def prompts
-    return redirect_to new_user_session_path unless user_signed_in?
+    return redirect_to(new_user_session_path) unless user_signed_in?
 
-    ask_question
+    set_random_content # for question
   end
 
   def notes
-    return redirect_to new_user_session_path unless user_signed_in?
+    return redirect_to(new_user_session_path) unless user_signed_in?
   end
 
   def recent_content
@@ -89,7 +84,7 @@ class MainController < ApplicationController
 
   private
 
-  def ask_question
+  def set_random_content
     Rails.application.config.content_types[:all].shuffle.each do |content_type|
       if @universe_scope.present?
         @content = content_type.where(user: current_user, universe: @universe_scope).sample
