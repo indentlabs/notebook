@@ -82,8 +82,13 @@ class ContentController < ApplicationController
   end
 
   def edit
-    @content = content_type_from_controller(self.class)
-               .find(params[:id])
+    content_type_class = content_type_from_controller(self.class)
+    @content = content_type_class.find_by(id: params[:id])
+
+    if @content.nil?
+      return redirect_to root_path,
+             notice: "Either this #{content_type_class.name.downcase} doesn't exist, or you don't have access to view it."
+    end
 
     unless @content.updatable_by? current_user
       return redirect_to @content, notice: t(:no_do_permission)
@@ -238,8 +243,8 @@ class ContentController < ApplicationController
   private
 
   def migrate_old_style_field_values
-    content ||= content_type_from_controller(self.class).find(params[:id])
-    TemporaryFieldMigrationService.migrate_fields_for_content(content, current_user)
+    content ||= content_type_from_controller(self.class).find_by(id: params[:id])
+    TemporaryFieldMigrationService.migrate_fields_for_content(content, current_user) if content.present?
   end
 
   def valid_content_types

@@ -27,7 +27,7 @@ class UsersController < ApplicationController
 
   def delete_my_account # :(
     unless user_signed_in?
-      redirect_to root_path
+      redirect_to(root_path, notice: "You must be signed in to do that!")
       return
     end
 
@@ -40,7 +40,7 @@ class UsersController < ApplicationController
     report_user_deletion_to_slack(current_user)
 
     current_user.really_destroy!
-    redirect_to root_path, notice: 'Your account has been deleted. We will miss you greatly!'
+    redirect_to(root_path, notice: 'Your account has been deleted. We will miss you greatly!')
   end
 
   def report_user_deletion_to_slack user
