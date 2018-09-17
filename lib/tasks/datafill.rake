@@ -24,7 +24,7 @@ namespace :datafill do
         skintone: COLORS.sample,
         fave_color: COLORS.sample,
       )
-      character.change_events.update_all(user_id: owner.id)
+      #character.change_events.update_all(user_id: owner.id)
     end
     puts
     puts "Done."
