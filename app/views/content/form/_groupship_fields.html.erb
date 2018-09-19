@@ -15,7 +15,7 @@
     <% end %>
 
   <% else %>
-    <% klass = parent.send(attribute.pluralize).build.class.name.downcase %>
+    <% klass = parent.send(attribute.pluralize).klass.name.downcase %>
 
     <div class="input-field">
       <%= f.label attribute, class: 'active' %>
@@ -24,13 +24,7 @@
         <div class="col s10">
           <%=
             f.select "#{attribute}_id",
-              current_user.send("linkable_#{klass.pluralize}")
-                .in_universe(@universe_scope)
-                .in_universe(@content.universe)
-                .sort_by(&:name)
-                .reject { |content| content.class.name == klass && content.id == @content.id }
-                .map { |c| [c.name, c.id] }
-                .compact,
+              @linkables_cache[klass.titleize] || [],
               include_blank: true
           %>
         </div>

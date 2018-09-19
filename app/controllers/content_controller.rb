@@ -3,6 +3,8 @@ class ContentController < ApplicationController
   before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy]
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
+  before_action :populate_linkable_content_for_each_content_type, only: [:new, :edit]
+
   def index
     @content_type_class = content_type_from_controller(self.class)
     pluralized_content_name = @content_type_class.name.downcase.pluralize
@@ -245,6 +247,26 @@ class ContentController < ApplicationController
   def migrate_old_style_field_values
     content ||= content_type_from_controller(self.class).find_by(id: params[:id])
     TemporaryFieldMigrationService.migrate_fields_for_content(content, current_user) if content.present?
+  end
+
+  def populate_linkable_content_for_each_content_type
+    @linkables_cache = {}
+    (current_user.user_content_type_activators.pluck(:content_type) - ["Universe"]).each do |class_name|
+      # class_name = "Character"
+
+      @linkables_cache[class_name] = current_user.send("linkable_#{class_name.downcase.pluralize}")
+        .in_universe(@universe_scope)
+
+      if @content.present? && @content.persisted?
+        @linkables_cache[class_name] = @linkables_cache[class_name]
+          .in_universe(@content.universe)
+          .reject { |content| content.class.name == class_name && content.id == @content.id }
+      end
+
+      @linkables_cache[class_name] = @linkables_cache[class_name].sort_by(&:name)
+        .map { |c| [c.name, c.id] }
+        .compact
+    end
   end
 
   def valid_content_types
