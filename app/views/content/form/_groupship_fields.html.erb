@@ -23,14 +23,9 @@
       <div class="row">
         <div class="col s10">
           <%=
+            # todo this needs memoized #easywin
             f.select "#{attribute}_id",
-              current_user.send("linkable_#{klass.pluralize}")
-                .in_universe(@universe_scope)
-                .in_universe(@content.universe)
-                .sort_by(&:name)
-                .reject { |content| content.class.name == klass && content.id == @content.id }
-                .map { |c| [c.name, c.id] }
-                .compact,
+              @linkables_cache[klass.titleize] || [],
               include_blank: true
           %>
         </div>

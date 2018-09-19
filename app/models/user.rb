@@ -53,6 +53,7 @@ class User < ApplicationRecord
       end
     end
   end
+
   #TODO: rename this to the more descriptive name contributable_#{content_type}
   # returns all content of that type that a user can edit/contribute to, even if it's not owned by the user
   Rails.application.config.content_types[:all_non_universe].each do |content_type|
@@ -68,6 +69,10 @@ class User < ApplicationRecord
       """)
     end
   end
+
+  #def linkable_universes
+    #todo
+  #end
 
   # TODO: Swap this out with a has_many when we transition from a scratchpad to users having multiple documents
   has_one :document, dependent: :destroy
