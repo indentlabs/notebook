@@ -35,19 +35,8 @@
   <% # Do some dynamic resizing of columns based on how many columns there are
      # TODO: move this into some service or something? Dunno, doesn't belong here.
     s_width = 12
-    m_width = 6
-    l_width = 4
-    attribute_fields_length = category.attribute_fields.length
-    if attribute_fields_length == 1
-      # If there's only one field on this tab, go full-width on all screen sizes
-      s_width = m_width = l_width = 12
-    elsif attribute_fields_length == 2
-      # If there's two fields on this tab, go half-width on medium- and large-screens
-      s_width = 12
-      m_width = l_width = 6
-    elsif attribute_fields_length > 2
-      # If there's at least 3 fields, use the defaults (detailed above)
-    end
+    m_width = 12
+    l_width = 12
   %>
 
   <% category.attribute_fields.where(hidden: [false, nil]).includes(:attribute_values).sort do |a, b|
