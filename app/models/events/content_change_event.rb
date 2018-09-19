@@ -4,6 +4,6 @@ class ContentChangeEvent < ApplicationRecord
   serialize :changed_fields, Hash
 
   def content
-    content_type.constantize.find(content_id)
+    content_type.constantize.find_by(id: content_id)
   end
 end
