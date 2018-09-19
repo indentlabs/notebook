@@ -82,7 +82,10 @@
       <% else # field_type == text %>
         <div class="col s9 m9 l9 markdownable">
           <%=
-            simple_format(Rails.application.config.markdown.render(value.presence || '').html_safe)
+            ContentFormatterService.show(
+            text: value,
+            viewing_user: current_user
+          )
           %>&nbsp;
         </div>
       <% end %>
