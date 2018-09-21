@@ -126,7 +126,8 @@ module HasAttributes
       field = AttributeField.find_by(
         user_id: user_id,
         attribute_category_id: category_ids,
-        label: label
+        label: label,
+        hidden: [nil, false]
       )
     end
 

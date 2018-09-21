@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_09_17_033731) do
+ActiveRecord::Schema.define(version: 2018_09_21_182215) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -65,6 +65,9 @@ ActiveRecord::Schema.define(version: 2018_09_17_033731) do
     t.string "old_column_source"
     t.index ["deleted_at", "attribute_category_id"], name: "deleted_at__attribute_category_id"
     t.index ["deleted_at", "name"], name: "index_attribute_fields_on_deleted_at_and_name"
+    t.index ["user_id", "attribute_category_id", "field_type", nil], name: "special_field_type_index"
+    t.index ["user_id", "attribute_category_id", "label", "hidden", nil], name: "field_lookup_by_label_index"
+    t.index ["user_id", "attribute_category_id", "label", "old_column_source", "field_type"], name: "temporary_migration_lookup_index"
     t.index ["user_id", "attribute_category_id"], name: "index_attribute_fields_on_user_id_and_attribute_category_id"
     t.index ["user_id", "field_type"], name: "index_attribute_fields_on_user_id_and_field_type"
     t.index ["user_id", "name"], name: "index_attribute_fields_on_user_id_and_name"

@@ -41,5 +41,9 @@ $(document).ready(function () {
 
     // Make the change!
     textarea_to_modify.val(current_textarea_value + token_to_insert);
+
+    // Don't jump to the top of the page after clicking!
+    click_event.stopPropagation();
+    return false;
   });
 });
