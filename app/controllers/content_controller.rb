@@ -250,8 +250,11 @@ class ContentController < ApplicationController
   end
 
   def populate_linkable_content_for_each_content_type
+    linkable_classes = Rails.application.config.content_types[:all].map(&:name) & current_user.user_content_type_activators.pluck(:content_type)
+    linkable_classes -= ["Universe"]
+
     @linkables_cache = {}
-    (Rails.application.config.content_types[:all].map(&:name) & current_user.user_content_type_activators.pluck(:content_type) - ["Universe"]).each do |class_name|
+    linkable_classes.each do |class_name|
       # class_name = "Character"
 
       @linkables_cache[class_name] = current_user.send("linkable_#{class_name.downcase.pluralize}")
