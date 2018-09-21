@@ -4,6 +4,7 @@ $(document).ready(function () {
     $(link_bar_container).html($('#content-field-link-bar-template').html())
     $(link_bar_container).find('.content-field-link-bar').show();
     $(link_bar_container).find('.dropdown-trigger').dropdown({coverTrigger: false});
+    $(link_bar_container).find('.tooltipped').tooltip({ enterDelay: 50 });
     add_link_bar_click_handlers();
   }
 
