@@ -25,6 +25,7 @@ class PermissionService < Service
   end
 
   def self.user_can_contribute_to_containing_universe?(user:, content:)
+    return false if user.nil?
     return true if [AttributeCategory, AttributeField, Attribute].include?(content.class) #todo audit this
     content.universe.present? && user.contributable_universes.pluck(:id).include?(content.universe.id)
   end
@@ -55,7 +56,7 @@ class PermissionService < Service
   end
 
   def self.billing_plan_allows_collective_content?(user:)
-    #user.active_billing_plans.any?(&:allows_collective_content) || 
+    #user.active_billing_plans.any?(&:allows_collective_content) ||
     BillingPlan::PREMIUM_IDS.include?(user.selected_billing_plan_id)
   end
 
