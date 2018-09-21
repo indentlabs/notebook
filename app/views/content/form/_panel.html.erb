@@ -68,56 +68,58 @@
         <%= render 'content/form/relation_input', f: f, attribute: field.old_column_source, label: field.label, relation: through_class %>
 
       <% elsif field.field_type == 'universe' %>
-        <div class="input-field">
-          <%= f.label field.name, field.label %><br />
+        <div class="content-field">
+          <div class="input-field">
+            <%= f.label field.name, field.label %><br />
 
-          <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) || f.object.universe_id.nil? %>
-            <%# todo not like this %>
-            <%
-              valid_universes = []
-              show_premium_notice = false
+            <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) || f.object.universe_id.nil? %>
+              <%# todo not like this %>
+              <%
+                valid_universes = []
+                show_premium_notice = false
 
-              if content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
-                valid_universes += current_user.universes
-                valid_universes += current_user.contributable_universes
-              else
-                # Premium content
-                if current_user.on_premium_plan? || content.user == current_user
+                if content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
                   valid_universes += current_user.universes
+                  valid_universes += current_user.contributable_universes
                 else
-                  show_premium_notice = true
-                end
+                  # Premium content
+                  if current_user.on_premium_plan? || content.user == current_user
+                    valid_universes += current_user.universes
+                  else
+                    show_premium_notice = true
+                  end
 
-                current_user.contributable_universes.each do |potential_universe|
-                  if potential_universe.user.on_premium_plan?
-                    valid_universes += [potential_universe]
+                  current_user.contributable_universes.each do |potential_universe|
+                    if potential_universe.user.on_premium_plan?
+                      valid_universes += [potential_universe]
+                    end
                   end
                 end
-              end
 
-            %>
+              %>
 
-            <% universe_attribute = Attribute.find_by(user: current_user, attribute_field: field, entity: f.object) %>
-            <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field.name %>
-            <%=
-              @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
-              select_tag "#{content.class.name.downcase}[custom_attribute_values][][value]",
-                options_for_select(
-                  @universe_dropdown_options.compact,
-                  content.universe_field_value.try(:id)
-                ),
-                include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
-            %>
-            <% if show_premium_notice %>
-              <div class="help-text">
-                <i class="material-icons" style="font-size: 90%">info</i>
-                While on a <%= link_to 'Starter plan', subscription_path %>, you can only create premium content in universes you're a contributor to.
-              </div>
+              <% universe_attribute = Attribute.find_by(user: current_user, attribute_field: field, entity: f.object) %>
+              <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field.name %>
+              <%=
+                @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
+                select_tag "#{content.class.name.downcase}[custom_attribute_values][][value]",
+                  options_for_select(
+                    @universe_dropdown_options.compact,
+                    content.universe_field_value.try(:id)
+                  ),
+                  include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
+              %>
+              <% if show_premium_notice %>
+                <div class="help-text">
+                  <i class="material-icons" style="font-size: 90%">info</i>
+                  While on a <%= link_to 'Starter plan', subscription_path %>, you can only create premium content in universes you're a contributor to.
+                </div>
+              <% end %>
+            <% else %>
+              <br />
+              <%= link_to(f.object.universe.name, f.object.universe) if f.object.universe %>
             <% end %>
-          <% else %>
-            <br />
-            <%= link_to(f.object.universe.name, f.object.universe) if f.object.universe %>
-          <% end %>
+          </div>
         </div>
 
       <% elsif field.label.start_with?('Private') %>
@@ -134,15 +136,17 @@
              (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
            )
         %>
-          <div class="input-field content-field">
-            <%= f.label field.name, field.label %>
-            <% attribute = Attribute.find_by(user: current_user, attribute_field: field, entity: f.object) %>
-            <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field.name %>
-            <%= text_area_tag "#{content.class.name.downcase}[custom_attribute_values][][value]", attribute.present? ? attribute.value :  "",
-                  class: "materialize-textarea",
-                  placeholder: 'Write as little or as much as you want!' %>
-            <div class="help-text">
-              Private notes are <em>always</em> visible to only you, even if content is made public and shared.
+          <div class="content-field">
+            <div class="input-field">
+              <%= f.label field.name, field.label %>
+              <% attribute = Attribute.find_by(user: current_user, attribute_field: field, entity: f.object) %>
+              <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field.name %>
+              <%= text_area_tag "#{content.class.name.downcase}[custom_attribute_values][][value]", attribute.present? ? attribute.value :  "",
+                    class: "materialize-textarea",
+                    placeholder: 'Write as little or as much as you want!' %>
+              <div class="help-text">
+                Private notes are <em>always</em> visible to only you, even if content is made public and shared.
+              </div>
             </div>
           </div>
         <% end %>
