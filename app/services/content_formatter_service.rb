@@ -71,7 +71,7 @@ class ContentFormatterService < Service
   end
 
   def self.private_link_template(content_model)
-    chip_template(content_model.class) { link_to(content_model.name, '#', class: 'content_link disabled') }
+    chip_template(content_model.class) { link_to('[Private page]', '#', class: 'content_link grey-text') }
   end
 
   def self.unknown_link_template(attempted_key)

@@ -20,10 +20,6 @@ $(document).ready(function () {
     add_link_bar(parent_content_field.find('.content-field-link-bar-container'));
   });
 
-  $('body').blur(function (focus_event) {
-    $('.content-field').removeClass('focused');
-  });
-
   function add_link_bar_click_handlers() {
     $('.js-content-link-option').click(function (click_event) {
       var selected_option    = $(click_event.target);
