@@ -96,15 +96,13 @@ module HasContent
 
     # [..., ..., ...]
     def recent_content_list
-      content_types = Rails.application.config.content_types[:all]
-
-      @user_recent_content_list ||= content_types.flat_map { |klass|
-        klass.where(user_id: id)
-             .order(updated_at: :desc)
-             .limit(10)
-      }.sort_by(&:updated_at)
-      .last(10)
-      .reverse
+      recently_changed_attributes = Attribute.where(user: self)
+                                             .order('updated_at desc')
+                                             .group([:entity_type, :entity_id])
+                                             .limit(10)
+      @user_recent_content_list = recently_changed_attributes.map do |attr|
+        attr.entity_type.constantize.find_by(id: attr.entity_id)
+      end.compact
     end
   end
 end
