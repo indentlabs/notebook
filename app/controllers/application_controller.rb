@@ -49,7 +49,7 @@ class ApplicationController < ActionController::Base
 
     @current_user_content = {}
     @activated_content_types.each do |content_type|
-      @current_user_content[content_type] = content_type.constantize.where(user: current_user)
+      @current_user_content[content_type] = content_type.constantize.where(user: current_user).to_a
     end
   end
 end

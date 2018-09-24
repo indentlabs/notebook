@@ -21,10 +21,8 @@
       if @universe_scope.present? && content_type != 'Universe'
         content_list = @universe_scope.send(pluralized_content_name)
       else
-        content_list = [
-          @current_user_content[content_type],                            # This user's created content
-          current_user.send("contributable_#{pluralized_content_name}")   # Plus, any pages this user can contribute to
-        ].inject(:+)
+        content_list = @current_user_content[content_type] +
+                       current_user.send("contributable_#{pluralized_content_name}")
 
         # todo I don't think this is actually necessary anymore, but leaving around for a few days just in case
         # if content_type != 'Universe'
