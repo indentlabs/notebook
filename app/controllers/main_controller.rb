@@ -22,8 +22,6 @@ class MainController < ApplicationController
   def dashboard
     return redirect_to new_user_session_path unless user_signed_in?
 
-    @content_types = @activated_content_types
-
     set_random_content # for questions
   end
 
