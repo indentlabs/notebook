@@ -82,11 +82,11 @@ class MainController < ApplicationController
   private
 
   def set_random_content
-    Rails.application.config.content_types[:all].shuffle.each do |content_type|
+    @activated_content_types.shuffle.each do |content_type|
       if @universe_scope.present?
-        @content = content_type.where(user: current_user, universe: @universe_scope).sample
+        @content = content_type.constantize.where(user: current_user, universe: @universe_scope).sample
       else
-        @content = content_type.where(user: current_user).sample
+        @content = content_type.constantize.where(user: current_user).sample
       end
 
       return if @content.present?
