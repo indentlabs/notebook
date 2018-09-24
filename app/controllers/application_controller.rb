@@ -38,10 +38,18 @@ class ApplicationController < ActionController::Base
 
   private
 
+  # Cache some super-common stuff we need for every page. For example, content lists for the side nav.
   def cache_most_used_page_information
+    return unless user_signed_in?
+
     @activated_content_types = (
       Rails.application.config.content_types[:all].map(&:name) & # Use config to dictate order
       current_user.user_content_type_activators.pluck(:content_type)
     )
+
+    @current_user_content = {}
+    @activated_content_types.each do |content_type|
+      @current_user_content[content_type] = content_type.constantize.where(user: current_user)
+    end
   end
 end

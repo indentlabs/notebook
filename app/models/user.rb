@@ -43,6 +43,7 @@ class User < ApplicationRecord
       Universe.where(id: contributor_ids)
     end
   end
+
   #TODO: rename this to #{content_type}_shared_with_me and only return contributable content that others own
   Rails.application.config.content_types[:all_non_universe].each do |content_type|
     pluralized_content_type = content_type.name.downcase.pluralize

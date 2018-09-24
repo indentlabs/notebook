@@ -14,18 +14,22 @@
 
 <div class="row">
   <% current_user_universe_ids = current_user.universes.pluck(:id) %>
-  <% @content_types.each do |content_type| %>
+  <% @activated_content_types.each do |content_type| %>
     <%
       pluralized_content_name = content_type.downcase.pluralize
 
       if @universe_scope.present? && content_type != 'Universe'
         content_list = @universe_scope.send(pluralized_content_name)
       else
-        content_list = current_user.send(pluralized_content_name) + current_user.send("contributable_#{pluralized_content_name}")
+        content_list = [
+          @current_user_content[content_type],                            # This user's created content
+          current_user.send("contributable_#{pluralized_content_name}")   # Plus, any pages this user can contribute to
+        ].inject(:+)
 
-        unless content_type == 'Universe'
-          content_list.concat(content_type.constantize.where(universe_id: current_user_universe_ids))
-        end
+        # todo I don't think this is actually necessary anymore, but leaving around for a few days just in case
+        # if content_type != 'Universe'
+        #   content_list.concat(content_type.constantize.where(universe_id: current_user_universe_ids))
+        # end
       end
 
       content_list = content_list.uniq
