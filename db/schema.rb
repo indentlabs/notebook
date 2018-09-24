@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_09_21_182215) do
+ActiveRecord::Schema.define(version: 2018_09_24_164517) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -1162,6 +1162,7 @@ ActiveRecord::Schema.define(version: 2018_09_21_182215) do
     t.integer "user_id"
     t.integer "character_id"
     t.integer "spoken_language_id"
+    t.index ["spoken_language_id"], name: "index_lingualisms_on_spoken_language_id"
   end
 
   create_table "location_capital_towns", force: :cascade do |t|
