@@ -6,11 +6,15 @@
   # todo description field
 
   content_ids = content_list.pluck(:id)
-  list_name_lookup_cache = Hash[
-    name_field.attribute_values.where(
-      entity_type: content_type.name
-    ).pluck(:entity_id, :value)
-  ]
+  if name_field
+    list_name_lookup_cache = Hash[
+      name_field.attribute_values.where(
+        entity_type: content_type.name
+      ).pluck(:entity_id, :value)
+    ]
+  else
+    list_name_lookup_cache = {}
+  end
 %>
 
 <ul class="collection <%= 'with-header' if title.present? %>" style='border: 0'>

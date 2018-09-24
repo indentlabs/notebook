@@ -8,11 +8,15 @@
   # todo description field
 
   content_ids = content_list.pluck(:id)
-  list_name_lookup_cache = Hash[
-    name_field.attribute_values.where(
-      entity_type: content_type_name
-    ).pluck(:entity_id, :value)
-  ]
+  if name_field
+    list_name_lookup_cache = Hash[
+      name_field.attribute_values.where(
+        entity_type: content_type_name
+      ).pluck(:entity_id, :value)
+    ]
+  else
+    list_name_lookup_cache = {}
+  end
 
   #raise list_name_lookup_cache.inspect
 %>
