@@ -28,6 +28,13 @@ class ApplicationController < ActionController::Base
     @page_description ||= 'Notebook.ai is a set of tools for writers, game designers, and roleplayers to create magnificent universes — and everything within them.'
   end
 
+  before_action do
+    @activated_content_types = (
+      Rails.application.config.content_types[:all].map(&:name) & # Use config to dictate order
+      current_user.user_content_type_activators.pluck(:content_type)
+    )
+  end
+
   def content_type_from_controller(content_controller_name)
     content_controller_name.to_s.chomp('Controller').singularize.constantize
   end
