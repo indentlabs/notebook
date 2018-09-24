@@ -38,7 +38,7 @@
     </div>
   <% end %>
 
-  <% if @content_types.length < 5 && current_user.active_subscriptions.any? %>
+  <% if @activated_content_types.length < 5 && BillingPlan::PREMIUM_IDS.include?(current_user.selected_billing_plan_id) %>
     <div class="dashboard-row col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
       <%= render partial: 'content/cards/activate_premium_pages_cta' %>
     </div>

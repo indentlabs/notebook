@@ -40,6 +40,8 @@ class MainController < ApplicationController
   def recent_content
     content_types = Rails.application.config.content_types[:all]
 
+    # todo optimize this / use Attributes
+
     @recent_edits = content_types.flat_map { |klass|
       klass.where(user_id: current_user.id)
            .order(updated_at: :desc)
