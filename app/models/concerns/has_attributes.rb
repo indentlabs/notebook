@@ -133,7 +133,7 @@ module HasAttributes
 
     def name_field_value
       @name_field_lookup_cache ||= {}
-      cache_key = "#{self.class.name}#{self.id}"
+      cache_key = "#{self.class.name}-#{self.id.to_s}"
 
       if @name_field_lookup_cache.key?(cache_key)
         return @name_field_lookup_cache[cache_key]
