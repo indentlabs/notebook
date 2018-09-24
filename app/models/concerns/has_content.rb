@@ -96,12 +96,23 @@ module HasContent
 
     # [..., ..., ...]
     def recent_content_list
+      # Todo: I think this is more optimized, but the group introduces weird
+      # ordering of the results, so we're building it a bit less optimized below
+      # just to ensure it's actually correct.
+      # recently_changed_attributes = Attribute.where(user: self)
+      #                                        .order('updated_at desc')
+      #                                        .group([:entity_type, :entity_id])
+      #                                        .limit(10)
+
       recently_changed_attributes = Attribute.where(user: self)
                                              .order('updated_at desc')
-                                             .group([:entity_type, :entity_id])
-                                             .limit(10)
-      @user_recent_content_list = recently_changed_attributes.map do |attr|
-        attr.entity_type.constantize.find_by(id: attr.entity_id)
+                                             .limit(100)
+                                             .group_by { |r| [r.entity_type, r.entity_id] }
+                                             .keys
+                                             .first(10)
+
+      @user_recent_content_list = recently_changed_attributes.map do |entity_type, entity_id|
+        entity_type.constantize.find_by(id: entity_id)
       end.compact
     end
   end
