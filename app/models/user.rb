@@ -48,9 +48,10 @@ class User < ApplicationRecord
   Rails.application.config.content_types[:all_non_universe].each do |content_type|
     pluralized_content_type = content_type.name.downcase.pluralize
     define_method "contributable_#{pluralized_content_type}" do
-      contributable_universes.flat_map do |universe|
-        universe.send(pluralized_content_type).where.not(user_id: self.id)
-      end
+      contributable_universe_ids = contributable_universes.pluck(:id)
+
+      content_type.where(universe_id: contributable_universe_ids)
+                  .where.not(user_id: self.id)
     end
   end
 
