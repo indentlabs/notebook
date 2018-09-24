@@ -38,10 +38,9 @@ class User < ApplicationRecord
   def contributable_universes
     @user_contributable_universes ||= begin
       # todo email confirmation needs to happy for data safety / privacy (only verified emails)
-      contributor_by_email = Contributor.where(email: self.email).pluck(:universe_id)
-      contributor_by_user  = Contributor.where(user: self).pluck(:universe_id)
+      contributor_ids = Contributor.where('email = ? OR user_id = ?', self.email, self.id).pluck(:universe_id)
 
-      Universe.where(id: contributor_by_email + contributor_by_user)
+      Universe.where(id: contributor_ids)
     end
   end
   #TODO: rename this to #{content_type}_shared_with_me and only return contributable content that others own
