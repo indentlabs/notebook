@@ -1,5 +1,22 @@
 <%# Usage: render partial: 'content/list/list', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true } %>
 
+<%
+  category_ids_for_this_content_type = AttributeCategory.where(entity_type: content_type.name.downcase, user_id: current_user).pluck(:id)
+  name_field = AttributeField.find_by(field_type: 'name', attribute_category_id: category_ids_for_this_content_type)
+  # todo description field
+
+  content_ids = content_list.pluck(:id)
+  if name_field
+    list_name_lookup_cache = Hash[
+      name_field.attribute_values.where(
+        entity_type: content_type.name
+      ).pluck(:entity_id, :value)
+    ]
+  else
+    list_name_lookup_cache = {}
+  end
+%>
+
 <ul class="collection <%= 'with-header' if title.present? %>" style='border: 0'>
   <% if title.present? %>
     <li class="collection-header"><h5><%= title %></h5></li>
@@ -11,7 +28,7 @@
         <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
       <% end %>
       <span class="title">
-        <%= link_to (content.respond_to?(:label) ? content.label : content.name_field_value), content %>
+        <%= link_to (content.respond_to?(:label) ? content.label : list_name_lookup_cache[content.id].presence || content.name), content %>
         <small class="grey-text">
           <% universe_field_value = content.universe_field_value %>
           <% if universe_field_value.present? %>
@@ -23,7 +40,7 @@
               end
             %>
             <% if universe_field_value %>
-              <%= link_to universe_field_value.try(:name_field_value), universe_field_value %>
+              <%= link_to universe_field_value.try(:name), universe_field_value %>
             <% end %>
           <% end %>
         </small>
@@ -37,7 +54,7 @@
         <% end %>
       </span>
       <p class="content-description truncate">
-        <%= content.description %>
+        <%# content.description %>
       </p>
       <p class='grey-text'>
 
@@ -58,7 +75,7 @@
         <% end %>
       </p>
       <span class="secondary-content hide-on-med-and-up">
-        <% if user_signed_in? && content.user == current_user %>
+        <% if user_signed_in? && content.user_id == current_user.id %>
           <%# todo also show if you're a contributor %>
           <%= link_to edit_polymorphic_path(content), class: 'js-edit-hover' do %>
             <i class="material-icons">edit</i>

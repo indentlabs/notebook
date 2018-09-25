@@ -132,10 +132,23 @@ module HasAttributes
     end
 
     def name_field_value
-      name_field_cache = name_field
-      return self.name if name_field_cache.nil?
+      @name_field_lookup_cache ||= {}
+      cache_key = "#{self.class.name}-#{self.id.to_s}"
 
-      name_field_cache.attribute_values.detect { |v| v.entity_id == self.id }&.value.presence || self.name.presence || "Untitled #{self.class.name}"
+      if @name_field_lookup_cache.key?(cache_key)
+        return @name_field_lookup_cache[cache_key]
+      end
+
+      name_field_cache = name_field
+      if name_field_cache.nil?
+        @name_field_lookup_cache[cache_key] = self.name
+        return self.name
+      end
+
+      field_value = name_field_cache.attribute_values.detect { |v| v.entity_id == self.id }&.value.presence || self.name.presence || "Untitled #{self.class.name}"
+      @name_field_lookup_cache[cache_key] = field_value
+
+      field_value
     end
 
     def universe_field_value

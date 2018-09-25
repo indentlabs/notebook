@@ -38,19 +38,20 @@ class User < ApplicationRecord
   def contributable_universes
     @user_contributable_universes ||= begin
       # todo email confirmation needs to happy for data safety / privacy (only verified emails)
-      contributor_by_email = Contributor.where(email: self.email).pluck(:universe_id)
-      contributor_by_user  = Contributor.where(user: self).pluck(:universe_id)
+      contributor_ids = Contributor.where('email = ? OR user_id = ?', self.email, self.id).pluck(:universe_id)
 
-      Universe.where(id: contributor_by_email + contributor_by_user)
+      Universe.where(id: contributor_ids)
     end
   end
+
   #TODO: rename this to #{content_type}_shared_with_me and only return contributable content that others own
   Rails.application.config.content_types[:all_non_universe].each do |content_type|
     pluralized_content_type = content_type.name.downcase.pluralize
     define_method "contributable_#{pluralized_content_type}" do
-      contributable_universes.flat_map do |universe|
-        universe.send(pluralized_content_type).where.not(user_id: self.id)
-      end
+      contributable_universe_ids = contributable_universes.pluck(:id)
+
+      content_type.where(universe_id: contributable_universe_ids)
+                  .where.not(user_id: self.id)
     end
   end
 

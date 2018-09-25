@@ -96,15 +96,24 @@ module HasContent
 
     # [..., ..., ...]
     def recent_content_list
-      content_types = Rails.application.config.content_types[:all]
+      # Todo: I think this is more optimized, but the group introduces weird
+      # ordering of the results, so we're building it a bit less optimized below
+      # just to ensure it's actually correct.
+      # recently_changed_attributes = Attribute.where(user: self)
+      #                                        .order('updated_at desc')
+      #                                        .group([:entity_type, :entity_id])
+      #                                        .limit(10)
 
-      @user_recent_content_list ||= content_types.flat_map { |klass|
-        klass.where(user_id: id)
-             .order(updated_at: :desc)
-             .limit(10)
-      }.sort_by(&:updated_at)
-      .last(10)
-      .reverse
+      recently_changed_attributes = Attribute.where(user: self)
+                                             .order('updated_at desc')
+                                             .limit(100)
+                                             .group_by { |r| [r.entity_type, r.entity_id] }
+                                             .keys
+                                             .first(10)
+
+      @user_recent_content_list = recently_changed_attributes.map do |entity_type, entity_id|
+        entity_type.constantize.find_by(id: entity_id)
+      end.compact
     end
   end
 end

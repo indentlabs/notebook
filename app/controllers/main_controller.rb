@@ -22,11 +22,6 @@ class MainController < ApplicationController
   def dashboard
     return redirect_to new_user_session_path unless user_signed_in?
 
-    @content_types = (
-      Rails.application.config.content_types[:all].map(&:name) & # Use config to dictate order
-      current_user.user_content_type_activators.pluck(:content_type)
-    )
-
     set_random_content # for questions
   end
 
@@ -42,6 +37,8 @@ class MainController < ApplicationController
 
   def recent_content
     content_types = Rails.application.config.content_types[:all]
+
+    # todo optimize this / use Attributes
 
     @recent_edits = content_types.flat_map { |klass|
       klass.where(user_id: current_user.id)
@@ -85,11 +82,11 @@ class MainController < ApplicationController
   private
 
   def set_random_content
-    Rails.application.config.content_types[:all].shuffle.each do |content_type|
+    @activated_content_types.shuffle.each do |content_type|
       if @universe_scope.present?
-        @content = content_type.where(user: current_user, universe: @universe_scope).sample
+        @content = content_type.constantize.where(user: current_user, universe: @universe_scope).sample
       else
-        @content = content_type.where(user: current_user).sample
+        @content = content_type.constantize.where(user: current_user).sample
       end
 
       return if @content.present?

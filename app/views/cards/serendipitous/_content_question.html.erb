@@ -22,11 +22,13 @@
     attribute_field_id: fields_for_these_categories.pluck(:id)
   ).where.not(
     value:       ["", nil]
+    # raise attribute_fields_with_values.inspect
   ).pluck(:attribute_field_id)
-  #raise empty_attribute_value.inspect
 
-  questionable_field_ids = fields_for_these_categories.pluck(:id) - attribute_fields_with_values
-  attribute_field_to_question = AttributeField.find_by(id: questionable_field_ids.sample)
+  if attribute_fields_with_values.any?
+    questionable_field_ids = fields_for_these_categories.pluck(:id) - attribute_fields_with_values
+    attribute_field_to_question = AttributeField.find_by(id: questionable_field_ids.sample)
+  end
 %>
 
 <% if attribute_field_to_question.present? %>
