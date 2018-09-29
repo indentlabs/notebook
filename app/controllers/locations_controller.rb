@@ -4,10 +4,6 @@ class LocationsController < ContentController
 
   private
 
-  def content_params
-    params.require(:location).permit(content_param_list)
-  end
-
   def content_param_list
     [
       :universe_id, :user_id, :name, :type_of, :description, #:map,

@@ -1,4 +1,3 @@
-
 class PlanetsController < ContentController
   private
 

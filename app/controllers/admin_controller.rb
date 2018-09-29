@@ -2,7 +2,7 @@ class AdminController < ApplicationController
   layout 'admin'
 
   before_action :authenticate_user!
-  before_action :require_admin_access
+  before_action :require_admin_access, except: [:masquerade]
 
   def dashboard
   end

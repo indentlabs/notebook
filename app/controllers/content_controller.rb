@@ -142,7 +142,7 @@ class ContentController < ApplicationController
 
   def update
     content_type = content_type_from_controller(self.class)
-    @content = content_type.find(params[:id])
+    @content = content_type.with_deleted.find(params[:id])
 
     unless @content.updatable_by?(current_user)
       # todo flash error instead? (shows up 2x currently)
@@ -233,6 +233,14 @@ class ContentController < ApplicationController
     successful_response(content_deletion_redirect_url, t(:delete_success, model_name: humanized_model_name))
   end
 
+  # List all recently-deleted content
+  def deleted
+    @content_pages = {}
+    @activated_content_types.each do |content_type|
+      @content_pages[content_type] = content_type.constantize.with_deleted.where('deleted_at > ?', 24.hours.ago)
+    end
+  end
+
   def attributes
     @content_type = params[:content_type]
     # todo make this a before_action load_content_type
@@ -289,7 +297,7 @@ class ContentController < ApplicationController
       .downcase
       .to_sym
 
-    params.require(content_class).permit(content_param_list)
+    params.require(content_class).permit(content_param_list + [:deleted_at])
   end
 
   def content_deletion_redirect_url

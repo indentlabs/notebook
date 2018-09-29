@@ -59,7 +59,7 @@ Rails.application.routes.draw do
   scope '/my' do
     get '/content',     to: 'main#dashboard', as: :dashboard
     get '/content/recent', to: 'main#recent_content', as: :recent_content
-    get '/submissions', to: 'main#comingsoon'
+    get '/content/deleted', to: 'content#deleted', as: :recently_deleted_content
     get '/prompts', to: 'main#prompts', as: :prompts
     get '/scratchpad', to: 'main#notes', as: :notes
 

@@ -1,4 +1,3 @@
-
 class TechnologiesController < ContentController
   private
 

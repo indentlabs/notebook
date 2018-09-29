@@ -1,10 +1,6 @@
 class FlorasController < ContentController
   private
 
-  def content_params
-    params.require(:flora).permit(content_param_list)
-  end
-
   def content_param_list
     %i(
       name description aliases universe_id
