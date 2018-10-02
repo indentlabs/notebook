@@ -3,7 +3,7 @@ class DocumentsController < ApplicationController
     document = Document.find(params[:id])
 
     unless document.user == current_user
-      redirect_to dashboard_path, notice: "You don't have permission to do that!"
+      redirect_to(dashboard_path, notice: "You don't have permission to do that!")
       return
     end
 
