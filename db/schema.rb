@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_10_02_034500) do
+ActiveRecord::Schema.define(version: 2018_10_02_170145) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -706,6 +706,8 @@ ActiveRecord::Schema.define(version: 2018_10_02_034500) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "title", default: "Untitled document"
+    t.string "privacy", default: "private"
+    t.text "synopsis"
     t.index ["user_id"], name: "index_documents_on_user_id"
   end
 
