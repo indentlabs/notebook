@@ -705,7 +705,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_034500) do
     t.text "body"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "title"
+    t.string "title", default: "Untitled document"
     t.index ["user_id"], name: "index_documents_on_user_id"
   end
 
