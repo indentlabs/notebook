@@ -61,7 +61,9 @@ Rails.application.routes.draw do
     get '/content/recent', to: 'main#recent_content', as: :recent_content
     get '/content/deleted', to: 'content#deleted', as: :recently_deleted_content
     get '/prompts', to: 'main#prompts', as: :prompts
+
     get '/scratchpad', to: 'main#notes', as: :notes
+    resources :documents
 
     # Billing
     scope '/billing' do
@@ -77,7 +79,6 @@ Rails.application.routes.draw do
       get '/payment_method/delete', to: 'subscriptions#delete_payment_method', as: :delete_payment_method
     end
   end
-  resources :documents
   delete 'delete_my_account', to: 'users#delete_my_account'
 
   # Lab apps

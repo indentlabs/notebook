@@ -45,6 +45,7 @@ gem 'serendipitous', git: 'https://github.com/indentlabs/serendipitous-gem.git'
 
 # Editor
 gem 'medium-editor-rails'
+gem 'quilljs-rails'
 
 # Graphs & Charts
 gem 'chartkick'

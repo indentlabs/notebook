@@ -1,0 +1,29 @@
+<%= form_for @document || Document.create(user: current_user) do |f| %>
+  <%=
+    f.text_area :body,
+      class: 'materialize-textarea quill_container',
+      placeholder: "Write as little or as much as you'd like! This field will expand as you write."
+  %>
+  <%= f.submit 'Save changes', class: 'btn btn-primary right blue' %>
+<% end %>
+
+<div style="clear: both"></div>
+<%= content_for :javascript do %>
+  var defaults = {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                //[{ 'header': [1, 2, 3, false] }],
+                //[{ 'color': [] }, { 'background': [] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                ['blockquote', 'code-block'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                ['clean']
+            ]
+        }
+    };
+
+
+  Quilljs.setDefaults(defaults);
+<% end %>

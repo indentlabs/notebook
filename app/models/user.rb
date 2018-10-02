@@ -75,8 +75,7 @@ class User < ApplicationRecord
     #todo
   #end
 
-  # TODO: Swap this out with a has_many when we transition from a scratchpad to users having multiple documents
-  has_one :document, dependent: :destroy
+  has_many :documents, dependent: :destroy
 
   after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
   after_create :initialize_referral_code

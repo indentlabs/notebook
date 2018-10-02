@@ -1,4 +1,12 @@
 class DocumentsController < ApplicationController
+  def index
+    @documents = current_user.documents
+  end
+
+  def edit
+    @document = Document.find_by(id: params[:id], user_id: current_user.id)
+  end
+
   def update
     document = Document.find(params[:id])
 
@@ -8,7 +16,7 @@ class DocumentsController < ApplicationController
     end
 
     document.update(document_params)
-    redirect_to notes_path, notice: "Your scratchpad has been saved!"
+    redirect_to documents_path, notice: "Your document has been saved!"
   end
 
   def document_params
