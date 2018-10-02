@@ -237,7 +237,7 @@ class ContentController < ApplicationController
   def deleted
     @content_pages = {}
     @activated_content_types.each do |content_type|
-      @content_pages[content_type] = content_type.constantize.with_deleted.where('deleted_at > ?', 24.hours.ago)
+      @content_pages[content_type] = content_type.constantize.with_deleted.where('deleted_at > ?', 24.hours.ago).where(user_id: current_user.id)
     end
   end
 
