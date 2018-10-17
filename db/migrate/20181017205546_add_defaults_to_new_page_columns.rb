@@ -1,26 +1,23 @@
 class AddDefaultsToNewPageColumns < ActiveRecord::Migration[5.2]
-  def up
-    change_column :universes, :page_type,    :string, default: 'Universe'
-    change_column :characters, :page_type,   :string, default: 'Character'
-    change_column :countries, :page_type,    :string, default: 'Country'
-    change_column :creatures, :page_type,    :string, default: 'Creature'
-    change_column :deities, :page_type,      :string, default: 'Deity'
-    change_column :floras, :page_type,       :string, default: 'Flora'
-    change_column :governments, :page_type,  :string, default: 'Government'
-    change_column :groups, :page_type,       :string, default: 'Group'
-    change_column :items, :page_type,        :string, default: 'Item'
-    change_column :landmarks, :page_type,    :string, default: 'Landmark'
-    change_column :languages, :page_type,    :string, default: 'Language'
-    change_column :locations, :page_type,    :string, default: 'Location'
-    change_column :magics, :page_type,       :string, default: 'Magic'
-    change_column :planets, :page_type,      :string, default: 'Planet'
-    change_column :races, :page_type,        :string, default: 'Race'
-    change_column :religions, :page_type,    :string, default: 'Religion'
-    change_column :scenes, :page_type,       :string, default: 'Scene'
-    change_column :technologies, :page_type, :string, default: 'Technology'
-    change_column :towns, :page_type,        :string, default: 'Town'
-  end
-
-  def down
+  def change
+    change_column_default :universes, :page_type, 'Universe'
+    change_column_default :characters, :page_type, 'Character'
+    change_column_default :countries, :page_type, 'Country'
+    change_column_default :creatures, :page_type, 'Creature'
+    change_column_default :deities, :page_type, 'Deity'
+    change_column_default :floras, :page_type, 'Flora'
+    change_column_default :governments, :page_type, 'Government'
+    change_column_default :groups, :page_type, 'Group'
+    change_column_default :items, :page_type, 'Item'
+    change_column_default :landmarks, :page_type, 'Landmark'
+    change_column_default :languages, :page_type, 'Language'
+    change_column_default :locations, :page_type, 'Location'
+    change_column_default :magics, :page_type, 'Magic'
+    change_column_default :planets, :page_type, 'Planet'
+    change_column_default :races, :page_type, 'Race'
+    change_column_default :religions, :page_type, 'Religion'
+    change_column_default :scenes, :page_type, 'Scene'
+    change_column_default :technologies, :page_type, 'Technology'
+    change_column_default :towns, :page_type, 'Town'
   end
 end
