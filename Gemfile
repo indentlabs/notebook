@@ -54,7 +54,6 @@ gem 'slack-notifier'
 gem 'redcarpet' #markdown formatting
 
 # Analytics
-gem 'raygun4ruby' #todo remove
 gem 'mixpanel-ruby'
 gem 'barnes'
 
