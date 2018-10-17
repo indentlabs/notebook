@@ -81,11 +81,11 @@
         </tr>
         <% content_list.each do |content| %>
         <tr>
-          <td><%= link_to list_name_lookup_cache[content.id].presence || content.name, polymorphic_path(content) %></td>
+          <td><%= link_to list_name_lookup_cache[content.id].presence || content.name, polymorphic_path(content.page_type.downcase, id: content.id) %></td>
           <td class="hide-on-small-only"><%# truncate(content.description, length: 200) %></td>
           <td>
             <div class="secondary-content">
-              <%= link_to edit_polymorphic_path(content) do %>
+              <%= link_to edit_polymorphic_path(content.page_type.downcase, id: content.id) do %>
                 <i class="material-icons">edit</i>
               <% end %>
             </div>
