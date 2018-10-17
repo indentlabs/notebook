@@ -10,7 +10,7 @@
     list_name_lookup_cache = Hash[
       name_field.attribute_values.where(
         entity_type: content_type.name
-      ).pluck(:entity_id, :value)
+      ).pluck(:entity_type, :entity_id, :value).map { |pt, id, v| ["#{pt}_#{id}", v]}
     ]
   else
     list_name_lookup_cache = {}
@@ -28,7 +28,7 @@
         <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
       <% end %>
       <span class="title">
-        <%= link_to content.name, content %>
+        <%= link_to (content.respond_to?(:label) ? content.label : list_name_lookup_cache["#{content.page_type}_#{content.id}"].presence || content.name), content %>
         <small class="grey-text">
           <% universe_field_value = content.universe_field_value %>
           <% if universe_field_value.present? %>
