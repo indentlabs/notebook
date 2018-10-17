@@ -1958,7 +1958,6 @@ ActiveRecord::Schema.define(version: 2018_09_24_164517) do
     t.datetime "updated_at", null: false
     t.index ["messageboard_id"], name: "index_thredded_posts_on_messageboard_id"
     t.index ["moderation_state", "updated_at"], name: "index_thredded_posts_for_display"
-    t.index ["postable_id"], name: "index_thredded_posts_on_postable_id"
     t.index ["postable_id"], name: "index_thredded_posts_on_postable_id_and_postable_type"
     t.index ["user_id"], name: "index_thredded_posts_on_user_id"
   end
