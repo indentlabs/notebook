@@ -33,12 +33,18 @@ module HasContent
 
     # [..., ...]
     def content_list
-      @user_content_list ||= begin
-        Rails.application.config.content_types[:all].flat_map do |type|
-          relation = type.name.downcase.pluralize.to_sym # :characters
-          send(relation)
+      polymorphic_content_fields = [:id, :name, :universe_id, :created_at, :updated_at, :deleted_at]
+
+      chained_query = nil
+      @activated_content_types.each do |content_type_class|
+        if chained_query.nil?
+          chained_query = content_type_class.select(*polymorphic_content_fields).where(user_id: self.id)
+        else
+          chained_query = content_type_class.select(*polymorphic_content_fields).where(user_id: self.id).union(chained_query)
         end
       end
+
+      @user_content_list = chained_query
     end
 
     # {
