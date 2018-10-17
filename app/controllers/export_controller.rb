@@ -27,13 +27,13 @@ class ExportController < ApplicationController
 
   def notebook_json
     report_to_mixpanel 'json', 'notebook'
-    json_dump = current_user.content.map { |category, content| {"#{category}": fill_relations(content)} }.to_json
+    json_dump = current_user.content.map { |category, content| {"#{category}": fill_relations(category.constantize, content)} }.to_json
     send_data json_dump, filename: "notebook-#{Date.today}.json"
   end
 
   def notebook_xml
     report_to_mixpanel 'xml', 'notebook'
-    xml_dump = current_user.content.map { |category, content| {"#{category}": fill_relations(content)}}.to_xml
+    xml_dump = current_user.content.map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_xml
     send_data xml_dump, filename: "notebook-#{Date.today}.xml"
   end
 
@@ -88,8 +88,7 @@ class ExportController < ApplicationController
     end
   end
 
-  def fill_relations ar_relation
-    ar_class = ar_relation.build.class
+  def fill_relations(ar_class, ar_relation)
     attribute_categories = ar_class.attribute_categories(current_user)
 
     ar_relation.map do |content|
@@ -99,7 +98,7 @@ class ExportController < ApplicationController
         begin
           value = content.send(attr.name)
         rescue
-          value = Attribute.where(user: current_user, attribute_field: attr, entity: content).first
+          value = Attribute.find_by(user: current_user, attribute_field: attr, entity_id: content.id, entity_type: ar_class.name)
           value = value.value if value
         end
         next if value.nil? || value.blank?

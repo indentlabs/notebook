@@ -31,10 +31,10 @@ module HasContent
       content_types: Rails.application.config.content_types[:all].map(&:name),
       page_scoping:  { user_id: self.id }
     )
-      polymorphic_content_fields = [:id, :name, :page_type, :user_id, :universe_id, :created_at, :updated_at, :deleted_at]
+      polymorphic_content_fields = [:id, :name, :page_type, :user_id, :universe_id, :created_at, :updated_at, :deleted_at, :privacy]
 
       chained_query = nil
-      content_types.each do |content_type|
+      (content_types + ["ContentPage"]).each do |content_type|
         content_type_class = content_type.constantize
         if chained_query.nil?
           chained_query = content_type_class.select(*polymorphic_content_fields).where(page_scoping)
