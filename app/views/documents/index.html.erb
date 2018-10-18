@@ -28,11 +28,13 @@
           <% end %>
         <% end %>
       </div>
-      <span class="title"><%= link_to document.title, edit_document_path(document) %></span>
+      <span class="title">
+        <%= link_to document.title, edit_document_path(document) %>
+        <span class="grey-text" style="font-size: 14px;"><%= pluralize document.body.split(' ').count, 'word' %></span>
+      </span>
       <div style="max-height: 80px; overflow-y: hidden;">
-        <%= sanitize truncate(document.body, escape: false, length: 140) %>
+        <%= sanitize truncate(document.body, escape: false, length: 200) %>
       </div>
-      <!--<a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>-->
     </li>
   <% end %>
 </ul>
