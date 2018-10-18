@@ -1,6 +1,6 @@
 <%= form_for @document || Document.new(user: current_user) do |f| %>
   <div>
-    <div class="grey-text">
+    <div class="grey-text autosave-bar">
       <i class="material-icons js-autosave-icon grey-text">save</i>
       <span class="js-autosave-status">
         This document will automatically save as you make changes.
@@ -9,10 +9,13 @@
     <%= f.text_field :title, placeholder: 'Untitled document', value: f.object.title.presence || 'Untitled document', style: 'font-size: 150%' %>
   </div>
 
-  <div id="editor"><%= @document.body.html_safe %></div>
-  <br />
-  <div class="grey-text" style="text-align: right">Don't forget to save!</div>
-  <%= f.submit 'Save changes', class: 'btn btn-primary right blue' %>
+  <div id="editor"><%= @document.body.html_safe %></div><br />
+  <div class="grey-text autosave-bar">
+    <i class="material-icons js-autosave-icon grey-text">save</i>
+    <span class="js-autosave-status">
+      This document will automatically save as you make changes.
+    </span>
+  </div>
 <% end %>
 
 <div style="clear: both"></div>
@@ -41,11 +44,13 @@
 
   // Autosave
   var autosave_event = null;
+  var last_autosave = null;
   quill.on('text-change', function(delta, oldDelta, source) {
     if (autosave_event === null) {
       console.log('Queueing autosave');
       $('.js-autosave-icon').addClass('grey-text');
       $('.js-autosave-icon').removeClass('black-text');
+      $('.js-autosave-icon').removeClass('red-text');
       $('.js-autosave-status').text('Changes made...');
 
       autosave_event = setTimeout(function () {
@@ -54,7 +59,7 @@
         autosave_event = null;
 
         // Do the autosave
-        $.ajax({
+        last_autosave = $.ajax({
           type: "PATCH",
           url: '<%= document_url(@document) %>',
           data: {
@@ -65,9 +70,17 @@
           },
         });
 
+        last_autosave.fail(function(jqXHR, textStatus) {
+          $('.js-autosave-status').text('There was a problem saving! We will try to save again, but please make sure you back up any changes.');
+          $('.js-autosave-status').addClass('red-text');
+          $('.js-autosave-status').removeClass('grey-text');
+          $('.js-autosave-status').removeClass('black-text');
+        });
+
         // Done!
         $('.js-autosave-icon').addClass('black-text');
         $('.js-autosave-icon').removeClass('grey-text');
+        $('.js-autosave-icon').removeClass('red-text');
         $('.js-autosave-status').text('Saved!');
       }, 5000);
     } else {
