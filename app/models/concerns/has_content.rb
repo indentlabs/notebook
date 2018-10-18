@@ -19,26 +19,32 @@ module HasContent
     #   characters: [...],
     #   locations:  [...]
     # }
-    def content
-      @user_content ||= begin
-        content_value = {}
-        Rails.application.config.content_types[:all].each do |type|
-          relation = type.name.downcase.pluralize.to_sym # :characters
-          content_value[relation] = send(relation)
-        end
-
-        content_value
-      end
+    def content(
+      content_types: Rails.application.config.content_types[:all].map(&:name),
+      page_scoping:  { user_id: self.id }
+    )
+      @user_content ||= content_list(page_scoping: page_scoping, content_types: content_types).group_by(&:page_type)
     end
 
     # [..., ...]
-    def content_list
-      @user_content_list ||= begin
-        Rails.application.config.content_types[:all].flat_map do |type|
-          relation = type.name.downcase.pluralize.to_sym # :characters
-          send(relation)
+    def content_list(
+      content_types: Rails.application.config.content_types[:all].map(&:name),
+      page_scoping:  { user_id: self.id }
+    )
+      # todo we can't select for universe_id here which kind of sucks, so we need to research 1) the repercussions, 2) what to do instead
+      polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :privacy]
+
+      chained_query = nil
+      (content_types + ["ContentPage"]).each do |content_type|
+        content_type_class = content_type.constantize
+        if chained_query.nil?
+          chained_query = content_type_class.select(*polymorphic_content_fields).where(page_scoping)
+        else
+          chained_query = content_type_class.select(*polymorphic_content_fields).where(page_scoping).union(chained_query)
         end
       end
+
+      @user_content_list ||= chained_query
     end
 
     # {
@@ -46,25 +52,12 @@ module HasContent
     #   locations:  [...]
     # }
     def content_in_universe universe_id
-      @user_content_in_universe ||= begin
-        content_value = {}
-        Rails.application.config.content_types[:all_non_universe].each do |type|
-          relation = type.name.downcase.pluralize.to_sym # :characters
-          content_value[relation] = send(relation).in_universe(universe_id)
-        end
-
-        content_value
-      end
+      @user_content_in_universe ||= content_list(page_scoping: { user_id: self.id, universe_id: universe_id }).group_by(&:page_type)
     end
 
     # 5
     def content_count
-      @user_content_count ||= begin
-        Rails.application.config.content_types[:all].map do |type|
-          relation = type.name.downcase.pluralize.to_sym # :characters
-          send(relation).count
-        end.sum
-      end
+      @user_content_count ||= content_list.count
     end
 
     # {

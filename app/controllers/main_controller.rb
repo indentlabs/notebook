@@ -37,20 +37,20 @@ class MainController < ApplicationController
   end
 
   def recent_content
-    content_types = Rails.application.config.content_types[:all]
-
     # todo optimize this / use Attributes
 
-    @recent_edits = content_types.flat_map { |klass|
-      klass.where(user_id: current_user.id)
+    @recent_edits = @activated_content_types.flat_map { |klass|
+      klass.constantize
+           .where(user_id: current_user.id)
            .order(updated_at: :desc)
            .limit(100)
     }.sort_by(&:updated_at)
     .last(100)
     .reverse
 
-    @recent_creates = content_types.flat_map { |klass|
-      klass.where(user_id: current_user.id)
+    @recent_creates = @activated_content_types.flat_map { |klass|
+      klass.constantize
+           .where(user_id: current_user.id)
            .order(created_at: :desc)
            .limit(100)
     }.sort_by(&:created_at)
@@ -84,10 +84,21 @@ class MainController < ApplicationController
 
   def set_random_content
     @activated_content_types.shuffle.each do |content_type|
-      if @universe_scope.present?
-        @content = content_type.constantize.where(user: current_user, universe: @universe_scope).sample
+      if content_type.downcase == "universe"
+        if @universe_scope.present?
+          # when we want to enable prompts for contributing universes we can remove the user:
+          # selector here, but we will need to verify the user has permission to see the universe
+          # when we do that, or else prompts could open leak
+          @content = content_type.constantize.where(user: current_user, id: @universe_scope.id).sample
+        else
+          @content = content_type.constantize.where(user: current_user).sample
+        end
       else
-        @content = content_type.constantize.where(user: current_user).sample
+        if @universe_scope.present?
+          @content = content_type.constantize.where(user: current_user, universe: @universe_scope).sample
+        else
+          @content = content_type.constantize.where(user: current_user).sample
+        end
       end
 
       return if @content.present?

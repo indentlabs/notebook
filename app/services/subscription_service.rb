@@ -3,6 +3,7 @@ class SubscriptionService < Service
 
   def self.add_subscription(user, plan_id)
     related_plan = BillingPlan.find_by(stripe_plan_id: plan_id, available: true)
+    raise "Plan #{plan_id} not available for user #{user.id}" if related_plan.nil?
 
     # Add any bonus bandwidth granted by the plan
     user.update(

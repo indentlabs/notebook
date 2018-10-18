@@ -20,7 +20,7 @@
   <li><%= link_to "All universes", "?universe=all" %></li>
   <% if current_user %>
     <li class="divider"></li>
-    <% (@current_user_content['Universe'] + current_user.contributable_universes).sort_by(&:name).each do |universe| %>
+    <% ((@current_user_content['Universe'] || []) + current_user.contributable_universes).sort_by(&:name).each do |universe| %>
       <li><%= link_to universe.name + (universe.user_id == current_user.id ? '' : ' (contributor)'), "?universe=#{universe.id}" %></li>
     <% end %>
   <% end %>

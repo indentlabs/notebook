@@ -25,10 +25,12 @@ class SearchController < ApplicationController
   # Returns all attributes on a class that we match against in a search.
   # Usage: searchable_attributes_for(Character) => [:name, :role, ...]
   def searchable_attributes_for klass
-    related_controller = "#{klass.to_s.pluralize}Controller".constantize.new
+    related_controller = "#{klass.to_s.pluralize}Controller".constantize.new # can throw NameError
     related_controller.send(:content_param_list).select do |attribute|
       !attribute.is_a?(Hash) && searchable_attribute?(attribute.to_s)
     end
+  rescue NameError # If we don't have a controller for a particular content type, treat it as no results
+    []
   end
 
   # Returns whether or not a particular attribute should be included on searches.

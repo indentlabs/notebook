@@ -43,13 +43,10 @@ class ApplicationController < ActionController::Base
     return unless user_signed_in?
 
     @activated_content_types = (
-      Rails.application.config.content_types[:all].map(&:name) & # Use config to dictate order
+      Rails.application.config.content_types[:all].map(&:name) & # Use config to dictate order, but AND to only include what a user has turned on
       current_user.user_content_type_activators.pluck(:content_type)
     )
 
-    @current_user_content = {}
-    @activated_content_types.each do |content_type|
-      @current_user_content[content_type] = content_type.constantize.where(user: current_user).to_a
-    end
+    @current_user_content = current_user.content(content_types: @activated_content_types)
   end
 end

@@ -82,7 +82,7 @@ class SubscriptionsController < ApplicationController
     end
 
     new_plan_id = params[:plan]
-    result = move_user_to_plan_requested(new_plan_id)
+    result = move_user_to_plan_requested(new_plan_id) if new_plan_id
 
     if result == :payment_method_needed
       redirect_to payment_info_path(plan: new_plan_id)

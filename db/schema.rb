@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_10_02_170145) do
+ActiveRecord::Schema.define(version: 2018_10_17_224014) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -269,6 +269,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.string "hobbies"
     t.string "personality_type"
     t.datetime "deleted_at"
+    t.string "page_type", default: "Character"
     t.index ["deleted_at", "id"], name: "index_characters_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_characters_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_characters_on_deleted_at_and_user_id"
@@ -293,6 +294,20 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "updated_at", null: false
     t.index ["content_id", "content_type"], name: "index_content_change_events_on_content_id_and_content_type"
     t.index ["user_id"], name: "index_content_change_events_on_user_id"
+  end
+
+  create_table "content_pages", force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_content_pages_on_universe_id"
+    t.index ["user_id"], name: "index_content_pages_on_user_id"
   end
 
   create_table "contributors", force: :cascade do |t|
@@ -327,6 +342,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "deleted_at"
     t.string "privacy"
     t.integer "user_id"
+    t.string "page_type", default: "Country"
     t.index ["deleted_at", "id"], name: "index_countries_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_countries_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_countries_on_deleted_at_and_user_id"
@@ -469,6 +485,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.string "family"
     t.string "genus"
     t.string "species"
+    t.string "page_type", default: "Creature"
     t.index ["deleted_at", "id"], name: "index_creatures_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_creatures_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_creatures_on_deleted_at_and_user_id"
@@ -508,6 +525,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "page_type", default: "Deity"
     t.index ["deleted_at", "id"], name: "index_deities_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_deities_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_deities_on_deleted_at_and_user_id"
@@ -780,6 +798,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.string "privacy"
     t.datetime "deleted_at"
     t.string "material_uses"
+    t.string "page_type", default: "Flora"
     t.index ["deleted_at", "id"], name: "index_floras_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_floras_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_floras_on_deleted_at_and_user_id"
@@ -898,6 +917,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "page_type", default: "Government"
     t.index ["deleted_at", "id"], name: "index_governments_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_governments_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_governments_on_deleted_at_and_user_id"
@@ -988,6 +1008,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "updated_at", null: false
     t.string "privacy"
     t.datetime "deleted_at"
+    t.string "page_type", default: "Group"
     t.index ["deleted_at", "id"], name: "index_groups_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_groups_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_groups_on_deleted_at_and_user_id"
@@ -1047,6 +1068,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "updated_at"
     t.string "privacy", default: "private", null: false
     t.datetime "deleted_at"
+    t.string "page_type", default: "Item"
     t.index ["deleted_at", "id"], name: "index_items_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_items_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_items_on_deleted_at_and_user_id"
@@ -1121,6 +1143,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "deleted_at"
     t.string "privacy"
     t.integer "user_id"
+    t.string "page_type", default: "Landmark"
     t.index ["deleted_at", "id"], name: "index_landmarks_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_landmarks_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_landmarks_on_deleted_at_and_user_id"
@@ -1147,6 +1170,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "updated_at", null: false
     t.string "privacy"
     t.datetime "deleted_at"
+    t.string "page_type", default: "Language"
     t.index ["deleted_at", "id"], name: "index_languages_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_languages_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_languages_on_deleted_at_and_user_id"
@@ -1255,6 +1279,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.string "founding_story"
     t.string "sports"
     t.datetime "deleted_at"
+    t.string "page_type", default: "Location"
     t.index ["deleted_at", "id"], name: "index_locations_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_locations_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_locations_on_deleted_at_and_user_id"
@@ -1291,6 +1316,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "updated_at", null: false
     t.string "privacy"
     t.datetime "deleted_at"
+    t.string "page_type", default: "Magic"
     t.index ["deleted_at", "id"], name: "index_magics_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_magics_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_magics_on_deleted_at_and_user_id"
@@ -1511,6 +1537,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "notes"
+    t.string "page_type", default: "Planet"
     t.index ["deleted_at", "id"], name: "index_planets_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_planets_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_planets_on_deleted_at_and_user_id"
@@ -1547,6 +1574,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "updated_at", null: false
     t.string "privacy"
     t.datetime "deleted_at"
+    t.string "page_type", default: "Race"
     t.index ["deleted_at", "id"], name: "index_races_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_races_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_races_on_deleted_at_and_user_id"
@@ -1615,6 +1643,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "updated_at", null: false
     t.string "privacy"
     t.datetime "deleted_at"
+    t.string "page_type", default: "Religion"
     t.index ["deleted_at", "id"], name: "index_religions_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_religions_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_religions_on_deleted_at_and_user_id"
@@ -1675,6 +1704,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "updated_at", null: false
     t.string "privacy"
     t.datetime "deleted_at"
+    t.string "page_type", default: "Scene"
     t.index ["deleted_at", "id"], name: "index_scenes_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_scenes_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_scenes_on_deleted_at_and_user_id"
@@ -1758,6 +1788,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "page_type", default: "Technology"
     t.index ["deleted_at", "id"], name: "index_technologies_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_technologies_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_technologies_on_deleted_at_and_user_id"
@@ -2184,6 +2215,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.datetime "deleted_at"
     t.string "privacy"
     t.integer "user_id"
+    t.string "page_type", default: "Town"
     t.index ["deleted_at", "id"], name: "index_towns_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_towns_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_towns_on_deleted_at_and_user_id"
@@ -2206,6 +2238,7 @@ ActiveRecord::Schema.define(version: 2018_10_02_170145) do
     t.string "technology"
     t.string "genre"
     t.datetime "deleted_at"
+    t.string "page_type", default: "Universe"
     t.index ["deleted_at", "id"], name: "index_universes_on_deleted_at_and_id"
     t.index ["deleted_at", "user_id"], name: "index_universes_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_universes_on_deleted_at"
