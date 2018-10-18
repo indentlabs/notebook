@@ -27,8 +27,11 @@ class DocumentsController < ApplicationController
       return
     end
 
-    document.update(document_params)
-    redirect_to(edit_document_path(document), notice: "Your document has been saved!")
+    if document.update(document_params)
+      head 200, content_type: "text/html"
+    else
+      head 501, content_type: "text/html"
+    end
   end
 
   def destroy

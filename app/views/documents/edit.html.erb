@@ -1,12 +1,15 @@
 <%= form_for @document || Document.new(user: current_user) do |f| %>
-  <%= f.text_field :title, placeholder: 'Untitled document', value: f.object.title.presence || 'Untitled document', style: 'font-size: 150%' %>
+  <div>
+    <div class="grey-text">
+      <i class="material-icons js-autosave-icon grey-text">save</i>
+      <span class="js-autosave-status">
+        This document will automatically save as you make changes.
+      </span>
+    </div>
+    <%= f.text_field :title, placeholder: 'Untitled document', value: f.object.title.presence || 'Untitled document', style: 'font-size: 150%' %>
+  </div>
 
-  <%=
-    f.text_area :body,
-      class: 'materialize-textarea quill_container',
-      id: 'editor',
-      placeholder: "Write as little or as much as you'd like! This field will expand as you write."
-  %>
+  <div id="editor"><%= @document.body.html_safe %></div>
   <br />
   <div class="grey-text" style="text-align: right">Don't forget to save!</div>
   <%= f.submit 'Save changes', class: 'btn btn-primary right blue' %>
@@ -14,27 +17,63 @@
 
 <div style="clear: both"></div>
 <%= content_for :javascript do %>
-  var defaults = {
-        theme: 'snow',
-        modules: {
-            toolbar: [
-                //[{ 'header': [1, 2, 3, false] }],
-                //[{ 'color': [] }, { 'background': [] }],
-                ['bold', 'italic', 'underline', 'strike', { 'script': 'sub'}, { 'script': 'super' }],
-                ['blockquote', 'code-block'],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                [{ 'indent': '-1'}, { 'indent': '+1' }],
-                ['clean']
-            ],
-            history: {
-              delay: 1000,
-              maxStack: 75,
-              userOnly: false
-            }
-        }
-    };
+  var toolbar_options = [
+    //[{ 'header': [1, 2, 3, false] }],
+    //[{ 'color': [] }, { 'background': [] }],
+    ['bold', 'italic', 'underline', 'strike', { 'script': 'sub'}, { 'script': 'super' }],
+    ['blockquote', 'code-block'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'indent': '-1'}, { 'indent': '+1' }],
+    ['clean']
+  ];
 
-  Quilljs.setDefaults(defaults);
+  var quill = new Quill('#editor', {
+    modules: {
+      toolbar: toolbar_options,
+      history: {
+        delay: 1000,
+        maxStack: 75,
+        userOnly: false
+      }
+    },
+    theme: 'snow'
+  });
+
+  // Autosave
+  var autosave_event = null;
+  quill.on('text-change', function(delta, oldDelta, source) {
+    if (autosave_event === null) {
+      console.log('Queueing autosave');
+      $('.js-autosave-icon').addClass('grey-text');
+      $('.js-autosave-icon').removeClass('black-text');
+      $('.js-autosave-status').text('Changes made...');
+
+      autosave_event = setTimeout(function () {
+        console.log('Autosaving...');
+        $('.js-autosave-status').text('Saving...');
+        autosave_event = null;
+
+        // Do the autosave
+        $.ajax({
+          type: "PATCH",
+          url: '<%= document_url(@document) %>',
+          data: {
+            document: {
+              title: $('#document_title').text(),
+              body:  $('#editor').find('.ql-editor').html()
+            }
+          },
+        });
+
+        // Done!
+        $('.js-autosave-icon').addClass('black-text');
+        $('.js-autosave-icon').removeClass('grey-text');
+        $('.js-autosave-status').text('Saved!');
+      }, 5000);
+    } else {
+      console.log('Waiting for existing autosave');
+    }
+  });
 
   // Allow entering `tab` into the editor
   $(document).delegate('#editor', 'keydown', function(e) {
