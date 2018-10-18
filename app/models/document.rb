@@ -11,7 +11,7 @@ class Document < ApplicationRecord
   end
 
   def self.icon
-    'chrome_reader_mode'
+    'description'
   end
 
   def name

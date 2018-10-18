@@ -1,7 +1,5 @@
-
 <ul class="collection with-header">
   <li class="collection-header">
-
     <h4>
       <div class="right">
         <%= link_to edit_document_path(:new), class: 'btn green white-text waves-effect waves-light', style: 'height: 45px' do %>
@@ -13,7 +11,9 @@
   </li>
   <% @documents.each do |document| %>
     <li class="collection-item avatar">
-      <i class="material-icons circle green">description</i>
+      <%= link_to document do %>
+        <i class="material-icons circle green"><%= Document.icon %></i>
+      <% end %>
       <div class="grey-text right">
         <div>
           <i class="material-icons">edit</i> last edited <%= time_ago_in_words document.updated_at %> ago
@@ -29,8 +29,8 @@
         <% end %>
       </div>
       <span class="title">
-        <%= link_to document.title, edit_document_path(document) %>
-        <span class="grey-text" style="font-size: 14px;"><%= pluralize document.body.split(' ').count, 'word' %></span>
+        <%= link_to document.title.presence || 'Untitled Document', edit_document_path(document) %>
+        <!--<span class="grey-text" style="font-size: 14px;"><%= pluralize document.body.split(' ').size, 'word' %></span>-->
       </span>
       <div style="max-height: 80px; overflow-y: hidden;">
         <%= sanitize truncate(document.body, escape: false, length: 200) %>
