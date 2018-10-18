@@ -31,14 +31,11 @@ module HasContent
       content_types: Rails.application.config.content_types[:all].map(&:name),
       page_scoping:  { user_id: self.id }
     )
+      # todo we can't select for universe_id here which kind of sucks, so we need to research 1) the repercussions, 2) what to do instead
+      polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :privacy]
 
       chained_query = nil
       (content_types + ["ContentPage"]).each do |content_type|
-        if content_type.downcase == "universe"
-          polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :privacy]
-        else
-          polymorphic_content_fields = [:id, :name, :page_type, :user_id, :universe_id, :created_at, :updated_at, :deleted_at, :privacy]
-        end
         content_type_class = content_type.constantize
         if chained_query.nil?
           chained_query = content_type_class.select(*polymorphic_content_fields).where(page_scoping)
