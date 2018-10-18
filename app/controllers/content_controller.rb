@@ -239,6 +239,7 @@ class ContentController < ApplicationController
     @activated_content_types.each do |content_type|
       @content_pages[content_type] = content_type.constantize.with_deleted.where('deleted_at > ?', 24.hours.ago).where(user_id: current_user.id)
     end
+    @content_pages["Document"] = current_user.documents.with_deleted.where('deleted_at > ?', 24.hours.ago)
   end
 
   def attributes

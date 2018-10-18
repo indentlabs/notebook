@@ -20,7 +20,7 @@ class DocumentsController < ApplicationController
   end
 
   def update
-    document = Document.find_or_initialize_by(id: params[:id], user: current_user)
+    document = Document.with_deleted.find_or_initialize_by(id: params[:id], user: current_user)
 
     unless document.user == current_user
       redirect_to(dashboard_path, notice: "You don't have permission to do that!")
@@ -45,6 +45,6 @@ class DocumentsController < ApplicationController
   private
 
   def document_params
-    params.require(:document).permit(:title, :body)
+    params.require(:document).permit(:title, :body, :deleted_at)
   end
 end
