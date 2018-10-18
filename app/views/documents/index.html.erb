@@ -15,7 +15,18 @@
     <li class="collection-item avatar">
       <i class="material-icons circle green">description</i>
       <div class="grey-text right">
-        <i class="material-icons">edit</i> last edited <%= time_ago_in_words document.updated_at %> ago
+        <div>
+          <i class="material-icons">edit</i> last edited <%= time_ago_in_words document.updated_at %> ago
+        </div>
+        <% if document.persisted? && current_user.can_delete?(document) %>
+          <%= link_to document,
+            method: :delete,
+            data: { confirm: "Are you sure? This will permanently delete this entire document!" } do %>
+            <div class="red-text text-lighten-2">
+              <i class="material-icons">delete</i> Delete this document
+            </div>
+          <% end %>
+        <% end %>
       </div>
       <span class="title"><%= link_to document.title, edit_document_path(document) %></span>
       <div style="max-height: 80px; overflow-y: hidden;">

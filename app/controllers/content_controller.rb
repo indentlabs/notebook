@@ -218,7 +218,7 @@ class ContentController < ApplicationController
 
   def destroy
     content_type = content_type_from_controller(self.class)
-    @content = content_type.find(params[:id])
+    @content = content_type.find_by(id: params[:id])
 
     unless current_user.can_delete? @content
       return redirect_to :back, notice: "You don't have permission to do that!"
