@@ -29,6 +29,8 @@ class SearchController < ApplicationController
     related_controller.send(:content_param_list).select do |attribute|
       !attribute.is_a?(Hash) && searchable_attribute?(attribute.to_s)
     end
+  rescue NameError # If we don't have a controller for a particular content type, treat it as no results
+    []
   end
 
   # Returns whether or not a particular attribute should be included on searches.
