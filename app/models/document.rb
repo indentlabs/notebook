@@ -7,7 +7,7 @@ class Document < ApplicationRecord
   self.authorizer_name = 'DocumentAuthorizer'
 
   def self.color
-    'black'
+    'teal'
   end
 
   def self.icon
