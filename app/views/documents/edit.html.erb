@@ -1,4 +1,4 @@
-<%= form_for @document || Document.new(user: current_user) do |f| %>
+<%= form_for @document do |f| %>
   <div>
     <div class="grey-text autosave-bar">
       <i class="material-icons js-autosave-icon grey-text">save</i>
@@ -9,7 +9,7 @@
     <%= f.text_field :title, placeholder: 'Untitled document', value: f.object.title.presence || 'Untitled document', style: 'font-size: 150%' %>
   </div>
 
-  <div id="editor"><%= @document.body.html_safe %></div><br />
+  <div id="editor"><%= @document.body.try(:html_safe) %></div><br />
   <div class="grey-text autosave-bar">
     <i class="material-icons js-autosave-icon grey-text">save</i>
     <span class="js-autosave-status">

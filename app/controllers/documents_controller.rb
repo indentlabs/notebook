@@ -12,6 +12,7 @@ class DocumentsController < ApplicationController
 
   def edit
     @document = Document.find_by(id: params[:id], user_id: current_user.id)
+    @document ||= current_user.documents.create
   end
 
   def create

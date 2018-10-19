@@ -1,5 +1,5 @@
-<ul class="collection with-header">
-  <li class="collection-header">
+<div class="row">
+  <div class="col s12">
     <h4>
       <div class="right">
         <%= link_to edit_document_path(:new), class: 'btn green white-text waves-effect waves-light', style: 'height: 45px' do %>
@@ -8,33 +8,41 @@
       </div>
       Your <%= current_user.documents.count %> documents
     </h4>
-  </li>
+  </div>
+</div class="row">
+<div class="row">
   <% @documents.each do |document| %>
-    <li class="collection-item avatar">
-      <%= link_to document do %>
-        <i class="material-icons circle green"><%= Document.icon %></i>
-      <% end %>
-      <div class="grey-text right">
-        <div>
-          <i class="material-icons">edit</i> last edited <%= time_ago_in_words document.updated_at %> ago
+    <div class="col s12 m6 l4">
+      <div class="card sticky-action">
+        <div class="card-image waves-effect waves-block waves-light">
+          <img class="activator" src="images/office.jpg">
         </div>
-        <% if document.persisted? && current_user.can_delete?(document) %>
-          <%= link_to document,
-            method: :delete,
-            data: { confirm: "Are you sure? This will permanently delete this entire document!" } do %>
-            <div class="red-text text-lighten-2 right">
-              <i class="material-icons">delete</i> Delete this document
-            </div>
+        <div class="card-content">
+          <span class="card-title activator grey-text text-darken-4">
+            <%= document.title.presence || 'Untitled document' %>
+            <i class="material-icons right">more_vert</i>
+          </span>
+          <p><a href="#">This is a link</a></p>
+        </div>
+        <div class="card-action">
+          <%= link_to edit_document_path(document), class: 'green-text' do %>
+            <i class="material-icons"><%= Document.icon %></i> Edit
           <% end %>
-        <% end %>
+          <% if document.persisted? && current_user.can_delete?(document) %>
+            <%= link_to document,
+              method: :delete,
+              data: { confirm: "Are you sure? This will permanently delete this entire document!" } do %>
+              <div class="red-text text-lighten-2 right">
+                <i class="material-icons">delete</i> Delete
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+        <div class="card-reveal">
+          <span class="card-title grey-text text-darken-4">Card Title<i class="material-icons right">close</i></span>
+          <p>Here is some more information about this product that is only revealed once clicked on.</p>
+        </div>
       </div>
-      <span class="title">
-        <%= link_to document.title.presence || 'Untitled Document', edit_document_path(document) %>
-        <!--<span class="grey-text" style="font-size: 14px;"><%= pluralize document.body.split(' ').size, 'word' %></span>-->
-      </span>
-      <div style="max-height: 80px; overflow-y: hidden;">
-        <%= sanitize truncate(document.body, escape: false, length: 200) %>
-      </div>
-    </li>
-  <% end %>
-</ul>
+    </div>
+    <% end %>
+</div>
