@@ -2,7 +2,7 @@ class DocumentsController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    @documents = current_user.documents.order('title asc')
+    @documents = current_user.documents.order('updated_at desc')
   end
 
   def show
