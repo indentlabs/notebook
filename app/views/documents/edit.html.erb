@@ -20,32 +20,7 @@
 
 <div style="clear: both"></div>
 <%= content_for :javascript do %>
-  var toolbar_options = [
-    //[{ 'header': [1, 2, 3, false] }],
-    //[{ 'color': [] }, { 'background': [] }],
-    ['bold', 'italic', 'underline', 'strike', { 'script': 'sub'}, { 'script': 'super' }],
-    ['blockquote', 'code-block'],
-    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-    [{ 'indent': '-1'}, { 'indent': '+1' }],
-    ['clean']
-  ];
-
-  var quill = new Quill('#editor', {
-    modules: {
-      toolbar: toolbar_options,
-      history: {
-        delay: 1000,
-        maxStack: 75,
-        userOnly: false
-      }
-    },
-    theme: 'snow'
-  });
-
-  // Autosave
-  var autosave_event = null;
-  var last_autosave = null;
-  quill.on('text-change', function(delta, oldDelta, source) {
+  function autosave() {
     if (autosave_event === null) {
       console.log('Queueing autosave');
       $('.js-autosave-icon').addClass('grey-text');
@@ -86,7 +61,35 @@
     } else {
       console.log('Waiting for existing autosave');
     }
+  }
+
+  var toolbar_options = [
+    //[{ 'header': [1, 2, 3, false] }],
+    //[{ 'color': [] }, { 'background': [] }],
+    ['bold', 'italic', 'underline', 'strike', { 'script': 'sub'}, { 'script': 'super' }],
+    ['blockquote', 'code-block'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'indent': '-1'}, { 'indent': '+1' }],
+    ['clean']
+  ];
+
+  var quill = new Quill('#editor', {
+    modules: {
+      toolbar: toolbar_options,
+      history: {
+        delay: 1000,
+        maxStack: 75,
+        userOnly: false
+      }
+    },
+    theme: 'snow'
   });
+
+  // Autosave
+  var autosave_event = null;
+  var last_autosave = null;
+  quill.on('text-change', autosave);
+  $('#document_title').on('change', autosave);
 
   // Allow entering `tab` into the editor
   $(document).delegate('#editor', 'keydown', function(e) {
