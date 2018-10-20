@@ -42,4 +42,13 @@ RailsAdmin.config do |config|
   config.authorize_with do
     redirect_to main_app.root_path unless user_signed_in? && current_user.site_administrator?
   end
+
+  config.included_models = ["User"]
+  # Todo whitelist the fields we want to show for each model
+  # config.model 'User' do
+  #   list do
+  #     field :name
+  #     field :created_at
+  #   end
+  # end
 end
