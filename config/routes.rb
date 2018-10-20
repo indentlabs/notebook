@@ -163,13 +163,14 @@ Rails.application.routes.draw do
   end
   get 'search/', to: 'search#results'
 
-  scope 'admin' do
+  scope 'admin_stats' do
     get '/', to: 'admin#dashboard', as: :admin_dashboard
     get '/content_type/:type', to: 'admin#content_type', as: :admin_content_type
 
     get '/attributes', to: 'admin#attributes', as: :admin_attributes
     get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
   end
+  mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
 
   scope 'export' do
     get '/', to: 'export#index', as: :notebook_export
