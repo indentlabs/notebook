@@ -1,4 +1,8 @@
 <%# Usage: render partial: 'content/display/quick_reference', locals: { content: @content } %>
+<%#
+  TODO: this needs optimized. Last count it was doing 55 SQL queries, so it has been temporarily
+  disabled (not called from dashboard.html.erb).
+%>
 
 <h4 class="reference-title">
   <i class="material-icons <%= content.class.color %>-text"><%= content.class.icon %></i>
@@ -19,6 +23,7 @@
 
 <table class="highlight">
   <% all_categories.each do |category| %>
+    <% break if found_attributes >= attributes_to_find %>
     <% category.attribute_fields.each do |attribute_field| %>
       <% break if found_attributes >= attributes_to_find %>
 
