@@ -43,7 +43,13 @@ RailsAdmin.config do |config|
     redirect_to main_app.root_path unless user_signed_in? && current_user.site_administrator?
   end
 
-  config.included_models = ["User"]
+  config.included_models = [
+    "User",
+    "ApiKey",
+    "BillingPlan",
+    "ImageUpload",
+    "Referral"
+  ]
   # Todo whitelist the fields we want to show for each model
   # config.model 'User' do
   #   list do
