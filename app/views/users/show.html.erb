@@ -75,8 +75,9 @@
         <div class="col s12">
           <h5 style="text-align: center">Recent activity</h5>
           <section id="cd-timeline" class="cd-container timeline-container">
-            <% @stream.each do |change_event| %>
-              <% next unless change_event.content.present? %>
+            <% @stream.each do |entity_id, change_events| %>
+              <% change_event = change_events.first %>
+              <% next unless change_event.present? && change_event.content.present? %>
               <%
                 if change_event.content_type == 'Attribute'
                   content_type_class = change_event.content.entity_type.constantize
