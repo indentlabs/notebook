@@ -2,7 +2,7 @@ class AdminController < ApplicationController
   layout 'admin'
 
   before_action :authenticate_user!
-  before_action :require_admin_access, except: [:masquerade]
+  before_action :require_admin_access
 
   def dashboard
   end
@@ -32,12 +32,13 @@ class AdminController < ApplicationController
   end
 
   def masquerade
-    # Do not allow masquerading in production, even for admins.
-    return unless Rails.env.development?
-
     masqueree = User.find_by(id: params[:user_id])
     sign_in masqueree
     redirect_to root_path
+  end
+
+  def unsubscribe
+
   end
 
   private
