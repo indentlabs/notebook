@@ -47,6 +47,7 @@ class AdminController < ApplicationController
     @users.update_all(selected_billing_plan_id: 1)
     @users.each do |user|
       SubscriptionService.cancel_all_existing_subscriptions(user)
+      UnsubscribedMailer.unsubscribed(user).deliver_now! if Rails.env.production?
     end
   end
 

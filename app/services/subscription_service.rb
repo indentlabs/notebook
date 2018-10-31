@@ -95,7 +95,7 @@ class SubscriptionService < Service
   end
 
   def self.report_subscription_change_to_slack(user, plan_id)
-    #return unless Rails.env == 'production'
+    return unless Rails.env == 'production'
     slack_hook = ENV['SLACK_HOOK']
     return unless slack_hook
 
