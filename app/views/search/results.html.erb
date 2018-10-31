@@ -1,29 +1,67 @@
 <h4 class="center">
-  <div><%= @query %></div>
-  <small class="grey-text">
-    <%= pluralize @results.values.flatten.count, 'match' %>
-  </small>
+  <div><span class="yellow"><%= @query %></span> results</div>
 </h4>
 
-<ul class="collapsible popout" data-collapsible="accordion">
-  <% @results.each do |content_type, content_list| %>
-    <% next if content_list.empty? %>
-    <% content_class = content_type.to_s.singularize.capitalize.constantize %>
+<div class="row">
+  <% @matched_attributes.each do |attribute| %>
+    <%
+      seen_key = "#{attribute.entity_type}-#{attribute.entity_id}"
+      next if @seen_result_pages.key?(seen_key)
+      @seen_result_pages[seen_key] = true
+    %>
 
-    <li>
-      <div class="collapsible-header active">
-        <i class="material-icons <%= content_class.color %>-text"><%= content_class.icon %></i>
-        <%= content_type.to_s.humanize %>
-        <span class="grey-text"><%= pluralize content_list.count, 'result' %></span>
+    <% entity = attribute.entity_type.constantize.find_by(id: attribute.entity_id) %>
+    <% next unless entity %>
+    <% next unless entity.user_id == current_user.id %>
+
+    <div class="col s12 m6">
+      <div class="card hoverable">
+        <div class="card-content black-text blue-grey lighten-5" style="height: 180px;">
+          <div class="card-title">
+            <%= link_to entity, class: "#{entity.class.color}-text" do %>
+              <i class="material-icons" style="position: relative; top: 3px;"><%= entity.class.icon %></i>
+              <%= entity.name %>
+            <% end %>
+            <% entity_universe = entity.try(:universe) %>
+            <% if entity_universe %>
+              <%= link_to entity_universe do %>
+                <span class="badge new <%= Universe.color %>" data-badge-caption="">
+                  <%= entity_universe.name %>
+                </span>
+              <% end %>
+            <% end %>
+          </div>
+          <p class="black-text darken-2">
+            <sup>Last edited <%= time_ago_in_words entity.updated_at %> ago</sup>
+          </p>
+          <p>
+            <strong><%= attribute.attribute_field.label %></strong>:
+            <%=
+              truncate(
+                attribute.value.gsub(
+                  /#{@query}/i,
+                  "<span class='yellow'>#{@query}</span>".html_safe
+                ),
+                length: 180,
+                separator: ' ',
+                escape: false
+              ) %>
+          </p>
+        </div>
+        <div class="card-action <%= entity.class.color %> lighten-1">
+          <%= link_to polymorphic_path(entity.page_type.downcase, id: entity.id), class: 'black-text' do %>
+            <i class="material-icons tiny" style="position: relative; top: 2px;"><%= entity.class.icon %></i> View
+          <% end %>
+          <%= link_to edit_polymorphic_path(entity.page_type.downcase, id: entity.id), class: 'black-text' do %>
+            <i class="material-icons tiny" style="position: relative; top: 2px;">edit</i> Edit
+          <% end %>
+        </div>
       </div>
-      <div class="collapsible-body">
-        <%= render partial: 'content/list/list', locals: { content_list: content_list, show_add_another_form: false } %>
-      </div>
-    </li>
+    </div>
   <% end %>
-</ul>
+</div>
 
-<% if @results.values.flatten.count.zero? %>
+<% if @matched_attributes.empty? %>
   <div class="card-panel">
     <p>
       Sorry, nothing matched your search query!
@@ -34,4 +72,10 @@
       <%= link_to 'Please report it!', 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform' %>
     </p>
   </div>
+<% else %>
+  <h4 class="center">
+    <small class="grey-text">
+      <%= pluralize @seen_result_pages.keys.count, 'match' %> found
+    </small>
+  </h4>
 <% end %>
