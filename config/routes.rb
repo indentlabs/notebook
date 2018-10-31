@@ -163,14 +163,15 @@ Rails.application.routes.draw do
   end
   get 'search/', to: 'search#results'
 
-  scope 'admin_stats' do
-    get '/', to: 'admin#dashboard', as: :admin_dashboard
+  scope 'admin' do
+    get '/stats', to: 'admin#dashboard', as: :admin_dashboard
     get '/content_type/:type', to: 'admin#content_type', as: :admin_content_type
     get '/attributes', to: 'admin#attributes', as: :admin_attributes
     get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
+    get '/unsubscribe', to: 'admin#unsubscribe'
+    post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
   end
   mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
-  get '/admin/unsubscribe', to: 'admin#unsubscribe'
 
   scope 'export' do
     get '/', to: 'export#index', as: :notebook_export

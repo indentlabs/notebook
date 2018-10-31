@@ -1,5 +1,6 @@
 class AdminController < ApplicationController
   layout 'admin'
+  layout 'application', only: [:unsubscribe]
 
   before_action :authenticate_user!
   before_action :require_admin_access
@@ -38,7 +39,13 @@ class AdminController < ApplicationController
   end
 
   def unsubscribe
+  end
 
+  def perform_unsubscribe
+    emails = params[:emails].split(/[\r|\n]+/)
+    @users = User.where(email: emails)
+    @users.update_all(selected_billing_plan_id: 1)
+    Subscription.where(user_id: @users.pluck(:id)).where('end_date > ?', DateTime.current).update_all(end_date: DateTime.current)
   end
 
   private
