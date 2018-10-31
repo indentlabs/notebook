@@ -168,7 +168,7 @@ Rails.application.routes.draw do
     get '/content_type/:type', to: 'admin#content_type', as: :admin_content_type
     get '/attributes', to: 'admin#attributes', as: :admin_attributes
     get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
-    get '/unsubscribe', to: 'admin#unsubscribe'
+    get '/unsubscribe', to: 'admin#unsubscribe', as: :mass_unsubscribe
     post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
   end
   mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
