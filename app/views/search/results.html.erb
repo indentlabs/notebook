@@ -16,36 +16,27 @@
 
     <div class="col s12 m6">
       <div class="card hoverable">
-        <div class="card-content black-text blue-grey lighten-5" style="height: 180px;">
+        <div class="card-content black-text blue-grey lighten-5" style="height: 180px; overflow: hidden">
           <div class="card-title">
             <%= link_to entity, class: "#{entity.class.color}-text" do %>
               <i class="material-icons" style="position: relative; top: 3px;"><%= entity.class.icon %></i>
               <%= entity.name %>
-            <% end %>
-            <% entity_universe = entity.try(:universe) %>
-            <% if entity_universe %>
-              <%= link_to entity_universe do %>
-                <span class="badge new <%= Universe.color %>" data-badge-caption="">
-                  <%= entity_universe.name %>
-                </span>
-              <% end %>
             <% end %>
           </div>
           <p class="black-text darken-2">
             <sup>Last edited <%= time_ago_in_words entity.updated_at %> ago</sup>
           </p>
           <p>
-            <strong><%= attribute.attribute_field.label %></strong>:
+            <strong class="left"><%= attribute.attribute_field.label %></strong>:
             <%=
-              truncate(
-                attribute.value.gsub(
+                ContentFormatterService.show(
+                  text: truncate(attribute.value, length: 180, separator: ' '),
+                  viewing_user: current_user
+                ).gsub(
                   /#{@query}/i,
                   "<span class='yellow'>#{@query}</span>".html_safe
-                ),
-                length: 180,
-                separator: ' ',
-                escape: false
-              ) %>
+                ).gsub("<p>", ' ').gsub("</p>", ' ').html_safe
+               %>
           </p>
         </div>
         <div class="card-action <%= entity.class.color %> lighten-1">
@@ -54,6 +45,13 @@
           <% end %>
           <%= link_to edit_polymorphic_path(entity.page_type.downcase, id: entity.id), class: 'black-text' do %>
             <i class="material-icons tiny" style="position: relative; top: 2px;">edit</i> Edit
+          <% end %>
+          <% entity_universe = entity.try(:universe) %>
+          <% if entity_universe %>
+            <%= link_to entity_universe, class: "black-text right", style: 'padding: 0 10px' do %>
+              <i class="material-icons tiny" style="position: relative; top: 2px"><%= Universe.icon %></i>
+              <span><%= entity_universe.name %></span>
+            <% end %>
           <% end %>
         </div>
       </div>
