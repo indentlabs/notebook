@@ -5,6 +5,7 @@ Checklist to create a new content type:
 
 - Generate models (with non-relation fields)
   - `rails g model Planet name:string user:references universe:references deleted_at:datetime privacy:string`
+  - Edit the migration to add a page_type column with default value Planet
   - `rake db:migrate`
 
 - Run `rake page_type:create` and type "Planet" at the prompt

@@ -26,6 +26,8 @@ Rails.application.routes.draw do
     get :deities, on: :member
     get :governments, on: :member
     get :vehicles, on: :member
+    get :buildings, on: :member
+    get :traditions, on: :member
     #<users_page_types>
   end
 
@@ -122,6 +124,8 @@ Rails.application.routes.draw do
     get :deities, on: :member
     get :governments, on: :member
     get :vehicles, on: :member
+    get :buildings, on: :member
+    get :traditions, on: :member
     #<universes_page_types>
     end
     resources :characters do
@@ -149,6 +153,8 @@ Rails.application.routes.draw do
     resources :deities
     resources :governments
     resources :vehicles
+    resources :buildings
+    resources :traditions
     #<page_type_resources>
 
     # Content attributes
