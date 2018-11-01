@@ -4,15 +4,14 @@ Checklist to create a new content type:
   - e.g. https://github.com/indentlabs/notebook/issues/258
 
 - Generate models (with non-relation fields)
-  - rails g model Planet name:string description:string ...
-  - don't forget to add `privacy`, `notes`, `private_notes`, `user_id`, `universe_id`, `deleted_at`
-  - probably want to just put core attributes here eventually, after de-systemizing other fields
+  - `rails g model Planet name:string user:references universe:references deleted_at:datetime privacy:string`
+  - `rake db:migrate`
 
 - Run `rake page_type:create` and type "Planet" at the prompt
 
 - Edit app/models/content_types/planet.rb to define color and icon
 
-- Add has_many :planets to universe.rb
+- Add `has_many :planets` to universe.rb
 
 - Add the content class to initializers/content_types.rb
   - most likely to :all, :available, and :free/:premium

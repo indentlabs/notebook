@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_10_30_051214) do
+ActiveRecord::Schema.define(version: 2018_11_01_205729) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -2312,6 +2312,19 @@ ActiveRecord::Schema.define(version: 2018_10_30_051214) do
     t.index ["id", "deleted_at"], name: "index_users_on_id_and_deleted_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
+  end
+
+  create_table "vehicles", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Vehicle"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_vehicles_on_universe_id"
+    t.index ["user_id"], name: "index_vehicles_on_user_id"
   end
 
   create_table "votables", force: :cascade do |t|
