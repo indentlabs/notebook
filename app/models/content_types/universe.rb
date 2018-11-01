@@ -45,6 +45,9 @@ class Universe < ApplicationRecord
   has_many :technologies
   has_many :towns
   has_many :vehicles
+  has_many :conditions
+  has_many :buildings
+  has_many :jobs
 
   has_many :contributors, dependent: :destroy
 

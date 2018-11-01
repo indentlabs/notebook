@@ -28,6 +28,8 @@ Rails.application.routes.draw do
     get :vehicles, on: :member
     get :buildings, on: :member
     get :traditions, on: :member
+    get :conditions, on: :member
+    get :jobs, on: :member
     #<users_page_types>
   end
 
@@ -126,6 +128,8 @@ Rails.application.routes.draw do
     get :vehicles, on: :member
     get :buildings, on: :member
     get :traditions, on: :member
+    get :conditions, on: :member
+    get :jobs, on: :member
     #<universes_page_types>
     end
     resources :characters do
@@ -155,6 +159,8 @@ Rails.application.routes.draw do
     resources :vehicles
     resources :buildings
     resources :traditions
+    resources :conditions
+    resources :jobs
     #<page_type_resources>
 
     # Content attributes
