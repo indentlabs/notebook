@@ -29,4 +29,3 @@ class Job < ActiveRecord::Base
     'job'
   end
 end
-    
