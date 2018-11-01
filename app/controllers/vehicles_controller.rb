@@ -6,8 +6,8 @@ class VehiclesController < ContentController
     [
       :name, :universe_id, :privacy
     ] + [ #<relations>
+      custom_attribute_values:     [:name, :value],
 
     ]
   end
 end
-    

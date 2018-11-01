@@ -6,8 +6,8 @@ class JobsController < ContentController
     [
       :name, :universe_id, :privacy, :page_type
     ] + [ #<relations>
+      custom_attribute_values:     [:name, :value],
 
     ]
   end
 end
-    
