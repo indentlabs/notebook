@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_11_01_210827) do
+ActiveRecord::Schema.define(version: 2018_11_01_234459) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -2128,12 +2128,12 @@ ActiveRecord::Schema.define(version: 2018_11_01_210827) do
     t.integer "posts_count", default: 0
     t.integer "topics_count", default: 0
     t.datetime "last_seen_at"
-    t.integer "moderation_state", default: 0, null: false
+    t.integer "moderation_state", default: 1, null: false
     t.datetime "moderation_state_changed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["latest_activity_at"], name: "index_thredded_user_details_on_latest_activity_at"
-    t.index ["moderation_state", "moderation_state_changed_at"], name: "index_thredded_user_details_for_moderations", order: { moderation_state_changed_at: :desc }
+    t.index ["moderation_state", "moderation_state_changed_at"], name: "index_thredded_user_details_for_moderations"
     t.index ["user_id"], name: "index_thredded_user_details_on_user_id", unique: true
   end
 

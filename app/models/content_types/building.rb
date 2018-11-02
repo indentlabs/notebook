@@ -28,5 +28,8 @@ class Building < ActiveRecord::Base
   def self.content_name
     'building'
   end
+
+  def description
+    overview_field_value('Description')
+  end
 end
-    

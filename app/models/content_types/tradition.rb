@@ -28,5 +28,8 @@ class Tradition < ActiveRecord::Base
   def self.content_name
     'tradition'
   end
+
+  def description
+    overview_field_value('Description')
+  end
 end
-    

@@ -28,5 +28,8 @@ class Condition < ActiveRecord::Base
   def self.content_name
     'condition'
   end
+
+  def description
+    overview_field_value('Description')
+  end
 end
-    

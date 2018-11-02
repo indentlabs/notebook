@@ -28,4 +28,8 @@ class Vehicle < ActiveRecord::Base
   def self.content_name
     'vehicle'
   end
+
+  def description
+    overview_field_value('Description')
+  end
 end
