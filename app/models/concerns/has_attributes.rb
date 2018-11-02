@@ -19,7 +19,7 @@ module HasAttributes
           name: category_name.to_s,
           label: details[:label],
           user: user,
-          created_at: "January 1, 1970".to_datetime
+          created_at: "January 1, 1970".to_datetime # um wat
         )
         # Default new categories to the default icon
         category.icon = details[:icon] unless category.persisted?
