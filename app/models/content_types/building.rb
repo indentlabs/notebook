@@ -18,11 +18,11 @@ class Building < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'black'
+    'silver'
   end
 
   def self.icon
-    'info'
+    'business'
   end
 
   def self.content_name

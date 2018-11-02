@@ -18,11 +18,11 @@ class Tradition < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'black'
+    'text-lighten-3 red'
   end
 
   def self.icon
-    'info'
+    'cake'
   end
 
   def self.content_name

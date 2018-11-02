@@ -18,11 +18,11 @@ class Job < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'black'
+    'text-lighten-1 brown'
   end
 
   def self.icon
-    'info'
+    'work'
   end
 
   def self.content_name

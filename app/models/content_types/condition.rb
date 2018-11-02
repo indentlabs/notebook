@@ -18,11 +18,11 @@ class Condition < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'black'
+    'text-darken-1 lime'
   end
 
   def self.icon
-    'info'
+    'bubble_chart'
   end
 
   def self.content_name
