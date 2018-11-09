@@ -43,12 +43,66 @@
 
 <div class="row">
   <div class="col s12">
-    <div>Additional features:</div>
+    <div>
+      <h4>Plan comparison</h4>
+      <div class="row">
+        <div class="col s9">
+          <table class="highlight comparison-table">
+            <tr>
+              <th style="width: 160px;"></th>
+              <th>Notebook.ai Core</th>
+              <th>Notebook.ai Premium</th>
+            </tr>
+            <tr>
+              <th>Create universes</th>
+              <td>Up to 5</td>
+              <td>Unlimited</td>
+            </tr>
+            <tr>
+              <th>Available page types</th>
+              <td>
+                <%= Rails.application.config.content_types[:free].count %> page types<br />
+                <% Rails.application.config.content_types[:free].each do |ct| %>
+                  <i class="material-icons <%= ct.color %>-text tooltipped" data-tooltip="<%= ct.name.pluralize %>"><%= ct.icon %></i>
+                <% end %>
+              </td>
+              <td>
+                <%= Rails.application.config.content_types[:all].count %> page types<br />
+                <% Rails.application.config.content_types[:all].each do |ct| %>
+                  <i class="material-icons <%= ct.color %>-text tooltipped" data-tooltip="<%= ct.name.pluralize %>"><%= ct.icon %></i>
+                <% end %>
+              </td>
+            </tr>
+            <tr>
+              <th>Upload images</th>
+              <td>Up to <strong>50MB</strong></td>
+              <td>Up to <strong>10GB</strong></td>
+            </tr>
+            <tr>
+              <th>Un-delete pages</th>
+              <td>up to 24 hours</td>
+              <td>up to 7 days</td>
+            </tr>
+            <tr>
+              <th>Price</th>
+              <td>Free</td>
+              <td>
+                $9/month
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="col s3">
+          <p class="light">
+            We also have feature and price comparison charts against the top software used by the following types of worldbuilders:
+          </p>
+          <%= link_to 'Writers', writers_landing_path, class: 'btn white black-text waves-effect waves-light', style: 'display: block' %>
+          <%= link_to 'Roleplayers', roleplayers_landing_path, class: 'btn white black-text waves-effect waves-light', style: 'display: block' %>
+          <%= link_to 'Game Designers', designers_landing_path, class: 'btn white black-text waves-effect waves-light', style: 'display: block' %>
+          <%# todo maybe tabs here? %>
+        </div>
 
-    * Starter can recover deleted images up to 24 hours after deletion, Premium up to 7 days
-    * Collaboration on both
-    * Premium sharing
-
-    * Unlimited documents on both
+      </div>
+    </div>
   </div>
 </div>

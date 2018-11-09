@@ -40,6 +40,7 @@ Rails.application.routes.draw do
     #get '/notebook', to: 'main#about_notebook', as: :about_notebook
     get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
     get '/pricing', to: 'main#pricing', as: :pricing
+    get '/features', to: 'main#features', as: :features
   end
 
   # Landing pages
