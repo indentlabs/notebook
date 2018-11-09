@@ -39,6 +39,7 @@ Rails.application.routes.draw do
   scope '/about' do
     #get '/notebook', to: 'main#about_notebook', as: :about_notebook
     get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
+    get '/pricing', to: 'main#pricing', as: :pricing
   end
 
   # Landing pages

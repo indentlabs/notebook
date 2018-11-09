@@ -35,6 +35,9 @@ class MainController < ApplicationController
     return redirect_to(new_user_session_path) unless user_signed_in?
   end
 
+  def pricing
+  end
+
   def recent_content
     # todo optimize this / use Attributes
     return [] if @activated_content_types.nil?
