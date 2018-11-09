@@ -27,6 +27,7 @@ Rails.application.config.content_types = {
     Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle,
   ],
 
+  # Content types to label as "new" around the site
   new: [
     Building, Condition, Job, Tradition, Vehicle
   ]
