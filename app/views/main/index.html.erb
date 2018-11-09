@@ -222,7 +222,7 @@
   <div class="container">
     <div class="section">
       <div class="row">
-        <% Rails.application.config.content_types[:all].each do |content_type| %>
+        <% ([Universe] + Rails.application.config.content_types[:premium]).each do |content_type| %>
           <div class="col l4 m6 s12">
             <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: content_type } %>
           </div>
@@ -302,20 +302,20 @@
                         <%= t('marketing.landing_page.pricing.premium_plan.price') %>
                       </em></small>
                     </span>
-                    <ul class="plan-features">
+                    <div class="row plan-features">
                       <% Rails.application.config.content_types[:all].each do |content_type| %>
-                        <li>
+                        <div class="col s12 m6">
                           <i class="material-icons <%= content_type.color %>-text">
                             <%= content_type.icon %>
                           </i>
                           <%= t("marketing.landing_page.pricing.premium_plan.#{content_type.name.downcase.pluralize}_html") %>
-                        </li>
+                        </div>
                       <% end %>
-                      <li>
+                      <div>
                         <i class="material-icons black-text">cloud_upload</i>
                         <%= t('marketing.landing_page.pricing.premium_plan.upload_html') %>
-                      </li>
-                    </ul>
+                      </div>
+                    </div>
                     <div class="row center">
                       <%= link_to t('marketing.landing_page.pricing.cta.button'),
                                   new_user_registration_path,
