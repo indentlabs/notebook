@@ -1,8 +1,9 @@
 class AdminController < ApplicationController
   layout 'admin'
+  layout 'application', only: [:unsubscribe, :perform_unsubscribe]
 
   before_action :authenticate_user!
-  before_action :require_admin_access, except: [:masquerade]
+  before_action :require_admin_access
 
   def dashboard
   end
@@ -32,12 +33,22 @@ class AdminController < ApplicationController
   end
 
   def masquerade
-    # Do not allow masquerading in production, even for admins.
-    return unless Rails.env.development?
-
     masqueree = User.find_by(id: params[:user_id])
     sign_in masqueree
     redirect_to root_path
+  end
+
+  def unsubscribe
+  end
+
+  def perform_unsubscribe
+    emails = params[:emails].split(/[\r|\n]+/)
+    @users = User.where(email: emails)
+    @users.update_all(selected_billing_plan_id: 1)
+    @users.each do |user|
+      SubscriptionService.cancel_all_existing_subscriptions(user)
+      UnsubscribedMailer.unsubscribed(user).deliver_now! if Rails.env.production?
+    end
   end
 
   private
