@@ -68,16 +68,18 @@
 
 <div class="row">
   <% @all_content_types.each.with_index do |content_type, i| %>
-    <% if i % 2 == 0 %>
-      </div>
-      <div class="row">
-    <% end %>
 
     <div class="col s12 m6">
       <div class="card">
         <div class="card-image">
           <%= image_tag "card-headers/#{content_type.name.downcase.pluralize}.jpg", height: 200, width: 300 %>
+          <% if Rails.application.config.content_types[:new].include?(content_type) %>
+            <span class="card-title">
+              <span class="new badge yellow black-text left" style="position: relative; top: -130px; left: -10px;"></span>
+            </span>
+          <% end %>
           <span class="card-title" style="width: 100%">
+
             <% if content_type.name == 'Universe' %>
               <div class="grey-text" style="font-size: .8rem; float: right; background: white; margin-top: 5px; padding: 5px 10px 5px 10px; border: 1px solid #429ADF">
                 Always on
@@ -101,13 +103,13 @@
                 </div>
               <% end %>
             <% end %>
-            <div>
+            <div class="bordered-text">
               <i class="material-icons <%= content_type.color %>-text" style="position: relative; top: 3px;"><%= content_type.icon %></i>
               <%= content_type.name.pluralize %>
             </div>
           </span>
         </div>
-        <div class="card-content">
+        <div class="card-content fixed-card-content">
           <div class="row">
             <div class="col s12">
               <p>
@@ -126,7 +128,7 @@
         <div class="card-action">
           <% if content_type.where(user: current_user).any? %>
               <%= link_to polymorphic_path(content_type) do %>
-                You have
+                view your
                 <%= pluralize content_type.where(user: current_user).count,
                               content_type.name.downcase %>
               <% end %>

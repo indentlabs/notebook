@@ -25,6 +25,10 @@ Rails.application.config.content_types = {
   premium: [
     Building, Condition, Country, Creature, Deity, Flora, Government, Group, Job, Landmark, Language,
     Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle,
+  ],
+
+  new: [
+    Building, Condition, Job, Tradition, Vehicle
   ]
 }
 
