@@ -41,6 +41,10 @@ Rails.application.routes.draw do
     get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
     get '/pricing', to: 'main#pricing', as: :pricing
     get '/features', to: 'main#features', as: :features
+
+    scope '/feature' do
+      # todo undelete, premium sharing, etc
+    end
   end
 
   # Landing pages
