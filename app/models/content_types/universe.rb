@@ -48,6 +48,7 @@ class Universe < ApplicationRecord
   has_many :conditions
   has_many :buildings
   has_many :jobs
+  has_many :traditions
 
   has_many :contributors, dependent: :destroy
 
