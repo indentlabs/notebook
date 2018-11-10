@@ -23,7 +23,22 @@ module HasContent
       content_types: Rails.application.config.content_types[:all].map(&:name),
       page_scoping:  { user_id: self.id }
     )
-      @user_content ||= content_list(page_scoping: page_scoping, content_types: content_types).group_by(&:page_type)
+      polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :privacy]
+      where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL'
+
+      sql = content_types.map do |page_type|
+        "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
+      end.join(' UNION ALL ') + ' ORDER BY page_type, id'
+
+      res = ActiveRecord::Base.connection.execute(sql)
+      @content_by_page_type ||= res.to_a.each_with_object({}) do |object, hash|
+        object.keys.each do |key|
+          object.except!(key) if key.is_a?(Integer)
+        end
+
+        hash[object['page_type']] ||= []
+        hash[object['page_type']] << ContentPage.new(object)
+      end
     end
 
     # [..., ...]
@@ -31,20 +46,16 @@ module HasContent
       content_types: Rails.application.config.content_types[:all].map(&:name),
       page_scoping:  { user_id: self.id }
     )
+
       # todo we can't select for universe_id here which kind of sucks, so we need to research 1) the repercussions, 2) what to do instead
       polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :privacy]
+      where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL'
 
-      chained_query = nil
-      (content_types + ["ContentPage"]).each do |content_type|
-        content_type_class = content_type.constantize
-        if chained_query.nil?
-          chained_query = content_type_class.select(*polymorphic_content_fields).where(page_scoping)
-        else
-          chained_query = content_type_class.select(*polymorphic_content_fields).where(page_scoping).union(chained_query)
-        end
-      end
+      sql = content_types.map do |page_type|
+        "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
+      end.join(' UNION ALL ')
 
-      @user_content_list ||= chained_query
+      @user_content_list ||= ActiveRecord::Base.connection.execute(sql)
     end
 
     # {
