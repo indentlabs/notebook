@@ -1,60 +1,79 @@
-<div class="row">
-  <div class="col s12">
-    <h4>
-      <div class="right">
-        <%= link_to edit_document_path(:new), class: 'btn green white-text waves-effect waves-light', style: 'height: 45px' do %>
-          <i class="material-icons" style="position: relative; top: 4px;">add</i> New Document
-        <% end %>
-      </div>
-      Your <%= current_user.documents.count %> documents
-    </h4>
-  </div>
-</div class="row">
-<div class="row">
-  <% @documents.each.with_index do |document, i| %>
-    <% if i % 3 == 0 %>
-      <div style="clear: both;" class="hide-on-small-only"></div>
-    <% end %>
-    <div class="col s12 m4 l4">
-      <div class="card sticky-action">
-        <div class="card-image waves-effect waves-block waves-light">
-          <%= image_tag "card-headers/document-mini.jpg", class: 'activator' %>
-        </div>
-        <div class="card-content">
-          <span class="card-title activator grey-text text-darken-4">
-            <%= document.title.presence || 'Untitled document' %>
-          </span>
-          <p class="grey-text">
-            <%= pluralize (document.body || "").split(/\s+/).count, 'word' %>
-            <br />
-            updated <%= time_ago_in_words document.updated_at %> ago
-          </p>
-        </div>
-        <div class="card-action">
-          <%= link_to edit_document_path(document), class: 'green-text' do %>
-            <i class="material-icons"><%= Document.icon %></i> Edit
-          <% end %>
-          <% if document.persisted? && current_user.can_delete?(document) %>
-            <%= link_to document,
-              method: :delete,
-              data: { confirm: "Are you sure? This will permanently delete this entire document!" } do %>
-              <div class="red-text text-lighten-2 right">
-                <i class="material-icons">delete</i>
-                Delete
-              </div>
-            <% end %>
+<% if @documents.any? %>
+  <div class="row">
+    <div class="col s12">
+      <h4>
+        <div class="right">
+          <%= link_to edit_document_path(:new), class: 'btn green white-text waves-effect waves-light', style: 'height: 45px' do %>
+            <i class="material-icons" style="position: relative; top: 4px;">add</i> New Document
           <% end %>
         </div>
-        <div class="card-reveal">
-          <span class="card-title grey-text text-darken-4">
-            <%= document.title.presence || 'Document preview' %>
-            <i class="material-icons right">close</i>
-          </span>
-          <p>
-            <%= sanitize truncate(document.body, escape: false, length: 420) %>
-          </p>
-        </div>
-      </div>
+        Your <%= current_user.documents.count %> documents
+      </h4>
     </div>
-    <% end %>
-</div>
+  </div class="row">
+  <div class="row">
+    <% @documents.each.with_index do |document, i| %>
+      <% if i % 3 == 0 %>
+        <div style="clear: both;" class="hide-on-small-only"></div>
+      <% end %>
+      <div class="col s12 m4 l4">
+        <div class="card sticky-action">
+          <div class="card-image waves-effect waves-block waves-light">
+            <%= image_tag "card-headers/document-mini.jpg", class: 'activator' %>
+          </div>
+          <div class="card-content">
+            <span class="card-title activator grey-text text-darken-4">
+              <%= document.title.presence || 'Untitled document' %>
+            </span>
+            <p class="grey-text">
+              <%= pluralize (document.body || "").split(/\s+/).count, 'word' %>
+              <br />
+              updated <%= time_ago_in_words document.updated_at %> ago
+            </p>
+          </div>
+          <div class="card-action">
+            <%= link_to edit_document_path(document), class: 'green-text' do %>
+              <i class="material-icons"><%= Document.icon %></i> Edit
+            <% end %>
+            <% if document.persisted? && current_user.can_delete?(document) %>
+              <%= link_to document,
+                method: :delete,
+                data: { confirm: "Are you sure? This will permanently delete this entire document!" } do %>
+                <div class="red-text text-lighten-2 right">
+                  <i class="material-icons">delete</i>
+                  Delete
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+          <div class="card-reveal">
+            <span class="card-title grey-text text-darken-4">
+              <%= document.title.presence || 'Document preview' %>
+              <i class="material-icons right">close</i>
+            </span>
+            <p>
+              <%= sanitize truncate(document.body, escape: false, length: 420) %>
+            </p>
+          </div>
+        </div>
+      </div>
+      <% end %>
+  </div>
+<% end %>
+
+<% if @documents.empty? %>
+  <div class="center" style="margin: 50px 0">
+    <h4>You haven't created any documents yet!</h4>
+    <h1>
+      <i class="material-icons <%= Document.color %>-text" style="font-size: 200%">
+        <%= Document.icon %>
+      </i>
+    </h1>
+    <p>
+      You can create an unlimited number of documents with no limits on length. Enjoy!
+    </p>
+
+    <%= link_to "Create your first document", edit_document_path(:new), class: "btn #{Document.color}" %>
+
+  </div>
+<% end %>

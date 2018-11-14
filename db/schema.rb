@@ -11,6 +11,7 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema.define(version: 2018_11_01_234459) do
+
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
     t.string "key"
