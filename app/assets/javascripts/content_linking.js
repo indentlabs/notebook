@@ -1,4 +1,6 @@
 $(document).ready(function () {
+  var quill_instance_ids = {};
+
   function add_link_bar(link_bar_container) {
     $('.content-field-link-bar-container').html('');
     $(link_bar_container).html($('#content-field-link-bar-template').html())
@@ -12,13 +14,51 @@ $(document).ready(function () {
     var focused_text_field = $(focus_event.target);
     var parent_content_field = focused_text_field.closest('.content-field');
 
-    $('.content-field').removeClass('focused');
-    parent_content_field.addClass('focused');
+    focus_field(focus_event);
+
     $('.content-field-link-bar').hide();
     parent_content_field.find('.content-field-link-bar').show();
 
     add_link_bar(parent_content_field.find('.content-field-link-bar-container'));
   });
+
+  function focus_field(focus_event) {
+    var focused_text_field = $(focus_event.target);
+    var parent_content_field = focused_text_field.closest('.content-field');
+    var input_field = parent_content_field.find('textarea.rich-text-input');
+
+    $('.content-field').removeClass('focused');
+    parent_content_field.addClass('focused');
+
+    /*
+    var toolbar_options = [
+      //[{ 'header': [1, 2, 3, false] }],
+      //[{ 'color': [] }, { 'background': [] }],
+      ['bold', 'italic', 'underline', 'strike', { 'script': 'sub'}, { 'script': 'super' }],
+      ['blockquote', 'code-block'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      ['clean']
+    ];
+
+    var input_field_id = input_field.attr('id');
+    if (!(input_field_id in quill_instance_ids)) {
+      var quill = new Quill('#' + input_field.attr('id'), {
+        modules: {
+          toolbar: toolbar_options,
+          history: {
+            delay: 1000,
+            maxStack: 75,
+            userOnly: false
+          }
+        },
+        theme: 'snow'
+      });
+
+      quill_instance_ids[input_field.attr('id')] = true;
+    }
+    */
+  };
 
   function add_link_bar_click_handlers() {
     $('.js-content-link-option').click(function (click_event) {
