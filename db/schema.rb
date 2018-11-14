@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_10_18_182216) do
-
+ActiveRecord::Schema.define(version: 2018_11_01_234459) do
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
     t.string "key"
@@ -63,8 +62,12 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.boolean "hidden"
     t.datetime "deleted_at"
     t.string "old_column_source"
+    t.index ["attribute_category_id", "deleted_at"], name: "index_attribute_fields_on_attribute_category_id_and_deleted_at"
+    t.index ["attribute_category_id", "label", "old_column_source", "field_type"], name: "attribute_fields_aci_label_ocs_ft"
+    t.index ["attribute_category_id", "label", "old_column_source", "user_id", "field_type"], name: "attribute_fields_aci_label_ocs_ui_ft"
     t.index ["deleted_at", "attribute_category_id"], name: "deleted_at__attribute_category_id"
     t.index ["deleted_at", "name"], name: "index_attribute_fields_on_deleted_at_and_name"
+    t.index ["deleted_at", "user_id", "attribute_category_id", "label", "hidden"], name: "attribute_fields_da_ui_aci_l_h"
     t.index ["user_id", "attribute_category_id", "field_type", "deleted_at"], name: "special_field_type_index"
     t.index ["user_id", "attribute_category_id", "label", "hidden", "deleted_at"], name: "field_lookup_by_label_index"
     t.index ["user_id", "attribute_category_id", "label", "old_column_source", "field_type", "deleted_at"], name: "temporary_migration_lookup_with_deleted_index"
@@ -86,6 +89,8 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.datetime "deleted_at"
+    t.index ["attribute_field_id", "deleted_at", "entity_id", "entity_type"], name: "attributes_afi_deleted_at_entity_id_entity_type"
+    t.index ["attribute_field_id", "deleted_at"], name: "index_attributes_on_attribute_field_id_and_deleted_at"
     t.index ["deleted_at", "attribute_field_id", "entity_type", "entity_id"], name: "deleted_at__attribute_field_id__entity_type_and_id"
     t.index ["entity_type", "entity_id"], name: "index_attributes_on_entity_type_and_entity_id"
     t.index ["user_id", "attribute_field_id"], name: "index_attributes_on_user_id_and_attribute_field_id"
@@ -122,6 +127,19 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "buildings", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Building"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_buildings_on_universe_id"
+    t.index ["user_id"], name: "index_buildings_on_user_id"
   end
 
   create_table "capital_cities_relationships", force: :cascade do |t|
@@ -274,6 +292,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "universe_id"], name: "index_characters_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_characters_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_characters_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_characters_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_characters_on_universe_id"
     t.index ["user_id"], name: "index_characters_on_user_id"
   end
@@ -282,6 +301,19 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.integer "user_id"
     t.integer "character_id"
     t.integer "child_id"
+  end
+
+  create_table "conditions", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Condition"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_conditions_on_universe_id"
+    t.index ["user_id"], name: "index_conditions_on_user_id"
   end
 
   create_table "content_change_events", force: :cascade do |t|
@@ -346,6 +378,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "id"], name: "index_countries_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_countries_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_countries_on_deleted_at_and_user_id"
+    t.index ["id", "deleted_at"], name: "index_countries_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_countries_on_universe_id"
     t.index ["user_id"], name: "index_countries_on_user_id"
   end
@@ -490,6 +523,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "universe_id"], name: "index_creatures_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_creatures_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_creatures_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_creatures_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_creatures_on_universe_id"
     t.index ["user_id"], name: "index_creatures_on_user_id"
   end
@@ -529,6 +563,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "id"], name: "index_deities_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_deities_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_deities_on_deleted_at_and_user_id"
+    t.index ["id", "deleted_at"], name: "index_deities_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_deities_on_universe_id"
     t.index ["user_id"], name: "index_deities_on_user_id"
   end
@@ -804,6 +839,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "universe_id"], name: "index_floras_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_floras_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_floras_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_floras_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_floras_on_universe_id"
     t.index ["user_id"], name: "index_floras_on_user_id"
   end
@@ -922,6 +958,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "id"], name: "index_governments_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_governments_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_governments_on_deleted_at_and_user_id"
+    t.index ["id", "deleted_at"], name: "index_governments_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_governments_on_universe_id"
     t.index ["user_id"], name: "index_governments_on_user_id"
   end
@@ -1014,6 +1051,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "universe_id"], name: "index_groups_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_groups_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_groups_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_groups_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_groups_on_universe_id"
     t.index ["user_id"], name: "index_groups_on_user_id"
   end
@@ -1074,8 +1112,22 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "universe_id"], name: "index_items_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_items_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_items_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_items_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_items_on_universe_id"
     t.index ["user_id"], name: "index_items_on_user_id"
+  end
+
+  create_table "jobs", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Job"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_jobs_on_universe_id"
+    t.index ["user_id"], name: "index_jobs_on_user_id"
   end
 
   create_table "key_itemships", force: :cascade do |t|
@@ -1148,6 +1200,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "id"], name: "index_landmarks_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_landmarks_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_landmarks_on_deleted_at_and_user_id"
+    t.index ["id", "deleted_at"], name: "index_landmarks_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_landmarks_on_universe_id"
     t.index ["user_id"], name: "index_landmarks_on_user_id"
   end
@@ -1176,6 +1229,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "universe_id"], name: "index_languages_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_languages_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_languages_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_languages_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_languages_on_universe_id"
     t.index ["user_id"], name: "index_languages_on_user_id"
   end
@@ -1285,6 +1339,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "universe_id"], name: "index_locations_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_locations_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_locations_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_locations_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_locations_on_universe_id"
     t.index ["user_id"], name: "index_locations_on_user_id"
   end
@@ -1322,6 +1377,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "universe_id"], name: "index_magics_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_magics_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_magics_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_magics_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_magics_on_universe_id"
     t.index ["user_id"], name: "index_magics_on_user_id"
   end
@@ -1542,6 +1598,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "id"], name: "index_planets_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_planets_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_planets_on_deleted_at_and_user_id"
+    t.index ["id", "deleted_at"], name: "index_planets_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_planets_on_universe_id"
     t.index ["user_id"], name: "index_planets_on_user_id"
   end
@@ -1580,6 +1637,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "universe_id"], name: "index_races_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_races_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_races_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_races_on_id_and_deleted_at"
   end
 
   create_table "raceships", force: :cascade do |t|
@@ -1649,6 +1707,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "universe_id"], name: "index_religions_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_religions_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_religions_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_religions_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_religions_on_universe_id"
     t.index ["user_id"], name: "index_religions_on_user_id"
   end
@@ -1710,6 +1769,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "universe_id"], name: "index_scenes_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_scenes_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_scenes_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_scenes_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_scenes_on_universe_id"
     t.index ["user_id"], name: "index_scenes_on_user_id"
   end
@@ -1793,6 +1853,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "id"], name: "index_technologies_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_technologies_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_technologies_on_deleted_at_and_user_id"
+    t.index ["id", "deleted_at"], name: "index_technologies_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_technologies_on_universe_id"
     t.index ["user_id"], name: "index_technologies_on_user_id"
   end
@@ -2066,12 +2127,12 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.integer "posts_count", default: 0
     t.integer "topics_count", default: 0
     t.datetime "last_seen_at"
-    t.integer "moderation_state", default: 0, null: false
+    t.integer "moderation_state", default: 1, null: false
     t.datetime "moderation_state_changed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["latest_activity_at"], name: "index_thredded_user_details_on_latest_activity_at"
-    t.index ["moderation_state", "moderation_state_changed_at"], name: "index_thredded_user_details_for_moderations", order: { moderation_state_changed_at: :desc }
+    t.index ["moderation_state", "moderation_state_changed_at"], name: "index_thredded_user_details_for_moderations"
     t.index ["user_id"], name: "index_thredded_user_details_on_user_id", unique: true
   end
 
@@ -2220,8 +2281,22 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "id"], name: "index_towns_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_towns_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_towns_on_deleted_at_and_user_id"
+    t.index ["id", "deleted_at"], name: "index_towns_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_towns_on_universe_id"
     t.index ["user_id"], name: "index_towns_on_user_id"
+  end
+
+  create_table "traditions", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Tradition"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_traditions_on_universe_id"
+    t.index ["user_id"], name: "index_traditions_on_user_id"
   end
 
   create_table "universes", force: :cascade do |t|
@@ -2243,6 +2318,7 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "id"], name: "index_universes_on_deleted_at_and_id"
     t.index ["deleted_at", "user_id"], name: "index_universes_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_universes_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_universes_on_id_and_deleted_at"
     t.index ["user_id"], name: "index_universes_on_user_id"
   end
 
@@ -2284,8 +2360,22 @@ ActiveRecord::Schema.define(version: 2018_10_18_182216) do
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["id", "deleted_at"], name: "index_users_on_id_and_deleted_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
+  end
+
+  create_table "vehicles", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Vehicle"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_vehicles_on_universe_id"
+    t.index ["user_id"], name: "index_vehicles_on_user_id"
   end
 
   create_table "votables", force: :cascade do |t|

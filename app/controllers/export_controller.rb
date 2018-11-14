@@ -122,11 +122,11 @@ class ExportController < ApplicationController
 
     text = ""
     content_types.each do |content_type|
-      ar_class = current_user.send(content_type).build.class
+      ar_class = content_type.constantize
       attribute_categories = ar_class.attribute_categories(current_user)
 
       text << "\n#{content_type.upcase}\n"
-      current_user.send(content_type).each do |content|
+      current_user.send(content_type.downcase.pluralize).each do |content|
         text << "  #{content.name}\n"
 
         attribute_categories.flat_map(&:attribute_fields).each do |attr|

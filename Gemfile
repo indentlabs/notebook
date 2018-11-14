@@ -73,6 +73,9 @@ gem 'delayed_job_active_record'
 # Exports
 gem 'csv'
 
+# Admin
+gem 'rails_admin', '~> 1.3'
+
 # Tech debt & hacks
 gem 'binding_of_caller' # see has_changelog.rb
 

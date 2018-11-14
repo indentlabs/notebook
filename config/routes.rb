@@ -25,6 +25,11 @@ Rails.application.routes.draw do
     get :technologies, on: :member
     get :deities, on: :member
     get :governments, on: :member
+    get :vehicles, on: :member
+    get :buildings, on: :member
+    get :traditions, on: :member
+    get :conditions, on: :member
+    get :jobs, on: :member
     #<users_page_types>
   end
 
@@ -121,6 +126,11 @@ Rails.application.routes.draw do
     get :technologies, on: :member
     get :deities, on: :member
     get :governments, on: :member
+    get :vehicles, on: :member
+    get :buildings, on: :member
+    get :traditions, on: :member
+    get :conditions, on: :member
+    get :jobs, on: :member
     #<universes_page_types>
     end
     resources :characters do
@@ -147,6 +157,11 @@ Rails.application.routes.draw do
     resources :technologies
     resources :deities
     resources :governments
+    resources :vehicles
+    resources :buildings
+    resources :traditions
+    resources :conditions
+    resources :jobs
     #<page_type_resources>
 
     # Content attributes
@@ -165,12 +180,14 @@ Rails.application.routes.draw do
   get 'search/', to: 'search#results'
 
   scope 'admin' do
-    get '/', to: 'admin#dashboard', as: :admin_dashboard
+    get '/stats', to: 'admin#dashboard', as: :admin_dashboard
     get '/content_type/:type', to: 'admin#content_type', as: :admin_content_type
-
     get '/attributes', to: 'admin#attributes', as: :admin_attributes
     get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
+    get '/unsubscribe', to: 'admin#unsubscribe', as: :mass_unsubscribe
+    post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
   end
+  mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
 
   scope 'export' do
     get '/', to: 'export#index', as: :notebook_export

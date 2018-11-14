@@ -38,6 +38,7 @@ class MainController < ApplicationController
 
   def recent_content
     # todo optimize this / use Attributes
+    return [] if @activated_content_types.nil?
 
     @recent_edits = @activated_content_types.flat_map { |klass|
       klass.constantize
