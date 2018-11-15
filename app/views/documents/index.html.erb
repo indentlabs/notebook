@@ -26,9 +26,11 @@
               <%= document.title.presence || 'Untitled document' %>
             </span>
             <p class="grey-text">
-              <%= pluralize 1 + ((document.body || "").split(/\s+/).count / 200).to_i, 'minute' %> read
+              ~<%= pluralize 1 + ((document.body || "").split(/\s+/).count / 200).to_i, 'minute' %> read
               <br />
-              updated <%= time_ago_in_words document.updated_at %> ago
+              <%= document.created_at == document.updated_at ? 'created' : 'updated' %>
+              <%= time_ago_in_words document.updated_at %>
+              ago
             </p>
           </div>
           <div class="card-action">
@@ -52,7 +54,7 @@
               <i class="material-icons right">close</i>
             </span>
             <p>
-              <%= sanitize truncate(document.body, escape: false, length: 420) %>
+              <%= sanitize truncate(document.body || '<em>This document is blank.</em>', escape: false, length: 420) %>
             </p>
           </div>
         </div>
