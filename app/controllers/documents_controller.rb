@@ -6,13 +6,15 @@ class DocumentsController < ApplicationController
   end
 
   def show
-    document = Document.find_by(id: params[:id])
+    document = Document.find_by(id: params[:id], user_id: current_user.id)
     redirect_to edit_document_path(document)
   end
 
   def edit
     @document = Document.find_by(id: params[:id], user_id: current_user.id)
     @document ||= current_user.documents.create
+
+    redirect_to root_path unless @document.updatable_by?(current_user)
   end
 
   def create
@@ -28,7 +30,7 @@ class DocumentsController < ApplicationController
       return
     end
 
-    if document.update(document_params)
+    if document.updatable_by?(current_user) && document.update(document_params)
       head 200, content_type: "text/html"
     else
       head 501, content_type: "text/html"
