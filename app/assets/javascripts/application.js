@@ -12,6 +12,5 @@
 //
 //= require autocomplete-rails
 //= require cocoon
-//= require quill.min
-//= require quill.global
+//= require medium-editor
 //= require_tree .

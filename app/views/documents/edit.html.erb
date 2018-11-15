@@ -9,17 +9,86 @@
     <%= f.text_field :title, placeholder: 'Untitled document', value: f.object.title.presence || 'Untitled document', style: 'font-size: 150%' %>
   </div>
 
-  <div id="editor"><%= @document.body.try(:html_safe) %></div><br />
+  <div id="editor" class="editable"><%= @document.body.try(:html_safe) %></div>
+
   <div class="grey-text autosave-bar">
     <i class="material-icons js-autosave-icon grey-text">save</i>
     <span class="js-autosave-status">
-      This document will automatically save as you make changes.
+      This document will automatically save as you make changes. It will also expand as you write!
     </span>
   </div>
 <% end %>
 
 <div style="clear: both"></div>
 <%= content_for :javascript do %>
+
+  var editor = new MediumEditor('#editor', {
+    targetBlank: true,
+    autoLink: true,
+    toolbar: {
+      buttons: [
+          'bold',
+          'italic',
+          'underline',
+          'strikethrough',
+          {
+              name: 'h1',
+              action: 'append-h2',
+              aria: 'header type 1',
+              tagNames: ['h2'],
+              contentDefault: '<b>H1</b>',
+              classList: ['custom-class-h1'],
+              attrs: {
+                  'data-custom-attr': 'attr-value-h1'
+              }
+          },
+          {
+              name: 'h2',
+              action: 'append-h3',
+              aria: 'header type 2',
+              tagNames: ['h3'],
+              contentDefault: '<b>H2</b>',
+              classList: ['custom-class-h2'],
+              attrs: {
+                  'data-custom-attr': 'attr-value-h2'
+              }
+          },
+          {
+              name: 'h3',
+              action: 'append-h4',
+              aria: 'header type 3',
+              tagNames: ['h4'],
+              contentDefault: '<b>H3</b>',
+              classList: ['custom-class-h3'],
+              attrs: {
+                  'data-custom-attr': 'attr-value-h3'
+              }
+          },
+          'justifyLeft',
+          'justifyCenter',
+          'justifyRight',
+          'justifyFull',
+          'orderedlist',
+          // 'indent',
+          // 'outdent',
+          'quote',
+          'anchor',
+          'removeFormat'
+
+          // https://github.com/yabwe/medium-editor#button-options
+      ]
+    },
+    anchorPreview: {
+        hideDelay: 0
+    },
+    placeholder: {
+        text: 'Write as little or as much as you want!'
+    },
+    paste: {
+      forcePlainText: false
+    }
+  });
+
   function autosave() {
     if (autosave_event === null) {
       console.log('Queueing autosave');
@@ -40,7 +109,7 @@
           data: {
             document: {
               title: $('#document_title').val(),
-              body:  $('#editor').find('.ql-editor').html()
+              body:  $('#editor').html()
             }
           },
         });
@@ -63,32 +132,10 @@
     }
   }
 
-  var toolbar_options = [
-    //[{ 'header': [1, 2, 3, false] }],
-    //[{ 'color': [] }, { 'background': [] }],
-    ['bold', 'italic', 'underline', 'strike', { 'script': 'sub'}, { 'script': 'super' }],
-    ['blockquote', 'code-block'],
-    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-    [{ 'indent': '-1'}, { 'indent': '+1' }],
-    ['clean']
-  ];
-
-  var quill = new Quill('#editor', {
-    modules: {
-      toolbar: toolbar_options,
-      history: {
-        delay: 1000,
-        maxStack: 75,
-        userOnly: false
-      }
-    },
-    theme: 'snow'
-  });
-
   // Autosave
   var autosave_event = null;
   var last_autosave = null;
-  quill.on('text-change', autosave);
+  editor.subscribe('editableInput', autosave);
   $('#document_title').on('change', autosave);
   $('#document_title').on('keydown', autosave);
   $('.js-autosave-status').on('click', autosave);
@@ -99,17 +146,19 @@
 
     if (keyCode == 9) {
       e.preventDefault();
+      /*
       var start = this.selectionStart;
       var end = this.selectionEnd;
 
       // set textarea value to: text before caret + tab + text after caret
-      $(this).val($(this).val().substring(0, start)
-                  + "\t"
-                  + $(this).val().substring(end));
+      $(this).html($(this).html().substring(0, start)
+                  + "space here"
+                  + $(this).html().substring(end));
 
       // put caret at right position again
       this.selectionStart =
       this.selectionEnd = start + 1;
+      */
     }
   });
 
