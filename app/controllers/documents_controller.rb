@@ -14,6 +14,9 @@ class DocumentsController < ApplicationController
     @document = Document.find_by(id: params[:id], user_id: current_user.id)
     @document ||= current_user.documents.create
 
+    # This eases documents from the old editor into the new one, replacing \n with <br>s
+    @document.update(body: @document.body.gsub("\n", "<br />")) if @document.body.include?("\n")
+
     redirect_to root_path unless @document.updatable_by?(current_user)
   end
 
