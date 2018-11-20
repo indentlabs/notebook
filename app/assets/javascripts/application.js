@@ -12,4 +12,5 @@
 //
 //= require autocomplete-rails
 //= require cocoon
+//= require medium-editor
 //= require_tree .

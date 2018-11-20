@@ -218,7 +218,7 @@ class ContentController < ApplicationController
 
   def destroy
     content_type = content_type_from_controller(self.class)
-    @content = content_type.find(params[:id])
+    @content = content_type.find_by(id: params[:id])
 
     unless current_user.can_delete? @content
       return redirect_to :back, notice: "You don't have permission to do that!"
@@ -239,6 +239,7 @@ class ContentController < ApplicationController
     @activated_content_types.each do |content_type|
       @content_pages[content_type] = content_type.constantize.with_deleted.where('deleted_at > ?', 24.hours.ago).where(user_id: current_user.id)
     end
+    @content_pages["Document"] = current_user.documents.with_deleted.where('deleted_at > ?', 24.hours.ago)
   end
 
   def attributes

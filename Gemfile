@@ -25,6 +25,7 @@ gem 'stripe_event'
 
 # Design
 gem 'material_icons'
+gem 'font-awesome-rails'
 gem 'sass-rails'
 
 # Quality of Life
