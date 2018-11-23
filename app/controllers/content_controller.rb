@@ -38,6 +38,8 @@ class ContentController < ApplicationController
     content_type = content_type_from_controller(self.class)
     return redirect_to root_path unless valid_content_types.map(&:name).include?(content_type.name)
     @content = content_type.find(params[:id])
+    @serialized_content = ContentSerializer.new(@content)
+    # raise @serialized_content.data.inspect
 
     return redirect_to(root_path) if @content.user.nil? # deleted user's content
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
@@ -61,7 +63,7 @@ class ContentController < ApplicationController
 
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
-        format.json { render json: @content }
+        format.json { render_json(@content) }
       end
     else
       return redirect_to root_path, notice: "You don't have permission to view that content."
@@ -252,6 +254,28 @@ class ContentController < ApplicationController
   end
 
   private
+
+  def render_json(content)
+    render json: JSON.pretty_generate({
+      name: content.try(:name),
+      description: content.try(:description),
+      universe: content.universe_id.nil? ? nil : {
+        id: content.universe_id,
+        name: content.universe.try(:name)
+      },
+      categories: Hash[content.class.attribute_categories(content.user).map { |category|
+        [category.name, category.attribute_fields.map { |field|
+          Hash[field.label, {
+            id: field.name,
+            value: field.attribute_values.find_by(
+              entity_type: content.page_type,
+              entity_id:   content.id
+            ).try(:value) || ""
+          }]
+        }]
+      }]
+    })
+  end
 
   def migrate_old_style_field_values
     content ||= content_type_from_controller(self.class).find_by(id: params[:id])

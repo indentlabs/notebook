@@ -1,7 +1,6 @@
 <% set_meta_tags title: content.name, description: content.description %>
 <%# TODO: Check if <content type>/_meta exists and render it here if so %>
 
-<% categories = @content.class.attribute_categories(@content.user) %>
 <div class="row">
   <div class="col s9">
     <div class="hoverable card">
@@ -11,7 +10,7 @@
       </div>
 
       <div class="card-content">
-        <% categories.each do |category| %>
+        <% @serialized_content.categories.each do |category| %>
           <%= render partial: 'content/display/category_panel', locals: { content: content, category: category } %>
         <% end %>
       </div>
@@ -22,7 +21,7 @@
   </div>
 
   <div class="col s3">
-    <%= render partial: 'content/display/sidelinks', locals: { categories_cache: categories, content: @content } %>
+    <%= render partial: 'content/display/sidelinks', locals: { content: @serialized_content } %>
   </div>
 </div>
 
