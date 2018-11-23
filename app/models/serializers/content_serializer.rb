@@ -1,5 +1,5 @@
 class ContentSerializer
-  attr_accessor :id, :name, :user
+  attr_accessor :id, :name, :user, :universe
 
   attr_accessor :categories
   attr_accessor :fields
@@ -29,6 +29,7 @@ class ContentSerializer
     self.id               = content.id
     self.name             = content.name
     self.user             = content.user
+    self.universe         = content.universe
 
     self.raw_model        = content
 
@@ -45,18 +46,21 @@ class ContentSerializer
       },
       categories: self.categories.map { |category|
         {
-          name:  category.name,
-          label: category.label,
-          icon:  category.icon,
+          name:   category.name,
+          label:  category.label,
+          icon:   category.icon,
+          hidden: !!category.hidden,
           fields: self.fields.select { |field| field.attribute_category_id == category.id }.map { |field|
             {
-              id:    field.name,
-              label: field.label,
-              type:  field.field_type,
+              id:     field.name,
+              label:  field.label,
+              type:   field.field_type,
+              hidden: !!field.hidden,
               old_column_source: field.old_column_source,
               value: self.attribute_values.detect { |value|
                 value.entity_type == content.page_type &&
-                value.entity_id   == content.id
+                value.entity_id   == content.id &&
+                value.attribute_field_id == field.id
               }.try(:value) || ""
             }
           }

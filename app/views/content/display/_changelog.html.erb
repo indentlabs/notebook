@@ -1,3 +1,10 @@
+<%
+  attribute_change_events = content.raw_model.attribute_change_events
+  content_change_events   = content.raw_model.content_change_events
+
+  changed_fields          = AttributeField.where(id: attribute_change_events.select { |event| event.content_type == 'Attribute' }.map(&:content_id))
+%>
+
 <%# todo full-page changelog with all events %>
 <div>
   <div class="flow-text">Changelog for <%= content.name %></div>
@@ -5,7 +12,7 @@
   <ul class="collection">
     <li class="collection-item">
       <table class="highlight centered changelog">
-        <% if content.attribute_change_events.any? %>
+        <% if attribute_change_events.any? %>
           <thead>
             <tr>
               <th>Who</th>
@@ -18,11 +25,11 @@
         <% end %>
 
         <tbody>
-          <% content.attribute_change_events.reverse.each do |change_event| %>
+          <% attribute_change_events.reverse.each do |change_event| %>
             <% next if change_event.user.nil? %>
             <% change_event.changed_fields.each do |field_key, change| %>
-              <%# todo this probably needs dope optimization %>
-              <% key = change_event.content.attribute_field.label %>
+              <% related_field = changed_fields.detect { |field| field.id == change_event.content_id } %>
+              <% key = related_field.label %>
               <% next if change.first.blank? && change.second.blank? %>
               <% next if %w(id created_at updated_at user user_id).include?(field_key) %>
 
@@ -33,7 +40,7 @@
                 visible_change = true
                 if key.start_with?('Private') # todo actual privacy flag on attributes
                   visible_change = user_signed_in? && (
-                    (content.is_a?(Universe) && content.user == current_user) ||
+                    (content.raw_model.is_a?(Universe) && content.user == current_user) ||
                     (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
                     (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
                   )
@@ -66,7 +73,7 @@
         </tbody>
       </table>
     </li>
-    <% content.content_change_events.reverse.each do |change_event| %>
+    <% content_change_events.reverse.each do |change_event| %>
       <% next if change_event.user.nil? %>
       <% next unless change_event.changed_fields.any? %>
       <li class="collection-item">
@@ -124,8 +131,8 @@
       </li>
     <% end %>
     <li class="collection-item">
-      <%= content.class.name %> <%= content.name %> was created by <%= link_to content.user.name, content.user %>
-      <span class='grey-text'><%= time_ago_in_words content.created_at %> ago</span>.
+      <%= content.class_name %> <%= content.name %> was created by <%= link_to content.user.name, content.user %>
+      <span class='grey-text'><%= time_ago_in_words content.raw_model.created_at %> ago</span>.
     </li>
   </ul>
 </div>

@@ -9,8 +9,14 @@
       </div>
 
       <div class="card-content">
-        <% @serialized_content.categories.each do |category| %>
-          <%= render partial: 'content/display/category_panel', locals: { content: content, category: category } %>
+        <% @serialized_content.data[:categories].each do |serialized_category| %>
+          <%=
+            render partial: 'content/display/category_panel',
+              locals: {
+                content: @serialized_content,
+                category: serialized_category
+              }
+          %>
         <% end %>
       </div>
 
