@@ -39,7 +39,6 @@ class ContentController < ApplicationController
     return redirect_to root_path unless valid_content_types.map(&:name).include?(content_type.name)
     @content = content_type.find(params[:id])
     @serialized_content = ContentSerializer.new(@content)
-    # raise @serialized_content.data.inspect
 
     return redirect_to(root_path) if @content.user.nil? # deleted user's content
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
@@ -63,7 +62,7 @@ class ContentController < ApplicationController
 
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
-        format.json { render_json(@content) }
+        format.json { render json: @serialized_content.data }
       end
     else
       return redirect_to root_path, notice: "You don't have permission to view that content."
