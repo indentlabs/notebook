@@ -2,7 +2,8 @@
   attribute_change_events = content.raw_model.attribute_change_events
   content_change_events   = content.raw_model.content_change_events
 
-  changed_fields          = AttributeField.where(id: attribute_change_events.select { |event| event.content_type == 'Attribute' }.map(&:content_id))
+  changed_attributes      = Attribute.where(id: attribute_change_events.select { |event| event.content_type == 'Attribute' }.map(&:content_id))
+  changed_fields          = AttributeField.where(id: changed_attributes.pluck(:attribute_field_id))
 %>
 
 <%# todo full-page changelog with all events %>
@@ -28,7 +29,8 @@
           <% attribute_change_events.reverse.each do |change_event| %>
             <% next if change_event.user.nil? %>
             <% change_event.changed_fields.each do |field_key, change| %>
-              <% related_field = changed_fields.detect { |field| field.id == change_event.content_id } %>
+              <% related_attribute = changed_attributes.detect { |attribute| attribute.id == change_event.content_id } %>
+              <% related_field = changed_fields.detect { |field| field.id == related_attribute.attribute_field_id } %>
               <% key = related_field.label %>
               <% next if change.first.blank? && change.second.blank? %>
               <% next if %w(id created_at updated_at user user_id).include?(field_key) %>
