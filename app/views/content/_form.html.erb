@@ -1,8 +1,8 @@
 <div style="padding: 35px 20px;">
-  <%= render 'content/form/errors', content: content %>
+  <%= render 'content/form/errors', content: content.raw_model %>
 
   <%# Content panels %>
-  <% content.class.attribute_categories(@content.persisted? ? @content.user : current_user).each do |category| %>
+  <% content.data[:categories].each do |category| %>
     <%= render 'content/form/panel', category: category, f: f, content: content %>
   <% end %>
 </div>

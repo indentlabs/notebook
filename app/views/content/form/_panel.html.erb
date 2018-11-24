@@ -1,76 +1,32 @@
-<div id="<%= category.name.gsub("'", '') %>_panel" class="row panel" style="display: none">
+<div id="<%= category[:name].gsub("'", '') %>_panel" class="row panel" style="display: none">
   <%# todo: break this out into a partial %>
-  <% if category.name == 'gallery' %>
-    <div>
-      <%= render partial: 'content/form/images/edit_list', locals: { content: content } %>
-    </div>
-    <div>
-      <h5>
-        Upload more images
-        <small class="grey-text">
-          <% if current_user.upload_bandwidth_kb > 0 %>
-            You have <%= Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty %> of bandwidth remaining.
-          <% else %>
-            You have no upload bandwidth remaining. Upgrade to Premium or delete some existing images for more.
-          <% end %>
-        </small>
-      </h5>
-    </div>
-    <div>
-      <%= render partial: 'content/form/images/upload', locals: { f: f, content: content } %>
-    </div>
-    <div>
-      <%= link_to_add_association "upload another", f,
-        :image_uploads,
-        partial: 'content/form/images/upload',
-        render_options: { locals: { f: f, content: content }}
-      %>
-    </div>
+  <% if category[:name] == 'gallery' %>
+    <%= render partial: 'content/form/gallery/panel', locals: { f: f, content: content } %>
   <% end %>
 
-  <% if category.name == 'contributors' %>
+  <% if category[:name] == 'contributors' %>
+    <%# todo reorganize the files for all these panels? %>
     <%= render partial: 'content/form/contributors', locals: { f: f, content: content } %>
   <% end %>
 
-  <%
-    s_width = 12
-    m_width = 12
-    l_width = 12
-  %>
+  <% category[:fields].each do |field| %>
+    <div class="col s12 m12 l12">
 
-  <% category.attribute_fields.where(hidden: [false, nil]).includes(:attribute_values).sort do |a, b|
-      a_value = case a.field_type
-      when 'name'
-        0
-      when 'universe'
-        1
-      else # 'text_area', 'link'
-        2
-      end
-
-      b_value = case b.field_type
-      when 'name'
-        0
-      when 'universe'
-        1
-      else
-        2
-      end
-
-      a_value <=> b_value
-    end.each do |field| %>
-    <%# todo definitely not this %>
-    <div class="col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
-
-      <% if field.field_type == 'link' %>
+      <% if field[:type] == 'link' %>
         <%# Relation-setting UI %>
-        <% through_class = content.class.reflect_on_association(field.old_column_source).options[:through].to_s %>
-        <%= render 'content/form/relation_input', f: f, attribute: field.old_column_source, label: field.label, relation: through_class %>
+        <% through_class = content.class.reflect_on_association(field[:old_column_source]).options[:through].to_s %>
+        <%=
+          render 'content/form/relation_input',
+            f: f,
+            attribute: field[:old_column_source],
+            label: field[:label],
+            relation: through_class
+        %>
 
-      <% elsif field.field_type == 'universe' %>
+      <% elsif field[:type] == 'universe' %>
         <div class="content-field">
           <div class="input-field">
-            <%= f.label field.name, field.label %><br />
+            <%= f.label field[:name], field[:label] %><br />
 
             <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) || f.object.universe_id.nil? %>
               <%# todo not like this %>
@@ -78,6 +34,7 @@
                 valid_universes = []
                 show_premium_notice = false
 
+                # todo audit this
                 if content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
                   valid_universes += current_user.universes
                   valid_universes += current_user.contributable_universes
@@ -95,17 +52,17 @@
                     end
                   end
                 end
-
               %>
 
-              <% universe_attribute = Attribute.find_by(user: current_user, attribute_field: field, entity: f.object) %>
-              <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field.name %>
+              <%# TODO REMOVE THIS QUERY %>
+              <% universe_attribute = Attribute.find_by(user: current_user, attribute_field_id: field[:id], entity: f.object) %>
+              <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field[:name] %>
               <%=
                 @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
                 select_tag "#{content.class.name.downcase}[custom_attribute_values][][value]",
                   options_for_select(
                     @universe_dropdown_options.compact,
-                    content.universe_field_value.try(:id)
+                    content.universe.try(:id)
                   ),
                   include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
               %>
@@ -122,7 +79,7 @@
           </div>
         </div>
 
-      <% elsif field.label.start_with?('Private') %>
+      <% elsif field[:label].start_with?('Private') %>
         <%#
           This field is shown if and only if:
           * A user is signed in AND
@@ -138,9 +95,10 @@
         %>
           <div class="content-field">
             <div class="input-field">
-              <%= f.label field.name, field.label %>
-              <% attribute = Attribute.find_by(user: current_user, attribute_field: field, entity: f.object) %>
-              <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field.name %>
+              <%= f.label field[:name], field[:label] %>
+              <%# TODO HOLY CRAP REMOVE THIS QUERY %>
+              <% attribute = Attribute.find_by(user: current_user, attribute_field_id: field[:id], entity: f.object) %>
+              <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field[:name] %>
               <%= text_area_tag "#{content.class.name.downcase}[custom_attribute_values][][value]", attribute.present? ? attribute.value :  "",
                     class: "materialize-textarea",
                     placeholder: 'Write as little or as much as you want!' %>
@@ -152,8 +110,8 @@
         <% end %>
 
       <% else %>
-        <% if AutocompleteService.autocompleteable?(field.label) %>
-          <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: AutocompleteService.for_field_label(field.label) %>
+        <% if AutocompleteService.autocompleteable?(field[:label]) %>
+          <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: AutocompleteService.for_field_label(field[:label]) %>
         <% else %>
           <%= render 'content/form/rich_text_input', f: f, content: content, field: field %>
         <% end %>

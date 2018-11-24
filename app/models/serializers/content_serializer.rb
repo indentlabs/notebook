@@ -69,4 +69,28 @@ class ContentSerializer
     }
   end
 
+  def sort_fields
+    # .sort do |a, b|
+    #     a_value = case a.field_type
+    #     when 'name'
+    #       0
+    #     when 'universe'
+    #       1
+    #     else # 'text_area', 'link'
+    #       2
+    #     end
+    #
+    #     b_value = case b.field_type
+    #     when 'name'
+    #       0
+    #     when 'universe'
+    #       1
+    #     else
+    #       2
+    #     end
+    #
+    #     a_value <=> b_value
+    #   end
+  end
+
 end
