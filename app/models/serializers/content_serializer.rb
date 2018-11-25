@@ -23,7 +23,7 @@ class ContentSerializer
   def initialize(content)
     # One query per table; lets not muck with joins yet
     self.attribute_values = Attribute.where(entity_type: content.page_type, entity_id: content.id)
-    self.fields           = AttributeField.where(id: self.attribute_values.pluck(:attribute_field_id))
+    self.fields           = AttributeField.where(id: self.attribute_values.pluck(:attribute_field_id).uniq)
     self.categories       = content.class.attribute_categories(content.user)
 
     self.id               = content.id
