@@ -54,8 +54,6 @@
                 end
               %>
 
-              <%# TODO REMOVE THIS QUERY %>
-              <% universe_attribute = Attribute.find_by(user: current_user, attribute_field_id: field[:id], entity: f.object) %>
               <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field[:name] %>
               <%=
                 @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
@@ -96,10 +94,8 @@
           <div class="content-field">
             <div class="input-field">
               <%= f.label field[:name], field[:label] %>
-              <%# TODO HOLY CRAP REMOVE THIS QUERY %>
-              <% attribute = Attribute.find_by(user: current_user, attribute_field_id: field[:id], entity: f.object) %>
               <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field[:name] %>
-              <%= text_area_tag "#{content.class.name.downcase}[custom_attribute_values][][value]", attribute.present? ? attribute.value :  "",
+              <%= text_area_tag "#{content.class.name.downcase}[custom_attribute_values][][value]", field[:value],
                     class: "materialize-textarea",
                     placeholder: 'Write as little or as much as you want!' %>
               <div class="help-text">
