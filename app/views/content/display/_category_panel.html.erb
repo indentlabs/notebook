@@ -24,7 +24,7 @@
 
         when 'link'
           if serialized_field[:old_column_source].present? && content.raw_model.respond_to?(serialized_field[:old_column_source].to_sym)
-            content.send(serialized_field[:old_column_source].to_sym)
+            content.raw_model.send(serialized_field[:old_column_source].to_sym)
           else
             nil
           end
@@ -46,7 +46,7 @@
         </div>
 
       <% elsif serialized_field[:type] == 'link' %>
-        <% klass = content.raw_model.send(attribute[:old_column_source]).klass %>
+        <% klass = content.raw_model.send(serialized_field[:old_column_source]).klass %>
         <div class="col s9 m9 l9 flow-text">
           <% value.each do |li| %>
             <div class="chip">
