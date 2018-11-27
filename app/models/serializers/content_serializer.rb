@@ -29,7 +29,7 @@ class ContentSerializer
     self.id               = content.id
     self.name             = content.name
     self.user             = content.user
-    self.universe         = content.universe
+    self.universe         = content.is_a?(Universe) ? self : content.universe
 
     self.raw_model        = content
 
@@ -40,9 +40,9 @@ class ContentSerializer
     self.data = {
       name: content.try(:name),
       description: content.try(:description),
-      universe: content.universe_id.nil? ? nil : {
-        id: content.universe_id,
-        name: content.universe.try(:name)
+      universe: self.universe.nil? ? nil : {
+        id: self.universe.id,
+        name: self.universe.try(:name)
       },
       categories: self.categories.map { |category|
         {
