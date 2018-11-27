@@ -70,7 +70,10 @@ class ContentController < ApplicationController
   end
 
   def new
-    @content = content_type_from_controller(self.class).new
+    @content = content_type_from_controller(self.class).new(user: current_user)
+    @serialized_categories_and_fields = CategoriesAndFieldsSerializer.new(
+      @content.class.attribute_categories(current_user)
+    )
 
     # todo this is a good spot to audit to disable and see if create permissions are ok also
     unless (current_user || User.new).can_create?(content_type_from_controller self.class)

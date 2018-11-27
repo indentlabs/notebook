@@ -1,5 +1,9 @@
 <%# Usage: render partial: 'content/form/contributors', locals: { content: content } %>
 
+<%
+  raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
+%>
+
 <p>
   Universes can have an unlimited number of collaborators.
 </p>
@@ -24,7 +28,7 @@
   </ul>
 </p>
 
-<% if content.raw_model.contributors.any? %>
+<% if raw_model.contributors.any? %>
   <p>
     The following users are enabled as contributors to this universe.
     <% if user_signed_in? && content.user == current_user %>

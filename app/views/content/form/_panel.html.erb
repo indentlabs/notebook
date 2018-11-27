@@ -1,3 +1,9 @@
+
+<%
+  raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
+%>
+
+
 <div id="<%= category[:name].gsub("'", '') %>_panel" class="row panel" style="display: none">
   <% if category[:name] == 'gallery' %>
     <%= render partial: 'content/form/gallery/panel', locals: { f: f, content: content } %>
@@ -13,7 +19,7 @@
 
       <% if field[:type] == 'link' %>
         <%# Relation-setting UI %>
-        <% through_class = content.raw_model.class.reflect_on_association(field[:old_column_source]).options[:through].to_s %>
+        <% through_class = raw_model.class.reflect_on_association(field[:old_column_source]).options[:through].to_s %>
         <%=
           render 'content/form/relation_input',
             f: f,
@@ -25,7 +31,7 @@
       <% elsif field[:type] == 'universe' %>
         <div class="content-field">
           <div class="input-field">
-            <%= f.label field[:name], field[:label] %><br />
+            <%= f.label field[:id], field[:label] %><br />
 
             <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) || f.object.universe_id.nil? %>
               <%# todo not like this %>
@@ -53,7 +59,7 @@
                 end
               %>
 
-              <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field[:name] %>
+              <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field[:id] %>
               <%=
                 @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
                 select_tag "#{content.class.name.downcase}[custom_attribute_values][][value]",
@@ -92,11 +98,7 @@
         %>
           <div class="content-field">
             <div class="input-field">
-              <%= f.label field[:name], field[:label] %>
-              <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field[:name] %>
-              <%= text_area_tag "#{content.class.name.downcase}[custom_attribute_values][][value]", field[:value],
-                    class: "materialize-textarea",
-                    placeholder: 'Write as little or as much as you want!' %>
+            <%= render 'content/form/rich_text_input', f: f, content: content, field: field %>
               <div class="help-text">
                 Private notes are <em>always</em> visible to only you, even if content is made public and shared.
               </div>
