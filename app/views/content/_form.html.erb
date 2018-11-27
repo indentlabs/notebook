@@ -1,8 +1,16 @@
 <div style="padding: 35px 20px;">
-  <%= render 'content/form/errors', content: content.raw_model %>
+  <%= render 'content/form/errors', content: @content %>
 
   <%# Content panels %>
-  <% content.data[:categories].each do |category| %>
+  <%
+    categories = if content.is_a?(ContentSerializer)
+      content.data[:categories]
+    else
+      
+    end
+  %>
+
+  <% categories.each do |category| %>
     <%= render 'content/form/panel', category: category, f: f, content: content %>
   <% end %>
 </div>
