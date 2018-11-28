@@ -6,12 +6,18 @@
           <%= render partial: 'content/display/image_card_header' %>
           <%= render partial: 'content/display/floating_action_buttons', locals: { editing: true } %>
         </div>
-        <%= render partial: 'content/form', locals: { f: form, content: @content } %>
+        <%= render partial: 'content/form', locals: { f: form, content: @serialized_content } %>
       </div>
     </div>
 
     <div class="col s12 m3">
-      <%= render partial: 'content/display/sidelinks', locals: { editing: true, content: @content } %>
+      <%=
+        render partial: 'content/display/sidelinks',
+          locals: {
+            editing: true,
+            content: @serialized_content
+          }
+      %>
     </div>
   <% end %>
 </div>
@@ -28,4 +34,3 @@
 <% if @content.persisted? %>
   <%= render partial: 'content/share', locals: { shared_content: @content} %>
 <% end %>
-<%= render partial: 'attribute_fields/modal', locals: { content: @content, safe_mode: true } %>

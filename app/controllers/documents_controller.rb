@@ -15,6 +15,7 @@ class DocumentsController < ApplicationController
     @document ||= current_user.documents.create
 
     # This eases documents from the old editor into the new one, replacing \n with <br>s
+    # Todo this line can be removed after running a migration that updates all existing documents, since you can no longer create a document with raw newlines
     @document.update(body: @document.body.gsub("\n", "<br />")) if @document.body.present? && @document.body.include?("\n")
 
     redirect_to root_path unless @document.updatable_by?(current_user)

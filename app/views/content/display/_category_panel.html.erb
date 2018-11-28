@@ -1,69 +1,52 @@
-<div id="<%= category.name.gsub("'", '') %>_panel" class="row panel">
-  <%= render partial: 'content/form/images/gallery',  locals: { content: content } if category.name == 'gallery' %>
-  <%= render partial: 'content/display/changelog',    locals: { content: content } if category.name == 'changelog' %>
-  <%= render partial: 'content/display/contributors', locals: { content: content } if category.name == 'contributors' %>
+<div id="<%= category[:name].gsub("'", '') %>_panel" class="row panel">
+  <%= render partial: 'content/form/images/gallery',  locals: { content: content } if category[:name] == 'gallery' %>
+  <%= render partial: 'content/display/changelog',    locals: { content: content } if category[:name] == 'changelog' %>
+  <%= render partial: 'content/display/contributors', locals: { content: content } if category[:name] == 'contributors' %>
 
-  <% category.attribute_fields.where(hidden: [false, nil]).eager_load(:attribute_values).sort do |a, b|
-      a_value = case a.field_type
-        when 'name'     then 0
-        when 'universe' then 1
-        else                 2
-      end
-
-      b_value = case b.field_type
-        when 'name'     then 0
-        when 'universe' then 1
-        else                 2
-      end
-
-      a_value <=> b_value
-    end.each do |attribute| %>
-    <% if attribute.label.start_with?("Private") %>
+  <% category[:fields].select { |field| !field[:hidden] }.each do |serialized_field| %>
+    <% if serialized_field[:label].start_with?("Private") %>
       <% next unless user_signed_in? && (
-         (content.is_a?(Universe) && content.user == current_user) ||
-         (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
-         (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
+         (content.raw_model.is_a?(Universe) && content.user == current_user) ||
+         (content.raw_model.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
+         (content.raw_model.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
        )
       %>
     <% end %>
 
     <%
-      value = case attribute.field_type
+      value = case serialized_field[:type]
         when 'universe'
-          Universe.find_by(id: content.universe_field_value)
+          Universe.find_by(id: serialized_field[:value].to_i)
 
-       # todo update all textearea/textarea --> text_area in prod data
+       # TODO: update all textearea/textarea --> text_area in prod data
         when 'name', 'text_area', 'textearea', 'textarea'
-          attribute.attribute_values.find_by(
-            entity_id:   content.id,
-            entity_type: content.class.name
-          ).try(:value).presence || ''
+          serialized_field[:value]
 
         when 'link'
-          if attribute.old_column_source.present? && content.respond_to?(attribute.old_column_source.to_sym)
-            content.send(attribute.old_column_source.to_sym)
+          if serialized_field[:old_column_source].present? && content.raw_model.respond_to?(serialized_field[:old_column_source].to_sym)
+            content.raw_model.send(serialized_field[:old_column_source].to_sym)
           else
-            ""
+            nil
           end
 
         else
-          raise "unknown field type = " + attribute.field_type.inspect
+          raise "unknown field type = " + serialized_field[:type].inspect
       end
     %>
     <% next if value.blank? %>
 
     <div class="row">
       <div class="col s3 m3 l3 right-align flow-text grey-text">
-        <%= attribute.label %>
+        <%= serialized_field[:label] %>
       </div>
 
-      <% if attribute.field_type == 'universe' %>
+      <% if serialized_field[:type] == 'universe' %>
         <div class="col s9 m9 l9 flow-text">
-          <%= link_to value.name_field_value, value if value.is_a?(Universe) %>
+          <%= link_to(value.name_field_value, value) if value.is_a?(Universe) %>
         </div>
 
-      <% elsif attribute.field_type == 'link' %>
-        <% klass = content.send(attribute.old_column_source).klass %>
+      <% elsif serialized_field[:type] == 'link' %>
+        <% klass = content.raw_model.send(serialized_field[:old_column_source]).klass %>
         <div class="col s9 m9 l9 flow-text">
           <% value.each do |li| %>
             <div class="chip">
@@ -79,7 +62,7 @@
           <% end %>
         </div>
 
-      <% else # field_type == text %>
+      <% else # serialized_field[:type] == text %>
         <div class="col s9 m9 l9 markdownable">
           <%=
             simple_format ContentFormatterService.show(
