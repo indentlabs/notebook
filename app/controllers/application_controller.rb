@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
 
   before_action :cache_most_used_page_information
+  before_action :cache_forums_unread_counts
 
   # todo name all these methods
   before_action do
@@ -48,5 +49,19 @@ class ApplicationController < ActionController::Base
     )
 
     @current_user_content = current_user.content(content_types: @activated_content_types)
+  end
+
+  def cache_forums_unread_counts
+    @unread_threads = if user_signed_in?
+      Thredded::Topic.unread_followed_by(current_user).count
+    else
+      0
+    end
+
+    @unread_private_messages = if user_signed_in?
+      Thredded::PrivateTopic.unread(current_user).count
+    else
+      0
+    end
   end
 end
