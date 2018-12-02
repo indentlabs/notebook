@@ -91,7 +91,7 @@ group :production do
 end
 
 group :test, :production do
-  gem 'therubyracer', platforms: :ruby
+  gem 'mini_racer'
   gem 'pg', '~> 0.18'
 end
 

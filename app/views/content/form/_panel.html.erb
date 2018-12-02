@@ -58,15 +58,15 @@
                 end
               %>
 
-              <%= hidden_field_tag "#{content.class.name.downcase}[custom_attribute_values][][name]", field[:id] %>
+              <%= hidden_field_tag "#{raw_model.class.name.downcase}[custom_attribute_values][][name]", field[:id] %>
               <%=
                 @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
-                select_tag "#{content.class.name.downcase}[custom_attribute_values][][value]",
+                select_tag "#{raw_model.class.name.downcase}[custom_attribute_values][][value]",
                   options_for_select(
                     @universe_dropdown_options.compact,
                     content.universe.try(:id)
                   ),
-                  include_blank: current_user.on_premium_plan? || content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
+                  include_blank: current_user.on_premium_plan? || raw_model.is_a?(Character) || raw_model.is_a?(Location) || raw_model.is_a?(Item)
               %>
               <% if show_premium_notice %>
                 <div class="help-text">
