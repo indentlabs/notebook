@@ -60,7 +60,7 @@ gem 'barnes'
 
 # Apps
 #gem 'easy_translate'
-gem 'levenshtein-ffi'
+#gem 'levenshtein-ffi'
 
 # Forum
 gem 'thredded'
