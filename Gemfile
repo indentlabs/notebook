@@ -58,9 +58,6 @@ gem 'redcarpet' #markdown formatting
 gem 'mixpanel-ruby'
 gem 'barnes'
 
-# Sharing
-gem 'social-share-button'
-
 # Apps
 #gem 'easy_translate'
 gem 'levenshtein-ffi'
