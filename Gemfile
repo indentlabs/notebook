@@ -63,7 +63,7 @@ gem 'social-share-button'
 
 # Apps
 #gem 'easy_translate'
-gem 'levenshtein-ffi'
+#gem 'levenshtein-ffi'
 
 # Forum
 gem 'thredded'
