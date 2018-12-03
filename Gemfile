@@ -57,13 +57,11 @@ gem 'redcarpet' #markdown formatting
 # Analytics
 gem 'mixpanel-ruby'
 gem 'barnes'
-
-# Sharing
-gem 'social-share-button'
+gem 'skylight'
 
 # Apps
 #gem 'easy_translate'
-gem 'levenshtein-ffi'
+#gem 'levenshtein-ffi'
 
 # Forum
 gem 'thredded'
