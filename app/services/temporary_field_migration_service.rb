@@ -1,6 +1,7 @@
 class TemporaryFieldMigrationService < Service
   def self.migrate_fields_for_content(content_model, user)
     return unless content_model.present? && user.present?
+    return if content_model.persisted? && content_model.updated_at > 'September 1, 2018'.to_datetime
 
     # todo we might be able to do this in a single left outer join
     attribute_categories = content_model.class.attribute_categories(content_model.user)
@@ -34,24 +35,26 @@ class TemporaryFieldMigrationService < Service
         next
       end
 
-      value_from_model = content_model.send(attribute_field.old_column_source)
-      if value_from_model.present? && value_from_model != existing_value.try(:value)
-        if existing_value
-          existing_value.disable_changelog_this_request = true
-          existing_value.update!(value: value_from_model)
-          existing_value.disable_changelog_this_request = false
-        else
-          new_value = attribute_field.attribute_values.new(
-            user_id:     user.id,
-            entity_type: content_model.class.name,
-            entity_id:   content_model.id,
-            value:       value_from_model,
-            privacy:     'private' # todo just make this the default for the column instead
-          )
+      if content_model.respond_to?(attribute_field.old_column_source)
+        value_from_model = content_model.send(attribute_field.old_column_source)
+        if value_from_model.present? && value_from_model != existing_value.try(:value)
+          if existing_value
+            existing_value.disable_changelog_this_request = true
+            existing_value.update!(value: value_from_model)
+            existing_value.disable_changelog_this_request = false
+          else
+            new_value = attribute_field.attribute_values.new(
+              user_id:     user.id,
+              entity_type: content_model.class.name,
+              entity_id:   content_model.id,
+              value:       value_from_model,
+              privacy:     'private' # todo just make this the default for the column instead
+            )
 
-          new_value.disable_changelog_this_request = true
-          new_value.save!
-          new_value.disable_changelog_this_request = true
+            new_value.disable_changelog_this_request = true
+            new_value.save!
+            new_value.disable_changelog_this_request = true
+          end
         end
       end
     end

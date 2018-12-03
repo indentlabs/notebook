@@ -25,6 +25,11 @@ Rails.application.routes.draw do
     get :technologies, on: :member
     get :deities, on: :member
     get :governments, on: :member
+    get :vehicles, on: :member
+    get :buildings, on: :member
+    get :traditions, on: :member
+    get :conditions, on: :member
+    get :jobs, on: :member
     #<users_page_types>
   end
 
@@ -67,7 +72,9 @@ Rails.application.routes.draw do
     get '/content/recent', to: 'main#recent_content', as: :recent_content
     get '/content/deleted', to: 'content#deleted', as: :recently_deleted_content
     get '/prompts', to: 'main#prompts', as: :prompts
+
     get '/scratchpad', to: 'main#notes', as: :notes
+    resources :documents
 
     # Billing
     scope '/billing' do
@@ -83,7 +90,6 @@ Rails.application.routes.draw do
       get '/payment_method/delete', to: 'subscriptions#delete_payment_method', as: :delete_payment_method
     end
   end
-  resources :documents
   delete 'delete_my_account', to: 'users#delete_my_account'
 
   # Lab apps
@@ -126,6 +132,11 @@ Rails.application.routes.draw do
     get :technologies, on: :member
     get :deities, on: :member
     get :governments, on: :member
+    get :vehicles, on: :member
+    get :buildings, on: :member
+    get :traditions, on: :member
+    get :conditions, on: :member
+    get :jobs, on: :member
     #<universes_page_types>
     end
     resources :characters do
@@ -152,6 +163,11 @@ Rails.application.routes.draw do
     resources :technologies
     resources :deities
     resources :governments
+    resources :vehicles
+    resources :buildings
+    resources :traditions
+    resources :conditions
+    resources :jobs
     #<page_type_resources>
 
     # Content attributes

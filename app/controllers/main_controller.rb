@@ -33,6 +33,7 @@ class MainController < ApplicationController
 
   def notes
     return redirect_to(new_user_session_path) unless user_signed_in?
+    redirect_to edit_document_path(current_user.documents.first)
   end
 
   def pricing

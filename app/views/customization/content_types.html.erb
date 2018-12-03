@@ -1,83 +1,75 @@
 <div class="row">
   <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          Customize your notebook
-        </div>
-        <div class="row">
-          <div class="col s12 m9">
-            <p>
-              Below, you can turn on or off any page types in Notebook.ai. You won't lose any pages
-              you've created in any of them even if you turn them off; you can always turn them back on again
-              and your lovely pages will be there.
-            </p>
-            <br />
-            <p>
-              Simply click the switch next to any page type to turn it on or off. After you refresh any page,
-              you'll see only the page types you have turned <em>on</em> as links in your sidebar.
-            </p>
-            <br />
-            <p>
-              You can also turn on premium-only content here (and are free to view, edit, and share your
-              existing premium content, even if you don't have an active subscription!), but you won't be
-              able to create <em>additional</em> premium content without a premium subscription, even if
-              you turn it on here.
-            </p>
-            <br />
-            <p>
-              Happy worldbuilding!
-            </p>
-          </div>
-          <div class="col m3 hide-on-small-only">
-            <%= image_tag 'tristan/small' %>
+    <ul class="collapsible">
+      <li class="active">
+        <div class="collapsible-header"><i class="material-icons">settings</i> Customize your notebook pages</div>
+        <div class="collapsible-body">
+          <div class="row">
+            <div class="col s12 m9">
+              <p>
+                Below, you can turn on or off any page types in Notebook.ai. You won't lose any pages
+                you've created in any of them even if you turn them off; you can always turn them back on again
+                and your lovely pages will be there.
+              </p>
+              <p>
+                Simply click the switch next to any page type to turn it on or off. After you refresh any page,
+                you'll see only the page types you have turned <em>on</em> as links in your sidebar.
+              </p>
+              <p>
+                You can also turn on premium-only content here (and are free to view, edit, and share your
+                existing premium content, even if you don't have an active subscription!), but you won't be
+                able to create <em>additional</em> premium content without a premium subscription, even if
+                you turn it on here.
+              </p>
+              <p>
+                Happy worldbuilding!
+              </p>
+            </div>
+            <div class="col m3 hide-on-small-only">
+              <%= image_tag 'tristan/small.png' %>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col s12">
-    <div class="card panel blue lighten-4">
-      <div class="card-content">
-        <p>
-          <strong>
-            Please note: Some users are currently having difficulties turning pages on or off when using Internet Explorer
-            to view this page.
-          </strong>
-        </p>
-        <br />
-        <p>
-          If you are having difficulties while using Internet Explorer, you may wish to temporarily try another browser like
-          Google Chrome or Mozilla Firefox to turn pages on or off. Once the pages are configured to your liking,
-          everything else should work in Internet Explorer just fine.
-        </p>
-        <br />
-        <p>
-          If you do not have another browser to customize your pages with, feel free to email me at
-          andrew<span></span>@<span>indent</span>labs.<span>com</span> and I'd be happy to turn everything
-          on for you manually.
-        </p>
-      </div>
-
-    </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">help</i> Having a problem turning pages on or off?</div>
+        <div class="collapsible-body">
+          <p>
+            <strong>
+              Some users are currently having difficulties turning pages on or off when using Internet Explorer
+              to view this page.
+            </strong>
+          </p>
+          <p>
+            If you are having difficulties while using Internet Explorer, you may wish to temporarily try another browser like
+            Google Chrome or Mozilla Firefox to turn pages on or off. Once the pages are configured to your liking,
+            the rest of the site should continue work in Internet Explorer just fine.
+          </p>
+          <p>
+            If you do not have another browser to customize your pages with, feel free to email me at
+            andrew<span></span>@<span>indent</span>labs.<span>com</span> and I'd be happy to turn everything
+            on for you manually.
+          </p>
+        </div>
+      </li>
+    </ul>
   </div>
 </div>
 
 <div class="row">
   <% @all_content_types.each.with_index do |content_type, i| %>
-    <% if i % 2 == 0 %>
-      </div>
-      <div class="row">
-    <% end %>
 
     <div class="col s12 m6">
       <div class="card">
         <div class="card-image">
           <%= image_tag "card-headers/#{content_type.name.downcase.pluralize}.jpg", height: 200, width: 300 %>
+          <% if Rails.application.config.content_types[:new].include?(content_type) %>
+            <span class="card-title">
+              <span class="new badge yellow black-text left" style="position: relative; top: -130px; left: -10px;"></span>
+            </span>
+          <% end %>
           <span class="card-title" style="width: 100%">
+
             <% if content_type.name == 'Universe' %>
               <div class="grey-text" style="font-size: .8rem; float: right; background: white; margin-top: 5px; padding: 5px 10px 5px 10px; border: 1px solid #429ADF">
                 Always on
@@ -101,13 +93,13 @@
                 </div>
               <% end %>
             <% end %>
-            <div>
+            <div class="bordered-text">
               <i class="material-icons <%= content_type.color %>-text" style="position: relative; top: 3px;"><%= content_type.icon %></i>
               <%= content_type.name.pluralize %>
             </div>
           </span>
         </div>
-        <div class="card-content">
+        <div class="card-content fixed-card-content">
           <div class="row">
             <div class="col s12">
               <p>
@@ -126,13 +118,13 @@
         <div class="card-action">
           <% if content_type.where(user: current_user).any? %>
               <%= link_to polymorphic_path(content_type) do %>
-                You have
+                view your
                 <%= pluralize content_type.where(user: current_user).count,
                               content_type.name.downcase %>
               <% end %>
           <% end %>
           <%= link_to attribute_customization_path(content_type.name.downcase) do %>
-            Customize page
+            Customize template
           <% end %>
         </div>
       </div>

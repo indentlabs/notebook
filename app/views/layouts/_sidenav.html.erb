@@ -37,39 +37,28 @@
         forum
       </i>
       Discussions
-      <%
-        unread_threads = Thredded::Topic
-          .followed_by(current_user)
-          .unread(current_user)
-          .count
-
-        private_messages = Thredded::PrivateTopic
-          .for_user(current_user)
-          .unread(current_user)
-          .count
-      %>
-      <% if unread_threads > 0 || private_messages > 0 %>
-        <span class="badge <%= 'blue white-text' if private_messages > 0 %>">
-          <%= unread_threads %><%= "/#{private_messages}" if private_messages > 0 %>
+      <% if @unread_threads > 0 || @unread_private_messages > 0 %>
+        <span class="badge <%= 'blue white-text' if @unread_private_messages > 0 %>">
+          <%= @unread_threads %><%= "/#{@unread_private_messages}" if @unread_private_messages > 0 %>
         </span>
       <% end %>
     <% end %>
   </li>
 
-  <li>
-    <%= link_to main_app.notes_path do %>
-      <i class="material-icons grey-text">
-        book
-      </i>
-      Scratchpad
-      <!-- <span class="badge">
-        5
-      </span> -->
-    <% end %>
-  </li>
-
   <li class="header">
     Your Notebook Pages
+  </li>
+
+  <li>
+    <%= link_to main_app.documents_path do %>
+      <i class="material-icons <%= Document.color %>-text">
+        <%= Document.icon %>
+      </i>
+      Documents
+      <span class="badge">
+        <%= current_user.documents.count %>
+      </span>
+    <% end %>
   </li>
 
   <%
@@ -106,9 +95,14 @@
 
   <!-- <li class="divider"></li> -->
   <li>
-    <%= link_to main_app.customization_content_types_path do %>
+    <%= link_to main_app.customization_content_types_path, class: 'tooltipped', data: {
+        position: 'right',
+        tooltip: "New in November: #{Rails.application.config.content_types[:new].map { |ct| ct.name.pluralize }.to_sentence}",
+        enterDelay: 50
+      } do %>
+      <span class="badge new right blue lighten-2">5</span>
       <i class="material-icons black-text">add</i>
-      Customize pages
+      Add more...
     <% end %>
   </li>
 

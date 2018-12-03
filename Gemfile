@@ -25,6 +25,7 @@ gem 'stripe_event'
 
 # Design
 gem 'material_icons'
+gem 'font-awesome-rails'
 gem 'sass-rails'
 
 # Quality of Life
@@ -90,7 +91,7 @@ group :production do
 end
 
 group :test, :production do
-  gem 'therubyracer', platforms: :ruby
+  gem 'mini_racer'
   gem 'pg', '~> 0.18'
 end
 

@@ -1,6 +1,9 @@
 class ContentController < ApplicationController
   # todo before_action :load_content to set @content
   before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy, :deleted, :attributes]
+
+  # Todo removing this will speed up page loads significantly. We need to figure out how to properly migrate all
+  # old content to the new attributes styling.
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
   before_action :populate_linkable_content_for_each_content_type, only: [:new, :edit]
@@ -38,6 +41,7 @@ class ContentController < ApplicationController
     content_type = content_type_from_controller(self.class)
     return redirect_to root_path unless valid_content_types.map(&:name).include?(content_type.name)
     @content = content_type.find(params[:id])
+    @serialized_content = ContentSerializer.new(@content)
 
     return redirect_to(root_path) if @content.user.nil? # deleted user's content
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
@@ -61,7 +65,7 @@ class ContentController < ApplicationController
 
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
-        format.json { render json: @content }
+        format.json { render json: @serialized_content.data }
       end
     else
       return redirect_to root_path, notice: "You don't have permission to view that content."
@@ -69,8 +73,10 @@ class ContentController < ApplicationController
   end
 
   def new
-    @content = content_type_from_controller(self.class)
-               .new
+    @content = content_type_from_controller(self.class).new(user: current_user)
+    @serialized_categories_and_fields = CategoriesAndFieldsSerializer.new(
+      @content.class.attribute_categories(current_user)
+    )
 
     # todo this is a good spot to audit to disable and see if create permissions are ok also
     unless (current_user || User.new).can_create?(content_type_from_controller self.class)
@@ -86,6 +92,7 @@ class ContentController < ApplicationController
   def edit
     content_type_class = content_type_from_controller(self.class)
     @content = content_type_class.find_by(id: params[:id])
+    @serialized_content = ContentSerializer.new(@content)
 
     if @content.nil?
       return redirect_to root_path,
@@ -218,7 +225,7 @@ class ContentController < ApplicationController
 
   def destroy
     content_type = content_type_from_controller(self.class)
-    @content = content_type.find(params[:id])
+    @content = content_type.find_by(id: params[:id])
 
     unless current_user.can_delete? @content
       return redirect_to :back, notice: "You don't have permission to do that!"
@@ -239,6 +246,7 @@ class ContentController < ApplicationController
     @activated_content_types.each do |content_type|
       @content_pages[content_type] = content_type.constantize.with_deleted.where('deleted_at > ?', 24.hours.ago).where(user_id: current_user.id)
     end
+    @content_pages["Document"] = current_user.documents.with_deleted.where('deleted_at > ?', 24.hours.ago)
   end
 
   def attributes
@@ -251,6 +259,28 @@ class ContentController < ApplicationController
   end
 
   private
+
+  def render_json(content)
+    render json: JSON.pretty_generate({
+      name: content.try(:name),
+      description: content.try(:description),
+      universe: content.universe_id.nil? ? nil : {
+        id: content.universe_id,
+        name: content.universe.try(:name)
+      },
+      categories: Hash[content.class.attribute_categories(content.user).map { |category|
+        [category.name, category.attribute_fields.map { |field|
+          Hash[field.label, {
+            id: field.name,
+            value: field.attribute_values.find_by(
+              entity_type: content.page_type,
+              entity_id:   content.id
+            ).try(:value) || ""
+          }]
+        }]
+      }]
+    })
+  end
 
   def migrate_old_style_field_values
     content ||= content_type_from_controller(self.class).find_by(id: params[:id])

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_10_30_051214) do
+ActiveRecord::Schema.define(version: 2018_11_01_234459) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -128,6 +128,19 @@ ActiveRecord::Schema.define(version: 2018_10_30_051214) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "buildings", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Building"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_buildings_on_universe_id"
+    t.index ["user_id"], name: "index_buildings_on_user_id"
   end
 
   create_table "capital_cities_relationships", force: :cascade do |t|
@@ -289,6 +302,19 @@ ActiveRecord::Schema.define(version: 2018_10_30_051214) do
     t.integer "user_id"
     t.integer "character_id"
     t.integer "child_id"
+  end
+
+  create_table "conditions", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Condition"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_conditions_on_universe_id"
+    t.index ["user_id"], name: "index_conditions_on_user_id"
   end
 
   create_table "content_change_events", force: :cascade do |t|
@@ -1090,6 +1116,19 @@ ActiveRecord::Schema.define(version: 2018_10_30_051214) do
     t.index ["id", "deleted_at"], name: "index_items_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_items_on_universe_id"
     t.index ["user_id"], name: "index_items_on_user_id"
+  end
+
+  create_table "jobs", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Job"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_jobs_on_universe_id"
+    t.index ["user_id"], name: "index_jobs_on_user_id"
   end
 
   create_table "key_itemships", force: :cascade do |t|
@@ -2089,12 +2128,12 @@ ActiveRecord::Schema.define(version: 2018_10_30_051214) do
     t.integer "posts_count", default: 0
     t.integer "topics_count", default: 0
     t.datetime "last_seen_at"
-    t.integer "moderation_state", default: 0, null: false
+    t.integer "moderation_state", default: 1, null: false
     t.datetime "moderation_state_changed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["latest_activity_at"], name: "index_thredded_user_details_on_latest_activity_at"
-    t.index ["moderation_state", "moderation_state_changed_at"], name: "index_thredded_user_details_for_moderations", order: { moderation_state_changed_at: :desc }
+    t.index ["moderation_state", "moderation_state_changed_at"], name: "index_thredded_user_details_for_moderations"
     t.index ["user_id"], name: "index_thredded_user_details_on_user_id", unique: true
   end
 
@@ -2129,6 +2168,8 @@ ActiveRecord::Schema.define(version: 2018_10_30_051214) do
     t.integer "user_id", null: false
     t.integer "postable_id", null: false
     t.datetime "read_at", null: false
+    t.integer "unread_posts_count", default: 0, null: false
+    t.integer "read_posts_count", default: 0, null: false
     t.index ["user_id", "postable_id"], name: "thredded_user_private_topic_read_states_user_postable", unique: true
   end
 
@@ -2144,6 +2185,11 @@ ActiveRecord::Schema.define(version: 2018_10_30_051214) do
     t.integer "user_id", null: false
     t.integer "postable_id", null: false
     t.datetime "read_at", null: false
+    t.integer "unread_posts_count", default: 0, null: false
+    t.integer "read_posts_count", default: 0, null: false
+    t.integer "messageboard_id", null: false
+    t.index ["messageboard_id"], name: "index_thredded_user_topic_read_states_on_messageboard_id"
+    t.index ["user_id", "messageboard_id"], name: "thredded_user_topic_read_states_user_messageboard"
     t.index ["user_id", "postable_id"], name: "thredded_user_topic_read_states_user_postable", unique: true
   end
 
@@ -2248,6 +2294,19 @@ ActiveRecord::Schema.define(version: 2018_10_30_051214) do
     t.index ["user_id"], name: "index_towns_on_user_id"
   end
 
+  create_table "traditions", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Tradition"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_traditions_on_universe_id"
+    t.index ["user_id"], name: "index_traditions_on_user_id"
+  end
+
   create_table "universes", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -2312,6 +2371,19 @@ ActiveRecord::Schema.define(version: 2018_10_30_051214) do
     t.index ["id", "deleted_at"], name: "index_users_on_id_and_deleted_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
+  end
+
+  create_table "vehicles", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Vehicle"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_vehicles_on_universe_id"
+    t.index ["user_id"], name: "index_vehicles_on_user_id"
   end
 
   create_table "votables", force: :cascade do |t|

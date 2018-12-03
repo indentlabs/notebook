@@ -1,8 +1,15 @@
 <div style="padding: 35px 20px;">
-  <%= render 'content/form/errors', content: content %>
+  <%= render 'content/form/errors', content: @content %>
 
   <%# Content panels %>
-  <% content.class.attribute_categories(@content.persisted? ? @content.user : current_user).each do |category| %>
+  <%
+    categories = if content.is_a?(ContentSerializer)
+      content.data[:categories]
+    else
+      @serialized_categories_and_fields.data
+    end
+  %>
+  <% categories.each do |category| %>
     <%= render 'content/form/panel', category: category, f: f, content: content %>
   <% end %>
 </div>
@@ -15,7 +22,7 @@
   <div class="content-field-link-bar">
     <div class="btn-group" role="group">
       <span class="grey-text" style="padding-top: 6px; padding-right: 4px;">
-        Link a page (<a href="#" class="tooltipped" data-tooltip="These links will insert a small snippet that<br />automatically turns into a link to that page after saving." data-position="bottom" data-html="true">?</a>):
+        Link a page (<a href="#" class="tooltipped" tabindex="-1" data-tooltip="These links will insert a small snippet that<br />automatically turns into a link to that page after saving." data-position="bottom" data-html="true">?</a>):
       </span>
       <% @linkables_cache.keys.each do |class_name| %>
         <% relation_class = class_name.constantize %>
