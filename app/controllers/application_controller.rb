@@ -60,8 +60,8 @@ class ApplicationController < ActionController::Base
 
     @unread_private_messages = if user_signed_in?
       Thredded::PrivateTopic
-        .for_user(thredded_current_user)
-        .unread(thredded_current_user)
+        .for_user(current_user)
+        .unread(current_user)
         .count
     else
       0
