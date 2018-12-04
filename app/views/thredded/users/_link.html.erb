@@ -1,10 +1,14 @@
 <% if user %>
   <% if !user.thredded_anonymous? %>
-    <a href="<%= user_path(user) %>"><%= user.thredded_display_name %></a>
-    <%= render partial: 'thredded/users/badge', locals: { user: user } %>
+    <% user_path = user_path(user) %>
+    <% if user_path.blank? %>
+      <span class='thredded--username'><%= user.thredded_display_name %></span>
+    <% else %>
+      <a href="<%= user_path %>"><%= user.thredded_display_name %></a>
+      <%= render partial: 'thredded/users/badge', locals: { user: user } %>
+    <% end %>
   <% else %>
     <%= user.thredded_display_name %>
-    <%= render partial: 'thredded/users/badge', locals: { user: user } %>
   <% end %>
 <% else %>
   <em><%= t 'thredded.null_user_name' %></em>
