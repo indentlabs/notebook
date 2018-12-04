@@ -58,11 +58,6 @@
               <th>Notebook.ai Premium</th>
             </tr>
             <tr>
-              <th>Create universes</th>
-              <td>Up to 5</td>
-              <td>Unlimited</td>
-            </tr>
-            <tr>
               <th>Available page types</th>
               <td>
                 <%= Rails.application.config.content_types[:free].count %> page types<br />
@@ -72,8 +67,9 @@
               </td>
               <td>
                 <%= Rails.application.config.content_types[:all].count %> page types<br />
-                <% Rails.application.config.content_types[:all].each do |ct| %>
-                  <i class="material-icons <%= ct.color %>-text tooltipped" data-tooltip="<%= ct.name.pluralize %>"><%= ct.icon %></i>
+                <% Rails.application.config.content_types[:all].each.with_index do |ct, i| %>
+                  <%= '<br />'.html_safe if i % 5 == 0 %>
+                  <i class="material-icons <%= ct.color %>-text tooltipped" data-tooltip="Create unlimited <%= ct.name.downcase.pluralize %>"><%= ct.icon %></i>
                 <% end %>
               </td>
             </tr>
@@ -81,6 +77,16 @@
               <th>Upload images</th>
               <td>Up to <strong>50MB</strong></td>
               <td>Up to <strong>10GB</strong></td>
+            </tr>
+            <tr>
+              <th>Create universes</th>
+              <td>Up to 5</td>
+              <td>Unlimited</td>
+            </tr>
+            <tr>
+              <th>Documents</th>
+              <td>Unlimited</td>
+              <td>Unlimited</td>
             </tr>
             <tr>
               <th>Un-delete pages</th>
@@ -153,3 +159,35 @@
   <%= link_to 'Start worldbuilding for free now', new_user_registration_path, class: 'btn blue white-text' %><br /><br />
   You can upgrade to Premium in your account settings at any time.
 </div>
+
+<ul class="collapsible" style="margin-top: 70px;">
+  <li>
+    <div class="collapsible-header"><i class="material-icons">help</i> What happens to my Premium pages after I downgrade back to Starter?</div>
+    <div class="collapsible-body"><span>
+      Notebook.ai is designed to feel like your own personal notebook &mdash; just digital. Whenever you create a page, it's yours forever and will never be restricted, no matter what.
+      You'll have full access to view, edit, share, and export any of your existing Notebook.ai pages, even if you don't have an active Premium subscription. They're your pages, not ours.
+    </span></div>
+  </li>
+  <li>
+    <div class="collapsible-header"><i class="material-icons">help</i> What happens if I downgrade before the Premium time I've paid for is used up?</div>
+    <div class="collapsible-body"><span>
+      Your Notebook.ai account will be instantly credited back all unused Premium time whenever you downgrade back to Starter. The next time you upgrade to Premium, that credit will be used
+      to prorate your next payment before charging you. For example, say you pay for a month and only use three weeks of it before downgrading back to Starter.
+      The next time you upgrade for a month, you'll only be charged for three weeks &mdash; because you had a week of credit left from your last subscription.
+    </span></div>
+  </li>
+  <li>
+    <div class="collapsible-header"><i class="material-icons">help</i> How often are subscriptions billed?</div>
+    <div class="collapsible-body"><span>
+      The monthly Premium plan is billed once per month for $9. Similarly, the three-month plan is billed $24 every three months, and the annual plan is billed $84 once per year.
+      Subscriptions will continue to renew until you downgrade back to the free Starter plan.
+    </span></div>
+  </li>
+  <li>
+    <div class="collapsible-header"><i class="material-icons">help</i> How do I downgrade back to the free Starter plan?</div>
+    <div class="collapsible-body"><span>
+      Simply click "Account Billing" in your account dropdown (in the top-right of every page) and click the "Downgrade" button next to the Starter plan.
+      You will be instantly downgraded and won't be charged again. Any unused time will be credited to your account to prorate future subscriptions.
+    </span></div>
+  </li>
+</ul>
