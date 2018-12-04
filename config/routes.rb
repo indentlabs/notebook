@@ -179,15 +179,17 @@ Rails.application.routes.draw do
   end
   get 'search/', to: 'search#results'
 
-  scope 'admin' do
-    get '/stats', to: 'admin#dashboard', as: :admin_dashboard
-    get '/content_type/:type', to: 'admin#content_type', as: :admin_content_type
-    get '/attributes', to: 'admin#attributes', as: :admin_attributes
-    get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
-    get '/unsubscribe', to: 'admin#unsubscribe', as: :mass_unsubscribe
-    post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
+  authenticate :user, lambda { |u| u.site_administrator? } do
+    scope 'admin' do
+      get '/stats', to: 'admin#dashboard', as: :admin_dashboard
+      get '/content_type/:type', to: 'admin#content_type', as: :admin_content_type
+      get '/attributes', to: 'admin#attributes', as: :admin_attributes
+      get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
+      get '/unsubscribe', to: 'admin#unsubscribe', as: :mass_unsubscribe
+      post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
+    end
+    mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
   end
-  mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
 
   scope 'export' do
     get '/', to: 'export#index', as: :notebook_export
@@ -267,6 +269,11 @@ Rails.application.routes.draw do
   # get '/forum/:wildcard/:another', to: 'emergency#temporarily_disabled'
   mount Thredded::Engine => '/forum'
   mount StripeEvent::Engine, at: '/webhooks/stripe'
+
+  require 'sidekiq/web'
+  authenticate :user, lambda { |u| u.site_administrator? } do
+    mount Sidekiq::Web => '/sidekiq'
+  end
 end
 
 # rubocop:enable LineLength

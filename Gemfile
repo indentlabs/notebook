@@ -4,7 +4,6 @@ ruby "~> 2.5"
 gem 'rails', '~> 5.2'
 gem 'puma', '~> 3.7'
 gem 'puma-heroku'
-gem 'rack-timeout'
 
 # Storage
 gem 'aws-sdk', '~> 1.5'
@@ -66,7 +65,10 @@ gem 'skylight'
 # Forum
 gem 'thredded'
 gem 'rails-ujs'
-gem 'delayed_job_active_record'
+
+# Workers
+gem 'sidekiq'
+gem 'redis'
 
 # Exports
 gem 'csv'
