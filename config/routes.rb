@@ -269,7 +269,9 @@ Rails.application.routes.draw do
   mount StripeEvent::Engine, at: '/webhooks/stripe'
 
   require 'sidekiq/web'
-  mount Sidekiq::Web => '/sidekiq'
+  authenticate :user, lambda { |u| u.site_administrator? } do
+    mount Sidekiq::Web => '/sidekiq'
+  end
 end
 
 # rubocop:enable LineLength
