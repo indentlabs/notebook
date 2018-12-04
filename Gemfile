@@ -4,7 +4,6 @@ ruby "~> 2.5"
 gem 'rails', '~> 5.2'
 gem 'puma', '~> 3.7'
 gem 'puma-heroku'
-gem 'rack-timeout'
 
 # Storage
 gem 'aws-sdk', '~> 1.5'
@@ -57,18 +56,19 @@ gem 'redcarpet' #markdown formatting
 # Analytics
 gem 'mixpanel-ruby'
 gem 'barnes'
-
-# Sharing
-gem 'social-share-button'
+gem 'skylight'
 
 # Apps
 #gem 'easy_translate'
-gem 'levenshtein-ffi'
+#gem 'levenshtein-ffi'
 
 # Forum
 gem 'thredded'
 gem 'rails-ujs'
-gem 'delayed_job_active_record'
+
+# Workers
+gem 'sidekiq'
+gem 'redis'
 
 # Exports
 gem 'csv'

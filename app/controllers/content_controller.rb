@@ -40,7 +40,8 @@ class ContentController < ApplicationController
   def show
     content_type = content_type_from_controller(self.class)
     return redirect_to root_path unless valid_content_types.map(&:name).include?(content_type.name)
-    @content = content_type.find(params[:id])
+    @content = content_type.find_by(id: params[:id])
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
     @serialized_content = ContentSerializer.new(@content)
 
     return redirect_to(root_path) if @content.user.nil? # deleted user's content
@@ -79,7 +80,7 @@ class ContentController < ApplicationController
     )
 
     # todo this is a good spot to audit to disable and see if create permissions are ok also
-    unless (current_user || User.new).can_create?(content_type_from_controller self.class)
+    unless (current_user || User.new).can_create?(content_type_from_controller(self.class))
       return redirect_back(fallback_location: root_path)
     end
 

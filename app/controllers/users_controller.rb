@@ -4,7 +4,9 @@ class UsersController < ApplicationController
   end
 
   def show
-    @user    = User.find(params[:id])
+    @user    = User.find_by(id: params[:id])
+    return redirect_to(root_path, notice: 'That user does not exist.') if @user.nil?
+
     @content = @user.public_content.select { |type, list| list.any? }
     @tabs    = @content.keys
     @stream  = @user.content_change_events.order('updated_at desc').limit(100).group_by do |cce|

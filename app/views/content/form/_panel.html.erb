@@ -39,12 +39,12 @@
                 show_premium_notice = false
 
                 # todo audit this
-                if content.is_a?(Character) || content.is_a?(Location) || content.is_a?(Item)
+                if raw_model.is_a?(Character) || raw_model.is_a?(Location) || raw_model.is_a?(Item)
                   valid_universes += current_user.universes
                   valid_universes += current_user.contributable_universes
                 else
                   # Premium content
-                  if current_user.on_premium_plan? || content.user == current_user
+                  if current_user.on_premium_plan? || (content.persisted? && content.user == current_user)
                     valid_universes += current_user.universes
                   else
                     show_premium_notice = true
@@ -90,9 +90,9 @@
             * That user is the owner of this content, if it's not in a universe
         %>
         <% if user_signed_in? && (
-             (content.is_a?(Universe) && content.user == current_user) ||
-             (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
-             (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
+             (raw_model.is_a?(Universe) && content.user == current_user) ||
+             (raw_model.respond_to?(:universe) && raw_model.universe      && raw_model.universe.user == current_user) ||
+             (raw_model.respond_to?(:universe) && raw_model.universe.nil? && content.user == current_user)
            )
         %>
           <div class="content-field">
