@@ -105,7 +105,7 @@ class ContentSerializer
   # }
   def old_style_link_fields
     # TODO I think we can remove this method
-    return []
+    return {}
 
     categories = Hash[YAML.load_file(Rails.root.join('config', 'attributes', "#{self.class_name.downcase}.yml")).map do |category_name, details|
       [
