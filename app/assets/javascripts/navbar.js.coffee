@@ -1,1 +1,0 @@
-$( -> $(".button-collapse").sidenav() )
