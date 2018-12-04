@@ -267,6 +267,9 @@ Rails.application.routes.draw do
   # get '/forum/:wildcard/:another', to: 'emergency#temporarily_disabled'
   mount Thredded::Engine => '/forum'
   mount StripeEvent::Engine, at: '/webhooks/stripe'
+
+  require 'sidekiq/web'
+  mount Sidekiq::Web => '/sidekiq'
 end
 
 # rubocop:enable LineLength
