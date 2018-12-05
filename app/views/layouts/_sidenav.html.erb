@@ -1,104 +1,200 @@
-<ul id="slide-out" class="sidenav sidenav-fixed">
-  <li class="content-search">
-    <form>
-      <div class="input-field">
-        <input id="search" type="search" required placeholder="Search your notebook">
-        <i class="material-icons">search</i>
-      </div>
-    </form>
-  </li>
-
-  <li>
-    <%= link_to root_path do %>
-      <i class="material-icons green-text">
-        adjust
-      </i>
-      Your assistant
+<ul id="sidenav-left" class="sidenav sidenav-fixed" style="transform: translateX(-105%);">
+  <li class="blue">
+    <%= link_to root_path, class: 'logo-container white-text' do %>
+      Notebook.ai
     <% end %>
   </li>
-
-  <li>
-    <%= link_to main_app.dashboard_path do %>
-      <i class="material-icons grey-text">
-        dashboard
-      </i>
-      Home
-    <% end %>
-  </li>
-
-  <li>
-    <%= link_to main_app.thredded_path do %>
-      <i class="material-icons grey-text">
-        forum
-      </i>
-      Discussions
-      <% if @unread_threads > 0 || @unread_private_messages > 0 %>
-        <span class="badge <%= 'blue white-text' if @unread_private_messages > 0 %>">
-          <%= @unread_threads %><%= "/#{@unread_private_messages}" if @unread_private_messages > 0 %>
-        </span>
-      <% end %>
-    <% end %>
-  </li>
-
-  <li class="header">
-    Your Notebook Pages
-  </li>
-
-  <li>
-    <%= link_to main_app.documents_path do %>
-      <i class="material-icons <%= Document.color %>-text">
-        <%= Document.icon %>
-      </i>
-      Documents
-      <span class="badge">
-        <%= current_user.documents.count %>
-      </span>
-    <% end %>
-  </li>
-
-  <%
-    @activated_content_types.each do |content_type|
-  %>
-    <% content_type_klass = content_type.constantize %>
-    <li>
-      <%#
-        todo define missing colors using the "Custom colors" section article
-        https://materializecss.com/waves.html#!
-      %>
-      <%= link_to main_app.polymorphic_path(content_type_klass), class: "white waves-effect waves-#{content_type_klass.color.split(' ').last}" do %>
-        <i class="material-icons <%= content_type_klass.color %>-text">
-          <%= content_type_klass.icon %>
-        </i>
-        <%= content_type.pluralize %>
-        <span class="badge">
-          <%=
-            pluralized_name = content_type.downcase.pluralize
-            if content_type_klass != Universe && @universe_scope
-              @universe_scope.send(pluralized_name).count
-            else
-              (
-                @current_user_content[content_type] || [] +
-                current_user.send("contributable_#{pluralized_name}") +
-                (content_type_klass == Universe ? [] : content_type_klass.where(universe_id: current_user.universes.pluck(:id)))
-              ).uniq.count
-            end
-          %>
-        </span>
-      <% end %>
-    </li>
-  <% end %>
-
-  <li class="divider"></li>
-  <li>
-    <%= link_to main_app.customization_content_types_path do %>
-      <i class="material-icons black-text">add</i>
-      Add more...
-    <% end %>
+  <li class="no-padding">
+    <ul class="collapsible collapsible-accordion">
+      <li class="bold waves-effect active">
+        <a class="collapsible-header" tabindex="0">
+          Navigation
+          <i class="material-icons chevron">chevron_left</i>
+        </a>
+        <div class="collapsible-body">
+          <ul>
+            <li>
+              <%= link_to main_app.dashboard_path, class: 'waves-effect' do %>
+                <i class="material-icons blue-text">
+                  dashboard
+                </i>
+                Home
+              <% end %>
+            </li>
+            <li>
+              <%= link_to main_app.thredded_path, class: 'waves-effect' do %>
+                <i class="material-icons green-text">
+                  forum
+                </i>
+                Discussions
+                <% if @unread_threads > 0 || @unread_private_messages > 0 %>
+                  <span class="badge <%= 'blue white-text' if @unread_private_messages > 0 %>">
+                    <%= @unread_threads %><%= "/#{@unread_private_messages}" if @unread_private_messages > 0 %>
+                  </span>
+                <% end %>
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li class="bold waves-effect">
+        <a class="collapsible-header" tabindex="0">
+          Worldbuilding
+          <i class="material-icons chevron">chevron_left</i>
+        </a>
+        <div class="collapsible-body" style="">
+          <ul>
+            <%
+              @activated_content_types.each do |content_type|
+            %>
+              <% content_type_klass = content_type.constantize %>
+              <li>
+                <%#
+                  todo define missing colors using the "Custom colors" section article
+                  https://materializecss.com/waves.html#!
+                %>
+                <%= link_to main_app.polymorphic_path(content_type_klass), class: "waves-effect waves-#{content_type_klass.color.split(' ').last}" do %>
+                  <i class="material-icons <%= content_type_klass.color %>-text">
+                    <%= content_type_klass.icon %>
+                  </i>
+                  <%= content_type.pluralize %>
+                  <span class="badge">
+                    <%=
+                      pluralized_name = content_type.downcase.pluralize
+                      if content_type_klass != Universe && @universe_scope
+                        @universe_scope.send(pluralized_name).count
+                      else
+                        (
+                          @current_user_content[content_type] || [] +
+                          current_user.send("contributable_#{pluralized_name}") +
+                          (content_type_klass == Universe ? [] : content_type_klass.where(universe_id: current_user.universes.pluck(:id)))
+                        ).uniq.count
+                      end
+                    %>
+                  </span>
+                <% end %>
+              </li>
+            <% end %>
+            <li>
+              <%= link_to main_app.customization_content_types_path, class: 'waves-effect' do %>
+                <i class="material-icons black-text">add</i>
+                Add more...
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li class="bold waves-effect">
+        <a class="collapsible-header" tabindex="0">
+          Writing
+          <i class="material-icons chevron">chevron_left</i>
+        </a>
+        <div class="collapsible-body" style="">
+          <ul>
+            <li>
+              <%= link_to main_app.documents_path, class: 'waves-effect' do %>
+                <i class="material-icons <%= Document.color %>-text">
+                  <%= Document.icon %>
+                </i>
+                Documents
+                <span class="badge">
+                  <%= current_user.documents.count %>
+                </span>
+              <% end %>
+            </li>
+            <li>
+              <%= link_to main_app.prompts_path, class: 'waves-effect' do %>
+                <i class="material-icons left orange-text">lightbulb_outline</i>
+                Prompts
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li class="bold waves-effect">
+        <a class="collapsible-header" tabindex="0">
+          Help
+          <i class="material-icons chevron">chevron_left</i>
+        </a>
+        <div class="collapsible-body">
+          <ul>
+            <li>
+              <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new', class: 'waves-effect' do %>
+                <i class="material-icons left">feedback</i>
+                Report a problem
+              <% end %>
+            </li>
+            <li>
+              <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new', class: 'waves-effect' do %>
+                <i class="material-icons left">feedback</i>
+                Request a feature
+              <% end %>
+            </li>
+            <li>
+              <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new', class: 'waves-effect' do %>
+                <i class="material-icons left">feedback</i>
+                Leave feedback
+              <% end %>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <%= link_to main_app.privacy_policy_path, class: 'waves-effect' do %>
+                <i class="material-icons left blue-text">verified_user</i>
+                Privacy policy
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li class="bold waves-effect">
+        <a class="collapsible-header" tabindex="0">
+          My Account
+          <i class="material-icons chevron">chevron_left</i>
+        </a>
+        <div class="collapsible-body">
+          <ul>
+            <li>
+              <%= link_to current_user, class: 'waves-effect' do %>
+                <i class="material-icons left green-text">person</i>
+                Profile
+              <% end %>
+            </li>
+            <li>
+              <%= link_to main_app.subscription_path, class: 'waves-effect' do %>
+                <i class="material-icons left blue-text">credit_card</i>
+                Billing
+                <span class="badge right"><%= current_user.on_premium_plan? ? 'Premium' : 'Starter' %></span>
+              <% end %>
+            </li>
+            <li>
+              <%= link_to main_app.notebook_export_path, class: 'waves-effect' do %>
+                <i class="material-icons left brown-text">file_download</i>
+                Data export
+              <% end %>
+            </li>
+            <li>
+              <%= link_to main_app.recently_deleted_content_path, class: 'waves-effect' do %>
+                <i class="material-icons left red-text">delete</i>
+                Recycle bin
+              <% end %>
+            </li>
+            <li>
+              <%= link_to main_app.edit_user_registration_path, class: 'waves-effect' do %>
+                <i class="material-icons left black-text">settings</i>
+                Settings
+                <span class="badge right">&nbsp;</span>
+              <% end %>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <%= link_to main_app.destroy_user_session_path, class: 'waves-effect' do %>
+                <i class="material-icons left">power_settings_new</i>
+                Sign out
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      </li>
+    </ul>
   </li>
 </ul>
-
-<script>
-$(document).ready(function(){
-  $('.sidenav').sidenav();
-});
-</script>

@@ -1,30 +1,4 @@
-<ul id="help-dropdown" class="dropdown-content">
-  <li>
-    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new' do %>
-      <i class="material-icons left">feedback</i>
-      Report a problem
-    <% end %>
-  </li>
-  <li>
-    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new' do %>
-      <i class="material-icons left">feedback</i>
-      Request a feature
-    <% end %>
-  </li>
-  <li>
-    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new' do %>
-      <i class="material-icons left">feedback</i>
-      Leave feedback
-    <% end %>
-  </li>
-  <li class="divider"></li>
-  <li>
-    <%= link_to main_app.privacy_policy_path do %>
-      <i class="material-icons left">verified_user</i>
-      Privacy policy
-    <% end %>
-  </li>
-</ul>
+
 
 <ul id="recent-content-dropdown" class="dropdown-content">
 <% if user_signed_in? %>
@@ -64,104 +38,21 @@
   </div>
 </div>
 
-<ul id="desktop-user-dropdown" class="dropdown-content">
-  <% if current_user %>
-    <li>
-      <%= link_to current_user do %>
-        <i class="material-icons left">person</i>
-        Creator profile
-        <span class="badge right">&nbsp;</span>
-      <% end %>
-    </li>
-
-    <li>
-      <%= link_to main_app.subscription_path do %>
-        <i class="material-icons left">credit_card</i>
-        Account billing
-        <span class="badge right">&nbsp;</span>
-      <% end %>
-    </li>
-    <li>
-      <%= link_to main_app.edit_user_registration_path do %>
-        <i class="material-icons left">settings</i>
-        Account settings
-        <span class="badge right">&nbsp;</span>
-      <% end %>
-    </li>
-    <li class="divider"></li>
-  <% end %>
-  <li>
-    <%= link_to main_app.prompts_path do %>
-      <i class="material-icons left">lightbulb_outline</i>
-      Worldbuilding prompts
-    <% end %>
-  </li>
-  <li>
-    <%= link_to main_app.notebook_export_path do %>
-      <i class="material-icons left">file_download</i>
-      Notebook downloads
-    <% end %>
-  </li>
-  <li>
-    <%= link_to main_app.recently_deleted_content_path do %>
-      <i class="material-icons left">delete</i>
-      Recently-deleted pages
-    <% end %>
-  </li>
-  <li class="divider"></li>
-  <li>
-    <%= link_to main_app.destroy_user_session_path do %>
-      <i class="material-icons left">power_settings_new</i>
-      Sign out
-    <% end %>
-  </li>
-</ul>
-
-<ul id="login-slide" class="sidenav">
-  <li><%= link_to 'Sign in', main_app.new_user_session_path %></li>
-  <li><%= link_to 'Sign up', main_app.new_user_registration_path %></li>
-  <li class="divider"></li>
-  <li><%= link_to 'Report a problem', 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new' %></li>
-  <li><%= link_to 'Request a feature', 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new' %></li>
-  <li><%= link_to 'Leave feedback', 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new' %></li>
-  <li class="divider"></li>
-  <li><%= link_to 'Privacy policy', main_app.privacy_policy_path %></li>
-</ul>
-
 <div class="navbar-fixed">
   <nav class="blue">
     <div class="nav-wrapper">
-      <%= link_to 'Notebook.ai', main_app.root_url, class: 'brand-logo center' %>
 
-      <ul class="right">
-        <li>
-          <%= link_to 'https://www.notebook.ai/forum/announcements/remembering-james-brown' do %>
-          <div class="hide-on-small-and-down"><i class="material-icons white-text">favorite_border</i></div>
-          <% end %>
-        </li>
-        <% if user_signed_in? %>
-        <li>
-          <a class="dropdown-trigger tooltipped" href="#!" data-target="help-dropdown" data-position="bottom" data-delay="100" data-tooltip="Need help?">
-            <i class="material-icons">help</i>
-          </a>
-        </li>
-        <li>
-          <a class="dropdown-trigger tooltipped" href="#!" data-target="desktop-user-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your content">
-            <div class="hide-on-med-and-up"><i class="material-icons">book</i></div>
-            <div class="hide-on-small-and-down"><%= current_user.name %> &nbsp; ▾</div>
-          </a>
-        </li>
-        <% else %>
+      <% unless user_signed_in? %>
+        <ul class="right">
           <li class="hide-on-med-and-down"><%= link_to 'Sign in', main_app.new_user_session_path %></li>
           <li class="hide-on-med-and-down"><%= link_to 'Sign up', main_app.new_user_registration_path %></li>
-        <% end %>
-      </ul>
+        </ul>
+      <% end %>
       <ul class="left">
         <li>
           <a class="sidenav-trigger" href="#" data-target="slide-out">
             <i class="material-icons">menu</i>
           </a>
-
         </li>
 
         <% if user_signed_in? %>
