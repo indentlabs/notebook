@@ -6,7 +6,8 @@ class UniversesController < ContentController
     define_method content_type_name do
       @content_type = content_type_name.to_s.singularize.capitalize.constantize
 
-      @universe = Universe.find(params[:id])
+      @universe = Universe.find_by(id: params[:id])
+      return redirect_to(root_path, notice: "That universe doesn't exist!") unless @universe.present?
       @content_list = @universe.send(content_type_name)
 
       # todo just use current_user.can_view?(@universe) and/or individual filtering
