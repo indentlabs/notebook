@@ -1,66 +1,11 @@
-
-
-<ul id="recent-content-dropdown" class="dropdown-content">
-<% if user_signed_in? %>
-  <% current_user.recent_content_list.each do |content| %>
-    <% content_class = content.class %>
-    <li>
-      <%= link_to main_app.polymorphic_path(content), class: "#{content_class.color}-text" do %>
-        <i class="material-icons left"><%= content_class.icon %></i>
-        <%= content.name %>
-      <% end %>
-    </li>
-  <% end %>
-  <% if current_user.content_count > 0 %>
-    <li class="divider"></li>
-    <li>
-      <%= link_to 'More...', main_app.recent_content_path, class: 'blue-text' %>
-    </li>
-  <% end %>
-<% end %>
-</ul>
-
-<div id="search-modal" class="modal">
-  <div class="modal-content">
-    <h4>Your handy pagefinder</h4>
-    <p>
-      Type anything you want below. It'll match page names (like the names of your characters, locations, and so on), but also
-      anything you've typed in any of those pages' fields as well. For example, searching "bald" will show you all your characters
-      that you've entered "bald" in for their hair style.
-    </p>
-    <%= form_tag main_app.search_path, method: :get do %>
-      <input type="search" name="q" value="" placeholder="search your notebook" />
-      <button type="submit" class="btn btn-primary blue">Search everything</button>
-    <% end %>
-  </div>
-  <div class="modal-footer">
-    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
-  </div>
-</div>
+<%= render partial: 'layouts/navbar/recent_content_dropdown' %>
+<%= render partial: 'layouts/modals/search' %>
 
 <div class="navbar-fixed">
-  <nav class="blue">
+  <nav class="blue navbar nav-extended">
     <div class="nav-wrapper">
-
-      <% unless user_signed_in? %>
-        <ul class="right">
-          <li class="hide-on-med-and-down"><%= link_to 'Sign in', main_app.new_user_session_path %></li>
-          <li class="hide-on-med-and-down"><%= link_to 'Sign up', main_app.new_user_registration_path %></li>
-        </ul>
-      <% end %>
-      <ul class="left">
-        <li>
-          <a class="sidenav-trigger" href="#" data-target="slide-out">
-            <i class="material-icons">menu</i>
-          </a>
-        </li>
-
+      <ul class="right">
         <% if user_signed_in? %>
-          <% if current_user && (current_user.universes.count > 0 || current_user.contributable_universes.count > 0) %>
-            <li>
-              <%= render partial: 'universes/picker' %>
-            </li>
-          <% end %>
           <% if current_user.recent_content_list.any? %>
             <li>
               <a class="dropdown-trigger tooltipped" href="#!" data-target="recent-content-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your recently-edited pages">
@@ -74,12 +19,36 @@
             </a>
           </li>
         <% else %>
+          <li class="hide-on-med-and-down">
+            <%= link_to 'Sign in', main_app.new_user_session_path %>
+          </li>
+          <li class="hide-on-med-and-down">
+            <%= link_to 'Sign up', main_app.new_user_registration_path %>
+          </li>
+        <% end %>
+      </ul>
+      <ul class="left">
+        <% if user_signed_in? %>
           <li>
-            <a href="#" data-target="login-slide" class="button-collapse">
+            <a class="sidenav-trigger" href="#" data-target="sidenav-left">
               <i class="material-icons">menu</i>
             </a>
           </li>
+          <% if current_user && (current_user.universes.count > 0 || current_user.contributable_universes.count > 0) %>
+            <li>
+              <%= render partial: 'universes/picker' %>
+            </li>
+          <% end %>
         <% end %>
+      </ul>
+    </div>
+
+    <div class="nav-content">
+      <ul class="tabs tabs-transparent">
+        <li class="tab"><a class="white-text active" href="#test1">Test 1</a></li>
+        <li class="tab"><a class="white-text" href="#test2">Test 2</a></li>
+        <li class="tab"><a class="white-text" href="#test3">Test 3</a></li>
+        <li class="tab"><a class="white-text" href="#test4">Test 4</a></li>
       </ul>
     </div>
   </nav>
