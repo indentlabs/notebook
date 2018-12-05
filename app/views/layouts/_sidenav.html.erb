@@ -6,35 +6,6 @@
   </li>
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
-      <li class="bold waves-effect">
-        <a class="collapsible-header" tabindex="0">
-          <i class="material-icons chevron <%= Universe.color %>-text"><%= Universe.icon %></i>
-          <%= @universe_scope.present? ? @universe_scope.name : 'Working universe' %>
-        </a>
-        <div class="collapsible-body">
-          <ul>
-            <li>
-              <%= link_to "?universe=all", class: 'waves-effect' do %>
-                <i class="material-icons purple-text">
-                  <%= Universe.icon %>
-                </i>
-                All Universes
-              <% end %>
-            </li>
-            <li class="divider"></li>
-            <% ((@current_user_content['Universe'] || []) + current_user.contributable_universes).sort_by(&:name).each do |universe| %>
-              <li>
-                <%= link_to "?universe=#{universe.id}", class: 'waves-effect' do %>
-                  <i class="material-icons purple-text">
-                    <%= Universe.icon %>
-                  </i>
-                  <%= truncate universe.name + (universe.user_id == current_user.id ? '' : ' (contributor)') %>
-                <% end %>
-              </li>
-            <% end %>
-          </ul>
-        </div>
-      </li>
       <li class="bold waves-effect active">
         <a class="collapsible-header" tabindex="0">
           Navigation
