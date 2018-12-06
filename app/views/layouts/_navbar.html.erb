@@ -2,7 +2,7 @@
 <%= render partial: 'layouts/modals/search' %>
 
 <div class="navbar-fixed">
-  <nav class="orange navbar nav-extended">
+  <nav class="<%= @navbar_color.presence || 'blue' %> navbar nav-extended">
     <div class="nav-wrapper">
       <ul class="right">
         <% if user_signed_in? %>
@@ -38,13 +38,20 @@
       </ul>
     </div>
 
-    <div class="nav-content">
-      <ul class="tabs tabs-transparent">
-        <li class="tab"><a class="white-text active" href="#test1">Test 1</a></li>
-        <li class="tab"><a class="white-text" href="#test2">Test 2</a></li>
-        <li class="tab"><a class="white-text" href="#test3">Test 3</a></li>
-        <li class="tab"><a class="white-text" href="#test4">Test 4</a></li>
-      </ul>
-    </div>
+    <% if @navbar_actions.present? && @navbar_actions.any? %>
+      <style>
+        main {
+          padding-top: 50px;
+        }
+      </style>
+      <div class="nav-content">
+        <ul class="tabs tabs-transparent">
+          <li class="tab"><a class="white-text active" href="#test1">Test 1</a></li>
+          <li class="tab"><a class="white-text" href="#test2">Test 2</a></li>
+          <li class="tab"><a class="white-text" href="#test3">Test 3</a></li>
+          <li class="tab"><a class="white-text" href="#test4">Test 4</a></li>
+        </ul>
+      </div>
+    <% end %>
   </nav>
 </div>
