@@ -4,9 +4,63 @@
       Notebook.ai
     <% end %>
   </li>
+  <li class="blue no-padding">
+    <ul class="collapsible collapsible-accordion">
+      <li class="bold waves-effect blue lighten-1">
+        <a class="collapsible-header" tabindex="0">
+          <%= @universe_scope.present? ? truncate(@universe_scope.name, length: 26) : 'All Universes' %>
+          <i class="material-icons chevron">chevron_left</i>
+        </a>
+        <div class="collapsible-body blue lighten-1">
+          <ul>
+            <% ((@current_user_content['Universe'] || []) + current_user.contributable_universes).sort_by(&:name).each do |universe| %>
+              <li>
+                <%= link_to "?universe=#{universe.id}", class: 'waves-effect' do %>
+                  <i class="material-icons <%= Universe.color %>-text">
+                    <%= Universe.icon %>
+                  </i>
+                  <%= truncate(universe.name, length: 26) %>
+                <% end %>
+              </li>
+            <% end %>
+            <li class="divider blue"></li>
+              <li class="blue lighten-2">
+                <%= link_to "?universe=all", class: 'waves-effect' do %>
+                  <i class="material-icons <%= Universe.color %>-text">
+                    <%= Universe.icon %>
+                  </i>
+                   All universes
+                <% end %>
+              </li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+  <!-- <li>
+    <%= link_to main_app.dashboard_path, class: 'waves-effect' do %>
+      <i class="material-icons blue-text">
+        dashboard
+      </i>
+      Home
+    <% end %>
+  </li>
+  <li>
+    <%= link_to main_app.thredded_path, class: 'waves-effect' do %>
+      <i class="material-icons green-text">
+        forum
+      </i>
+      Discussions
+      <% if @unread_threads > 0 || @unread_private_messages > 0 %>
+        <span class="badge <%= 'blue white-text' if @unread_private_messages > 0 %>">
+          <%= @unread_threads %><%= "/#{@unread_private_messages}" if @unread_private_messages > 0 %>
+        </span>
+      <% end %>
+    <% end %>
+  </li> -->
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
-      <li class="bold waves-effect active">
+      <!-- <li class="bold waves-effect active">
         <a class="collapsible-header" tabindex="0">
           Navigation
           <i class="material-icons chevron">chevron_left</i>
@@ -36,7 +90,7 @@
             </li>
           </ul>
         </div>
-      </li>
+      </li> -->
       <li class="bold waves-effect">
         <a class="collapsible-header" tabindex="0">
           Worldbuilding
