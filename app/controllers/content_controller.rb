@@ -8,6 +8,8 @@ class ContentController < ApplicationController
 
   before_action :populate_linkable_content_for_each_content_type, only: [:new, :edit]
 
+  before_action :set_navbar_color
+
   def index
     @content_type_class = content_type_from_controller(self.class)
     pluralized_content_name = @content_type_class.name.downcase.pluralize
@@ -366,5 +368,10 @@ class ContentController < ApplicationController
 
   def humanized_model_name
     content_type_from_controller(self.class).model_name.human
+  end
+
+  def set_navbar_color
+    content_type = content_type_from_controller(self.class)
+    @navbar_color = content_type.color
   end
 end
