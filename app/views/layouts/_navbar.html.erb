@@ -46,10 +46,13 @@
       </style>
       <div class="nav-content">
         <ul class="tabs tabs-transparent">
-          <li class="tab"><a class="white-text active" href="#test1">Test 1</a></li>
-          <li class="tab"><a class="white-text" href="#test2">Test 2</a></li>
-          <li class="tab"><a class="white-text" href="#test3">Test 3</a></li>
-          <li class="tab"><a class="white-text" href="#test4">Test 4</a></li>
+          <% @navbar_actions.each do |action| %>
+            <li class="tab">
+              <a class="white-text tab-link <%= 'active' if action[:href] == request.env['PATH_INFO'] %>" href="<%= action[:href] %>">
+                <%= action[:label] %>
+              </a>
+            </li>
+          <% end %>
         </ul>
       </div>
     <% end %>

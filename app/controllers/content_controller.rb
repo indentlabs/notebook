@@ -9,6 +9,7 @@ class ContentController < ApplicationController
   before_action :populate_linkable_content_for_each_content_type, only: [:new, :edit]
 
   before_action :set_navbar_color
+  before_action :set_navbar_actions
 
   def index
     @content_type_class = content_type_from_controller(self.class)
@@ -373,5 +374,23 @@ class ContentController < ApplicationController
   def set_navbar_color
     content_type = content_type_from_controller(self.class)
     @navbar_color = content_type.color
+  end
+
+  def set_navbar_actions
+    content_type = content_type_from_controller(self.class)
+    @navbar_actions = [
+      {
+        label: "Your #{content_type.name.downcase.pluralize}",
+        href: main_app.polymorphic_path(content_type)
+      },
+      {
+        label: "New #{content_type.name.downcase}",
+        href: main_app.new_polymorphic_path(content_type)
+      },
+      {
+        label: 'Discussions',
+        href: '#'
+      }
+    ]
   end
 end
