@@ -25,7 +25,7 @@ class CategoriesAndFieldsSerializer
             old_column_source: field.old_column_source,
             value: ""
           }
-        } + (old_style_link_fields[category.name].presence || [])).sort do |a, b|
+        }).sort do |a, b|
           a_value = case a[:type]
             when 'name'     then 0
             when 'universe' then 1
@@ -64,20 +64,20 @@ class CategoriesAndFieldsSerializer
   #     ...
   #   ]
   # }
-  def old_style_link_fields
-    categories = Hash[YAML.load_file(Rails.root.join('config', 'attributes', "#{self.class_name.downcase}.yml")).map do |category_name, details|
-      [
-        category_name.to_s,
-        (details[:attributes] || []).select { |field| field[:field_type] == 'link'}.map do |field|
-          {
-            id:    field[:name],
-            label: field[:label],
-            type:  field[:field_type].presence || 'textarea',
-            old_column_source: field[:name],
-            value: ""
-          }
-        end
-      ]
-    end]
-  end
+  # def old_style_link_fields
+  #   categories = Hash[YAML.load_file(Rails.root.join('config', 'attributes', "#{self.class_name.downcase}.yml")).map do |category_name, details|
+  #     [
+  #       category_name.to_s,
+  #       (details[:attributes] || []).select { |field| field[:field_type] == 'link'}.map do |field|
+  #         {
+  #           id:    field[:name],
+  #           label: field[:label],
+  #           type:  field[:field_type].presence || 'textarea',
+  #           old_column_source: field[:name],
+  #           value: ""
+  #         }
+  #       end
+  #     ]
+  #   end]
+  # end
 end
