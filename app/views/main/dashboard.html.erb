@@ -33,11 +33,21 @@
     </div>
   <% end %>
 
-  <% if @activated_content_types.length < 5 && BillingPlan::PREMIUM_IDS.include?(current_user.selected_billing_plan_id) %>
-    <div class="dashboard-row col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
-      <%= render partial: 'content/cards/activate_premium_pages_cta' %>
-    </div>
-  <% end %>
+  <div class="dashboard-row col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
+    <%= link_to customization_content_types_path do %>
+      <div class="hoverable card">
+        <div class="card-image">
+          <%= image_tag "card-headers/more.jpg", height: 265 %>
+          <span class="card-title bordered-text">
+            <div>
+              <i class="material-icons white-text" style="position: relative; top: 3px;">add</i>
+              <%= Rails.application.config.content_types[:all].count - @activated_content_types.count %> other page types available
+            </div>
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
 
   <div class="dashboard-row col <%= "s#{s_width} m#{m_width} l#{l_width}" %> hide-on-med-and-up">
     <%= render partial: 'content/cards/mobile_links' %>
