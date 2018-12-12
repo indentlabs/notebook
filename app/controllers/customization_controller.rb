@@ -7,6 +7,7 @@ class CustomizationController < ApplicationController
     @all_content_types = Rails.application.config.content_types[:all]
     @premium_content_types = Rails.application.config.content_types[:premium]
     @my_activators = current_user.user_content_type_activators.pluck(:content_type)
+    @sidenav_expansion = 'worldbuilding'
   end
 
   def toggle_content_type

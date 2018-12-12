@@ -10,6 +10,7 @@ class ContentController < ApplicationController
 
   before_action :set_navbar_color
   before_action :set_navbar_actions
+  before_action :set_sidenav_expansion
 
   def index
     @content_type_class = content_type_from_controller(self.class)
@@ -373,7 +374,7 @@ class ContentController < ApplicationController
 
   def set_navbar_color
     content_type = content_type_from_controller(self.class)
-    @navbar_color = content_type.color
+    @navbar_color = content_type.hex_color
   end
 
   def set_navbar_actions
@@ -396,5 +397,9 @@ class ContentController < ApplicationController
         href: discussions_link
       }
     end
+  end
+
+  def set_sidenav_expansion
+    @sidenav_expansion = 'worldbuilding'
   end
 end
