@@ -1,6 +1,8 @@
 class DocumentsController < ApplicationController
   before_action :authenticate_user!
 
+  before_action :set_sidenav_expansion
+
   def index
     @documents = current_user.documents.order('updated_at desc')
   end
@@ -50,6 +52,10 @@ class DocumentsController < ApplicationController
     else
       redirect_back(fallback_location: root_path, notice: "You don't have permission to do that!")
     end
+  end
+
+  def set_sidenav_expansion
+    @sidenav_expansion = 'writing'
   end
 
   private
