@@ -1,18 +1,70 @@
-<% if @content %>
-  <div class="row">
+<div class="row">
+  <div class="col s12 m3">
+    <%= link_to documents_path do %>
+      <div class="hoverable card <%= Document.color %>">
+        <div class="card-content white-text">
+          <span class="card-title">
+            <span class="right white-text"><%= @current_user_content['Documents'].count %></span>
+            Documents
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="col s12 m3">
+    <%= link_to thredded_path do %>
+      <div class="hoverable card blue">
+        <div class="card-content white-text">
+          <span class="card-title">
+            <span class="right white-text">
+              <%= @unread_threads %><%= "/#{@unread_private_messages}" if @unread_private_messages > 0 %>
+            </span>
+            Discussions
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="col s12 m3">
+    <%= link_to prompts_path do %>
+      <div class="hoverable card orange">
+        <div class="card-content white-text">
+          <span class="card-title">
+            <span class="right white-text">&nbsp;</span>
+            Prompts
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="col s12 m3">
+    <%= link_to current_user do %>
+      <div class="hoverable card green">
+        <div class="card-content white-text">
+          <span class="card-title">
+            <span class="right white-text">&nbsp;</span>
+            Profile
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @content %>
     <div class="col s12">
       <%= render partial: 'cards/serendipitous/content_question', locals: { content: @content } %>
     </div>
-  </div>
-<% end %>
+  <% end %>
 
-<%
-  s_width = 12
-  m_width = 6
-  l_width = 6
-%>
+  <%
+    s_width = 12
+    m_width = 6
+    l_width = 6
+  %>
 
-<div class="row">
   <% current_user_universe_ids = current_user.universes.pluck(:id) %>
   <% @activated_content_types.each do |content_type| %>
     <%
