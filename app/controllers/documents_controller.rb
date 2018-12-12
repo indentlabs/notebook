@@ -2,6 +2,7 @@ class DocumentsController < ApplicationController
   before_action :authenticate_user!
 
   before_action :set_sidenav_expansion
+  before_action :set_navbar_color
 
   def index
     @documents = current_user.documents.order('updated_at desc')
@@ -56,6 +57,11 @@ class DocumentsController < ApplicationController
 
   def set_sidenav_expansion
     @sidenav_expansion = 'writing'
+  end
+
+  def set_navbar_color
+    content_type = content_type_from_controller(self.class)
+    @navbar_color = content_type.hex_color
   end
 
   private

@@ -10,6 +10,10 @@ class Document < ApplicationRecord
     'teal'
   end
 
+  def self.hex_color
+    '#009688'
+  end
+
   def self.icon
     'description'
   end
