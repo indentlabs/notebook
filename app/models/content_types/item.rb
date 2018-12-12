@@ -40,6 +40,10 @@ class Item < ApplicationRecord
     'amber'
   end
 
+  def self.hex_color
+    '#FFC107'
+  end
+
   def self.icon
     'beach_access'
   end

@@ -36,6 +36,10 @@ class Scene < ApplicationRecord
     'grey'
   end
 
+  def self.hex_color
+    '#9E9E9E'
+  end
+
   def self.icon
     'local_movies'
   end

@@ -31,6 +31,10 @@ class Government < ApplicationRecord
     'darken-2 green'
   end
 
+  def self.hex_color
+    '#388E3C'
+  end
+
   def self.icon
     'account_balance'
   end

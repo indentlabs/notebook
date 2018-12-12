@@ -41,6 +41,10 @@ class Deity < ApplicationRecord
     'text-lighten-4 blue'
   end
 
+  def self.hex_color
+    '#BBDEFB'
+  end
+
   def self.icon
     'ac_unit'
   end

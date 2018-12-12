@@ -21,6 +21,10 @@ class Building < ActiveRecord::Base
     'blue-grey'
   end
 
+  def self.hex_color
+    '#607D8B'
+  end
+
   def self.icon
     'business'
   end

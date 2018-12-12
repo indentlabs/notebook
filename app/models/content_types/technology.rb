@@ -35,6 +35,10 @@ class Technology < ApplicationRecord
     'text-darken-2 red'
   end
 
+  def self.hex_color
+    '#D32F2F'
+  end
+
   def self.icon
     'router'
   end

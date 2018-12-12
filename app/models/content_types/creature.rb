@@ -41,6 +41,10 @@ class Creature < ApplicationRecord
     'brown'
   end
 
+  def self.hex_color
+    '#795548'
+  end
+
   def self.icon
     'pets'
   end

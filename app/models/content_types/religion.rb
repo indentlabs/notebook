@@ -43,6 +43,10 @@ class Religion < ApplicationRecord
     'yellow'
   end
 
+  def self.hex_color
+    '#FFEB3B'
+  end
+
   def self.icon
     'brightness_7'
   end
