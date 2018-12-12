@@ -23,6 +23,8 @@ module HasContent
       content_types: Rails.application.config.content_types[:all].map(&:name),
       page_scoping:  { user_id: self.id }
     )
+      return {} if content_types.empty?
+
       polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :privacy]
       where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL'
 

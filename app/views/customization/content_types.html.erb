@@ -9,17 +9,11 @@
               <p>
                 Below, you can turn on or off any page types in Notebook.ai. You won't lose any pages
                 you've created in any of them even if you turn them off; you can always turn them back on again
-                and your lovely pages will be there.
+                and your lovely pages will still be there.
               </p>
               <p>
-                Simply click the switch next to any page type to turn it on or off. After you refresh any page,
-                you'll see only the page types you have turned <em>on</em> as links in your sidebar.
-              </p>
-              <p>
-                You can also turn on premium-only content here (and are free to view, edit, and share your
-                existing premium content, even if you don't have an active subscription!), but you won't be
-                able to create <em>additional</em> premium content without a premium subscription, even if
-                you turn it on here.
+                Simply click any page you'd like to turn on or off. Pages that are in black and white and blurred
+                are turned off (hidden), and pages that are clear and in color are turned on and ready to use!
               </p>
               <p>
                 Happy worldbuilding!
@@ -32,24 +26,54 @@
         </div>
       </li>
       <li>
-        <div class="collapsible-header"><i class="material-icons">help</i> Having a problem turning pages on or off? / why can i turn on pages i don't have access to? / how do i request new page types?</div>
+        <div class="collapsible-header"><i class="material-icons">help</i> What pages are available to me on my current billing plan?</div>
         <div class="collapsible-body">
-          <p>
-            <strong>
-              Some users are currently having difficulties turning pages on or off when using Internet Explorer
-              to view this page.
-            </strong>
-          </p>
-          <p>
-            If you are having difficulties while using Internet Explorer, you may wish to temporarily try another browser like
-            Google Chrome or Mozilla Firefox to turn pages on or off. Once the pages are configured to your liking,
-            the rest of the site should continue work in Internet Explorer just fine.
-          </p>
-          <p>
-            If you do not have another browser to customize your pages with, feel free to email me at
-            andrew<span></span>@<span>indent</span>labs.<span>com</span> and I'd be happy to turn everything
-            on for you manually.
-          </p>
+          <div class="row">
+            <div class="col s12 m9">
+              <p>
+                Answer here
+              </p>
+            </div>
+            <div class="col m3 hide-on-small-only">
+              <%= image_tag 'tristan/small.png' %>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">help</i> Why can I turn on pages I don't have access to?</div>
+        <div class="collapsible-body">
+          <div class="row">
+            <div class="col s12 m9">
+              <p>
+                You can turn on Premium-only content here to quickly access any existing pages you have of that type. For example,
+                if you created a dozen Creatures while on Premium, you'll always be able to turn on Creatures here and get back to
+                those pages.
+              </p>
+              <p>
+                As a reminder, you'll always have access to every page you've ever created, whether you're on Premium or not. They're
+                <em>your</em> pages!
+              </p>
+            </div>
+            <div class="col m3 hide-on-small-only">
+              <%= image_tag 'tristan/small.png' %>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">help</i> How do I request a new page type?</div>
+        <div class="collapsible-body">
+          <div class="row">
+            <div class="col s12 m9">
+              <p>
+                Answer here
+              </p>
+            </div>
+            <div class="col m3 hide-on-small-only">
+              <%= image_tag 'tristan/small.png' %>
+            </div>
+          </div>
         </div>
       </li>
     </ul>
@@ -61,10 +85,13 @@
     <div class="col s6 m3 l3">
       <a href="#" class="js-enable-content-type" data-content-type="<%= content_type.name %>">
         <div class="hoverable card <%= 'active' if @my_activators.include?(content_type.name) %>"
-             style="border-bottom: 5px solid <%= content_type.hex_color %>">
+             style="border-bottom: 10px solid <%= content_type.hex_color %>">
           <div class="card-image">
             <%= image_tag "card-headers/#{content_type.name.downcase.pluralize}.jpg", height: 180, width: 200 %>
-            <span class="card-title bordered-text"><%= content_type.name.pluralize %></span>
+            <span class="card-title bordered-text">
+              <i class="material-icons <%= content_type.color %>-text" style="position: relative; top: 3px;"><%= content_type.icon %></i>
+              <%= content_type.name.pluralize %>
+            </span>
           </div>
         </div>
       </a>
@@ -72,83 +99,9 @@
   <% end %>
 </div>
 
-
 <div class="row">
-  <% @all_content_types.each.with_index do |content_type, i| %>
 
-    <div class="col s12 m6">
-      <div class="card">
-        <div class="card-image">
-          <%= image_tag "card-headers/#{content_type.name.downcase.pluralize}.jpg", height: 200, width: 300 %>
-          <% if Rails.application.config.content_types[:new].include?(content_type) %>
-            <span class="card-title">
-              <span class="new badge yellow black-text left" style="position: relative; top: -130px; left: -10px;"></span>
-            </span>
-          <% end %>
-          <span class="card-title" style="width: 100%">
-
-            <% if content_type.name == 'Universe' %>
-              <div class="grey-text" style="font-size: .8rem; float: right; background: white; margin-top: 5px; padding: 5px 10px 5px 10px; border: 1px solid #429ADF">
-                Always on
-              </div>
-            <% else %>
-              <%= form_tag customization_toggle_content_type_path, method: :POST, remote: true do %>
-                <div class="switch" style="float: right; background: white; padding: 0 10px 5px 10px; border: 1px solid #429ADF">
-                  <label>
-                    Hidden
-                    <%= hidden_field_tag :content_type, content_type.name %>
-                    <%= check_box_tag :active,
-                        'on',
-                        @my_activators.include?(content_type.name),
-                        {
-                          onChange: "$(this).closest('form').submit();"
-                        }
-                    %>
-                    <span class="lever"></span>
-                    On
-                  </label>
-                </div>
-              <% end %>
-            <% end %>
-            <div class="bordered-text">
-              <i class="material-icons <%= content_type.color %>-text" style="position: relative; top: 3px;"><%= content_type.icon %></i>
-              <%= content_type.name.pluralize %>
-            </div>
-          </span>
-        </div>
-        <div class="card-content fixed-card-content">
-          <div class="row">
-            <div class="col s12">
-              <p>
-                <%= t("content_descriptions.#{content_type.name.downcase}") %>
-              </p>
-              <br />
-              <p>
-                <% if @premium_content_types.include?(content_type) %>
-                  <%= content_type.name.pluralize %> require a
-                  <%= link_to 'Premium subscription', subscription_path %> to create.
-                <% end %>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="card-action">
-          <% if content_type.where(user: current_user).any? %>
-              <%= link_to polymorphic_path(content_type) do %>
-                view your
-                <%= pluralize content_type.where(user: current_user).count,
-                              content_type.name.downcase %>
-              <% end %>
-          <% end %>
-          <%= link_to attribute_customization_path(content_type.name.downcase) do %>
-            Customize template
-          <% end %>
-        </div>
-      </div>
-    </div>
-  <% end %>
-
-  <div class="col s12 m6">
+  <div class="col s12 m6 offset-m3">
     <div class="card">
       <div class="card-image">
         <%= image_tag "card-headers/more.jpg", height: 200, width: 300 %>
@@ -166,15 +119,13 @@
               We're adding more page types soon so you can customize your digital notebook
               to match your world &mdash; not the other way around.
             </p>
-            <br />
-            <p>
-              Have something in mind you're dying to plan in Notebook.ai?
-              <%= link_to 'https://docs.google.com/forms/d/1PFOaa97Cu3vrceUvcuFT6nyITaMwR-4wQSarUdVoPSg/edit' do %>
-                You can request new pages to be added with this form!
-              <% end %>
-            </p>
           </div>
         </div>
+      </div>
+      <div class="card-action">
+        <%= link_to 'https://docs.google.com/forms/d/1PFOaa97Cu3vrceUvcuFT6nyITaMwR-4wQSarUdVoPSg/edit', target: '_new' do %>
+          Request a new page type
+        <% end %>
       </div>
     </div>
   </div>
