@@ -3,6 +3,7 @@ class DocumentsController < ApplicationController
 
   before_action :set_sidenav_expansion
   before_action :set_navbar_color
+  before_action :set_navbar_actions
 
   def index
     @documents = current_user.documents.order('updated_at desc')
@@ -63,6 +64,23 @@ class DocumentsController < ApplicationController
     content_type = content_type_from_controller(self.class)
     @navbar_color = content_type.hex_color
   end
+
+  def set_navbar_actions
+    @navbar_actions = []
+
+    if @current_user_content['Document'].present?
+      @navbar_actions << {
+        label: "Your #{@current_user_content['Document'].count} Document#{'s' unless @navbar_actions == 1}",
+        href: documents_path
+      }
+    end
+
+    @navbar_actions << {
+      label: "New Document",
+      href: edit_document_path(:new)
+    }
+  end
+
 
   private
 

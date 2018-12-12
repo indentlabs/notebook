@@ -49,7 +49,7 @@ class ApplicationController < ActionController::Base
     )
 
     @current_user_content = current_user.content(content_types: @activated_content_types)
-    @current_user_content['Documents'] = current_user.documents
+    @current_user_content['Document'] = current_user.documents
   end
 
   def cache_forums_unread_counts
