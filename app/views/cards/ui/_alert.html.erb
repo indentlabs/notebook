@@ -1,7 +1,8 @@
 <% if alert %>
-  <div class="card-panel amber darken-3 hoverable">
-    <span class="white-text">
-      <%= alert.html_safe unless alert.blank? %>
-    </span>
-  </div>
+  <%= content_for :javascript do %>
+    M.toast({
+      html: "<%= alert.gsub('"', '\"').html_safe %>",
+      classes: 'rounded'
+    })
+  <% end %>
 <% end %>
