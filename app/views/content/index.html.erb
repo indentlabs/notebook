@@ -2,32 +2,31 @@
   content_type = @content_type_class.name.downcase
 %>
 
-<div class="slider" style="height: 140px;">
-  <ul class="slides">
-    <li>
-      <%= image_tag "card-headers/#{content_type.pluralize}.jpg" %>
-      <div class="caption center-align bordered-text">
-        <h3><%= content_type.titleize.pluralize %></h3>
-        <h5 class="light grey-text text-lighten-3"><%= t("content_oneliners.#{content_type}") %></h5>
-      </div>
-    </li>
-  </ul>
-</div>
+<%= content_for :full_width_page_header do %>
+  <div class="slider" style="height: 1px">
+    <ul class="slides">
+      <li>
+        <%= image_tag "card-headers/#{content_type.pluralize}.jpg" %>
+        <div class="caption center-align bordered-text">
+          <h3><%= content_type.titleize.pluralize %></h3>
+          <h5 class="light grey-text text-lighten-3"><%= t("content_oneliners.#{content_type}") %></h5>
+        </div>
+      </li>
+    </ul>
+  </div>
+<% end %>
 
-<script type="text/javascript">
+<%= content_for :javascript do %>
   $(document).ready(function(){
     $('.slider').slider({
       height: 200,
       indicators: false
     });
   });
-</script>
+<% end %>
 
 <% if @content.any? %>
-  <h4>
-    Your <%= pluralize(@content.count, content_type) %>
-    <%= render partial: 'content/list/actions', locals: { } %>
-  </h4>
+  <%= render partial: 'content/components/list_filter_bar', locals: { } %>
   <%= render partial: 'content/list/list', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true } %>
 
 <% elsif @content.empty? %>
