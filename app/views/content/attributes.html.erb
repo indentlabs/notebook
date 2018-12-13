@@ -1,24 +1,8 @@
-<div class="slider" style="height: 140px;">
-  <ul class="slides">
-    <li>
-      <%= image_tag "card-headers/#{@content_type.pluralize}.jpg" %>
-      <div class="caption center-align">
-        <h3><%= @content_type.titleize.pluralize %></h3>
-        <h5 class="light grey-text text-lighten-3"><%= t("content_oneliners.#{@content_type}") %></h5>
-      </div>
-    </li>
-  </ul>
-</div>
-<script type="text/javascript">
-  $(document).ready(function(){
-    $('.slider').slider({
-      height: 200,
-      indicators: false
-    });
-  });
-</script>
+<%= content_for :full_width_page_header do %>
+  <%= render partial: 'content/components/parallax_header', locals: { content_type: @content_type_class.name } %>
+<% end %>
 
-<ul class="collapsible">
+<ul class="collapsible white">
   <li class="active">
     <div class="collapsible-header">
       <i class="material-icons <%= @content_type_class.color %>-text"><%= @content_type_class.icon %></i>

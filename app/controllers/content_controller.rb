@@ -8,6 +8,8 @@ class ContentController < ApplicationController
 
   before_action :populate_linkable_content_for_each_content_type, only: [:new, :edit]
 
+  before_action :set_attributes_content_type, only: [:attributes]
+
   before_action :set_navbar_color
   before_action :set_navbar_actions
   before_action :set_sidenav_expansion
@@ -256,12 +258,6 @@ class ContentController < ApplicationController
   end
 
   def attributes
-    @content_type = params[:content_type]
-    # todo make this a before_action load_content_type
-    unless valid_content_types.map { |c| c.name.downcase }.include?(@content_type)
-      raise "Invalid content type on attributes customization page: #{@content_type}"
-    end
-    @content_type_class = @content_type.titleize.constantize
   end
 
   private
@@ -373,16 +369,25 @@ class ContentController < ApplicationController
     content_type_from_controller(self.class).model_name.human
   end
 
+  def set_attributes_content_type
+    @content_type = params[:content_type]
+    # todo make this a before_action load_content_type
+    unless valid_content_types.map { |c| c.name.downcase }.include?(@content_type)
+      raise "Invalid content type on attributes customization page: #{@content_type}"
+    end
+    @content_type_class = @content_type.titleize.constantize
+  end
+
   def set_navbar_color
-    content_type = content_type_from_controller(self.class)
-    @navbar_color = content_type.hex_color
+    content_type = @content_type_class || content_type_from_controller(self.class)
+    @navbar_color = content_type.try(:hex_color) || '#2196F3'
   end
 
   def set_navbar_actions
-    content_type = content_type_from_controller(self.class)
+    content_type = @content_type_class || content_type_from_controller(self.class)
     @navbar_actions = [
       {
-        label: "Your #{view_context.pluralize @current_user_content[content_type.name].count, content_type.name.downcase}",
+        label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
         href: main_app.polymorphic_path(content_type)
       },
       {
