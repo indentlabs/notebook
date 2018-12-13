@@ -156,3 +156,13 @@ Thredded.notifiers = []
 #
 # add in (must install separate gem (under development) as well):
 # Thredded.notifiers = [Thredded::EmailNotifier.new, Thredded::PushoverNotifier.new(ENV['PUSHOVER_APP_ID'])]
+
+module AllowUsersToDeleteOwnTopics
+  def destroy?
+    super || @topic.user_id == @user.id
+  end
+end
+
+Rails.application.config.to_prepare do
+  Thredded::TopicPolicy.prepend AllowUsersToDeleteOwnTopics
+end

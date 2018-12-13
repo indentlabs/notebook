@@ -28,7 +28,8 @@ class UsersController < ApplicationController
     content_type_name = content_type.name.downcase.pluralize.to_sym # :characters, :items, etc
     define_method content_type_name do
       @content_type = content_type
-      @user = User.find(params[:id])
+      @user = User.find_by(id: params[:id])
+      return redirect_to(root_path, notice: "This user does not exist") unless @user.present?
       @content_list = @user.send(content_type_name).is_public.order(:name)
 
       render :content_list

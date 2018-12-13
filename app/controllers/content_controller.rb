@@ -97,12 +97,13 @@ class ContentController < ApplicationController
   def edit
     content_type_class = content_type_from_controller(self.class)
     @content = content_type_class.find_by(id: params[:id])
-    @serialized_content = ContentSerializer.new(@content)
-
     if @content.nil?
-      return redirect_to root_path,
-             notice: "Either this #{content_type_class.name.downcase} doesn't exist, or you don't have access to view it."
+      return redirect_to(root_path,
+        notice: "Either this #{content_type_class.name.downcase} doesn't exist, or you don't have access to view it."
+      )
     end
+
+    @serialized_content = ContentSerializer.new(@content)
 
     unless @content.updatable_by? current_user
       return redirect_to @content, notice: t(:no_do_permission)

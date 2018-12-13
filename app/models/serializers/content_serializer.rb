@@ -52,7 +52,7 @@ class ContentSerializer
           label:  category.label,
           icon:   category.icon,
           hidden: !!category.hidden,
-          fields: (self.fields.select { |field| field.attribute_category_id == category.id }.map { |field|
+          fields: self.fields.select { |field| field.attribute_category_id == category.id }.map { |field|
             {
               id:     field.name,
               label:  field.label,
@@ -65,7 +65,7 @@ class ContentSerializer
                 value.attribute_field_id == field.id
               }.try(:value) || ""
             }
-          } + (old_style_link_fields[category.name].presence || [])).sort do |a, b|
+          }.sort do |a, b|
             a_value = case a[:type]
               when 'name'     then 0
               when 'universe' then 1
@@ -89,37 +89,5 @@ class ContentSerializer
         }
       }
     }
-  end
-
-  # {
-  #   'overview': [
-  #     {
-  #       id: 'children',
-  #       label: 'Children',
-  #       relation: 'Character',
-  #       type: 'link',
-  #       value: [Character, Character, Character]
-  #     },
-  #     ...
-  #   ]
-  # }
-  def old_style_link_fields
-    # TODO I think we can remove this method
-    return {}
-
-    categories = Hash[YAML.load_file(Rails.root.join('config', 'attributes', "#{self.class_name.downcase}.yml")).map do |category_name, details|
-      [
-        category_name.to_s,
-        (details[:attributes] || []).select { |field| field[:field_type] == 'link'}.map do |field|
-          {
-            id:    field[:name],
-            label: field[:label],
-            type:  field[:field_type].presence || 'textarea',
-            old_column_source: field[:name],
-            value: self.raw_model.send(field[:name])
-          }
-        end
-      ]
-    end]
   end
 end
