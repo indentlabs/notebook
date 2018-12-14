@@ -1,11 +1,53 @@
 <% if current_user.content_count > 0 %>
   <div class="row">
-    <div class="col s12">
+    <div class="col s12 m8">
       <%= render partial: 'cards/serendipitous/content_question', locals: {
         content: @content,
         redirect_path: prompts_path,
         show_empty_prompt: true
       } %>
+    </div>
+    <div class="col m4 hide-on-sm-only center">
+      <div style="padding: 0 20px; ">
+        <h3 class="grey-text text-lighten-1">
+          <small>From</small>
+          <br />
+          Your world
+        </h3>
+        <p class="grey-text text-lighten-1 flow-text">
+          This writing prompt was generated automatically from the pages in your notebook.
+        </p>
+        <!-- <ul class="grey-text lighten-3">
+          <li>
+            <%= link_to 'View my prompt settings', '#' %>
+          </li>
+        </ul> -->
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col s12 m4">
+      <%= link_to documents_path do %>
+        <div class="hoverable card <%= @content.class.color %>">
+          <div class="card-content white-text">
+            <span class="card-title">
+              View <%= @content.name %>
+            </span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <div class="col s12 m4">
+      <%= link_to prompts_path do %>
+        <div class="hoverable card orange">
+          <div class="card-content white-text">
+            <span class="card-title">
+              Next question
+            </span>
+          </div>
+        </div>
+      <% end %>
     </div>
   </div>
 <% else %>

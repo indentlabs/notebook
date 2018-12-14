@@ -1,6 +1,9 @@
 class RegistrationsController < Devise::RegistrationsController
   after_action :add_account, only: [:create]
 
+  before_action :set_navbar_actions, only: [:edit]
+  before_action :set_navbar_color, only: [:edit]
+
   def new
     super
     if params[:referral]
@@ -20,6 +23,30 @@ class RegistrationsController < Devise::RegistrationsController
 
   def update_resource(resource, params)
     resource.update_without_password(params)
+  end
+
+  def set_navbar_color
+    @navbar_color = '#000000'
+  end
+
+  def set_navbar_actions
+    @navbar_actions = [
+      {
+        label: "Your info",
+        href: '#your-info',
+        target: '_self'
+      },
+      {
+        label: "Preferences",
+        href: '#preferences',
+        target: '_self'
+      },
+      {
+        label: 'More options',
+        href: '#more-options',
+        target: '_self'
+      }
+    ]
   end
 
   protected
