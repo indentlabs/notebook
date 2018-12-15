@@ -66,8 +66,18 @@
                   <%= change_event.action %>
                 </td>
                 <td><%= key.titleize %></td>
-                <td><%= old_value.truncate(380) %></td>
-                <td><%= new_value.truncate(380) %></td>
+                <td>
+                  <%= simple_format ContentFormatterService.show(
+                    text: old_value.truncate(380),
+                    viewing_user: current_user
+                  ) %>
+                </td>
+                <td>
+                  <%= simple_format ContentFormatterService.show(
+                    text: new_value.truncate(380),
+                    viewing_user: current_user
+                  ) %>
+                </td>
                 <td><span class="grey-text"><%= time_ago_in_words change_event.created_at %> ago</span></td>
               </tr>
             <% end %>

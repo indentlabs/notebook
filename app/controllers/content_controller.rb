@@ -112,7 +112,7 @@ class ContentController < ApplicationController
   end
 
   def create
-    content_type = content_type_from_controller self.class
+    content_type = content_type_from_controller(self.class)
     initialize_object
 
     unless current_user.can_create?(content_type)

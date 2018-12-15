@@ -36,6 +36,9 @@ class MainController < ApplicationController
     redirect_to edit_document_path(current_user.documents.first)
   end
 
+  def pricing
+  end
+
   def recent_content
     # todo optimize this / use Attributes
     return [] if @activated_content_types.nil?
