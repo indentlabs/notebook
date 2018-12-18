@@ -11,8 +11,16 @@ class DocumentsController < ApplicationController
   end
 
   def show
-    document = Document.find_by(id: params[:id], user_id: current_user.id)
-    redirect_to edit_document_path(document)
+    @document = Document.find_by(id: params[:id], user_id: current_user.id)
+
+    unless @document.present? || @document.viewable_by?(current_user || User.new)
+      redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+    end
+
+    @navbar_actions.unshift({
+      label: (@document.name || 'Untitled document'),
+      href: document_path(@document)
+    })
   end
 
   def edit

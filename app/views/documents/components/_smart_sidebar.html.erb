@@ -1,0 +1,44 @@
+<% if current_user && @document.updatable_by?(current_user) %>
+  <div class="card blue-grey lighten-4">
+    <div class="card-content">
+      <span class="card-title grey-text text-darken-4">
+        This document
+        <i class="material-icons right activator" style="cursor: pointer">settings</i>
+      </span>
+      <ul>
+        <li>&middot; Written by <%= link_to @document.user.name, @document.user %>
+        <!--
+        <li>
+          &middot; Visibility:
+          <a href="#" class="tooltipped" data-tooltip="Sharing documents is coming soon.">Private</a>
+        </li>
+        -->
+        <li>&middot; Created <%= time_ago_in_words @document.created_at %> ago</li>
+        <li>&middot; Last edited <%= time_ago_in_words @document.updated_at %> ago</li>
+      </ul>
+      <p class="blue-text">
+        This card is only visible to you.
+      </p>
+    </div>
+    <div class="card-reveal">
+      <span class="card-title grey-text text-darken-4">
+        Settings<i class="material-icons right">close</i>
+      </span>
+      <ul>
+        <li>
+          <% if @document.persisted? && current_user.can_delete?(@document) %>
+            <%= link_to @document,
+              method: :delete,
+              class: 'small btn red white-text',
+              data: {
+                confirm: "Are you sure? This will permanently delete this entire document!"
+              } do
+            %>
+              Delete this document
+            <% end %>
+          <% end %>
+        </li>
+      </ul>
+    </div>
+  </div>
+<% end %>
