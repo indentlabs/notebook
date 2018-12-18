@@ -28,6 +28,9 @@ class MainController < ApplicationController
   def prompts
     return redirect_to(new_user_session_path) unless user_signed_in?
 
+    @sidenav_expansion = 'writing'
+    @navbar_color = '#FF9800'
+
     set_random_content # for question
   end
 
