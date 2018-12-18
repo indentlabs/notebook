@@ -3,7 +3,8 @@ class DocumentsController < ApplicationController
 
   before_action :set_sidenav_expansion
   before_action :set_navbar_color
-  before_action :set_navbar_actions
+  before_action :set_navbar_actions, except: [:edit]
+  before_action :set_footer_visibility, only: [:edit]
 
   def index
     @documents = current_user.documents.order('updated_at desc')
@@ -81,6 +82,9 @@ class DocumentsController < ApplicationController
     }
   end
 
+  def set_footer_visibility
+    @show_footer = false
+  end
 
   private
 

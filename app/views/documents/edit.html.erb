@@ -1,13 +1,35 @@
 <%= form_for @document do |f| %>
-  <div>
-    <div class="grey-text autosave-bar">
-      <i class="material-icons js-autosave-icon grey-text">save</i>
-      <span class="js-autosave-status">
-        This document will automatically save as you make changes.
-      </span>
+  <%= content_for :full_width_page_header do %>
+    <div class="document-name-bar">
+      <div class="row teal lighten-1 white-text fixed">
+        <div class="col s12">
+          Editing
+          <div class="input-field inline">
+            <%=
+              f.text_field :title,
+                placeholder: 'Untitled document',
+                value: f.object.title.presence || 'Untitled document',
+                class: 'white-text',
+                style: 'font-size: 150%; border-bottom: 1px solid white;'
+            %>
+          </div>
+        </div>
+      </div>
     </div>
-    <%= f.text_field :title, placeholder: 'Untitled document', value: f.object.title.presence || 'Untitled document', style: 'font-size: 150%' %>
-  </div>
+
+    <div class="autosave-bar">
+      <div class="row">
+        <div class="col s12">
+          <span class="grey-text autosave-bar">
+            <i class="material-icons js-autosave-icon grey-text">save</i>
+            <span class="js-autosave-status">
+              This document will automatically save as you make changes.
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  <% end %>
 
   <div id="editor" class="editable"><%= @document.body.try(:html_safe) %></div>
 
