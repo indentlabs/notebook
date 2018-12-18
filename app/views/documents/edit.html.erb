@@ -55,7 +55,19 @@
               Settings<i class="material-icons right">close</i>
             </span>
             <ul>
-              <li><%= link_to 'Delete this document', '#', class: 'red white-text btn' %>
+              <li>
+                <% if @document.persisted? && current_user.can_delete?(@document) %>
+                  <%= link_to @document,
+                    method: :delete,
+                    class: 'small btn red white-text',
+                    data: {
+                      confirm: "Are you sure? This will permanently delete this entire document!"
+                    } do
+                  %>
+                    Delete this document
+                  <% end %>
+                <% end %>
+              </li>
             </ul>
           </div>
         </div>

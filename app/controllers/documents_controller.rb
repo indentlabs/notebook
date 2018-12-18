@@ -51,9 +51,9 @@ class DocumentsController < ApplicationController
 
     if current_user.can_delete?(document)
       document.destroy
-      redirect_back(fallback_location: documents_path, notice: "The document was successfully deleted.")
+      redirect_to(documents_path, notice: "The document was successfully deleted.")
     else
-      redirect_back(fallback_location: root_path, notice: "You don't have permission to do that!")
+      redirect_to(root_path, notice: "You don't have permission to do that!")
     end
   end
 
