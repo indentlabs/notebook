@@ -34,9 +34,11 @@
     questionable_field_ids = fields_for_these_categories.pluck(:id) - attribute_fields_with_values
     attribute_field_to_question = AttributeField.find_by(id: questionable_field_ids.sample)
   end
+
+  @serendipitous_asking_question = attribute_field_to_question.present?
 %>
 
-<% if attribute_field_to_question.present? %>
+<% if @serendipitous_asking_question %>
   <div class="content-question card">
     <div class="card-content light-blue darken-1 white-text">
       <i class="material-icons <%= content.class.color %>-text circle right circle white"><%= content.class.icon %></i>

@@ -149,7 +149,7 @@ class ContentController < ApplicationController
         upload_files params['image_uploads'], content_type.name, @content.id
       end
 
-      successful_response(content_creation_redirect_url, t(:create_success, model_name: humanized_model_name))
+      successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
       failed_response('new', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.map(&:messages).to_sentence)
     end
@@ -195,7 +195,7 @@ class ContentController < ApplicationController
     end
 
     if update_success
-      successful_response(@content, t(:update_success, model_name: humanized_model_name))
+      successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
       failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.map(&:messages).to_sentence)
     end
@@ -243,9 +243,10 @@ class ContentController < ApplicationController
       'content_type': content_type.name
     }) if Rails.env.production?
 
+    cached_page_name = @content.try(:name)
     @content.destroy
 
-    successful_response(content_deletion_redirect_url, t(:delete_success, model_name: humanized_model_name))
+    successful_response(content_deletion_redirect_url, t(:delete_success, model_name: cached_page_name.presence || humanized_model_name))
   end
 
   # List all recently-deleted content
