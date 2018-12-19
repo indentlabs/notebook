@@ -1,26 +1,20 @@
 class ForumsLinkbuilderService < Service
   def self.worldbuilding_url(page_type)
-    case page_type.name
-    when 'Character'
-      '/forum/characters-board'
-    when 'Creature'
-      '/forum/characters' # [sic]
-    when 'Flora'
-      '/forum/flora'
-    when 'Government'
-      '/forum/governments'
-    when 'Language'
-      '/forum/general-worldbuilding' # wtf did I do here
-    when 'Location'
-      '/forum/locations'
-    when 'Magic'
-      '/forum/magic'
-    when 'Planet'
-      '/forum/planets'
-    when 'Religion'
-      '/forum/religions'
-    when 'Technology'
-      '/forum/technology'
-    end
+    self.content_to_url_map.fetch(page_type, nil)
+  end
+
+  def self.content_to_url_map
+    {
+      'Character': '/forum/characters-board',
+      'Creature': '/forum/characters', # [sic]
+      'Flora': '/forum/flora',
+      'Government': '/forum/governments',
+      'Language': '/forum/general-worldbuilding', # wtf did I do
+      'Location': '/forum/locations',
+      'Magic': '/forum/magic',
+      'Planet': '/forum/planets',
+      'Religion': '/forum/religions',
+      'Technology': '/forum/technology'
+    }
   end
 end
