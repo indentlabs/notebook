@@ -194,10 +194,6 @@ Rails.application.config.to_prepare do
         {
           label: "New #{content_type.name.downcase}",
           href: main_app.new_polymorphic_path(content_type)
-        },
-        {
-          label: 'Customize template',
-          href: main_app.attribute_customization_path(content_type.name.downcase)
         }
       ]
 
@@ -208,6 +204,11 @@ Rails.application.config.to_prepare do
           href: discussions_link
         }
       end
+
+      @navbar_actions << {
+        label: 'Customize template',
+        href: main_app.attribute_customization_path(content_type.name.downcase)
+      }
     end
 
     def set_sidenav_expansion
