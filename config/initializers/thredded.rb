@@ -210,7 +210,11 @@ Rails.application.config.to_prepare do
     end
 
     def set_sidenav_expansion
-      @sidenav_expansion = 'worldbuilding'
+      if related_content_type.present?
+        @sidenav_expansion = 'worldbuilding'
+      else
+        @sidenav_expansion = 'writing'
+      end
     end
 
     private
