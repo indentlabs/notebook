@@ -223,7 +223,13 @@ Rails.application.config.to_prepare do
 
     def related_content_type
       current_path = request.env['REQUEST_PATH']
-      ForumsLinkbuilderService.content_to_url_map.key(current_path)
+      match = ForumsLinkbuilderService.content_to_url_map.detect { |key, base_url| current_path.start_with?(base_url) }
+
+      if match
+        return match[0] # class
+      else
+        return nil
+      end
     end
 
   end
