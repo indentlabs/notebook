@@ -185,6 +185,7 @@ Rails.application.config.to_prepare do
       content_type = related_content_type
       return if content_type.nil?
 
+      content_type = content_type.to_s.constantize
       @navbar_actions = [
         {
           label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
