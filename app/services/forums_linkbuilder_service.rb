@@ -1,6 +1,6 @@
 class ForumsLinkbuilderService < Service
   def self.worldbuilding_url(page_type)
-    self.content_to_url_map.fetch(page_type, nil)
+    self.content_to_url_map.fetch(page_type.name.to_sym, nil)
   end
 
   def self.content_to_url_map
