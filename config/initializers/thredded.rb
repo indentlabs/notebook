@@ -177,7 +177,7 @@ Rails.application.config.to_prepare do
       current_path = request.env['REQUEST_PATH']
 
       if content_type = related_content_type
-        @navbar_color = content_type.constantize.hex_color
+        @navbar_color = content_type.to_s.constantize.hex_color
       end
     end
 
