@@ -11,6 +11,10 @@ class RegistrationsController < Devise::RegistrationsController
     end
   end
 
+  def edit
+    @sidenav_expansion = 'my account'
+  end
+
   private
 
   def sign_up_params

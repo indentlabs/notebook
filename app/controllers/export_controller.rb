@@ -3,6 +3,8 @@ class ExportController < ApplicationController
   before_action :whitelist_pluralized_model, only: [:csv]
 
   def index
+    @sidenav_expansion = 'my account'
+
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed export page', {
       'content count': current_user.content_count
     }) if Rails.env.production?

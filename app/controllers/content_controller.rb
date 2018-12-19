@@ -11,7 +11,7 @@ class ContentController < ApplicationController
   before_action :set_attributes_content_type, only: [:attributes]
 
   before_action :set_navbar_color
-  before_action :set_navbar_actions
+  before_action :set_navbar_actions, except: [:deleted]
   before_action :set_sidenav_expansion
 
   def index
@@ -256,6 +256,9 @@ class ContentController < ApplicationController
       @content_pages[content_type] = content_type.constantize.with_deleted.where('deleted_at > ?', 24.hours.ago).where(user_id: current_user.id)
     end
     @content_pages["Document"] = current_user.documents.with_deleted.where('deleted_at > ?', 24.hours.ago)
+
+    # Override controller
+    @sidenav_expansion = 'my account'
   end
 
   def attributes

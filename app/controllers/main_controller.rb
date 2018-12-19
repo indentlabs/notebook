@@ -34,6 +34,7 @@ class MainController < ApplicationController
     set_random_content # for question
   end
 
+  # deprecated path just kept around for bookmarks for a while
   def notes
     return redirect_to(new_user_session_path) unless user_signed_in?
     redirect_to edit_document_path(current_user.documents.first)
@@ -71,6 +72,7 @@ class MainController < ApplicationController
   def for_designers
   end
 
+  # deprecated path todo cleanup
   def for_friends
     @subscriber_count = User.where(selected_billing_plan_id: [3, 4]).count
     @drawing_date = 'June 15, 2017 12:00pm'.to_date
@@ -82,6 +84,10 @@ class MainController < ApplicationController
   helper_method :resource_name, :resource, :devise_mapping
 
   def feature_voting
+  end
+
+  def privacyinfo
+    @sidenav_expansion = 'help'
   end
 
   private

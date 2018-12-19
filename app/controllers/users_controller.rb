@@ -4,6 +4,8 @@ class UsersController < ApplicationController
   end
 
   def show
+    @sidenav_expansion = 'my account'
+    
     @user    = User.find_by(id: params[:id])
     return redirect_to(root_path, notice: 'That user does not exist.') if @user.nil?
 
