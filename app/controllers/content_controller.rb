@@ -389,16 +389,19 @@ class ContentController < ApplicationController
 
   def set_navbar_actions
     content_type = @content_type_class || content_type_from_controller(self.class)
-    @navbar_actions = [
-      {
+    @navbar_actions = []
+
+    if @current_user_content
+      @navbar_actions << {
         label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
         href: main_app.polymorphic_path(content_type)
-      },
-      {
-        label: "New #{content_type.name.downcase}",
-        href: main_app.new_polymorphic_path(content_type)
       }
-    ]
+    end
+
+    @navbar_actions << {
+      label: "New #{content_type.name.downcase}",
+      href: main_app.new_polymorphic_path(content_type)
+    }
 
     discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
     if discussions_link.present?
