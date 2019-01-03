@@ -1,0 +1,18 @@
+<% if @content.any? %>
+  <div class="collection with-header hoverable">
+    <div class="collection-header blue lighten-1 white-text">
+      <div style="padding: 5px 10px">
+        Public pages
+      </div>
+    </div>
+    <% @tabs.each do |tab| %>
+      <% content_type_class = @user.send(tab).build.class %>
+      <%= link_to send("#{tab}_user_path"), class: "collection-item #{content_type_class.color}-text" do %>
+        <%= pluralize @content[tab].length, tab.to_s.singularize %>
+        <span class="secondary-content">
+          <i class="material-icons <%= content_type_class.color %>-text"><%= content_type_class.icon %></i>
+        </span>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
