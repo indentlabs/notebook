@@ -1,5 +1,7 @@
-<%= render partial: 'layouts/navbar/recent_content_dropdown' %>
-<%= render partial: 'layouts/modals/search' %>
+<% if user_signed_in? %>
+  <%= render partial: 'layouts/navbar/recent_content_dropdown' %>
+  <%= render partial: 'layouts/modals/search' %>
+<% end %>
 
 <div class="navbar-fixed">
   <nav class="navbar nav-extended <%= 'logged-in' if user_signed_in? %>" style="background-color: <%= @navbar_color.presence || '#2196F3' %>">
@@ -34,6 +36,10 @@
               <i class="material-icons">menu</i>
             </a>
           </li>
+        <% else %>
+          <li>
+            <%= link_to 'Home', main_app.root_path %>
+          </li>        
         <% end %>
       </ul>
     </div>
