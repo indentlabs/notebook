@@ -34,23 +34,7 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def set_navbar_actions
-    @navbar_actions = [
-      {
-        label: "Your info",
-        href: '#your-info',
-        target: '_self'
-      },
-      {
-        label: "Preferences",
-        href: '#preferences',
-        target: '_self'
-      },
-      {
-        label: 'More options',
-        href: '#more-options',
-        target: '_self'
-      }
-    ]
+    @navbar_actions = []
   end
 
   protected
