@@ -29,13 +29,13 @@ class ExportController < ApplicationController
 
   def notebook_json
     report_to_mixpanel 'json', 'notebook'
-    json_dump = current_user.content.map { |category, content| {"#{category}": fill_relations(category.constantize, content)} }.to_json
+    json_dump = current_user.content.except('Document').map { |category, content| {"#{category}": fill_relations(category.constantize, content)} }.to_json
     send_data json_dump, filename: "notebook-#{Date.today}.json"
   end
 
   def notebook_xml
     report_to_mixpanel 'xml', 'notebook'
-    xml_dump = current_user.content.map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_xml
+    xml_dump = current_user.content.except('Document').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_xml
     send_data xml_dump, filename: "notebook-#{Date.today}.xml"
   end
 
@@ -120,7 +120,7 @@ class ExportController < ApplicationController
   end
 
   def content_to_outline
-    content_types = current_user.content.keys
+    content_types = current_user.content.except('Document').keys
 
     text = ""
     content_types.each do |content_type|
