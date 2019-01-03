@@ -4,70 +4,21 @@ Rails.application.routes.draw do
   get 'customization/content_types'
   post 'customization/toggle_content_type'
 
+  # User-centric stuff
   devise_for :users, :controllers => { registrations: 'registrations' }
   resources :users do
-    get :characters, on: :member
-    get :locations,  on: :member
-    get :items,      on: :member
-    get :creatures,  on: :member
-    get :races,      on: :member
-    get :religions,  on: :member
-    get :magics,     on: :member
-    get :languages,  on: :member
-    get :floras,     on: :member
-    get :towns,      on: :member
-    get :countries,  on: :member
-    get :landmarks,  on: :member
-    get :scenes,     on: :member
-    get :groups,     on: :member
-    get :universes,  on: :member
-    get :planets, on: :member
-    get :technologies, on: :member
-    get :deities, on: :member
-    get :governments, on: :member
-    get :vehicles, on: :member
-    get :buildings, on: :member
-    get :traditions, on: :member
-    get :conditions, on: :member
-    get :jobs, on: :member
-    #<users_page_types>
+    # get :characters, on: :member <...etc...>
+    Rails.application.config.content_types[:all].each do |content_type|
+      get content_type.name.downcase.pluralize.to_sym, on: :member
+    end
   end
-
-  delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
-
-  get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
-
-  # Main pages
-  root to: 'main#index'
-
-  # Info pages
-  scope '/about' do
-    #get '/notebook', to: 'main#about_notebook', as: :about_notebook
-    get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
-  end
-
-  # Landing pages
-  scope '/for' do
-    get '/writers', to: 'main#for_writers', as: :writers_landing
-    get '/roleplayers', to: 'main#for_roleplayers', as: :roleplayers_landing
-    get '/designers', to: 'main#for_designers', as: :designers_landing
-
-    get '/friends', to: 'main#for_friends', as: :friends_landing
-  end
-
-  scope '/vote' do
-    get '/community', to: 'main#feature_voting', as: :community_voting
-    get '/:id', to: 'voting#vote', as: :cast_vote
-  end
-
-  # User-centric stuff
   scope '/my' do
-    get '/content',     to: 'main#dashboard', as: :dashboard
-    get '/content/recent', to: 'main#recent_content', as: :recent_content
+    get '/content',         to: 'main#dashboard', as: :dashboard
+    get '/content/recent',  to: 'main#recent_content', as: :recent_content
     get '/content/deleted', to: 'content#deleted', as: :recently_deleted_content
-    get '/prompts', to: 'main#prompts', as: :prompts
+    get '/prompts',         to: 'main#prompts', as: :prompts
 
-    get '/scratchpad', to: 'main#notes', as: :notes
+    get '/scratchpad',      to: 'main#notes', as: :notes
     resources :documents
 
     # Billing
@@ -85,6 +36,24 @@ Rails.application.routes.draw do
     end
   end
   delete 'delete_my_account', to: 'users#delete_my_account'
+  delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
+  get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
+
+  # Main pages
+  root to: 'main#index'
+
+  # Info pages
+  scope '/about' do
+    #get '/notebook', to: 'main#about_notebook', as: :about_notebook
+    get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
+  end
+
+  # Landing pages
+  scope '/for' do
+    get '/writers', to: 'main#for_writers', as: :writers_landing
+    get '/roleplayers', to: 'main#for_roleplayers', as: :roleplayers_landing
+    get '/designers', to: 'main#for_designers', as: :designers_landing
+  end
 
   # Lab apps
   scope '/app' do
@@ -108,61 +77,17 @@ Rails.application.routes.draw do
   scope '/plan' do
     # Core content types
     resources :universes do
-      get :characters, on: :member
-      get :locations,  on: :member
-      get :items,      on: :member
-      get :creatures,  on: :member
-      get :races,      on: :member
-      get :religions,  on: :member
-      get :magics,     on: :member
-      get :languages,  on: :member
-      get :floras,     on: :member
-      get :scenes,     on: :member
-      get :groups,     on: :member
-      get :countries,  on: :member
-      get :towns,      on: :member
-      get :landmarks,  on: :member
-      get :planets, on: :member
-    get :technologies, on: :member
-    get :deities, on: :member
-    get :governments, on: :member
-    get :vehicles, on: :member
-    get :buildings, on: :member
-    get :traditions, on: :member
-    get :conditions, on: :member
-    get :jobs, on: :member
-    #<universes_page_types>
+      # get :characters, on: :member <...etc...>
+      Rails.application.config.content_types[:all_non_universe].each do |content_type|
+        get content_type.name.downcase.pluralize.to_sym, on: :member
+      end
     end
-    resources :characters do
-      get :autocomplete_character_name, on: :collection, as: :autocomplete_name
+    Rails.application.config.content_types[:all_non_universe].each do |content_type|
+      # resources :characters do
+      resources content_type.name.downcase.pluralize.to_sym do
+        get :changelog, on: :member
+      end
     end
-    resources :items
-    resources :locations do
-      get :autocomplete_location_name, on: :collection, as: :autocomplete_name
-    end
-
-    # Extended content types
-    resources :creatures
-    resources :races
-    resources :religions
-    resources :magics
-    resources :languages
-    resources :floras
-    resources :towns
-    resources :countries
-    resources :landmarks
-    resources :scenes
-    resources :groups
-    resources :planets
-    resources :technologies
-    resources :deities
-    resources :governments
-    resources :vehicles
-    resources :buildings
-    resources :traditions
-    resources :conditions
-    resources :jobs
-    #<page_type_resources>
 
     # Content attributes
     resources :attributes, except: [:show]
@@ -172,6 +97,7 @@ Rails.application.routes.draw do
     # Image handling
     delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion
 
+    # Attributes
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
 
     # Coming Soon TM
