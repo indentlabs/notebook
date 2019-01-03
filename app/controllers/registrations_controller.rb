@@ -22,7 +22,10 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def account_update_params
-    params.require(:user).permit(:name, :email, :username, :password, :password_confirmation, :email_updates, :fluid_preference)
+    params.require(:user).permit(
+      :name, :email, :username, :password, :password_confirmation, :email_updates, :fluid_preference,
+      :bio, :favorite_genre, :favorite_author, :interests, :age, :location, :gender
+    )
   end
 
   def update_resource(resource, params)
