@@ -11,7 +11,8 @@ class ContentController < ApplicationController
   before_action :set_attributes_content_type, only: [:attributes]
 
   before_action :set_navbar_color
-  before_action :set_navbar_actions, except: [:deleted]
+  before_action :set_general_navbar_actions, except: [:deleted, :show]
+  before_action :set_specific_navbar_actions, only: [:show]
   before_action :set_sidenav_expansion
 
   def index
@@ -49,6 +50,11 @@ class ContentController < ApplicationController
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
     @serialized_content = ContentSerializer.new(@content)
+
+    @navbar_actions.unshift({
+      label: @serialized_content.name,
+      href: main_app.polymorphic_path(@content)
+    }) if user_signed_in?
 
     return redirect_to(root_path) if @content.user.nil? # deleted user's content
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
@@ -387,7 +393,8 @@ class ContentController < ApplicationController
     @navbar_color = content_type.try(:hex_color) || '#2196F3'
   end
 
-  def set_navbar_actions
+  # For index, new, edit
+  def set_general_navbar_actions
     content_type = @content_type_class || content_type_from_controller(self.class)
     @navbar_actions = []
 
@@ -415,6 +422,26 @@ class ContentController < ApplicationController
       label: 'Customize template',
       href: main_app.attribute_customization_path(content_type.name.downcase)
     }
+  end
+
+  # For showing a specific piece of content
+  def set_specific_navbar_actions
+    content_type = @content_type_class || content_type_from_controller(self.class)
+    @navbar_actions = []
+
+    if user_signed_in?
+      if @current_user_content
+        @navbar_actions << {
+          label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
+          href: main_app.polymorphic_path(content_type)
+        }
+      end
+
+      @navbar_actions << {
+        label: "New #{content_type.name.downcase}",
+        href: main_app.new_polymorphic_path(content_type)
+      }
+    end
   end
 
   def set_sidenav_expansion
