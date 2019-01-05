@@ -48,7 +48,8 @@ class ApplicationController < ActionController::Base
       current_user.user_content_type_activators.pluck(:content_type)
     )
 
-    @current_user_content = current_user.content(content_types: @activated_content_types)
+    # We always want to cache Universes, even if they aren't explicitly turned on.
+    @current_user_content = current_user.content(content_types: @activated_content_types + ['Universe'])
     @current_user_content['Document'] = current_user.documents
   end
 

@@ -28,7 +28,7 @@ module HasContent
       polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :privacy]
       where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL'
 
-      sql = content_types.map do |page_type|
+      sql = content_types.uniq.map do |page_type|
         "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
       end.join(' UNION ALL ') + ' ORDER BY page_type, id'
 
@@ -53,7 +53,7 @@ module HasContent
       polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :privacy]
       where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL'
 
-      sql = content_types.map do |page_type|
+      sql = content_types.uniq.map do |page_type|
         "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
       end.join(' UNION ALL ')
 
