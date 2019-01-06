@@ -23,4 +23,8 @@ class ForumsLinkbuilderService < Service
       'Tradition': '/forum/traditions'
     }
   end
+
+  def self.is_discussions_page?(url)
+    return url.start_with?('/forum/')
+  end
 end

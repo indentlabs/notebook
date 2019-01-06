@@ -201,7 +201,8 @@ Rails.application.config.to_prepare do
       if discussions_link.present?
         @navbar_actions << {
           label: 'Discussions',
-          href: discussions_link
+          href: discussions_link,
+          class: ForumsLinkbuilderService.is_discussions_page?(request.env['REQUEST_PATH']) ? 'active' : nil
         }
       end
 
