@@ -63,7 +63,7 @@
                 select_tag "#{raw_model.class.name.downcase}[custom_attribute_values][][value]",
                   options_for_select(
                     @universe_dropdown_options.compact,
-                    content.universe.try(:id)
+                    content.is_a?(ContentSerializer) ? content.universe.try(:id) : @universe_scope.try(:id)
                   ),
                   include_blank: current_user.on_premium_plan? || raw_model.is_a?(Character) || raw_model.is_a?(Location) || raw_model.is_a?(Item)
               %>
