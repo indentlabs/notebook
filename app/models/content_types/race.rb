@@ -33,11 +33,11 @@ class Race < ApplicationRecord
   end
 
   def self.color
-    'light-green'
+    'darken-2 light-green'
   end
 
   def self.hex_color
-    '#8BC34A'
+    '#689F38'
   end
 
   def self.icon
