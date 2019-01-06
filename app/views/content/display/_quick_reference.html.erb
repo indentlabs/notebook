@@ -31,7 +31,13 @@
               <% next unless field[:value].present? %>
               <tr>
                 <td class="grey-text text-darken-1"><%= field[:label] %></td>
-                <td><%= field[:value] %></td>
+                <td>
+                  <% if field[:type] == 'universe' %>
+                    <%= link_to serialized_content.data[:universe][:name], universe_path(field[:value]) %>
+                  <% else %>
+                    <%= field[:value] %>
+                  <% end %>
+                </td>
               </tr>
             <% end %>
           </table>
