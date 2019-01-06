@@ -182,6 +182,7 @@ Rails.application.config.to_prepare do
     end
 
     def set_navbar_actions
+      return unless user_signed_in?
       content_type = related_content_type
       return if content_type.nil?
 
