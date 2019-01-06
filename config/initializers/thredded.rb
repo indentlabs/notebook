@@ -166,3 +166,72 @@ end
 Rails.application.config.to_prepare do
   Thredded::TopicPolicy.prepend AllowUsersToDeleteOwnTopics
 end
+
+Rails.application.config.to_prepare do
+  Thredded::ApplicationController.module_eval do
+    before_action :set_navbar_color
+    before_action :set_navbar_actions
+    before_action :set_sidenav_expansion
+
+    def set_navbar_color
+      current_path = request.env['REQUEST_PATH']
+
+      if content_type = related_content_type
+        @navbar_color = content_type.to_s.constantize.hex_color
+      end
+    end
+
+    def set_navbar_actions
+      content_type = related_content_type
+      return if content_type.nil?
+
+      content_type = content_type.to_s.constantize
+      @navbar_actions = [
+        {
+          label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
+          href: main_app.polymorphic_path(content_type)
+        },
+        {
+          label: "New #{content_type.name.downcase}",
+          href: main_app.new_polymorphic_path(content_type)
+        }
+      ]
+
+      discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
+      if discussions_link.present?
+        @navbar_actions << {
+          label: 'Discussions',
+          href: discussions_link,
+          class: ForumsLinkbuilderService.is_discussions_page?(request.env['REQUEST_PATH']) ? 'active' : nil
+        }
+      end
+
+      @navbar_actions << {
+        label: 'Customize template',
+        href: main_app.attribute_customization_path(content_type.name.downcase)
+      }
+    end
+
+    def set_sidenav_expansion
+      if related_content_type.present?
+        @sidenav_expansion = 'worldbuilding'
+      else
+        @sidenav_expansion = 'writing'
+      end
+    end
+
+    private
+
+    def related_content_type
+      current_path = request.env['REQUEST_PATH']
+      match = ForumsLinkbuilderService.content_to_url_map.detect { |key, base_url| current_path.start_with?(base_url) }
+
+      if match
+        return match[0] # class
+      else
+        return nil
+      end
+    end
+
+  end
+end

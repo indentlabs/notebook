@@ -21,6 +21,10 @@ class Condition < ActiveRecord::Base
     'text-darken-1 lime'
   end
 
+  def self.hex_color
+    '#CDDC39'
+  end
+
   def self.icon
     'bubble_chart'
   end

@@ -28,6 +28,10 @@ class Language < ApplicationRecord
     'blue'
   end
 
+  def self.hex_color
+    '#2196F3'
+  end
+
   def self.icon
     'forum'
   end

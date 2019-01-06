@@ -36,6 +36,10 @@ class Flora < ApplicationRecord
     'text-lighten-3 lighten-3 teal'
   end
 
+  def self.hex_color
+    '#80CBC4'
+  end
+
   def self.icon
     'local_florist'
   end

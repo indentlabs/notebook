@@ -1,168 +1,13 @@
-<ul id="help-dropdown" class="dropdown-content">
-  <li>
-    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new' do %>
-      <i class="material-icons left">feedback</i>
-      Report a problem
-    <% end %>
-  </li>
-  <li>
-    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new' do %>
-      <i class="material-icons left">feedback</i>
-      Request a feature
-    <% end %>
-  </li>
-  <li>
-    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new' do %>
-      <i class="material-icons left">feedback</i>
-      Leave feedback
-    <% end %>
-  </li>
-  <li class="divider"></li>
-  <li>
-    <%= link_to main_app.privacy_policy_path do %>
-      <i class="material-icons left">verified_user</i>
-      Privacy policy
-    <% end %>
-  </li>
-</ul>
-
-<ul id="recent-content-dropdown" class="dropdown-content">
 <% if user_signed_in? %>
-  <% current_user.recent_content_list.each do |content| %>
-    <% content_class = content.class %>
-    <li>
-      <%= link_to main_app.polymorphic_path(content), class: "#{content_class.color}-text" do %>
-        <i class="material-icons left"><%= content_class.icon %></i>
-        <%= content.name %>
-      <% end %>
-    </li>
-  <% end %>
-  <% if current_user.content_count > 0 %>
-    <li class="divider"></li>
-    <li>
-      <%= link_to 'More...', main_app.recent_content_path, class: 'blue-text' %>
-    </li>
-  <% end %>
+  <%= render partial: 'layouts/navbar/recent_content_dropdown' %>
+  <%= render partial: 'layouts/modals/search' %>
 <% end %>
-</ul>
-
-<div id="search-modal" class="modal">
-  <div class="modal-content">
-    <h4>Your handy pagefinder</h4>
-    <p>
-      Type anything you want below. It'll match page names (like the names of your characters, locations, and so on), but also
-      anything you've typed in any of those pages' fields as well. For example, searching "bald" will show you all your characters
-      that you've entered "bald" in for their hair style.
-    </p>
-    <%= form_tag main_app.search_path, method: :get do %>
-      <input type="search" name="q" value="" placeholder="search your notebook" />
-      <button type="submit" class="btn btn-primary blue">Search everything</button>
-    <% end %>
-  </div>
-  <div class="modal-footer">
-    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
-  </div>
-</div>
-
-<ul id="desktop-user-dropdown" class="dropdown-content">
-  <% if current_user %>
-    <li>
-      <%= link_to current_user do %>
-        <i class="material-icons left">person</i>
-        Creator profile
-        <span class="badge right">&nbsp;</span>
-      <% end %>
-    </li>
-
-    <li>
-      <%= link_to main_app.subscription_path do %>
-        <i class="material-icons left">credit_card</i>
-        Account billing
-        <span class="badge right">&nbsp;</span>
-      <% end %>
-    </li>
-    <li>
-      <%= link_to main_app.edit_user_registration_path do %>
-        <i class="material-icons left">settings</i>
-        Account settings
-        <span class="badge right">&nbsp;</span>
-      <% end %>
-    </li>
-    <li class="divider"></li>
-  <% end %>
-  <li>
-    <%= link_to main_app.prompts_path do %>
-      <i class="material-icons left">lightbulb_outline</i>
-      Worldbuilding prompts
-    <% end %>
-  </li>
-  <li>
-    <%= link_to main_app.notebook_export_path do %>
-      <i class="material-icons left">file_download</i>
-      Notebook downloads
-    <% end %>
-  </li>
-  <li>
-    <%= link_to main_app.recently_deleted_content_path do %>
-      <i class="material-icons left">delete</i>
-      Recently-deleted pages
-    <% end %>
-  </li>
-  <li class="divider"></li>
-  <li>
-    <%= link_to main_app.destroy_user_session_path do %>
-      <i class="material-icons left">power_settings_new</i>
-      Sign out
-    <% end %>
-  </li>
-</ul>
-
-<ul id="login-slide" class="sidenav">
-  <li><%= link_to 'Sign in', main_app.new_user_session_path %></li>
-  <li><%= link_to 'Sign up', main_app.new_user_registration_path %></li>
-  <li class="divider"></li>
-  <li><%= link_to 'Report a problem', 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new' %></li>
-  <li><%= link_to 'Request a feature', 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new' %></li>
-  <li><%= link_to 'Leave feedback', 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new' %></li>
-  <li class="divider"></li>
-  <li><%= link_to 'Privacy policy', main_app.privacy_policy_path %></li>
-</ul>
 
 <div class="navbar-fixed">
-  <nav class="blue">
+  <nav class="navbar nav-extended <%= 'logged-in' if user_signed_in? %>" style="background-color: <%= @navbar_color.presence || '#2196F3' %>">
     <div class="nav-wrapper">
-      <%= link_to 'Notebook.ai', main_app.root_url, class: 'brand-logo center' %>
-
       <ul class="right">
-        <li>
-          <%= link_to 'https://www.notebook.ai/forum/announcements/remembering-james-brown' do %>
-          <div class="hide-on-small-and-down"><i class="material-icons white-text">favorite_border</i></div>
-          <% end %>
-        </li>
         <% if user_signed_in? %>
-        <li>
-          <a class="dropdown-trigger tooltipped" href="#!" data-target="help-dropdown" data-position="bottom" data-delay="100" data-tooltip="Need help?">
-            <i class="material-icons">help</i>
-          </a>
-        </li>
-        <li>
-          <a class="dropdown-trigger tooltipped" href="#!" data-target="desktop-user-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your content">
-            <div class="hide-on-med-and-up"><i class="material-icons">book</i></div>
-            <div class="hide-on-small-and-down"><%= current_user.name %> &nbsp; ▾</div>
-          </a>
-        </li>
-        <% else %>
-          <li class="hide-on-med-and-down"><%= link_to 'Sign in', main_app.new_user_session_path %></li>
-          <li class="hide-on-med-and-down"><%= link_to 'Sign up', main_app.new_user_registration_path %></li>
-        <% end %>
-      </ul>
-      <ul class="left">
-        <% if user_signed_in? %>
-          <% if current_user && (current_user.universes.count > 0 || current_user.contributable_universes.count > 0) %>
-            <li>
-              <%= render partial: 'universes/picker' %>
-            </li>
-          <% end %>
           <% if current_user.recent_content_list.any? %>
             <li>
               <a class="dropdown-trigger tooltipped" href="#!" data-target="recent-content-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your recently-edited pages">
@@ -177,12 +22,50 @@
           </li>
         <% else %>
           <li>
-            <a href="#" data-target="login-slide" class="button-collapse">
+            <%= link_to 'Sign in', main_app.new_user_session_path %>
+          </li>
+          <li>
+            <%= link_to 'Sign up', main_app.new_user_registration_path %>
+          </li>
+        <% end %>
+      </ul>
+      <ul class="left">
+        <% if user_signed_in? %>
+          <li>
+            <a class="sidenav-trigger" href="#" data-target="sidenav-left">
               <i class="material-icons">menu</i>
             </a>
+          </li>
+          <li class="hide-on-large-only">
+            <%= link_to main_app.root_path, class: 'tooltipped', data: { tooltip: 'Your dashboard' } do %>
+              <i class="material-icons">dashboard</i>
+            <% end %>
+          </li>
+        <% else %>
+          <li>
+            <%= link_to 'Home', main_app.root_path %>
           </li>
         <% end %>
       </ul>
     </div>
+
+    <% if @navbar_actions.present? && @navbar_actions.any? %>
+      <style>
+        main {
+          padding-top: 50px;
+        }
+      </style>
+      <div class="nav-content">
+        <ul class="tabs tabs-transparent">
+          <% @navbar_actions.each do |action| %>
+            <li class="tab">
+              <a class="white-text <%= 'active' if action[:href] == request.env['REQUEST_PATH'] %> <%= action[:class] %>" href="<%= action[:href] %>" target="<%= action[:target] || '_self' %>"">
+                <%= action[:label] %>
+              </a>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
   </nav>
 </div>

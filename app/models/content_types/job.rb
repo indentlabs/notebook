@@ -21,6 +21,10 @@ class Job < ActiveRecord::Base
     'text-lighten-1 brown'
   end
 
+  def self.hex_color
+    '#795548'
+  end
+
   def self.icon
     'work'
   end

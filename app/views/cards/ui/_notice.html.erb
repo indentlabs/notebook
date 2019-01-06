@@ -1,7 +1,8 @@
 <% if notice %>
-  <div class="card-panel light-blue darken-3 hoverable">
-    <span class="white-text">
-      <%= notice.html_safe unless notice.blank? %>
-    </span>
-  </div>
+  <%= content_for :javascript do %>
+    M.toast({
+      html: "<%= notice.gsub('"', '\"').html_safe %>",
+      classes: 'rounded'
+    })
+  <% end %>
 <% end %>

@@ -1,20 +1,24 @@
 <%= form_for @document do |f| %>
-  <div>
-    <div class="grey-text autosave-bar">
-      <i class="material-icons js-autosave-icon grey-text">save</i>
-      <span class="js-autosave-status">
-        This document will automatically save as you make changes.
-      </span>
-    </div>
-    <%= f.text_field :title, placeholder: 'Untitled document', value: f.object.title.presence || 'Untitled document', style: 'font-size: 150%' %>
-  </div>
+  <%= content_for :full_width_page_header do %>
+    <%= render partial: 'documents/components/document_name_bar', locals: { document: @document, f: f } %>
+    <%= render partial: 'documents/components/autosave_bar', locals: { document: @document } %>
 
-  <div id="editor" class="editable"><%= @document.body.try(:html_safe) %></div>
+    <div class="row">
+      <div class="col s12 m8 l8 offset-l1">
+        <div id="editor" class="editable"><%= @document.body.try(:html_safe) %></div>
+      </div>
+      <div class="col l2 m4 smart-sidebar">
+        <%= render partial: 'documents/components/smart_sidebar', locals: { document: @document } %>
+      </div>
+    </div>
+  <% end %>
+
 
   <div class="grey-text autosave-bar">
     <i class="material-icons js-autosave-icon grey-text">save</i>
     <span class="js-autosave-status">
-      This document will automatically save as you make changes. It will also expand as you write!
+      This document will automatically save as you make changes.
+      Highlight any text to bring up formatting options.
     </span>
   </div>
 <% end %>

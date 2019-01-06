@@ -17,18 +17,20 @@
   else
     list_name_lookup_cache = {}
   end
-
-  #raise list_name_lookup_cache.inspect
 %>
 
-<div class="card hoverable">
+<div class="hoverable card">
   <div class="card-image">
     <% images = ImageUpload.where(content_type: content_type_name, content_id: content_list.pluck(:id)) %>
-    <% if rand(3) < 2 && images.any? %>
-      <%= image_tag images.sample.src(:large), class: 'activator', style: 'height: 265px' %>
-    <% else %>
-      <%= image_tag "card-headers/#{content_type_pluralized}.jpg", class: 'activator', style: 'height: 265px' %>
-    <% end %>
+    <%
+      category_image = if rand(3) < 2 && images.any?
+        images.sample.src(:large)
+      else
+        asset_path("card-headers/#{content_type_pluralized}.jpg")
+      end
+    %>
+    <div class="activator" style="height: 265px; background: url('<%= category_image %>'); background-size: cover;">
+    </div>
     <span class="card-title bordered-text" style="font-size: 200%">
       <% if defined?(card_title) && !card_title.blank? %>
         <%= card_title %>
@@ -37,10 +39,11 @@
       <% end %>
     </span>
     <% if user_signed_in? %>
-      <%= link_to new_polymorphic_path(content_type), class: "btn-floating btn-large halfway-fab waves-effect waves-light #{content_type_class.color} tooltipped",
+      <%= link_to new_polymorphic_path(content_type), class: "btn-floating btn-large halfway-fab waves-effect waves-light #{content_type_class.color} tooltipped #{'grey' unless current_user.can_create?(content_type_class)}",
         data: {
           position: 'bottom',
-          tooltip: "Create a #{content_type.to_s}",
+          tooltip: current_user.can_create?(content_type_class) ? "Create a#{'n' if %w(a e i o u).include?(content_type.to_s[0])} #{content_type.to_s}"
+                                                                : "#{content_type.to_s.pluralize.titleize} require a Premium subscription to create.",
           enterDelay: 50
         } do %>
         <i class="material-icons">add</i>

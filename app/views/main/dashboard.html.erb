@@ -1,18 +1,68 @@
-<% if @content %>
-  <div class="row">
+<div class="row">
+  <div class="col s12 m3">
+    <%= link_to documents_path do %>
+      <div class="hoverable card <%= Document.color %>">
+        <div class="card-content white-text">
+          <span class="card-title">
+            <span class="right white-text"><%= @current_user_content['Document'].count %></span>
+            Documents
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="col s12 m3">
+    <%= link_to thredded_path do %>
+      <div class="hoverable card blue">
+        <div class="card-content white-text">
+          <span class="card-title">
+            <span class="right white-text">
+              <%= @unread_threads %><%= "/#{@unread_private_messages}" if @unread_private_messages > 0 %>
+            </span>
+            Discussions
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="col s12 m3">
+    <%= link_to prompts_path do %>
+      <div class="hoverable card orange">
+        <div class="card-content white-text">
+          <span class="card-title">
+            Prompts
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="col s12 m3">
+    <%= link_to current_user do %>
+      <div class="hoverable card green">
+        <div class="card-content white-text">
+          <span class="card-title">
+            Profile
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @content %>
     <div class="col s12">
       <%= render partial: 'cards/serendipitous/content_question', locals: { content: @content } %>
     </div>
-  </div>
-<% end %>
+  <% end %>
 
-<%
-  s_width = 12
-  m_width = 6
-  l_width = 6
-%>
+  <%
+    s_width = 12
+    m_width = 6
+    l_width = 6
+  %>
 
-<div class="row">
   <% current_user_universe_ids = current_user.universes.pluck(:id) %>
   <% @activated_content_types.each do |content_type| %>
     <%
@@ -33,13 +83,23 @@
     </div>
   <% end %>
 
-  <% if @activated_content_types.length < 5 && BillingPlan::PREMIUM_IDS.include?(current_user.selected_billing_plan_id) %>
-    <div class="dashboard-row col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
-      <%= render partial: 'content/cards/activate_premium_pages_cta' %>
-    </div>
-  <% end %>
-
-  <div class="dashboard-row col <%= "s#{s_width} m#{m_width} l#{l_width}" %> hide-on-med-and-up">
-    <%= render partial: 'content/cards/mobile_links' %>
+  <div class="dashboard-row col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
+    <%= link_to customization_content_types_path do %>
+      <div class="hoverable card">
+        <div class="card-image">
+          <%= image_tag "card-headers/more.jpg", height: 265 %>
+          <span class="card-title bordered-text">
+            <div>
+              <i class="material-icons white-text" style="position: relative; top: 3px;">add</i>
+              <%= Rails.application.config.content_types[:all].count - @activated_content_types.count %> other page types available
+            </div>
+          </span>
+        </div>
+      </div>
+    <% end %>
   </div>
 </div>
+
+<% 5.times do %>
+  <br />
+<% end %>

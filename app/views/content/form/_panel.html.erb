@@ -3,7 +3,6 @@
   raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
 %>
 
-
 <div id="<%= category[:name].gsub("'", '') %>_panel" class="row panel" style="display: none">
   <% if category[:name] == 'gallery' %>
     <%= render partial: 'content/form/gallery/panel', locals: { f: f, content: content } %>
@@ -64,7 +63,7 @@
                 select_tag "#{raw_model.class.name.downcase}[custom_attribute_values][][value]",
                   options_for_select(
                     @universe_dropdown_options.compact,
-                    content.universe.try(:id)
+                    content.is_a?(ContentSerializer) ? content.universe.try(:id) : @universe_scope.try(:id)
                   ),
                   include_blank: current_user.on_premium_plan? || raw_model.is_a?(Character) || raw_model.is_a?(Location) || raw_model.is_a?(Item)
               %>

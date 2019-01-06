@@ -1,90 +1,116 @@
-<h1>Your recently-deleted pages</h1>
-<p>
-  Pages can be "un-deleted" for up to 24 hours after deletion.
-  After this time, they are permanently deleted and cannot be recovered.
-  Use this page if you've accidentally deleted a page and need to recover it.
-</p>
+<div class="row">
 
-<% showed_any_content = false %>
-
-<% @content_pages.each do |content_type_name, content_list| %>
-  <% next unless content_list.any? %>
-  <% showed_any_content = true %>
-  <h2><%= content_type_name.pluralize %></h2>
-
-  <%
-    content_type = content_type_name.constantize
-    category_ids_for_this_content_type = AttributeCategory.where(entity_type: content_type_name.downcase, user_id: current_user).pluck(:id)
-    name_field = AttributeField.find_by(field_type: 'name', attribute_category_id: category_ids_for_this_content_type)
-
-    content_ids = content_list.pluck(:id)
-    if name_field
-      list_name_lookup_cache = Hash[
-        name_field.attribute_values.where(
-          entity_type: content_type_name
-        ).pluck(:entity_id, :value)
-      ]
-    else
-      list_name_lookup_cache = {}
-    end
-  %>
-
-  <ul class="collection" style='border: 0'>
-    <% content_list.each do |content| %>
-      <li class="collection-item avatar">
-        <%= link_to content do %>
-          <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
-        <% end %>
-        <span class="title">
-          <%= (content.respond_to?(:label) ? content.label : list_name_lookup_cache[content.id].presence || content.name) %>
-          <small class="grey-text">
-            <% universe_field_value = content.universe_field_value %>
-            <% if universe_field_value.present? %>
-              <i class="material-icons"><%= Universe.icon %></i>
-              <%# todo remove this hack %>
-              <%
-                if universe_field_value.is_a?(Integer)
-                  universe_field_value = Universe.find_by(id: universe_field_value, user: content.user)
-                end
-              %>
-              <% if universe_field_value %>
-                <%= link_to universe_field_value.try(:name), universe_field_value %>
-              <% end %>
-            <% end %>
-          </small>
-          <% if user_signed_in? && (
-              (content.universe_field_value.present? && universe_field_value.try(:user) != current_user) ||
-              (content.is_a?(Universe) && content.user != current_user)
-            )
-          %>
-            <span class="new badge grey white-text tooltipped" style="float: inherit; margin: 0;" data-badge-caption="contributing"
-              data-position="bottom" data-delay="100" data-tooltip="You have been added as a contributor to this universe and its content."></span>
-          <% end %>
-        </span>
-        <p class='grey-text'>
-          <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.deleted_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
-            <i class="material-icons">delete</i>
-            deleted <%= time_ago_in_words content.deleted_at %> ago
-          </span>
-          <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.deleted_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
-            <i class="material-icons">alarm</i>
-            recoverable for the next <%= distance_of_time_in_words(DateTime.current, content.deleted_at + 24.hours) %>
-          </span>
+  <div class="col s12">
+    <div class="card red lighten-5">
+      <div class="card-content">
+        <p class="grey-text text-darken-3">
+          Pages can be "un-deleted" for up to 24 hours after deletion.
+          After this time, they are permanently deleted and cannot be recovered.
+          Use this page if you've accidentally deleted a page and need to recover it.
         </p>
-        <span class="secondary-content">
-          <%= form_for content do |f| %>
-            <%= f.hidden_field :deleted_at, value: nil %>
-            <%= f.submit 'Restore this page (undelete)', class: 'white btn black-text' %>
-          <% end %>
-        </span>
-      </li>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <% showed_any_content = false %>
+
+    <% @content_pages.each do |content_type_name, content_list| %>
+      <% next unless content_list.any? %>
+      <% showed_any_content = true %>
+
+      <%
+        content_type = content_type_name.constantize
+        category_ids_for_this_content_type = AttributeCategory.where(entity_type: content_type_name.downcase, user_id: current_user).pluck(:id)
+        name_field = AttributeField.find_by(field_type: 'name', attribute_category_id: category_ids_for_this_content_type)
+
+        content_ids = content_list.pluck(:id)
+        if name_field
+          list_name_lookup_cache = Hash[
+            name_field.attribute_values.where(
+              entity_type: content_type_name
+            ).pluck(:entity_id, :value)
+          ]
+        else
+          list_name_lookup_cache = {}
+        end
+      %>
+
+      <div class="row">
+        <div class="col s12 m3 l2 grey-text">
+          <h4 style="text-align: right">
+            <%= content_type_name.pluralize %>
+          </h4>
+        </div>
+        <div class="col s12 m9 l9 offset-l1">
+          <div class="card">
+            <div class="card-content" style="padding: 0;">
+              <ul class="collection" style='border: 0'>
+                <% content_list.each do |content| %>
+                  <li class="collection-item avatar">
+                    <%= link_to content do %>
+                      <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
+                    <% end %>
+                    <span class="title">
+                      <%= (content.respond_to?(:label) ? content.label : list_name_lookup_cache[content.id].presence || content.name) %>
+                      <small class="grey-text">
+                        <% universe_field_value = content.universe_field_value %>
+                        <% if universe_field_value.present? %>
+                          <i class="material-icons"><%= Universe.icon %></i>
+                          <%# todo remove this hack %>
+                          <%
+                            if universe_field_value.is_a?(Integer)
+                              universe_field_value = Universe.find_by(id: universe_field_value, user: content.user)
+                            end
+                          %>
+                          <% if universe_field_value %>
+                            <%= link_to universe_field_value.try(:name), universe_field_value %>
+                          <% end %>
+                        <% end %>
+                      </small>
+                      <% if user_signed_in? && (
+                          (content.universe_field_value.present? && universe_field_value.try(:user) != current_user) ||
+                          (content.is_a?(Universe) && content.user != current_user)
+                        )
+                      %>
+                        <span class="new badge grey white-text tooltipped" style="float: inherit; margin: 0;" data-badge-caption="contributing"
+                          data-position="bottom" data-delay="100" data-tooltip="You have been added as a contributor to this universe and its content."></span>
+                      <% end %>
+                    </span>
+                    <p class='grey-text'>
+                      <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.deleted_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
+                        <i class="material-icons">delete</i>
+                        deleted <%= time_ago_in_words content.deleted_at %> ago
+                      </span>
+                      <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.deleted_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
+                        <i class="material-icons">alarm</i>
+                        recoverable for the next <%= distance_of_time_in_words(DateTime.current, content.deleted_at + 24.hours) %>
+                      </span>
+                    </p>
+                    <span class="secondary-content">
+                      <%= form_for content do |f| %>
+                        <%= f.hidden_field :deleted_at, value: nil %>
+                        <%= f.submit 'Recover', class: 'white btn black-text' %>
+                      <% end %>
+                    </span>
+                  </li>
+                <% end %>
+
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <% end %>
 
-  </ul>
-<% end %>
+    <% if !showed_any_content %>
+      <p class="grey-text">
+        Looks like you haven't deleted any pages in the past 24 hours. If you do, they will show up here for a limited time.
+      </p>
+    <% end %>
 
-<% if !showed_any_content %>
-  <p class="grey-text">
-    Looks like you haven't deleted any pages in the past 24 hours. If you do, they will show up here for a limited time.
-  </p>
-<% end %>
+
+
+  </div>
+</div>

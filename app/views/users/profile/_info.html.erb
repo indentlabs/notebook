@@ -1,0 +1,56 @@
+<div class="hoverable card">
+  <div class="card-content">
+    <div class="card-title">
+      <%= render partial: 'users/profile/name' %>
+    </div>
+    <div class="row">
+      <div class="col s12 m7">
+        <div style="text-transform: uppercase;" class="grey-text">
+          Joined Notebook.ai
+        </div>
+        <div>
+          <%= time_ago_in_words @user.created_at %> ago
+        </div>
+        <br />
+
+        <% if @user.bio.present? %>
+          <div style="text-transform: uppercase;" class="grey-text">
+            Bio
+          </div>
+          <div>
+            <%= truncate(@user.bio, length: 500) %>
+          </div>
+          <br />
+        <% end %>
+
+        <% if @user.username.present? %>
+          <div style="text-transform: uppercase;" class="grey-text">
+            Username
+          </div>
+          <div>
+            <%= link_to "@#{@user.username}", thredded_path %>
+          </div>
+          <br />
+        <% end %>
+      </div>
+      <div class="col s12 m5">
+        <% %w(interests favorite_genre favorite_author).each do |field| %>
+          <% next unless @user.send(field).present? %>
+          <div style="text-transform: uppercase;" class="grey-text">
+            <%= field.titleize %>
+          </div>
+          <div>
+            <%= @user.send(field) %>
+          </div>
+          <br />
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <% if user_signed_in? && current_user.id == @user.id %>
+    <div class="card-action grey lighten-3">
+      <%= link_to 'Edit your profile', edit_user_registration_path, class: 'waves-effect' %>
+    </div>
+  <% end %>
+
+</div>

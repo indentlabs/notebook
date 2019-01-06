@@ -39,6 +39,10 @@ class Town < ApplicationRecord
     'text-lighten-3 lighten-3 purple'
   end
 
+  def self.hex_color
+    '#CE93D8'
+  end
+
   def self.icon
     'location_city'
   end

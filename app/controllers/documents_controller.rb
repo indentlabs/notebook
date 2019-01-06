@@ -1,13 +1,26 @@
 class DocumentsController < ApplicationController
   before_action :authenticate_user!
 
+  before_action :set_sidenav_expansion
+  before_action :set_navbar_color
+  before_action :set_navbar_actions, except: [:edit]
+  before_action :set_footer_visibility, only: [:edit]
+
   def index
     @documents = current_user.documents.order('updated_at desc')
   end
 
   def show
-    document = Document.find_by(id: params[:id], user_id: current_user.id)
-    redirect_to edit_document_path(document)
+    @document = Document.find_by(id: params[:id], user_id: current_user.id)
+
+    unless @document.present? || @document.viewable_by?(current_user || User.new)
+      redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+    end
+
+    @navbar_actions.unshift({
+      label: (@document.name || 'Untitled document'),
+      href: document_path(@document)
+    })
   end
 
   def edit
@@ -46,10 +59,39 @@ class DocumentsController < ApplicationController
 
     if current_user.can_delete?(document)
       document.destroy
-      redirect_back(fallback_location: documents_path, notice: "The document was successfully deleted.")
+      redirect_to(documents_path, notice: "The document was successfully deleted.")
     else
-      redirect_back(fallback_location: root_path, notice: "You don't have permission to do that!")
+      redirect_to(root_path, notice: "You don't have permission to do that!")
     end
+  end
+
+  def set_sidenav_expansion
+    @sidenav_expansion = 'writing'
+  end
+
+  def set_navbar_color
+    content_type = content_type_from_controller(self.class)
+    @navbar_color = content_type.hex_color
+  end
+
+  def set_navbar_actions
+    @navbar_actions = []
+
+    if @current_user_content['Document'].present?
+      @navbar_actions << {
+        label: "Your #{@current_user_content['Document'].count} Document#{'s' unless @navbar_actions == 1}",
+        href: documents_path
+      }
+    end
+
+    @navbar_actions << {
+      label: "New Document",
+      href: edit_document_path(:new)
+    }
+  end
+
+  def set_footer_visibility
+    @show_footer = false
   end
 
   private

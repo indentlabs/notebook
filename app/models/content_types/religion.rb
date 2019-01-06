@@ -40,7 +40,11 @@ class Religion < ApplicationRecord
   end
 
   def self.color
-    'yellow'
+    'indigo'
+  end
+
+  def self.hex_color
+    '#3f51b5'
   end
 
   def self.icon

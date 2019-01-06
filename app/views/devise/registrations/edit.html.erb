@@ -1,31 +1,29 @@
-<div class="row">
-  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-    <%= devise_error_messages! %>
+<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+  <%= devise_error_messages! %>
 
-    <div class="row">
-      <div class="col s12">
-        <ul class="tabs tabs-fixed-width">
-          <li class="tab col s3"><a class="active" href="#info">Your Info</a></li>
-          <li class="tab col s3"><a href="#preferences">Preferences</a></li>
-          <li class="tab col s3"><a href="#more">More...</a></li>
-        </ul>
-      </div>
-      <div id="info" class="col s12">
-        <%= render partial: 'devise/registrations/panes/information', locals: { f: f } %>
-      </div>
-      <div id="preferences" class="col s12">
-        <%= render partial: 'devise/registrations/panes/preferences', locals: { f: f } %>
-      </div>
-      <div id="more" class="col s12">
-        <%= render partial: 'devise/registrations/panes/more', locals: { f: f } %>
-      </div>
+  <div class="row">
+    <div class="col s12">
+      <ul class="tabs">
+        <li class="tab col s3"><a href="#your-info" class="black-text">Your info</a></li>
+        <li class="tab col s3"><a href="#preferences" class="black-text">Preferences</a></li>
+        <li class="tab col s3"><a href="#more-options" class="black-text">More options</a></li>
+      </ul>
     </div>
+    <div id="your-info" class="col s12">
+      <%= render partial: 'devise/registrations/panes/information', locals: { f: f } %>
+    </div>
+    <div id="preferences" class="col s12">
+      <%= render partial: 'devise/registrations/panes/preferences', locals: { f: f } %>
+    </div>
+    <div id="more-options" class="col s12">
+      <%= render partial: 'devise/registrations/panes/more', locals: { f: f } %>
+    </div>
+  </div>
 
-    <div class="center">
-      <div class="actions">
-        <%= f.submit "Save changes", class: 'btn blue' %>
-        <%= link_to "Cancel", :back, class: 'btn grey' %>
-      </div>
+  <div class="center">
+    <div class="actions">
+      <%= f.submit "Save changes", class: 'btn blue' %>
+      <%= link_to "Cancel", :back, class: 'btn grey' %>
     </div>
-  <% end %>
-</div>
+  </div>
+<% end %>

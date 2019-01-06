@@ -44,6 +44,10 @@ class Group < ApplicationRecord
     'cyan'
   end
 
+  def self.hex_color
+    '#00BCD4'
+  end
+
   def self.icon
     'wc'
   end

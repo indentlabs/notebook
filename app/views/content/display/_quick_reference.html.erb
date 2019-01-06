@@ -1,7 +1,6 @@
 <%# Usage: render partial: 'content/display/quick_reference', locals: { content: @content } %>
-<%#
-  TODO: this needs optimized. Last count it was doing 55 SQL queries, so it has been temporarily
-  disabled (not called from dashboard.html.erb).
+<%
+  serialized_content = ContentSerializer.new(content)
 %>
 
 <h4 class="reference-title">
@@ -15,43 +14,35 @@
     <% end %>
   <% end %>
 </h4>
-<h5><%= content.description %></h5>
 
-<% all_categories = content.class.attribute_categories(current_user) %>
-<% found_attributes = 0 %>
-<% attributes_to_find = 5 %>
-
-<table class="highlight">
-  <% all_categories.each do |category| %>
-    <% break if found_attributes >= attributes_to_find %>
-    <% category.attribute_fields.each do |attribute_field| %>
-      <% break if found_attributes >= attributes_to_find %>
-
-      <% next unless attribute_field.name.present? %>
-      <% next if attribute_field.name.end_with? '_id' %>
-      <% next if attribute_field.name == 'privacy' %>
-      <% next if ['name', 'description'].include?(attribute_field.name) %>
-
-      <% next unless content.respond_to? attribute_field.name %>
-      <% next unless content.send(attribute_field.name).present? %>
-      <% next if content.send(attribute_field.name).is_a?(ActiveRecord::Associations::CollectionProxy) %>
-
-      <% found_attributes += 1 %>
-      <tr>
-        <td>
-          <div style="min-width: 80px;">
-            <strong><%= attribute_field.label %></strong>
-          </div>
-        </td>
-        <td><%= content.send(attribute_field.name) %></td>
-      </tr>
-    <% end %>
+<ul class="collapsible">
+  <% serialized_content.data[:categories].each do |category| %>
+    <% next if ['changelog'].include?(category[:name]) %>
+    <% next unless category[:fields].any? { |field| field[:value].present? } %>
+    <li>
+      <div class="collapsible-header">
+        <i class="material-icons grey-text"><%= category[:icon] %></i>
+        <%= category[:label] %>
+      </div>
+      <div class="collapsible-body">
+        <span>
+          <table class="highlight">
+            <% category[:fields].each do |field| %>
+              <% next unless field[:value].present? %>
+              <tr>
+                <td class="grey-text text-darken-1"><%= field[:label] %></td>
+                <td>
+                  <% if field[:type] == 'universe' %>
+                    <%= link_to serialized_content.data[:universe][:name], universe_path(field[:value]) %>
+                  <% else %>
+                    <%= field[:value] %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </table>
+        </span>
+      </div>
+    </li>
   <% end %>
-  <% if found_attributes < attributes_to_find %>
-    <tr>
-      <td class="grey-text" colspan="2">
-        More information will automatically appear here as you add it to <%= content.name %>.
-      </td>
-    </tr>
-  <% end %>
-</table>
+</ul>

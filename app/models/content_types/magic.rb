@@ -30,6 +30,10 @@ class Magic < ApplicationRecord
     'orange'
   end
 
+  def self.hex_color
+    '#FF9800'
+  end
+
   def self.icon
     'flash_on'
   end

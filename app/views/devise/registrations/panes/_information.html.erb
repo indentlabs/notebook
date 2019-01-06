@@ -1,19 +1,97 @@
-<div class="card">
-  <div class="card-content">
-    <h4>Personal information</h4>
-    <div class="field">
-      <%= f.label 'Name (visible on your profile and forum posts)' %><br />
-      <%= f.text_field :name, autofocus: true %>
+<div class="row">
+  <div class="col s12 m4 grey-text">
+    <h4>Public information</h4>
+    <p class="flow-text">
+      This information is visible to other users.
+    </p>
+  </div>
+  <div class="col s12 m8">
+    <div class="card">
+      <div class="card-content">
+        <div class="field">
+          <%= f.label 'Name (visible on your profile and forum posts)' %><br />
+          <%= f.text_field :name, autofocus: true %>
+        </div>
+
+        <div class="field">
+          <%= f.label 'Username (users can @mention you with your username on the forums)' %><br />
+          <%= f.text_field :username %>
+        </div>
+      </div>
     </div>
 
-    <div class="field">
-      <%= f.label 'Email (always completely private)' %><br />
-      <%= f.email_field :email %>
+    <div class="card">
+      <div class="card-content">
+        <div class="input-field">
+          <%= f.text_area :bio, class: 'materialize-textarea with-character-counter', data: { length: 500 } %>
+          <%= f.label 'Bio' %><br />
+        </div>
+
+        <div class="input-field">
+          <%= f.text_field :favorite_genre, class: 'materialize-textarea' %>
+          <%= f.label 'Favorite genre' %><br />
+        </div>
+
+        <div class="input-field">
+          <%= f.text_field :favorite_author, class: 'materialize-textarea' %>
+          <%= f.label 'Favorite author' %><br />
+        </div>
+
+        <div class="input-field">
+          <%= f.text_field :interests, class: 'materialize-textarea' %>
+          <%= f.label 'Interests' %><br />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12 m4 grey-text">
+    <h4>Private information</h4>
+    <p class="flow-text">
+      This information is only ever visible to you.
+    </p>
+    <p>
+      Notebook.ai will never share this information, but may also look at it to better understand its users.
+    </p>
+  </div>
+
+  <div class="col s12 m8">
+    <div class="card">
+      <div class="card-content">
+        <div class="field">
+          <%= f.label 'Email (always completely private)' %><br />
+          <%= f.email_field :email %>
+        </div>
+      </div>
     </div>
 
-    <div class="field">
-      <%= f.label 'Username (users can @mention you with your username on the forums)' %><br />
-      <%= f.text_field :username %>
+    <div class="card">
+      <div class="card-content">
+        <div class="input-field">
+          <%= f.text_field :age, class: 'materialize-textarea' %>
+          <%= f.label 'Age' %><br />
+        </div>
+
+        <div class="input-field">
+          <%= f.text_field :location, class: 'materialize-textarea' %>
+          <%= f.label 'Location' %><br />
+        </div>
+
+        <div class="input-field">
+          <%= f.text_field :gender, class: 'materialize-textarea' %>
+          <%= f.label 'Gender' %><br />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        Last login
+        <%= time_ago_in_words current_user.current_sign_in_at %> ago
+        from IP <%= current_user.current_sign_in_ip %>.
+      </div>
     </div>
   </div>
 </div>
@@ -22,17 +100,32 @@
   <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
 <% end %>
 
-<div class="card">
-  <div class="card-content">
-    <h4>Changing your password</h4>
-    <div class="field">
-      <%= f.label :password %> <em>(leave blank if you don't want to change it)</em><br />
-      <%= f.password_field :password, autocomplete: "off" %>
-    </div>
+<div class="row">
+  <div class="col s12 m4 grey-text">
+    <h4>Password change</h4>
+    <p class="flow-text">
+      Leave this blank unless you want to change your password.
+    </p>
+  </div>
+  <div class="col s12 m8">
+    <div class="card">
+      <div class="card-content">
+        <div class="field">
+          <%= f.label 'New password' %><br />
+          <%= f.password_field :password, autocomplete: "off" %>
+        </div>
 
-    <div class="field">
-      <%= f.label :password_confirmation %><br />
-      <%= f.password_field :password_confirmation, autocomplete: "off" %>
+        <div class="field">
+          <%= f.label 'New password (again)' %><br />
+          <%= f.password_field :password_confirmation, autocomplete: "off" %>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<%= content_for :javascript do %>
+  $(document).ready(function() {
+    $('.with-character-counter').characterCounter();
+  });
+<% end %>

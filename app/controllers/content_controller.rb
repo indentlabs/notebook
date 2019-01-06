@@ -8,6 +8,13 @@ class ContentController < ApplicationController
 
   before_action :populate_linkable_content_for_each_content_type, only: [:new, :edit]
 
+  before_action :set_attributes_content_type, only: [:attributes]
+
+  before_action :set_navbar_color
+  before_action :set_general_navbar_actions, except: [:deleted, :show, :changelog]
+  before_action :set_specific_navbar_actions, only: [:show, :changelog]
+  before_action :set_sidenav_expansion
+
   def index
     @content_type_class = content_type_from_controller(self.class)
     pluralized_content_name = @content_type_class.name.downcase.pluralize
@@ -43,6 +50,18 @@ class ContentController < ApplicationController
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
     @serialized_content = ContentSerializer.new(@content)
+
+    if user_signed_in?
+      @navbar_actions << {
+        label: @serialized_content.name,
+        href: main_app.polymorphic_path(@content)
+      }
+
+      @navbar_actions << {
+        label: 'Changelog',
+        href: send("changelog_#{content_type.name.downcase}_path", @content)
+      }
+    end
 
     return redirect_to(root_path) if @content.user.nil? # deleted user's content
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
@@ -81,7 +100,7 @@ class ContentController < ApplicationController
 
     # todo this is a good spot to audit to disable and see if create permissions are ok also
     unless (current_user || User.new).can_create?(content_type_from_controller(self.class))
-      return redirect_back(fallback_location: root_path)
+      return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
     end
 
     respond_to do |format|
@@ -143,7 +162,7 @@ class ContentController < ApplicationController
         upload_files params['image_uploads'], content_type.name, @content.id
       end
 
-      successful_response(content_creation_redirect_url, t(:create_success, model_name: humanized_model_name))
+      successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
       failed_response('new', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.map(&:messages).to_sentence)
     end
@@ -189,9 +208,29 @@ class ContentController < ApplicationController
     end
 
     if update_success
-      successful_response(@content, t(:update_success, model_name: humanized_model_name))
+      successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
       failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.map(&:messages).to_sentence)
+    end
+  end
+
+  def changelog
+    content_type = content_type_from_controller(self.class)
+    return redirect_to root_path unless valid_content_types.map(&:name).include?(content_type.name)
+    @content = content_type.find_by(id: params[:id])
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+    @serialized_content = ContentSerializer.new(@content)
+
+    if user_signed_in?
+      @navbar_actions << {
+        label: @serialized_content.name,
+        href: main_app.polymorphic_path(@content)
+      }
+
+      @navbar_actions << {
+        label: 'Changelog',
+        href: send("changelog_#{content_type.name.downcase}_path", @content)
+      }
     end
   end
 
@@ -237,9 +276,10 @@ class ContentController < ApplicationController
       'content_type': content_type.name
     }) if Rails.env.production?
 
+    cached_page_name = @content.try(:name)
     @content.destroy
 
-    successful_response(content_deletion_redirect_url, t(:delete_success, model_name: humanized_model_name))
+    successful_response(content_deletion_redirect_url, t(:delete_success, model_name: cached_page_name.presence || humanized_model_name))
   end
 
   # List all recently-deleted content
@@ -249,15 +289,12 @@ class ContentController < ApplicationController
       @content_pages[content_type] = content_type.constantize.with_deleted.where('deleted_at > ?', 24.hours.ago).where(user_id: current_user.id)
     end
     @content_pages["Document"] = current_user.documents.with_deleted.where('deleted_at > ?', 24.hours.ago)
+
+    # Override controller
+    @sidenav_expansion = 'my account'
   end
 
   def attributes
-    @content_type = params[:content_type]
-    # todo make this a before_action load_content_type
-    unless valid_content_types.map { |c| c.name.downcase }.include?(@content_type)
-      raise "Invalid content type on attributes customization page: #{@content_type}"
-    end
-    @content_type_class = @content_type.titleize.constantize
   end
 
   private
@@ -367,5 +404,74 @@ class ContentController < ApplicationController
 
   def humanized_model_name
     content_type_from_controller(self.class).model_name.human
+  end
+
+  def set_attributes_content_type
+    @content_type = params[:content_type]
+    # todo make this a before_action load_content_type
+    unless valid_content_types.map { |c| c.name.downcase }.include?(@content_type)
+      raise "Invalid content type on attributes customization page: #{@content_type}"
+    end
+    @content_type_class = @content_type.titleize.constantize
+  end
+
+  def set_navbar_color
+    content_type = @content_type_class || content_type_from_controller(self.class)
+    @navbar_color = content_type.try(:hex_color) || '#2196F3'
+  end
+
+  # For index, new, edit
+  def set_general_navbar_actions
+    content_type = @content_type_class || content_type_from_controller(self.class)
+    @navbar_actions = []
+
+    if @current_user_content
+      @navbar_actions << {
+        label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
+        href: main_app.polymorphic_path(content_type)
+      }
+    end
+
+    @navbar_actions << {
+      label: "New #{content_type.name.downcase}",
+      href: main_app.new_polymorphic_path(content_type)
+    }
+
+    discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
+    if discussions_link.present?
+      @navbar_actions << {
+        label: 'Discussions',
+        href: discussions_link
+      }
+    end
+
+    @navbar_actions << {
+      label: 'Customize template',
+      href: main_app.attribute_customization_path(content_type.name.downcase)
+    }
+  end
+
+  # For showing a specific piece of content
+  def set_specific_navbar_actions
+    content_type = @content_type_class || content_type_from_controller(self.class)
+    @navbar_actions = []
+
+    if user_signed_in?
+      if @current_user_content
+        @navbar_actions << {
+          label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
+          href: main_app.polymorphic_path(content_type)
+        }
+      end
+      #
+      # @navbar_actions << {
+      #   label: "New #{content_type.name.downcase}",
+      #   href: main_app.new_polymorphic_path(content_type)
+      # }
+    end
+  end
+
+  def set_sidenav_expansion
+    @sidenav_expansion = 'worldbuilding'
   end
 end

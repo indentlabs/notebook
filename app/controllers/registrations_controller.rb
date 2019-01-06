@@ -1,11 +1,18 @@
 class RegistrationsController < Devise::RegistrationsController
   after_action :add_account, only: [:create]
 
+  before_action :set_navbar_actions, only: [:edit]
+  before_action :set_navbar_color, only: [:edit]
+
   def new
     super
     if params[:referral]
       session[:referral] = params[:referral]
     end
+  end
+
+  def edit
+    @sidenav_expansion = 'my account'
   end
 
   private
@@ -15,11 +22,22 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def account_update_params
-    params.require(:user).permit(:name, :email, :username, :password, :password_confirmation, :email_updates, :fluid_preference)
+    params.require(:user).permit(
+      :name, :email, :username, :password, :password_confirmation, :email_updates, :fluid_preference,
+      :bio, :favorite_genre, :favorite_author, :interests, :age, :location, :gender
+    )
   end
 
   def update_resource(resource, params)
     resource.update_without_password(params)
+  end
+
+  def set_navbar_color
+    @navbar_color = '#000000'
+  end
+
+  def set_navbar_actions
+    @navbar_actions = []
   end
 
   protected

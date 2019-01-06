@@ -21,6 +21,10 @@ class Vehicle < ActiveRecord::Base
     'text-lighten-2 green'
   end
 
+  def self.hex_color
+    '#81C784'
+  end
+
   def self.icon
     'drive_eta'
   end
