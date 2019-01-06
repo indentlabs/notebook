@@ -1,4 +1,4 @@
-<% if current_user.content_count > 0 %>
+<% if current_user.content_count > 0 && @content %>
   <div class="row">
     <div class="col s12 m12 l8">
       <%= render partial: 'cards/serendipitous/content_question', locals: {
@@ -49,7 +49,7 @@
           <div class="hoverable card orange">
             <div class="card-content white-text">
               <span class="card-title">
-                Next prompt
+                Skip this prompt
               </span>
             </div>
           </div>
@@ -68,9 +68,17 @@
     <h5>Worldbuilding prompts</h5>
     <p>
       <% if current_user.content_count.zero? %>
-        Once you've created some ideas in Notebook.ai, you can visit this page for writing prompts set in your world. They'll star your characters, in your locations, using your items, seeing your creatures, practicing your religions, and so on &mdash; so check back frequently for the latest prompts just for you!
+        Once you've created some ideas in Notebook.ai, you can visit this page for writing prompts set in your world.
+        They'll star your characters, in your locations, using your items, seeing your creatures, practicing your religions, and so on &mdash; so check back frequently for the latest prompts just for you!
       <% else %>
-        It looks like your world is pretty fleshed out already, and you've answered all the questions I've come up with. Check back later and I might have a writing prompt for you, but I bet I can come up with some sooner if you
+        It looks like
+        <% if @universe_scope.present? %>
+          <%= link_to @universe_scope.name, @universe_scope %>
+        <% else %>
+          your world
+        <% end %>
+        is pretty fleshed out already, and you've answered all the questions I've come up with so far.
+        Check back later and I might have a writing prompt for you, but I bet I can come up with some sooner if you
         <% new_content = (current_user.createable_content_types - [Universe]).sample %>
         <%= link_to new_polymorphic_path(new_content) do %>
           create
