@@ -10,10 +10,10 @@ class ContentController < ApplicationController
 
   before_action :set_attributes_content_type, only: [:attributes]
 
-  before_action :set_navbar_color
-  before_action :set_general_navbar_actions, except: [:deleted, :show, :changelog]
+  before_action :set_navbar_color, except: [:api_sort]
+  before_action :set_general_navbar_actions, except: [:deleted, :show, :changelog, :api_sort]
   before_action :set_specific_navbar_actions, only: [:show, :changelog]
-  before_action :set_sidenav_expansion
+  before_action :set_sidenav_expansion, except: [:api_sort]
 
   def index
     @content_type_class = content_type_from_controller(self.class)
@@ -295,6 +295,32 @@ class ContentController < ApplicationController
   end
 
   def attributes
+    @attribute_categories = @content_type_class.attribute_categories(current_user, show_hidden: true).order(:position)
+  end
+
+  def api_sort #todo
+    sort_params = params.permit(:category_id, :intended_position)
+
+    category = AttributeCategory.find_by(id: sort_params[:category_id].to_i)
+    return unless category.user_id == current_user.id
+
+    # Ugh not another one of these backfills
+    if category.position.nil?
+      content_type_class = category.entity_type.titleize.constantize
+      categories_to_order_first = content_type_class.attribute_categories(current_user, show_hidden: true).order(:created_at, :id)
+
+      ActiveRecord::Base.transaction do
+        categories_to_order_first.each.with_index do |category, index|
+          category.update(position: sort_params[:intended_position])
+        end
+      end
+    end
+
+    if category.reload && category.insert_at(1 + [sort_params[:intended_position].to_i, 0].max)
+      render json: 200
+    else
+      render json: 500
+    end
   end
 
   private

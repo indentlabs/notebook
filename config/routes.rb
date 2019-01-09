@@ -91,6 +91,7 @@ Rails.application.routes.draw do
     end
 
     # Content attributes
+    put '/attribute_categories/sort', to: 'content#api_sort'
     resources :attributes, except: [:show]
     resources :attribute_categories, except: [:show]
     resources :attribute_fields, except: [:show]

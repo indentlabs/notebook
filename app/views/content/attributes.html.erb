@@ -4,13 +4,13 @@
 
 <ul class="sortable collapsible white">
   <%= render partial: 'content/attributes/general_settings', locals: { content_type: @content_type, content_type_class: @content_type_class } %>
-  <% @content_type_class.attribute_categories(current_user, show_hidden: true).each do |attribute_category| %>
+  <% @attribute_categories.each do |attribute_category| %>
     <% next if ['Settings', 'Contributors', 'Gallery', 'Changelog'].include? attribute_category.label %>
     <% hidden_category = !!attribute_category.hidden %>
-    <li>
+    <li data-position="<%= attribute_category.position %>" data-category-id="<%= attribute_category.id %>">
       <div class="collapsible-header">
         <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
-        <i class="material-icons"><%= attribute_category.icon %></i><%= attribute_category.label %>
+        <i class="material-icons"><%= attribute_category.icon %></i><%= attribute_category.label %> <%= attribute_category.position.inspect %>
         <% if hidden_category %>
           <span class="grey-text">&mdash;hidden</span>
         <% end %>
@@ -198,20 +198,51 @@
  </ul>
 
 <%= content_for :javascript do %>
-   $('.sortable').sortable({axis: 'y', cursor: 'move', handle: '.sortable-handle'});
-
-   $('.iconpicker-input').iconpicker({
-     icons: [
-       <% MATERIAL_ICONS.each do |icon_name| %>
+  $('.iconpicker-input').iconpicker({
+    icons: [
+      <% MATERIAL_ICONS.each do |icon_name| %>
         { title: "<%= icon_name %>", searchTerms: ["<%= icon_name %>"] },
-       <% end %>
-     ], // list of icon objects [{title:String, searchTerms:String}]. By default, all Font Awesome icons are included.
-     fullClassFormatter: function (val) {
-       return 'material-icons ' + val;
-     }}
-   );
-   $(document).on('click','.iconpicker-item',function(e){
-     e.preventDefault();
-     return false;
-   });
+      <% end %>
+    ], // list of icon objects [{title:String, searchTerms:String}]. By default, all Font Awesome icons are included.
+    fullClassFormatter: function (val) {
+      return 'material-icons ' + val;
+    }}
+  );
+  $(document).on('click','.iconpicker-item',function(e){
+    e.preventDefault();
+    return false;
+  });
+
+  $('.sortable').sortable({
+    axis: 'y',
+    cursor: 'move',
+    handle: '.sortable-handle',
+
+    update: function (event, ui) {
+      var dragged_element = $(ui.item[0]);
+      /*
+      var intended_sort = $.map(dragged_element.parent().first().children(), function (li) {
+        var category_id = $(li).data('category-id');
+        var position    = $(li).data('position');
+
+        if (typeof category_id !== 'undefined' && typeof position !== 'undefined') {
+          return {
+            id: category_id,
+            position: position
+          };
+        }
+      });
+      */
+
+      $.ajax({
+        type: "PUT",
+        dataType: "json",
+        url: '/plan/attribute_categories/sort',
+        data: {
+          category_id: dragged_element.data('category-id'),
+          intended_position: dragged_element.index() - 1
+        }
+      });
+    }
+  });
 <% end %>

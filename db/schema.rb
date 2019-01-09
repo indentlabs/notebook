@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_01_03_211346) do
+ActiveRecord::Schema.define(version: 2019_01_09_201055) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -45,6 +45,7 @@ ActiveRecord::Schema.define(version: 2019_01_03_211346) do
     t.datetime "updated_at"
     t.boolean "hidden"
     t.datetime "deleted_at"
+    t.integer "position"
     t.index ["entity_type"], name: "index_attribute_categories_on_entity_type"
     t.index ["name"], name: "index_attribute_categories_on_name"
     t.index ["user_id"], name: "index_attribute_categories_on_user_id"
@@ -63,6 +64,7 @@ ActiveRecord::Schema.define(version: 2019_01_03_211346) do
     t.boolean "hidden"
     t.datetime "deleted_at"
     t.string "old_column_source"
+    t.integer "position"
     t.index ["attribute_category_id", "deleted_at"], name: "index_attribute_fields_on_attribute_category_id_and_deleted_at"
     t.index ["attribute_category_id", "label", "old_column_source", "field_type"], name: "attribute_fields_aci_label_ocs_ft"
     t.index ["attribute_category_id", "label", "old_column_source", "user_id", "field_type"], name: "attribute_fields_aci_label_ocs_ui_ft"
