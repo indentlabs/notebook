@@ -307,7 +307,7 @@ class ContentController < ApplicationController
     # Ugh not another one of these backfills
     if category.position.nil?
       content_type_class = category.entity_type.titleize.constantize
-      categories_to_order_first = content_type_class.attribute_categories(current_user, show_hidden: true).order(:created_at, :id).reverse
+      categories_to_order_first = content_type_class.attribute_categories(current_user, show_hidden: true)
 
       ActiveRecord::Base.transaction do
         categories_to_order_first.each.with_index do |category, index|
