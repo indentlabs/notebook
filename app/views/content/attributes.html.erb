@@ -1,28 +1,15 @@
 <%= content_for :full_width_page_header do %>
-  <%= render partial: 'content/components/parallax_header', locals: { content_type: @content_type_class.name, content_class: @content_type_class } %>
+  <%= render partial: 'content/components/parallax_header', locals: { content_type: @content_type, content_class: @content_type_class } %>
 <% end %>
 
-<ul class="collapsible white">
-  <li class="active">
-    <div class="collapsible-header">
-      <i class="material-icons <%= @content_type_class.color %>-text"><%= @content_type_class.icon %></i>
-      General <%= @content_type.titleize %> settings
-    </div>
-    <div class="collapsible-body">
-      <p>
-        More <%= @content_type  %>-specific settings are coming soon. In the meantime, you can customize your <%= @content_type %> categories
-        and fields by clicking a category below. Changes will be applied to all existing <%=  @content_type %> pages as well as pages not-yet-created.
-      </p>
-      <p>
-        And don't forget, you can always toggle entire pages on or off by <%= link_to 'customizing your pages', customization_content_types_path %>!
-      </p>
-    </div>
-  </li>
+<ul class="sortable collapsible white">
+  <%= render partial: 'content/attributes/general_settings', locals: { content_type: @content_type, content_type_class: @content_type_class } %>
   <% @content_type_class.attribute_categories(current_user, show_hidden: true).each do |attribute_category| %>
     <% next if ['Settings', 'Contributors', 'Gallery', 'Changelog'].include? attribute_category.label %>
     <% hidden_category = !!attribute_category.hidden %>
     <li>
       <div class="collapsible-header">
+        <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
         <i class="material-icons"><%= attribute_category.icon %></i><%= attribute_category.label %>
         <% if hidden_category %>
           <span class="grey-text">&mdash;hidden</span>
@@ -34,7 +21,7 @@
           <div class="row">
             <div class="col s12">
               <h5>Customize fields</h5>
-              <ul class="collapsible">
+              <ul class="sortable collapsible">
                 <% attribute_category.attribute_fields.sort do |a, b|
                     a_value = case a.field_type
                     when 'name'
@@ -62,6 +49,7 @@
                   <% hidden_field = !!attribute_field.hidden %>
                   <li>
                     <div class="collapsible-header">
+                      <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
                       <i class="material-icons"><%= attribute_field.icon %></i>
                       <%= attribute_field.label %>
                       <% if hidden_field %>
@@ -209,8 +197,9 @@
   </li>
  </ul>
 
+<%= content_for :javascript do %>
+   $('.sortable').sortable({axis: 'y', cursor: 'move', handle: '.sortable-handle'});
 
- <script type="text/javascript">
    $('.iconpicker-input').iconpicker({
      icons: [
        <% MATERIAL_ICONS.each do |icon_name| %>
@@ -225,4 +214,4 @@
      e.preventDefault();
      return false;
    });
- </script>
+<% end %>
