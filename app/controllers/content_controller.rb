@@ -311,12 +311,12 @@ class ContentController < ApplicationController
 
       ActiveRecord::Base.transaction do
         categories_to_order_first.each.with_index do |category, index|
-          category.update_column(:position, index)
+          category.update_column(:position, 1 + index)
         end
       end
     end
 
-    if category.reload && category.insert_at(1 + [sort_params[:intended_position].to_i, 0].max)
+    if category.reload && category.insert_at(1 + sort_params[:intended_position].to_i)
       render json: 200
     else
       render json: 500
