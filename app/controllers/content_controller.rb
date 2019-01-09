@@ -311,7 +311,7 @@ class ContentController < ApplicationController
 
       ActiveRecord::Base.transaction do
         categories_to_order_first.each.with_index do |category, index|
-          category.update(position: sort_params[:intended_position])
+          category.update_column(:position, index)
         end
       end
     end
