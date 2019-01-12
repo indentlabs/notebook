@@ -7,7 +7,7 @@
   <% @attribute_categories.each do |attribute_category| %>
     <% next if ['Settings', 'Contributors', 'Gallery', 'Changelog'].include? attribute_category.label %>
     <% hidden_category = !!attribute_category.hidden %>
-    <li data-position="<%= attribute_category.position %>" data-category-id="<%= attribute_category.id %>">
+    <li data-position="<%= attribute_category.position %>" data-content-id="<%= attribute_category.id %>">
       <div class="collapsible-header">
         <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
         <i class="material-icons"><%= attribute_category.icon %></i><%= attribute_category.label %> <%= attribute_category.position %>
@@ -20,8 +20,13 @@
         <% unless hidden_category %>
           <div class="row">
             <div class="col s12">
-              <h5>Customize fields</h5>
               <ul class="sortable collapsible" data-sortable-class="AttributeField">
+                <li>
+                  <div class="collapsible-header">
+                    <i class="material-icons <%= @content_type_class.color %>-text"><%= attribute_category.icon %></i>
+                    Customize this category's fields
+                  </div>
+                </li>
                 <% attribute_category.attribute_fields.sort do |a, b|
                     a_value = case a.field_type
                     when 'name'
@@ -51,11 +56,11 @@
                     <% next unless attribute_field.persisted? %>
                   <%# todo not this %>
                   <% hidden_field = !!attribute_field.hidden %>
-                  <li>
+                  <li data-position="<%= attribute_field.position %>" data-content-id="<%= attribute_field.id %>">
                     <div class="collapsible-header">
                       <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
                       <i class="material-icons"><%= attribute_field.icon %></i>
-                      <%= attribute_field.label %>
+                      <%= attribute_field.label %> <%= attribute_field.position %>
                       <% if hidden_field %>
                         <span class="grey-text">&mdash;hidden</span>
                       <% end %>
@@ -230,7 +235,7 @@
         dataType: "json",
         url: '/plan/content/sort',
         data: {
-          content_id:        dragged_element.data('category-id'),
+          content_id:        dragged_element.data('content-id'),
           intended_position: dragged_element.index() - 1,
           sortable_class:    dragged_element.parent().data('sortable-class')
         }

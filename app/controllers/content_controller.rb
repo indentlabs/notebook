@@ -304,13 +304,14 @@ class ContentController < ApplicationController
     return unless sortable_class
 
     content = sortable_class.find_by(id: sort_params[:content_id].to_i)
+    return unless content.present?
     return unless content.user_id == current_user.id
     return unless content.respond_to?(:position)
 
     # Ugh not another one of these backfills
     if content.position.nil?
-      content_type_class = content.entity_type.titleize.constantize
       content_to_order_first = if content.is_a?(AttributeCategory)
+        content_type_class = content.entity_type.titleize.constantize
         content_type_class.attribute_categories(current_user, show_hidden: true)
       elsif content.is_a?(AttributeField)
         content.attribute_category.attribute_fields
