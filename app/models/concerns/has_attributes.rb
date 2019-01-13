@@ -18,8 +18,7 @@ module HasAttributes
           entity_type: self.content_name,
           name: category_name.to_s,
           label: details[:label],
-          user: user,
-          created_at: "January 1, 1970".to_datetime # um wat
+          user: user
         )
         # Default new categories to the default icon
         category.icon = details[:icon] unless category.persisted?
@@ -27,12 +26,17 @@ module HasAttributes
         category.save! if user && category.new_record?
         category.attribute_fields << details[:attributes].map do |field|
           af_field = category.attribute_fields.with_deleted.find_or_initialize_by(
-            label: field[:label],
+            # label: field[:label],
             old_column_source: field[:name],
             user: user,
             field_type: field[:field_type].presence || "text_area"
           )
-          af_field.save! if user && af_field.new_record?
+          if af_field.label.empty?
+            af_field.label = field[:label]
+          end
+          if user && af_field.new_record?
+            af_field.save!
+          end
           af_field
         end if details.key?(:attributes)
 
