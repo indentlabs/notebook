@@ -31,7 +31,7 @@ module HasAttributes
             user: user,
             field_type: field[:field_type].presence || "text_area"
           )
-          if af_field.label.empty?
+          if af_field.label.nil?
             af_field.label = field[:label]
           end
           if user && af_field.new_record?
