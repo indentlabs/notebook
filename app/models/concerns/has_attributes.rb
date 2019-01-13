@@ -17,11 +17,13 @@ module HasAttributes
         category = AttributeCategory.with_deleted.find_or_initialize_by(
           entity_type: self.content_name,
           name: category_name.to_s,
-          label: details[:label],
           user: user
         )
-        # Default new categories to the default icon
-        category.icon = details[:icon] unless category.persisted?
+        # Default new categories to some sane defaults
+        unless category.persisted?
+          category.icon = details[:icon]
+          category.label = details[:label]
+        end
 
         category.save! if user && category.new_record?
         category.attribute_fields << details[:attributes].map do |field|
