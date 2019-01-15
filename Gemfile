@@ -56,7 +56,6 @@ gem 'redcarpet' #markdown formatting
 # Analytics
 gem 'mixpanel-ruby'
 gem 'barnes'
-gem 'skylight'
 
 # Apps
 #gem 'easy_translate'
