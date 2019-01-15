@@ -7,10 +7,11 @@
   <% @attribute_categories.each do |attribute_category| %>
     <% next if ['Settings', 'Contributors', 'Gallery', 'Changelog'].include? attribute_category.label %>
     <% hidden_category = !!attribute_category.hidden %>
-    <li data-position="<%= attribute_category.position %>" data-content-id="<%= attribute_category.id %>">
+    <li data-position="<%= attribute_category.position %>" data-content-id="<%= attribute_category.id %>" class="js-category-container">
       <div class="collapsible-header">
         <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
-        <i class="material-icons"><%= attribute_category.icon %></i><%= attribute_category.label %>
+        <i class="material-icons"><%= attribute_category.icon %></i>
+        <span class="js-category-label"><%= attribute_category.label %></span>
         <% if hidden_category %>
           <span class="grey-text">&mdash;hidden</span>
         <% end %>
@@ -168,9 +169,9 @@
                     Rename this category
                   </div>
                   <div class="collapsible-body">
-                    <%= form_for(attribute_category, method: :put, class: 'inline') do |f| %>
-                      <%= f.text_field :label %>
-                      <%= f.submit 'Rename this category', class: 'btn white black-text' %>
+                    <%= form_for(attribute_category, method: :put, class: 'inline', remote: true) do |f| %>
+                      <%= f.text_field :label, class: 'js-new-category-name' %>
+                      <%= f.submit 'Rename this category', class: 'btn white black-text js-update-category-name' %>
                     <% end %>
                   </div>
                 </li>
@@ -318,5 +319,11 @@
     var new_field_name = $(this).parent().find('.js-new-field-name').val();
     var field_label = $(this).closest('li').find('.collapsible-header > .js-field-label');
     field_label.text(new_field_name);
+  });
+
+  $('.js-update-category-name').click(function (e) {
+    var new_category_name = $(this).parent().find('.js-new-category-name').val();
+    var category_label = $(this).closest('.js-category-container').find('.js-category-label');
+    category_label.text(new_category_name);
   });
 <% end %>
