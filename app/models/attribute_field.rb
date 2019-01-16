@@ -9,6 +9,8 @@ class AttributeField < ApplicationRecord
 
   validates_presence_of :user_id
 
+  acts_as_list scope: [:user_id, :attribute_category_id]
+
   include HasAttributes
   include Serendipitous::Concern
 

@@ -12,6 +12,8 @@ class AttributeCategory < ApplicationRecord
   include Authority::Abilities
   self.authorizer_name = 'AttributeAuthorizer'
 
+  acts_as_list scope: [:user_id, :entity_type]
+
   before_validation :ensure_name
 
   def self.color

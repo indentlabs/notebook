@@ -17,22 +17,28 @@ module HasAttributes
         category = AttributeCategory.with_deleted.find_or_initialize_by(
           entity_type: self.content_name,
           name: category_name.to_s,
-          label: details[:label],
-          user: user,
-          created_at: "January 1, 1970".to_datetime # um wat
+          user: user
         )
-        # Default new categories to the default icon
-        category.icon = details[:icon] unless category.persisted?
+        # Default new categories to some sane defaults
+        unless category.persisted?
+          category.icon = details[:icon]
+          category.label = details[:label]
+        end
 
         category.save! if user && category.new_record?
         category.attribute_fields << details[:attributes].map do |field|
           af_field = category.attribute_fields.with_deleted.find_or_initialize_by(
-            label: field[:label],
+            # label: field[:label],
             old_column_source: field[:name],
             user: user,
             field_type: field[:field_type].presence || "text_area"
           )
-          af_field.save! if user && af_field.new_record?
+          if af_field.label.nil?
+            af_field.label = field[:label]
+          end
+          if user && af_field.new_record?
+            af_field.save!
+          end
           af_field
         end if details.key?(:attributes)
 
@@ -53,7 +59,7 @@ module HasAttributes
             .attribute_categories
               .where(entity_type: self.content_name, hidden: acceptable_hidden_values)
               .eager_load(attribute_fields: :attribute_values)
-              .order('attribute_categories.created_at, attribute_categories.id')
+              .order('attribute_categories.position, attribute_categories.created_at, attribute_categories.id')
 
             # We need to do something like this, but... not this.
             #.eager_load(attribute_fields: :attribute_values) # .eager_load(:attribute_fields)

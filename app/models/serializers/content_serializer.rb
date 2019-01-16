@@ -58,6 +58,7 @@ class ContentSerializer
               label:  field.label,
               type:   field.field_type,
               hidden: !!field.hidden,
+              position: field.position,
               old_column_source: field.old_column_source,
               value: self.attribute_values.detect { |value|
                 value.entity_type == content.page_type &&
@@ -84,7 +85,11 @@ class ContentSerializer
             #   a[:label] <=> b[:label]
             # end
 
-            a_value <=> b_value
+            if a[:position] && b[:position]
+              a[:position] <=> b[:position]
+            else
+              a_value <=> b_value
+            end
           end
         }
       }
