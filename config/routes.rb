@@ -12,7 +12,7 @@ Rails.application.routes.draw do
       get content_type.name.downcase.pluralize.to_sym, on: :member
     end
   end
-  get '/@:username', to: 'users#show'
+  get '/@:username', to: 'users#show', as: :profile_by_username
 
   scope '/my' do
     get '/content',         to: 'main#dashboard', as: :dashboard
