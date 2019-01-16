@@ -57,7 +57,6 @@ gem 'acts_as_list' #sortables
 # Analytics
 gem 'mixpanel-ruby'
 gem 'barnes'
-gem 'skylight'
 
 # Apps
 #gem 'easy_translate'
