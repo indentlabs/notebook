@@ -13,7 +13,7 @@ class ForumsLinkbuilderService < Service
       'Item': '/forum/items',
       'Job': '/forum/jobs',
       'Landmark': '/forum/landmarks',
-      'Language': '/forum/general-worldbuilding', # wtf did I do
+      'Language': '/forum/languages', # wtf did I do
       'Location': '/forum/locations',
       'Magic': '/forum/magic',
       'Planet': '/forum/planets',
