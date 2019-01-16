@@ -190,6 +190,14 @@ class User < ApplicationRecord
     found_key.user
   end
 
+  def profile_url
+    if self.username.present?
+      Rails.application.routes.url_helpers.profile_by_username_path(username: self.username)
+    else
+      Rails.application.routes.url_helpers.user_path(id: self.id)
+    end
+  end
+
   private
 
   # Attributes that are non-public, and should be blacklisted from any public
