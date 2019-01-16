@@ -13,7 +13,7 @@ class User < ApplicationRecord
 
   validates_uniqueness_of :username, allow_nil: true, allow_blank: true
   validates_format_of :username, with: /\A[A-Za-z0-9]+\z/
-  validates :username, length: { in: 1..20 }
+  validates :username, length: { in: 1..40 }
 
   has_many :subscriptions,                dependent: :destroy
   has_many :billing_plans, through: :subscriptions
