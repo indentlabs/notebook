@@ -12,7 +12,7 @@ class User < ApplicationRecord
   include Authority::UserAbilities
 
   validates_uniqueness_of :username, allow_nil: true, allow_blank: true
-  validates_format_of :username, with: /\A[A-Za-z0-9]+\z/
+  validates_format_of :username, with: /\A[A-Za-z0-9\-_]+\z/
   validates :username, length: { in: 1..40 }
 
   has_many :subscriptions,                dependent: :destroy
