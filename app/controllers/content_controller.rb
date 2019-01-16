@@ -10,10 +10,10 @@ class ContentController < ApplicationController
 
   before_action :set_attributes_content_type, only: [:attributes]
 
-  before_action :set_navbar_color
-  before_action :set_general_navbar_actions, except: [:deleted, :show, :changelog]
+  before_action :set_navbar_color, except: [:api_sort]
+  before_action :set_general_navbar_actions, except: [:deleted, :show, :changelog, :api_sort]
   before_action :set_specific_navbar_actions, only: [:show, :changelog]
-  before_action :set_sidenav_expansion
+  before_action :set_sidenav_expansion, except: [:api_sort]
 
   def index
     @content_type_class = content_type_from_controller(self.class)
@@ -295,6 +295,40 @@ class ContentController < ApplicationController
   end
 
   def attributes
+    @attribute_categories = @content_type_class.attribute_categories(current_user, show_hidden: true).order(:position)
+  end
+
+  def api_sort #todo
+    sort_params = params.permit(:content_id, :intended_position, :sortable_class)
+    sortable_class = sort_params[:sortable_class].constantize # todo audit
+    return unless sortable_class
+
+    content = sortable_class.find_by(id: sort_params[:content_id].to_i)
+    return unless content.present?
+    return unless content.user_id == current_user.id
+    return unless content.respond_to?(:position)
+
+    # Ugh not another one of these backfills
+    if content.position.nil?
+      content_to_order_first = if content.is_a?(AttributeCategory)
+        content_type_class = content.entity_type.titleize.constantize
+        content_type_class.attribute_categories(current_user, show_hidden: true)
+      elsif content.is_a?(AttributeField)
+        content.attribute_category.attribute_fields
+      end
+
+      ActiveRecord::Base.transaction do
+        content_to_order_first.each.with_index do |content_to_order, index|
+          content_to_order.update_column(:position, 1 + index)
+        end
+      end
+    end
+
+    if content.reload && content.insert_at(1 + sort_params[:intended_position].to_i)
+      render json: 200
+    else
+      render json: 500
+    end
   end
 
   private

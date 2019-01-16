@@ -22,6 +22,7 @@ class CategoriesAndFieldsSerializer
             label:  field.label,
             type:   field.field_type,
             hidden: !!field.hidden,
+            position: field.position,
             old_column_source: field.old_column_source,
             value: ""
           }
@@ -44,7 +45,11 @@ class CategoriesAndFieldsSerializer
           #   a[:label] <=> b[:label]
           # end
 
-          a_value <=> b_value
+          if a[:position] && b[:position]
+            a[:position] <=> b[:position]
+          else
+            a_value <=> b_value
+          end
         end
       }
     end

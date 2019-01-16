@@ -52,6 +52,7 @@ gem 'slack-notifier'
 
 # Form enhancements
 gem 'redcarpet' #markdown formatting
+gem 'acts_as_list' #sortables
 
 # Analytics
 gem 'mixpanel-ruby'
