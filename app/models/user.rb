@@ -12,6 +12,7 @@ class User < ApplicationRecord
   include Authority::UserAbilities
 
   validates_uniqueness_of :username, allow_nil: true, allow_blank: true
+  validates :username, length: { in: 1..20 }
 
   has_many :subscriptions,                dependent: :destroy
   has_many :billing_plans, through: :subscriptions
