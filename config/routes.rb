@@ -12,6 +12,8 @@ Rails.application.routes.draw do
       get content_type.name.downcase.pluralize.to_sym, on: :member
     end
   end
+  get '/@:username', to: 'users#show'
+
   scope '/my' do
     get '/content',         to: 'main#dashboard', as: :dashboard
     get '/content/recent',  to: 'main#recent_content', as: :recent_content

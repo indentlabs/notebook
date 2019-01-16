@@ -5,8 +5,8 @@ class UsersController < ApplicationController
 
   def show
     @sidenav_expansion = 'my account'
-    
-    @user    = User.find_by(id: params[:id])
+
+    @user    = User.find_by(user_params)
     return redirect_to(root_path, notice: 'That user does not exist.') if @user.nil?
 
     @content = @user.public_content.select { |type, list| list.any? }
@@ -69,5 +69,11 @@ class UsersController < ApplicationController
       username: 'tristan'
 
     notifier.ping ":bomb: :bomb: :bomb: #{user.email.split('@').first}@ (##{user.id}) just deleted their account."
+  end
+
+  private
+
+  def user_params
+    params.permit(:id, :username)
   end
 end
