@@ -52,11 +52,11 @@ gem 'slack-notifier'
 
 # Form enhancements
 gem 'redcarpet' #markdown formatting
+gem 'acts_as_list' #sortables
 
 # Analytics
 gem 'mixpanel-ruby'
 gem 'barnes'
-gem 'skylight'
 
 # Apps
 #gem 'easy_translate'

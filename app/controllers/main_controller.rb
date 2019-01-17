@@ -44,23 +44,8 @@ class MainController < ApplicationController
     # todo optimize this / use Attributes
     return [] if @activated_content_types.nil?
 
-    @recent_edits = @activated_content_types.flat_map { |klass|
-      klass.constantize
-           .where(user_id: current_user.id)
-           .order(updated_at: :desc)
-           .limit(100)
-    }.sort_by(&:updated_at)
-    .last(100)
-    .reverse
-
-    @recent_creates = @activated_content_types.flat_map { |klass|
-      klass.constantize
-           .where(user_id: current_user.id)
-           .order(created_at: :desc)
-           .limit(100)
-    }.sort_by(&:created_at)
-    .last(100)
-    .reverse
+    @recent_edits = current_user.recent_content_list(limit: 50)
+    @recent_creates = current_user.recent_content_list_by_create(limit: 50)
   end
 
   def for_writers
