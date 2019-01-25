@@ -8,6 +8,11 @@ $(document).ready(function () {
     add_link_bar_click_handlers();
   }
 
+  function show_im_feeling_lucky_button(container) {
+    $('.im-feeling-lucky').hide();
+    container.show();
+  }
+
   $('.content-field').find('textarea').focus(function (focus_event) {
     var focused_text_field = $(focus_event.target);
     var parent_content_field = focused_text_field.closest('.content-field');
@@ -18,6 +23,7 @@ $(document).ready(function () {
     parent_content_field.find('.content-field-link-bar').show();
 
     add_link_bar(parent_content_field.find('.content-field-link-bar-container'));
+    show_im_feeling_lucky_button(parent_content_field.find('.im-feeling-lucky'));
   });
 
   function add_link_bar_click_handlers() {
