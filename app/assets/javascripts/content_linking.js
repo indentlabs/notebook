@@ -52,5 +52,17 @@ $(document).ready(function () {
       click_event.stopPropagation();
       return false;
     });
+
+    $('div.btn-group.with-toggler > a.btn:first').click(function () {
+      var group_is_open = $('div.btn-group.with-toggler > a.btn:nth-child(2)').is(':visible');
+      var rest_of_group = $('div.btn-group.with-toggler > a:not(:first-child)');
+      var applied_class = group_is_open ? 'fadeOutLeft' : 'fadeInLeft';
+
+      if (group_is_open) {
+        rest_of_group.fadeOut();
+      } else {
+        rest_of_group.fadeIn();
+      }
+    });
   }
 });

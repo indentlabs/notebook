@@ -20,16 +20,24 @@
 
 <div id="content-field-link-bar-template">
   <div class="content-field-link-bar">
-    <div class="btn-group" role="group">
-      <span class="grey-text" style="padding-top: 6px; padding-right: 4px;">
-        Link a page (<a href="#" class="tooltipped" tabindex="-1" data-tooltip="These links will insert a small snippet that<br />automatically turns into a link to that page after saving." data-position="bottom" data-html="true">?</a>):
-      </span>
+    <div class="btn-group with-toggler" role="group">
+      <a class="btn green tooltipped"
+         style="padding: 0 9px;"
+         data-tooltip="Link any page with a small snippet that<br />automatically renders as a link to that page."
+         data-position="bottom"
+         data-html="true">
+        <i class="material-icons">
+          alternate_email
+        </i>
+      </a>
       <% @linkables_cache.keys.each do |class_name| %>
         <% relation_class = class_name.constantize %>
+        <% next unless @linkables_cache.fetch(class_name, []).any? %>
         <a class="btn btn-small <%= relation_class.color %> dropdown-trigger <%= 'disabled' unless @linkables_cache.fetch(class_name, []).any? %> tooltipped"
-           href="#" style="padding: 0 9px;"
+           href="#"
+           style="padding: 0 9px;"
            data-target='active_link_bar_<%= class_name %>'
-           data-tooltip="<%= class_name.pluralize %>"
+           data-tooltip="Your <%= class_name.pluralize %>"
            data-position="bottom"
            tabindex="-1">
           <i class="material-icons">
