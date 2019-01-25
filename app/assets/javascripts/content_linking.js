@@ -65,9 +65,13 @@ $(document).ready(function () {
       var applied_class = group_is_open ? 'fadeOutLeft' : 'fadeInLeft';
 
       if (group_is_open) {
-        rest_of_group.fadeOut();
+        console.log('closing group');
+        rest_of_group.removeClass('bounceIn');
+        rest_of_group.addClass('bounceOut');
       } else {
-        rest_of_group.fadeIn();
+        console.log('opening group');
+        rest_of_group.removeClass('bounceOut');
+        rest_of_group.addClass('bounceIn');
       }
     });
   }
