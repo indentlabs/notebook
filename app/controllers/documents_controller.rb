@@ -6,6 +6,8 @@ class DocumentsController < ApplicationController
   before_action :set_navbar_actions, except: [:edit]
   before_action :set_footer_visibility, only: [:edit]
 
+  layout 'editor', only: [:edit]
+
   def index
     @documents = current_user.documents.order('updated_at desc')
   end
