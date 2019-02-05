@@ -28,9 +28,9 @@ class DocumentsController < ApplicationController
   def analysis
     @document = Document.find_by(id: params[:id], user_id: current_user.id)
 
-    unless @document.present? && (current_user || User.new).can_read?(@document)
-      redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
-    end
+    # unless @document.present? && (current_user || User.new).can_read?(@document)
+    #   redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+    # end
 
     @navbar_actions.unshift({
       label: (@document.name || 'Untitled document'),
