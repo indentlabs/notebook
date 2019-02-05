@@ -60,7 +60,7 @@ class ContentSerializer
               hidden: !!field.hidden,
               position: field.position,
               old_column_source: field.old_column_source,
-              value: self.attribute_values.detect { |value|
+              value: self.attribute_values.order('created_at desc').detect { |value| #codesmell here: we shouldn't ever have multiple attribute values but for some reason we do sometimes (in collaboration?)
                 value.entity_type == content.page_type &&
                 value.entity_id   == content.id &&
                 value.attribute_field_id == field.id

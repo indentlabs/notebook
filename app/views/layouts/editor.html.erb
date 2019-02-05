@@ -1,21 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/medium-editor/5.22.1/css/medium-editor.min.css" integrity="sha256-R45gjjgTM82XinRpA4xKOL00zJ2/ajOSjY3tvw5JaDM=" crossorigin="anonymous" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/medium-editor/5.22.1/css/themes/bootstrap.min.css" integrity="sha256-IAkbHl+TfLeobqAknNEdwDbXIW8A0Rj7GEftvOJa/LI=" crossorigin="anonymous" />
-
   <%= render 'layouts/common_head' %>
-
-  <script async src="https://cdnjs.cloudflare.com/ajax/libs/medium-editor/5.22.1/js/medium-editor.min.js" integrity="sha256-Q35a6YaW9okg2cZSdp9fcxRE33VKe3rp1mX1uf1Q85M=" crossorigin="anonymous"></script>
 </head>
-<body>
+<body data-in-app="true">
+  <%= render 'layouts/sidenav', locals: { fixed: false } if user_signed_in? %>
+  <%= render 'layouts/document_navbar' %>
 
-  <%= render 'layouts/navbar' %>
-
-  <main>
-    <div>
+  <main style="padding-top: 10px;">
+    <%= yield :full_width_page_header %>
+    <div class="container-fluid">
       <div class="row">
-        <div class="col s12 m12">
+        <div class="col s12">
           <%= yield %>
         </div>
       </div>
@@ -23,13 +19,19 @@
 
     <%= render 'layouts/ganalytics' %>
 
-    <a href="https://plus.google.com/118076966717703203223" rel="publisher"></a>
   </main>
 
-  <%= render 'layouts/footer' %>
+  <%= render 'layouts/footer' unless defined?(@show_footer) && !@show_footer %>
+  <%= render partial: 'content/keyboard_controls_help_modal' %>
 
   <script type="text/javascript">
     <%= yield :javascript %>
+
+    $(document).ready(function() {
+      $('.tooltipped').tooltip({ enterDelay: 50 });
+      M.AutoInit();
+      $('.dropdown-trigger').dropdown({coverTrigger: false});
+    });
   </script>
 
 </body>
