@@ -19,7 +19,9 @@ Rails.application.routes.draw do
     get '/prompts',         to: 'main#prompts', as: :prompts
 
     get '/scratchpad',      to: 'main#notes', as: :notes
-    resources :documents
+    resources :documents do
+      get '/analysis',      to: 'documents#analysis', on: :member
+    end
 
     # Billing
     scope '/billing' do

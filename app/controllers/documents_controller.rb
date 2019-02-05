@@ -25,6 +25,24 @@ class DocumentsController < ApplicationController
     })
   end
 
+  def analysis
+    @document = Document.find_by(id: params[:id], user_id: current_user.id)
+
+    unless @document.present? && (current_user || User.new).can_read?(@document)
+      redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+    end
+
+    @navbar_actions.unshift({
+      label: (@document.name || 'Untitled document'),
+      href: document_path(@document)
+    })
+
+    @navbar_actions.unshift({
+      label: 'Analysis',
+      href: analysis_document_path(@document)
+    })
+  end
+
   def edit
     @document = Document.find_by(id: params[:id], user_id: current_user.id)
     @document ||= current_user.documents.create
