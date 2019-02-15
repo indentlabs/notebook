@@ -9,10 +9,7 @@ class Language < ApplicationRecord
   include BelongsToUniverse
 
   include HasAttributes
-  include HasPrivacy
-  include HasContentGroupers
-  include HasImageUploads
-  include HasChangelog
+  include IsContentPage
 
   include Serendipitous::Concern
 

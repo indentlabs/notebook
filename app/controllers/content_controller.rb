@@ -192,6 +192,8 @@ class ContentController < ApplicationController
       end
     end
 
+    update_page_tags
+
     if @content.user == current_user
       # todo this needs some extra validation probably to ensure each attribute is one associated with this page
       update_success = @content.update_attributes(content_params)
@@ -332,6 +334,10 @@ class ContentController < ApplicationController
   end
 
   private
+
+  def update_page_tags
+    raise params.inspect
+  end
 
   def render_json(content)
     render json: JSON.pretty_generate({
