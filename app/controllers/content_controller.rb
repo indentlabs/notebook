@@ -26,8 +26,8 @@ class ContentController < ApplicationController
       @content = @universe_scope.send(pluralized_content_name)
     else
       @content = (
-        current_user.send(pluralized_content_name) +
-        current_user.send("contributable_#{pluralized_content_name}")
+        current_user.send(pluralized_content_name).includes(:page_tags) +
+        current_user.send("contributable_#{pluralized_content_name}").includes(:page_tags)
       )
 
       unless @content_type_class == Universe
