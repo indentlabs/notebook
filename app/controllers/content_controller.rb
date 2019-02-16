@@ -39,13 +39,13 @@ class ContentController < ApplicationController
     @content = @content.to_a.flatten.uniq
 
     # Filters
+    @page_tags = PageTag.where(
+      page_type: @content_type_class.name,
+      page_id:   @content.pluck(:id)
+    )
     if params.key?(:slug)
-      page_tags = PageTag.where(
-        slug:      params[:slug],
-        page_type: @content_type_class.name,
-        page_id:   @content.pluck(:id)
-      )
-      @content.select! { |content| page_tags.pluck(:page_id).include?(content.id) }
+      filtered_page_tags = @page_tags.where(slug: params[:slug])
+      @content.select! { |content| filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
 
     @content = @content.sort_by(&:name)
