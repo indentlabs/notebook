@@ -34,11 +34,20 @@
             <div class="chips chips-autocomplete chips-initial"></div>
             <%= f.hidden_field :page_tags, value: content.page_tags.join(',,,|||,,,'), id: 'hidden_page_tags_value' %>
 
-            <div class="help-text">
+            <div class="help-text show-when-focused">
               <i class="material-icons tiny">label</i>
-              <span class="new badge blue"></span>
-              Press enter to create a new tag.
+              Type and press enter to create a new tag, or click any of the suggested tags below to add it.
             </div>
+            <div class="tags-container show-when-focused">
+              <% @suggested_page_tags.each do |tag| %>
+                <%=
+                  link_to '#', class: 'js-add-tag' do
+                %>
+                  <span class="new badge grey left hoverable" data-badge-caption="<%= tag %>"></span>
+                <% end %>
+              <% end %>
+            </div>
+            <div class="clearfix"></div>
           </div>
         </div>
         <%= content_for :javascript do %>
@@ -71,6 +80,7 @@
             onChipAdd: update_hidden_page_tag_value,
             onChipDelete: update_hidden_page_tag_value
           });
+          window.page_tags_reference = chips;
         <% end %>
 
       <% elsif field[:type] == 'universe' %>

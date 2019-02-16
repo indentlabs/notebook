@@ -109,6 +109,10 @@ class ContentController < ApplicationController
     @serialized_categories_and_fields = CategoriesAndFieldsSerializer.new(
       @content.class.attribute_categories(current_user)
     )
+    @suggested_page_tags = (
+      current_user.page_tags.where(page_type: @content.class.name).pluck(:tag) +
+        PageTagService.suggested_tags_for(@content.class.name)
+    ).uniq
 
     # todo this is a good spot to audit to disable and see if create permissions are ok also
     unless (current_user || User.new).can_create?(content_type_from_controller(self.class))
@@ -131,6 +135,10 @@ class ContentController < ApplicationController
     end
 
     @serialized_content = ContentSerializer.new(@content)
+    @suggested_page_tags = (
+      current_user.page_tags.where(page_type: content_type_class.name).pluck(:tag) +
+        PageTagService.suggested_tags_for(content_type_class.name)
+      ).uniq - @serialized_content.page_tags
 
     unless @content.updatable_by? current_user
       return redirect_to @content, notice: t(:no_do_permission)
@@ -173,6 +181,8 @@ class ContentController < ApplicationController
       if params.key? 'image_uploads'
         upload_files params['image_uploads'], content_type.name, @content.id
       end
+
+      update_page_tags
 
       successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
