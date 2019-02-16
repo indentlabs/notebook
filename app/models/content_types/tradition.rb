@@ -7,11 +7,7 @@ class Tradition < ActiveRecord::Base
   validates :user_id, presence: true
 
   include BelongsToUniverse
-  include HasAttributes
-  include HasPrivacy
-  include HasContentGroupers
-  include HasImageUploads
-  include HasChangelog
+  include IsContentPage
   include Serendipitous::Concern
 
   include Authority::Abilities

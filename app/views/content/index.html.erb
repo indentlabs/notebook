@@ -6,7 +6,29 @@
   <%= render partial: 'content/components/parallax_header', locals: { content_type: content_type, content_class: @content_type_class } %>
 <% end %>
 
+
+<% if @page_tags.any? %>
+  <div class="tags-container">
+    <span class="left grey-text">View by tag:&nbsp;</span>
+    <%= link_to polymorphic_path(@content_type_class) do %>
+      <span class="new badge <%= params.key?(:slug) ? 'grey' : @content_type_class.color %> left" data-badge-caption="All <%= content_type.pluralize %>"></span>
+    <% end %>
+    <% @page_tags.each do |tag| %>
+      <%=
+        link_to send(
+          "page_tag_#{content_type.pluralize}_path",
+          slug: PageTagService.slug_for(tag.tag)
+        ) do
+      %>
+        <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+      <% end %>
+    <% end %>
+  </div>
+  <div style="clear: both"></div>
+<% end %>
+
 <% if @content.any? %>
+
   <%= render partial: 'content/components/list_filter_bar', locals: { } %>
   <div class="card">
     <%= render partial: 'content/list/list', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true } %>
