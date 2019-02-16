@@ -6,7 +6,7 @@ class PageTagService < Service
   def self.suggested_tags_for(class_name)
     case class_name
     when Building.name
-      ["School", "Shop"]
+      ["School", "Business"]
     when Character.name
       ["Main character", "Side character", "Background character"]
     when Condition.name
