@@ -65,16 +65,18 @@
         </div>
 
       <% elsif serialized_field[:type] == 'tags' %>
-        <% value.each do |tag| %>
-          <%=
-            link_to send(
-              "page_tag_#{content.raw_model.class.name.downcase.pluralize}_path",
-              slug: PageTagService.slug_for(tag)
-            ) do
-          %>
-            <span class="new badge red left" data-badge-caption="<%= tag %>"></span>
+        <div class="tags-container">
+          <% value.each do |tag| %>
+            <%=
+              link_to send(
+                "page_tag_#{content.raw_model.class.name.downcase.pluralize}_path",
+                slug: PageTagService.slug_for(tag)
+              ) do
+            %>
+              <span class="new badge red left" data-badge-caption="<%= tag %>"></span>
+            <% end %>
           <% end %>
-        <% end %>
+        </div>
 
       <% else # serialized_field[:type] == text %>
         <div class="col s9 m9 l9 markdownable">

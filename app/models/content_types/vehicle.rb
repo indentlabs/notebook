@@ -7,6 +7,7 @@ class Vehicle < ActiveRecord::Base
   validates :user_id, presence: true
 
   include IsContentPage
+  include BelongsToUniverse
   include Serendipitous::Concern
 
   include Authority::Abilities
