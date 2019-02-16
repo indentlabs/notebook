@@ -28,6 +28,9 @@
             nil
           end
 
+        when 'tags'
+          content.page_tags
+
         else
           raise "unknown field type = " + serialized_field[:type].inspect
       end
@@ -60,6 +63,18 @@
             </div>
           <% end %>
         </div>
+
+      <% elsif serialized_field[:type] == 'tags' %>
+        <% value.each do |tag| %>
+          <%=
+            link_to send(
+              "page_tag_#{content.raw_model.class.name.downcase.pluralize}_path",
+              slug: PageTagService.slug_for(tag)
+            ) do
+          %>
+            <span class="new badge red left" data-badge-caption="<%= tag %>"></span>
+          <% end %>
+        <% end %>
 
       <% else # serialized_field[:type] == text %>
         <div class="col s9 m9 l9 markdownable">

@@ -8,7 +8,7 @@ class Building < ActiveRecord::Base
 
   include BelongsToUniverse
   include IsContentPage
-  
+
   include Serendipitous::Concern
 
   include Authority::Abilities

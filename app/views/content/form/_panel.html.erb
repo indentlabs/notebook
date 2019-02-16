@@ -56,20 +56,18 @@
             secondaryPlaceholder: '+ Tag',
             autocompleteOptions: {
               data: {
-                'Apple': null,
-                'Microsoft': null,
-                'Google': null
+                <% @content.page_tags.pluck(:tag).each do |tag| %>
+                  '<%= tag %>': null,
+                <% end %>
               },
               limit: 100,
               minLength: 1
             },
-            data: [{
-              tag: 'Apple',
-            }, {
-              tag: 'Microsoft',
-            }, {
-              tag: 'Google',
-            }],
+            data: [
+              <% @content.page_tags.pluck(:tag).each do |tag| %>
+                {tag: '<%= tag %>'},
+              <% end %>
+            ],
             onChipAdd: update_hidden_page_tag_value,
             onChipDelete: update_hidden_page_tag_value
           });

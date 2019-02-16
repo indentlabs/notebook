@@ -36,7 +36,19 @@ class ContentController < ApplicationController
       end
     end
 
-    @content = @content.to_a.flatten.uniq.sort_by(&:name)
+    @content = @content.to_a.flatten.uniq
+
+    # Filters
+    if params.key?(:slug)
+      page_tags = PageTag.where(
+        slug:      params[:slug],
+        page_type: @content_type_class.name,
+        page_id:   @content.pluck(:id)
+      )
+      @content.select! { |content| page_tags.pluck(:page_id).include?(content.id) }
+    end
+
+    @content = @content.sort_by(&:name)
 
     respond_to do |format|
       format.html { render 'content/index' }
@@ -336,7 +348,23 @@ class ContentController < ApplicationController
   private
 
   def update_page_tags
-    raise params.inspect
+    tag_list = page_tag_params.fetch(:page_tags, "").split(',,,|||,,,')
+    current_tags = @content.page_tags.pluck(:tag)
+
+    tags_to_add    = tag_list - current_tags
+    tags_to_remove = current_tags - tag_list
+
+    tags_to_add.each do |tag|
+      @content.page_tags.find_or_create_by(
+        tag:  tag,
+        slug: PageTagService.slug_for(tag),
+        user: @content.user
+      )
+    end
+
+    tags_to_remove.each do |tag|
+      @content.page_tags.find_by(tag: tag).destroy
+    end
   end
 
   def render_json(content)
@@ -407,6 +435,15 @@ class ContentController < ApplicationController
       .to_sym
 
     params.require(content_class).permit(content_param_list + [:deleted_at])
+  end
+
+  def page_tag_params
+    content_class = content_type_from_controller(self.class)
+      .name
+      .downcase
+      .to_sym
+
+    params.require(content_class).permit(:page_tags)
   end
 
   def content_deletion_redirect_url
