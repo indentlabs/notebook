@@ -13,7 +13,7 @@
     <%= link_to polymorphic_path(@content_type_class) do %>
       <span class="new badge <%= params.key?(:slug) ? 'grey' : @content_type_class.color %> left" data-badge-caption="All <%= content_type.pluralize %>"></span>
     <% end %>
-    <% @page_tags.each do |tag| %>
+    <% @page_tags.uniq(&:tag).each do |tag| %>
       <%=
         link_to send(
           "page_tag_#{content_type.pluralize}_path",
