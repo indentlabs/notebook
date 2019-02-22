@@ -182,7 +182,7 @@ class ContentController < ApplicationController
         upload_files params['image_uploads'], content_type.name, @content.id
       end
 
-      update_page_tags
+      update_page_tags unless [AttributeCategory.name, AttributeField.name].include?(@content.class.name)
 
       successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
@@ -214,7 +214,7 @@ class ContentController < ApplicationController
       end
     end
 
-    update_page_tags
+    update_page_tags unless [AttributeCategory.name, AttributeField.name].include?(@content.class.name)
 
     if @content.user == current_user
       # todo this needs some extra validation probably to ensure each attribute is one associated with this page
