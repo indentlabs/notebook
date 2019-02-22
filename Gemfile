@@ -63,7 +63,7 @@ gem 'barnes'
 #gem 'levenshtein-ffi'
 
 # Forum
-gem 'thredded'
+gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
 gem 'rails-ujs'
 
 # Workers
