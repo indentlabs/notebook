@@ -16,13 +16,13 @@ class PageTagService < Service
     when Creature.name
       ["Domesticated", "Wild", "Humanoid"]
     when Deity.name
-      ["Good", "Evil"]
+      ["Good", "Evil", "Neutral"]
     when Flora.name
-      ["Floral", "Weed"]
+      ["Floral", "Weed", "Tree", "Bush"]
     when Government.name
       ["Republic", "Democracy", "Monarchy", "Dictatorship"]
     when Group.name
-      ["Good", "Evil"]
+      ["Good", "Evil", "Secret"]
     when Item.name
       ["Weapon", "Armor", "Artifact", "Relic"]
     when Job.name
