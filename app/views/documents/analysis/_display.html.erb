@@ -63,7 +63,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <h5 class="white-text">
-            <%= pluralize (analysis.word_count / 200.0).round, 'minute' %>
+            <%= distance_of_time_in_words(analysis.word_count / 200.0 * 60, 0, include_seconds: true) %>
           </h5>
           Average reader
           <div><small>at 200 words per minute</small></div>
@@ -460,11 +460,11 @@
 <div class="row">
   <div class="col s12">
     <div class="purple card lighten-5">
-      <div class="card-content">
+      <div class="card-content" style="overflow: auto">
         <div class="card-title">Words per sentence</div>
-        <p>
-          <%= line_chart((1..analysis.sentence_count).to_a.zip(analysis.words_per_sentence)) %>
-        </p>
+        <div style="width: 30000px;">
+          <%= line_chart((1..analysis.sentence_count).to_a.zip(analysis.words_per_sentence), library: { chart: { zoomType: 'x' } }) %>
+        </div>
       </div>
       <div class="card-action">
         <a class="activator blue-text text-darken-4">

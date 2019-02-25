@@ -8,8 +8,13 @@ class DocumentAnalysisJob < ApplicationJob
     return unless analysis.present?
 
     # Start the analysis!
+    puts "Analysing: Counts"
     Documents::Analysis::CountingService.analyze(analysis.id)
+
+    puts "Analysing: Readability"
     Documents::Analysis::ReadabilityService.analyze(analysis.id)
+
+    puts "Analysing: Parts of Speech"
     Documents::Analysis::PartsOfSpeechService.analyze(analysis.id)
 
     # TODO:
