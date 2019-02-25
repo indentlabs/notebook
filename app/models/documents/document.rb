@@ -27,4 +27,11 @@ class Document < ApplicationRecord
   def universe_field_value
     #todo when documents belong to a universe
   end
+
+  def analyze!
+    # Create an analysis placeholder to show the user one is queued,
+    # then process it async
+    analysis = self.document_analysis.create
+    DocumentAnalysisJob.perform_later(analysis.reload.id)
+  end
 end

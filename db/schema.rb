@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_02_25_004454) do
+ActiveRecord::Schema.define(version: 2019_02_25_021227) do
+
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
     t.string "key"
@@ -786,6 +787,7 @@ ActiveRecord::Schema.define(version: 2019_02_25_004454) do
     t.json "words_per_sentence"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "completed_at"
     t.index ["document_id"], name: "index_document_analyses_on_document_id"
   end
 

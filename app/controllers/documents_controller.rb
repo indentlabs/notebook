@@ -34,6 +34,8 @@ class DocumentsController < ApplicationController
     #   redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     # end
 
+    @analysis = @document.document_analysis.order('updated_at DESC').first
+
     @navbar_actions.unshift({
       label: (@document.name || 'Untitled document'),
       href: document_path(@document)
@@ -43,6 +45,17 @@ class DocumentsController < ApplicationController
       label: 'Analysis',
       href: analysis_document_path(@document)
     })
+  end
+
+  def queue_analysis
+    # todo use existing permissions system to restrict linkjackers to premium
+    return unless user_signed_in? && current_user.on_premium_plan?
+
+    @document = Document.find_by(id: params[:id], user_id: current_user.id)
+    return unless @document.present?
+
+    @document.analyze!
+    redirect_to analysis_document_path(@document)
   end
 
   def edit

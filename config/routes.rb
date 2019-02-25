@@ -21,7 +21,8 @@ Rails.application.routes.draw do
 
     get '/scratchpad',      to: 'main#notes', as: :notes
     resources :documents do
-      get '/analysis',      to: 'documents#analysis', on: :member
+      get '/analysis',       to: 'documents#analysis', on: :member
+      get '/queue_analysis', to: 'documents#queue_analysis', on: :member
     end
 
     # Billing
