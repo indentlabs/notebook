@@ -49,6 +49,14 @@ gem 'medium-editor-rails'
 
 # Document understanding
 gem 'htmlentities'
+gem 'birch', github: 'billthompson/birch', branch: 'birch-ruby22'
+gem 'treat'
+# gem 'treat', :git => 'https://github.com/indentlabs/treat-gem.git'
+gem 'engtagger'
+
+# These are unfortunately necessary as a hack to get treat running properly
+gem 'rubyzip', '>= 1.0.0' # will load new rubyzip version
+gem 'zip-zip' # will load compatibility for old rubyzip API.
 
 # Graphs & Charts
 gem 'chartkick'
