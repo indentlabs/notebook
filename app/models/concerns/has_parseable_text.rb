@@ -24,6 +24,10 @@ module HasParseableText
       @words ||= plaintext.downcase.gsub(/[^\s\w']/, '').split(' ').reject { |w| is_numeric?(w) }
     end
 
+    def pages
+      @pages ||= plaintext.split("\n").in_groups_of(25)
+    end
+
     def acronyms
       @acroynyms ||= words
         .select { |word| word == word.upcase && word.length > 1 && !is_numeric?(word) }
