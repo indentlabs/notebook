@@ -87,6 +87,46 @@ module Documents
         return nil unless readability_scores.length > 2
         100 - readability_scores.sort.slice(1..-2).sum.to_f / 4
       end
+
+      def self.readability_score_category(score)
+        case score
+        when 0..35
+          return 'Hard'
+        when 36..65
+          return 'Average'
+        when 66..100
+          return 'Easy'
+        end
+      end
+
+      def self.readability_score_text(analysis)
+        category = self.readability_score_category(analysis.readability_score)
+
+        case category
+        when 'Easy'
+          [
+            "Nice!",
+            "This document is easily understandable by readers with at least a",
+            analysis.combined_average_reading_level.round.ordinalize,
+            "grade reading level."
+          ].join(' ')
+        when 'Average'
+          [
+            "Not bad!",
+            "This document is understandable by readers with at least a",
+            analysis.combined_average_reading_level.round.ordinalize,
+            "grade reading level."
+          ].join(' ')
+        when 'Hard'
+          [
+            "This document is mostly understandable by readers with at least a",
+            analysis.combined_average_reading_level.round.ordinalize,
+            "grade reading level.",
+            "It could definitely be improved!"
+          ].join(' ')
+        end
+      end
+
     end
   end
 end

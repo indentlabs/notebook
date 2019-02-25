@@ -9,8 +9,14 @@ class DocumentAnalysisJob < ApplicationJob
 
     # Start the analysis!
     Documents::Analysis::CountingService.analyze(analysis.id)
-    Documents::Analysis::ReadbilityService.analyze(analysis.id)
+    Documents::Analysis::ReadabilityService.analyze(analysis.id)
     Documents::Analysis::PartsOfSpeechService.analyze(analysis.id)
+
+    # TODO:
+    # - Sentiment analysis
+    # - Character appearance analysis
+    # - Typo analysis
+    # - Gotcha analysis
 
     analysis.update(completed_at: DateTime.current)
   end

@@ -14,6 +14,13 @@ module Documents
         analysis.adverb_count      = document.adverbs.count
         analysis.determiner_count  = document.determiners.count
 
+        # TODO other POS counters:
+        # - numbers
+        # - stop words
+        # - URLs
+        # - abbreviations
+        # - acronyms
+
         analysis.save!
       end
     end

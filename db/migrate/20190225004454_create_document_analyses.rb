@@ -6,6 +6,7 @@ class CreateDocumentAnalyses < ActiveRecord::Migration[5.2]
       t.integer :page_count
       t.integer :paragraph_count
       t.integer :character_count
+      t.integer :sentence_count
       t.integer :readability_score
       t.float :combined_average_reading_level
       t.integer :flesch_kincaid_grade_level
@@ -15,6 +16,7 @@ class CreateDocumentAnalyses < ActiveRecord::Migration[5.2]
       t.float :coleman_liau_index
       t.float :automated_readability_index
       t.float :gunning_fog_index
+      t.float :smog_grade
       t.integer :adjective_count
       t.integer :noun_count
       t.integer :verb_count
@@ -29,6 +31,7 @@ class CreateDocumentAnalyses < ActiveRecord::Migration[5.2]
       t.integer :simple_words_count
       t.integer :complex_words_count
       t.json :words_per_sentence
+      t.datetime :completed_at
 
       t.timestamps
     end

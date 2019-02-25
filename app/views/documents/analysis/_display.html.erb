@@ -6,7 +6,7 @@
     <div class="card <%= Document.color %>">
       <div class="card-content white-text center">
         <span class="card-title">
-          <h5 class="white-text">3,400</h5>
+          <h5 class="white-text"><%= number_with_delimiter analysis.word_count %></h5>
           Words
         </span>
       </div>
@@ -17,8 +17,8 @@
     <div class="card <%= Document.color %>">
       <div class="card-content white-text center">
         <span class="card-title">
-          <h5 class="white-text">20</h5>
-          Pages
+          <h5 class="white-text"><%= number_with_delimiter analysis.page_count %></h5>
+          Pages <%# todo proper optional pluralization %>
         </span>
       </div>
     </div>
@@ -28,17 +28,7 @@
     <div class="card <%= Document.color %> lighten-3">
       <div class="card-content white-text center">
         <span class="card-title">
-          <h5 class="white-text">12</h5>
-          Chapters
-        </span>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m2">
-    <div class="card <%= Document.color %> lighten-3">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          <h5 class="white-text">935</h5>
+          <h5 class="white-text"><%= number_with_delimiter analysis.paragraph_count %></h5>
           Paragraphs
         </span>
       </div>
@@ -48,8 +38,18 @@
     <div class="card <%= Document.color %> lighten-3">
       <div class="card-content white-text center">
         <span class="card-title">
-          <h5 class="white-text">12,235</h5>
-          Characters
+          <h5 class="white-text"><%= number_with_delimiter analysis.sentence_count %></h5>
+          Sentences
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m2">
+    <div class="card <%= Document.color %> lighten-3">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <h5 class="white-text"><%= number_with_delimiter analysis.character_count %></h5>
+          Letters
         </span>
       </div>
     </div>
@@ -62,9 +62,11 @@
     <div class="card orange darken-2">
       <div class="card-content white-text center">
         <span class="card-title">
-          <h5 class="white-text">17 minutes</h5>
+          <h5 class="white-text">
+            <%= pluralize (analysis.word_count / 200.0).round, 'minute' %>
+          </h5>
           Average reader
-          <div><small>200 words per minute</small></div>
+          <div><small>at 200 words per minute</small></div>
         </span>
       </div>
     </div>
@@ -73,9 +75,11 @@
     <div class="card orange lighten-2">
       <div class="card-content white-text center">
         <span class="card-title">
-          <h5 class="white-text">34 minutes</h5>
+          <h5 class="white-text">
+            <%= pluralize (analysis.word_count / 100.0).round, 'minute' %>
+          </h5>
           Slow reader
-          <div><small>100 words per minute</small></div>
+          <div><small>at 100 words per minute</small></div>
         </span>
       </div>
     </div>
@@ -84,9 +88,11 @@
     <div class="card orange lighten-2">
       <div class="card-content white-text center">
         <span class="card-title">
-          <h5 class="white-text">11 minutes</h5>
+          <h5 class="white-text">
+            <%= pluralize (analysis.word_count / 300.0).round, 'minute' %>
+          </h5>
           Fast reader
-          <div><small>300 words per minute</small></div>
+          <div><small>at 300 words per minute</small></div>
         </span>
       </div>
     </div>
@@ -95,9 +101,11 @@
     <div class="card orange lighten-2">
       <div class="card-content white-text center">
         <span class="card-title">
-          <h5 class="white-text">8 minutes</h5>
+          <h5 class="white-text">
+            <%= pluralize (analysis.word_count / 400.0).round, 'minute' %>
+          </h5>
           Speed reader
-          <div><small>400 words per minute</small></div>
+          <div><small>at 400 words per minute</small></div>
         </span>
       </div>
     </div>
@@ -111,13 +119,15 @@
       <div class="card-content">
         <div class="row">
           <div class="col s12 m3 white-text center">
-            <h2>64</h2>
+            <h2><%= analysis.readability_score %></h2>
             READABILITY
           </div>
           <div class="col s12 m9">
-            <h4>Easy</h4>
+            <h4>
+              <% Documents::Analysis::ReadabilityService.readability_score_category(analysis.readability_score) %>
+            </h4>
             <p>
-              Nice! This document is easily understandable by readers with at least a 4th grade reading level.
+              <%= Documents::Analysis::ReadabilityService.readability_score_text(analysis) %>
             </p>
           </div>
         </div>
@@ -139,14 +149,14 @@
           "show more readability statistics".
         </p>
         <ul>
-          <li>Flesch-Kincaid grade level: 35</li>
-          <li>Flesch-Kincaid age minimum: 12</li>
-          <li>Flesch-Kincaid reading ease: 102</li>
-          <li>Forcast grade level: 7</li>
-          <li>Coleman liau index: 8</li>
-          <li>Automated readability index: 10</li>
-          <li>Gunning fog index: 12</li>
-          <li>Combined average reading level: 12</li>
+          <li>Flesch-Kincaid grade level: <%= analysis.flesch_kincaid_grade_level.round %></li>
+          <li>Flesch-Kincaid age minimum: <%= analysis.flesch_kincaid_age_minimum.round %></li>
+          <li>Flesch-Kincaid reading ease: <%= analysis.flesch_kincaid_reading_ease.round %></li>
+          <li>Forcast grade level: <%= analysis.forcast_grade_level.round %></li>
+          <li>Coleman liau index: <%= analysis.coleman_liau_index.round %></li>
+          <li>Automated readability index: <%= analysis.automated_readability_index.round %></li>
+          <li>Gunning fog index: <%= analysis.gunning_fog_index.round %></li>
+          <li>Combined average reading level: <%= analysis.combined_average_reading_level.round %></li>
         </ul>
       </div>
     </div>
@@ -155,6 +165,7 @@
   <div class="col s12 m6">
     <div class="green card lighten-3">
       <div class="card-content">
+        <%# TODO: Tips from highest/lowest readability scores %>
         To increase your readability further, try using shorter sentences.
       </div>
     </div>
@@ -168,11 +179,15 @@
 </div>
 
 <div class="extended-readability-statistics row animated">
+  <%# TODO: Order these cards by % %>
+  <%# TODO: Darken/lighten card based on % %>
   <div class="col s12 m3">
     <div class="card blue">
       <div class="card-content white-text center">
         <span class="card-title">
-          <div class="white-text">33.35%</div>
+          <div class="white-text">
+            <%= (analysis.adjective_count.to_f / analysis.word_count * 100).round(1) %>%
+          </div>
           Adjectives
         </span>
       </div>
@@ -182,7 +197,9 @@
     <div class="card blue lighten-1">
       <div class="card-content white-text center">
         <span class="card-title">
-          <div class="white-text">29.33%</div>
+          <div class="white-text">
+            <%= (analysis.noun_count.to_f / analysis.word_count * 100).round(1) %>%
+          </div>
           Nouns
         </span>
       </div>
@@ -192,7 +209,9 @@
     <div class="card blue lighten-2">
       <div class="card-content white-text center">
         <span class="card-title">
-          <div class="white-text">13.75%</div>
+          <div class="white-text">
+            <%= (analysis.verb_count.to_f / analysis.word_count * 100).round(1) %>%
+          </div>
           Verbs
         </span>
       </div>
@@ -202,7 +221,9 @@
     <div class="card blue lighten-3">
       <div class="card-content white-text center">
         <span class="card-title">
-          <div class="white-text">0.05%</div>
+          <div class="white-text">
+            <%= (analysis.pronoun_count.to_f / analysis.word_count * 100).round(1) %>%
+          </div>
           Pronouns
         </span>
       </div>
@@ -212,7 +233,9 @@
     <div class="card blue lighten-3">
       <div class="card-content white-text center">
         <span class="card-title">
-          <div class="white-text">1.05%</div>
+          <div class="white-text">
+            <%= (analysis.preposition_count.to_f / analysis.word_count * 100).round(1) %>%
+          </div>
           Prepositions
         </span>
       </div>
@@ -222,7 +245,9 @@
     <div class="card blue lighten-3">
       <div class="card-content white-text center">
         <span class="card-title">
-          <div class="white-text">5.02%</div>
+          <div class="white-text">
+            <%= (analysis.conjunction_count.to_f / analysis.word_count * 100).round(1) %>%
+          </div>
           Conjunctions
         </span>
       </div>
@@ -232,7 +257,9 @@
     <div class="card blue lighten-2">
       <div class="card-content white-text center">
         <span class="card-title">
-          <div class="white-text">14.23%</div>
+          <div class="white-text">
+            <%= (analysis.adverb_count.to_f / analysis.word_count * 100).round(1) %>%
+          </div>
           Adverbs
         </span>
       </div>
@@ -242,7 +269,9 @@
     <div class="card blue lighten-1">
       <div class="card-content white-text center">
         <span class="card-title">
-          <div class="white-text">15.32%</div>
+          <div class="white-text">
+            <%= (analysis.determiner_count.to_f / analysis.word_count * 100).round(1) %>%
+          </div>
           Determiners
         </span>
       </div>
@@ -254,96 +283,21 @@
       <div class="card-content white-text">
         <div class="card-title">N-syllable words</div>
         <p>
-          <%= column_chart({ 1 => 259, 2 => 415, 3 => 329, 4 => 129, 5 => 110, 6 => 25, 7 => 50, 8 => 3, 9 => 1 }) %>
+          <%= column_chart(analysis.n_syllable_words) %>
         </p>
       </div>
     </div>
   </div>
-
-  <!--
-  <div class="col s12 m3">
-    <div class="card <%= Document.color %> lighten-3">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          Most common<br />1-syllable words
-        </span>
-        <p>
-          <span class="left badge orange">the</span>
-          <span class="left badge orange">and</span>
-          <span class="left badge orange">he</span>
-          <span class="left badge orange">she</span>
-          <span class="left badge orange">they</span>
-          <span class="left badge orange">smile</span>
-        </p>
-        <div class="clearfix"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col s12 m3">
-    <div class="card <%= Document.color %> lighten-3">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          Most common<br />2-syllable words
-        </span>
-        <p>
-          <span class="left badge orange">therefore</span>
-          <span class="left badge orange">again</span>
-          <span class="left badge orange">walking</span>
-          <span class="left badge orange">magic</span>
-          <span class="left badge orange">dragon</span>
-          <span class="left badge orange">kingdom</span>
-        </p>
-        <div class="clearfix"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col s12 m3">
-    <div class="card <%= Document.color %> lighten-3">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          Most common<br />3-syllable words
-        </span>
-        <p>
-          <span class="left badge orange">already</span>
-          <span class="left badge orange">carelessly</span>
-          <span class="left badge orange">suddenly</span>
-          <span class="left badge orange">blissfully</span>
-          <span class="left badge orange">exactly</span>
-          <span class="left badge orange">timidly</span>
-        </p>
-        <div class="clearfix"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col s12 m3">
-    <div class="card <%= Document.color %> lighten-3">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          Most common<br />4-syllable words
-        </span>
-        <p>
-          <span class="left badge orange">legendary</span>
-          <span class="left badge orange">observation</span>
-          <span class="left badge orange">innuendo</span>
-          <span class="left badge orange">violently</span>
-          <span class="left badge orange">comfortable</span>
-          <span class="left badge orange">mimblewimble</span>
-        </p>
-        <div class="clearfix"></div>
-      </div>
-    </div>
-  </div>
-  -->
 
   <div class="col s12 m6">
     <div class="card blue lighten-3">
       <div class="card-content white-text">
         <div class="card-title">Word variety</div>
         <p>
-          <%= pie_chart({ 'Words used multiple times' => 2060, 'Words used exactly once' => 440 }) %>
+          <%= pie_chart({
+            'Words used multiple times' => analysis.words_used_repeatedly_count,
+            'Words used exactly once' => analysis.words_used_once_count
+          }) %>
         </p>
       </div>
       <div class="card-action">
@@ -362,7 +316,10 @@
       <div class="card-content white-text">
         <div class="card-title">Word complexity</div>
         <p>
-          <%= pie_chart({ 'Simple words' => 1861, 'Complex words' => 1539 }) %>
+          <%= pie_chart({
+            'Simple words' => analysis.simple_words_count,
+            'Complex words' => analysis.complex_words_count
+            }) %>
         </p>
       </div>
       <div class="card-action">
@@ -377,7 +334,7 @@
   </div>
 </div>
 
-<h5>Plot</h5>
+<!-- <h5>Plot</h5>
 <div class="row">
   <div class="col s12">
     <div class="card grey lighten-5">
@@ -392,7 +349,7 @@
         ]) %>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!--
   <% 10.times do |i| %>
@@ -407,9 +364,7 @@
       </div>
     </div>
   <% end %>
-  -->
 
-  <!--
   <div class="row">
     <div class="col s12">
       <div class="card grey lighten-3">
@@ -429,10 +384,10 @@
       </div>
     </div>
   </div>
-  -->
 </div>
+-->
 
-<h5>Characters</h5>
+<!-- <h5>Characters</h5>
 <div class="row">
   <div class="col s12">
     <div class="card green lighten-3">
@@ -499,7 +454,7 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
 
 <h5>Style</h5>
 <div class="row">
@@ -508,7 +463,7 @@
       <div class="card-content">
         <div class="card-title">Words per sentence</div>
         <p>
-          <%= line_chart((1..100).map { |i| [i, 5 + 7 * Math.sin(i).abs * rand(3)] }) %>
+          <%= line_chart((1..analysis.sentence_count).to_a.zip(analysis.words_per_sentence)) %>
         </p>
       </div>
       <div class="card-action">

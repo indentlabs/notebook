@@ -12,6 +12,7 @@ module Documents
         analysis.page_count      = document.pages.count
         analysis.paragraph_count = document.paragraphs.count
         analysis.character_count = document.characters.count
+        analysis.sentence_count  = document.sentences.count
 
         # Syllable counting -- needs audit on memory/speed, could be hugely optimized
         analysis.n_syllable_words = Hash[(1..20).map do |syllable_count|
