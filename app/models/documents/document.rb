@@ -2,11 +2,13 @@ class Document < ApplicationRecord
   acts_as_paranoid
 
   belongs_to :user
+  has_many :document_analysis
+
+  include HasParseableText
+  include HasPartsOfSpeech
 
   include Authority::Abilities
   self.authorizer_name = 'DocumentAuthorizer'
-
-  has_many :document_analysis
 
   def self.color
     'teal'
