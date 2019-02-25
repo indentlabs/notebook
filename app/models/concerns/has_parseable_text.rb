@@ -4,24 +4,24 @@ module HasParseableText
   extend ActiveSupport::Concern
 
   included do
-    SYLLABLE_COUNT_OVERRIDES = {
-      'ion' => 2
-    }
+    def plaintext
+      @plaintext ||= Documents::PlaintextService.from_html(self.body)
+    end
 
     def characters
-      @characters ||= text.chars
+      @characters ||= plaintext.chars
     end
 
     def paragraphs
-      @paragraphs ||= text.split(/[\r\n\t]+/)
+      @paragraphs ||= plaintext.split(/[\r\n\t]+/)
     end
 
     def sentences
-      @sentences ||= text.strip.split(/[!\?\.]/)
+      @sentences ||= plaintext.strip.split(/[!\?\.]/)
     end
 
     def words
-      @words ||= text.downcase.gsub(/[^\s\w']/, '').split(' ').reject { |w| is_numeric?(w) }
+      @words ||= plaintext.downcase.gsub(/[^\s\w']/, '').split(' ').reject { |w| is_numeric?(w) }
     end
 
     def acronyms
@@ -33,7 +33,7 @@ module HasParseableText
 
     # As defined by Robert Gunning in the GFI and SMOG
     def complex_words
-      @complex_words ||= unique_words.select { |word| syllables_in(word) >= 3 }
+      @complex_words ||= unique_words.select { |word| Documents::Analysis::SyllablesService.count(word) >= 3 }
     end
 
     def simple_words
@@ -45,22 +45,11 @@ module HasParseableText
     end
 
     def words_with_syllables syllable_count
-      words.select { |word| syllables_in(word) == syllable_count }
+      words.select { |word| Documents::Analysis::SyllablesService.count(word) == syllable_count }
     end
 
     def word_syllables
-      words.map(&method(:syllables_in))
-    end
-
-    #todo add this to some stringlib instead
-    def syllables_in word
-      word.downcase.gsub!(/[^a-z]/, '')
-
-      return 1 if word.length <= 3
-      return SYLLABLE_COUNT_OVERRIDES[word] if SYLLABLE_COUNT_OVERRIDES.key? word
-
-      word.sub(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '').sub!(/^y/, '')
-      word.scan(/[aeiouy]{1,2}/).length
+      words.map { |word| Documents::Analysis::SyllablesService.count(word) }
     end
 
     def is_numeric?(string)

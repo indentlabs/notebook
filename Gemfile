@@ -47,6 +47,9 @@ gem 'serendipitous', git: 'https://github.com/indentlabs/serendipitous-gem.git'
 # Editor
 gem 'medium-editor-rails'
 
+# Document understanding
+gem 'htmlentities'
+
 # Graphs & Charts
 gem 'chartkick'
 gem 'slack-notifier'
