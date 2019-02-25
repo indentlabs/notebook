@@ -8,11 +8,6 @@ class DocumentAnalysisJob < ApplicationJob
     return unless analysis.present?
 
     # Start the analysis!
-    Documents::Analysis::CountingService.analyze(analysis.document_id)
-
-
-    # Do something later
-    require 'pry'
-    binding.pry
+    Documents::Analysis::CountingService.analyze(analysis.id)
   end
 end
