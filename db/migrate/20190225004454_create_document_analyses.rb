@@ -19,7 +19,7 @@ class CreateDocumentAnalyses < ActiveRecord::Migration[5.2]
       t.integer :noun_count
       t.integer :verb_count
       t.integer :pronoun_count
-      t.integer :proposition_count
+      t.integer :preposition_count
       t.integer :conjunction_count
       t.integer :adverb_count
       t.integer :determiner_count

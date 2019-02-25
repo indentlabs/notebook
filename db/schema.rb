@@ -775,7 +775,7 @@ ActiveRecord::Schema.define(version: 2019_02_25_064111) do
     t.integer "noun_count"
     t.integer "verb_count"
     t.integer "pronoun_count"
-    t.integer "proposition_count"
+    t.integer "preposition_count"
     t.integer "conjunction_count"
     t.integer "adverb_count"
     t.integer "determiner_count"

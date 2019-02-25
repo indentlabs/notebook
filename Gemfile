@@ -50,8 +50,7 @@ gem 'medium-editor-rails'
 # Document understanding
 gem 'htmlentities'
 gem 'birch', github: 'billthompson/birch', branch: 'birch-ruby22'
-gem 'treat'
-# gem 'treat', :git => 'https://github.com/indentlabs/treat-gem.git'
+gem 'treat'#, :git => 'https://github.com/indentlabs/treat-gem.git'
 gem 'engtagger'
 
 # These are unfortunately necessary as a hack to get treat running properly
