@@ -9,5 +9,6 @@ class DocumentAnalysisJob < ApplicationJob
 
     # Start the analysis!
     Documents::Analysis::CountingService.analyze(analysis.id)
+    Documents::Analysis::ReadbilityService.analyze(analysis.id)
   end
 end
