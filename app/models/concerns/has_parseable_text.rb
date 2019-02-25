@@ -25,7 +25,7 @@ module HasParseableText
     end
 
     def pages
-      @pages ||= plaintext.split("\n").in_groups_of(25)
+      @pages ||= plaintext.split("\n").each_slice(Documents::PlaintextService::PLAINTEXT_LINES_PER_PAGE)
     end
 
     def acronyms
