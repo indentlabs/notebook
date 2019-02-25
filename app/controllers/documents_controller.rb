@@ -26,8 +26,10 @@ class DocumentsController < ApplicationController
   end
 
   def analysis
+    # TODO uncomment this before it goes to production to limit analysis to document owners
     @document = Document.find_by(id: params[:id])#, user_id: current_user.id)
 
+    # TODO undo commenting this before it goes to production; it's commented out for private demos
     # unless @document.present? && (current_user || User.new).can_read?(@document)
     #   redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     # end
