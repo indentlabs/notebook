@@ -6,6 +6,8 @@ class Document < ApplicationRecord
   include Authority::Abilities
   self.authorizer_name = 'DocumentAuthorizer'
 
+  has_many :document_analysis
+
   def self.color
     'teal'
   end
