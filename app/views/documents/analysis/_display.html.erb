@@ -76,7 +76,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <h5 class="white-text">
-            <%= pluralize (analysis.word_count / 100.0).round, 'minute' %>
+            <%= distance_of_time_in_words(analysis.word_count / 100.0 * 60, 0, include_seconds: true) %>
           </h5>
           Slow reader
           <div><small>at 100 words per minute</small></div>
@@ -89,7 +89,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <h5 class="white-text">
-            <%= pluralize (analysis.word_count / 300.0).round, 'minute' %>
+            <%= distance_of_time_in_words(analysis.word_count / 300.0 * 60, 0, include_seconds: true) %>
           </h5>
           Fast reader
           <div><small>at 300 words per minute</small></div>
@@ -102,7 +102,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <h5 class="white-text">
-            <%= pluralize (analysis.word_count / 400.0).round, 'minute' %>
+            <%= distance_of_time_in_words(analysis.word_count / 400.0 * 60, 0, include_seconds: true) %>
           </h5>
           Speed reader
           <div><small>at 400 words per minute</small></div>
@@ -459,16 +459,16 @@
 <h5>Style</h5>
 <div class="row">
   <div class="col s12">
-    <div class="purple card lighten-5">
-      <div class="card-content" style="overflow: auto">
+    <div class="card">
+      <div class="card-content">
         <div class="card-title">Words per sentence</div>
-        <div style="width: 30000px;">
-          <%= line_chart((1..analysis.sentence_count).to_a.zip(analysis.words_per_sentence), library: { chart: { zoomType: 'x' } }) %>
+        <div>
+          <div id="graph-words-per-sentence"></div>
         </div>
       </div>
       <div class="card-action">
         <a class="activator blue-text text-darken-4">
-          How to read this chart
+          How to use this chart
         </a>
       </div>
       <div class="card-reveal">
@@ -508,6 +508,50 @@ $(document).ready(function () {
 
     e.stopPropagation();
     return false;
+  });
+
+  var words_per_sentence_chart = Highcharts.chart('graph-words-per-sentence', {
+    chart: {
+      type: 'line',
+      zoomType: 'x'
+    },
+    title: {
+      text: ''
+    },
+    xAxis: {
+      title: {
+        text: 'Sentence ID'
+      },
+      tickInterval: 1,
+      scrollbar: {
+        enabled: true
+      },
+      // plotBands: [{
+      //   color: 'orange', // Color value
+      //   from: 350, // Start of the plot band
+      //   to: 400 // End of the plot band
+      // }],
+    },
+    yAxis: {
+      title: {
+        text: 'Words per sentence'
+      },
+      gridLineWidth: 1,
+      type: 'linear'
+    },
+    series: [{
+      name: 'Words',
+      data: <%= analysis.words_per_sentence %>,
+      // TODO zoning for pockets of sequential high/low outliers?
+    }],
+    tooltip: {
+      formatter: function() {
+        return 'Sentence ID ' + this.x + ' has <b>' + this.y + '</b> word' + (this.y == 1 ? '' : 's') + '.';
+      }
+    },
+    legend: {
+      enabled: false
+    }
   });
 })
 </script>

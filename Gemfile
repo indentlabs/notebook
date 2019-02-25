@@ -59,7 +59,8 @@ gem 'zip-zip' # will load compatibility for old rubyzip API.
 
 # Graphs & Charts
 gem 'chartkick'
-gem 'slack-notifier'
+gem 'highcharts-rails'
+# gem 'highstock-rails'
 
 # Form enhancements
 gem 'redcarpet' #markdown formatting
@@ -68,6 +69,7 @@ gem 'acts_as_list' #sortables
 # Analytics
 gem 'mixpanel-ruby'
 gem 'barnes'
+gem 'slack-notifier'
 
 # Apps
 #gem 'easy_translate'
