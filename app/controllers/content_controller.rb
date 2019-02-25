@@ -26,8 +26,8 @@ class ContentController < ApplicationController
       @content = @universe_scope.send(pluralized_content_name)
     else
       @content = (
-        current_user.send(pluralized_content_name) +
-        current_user.send("contributable_#{pluralized_content_name}")
+        current_user.send(pluralized_content_name).includes(:page_tags) +
+        current_user.send("contributable_#{pluralized_content_name}").includes(:page_tags)
       )
 
       unless @content_type_class == Universe
@@ -36,7 +36,19 @@ class ContentController < ApplicationController
       end
     end
 
-    @content = @content.to_a.flatten.uniq.sort_by(&:name)
+    @content = @content.to_a.flatten.uniq
+
+    # Filters
+    @page_tags = PageTag.where(
+      page_type: @content_type_class.name,
+      page_id:   @content.pluck(:id)
+    )
+    if params.key?(:slug)
+      filtered_page_tags = @page_tags.where(slug: params[:slug])
+      @content.select! { |content| filtered_page_tags.pluck(:page_id).include?(content.id) }
+    end
+
+    @content = @content.sort_by(&:name)
 
     respond_to do |format|
       format.html { render 'content/index' }
@@ -97,6 +109,10 @@ class ContentController < ApplicationController
     @serialized_categories_and_fields = CategoriesAndFieldsSerializer.new(
       @content.class.attribute_categories(current_user)
     )
+    @suggested_page_tags = (
+      current_user.page_tags.where(page_type: @content.class.name).pluck(:tag) +
+        PageTagService.suggested_tags_for(@content.class.name)
+    ).uniq
 
     # todo this is a good spot to audit to disable and see if create permissions are ok also
     unless (current_user || User.new).can_create?(content_type_from_controller(self.class))
@@ -119,6 +135,10 @@ class ContentController < ApplicationController
     end
 
     @serialized_content = ContentSerializer.new(@content)
+    @suggested_page_tags = (
+      current_user.page_tags.where(page_type: content_type_class.name).pluck(:tag) +
+        PageTagService.suggested_tags_for(content_type_class.name)
+      ).uniq - @serialized_content.page_tags
 
     unless @content.updatable_by? current_user
       return redirect_to @content, notice: t(:no_do_permission)
@@ -162,6 +182,8 @@ class ContentController < ApplicationController
         upload_files params['image_uploads'], content_type.name, @content.id
       end
 
+      update_page_tags if @content.respond_to?(:page_tags)
+
       successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
       failed_response('new', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.map(&:messages).to_sentence)
@@ -191,6 +213,8 @@ class ContentController < ApplicationController
         ContributorService.invite_contributor_to_universe(universe: @content, email: email.downcase)
       end
     end
+
+    update_page_tags if @content.respond_to?(:page_tags)
 
     if @content.user == current_user
       # todo this needs some extra validation probably to ensure each attribute is one associated with this page
@@ -333,6 +357,26 @@ class ContentController < ApplicationController
 
   private
 
+  def update_page_tags
+    tag_list = page_tag_params.fetch(:page_tags, "").split(',,,|||,,,')
+    current_tags = @content.page_tags.pluck(:tag)
+
+    tags_to_add    = tag_list - current_tags
+    tags_to_remove = current_tags - tag_list
+
+    tags_to_add.each do |tag|
+      @content.page_tags.find_or_create_by(
+        tag:  tag,
+        slug: PageTagService.slug_for(tag),
+        user: @content.user
+      )
+    end
+
+    tags_to_remove.each do |tag|
+      @content.page_tags.find_by(tag: tag).destroy
+    end
+  end
+
   def render_json(content)
     render json: JSON.pretty_generate({
       name: content.try(:name),
@@ -401,6 +445,15 @@ class ContentController < ApplicationController
       .to_sym
 
     params.require(content_class).permit(content_param_list + [:deleted_at])
+  end
+
+  def page_tag_params
+    content_class = content_type_from_controller(self.class)
+      .name
+      .downcase
+      .to_sym
+
+    params.require(content_class).permit(:page_tags)
   end
 
   def content_deletion_redirect_url

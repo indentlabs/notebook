@@ -40,6 +40,8 @@ class AttributeField < ApplicationRecord
       Universe.icon
     when 'textarea'
       'text_fields'
+    when 'tags'
+      'label'
     else
       'text_fields'
     end
@@ -67,6 +69,10 @@ class AttributeField < ApplicationRecord
 
   def universe_field?
     self.field_type == 'universe'
+  end
+
+  def tags_field?
+    self.field_type == 'tags'
   end
 
   private

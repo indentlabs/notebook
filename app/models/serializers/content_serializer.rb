@@ -4,6 +4,7 @@ class ContentSerializer
   attr_accessor :categories
   attr_accessor :fields
   attr_accessor :attribute_values
+  attr_accessor :page_tags
 
   attr_accessor :raw_model
   attr_accessor :class_name, :class_color, :class_icon
@@ -38,6 +39,8 @@ class ContentSerializer
     self.class_name       = content.class.name
     self.class_color      = content.class.color
     self.class_icon       = content.class.icon
+
+    self.page_tags        = content.page_tags.pluck(:tag) || []
 
     self.data = {
       name: content.try(:name),

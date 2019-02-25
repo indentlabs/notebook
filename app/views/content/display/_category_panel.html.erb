@@ -17,8 +17,7 @@
         when 'universe'
           Universe.find_by(id: serialized_field[:value].to_i)
 
-       # TODO: update all textearea/textarea --> text_area in prod data
-        when 'name', 'text_area', 'textearea', 'textarea'
+        when 'name', 'text_area'
           serialized_field[:value]
 
         when 'link'
@@ -27,6 +26,9 @@
           else
             nil
           end
+
+        when 'tags'
+          content.page_tags
 
         else
           raise "unknown field type = " + serialized_field[:type].inspect
@@ -58,6 +60,24 @@
                 <%= li.name_field_value %>
               <% end %>
             </div>
+          <% end %>
+        </div>
+
+      <% elsif serialized_field[:type] == 'tags' %>
+        <div class="tags-container">
+          <% value.each do |tag| %>
+            <% if user_signed_in? && @content.user == current_user %>
+              <%=
+                link_to send(
+                  "page_tag_#{content.raw_model.class.name.downcase.pluralize}_path",
+                  slug: PageTagService.slug_for(tag)
+                ) do
+              %>
+                <span class="new badge <%= @content.class.color %> left" data-badge-caption="<%= tag %>"></span>
+              <% end %>
+            <% else %>
+              <span class="new badge <%= @content.class.color %> left" data-badge-caption="<%= tag %>"></span>
+            <% end %>
           <% end %>
         </div>
 

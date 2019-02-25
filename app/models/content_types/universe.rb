@@ -8,10 +8,7 @@
 class Universe < ApplicationRecord
   acts_as_paranoid
 
-  include HasAttributes
-  include HasPrivacy
-  include HasImageUploads
-  include HasChangelog
+  include IsContentPage
 
   include Serendipitous::Concern
 
