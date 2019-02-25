@@ -186,7 +186,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.adjective_count.to_f / analysis.word_count * 100).round(1) %>%
+            <%= (analysis.adjective_count.to_f / analysis.word_count * 100).round(2) %>%
           </div>
           Adjectives
         </span>
@@ -198,7 +198,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.noun_count.to_f / analysis.word_count * 100).round(1) %>%
+            <%= (analysis.noun_count.to_f / analysis.word_count * 100).round(2) %>%
           </div>
           Nouns
         </span>
@@ -210,7 +210,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.verb_count.to_f / analysis.word_count * 100).round(1) %>%
+            <%= (analysis.verb_count.to_f / analysis.word_count * 100).round(2) %>%
           </div>
           Verbs
         </span>
@@ -222,7 +222,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.pronoun_count.to_f / analysis.word_count * 100).round(1) %>%
+            <%= (analysis.pronoun_count.to_f / analysis.word_count * 100).round(2) %>%
           </div>
           Pronouns
         </span>
@@ -234,7 +234,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.preposition_count.to_f / analysis.word_count * 100).round(1) %>%
+            <%= (analysis.preposition_count.to_f / analysis.word_count * 100).round(2) %>%
           </div>
           Prepositions
         </span>
@@ -246,7 +246,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.conjunction_count.to_f / analysis.word_count * 100).round(1) %>%
+            <%= (analysis.conjunction_count.to_f / analysis.word_count * 100).round(2) %>%
           </div>
           Conjunctions
         </span>
@@ -258,7 +258,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.adverb_count.to_f / analysis.word_count * 100).round(1) %>%
+            <%= (analysis.adverb_count.to_f / analysis.word_count * 100).round(2) %>%
           </div>
           Adverbs
         </span>
@@ -270,7 +270,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.determiner_count.to_f / analysis.word_count * 100).round(1) %>%
+            <%= (analysis.determiner_count.to_f / analysis.word_count * 100).round(2) %>%
           </div>
           Determiners
         </span>
@@ -279,12 +279,10 @@
   </div>
 
   <div class="col s12">
-    <div class="card blue lighten-3">
-      <div class="card-content white-text">
+    <div class="card">
+      <div class="card-content">
         <div class="card-title">N-syllable words</div>
-        <p>
-          <%= column_chart(analysis.n_syllable_words) %>
-        </p>
+        <div id="graph-n-syllable-words"></div>
       </div>
     </div>
   </div>
@@ -508,6 +506,53 @@ $(document).ready(function () {
 
     e.stopPropagation();
     return false;
+  });
+
+  var n_syllables_per_words_chart = Highcharts.chart('graph-n-syllable-words', {
+    chart: {
+      type: 'column',
+    },
+    title: {
+      text: ''
+    },
+    xAxis: {
+      title: {
+        text: 'Syllables'
+      },
+      tickInterval: 1,
+      plotBands: [{
+        color: 'green',
+        from: 0,
+        to: 2.5,
+        label: {
+          text: 'Simple words'
+        }
+      }, {
+        color: 'yellow',
+        from: 2.5,
+        to: 20,
+        label: {
+          text: 'Complex words'
+        }
+      }]
+    },
+    yAxis: {
+      title: {
+        text: 'Words'
+      }
+    },
+    series: [{
+      name: 'Words',
+      data: <%= analysis.n_syllable_words.map { |k, v| [k, v] } %>
+    }],
+    tooltip: {
+      formatter: function() {
+        return 'This document contains <b>' + this.y + '</b> ' + this.x + '-syllable word' + (this.y == 1 ? '' : 's') + '.';
+      }
+    },
+    legend: {
+      enabled: false
+    }
   });
 
   var words_per_sentence_chart = Highcharts.chart('graph-words-per-sentence', {
