@@ -52,6 +52,7 @@ gem 'htmlentities'
 gem 'birch', github: 'billthompson/birch', branch: 'birch-ruby22'
 gem 'treat'#, :git => 'https://github.com/indentlabs/treat-gem.git'
 gem 'engtagger'
+gem 'ibm_watson'
 
 # These are unfortunately necessary as a hack to get treat running properly
 gem 'rubyzip', '>= 1.0.0' # will load new rubyzip version
