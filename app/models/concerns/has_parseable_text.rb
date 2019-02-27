@@ -17,7 +17,7 @@ module HasParseableText
     end
 
     def sentences
-      @sentences ||= plaintext.strip.split(/[!\?\.]/)
+      @sentences ||= plaintext.strip.split(/[!\?\.]/).reject(&:empty?)
     end
 
     def words
