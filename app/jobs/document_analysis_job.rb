@@ -17,6 +17,9 @@ class DocumentAnalysisJob < ApplicationJob
     puts "Analysing: Parts of Speech"
     Documents::Analysis::PartsOfSpeechService.analyze(analysis.id)
 
+    puts "IBM Watson's Analysis"
+    Documents::Analysis::ThirdParty::IbmWatsonService.analyze(analysis.id)
+
     # TODO:
     # - Sentiment analysis
     # - Character appearance analysis

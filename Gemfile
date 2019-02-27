@@ -48,6 +48,7 @@ gem 'serendipitous', git: 'https://github.com/indentlabs/serendipitous-gem.git'
 gem 'medium-editor-rails'
 
 # Document understanding
+# TODO put these gems in a :worker group and manually include it on worker init
 gem 'htmlentities'
 gem 'birch', github: 'billthompson/birch', branch: 'birch-ruby22'
 gem 'treat'#, :git => 'https://github.com/indentlabs/treat-gem.git'

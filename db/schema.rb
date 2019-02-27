@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_02_25_004454) do
+ActiveRecord::Schema.define(version: 2019_02_27_225006) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -786,11 +786,45 @@ ActiveRecord::Schema.define(version: 2019_02_25_004454) do
     t.integer "words_used_repeatedly_count"
     t.integer "simple_words_count"
     t.integer "complex_words_count"
+    t.integer "sentiment_score"
+    t.string "sentiment_label"
+    t.string "language"
     t.json "words_per_sentence"
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["document_id"], name: "index_document_analyses_on_document_id"
+  end
+
+  create_table "document_categories", force: :cascade do |t|
+    t.integer "document_analysis_id"
+    t.string "label"
+    t.string "score"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_analysis_id"], name: "index_document_categories_on_document_analysis_id"
+  end
+
+  create_table "document_concepts", force: :cascade do |t|
+    t.integer "document_analysis_id"
+    t.string "text"
+    t.float "relevance"
+    t.string "reference_link"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_analysis_id"], name: "index_document_concepts_on_document_analysis_id"
+  end
+
+  create_table "document_entities", force: :cascade do |t|
+    t.string "entity_type"
+    t.integer "entity_id"
+    t.string "text"
+    t.float "relevance"
+    t.integer "document_analysis_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_analysis_id"], name: "index_document_entities_on_document_analysis_id"
+    t.index ["entity_type", "entity_id"], name: "index_document_entities_on_entity_type_and_entity_id"
   end
 
   create_table "documents", force: :cascade do |t|
