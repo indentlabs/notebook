@@ -1,0 +1,28 @@
+<div class="row">
+  <div class="col s12">
+    <div class="card horizontal">
+      <div class="card-image">
+        <%= image_tag 'card-headers/document-mini.jpg' %>
+      </div>
+      <div class="card-stacked">
+        <div class="card-content">
+          <div class="card-title">
+            <%= document.title || 'Untitled document' %><br />
+            <span class="grey-text">by</span>
+            <%= link_to document.user.name, document.user %>
+          </div>
+
+          <p>Language: <%= analysis.language %></p>
+          <p>Originally created <%= time_ago_in_words document.created_at %> ago</p>
+          <p>Last edited <%= time_ago_in_words document.updated_at %> ago</p>
+          <p>Analysis took <%= (analysis.completed_at - analysis.created_at).round(1) %> minutes</p>
+          <p>Analysis completed <%= time_ago_in_words analysis.completed_at %> ago</p>
+        </div>
+        <div class="card-action">
+          <a href="#">View document</a>
+          <a href="#" class="right">Edit document</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

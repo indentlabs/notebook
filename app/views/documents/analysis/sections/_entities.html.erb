@@ -1,0 +1,28 @@
+<h5 class="grey-text">Entities</h5>
+<div class="row">
+  <% analysis.document_entities.each do |entity| %>
+    <% entity_class = entity.entity_type.constantize %>
+    <div class="col s12 m4">
+      <div class="card">
+        <div class="card-content <%= entity_class.color %> lighten-3">
+          <div class="card-title">
+            <i class="material-icons"><%= entity_class.icon %></i>
+            <%= entity.text %>
+          </div>
+          <ul>
+            <li>Relevance: <%= entity.relevance %></li>
+            <li>Sentiment: <%= entity.sentiment_label %> (<%= entity.sentiment_score %>)</li>
+            <li>Joy: <%= entity.joy_score %></li>
+            <li>Sadness: <%= entity.sadness_score %></li>
+            <li>Fear: <%= entity.fear_score %></li>
+            <li>Disgust: <%= entity.disgust_score %></li>
+            <li>Anger: <%= entity.anger_score %></li>
+          </ul>
+        </div>
+        <div class="card-action <%= entity_class.color %> lighten-5">
+          <a href="#" class="<%= entity_class.color %>-text">View Notebook.ai page</a>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
