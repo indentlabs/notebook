@@ -33,6 +33,11 @@ class CreateDocumentAnalyses < ActiveRecord::Migration[5.2]
       t.integer :sentiment_score
       t.string  :sentiment_label
       t.string :language
+      t.float :sadness_score
+      t.float :joy_score
+      t.float :fear_score
+      t.float :disgust_score
+      t.float :anger_score
       t.json :words_per_sentence
       t.datetime :completed_at
 

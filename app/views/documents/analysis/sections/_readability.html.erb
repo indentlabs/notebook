@@ -1,0 +1,321 @@
+<h5>Ease of reading</h5>
+<div class="row">
+  <div class="col s12 m6">
+    <div class="green card">
+      <div class="card-content">
+        <div class="row">
+          <div class="col s12 m3 white-text center">
+            <h2><%= analysis.readability_score %></h2>
+            READABILITY
+          </div>
+          <div class="col s12 m9">
+            <h4>
+              <% Documents::Analysis::ReadabilityService.readability_score_category(analysis.readability_score) %>
+            </h4>
+            <p>
+              <%= Documents::Analysis::ReadabilityService.readability_score_text(analysis) %>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="card-action green lighten-1">
+        <a class="activator blue-text text-darken-4">
+          How is this calculated?
+        </a>
+      </div>
+      <div class="card-reveal">
+        <span class="card-title grey-text text-darken-4">
+          Readability scales
+          <i class="material-icons right">close</i>
+        </span>
+        <p>
+          In order to provide you with a generalized score in Notebook.ai, we compute
+          several of the most well-known readability scores on your text and average
+          them together. You can see the original scores per readability test by clicking
+          "show more readability statistics".
+        </p>
+        <ul>
+          <li>Flesch-Kincaid grade level: <%= analysis.flesch_kincaid_grade_level.try(:round) %></li>
+          <li>Flesch-Kincaid age minimum: <%= analysis.flesch_kincaid_age_minimum.try(:round) %></li>
+          <li>Flesch-Kincaid reading ease: <%= analysis.flesch_kincaid_reading_ease.try(:round) %></li>
+          <li>Forcast grade level: <%= analysis.forcast_grade_level.try(:round) %></li>
+          <li>Coleman liau index: <%= analysis.coleman_liau_index.try(:round) %></li>
+          <li>Automated readability index: <%= analysis.automated_readability_index.try(:round) %></li>
+          <li>Gunning fog index: <%= analysis.gunning_fog_index.try(:round) %></li>
+          <li>Combined average reading level: <%= analysis.combined_average_reading_level.try(:round) %></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12 m6">
+    <div class="green card lighten-3">
+      <div class="card-content">
+        <%# TODO: Tips from highest/lowest readability scores %>
+        To increase your readability further, try using shorter sentences.
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <a href="#" class="hoverable btn btn-large teal lighten-1 white-text js-toggle-extended-readability-statistics">
+      Show more readability statistics
+    </a>
+  </div>
+</div>
+
+<div class="extended-readability-statistics row animated">
+  <%# TODO: Order these cards by % %>
+  <%# TODO: Darken/lighten card based on % %>
+  <div class="col s12 m3">
+    <div class="card blue">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= (analysis.adjective_count.to_f / analysis.word_count * 100).round(2) %>%
+          </div>
+          Adjectives
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-1">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= (analysis.noun_count.to_f / analysis.word_count * 100).round(2) %>%
+          </div>
+          Nouns
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-2">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= (analysis.verb_count.to_f / analysis.word_count * 100).round(2) %>%
+          </div>
+          Verbs
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-3">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= (analysis.pronoun_count.to_f / analysis.word_count * 100).round(2) %>%
+          </div>
+          Pronouns
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-3">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= (analysis.preposition_count.to_f / analysis.word_count * 100).round(2) %>%
+          </div>
+          Prepositions
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-3">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= (analysis.conjunction_count.to_f / analysis.word_count * 100).round(2) %>%
+          </div>
+          Conjunctions
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-2">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= (analysis.adverb_count.to_f / analysis.word_count * 100).round(2) %>%
+          </div>
+          Adverbs
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-1">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= (analysis.determiner_count.to_f / analysis.word_count * 100).round(2) %>%
+          </div>
+          Determiners
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">N-syllable words</div>
+        <div id="graph-n-syllable-words"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12 m6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Word variety</div>
+        <div id="graph-word-variety"></div>
+      </div>
+      <div class="card-action">
+        <a class="activator blue-text text-darken-4">
+          Why is this important?
+        </a>
+      </div>
+      <div class="card-reveal">
+        explanation
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12 m6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Word complexity</div>
+        <div id="graph-word-complexity"></div>
+      </div>
+      <div class="card-action">
+        <a class="activator blue-text text-darken-4">
+          Why is this important?
+        </a>
+      </div>
+      <div class="card-reveal">
+        explanation
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function () {
+  $('.extended-readability-statistics').css('display', 'none');
+  $('.extended-readability-statistics').toggleClass('fadeOut');
+  $('.js-toggle-extended-readability-statistics').click(function (e) {
+    var extended_section = $('.extended-readability-statistics');
+    var visible = extended_section.is(':visible');
+    var new_button_verb = visible ? 'Show' : 'Hide';
+
+    extended_section.toggleClass('fadeIn');
+    extended_section.toggleClass('fadeOut');
+    extended_section.css('display', visible ? 'none' : 'block');
+
+    $(this).text(new_button_verb + ' more readability statistics');
+
+    e.stopPropagation();
+    return false;
+  });
+
+  var n_syllables_per_words_chart = Highcharts.chart('graph-n-syllable-words', {
+    chart: {
+      type: 'column',
+    },
+    title: {
+      text: ''
+    },
+    xAxis: {
+      title: {
+        text: 'Syllables'
+      },
+      tickInterval: 1,
+      plotBands: [{
+        color: 'lightgreen',
+        from: 0,
+        to: 2.5,
+        label: {
+          text: 'Simple words'
+        }
+      }, {
+        color: 'lightyellow',
+        from: 2.5,
+        to: 20,
+        label: {
+          text: 'Complex words'
+        }
+      }]
+    },
+    yAxis: {
+      title: {
+        text: 'Words'
+      }
+    },
+    series: [{
+      name: 'Words',
+      data: <%= analysis.n_syllable_words.map { |k, v| [k, v] } %>
+    }],
+    tooltip: {
+      formatter: function() {
+        return 'This document contains <b>' + this.y + '</b> ' + this.x + '-syllable word' + (this.y == 1 ? '' : 's') + '.';
+      }
+    },
+    legend: {
+      enabled: false
+    }
+  });
+
+  var word_variety_chart = Highcharts.chart('graph-word-variety', {
+    chart: {
+        type: 'pie'
+    },
+    title: {
+        text: 'Number of words used...'
+    },
+    series: [{
+        name: 'Words',
+        colorByPoint: true,
+        data: [{
+            name: 'exactly once',
+            y: <%= analysis.words_used_once_count %>,
+            sliced: true,
+            selected: true
+        }, {
+            name: 'multiple times',
+            y: <%= analysis.words_used_repeatedly_count %>
+        }]
+    }]
+  });
+
+  var word_complexity_chart = Highcharts.chart('graph-word-complexity', {
+    chart: {
+        type: 'pie'
+    },
+    title: {
+        text: 'Number of...'
+    },
+    series: [{
+        name: 'Words',
+        colorByPoint: true,
+        data: [{
+            name: 'simple words',
+            y: <%= analysis.simple_words_count %>,
+            sliced: true,
+            selected: true
+        }, {
+            name: 'complex words',
+            y: <%= analysis.complex_words_count %>
+        }]
+    }]
+  });
+});
+</script>

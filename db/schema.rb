@@ -789,6 +789,11 @@ ActiveRecord::Schema.define(version: 2019_02_27_225006) do
     t.integer "sentiment_score"
     t.string "sentiment_label"
     t.string "language"
+    t.float "sadness_score"
+    t.float "joy_score"
+    t.float "fear_score"
+    t.float "disgust_score"
+    t.float "anger_score"
     t.json "words_per_sentence"
     t.datetime "completed_at"
     t.datetime "created_at", null: false
@@ -821,6 +826,13 @@ ActiveRecord::Schema.define(version: 2019_02_27_225006) do
     t.string "text"
     t.float "relevance"
     t.integer "document_analysis_id"
+    t.string "sentiment_label"
+    t.float "sentiment_score"
+    t.float "sadness_score"
+    t.float "joy_score"
+    t.float "fear_score"
+    t.float "disgust_score"
+    t.float "anger_score"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["document_analysis_id"], name: "index_document_entities_on_document_analysis_id"
