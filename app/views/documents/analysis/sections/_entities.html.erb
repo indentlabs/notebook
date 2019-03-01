@@ -1,6 +1,6 @@
 <h5 class="grey-text">Entities</h5>
 <div class="row">
-  <% analysis.document_entities.each do |entity| %>
+  <% analysis.document_entities.order('entity_type').each do |entity| %>
     <% entity_class = entity.entity_type.constantize %>
     <div class="col s12 m4">
       <div class="card">
@@ -25,4 +25,63 @@
       </div>
     </div>
   <% end %>
+
+  <div class="col s12 m12">
+    <div class="card">
+      <div class="card-content">
+        <div id="graph-character-emotions"></div>
+      </div>
+    </div>
+  </div>
 </div>
+
+
+<script type="text/javascript">
+$(document).ready(function () {
+
+  var emotions_chart = Highcharts.chart('graph-character-emotions', {
+    chart: {
+        polar: true,
+        type: 'line'
+    },
+    title: {
+        text: 'Character emotional range'
+    },
+    xAxis: {
+        categories: ['Joy', 'Sadness', 'Fear', 'Disgust', 'Anger'],
+        tickmarkPlacement: 'on',
+        lineWidth: 0
+    },
+    yAxis: {
+        gridLineInterpolation: 'polygon',
+        lineWidth: 0,
+        min: 0,
+        max: 100
+    },
+    legend: {
+        align: 'right',
+        verticalAlign: 'top',
+        y: 70,
+        layout: 'vertical'
+    },
+
+    series: [
+      <% analysis.document_entities.where(entity_type: 'Character').each do |entity| %>
+        {
+          name: '<%= entity.text %>',
+          data: <%=
+            [
+              (100 * entity.joy_score).round(1),
+              (100 * entity.sadness_score).round(1),
+              (100 * entity.fear_score).round(1),
+              (100 * entity.disgust_score).round(1),
+              (100 * entity.anger_score).round(1)
+            ]
+          %>,
+          pointPlacement: 'on'
+        },
+      <% end %>
+    ]
+  });
+})
+</script>

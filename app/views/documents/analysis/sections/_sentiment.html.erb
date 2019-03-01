@@ -1,6 +1,6 @@
 <h5 class="grey-text">Sentiment</h5>
 <div class="row">
-  <div class="col s12 m6 l2">
+  <div class="col s12 m6">
     <div class="card">
       <div class="card-content">
         <div>
@@ -12,59 +12,59 @@
     </div>
   </div>
 
-  <div class="col s12 m6 l2">
+  <div class="col s12 m6">
     <div class="card">
-      <div class="card-content yellow">
-        <div>
-          <ul>
-            <li>Joy: <%= analysis.joy_score %></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m6 l2">
-    <div class="card">
-      <div class="card-content blue">
-        <div>
-          <ul>
-            <li>Sadness: <%= analysis.sadness_score %></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m6 l2">
-    <div class="card">
-      <div class="card-content orange">
-        <div>
-          <ul>
-            <li>Fear: <%= analysis.fear_score %></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m6 l2">
-    <div class="card">
-      <div class="card-content green">
-        <div>
-          <ul>
-            <li>Disgust: <%= analysis.disgust_score %></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m6 l2">
-    <div class="card">
-      <div class="card-content red">
-        <div>
-          <ul>
-            <li>Anger: <%= analysis.anger_score %></li>
-          </ul>
-        </div>
+      <div class="card-content">
+        <div id="graph-emotions"></div>
       </div>
     </div>
   </div>
 </div>
+
+
+<script type="text/javascript">
+$(document).ready(function () {
+
+  var emotions_chart = Highcharts.chart('graph-emotions', {
+    chart: {
+        polar: true,
+        type: 'line'
+    },
+    title: {
+        text: 'Emotional distribution'
+    },
+    xAxis: {
+        categories: ['Joy', 'Sadness', 'Fear', 'Disgust', 'Anger'],
+        tickmarkPlacement: 'on',
+        lineWidth: 0
+    },
+    yAxis: {
+        gridLineInterpolation: 'polygon',
+        lineWidth: 0,
+        min: 0,
+        max: 100
+    },
+    tooltip: {
+      shared: true,
+      pointFormat: '<span style="color:{series.color}">Emotional score: <b>{point.y}</b><br/>'
+    },
+    legend: {
+      enabled: false
+    },
+
+    series: [{
+      name: 'Emotions',
+      data: <%=
+        [
+          (100 * analysis.joy_score).round(1),
+          (100 * analysis.sadness_score).round(1),
+          (100 * analysis.fear_score).round(1),
+          (100 * analysis.disgust_score).round(1),
+          (100 * analysis.anger_score).round(1)
+        ]
+      %>,
+      pointPlacement: 'on'
+    }]
+  });
+})
+</script>
