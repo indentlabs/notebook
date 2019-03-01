@@ -2,7 +2,11 @@ class Document < ApplicationRecord
   acts_as_paranoid
 
   belongs_to :user
-  has_many :document_analysis
+
+  has_many :document_analysis,   dependent: :destroy
+  has_many :document_entities,   through: :document_analysis
+  has_many :document_concepts,   through: :document_analysis
+  has_many :document_categories, through: :document_analysis
 
   include HasParseableText
   include HasPartsOfSpeech
