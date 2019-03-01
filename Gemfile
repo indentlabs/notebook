@@ -47,18 +47,6 @@ gem 'serendipitous', git: 'https://github.com/indentlabs/serendipitous-gem.git'
 # Editor
 gem 'medium-editor-rails'
 
-# Document understanding
-# TODO put these gems in a :worker group and manually include it on worker init
-gem 'htmlentities'
-gem 'birch', github: 'billthompson/birch', branch: 'birch-ruby22'
-gem 'treat'#, :git => 'https://github.com/indentlabs/treat-gem.git'
-gem 'engtagger'
-gem 'ibm_watson'
-
-# These are unfortunately necessary as a hack to get treat running properly
-gem 'rubyzip', '>= 1.0.0' # will load new rubyzip version
-gem 'zip-zip' # will load compatibility for old rubyzip API.
-
 # Graphs & Charts
 gem 'chartkick'
 gem 'highcharts-rails'
@@ -140,4 +128,20 @@ group :development do
   gem 'memory_profiler'
   gem 'flamegraph'
   gem 'stackprof'
+end
+
+group :worker do
+  # These gems are only used in workers (and just so happen to slow down app startup
+  # by quite a bit), so we exclude them from all environments other than RAILS_ENV=worker.
+
+  # Document understanding
+  gem 'htmlentities'
+  gem 'birch', github: 'billthompson/birch', branch: 'birch-ruby22'
+  gem 'treat'#, :git => 'https://github.com/indentlabs/treat-gem.git'
+  gem 'engtagger'
+  gem 'ibm_watson'
+
+  # These are unfortunately necessary as a hack to get treat running properly
+  gem 'rubyzip', '>= 1.0.0' # will load new rubyzip version
+  gem 'zip-zip' # will load compatibility for old rubyzip API.
 end
