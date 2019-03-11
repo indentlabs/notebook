@@ -12,6 +12,8 @@ class User < ApplicationRecord
   include Authority::UserAbilities
 
   validates_uniqueness_of :username, allow_nil: true, allow_blank: true
+  validates_format_of :username, with: /\A[A-Za-z0-9\-_\$\+\!\*]+\z/, message: 'must be between 1 and 40 alphanumeric characters (-, _, $, +, !, and * also accepted)'
+  validates :username, length: { in: 0..40, message: 'must be between 1 and 40 alphanumeric characters (-, _, $, +, !, and * also accepted)' }
 
   has_many :subscriptions,                dependent: :destroy
   has_many :billing_plans, through: :subscriptions
@@ -187,6 +189,14 @@ class User < ApplicationRecord
     return nil unless found_key.present?
 
     found_key.user
+  end
+
+  def profile_url
+    if self.username.present?
+      Rails.application.routes.url_helpers.profile_by_username_path(username: self.username)
+    else
+      Rails.application.routes.url_helpers.user_path(id: self.id)
+    end
   end
 
   private
