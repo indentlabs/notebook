@@ -4,7 +4,7 @@ class Api::V1::ApiContentService < Service
     user = User.from_api_key(api_key)
 
     return "Error: Invalid API Key"      if user.nil?
-    return "Error: Invalid content type" if valid_content_type?(content_type)
+    return "Error: Invalid content type" unless valid_content_type?(content_type)
 
     # todo we need to serialize attributes instead of natural model columns
     user.send(content_type.downcase.pluralize).as_json

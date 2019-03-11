@@ -36,6 +36,7 @@ class User < ApplicationRecord
   has_many :user_content_type_activators, dependent: :destroy
 
   has_many :api_keys,                     dependent: :destroy
+  has_many :page_tags,                    dependent: :destroy
 
   def contributable_universes
     @user_contributable_universes ||= begin

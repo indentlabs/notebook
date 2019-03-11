@@ -4,6 +4,7 @@ class ContentSerializer
   attr_accessor :categories
   attr_accessor :fields
   attr_accessor :attribute_values
+  attr_accessor :page_tags
 
   attr_accessor :raw_model
   attr_accessor :class_name, :class_color, :class_icon
@@ -39,6 +40,8 @@ class ContentSerializer
     self.class_color      = content.class.color
     self.class_icon       = content.class.icon
 
+    self.page_tags        = content.page_tags.pluck(:tag) || []
+
     self.data = {
       name: content.try(:name),
       description: content.try(:description),
@@ -60,7 +63,7 @@ class ContentSerializer
               hidden: !!field.hidden,
               position: field.position,
               old_column_source: field.old_column_source,
-              value: self.attribute_values.detect { |value|
+              value: self.attribute_values.order('created_at desc').detect { |value| #codesmell here: we shouldn't ever have multiple attribute values but for some reason we do sometimes (in collaboration?)
                 value.entity_type == content.page_type &&
                 value.entity_id   == content.id &&
                 value.attribute_field_id == field.id

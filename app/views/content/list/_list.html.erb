@@ -53,7 +53,23 @@
             data-position="bottom" data-delay="100" data-tooltip="You have been added as a contributor to this universe and its content."></span>
         <% end %>
       </span>
-      <p class='grey-text'>
+      <p class="tags-container">
+        <% content.page_tags.each do |tag| %>
+          <% if user_signed_in? && content.user == current_user %>
+            <%=
+              link_to send(
+                "page_tag_#{content.class.name.downcase.pluralize}_path",
+                slug: PageTagService.slug_for(tag.tag)
+              ) do
+            %>
+              <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+            <% end %>
+          <% else %>
+            <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+          <% end %>
+        <% end %>
+      </p>
+      <p class='grey-text' style="clear: both">
         <% if user_signed_in? %>
           <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
             <i class="material-icons">mode_edit</i>
@@ -71,7 +87,7 @@
         <% end %>
       </p>
       <span class="secondary-content hide-on-med-and-up">
-        <% if user_signed_in? && content.user_id == current_user.id %>
+        <% if user_signed_in? && content.updatable_by?(current_user) %>
           <%# todo also show if you're a contributor %>
           <%= link_to edit_polymorphic_path(content.page_type.downcase, id: content.id), class: 'js-edit-hover' do %>
             <i class="material-icons">edit</i>

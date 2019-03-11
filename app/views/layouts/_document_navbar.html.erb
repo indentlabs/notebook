@@ -1,0 +1,42 @@
+<div class="navbar-fixed">
+  <nav class="navbar nav-extended <%= 'logged-in' if user_signed_in? %>" style="background-color: <%= @navbar_color.presence || '#2196F3' %>">
+    <div class="nav-wrapper">
+      <ul>
+        <!--
+        <li>
+          <%= yield :navbar_right_content %>
+        </li>
+        -->
+        <li class="left">
+          <a class="sidenav-trigger show-on-large left" href="#" data-target="sidenav-left">
+            <i class="material-icons">menu</i>
+          </a>
+        </li>
+        <li class="right">
+          <%=
+            link_to documents_path, class: 'tooltipped', data: {
+              position: 'left',
+              tooltip: 'Back to your documents'
+            } do
+          %>
+            <i class="material-icons white-text">file_copy</i>
+          <% end %>
+        </li>
+        <li class="right">
+          <%=
+            link_to edit_document_path(:new), class: 'tooltipped', data: {
+              position: 'left',
+              tooltip: 'New document'
+            },
+            target: '_blank' do
+          %>
+            <i class="material-icons white-text">note_add</i>
+          <% end %>
+        </li>
+        <li>
+          <%= yield :navbar_left_content %>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</div>

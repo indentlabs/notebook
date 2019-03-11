@@ -6,6 +6,8 @@ class DocumentsController < ApplicationController
   before_action :set_navbar_actions, except: [:edit]
   before_action :set_footer_visibility, only: [:edit]
 
+  layout 'editor', only: [:edit]
+
   def index
     @documents = current_user.documents.order('updated_at desc')
   end
@@ -13,7 +15,7 @@ class DocumentsController < ApplicationController
   def show
     @document = Document.find_by(id: params[:id], user_id: current_user.id)
 
-    unless @document.present? || @document.viewable_by?(current_user || User.new)
+    unless @document.present? && (current_user || User.new).can_read?(@document)
       redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     end
 
@@ -86,7 +88,8 @@ class DocumentsController < ApplicationController
 
     @navbar_actions << {
       label: "New Document",
-      href: edit_document_path(:new)
+      href: edit_document_path(:new),
+      target: '_blank'
     }
   end
 
