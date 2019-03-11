@@ -12,8 +12,8 @@ class User < ApplicationRecord
   include Authority::UserAbilities
 
   validates_uniqueness_of :username, allow_nil: true, allow_blank: true
-  validates_format_of :username, with: /\A[A-Za-z0-9\-_\$\+\!\*\(\)]+\z/
-  validates :username, length: { in: 1..40 }
+  validates_format_of :username, with: /\A[A-Za-z0-9\-_\$\+\!\*]+\z/, message: 'must be between 1 and 40 alphanumeric characters (-, _, $, +, !, and * also accepted)'
+  validates :username, length: { in: 0..40, message: 'must be between 1 and 40 alphanumeric characters (-, _, $, +, !, and * also accepted)' }
 
   has_many :subscriptions,                dependent: :destroy
   has_many :billing_plans, through: :subscriptions
