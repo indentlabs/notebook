@@ -12,7 +12,7 @@ class User < ApplicationRecord
   include Authority::UserAbilities
 
   validates :username, 
-    uniqueness: true,
+    uniqueness: { case_sensitive: false },
     allow_nil: true,
     allow_blank: true,
     length: { maximum: 40 },
