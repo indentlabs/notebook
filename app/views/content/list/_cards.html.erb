@@ -1,9 +1,6 @@
-<div class="row">
+<div class="row js-content-cards-list">
   <% content_list.each.with_index do |content, i| %>
-    <% if i % 3 == 0 %>
-      <div style="clear: both;" class="hide-on-small-only"></div>
-    <% end %>
-    <div class="col s12 m4 l4">
+    <div class="col s12 m4 l4 js-content-card-container">
       <div class="card sticky-action">
         <div class="card-image waves-effect waves-block waves-light">
           <% content_image = asset_path("card-headers/#{content_type.name.downcase.pluralize}.jpg") %>
@@ -16,7 +13,7 @@
           <div class="activator" style="height: 265px; background: url('<%= content_image %>'); background-size: cover;"></div>
         </div>
         <div class="card-content">
-          <span class="card-title activator grey-text text-darken-4">
+          <span class="card-title js-content-name activator grey-text text-darken-4">
             <%= content.name.presence || 'Untitled' %>
           </span>
           <p>
@@ -28,7 +25,7 @@
           </p>
         </div>
         <div class="card-action nice-icon-links">
-          <%= link_to edit_polymorphic_path(content), class: 'green-text right', target: '_new' do %>
+          <%= link_to edit_polymorphic_path(content), class: 'green-text right', target: content.is_a?(Document) ? '_new' : '_self' do %>
             <i class="material-icons"><%= content_type.icon %></i> Edit
           <% end %>
           <%= link_to polymorphic_path(content), class: 'blue-text text-lighten-1' do %>
