@@ -81,6 +81,7 @@
         <td class="hide-on-small-only">
           <p class='grey-text' style="clear: both">
             <% if user_signed_in? %>
+              <span class="sortable-text"><%= content.updated_at.strftime("%Y/%m/%d %H:%M") %></span>
               <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
                 <i class="material-icons">mode_edit</i>
 
@@ -90,7 +91,7 @@
           </p>
         </td>
         <td>
-          <span class="hide-on-med-and-up">
+          <span class="hide-on-small-only">
             <% if user_signed_in? && content.updatable_by?(current_user) %>
               <%# todo also show if you're a contributor %>
               <%= link_to edit_polymorphic_path(content.page_type.downcase, id: content.id), class: 'js-edit-hover' do %>
