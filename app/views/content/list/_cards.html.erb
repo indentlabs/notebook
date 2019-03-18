@@ -6,16 +6,14 @@
     <div class="col s12 m4 l4">
       <div class="card sticky-action">
         <div class="card-image waves-effect waves-block waves-light">
+          <% content_image = asset_path("card-headers/#{content_type.name.downcase.pluralize}.jpg") %>
           <% if content.respond_to?(:image_uploads) %>
             <% images = content.image_uploads %>
             <% if images.any? %>
-              <%= image_tag(images.sample.src(:large), class: 'activator') %>
-            <% else %>
-            <%= image_tag("card-headers/#{content_type.name.downcase.pluralize}.jpg", class: 'activator') %>
+              <% content_image = images.sample.src(:large) %>
             <% end %>
-          <% else %>
-          <%= image_tag("card-headers/#{content_type.name.downcase.pluralize}.jpg", class: 'activator') %>
           <% end %>
+          <div class="activator" style="height: 265px; background: url('<%= content_image %>'); background-size: cover;"></div>
         </div>
         <div class="card-content">
           <span class="card-title activator grey-text text-darken-4">
