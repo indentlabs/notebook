@@ -25,4 +25,15 @@ class Document < ApplicationRecord
   def universe_field_value
     #todo when documents belong to a universe
   end
+
+  def role # TODO: this is a gross abuse of polymorphism
+    words = (self.body || "").split(/\s+/).count
+    minutes = 1 + (words / 200).to_i
+
+    "~#{minutes} minute read"
+  end
+
+  def description
+    self.body
+  end
 end
