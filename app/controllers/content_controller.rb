@@ -44,8 +44,8 @@ class ContentController < ApplicationController
       page_id:   @content.pluck(:id)
     )
     if params.key?(:slug)
-      filtered_page_tags = @page_tags.where(slug: params[:slug])
-      @content.select! { |content| filtered_page_tags.pluck(:page_id).include?(content.id) }
+      @filtered_page_tags = @page_tags.where(slug: params[:slug])
+      @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
 
     @content = @content.sort_by(&:name)
