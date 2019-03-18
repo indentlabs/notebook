@@ -17,93 +17,134 @@
   end
 %>
 
-<ul class="collection <%= 'with-header' if title.present? %>" style='border: 0'>
-  <% if title.present? %>
-    <li class="collection-header"><h5><%= title %></h5></li>
-  <% end %>
-
-  <% content_list.each do |content| %>
-    <li class="collection-item avatar">
-      <%= link_to content do %>
-        <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
-      <% end %>
-      <span class="title">
-        <%= link_to (content.respond_to?(:label) ? content.label : list_name_lookup_cache["#{content.page_type}_#{content.id}"].presence || content.name), content %>
-        <small class="grey-text">
-          <% universe_field_value = content.universe_field_value %>
-          <% if universe_field_value.present? %>
-            <i class="material-icons"><%= Universe.icon %></i>
-            <%# todo remove this hack %>
-            <%
-              if universe_field_value.is_a?(Integer)
-                universe_field_value = Universe.find_by(id: universe_field_value, user: content.user)
-              end
-            %>
-            <% if universe_field_value %>
-              <%= link_to universe_field_value.try(:name), universe_field_value %>
-            <% end %>
+<table class="table table-hover data-table">
+  <thead>
+    <tr>
+      <th style="width: 12px;"></th>
+      <th>Name</th>
+      <th class="hide-on-small-only">Last updated</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% content_list.each do |content| %>
+      <tr>
+        <td class="<%= content.class.color %> icon-column">
+          <%= link_to content do %>
+            <i class="material-icons small <%= content.class.color %> white-text"><%= content.class.icon %></i>
           <% end %>
-        </small>
-        <% if user_signed_in? && (
-            (content.universe_field_value.present? && universe_field_value.try(:user) != current_user) ||
-            (content.is_a?(Universe) && content.user != current_user)
-          )
-        %>
-          <span class="new badge grey white-text tooltipped" style="float: inherit; margin: 0;" data-badge-caption="contributing"
-            data-position="bottom" data-delay="100" data-tooltip="You have been added as a contributor to this universe and its content."></span>
-        <% end %>
-      </span>
-      <p class="tags-container">
-        <% content.page_tags.each do |tag| %>
-          <% if user_signed_in? && content.user == current_user %>
-            <%=
-              link_to send(
-                "page_tag_#{content.class.name.downcase.pluralize}_path",
-                slug: PageTagService.slug_for(tag.tag)
-              ) do
+        </td>
+        <td>
+          <div class="title">
+            <%= link_to (content.respond_to?(:label) ? content.label : list_name_lookup_cache["#{content.page_type}_#{content.id}"].presence || content.name), content %>
+            <small class="grey-text">
+              <% universe_field_value = content.universe_field_value %>
+              <% if universe_field_value.present? %>
+                <i class="material-icons"><%= Universe.icon %></i>
+                <%# todo remove this hack %>
+                <%
+                  if universe_field_value.is_a?(Integer)
+                    universe_field_value = Universe.find_by(id: universe_field_value, user: content.user)
+                  end
+                %>
+                <% if universe_field_value %>
+                  <%= link_to universe_field_value.try(:name), universe_field_value %>
+                <% end %>
+              <% end %>
+            </small>
+            <% if user_signed_in? && (
+                (content.universe_field_value.present? && universe_field_value.try(:user) != current_user) ||
+                (content.is_a?(Universe) && content.user != current_user)
+              )
             %>
-              <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+              <span class="new badge grey white-text tooltipped" style="float: inherit; margin: 0;" data-badge-caption="contributing"
+                data-position="bottom" data-delay="100" data-tooltip="You have been added as a contributor to this universe and its content."></span>
             <% end %>
-          <% else %>
-            <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
-          <% end %>
-        <% end %>
-      </p>
-      <p class='grey-text' style="clear: both">
-        <% if user_signed_in? %>
-          <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
-            <i class="material-icons">mode_edit</i>
+          </div>
+          <div class="tags-container">
+            <% content.page_tags.each do |tag| %>
+              <% if user_signed_in? && content.user == current_user %>
+                <%=
+                  link_to send(
+                    "page_tag_#{content.class.name.downcase.pluralize}_path",
+                    slug: PageTagService.slug_for(tag.tag)
+                  ) do
+                %>
+                  <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                <% end %>
+              <% else %>
+                <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+              <% end %>
+            <% end %>
+          </div>
+        </td>
+        <td class="hide-on-small-only">
+          <p class='grey-text' style="clear: both">
+            <% if user_signed_in? %>
+              <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
+                <i class="material-icons">mode_edit</i>
 
-            <%
-              if content.updated_at == content.created_at
-                action = 'created'
-              else
-                action = 'updated'
-              end
-            %>
-
-            <%= action %> <%= time_ago_in_words content.updated_at %> ago
+                <%= time_ago_in_words content.updated_at %> ago
+              </span>
+            <% end %>
+          </p>
+        </td>
+        <td>
+          <span class="hide-on-med-and-up">
+            <% if user_signed_in? && content.updatable_by?(current_user) %>
+              <%# todo also show if you're a contributor %>
+              <%= link_to edit_polymorphic_path(content.page_type.downcase, id: content.id), class: 'js-edit-hover' do %>
+                <i class="material-icons">edit</i>
+              <% end %>
+            <% end %>
           </span>
-        <% end %>
-      </p>
-      <span class="secondary-content hide-on-med-and-up">
-        <% if user_signed_in? && content.updatable_by?(current_user) %>
-          <%# todo also show if you're a contributor %>
-          <%= link_to edit_polymorphic_path(content.page_type.downcase, id: content.id), class: 'js-edit-hover' do %>
-            <i class="material-icons">edit</i>
-          <% end %>
-        <% end %>
-      </span>
-    </li>
-  <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
 
-  <% if local_assigns[:show_add_another_form] && content_list.any? && current_user.can_create?(content_type) %>
+<script type="text/javascript">
+$(document).ready(function() {
+  $(".data-table").dataTable({
+    autoWidth: false,
+    lengthChange: false,
+    pageLength: 25,
+    pagingType: 'simple_numbers',
+    order: [[1, 'asc']],
+    columnDefs: [
+      { "orderable": false, "targets": [0, 3] },
+      { "type": "numeric", "targets": 3 },
+    ],
+    language: {
+      emptyTable:     "No <%= @pluralized_type_name %> available in table",
+      info:           "Showing _START_-_END_ of your _TOTAL_ <%= @pluralized_type_name %>",
+      infoEmpty:      "Showing 0 <%= @pluralized_type_name %>",
+      infoFiltered:   "(filtered from _MAX_ total <%= @pluralized_type_name %>)",
+      lengthMenu:     "Show _MENU_ <%= @pluralized_type_name %>",
+      loadingRecords: "Loading...",
+      processing:     "Processing...",
+      search:         "Search your <%= @pluralized_type_name %>...",
+      zeroRecords:    "No matching <%= @pluralized_type_name %> found",
+      paginate: {
+        first:      "First page",
+        last:       "Last page",
+        next:       "Next page",
+        previous:   "Previous page"
+      },
+    },
+    //stripeClasses: ["<%= @content_type_class.color %> lighten-5", "white"]
+  });
+});
+</script>
+
+<% if local_assigns[:show_add_another_form] && content_list.any? && current_user.can_create?(content_type) %>
+  <ul class="collection <%= 'with-header' if title.present? %>" style='border: 0'>
     <%# todo real permissions here %>
     <% if content_type == Character || content_type == Location || content_type == Item || current_user.on_premium_plan? %>
       <% unless content_type == Universe %>
         <%= render partial: 'content/list/quick_add_form', locals: { content_type: content_type } %>
       <% end %>
     <% end %>
-  <% end %>
-
-</ul>
+  </ul>
+<% end %>

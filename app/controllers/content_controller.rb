@@ -16,18 +16,19 @@ class ContentController < ApplicationController
   before_action :set_sidenav_expansion, except: [:api_sort]
 
   def index
-    @content_type_class = content_type_from_controller(self.class)
-    pluralized_content_name = @content_type_class.name.downcase.pluralize
+    @content_type_class   = content_type_from_controller(self.class)
+    @content_type_name    = @content_type_class.name.downcase
+    @pluralized_type_name = @content_type_name.pluralize
 
     # Create the default fields for this user if they don't have any already
     @content_type_class.attribute_categories(current_user)
 
     if @universe_scope.present? && @content_type_class != Universe
-      @content = @universe_scope.send(pluralized_content_name)
+      @content = @universe_scope.send(@pluralized_type_name)
     else
       @content = (
-        current_user.send(pluralized_content_name).includes(:page_tags) +
-        current_user.send("contributable_#{pluralized_content_name}").includes(:page_tags)
+        current_user.send(@pluralized_type_name).includes(:page_tags) +
+        current_user.send("contributable_#{@pluralized_type_name}").includes(:page_tags)
       )
 
       unless @content_type_class == Universe
@@ -48,7 +49,7 @@ class ContentController < ApplicationController
       @content.select! { |content| filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
 
-    @content = @content.sort_by(&:name)
+    @content = @content.sort_by { |c| c.name.downcase }
 
     respond_to do |format|
       format.html { render 'content/index' }

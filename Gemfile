@@ -35,6 +35,7 @@ gem 'paranoia'
 # Javascript
 gem 'coffee-rails'
 gem 'rails-jquery-autocomplete'
+gem 'jquery-datatables'
 
 # SEO
 gem 'meta-tags'

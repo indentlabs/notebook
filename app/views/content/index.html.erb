@@ -1,56 +1,67 @@
-<%
-  content_type = @content_type_class.name.downcase
-%>
-
 <%= content_for :full_width_page_header do %>
-  <%= render partial: 'content/components/parallax_header', locals: { content_type: content_type, content_class: @content_type_class } %>
+  <%= render partial: 'content/components/parallax_header', locals: { content_type: @content_type_name, content_class: @content_type_class } %>
 <% end %>
 
-
 <% if @page_tags.any? %>
-  <div class="tags-container">
-    <span class="left grey-text">View by tag:&nbsp;</span>
-    <%= link_to polymorphic_path(@content_type_class) do %>
-      <span class="new badge <%= params.key?(:slug) ? 'grey' : @content_type_class.color %> left" data-badge-caption="All <%= content_type.pluralize %>"></span>
-    <% end %>
-    <% @page_tags.uniq(&:tag).each do |tag| %>
-      <%=
-        link_to send(
-          "page_tag_#{content_type.pluralize}_path",
-          slug: PageTagService.slug_for(tag.tag)
-        ) do
-      %>
-        <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
-      <% end %>
-    <% end %>
+  <div class="card">
+    <div class="card-content">
+      <div class="tags-container">
+        <span class="left grey-text">Filter by tag:&nbsp;&nbsp;&nbsp;</span>
+        <%= link_to polymorphic_path(@content_type_class) do %>
+          <span class="new badge <%= params.key?(:slug) ? 'grey' : @content_type_class.color %> left" data-badge-caption="All <%= @pluralized_type_name %>"></span>
+        <% end %>
+        <% @page_tags.uniq(&:tag).each do |tag| %>
+          <%=
+            link_to send(
+              "page_tag_#{@pluralized_type_name}_path",
+              slug: PageTagService.slug_for(tag.tag)
+            ) do
+          %>
+            <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+          <% end %>
+        <% end %>
+      </div>
+      <div style="clear: both"></div>
+    </div>
   </div>
-  <div style="clear: both"></div>
 <% end %>
 
 <% if @content.any? %>
-
-  <%= render partial: 'content/components/list_filter_bar', locals: { } %>
+  <%# render partial: 'content/components/list_filter_bar', locals: { } %>
   <div class="card">
-    <%= render partial: 'content/list/list', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true } %>
+    <%= render partial: 'content/list/list', locals: { content_list: @content, content_type: @content_type_class } %>
+  </div>
+  <div class="card">
+    <div class="card-content">
+      <% if current_user.can_create?(@content_type_class) %>
+        <% if @content_type_class == Character || @content_type_class == Location || @content_type_class == Item || current_user.on_premium_plan? %>
+          <% unless @content_type_class == Universe %>
+            <ul class="collection" style="border: 0">
+              <%= render partial: 'content/list/quick_add_form', locals: { content_type: @content_type_class } %>
+            </ul>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
   </div>
 
 <% elsif @content.empty? %>
 
   <div class="center" style="margin: 50px 0">
-    <h4>You haven't created any <%= content_type.pluralize %> yet!</h4>
+    <h4>You haven't created any <%= @pluralized_type_name %> yet!</h4>
     <h1>
       <i class="material-icons <%= @content_type_class.color %>-text" style="font-size: 200%">
         <%= @content_type_class.icon %>
       </i>
     </h1>
     <p>
-      <%= t("content_descriptions.#{content_type}") %>
+      <%= t("content_descriptions.#{@content_type_name}") %>
     </p>
 
     <% if current_user.can_create? @content_type_class %>
-      <%= link_to "Create your first #{content_type.humanize.downcase}", new_polymorphic_path(@content_type_class), class: "btn #{@content_type_class.color}" %>
+      <%= link_to "Create your first #{@content_type_name}", new_polymorphic_path(@content_type_class), class: "btn #{@content_type_class.color}" %>
     <% else %>
-      <%= link_to "Upgrade to Premium to create your first #{content_type.humanize.downcase}", subscription_path %>
+      <%= link_to "Upgrade to Premium to create your first #{@content_type_name}", subscription_path %>
     <% end %>
 
     <p class="grey-text text-lighten-2" style="padding-top: 20px;">
