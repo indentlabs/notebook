@@ -52,10 +52,10 @@
                       slug: PageTagService.slug_for(tag.tag)
                     ) do
                   %>
-                    <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                    <span class="new badge <%= params[:slug] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
                   <% end %>
                 <% else %>
-                  <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                  <span class="new badge <%= params[:slug] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
                 <% end %>
               <% end %>
             </p>
@@ -70,4 +70,20 @@
       </div>
     </div>
   <% end %>
+
+  <div class="col s12 m4 l4">
+    <%= link_to new_polymorphic_path(content_type), class: 'white-text' do %>
+      <div class="card <%= content_type.color %> lighten-1" style="height: 440px;">
+        <div class="card-content fixed-card-content centered-card-content">
+          <strong class="card-title">
+            New<br />
+            <%= content_type.name %>
+          </strong>
+          <p>
+            <i class="material-icons large">add</i>
+          </p>
+        </div>
+      </div>
+    <% end %>
+  </div>
 </div>
