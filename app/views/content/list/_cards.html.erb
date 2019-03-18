@@ -19,12 +19,12 @@
           <span class="card-title activator grey-text text-darken-4">
             <%= content.name.presence || 'Untitled' %>
           </span>
-          <p class="grey-text">
-            <%= content.role %>
-            <br />
-            <%= content.created_at == content.updated_at ? 'created' : 'updated' %>
-            <%= time_ago_in_words content.updated_at %>
-            ago
+          <p>
+            <% if content.is_a?(Document) %>
+              <%= content.reading_estimate %>
+            <% else %>
+              <%= content.description %>
+            <% end %>
           </p>
         </div>
         <div class="card-action nice-icon-links">
@@ -40,8 +40,34 @@
             <%= content.name.presence || 'Document preview' %>
             <i class="material-icons right">close</i>
           </span>
-          <p>
-            <%= sanitize truncate(content.description || '<em>This document is blank.</em>', escape: false, length: 420) %>
+          <% if content.is_a?(Document) %>
+            <p>
+              <%= sanitize truncate(content.description || '<em>This document is blank.</em>', escape: false, length: 420) %>
+            </p>
+          <% end %>
+          <% if content.respond_to?(:page_tags) %>
+            <p class="tags-container">
+              <% content.page_tags.each do |tag| %>
+                <% if user_signed_in? && content.user == current_user %>
+                  <%=
+                    link_to send(
+                      "page_tag_#{content.class.name.downcase.pluralize}_path",
+                      slug: PageTagService.slug_for(tag.tag)
+                    ) do
+                  %>
+                    <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                  <% end %>
+                <% else %>
+                  <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                <% end %>
+              <% end %>
+            </p>
+          <% end %>
+          <div class="clearfix"></div>
+          <p class="grey-text clearfix">
+            <%= content.created_at == content.updated_at ? 'created' : 'last updated' %>
+            <%= time_ago_in_words content.updated_at %>
+            ago
           </p>
         </div>
       </div>

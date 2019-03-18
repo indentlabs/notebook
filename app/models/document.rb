@@ -26,7 +26,7 @@ class Document < ApplicationRecord
     #todo when documents belong to a universe
   end
 
-  def role # TODO: this is a gross abuse of polymorphism
+  def reading_estimate
     words = (self.body || "").split(/\s+/).count
     minutes = 1 + (words / 200).to_i
 
