@@ -9,16 +9,30 @@
       </div>
 
       <div class="btn-group card">
-        <a class='dropdown-trigger btn white black-text' href='#' data-target='universe-filter-dropdown'>
+        <a
+          class='dropdown-trigger btn white black-text tooltipped <%= @universe_scope.present? ? Universe.color : 'white' %> lighten-5'
+          href='#'
+          data-position="bottom"
+          data-delay="500"
+          data-tooltip="Filter by universe"
+          data-target='universe-filter-dropdown'>
           <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
+          <%= @universe_scope.try(:name) if @universe_scope %>
         </a>
         <ul id='universe-filter-dropdown' class='dropdown-content'>
-          <li><a href="#!">All Universes</a></li>
+          <li>
+            <a href="?universe=all" class="<%= Universe.color %>-text">
+              <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
+              All Universes
+            </a>
+          </li>
           <li class="divider" tabindex="-1"></li>
           <% @current_user_content.fetch('Universe', []).each do |universe| %>
+            <% next unless universe.becomes(Universe).send(content_type.name.downcase.pluralize).any? %>
             <li>
-              <a href="#!" data-universe-id="<%= universe.id %>">
+              <a href="?universe=<%= universe.id %>" data-universe-id="<%= universe.id %>" class="<%= Universe.color %>-text">
                 <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
+                <span class="grey-text">in</span>
                 <%= universe.name %>
               </a>
             </li>
@@ -27,7 +41,13 @@
       </div>
 
       <div class="btn-group card">
-        <a class='dropdown-trigger btn <%= @filtered_page_tags.nil? ? 'white' : content_type.color %> lighten-4 black-text' href='#' data-target='tag-filter-dropdown'>
+        <a
+          class='dropdown-trigger btn <%= @filtered_page_tags.nil? ? 'white' : content_type.color %> lighten-4 black-text tooltipped'
+          href='#'
+          data-target='tag-filter-dropdown'
+          data-position="bottom"
+          data-delay="500"
+          data-tooltip="Filter by tag">
           <i class="material-icons red-text">loyalty</i>
           <%= @filtered_page_tags.try(:first).try(:tag) %>
         </a>
@@ -57,17 +77,17 @@
         </ul>
       </div>
 
-      <a class='btn grey lighten-2 black-text tooltipped'
+      <!-- <a class='btn grey lighten-2 black-text tooltipped'
          href='#'
          data-position="bottom"
          data-delay="500"
          data-tooltip="Favoriting pages is a new feature coming soon.">
         <i class="material-icons amber-text">star_outline</i>
-      </a>
+      </a> -->
 
       &nbsp;
 
-      <div class="btn-group card">
+      <!-- <div class="btn-group card">
         <a class='btn white grey-text tooltipped'
            href='#'
            data-position="bottom"
@@ -91,7 +111,7 @@
            data-tooltip="Most-recent order">
           <i class="material-icons black-text">access_time</i>
         </a>
-      </div>
+      </div> -->
 
       &nbsp;
 
