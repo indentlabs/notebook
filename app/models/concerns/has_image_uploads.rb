@@ -8,13 +8,6 @@ module HasImageUploads
     # todo: dependent: :destroy
     # todo: destroy from s3 on destroy
 
-    def image_uploads
-      ImageUpload.where(
-        content_type: self.class.name,
-        content_id: self.id
-      )
-    end
-
     def public_image_uploads
       self.image_uploads.where(privacy: 'public')
     end
