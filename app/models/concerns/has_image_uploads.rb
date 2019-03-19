@@ -4,7 +4,7 @@ module HasImageUploads
   extend ActiveSupport::Concern
 
   included do
-    has_many :image_uploads
+    has_many :image_uploads, as: :content
     # todo: dependent: :destroy
     # todo: destroy from s3 on destroy
 

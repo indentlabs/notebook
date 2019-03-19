@@ -1,5 +1,6 @@
 class ImageUpload < ApplicationRecord
   belongs_to :user
+  belongs_to :content, polymorphic: true
 
   has_attached_file :src,
     path: 'content/uploads/:style/:filename',
