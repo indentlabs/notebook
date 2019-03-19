@@ -1,6 +1,6 @@
 <div class="row js-content-cards-list">
   <% content_list.each.with_index do |content, i| %>
-    <div class="col s12 m4 l4 js-content-card-container">
+    <div class="col s12 m6 l4 js-content-card-container">
       <div class="card sticky-action">
         <div class="card-image waves-effect waves-block waves-light">
           <% content_image = asset_path("card-headers/#{content_type.name.downcase.pluralize}.jpg") %>
@@ -12,7 +12,7 @@
           <% end %>
           <div class="activator" style="height: 265px; background: url('<%= content_image %>'); background-size: cover;"></div>
         </div>
-        <div class="card-content fixed-card-content">
+        <div class="card-content fixed-card-content" style="overflow: hidden">
           <span class="card-title js-content-name activator grey-text text-darken-4">
             <%= content.name.presence || 'Untitled' %>
           </span>
@@ -20,7 +20,7 @@
             <% if content.is_a?(Document) %>
               <%= content.reading_estimate %>
             <% else %>
-              <%= ContentFormatterService.show(text: content.description, viewing_user: current_user) %>
+              <%= ContentFormatterService.show(text: truncate(content.description, length: 140), viewing_user: current_user) %>
             <% end %>
           </p>
         </div>
@@ -37,7 +37,7 @@
             <%= content.name.presence || 'Document preview' %>
             <i class="material-icons right">close</i>
           </span>
-          <% if content.is_a?(Document) %>
+          <% if content.is_a?(Document) || (content.description.try(:length) || 0 > 140) %>
             <p>
               <%= sanitize truncate(content.description || '<em>This document is blank.</em>', escape: false, length: 420) %>
             </p>
@@ -72,7 +72,7 @@
   <% end %>
 
   <% if current_user.can_create?(content_type) %>
-    <div class="col s12 m4 l4">
+    <div class="col s12 m6 l4">
       <%# TODO: We really need to fix up the new document path so we don't have weird overrides like this %>
       <%= link_to content_type == Document ? edit_document_path(:new) : new_polymorphic_path(content_type), class: 'white-text' do %>
         <div class="card <%= content_type.color %> lighten-1" style="height: 440px;">
