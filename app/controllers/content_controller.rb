@@ -23,11 +23,11 @@ class ContentController < ApplicationController
     @content_type_class.attribute_categories(current_user)
 
     if @universe_scope.present? && @content_type_class != Universe
-      @content = @universe_scope.send(pluralized_content_name)
+      @content = @universe_scope.send(pluralized_content_name).includes(:page_tags, :image_uploads)
     else
       @content = (
-        current_user.send(pluralized_content_name).includes(:page_tags) +
-        current_user.send("contributable_#{pluralized_content_name}").includes(:page_tags)
+        current_user.send(pluralized_content_name).includes(:page_tags, :image_uploads) +
+        current_user.send("contributable_#{pluralized_content_name}").includes(:page_tags, :image_uploads)
       )
 
       unless @content_type_class == Universe
@@ -42,12 +42,13 @@ class ContentController < ApplicationController
     @page_tags = PageTag.where(
       page_type: @content_type_class.name,
       page_id:   @content.pluck(:id)
-    )
+    ).order(:tag)
     if params.key?(:slug)
-      filtered_page_tags = @page_tags.where(slug: params[:slug])
-      @content.select! { |content| filtered_page_tags.pluck(:page_id).include?(content.id) }
+      @filtered_page_tags = @page_tags.where(slug: params[:slug])
+      @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
 
+    @page_tags = @page_tags.uniq(&:tag)
     @content = @content.sort_by(&:name)
 
     respond_to do |format|
