@@ -20,7 +20,7 @@ class ContentFormatterService < Service
   def self.show(text:, viewing_user: User.new)
     # We want to evaluate markdown first, because the markdown engine also happens
     # to strip out HTML tags. So: markdown, _then_ insert content links.
-    formatted_text = markdown.render(text).html_safe
+    formatted_text = markdown.render(text || '').html_safe
     substitute_content_links(formatted_text, viewing_user).html_safe
   end
 
