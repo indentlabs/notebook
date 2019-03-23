@@ -189,6 +189,10 @@ Rails.application.config.to_prepare do
             href: main_app.prompts_path
           },
           {
+            label: "Image prompts",
+            href: main_app.prompts_image_path
+          },
+          {
             label: "Peer prompts",
             href: '/forum/writing-prompts'
           }
