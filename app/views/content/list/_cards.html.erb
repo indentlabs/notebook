@@ -20,7 +20,7 @@
             <% if content.is_a?(Document) %>
               <%= content.reading_estimate %>
             <% else %>
-              <%= ContentFormatterService.show(text: truncate(content.description, length: 140), viewing_user: current_user) %>
+              <%= sanitize ContentFormatterService.show(text: truncate(content.description, length: 140), viewing_user: current_user) %>
             <% end %>
           </p>
         </div>
@@ -39,7 +39,7 @@
           </span>
           <% if content.is_a?(Document) || (content.description.try(:length) || 0 > 140) %>
             <p>
-              <%= sanitize truncate(content.description || '<em>This document is blank.</em>', escape: false, length: 420) %>
+              <%= sanitize ContentFormatterService.show(text: truncate(content.description, length: 420, escape: false), viewing_user: current_user) %>
             </p>
           <% end %>
           <% if content.respond_to?(:page_tags) %>
