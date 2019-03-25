@@ -405,29 +405,6 @@ class ContentController < ApplicationController
     TemporaryFieldMigrationService.migrate_fields_for_content(content, current_user) if content.present?
   end
 
-  def populate_linkable_content_for_each_content_type
-    linkable_classes = Rails.application.config.content_types[:all].map(&:name) & current_user.user_content_type_activators.pluck(:content_type)
-    linkable_classes -= ["Universe"]
-
-    @linkables_cache = {}
-    linkable_classes.each do |class_name|
-      # class_name = "Character"
-
-      @linkables_cache[class_name] = current_user.send("linkable_#{class_name.downcase.pluralize}")
-        .in_universe(@universe_scope)
-
-      if @content.present? && @content.persisted?
-        @linkables_cache[class_name] = @linkables_cache[class_name]
-          .in_universe(@content.universe)
-          .reject { |content| content.class.name == class_name && content.id == @content.id }
-      end
-
-      @linkables_cache[class_name] = @linkables_cache[class_name].sort_by(&:name)
-        .map { |c| [c.name, c.id] }
-        .compact
-    end
-  end
-
   def valid_content_types
     Rails.application.config.content_types[:all]
   end

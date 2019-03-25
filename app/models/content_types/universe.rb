@@ -49,6 +49,10 @@ class Universe < ApplicationRecord
 
   has_many :contributors, dependent: :destroy
 
+  # Stub for when we allow universe nesting; also makes polymorphism play a bit nicer
+  scope :in_universe, ->(id = nil) { where(id: id) unless id.nil? }
+
+
   after_destroy do
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       content_type.where(universe_id: self.id).update_all(universe_id: nil)

@@ -6,7 +6,10 @@
         <i class="material-icons right activator" style="cursor: pointer">settings</i>
       </span>
       <ul>
-        <li>&middot; Written by <%= link_to @document.user.name, @document.user %>
+        <li>
+          <i class="material-icons grey-text">edit</i>
+          Written by <%= link_to @document.user.name, @document.user %>
+        </li>
         <!--
         <li>
           &middot; Visibility:
@@ -39,6 +42,51 @@
           <% end %>
         </li>
       </ul>
+    </div>
+  </div>
+
+  <div class="card blue-grey lighten-4">
+    <div class="card-content">
+      <span class="card-title grey-text text-darken-4">
+        Insert page link
+        <span class="grey-text" style="padding-top: 6px; padding-right: 4px;">
+          (<a href="#" class="tooltipped" tabindex="-1" data-tooltip="These links will insert a small snippet that<br />automatically turns into a link to that page after saving." data-position="bottom" data-html="true">?</a>)
+        </span>
+      </span>
+      <div class="document-link-bar">
+        <div class="btn-group" role="group">
+
+          <% @linkables_cache.keys.each do |class_name| %>
+            <% relation_class = class_name.constantize %>
+            <a class="btn btn-small <%= relation_class.color %> dropdown-trigger <%= 'disabled' unless @linkables_cache.fetch(class_name, []).any? %> tooltipped"
+               href="#" style="padding: 0 9px;"
+               data-target='active_link_bar_<%= class_name %>'
+               data-tooltip="<%= class_name.pluralize %>"
+               data-position="bottom"
+               tabindex="-1">
+              <i class="material-icons">
+                <%= relation_class.icon %>
+              </i>
+            </a>
+
+            <ul id='active_link_bar_<%= class_name %>' class='dropdown-content'>
+              <%
+                @linkables_cache[class_name].each do |linkable|
+              %>
+                <li>
+                  <a href="#" data-content-type="<%= class_name %>" data-content-id="<%= linkable.second %>" class="js-content-link-option">
+                    <i class="material-icons <%= relation_class.color %>-text"><%= relation_class.icon %></i>
+                    <%= linkable.first %>
+                  </a>
+                </li>
+              <%
+              end
+              %>
+            </ul>
+
+          <% end %>
+        </div>
+      </div>
     </div>
   </div>
 <% end %>
