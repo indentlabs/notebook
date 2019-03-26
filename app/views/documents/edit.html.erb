@@ -169,4 +169,22 @@
     }
   });
 
+  $('.js-content-link-option').click(function (click_event) {
+    var selected_option    = $(click_event.target);
+    var document_editor    = editor;
+
+    var token_to_insert = [
+      '[[',
+      selected_option.data('content-type'),
+      '-',
+      selected_option.data('content-id'),
+      ']]'
+    ].join('');
+
+    editor.cleanPaste(token_to_insert);
+    // Don't jump to the top of the page after clicking!
+    click_event.stopPropagation();
+    return false;
+  });
+
 <% end %>
