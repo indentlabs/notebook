@@ -46,6 +46,7 @@ class DocumentsController < ApplicationController
   def update
     document = Document.with_deleted.find_or_initialize_by(id: params[:id], user: current_user)
 
+    # todo current_user.can_modify?(document) instead
     unless document.user == current_user
       redirect_to(dashboard_path, notice: "You don't have permission to do that!")
       return

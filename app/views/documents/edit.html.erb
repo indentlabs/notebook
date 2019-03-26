@@ -92,7 +92,8 @@
         text: 'Write as little or as much as you want!'
     },
     paste: {
-      forcePlainText: false
+      forcePlainText: false,
+      cleanAttrs: ['style', 'dir'],
     }
   });
 
@@ -174,14 +175,25 @@
     var document_editor    = editor;
 
     var token_to_insert = [
+      '<strong class="page-link-shortcode">',
       '[[',
       selected_option.data('content-type'),
       '-',
       selected_option.data('content-id'),
-      ']] '
+      ']]',
+      '</strong>',
+      '&nbsp;'
     ].join('');
+    console.log("Inserting " + token_to_insert);
 
-    editor.cleanPaste(token_to_insert);
+    // If the editor isn't focused, we need to focus it before pasting
+    if (!editor.getFocusedElement()) {
+      $('#editor').trigger('click');
+    } else {
+      // Paste to the end of the document
+    }
+
+    editor.pasteHTML(token_to_insert);
 
     // Don't jump to the top of the page after clicking!
     click_event.stopPropagation();

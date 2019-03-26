@@ -60,6 +60,7 @@
         <div class="btn-group" role="group">
 
           <% @linkables_cache.keys.each do |class_name| %>
+            <% next unless @linkables_cache.fetch(class_name, []).any? %>
             <% relation_class = class_name.constantize %>
             <a class="btn btn-small <%= relation_class.color %> dropdown-trigger <%= 'disabled' unless @linkables_cache.fetch(class_name, []).any? %> tooltipped"
                href="#" style="padding: 0 9px;"
