@@ -10,7 +10,8 @@ gem 'aws-sdk', '~> 1.5'
 gem 'aws-sdk-s3'
 gem 'filesize'
 
-# Image processing
+# Images & image processing
+gem 'unsplash'
 gem 'paperclip'
 gem 'rmagick'
 

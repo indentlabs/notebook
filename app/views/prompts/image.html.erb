@@ -1,0 +1,68 @@
+<div class="row">
+  <div class="col s12">
+    <% if @image_prompt.present? %>
+      <div class="card">
+        <div class="card-image">
+          <%= image_tag @image_prompt[:url] %>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <p>
+            <%= link_to "\"#{@image_prompt[:description] || 'Photo'}\"", @image_prompt[:source] %>
+            by
+            <%= link_to @image_prompt.dig(:user, :name), (@image_prompt.dig(:user, :portfolio) || @image_prompt[:source]) %>
+            <% if @image_prompt.dig(:location, :title).present? %>
+              in
+              <% @image_prompt.dig(:location, :title) %>
+            <% end %>
+            <!-- provided by
+            <%= link_to 'Unsplash', 'https://www.unsplash.com' %> -->
+            and licensed with the
+            <%= link_to 'Unsplash license', 'https://unsplash.com/license' %>.
+          </p>
+          <p>
+            This image is free to use for commerical or non-commercial purposes.
+          </p>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">
+          Image prompts for your world
+          <span class="new yellow badge black-text" data-badge-caption="beta"></span>
+        </div>
+        <p>
+          You'll get a random image prompt by default, but you can also narrow down the categories that can appear from the list below.
+          For best results, use at least 5 categories.
+          <br />
+        </p>
+        <form method="GET">
+          <div class="row">
+            <% PromptsService.image_categories_for(current_user).each do |category| %>
+              <div class="col s6 m6 l4">
+                <label>
+                  <input type="checkbox" name="query[]" value="<%= category %>" <%= 'checked' if params.fetch(:query, []).include?(category) %> />
+                  <span><%= category %></span>
+                </label>
+              </div>
+            <% end %>
+          </div>
+          <!-- <div class="input-field col s12 m6">
+            <select name="orientation">
+              <option value="" selected>Surprise me!</option>
+              <option value="portait">Portrait</option>
+              <option value="landscape">Landscape</option>
+              <option value="squarish">Square-ish</option>
+            </select>
+            <label>Image orientation (optional)</label>
+          </div> -->
+
+          <div class="clearfix"></div>
+          <input type="submit" class="btn amber darken-1 white-text" value="Generate" />
+        </form>
+      </div>
+    </div>
+  </div>

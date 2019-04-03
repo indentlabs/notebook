@@ -32,6 +32,21 @@ class MainController < ApplicationController
     @navbar_color = '#FF9800'
 
     set_random_content # for question
+
+    @navbar_actions = [
+      {
+        label: "Notebook prompts",
+        href: main_app.prompts_path
+      },
+      {
+        label: "Image prompts",
+        href: main_app.prompts_image_path
+      },
+      {
+        label: "Peer prompts",
+        href: '/forum/writing-prompts'
+      }
+    ]
   end
 
   # deprecated path just kept around for bookmarks for a while

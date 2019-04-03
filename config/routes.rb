@@ -1,6 +1,8 @@
 # rubocop:disable LineLength
 
 Rails.application.routes.draw do
+  get 'prompts/notebook'
+  get 'prompts/image'
   get 'customization/content_types'
   post 'customization/toggle_content_type'
 

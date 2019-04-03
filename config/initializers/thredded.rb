@@ -182,6 +182,24 @@ Rails.application.config.to_prepare do
     end
 
     def set_navbar_actions
+      if request.env['PATH_INFO'] == '/writing-prompts'
+        @navbar_actions = [
+          {
+            label: "Notebook prompts",
+            href: main_app.prompts_path
+          },
+          {
+            label: "Image prompts",
+            href: main_app.prompts_image_path
+          },
+          {
+            label: "Peer prompts",
+            href: '/forum/writing-prompts'
+          }
+        ]
+        return
+      end
+
       return unless user_signed_in?
       content_type = related_content_type
       return if content_type.nil?
