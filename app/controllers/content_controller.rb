@@ -551,11 +551,11 @@ class ContentController < ApplicationController
           href: main_app.polymorphic_path(content_type)
         }
       end
-      #
-      # @navbar_actions << {
-      #   label: "New #{content_type.name.downcase}",
-      #   href: main_app.new_polymorphic_path(content_type)
-      # }
+
+      @navbar_actions << {
+        label: "New #{content_type.name.downcase}",
+        href: main_app.new_polymorphic_path(content_type)
+      }
     end
   end
 
