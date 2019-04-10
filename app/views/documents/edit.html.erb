@@ -8,7 +8,7 @@
 
     <div class="row">
       <div class="col s12 m8 l8 offset-l1">
-        <div id="editor" class="editable"><%= @document.body.try(:html_safe) %></div>
+        <div id="editor" class="editable js-can-mention-pages"><%= @document.body.try(:html_safe) %></div>
       </div>
       <div class="col s12 m4 l2 smart-sidebar">
         <%= render partial: 'documents/components/smart_sidebar', locals: { document: @document } %>
@@ -27,7 +27,6 @@
 
 <div style="clear: both"></div>
 <%= content_for :javascript do %>
-
   var editor = new MediumEditor('#editor', {
     targetBlank: true,
     autoLink: true,
@@ -169,4 +168,31 @@
     }
   });
 
+  $(document).ready(function(){
+    // Page @mentions
+    var tribute = new Tribute({
+      values: [
+        <% @linkables_cache.each do |class_name, collection| %>
+          <% linkable_class = class_name.constantize %>
+          <% collection.each do |page_name, page_id| %>
+            {
+              key:   "<%= page_name.gsub('"', "\"") %>",
+              value: '[[<%= class_name %>-<%= page_id %>]]',
+              color: '<%= linkable_class.color %>',
+              icon:  '<%= linkable_class.icon %>'
+            },
+          <% end %>
+        <% end %>
+      ],
+      selectTemplate: function (item) {
+        // We're overriding the default here so we don't prepend a @
+        return '<span class="' + item.original.color + '-text" contenteditable="false">' + item.original.value + '</span>';
+      },
+      menuItemTemplate: function (item) {
+        return '<i class="material-icons right ' + item.original.color + '-text">' + item.original.icon + '</i>' + item.string;
+      },
+      spaceSelectsMatch: false
+    });
+    tribute.attach(document.querySelectorAll('.js-can-mention-pages'));
+  });
 <% end %>

@@ -67,11 +67,11 @@ class ContentFormatterService < Service
   end
 
   def self.link_template(content_model)
-    chip_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: "content_link #{content_model.class}-link") }
+    inline_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: "content_link #{content_model.class.name.downcase}-link") }
   end
 
   def self.private_link_template(content_model)
-    chip_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: 'grey-text content_link disabled') }
+    inline_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: 'grey-text content_link disabled') }
   end
 
   def self.unknown_link_template(attempted_key)
@@ -92,6 +92,14 @@ class ContentFormatterService < Service
       end
       body += yield
       body.html_safe
+    end
+  end
+
+  def self.inline_template(class_model=nil)
+    content_tag(:span, class: 'inline-link') do
+      content_tag(:span, class: class_model ? "#{class_model.color}-text" : '') do
+        yield
+      end
     end
   end
 
