@@ -96,7 +96,7 @@ class ContentFormatterService < Service
   end
 
   def self.inline_template(class_model=nil)
-    content_tag(:span, class: 'chipf') do
+    content_tag(:span, class: 'inline-link') do
       content_tag(:span, class: class_model ? "#{class_model.color}-text" : '') do
         yield
       end
