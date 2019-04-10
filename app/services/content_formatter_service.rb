@@ -100,7 +100,7 @@ class ContentFormatterService < Service
   def self.link_for(content_model)
     [
       Rails.env.production? ? 'https://' : 'http://',
-      'www.notebook.ai', # Rails.application.routes.default_url_options[:host],
+      Rails.env.production? ? 'www.notebook.ai' : 'localhost:3000', # Rails.application.routes.default_url_options[:host]?
       '/plan/',
       content_model.class.name.downcase.pluralize,
       '/',
