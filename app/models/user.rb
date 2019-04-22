@@ -11,14 +11,14 @@ class User < ApplicationRecord
   include HasContent
   include Authority::UserAbilities
 
-  validates :username, 
+  validates :username,
     uniqueness: true,
     allow_nil: true,
     allow_blank: true,
     length: { maximum: 40 },
     format: /\A[A-Za-z0-9\-_\$\+\!\*]+\z/
 
-  has_many :subscriptions,                dependent: :destroy
+  has_many :subscriptions, dependent: :destroy
   has_many :billing_plans, through: :subscriptions
   def on_premium_plan?
     BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id)
