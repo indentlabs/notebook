@@ -11,14 +11,14 @@ class User < ApplicationRecord
   include HasContent
   include Authority::UserAbilities
 
-  validates :username, 
+  validates :username,
     uniqueness: true,
     allow_nil: true,
     allow_blank: true,
     length: { maximum: 40 },
     format: /\A[A-Za-z0-9\-_\$\+\!\*]+\z/
 
-  has_many :subscriptions,                dependent: :destroy
+  has_many :subscriptions, dependent: :destroy
   has_many :billing_plans, through: :subscriptions
   def on_premium_plan?
     BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id)
@@ -52,7 +52,7 @@ class User < ApplicationRecord
 
   #TODO: rename this to #{content_type}_shared_with_me and only return contributable content that others own
   Rails.application.config.content_types[:all_non_universe].each do |content_type|
-    pluralized_content_type = content_type.name.downcase.pluralize
+    pluralized_content_type = content_type.name.tableize
     define_method "contributable_#{pluralized_content_type}" do
       contributable_universe_ids = contributable_universes.pluck(:id)
 
@@ -64,7 +64,7 @@ class User < ApplicationRecord
   #TODO: rename this to the more descriptive name contributable_#{content_type}
   # returns all content of that type that a user can edit/contribute to, even if it's not owned by the user
   Rails.application.config.content_types[:all_non_universe].each do |content_type|
-    pluralized_content_type = content_type.name.downcase.pluralize
+    pluralized_content_type = content_type.name.tableize
     define_method "linkable_#{pluralized_content_type}" do
       my_universe_ids = universes.pluck(:id)
       contributable_universe_ids = contributable_universes.pluck(:id)

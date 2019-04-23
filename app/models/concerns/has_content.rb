@@ -5,7 +5,7 @@ module HasContent
 
   included do
     Rails.application.config.content_types[:all].each do |content_type|
-      content_type_sym = content_type.name.downcase.pluralize.to_sym # :characters
+      content_type_sym = content_type.name.tableize.to_sym # :characters
 
       #has_many :characters, :locations, etc
       has_many content_type_sym, dependent: :destroy
@@ -29,7 +29,7 @@ module HasContent
       where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL'
 
       sql = content_types.uniq.map do |page_type|
-        "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
+        "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.tableize} WHERE #{where_conditions}"
       end.join(' UNION ALL ') + ' ORDER BY page_type, id'
 
       res = ActiveRecord::Base.connection.execute(sql)
@@ -54,7 +54,7 @@ module HasContent
       where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL'
 
       sql = content_types.uniq.map do |page_type|
-        "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
+        "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.tableize} WHERE #{where_conditions}"
       end.join(' UNION ALL ')
 
       @user_content_list ||= ActiveRecord::Base.connection.execute(sql)
@@ -82,7 +82,7 @@ module HasContent
         content_value = {}
 
         Rails.application.config.content_types[:all].each do |type|
-          relation = type.name.downcase.pluralize.to_sym # :characters
+          relation = type.name.tableize.to_sym # :characters
           content_value[relation] = send(relation).is_public
         end
 
@@ -94,7 +94,7 @@ module HasContent
     def public_content_count
       @user_content_count ||= begin
         Rails.application.config.content_types[:all].map do |type|
-          relation = type.name.downcase.pluralize.to_sym # :characters
+          relation = type.name.tableize.to_sym # :characters
           send(relation).is_public.count
         end.sum
       end

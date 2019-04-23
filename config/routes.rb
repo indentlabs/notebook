@@ -9,7 +9,7 @@ Rails.application.routes.draw do
   resources :users do
     # get :characters, on: :member <...etc...>
     Rails.application.config.content_types[:all].each do |content_type|
-      get content_type.name.downcase.pluralize.to_sym, on: :member
+      get content_type.name.tableize.to_sym, on: :member
       # todo page tags here
     end
   end
@@ -82,14 +82,14 @@ Rails.application.routes.draw do
     resources :universes do
       # get :characters, on: :member <...etc...>
       Rails.application.config.content_types[:all_non_universe].each do |content_type|
-        get content_type.name.downcase.pluralize.to_sym, on: :member
+        get content_type.name.tableize.to_sym, on: :member
       end
       get :changelog, on: :member
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
     end
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       # resources :characters do
-      resources content_type.name.downcase.pluralize.to_sym do
+      resources content_type.name.tableize.to_sym do
         get :changelog, on: :member
         get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
       end

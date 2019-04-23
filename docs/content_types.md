@@ -2,10 +2,11 @@ Checklist to create a new content type:
 
 - List all fields/types/relations out (for your sanity)
   - e.g. https://github.com/indentlabs/notebook/issues/258
+  - name:string page_type:string user:references privacy:string deleted_at:datetime universe:references
 
 - Generate models (with non-relation fields)
   - `rails g model Planet name:string user:references universe:references deleted_at:datetime privacy:string`
-  - Edit the migration to add a page_type column with default value Planet
+  - Edit the migration's page_type column to add a default value "Planet"
   - `rake db:migrate`
 
 - Run `rake page_type:create` and type "Planet" at the prompt
@@ -21,6 +22,8 @@ Checklist to create a new content type:
   - resize to 600x400 and optimize size to <100kb, ideally <50kb
 
 - Customize groupings in config/attributes/planet.yml
+  - change universe_id type to :universe, name type to :name
+  - add tags
 
 - Add translations to en.yml
   - class name translations under activerecord.models
