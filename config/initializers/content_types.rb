@@ -1,9 +1,9 @@
 Rails.application.config.content_types = {
   # The complete list of all content types
-  all: [
+  all: [ # todo sort this lol
     Universe, Character, Location, Item, Building, Condition, Country, Creature, Deity, Flora,
     Government, Group, Job, Landmark, Language, Magic, Planet, Race, Religion, Scene,
-    Technology, Town, Tradition, Vehicle,
+    Technology, Town, Tradition, Vehicle, CustomPage
   ],
 
   # These content types are always on for all users, and cannot be toggled off
@@ -14,8 +14,8 @@ Rails.application.config.content_types = {
 
   # These content types are available to be turned on
   available: [
-    Building, Condition, Country, Creature, Deity, Flora, Government, Group, Job, Landmark, Language,
-    Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle
+    Building, Condition, Country, Creature, CustomPage, Deity, Flora, Government, Group, Job,
+    Landmark, Language, Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle
   ],
 
   # These content types can be created by any user
@@ -23,13 +23,13 @@ Rails.application.config.content_types = {
 
   # These content types require a premium subscription to create
   premium: [
-    Building, Condition, Country, Creature, Deity, Flora, Government, Group, Job, Landmark, Language,
-    Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle,
+    Building, Condition, Country, Creature, CustomPage, Deity, Flora, Government, Group, Job, Landmark,
+    Language, Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle,
   ],
 
   # Content types to label as "new" around the site
   new: [
-    Building, Condition, Job, Tradition, Vehicle
+    CustomPage
   ]
 }
 

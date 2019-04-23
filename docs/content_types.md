@@ -22,6 +22,8 @@ Checklist to create a new content type:
   - resize to 600x400 and optimize size to <100kb, ideally <50kb
 
 - Customize groupings in config/attributes/planet.yml
+  - change universe_id type to :universe, name type to :name
+  - add tags
 
 - Add translations to en.yml
   - class name translations under activerecord.models

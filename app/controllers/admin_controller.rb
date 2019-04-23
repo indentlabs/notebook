@@ -17,7 +17,7 @@ class AdminController < ApplicationController
     end
 
     @content_type = type.constantize
-    @relation_name = type.downcase.pluralize.to_sym
+    @relation_name = type.tableize.to_sym
   end
 
   def universes

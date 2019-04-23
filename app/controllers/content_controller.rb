@@ -17,7 +17,7 @@ class ContentController < ApplicationController
 
   def index
     @content_type_class = content_type_from_controller(self.class)
-    pluralized_content_name = @content_type_class.name.downcase.pluralize
+    pluralized_content_name = @content_type_class.name.tableize
 
     # Create the default fields for this user if they don't have any already
     @content_type_class.attribute_categories(current_user)
@@ -72,7 +72,7 @@ class ContentController < ApplicationController
 
       @navbar_actions << {
         label: 'Changelog',
-        href: send("changelog_#{content_type.name.downcase}_path", @content)
+        href: send("changelog_#{content_type.name.tableize.singularize}_path", @content)
       }
     end
 
@@ -474,10 +474,10 @@ class ContentController < ApplicationController
   def set_attributes_content_type
     @content_type = params[:content_type]
     # todo make this a before_action load_content_type
-    unless valid_content_types.map { |c| c.name.downcase }.include?(@content_type)
+    unless valid_content_types.map { |c| c.name.tableize.singularize }.include?(@content_type)
       raise "Invalid content type on attributes customization page: #{@content_type}"
     end
-    @content_type_class = @content_type.titleize.constantize
+    @content_type_class = @content_type.camelize.constantize
   end
 
   def set_navbar_color
@@ -512,7 +512,7 @@ class ContentController < ApplicationController
 
     @navbar_actions << {
       label: 'Customize template',
-      href: main_app.attribute_customization_path(content_type.name.downcase)
+      href: main_app.attribute_customization_path(content_type.name.tableize.singularize)
     }
   end
 

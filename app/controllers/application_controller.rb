@@ -78,7 +78,7 @@ class ApplicationController < ActionController::Base
     linkable_classes.each do |class_name|
       # class_name = "Character"
 
-      @linkables_cache[class_name] = current_user.send("linkable_#{class_name.downcase.pluralize}")
+      @linkables_cache[class_name] = current_user.send("linkable_#{class_name.tableize}")
         .in_universe(@universe_scope)
 
       if @content.present? && @content.persisted?

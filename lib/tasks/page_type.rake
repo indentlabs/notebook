@@ -33,12 +33,7 @@ class #{page_type} < ActiveRecord::Base
   validates :user_id, presence: true
 
   include BelongsToUniverse
-  include HasAttributes
-  include HasPrivacy
-  include HasContentGroupers
-  include HasImageUploads
-  include HasChangelog
-  include Serendipitous::Concern
+  include IsContentPage
 
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
@@ -74,7 +69,7 @@ class #{page_type.pluralize}Controller < ContentController
   end
 end
     """
-    File.open("app/controllers/#{page_type.downcase.pluralize}_controller.rb", 'w+') do |file|
+    File.open("app/controllers/#{page_type.tableize}_controller.rb", 'w+') do |file|
       file.write(controller_definition)
     end
 
@@ -82,9 +77,9 @@ end
     routes = File.read("config/routes.rb")
 
     # Swap new routes in
-    routes.gsub!(/#<users_page_types>/, "get :#{page_type.downcase.pluralize}, on: :member\n    #<users_page_types>")
-    routes.gsub!(/#<universes_page_types>/, "get :#{page_type.downcase.pluralize}, on: :member\n    #<universes_page_types>")
-    routes.gsub!(/#<page_type_resources>/, "resources :#{page_type.downcase.pluralize}\n    #<page_type_resources>")
+    routes.gsub!(/#<users_page_types>/, "get :#{page_type.tableize}, on: :member\n    #<users_page_types>")
+    routes.gsub!(/#<universes_page_types>/, "get :#{page_type.tableize}, on: :member\n    #<universes_page_types>")
+    routes.gsub!(/#<page_type_resources>/, "resources :#{page_type.tableize}\n    #<page_type_resources>")
 
     # Write new routes back to file
     File.open("config/routes.rb", 'w') do |file|
@@ -102,6 +97,12 @@ end
       next if ["private_notes", "notes", "privacy", "universe_id"].include?(field)
       "    - :name: #{field.to_s}\n      :label: #{field.to_s.titleize}"
     end.compact.join("\n") + """
+  - :name: universe_id
+    :label: Universe
+    :field_type: universe
+  - :name:
+    :label: Tags
+    :field_type: tags
 :gallery:
   :label: Gallery
   :icon: photo_library
