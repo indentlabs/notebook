@@ -1,8 +1,6 @@
 class ContentController < ApplicationController
   before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy, :deleted, :attributes]
 
-  # Todo removing this will speed up page loads significantly. We need to figure out how to properly migrate all
-  # old content to the new attributes styling.
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
   before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit]

@@ -1,3 +1,6 @@
+# This service moves attribute values from being directly stored on the model (e.g. Character#age)
+# to the new-style of having values in an associated Attribute model.
+# Once all data has been moved over, we can remove these old columns and delete this service.
 class TemporaryFieldMigrationService < Service
   def self.migrate_all_content_for_user(user)
     user.content_list.each do |content|
