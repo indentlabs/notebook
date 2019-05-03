@@ -77,9 +77,12 @@ class User < ApplicationRecord
     end
   end
 
-  #def linkable_universes
-    #todo
-  #end
+  def linkable_universes
+    my_universe_ids = universes.pluck(:id)
+    contributable_universe_ids = contributable_universes.pluck(:id)
+
+    Universe.where(id: my_universe_ids + contributable_universe_ids)
+  end
 
   has_many :documents, dependent: :destroy
 
