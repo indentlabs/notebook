@@ -1,5 +1,5 @@
 class ContentController < ApplicationController
-  before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy, :deleted, :attributes]
+  before_action :authenticate_user!, except: [:show, :changelog, :api_sort]
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
