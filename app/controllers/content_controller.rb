@@ -1,5 +1,4 @@
 class ContentController < ApplicationController
-  # todo before_action :load_content to set @content
   before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy, :deleted, :attributes]
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
@@ -150,7 +149,7 @@ class ContentController < ApplicationController
   end
 
   def create
-    content_type = content_type_from_controller self.class
+    content_type = content_type_from_controller(self.class)
     initialize_object
 
     unless current_user.can_create?(content_type)
