@@ -320,7 +320,7 @@ class ContentController < ApplicationController
     @attribute_categories = @content_type_class.attribute_categories(current_user, show_hidden: true).order(:position)
   end
 
-  def api_sort #todo
+  def api_sort
     sort_params = params.permit(:content_id, :intended_position, :sortable_class)
     sortable_class = sort_params[:sortable_class].constantize # todo audit
     return unless sortable_class
