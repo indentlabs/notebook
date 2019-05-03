@@ -1,17 +1,11 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
 
-  before_action :set_metadata
-
   before_action :cache_most_used_page_information
   before_action :cache_forums_unread_counts
 
-  before_action :set_universe_session
-  before_action :set_universe_scope
-
-  private
-
-  def set_universe_session
+  # todo name all these methods
+  before_action do
     if params[:universe].present? && user_signed_in?
       if params[:universe] == 'all'
         session.delete(:universe_id)
@@ -23,25 +17,27 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def set_universe_scope
-    if current_user && session.key?(:universe_id)
+  before_action do
+    if current_user && session[:universe_id]
       @universe_scope = Universe.find_by(id: session[:universe_id])
-      # todo this looks like you can't scope to a collaborating universe
       @universe_scope = nil unless current_user.universes.include?(@universe_scope) || current_user.contributable_universes.include?(@universe_scope)
     else
       @universe_scope = nil
     end
   end
 
-  def set_metadata
+  before_action do
     @page_title ||= ''
     @page_keywords ||= %w[writing author nanowrimo novel character fiction fantasy universe creative dnd roleplay larp game design]
     @page_description ||= 'Notebook.ai is a set of tools for writers, game designers, and roleplayers to create magnificent universes — and everything within them.'
   end
 
+
   def content_type_from_controller(content_controller_name)
     content_controller_name.to_s.chomp('Controller').singularize.constantize
   end
+
+  private
 
   # Cache some super-common stuff we need for every page. For example, content lists for the side nav.
   def cache_most_used_page_information

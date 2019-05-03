@@ -1,17 +1,18 @@
 class ContentController < ApplicationController
+  # todo before_action :load_content to set @content
   before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy, :deleted, :attributes]
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
   before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit]
 
+  before_action :set_attributes_content_type, only: [:attributes]
+
   before_action :set_navbar_color, except: [:api_sort]
   before_action :set_general_navbar_actions, except: [:deleted, :show, :changelog, :api_sort]
   before_action :set_specific_navbar_actions, only: [:show, :changelog]
   before_action :set_sidenav_expansion, except: [:api_sort]
 
-  before_action :set_attributes_content_type, only: [:attributes]
-  
   def index
     @content_type_class = content_type_from_controller(self.class)
     pluralized_content_name = @content_type_class.name.downcase.pluralize
@@ -149,7 +150,7 @@ class ContentController < ApplicationController
   end
 
   def create
-    content_type = content_type_from_controller(self.class)
+    content_type = content_type_from_controller self.class
     initialize_object
 
     unless current_user.can_create?(content_type)
