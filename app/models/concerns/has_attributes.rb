@@ -153,6 +153,7 @@ module HasAttributes
           user: self.user,
           attribute_categories: { entity_type: self.class.name.downcase }
         )
+        #todo why is this commented out? is it needed?
         #next if field.nil?
         raise "unknown field for attribute: #{attribute.inspect}" if field.nil?
 
