@@ -1,4 +1,10 @@
 class TemporaryFieldMigrationService < Service
+  def self.migrate_all_content_for_user(user)
+    user.content_list.each do |content|
+      self.migrate_fields_for_content(content, user)
+    end
+  end
+
   def self.migrate_fields_for_content(content_model, user)
     return unless content_model.present? && user.present?
     return if content_model.persisted? && content_model.updated_at > 'September 1, 2018'.to_datetime
