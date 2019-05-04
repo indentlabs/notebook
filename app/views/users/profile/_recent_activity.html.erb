@@ -23,13 +23,15 @@
             %>
           </h5>
           <p>
-            <% if entity.universe.present? %>
-              <%= @user.name %>
-              <%= change_events.first.action %> a
-              <%= entity.class.name.downcase %> in the
+            <%= @user.name %>
+            <%= change_events.first.action %> a
+            <%= entity.class.name.downcase %>
+            <% if !entity.is_a?(Universe) && entity.universe.present? %>
+              in the
               <%= link_to entity.universe.name, entity.universe, class: "#{Universe.color}-text" %>
-              universe.
+              universe
             <% end %>
+            <span class="grey-text"><%= time_ago_in_words(change_events.first.updated_at) %> ago</span>.
           </p>
         </div>
         <div class="card-action">

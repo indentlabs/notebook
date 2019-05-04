@@ -8,6 +8,6 @@ class ContentChangeEvent < ApplicationRecord
   end
   
   def entity
-    content.entity
+    content.try(:entity) || content
   end
 end
