@@ -1,8 +1,49 @@
-<%# This partial has been deprecated in favor of _recent_activity %>
 <% if @stream.any? %>
+  <h6 style="text-align: center" class="grey-text">Recent worldbuilding activity</h6>
+
+  <% @stream.each do |entity_id, change_events| %>
+    <% entity = change_events.first.entity %>
+    <div class="hoverable card horizontal" style="border: 1px solid <%= entity.class.hex_color %>">
+      <div class="card-image" style="overflow: hidden">
+        <%# todo use page images %>
+        <%= image_tag "card-headers/#{entity.class.name.downcase.pluralize}.jpg", class: "activator", style: 'max-width: 280px;' %>
+      </div>
+      <div class="card-stacked">
+        <div class="card-content">
+          <h5>
+            <i class="material-icons <%= entity.class.color %>-text"><%= entity.class.icon %></i>
+            <%= entity.name %><%
+              if entity.description.present?
+            %><small>,</small>
+              <small class="grey-text">
+                <%= entity.description %>
+              </small>
+            <%
+              end
+            %>
+          </h5>
+          <p>
+            <% if entity.universe.present? %>
+              <%= @user.name %>
+              <%= change_events.first.action %> a
+              <%= entity.class.name.downcase %> in the
+              <%= link_to entity.universe.name, entity.universe, class: "#{Universe.color}-text" %>
+              universe.
+            <% end %>
+          </p>
+        </div>
+        <div class="card-action">
+          <%= link_to "View #{entity.name}", entity, class: 'blue-text' %>
+          <% if user_signed_in? && current_user.can_update?(entity) %>
+            <%= link_to "Edit #{entity.name}", entity, class: 'green-text' %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
   <div class="row">
     <div class="col s12">
-      <h5 style="text-align: center" class="grey-text">Recent activity</h5>
       <section id="cd-timeline" class="cd-container timeline-container">
         <% @stream.each do |entity_id, change_events| %>
           <% change_event = change_events.first %>

@@ -106,7 +106,7 @@ namespace :data_migrations do
     to_migrate = User.all.pluck(:id) - AttributeCategory.pluck(:user_id).uniq
 
     users_migrated = 1
-    to_migrate.first(50).each do |user_id|
+    to_migrate.first(100).each do |user_id|
         user = User.find(user_id)
         puts "Migrating user ##{user_id} #{user.email} (#{users_migrated}/#{to_migrate.count})"
         

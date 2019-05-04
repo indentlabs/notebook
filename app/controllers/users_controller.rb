@@ -11,6 +11,8 @@ class UsersController < ApplicationController
 
     @content = @user.public_content.select { |type, list| list.any? }
     @tabs    = @content.keys
+
+    # todo this is really bad and needs redone/improved
     @stream  = @user.content_change_events.order('updated_at desc').limit(100).group_by do |cce|
       next if cce.content.nil?
       if cce.content.is_a?(Attribute)
