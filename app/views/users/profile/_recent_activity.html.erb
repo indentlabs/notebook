@@ -1,12 +1,12 @@
 <% if @stream.any? %>
-  <h6 style="text-align: center" class="grey-text">Recent worldbuilding activity</h6>
+  <h6 style="text-align: center; margin: 30px 0;" class="grey-text">Recent worldbuilding activity</h6>
 
   <% @stream.each do |entity_id, change_events| %>
     <% entity = change_events.first.entity %>
     <div class="hoverable card horizontal" style="border: 1px solid <%= entity.class.hex_color %>">
-      <div class="card-image" style="overflow: hidden">
+      <div class="card-image <%= entity.class.color %>" style="overflow: hidden">
         <%# todo use page images %>
-        <%= image_tag "card-headers/#{entity.class.name.downcase.pluralize}.jpg", class: "activator", style: 'max-width: 280px;' %>
+        <%= image_tag "card-headers/#{entity.class.name.downcase.pluralize}.jpg", class: "activator", style: 'max-width: 280px; object-fit: cover; min-height: 100%' %>
       </div>
       <div class="card-stacked">
         <div class="card-content">
@@ -43,61 +43,6 @@
       </div>
     </div>
   <% end %>
-
-  <div class="row">
-    <div class="col s12">
-      <section id="cd-timeline" class="cd-container timeline-container">
-        <% @stream.each do |entity_id, change_events| %>
-          <% change_event = change_events.first %>
-          <% next unless change_event.present? && change_event.content.present? %>
-          <%
-            if change_event.content_type == 'Attribute'
-              content_type_class = change_event.content.entity_type.constantize
-              content            = content_type_class.find_by(id: change_event.content.entity_id)
-            else
-              content_type_class = change_event.content_type.constantize
-              content            = content_type_class.find_by(id: change_event.content_id)
-            end
-          %>
-          <% next if content.nil? %>
-          <% next unless content.readable_by?(user_signed_in? ? current_user : User.new) %>
-
-          <div class="cd-timeline-block">
-            <div class="cd-timeline-img <%= content_type_class.color %>">
-              <i class="material-icons white-text"><%= content_type_class.icon %></i>
-            </div>
-
-            <div class="cd-timeline-content card hoverable">
-              <div class="card-content <%= content_type_class.color %> grey-text text-lighten-2">
-                <%= link_to content.name, content, class: 'white-text' %>
-              </div>
-              <% if content.description.present? %>
-                <div class="card-content">
-                  <%= truncate(content.description, length: 300) %>
-                </div>
-              <% end %>
-              <% if content.respond_to?(:universe_id) && content.universe_id.present? && content.universe_id > 0 %>
-                <div class="card-content">
-                  <i class="material-icons <%= Universe.color %>-text" style="font-size: 100%; position: relative; top: 2px">
-                    <%= Universe.icon %>
-                  </i>
-                  <%= link_to content.universe.name, content.universe %>
-                </div>
-              <% end %>
-              <div class="card-content grey lighten-3 grey-text text-darken-1">
-                <i class="material-icons" style="font-size: 100%; position: relative; top: 2px">access_time</i>
-                <%= change_event.action %>
-                <%= time_ago_in_words change_event.created_at %> ago
-              </div>
-              <span class="cd-date">
-                <!-- offset text -->
-              </span>
-            </div>
-          </div>
-        <% end %>
-      </section>
-    </div>
-  </div>
 <% else %>
   <div class="grey-text">
     It seems <%= @user.name %> isn't sharing any public activity.
