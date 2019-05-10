@@ -220,17 +220,18 @@ class ContentController < ApplicationController
     if @content.user == current_user
       # todo this needs some extra validation probably to ensure each attribute is one associated with this page
       update_success = @content.update_attributes(content_params)
-
-      cache_params = {}
-      cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField, Attribute].include?(@content.class)
-      cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
-
-      @content.update(cache_params) if cache_params.any? && update_success
     else
       # Exclude fields only the real owner can edit
       #todo move field list somewhere when it grows
       update_success = @content.update_attributes(content_params.except(:universe_id))
     end
+
+    cache_params = {}
+    cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField, Attribute].include?(@content.class)
+    cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
+
+    @content.update(cache_params) if cache_params.any? && update_success
+
 
     if update_success
       successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
