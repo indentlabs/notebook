@@ -1,8 +1,8 @@
 <% if @stream.any? %>
   <h6 style="text-align: center; margin: 30px 0;" class="grey-text">Recent worldbuilding activity</h6>
 
-  <% @stream.each do |entity_id, change_events| %>
-    <% entity = change_events.first.entity %>
+  <% @stream.each do |entity| %>
+    <% next unless User.new.can_read?(entity) || (user_signed_in? && current_user.can_read?(entity)) %>
     <div class="hoverable card horizontal" style="border: 1px solid <%= entity.class.hex_color %>">
       <div class="card-image <%= entity.class.color %>" style="overflow: hidden">
         <%# todo use page images %>
@@ -10,7 +10,18 @@
       </div>
       <div class="card-stacked">
         <div class="card-content">
-          <h5>
+          <span class="right">
+            <% if !User.new.can_read?(entity) %>
+              <i class="material-icons tooltipped grey-text"
+                data-tooltip="This page is only visible to you and your collaborators."
+                >visibility_off</i>
+            <% else %>
+              <i class="material-icons tooltipped black-text"
+                data-tooltip="This page is visible to anyone with the link."
+                >visibility</i>
+            <% end %>
+          </span>
+          <h5 style="margin-top: 0">
             <i class="material-icons <%= entity.class.color %>-text"><%= entity.class.icon %></i>
             <%= entity.name %><%
               if entity.description.present?
@@ -24,14 +35,14 @@
           </h5>
           <p>
             <%= @user.name %>
-            <%= change_events.first.action %> a
+            updated a<%= 'n' if %(a e i o u).include?(entity.class.name.downcase.first) %>
             <%= entity.class.name.downcase %>
             <% if !entity.is_a?(Universe) && entity.universe.present? %>
               in the
               <%= link_to entity.universe.name, entity.universe, class: "#{Universe.color}-text" %>
               universe
             <% end %>
-            <span class="grey-text"><%= time_ago_in_words(change_events.first.updated_at) %> ago</span>.
+            <span class="grey-text"><%= time_ago_in_words(entity.updated_at) %> ago</span>.
           </p>
         </div>
         <div class="card-action">

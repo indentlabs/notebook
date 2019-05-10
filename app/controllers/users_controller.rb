@@ -13,16 +13,18 @@ class UsersController < ApplicationController
     @tabs    = @content.keys
 
     # todo this is really bad and needs redone/improved
-    @stream  = @user.content_change_events.order('updated_at desc').limit(100).group_by do |cce|
-      next if cce.content.nil?
-      if cce.content.is_a?(Attribute)
-        next if cce.content.entity.nil?
-        cce.content.entity.id
-      else
-        cce.content.id
-      end
-    end
+    # @stream  = @user.content_change_events.order('updated_at desc').limit(100).group_by do |cce|
+    #   next if cce.content.nil?
+    #   if cce.content.is_a?(Attribute)
+    #     next if cce.content.entity.nil?
+    #     cce.content.entity.id
+    #   else
+    #     cce.content.id
+    #   end
+    # end
 
+    @stream = @user.recent_content_list(limit: 20)
+    
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(@user.id, 'viewed profile', {
       'sharing any content': @user.public_content_count != 0
     }) if Rails.env.production?
