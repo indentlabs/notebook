@@ -11,7 +11,12 @@ class User < ApplicationRecord
   include HasContent
   include Authority::UserAbilities
 
-  validates_uniqueness_of :username, allow_nil: true, allow_blank: true
+  validates :username, 
+    uniqueness: true,
+    allow_nil: true,
+    allow_blank: true,
+    length: { maximum: 40 },
+    format: /\A[A-Za-z0-9\-_\$\+\!\*]+\z/
 
   has_many :subscriptions,                dependent: :destroy
   has_many :billing_plans, through: :subscriptions
@@ -187,6 +192,14 @@ class User < ApplicationRecord
     return nil unless found_key.present?
 
     found_key.user
+  end
+
+  def profile_url
+    if self.username.present?
+      Rails.application.routes.url_helpers.profile_by_username_path(username: self.username)
+    else
+      Rails.application.routes.url_helpers.user_path(id: self.id)
+    end
   end
 
   private

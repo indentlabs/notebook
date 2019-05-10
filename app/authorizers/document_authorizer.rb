@@ -1,4 +1,8 @@
 class DocumentAuthorizer < ApplicationAuthorizer
+  def self.creatable_by?(user)
+    true
+  end
+
   def readable_by?(user)
     [
       resource.user_id == user.id

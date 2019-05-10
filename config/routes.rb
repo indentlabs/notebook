@@ -13,6 +13,8 @@ Rails.application.routes.draw do
       # todo page tags here
     end
   end
+  get '/@:username', to: 'users#show', as: :profile_by_username
+
   scope '/my' do
     get '/content',         to: 'main#dashboard', as: :dashboard
     get '/content/recent',  to: 'main#recent_content', as: :recent_content

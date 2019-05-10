@@ -1,0 +1,109 @@
+<div class="row js-content-cards-list">
+  <% content_list.each.with_index do |content, i| %>
+    <div class="col s12 m6 l4 js-content-card-container">
+      <div class="card sticky-action">
+        <div class="card-image waves-effect waves-block waves-light">
+          <% content_image = asset_path("card-headers/#{content_type.name.downcase.pluralize}.jpg") %>
+          <% if content.respond_to?(:image_uploads) %>
+            <% images = content.image_uploads %>
+            <% if images.any? %>
+              <% content_image = images.sample.src(:medium) %>
+            <% end %>
+          <% end %>
+          <div class="activator" style="height: 265px; background: url('<%= content_image %>'); background-size: cover;"></div>
+        </div>
+        <div class="card-content fixed-card-content" style="overflow: hidden">
+          <span class="card-title js-content-name activator grey-text text-darken-4">
+            <%= content.name.presence || 'Untitled' %>
+          </span>
+          <p>
+            <% if content.is_a?(Document) %>
+              <%= content.reading_estimate %>
+            <% else %>
+              <%= sanitize ContentFormatterService.show(text: truncate(content.description, length: 140), viewing_user: current_user) %>
+            <% end %>
+          </p>
+        </div>
+        <div class="card-action nice-icon-links">
+          <%= link_to edit_polymorphic_path(content), class: 'green-text right', target: content.is_a?(Document) ? '_new' : '_self' do %>
+            <i class="material-icons"><%= content_type.icon %></i> Edit
+          <% end %>
+          <%= link_to polymorphic_path(content), class: 'blue-text text-lighten-1' do %>
+            <i class="material-icons"><%= content_type.icon %></i> View
+          <% end %>
+        </div>
+        <div class="card-reveal">
+          <span class="card-title grey-text text-darken-4">
+            <%= content.name.presence || 'Document preview' %>
+            <i class="material-icons right">close</i>
+          </span>
+          <% if content.is_a?(Document) || (content.description.try(:length) || 0 > 140) %>
+            <p>
+              <%= sanitize ContentFormatterService.show(text: truncate(content.description, length: 420, escape: false), viewing_user: current_user) %>
+            </p>
+          <% end %>
+          <% if content.respond_to?(:page_tags) %>
+            <p class="tags-container">
+              <% content.page_tags.each do |tag| %>
+                <% if user_signed_in? && content.user == current_user %>
+                  <%=
+                    link_to send(
+                      "page_tag_#{content.class.name.downcase.pluralize}_path",
+                      slug: PageTagService.slug_for(tag.tag)
+                    ) do
+                  %>
+                    <span class="new badge <%= params[:slug] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                  <% end %>
+                <% else %>
+                  <span class="new badge <%= params[:slug] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                <% end %>
+              <% end %>
+            </p>
+          <% end %>
+          <div class="clearfix"></div>
+          <p class="grey-text clearfix">
+            <%= content.created_at == content.updated_at ? 'created' : 'last updated' %>
+            <%= time_ago_in_words content.updated_at %>
+            ago
+          </p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if current_user.can_create?(content_type) %>
+    <div class="col s12 m6 l4">
+      <%# TODO: We really need to fix up the new document path so we don't have weird overrides like this %>
+      <%= link_to content_type == Document ? edit_document_path(:new) : new_polymorphic_path(content_type), class: 'white-text' do %>
+        <div class="card <%= content_type.color %> lighten-1" style="height: 440px;">
+          <div class="card-content fixed-card-content centered-card-content">
+            <strong class="card-title">
+              New<br />
+              <%= content_type.name %>
+            </strong>
+            <p>
+              <i class="material-icons large">add</i>
+            </p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="col s12 m6 l4">
+      <div class="card <%= content_type.color %> lighten-3" style="height: 440px;">
+        <div class="card-content fixed-card-content">
+          <p class="center grey-text text-lighten-1" style="margin-top: 50px; margin-bottom: 20px;">
+            <i class="material-icons large"><%= content_type.icon %></i>
+          </p>
+          <p>
+            An active
+            <%= link_to 'Notebook.ai Premium', subscription_path, class: 'blue-text text-darken-2' %> subscription
+            is required to create additional
+            <%= content_type.name.downcase %> pages, but pages you've already created will always
+            be available here.
+          </p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
