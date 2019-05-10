@@ -9,17 +9,19 @@
       </div>
       <div class="card-stacked">
         <div class="card-content">
-          <span class="right">
-            <% if !User.new.can_read?(entity) %>
-              <i class="material-icons tooltipped grey-text"
-                data-tooltip="This page is only visible to you and your collaborators."
-                >visibility_off</i>
-            <% else %>
-              <i class="material-icons tooltipped black-text"
-                data-tooltip="This page is visible to anyone with the link."
-                >visibility</i>
-            <% end %>
-          </span>
+          <% if user_signed_in? && current_user.id == entity.user_id %>
+            <span class="right">
+              <% if !User.new.can_read?(entity) %>
+                <i class="material-icons tooltipped grey-text"
+                  data-tooltip="This page is only visible to you and your collaborators."
+                  >visibility_off</i>
+              <% else %>
+                <i class="material-icons tooltipped black-text"
+                  data-tooltip="This page is visible to anyone with the link."
+                  >visibility</i>
+              <% end %>
+            </span>
+          <% end %>
           <h5 style="margin-top: 0">
             <i class="material-icons <%= entity.class.color %>-text" style="position: relative; top: 3px">
               <%= entity.class.icon %>
