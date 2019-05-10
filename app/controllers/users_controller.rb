@@ -57,6 +57,7 @@ class UsersController < ApplicationController
     report_user_deletion_to_slack(current_user)
 
     # Queue user for background deletion instead of doing it inline
+    current_user.update_column(:email, nil)
     current_user.update(deleted_at: DateTime.current)
     #current_user.really_destroy!
 
