@@ -1,5 +1,13 @@
 # Controller for the Attribute model
 class AttributeFieldsController < ContentController
+  def create
+    initialize_object.save!
+    
+    redirect_back(
+      fallback_location: attribute_customization_path(content_type: @content.attribute_category.entity_type),
+      notice: "Nifty new #{@content.label} field created!"
+    )
+  end
 
   def destroy
     # Delete this field as usual -- sets @content
@@ -13,8 +21,10 @@ class AttributeFieldsController < ContentController
   private
 
   def initialize_object
-    @content = AttributeField.find_or_initialize_by(content_params)
-    @content.field_type = 'text_area'
+    @content = AttributeField.find_or_initialize_by(content_params).tap do |field|
+      field.user_id    = current_user.id
+      field.field_type = 'text_area'
+    end
 
     if @content.attribute_category_id.nil?
       category = current_user.attribute_categories.where(label: content_params[:attribute_category] || content_params[:label]).first_or_initialize.tap do |c|
@@ -24,9 +34,11 @@ class AttributeFieldsController < ContentController
       @content.attribute_category_id = category.id
     end
 
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created attribute', {
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created attribute field', {
       'content_type': params[:entity_type]
     }) if Rails.env.production?
+
+    @content
   end
 
   def content_deletion_redirect_url
