@@ -3,7 +3,7 @@ class AttributeCategoriesController < ContentController
   def create
     initialize_object.save!
     redirect_to(
-      attribute_customization_path(content_type: @content.entity_type), 
+      attribute_customization_path(content_type: @content.entity_type),
       notice: "Shiny new #{@content.label} category created!"
     )
   end
