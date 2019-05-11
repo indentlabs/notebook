@@ -10,8 +10,8 @@ module HasContentLinking
 
   included do
     def reciprocate relation:, parent_object_ref:, added_object_ref:
-      parent_object = self.send(parent_object_ref)
-      added_object  = self.send(added_object_ref)
+      parent_object = self.send(parent_object_ref).reload
+      added_object  = self.send(added_object_ref).reload
 
       # if some_character.siblingships.pluck(:sibling_id).include?(parent_object.id)
       if added_object.send(relation).pluck("#{added_object_ref}_id").include?(parent_object.id)
