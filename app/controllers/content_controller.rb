@@ -159,9 +159,6 @@ class ContentController < ApplicationController
       return redirect_back(fallback_location: root_path, notice: "Creating this type of page requires an active Premium subscription.")
     end
 
-    require 'pry'
-    binding.pry
-
     # Default names to untitled until one has been set
     unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name)
       @content.name ||= "Untitled #{content_type.name.downcase}"
