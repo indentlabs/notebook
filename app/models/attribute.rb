@@ -18,4 +18,8 @@ class Attribute < ApplicationRecord
       # todo probably need permissions service here also
     end
   end
+
+  after_save do
+    entity.touch
+  end
 end
