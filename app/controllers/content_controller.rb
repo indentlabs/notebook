@@ -1,9 +1,6 @@
 class ContentController < ApplicationController
-  # todo before_action :load_content to set @content
-  before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy, :deleted, :attributes]
+  before_action :authenticate_user!, except: [:show, :changelog, :api_sort]
 
-  # Todo removing this will speed up page loads significantly. We need to figure out how to properly migrate all
-  # old content to the new attributes styling.
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
   before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit]
@@ -322,7 +319,7 @@ class ContentController < ApplicationController
     @attribute_categories = @content_type_class.attribute_categories(current_user, show_hidden: true).order(:position)
   end
 
-  def api_sort #todo
+  def api_sort
     sort_params = params.permit(:content_id, :intended_position, :sortable_class)
     sortable_class = sort_params[:sortable_class].constantize # todo audit
     return unless sortable_class
