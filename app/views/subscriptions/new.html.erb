@@ -1,6 +1,6 @@
 <% free_for_life_user = current_user.selected_billing_plan_id == 2 %>
-<% on_premium_plan = ['early-adopters', 'premium', 'premium-trio', 'premium-annual'].include? @active_billing_plan.stripe_plan_id %>
-<% active_stripe_plan = @active_billing_plan.stripe_plan_id %>
+<% on_premium_plan = ['early-adopters', 'premium', 'premium-trio', 'premium-annual'].include? @active_billing_plan.try(:stripe_plan_id) %>
+<% active_stripe_plan = @active_billing_plan.try(:stripe_plan_id) %>
 
 <p class="right hide-on-small-only">
   <% Rails.application.config.content_types[:all_non_universe].each do |content_class| %>

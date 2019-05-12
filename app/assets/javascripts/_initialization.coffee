@@ -4,11 +4,15 @@
 
 window.Notebook ||= {}
 Notebook.init = ->
-  $('.tooltipped').tooltip { enterDelay: 50 }
+  # Initialize MaterializeCSS stuff
   M.AutoInit()
+  $('.sidenav').sidenav()
+  $('.slider').slider { height: 200, indicators: false }
   $('.dropdown-trigger').dropdown { coverTrigger: false }
+  $('.tooltipped').tooltip { enterDelay: 50 }
 
   console.log 'Hey look it works'
+
 
 # We're using $ -> here for document readiness, but if we ever use Turbolinks we'd want:
 # $(document).on "turbolinks:load", ->

@@ -22,7 +22,7 @@
       <div>
         <%= link_to 'Open', image.src(:original), class: 'btn white black-text', target: '_new' %>
         <%= link_to 'Delete', image_deletion_path(image.id),
-          class: 'btn white black-text',
+          class: 'btn white black-text js-remove-image',
           method: 'delete',
           remote: true,
           data: { confirm: "Are you sure? This can't be undone." } %>
@@ -30,12 +30,3 @@
     </div>
   </div>
 <% end %>
-
-<script type="text/javascript">
-$(document).ready(function() {
-  $('a[data-remote]').on('ajax:success', function (e, data, status, xhr) {
-    // Remove the image from the UI
-    $(this).closest('.row').fadeOut().remove();
-  });
-})
-</script>
