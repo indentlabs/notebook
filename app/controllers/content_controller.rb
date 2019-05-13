@@ -153,21 +153,21 @@ class ContentController < ApplicationController
     initialize_object
 
     unless current_user.can_create?(content_type)
-      # todo set flash[:notice] about premium
-      return redirect_back fallback_location: root_path
+      return redirect_back(fallback_location: root_path, notice: "Creating this type of page requires an active Premium subscription.")
     end
 
-    #  Don't set name fields on content that doesn't have a name field
-    #todo abstract this (and the one in update) to a function
+    # Default names to untitled until one has been set
     unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name)
-      @content.name ||= @content.name_field_value || "Untitled"
+      @content.name ||= "Untitled #{content_type.name.downcase}"
     end
+
+    # Default owner to the current user
+    @content.user_id ||= current_user.id
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
       'content_type': content_type.name
     }) if Rails.env.production?
 
-    @content.user = current_user if @content.user_id.nil?
     if @content.update_attributes(content_params)
       cache_params = {}
       cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField].include?(@content.class)
@@ -217,17 +217,16 @@ class ContentController < ApplicationController
     if @content.user == current_user
       # todo this needs some extra validation probably to ensure each attribute is one associated with this page
       update_success = @content.update_attributes(content_params)
-
-      cache_params = {}
-      cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField, Attribute].include?(@content.class)
-      cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
-
-      @content.update(cache_params) if cache_params.any? && update_success
     else
       # Exclude fields only the real owner can edit
       #todo move field list somewhere when it grows
       update_success = @content.update_attributes(content_params.except(:universe_id))
     end
+
+    cache_params = {}
+    cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField, Attribute].include?(@content.class)
+    cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
+    @content.update(cache_params) if cache_params.any? && update_success
 
     if update_success
       successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))

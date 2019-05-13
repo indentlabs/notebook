@@ -183,7 +183,7 @@ RSpec.describe SubscriptionsController, type: :controller do
   describe "User on Premium" do
     before do
       # Create a premium subscription for the user
-      @user.update(selected_billing_plan_id: BillingPlan.find_by(stripe_plan_id: 'premium').id)
+      @user.update(selected_billing_plan_id: @premium_plan.id)
     end
 
     it "allows downgrading to Starter" do
