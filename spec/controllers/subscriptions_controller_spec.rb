@@ -144,7 +144,7 @@ RSpec.describe SubscriptionsController, type: :controller do
         )
 
       expect(@user.selected_billing_plan_id).to eq(@free_plan.id)
-      expect(@user.active_billing_plans).to eq([@free_plan])
+      expect(@user.active_billing_plans).not_to eq([@premium_plan])
 
       post :change, params: { stripe_plan_id: 'premium' }
 
@@ -155,7 +155,7 @@ RSpec.describe SubscriptionsController, type: :controller do
 
     describe "Starter Permissions" do
       before do
-        @user.update(selected_billing_plan_id: @premium_plan.id)
+        @user.update(selected_billing_plan_id: @free_plan.id)
       end
 
       it "allows Starter users to create core content types" do

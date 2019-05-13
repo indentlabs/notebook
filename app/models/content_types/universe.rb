@@ -49,7 +49,7 @@ class Universe < ApplicationRecord
 
   has_many :contributors, dependent: :destroy
 
-  scope :in_universe, ->(universe = nil) { where(universe: self) unless universe.nil? }
+  scope :in_universe, ->(universe = nil) { where(id: universe.try(:id)) unless universe.nil? }
 
   after_destroy do
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
