@@ -6,6 +6,8 @@ class DocumentsController < ApplicationController
   before_action :set_navbar_actions, except: [:edit]
   before_action :set_footer_visibility, only: [:edit]
 
+  before_action :cache_linkable_content_for_each_content_type, only: [:edit]
+
   layout 'editor', only: [:edit]
 
   def index

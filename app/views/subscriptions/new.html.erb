@@ -1,6 +1,6 @@
 <% free_for_life_user = current_user.selected_billing_plan_id == 2 %>
-<% on_premium_plan = ['early-adopters', 'premium', 'premium-trio', 'premium-annual'].include? @active_billing_plan.stripe_plan_id %>
-<% active_stripe_plan = @active_billing_plan.stripe_plan_id %>
+<% on_premium_plan = ['early-adopters', 'premium', 'premium-trio', 'premium-annual'].include? @active_billing_plan.try(:stripe_plan_id) %>
+<% active_stripe_plan = @active_billing_plan.try(:stripe_plan_id) %>
 
 <p class="right hide-on-small-only">
   <% Rails.application.config.content_types[:all_non_universe].each do |content_class| %>
@@ -277,7 +277,7 @@
                   Of these, <strong><%= pluralize converted_referrals.count, 'user' %></strong> <%= converted_referrals.count == 1 ? 'has' : 'have' %> earned you both a Premium bonus!
                 </li>
               <% else %>
-                <li>None have signed up for Premium yet, however.</li>
+                <li>None have signed up for Premium yet. You receive a permanent 100MB boost to your upload storage whenever someone you refers upgrades to Premium. And they get a 100MB boost, too!</li>
               <% end %>
             </ul>
           </div>
