@@ -3,7 +3,7 @@
   creating = defined?(creating) && creating
 
   # "Personal content" refers to whether the content we're looking at belongs to the user doing the looking
-  personal_content = @content.updatable_by?(current_user) || @content.new_record?
+  personal_content = user_signed_in? && (@content.updatable_by?(current_user) || @content.new_record?)
 %>
 
 <%# Primary FAB %>
