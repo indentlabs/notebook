@@ -8,7 +8,11 @@ class Siblingship < ApplicationRecord
   belongs_to :sibling, class_name: 'Character'
 
   after_create do
-    self.reciprocate relation: :siblingships, parent_object_ref: :character, added_object_ref: :sibling
+    self.reciprocate(
+      relation:          :siblingships, 
+      parent_object_ref: :character, 
+      added_object_ref:  :sibling
+    )
   end
 
   after_destroy do

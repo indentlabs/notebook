@@ -14,6 +14,7 @@ class LocationsController < ContentController
 
       # Relations
       #todo might be able to inject/reflect these from :relates concern implementation
+      #todo why are capital/largest/notable relationships doubled up here? 
       custom_attribute_values:                   [:name, :value],
       location_leaderships_attributes:           [:id, :leader_id,       :_destroy],
       capital_cities_relationships_attributes:   [:id, :capital_city_id, :_destroy],
