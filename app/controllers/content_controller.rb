@@ -484,6 +484,8 @@ class ContentController < ApplicationController
   # For index, new, edit
   def set_general_navbar_actions
     content_type = @content_type_class || content_type_from_controller(self.class)
+    return if [AttributeCategory, AttributeField, Attribute].include?(content_type)
+    
     @navbar_actions = []
 
     if @current_user_content
