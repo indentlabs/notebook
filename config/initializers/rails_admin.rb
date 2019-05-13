@@ -48,8 +48,9 @@ RailsAdmin.config do |config|
     "ApiKey",
     "BillingPlan",
     "ImageUpload",
-    "Referral"
-  ]
+    "Referral",
+    "Document",
+  ] + Rails.application.config.content_types[:all].map(&:name)
   # Todo whitelist the fields we want to show for each model
   # config.model 'User' do
   #   list do
