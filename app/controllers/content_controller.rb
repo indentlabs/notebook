@@ -1,12 +1,9 @@
 class ContentController < ApplicationController
-  # todo before_action :load_content to set @content
-  before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy, :deleted, :attributes]
+  before_action :authenticate_user!, except: [:show, :changelog, :api_sort]
 
-  # Todo removing this will speed up page loads significantly. We need to figure out how to properly migrate all
-  # old content to the new attributes styling.
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
-  before_action :populate_linkable_content_for_each_content_type, only: [:new, :edit]
+  before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit]
 
   before_action :set_attributes_content_type, only: [:attributes]
 
@@ -23,11 +20,11 @@ class ContentController < ApplicationController
     @content_type_class.attribute_categories(current_user)
 
     if @universe_scope.present? && @content_type_class != Universe
-      @content = @universe_scope.send(pluralized_content_name)
+      @content = @universe_scope.send(pluralized_content_name).includes(:page_tags, :image_uploads)
     else
       @content = (
-        current_user.send(pluralized_content_name).includes(:page_tags) +
-        current_user.send("contributable_#{pluralized_content_name}").includes(:page_tags)
+        current_user.send(pluralized_content_name).includes(:page_tags, :image_uploads) +
+        current_user.send("contributable_#{pluralized_content_name}").includes(:page_tags, :image_uploads)
       )
 
       unless @content_type_class == Universe
@@ -42,12 +39,13 @@ class ContentController < ApplicationController
     @page_tags = PageTag.where(
       page_type: @content_type_class.name,
       page_id:   @content.pluck(:id)
-    )
+    ).order(:tag)
     if params.key?(:slug)
-      filtered_page_tags = @page_tags.where(slug: params[:slug])
-      @content.select! { |content| filtered_page_tags.pluck(:page_id).include?(content.id) }
+      @filtered_page_tags = @page_tags.where(slug: params[:slug])
+      @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
 
+    @page_tags = @page_tags.uniq(&:tag)
     @content = @content.sort_by(&:name)
 
     respond_to do |format|
@@ -151,7 +149,7 @@ class ContentController < ApplicationController
   end
 
   def create
-    content_type = content_type_from_controller self.class
+    content_type = content_type_from_controller(self.class)
     initialize_object
 
     unless current_user.can_create?(content_type)
@@ -322,7 +320,7 @@ class ContentController < ApplicationController
     @attribute_categories = @content_type_class.attribute_categories(current_user, show_hidden: true).order(:position)
   end
 
-  def api_sort #todo
+  def api_sort
     sort_params = params.permit(:content_id, :intended_position, :sortable_class)
     sortable_class = sort_params[:sortable_class].constantize # todo audit
     return unless sortable_class
@@ -402,29 +400,6 @@ class ContentController < ApplicationController
   def migrate_old_style_field_values
     content ||= content_type_from_controller(self.class).find_by(id: params[:id])
     TemporaryFieldMigrationService.migrate_fields_for_content(content, current_user) if content.present?
-  end
-
-  def populate_linkable_content_for_each_content_type
-    linkable_classes = Rails.application.config.content_types[:all].map(&:name) & current_user.user_content_type_activators.pluck(:content_type)
-    linkable_classes -= ["Universe"]
-
-    @linkables_cache = {}
-    linkable_classes.each do |class_name|
-      # class_name = "Character"
-
-      @linkables_cache[class_name] = current_user.send("linkable_#{class_name.downcase.pluralize}")
-        .in_universe(@universe_scope)
-
-      if @content.present? && @content.persisted?
-        @linkables_cache[class_name] = @linkables_cache[class_name]
-          .in_universe(@content.universe)
-          .reject { |content| content.class.name == class_name && content.id == @content.id }
-      end
-
-      @linkables_cache[class_name] = @linkables_cache[class_name].sort_by(&:name)
-        .map { |c| [c.name, c.id] }
-        .compact
-    end
   end
 
   def valid_content_types
@@ -522,7 +497,7 @@ class ContentController < ApplicationController
     @navbar_actions << {
       label: "New #{content_type.name.downcase}",
       href: main_app.new_polymorphic_path(content_type)
-    }
+    } if user_signed_in? && current_user.can_create?(content_type)
 
     discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
     if discussions_link.present?
@@ -550,11 +525,11 @@ class ContentController < ApplicationController
           href: main_app.polymorphic_path(content_type)
         }
       end
-      #
-      # @navbar_actions << {
-      #   label: "New #{content_type.name.downcase}",
-      #   href: main_app.new_polymorphic_path(content_type)
-      # }
+
+      @navbar_actions << {
+        label: "New #{content_type.name.downcase}",
+        href: main_app.new_polymorphic_path(content_type)
+      }
     end
   end
 

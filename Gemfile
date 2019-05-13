@@ -36,6 +36,11 @@ gem 'paranoia'
 gem 'coffee-rails'
 gem 'rails-jquery-autocomplete'
 
+# Form enhancements
+gem 'redcarpet' #markdown formatting
+gem 'acts_as_list' #sortables
+gem 'tribute' # @mentions
+
 # SEO
 gem 'meta-tags'
 
@@ -49,10 +54,6 @@ gem 'medium-editor-rails'
 # Graphs & Charts
 gem 'chartkick'
 gem 'slack-notifier'
-
-# Form enhancements
-gem 'redcarpet' #markdown formatting
-gem 'acts_as_list' #sortables
 
 # Analytics
 gem 'mixpanel-ruby'

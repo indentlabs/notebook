@@ -13,7 +13,9 @@ class SubscriptionService < Service
     # Add any one-time referral bonuses
     add_any_referral_bonuses(user, plan_id)
 
-    user.update(selected_billing_plan_id: related_plan.id)
+    # We intentionally skip callbacks on this to ensure the billing plan changes even on invalid users
+    user.update_column(:selected_billing_plan_id, related_plan.id)
+
     user.subscriptions.create(
       billing_plan:    related_plan,
       start_date:      DateTime.now,
