@@ -27,7 +27,7 @@ class ContentController < ApplicationController
         current_user.send("contributable_#{pluralized_content_name}").includes(:page_tags, :image_uploads)
       )
 
-      unless @content_type_class == Universe
+      if @content_type_class != Universe
         my_universe_ids = current_user.universes.pluck(:id)
         @content.concat(@content_type_class.where(universe_id: my_universe_ids))
       end
@@ -56,9 +56,11 @@ class ContentController < ApplicationController
 
   def show
     content_type = content_type_from_controller(self.class)
-    return redirect_to root_path unless valid_content_types.map(&:name).include?(content_type.name)
+    return redirect_to(root_path) unless valid_content_types.map(&:name).include?(content_type.name)
+
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+
     @serialized_content = ContentSerializer.new(@content)
 
     if user_signed_in?

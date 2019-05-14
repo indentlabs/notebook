@@ -121,9 +121,10 @@ end
 
 group :development do
   gem 'web-console'
-  gem 'bullet', '>= 5.4'
+  gem 'bullet'
   gem 'rack-mini-profiler'
   gem 'memory_profiler'
   gem 'flamegraph'
   gem 'stackprof'
+  gem 'bundler-audit'
 end
