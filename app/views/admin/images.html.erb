@@ -1,0 +1,17 @@
+<% @images.each do |image| %>
+  <div class="card" style="display: inline-block">
+    <div class="card-content">
+      <%= link_to image.src(:original) do %>
+        <%= image_tag image.src(:medium), alt: image.id %>
+      <% end %>
+      <br />
+      <%= link_to "#{image.content.try(:name).presence || 'Page'} (#{image.content.try(:privacy)})", image.content, class: (image.content.class.try(:color).presence || 'black') + '-text' %>
+    </div>
+  </div>
+<% end %>
+
+<hr />
+<h3 class="center" style="margin-bottom: 400px;">
+  <%= link_to 'Previous page', {page: params[:page].to_i - 1} %> |
+  <%= link_to 'Next page', {page: params[:page].to_i + 1} %>
+</h3>

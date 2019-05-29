@@ -5,7 +5,7 @@ class ContentFormatterService < Service
   extend ActionView::Context            # content_tag
 
   include Rails.application.routes.url_helpers
-  default_url_options[:host] = 'localhost' # todo WHAT?
+  default_url_options[:host] = 'test' # todo WHAT?
 
   # Token format is [[character-35]] or [[location-1]] etc, with the format:
   # [[<page_type>-<page_id>]].
