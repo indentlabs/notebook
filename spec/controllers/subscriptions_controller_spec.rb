@@ -198,12 +198,14 @@ RSpec.describe SubscriptionsController, type: :controller do
 
     describe "Premium Permissions" do
       it "allows Premium users to create core content types" do
+        @user.update(selected_billing_plan_id: @premium_plan.id)
         expect(@user.can_create?(Character)).to eq(true)
         expect(@user.can_create?(Location)).to eq(true)
         expect(@user.can_create?(Item)).to eq(true)
       end
 
       it "allows Premium users to create extended content types" do
+        @user.update(selected_billing_plan_id: @premium_plan.id)
         expect(@user.can_create?(Creature)).to eq(true)
         expect(@user.can_create?(Race)).to eq(true)
         expect(@user.can_create?(Religion)).to eq(true)
@@ -214,6 +216,7 @@ RSpec.describe SubscriptionsController, type: :controller do
       end
 
       it "allows Premium users to create collective content types" do
+        @user.update(selected_billing_plan_id: @premium_plan.id)
         expect(@user.can_create?(Scene)).to eq(true)
       end
     end
