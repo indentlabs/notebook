@@ -14,7 +14,7 @@ class Food < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'light-green'
+    'red'
   end
 
   def self.hex_color
