@@ -21,6 +21,10 @@ class School < ActiveRecord::Base
     'black'
   end
 
+  def self.hex_color
+    '#000000'
+  end
+
   def self.icon
     'info'
   end

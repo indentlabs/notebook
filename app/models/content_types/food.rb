@@ -1,4 +1,3 @@
-
 class Food < ActiveRecord::Base
   acts_as_paranoid
 
@@ -19,6 +18,10 @@ class Food < ActiveRecord::Base
 
   def self.color
     'black'
+  end
+
+  def self.hex_color
+    '#000000'
   end
 
   def self.icon

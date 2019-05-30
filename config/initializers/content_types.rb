@@ -2,7 +2,8 @@ Rails.application.config.content_types = {
   # The complete list of all content types
   all: [
     Universe, Character, Location, Item, Building, Condition, Country, Creature, Deity, Flora,
-    Government, Group, Job, Landmark, Language, Magic, Planet, Race, Religion, Scene,
+    Food, Government, Group, Job, Landmark, Language, Magic, Planet, Race, Religion, Scene,
+    School, Sport,
     Technology, Town, Tradition, Vehicle,
   ],
 
@@ -15,7 +16,7 @@ Rails.application.config.content_types = {
   # These content types are available to be turned on
   available: [
     Building, Condition, Country, Creature, Deity, Flora, Government, Group, Job, Landmark, Language,
-    Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle
+    Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle, Sport, School, Food
   ],
 
   # These content types can be created by any user
@@ -25,11 +26,12 @@ Rails.application.config.content_types = {
   premium: [
     Building, Condition, Country, Creature, Deity, Flora, Government, Group, Job, Landmark, Language,
     Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle,
+    School, Sport, Food
   ],
 
   # Content types to label as "new" around the site
   new: [
-    Building, Condition, Job, Tradition, Vehicle
+    Sport, School, Food
   ]
 }
 
