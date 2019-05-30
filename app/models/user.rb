@@ -43,6 +43,8 @@ class User < ApplicationRecord
 
   has_many :api_keys,                     dependent: :destroy
 
+  has_many :notice_dismissals,            dependent: :destroy
+
   def contributable_universes
     @user_contributable_universes ||= begin
       # todo email confirmation needs to happy for data safety / privacy (only verified emails)

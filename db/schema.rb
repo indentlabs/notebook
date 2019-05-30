@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_05_30_025738) do
+ActiveRecord::Schema.define(version: 2019_05_30_192249) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -1425,6 +1425,14 @@ ActiveRecord::Schema.define(version: 2019_05_30_025738) do
     t.integer "user_id"
     t.integer "location_id"
     t.integer "notable_city_id"
+  end
+
+  create_table "notice_dismissals", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "notice_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_notice_dismissals_on_user_id"
   end
 
   create_table "officeships", force: :cascade do |t|

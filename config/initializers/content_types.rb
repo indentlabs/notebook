@@ -20,13 +20,13 @@ Rails.application.config.content_types = {
   ],
 
   # These content types can be created by any user
-  free: [Universe, Character, Location, Item],
+  free: [Universe, Character, Location, Item, School],
 
   # These content types require a premium subscription to create
   premium: [
     Building, Condition, Country, Creature, Deity, Flora, Government, Group, Job, Landmark, Language,
     Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle,
-    School, Sport, Food
+    Sport, Food
   ],
 
   # Content types to label as "new" around the site
