@@ -18,15 +18,15 @@ class School < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'black'
+    'cyan'
   end
 
   def self.hex_color
-    '#000000'
+    '#00BCD4'
   end
 
   def self.icon
-    'info'
+    'school'
   end
 
   def self.content_name
