@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_02_16_080611) do
+ActiveRecord::Schema.define(version: 2019_05_30_025738) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -847,6 +847,19 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.index ["user_id"], name: "index_floras_on_user_id"
   end
 
+  create_table "foods", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Food"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_foods_on_universe_id"
+    t.index ["user_id"], name: "index_foods_on_user_id"
+  end
+
   create_table "friendly_id_slugs", force: :cascade do |t|
     t.string "slug", null: false
     t.integer "sluggable_id", null: false
@@ -1076,6 +1089,7 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.string "src_content_type"
     t.integer "src_file_size"
     t.datetime "src_updated_at"
+    t.boolean "audited"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
   end
@@ -1791,6 +1805,19 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.index ["user_id"], name: "index_scenes_on_user_id"
   end
 
+  create_table "schools", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "School"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_schools_on_universe_id"
+    t.index ["user_id"], name: "index_schools_on_user_id"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.string "username", null: false
     t.string "password", null: false
@@ -1810,6 +1837,19 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.integer "user_id"
     t.integer "group_id"
     t.integer "sistergroup_id"
+  end
+
+  create_table "sports", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Sport"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_sports_on_universe_id"
+    t.index ["user_id"], name: "index_sports_on_user_id"
   end
 
   create_table "stripe_event_logs", force: :cascade do |t|
