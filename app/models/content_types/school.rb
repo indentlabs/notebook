@@ -7,11 +7,11 @@ class School < ActiveRecord::Base
 
   include BelongsToUniverse
   include IsContentPage
-  
+
   include Serendipitous::Concern
 
   include Authority::Abilities
-  self.authorizer_name = 'ExtendedContentAuthorizer'
+  self.authorizer_name = 'CoreContentAuthorizer'
 
   def self.color
     'cyan'
