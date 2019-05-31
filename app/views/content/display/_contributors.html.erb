@@ -12,7 +12,7 @@
         <p class="grey-text">
           Invited <%= time_ago_in_words contributor.created_at %> ago
         </p>
-        <% if current_user && content.user == current_user %>
+        <% if user_signed_in? && content.user == current_user %>
           <p>
             <%= link_to 'Remove this contributor', remove_contributor_path(contributor.id),
               class: 'js-remove-contributor',
@@ -27,14 +27,4 @@
   </ul>
 
   <%= render partial: 'content/form/contributors/leave', locals: { content: content } %>
-
-  <%# todo move to content_for :javascript ? %>
-  <script type="text/javascript">
-  $(document).ready(function() {
-    $('a.js-remove-contributor[data-remote]').on('ajax:success', function (e, data, status, xhr) {
-      // Remove the image from the UI
-      $(this).closest('.collection-item').fadeOut().remove();
-    });
-  })
-  </script>
 </div>

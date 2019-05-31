@@ -11,16 +11,20 @@ class UsersController < ApplicationController
 
     @content = @user.public_content.select { |type, list| list.any? }
     @tabs    = @content.keys
-    @stream  = @user.content_change_events.order('updated_at desc').limit(100).group_by do |cce|
-      next if cce.content.nil?
-      if cce.content.is_a?(Attribute)
-        next if cce.content.entity.nil?
-        cce.content.entity.id
-      else
-        cce.content.id
-      end
-    end
 
+    # todo this is really bad and needs redone/improved
+    # @stream  = @user.content_change_events.order('updated_at desc').limit(100).group_by do |cce|
+    #   next if cce.content.nil?
+    #   if cce.content.is_a?(Attribute)
+    #     next if cce.content.entity.nil?
+    #     cce.content.entity.id
+    #   else
+    #     cce.content.id
+    #   end
+    # end
+
+    @stream = @user.recent_content_list(limit: 20)
+    
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(@user.id, 'viewed profile', {
       'sharing any content': @user.public_content_count != 0
     }) if Rails.env.production?
@@ -53,8 +57,8 @@ class UsersController < ApplicationController
     report_user_deletion_to_slack(current_user)
 
     # Queue user for background deletion instead of doing it inline
-    current_user.update(deleted_at: DateTime.current)
-    #current_user.really_destroy!
+    # current_user.update(deleted_at: DateTime.current)
+    current_user.really_destroy!
 
     redirect_to(root_path, notice: 'Your account has been deleted. We will miss you greatly!')
   end

@@ -97,9 +97,8 @@ Rails.application.routes.draw do
 
     # Content attributes
     put '/content/sort', to: 'content#api_sort'
-    resources :attributes, except: [:show]
-    resources :attribute_categories, except: [:show]
-    resources :attribute_fields, except: [:show]
+    resources :attribute_categories, only: [:create, :update, :destroy]
+    resources :attribute_fields,     only: [:create, :update, :destroy]
 
     # Image handling
     delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion

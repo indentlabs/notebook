@@ -2,7 +2,7 @@ class CustomizationController < ApplicationController
   before_action :verify_content_type_can_be_toggled, only: [:toggle_content_type]
 
   def content_types
-    return redirect_to root_path unless user_signed_in?
+    return redirect_to(root_path) unless user_signed_in?
 
     @all_content_types = Rails.application.config.content_types[:all]
     @premium_content_types = Rails.application.config.content_types[:premium]

@@ -3,7 +3,9 @@
 <head>
   <%= render 'layouts/common_head' %>
 </head>
-<body data-in-app="true" class="<%= 'has-fixed-sidenav' if user_signed_in? %>">
+<body data-in-app="true"
+      class="<%= controller_name %> <%= action_name %> <%= 'has-fixed-sidenav' if user_signed_in? %>"
+>
   <%= render 'layouts/sidenav' if user_signed_in? %>
   <%= render 'layouts/navbar' %>
 
@@ -22,9 +24,6 @@
         </div>
       </div>
     </div>
-
-    <%= render 'layouts/ganalytics' %>
-
   </main>
 
   <%= render 'layouts/footer' unless defined?(@show_footer) && !@show_footer %>
@@ -32,13 +31,10 @@
 
   <script type="text/javascript">
     $(document).ready(function() {
-      $('.tooltipped').tooltip({ enterDelay: 50 });
-      M.AutoInit();
-      $('.dropdown-trigger').dropdown({coverTrigger: false});
-
       <%= yield :javascript %>
     });
   </script>
+  <%= render 'layouts/ganalytics' %>
 
 </body>
 </html>

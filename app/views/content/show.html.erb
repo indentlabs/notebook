@@ -27,17 +27,19 @@
 
   <div class="col s3">
     <%= render partial: 'content/display/sidelinks', locals: { content: @serialized_content } %>
+
+    <% if user_signed_in? && current_user.can_create?(@serialized_content.raw_model.class) %>
+      <%= link_to new_polymorphic_path(@serialized_content.raw_model.class) do %>
+        <div class="<%= @serialized_content.class_color %> card">
+          <div class="card-content white-text">
+            <i class="right material-icons">arrow_forward</i>
+            Create another <%= @serialized_content.class_name.downcase %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
   </div>
 </div>
-
-<%= content_for :javascript do %>
-  $(document).ready(function(){
-    $('.slider').slider({
-      height: 200,
-      indicators: false
-    });
-  });
-<% end %>
 
 <%= render partial: 'content/share', locals: { shared_content: @content} %>
 

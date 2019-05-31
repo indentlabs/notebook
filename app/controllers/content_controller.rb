@@ -1,9 +1,6 @@
 class ContentController < ApplicationController
-  # todo before_action :load_content to set @content
-  before_action :authenticate_user!, only: [:index, :new, :create, :edit, :update, :destroy, :deleted, :attributes]
+  before_action :authenticate_user!, except: [:show, :changelog, :api_sort]
 
-  # Todo removing this will speed up page loads significantly. We need to figure out how to properly migrate all
-  # old content to the new attributes styling.
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
   before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit]
@@ -30,7 +27,7 @@ class ContentController < ApplicationController
         current_user.send("contributable_#{pluralized_content_name}").includes(:page_tags, :image_uploads)
       )
 
-      unless @content_type_class == Universe
+      if @content_type_class != Universe
         my_universe_ids = current_user.universes.pluck(:id)
         @content.concat(@content_type_class.where(universe_id: my_universe_ids))
       end
@@ -59,9 +56,11 @@ class ContentController < ApplicationController
 
   def show
     content_type = content_type_from_controller(self.class)
-    return redirect_to root_path unless valid_content_types.map(&:name).include?(content_type.name)
+    return redirect_to(root_path) unless valid_content_types.map(&:name).include?(content_type.name)
+
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+
     @serialized_content = ContentSerializer.new(@content)
 
     if user_signed_in?
@@ -152,25 +151,25 @@ class ContentController < ApplicationController
   end
 
   def create
-    content_type = content_type_from_controller self.class
+    content_type = content_type_from_controller(self.class)
     initialize_object
 
     unless current_user.can_create?(content_type)
-      # todo set flash[:notice] about premium
-      return redirect_back fallback_location: root_path
+      return redirect_back(fallback_location: root_path, notice: "Creating this type of page requires an active Premium subscription.")
     end
 
-    #  Don't set name fields on content that doesn't have a name field
-    #todo abstract this (and the one in update) to a function
+    # Default names to untitled until one has been set
     unless [AttributeCategory, AttributeField, Attribute].map(&:name).include?(@content.class.name)
-      @content.name ||= @content.name_field_value || "Untitled"
+      @content.name ||= "Untitled #{content_type.name.downcase}"
     end
+
+    # Default owner to the current user
+    @content.user_id ||= current_user.id
 
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
       'content_type': content_type.name
     }) if Rails.env.production?
 
-    @content.user = current_user if @content.user_id.nil?
     if @content.update_attributes(content_params)
       cache_params = {}
       cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField].include?(@content.class)
@@ -220,17 +219,16 @@ class ContentController < ApplicationController
     if @content.user == current_user
       # todo this needs some extra validation probably to ensure each attribute is one associated with this page
       update_success = @content.update_attributes(content_params)
-
-      cache_params = {}
-      cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField, Attribute].include?(@content.class)
-      cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
-
-      @content.update(cache_params) if cache_params.any? && update_success
     else
       # Exclude fields only the real owner can edit
       #todo move field list somewhere when it grows
       update_success = @content.update_attributes(content_params.except(:universe_id))
     end
+
+    cache_params = {}
+    cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField, Attribute].include?(@content.class)
+    cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
+    @content.update(cache_params) if cache_params.any? && update_success
 
     if update_success
       successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
@@ -323,7 +321,7 @@ class ContentController < ApplicationController
     @attribute_categories = @content_type_class.attribute_categories(current_user, show_hidden: true).order(:position)
   end
 
-  def api_sort #todo
+  def api_sort
     sort_params = params.permit(:content_id, :intended_position, :sortable_class)
     sortable_class = sort_params[:sortable_class].constantize # todo audit
     return unless sortable_class
@@ -488,6 +486,8 @@ class ContentController < ApplicationController
   # For index, new, edit
   def set_general_navbar_actions
     content_type = @content_type_class || content_type_from_controller(self.class)
+    return if [AttributeCategory, AttributeField, Attribute].include?(content_type)
+    
     @navbar_actions = []
 
     if @current_user_content

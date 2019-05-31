@@ -144,7 +144,7 @@ RSpec.describe SubscriptionsController, type: :controller do
         )
 
       expect(@user.selected_billing_plan_id).to eq(@free_plan.id)
-      expect(@user.active_billing_plans).to eq([@free_plan])
+      expect(@user.active_billing_plans).not_to eq([@premium_plan])
 
       post :change, params: { stripe_plan_id: 'premium' }
 
@@ -155,7 +155,7 @@ RSpec.describe SubscriptionsController, type: :controller do
 
     describe "Starter Permissions" do
       before do
-        @user.update(selected_billing_plan_id: @premium_plan.id)
+        @user.update(selected_billing_plan_id: @free_plan.id)
       end
 
       it "allows Starter users to create core content types" do
@@ -183,7 +183,7 @@ RSpec.describe SubscriptionsController, type: :controller do
   describe "User on Premium" do
     before do
       # Create a premium subscription for the user
-      @user.update(selected_billing_plan_id: BillingPlan.find_by(stripe_plan_id: 'premium').id)
+      @user.update(selected_billing_plan_id: @premium_plan.id)
     end
 
     it "allows downgrading to Starter" do
@@ -198,12 +198,14 @@ RSpec.describe SubscriptionsController, type: :controller do
 
     describe "Premium Permissions" do
       it "allows Premium users to create core content types" do
+        @user.update(selected_billing_plan_id: 4)
         expect(@user.can_create?(Character)).to eq(true)
         expect(@user.can_create?(Location)).to eq(true)
         expect(@user.can_create?(Item)).to eq(true)
       end
 
       it "allows Premium users to create extended content types" do
+        @user.update(selected_billing_plan_id: 4)
         expect(@user.can_create?(Creature)).to eq(true)
         expect(@user.can_create?(Race)).to eq(true)
         expect(@user.can_create?(Religion)).to eq(true)
@@ -214,6 +216,7 @@ RSpec.describe SubscriptionsController, type: :controller do
       end
 
       it "allows Premium users to create collective content types" do
+        @user.update(selected_billing_plan_id: 4)
         expect(@user.can_create?(Scene)).to eq(true)
       end
     end

@@ -12,13 +12,13 @@ class User < ApplicationRecord
   include Authority::UserAbilities
 
   validates :username, 
-    uniqueness: true,
+    uniqueness: { case_sensitive: false },
     allow_nil: true,
     allow_blank: true,
     length: { maximum: 40 },
     format: /\A[A-Za-z0-9\-_\$\+\!\*]+\z/
 
-  has_many :subscriptions,                dependent: :destroy
+  has_many :subscriptions, dependent: :destroy
   has_many :billing_plans, through: :subscriptions
   def on_premium_plan?
     BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id)
@@ -35,11 +35,13 @@ class User < ApplicationRecord
 
   has_many :votes,                        dependent: :destroy
   has_many :raffle_entries,               dependent: :destroy
+
   has_many :content_change_events,        dependent: :destroy
+  has_many :page_tags,                    dependent: :destroy
+
   has_many :user_content_type_activators, dependent: :destroy
 
   has_many :api_keys,                     dependent: :destroy
-  has_many :page_tags,                    dependent: :destroy
 
   def contributable_universes
     @user_contributable_universes ||= begin
@@ -77,9 +79,12 @@ class User < ApplicationRecord
     end
   end
 
-  #def linkable_universes
-    #todo
-  #end
+  def linkable_universes
+    my_universe_ids = universes.pluck(:id)
+    contributable_universe_ids = contributable_universes.pluck(:id)
+
+    Universe.where(id: my_universe_ids + contributable_universe_ids)
+  end
 
   has_many :documents, dependent: :destroy
 
@@ -87,6 +92,8 @@ class User < ApplicationRecord
   after_create :initialize_referral_code
   after_create :initialize_secure_code
   after_create :initialize_content_type_activators
+  # TODO we should do this, but we need to figure out how to make it fast first
+  # after_create :initialize_categories_and_fields
 
   def createable_content_types
     Rails.application.config.content_types[:all].select { |c| can_create? c }
