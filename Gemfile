@@ -93,7 +93,7 @@ end
 
 group :test, :production do
   gem 'mini_racer'
-  gem 'pg', '~> 0.18'
+  gem 'pg', '~> 1.1'
 end
 
 group :test do
@@ -114,7 +114,7 @@ group :test do
   gem 'rspec-rails'
   gem 'webmock'
   gem 'rubocop', require: false
-  gem 'ruby-prof', '0.15.9'
+  gem 'ruby-prof', '0.18.0'
   gem 'shoulda-matchers', '~> 3.1'
   gem 'rails-controller-testing'
 end
