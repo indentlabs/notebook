@@ -18,7 +18,7 @@ class Food < ActiveRecord::Base
   end
 
   def self.hex_color
-    '#8BC34A'
+    '#F44336'
   end
 
   def self.icon
