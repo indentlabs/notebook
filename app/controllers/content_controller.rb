@@ -106,8 +106,13 @@ class ContentController < ApplicationController
 
   def new
     @content = content_type_from_controller(self.class).new(user: current_user)
+    current_users_categories_and_fields = @content.class.attribute_categories(current_user)
+    if current_users_categories_and_fields.empty?
+      content_type_from_controller(self.class).create_default_attribute_categories(current_user)
+      current_users_categories_and_fields = @content.class.attribute_categories(current_user)
+    end
     @serialized_categories_and_fields = CategoriesAndFieldsSerializer.new(
-      @content.class.attribute_categories(current_user)
+      current_users_categories_and_fields
     )
     @suggested_page_tags = (
       current_user.page_tags.where(page_type: @content.class.name).pluck(:tag) +

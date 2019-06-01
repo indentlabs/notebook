@@ -33,11 +33,8 @@ class #{page_type} < ActiveRecord::Base
   validates :user_id, presence: true
 
   include BelongsToUniverse
-  include HasAttributes
-  include HasPrivacy
-  include HasContentGroupers
-  include HasImageUploads
-  include HasChangelog
+  include IsContentPage
+  
   include Serendipitous::Concern
 
   include Authority::Abilities
@@ -45,6 +42,10 @@ class #{page_type} < ActiveRecord::Base
 
   def self.color
     'black'
+  end
+
+  def self.hex_color
+    '#000000'
   end
 
   def self.icon
