@@ -30,6 +30,12 @@ class AdminController < ApplicationController
   def items
   end
 
+  def images
+    @images = ImageUpload.offset(params[:page].to_i * 500).limit(500)
+              .includes(:content)
+              #.where.not(audited: true)
+  end
+
   def masquerade
     masqueree = User.find_by(id: params[:user_id])
     sign_in masqueree
