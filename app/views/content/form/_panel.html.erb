@@ -100,6 +100,9 @@
                   # Premium content
                   if current_user.on_premium_plan? || (raw_model.persisted? && content.user == current_user)
                     valid_universes += current_user.universes
+
+                    # Allow premium users to add premium content to non-premium universes
+                    valid_universes += current_user.contributable_universes
                   else
                     show_premium_notice = true
                   end
