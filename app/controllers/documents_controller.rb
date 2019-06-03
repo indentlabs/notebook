@@ -50,12 +50,11 @@ class DocumentsController < ApplicationController
   end
 
   def queue_analysis
-    # todo use existing permissions system to restrict linkjackers to premium
-    return unless user_signed_in? && current_user.on_premium_plan?
-
     @document = Document.find_by(id: params[:id], user_id: current_user.id)
-    return unless @document.present?
-
+    return redirect_back(fallback_location: documents_path, notice: "That document doesn't exist!") unless @document.present?
+    return redirect_back(fallback_location: documents_path, notice: "Document analysis is a feature for Premium users.") unless @document.user.on_premium_plan?
+    return redirect_back(fallback_location: documents_path, notice: "You don't have permission to do that!") unless @document.user == current_user
+    
     @document.analyze!
     redirect_to analysis_document_path(@document)
   end
