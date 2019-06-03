@@ -4,7 +4,7 @@
 
   <div class="row">
     <div class="col s12 m8 l8 offset-l1">
-      <div id="editor" class="editable"><%= @document.body.try(:html_safe) || 'This document is blank.' %></div>
+      <div id="editor"><%= ContentFormatterService.substitute_content_links(@document.body.try(:html_safe) || "", current_user).html_safe %></div>
     </div>
     <div class="col l2 m4 smart-sidebar">
       <%= render partial: 'documents/components/smart_sidebar', locals: { document: @document } %>

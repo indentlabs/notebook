@@ -7,11 +7,12 @@
     </div>
     <% @tabs.each do |tab| %>
       <% content_type_class = @user.send(tab).build.class %>
-      <%= link_to send("#{tab}_user_path"), class: "collection-item #{content_type_class.color}-text" do %>
+      <%= link_to send("#{tab}_user_path", { id: @user.id }), class: "collection-item #{content_type_class.color}-text" do %>
         <%= pluralize @content[tab].length, tab.to_s.singularize %>
         <span class="secondary-content">
           <i class="material-icons <%= content_type_class.color %>-text"><%= content_type_class.icon %></i>
         </span>
+        <div style="clear: both"></div>
       <% end %>
     <% end %>
   </div>

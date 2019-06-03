@@ -2,11 +2,11 @@ source 'https://rubygems.org'
 ruby "~> 2.5"
 
 gem 'rails', '~> 5.2'
-gem 'puma', '~> 3.7'
+gem 'puma', '~> 3.12'
 gem 'puma-heroku'
 
 # Storage
-gem 'aws-sdk', '~> 1.5'
+gem 'aws-sdk', '~> 3.0'
 gem 'aws-sdk-s3'
 gem 'filesize'
 
@@ -37,6 +37,11 @@ gem 'coffee-rails'
 gem 'rails-jquery-autocomplete'
 gem 'animate-rails'
 
+# Form enhancements
+gem 'redcarpet' #markdown formatting
+gem 'acts_as_list' #sortables
+gem 'tribute' # @mentions
+
 # SEO
 gem 'meta-tags'
 
@@ -51,10 +56,6 @@ gem 'medium-editor-rails'
 gem 'chartkick'
 gem 'highcharts-rails'
 # gem 'highstock-rails'
-
-# Form enhancements
-gem 'redcarpet' #markdown formatting
-gem 'acts_as_list' #sortables
 
 # Analytics
 gem 'mixpanel-ruby'
@@ -95,7 +96,7 @@ end
 
 group :test, :production do
   gem 'mini_racer'
-  gem 'pg', '~> 0.18'
+  gem 'pg', '~> 1.1'
 end
 
 group :test do
@@ -116,18 +117,19 @@ group :test do
   gem 'rspec-rails'
   gem 'webmock'
   gem 'rubocop', require: false
-  gem 'ruby-prof', '0.15.9'
-  gem 'shoulda-matchers', '~> 3.1'
+  gem 'ruby-prof', '0.18.0'
+  gem 'shoulda-matchers', '~> 4.0'
   gem 'rails-controller-testing'
 end
 
 group :development do
   gem 'web-console'
-  gem 'bullet', '>= 5.4'
+  gem 'bullet'
   gem 'rack-mini-profiler'
   gem 'memory_profiler'
   gem 'flamegraph'
   gem 'stackprof'
+  gem 'bundler-audit'
 end
 
 group :worker do

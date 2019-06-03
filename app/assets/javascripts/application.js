@@ -17,4 +17,5 @@
 //= require chartkick
 //= require highcharts
 //= require highcharts/highcharts-more
+//= require tribute
 //= require_tree .

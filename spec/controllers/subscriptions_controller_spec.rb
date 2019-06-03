@@ -48,6 +48,36 @@ RSpec.describe SubscriptionsController, type: :controller do
     @user.update(stripe_customer_id: 'stripe-id')
     sign_in @user
 
+    @free_plan = BillingPlan.create(
+      name: 'Starter',
+      stripe_plan_id: 'starter',
+      monthly_cents: 0, # $0.00/mo
+      available: true,
+
+      # Content creation and other permissions:
+      universe_limit: 5,
+      allows_core_content: true,
+      allows_extended_content: false,
+      allows_collective_content: false,
+      allows_collaboration: false,
+      bonus_bandwidth_kb: 123155
+    )
+
+    @beta_plan = BillingPlan.create(
+      name: 'Early Adopters',
+      stripe_plan_id: 'early-adopters',
+      monthly_cents: 0, # $0.00/mo
+      available: true,
+
+      # Content creation and other permissions:
+      universe_limit: 5,
+      allows_core_content: true,
+      allows_extended_content: false,
+      allows_collective_content: false,
+      allows_collaboration: false,
+      bonus_bandwidth_kb: 123155
+    )
+
     @premium_plan = BillingPlan.create(
       name: 'Premium',
       stripe_plan_id: 'premium',
@@ -73,21 +103,6 @@ RSpec.describe SubscriptionsController, type: :controller do
       allows_collaboration: true,
       bonus_bandwidth_kb: 123155
     )
-
-    @free_plan = BillingPlan.create(
-      name: 'Starter',
-      stripe_plan_id: 'starter',
-      monthly_cents: 0, # $0.00/mo
-      available: true,
-
-      # Content creation and other permissions:
-      universe_limit: 5,
-      allows_core_content: true,
-      allows_extended_content: false,
-      allows_collective_content: false,
-      allows_collaboration: false,
-      bonus_bandwidth_kb: 123155
-    )
   end
 
   describe "User with no plan (fallback to Starter) tries to upgrade" do
@@ -101,7 +116,6 @@ RSpec.describe SubscriptionsController, type: :controller do
   describe "User on Starter" do
     before do
       # Create a Starter subscription for the user
-      @user.active_subscriptions.create(billing_plan: @free_plan, start_date: Time.now - 5.days, end_date: Time.now + 5.days)
       @user.update(selected_billing_plan_id: @free_plan.id)
     end
 
@@ -130,7 +144,7 @@ RSpec.describe SubscriptionsController, type: :controller do
         )
 
       expect(@user.selected_billing_plan_id).to eq(@free_plan.id)
-      expect(@user.active_billing_plans).to eq([@free_plan])
+      expect(@user.active_billing_plans).not_to eq([@premium_plan])
 
       post :change, params: { stripe_plan_id: 'premium' }
 
@@ -141,7 +155,7 @@ RSpec.describe SubscriptionsController, type: :controller do
 
     describe "Starter Permissions" do
       before do
-        @user.update(selected_billing_plan_id: @premium_plan.id)
+        @user.update(selected_billing_plan_id: @free_plan.id)
       end
 
       it "allows Starter users to create core content types" do
@@ -169,12 +183,10 @@ RSpec.describe SubscriptionsController, type: :controller do
   describe "User on Premium" do
     before do
       # Create a premium subscription for the user
-      @user.active_subscriptions.create(billing_plan: @premium_plan, start_date: Time.now - 5.days, end_date: Time.now + 5.days)
-      expect(@user.active_subscriptions.map(&:billing_plan_id)).to eq([@premium_plan.id])
+      @user.update(selected_billing_plan_id: @premium_plan.id)
     end
 
     it "allows downgrading to Starter" do
-
       # Downgrade to Starter
       post :change, params: { stripe_plan_id: 'starter' }
 
@@ -186,12 +198,14 @@ RSpec.describe SubscriptionsController, type: :controller do
 
     describe "Premium Permissions" do
       it "allows Premium users to create core content types" do
+        @user.update(selected_billing_plan_id: 4)
         expect(@user.can_create?(Character)).to eq(true)
         expect(@user.can_create?(Location)).to eq(true)
         expect(@user.can_create?(Item)).to eq(true)
       end
 
       it "allows Premium users to create extended content types" do
+        @user.update(selected_billing_plan_id: 4)
         expect(@user.can_create?(Creature)).to eq(true)
         expect(@user.can_create?(Race)).to eq(true)
         expect(@user.can_create?(Religion)).to eq(true)
@@ -202,6 +216,7 @@ RSpec.describe SubscriptionsController, type: :controller do
       end
 
       it "allows Premium users to create collective content types" do
+        @user.update(selected_billing_plan_id: 4)
         expect(@user.can_create?(Scene)).to eq(true)
       end
     end

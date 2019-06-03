@@ -5,7 +5,7 @@ class ContentFormatterService < Service
   extend ActionView::Context            # content_tag
 
   include Rails.application.routes.url_helpers
-  default_url_options[:host] = 'localhost' # todo WHAT?
+  default_url_options[:host] = 'localhost' # todo We should figure out how to remove this #codesmell
 
   # Token format is [[character-35]] or [[location-1]] etc, with the format:
   # [[<page_type>-<page_id>]].
@@ -20,7 +20,7 @@ class ContentFormatterService < Service
   def self.show(text:, viewing_user: User.new)
     # We want to evaluate markdown first, because the markdown engine also happens
     # to strip out HTML tags. So: markdown, _then_ insert content links.
-    formatted_text = markdown.render(text).html_safe
+    formatted_text = markdown.render(text || '').html_safe
     substitute_content_links(formatted_text, viewing_user).html_safe
   end
 
@@ -67,11 +67,11 @@ class ContentFormatterService < Service
   end
 
   def self.link_template(content_model)
-    chip_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: "content_link #{content_model.class}-link") }
+    inline_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: "content_link #{content_model.class.name.downcase}-link") }
   end
 
   def self.private_link_template(content_model)
-    chip_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: 'grey-text content_link disabled') }
+    inline_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: 'grey-text content_link disabled') }
   end
 
   def self.unknown_link_template(attempted_key)
@@ -95,12 +95,20 @@ class ContentFormatterService < Service
     end
   end
 
+  def self.inline_template(class_model=nil)
+    content_tag(:span, class: 'inline-link') do
+      content_tag(:span, class: class_model ? "#{class_model.color}-text" : '') do
+        yield
+      end
+    end
+  end
+
   # This is a hack until I figure out how to include polymorphic paths in a service model.
   #todo remove this
   def self.link_for(content_model)
     [
       Rails.env.production? ? 'https://' : 'http://',
-      'www.notebook.ai', # Rails.application.routes.default_url_options[:host],
+      Rails.env.production? ? 'www.notebook.ai' : 'localhost:3000', # Rails.application.routes.default_url_options[:host]?
       '/plan/',
       content_model.class.name.downcase.pluralize,
       '/',

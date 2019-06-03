@@ -1,0 +1,2 @@
+module NoticeDismissalHelper
+end

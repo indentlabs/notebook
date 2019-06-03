@@ -1,6 +1,7 @@
 # rubocop:disable LineLength
 
 Rails.application.routes.draw do
+  get 'notice_dismissal/dismiss'
   get 'customization/content_types'
   post 'customization/toggle_content_type'
 
@@ -13,6 +14,8 @@ Rails.application.routes.draw do
       # todo page tags here
     end
   end
+  get '/@:username', to: 'users#show', as: :profile_by_username
+
   scope '/my' do
     get '/content',         to: 'main#dashboard', as: :dashboard
     get '/content/recent',  to: 'main#recent_content', as: :recent_content
@@ -98,9 +101,8 @@ Rails.application.routes.draw do
 
     # Content attributes
     put '/content/sort', to: 'content#api_sort'
-    resources :attributes, except: [:show]
-    resources :attribute_categories, except: [:show]
-    resources :attribute_fields, except: [:show]
+    resources :attribute_categories, only: [:create, :update, :destroy]
+    resources :attribute_fields,     only: [:create, :update, :destroy]
 
     # Image handling
     delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion
@@ -120,6 +122,7 @@ Rails.application.routes.draw do
       get '/attributes', to: 'admin#attributes', as: :admin_attributes
       get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
       get '/unsubscribe', to: 'admin#unsubscribe', as: :mass_unsubscribe
+      get '/images', to: 'admin#images', as: :image_audit
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'

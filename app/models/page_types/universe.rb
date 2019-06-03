@@ -19,7 +19,7 @@ class Universe < ApplicationRecord
   validates :user_id, presence: true
 
   belongs_to :user
-  # The following doesn't work because we reference Universe when setting up this config
+  # The following doesn't work because Rails.application.config isn't initialized yet
   # Rails.application.config.content_types[:all_non_universe].each do |content_type|
   #   has_many content_types.name.downcase.pluralize.to_sym
   # end
@@ -46,8 +46,13 @@ class Universe < ApplicationRecord
   has_many :buildings
   has_many :jobs
   has_many :traditions
+  has_many :sports
+  has_many :schools
+  has_many :foods
 
   has_many :contributors, dependent: :destroy
+
+  scope :in_universe, ->(universe = nil) { where(id: universe.try(:id)) unless universe.nil? }
 
   after_destroy do
     Rails.application.config.content_types[:all_non_universe].each do |content_type|

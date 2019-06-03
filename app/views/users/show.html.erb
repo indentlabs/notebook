@@ -5,17 +5,23 @@
     image_src: @user.image_url(120)
 
     content_jsonld = {
-      '@id': user_url,
-      '@type': 'http://schema.org/Person',
-      'http://schema.org/name': @user.name,
-      'http://schema.org/description': "#{@user.name}’s profile on notebook.ai",
+      '@id': user_url(id: @user.id),
+      '@type': 'https://schema.org/Person',
+      'https://schema.org/name': @user.name,
+      'https://schema.org/description': "#{@user.name}’s profile on notebook.ai",
       'https://schema.org/image': @user.image_url(120)
     }
   %>
   <%= content_jsonld.to_json.html_safe %> %>
 </script>
 
-<div class="row">
+<%= content_for :full_width_page_header do %>
+  <div style="height: 200px; overflow: hidden;">
+    <%= image_tag "card-headers/users.png" %>
+  </div>
+<% end %>
+
+<div class="row" style="margin-top: -140px;">
   <div class="col s12 m3">
     <%= render partial: 'users/profile/avatar' %>
     <%= render partial: 'users/profile/public_pages' %>
@@ -24,11 +30,7 @@
 
   <div class="col s12 m9">
     <%= render partial: 'users/profile/info' %>
+    <%= render partial: 'users/profile/recent_activity' %>
   </div>
 </div>
 
-<div class="row">
-  <div class="col s12">
-    <%= render partial: 'users/profile/public_activity' %>
-  </div>
-</div>

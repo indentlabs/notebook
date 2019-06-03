@@ -36,30 +36,27 @@
     <%=
       text_area_tag "#{content_name}[custom_attribute_values][][value]",
                     value,
-                    class: "materialize-textarea #{defined?(autocomplete) && autocomplete ? ('autocomplete ' + 'js-autocomplete-' + field[:id].to_s) : ''}",
+                    class: "js-can-mention-pages materialize-textarea #{defined?(autocomplete) && autocomplete ? ('autocomplete ' + 'js-autocomplete-' + field[:id].to_s) : ''}",
                     placeholder: placeholder
     %>
 
-    <div class="content-field-link-bar-container"></div>
+    <p class="grey-text show-when-focused">
+      Tip: You can press @ to insert a link to your other pages. 
+    </p>
   </div>
 </div>
 
 <% if defined?(autocomplete) && autocomplete %>
   <%= content_for :javascript do %>
     $(function() {
-      // This setTimeout is an unfortunate hack to ensure this runs after initializing materialize
-      setTimeout(function() {
-        //console.log("Initializing autocomplete for #<%= "#{content_name}_#{field[:label]}" %>");
-
-        $('.js-autocomplete-<%= field[:id].to_s %>').autocomplete({
-          limit: 5,
-          data: {
-            <% autocomplete.each do |autocomplete_option| %>
-              "<%= autocomplete_option %>": null,
-            <% end %>
-          }
-        });
-      }, 1000);
+      $('.js-autocomplete-<%= field[:id].to_s %>').autocomplete({
+        limit: 5,
+        data: {
+          <% autocomplete.each do |autocomplete_option| %>
+            "<%= autocomplete_option %>": null,
+          <% end %>
+        }
+      });
     });
   <% end %>
 <% end %>

@@ -30,6 +30,10 @@ class Document < ApplicationRecord
     title
   end
 
+  def description
+    self.body
+  end
+
   def universe_field_value
     #todo when documents belong to a universe
   end
@@ -42,5 +46,12 @@ class Document < ApplicationRecord
 
     # TODO: Should we also be deleting all existing analyses here since they're
     #       now out of date? Or should we wait until the analysis is complete?
+  end
+
+  def reading_estimate
+    words = (self.body || "").split(/\s+/).count
+    minutes = 1 + (words / 200).to_i
+
+    "~#{minutes} minute read"
   end
 end

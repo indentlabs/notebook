@@ -1,49 +1,6 @@
 <% if @documents.any? %>
-  <%= render partial: 'content/components/list_filter_bar', locals: { } %>
-
-  <div class="row">
-    <% @documents.each.with_index do |document, i| %>
-      <% if i % 3 == 0 %>
-        <div style="clear: both;" class="hide-on-small-only"></div>
-      <% end %>
-      <div class="col s12 m4 l4">
-        <div class="card sticky-action">
-          <div class="card-image waves-effect waves-block waves-light">
-            <%= image_tag "card-headers/document-mini.jpg", class: 'activator' %>
-          </div>
-          <div class="card-content">
-            <span class="card-title activator grey-text text-darken-4">
-              <%= document.title.presence || 'Untitled document' %>
-            </span>
-            <p class="grey-text">
-              ~<%= pluralize 1 + ((document.body || "").split(/\s+/).count / 200).to_i, 'minute' %> read
-              <br />
-              <%= document.created_at == document.updated_at ? 'created' : 'updated' %>
-              <%= time_ago_in_words document.updated_at %>
-              ago
-            </p>
-          </div>
-          <div class="card-action nice-icon-links">
-            <%= link_to edit_document_path(document), class: 'green-text right', target: '_blank' do %>
-              <i class="material-icons"><%= Document.icon %></i> Edit
-            <% end %>
-            <%= link_to document_path(document), class: 'blue-text text-lighten-1' do %>
-              <i class="material-icons"><%= Document.icon %></i> View
-            <% end %>
-          </div>
-          <div class="card-reveal">
-            <span class="card-title grey-text text-darken-4">
-              <%= document.title.presence || 'Document preview' %>
-              <i class="material-icons right">close</i>
-            </span>
-            <p>
-              <%= sanitize truncate(document.body || '<em>This document is blank.</em>', escape: false, length: 420) %>
-            </p>
-          </div>
-        </div>
-      </div>
-      <% end %>
-  </div>
+  <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } %>
+  <%= render partial: 'content/list/cards', locals: { content_list: @documents, content_type: Document } %>
 <% end %>
 
 <% if @documents.empty? %>

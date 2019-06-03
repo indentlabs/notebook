@@ -29,8 +29,7 @@
         asset_path("card-headers/#{content_type_pluralized}.jpg")
       end
     %>
-    <div class="activator" style="height: 265px; background: url('<%= category_image %>'); background-size: cover;">
-    </div>
+    <div class="activator" style="height: 265px; background: url('<%= category_image %>'); background-size: cover;"></div>
     <span class="card-title bordered-text" style="font-size: 200%">
       <% if defined?(card_title) && !card_title.blank? %>
         <%= card_title %>
@@ -39,7 +38,7 @@
       <% end %>
     </span>
     <% if user_signed_in? %>
-      <%= link_to new_polymorphic_path(content_type), class: "btn-floating btn-large halfway-fab waves-effect waves-light #{content_type_class.color} tooltipped #{'grey' unless current_user.can_create?(content_type_class)}",
+      <%= link_to new_polymorphic_path(content_type), class: "btn-floating btn-large hoverable halfway-fab waves-effect waves-light #{content_type_class.color} tooltipped #{'grey' unless current_user.can_create?(content_type_class)}",
         data: {
           position: 'bottom',
           tooltip: current_user.can_create?(content_type_class) ? "Create a#{'n' if %w(a e i o u).include?(content_type.to_s[0])} #{content_type.to_s}"
@@ -49,7 +48,7 @@
         <i class="material-icons">add</i>
       <% end %>
 
-      <%= link_to polymorphic_path(content_type_class), class: "btn-floating halfway-fab waves-effect waves-light grey black-text tooltipped", style: "right: 90px",
+      <%= link_to polymorphic_path(content_type_class), class: "btn-floating hoverable halfway-fab waves-effect waves-light grey black-text tooltipped", style: "right: 90px",
         data: {
           position: 'bottom',
           tooltip: "View all #{content_type_pluralized}",

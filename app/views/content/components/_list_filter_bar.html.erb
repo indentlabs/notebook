@@ -1,50 +1,96 @@
-<!-- <div class="row">
-  <div class="col s12 right">
+<div class="row">
+  <div class="col s12">
     <div class="filter-bar">
-      <div class="btn-group card">
+      <!-- <div class="btn-group card">
         <a href="#" class="btn white black-text"><i class="material-icons">view_module</i></a>
         <a href="#" class="btn white black-text"><i class="material-icons">view_headline</i></a>
         <a href="#" class="btn white black-text"><i class="material-icons">view_stream</i></a>
         <a href="#" class="btn white black-text"><i class="material-icons">grid_on</i></a>
-      </div>
+      </div> -->
 
-      <div class="btn-group card">
-        <a class='dropdown-trigger btn white black-text' href='#' data-target='universe-filter-dropdown'>
-          <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
-        </a>
-        <ul id='universe-filter-dropdown' class='dropdown-content'>
-          <li><a href="#!">All Universes</a></li>
-          <li class="divider" tabindex="-1"></li>
-          <% @current_user_content.fetch('Universe', []).each do |universe| %>
+      <% if content_type.new.respond_to?(:universe) %>
+        <div class="btn-group card">
+          <a
+            class='dropdown-trigger btn white black-text tooltipped <%= @universe_scope.present? ? Universe.color : 'white' %> lighten-5'
+            href='#'
+            data-position="bottom"
+            data-delay="500"
+            data-tooltip="Filter by universe"
+            data-target='universe-filter-dropdown'>
+            <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
+            <%= @universe_scope.try(:name) if @universe_scope %>
+          </a>
+          <ul id='universe-filter-dropdown' class='dropdown-content'>
             <li>
-              <a href="#!" data-universe-id="<%= universe.id %>">
+              <a href="?universe=all" class="<%= Universe.color %>-text">
                 <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
-                <%= universe.name %>
+                All Universes
               </a>
             </li>
-          <% end %>
-        </ul>
-      </div>
+            <li class="divider" tabindex="-1"></li>
+            <% @current_user_content.fetch('Universe', []).each do |universe| %>
+              <% next unless universe.becomes(Universe).send(content_type.name.downcase.pluralize).any? rescue false %>
+              <li>
+                <a href="?universe=<%= universe.id %>" data-universe-id="<%= universe.id %>" class="<%= Universe.color %>-text">
+                  <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
+                  <span class="grey-text">in</span>
+                  <%= universe.name %>
+                </a>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
 
-      <a class='btn grey lighten-2 black-text tooltipped'
-         href='#'
-         data-position="bottom"
-         data-delay="500"
-         data-tooltip="Tagging pages is a new feature coming soon.">
-        <i class="material-icons red-text">loyalty</i>
-      </a>
+      <% if @page_tags.present? && @page_tags.any? %>
+        <div class="btn-group card">
+          <a
+            class='dropdown-trigger btn <%= @filtered_page_tags.nil? ? 'white' : content_type.color %> lighten-4 black-text tooltipped'
+            href='#'
+            data-target='tag-filter-dropdown'
+            data-position="bottom"
+            data-delay="500"
+            data-tooltip="Filter by tag">
+            <i class="material-icons <%= content_type.color %>-text">loyalty</i>
+            <%= @filtered_page_tags.try(:first).try(:tag) %>
+          </a>
+          <ul id='tag-filter-dropdown' class='dropdown-content'>
+            <li>
+              <%= link_to polymorphic_path(content_type), class: "#{content_type.color}-text" do %>
+                <i class="material-icons">loyalty</i>
+                All <%= content_type.name.downcase.pluralize %>
+              <% end %>
+            </li>
+            <li class="divider" tabindex="-1"></li>
+            <% @page_tags.each do |page_tag| %>
+              <li>
+                <%=
+                  link_to send(
+                    "page_tag_#{content_type.name.downcase.pluralize}_path",
+                    slug: PageTagService.slug_for(page_tag.tag)
+                  ), class: "#{content_type.color}-text" do
+                %>
+                  <i class="material-icons">loyalty</i>
+                  <small class="grey-text">tagged</small>
+                  <%= page_tag.tag %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
 
-      <a class='btn grey lighten-2 black-text tooltipped'
+      <!-- <a class='btn grey lighten-2 black-text tooltipped'
          href='#'
          data-position="bottom"
          data-delay="500"
          data-tooltip="Favoriting pages is a new feature coming soon.">
         <i class="material-icons amber-text">star_outline</i>
-      </a>
+      </a> -->
 
       &nbsp;
 
-      <div class="btn-group card">
+      <!-- <div class="btn-group card">
         <a class='btn white grey-text tooltipped'
            href='#'
            data-position="bottom"
@@ -68,15 +114,15 @@
            data-tooltip="Most-recent order">
           <i class="material-icons black-text">access_time</i>
         </a>
-      </div>
+      </div> -->
 
       &nbsp;
 
-      <div class="input-field inline" style="position: relative; top: 5px;">
-        <input id="email_inline" type="email" class="validate">
-        <label for="email_inline">Filter by name...</label>
+      <div class="input-field inline" style="position: relative; top: 5px; min-width: 320px">
+        <input id="js-content-name-filter" type="text">
+        <label for="js-content-name-filter">Filter <%= content_type.name.downcase.pluralize %> by name...</label>
       </div>
 
     </div>
   </div>
-</div> -->
+</div>

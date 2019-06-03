@@ -93,14 +93,16 @@
                 valid_universes = []
                 show_premium_notice = false
 
-                # todo audit this
-                if raw_model.is_a?(Character) || raw_model.is_a?(Location) || raw_model.is_a?(Item)
+                if Rails.application.config.content_types[:free].map(&:name).include?(raw_model.class.name)
                   valid_universes += current_user.universes
                   valid_universes += current_user.contributable_universes
                 else
                   # Premium content
                   if current_user.on_premium_plan? || (raw_model.persisted? && content.user == current_user)
                     valid_universes += current_user.universes
+
+                    # Allow premium users to add premium content to non-premium universes
+                    valid_universes += current_user.contributable_universes
                   else
                     show_premium_notice = true
                   end
@@ -121,7 +123,7 @@
                     @universe_dropdown_options.compact,
                     content.is_a?(ContentSerializer) ? content.universe.try(:id) : @universe_scope.try(:id)
                   ),
-                  include_blank: current_user.on_premium_plan? || raw_model.is_a?(Character) || raw_model.is_a?(Location) || raw_model.is_a?(Item)
+                  include_blank: current_user.on_premium_plan? || Rails.application.config.content_types[:free].map(&:name).include?(raw_model.class.name)
               %>
               <% if show_premium_notice %>
                 <div class="help-text">
