@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 ruby "~> 2.5"
 
 gem 'rails', '~> 5.2'
-gem 'puma', '~> 3.7'
+gem 'puma', '~> 3.12'
 gem 'puma-heroku'
 
 # Storage
