@@ -21,6 +21,8 @@ class ContentController < ApplicationController
 
     if @universe_scope.present? && @content_type_class != Universe
       @content = @universe_scope.send(pluralized_content_name).includes(:page_tags, :image_uploads)
+
+      @show_scope_notice = true
     else
       @content = (
         current_user.send(pluralized_content_name).includes(:page_tags, :image_uploads) +
