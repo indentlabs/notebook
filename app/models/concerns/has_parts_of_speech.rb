@@ -4,24 +4,72 @@ module HasPartsOfSpeech
   extend ActiveSupport::Concern
 
   included do
+    def nouns
+      EngTagger.new.get_nouns(tagged_text)
+    end
+
+    def proper_nouns
+      EngTagger.new.get_proper_nouns(tagged_text)
+    end
+
+    def noun_phrases
+      EngTagger.new.get_noun_phrases(tagged_text)
+    end
+
+    def verbs
+      EngTagger.new.get_verbs(tagged_text)
+    end
+
+    def present_verbs
+      EngTagger.new.get_present_verbs(tagged_text)
+    end
+
+    def infinitive_verbs
+      EngTagger.new.get_infinitive_verbs(tagged_text)
+    end
+
+    def past_tense_verbs
+      EngTagger.new.get_past_tense_verbs(tagged_text)
+    end
+
+    def passive_verbs
+      EngTagger.new.get_passive_verbs(tagged_text)
+    end
+
+    def gerund_verbs
+      EngTagger.new.get_gerund_verbs(tagged_text)
+    end
+
     def adjectives
-      @adjectives ||= words.select { |word| word.category == 'adjective' }.uniq
+      EngTagger.new.get_adjectives(tagged_text)
+    end
+
+    def superlative_adjectives
+      EngTagger.new.get_superlative_adjectives(tagged_text)
+    end
+
+    def comparative_adjectives
+      EngTagger.new.get_comparative_adjectives(tagged_text)
     end
 
     def adverbs
-      @adverbs ||= words.select { |word| word.category == 'adverb' }.uniq
+      EngTagger.new.get_adverbs(tagged_text)
     end
 
     def conjunctions
-      @conjunctions ||= words.select { |word| word.category == 'conjunction' }.uniq
+      EngTagger.new.get_conjunctions(tagged_text)
     end
 
     def determiners
-      @determiners ||= words.select { |word| word.category == 'determiner' }.uniq
+      EngTagger.new.get_determiners(tagged_text)
     end
 
-    def nouns
-      @nouns ||= words.select { |word| word.category == 'noun' }.uniq
+    def prepositions
+      EngTagger.new.get_prepositions(tagged_text)
+    end
+
+    def interrogatives
+      EngTagger.new.get_interrogatives(tagged_text)
     end
 
     def numbers
@@ -31,24 +79,12 @@ module HasPartsOfSpeech
         .uniq
     end
 
-    def prepositions
-      @prepositions ||= words.select { |word| word.category == 'preposition' }.uniq
-    end
-
     def pronouns
       @pronouns ||= words.select { |word| I18n.t('pronouns').include? word }.uniq
     end
 
     def stop_words
       words.select { |word| I18n.t('stop-words').include? word }.uniq
-    end
-
-    def verbs
-      @verbs ||= words.select { |word| word.category == 'verb' }.uniq
-    end
-
-    def unrecognized_words
-      @unrecognized_words ||= words.select { |word| word.category == 'unknown' }.uniq - pronouns
     end
   end
 end

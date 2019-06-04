@@ -139,7 +139,10 @@ group :worker do
   # Document understanding
   gem 'htmlentities'
   gem 'birch', github: 'billthompson/birch', branch: 'birch-ruby22'
-  gem 'treat'#, :git => 'https://github.com/indentlabs/treat-gem.git'
+
+  # Todo this is a super useful gem but no longer maintained and too full of bugs to use; we should find/write an alternative.
+  # gem 'treat', :git => 'https://github.com/indentlabs/treat-gem.git'
+
   gem 'engtagger'
   gem 'ibm_watson'
 
@@ -147,3 +150,4 @@ group :worker do
   gem 'rubyzip', '>= 1.0.0' # will load new rubyzip version
   gem 'zip-zip' # will load compatibility for old rubyzip API.
 end
+gem 'engtagger'

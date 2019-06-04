@@ -14,6 +14,8 @@ class Document < ApplicationRecord
   include Authority::Abilities
   self.authorizer_name = 'DocumentAuthorizer'
 
+  attr_accessor :tagged_text
+
   def self.color
     'teal'
   end
@@ -53,5 +55,12 @@ class Document < ApplicationRecord
     minutes = 1 + (words / 200).to_i
 
     "~#{minutes} minute read"
+  end
+
+  def tagged_text
+    @tagged_text ||= begin
+      tagger = EngTagger.new
+      tagger.add_tags(plaintext)
+    end
   end
 end
