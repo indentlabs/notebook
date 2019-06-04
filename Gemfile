@@ -151,3 +151,4 @@ group :worker do
   gem 'zip-zip' # will load compatibility for old rubyzip API.
 end
 gem 'engtagger'
+gem 'ibm_watson'

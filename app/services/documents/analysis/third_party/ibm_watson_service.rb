@@ -7,7 +7,7 @@ module Documents
           document = analysis.document
 
           # Authorize a client to analyze with
-          watson_client = IBMWatson::NaturalLanguageUnderstandingV1.new(
+          watson_client = ::IBMWatson::NaturalLanguageUnderstandingV1.new(
             iam_apikey: ENV['WATSON_API_KEY'],
             version:    '2018-03-16'
           )
