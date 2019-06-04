@@ -3,7 +3,7 @@ module Documents
     module ThirdParty
       class IbmWatsonService < Service
         def self.analyze(analysis_id)
-          analysis = DocumentAnalysis.find(analysis_id)
+          analysis = ::DocumentAnalysis.find(analysis_id)
           document = analysis.document
 
           # Authorize a client to analyze with

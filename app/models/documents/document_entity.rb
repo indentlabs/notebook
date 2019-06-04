@@ -2,7 +2,7 @@ class DocumentEntity < ApplicationRecord
   belongs_to :entity, polymorphic: true
   belongs_to :document_analysis
 
-  after_create :match_notebook_page
+  after_create :match_notebook_page!
 
   # TODO should this be some chain of method aliases maybe? or cached on object?
   def document_owner
