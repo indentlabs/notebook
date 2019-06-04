@@ -61,11 +61,13 @@ module HasPartsOfSpeech
     end
 
     def determiners
-      EngTagger.new.get_determiners(tagged_text)
+      # todo need something else
+      # EngTagger.new.get_determiners(tagged_text)
     end
 
     def prepositions
-      EngTagger.new.get_prepositions(tagged_text)
+      # todo need something else
+      # EngTagger.new.get_prepositions(tagged_text)
     end
 
     def interrogatives
