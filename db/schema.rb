@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_05_30_192249) do
+ActiveRecord::Schema.define(version: 2019_06_04_162744) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -798,6 +798,8 @@ ActiveRecord::Schema.define(version: 2019_05_30_192249) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "progress"
+    t.integer "interrogative_count"
     t.index ["document_id"], name: "index_document_analyses_on_document_id"
   end
 
@@ -1170,9 +1172,8 @@ ActiveRecord::Schema.define(version: 2019_05_30_192249) do
     t.datetime "updated_at", null: false
     t.string "src_file_name"
     t.string "src_content_type"
-    t.integer "src_file_size"
+    t.bigint "src_file_size"
     t.datetime "src_updated_at"
-    t.boolean "audited"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
   end
@@ -2519,13 +2520,11 @@ ActiveRecord::Schema.define(version: 2019_05_30_192249) do
     t.string "age"
     t.string "gender"
     t.string "interests"
-    t.string "slug"
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["id", "deleted_at"], name: "index_users_on_id_and_deleted_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
-    t.index ["slug"], name: "index_users_on_slug", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
