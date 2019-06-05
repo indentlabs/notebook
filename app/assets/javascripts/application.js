@@ -18,4 +18,5 @@
 //= require highcharts
 //= require highcharts/highcharts-more
 //= require tribute
+//= require d3
 //= require_tree .

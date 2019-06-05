@@ -42,45 +42,70 @@
 
     <script type="text/javascript">
       $(document).ready(function () {
-        var emotions_chart = Highcharts.chart('graph-character-emotions-<%= entity.id %>', {
-          chart: {
-              polar: true,
-              type: 'line'
-          },
-          title: {
-              text: 'Emotional range'
-          },
-          xAxis: {
-              categories: ['Joy', 'Sadness', 'Fear', 'Disgust', 'Anger'],
-              tickmarkPlacement: 'on',
-              lineWidth: 0
-          },
-          yAxis: {
-              lineWidth: 0,
-              min: 0,
-              max: 100
-          },
-          legend: {
-            enabled: false
-          },
-          series: [
-              {
-                name: '<%= entity.text %>',
-                data: <%=
-                  [
-                    (100 * entity.joy_score).round(1),
-                    (100 * entity.sadness_score).round(1),
-                    (100 * entity.fear_score).round(1),
-                    (100 * entity.disgust_score).round(1),
-                    (100 * entity.anger_score).round(1)
-                  ]
-                %>,
-                pointPlacement: 'on'
-              }
-          ]
-        });
-      })
-      </script>
+        /* Radar chart design created by Nadieh Bremer - VisualCinnamon.com */
+        ////////////////////////////////////////////////////////////// 
+        //////////////////////// Set-Up ////////////////////////////// 
+        ////////////////////////////////////////////////////////////// 
+
+        var margin = {top: 100, right: 100, bottom: 100, left: 100},
+          width = Math.min(700, window.innerWidth - 10) - margin.left - margin.right,
+          height = Math.min(width, window.innerHeight - margin.top - margin.bottom - 20);
+            
+        ////////////////////////////////////////////////////////////// 
+        ////////////////////////// Data ////////////////////////////// 
+        ////////////////////////////////////////////////////////////// 
+
+        var data = [
+              [//iPhone
+              {axis:"Battery Life",value:0.22},
+              {axis:"Brand",value:0.28},
+              {axis:"Contract Cost",value:0.29},
+              {axis:"Design And Quality",value:0.17},
+              {axis:"Have Internet Connectivity",value:0.22},
+              {axis:"Large Screen",value:0.02},
+              {axis:"Price Of Device",value:0.21},
+              {axis:"To Be A Smartphone",value:0.50}			
+              ],[//Samsung
+              {axis:"Battery Life",value:0.27},
+              {axis:"Brand",value:0.16},
+              {axis:"Contract Cost",value:0.35},
+              {axis:"Design And Quality",value:0.13},
+              {axis:"Have Internet Connectivity",value:0.20},
+              {axis:"Large Screen",value:0.13},
+              {axis:"Price Of Device",value:0.35},
+              {axis:"To Be A Smartphone",value:0.38}
+              ],[//Nokia Smartphone
+              {axis:"Battery Life",value:0.26},
+              {axis:"Brand",value:0.10},
+              {axis:"Contract Cost",value:0.30},
+              {axis:"Design And Quality",value:0.14},
+              {axis:"Have Internet Connectivity",value:0.22},
+              {axis:"Large Screen",value:0.04},
+              {axis:"Price Of Device",value:0.41},
+              {axis:"To Be A Smartphone",value:0.30}
+              ]
+            ];
+        ////////////////////////////////////////////////////////////// 
+        //////////////////// Draw the Chart ////////////////////////// 
+        ////////////////////////////////////////////////////////////// 
+
+        var color = d3.scalePoint()
+          .range(["#EDC951","#CC333F","#00A0B0"]);
+          
+        var radarChartOptions = {
+          w: width,
+          h: height,
+          margin: margin,
+          maxValue: 0.5,
+          levels: 5,
+          roundStrokes: true,
+          color: color
+        };
+        //Call function to draw the Radar chart
+        RadarChart("#graph-character-emotions-<%= entity.id %>", data, radarChartOptions);
+
+      });
+    </script>
 
   <% end %>
 
