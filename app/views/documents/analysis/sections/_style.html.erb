@@ -1,12 +1,23 @@
+<style>
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+.zoom {
+  cursor: move;
+  fill: none;
+  pointer-events: all;
+}
+</style>
+
 <h5 class="grey-text">Style</h5>
 <div class="row">
   <div class="col s12">
     <div class="card">
       <div class="card-content">
         <div class="card-title">Words per sentence</div>
-        <div>
-          <div id="graph-words-per-sentence"></div>
-        </div>
+        <div id="words-per-sentence" style="height: 600px"></div>
       </div>
       <div class="card-action">
         <a class="activator blue-text text-darken-4">
@@ -34,45 +45,130 @@
 </div>
 
 <script type="text/javascript">
-$(document).ready(function () {
+  $(document).ready(function () {
+    var words_per_sentence = <%= analysis.words_per_sentence %>;
 
-  var words_per_sentence_chart = Highcharts.chart('graph-words-per-sentence', {
-    chart: {
-      type: 'line',
-      zoomType: 'x'
-    },
-    title: {
-      text: ''
-    },
-    xAxis: {
-      title: {
-        text: 'Sentence ID'
-      },
-      tickInterval: 1,
-      scrollbar: {
-        enabled: true
-      },
-    },
-    yAxis: {
-      title: {
-        text: 'Words per sentence'
-      },
-      gridLineWidth: 1,
-      type: 'linear'
-    },
-    series: [{
-      name: 'Words',
-      data: <%= analysis.words_per_sentence %>,
-      // TODO zoning for pockets of sequential high/low outliers?
-    }],
-    tooltip: {
-      formatter: function() {
-        return 'Sentence ID ' + this.x + ' has <b>' + this.y + '</b> word' + (this.y == 1 ? '' : 's') + '.';
-      }
-    },
-    legend: {
-      enabled: false
+    var margin  = {top: 20, right: 20, bottom: 110, left: 40},
+        margin2 = {top: 430, right: 20, bottom: 300, left: 40},
+        width   = 600,
+        height  = 400,
+        height2 = 200;
+
+    var svg = d3.select("#words-per-sentence")
+      .append("svg")
+      .attr('width', width)
+      .attr('height', height);
+  
+    var x  = d3.scaleLinear().range([0, width]),
+        x2 = d3.scaleLinear().range([0, width]),
+        y  = d3.scaleLinear().range([height, 0]),
+        y2 = d3.scaleLinear().range([height2, 0]);
+
+    var xAxis = d3.axisBottom(x),
+        xAxis2 = d3.axisBottom(x2),
+        yAxis = d3.axisLeft(y);
+
+    var brush = d3.brushX()
+        .extent([[0, 0], [width, height2]])
+        .on("brush end", brushed);
+
+    var zoom = d3.zoom()
+        .scaleExtent([1, Infinity])
+        .translateExtent([[0, 0], [width, height]])
+        .extent([[0, 0], [width, height]])
+        .on("zoom", zoomed);
+
+    var line = d3.line()
+        .x(function (d) { return x(d); })
+        .y(function (d) { return y(d); });
+
+    var line2 = d3.line()
+        .x(function (d) { return x2(d); })
+        .y(function (d) { return y2(d); });
+
+    var clip = svg.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("x", 0)
+        .attr("y", 0); 
+
+    var line_chart = svg.append("g")
+        .attr("class", "focus")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("clip-path", "url(#clip)");
+
+    var focus = svg.append("g")
+        .attr("class", "focus")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var context = svg.append("g")
+        .attr("class", "context")
+        .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+    words_per_sentence.forEach(function (word_count, sentence_index) {
+      x.domain([0, words_per_sentence.length]);
+      y.domain(d3.extent(words_per_sentence));
+      x2.domain(x.domain());
+      y2.domain(y.domain());
+
+      focus.append("g")
+          .attr("class", "axis axis--x")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
+
+      focus.append("g")
+          .attr("class", "axis axis--y")
+          .call(yAxis);
+
+      line_chart.append("path")
+          .datum([sentence_index, word_count])
+          .attr("class", "line")
+          .attr("d", line);
+
+      context.append("path")
+          .datum([word_count])
+          .attr("class", "line")
+          .attr("d", line2);
+
+      context.append("g")
+          .attr("class", "axis axis--x")
+          .attr("transform", "translate(0," + height2 + ")")
+          .call(xAxis2);
+
+      context.append("g")
+          .attr("class", "brush")
+          .call(brush)
+          .call(brush.move, x.range());
+
+      svg.append("rect")
+          .attr("class", "zoom")
+          .attr("width", width)
+          .attr("height", height)
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+          .call(zoom);
+    });
+
+    function brushed() {
+      if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+      var s = d3.event.selection || x2.range();
+      x.domain(s.map(x2.invert, x2));
+      line_chart.select(".line").attr("d", line);
+      focus.select(".axis--x").call(xAxis);
+      svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
+          .scale(width / (s[1] - s[0]))
+          .translate(-s[0], 0));
+    }
+
+    function zoomed() {
+      if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+      var t = d3.event.transform;
+      x.domain(t.rescaleX(x2).domain());
+      line_chart.select(".line").attr("d", line);
+      focus.select(".axis--x").call(xAxis);
+      context.select(".brush").call(brush.move, x.range().map(t.invertX, t));
     }
   });
-})
+
 </script>
