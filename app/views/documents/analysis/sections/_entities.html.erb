@@ -24,6 +24,7 @@
             <%= entity.text %>
             <i class="material-icons right black-text">close</i>
           </span>
+          <div class="card-title">Emotional range</div>
           <div id="graph-character-emotions-<%= entity.id %>"></div>
           <ul class="help-text">
             <li>Sentiment: <%= entity.sentiment_label %> (<%= entity.sentiment_score %>)</li>
@@ -42,49 +43,15 @@
 
     <script type="text/javascript">
       $(document).ready(function () {
-        /* Radar chart design created by Nadieh Bremer - VisualCinnamon.com */
-        ////////////////////////////////////////////////////////////// 
-        //////////////////////// Set-Up ////////////////////////////// 
-        ////////////////////////////////////////////////////////////// 
-
-        var margin = {top: 100, right: 100, bottom: 100, left: 100},
-          width = Math.min(700, window.innerWidth - 10) - margin.left - margin.right,
-          height = Math.min(width, window.innerHeight - margin.top - margin.bottom - 20);
-            
-        ////////////////////////////////////////////////////////////// 
-        ////////////////////////// Data ////////////////////////////// 
-        ////////////////////////////////////////////////////////////// 
-
         var data = [
-              [//iPhone
-              {axis:"Battery Life",value:0.22},
-              {axis:"Brand",value:0.28},
-              {axis:"Contract Cost",value:0.29},
-              {axis:"Design And Quality",value:0.17},
-              {axis:"Have Internet Connectivity",value:0.22},
-              {axis:"Large Screen",value:0.02},
-              {axis:"Price Of Device",value:0.21},
-              {axis:"To Be A Smartphone",value:0.50}			
-              ],[//Samsung
-              {axis:"Battery Life",value:0.27},
-              {axis:"Brand",value:0.16},
-              {axis:"Contract Cost",value:0.35},
-              {axis:"Design And Quality",value:0.13},
-              {axis:"Have Internet Connectivity",value:0.20},
-              {axis:"Large Screen",value:0.13},
-              {axis:"Price Of Device",value:0.35},
-              {axis:"To Be A Smartphone",value:0.38}
-              ],[//Nokia Smartphone
-              {axis:"Battery Life",value:0.26},
-              {axis:"Brand",value:0.10},
-              {axis:"Contract Cost",value:0.30},
-              {axis:"Design And Quality",value:0.14},
-              {axis:"Have Internet Connectivity",value:0.22},
-              {axis:"Large Screen",value:0.04},
-              {axis:"Price Of Device",value:0.41},
-              {axis:"To Be A Smartphone",value:0.30}
-              ]
-            ];
+          [
+            { axis: "Joy",     value: <%= (100 * entity.joy_score).round(1) %> },
+            { axis: "Sadness", value: <%= (100 * entity.sadness_score).round(1) %> },
+            { axis: "Fear",    value: <%= (100 * entity.fear_score).round(1) %> },
+            { axis: "Disgust", value: <%= (100 * entity.disgust_score).round(1) %> },
+            { axis: "Anger",   value: <%= (100 * entity.anger_score).round(1) %> }
+          ]
+        ];
         ////////////////////////////////////////////////////////////// 
         //////////////////// Draw the Chart ////////////////////////// 
         ////////////////////////////////////////////////////////////// 
@@ -93,11 +60,16 @@
           .range(["#EDC951","#CC333F","#00A0B0"]);
           
         var radarChartOptions = {
-          w: width,
-          h: height,
-          margin: margin,
-          maxValue: 0.5,
-          levels: 5,
+          w: 400,
+          h: 300,
+          margin: {
+            top: 50, 
+            right: 0, 
+            bottom: 20, 
+            left: 10
+          },
+          maxValue: 100,
+          levels: 4,
           roundStrokes: true,
           color: color
         };
@@ -112,6 +84,7 @@
   <div class="col s12 m12">
     <div class="card">
       <div class="card-content">
+        <div class="card-title">Ensemble emotional range</div>
         <div id="graph-character-emotions"></div>
       </div>
     </div>
@@ -119,49 +92,42 @@
 </div>
 
 <script type="text/javascript">
-$(document).ready(function () {
-  var emotions_chart = Highcharts.chart('graph-character-emotions', {
-    chart: {
-        polar: true,
-        type: 'line'
-    },
-    title: {
-        text: 'Ensemble emotional range'
-    },
-    xAxis: {
-        categories: ['Joy', 'Sadness', 'Fear', 'Disgust', 'Anger'],
-        tickmarkPlacement: 'on',
-        lineWidth: 0
-    },
-    yAxis: {
-        lineWidth: 0,
-        min: 0,
-        max: 100
-    },
-    legend: {
-        align: 'right',
-        verticalAlign: 'top',
-        y: 70,
-        layout: 'vertical'
-    },
+  $(document).ready(function () {
 
-    series: [
+    var data = [
       <% analysis.document_entities.where(entity_type: 'Character').each do |entity| %>
-        {
-          name: '<%= entity.text %>',
-          data: <%=
-            [
-              (100 * entity.joy_score).round(1),
-              (100 * entity.sadness_score).round(1),
-              (100 * entity.fear_score).round(1),
-              (100 * entity.disgust_score).round(1),
-              (100 * entity.anger_score).round(1)
-            ]
-          %>,
-          pointPlacement: 'on'
-        },
+        [
+          { axis: "Joy",     value: <%= (100 * entity.joy_score).round(1) %> },
+          { axis: "Sadness", value: <%= (100 * entity.sadness_score).round(1) %> },
+          { axis: "Fear",    value: <%= (100 * entity.fear_score).round(1) %> },
+          { axis: "Disgust", value: <%= (100 * entity.disgust_score).round(1) %> },
+          { axis: "Anger",   value: <%= (100 * entity.anger_score).round(1) %> }
+        ],
       <% end %>
-    ]
+    ];
+    ////////////////////////////////////////////////////////////// 
+    //////////////////// Draw the Chart ////////////////////////// 
+    ////////////////////////////////////////////////////////////// 
+
+    var color = d3.scalePoint()
+      .range(["#EDC951","#CC333F","#00A0B0"]);
+      
+    var radarChartOptions = {
+      w: 400,
+      h: 300,
+      margin: {
+        top:    100, 
+        right:  100, 
+        bottom: 100, 
+        left:   100
+      },
+      levels: 4,
+      maxValue: 100,
+      roundStrokes: true,
+      color: color,
+      dotRadius: 2
+    };
+    RadarChart("#graph-character-emotions", data, radarChartOptions);
   });
-})
+
 </script>
