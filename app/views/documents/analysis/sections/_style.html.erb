@@ -62,18 +62,9 @@
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    <%= analysis.words_per_sentence %>.forEach(function (data) {
-      console.log(data);
-    });
-
-    //Read the data
-    data = word_count_data;
-
-    console.log(data);
-
     // Add X axis --> it is a date format
     var x = d3.scaleLinear()
-      .domain(d3.extent(data, function(d) { return d.sentence_index; }))
+      .domain(d3.extent(word_count_data, function(d) { return d.sentence_index; }))
       .range([ 0, width ]);
     xAxis = svg.append("g")
       .attr("transform", "translate(0," + height + ")")
@@ -81,7 +72,7 @@
 
     // Add Y axis
     var y = d3.scaleLinear()
-      .domain([0, d3.max(data, function(d) { return +d.value; })])
+      .domain([0, d3.max(word_count_data, function(d) { return +d.value; })])
       .range([ height, 0 ]);
     yAxis = svg.append("g")
       .call(d3.axisLeft(y));
@@ -106,7 +97,7 @@
 
     // Add the line
     line.append("path")
-      .datum(data)
+      .datum(word_count_data)
       .attr("class", "line")  // I add the class line to be able to modify this line later on.
       .attr("fill", "none")
       .attr("stroke", "steelblue")
@@ -155,7 +146,7 @@
 
     // If user double click, reinitialize the chart
     svg.on("dblclick",function(){
-      x.domain(d3.extent(data, function(d) { return d.sentence_index; }))
+      x.domain(d3.extent(word_count_data, function(d) { return d.sentence_index; }))
       xAxis.transition().call(d3.axisBottom(x))
       line
         .select('.line')
