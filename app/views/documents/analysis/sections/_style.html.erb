@@ -17,7 +17,7 @@
     <div class="card">
       <div class="card-content">
         <div class="card-title">Words per sentence</div>
-        <div id="words-per-sentence" style="height: 600px"></div>
+        <div id="words-per-sentence" ></div>
       </div>
       <div class="card-action">
         <a class="activator blue-text text-darken-4">
@@ -46,129 +46,124 @@
 
 <script type="text/javascript">
   $(document).ready(function () {
-    var words_per_sentence = <%= analysis.words_per_sentence %>;
+    var word_count_data = $.map(<%= analysis.words_per_sentence %>, function( val, i ) {
+      return { sentence_index: i, value: val };
+    });
 
-    var margin  = {top: 20, right: 20, bottom: 110, left: 40},
-        margin2 = {top: 430, right: 20, bottom: 300, left: 40},
-        width   = 600,
-        height  = 400,
-        height2 = 200;
+    var margin = {top: 10, right: 30, bottom: 30, left: 60},
+        width = 1100 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
 
+    // append the svg object to the body of the page
     var svg = d3.select("#words-per-sentence")
       .append("svg")
-      .attr('width', width)
-      .attr('height', height);
-  
-    var x  = d3.scaleLinear().range([0, width]),
-        x2 = d3.scaleLinear().range([0, width]),
-        y  = d3.scaleLinear().range([height, 0]),
-        y2 = d3.scaleLinear().range([height2, 0]);
+        .attr("width",  width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    var xAxis = d3.axisBottom(x),
-        xAxis2 = d3.axisBottom(x2),
-        yAxis = d3.axisLeft(y);
+    <%= analysis.words_per_sentence %>.forEach(function (data) {
+      console.log(data);
+    });
 
-    var brush = d3.brushX()
-        .extent([[0, 0], [width, height2]])
-        .on("brush end", brushed);
+    //Read the data
+    data = word_count_data;
 
-    var zoom = d3.zoom()
-        .scaleExtent([1, Infinity])
-        .translateExtent([[0, 0], [width, height]])
-        .extent([[0, 0], [width, height]])
-        .on("zoom", zoomed);
+    console.log(data);
 
-    var line = d3.line()
-        .x(function (d) { return x(d); })
-        .y(function (d) { return y(d); });
+    // Add X axis --> it is a date format
+    var x = d3.scaleLinear()
+      .domain(d3.extent(data, function(d) { return d.sentence_index; }))
+      .range([ 0, width ]);
+    xAxis = svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
 
-    var line2 = d3.line()
-        .x(function (d) { return x2(d); })
-        .y(function (d) { return y2(d); });
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain([0, d3.max(data, function(d) { return +d.value; })])
+      .range([ height, 0 ]);
+    yAxis = svg.append("g")
+      .call(d3.axisLeft(y));
 
+    // Add a clipPath: everything out of this area won't be drawn.
     var clip = svg.append("defs").append("svg:clipPath")
         .attr("id", "clip")
         .append("svg:rect")
-        .attr("width", width)
-        .attr("height", height)
+        .attr("width", width )
+        .attr("height", height )
         .attr("x", 0)
-        .attr("y", 0); 
+        .attr("y", 0);
 
-    var line_chart = svg.append("g")
-        .attr("class", "focus")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-        .attr("clip-path", "url(#clip)");
+    // Add brushing
+    var brush = d3.brushX()                   // Add the brush feature using the d3.brush function
+        .extent( [ [0,0], [width,height] ] )  // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+        .on("end", updateChart)               // Each time the brush selection changes, trigger the 'updateChart' function
 
-    var focus = svg.append("g")
-        .attr("class", "focus")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    // Create the line variable: where both the line and the brush take place
+    var line = svg.append('g')
+      .attr("clip-path", "url(#clip)")
 
-    var context = svg.append("g")
-        .attr("class", "context")
-        .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+    // Add the line
+    line.append("path")
+      .datum(data)
+      .attr("class", "line")  // I add the class line to be able to modify this line later on.
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.sentence_index) })
+        .y(function(d) { return y(d.value) })
+        )
 
-    words_per_sentence.forEach(function (word_count, sentence_index) {
-      x.domain([0, words_per_sentence.length]);
-      y.domain(d3.extent(words_per_sentence));
-      x2.domain(x.domain());
-      y2.domain(y.domain());
+    // Add the brushing
+    line
+      .append("g")
+        .attr("class", "brush")
+        .call(brush);
 
-      focus.append("g")
-          .attr("class", "axis axis--x")
-          .attr("transform", "translate(0," + height + ")")
-          .call(xAxis);
+    // A function that set idleTimeOut to null
+    var idleTimeout
+    function idled() { idleTimeout = null; }
 
-      focus.append("g")
-          .attr("class", "axis axis--y")
-          .call(yAxis);
+    // A function that update the chart for given boundaries
+    function updateChart() {
 
-      line_chart.append("path")
-          .datum([sentence_index, word_count])
-          .attr("class", "line")
-          .attr("d", line);
+      // What are the selected boundaries?
+      extent = d3.event.selection
 
-      context.append("path")
-          .datum([word_count])
-          .attr("class", "line")
-          .attr("d", line2);
+      // If no selection, back to initial coordinate. Otherwise, update X axis domain
+      if(!extent){
+        if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
+        x.domain([ 4,8])
+      }else{
+        x.domain([ x.invert(extent[0]), x.invert(extent[1]) ])
+        line.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
+      }
 
-      context.append("g")
-          .attr("class", "axis axis--x")
-          .attr("transform", "translate(0," + height2 + ")")
-          .call(xAxis2);
+      // Update axis and line position
+      xAxis.transition().duration(1000).call(d3.axisBottom(x))
+      line
+          .select('.line')
+          .transition()
+          .duration(1000)
+          .attr("d", d3.line()
+            .x(function(d) { return x(d.sentence_index) })
+            .y(function(d) { return y(d.value) })
+          )
+    }
 
-      context.append("g")
-          .attr("class", "brush")
-          .call(brush)
-          .call(brush.move, x.range());
-
-      svg.append("rect")
-          .attr("class", "zoom")
-          .attr("width", width)
-          .attr("height", height)
-          .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-          .call(zoom);
+    // If user double click, reinitialize the chart
+    svg.on("dblclick",function(){
+      x.domain(d3.extent(data, function(d) { return d.sentence_index; }))
+      xAxis.transition().call(d3.axisBottom(x))
+      line
+        .select('.line')
+        .transition()
+        .attr("d", d3.line()
+          .x(function(d) { return x(d.sentence_index) })
+          .y(function(d) { return y(d.value) })
+      )
     });
-
-    function brushed() {
-      if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-      var s = d3.event.selection || x2.range();
-      x.domain(s.map(x2.invert, x2));
-      line_chart.select(".line").attr("d", line);
-      focus.select(".axis--x").call(xAxis);
-      svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
-          .scale(width / (s[1] - s[0]))
-          .translate(-s[0], 0));
-    }
-
-    function zoomed() {
-      if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
-      var t = d3.event.transform;
-      x.domain(t.rescaleX(x2).domain());
-      line_chart.select(".line").attr("d", line);
-      focus.select(".axis--x").call(xAxis);
-      context.select(".brush").call(brush.move, x.range().map(t.invertX, t));
-    }
   });
-
 </script>
