@@ -18,6 +18,21 @@
           </div>
         </div>
       <% end %>
+
+      <% if @document.persisted? %>
+        <%= link_to '#', class: "halfway-fab waves-effect waves-light share", style: 'width: 100%' do %>
+          <div class="card <%= Document.color %> lighten-2">
+            <div class="card-content white-text">
+              <i class="material-icons left">share</i>
+              Share document
+            </div>
+          </div>
+        <% end %>
+      <% end %>
     </div>
   </div>
+<% end %>
+
+<% if @document.persisted? %>
+  <%= render partial: 'content/share', locals: { shared_content: @document } %>
 <% end %>
