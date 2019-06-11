@@ -5,7 +5,8 @@ class DocumentAuthorizer < ApplicationAuthorizer
 
   def readable_by?(user)
     [
-      resource.user_id == user.id
+      resource.user_id == user.id,
+      resource.privacy == 'public'
     ].any?
   end
 

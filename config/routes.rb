@@ -16,6 +16,8 @@ Rails.application.routes.draw do
   end
   get '/@:username', to: 'users#show', as: :profile_by_username
 
+  resources :documents
+
   scope '/my' do
     get '/content',         to: 'main#dashboard', as: :dashboard
     get '/content/recent',  to: 'main#recent_content', as: :recent_content
@@ -23,6 +25,8 @@ Rails.application.routes.draw do
     get '/prompts',         to: 'main#prompts', as: :prompts
 
     get '/scratchpad',      to: 'main#notes', as: :notes
+
+    # Legacy routes: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
 
     # Billing
