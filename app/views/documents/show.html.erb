@@ -7,8 +7,6 @@
       <div id="editor"><%= ContentFormatterService.substitute_content_links(@document.body.try(:html_safe) || "", current_user).html_safe %></div>
     </div>
     <div class="col l2 m4 smart-sidebar">
-      <%= render partial: 'documents/components/smart_sidebar', locals: { document: @document } %>
-
       <%= link_to edit_document_path(@document), target: '_new' do %>
         <div class="card <%= Document.color %>">
           <div class="card-content">
@@ -19,20 +17,7 @@
         </div>
       <% end %>
 
-      <% if @document.persisted? %>
-        <%= link_to '#', class: "halfway-fab waves-effect waves-light share", style: 'width: 100%' do %>
-          <div class="card <%= Document.color %> lighten-2">
-            <div class="card-content white-text">
-              <i class="material-icons left">share</i>
-              Share document
-            </div>
-          </div>
-        <% end %>
-      <% end %>
+      <%= render partial: 'documents/components/smart_sidebar', locals: { document: @document } %>
     </div>
   </div>
-<% end %>
-
-<% if @document.persisted? %>
-  <%= render partial: 'content/share', locals: { shared_content: @document } %>
 <% end %>
