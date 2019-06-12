@@ -20,6 +20,7 @@ class Siblingship < ApplicationRecord
     this_object  = Character.find_by(id: self.character_id)
     other_object = Character.find_by(id: self.sibling_id)
 
-    other_object.siblings.delete(this_object) unless other_object.nil?
+    return unless other_object.present?
+    other_object.siblings.delete(this_object)
   end
 end

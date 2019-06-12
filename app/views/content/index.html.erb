@@ -25,36 +25,82 @@
 
 <% elsif @content.empty? %>
 
-  <div class="center" style="margin: 50px 0">
-    <h4>You haven't created any <%= content_type.pluralize %> yet!</h4>
-    <h1>
-      <i class="material-icons <%= @content_type_class.color %>-text" style="font-size: 200%">
-        <%= @content_type_class.icon %>
-      </i>
-    </h1>
-    <p>
-      <%= t("content_descriptions.#{content_type}") %>
-    </p>
+  <div class="row">
+    <div class="col s12 m8 offset-m2">
+      <div class="hoverable card center" style="margin: 20px 0 0 0; padding: 50px 0; border-bottom: 10px solid <%= @content_type_class.hex_color %>">
+        <h4>
+          You haven't created any <%= content_type.pluralize %>
+          <% if @universe_scope %>
+            in the <%= link_to @universe_scope.name, @universe_scope %> universe
+          <% end %>
+          yet!
+        </h4>
+        <h1>
+          <i class="material-icons <%= @content_type_class.color %>-text" style="font-size: 200%">
+            <%= @content_type_class.icon %>
+          </i>
+        </h1>
+        <p>
+          <%= t("content_descriptions.#{content_type}") %>
+        </p>
 
-    <% if current_user.can_create? @content_type_class %>
-      <%= link_to "Create your first #{content_type.humanize.downcase}", new_polymorphic_path(@content_type_class), class: "btn #{@content_type_class.color}" %>
-    <% else %>
-      <%= link_to "Upgrade to Premium to create your first #{content_type.humanize.downcase}", subscription_path %>
+        <% if current_user.can_create? @content_type_class %>
+          <%= link_to "Create your first #{content_type.humanize.downcase}", new_polymorphic_path(@content_type_class), class: "btn-large #{@content_type_class.color} darken-1" %>
+        <% else %>
+          <%= link_to "Upgrade to Premium to create your first #{content_type.humanize.downcase}", subscription_path %>
+        <% end %>
+
+        <p class="grey-text text-lighten-2" style="padding-top: 20px;">
+          <% 5.times { %><i class="material-icons"><%= @content_type_class.icon %></i>&nbsp;&nbsp;&nbsp;&nbsp;<%}%>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col s12 m4 <%= @universe_scope ? 'offset-m2' : 'offset-m4' %>">
+      <div class="hoverable card">
+        <div class="card-content">
+          <div class="card-title">
+            Customize template
+          </div>
+          <p>
+            Click the button below to customize the categories and fields for all
+            of your <%= @content_type_class.name.downcase.pluralize %>.
+          </p>
+          <br />
+          <p>
+            <%=
+              link_to "Customize",
+                attribute_customization_path(@content_type_class.name.downcase),
+                class: "btn #{@content_type_class.color}-text #{@content_type_class.color} lighten-5 text-darken-4"
+            %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <% if @universe_scope %>
+      <div class="col s12 m4">
+        <div class="hoverable card">
+          <div class="card-content">
+            <div class="card-title">
+              Focus on another universe
+            </div>
+            <p>
+              You're currently focused on the 
+              <%= link_to @universe_scope.name, @universe_scope, class: Universe.color + '-text' %>
+              universe and only seeing <%= @content_type_class.name.downcase.pluralize %> in that
+              universe.
+            </p>
+            <br />
+            <p>
+              You can change what universe you're focused on by selecting a different one in the sidebar.
+            </p>
+          </div>
+        </div>
+      </div>
     <% end %>
-
-    <p class="grey-text text-lighten-2" style="padding-top: 20px;">
-      <% 5.times { %><i class="material-icons"><%= @content_type_class.icon %></i>&nbsp;&nbsp;&nbsp;&nbsp;<%}%>
-    </p>
-
-    <p style="padding-top: 20px">
-      You can now customize your <%= @content_type_class.name %> template, too!
-    </p>
-
-    <%=
-      link_to "Customize your #{@content_type_class.name} template",
-        attribute_customization_path(@content_type_class.name.downcase),
-        class: "btn #{@content_type_class.color}-text white"
-    %>
   </div>
 
 <% end %>
