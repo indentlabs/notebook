@@ -19,6 +19,7 @@ class DocumentsController < ApplicationController
 
     unless @document.present? && (current_user || User.new).can_read?(@document)
       redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+      return
     end
 
     @navbar_actions.unshift({

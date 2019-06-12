@@ -15,14 +15,16 @@ class Childrenship < ApplicationRecord
     this_object  = Character.find_by(id: self.character_id)
     other_object = Character.find_by(id: self.child_id)
 
+    return unless other_object.present?
+
     # If this character is marked having a child, we need to figure out whether it's the father or mother
     # of that child and create the proper association
     gender = gender_of_object this_object
     if gender == :male
-      other_object.fatherships.create(character: other_object, father: this_object) unless other_object.fathers.include? this_object
+      other_object.fatherships.create(character: other_object, father: this_object) unless other_object.fathers.include?(this_object)
 
     elsif gender == :female
-      other_object.motherships.create(character: other_object, mother: this_object) unless other_object.mothers.include? this_object
+      other_object.motherships.create(character: other_object, mother: this_object) unless other_object.mothers.include?(this_object)
 
     end
   end
