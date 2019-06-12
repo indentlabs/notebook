@@ -1,5 +1,17 @@
 <% set_meta_tags title: @content.name, description: @content.description %>
 
+<%= content_for :full_width_page_header do %>
+  <div class="parallax-header">
+    <% if @content.image_uploads.any? %>
+      <% @content.image_uploads.each do |image| %>
+        <%= image_tag image.src.url(:large) %>
+      <% end %>
+    <% else %>
+      <%= image_tag "card-headers/characters.jpg" %>
+    <% end %>
+  </div>
+<% end %>
+
 <div class="row">
   <div class="col s9">
     <div class="hoverable card">
