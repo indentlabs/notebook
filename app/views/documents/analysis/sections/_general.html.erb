@@ -12,11 +12,19 @@
             <%= link_to document.user.name, document.user %>
           </div>
 
-          <p>Language: <%= analysis.language %></p>
-          <p>Originally created <%= time_ago_in_words document.created_at %> ago</p>
-          <p>Last edited <%= time_ago_in_words document.updated_at %> ago</p>
-          <p>Analysis took <%= (analysis.completed_at - analysis.created_at).round(1) %> minutes</p>
-          <p>Analysis completed <%= time_ago_in_words analysis.completed_at %> ago</p>
+          <!--<p>Language: <%= analysis.language %></p>-->
+          <ul class="browser-default">
+            <li>This document:</li>
+              <ul class="browser-default">
+                <li>Originally created <%= time_ago_in_words document.created_at %> ago</li>
+                <li>Last edited <%= time_ago_in_words document.updated_at %> ago</li>
+              </ul>
+            <li>This analysis:</li>
+              <ul class="browser-default">
+                <li>Took <%= (analysis.completed_at - analysis.created_at).round(1) %> minutes to complete</li>
+                <li>Completed <%= time_ago_in_words analysis.completed_at %> ago</li>
+              </ul>
+          </ul>
         </div>
         <div class="card-action">
           <%= link_to 'View document', document_path(document) %>
