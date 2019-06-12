@@ -21,8 +21,13 @@
   <% end %>
 <% elsif @content.persisted? %>
   <%= link_to '#',
-    class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color} share",
-    style: 'z-index: 1;' do %>
+    class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color} share tooltipped",
+    style: 'z-index: 1;',
+    data: {
+      position: 'bottom',
+      enterDelay: '500',
+      tooltip: "Share this #{@content.class.name.downcase}"
+    } do %>
     <i class="material-icons">share</i>
   <% end %>
 <% end %>
@@ -48,7 +53,7 @@
 <% end %>
 
 <% if personal_content && @content.persisted? %>
-  <a class="btn-floating btn-small halfway-fab waves-effect waves-light white share" style="z-index: 1; margin-right: 146px;">
+  <a class="btn-floating btn-small halfway-fab waves-effect waves-light white share tooltipped" style="z-index: 1; margin-right: 146px;" data-tooltip="Share this <%= @content.class.name.downcase %>">
     <i class="material-icons black-text">share</i>
   </a>
 <% end %>
