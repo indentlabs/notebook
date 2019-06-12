@@ -199,7 +199,7 @@
     <div class="card">
       <div class="card-content">
         <div class="card-title">N-syllable words</div>
-        <div id="graph-n-syllable-words"></div>
+        <%= column_chart analysis.n_syllable_words.map { |k, v| [k, v] } %>
       </div>
     </div>
   </div>
@@ -208,7 +208,13 @@
     <div class="card">
       <div class="card-content">
         <div class="card-title">Word variety</div>
-        <div id="graph-word-variety"></div>
+        <p>Number of words used...</p>
+        <%= 
+          pie_chart({
+            'exactly once'   => analysis.words_used_once_count, 
+            'multiple times' => analysis.words_used_repeatedly_count
+          })
+        %>
       </div>
       <div class="card-action">
         <a class="activator blue-text text-darken-4">
@@ -216,7 +222,10 @@
         </a>
       </div>
       <div class="card-reveal">
-        explanation
+        <span class="card-title grey-text text-darken-4">
+          Why is this important?
+          <i class="material-icons right">close</i>
+        </span>
       </div>
     </div>
   </div>
@@ -225,7 +234,15 @@
     <div class="card">
       <div class="card-content">
         <div class="card-title">Word complexity</div>
-        <div id="graph-word-complexity"></div>
+        <p>
+          Number of unique...
+        </p>
+        <%=
+          pie_chart({
+            'simple words'  => analysis.simple_words_count,
+            'complex words' => analysis.complex_words_count
+          })
+        %>
       </div>
       <div class="card-action">
         <a class="activator blue-text text-darken-4">
@@ -233,7 +250,10 @@
         </a>
       </div>
       <div class="card-reveal">
-        explanation
+        <span class="card-title grey-text text-darken-4">
+          Why is this important?
+          <i class="material-icons right">close</i>
+        </span>
       </div>
     </div>
   </div>
@@ -256,97 +276,6 @@ $(document).ready(function () {
 
     e.stopPropagation();
     return false;
-  });
-
-  var n_syllables_per_words_chart = Highcharts.chart('graph-n-syllable-words', {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: ''
-    },
-    xAxis: {
-      title: {
-        text: 'Syllables'
-      },
-      tickInterval: 1,
-      plotBands: [{
-        color: 'lightgreen',
-        from: 0,
-        to: 2.5,
-        label: {
-          text: 'Simple words'
-        }
-      }, {
-        color: 'lightyellow',
-        from: 2.5,
-        to: 20,
-        label: {
-          text: 'Complex words'
-        }
-      }]
-    },
-    yAxis: {
-      title: {
-        text: 'Words'
-      }
-    },
-    series: [{
-      name: 'Words',
-      data: <%= analysis.n_syllable_words.map { |k, v| [k, v] } %>
-    }],
-    tooltip: {
-      formatter: function() {
-        return 'This document contains <b>' + this.y + '</b> ' + this.x + '-syllable word' + (this.y == 1 ? '' : 's') + '.';
-      }
-    },
-    legend: {
-      enabled: false
-    }
-  });
-
-  var word_variety_chart = Highcharts.chart('graph-word-variety', {
-    chart: {
-        type: 'pie'
-    },
-    title: {
-        text: 'Number of words used...'
-    },
-    series: [{
-        name: 'Words',
-        colorByPoint: true,
-        data: [{
-            name: 'exactly once',
-            y: <%= analysis.words_used_once_count %>,
-            sliced: true,
-            selected: true
-        }, {
-            name: 'multiple times',
-            y: <%= analysis.words_used_repeatedly_count %>
-        }]
-    }]
-  });
-
-  var word_complexity_chart = Highcharts.chart('graph-word-complexity', {
-    chart: {
-        type: 'pie'
-    },
-    title: {
-        text: 'Number of...'
-    },
-    series: [{
-        name: 'Words',
-        colorByPoint: true,
-        data: [{
-            name: 'simple words',
-            y: <%= analysis.simple_words_count %>,
-            sliced: true,
-            selected: true
-        }, {
-            name: 'complex words',
-            y: <%= analysis.complex_words_count %>
-        }]
-    }]
   });
 });
 </script>
