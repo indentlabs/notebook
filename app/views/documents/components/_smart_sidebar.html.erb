@@ -7,12 +7,6 @@
       </span>
       <ul>
         <li>&middot; Written by <%= link_to @document.user.name, @document.user %>
-        <!--
-        <li>
-          &middot; Visibility:
-          <a href="#" class="tooltipped" data-tooltip="Sharing documents is coming soon.">Private</a>
-        </li>
-        -->
         <li>&middot; Created <%= time_ago_in_words @document.created_at %> ago</li>
         <li>&middot; Last edited <%= time_ago_in_words @document.updated_at %> ago</li>
       </ul>
@@ -48,6 +42,17 @@
         <div class="card-content white-text">
           <i class="material-icons left">share</i>
           Share document
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+
+  <% if @document.user.on_premium_plan? %>
+    <%= link_to analysis_document_path(@document), class: "halfway-fab waves-effect waves-light", style: 'width: 100%' do %>
+      <div class="card <%= Document.color %> lighten-2">
+        <div class="card-content white-text">
+          <i class="material-icons left">bar_chart</i>
+          Analyze document
         </div>
       </div>
     <% end %>
