@@ -32,19 +32,22 @@ class Childrenship < ApplicationRecord
     this_object  = Character.find_by(id: self.character_id)
     other_object = Character.find_by(id: self.child_id)
 
-    gender = gender_of_object this_object
+    # If there's no linked object to modify, what are we even doing here?
+    return unless other_object.present?
+
+    gender = gender_of_object(this_object)
     if gender == :male
-      other_object.fathers.delete this_object
+      other_object.fathers.delete(this_object)
 
     elsif gender == :female
-      other_object.mothers.delete this_object
+      other_object.mothers.delete(this_object)
 
     elsif gender.nil?
-      if other_object.fathers.include? this_object
-        other_object.fathers.delete this_object
+      if other_object.fathers.include?(this_object)
+        other_object.fathers.delete(this_object)
 
-      elsif other_object.mothers.include? this_object
-        other_object.mothers.delete this_object
+      elsif other_object.mothers.include?(this_object)
+        other_object.mothers.delete(this_object)
       end
     end
   end
