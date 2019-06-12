@@ -2,7 +2,7 @@
   content_name = f.object.class.content_name
 
   field_id = "#{content_name}_#{field[:id]}"
-  value = if f.object.respond_to?(field[:id].to_sym)
+  value ||= if f.object.respond_to?(field[:id].to_sym)
     value = f.object.send(field[:id].to_sym)
   else
     value = field[:value]

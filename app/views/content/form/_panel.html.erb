@@ -1,4 +1,3 @@
-
 <%
   raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
 %>
@@ -161,6 +160,10 @@
             </div>
           </div>
         <% end %>
+      
+      <% elsif field[:type] == 'name' && @entity.present? %>
+        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, value: @entity.try(:text) %>
+        <%= f.hidden_field :document_entity_id, value: @entity.id %>
 
       <% else %>
         <% if AutocompleteService.autocompleteable?(field[:label]) %>

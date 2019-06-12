@@ -1,0 +1,19 @@
+<%
+  visible_documents = content.documents.select { |document| (current_user || User.new).can_read?(document) }
+%>
+
+<div id="documents_panel" class="row panel">
+  <% if visible_documents.any? %>
+    <%= content.name %> appears in the following documents:
+
+    <ul class="browser-default">
+      <% visible_documents.each do |document| %>
+        <li>
+          <%= link_to document.title, document, class: Document.color + '-text flow-text' %>
+          <br />
+          by <%= link_to document.user.name, document.user %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>

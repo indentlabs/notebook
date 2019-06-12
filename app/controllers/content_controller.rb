@@ -126,6 +126,13 @@ class ContentController < ApplicationController
       return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
     end
 
+    if params[:document_entity]
+      @entity = DocumentEntity.find_by(id: params[:document_entity].to_i)
+      if @entity.document_owner != current_user
+        @entity = nil
+      end
+    end
+
     respond_to do |format|
       format.html { render 'content/new', locals: { content: @content } }
       format.json { render json: @content }
@@ -190,6 +197,13 @@ class ContentController < ApplicationController
       end
 
       update_page_tags if @content.respond_to?(:page_tags)
+      
+      if content_params.key?('document_entity_id')
+        document_entity = DocumentEntity.find_by(id: content_params['document_entity_id'].to_i)
+        if document_entity.document_owner == current_user
+          document_entity.update(entity_id: @content.reload.id)
+        end
+      end
 
       successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
@@ -427,7 +441,7 @@ class ContentController < ApplicationController
       .downcase
       .to_sym
 
-    params.require(content_class).permit(content_param_list + [:deleted_at])
+    params.require(content_class).permit(content_param_list + [:deleted_at, :document_entity_id])
   end
 
   def page_tag_params
