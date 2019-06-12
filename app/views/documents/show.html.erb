@@ -6,18 +6,20 @@
     <div class="col s12 m8 l8 offset-l1">
       <div id="editor"><%= ContentFormatterService.substitute_content_links(@document.body.try(:html_safe) || "", current_user).html_safe %></div>
     </div>
-    <div class="col l2 m4 smart-sidebar">
-      <%= render partial: 'documents/components/smart_sidebar', locals: { document: @document } %>
-
-      <%= link_to edit_document_path(@document), target: '_new' do %>
-        <div class="card <%= Document.color %>">
-          <div class="card-content">
-            <span class="card-title white-text">
-              Edit this document
-            </span>
+    <% if user_signed_in? && current_user.can_update?(@document) %>
+      <div class="col l2 m4 smart-sidebar">
+        <%= link_to edit_document_path(@document), target: '_new' do %>
+          <div class="card <%= Document.color %>">
+            <div class="card-content">
+              <span class="card-title white-text">
+                Edit this document
+              </span>
+            </div>
           </div>
-        </div>
-      <% end %>
-    </div>
+        <% end %>
+
+        <%= render partial: 'documents/components/smart_sidebar', locals: { document: @document } %>
+      </div>
+    <% end %>
   </div>
 <% end %>

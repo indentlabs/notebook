@@ -1,5 +1,5 @@
 class DocumentsController < ApplicationController
-  before_action :authenticate_user!, except: [:analysis]
+  before_action :authenticate_user!, except: [:show]
 
   before_action :set_sidenav_expansion
   before_action :set_navbar_color
@@ -15,10 +15,10 @@ class DocumentsController < ApplicationController
   end
 
   def show
-    @document = Document.find_by(id: params[:id], user_id: current_user.id)
+    @document = Document.find_by(id: params[:id])
 
     unless @document.present? && (current_user || User.new).can_read?(@document)
-      redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     end
 
     @navbar_actions.unshift({
@@ -112,6 +112,7 @@ class DocumentsController < ApplicationController
 
   def set_navbar_actions
     @navbar_actions = []
+    return unless user_signed_in?
 
     if @current_user_content && @current_user_content['Document'].present?
       @navbar_actions << {
@@ -134,6 +135,6 @@ class DocumentsController < ApplicationController
   private
 
   def document_params
-    params.require(:document).permit(:title, :body, :deleted_at)
+    params.require(:document).permit(:title, :body, :deleted_at, :privacy)
   end
 end
