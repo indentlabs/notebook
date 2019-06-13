@@ -5,8 +5,11 @@
     <div class="col s12 m6">
       <div class="card">
         <div class="card-image waves-effect waves-block waves-light">
-          <%# todo page image if matched to a page + images exist %>
-          <%= image_tag 'card-headers/' + entity_class.name.downcase.pluralize + '.jpg', class: 'activator' %>
+          <% if entity.entity && entity.entity.image_uploads.any? %>
+            <%= image_tag entity.entity.image_uploads.sample.src.url(:large), class: 'activator' %>
+          <% else %>
+            <%= image_tag 'card-headers/' + entity_class.name.downcase.pluralize + '.jpg', class: 'activator' %>
+          <% end %>
         </div>
         <div class="card-content">
           <span class="card-title activator <%= entity_class.color %>-text">
