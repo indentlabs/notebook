@@ -17,9 +17,9 @@ Rails.application.routes.draw do
   get '/@:username', to: 'users#show', as: :profile_by_username
 
   resources :documents do
-    get '/analysis',       to: 'documents#analysis',       on: :member
-    get '/queue_analysis', to: 'documents#queue_analysis', on: :member
-    get '/link_entity',    to: 'documents#link_entity'
+    get  '/analysis',       to: 'documents#analysis',       on: :member
+    get  '/queue_analysis', to: 'documents#queue_analysis', on: :member
+    post '/link_entity',    to: 'documents#link_entity',    on: :collection
   end
 
   scope '/my' do

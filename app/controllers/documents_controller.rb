@@ -59,6 +59,22 @@ class DocumentsController < ApplicationController
     redirect_to analysis_document_path(@document)
   end
 
+  def link_entity
+    document_entity = DocumentEntity.find_by(id: linked_entity_params[:document_entity_id].to_i)
+    # todo some real perms?
+    if document_entity && document_entity.document_owner == current_user
+      # todo strong params update sans DEI?
+      document_entity.update(
+        entity_type: linked_entity_params[:entity_type], 
+        entity_id:   linked_entity_params[:entity_id].to_i
+      )
+
+      return redirect_to(analysis_document_path(document_entity.document_analysis), notice: "Page linked!")
+    end
+
+    redirect_back(fallback_location: documents_path, notice: "You don't have permission to do that!")
+  end
+
   def edit
     @document = Document.find_by(id: params[:id], user_id: current_user.id)
     @document ||= current_user.documents.create
@@ -136,5 +152,9 @@ class DocumentsController < ApplicationController
 
   def document_params
     params.require(:document).permit(:title, :body, :deleted_at, :privacy)
+  end
+
+  def linked_entity_params
+    params.permit(:entity_id, :entity_type, :document_entity_id)
   end
 end

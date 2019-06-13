@@ -50,7 +50,7 @@
               <i class="material-icons left">add</i>
               Create <%= entity.entity_type %>
             <% end %>
-            <%= link_to '#', class: entity_class.color + '-text right js-link-entity' do %>
+            <%= link_to '#', class: entity_class.color + '-text right js-link-entity', data: { id: entity.id } do %>
               <i class="material-icons left">link</i>
               Link <%= entity.entity_type %>
             <% end %>
@@ -115,15 +115,21 @@
     <p>
       You can link a detected entity to one of your already-created pages by selecting it below.
     </p>
-    <%= form_for document_analysis_path do |f| %>
-      <%= f.hidden_tag :document_entity_id, value: nil %>
+    <%= form_with url: link_entity_documents_path do |f| %>
+      <%= f.hidden_field :entity_type,        value: nil %>
+      <%= f.hidden_field :entity_id,          value: nil %>
+      <%= f.hidden_field :document_entity_id, value: nil %>
+
       <% @current_user_content.each do |content_type, content_list| %>
         <% content_type_class = content_type.constantize %>
         <% next if content_type == 'Document' %>
         <h5><%= content_type.pluralize %></h5>
         <ul class="collection">
           <% content_list.each do |content| %>
-            <a href="#" class="<%= content_type_class.color %>-text">
+            <a href="#" 
+               class="<%= content_type_class.color %>-text js-link-entity-selection" 
+               data-id="<%= content.id %>"
+               data-type="<%= content_type %>">
               <li class="collection-item">
                 <i class="material-icons left"><%= content_type_class.icon %></i>
                 <%= content.name %>
@@ -146,7 +152,21 @@
   $(document).ready(function () {
 
     $('.js-link-entity').click(function () {
+      $('#entity-link-modal').find('input[name=document_entity_id]').val($(this).data('id'));
+
       $('#entity-link-modal').modal('open');
+
+      return false;
+    });
+
+    $('.js-link-entity-selection').click(function () {
+      var entity = $(this);
+      var form   = $(this).closest('form');
+
+      form.find('input[name=entity_id]').val(entity.data('id'));
+      form.find('input[name=entity_type]').val(entity.data('type'));
+      
+      form.submit();
       return false;
     });
 
