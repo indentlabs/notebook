@@ -37,13 +37,14 @@
         </div>
         <div class="card-action">
           <% if entity.entity_id %>
-            <%= link_to polymorphic_path(entity_class.name.downcase, id: entity.entity_id), class: 'blue-text' do %>
-              <i class="material-icons left"><%= entity_class.icon %></i>
-              View <%= entity.text %>
+            <% linked_entity_class = entity.entity.class %>
+            <%= link_to polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'blue-text' do %>
+              <i class="material-icons left"><%= linked_entity_class.icon %></i>
+              View <%= entity.entity.name %>
             <% end %>
-            <%= link_to edit_polymorphic_path(entity_class.name.downcase, id: entity.entity_id), class: 'green-text right' do %>
-              <i class="material-icons left"><%= entity_class.icon %></i>
-              Edit <%= entity.text %>
+            <%= link_to edit_polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'green-text right' do %>
+              <i class="material-icons left"><%= linked_entity_class.icon %></i>
+              Edit <%= entity.entity.name %>
             <% end %>
           <% else %>
             <%= link_to new_polymorphic_path(entity_class, document_entity: entity.id), class: entity_class.color + '-text' do %>
