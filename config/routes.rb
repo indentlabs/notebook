@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   resources :documents do
     get '/analysis',       to: 'documents#analysis',       on: :member
     get '/queue_analysis', to: 'documents#queue_analysis', on: :member
+    get '/link_entity',    to: 'documents#link_entity'
   end
 
   scope '/my' do

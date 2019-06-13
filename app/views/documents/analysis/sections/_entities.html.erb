@@ -48,7 +48,11 @@
           <% else %>
             <%= link_to new_polymorphic_path(entity_class, document_entity: entity.id), class: entity_class.color + '-text' do %>
               <i class="material-icons left">add</i>
-              Create <%= entity.entity_type %> page for <%= entity.text %>
+              Create <%= entity.entity_type %>
+            <% end %>
+            <%= link_to '#', class: entity_class.color + '-text right js-link-entity' do %>
+              <i class="material-icons left">link</i>
+              Link <%= entity.entity_type %>
             <% end %>
           <% end %>
         </div>
@@ -105,8 +109,46 @@
   </div>
 </div>
 
+<div id="entity-link-modal" class="modal">
+  <div class="modal-content">
+    <h4>Link an existing page you've created</h4>
+    <p>
+      You can link a detected entity to one of your already-created pages by selecting it below.
+    </p>
+    <%= form_for document_analysis_path do |f| %>
+      <%= f.hidden_tag :document_entity_id, value: nil %>
+      <% @current_user_content.each do |content_type, content_list| %>
+        <% content_type_class = content_type.constantize %>
+        <% next if content_type == 'Document' %>
+        <h5><%= content_type.pluralize %></h5>
+        <ul class="collection">
+          <% content_list.each do |content| %>
+            <a href="#" class="<%= content_type_class.color %>-text">
+              <li class="collection-item">
+                <i class="material-icons left"><%= content_type_class.icon %></i>
+                <%= content.name %>
+                <span class="secondary-content">
+                  <i class="material-icons">link</i>
+                </span>
+              </li>
+            </a>
+          <% end %>
+        </ul>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+  </div>
+</div>
+
 <script type="text/javascript">
   $(document).ready(function () {
+
+    $('.js-link-entity').click(function () {
+      $('#entity-link-modal').modal('open');
+      return false;
+    });
 
     var data = [
       <% analysis.document_entities.where(entity_type: 'Character').each do |entity| %>
