@@ -6,6 +6,7 @@ module Documents
         document = analysis.document
 
         analysis.noun_count          = document.nouns.count
+        analysis.proper_noun_count   = document.proper_nouns.count
         analysis.adjective_count     = document.adjectives.count
         analysis.verb_count          = document.verbs.count
         analysis.pronoun_count       = document.pronouns.count

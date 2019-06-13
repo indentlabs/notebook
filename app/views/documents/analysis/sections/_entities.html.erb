@@ -1,4 +1,23 @@
 <h5 class="grey-text">Entities</h5>
+
+<script type="text/javascript">
+  var color = d3.scalePoint().range(["#EDC951","#CC333F","#00A0B0"]);
+  var radarChartOptions = {
+    w: 400,
+    h: 300,
+    margin: {
+      top: 50, 
+      right: 0, 
+      bottom: 20, 
+      left: 10
+    },
+    maxValue: 100,
+    levels: 4,
+    roundStrokes: true,
+    color: color
+  };
+</script>
+
 <div class="row">
   <% analysis.document_entities.order('entity_type').each do |entity| %>
     <% entity_class = entity.entity_type.constantize %>
@@ -33,12 +52,12 @@
           <div class="card-title">Emotional range</div>
           <div id="graph-character-emotions-<%= entity.id %>"></div>
           <ul class="help-text">
-            <li>Sentiment: <%= entity.sentiment_label %> (<%= entity.sentiment_score %>)</li>
-            <li>Joy: <%= entity.joy_score %></li>
-            <li>Sadness: <%= entity.sadness_score %></li>
-            <li>Fear: <%= entity.fear_score %></li>
-            <li>Disgust: <%= entity.disgust_score %></li>
-            <li>Anger: <%= entity.anger_score %></li>
+            <li>Sentiment: <%= entity.sentiment_label %> (<%= (100 * entity.sentiment_score).round(1) %>)</li>
+            <li>Joy: <%= (100 * entity.joy_score ).round(1) %></li>
+            <li>Sadness: <%= (100 * entity.sadness_score).round(1) %></li>
+            <li>Fear: <%= (100 * entity.fear_score).round(1) %></li>
+            <li>Disgust: <%= (100 * entity.disgust_score).round(1) %></li>
+            <li>Anger: <%= (100 * entity.anger_score).round(1) %></li>
           </ul>
         </div>
         <div class="card-action">
@@ -77,30 +96,8 @@
             { axis: "Anger",   value: <%= (100 * entity.anger_score).round(1) %> }
           ]
         ];
-        ////////////////////////////////////////////////////////////// 
-        //////////////////// Draw the Chart ////////////////////////// 
-        ////////////////////////////////////////////////////////////// 
 
-        var color = d3.scalePoint()
-          .range(["#EDC951","#CC333F","#00A0B0"]);
-          
-        var radarChartOptions = {
-          w: 400,
-          h: 300,
-          margin: {
-            top: 50, 
-            right: 0, 
-            bottom: 20, 
-            left: 10
-          },
-          maxValue: 100,
-          levels: 4,
-          roundStrokes: true,
-          color: color
-        };
-        //Call function to draw the Radar chart
         RadarChart("#graph-character-emotions-<%= entity.id %>", data, radarChartOptions);
-
       });
     </script>
 

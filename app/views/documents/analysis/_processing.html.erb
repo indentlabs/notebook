@@ -1,9 +1,10 @@
 <h4>Your document is being analyzed...</h4>
 <div class="progress">
-  <div class="determinate" style="width: 70%"></div>
+  <div class="determinate" style="width: <%= analysis.progress %>%"></div>
 </div>
 <p>
-  You can check the analysis progress below.
+  Notebook.ai is processing this document right now. 
+  Refresh this page to see progress or check back later.
 </p>
 
 <h4>Progress</h4>
@@ -11,9 +12,13 @@
   <div class="col s12 m6">
     <div class="card">
       <div class="card-content">
-        <div class="card-title">Something</div>
+        <div class="card-title">Word Choice</div>
         <div class="progress">
-          <div class="indeterminate"></div>
+          <% if analysis && analysis.progress >= 25 %>
+            <div class="determinate" style="width: 100%"></div>
+          <% else %>
+            <div class="indeterminate"></div>
+          <% end %>
         </div>
       </div>
     </div>
@@ -22,9 +27,13 @@
   <div class="col s12 m6">
     <div class="card">
       <div class="card-content">
-        <div class="card-title">Something</div>
+        <div class="card-title">Readability</div>
         <div class="progress">
-          <div class="indeterminate"></div>
+          <% if analysis && analysis.progress >= 50 %>
+            <div class="determinate" style="width: 100%"></div>
+          <% else %>
+            <div class="indeterminate"></div>
+          <% end %>
         </div>
       </div>
     </div>
@@ -33,9 +42,13 @@
   <div class="col s12 m6">
     <div class="card">
       <div class="card-content">
-        <div class="card-title">Something</div>
+        <div class="card-title">Entities</div>
         <div class="progress">
-          <div class="indeterminate"></div>
+          <% if analysis && analysis.progress >= 75 %>
+            <div class="determinate" style="width: 100%"></div>
+          <% else %>
+            <div class="indeterminate"></div>
+          <% end %>
         </div>
       </div>
     </div>
@@ -44,7 +57,7 @@
   <div class="col s12 m6">
     <div class="card">
       <div class="card-content">
-        <div class="card-title">Something</div>
+        <div class="card-title">Emotion</div>
         <div class="progress">
           <div class="indeterminate"></div>
         </div>
@@ -52,7 +65,3 @@
     </div>
   </div>
 </div>
-
-<p>
-  <%= analysis.inspect %>
-</p>

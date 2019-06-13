@@ -30,7 +30,7 @@ class CreateDocumentAnalyses < ActiveRecord::Migration[5.2]
       t.integer :words_used_repeatedly_count
       t.integer :simple_words_count
       t.integer :complex_words_count
-      t.integer :sentiment_score
+      t.float :sentiment_score
       t.string  :sentiment_label
       t.string :language
       t.float :sadness_score
