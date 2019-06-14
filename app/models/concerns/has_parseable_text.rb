@@ -13,11 +13,15 @@ module HasParseableText
     end
 
     def paragraphs
-      @paragraphs ||= plaintext.split(/[\r\n\t]+/)
+      # We use paragraph tags by default, but people might paste in divs also
+      @paragraphs ||= begin
+        paragraphs =  body.scan(/<p>[^<]+<\/p>/).map {     |text| ActionView::Base.full_sanitizer.sanitize(text) }
+        paragraphs << body.scan(/<div>[^<]+<\/div>/).map { |text| ActionView::Base.full_sanitizer.sanitize(text) }
+      end.flatten
     end
 
     def sentences
-      @sentences ||= plaintext.strip.split(/[!\?\.]/).reject(&:empty?)
+      @sentences ||= plaintext.strip.split(/[!\?\.]/).reject(&:empty?).map { |sentence| sentence.gsub("\n", ' ') }
     end
 
     def words
@@ -25,6 +29,7 @@ module HasParseableText
     end
 
     def pages
+      # todo this might make more sense as a word count splitter instead of lines?
       @pages ||= plaintext.split("\n").each_slice(Documents::PlaintextService::PLAINTEXT_LINES_PER_PAGE)
     end
 
