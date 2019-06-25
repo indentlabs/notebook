@@ -19,6 +19,6 @@ class Fathership < ApplicationRecord
     this_object  = Character.find_by(id: self.character_id)
     other_object = Character.find_by(id: self.father_id)
 
-    other_object.children.delete(this_object)
+    other_object.children.delete(this_object) if other_object.present?
   end
 end
