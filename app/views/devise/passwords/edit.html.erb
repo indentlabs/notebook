@@ -1,25 +1,40 @@
-<h2>Change your password</h2>
-
-<%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
-  <%= devise_error_messages! %>
-  <%= f.hidden_field :reset_password_token %>
-
-  <div class="field">
-    <%= f.label :password, "New password" %><br />
-    <% if @minimum_password_length %>
-      <em>(<%= @minimum_password_length %> characters minimum)</em><br />
-    <% end %>
-    <%= f.password_field :password, autofocus: true, autocomplete: "off" %>
-  </div>
-
-  <div class="field">
-    <%= f.label :password_confirmation, "Confirm new password" %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "off" %>
-  </div>
-
-  <div class="actions">
-    <%= f.submit "Change my password" %>
+<% if resource.errors.any? %>
+  <div class="card red lighten-3">
+    <div class="card-content">
+      <div class="card-title">Please fix the following errors:</div>
+      <ul class="browser-default">
+        <%= devise_error_messages! %>
+      </ul>
+    </div>
   </div>
 <% end %>
 
-<%= render "devise/shared/links" %>
+<div class="card">
+  <div class="card-content">
+    <div class="card-title">Change your password</div>
+
+    <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
+      <%= f.hidden_field :reset_password_token %>
+
+      <div class="field">
+        <%= f.label :password, "New password" %><br />
+        <%= f.password_field :password, autofocus: true, autocomplete: "off", class: "validate", minlength: @minimum_password_length.presence || 1, required: 'required' %>
+        <% if @minimum_password_length %>
+          <em class="help-text">(<%= @minimum_password_length %> characters minimum)</em><br />
+        <% end %>
+      </div>
+
+      <div class="field">
+        <%= f.label :password_confirmation, "Confirm new password" %><br />
+        <%= f.password_field :password_confirmation, autocomplete: "off", class: "validate", minlength: @minimum_password_length.presence || 1, required: 'required' %>
+      </div>
+
+      <div class="actions center">
+        <%= f.submit "Change my password", class: 'btn' %>
+        <br /><br />
+        <%= render "devise/shared/links" %>
+      </div>
+    <% end %>
+
+  </div>
+</div>

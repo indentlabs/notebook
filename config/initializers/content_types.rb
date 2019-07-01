@@ -20,7 +20,7 @@ Rails.application.config.content_types = {
   ],
 
   # These content types can be created by any user
-  free: [Universe, Character, Location, Item, School],
+  free: [Universe, Character, Location, Item],
 
   # These content types require a premium subscription to create
   premium: [
