@@ -81,6 +81,6 @@ class AutocompleteService < Service
 
   # helper method so we don't have to I18n every time
   def self.t(key)
-    I18n.t(key)
+    I18n.t(key, scope: 'autocomplete')
   end
 end
