@@ -23,6 +23,7 @@ class User < ApplicationRecord
   def on_premium_plan?
     BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id)
   end
+  has_many :promotions
 
   has_many :image_uploads
 
