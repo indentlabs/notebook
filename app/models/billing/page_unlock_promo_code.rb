@@ -6,16 +6,13 @@ class PageUnlockPromoCode < ApplicationRecord
     page_types.split('|') & Rails.application.config.content_types[:all].map(&:name)
   end
 
-  def already_activated_users
-    promotions.select(:user_id)
-  end
 
   def activate!(user)
     return false unless uses_remaining > 0
 
     # Make sure this user hasn't activated this promo code before
     return false unless user.present?
-    # return if users.where(id: user.id).any?
+    return false if users.pluck(:id).include?(user.id)
 
     # Activate!
     # technically two requests at the same time could still double-activate at 

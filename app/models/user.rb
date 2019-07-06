@@ -25,6 +25,7 @@ class User < ApplicationRecord
   end
   has_many :promotions
 
+
   has_many :image_uploads
 
   has_one :referral_code, dependent: :destroy
@@ -133,6 +134,7 @@ class User < ApplicationRecord
     "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
   end
 
+  # TODO these (3) can probably all be scopes on the related object, no?
   def active_subscriptions
     subscriptions
       .where('start_date < ?', Time.now)
@@ -142,6 +144,10 @@ class User < ApplicationRecord
   def active_billing_plans
     billing_plan_ids = active_subscriptions.pluck(:billing_plan_id)
     BillingPlan.where(id: billing_plan_ids).uniq
+  end
+
+  def active_promotions
+    promotions.active
   end
 
   def initialize_stripe_customer
