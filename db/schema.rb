@@ -1738,11 +1738,12 @@ ActiveRecord::Schema.define(version: 2019_07_06_073303) do
 
   create_table "promotions", force: :cascade do |t|
     t.integer "user_id"
-    t.integer "promo_code_id"
+    t.integer "page_unlock_promo_code_id"
     t.datetime "expires_at"
     t.string "content_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["page_unlock_promo_code_id"], name: "index_promotions_on_page_unlock_promo_code_id"
     t.index ["user_id"], name: "index_promotions_on_user_id"
   end
 

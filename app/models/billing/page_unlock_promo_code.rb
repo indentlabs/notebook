@@ -1,17 +1,21 @@
 class PageUnlockPromoCode < ApplicationRecord
-  has_many :promotions, as: :promo_code
-  has_many :users, through: :promotions
+  has_many :promotions
+  has_many :users, -> { distinct }, through: :promotions
 
   def unlocked_page_types
-    page_types.split('|') & Rails.application.config.content_types[:all]
+    page_types.split('|') & Rails.application.config.content_types[:all].map(&:name)
+  end
+
+  def already_activated_users
+    promotions.select(:user_id)
   end
 
   def activate!(user)
-    return unless uses_remaining > 0
+    return false unless uses_remaining > 0
 
     # Make sure this user hasn't activated this promo code before
-    return unless user.present?
-    return if users.where(id: user.id).any?
+    return false unless user.present?
+    # return if users.where(id: user.id).any?
 
     # Activate!
     # technically two requests at the same time could still double-activate at 
@@ -25,5 +29,7 @@ class PageUnlockPromoCode < ApplicationRecord
         expires_at:   DateTime.current + days_active.days,
       )
     end
+
+    return true
   end
 end
