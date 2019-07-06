@@ -1,0 +1,2 @@
+class PageUnlockPromoCode < ApplicationRecord
+end
