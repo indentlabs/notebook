@@ -11,7 +11,7 @@ class Scene < ApplicationRecord
   include Serendipitous::Concern
 
   include Authority::Abilities
-  self.authorizer_name = 'CollectiveContentAuthorizer'
+  self.authorizer_name = 'ExtendedContentAuthorizer'
 
   # Characters
   relates :scene_characters, with: :scene_characterships
