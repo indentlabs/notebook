@@ -12,7 +12,7 @@ class Magic < ApplicationRecord
   include Serendipitous::Concern
 
   include Authority::Abilities
-  self.authorizer_name = "#{self.name}ContentAuthorizer"
+  self.authorizer_name = "ExtendedContentAuthorizer"
 
   # Characters
   relates :deities, with: :magic_deityships
