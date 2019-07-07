@@ -4,8 +4,7 @@ class ExtendedContentAuthorizer < ContentAuthorizer
 
     [
       PermissionService.billing_plan_allows_extended_content?(user: user),
-      PermissionService.user_can_collaborate_in_universe_that_allows_extended_content?(user: user),
-      PermissionService.user_has_active_promotion_for_this_content_type(user: user, content_type: 'Location')
+      PermissionService.user_can_collaborate_in_universe_that_allows_extended_content?(user: user)
     ].any?
   end
 end
