@@ -4,10 +4,10 @@ class PageUnlockPromoCode < ApplicationRecord
 
   serialize :page_types, Array
 
-  def whitelisted_page_types
-    page_types & Rails.application.config.content_types[:all].map(&:name)
+  before_save do
+    # Whitelist page types to ensure we're only saving promo codes for actual pages :)
+    page_types = page_types & Rails.application.config.content_types[:all].map(&:name)
   end
-
 
   def activate!(user)
     return false unless uses_remaining > 0
@@ -21,7 +21,7 @@ class PageUnlockPromoCode < ApplicationRecord
     # 1 use left, but this seems not worth it to fix
     update(uses_remaining: uses_remaining - 1)
   
-    whitelisted_page_types.each do |page_type|
+    page_types.each do |page_type|
       promotions.create(
         user:         user,
         content_type: page_type,
