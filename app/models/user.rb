@@ -150,6 +150,10 @@ class User < ApplicationRecord
     promotions.active
   end
 
+  def active_promo_codes
+    PageUnlockPromoCode.where(id: active_promotions.pluck(:page_unlock_promo_code_id))
+  end
+
   def initialize_stripe_customer
     if self.stripe_customer_id.nil?
       customer_data = Stripe::Customer.create(email: self.email)

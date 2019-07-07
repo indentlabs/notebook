@@ -2,15 +2,7 @@
 <% on_premium_plan = ['early-adopters', 'premium', 'premium-trio', 'premium-annual'].include? @active_billing_plan.try(:stripe_plan_id) %>
 <% active_stripe_plan = @active_billing_plan.try(:stripe_plan_id) %>
 
-<p class="right hide-on-small-only">
-  <% Rails.application.config.content_types[:all_non_universe].each do |content_class| %>
-    <% can_create = current_user.can_create?(content_class) %>
-    <% edit_message = current_user.send(content_class.name.pluralize.downcase).any? && !can_create %>
-    <i class="material-icons <%= can_create ? content_class.color : 'grey' %>-text tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="You <%= can_create ? 'can' : 'cannot' %> create new <%= content_class.name.pluralize.downcase %>.<%= ' You can edit your existing ones.' if edit_message %>">
-      <%= content_class.icon %>
-    </i>
-  <% end %>
-</p>
+here
 
 <h4>Subscription Plan</h4>
 
@@ -263,16 +255,50 @@
           Enter it below to apply it to your account. Codes may only be used once per account.
         </p>
 
-        <div class="input-field col s6">
-          <input id="promo_code" type="text">
-          <label for="promo_code">Code</label>
-        </div>
-
-        <div class="input-field col s6">
-          <input type="submit" class="white black-text btn" value="Redeem" />
-        </div>
-
+        <%= form_for :promotional_code, url: redeem_path do |form| %>
+          <div class="input-field col s6">
+            <%= form.text_field :promo_code %>
+            <label for="promo_code">Code</label>
+          </div>
+          
+          <div class="input-field col s6">
+            <%= form.submit 'Redeem code', class: 'white black-text btn' %>
+          </div>
+        <% end  %>
         <div class="clearfix"></div>
+
+        <% if current_user.active_promotions.any? %>
+          <p>
+            Your active promo codes:
+
+            <ul class="browser-default">
+              <% current_user.active_promo_codes.each do |promo_code| %>
+                <% promotion = Promotion.find_by(user: current_user, page_unlock_promo_code_id: promo_code.id) %>
+                <li>
+                  <p>
+                    <strong><%= promo_code.code %></strong> - <%= promo_code.description %>
+                    <span class="grey-text">
+                      (active for another <%= distance_of_time_in_words(DateTime.current, promotion.expires_at) %>)
+                    </span>
+                  </p>
+                  <p>
+                    Pages unlocked:
+                    <% promo_code.page_types.each do |page_type| %>
+                      <% page_type_class = page_type.constantize %>
+                      <%= link_to polymorphic_path(page_type_class) do %>
+                        <i class="material-icons <%= page_type_class.color %>-text tooltipped" data-tooltip="<%= page_type.pluralize %>">
+                          <%= page_type_class.icon %>
+                        </i>
+                      <% end %>
+                    <% end %>
+                  </p>
+                </li>
+              <% end %>
+            </ul>
+
+            <%= link_to 'Click here to turn on your new page types!', customization_content_types_path, class: 'btn blue white-text' %>
+          </p>
+        <% end %>
       </div>
     </div>
   </div>

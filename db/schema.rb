@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_07_06_073303) do
+ActiveRecord::Schema.define(version: 2019_07_07_182422) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -1562,6 +1562,8 @@ ActiveRecord::Schema.define(version: 2019_07_06_073303) do
     t.integer "days_active"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "internal_description"
+    t.string "description"
   end
 
   create_table "past_ownerships", force: :cascade do |t|

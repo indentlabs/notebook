@@ -41,6 +41,9 @@ Rails.application.routes.draw do
 
       # This should probably be a DELETE
       get '/payment_method/delete', to: 'subscriptions#delete_payment_method', as: :delete_payment_method
+
+      # Promotional codes
+      post '/redeem', to: 'subscriptions#redeem_code'
     end
   end
   delete 'delete_my_account', to: 'users#delete_my_account'

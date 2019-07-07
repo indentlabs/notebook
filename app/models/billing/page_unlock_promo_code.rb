@@ -6,7 +6,7 @@ class PageUnlockPromoCode < ApplicationRecord
 
   before_save do
     # Whitelist page types to ensure we're only saving promo codes for actual pages :)
-    page_types = page_types & Rails.application.config.content_types[:all].map(&:name)
+    self.page_types = page_types & Rails.application.config.content_types[:all].map(&:name)
   end
 
   def activate!(user)
