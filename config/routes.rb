@@ -45,6 +45,9 @@ Rails.application.routes.draw do
 
       # This should probably be a DELETE
       get '/payment_method/delete', to: 'subscriptions#delete_payment_method', as: :delete_payment_method
+
+      # Promotional codes
+      post '/redeem', to: 'subscriptions#redeem_code'
     end
   end
   delete 'delete_my_account', to: 'users#delete_my_account'
@@ -128,6 +131,7 @@ Rails.application.routes.draw do
       get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
       get '/unsubscribe', to: 'admin#unsubscribe', as: :mass_unsubscribe
       get '/images', to: 'admin#images', as: :image_audit
+      get '/promos', to: 'admin#promos', as: :admin_promos
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'

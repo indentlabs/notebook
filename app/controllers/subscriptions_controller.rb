@@ -1,9 +1,12 @@
 class SubscriptionsController < ApplicationController
   before_action :authenticate_user!
+
   protect_from_forgery except: :stripe_webhook
 
   # General billing page
   def new
+    @sidenav_expansion = 'my account'
+    
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed billing page', {
       'current billing plan': current_user.selected_billing_plan_id,
       'content count': current_user.content_count
@@ -121,6 +124,29 @@ class SubscriptionsController < ApplicationController
   def stripe_webhook
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'stripe webhook') if Rails.env.production?
     #todo handle webhooks :(
+  end
+
+  def redeem_code
+    code = PageUnlockPromoCode.find_by(code: params.require(:promotional_code).permit(:promo_code)[:promo_code])
+
+    if code.nil?
+      redirect_back(fallback_location: subscription_path, alert: "This isn't a valid promo code.")
+      return
+    end
+
+    if code.uses_remaining < 1
+      redirect_back(fallback_location: subscription_path, alert: "This promo code has expired!")
+      return
+    end
+
+    if code.users.include?(current_user)
+      redirect_back(fallback_location: subscription_path, alert: "You've already activated this promo code!")
+      return
+    end      
+
+    # If it looks like a valid code and quacks like a valid code, it's probably a valid code
+    code.activate!(current_user)
+    redirect_back(fallback_location: subscription_path, notice: "Promo code successfully activated!")
   end
 
   private

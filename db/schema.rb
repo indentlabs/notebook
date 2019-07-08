@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_06_13_055406) do
+ActiveRecord::Schema.define(version: 2019_07_07_182422) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -1555,6 +1555,17 @@ ActiveRecord::Schema.define(version: 2019_06_13_055406) do
     t.index ["user_id"], name: "index_page_tags_on_user_id"
   end
 
+  create_table "page_unlock_promo_codes", force: :cascade do |t|
+    t.string "code"
+    t.string "page_types"
+    t.integer "uses_remaining"
+    t.integer "days_active"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "internal_description"
+    t.string "description"
+  end
+
   create_table "past_ownerships", force: :cascade do |t|
     t.integer "user_id"
     t.integer "item_id"
@@ -1725,6 +1736,17 @@ ActiveRecord::Schema.define(version: 2019_06_13_055406) do
     t.index ["id", "deleted_at"], name: "index_planets_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_planets_on_universe_id"
     t.index ["user_id"], name: "index_planets_on_user_id"
+  end
+
+  create_table "promotions", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "page_unlock_promo_code_id"
+    t.datetime "expires_at"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["page_unlock_promo_code_id"], name: "index_promotions_on_page_unlock_promo_code_id"
+    t.index ["user_id"], name: "index_promotions_on_user_id"
   end
 
   create_table "races", force: :cascade do |t|

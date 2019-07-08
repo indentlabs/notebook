@@ -1,7 +1,16 @@
 <div class="row">
   <div class="col s12 m6 offset-m3">
     <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-      <%= devise_error_messages! %>
+      <% if resource.errors.any? %>
+        <div class="card red lighten-3">
+          <div class="card-content">
+            <div class="card-title">Please fix the following errors:</div>
+            <ul class="browser-default">
+              <%= devise_error_messages! %>
+            </ul>
+          </div>
+        </div>
+      <% end %>
 
       <div class="card">
         <div class="card-content">

@@ -11,7 +11,7 @@ class School < ActiveRecord::Base
   include Serendipitous::Concern
 
   include Authority::Abilities
-  self.authorizer_name = 'CoreContentAuthorizer'
+  self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
     'cyan'

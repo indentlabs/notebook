@@ -15,17 +15,17 @@ class Childrenship < ApplicationRecord
     this_object  = Character.find_by(id: self.character_id)
     other_object = Character.find_by(id: self.child_id)
 
-    return unless other_object.present?
+    if other_object.present?
+      # If this character is marked having a child, we need to figure out whether it's the father or mother
+      # of that child and create the proper association
+      gender = gender_of_object this_object
+      if gender == :male
+        other_object.fatherships.create(character: other_object, father: this_object) unless other_object.fathers.include?(this_object)
 
-    # If this character is marked having a child, we need to figure out whether it's the father or mother
-    # of that child and create the proper association
-    gender = gender_of_object this_object
-    if gender == :male
-      other_object.fatherships.create(character: other_object, father: this_object) unless other_object.fathers.include?(this_object)
+      elsif gender == :female
+        other_object.motherships.create(character: other_object, mother: this_object) unless other_object.mothers.include?(this_object)
 
-    elsif gender == :female
-      other_object.motherships.create(character: other_object, mother: this_object) unless other_object.mothers.include?(this_object)
-
+      end
     end
   end
 
@@ -35,21 +35,21 @@ class Childrenship < ApplicationRecord
     other_object = Character.find_by(id: self.child_id)
 
     # If there's no linked object to modify, what are we even doing here?
-    return unless other_object.present?
-
-    gender = gender_of_object(this_object)
-    if gender == :male
-      other_object.fathers.delete(this_object)
-
-    elsif gender == :female
-      other_object.mothers.delete(this_object)
-
-    elsif gender.nil?
-      if other_object.fathers.include?(this_object)
+    if other_object.present?
+      gender = gender_of_object(this_object)
+      if gender == :male
         other_object.fathers.delete(this_object)
 
-      elsif other_object.mothers.include?(this_object)
+      elsif gender == :female
         other_object.mothers.delete(this_object)
+
+      elsif gender.nil?
+        if other_object.fathers.include?(this_object)
+          other_object.fathers.delete(this_object)
+
+        elsif other_object.mothers.include?(this_object)
+          other_object.mothers.delete(this_object)
+        end
       end
     end
   end
