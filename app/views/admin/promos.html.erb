@@ -1,0 +1,33 @@
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Code</th>
+    <th>Internal description</th>
+    <th>Public description</th>
+    <th>Availability</th>
+    <th>Active now</th>
+    <th>Pages unlocked</th>
+    <th>Days active</th>
+  </tr>
+  <% @codes.each do |code| %>
+    <tr>
+      <td><%= code.id %></td>
+      <td><%= code.code %></td>
+      <td><%= code.internal_description %></td>
+      <td><%= code.description %></td>
+      <td>
+        <% used = code.promotions.pluck(:user_id).uniq.count %>
+        <% ratio = (code.uses_remaining * 100.0) / (code.uses_remaining + used) %>
+        <div class="progress">
+          <div class="determinate" style="width: <%= ratio.round(1) %>%"></div>
+        </div>
+        <ul>
+          <li><%= used %> used</li>
+          <li><%= code.uses_remaining %> remaining</li>
+      </td>
+      <td><%= code.promotions.active.pluck(:user_id).uniq.count %></td>
+      <td><%= code.page_types.to_sentence %></td>
+      <td><%= code.days_active %> days</td>
+    </tr>
+  <% end %>
+</table>

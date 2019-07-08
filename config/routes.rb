@@ -127,6 +127,7 @@ Rails.application.routes.draw do
       get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
       get '/unsubscribe', to: 'admin#unsubscribe', as: :mass_unsubscribe
       get '/images', to: 'admin#images', as: :image_audit
+      get '/promos', to: 'admin#promos', as: :admin_promos
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
