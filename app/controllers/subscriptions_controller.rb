@@ -5,6 +5,8 @@ class SubscriptionsController < ApplicationController
 
   # General billing page
   def new
+    @sidenav_expansion = 'my account'
+    
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed billing page', {
       'current billing plan': current_user.selected_billing_plan_id,
       'content count': current_user.content_count
