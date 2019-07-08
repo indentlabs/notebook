@@ -12,7 +12,7 @@ class Building < ActiveRecord::Base
   include Serendipitous::Concern
 
   include Authority::Abilities
-  self.authorizer_name = 'ExtendedContentAuthorizer'
+  self.authorizer_name = "ExtendedContentAuthorizer"
 
   def self.color
     'blue-grey'

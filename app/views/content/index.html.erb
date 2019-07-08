@@ -44,7 +44,7 @@
           <%= t("content_descriptions.#{content_type}") %>
         </p>
 
-        <% if current_user.can_create? @content_type_class %>
+        <% if current_user.can_create?(@content_type_class) || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: @content_type_class.name) %>
           <%= link_to "Create your first #{content_type.humanize.downcase}", new_polymorphic_path(@content_type_class), class: "btn-large #{@content_type_class.color} darken-1" %>
         <% else %>
           <%= link_to "Upgrade to Premium to create your first #{content_type.humanize.downcase}", subscription_path %>

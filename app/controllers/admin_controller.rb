@@ -55,6 +55,10 @@ class AdminController < ApplicationController
     end
   end
 
+  def promos
+    @codes = PageUnlockPromoCode.all.includes(:promotions)
+  end
+
   private
 
   def require_admin_access

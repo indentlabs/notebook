@@ -122,7 +122,9 @@ class ContentController < ApplicationController
     ).uniq
 
     # todo this is a good spot to audit to disable and see if create permissions are ok also
-    unless (current_user || User.new).can_create?(content_type_from_controller(self.class))
+    unless (current_user || User.new).can_create?(@content.class) \
+      || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: @content.class.name)
+
       return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
     end
 
@@ -161,7 +163,9 @@ class ContentController < ApplicationController
     content_type = content_type_from_controller(self.class)
     initialize_object
 
-    unless current_user.can_create?(content_type)
+    unless current_user.can_create?(content_type) \
+      || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type.name)
+      
       return redirect_back(fallback_location: root_path, notice: "Creating this type of page requires an active Premium subscription.")
     end
 
@@ -507,7 +511,8 @@ class ContentController < ApplicationController
     @navbar_actions << {
       label: "New #{content_type.name.downcase}",
       href: main_app.new_polymorphic_path(content_type)
-    } if user_signed_in? && current_user.can_create?(content_type)
+    } if user_signed_in? && current_user.can_create?(content_type) \
+    || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type.name)
 
     discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
     if discussions_link.present?
