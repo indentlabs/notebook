@@ -117,6 +117,15 @@ class DocumentsController < ApplicationController
     end
   end
 
+  def destroy_analysis
+    document = Document.find_by(id: params[:id])
+    return unless document.user == current_user
+
+    document.document_analysis.destroy_all
+
+    redirect_back(fallback_location: analysis_document_path(document), notice: "Analysis deleted.")
+  end
+
   def set_sidenav_expansion
     @sidenav_expansion = 'writing'
   end

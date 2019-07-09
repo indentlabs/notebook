@@ -1,18 +1,12 @@
-<h5 class="grey-text">Concepts</h5>
-<div class="row">
-  <% analysis.document_concepts.each do |concept| %>
-    <div class="col s12">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title">
-            <%= concept.text %>
-          </div>
-          <ul>
-            <li>Relevance: <%= concept.relevance %></li>
-            <li>Reference: <%= link_to 'Reference', concept.reference_link %></li>
-          </ul>
+<% if analysis.document_concepts.relevant.any? %> 
+  <h5 class="grey-text">External references</h5>
+  <div class="row">
+    <% analysis.document_concepts.relevant.each do |concept| %>
+      <%= link_to concept.reference_link do %>
+        <div class="chip">
+          <%= concept.text %>
         </div>
-      </div>
-    </div>
-  <% end %>
-</div>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
