@@ -1,22 +1,27 @@
+<%
+  sentiment_color = (analysis.sentiment_score < 0) ? 'blue' : 'green'
+%>
+
 <h5 class="grey-text">Sentiment</h5>
 <div class="row">
   <div class="col s12 m6">
     <div class="card">
-      <div class="card-content blue lighten-4">
+      <div class="card-content <%= sentiment_color %> lighten-4">
         <div class="card-title">
           Overall <%= analysis.sentiment_label %>
         </div>
-        <span style="font-size: 32px; margin-right: 10px;" class="blue-text left center">
+        <span style="font-size: 32px; margin-right: 10px;" class="<%= sentiment_color %>-text left center">
           <i class="material-icons large">face</i><br />
           <span style="position: relative; top: -25px;">
-            <%= analysis.sentiment_score %>
+            <%= (analysis.sentiment_score * 100).round %>
           </span>
         </span>
         <p>
-          Some text
+          This document expresses a generally <%= analysis.sentiment_label %> sentiment throughout. 
         </p>
+        <br />
         <p>
-          Score: <%= analysis.sentiment_score %>
+          Your score is based on a scale from 1 to 100 based on how intense this emotion appears to be, where 100 is most intense and 0 scales towards the opposite emotion.
         </p>
         <div class="clearfix"></div>
       </div>
