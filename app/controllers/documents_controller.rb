@@ -1,5 +1,5 @@
 class DocumentsController < ApplicationController
-  before_action :authenticate_user!, except: [:show]
+  before_action :authenticate_user!, except: [:show, :analysis]
 
   before_action :set_sidenav_expansion
   before_action :set_navbar_color
