@@ -221,29 +221,29 @@
       </div>
 
       <%= 
-      column_chart([
-        { name: 'This document',   data: [
-          ['% Adjectives', analysis.pos_percentage(:adjective)],
-          ['% Adverbs',    analysis.pos_percentage(:adverb)],
-          ['% Nouns',      analysis.pos_percentage(:noun)],
-          ['% Pronouns',   analysis.pos_percentage(:pronoun)],
-          ['% Verbs',      analysis.pos_percentage(:verb)]
-        ] }, 
-        { name: 'Average writing', data: [
-          ['% Adjectives', 8],
-          ['% Adverbs', 5],
-          ['% Nouns', 25],
-          ['% Pronouns', 5], 
-          ['% Verbs', 17]
-        ] }, 
-        { name: 'Hemingway',       data: [
-          ['% Adjectives', 5],
-          ['% Adverbs', 7],
-          ['% Nouns', 18],
-          ['% Pronouns', 12], 
-          ['% Verbs', 23]
-        ] }
-      ])
+        column_chart([
+          { name: 'This document',   data: [
+            ['% Adjectives', analysis.pos_percentage(:adjective)],
+            ['% Adverbs',    analysis.pos_percentage(:adverb)],
+            ['% Nouns',      analysis.pos_percentage(:noun)],
+            ['% Pronouns',   analysis.pos_percentage(:pronoun)],
+            ['% Verbs',      analysis.pos_percentage(:verb)]
+          ] }, 
+          { name: 'Average writing', data: [
+            ['% Adjectives', 8],
+            ['% Adverbs', 5],
+            ['% Nouns', 25],
+            ['% Pronouns', 5], 
+            ['% Verbs', 17]
+          ] }, 
+          { name: 'Hemingway',       data: [
+            ['% Adjectives', 5],
+            ['% Adverbs', 7],
+            ['% Nouns', 18],
+            ['% Pronouns', 12], 
+            ['% Verbs', 23]
+          ] }
+        ])
       %>
     </div>
   </div>
@@ -252,7 +252,7 @@
     <div class="card">
       <div class="card-content">
         <div class="card-title">Number of N-syllable words</div>
-        <%= column_chart(analysis.n_syllable_words.map { |k, v| [k, v] }, colors: ["#8f8"]) %>
+        <%= column_chart(analysis.n_syllable_words.map { |k, v| [k, v] }, colors: [Document.hex_color]) %>
       </div>
     </div>
   </div>
@@ -336,8 +336,20 @@
   
   <div class="col s12">
     <div class="card">
-      lexical richness
-      <img src="https://d2gp9nmj724j45.cloudfront.net/assets/analitics/hemingway/lexical-richness-faed668ca0f18e54d6a03f83c4a11587f8240f96977b3b6c886b2c6f91d55bbc.png" />
+      <div class="card-content">
+        <div class="card-title">Lexical richness: % unique words per passage</div>
+
+        <%= 
+          column_chart([
+            ['This document',       analysis.pos_percentage(:words_used_once)],
+            ['Hemingway',           12.5],
+            ['The Grapes of Wrath', 14.5],
+            ['The Great Gatsby',    16],
+            ["Swann's Way",         17],
+            ["Typical Writing",     22]
+          ], colors: [Document.hex_color])
+        %>
+      </div>
     </div>
   </div>
 </div>

@@ -130,14 +130,16 @@
 
   <% end %>
 
-  <div class="col s12 m12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Ensemble emotional range</div>
-        <div id="graph-character-emotions"></div>
+  <% if analysis.document_entities.where(entity_type: 'Character').any? %>
+    <div class="col s12 m12">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-title">Ensemble emotional range</div>
+          <div id="graph-character-emotions"></div>
+        </div>
       </div>
     </div>
-  </div>
+  <% end %>
 </div>
 
 <div id="entity-link-modal" class="modal">
@@ -201,40 +203,38 @@
       return false;
     });
 
-    var data = [
-      <% analysis.document_entities.where(entity_type: 'Character').each do |entity| %>
-        [
-          { axis: "Joy",     value: <%= (100 * entity.joy_score).round(1) %> },
-          { axis: "Sadness", value: <%= (100 * entity.sadness_score).round(1) %> },
-          { axis: "Fear",    value: <%= (100 * entity.fear_score).round(1) %> },
-          { axis: "Disgust", value: <%= (100 * entity.disgust_score).round(1) %> },
-          { axis: "Anger",   value: <%= (100 * entity.anger_score).round(1) %> }
-        ],
-      <% end %>
-    ];
-    ////////////////////////////////////////////////////////////// 
-    //////////////////// Draw the Chart ////////////////////////// 
-    ////////////////////////////////////////////////////////////// 
-
-    var color = d3.scalePoint()
-      .range(["#EDC951","#CC333F","#00A0B0"]);
-      
-    var radarChartOptions = {
-      w: 400,
-      h: 300,
-      margin: {
-        top:    100, 
-        right:  100, 
-        bottom: 100, 
-        left:   100
-      },
-      levels: 4,
-      maxValue: 100,
-      roundStrokes: true,
-      color: color,
-      dotRadius: 2
-    };
-    RadarChart("#graph-character-emotions", data, radarChartOptions);
+    <% if analysis.document_entities.where(entity_type: 'Character').any? %>
+      var data = [
+        <% analysis.document_entities.where(entity_type: 'Character').each do |entity| %>
+          [
+            { axis: "Joy",     value: <%= (100 * entity.joy_score).round(1) %> },
+            { axis: "Sadness", value: <%= (100 * entity.sadness_score).round(1) %> },
+            { axis: "Fear",    value: <%= (100 * entity.fear_score).round(1) %> },
+            { axis: "Disgust", value: <%= (100 * entity.disgust_score).round(1) %> },
+            { axis: "Anger",   value: <%= (100 * entity.anger_score).round(1) %> }
+          ],
+        <% end %>
+      ];
+      var color = d3.scalePoint()
+        .range(["#EDC951","#CC333F","#00A0B0"]);
+        
+      var radarChartOptions = {
+        w: 400,
+        h: 300,
+        margin: {
+          top:    100, 
+          right:  100, 
+          bottom: 100, 
+          left:   100
+        },
+        levels: 4,
+        maxValue: 100,
+        roundStrokes: true,
+        color: color,
+        dotRadius: 2
+      };
+      RadarChart("#graph-character-emotions", data, radarChartOptions);
+    <% end %>
   });
 
 </script>
