@@ -15,8 +15,6 @@
 //= require medium-editor
 //= require Chart.bundle
 //= require chartkick
-//= require highcharts
-//= require highcharts/highcharts-more
 //= require tribute
 //= require d3
 //= require_tree .

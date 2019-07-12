@@ -54,8 +54,6 @@ gem 'medium-editor-rails'
 
 # Graphs & Charts
 gem 'chartkick'
-gem 'highcharts-rails'
-# gem 'highstock-rails'
 gem 'd3-rails'
 
 # Analytics
