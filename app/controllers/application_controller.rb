@@ -44,6 +44,7 @@ class ApplicationController < ActionController::Base
 
   # Cache some super-common stuff we need for every page. For example, content lists for the side nav.
   def cache_most_used_page_information
+    @current_user_content = {}
     return unless user_signed_in?
 
     @activated_content_types = (
