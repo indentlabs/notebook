@@ -122,7 +122,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.adjective_count.to_f / analysis.word_count * 100).round(2) %>%
+            <%= analysis.pos_percentage(:adjective) %>%
           </div>
           Adjectives
         </span>
@@ -134,7 +134,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.noun_count.to_f / analysis.word_count * 100).round(2) %>%
+            <%= analysis.pos_percentage(:noun) %>%
           </div>
           Nouns
         </span>
@@ -146,7 +146,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.verb_count.to_f / analysis.word_count * 100).round(2) %>%
+            <%= analysis.pos_percentage(:verb) %>%
           </div>
           Verbs
         </span>
@@ -158,7 +158,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.pronoun_count.to_f / analysis.word_count * 100).round(2) %>%
+            <%= analysis.pos_percentage(:pronoun) %>%
           </div>
           Pronouns
         </span>
@@ -170,7 +170,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.proper_noun_count.to_f / analysis.word_count * 100).round(2) %>%
+            <%= analysis.pos_percentage(:proper_noun) %>%
           </div>
           Proper nouns
         </span>
@@ -182,7 +182,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.conjunction_count.to_f / analysis.word_count * 100).round(2) %>%
+            <%= analysis.pos_percentage(:conjunction) %>%
           </div>
           Conjunctions
         </span>
@@ -194,7 +194,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.adverb_count.to_f / analysis.word_count * 100).round(2) %>%
+            <%= analysis.pos_percentage(:adverb) %>%
           </div>
           Adverbs
         </span>
@@ -206,7 +206,7 @@
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
-            <%= (analysis.interrogative_count.to_f / analysis.word_count * 100).round(2) %>%
+            <%= analysis.pos_percentage(:interrogative) %>%
           </div>
           Interrogatives
         </span>
@@ -216,7 +216,35 @@
 
   <div class="col s12">
     <div class="card">
-      <img src="https://d2gp9nmj724j45.cloudfront.net/assets/analitics/hemingway/parts-of-speech-e05f044b1d08486b7c4ba0ab333a51c40eb347b3df2bb10a87b68d3b1c200a93.png" />
+      <div class="card-content">
+        <div class="card-title">Stylistic baseline comparison</div>
+      </div>
+
+      <%= 
+      column_chart([
+        { name: 'This document',   data: [
+          ['% Adjectives', analysis.pos_percentage(:adjective)],
+          ['% Adverbs',    analysis.pos_percentage(:adverb)],
+          ['% Nouns',      analysis.pos_percentage(:noun)],
+          ['% Pronouns',   analysis.pos_percentage(:pronoun)],
+          ['% Verbs',      analysis.pos_percentage(:verb)]
+        ] }, 
+        { name: 'Average writing', data: [
+          ['% Adjectives', 8],
+          ['% Adverbs', 5],
+          ['% Nouns', 25],
+          ['% Pronouns', 5], 
+          ['% Verbs', 17]
+        ] }, 
+        { name: 'Hemingway',       data: [
+          ['% Adjectives', 5],
+          ['% Adverbs', 7],
+          ['% Nouns', 18],
+          ['% Pronouns', 12], 
+          ['% Verbs', 23]
+        ] }
+      ])
+      %>
     </div>
   </div>
 

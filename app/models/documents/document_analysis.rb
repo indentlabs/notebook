@@ -7,6 +7,11 @@ class DocumentAnalysis < ApplicationRecord
   serialize :words_per_sentence, Array
   serialize :n_syllable_words,   Hash
 
+  # usage: analysis.pos_percentage(:adjective) => 23.4
+  def pos_percentage(pos_symbol)
+    (send(pos_symbol.to_s + '_count').to_f / word_count * 100).round(2)
+  end
+
   def complete?
     self.completed_at.present?
   end
