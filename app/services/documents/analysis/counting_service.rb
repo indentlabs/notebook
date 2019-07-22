@@ -22,12 +22,12 @@ module Documents
         # Word reuse -- there's probably a WAY better way to compute this, but
         # I guess speed isn't priority #1 when you're async anyway. We should
         # definitely audit memory usage here though.
-        analysis.words_used_once_count = document.words
+        analysis.words_used_repeatedly_count = document.words
             .select { |word| document.words.rindex(word) != document.words.index(word) }
             .uniq
             .count
 
-        analysis.words_used_repeatedly_count = analysis.word_count - analysis.words_used_once_count
+        analysis.words_used_once_count = analysis.word_count - analysis.words_used_repeatedly_count
 
         # Complexity counters
         analysis.complex_words_count = document.complex_words.count
