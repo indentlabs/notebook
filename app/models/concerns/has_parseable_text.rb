@@ -30,7 +30,7 @@ module HasParseableText
     end
 
     def words
-      @words ||= plaintext.downcase.gsub(/[^\s\w']/, '').split(' ').reject { |w| is_numeric?(w) }
+      @words ||= plaintext.downcase.gsub(/[^\s\w\d']/, '').split(' ')
     end
 
     def pages
