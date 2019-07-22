@@ -4,7 +4,7 @@ module Documents
 
     # From https://github.com/alexdunae/premailer/blob/master/lib/premailer/html_to_plain_text.rb
     def self.from_html(html, line_length = 80, from_charset = 'UTF-8')
-      txt = html
+      txt = html.dup
 
       # strip text ignored html. Useful for removing
       # headers and footers that aren't needed in the

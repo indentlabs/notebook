@@ -13,10 +13,15 @@ module HasParseableText
     end
 
     def paragraphs
-      # We use paragraph tags by default, but people might paste in divs also
       @paragraphs ||= begin
-        paragraphs =  body.scan(/<p>[^<]+<\/p>/).map {     |text| ActionView::Base.full_sanitizer.sanitize(text) }
-        paragraphs << body.scan(/<div>[^<]+<\/div>/).map { |text| ActionView::Base.full_sanitizer.sanitize(text) }
+        # Normalize text
+        ## We use paragraph tags by default, but people might paste in divs also
+        paragraphed_sanity = ActionController::Base.helpers.sanitize(body, :tags => %w(div p))
+        paragraphed_sanity.gsub!('<div></div>', '')
+        paragraphed_sanity.gsub!('<p></p>', '')
+        
+        paragraphs =  paragraphed_sanity.scan(/<p>[^<]+<\/p>/).map {     |text| ActionView::Base.full_sanitizer.sanitize(text) }
+        paragraphs << paragraphed_sanity.scan(/<div>[^<]+<\/div>/).map { |text| ActionView::Base.full_sanitizer.sanitize(text) }
       end.flatten
     end
 
