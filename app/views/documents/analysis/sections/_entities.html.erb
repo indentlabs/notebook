@@ -3,18 +3,18 @@
 <script type="text/javascript">
   var color = d3.scalePoint().range(["#EDC951","#CC333F","#00A0B0"]);
   var radarChartOptions = {
-    w: 400,
     h: 300,
     margin: {
-      top: 50, 
+      top: 10, 
       right: 0, 
-      bottom: 20, 
-      left: 10
+      bottom: 10, 
+      left: 0
     },
-    maxValue: 100,
     levels: 4,
+    maxValue: 100,
     roundStrokes: true,
-    color: color
+    color: color,
+    dotRadius: 2
   };
 </script>
 
@@ -55,31 +55,31 @@
             <li>
               Joy: <%= (100 * entity.joy_score ).round(1) %>
               <div class="progress">
-                <div class="determinate yellow" style="width: <%= (100 * entity.joy_score ).round(1) %>70%"></div>
+                <div class="determinate <%= EmotionService.color_for_emotion(:joy) %>" style="width: <%= (100 * entity.joy_score ).round(1) %>70%"></div>
               </div>
             </li>
             <li>
               Sadness: <%= (100 * entity.sadness_score).round(1) %>
               <div class="progress">
-                <div class="determinate blue" style="width: <%= (100 * entity.sadness_score ).round(1) %>70%"></div>
+                <div class="determinate <%= EmotionService.color_for_emotion(:sadness) %>" style="width: <%= (100 * entity.sadness_score ).round(1) %>70%"></div>
               </div>
             </li>
             <li>
               Fear: <%= (100 * entity.fear_score).round(1) %>
               <div class="progress">
-                <div class="determinate black" style="width: <%= (100 * entity.fear_score ).round(1) %>70%"></div>
+                <div class="determinate <%= EmotionService.color_for_emotion(:fear) %>" style="width: <%= (100 * entity.fear_score ).round(1) %>70%"></div>
               </div>
             </li>
             <li>
               Disgust: <%= (100 * entity.disgust_score).round(1) %>
               <div class="progress">
-                <div class="determinate green" style="width: <%= (100 * entity.disgust_score ).round(1) %>70%"></div>
+                <div class="determinate <%= EmotionService.color_for_emotion(:disgust) %>" style="width: <%= (100 * entity.disgust_score ).round(1) %>70%"></div>
               </div>
             </li>
             <li>
               Anger: <%= (100 * entity.anger_score).round(1) %>
               <div class="progress">
-                <div class="determinate red" style="width: <%= (100 * entity.anger_score ).round(1) %>70%"></div>
+                <div class="determinate <%= EmotionService.color_for_emotion(:anger) %>" style="width: <%= (100 * entity.anger_score ).round(1) %>70%"></div>
               </div>
             </li>
             <li>
@@ -92,20 +92,20 @@
             <% linked_entity_class = entity.entity.class %>
             <%= link_to polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'blue-text' do %>
               <i class="material-icons left"><%= linked_entity_class.icon %></i>
-              View <%= entity.entity.name %>
+              View
             <% end %>
             <%= link_to edit_polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'green-text right' do %>
               <i class="material-icons left"><%= linked_entity_class.icon %></i>
-              Edit <%= entity.entity.name %>
+              Edit
             <% end %>
           <% else %>
             <%= link_to new_polymorphic_path(entity_class, document_entity: entity.id), class: entity_class.color + '-text' do %>
               <i class="material-icons left">add</i>
-              Create <%= entity.entity_type %>
+              New page
             <% end %>
             <%= link_to '#', class: entity_class.color + '-text right js-link-entity', data: { id: entity.id } do %>
               <i class="material-icons left">link</i>
-              Link <%= entity.entity_type %>
+              Link page
             <% end %>
           <% end %>
         </div>
@@ -131,11 +131,43 @@
   <% end %>
 
   <% if analysis.document_entities.where(entity_type: 'Character').any? %>
-    <div class="col s12 m12">
+    <div class="col s12 m6">
       <div class="card">
         <div class="card-content">
-          <div class="card-title">Ensemble emotional range</div>
+          <div class="card-title">Character ensemble emotional spread</div>
           <div id="graph-character-emotions"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col s12">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-title">Character emotions</div>
+            <table class="highlight">
+              <tr>
+                <th>Character</th>
+                <th>Dominant emotion</th>
+                <th>Recessive emotion</th>
+              </tr>
+              <% analysis.document_entities.where(entity_type: 'Character').each do |character| %>
+                <tr>
+                  <td><%= character.text %></td>
+                  <td>
+                    <div class="chip <%= EmotionService.color_for_emotion(character.dominant_emotion.first.first) %> lighten-3">
+                      <%= character.dominant_emotion.first.first.to_s.titleize %>
+                      (<%= (character.dominant_emotion.first.second * 100).round %>%)
+                    </div>
+                  </td>
+                  <td>
+                    <div class="chip <%= EmotionService.color_for_emotion(character.recessive_emotion.first.first) %> lighten-3">
+                      <%= character.recessive_emotion.first.first.to_s.titleize %>
+                      (<%= (character.recessive_emotion.first.second * 100).round %>%)
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -215,24 +247,25 @@
           ],
         <% end %>
       ];
-      var color = d3.scalePoint()
-        .range(["#EDC951","#CC333F","#00A0B0"]);
-        
-      var radarChartOptions = {
-        w: 400,
-        h: 300,
-        margin: {
-          top:    100, 
-          right:  100, 
-          bottom: 100, 
-          left:   100
-        },
-        levels: 4,
-        maxValue: 100,
-        roundStrokes: true,
-        color: color,
-        dotRadius: 2
-      };
+      /*
+        var color = d3.scalePoint()
+          .range(["#EDC951","#CC333F","#00A0B0"]);
+          
+        var radarChartOptions = {
+          h: 300,
+          margin: {
+            top:    30, 
+            right:  30, 
+            bottom: 30, 
+            left:   30
+          },
+          levels: 3,
+          maxValue: 100,
+          roundStrokes: true,
+          color: color,
+          dotRadius: 2
+        };
+      */
       RadarChart("#graph-character-emotions", data, radarChartOptions);
     <% end %>
   });

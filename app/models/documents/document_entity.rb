@@ -37,4 +37,22 @@ class DocumentEntity < ApplicationRecord
     # TODO: levenshtein distance threshold comparison?
     entity.name == self.text
   end
+
+  def dominant_emotion
+    emotions.sort_by { |emotion, score| score }.reverse
+  end
+
+  def recessive_emotion
+    emotions.sort_by { |emotion, score| score }
+  end
+
+  def emotions
+    {
+      sadness: sadness_score,
+      joy: joy_score,
+      fear: fear_score,
+      disgust: disgust_score,
+      anger: anger_score
+    }
+  end
 end

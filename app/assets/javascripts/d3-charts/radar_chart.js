@@ -9,7 +9,7 @@ function RadarChart(id, data, options) {
 	var cfg = {
 	 w: 600,				//Width of the circle
 	 h: 600,				//Height of the circle
-	 margin: {top: 20, right: 20, bottom: 20, left: 20}, //The margins of the SVG
+	 margin: {top: 100, right: 100, bottom: 100, left: 100}, //The margins of the SVG
 	 levels: 3,				//How many levels or inner circles should there be drawn
 	 maxValue: 0, 			//What is the value that the biggest circle will represent
 	 labelFactor: 1.25, 	//How much farther than the radius of the outer circle should the labels be placed
@@ -52,8 +52,12 @@ function RadarChart(id, data, options) {
 	
 	//Initiate the radar chart SVG
 	var svg = d3.select(id).append("svg")
-			.attr("width",  cfg.w + cfg.margin.left + cfg.margin.right)
-			.attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
+			.attr("width", '100%')
+			.attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom + 200)
+			.attr('viewBox','100 -50 ' + 
+				Math.min(cfg.w, cfg.h + 100) + ' ' + 
+				Math.min(cfg.w, cfg.h))
+			.attr('preserveAspectRatio', 'xMinYMin')
 			.attr("class", "radar"+id);
 	//Append a g element		
 	var g = svg.append("g")
