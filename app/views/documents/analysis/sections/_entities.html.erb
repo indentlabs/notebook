@@ -101,11 +101,11 @@
           <% else %>
             <%= link_to new_polymorphic_path(entity_class, document_entity: entity.id), class: entity_class.color + '-text' do %>
               <i class="material-icons left">add</i>
-              New page
+              New <%= entity_class.name %>
             <% end %>
             <%= link_to '#', class: entity_class.color + '-text right js-link-entity', data: { id: entity.id } do %>
               <i class="material-icons left">link</i>
-              Link page
+              Link existing
             <% end %>
           <% end %>
         </div>
@@ -130,44 +130,12 @@
 
   <% end %>
 
-  <% if analysis.document_entities.where(entity_type: 'Character').any? %>
+  <% if analysis.document_entities.where(entity_type: 'Character').any? && false %>
     <div class="col s12 m6">
       <div class="card">
         <div class="card-content">
           <div class="card-title">Character ensemble emotional spread</div>
           <div id="graph-character-emotions"></div>
-        </div>
-      </div>
-    </div>
-    <div class="col s12">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title">Character emotions</div>
-            <table class="highlight">
-              <tr>
-                <th>Character</th>
-                <th>Dominant emotion</th>
-                <th>Recessive emotion</th>
-              </tr>
-              <% analysis.document_entities.where(entity_type: 'Character').each do |character| %>
-                <tr>
-                  <td><%= character.text %></td>
-                  <td>
-                    <div class="chip <%= EmotionService.color_for_emotion(character.dominant_emotion.first.first) %> lighten-3">
-                      <%= character.dominant_emotion.first.first.to_s.titleize %>
-                      (<%= (character.dominant_emotion.first.second * 100).round %>%)
-                    </div>
-                  </td>
-                  <td>
-                    <div class="chip <%= EmotionService.color_for_emotion(character.recessive_emotion.first.first) %> lighten-3">
-                      <%= character.recessive_emotion.first.first.to_s.titleize %>
-                      (<%= (character.recessive_emotion.first.second * 100).round %>%)
-                    </div>
-                  </td>
-                </tr>
-              <% end %>
-            </table>
-          </div>
         </div>
       </div>
     </div>

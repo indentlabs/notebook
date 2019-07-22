@@ -36,6 +36,41 @@
       </div>
     </div>
   </div>
+
+  <% if analysis.document_entities.order('relevance desc').where(entity_type: 'Character').any? %>
+    <div class="col s12">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-title">Character emotions</div>
+            <table class="highlight">
+              <tr>
+                <th>Character</th>
+                <th>Dominant emotion</th>
+                <th>Recessive emotion</th>
+              </tr>
+              <% analysis.document_entities.where(entity_type: 'Character').each do |character| %>
+                <tr>
+                  <td><%= character.text %></td>
+                  <td>
+                    <div class="chip <%= EmotionService.color_for_emotion(character.dominant_emotion.first.first) %> lighten-3">
+                      <%= character.dominant_emotion.first.first.to_s.titleize %>
+                      (<%= (character.dominant_emotion.first.second * 100).round %>%)
+                    </div>
+                  </td>
+                  <td>
+                    <div class="chip <%= EmotionService.color_for_emotion(character.recessive_emotion.first.first) %> lighten-3">
+                      <%= character.recessive_emotion.first.first.to_s.titleize %>
+                      (<%= (character.recessive_emotion.first.second * 100).round %>%)
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
 </div>
 
 <style>

@@ -263,10 +263,10 @@ function RadarChart(id, data, options) {
 		  line.push(word);
 		  tspan.text(line.join(" "));
 		  if (tspan.node().getComputedTextLength() > width) {
-			line.pop();
-			tspan.text(line.join(" "));
-			line = [word];
-			tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+				line.pop();
+				tspan.text(line.join(" "));
+				line = [word];
+				tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
 		  }
 		}
 	  });
