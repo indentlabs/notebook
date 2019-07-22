@@ -40,7 +40,7 @@
 
 <style>
 .bar {
-  fill: #5f89ad;
+  fill: <%= Document.hex_color %>;
 }
 
 .axis {
@@ -94,14 +94,17 @@ $(document).ready(function () {
     left: 60
   };
 
-  var width = 300,
+  var width = 400,
       height = 300;
 
-  var svg = d3.select("#graph-emotions").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+  var svg = d3.select("#graph-emotions")
+    .append("svg")
+      .attr("width", '100%')
+      .attr("height", height)
+      .attr('viewBox','0 0 ' + Math.min(width, height) + ' ' + Math.min(width, height + margin.bottom))
+      .attr('preserveAspectRatio', 'xMinYMin')
     .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   var x = d3.scaleLinear()
     .range([0, width])
