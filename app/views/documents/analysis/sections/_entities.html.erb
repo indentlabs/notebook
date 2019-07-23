@@ -37,9 +37,9 @@
             <i class="material-icons right black-text">more_vert</i>
           </span>
           <p>
-            Relevance score: <%= (entity.relevance * 100).round(1) %>%
+            Relevance score: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 'Calculating...' %>%
             <div class="progress <%= entity_class.color %> lighten-5">
-              <div class="determinate <%= entity_class.color %>" style="width: <%= (entity.relevance * 100).round(1) %>%"></div>
+              <div class="determinate <%= entity_class.color %>" style="width: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 0 %>%"></div>
             </div>
           </p>
         </div>
@@ -52,38 +52,17 @@
           <div class="card-title">Emotional range</div>
           <div id="graph-character-emotions-<%= entity.id %>"></div>
           <ul class="help-text">
+            <% [:joy, :sadness, :fear, :disgust, :anger].each do |emotion| %>
+              <% emotion_score = entity.send("#{emotion}_score") %>
+              <li>
+                <%= emotion.to_s.titleize %>: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 'Calculating...' %>
+                <div class="progress">
+                  <div class="determinate <%= EmotionService.color_for_emotion(emotion) %>" style="width: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 0 %>%"></div>
+                </div>
+              </li>
+            <% end %>
             <li>
-              Joy: <%= (100 * entity.joy_score ).round(1) %>
-              <div class="progress">
-                <div class="determinate <%= EmotionService.color_for_emotion(:joy) %>" style="width: <%= (100 * entity.joy_score ).round(1) %>70%"></div>
-              </div>
-            </li>
-            <li>
-              Sadness: <%= (100 * entity.sadness_score).round(1) %>
-              <div class="progress">
-                <div class="determinate <%= EmotionService.color_for_emotion(:sadness) %>" style="width: <%= (100 * entity.sadness_score ).round(1) %>70%"></div>
-              </div>
-            </li>
-            <li>
-              Fear: <%= (100 * entity.fear_score).round(1) %>
-              <div class="progress">
-                <div class="determinate <%= EmotionService.color_for_emotion(:fear) %>" style="width: <%= (100 * entity.fear_score ).round(1) %>70%"></div>
-              </div>
-            </li>
-            <li>
-              Disgust: <%= (100 * entity.disgust_score).round(1) %>
-              <div class="progress">
-                <div class="determinate <%= EmotionService.color_for_emotion(:disgust) %>" style="width: <%= (100 * entity.disgust_score ).round(1) %>70%"></div>
-              </div>
-            </li>
-            <li>
-              Anger: <%= (100 * entity.anger_score).round(1) %>
-              <div class="progress">
-                <div class="determinate <%= EmotionService.color_for_emotion(:anger) %>" style="width: <%= (100 * entity.anger_score ).round(1) %>70%"></div>
-              </div>
-            </li>
-            <li>
-              Overall sentiment: <%= entity.sentiment_label %> (<%= (100 * entity.sentiment_score).round(1) %>)
+              Overall sentiment: <%= entity.sentiment_label %> (<%= (entity.sentiment_score.present? ? (100 * entity.sentiment_score).round(1) : 'Calculating...') %>)
             </li>
           </ul>
         </div>
@@ -116,11 +95,11 @@
       $(document).ready(function () {
         var data = [
           [
-            { axis: "Joy",     value: <%= (100 * entity.joy_score).round(1) %> },
-            { axis: "Sadness", value: <%= (100 * entity.sadness_score).round(1) %> },
-            { axis: "Fear",    value: <%= (100 * entity.fear_score).round(1) %> },
-            { axis: "Disgust", value: <%= (100 * entity.disgust_score).round(1) %> },
-            { axis: "Anger",   value: <%= (100 * entity.anger_score).round(1) %> }
+            { axis: "Joy",     value: <%= (100 * (entity.joy_score.presence || 0)).round(1) %> },
+            { axis: "Sadness", value: <%= (100 * (entity.sadness_score.presence || 0)).round(1) %> },
+            { axis: "Fear",    value: <%= (100 * (entity.fear_score.presence || 0)).round(1) %> },
+            { axis: "Disgust", value: <%= (100 * (entity.disgust_score.presence || 0)).round(1) %> },
+            { axis: "Anger",   value: <%= (100 * (entity.anger_score.presence || 0)).round(1) %> }
           ]
         ];
 
@@ -129,6 +108,15 @@
     </script>
 
   <% end %>
+
+  <div class="col s12 m6">
+    <%= link_to '#', class: 'white-text js-link-entity', data: { id: -1 } do %>
+      <div class="card-panel <%= Document.color %>">
+        <i class="material-icons right">add</i>
+        <div class="card-title">Link a missing page</div>
+      </div>
+    <% end %>
+  </div>
 
   <% if analysis.document_entities.where(entity_type: 'Character').any? && false %>
     <div class="col s12 m6">
@@ -149,9 +137,11 @@
       You can link a detected entity to one of your already-created pages by selecting it below.
     </p>
     <%= form_with url: link_entity_documents_path do |f| %>
-      <%= f.hidden_field :entity_type,        value: nil %>
-      <%= f.hidden_field :entity_id,          value: nil %>
-      <%= f.hidden_field :document_entity_id, value: nil %>
+      <%= f.hidden_field :document_id,          value: analysis.document_id %>
+      <%= f.hidden_field :document_analysis_id, value: analysis.id %>
+      <%= f.hidden_field :entity_type,          value: nil %>
+      <%= f.hidden_field :entity_id,            value: nil %>
+      <%= f.hidden_field :document_entity_id,   value: nil %>
 
       <% @current_user_content.each do |content_type, content_list| %>
         <% content_type_class = content_type.constantize %>
@@ -207,11 +197,11 @@
       var data = [
         <% analysis.document_entities.where(entity_type: 'Character').each do |entity| %>
           [
-            { axis: "Joy",     value: <%= (100 * entity.joy_score).round(1) %> },
-            { axis: "Sadness", value: <%= (100 * entity.sadness_score).round(1) %> },
-            { axis: "Fear",    value: <%= (100 * entity.fear_score).round(1) %> },
-            { axis: "Disgust", value: <%= (100 * entity.disgust_score).round(1) %> },
-            { axis: "Anger",   value: <%= (100 * entity.anger_score).round(1) %> }
+            { axis: "Joy",     value: <%= (100 * (entity.joy_score.presence || 0)).round(1) %> },
+            { axis: "Sadness", value: <%= (100 * (entity.sadness_score.presence || 0)).round(1) %> },
+            { axis: "Fear",    value: <%= (100 * (entity.fear_score.presence || 0)).round(1) %> },
+            { axis: "Disgust", value: <%= (100 * (entity.disgust_score.presence || 0)).round(1) %> },
+            { axis: "Anger",   value: <%= (100 * (entity.anger_score.presence || 0)).round(1) %> }
           ],
         <% end %>
       ];

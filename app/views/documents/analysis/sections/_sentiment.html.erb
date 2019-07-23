@@ -49,6 +49,8 @@
                 <th>Recessive emotion</th>
               </tr>
               <% analysis.document_entities.where(entity_type: 'Character').each do |character| %>
+                <% next if character.dominant_emotion.first.second.nil? %>
+                <% next if character.recessive_emotion.first.second.nil? %>
                 <tr>
                   <td><%= character.text %></td>
                   <td>

@@ -60,19 +60,50 @@ class DocumentsController < ApplicationController
   end
 
   def link_entity
-    document_entity = DocumentEntity.find_by(id: linked_entity_params[:document_entity_id].to_i)
-    # todo some real perms?
-    if document_entity && document_entity.document_owner == current_user
-      # todo strong params update sans DEI?
-      document_entity.update(
-        entity_type: linked_entity_params[:entity_type], 
-        entity_id:   linked_entity_params[:entity_id].to_i
+    # Preconditions lol
+    raise "Invalid entity type #{linked_entity_params[:entity_type]}" unless Rails.application.config.content_types[:all].map(&:name).include?(linked_entity_params[:entity_type])
+
+    if (linked_entity_params[:document_entity_id].to_i == -1)
+      require 'pry'
+      binding.pry
+
+      # If we pass in an ID of -1, then we're adding a new DocumentEntity (rather than linking an existing one)
+      # Therefore, we need to create one.
+      document_analysis = DocumentAnalysis.joins(:document).find_by(
+        id: linked_entity_params[:document_analysis_id].to_i, 
+        documents: { user: current_user }
+      )
+      raise "No document analysis found for id=#{linked_entity_params[:document_analysis_id]} / user=#{current_user.id}" if document_analysis.nil?      
+
+      # Now that we have the analysis reference, we just create a new DocumentEntity on it for the associated page
+      page = linked_entity_params[:entity_type].constantize.find(linked_entity_params[:entity_id]) # raises exception if not found :+1:
+
+      document_entity = document_analysis.document_entities.create!(
+        entity_type: linked_entity_params[:entity_type],
+        entity_id:   linked_entity_params[:entity_id],
+        text:        page.name
       )
 
+      # Finally, we need to kick off another analysis job to fetch information about this entity
+      document_entity.analyze!
+
       return redirect_to(analysis_document_path(document_entity.document_analysis), notice: "Page linked!")
+
+    else
+      # If we pass in an actual ID for the document entity, we're modifying an existing one
+      document_entity = DocumentEntity.find_by(id: linked_entity_params[:document_entity_id].to_i)
+      # todo some real perms?
+      if document_entity && document_entity.document_owner == current_user
+        # todo strong params update sans DEI?
+        document_entity.update(
+          entity_type: linked_entity_params[:entity_type], 
+          entity_id:   linked_entity_params[:entity_id].to_i
+        )
+
+        return redirect_to(analysis_document_path(document_entity.document_analysis), notice: "Page linked!")
+      end
     end
 
-    redirect_back(fallback_location: documents_path, notice: "You don't have permission to do that!")
   end
 
   def edit
@@ -164,6 +195,6 @@ class DocumentsController < ApplicationController
   end
 
   def linked_entity_params
-    params.permit(:entity_id, :entity_type, :document_entity_id)
+    params.permit(:entity_id, :entity_type, :document_entity_id, :document_id, :document_analysis_id)
   end
 end

@@ -2,7 +2,7 @@ class DocumentEntity < ApplicationRecord
   belongs_to :entity, polymorphic: true
   belongs_to :document_analysis
 
-  after_create :match_notebook_page!
+  after_create :match_notebook_page!, if: Proc.new { |de| de.entity_id.nil? }
 
   # TODO should this be some chain of method aliases maybe? or cached on object?
   def document_owner
@@ -24,6 +24,12 @@ class DocumentEntity < ApplicationRecord
 
     # Return true/false for whether we found a match
     matched_entity.present?
+  end
+
+  # Analyze this entity within the context of an existing document analysis
+  # AKA this entity was probably added manuallly post-analysis
+  def analyze!(document_analysis)
+    
   end
 
   def entity_relation
