@@ -6,11 +6,7 @@ module Documents
           analysis = ::DocumentAnalysis.find(analysis_id)
           document = analysis.document
 
-          # Authorize a client to analyze with
-          watson_client = ::IBMWatson::NaturalLanguageUnderstandingV1.new(
-            iam_apikey: ENV['WATSON_API_KEY'],
-            version:    '2018-03-16'
-          )
+          watson_client = new_client
 
           # Fetch a bunch of raw results to analyze
           watson = watson_client.analyze(
@@ -109,6 +105,40 @@ module Documents
           analysis.save!
         end
 
+        # This re-analyzes a specific entity within a document, useful for manually adding entities post-analysis
+        def analyze_entity(document_entity)
+          watson_client = new_client
+
+          entity = ::DocumentEntity.find(document_entity.to_i) # raises unless found :+1:
+          analysis = entity.document_analysis
+          document = analysis.document_analysis.document
+
+          require 'pry'
+          binding.pry
+
+          # Fetch a bunch of raw results to analyze
+          watson = watson_client.analyze(
+            text:     document.body,
+            features: {
+              "sentiment":  {
+                "targets": {
+                  entity.text
+                }
+              },
+              "emotion": {
+                "targets": {
+                  entity.text
+                }
+              }
+            }
+          ).result
+
+          require 'pry'
+          binding.pry
+        end
+
+        private
+
         def self.entity_type_map_to_notebook_entity_type
           {
             'Person'       => Character.name,
@@ -132,6 +162,14 @@ module Documents
 
         def self.should_save_category?(category)
           category.key?('score') && category.dig('score') >= 0.3
+        end
+
+        def new_client
+          # Authorize a client to analyze with
+          watson_client = ::IBMWatson::NaturalLanguageUnderstandingV1.new(
+            iam_apikey: ENV['WATSON_API_KEY'],
+            version:    '2018-03-16'
+          )
         end
       end
     end

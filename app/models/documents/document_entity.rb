@@ -28,8 +28,8 @@ class DocumentEntity < ApplicationRecord
 
   # Analyze this entity within the context of an existing document analysis
   # AKA this entity was probably added manuallly post-analysis
-  def analyze!(document_analysis)
-    
+  def analyze!
+    DocumentEntityAnalysisJob.perform_later(id)
   end
 
   def entity_relation
