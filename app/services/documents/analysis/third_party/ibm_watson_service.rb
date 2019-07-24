@@ -140,33 +140,33 @@ module Documents
             }
           ).result
 
-          entity_sentiment_block = (watson.dig('sentiment', 'targets').presence || {}).detect { |target| target['text'] == entity.text }
-          entity_emotion_block   = (watson.dig('emotion',   'targets').presence || {}).detect { |target| target['text'] == entity.text }
-          entity.update(
+          entity_sentiment_block = (watson.dig('sentiment', 'targets').presence || {}).detect { |target| target['text'] == entity.text }.presence || {}
+          entity_emotion_block   = (watson.dig('emotion',   'targets').presence || {}).detect { |target| target['text'] == entity.text }.presence || {}
+          entity.update!(
             relevance:       0.75, # todo we should figure something out here, uh oh
-            sentiment_label: entity_sentiment_block.dig('label'),
-            sentiment_score: entity_sentiment_block.dig('score'),
-            sadness_score:   entity_emotion_block.dig('emotion', 'sadness'),
-            joy_score:       entity_emotion_block.dig('emotion', 'joy'),
-            fear_score:      entity_emotion_block.dig('emotion', 'fear'),
-            disgust_score:   entity_emotion_block.dig('emotion', 'disgust'),
-            anger_score:     entity_emotion_block.dig('emotion', 'anger')
+            sentiment_label: entity_sentiment_block.dig('label')            || 'Unknown',
+            sentiment_score: entity_sentiment_block.dig('score')            || 0,
+            sadness_score:   entity_emotion_block.dig('emotion', 'sadness') || 0,
+            joy_score:       entity_emotion_block.dig('emotion', 'joy')     || 0,
+            fear_score:      entity_emotion_block.dig('emotion', 'fear')    || 0,
+            disgust_score:   entity_emotion_block.dig('emotion', 'disgust') || 0,
+            anger_score:     entity_emotion_block.dig('emotion', 'anger')   || 0
           )
 
-        # For whatever reason, IBM throws an exception if an entity isn't found in text (rather than something sane)
+        # For whatever reason, IBM *sometimes* throws an exception if an entity isn't found in text (rather than something sane)
         # so we catch this exception and handle it accordingly
         rescue IBMCloudSdkCore::ApiException => api_error
           raise api_error unless api_error.code == 400
 
           # If we get back a 400 for this entity, it wasn't found in the text.
-          entity.update(
+          entity.update!(
             sentiment_label: 'Unknown',
-            sentiment_score: -1,
-            sadness_score:   -1,
-            joy_score:       -1,
-            fear_score:      -1,
-            disgust_score:   -1,
-            anger_score:     -1
+            sentiment_score: 0,
+            sadness_score:   0,
+            joy_score:       0,
+            fear_score:      0,
+            disgust_score:   0,
+            anger_score:     0
           )
         end
 
