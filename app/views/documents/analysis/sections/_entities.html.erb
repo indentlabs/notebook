@@ -122,17 +122,6 @@
       </div>
     <% end %>
   </div>
-
-  <% if analysis.document_entities.where(entity_type: 'Character').any? && false %>
-    <div class="col s12 m6">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title">Character ensemble emotional spread</div>
-          <div id="graph-character-emotions"></div>
-        </div>
-      </div>
-    </div>
-  <% end %>
 </div>
 
 <div id="entity-link-modal" class="modal">
@@ -197,40 +186,6 @@
       form.submit();
       return false;
     });
-
-    <% if analysis.document_entities.where(entity_type: 'Character').any? %>
-      var data = [
-        <% analysis.document_entities.where(entity_type: 'Character').each do |entity| %>
-          [
-            { axis: "Joy",     value: <%= (100 * (entity.joy_score.presence || 0)).round(1) %> },
-            { axis: "Sadness", value: <%= (100 * (entity.sadness_score.presence || 0)).round(1) %> },
-            { axis: "Fear",    value: <%= (100 * (entity.fear_score.presence || 0)).round(1) %> },
-            { axis: "Disgust", value: <%= (100 * (entity.disgust_score.presence || 0)).round(1) %> },
-            { axis: "Anger",   value: <%= (100 * (entity.anger_score.presence || 0)).round(1) %> }
-          ],
-        <% end %>
-      ];
-      /*
-        var color = d3.scalePoint()
-          .range(["#EDC951","#CC333F","#00A0B0"]);
-          
-        var radarChartOptions = {
-          h: 300,
-          margin: {
-            top:    30, 
-            right:  30, 
-            bottom: 30, 
-            left:   30
-          },
-          levels: 3,
-          maxValue: 100,
-          roundStrokes: true,
-          color: color,
-          dotRadius: 2
-        };
-      */
-      RadarChart("#graph-character-emotions", data, radarChartOptions);
-    <% end %>
   });
 
 </script>

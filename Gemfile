@@ -141,8 +141,4 @@ group :worker do
 
   gem 'engtagger'
   gem 'ibm_watson'
-
-  # These are unfortunately necessary as a hack to get treat running properly
-  gem 'rubyzip', '>= 1.0.0' # will load new rubyzip version
-  gem 'zip-zip' # will load compatibility for old rubyzip API.
 end
