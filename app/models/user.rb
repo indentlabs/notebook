@@ -23,10 +23,9 @@ class User < ApplicationRecord
   def on_premium_plan?
     BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id)
   end
-  has_many :promotions
+  has_many :promotions, dependent: :destroy
 
-
-  has_many :image_uploads
+  has_many :image_uploads, dependent: :destroy
 
   has_one :referral_code, dependent: :destroy
   has_many :referrals, foreign_key: :referrer_id, dependent: :destroy
