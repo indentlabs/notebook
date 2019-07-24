@@ -16,7 +16,7 @@ module HasParseableText
       @paragraphs ||= begin
         # Normalize text
         ## We use paragraph tags by default, but people might paste in divs also
-        paragraphed_sanity = ActionController::Base.helpers.sanitize(body, :tags => %w(div p))
+        paragraphed_sanity = ActionController::Base.helpers.sanitize(body, tags: %w(div p), attributes: %w())
         paragraphed_sanity.gsub!('<div></div>', '')
         paragraphed_sanity.gsub!('<p></p>', '')
         
