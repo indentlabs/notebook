@@ -16,9 +16,7 @@ module Documents
                 "sentiment": true, # this allows us to skip the sentiment call later if we don't care about calculating sentiment on entities we don't care about also
                 "emotion":   true  # see https://console.bluemix.net/apidocs/natural-language-understanding ctrl+f entities.emotion
               },
-              "categories": {
-                "explanation": true
-              },
+              "categories": {},
               "concepts":   {
                 "limit": 10
               },
