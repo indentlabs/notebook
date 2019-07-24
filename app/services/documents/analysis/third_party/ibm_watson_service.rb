@@ -10,13 +10,15 @@ module Documents
 
           # Fetch a bunch of raw results to analyze
           watson = watson_client.analyze(
-            text:     document.body,
+            html:     document.body,
             features: {
               "entities":   {
                 "sentiment": true, # this allows us to skip the sentiment call later if we don't care about calculating sentiment on entities we don't care about also
                 "emotion":   true  # see https://console.bluemix.net/apidocs/natural-language-understanding ctrl+f entities.emotion
               },
-              "categories": {},
+              "categories": {
+                "explanation": true
+              },
               "concepts":   {
                 "limit": 10
               },
@@ -24,6 +26,9 @@ module Documents
               "emotion":    {}
             }
           ).result
+
+          require 'pry'
+          binding.pry
 
           # Language detection
           analysis.language = watson.dig('language')
@@ -106,43 +111,74 @@ module Documents
         end
 
         # This re-analyzes a specific entity within a document, useful for manually adding entities post-analysis
-        def analyze_entity(document_entity)
+        def self.analyze_entity(document_entity)
           watson_client = new_client
 
           entity = ::DocumentEntity.find(document_entity.to_i) # raises unless found :+1:
           analysis = entity.document_analysis
-          document = analysis.document_analysis.document
-
-          require 'pry'
-          binding.pry
+          document = analysis.document
 
           # Fetch a bunch of raw results to analyze
           watson = watson_client.analyze(
-            text:     document.body,
+            html:     document.body,
             features: {
-              "sentiment":  {
-                "targets": {
+              "entities": {
+                "targets": [
                   entity.text
-                }
+                ]
+              },
+              "sentiment":  {
+                "targets": [
+                  entity.text
+                ]
               },
               "emotion": {
-                "targets": {
+                "targets": [
                   entity.text
-                }
+                ]
               }
             }
           ).result
 
-          require 'pry'
-          binding.pry
+          entity_sentiment_block = (watson.dig('sentiment', 'targets').presence || {}).detect { |target| target['text'] == entity.text }
+          entity_emotion_block   = (watson.dig('emotion',   'targets').presence || {}).detect { |target| target['text'] == entity.text }
+          entity.update(
+            relevance:       0.75, # todo we should figure something out here, uh oh
+            sentiment_label: entity_sentiment_block.dig('label'),
+            sentiment_score: entity_sentiment_block.dig('score'),
+            sadness_score:   entity_emotion_block.dig('emotion', 'sadness'),
+            joy_score:       entity_emotion_block.dig('emotion', 'joy'),
+            fear_score:      entity_emotion_block.dig('emotion', 'fear'),
+            disgust_score:   entity_emotion_block.dig('emotion', 'disgust'),
+            anger_score:     entity_emotion_block.dig('emotion', 'anger')
+          )
+
+        # For whatever reason, IBM throws an exception if an entity isn't found in text (rather than something sane)
+        # so we catch this exception and handle it accordingly
+        rescue IBMCloudSdkCore::ApiException => api_error
+          raise api_error unless api_error.code == 400
+
+          # If we get back a 400 for this entity, it wasn't found in the text.
+          entity.update(
+            sentiment_label: 'Unknown',
+            sentiment_score: -1,
+            sadness_score:   -1,
+            joy_score:       -1,
+            fear_score:      -1,
+            disgust_score:   -1,
+            anger_score:     -1
+          )
         end
 
         private
 
         def self.entity_type_map_to_notebook_entity_type
+          # todo we can probably also build Towns from location disambiguations, e.g. 
+          #    {"type"=>"Location", "text"=>"Bendal", "relevance"=>0.159735, "disambiguation"=>{"subtype"=>["City"]}, "count"=>2},
           {
             'Person'       => Character.name,
             'Organization' => Group.name,
+            'Company'      => Group.name, # todo actual Company pages?
             'Location'     => Location.name,
             'JobTitle'     => Job.name,
             'Facility'     => Building.name
@@ -164,7 +200,7 @@ module Documents
           category.key?('score') && category.dig('score') >= 0.3
         end
 
-        def new_client
+        def self.new_client
           # Authorize a client to analyze with
           watson_client = ::IBMWatson::NaturalLanguageUnderstandingV1.new(
             iam_apikey: ENV['WATSON_API_KEY'],
