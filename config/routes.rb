@@ -17,10 +17,13 @@ Rails.application.routes.draw do
   get '/@:username', to: 'users#show', as: :profile_by_username
 
   resources :documents do
-    get  '/analysis',         to: 'documents#analysis',         on: :member
-    get  '/queue_analysis',   to: 'documents#queue_analysis',   on: :member
-    post '/link_entity',      to: 'documents#link_entity',      on: :collection
-    get  '/destroy_analysis', to: 'documents#destroy_analysis', on: :member
+    get  '/analysis',         to: 'documents#analysis',                on: :member
+    get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
+    post '/link_entity',      to: 'documents#link_entity',             on: :collection
+
+    # todo these routes don't belong here and make for awfully weird urls (/documents/:analysis_id/destroy, etc)
+    get  '/destroy_analysis', to: 'documents#destroy_analysis',        on: :member
+    get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
   end
 
   scope '/my' do

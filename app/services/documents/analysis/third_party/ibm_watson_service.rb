@@ -143,7 +143,7 @@ module Documents
           entity_sentiment_block = (watson.dig('sentiment', 'targets').presence || {}).detect { |target| target['text'] == entity.text }.presence || {}
           entity_emotion_block   = (watson.dig('emotion',   'targets').presence || {}).detect { |target| target['text'] == entity.text }.presence || {}
           entity.update!(
-            relevance:       0.75, # todo we should figure something out here, uh oh
+            relevance:       1.00, # todo we should figure something out here, uh oh
             sentiment_label: entity_sentiment_block.dig('label')            || 'Unknown',
             sentiment_score: entity_sentiment_block.dig('score')            || 0,
             sadness_score:   entity_emotion_block.dig('emotion', 'sadness') || 0,

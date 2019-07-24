@@ -145,6 +145,16 @@ class DocumentsController < ApplicationController
     end
   end
 
+  def destroy_document_entity
+    entity   = DocumentEntity.find_by(id: params[:id])
+    document = entity.document_analysis.document
+    return unless document.user == current_user
+
+    entity.destroy
+
+    redirect_back(fallback_location: analysis_document_path(document), notice: "Entity removed from analysis.")
+  end
+
   def destroy_analysis
     document = Document.find_by(id: params[:id])
     return unless document.user == current_user
