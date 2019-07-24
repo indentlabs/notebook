@@ -152,22 +152,6 @@ module Documents
             disgust_score:   entity_emotion_block.dig('emotion', 'disgust') || 0,
             anger_score:     entity_emotion_block.dig('emotion', 'anger')   || 0
           )
-
-        # For whatever reason, IBM *sometimes* throws an exception if an entity isn't found in text (rather than something sane)
-        # so we catch this exception and handle it accordingly
-        rescue IBMCloudSdkCore::ApiException => api_error
-          raise api_error unless api_error.code == 400
-
-          # If we get back a 400 for this entity, it wasn't found in the text.
-          entity.update!(
-            sentiment_label: 'Unknown',
-            sentiment_score: 0,
-            sadness_score:   0,
-            joy_score:       0,
-            fear_score:      0,
-            disgust_score:   0,
-            anger_score:     0
-          )
         end
 
         private
