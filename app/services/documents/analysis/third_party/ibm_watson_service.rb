@@ -25,9 +25,6 @@ module Documents
             }
           ).result
 
-          require 'pry'
-          binding.pry
-
           # Language detection
           analysis.language = watson.dig('language')
 
