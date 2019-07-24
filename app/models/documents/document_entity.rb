@@ -44,6 +44,10 @@ class DocumentEntity < ApplicationRecord
     entity.name == self.text
   end
 
+  def linked_name_if_possible
+    entity.present? ? entity.name : text
+  end
+
   def dominant_emotion
     emotions.sort_by { |emotion, score| score }.reverse
   end
