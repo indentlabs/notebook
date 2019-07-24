@@ -26,7 +26,7 @@ Rails.application.config.content_types = {
   premium: [
     Building, Condition, Country, Creature, Deity, Flora, Government, Group, Job, Landmark, Language,
     Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle,
-    Sport, Food
+    Sport, Food, School
   ],
 
   # Content types to label as "new" around the site
