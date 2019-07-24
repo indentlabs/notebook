@@ -6,12 +6,16 @@
   <% if visible_documents.any? %>
     <%= content.name %> appears in the following documents:
 
-    <ul class="browser-default">
+    <ul>
       <% visible_documents.each do |document| %>
         <li>
-          <%= link_to document.title, document, class: Document.color + '-text flow-text' %>
+          <%= link_to document, class: "#{Document.color}-text" do %>
+            <i class="material-icons <%= Document.color %>-text left large"><%= Document.icon %></i>
+            <span class="flow-text"><%= document.title %></span>
+          <% end %>
           <br />
           by <%= link_to document.user.name, document.user, class: 'green-text' %>
+          <div class="clearfix"></div>
         </li>
       <% end %>
     </ul>
