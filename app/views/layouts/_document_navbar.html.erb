@@ -28,30 +28,6 @@
             <i class="material-icons white-text left">note_add</i>
           <% end %>
         </li>
-        <li class="right">
-          <%=
-            link_to '#', class: 'tooltipped share', data: {
-              position: 'bottom',
-              tooltip: 'Share this document'
-            } do
-          %>
-            <i class="material-icons white-text left">share</i>
-            <span class="hide-on-med-and-down">Share</span>
-          <% end %>
-        </li>
-        <li class="right">
-          <% if @document.user.on_premium_plan? %>
-            <%= link_to analysis_document_path(@document), class: "tooltipped", data: { tooltip: 'Analyze this document', position: 'bottom' } do %>
-              <i class="material-icons left">bar_chart</i>
-              <span class="hide-on-med-and-down">Analyze</span>
-            <% end %>
-          <% else %>
-            <%= link_to subscription_path, class: "tooltipped", data: { tooltip: 'Analyze this document', position: 'bottom' } do %>
-              <i class="material-icons left">bar_chart</i>
-              <span class="hide-on-med-and-down">Analyze</span>
-            <% end %>
-          <% end %>
-        </li>
 
         <ul id="about-this-document-dropdown" class="dropdown-content">
           <li style="padding: 0 20px" class="<%= Document.color %> lighten-5">
@@ -82,16 +58,18 @@
           </li>
           <li class="divider"></li>
           <li>
-            <a href="#">
+            <%= link_to analysis_document_path(@document) do %>
               <i class="material-icons left orange-text">bar_chart</i>
               Analyze this document
-            </a>
+            <% end %>
           </li>
           <li>
-            <a href="#">
-              <i class="material-icons left purple-text">share</i>
+            <%=
+              link_to '#', class: 'share' do
+            %>
+              <i class="material-icons purple-text left">share</i>
               Share this document
-            </a>
+            <% end %>
           </li>
           <% if current_user.can_delete?(@document) %>
             <li>
@@ -117,6 +95,19 @@
           %>
             <i class="material-icons white-text left"><%= Document.icon %></i>
             <span class="hide-on-med-and-down">About</span>
+          <% end %>
+        </li>
+        <li class="right">
+          <% if @document.user.on_premium_plan? %>
+            <%= link_to analysis_document_path(@document), class: "tooltipped", data: { tooltip: 'Analyze this document', position: 'bottom' } do %>
+              <i class="material-icons left">bar_chart</i>
+              <span class="hide-on-med-and-down">Analyze</span>
+            <% end %>
+          <% else %>
+            <%= link_to subscription_path, class: "tooltipped", data: { tooltip: 'Analyze this document', position: 'bottom' } do %>
+              <i class="material-icons left">bar_chart</i>
+              <span class="hide-on-med-and-down">Analyze</span>
+            <% end %>
           <% end %>
         </li>
         <li class="left" style="margin-left: 20px">
