@@ -41,7 +41,6 @@ class SubscriptionService < Service
       begin
         stripe_subscription.save unless Rails.env.test?
       rescue Stripe::CardError => e
-        flash[:alert] = "We couldn't upgrade you to Premium because #{e.message.downcase} Please double check that your information is correct."
         return :failed_card
       end
     end

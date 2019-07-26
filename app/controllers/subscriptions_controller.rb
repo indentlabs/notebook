@@ -36,6 +36,7 @@ class SubscriptionsController < ApplicationController
     if result == :payment_method_needed
       redirect_to payment_info_path(plan: new_plan_id)
     elsif result == :failed_card
+      flash[:alert] = "We couldn't upgrade you to Premium because your card was denied. Please double check that your information is correct."
       return
     else
       redirect_to(subscription_path, notice: "Your plan was successfully changed.")
