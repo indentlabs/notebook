@@ -2,30 +2,25 @@
   <nav class="navbar nav-extended <%= 'logged-in' if user_signed_in? %>" style="background-color: <%= @navbar_color.presence || '#2196F3' %>">
     <div class="nav-wrapper">
       <ul>
-        <!--
-        <li>
-          <%= yield :navbar_right_content %>
-        </li>
-        -->
         <li class="left">
           <a class="sidenav-trigger show-on-large left" href="#" data-target="sidenav-left">
             <i class="material-icons">menu</i>
           </a>
         </li>
-        <li class="right">
+        <li class="left">
           <%=
             link_to documents_path, class: 'tooltipped', data: {
-              position: 'left',
+              position: 'bottom',
               tooltip: 'Back to your documents'
             } do
           %>
             <i class="material-icons white-text">file_copy</i>
           <% end %>
         </li>
-        <li class="right">
+        <li class="left">
           <%=
             link_to edit_document_path(:new), class: 'tooltipped', data: {
-              position: 'left',
+              position: 'bottom',
               tooltip: 'New document'
             },
             target: '_blank' do
@@ -33,10 +28,94 @@
             <i class="material-icons white-text">note_add</i>
           <% end %>
         </li>
-        <li>
+        <li class="right">
+          <%=
+            link_to '#', class: 'tooltipped share', data: {
+              position: 'bottom',
+              tooltip: 'Share this document'
+            } do
+          %>
+            <i class="material-icons white-text">share</i>
+          <% end %>
+        </li>
+        <li class="right">
+          <%=
+            link_to '#', class: 'tooltipped', data: {
+              position: 'bottom',
+              tooltip: 'Analyze this document'
+            } do
+          %>
+            <i class="material-icons white-text">bar_chart</i>
+          <% end %>
+        </li>
+
+        <ul id="dropdown1" class="dropdown-content">
+          <li>
+            <%= link_to @document.user, class: User.color + '-text' do %>
+              <i class="material-icons left"><%= User.icon %></i>
+              <span class="black-text">Written by</span>
+              <%= @document.user.name %>
+            <% end %>
+          </li>
+          <li class="divider"></li>
+          <li style="padding: 0 20px">
+            <h5 class="grey-text text-darken-4">
+              About this document
+            </h5>
+            <ul>
+              <li>
+                Created <%= time_ago_in_words @document.created_at %> ago
+              </li>
+              <li>Last edited <%= time_ago_in_words @document.updated_at %> ago</li>
+            </ul>
+          </li>
+          <li class="divider"></li>
+          <li>
+            <a href="#">
+              <i class="material-icons left orange-text">bar_chart</i>
+              Analyze this document
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <i class="material-icons left purple-text">share</i>
+              Share this document
+            </a>
+          </li>
+          <% if current_user.can_delete?(@document) %>
+            <li>
+              <%= link_to @document,
+                method: :delete,
+                data: {
+                  confirm: "Are you sure? This will permanently delete this entire document!"
+                } do
+              %>
+                <i class="material-icons left red-text">delete</i>
+                Delete this document
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+        <li class="right">
+          <%=
+            link_to '#', class: 'tooltipped dropdown-trigger', data: {
+              position: 'bottom',
+              tooltip: 'About this document',
+              target: 'dropdown1'
+            } do
+          %>
+            <i class="material-icons white-text"><%= Document.icon %></i>
+          <% end %>
+        </li>
+        <li class="left" style="margin-left: 20px">
           <%= yield :navbar_left_content %>
+        </li>
+        <li class="right">
+          <%= yield :navbar_right_content %>
         </li>
       </ul>
     </div>
   </nav>
 </div>
+
+<%= render partial: 'content/share', locals: { shared_content: @document } %>
