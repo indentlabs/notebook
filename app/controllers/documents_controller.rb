@@ -27,6 +27,10 @@ class DocumentsController < ApplicationController
       .order('entity_type asc')
 
     @navbar_actions.unshift({
+      label: 'Edit this document',
+      href: edit_document_path(@document)
+    })
+    @navbar_actions.unshift({
       label: (@document.name || 'Untitled document'),
       href: document_path(@document)
     })

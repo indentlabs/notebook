@@ -98,22 +98,24 @@
   </ul>
 <% end %>
 
-<div class="smart-sidebar hide-on-med-and-down">
-  <div class="entities-container">
-    <div class="grey-text center">Quick reference</div>
-    <% @linked_entities.each do |entity| %>
-      <% entity_class = entity.entity_type.constantize %>
-      <% linked_entity = entity.entity %>
-      <% next unless linked_entity.present? %>
+<% if @linked_entities.any? %>
+  <div class="smart-sidebar hide-on-med-and-down">
+    <div class="entities-container">
+      <div class="grey-text center">Quick reference</div>
+      <% @linked_entities.each do |entity| %>
+        <% entity_class = entity.entity_type.constantize %>
+        <% linked_entity = entity.entity %>
+        <% next unless linked_entity.present? %>
 
-      <a href="#"
-        class="hoverable entity-trigger sidenav-trigger white-text <%= entity_class.color %>"
-        data-target="quick-reference-<%= entity.entity_type %>-<%= entity.entity_id %>">
-        <i class="material-icons small left">
-          <%= entity_class.icon %>
-        </i>
-        <%= entity.linked_name_if_possible %>
-      </a>
-    <% end %>
+        <a href="#"
+          class="hoverable entity-trigger sidenav-trigger white-text <%= entity_class.color %>"
+          data-target="quick-reference-<%= entity.entity_type %>-<%= entity.entity_id %>">
+          <i class="material-icons small left">
+            <%= entity_class.icon %>
+          </i>
+          <%= entity.linked_name_if_possible %>
+        </a>
+      <% end %>
+    </div>
   </div>
-</div>
+<% end %>
