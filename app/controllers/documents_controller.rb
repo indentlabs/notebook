@@ -21,6 +21,11 @@ class DocumentsController < ApplicationController
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     end
 
+    @linked_entities = @document.document_entities
+      .where.not(entity_id: nil)
+      .includes(:entity)
+      .order('entity_type asc')
+
     @navbar_actions.unshift({
       label: (@document.name || 'Untitled document'),
       href: document_path(@document)
