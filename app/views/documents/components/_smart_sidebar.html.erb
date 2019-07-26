@@ -1,14 +1,118 @@
-<div class="smart-sidebar">
+<%# Generate reference sidebars %>
+<% @linked_entities.each do |entity| %>
+  <% linked_entity = entity.entity %>
+  <% entity_class = linked_entity.class %>
+  <% next unless linked_entity.present? %>
+
+  <% serialized_entity = ContentSerializer.new(linked_entity) %>
+
+  <ul id="quick-reference-<%= entity.entity_type %>-<%= entity.entity_id %>" class="sidenav quick-reference-sidenav">
+    <li>
+      <div class="user-view">
+        <div class="background">
+          <%= image_tag "card-headers/#{entity.entity_type.downcase.pluralize}.jpg", width: '100%' %>
+        </div>
+        <a href="#name">
+          <h1 class="white-text name bordered-text">
+            <i class="material-icons <%= entity_class.color %>-text left">
+              <%= entity_class.icon %>
+            </i>
+            <%= linked_entity.name %>
+          </h1>
+        </a>
+        <a href="#email">
+          <span class="white-text description bordered-text">
+            <%= truncate linked_entity.description %>
+          </span>
+        </a>
+      </div>
+    </li>
+
+    <% serialized_entity.data[:categories].each do |serialized_category| %>
+      <li class="no-padding">
+        <ul class="collapsible collapsible-accordion">
+          <li class="bold waves-effect">
+            <a class="collapsible-header" tabindex="0">
+              <i class="material-icons left"><%= serialized_category[:icon] %></i>
+              <%= serialized_category[:label] %>
+              <i class="material-icons chevron">chevron_right</i>
+            </a>
+            <div class="collapsible-body reference-fields-container">
+              <ul class="reference-fields-list">
+                <% any_filled_in_fields = false %>
+                <% serialized_category[:fields].each do |serialized_field| %>
+                  <%
+                    value = case serialized_field[:type]
+                    when 'text_area'
+                      serialized_field[:value]
+                    when 'link'
+                      # oof this should really be on the serializer already
+                      linked_entity.send(serialized_field[:old_column_source])
+                    end
+                  %>
+
+                  <% next unless value.present? %>
+                  <% any_filled_in_fields = true %>
+                  <li class="subheader"><%= serialized_field[:label] %></li>
+
+                  <% if serialized_field[:type] == "text_area" %>
+                    <li><%= value %></li>
+                  <% elsif serialized_field[:type] == "link" %>
+                    <% value.each do |related_page| %>
+                      <li>
+                        <%= link_to related_page do %>
+                          <i class="material-icons <%= related_page.class.color %>-text left">
+                            <%= related_page.class.icon %>
+                          </i>
+                          <%= related_page.name %>
+                        <% end %>
+                      </li>
+                    <% end %>
+                  <% end %>
+                <% end %>
+
+                <% if !any_filled_in_fields %>
+                  <li>Nothing has been answered in this category... yet!</li>
+                <% end %>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </li>
+    <% end %>
+
+    <li class="divider"></li>
+
+    <li>
+      <%= link_to polymorphic_path(linked_entity), class: "blue-text", target: '_new' do %>
+        <i class="material-icons left <%= entity_class.color %>-text"><%= entity_class.icon %></i>
+        View <%= linked_entity.name %>
+      <% end %>
+    </li>
+    <li>
+      <%= link_to edit_polymorphic_path(linked_entity), class: "green-text" do %>
+        <i class="material-icons left <%= entity_class.color %>-text"><%= entity_class.icon %></i>
+        Edit <%= linked_entity.name %>
+      <% end %>
+    </li>
+  </ul>
+<% end %>
+
+<div class="smart-sidebar hide-on-med-and-down">
   <div class="entities-container">
-    <% document.document_entities.each do |entity| %>
+    <div class="grey-text center">Quick reference</div>
+    <% @linked_entities.each do |entity| %>
       <% entity_class = entity.entity_type.constantize %>
+      <% linked_entity = entity.entity %>
+      <% next unless linked_entity.present? %>
+
       <a href="#"
-        class="entity-trigger tooltipped white-text <%= entity_class.color %> circle" 
-        data-tooltip="Quick reference <%= entity.text %>" 
-        data-position="left">
-        <i class="material-icons small">
+        class="hoverable entity-trigger sidenav-trigger white-text <%= entity_class.color %>"
+        data-target="quick-reference-<%= entity.entity_type %>-<%= entity.entity_id %>">
+        <i class="material-icons small left">
           <%= entity_class.icon %>
         </i>
+        <%= entity.linked_name_if_possible %>
       </a>
     <% end %>
   </div>

@@ -109,6 +109,11 @@ class DocumentsController < ApplicationController
     # Todo this line can be removed after running a migration that updates all existing documents, since you can no longer create a document with raw newlines
     @document.update(body: @document.body.gsub("\n", "<br />")) if @document.body.present? && @document.body.include?("\n")
 
+    @linked_entities = @document.document_entities
+      .where.not(entity_id: nil)
+      .includes(:entity)
+      .order('entity_type asc')
+
     redirect_to root_path unless @document.updatable_by?(current_user)
   end
 
