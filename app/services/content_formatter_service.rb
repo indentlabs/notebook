@@ -7,11 +7,7 @@ class ContentFormatterService < Service
   include Rails.application.routes.url_helpers
   default_url_options[:host] = 'localhost' # todo We should figure out how to remove this #codesmell
 
-  # Token format is [[character-35]] or [[location-1]] etc, with the format:
-  # [[<page_type>-<page_id>]].
-  # todo page slugs could be cool for this? I dunno. We probably don't want to use a
-  # field like name that can change ([[bob]]) or have an ambiguous link.
-  TOKEN_REGEX = /\[\[([^\-]+)\-([^\]]+)\]\]/
+  PAGE_LINK_CLASS = 'page-link'
 
   # Only allow linking to content type classes
   # todo: we shouldn't have to map name here, but apparently rails is having a little difficulty
@@ -31,7 +27,10 @@ class ContentFormatterService < Service
     Rails.application.config.markdown
   end
 
+  # Uhhhh, there's really no reason we should be doing this server-side. 
+  # We have everything we need on-page to do it client-side, so lets do that instead. #todo
   def self.substitute_content_links(text, viewing_user)
+    return text
     tokens_to_replace(text).each do |token|
       text.gsub!(token[:matched_string], replacement_for_token(token, viewing_user))
     end
@@ -39,13 +38,12 @@ class ContentFormatterService < Service
   end
 
   def self.tokens_to_replace(text)
-    matches = text.scan(TOKEN_REGEX).map do |klass, id|
-      {
-        content_type:   klass,
-        content_id:     id,
-        matched_string: "[[#{klass}-#{id}]]"
-      }
-    end
+    # Page links are now in HTML and look like this:
+    # <span class="page-link <color>-text" contenteditable="false" data-class="Character" data-id="7">Edmond</span>
+    # Rather than trying to match these kinds of tokens with a regex, it now makes sense to just get
+    # all spans within the text that have the `page-link` class.
+    doc = Nokogiri::HTML(text)
+    doc.xpath("//*[contains(concat(' ', normalize-space(@class), ' '), ' #{PAGE_LINK_CLASS} ')]")
   end
 
   def self.replacement_for_token(token, viewing_user)
@@ -79,6 +77,7 @@ class ContentFormatterService < Service
   end
 
   #todo maybe just move this to a partial?
+  #todo is this even used anymore?
   def self.chip_template(class_model=nil)
     content_tag(:span, class: 'chip') do
       body = ''
