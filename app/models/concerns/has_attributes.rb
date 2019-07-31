@@ -37,7 +37,7 @@ module HasAttributes
 
       # Always include  the flatfile categories (but create AR versions if they don't exist)
       categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
-        category = AttributeCategory.with_deleted.find_or_initialize_by( # i think we can do resets by just deleting all and removing with_deleted here
+        category = AttributeCategory.with_deleted.find_or_initialize_by(
           entity_type: self.content_name,
           name: category_name.to_s,
           user: user
