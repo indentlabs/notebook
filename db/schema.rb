@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_07_07_182422) do
+ActiveRecord::Schema.define(version: 2019_07_31_222334) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -801,6 +801,7 @@ ActiveRecord::Schema.define(version: 2019_07_07_182422) do
     t.integer "progress"
     t.integer "interrogative_count"
     t.integer "proper_noun_count"
+    t.datetime "queued_at"
     t.index ["document_id"], name: "index_document_analyses_on_document_id"
   end
 
