@@ -70,6 +70,19 @@ class DocumentsController < ApplicationController
     # Preconditions lol
     raise "Invalid entity type #{linked_entity_params[:entity_type]}" unless Rails.application.config.content_types[:all].map(&:name).include?(linked_entity_params[:entity_type])
 
+    if (linked_entity_params[:document_analysis_id].to_i == -1)
+      # If there's no document analysis present, we're creating an entity without an associated analysis yet
+      # So we just create a, uh, placeholder I guess
+      document = Document.find_by(id: linked_entity_params[:document_id], user: current_user.id)
+      analysis = document.document_analysis.first_or_create
+      linked_entity_params[:document_analysis_id] = analysis.id
+
+      require 'pry'
+      binding.pry
+    
+      # todo document entities might make more sense to be tied to documents instead of analyses
+    end
+
     if (linked_entity_params[:document_entity_id].to_i == -1)
       # If we pass in an ID of -1, then we're adding a new DocumentEntity (rather than linking an existing one)
       # Therefore, we need to create one.

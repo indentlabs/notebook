@@ -118,14 +118,85 @@
         <% next unless linked_entity.present? %>
 
         <a href="#"
-          class="hoverable entity-trigger sidenav-trigger white-text <%= entity_class.color %>"
-          data-target="quick-reference-<%= entity.entity_type %>-<%= entity.entity_id %>">
+           class="hoverable entity-trigger sidenav-trigger white-text <%= entity_class.color %>"
+           data-target="quick-reference-<%= entity.entity_type %>-<%= entity.entity_id %>">
           <i class="material-icons small left">
             <%= entity_class.icon %>
           </i>
           <%= entity.linked_name_if_possible %>
         </a>
       <% end %>
+
+      <a href="#"
+         class="hoverable entity-trigger white-text orange js-link-entity">
+        <i class="material-icons small left">add
+        </i>
+        Add a page
+      </a>
     </div>
   </div>
 <% end %>
+
+<%# todo this could be a partial with configurable title/text and reused on analysis page %>
+<div id="entity-link-modal" class="modal">
+  <div class="modal-content">
+    <h4>Add a quick reference</h4>
+    <p>
+      Select the page below you'd like to link to this document. 
+      You can then click it at any time to quickly view that page without leaving your document.
+    </p>
+    <%= form_with url: link_entity_documents_path, method: :POST do |f| %>
+      <%= f.hidden_field :document_id,          value: document.id %>
+      <%= f.hidden_field :document_analysis_id, value: nil %>
+      <%= f.hidden_field :entity_type,          value: nil %>
+      <%= f.hidden_field :entity_id,            value: nil %>
+      <%= f.hidden_field :document_entity_id,   value: nil %>
+
+      <% @current_user_content.each do |content_type, content_list| %>
+        <% content_type_class = content_type.constantize %>
+        <% next if content_type == 'Document' %>
+        <h5><%= content_type.pluralize %></h5>
+        <ul class="collection">
+          <% content_list.each do |content| %>
+            <a href="#" 
+               class="<%= content_type_class.color %>-text js-link-entity-selection" 
+               data-id="<%= content.id %>"
+               data-type="<%= content_type %>">
+              <li class="collection-item hoverable">
+                <i class="material-icons left"><%= content_type_class.icon %></i>
+                <%= content.name %>
+                <span class="secondary-content">
+                  <i class="material-icons">link</i>
+                </span>
+              </li>
+            </a>
+          <% end %>
+        </ul>
+      <% end %>
+      <%= f.submit 'submit' %>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+
+    $('.js-link-entity').click(function () {
+      $('#entity-link-modal').modal('open');
+      return false;
+    });
+
+    $('.js-link-entity-selection').click(function () {
+      var entity = $(this);
+      var form   = $(this).closest('form');
+
+      form.find('input[name=entity_id]').val(entity.data('id'));
+      form.find('input[name=entity_type]').val(entity.data('type'));
+      
+      // form.submit();
+    });
+  });
+</script>
