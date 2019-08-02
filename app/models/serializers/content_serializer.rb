@@ -65,11 +65,7 @@ class ContentSerializer
               hidden: !!field.hidden,
               position: field.position,
               old_column_source: field.old_column_source,
-              value: self.attribute_values.order('created_at desc').detect { |value| #codesmell here: we shouldn't ever have multiple attribute values but for some reason we do sometimes (in collaboration?)
-                value.entity_type == content.page_type &&
-                value.entity_id   == content.id &&
-                value.attribute_field_id == field.id
-              }.try(:value) || ""
+              value: value_for(field, content)
             }
           }.sort do |a, b|
             a_value = case a[:type]
@@ -99,5 +95,26 @@ class ContentSerializer
         }
       }
     }
+  end
+
+  def value_for(attribute_field, content)
+    case attribute_field.field_type
+    when 'link'
+      self.raw_model.send(attribute_field.old_column_source).map do |page| 
+        {
+          id:        page.id,
+          name:      page.name,
+          page_type: page.class.name
+        }
+      end
+
+    else # text_area, name, universe, etc
+      #codesmell here: we shouldn't ever have multiple attribute values but for some reason we do sometimes (in collaboration?)
+      self.attribute_values.order('created_at desc').detect { |value| 
+        value.entity_type        == content.page_type &&
+        value.entity_id          == content.id &&
+        value.attribute_field_id == attribute_field.id
+      }.try(:value) || ""
+    end
   end
 end

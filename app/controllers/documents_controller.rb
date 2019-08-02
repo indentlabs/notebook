@@ -69,6 +69,7 @@ class DocumentsController < ApplicationController
     redirect_to analysis_document_path(@document)
   end
 
+  # todo this function is an embarassment
   def link_entity
     # Preconditions lol
     raise "Invalid entity type #{linked_entity_params[:entity_type]}" unless Rails.application.config.content_types[:all].map(&:name).include?(linked_entity_params[:entity_type])
@@ -95,7 +96,7 @@ class DocumentsController < ApplicationController
       )
       raise "No document analysis found for id=#{document_analysis_id} / user=#{current_user.id}" if document_analysis.nil?      
 
-      # # Now that we have the analysis reference, we just create a new DocumentEntity on it for the associated page
+      # Now that we have the analysis reference, we just create a new DocumentEntity on it for the associated page
       page = linked_entity_params[:entity_type].constantize.find(linked_entity_params[:entity_id]) # raises exception if not found :+1:
 
       document_entity = document_analysis.document_entities.create!(
@@ -138,10 +139,22 @@ class DocumentsController < ApplicationController
     # Todo this line can be removed after running a migration that updates all existing documents, since you can no longer create a document with raw newlines
     @document.update(body: @document.body.gsub("\n", "<br />")) if @document.body.present? && @document.body.include?("\n")
 
-    @linked_entities = @document.document_entities
-      .where.not(entity_id: nil)
-      .includes(:entity)
-      .order('entity_type asc')
+    # Uhhhhhhh, no comment
+    @linked_entities = []
+    Rails.application.config.content_types[:all].each do |content_type|
+      @linked_entities += @document.document_entities
+        .where(entity_type: content_type.name)
+        .where.not(entity_id: nil)
+        .includes(:entity, entity: [:universe, :user])
+        .includes(entity: Rails.application.config.inverse_content_relations.fetch(content_type.name, []).map do |relation, data|
+          data[:inverse_class] == content_type.name ? data[:with] : nil
+        end.compact)
+    end
+
+    # @linked_entities = @document.document_entities
+    #   .where.not(entity_id: nil)
+    #   .includes(:entity)
+    #   .order('entity_type asc')
 
     redirect_to root_path unless @document.updatable_by?(current_user)
   end
