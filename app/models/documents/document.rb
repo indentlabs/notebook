@@ -43,7 +43,7 @@ class Document < ApplicationRecord
   def analyze!
     # Create an analysis placeholder to show the user one is queued,
     # then process it async.
-    analysis = self.document_analysis.create
+    analysis = self.document_analysis.create(queued_at: DateTime.current)
     DocumentAnalysisJob.perform_later(analysis.reload.id)
 
     # TODO: Should we also be deleting all existing analyses here since they're

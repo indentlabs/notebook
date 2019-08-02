@@ -46,7 +46,7 @@ class DocumentsController < ApplicationController
       redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     end
 
-    @analysis = @document.document_analysis.order('updated_at DESC').first
+    @analysis = @document.document_analysis.where.not(queued_at: nil).order('updated_at DESC').first
 
     @navbar_actions.unshift({
       label: (@document.name || 'Untitled document'),
