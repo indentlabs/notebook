@@ -125,6 +125,11 @@ class DocumentsController < ApplicationController
     end
   end
 
+  def new
+    document = current_user.documents.create
+    redirect_to edit_document_path(document)
+  end
+
   def edit
     @document = Document.find_by(id: params[:id], user_id: current_user.id)
     @document ||= current_user.documents.create
@@ -213,7 +218,7 @@ class DocumentsController < ApplicationController
 
     @navbar_actions << {
       label: "New Document",
-      href: edit_document_path(:new),
+      href: new_document_path,
       target: '_blank'
     }
   end
