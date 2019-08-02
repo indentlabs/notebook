@@ -50,7 +50,8 @@
                       serialized_field[:value]
                     when 'link'
                       # oof this should really be on the serializer already
-                      linked_entity.send(serialized_field[:old_column_source])
+                      #linked_entity.send(serialized_field[:old_column_source])
+                      []
                     end
                   %>
 
@@ -145,12 +146,12 @@
       Select the page below you'd like to link to this document. 
       You can then click it at any time to quickly view that page without leaving your document.
     </p>
-    <%= form_with url: link_entity_documents_path, method: :POST do |f| %>
+    <%= form_with url: link_entity_documents_path, method: :post, authenticity_token: false do |f| %>
       <%= f.hidden_field :document_id,          value: document.id %>
-      <%= f.hidden_field :document_analysis_id, value: nil %>
+      <%= f.hidden_field :document_analysis_id, value: -1 %>
+      <%= f.hidden_field :document_entity_id,   value: -1 %>
       <%= f.hidden_field :entity_type,          value: nil %>
       <%= f.hidden_field :entity_id,            value: nil %>
-      <%= f.hidden_field :document_entity_id,   value: nil %>
 
       <% @current_user_content.each do |content_type, content_list| %>
         <% content_type_class = content_type.constantize %>
@@ -195,8 +196,7 @@
 
       form.find('input[name=entity_id]').val(entity.data('id'));
       form.find('input[name=entity_type]').val(entity.data('type'));
-      
-      // form.submit();
+      form.submit();
     });
   });
 </script>

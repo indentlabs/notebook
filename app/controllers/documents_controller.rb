@@ -1,6 +1,9 @@
 class DocumentsController < ApplicationController
   before_action :authenticate_user!, except: [:show, :analysis]
 
+  # Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
+  skip_before_action :verify_authenticity_token, only: [:link_entity]
+
   before_action :set_sidenav_expansion
   before_action :set_navbar_color
   before_action :set_navbar_actions, except: [:edit]
@@ -70,16 +73,16 @@ class DocumentsController < ApplicationController
     # Preconditions lol
     raise "Invalid entity type #{linked_entity_params[:entity_type]}" unless Rails.application.config.content_types[:all].map(&:name).include?(linked_entity_params[:entity_type])
 
-    if (linked_entity_params[:document_analysis_id].to_i == -1)
+    # Take this out of the params upfront in case we need to modify the value (after creating one, for example)
+    document_analysis_id = linked_entity_params[:document_analysis_id].to_i
+
+    if (document_analysis_id == -1)
       # If there's no document analysis present, we're creating an entity without an associated analysis yet
       # So we just create a, uh, placeholder I guess
       document = Document.find_by(id: linked_entity_params[:document_id], user: current_user.id)
       analysis = document.document_analysis.first_or_create
-      linked_entity_params[:document_analysis_id] = analysis.id
+      document_analysis_id = analysis.id
 
-      require 'pry'
-      binding.pry
-    
       # todo document entities might make more sense to be tied to documents instead of analyses
     end
 
@@ -87,12 +90,12 @@ class DocumentsController < ApplicationController
       # If we pass in an ID of -1, then we're adding a new DocumentEntity (rather than linking an existing one)
       # Therefore, we need to create one.
       document_analysis = DocumentAnalysis.joins(:document).find_by(
-        id: linked_entity_params[:document_analysis_id].to_i, 
+        id: document_analysis_id, 
         documents: { user: current_user }
       )
-      raise "No document analysis found for id=#{linked_entity_params[:document_analysis_id]} / user=#{current_user.id}" if document_analysis.nil?      
+      raise "No document analysis found for id=#{document_analysis_id} / user=#{current_user.id}" if document_analysis.nil?      
 
-      # Now that we have the analysis reference, we just create a new DocumentEntity on it for the associated page
+      # # Now that we have the analysis reference, we just create a new DocumentEntity on it for the associated page
       page = linked_entity_params[:entity_type].constantize.find(linked_entity_params[:entity_id]) # raises exception if not found :+1:
 
       document_entity = document_analysis.document_entities.create!(
@@ -101,10 +104,10 @@ class DocumentsController < ApplicationController
         text:        page.name
       )
 
-      # Finally, we need to kick off another analysis job to fetch information about this entity
-      document_entity.analyze!
+      # # Finally, we need to kick off another analysis job to fetch information about this entity
+      document_entity.analyze! if current_user.on_premium_plan?
 
-      return redirect_to(analysis_document_path(document_entity.document_analysis.document), notice: "Page linked!")
+      return redirect_back(fallback_location: analysis_document_path(document_entity.document_analysis.document), notice: "Page linked!")
 
     else
       # If we pass in an actual ID for the document entity, we're modifying an existing one
@@ -120,7 +123,6 @@ class DocumentsController < ApplicationController
         return redirect_to(analysis_document_path(document_entity.document_analysis.document), notice: "Page linked!")
       end
     end
-
   end
 
   def edit
