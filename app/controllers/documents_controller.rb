@@ -81,7 +81,7 @@ class DocumentsController < ApplicationController
       # If there's no document analysis present, we're creating an entity without an associated analysis yet
       # So we just create a, uh, placeholder I guess
       document = Document.find_by(id: linked_entity_params[:document_id], user: current_user.id)
-      analysis = document.document_analysis.first_or_create
+      analysis = Documents::Analysis::DocumentAnalysisService.create_placeholder_analysis(document)
       document_analysis_id = analysis.id
 
       # todo document entities might make more sense to be tied to documents instead of analyses
@@ -166,6 +166,8 @@ class DocumentsController < ApplicationController
 
   def update
     document = Document.with_deleted.find_or_initialize_by(id: params[:id], user: current_user)
+
+    DocumentMentionJob.perform_later(document.id)
 
     unless document.user == current_user
       redirect_to(dashboard_path, notice: "You don't have permission to do that!")
