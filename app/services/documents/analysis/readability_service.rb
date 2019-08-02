@@ -5,14 +5,14 @@ module Documents
         analysis = DocumentAnalysis.find(analysis_id)
         document = analysis.document
 
-        analysis.flesch_kincaid_grade_level  = FleschKincaidService.grade_level(document)
-        analysis.flesch_kincaid_age_minimum  = FleschKincaidService.age_minimum(document)
-        analysis.flesch_kincaid_reading_ease = FleschKincaidService.reading_ease(document)
+        analysis.flesch_kincaid_grade_level     = FleschKincaidService.grade_level(document)
+        analysis.flesch_kincaid_age_minimum     = FleschKincaidService.age_minimum(document)
+        analysis.flesch_kincaid_reading_ease    = FleschKincaidService.reading_ease(document)
 
-        analysis.forcast_grade_level         = self.forcast_grade_level(document)
-        analysis.coleman_liau_index          = self.coleman_liau_index(document)
-        analysis.automated_readability_index = self.automated_readability_index(document)
-        analysis.gunning_fog_index           = self.gunning_fog_index(document)
+        analysis.forcast_grade_level            = self.forcast_grade_level(document)
+        analysis.coleman_liau_index             = self.coleman_liau_index(document)
+        analysis.automated_readability_index    = self.automated_readability_index(document)
+        analysis.gunning_fog_index              = self.gunning_fog_index(document)
 
         analysis.combined_average_reading_level = self.combined_average_grade_level(analysis)
         analysis.readability_score              = self.readability_score(analysis)
@@ -65,8 +65,8 @@ module Documents
         readability_scores.select! { |value| value.is_a?(Numeric) }
         readability_scores.reject! { |hasselhoff| hasselhoff.abs == Float::INFINITY }
 
-        return nil unless readability_scores.length > 2
-        readability_scores.sort.slice(1..-2).sum.to_f / 4
+        return nil unless readability_scores.compact.length > 2
+        readability_scores.compact.sort.slice(1..-2).sum.to_f / 4
       end
 
       def self.readability_score(analysis)
@@ -84,8 +84,8 @@ module Documents
         readability_scores.select! { |value| value.is_a?(Numeric) }
         readability_scores.reject! { |hasselhoff| hasselhoff.abs == Float::INFINITY }
 
-        return nil unless readability_scores.length > 2
-        100 - readability_scores.sort.slice(1..-2).sum.to_f / 4
+        return nil unless readability_scores.compact.length > 2
+        100 - readability_scores.compact.sort.slice(1..-2).sum.to_f / 4
       end
 
       def self.readability_score_category(score)

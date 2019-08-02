@@ -1,7 +1,7 @@
 class DocumentsController < ApplicationController
   before_action :authenticate_user!, except: [:show, :analysis]
 
-  # Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
+  # todo Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
   skip_before_action :verify_authenticity_token, only: [:link_entity]
 
   before_action :set_sidenav_expansion
