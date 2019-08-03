@@ -100,13 +100,15 @@ class ContentSerializer
   def value_for(attribute_field, content)
     case attribute_field.field_type
     when 'link'
-      self.raw_model.send(attribute_field.old_column_source).map do |page| 
-        {
-          id:        page.id,
-          name:      page.name,
-          page_type: page.class.name
-        }
-      end
+      self.raw_model.send(attribute_field.old_column_source)
+        # We COULD scope down the size of what's stored here to a hash if we want
+        # .map do |page| 
+        #   {
+        #     id:        page.id,
+        #     name:      page.name,
+        #     page_type: page.class.name
+        #   }
+        # end
 
     else # text_area, name, universe, etc
       #codesmell here: we shouldn't ever have multiple attribute values but for some reason we do sometimes (in collaboration?)

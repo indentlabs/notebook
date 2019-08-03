@@ -41,28 +41,19 @@
               <i class="material-icons chevron">chevron_right</i>
             </a>
             <div class="collapsible-body reference-fields-container">
-              <ul class="reference-fields-list">
+              <ul class="reference-fields-list selectable">
                 <% any_filled_in_fields = false %>
                 <% serialized_category[:fields].each do |serialized_field| %>
-                  <%
-                    value = case serialized_field[:type]
-                    when 'text_area'
-                      serialized_field[:value]
-                    when 'link'
-                      # oof this should really be on the serializer already
-                      linked_entity.send(serialized_field[:old_column_source])
-                      # []
-                    end
-                  %>
-
-                  <% next unless value.present? %>
+                  <% next unless serialized_field[:value].present? %>
                   <% any_filled_in_fields = true %>
-                  <li><a href="#" class="subheader"><%= serialized_field[:label] %></a></li>
+                  <li>
+                    <a href="#" class="subheader"><%= serialized_field[:label] %></a>
+                  </li>
 
                   <% if serialized_field[:type] == "text_area" %>
-                    <li><%= value %></li>
+                    <li><%= serialized_field[:value] %></li>
                   <% elsif serialized_field[:type] == "link" %>
-                    <% value.each do |related_page| %>
+                    <% serialized_field[:value].each do |related_page| %>
                       <li>
                         <%= link_to related_page do %>
                           <i class="material-icons <%= related_page.class.color %>-text left">
