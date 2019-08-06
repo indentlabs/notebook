@@ -1,5 +1,5 @@
 <%
-  visible_documents = content.documents.select { |document| (current_user || User.new).can_read?(document) }
+  visible_documents = content.documents.includes(:user).select { |document| (current_user || User.new).can_read?(document) }
 %>
 
 <div id="documents_panel" class="row panel">

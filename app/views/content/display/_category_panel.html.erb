@@ -23,9 +23,9 @@
 
         when 'link'
           if serialized_field[:old_column_source].present? && content.raw_model.respond_to?(serialized_field[:old_column_source].to_sym)
-            # what the heckaroony why aren't we serializing these relations
-            content.raw_model.send(serialized_field[:old_column_source].to_sym)
+            serialized_field[:value]
           else
+            # todo uhhhh is this just a safety guard or are there actual cases of bad data triggering here?
             nil
           end
 
