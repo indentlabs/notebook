@@ -26,13 +26,15 @@ class DocumentsController < ApplicationController
     preload_linked_entities
 
     @navbar_actions.unshift({
-      label: 'Edit document',
-      href: edit_document_path(@document)
+      label: 'Edit',
+      href: edit_document_path(@document),
+      class: 'right '
     })
     if @document.user == current_user
       @navbar_actions.unshift({
-        label: 'Analyze document',
-        href: analysis_document_path(@document)
+        label: 'Analyze',
+        href: analysis_document_path(@document),
+        class: 'right'
       })
     end
     @navbar_actions.unshift({
