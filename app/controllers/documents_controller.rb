@@ -4,6 +4,7 @@ class DocumentsController < ApplicationController
   # todo Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
   skip_before_action :verify_authenticity_token, only: [:link_entity]
 
+  before_action :set_document, only: [:show, :analysis, :queue_analysis, :edit, :destroy]
   before_action :set_sidenav_expansion
   before_action :set_navbar_color
   before_action :set_navbar_actions, except: [:edit]
@@ -18,16 +19,11 @@ class DocumentsController < ApplicationController
   end
 
   def show
-    @document = Document.find_by(id: params[:id])
-
     unless @document.present? && (current_user || User.new).can_read?(@document)
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     end
 
-    @linked_entities = @document.document_entities
-      .where.not(entity_id: nil)
-      .includes(:entity)
-      .order('entity_type asc')
+    preload_linked_entities
 
     @navbar_actions.unshift({
       label: 'Edit document',
@@ -46,8 +42,6 @@ class DocumentsController < ApplicationController
   end
 
   def analysis
-    @document = Document.find_by(id: params[:id], user_id: current_user.id)
-
     unless @document.present? && (current_user || User.new).can_read?(@document)
       redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     end
@@ -66,7 +60,6 @@ class DocumentsController < ApplicationController
   end
 
   def queue_analysis
-    @document = Document.find_by(id: params[:id], user_id: current_user.id)
     return redirect_back(fallback_location: documents_path, notice: "That document doesn't exist!") unless @document.present?
     return redirect_back(fallback_location: documents_path, notice: "Document analysis is a feature for Premium users.") unless @document.user.on_premium_plan?
     return redirect_back(fallback_location: documents_path, notice: "You don't have permission to do that!") unless @document.user == current_user
@@ -138,27 +131,9 @@ class DocumentsController < ApplicationController
   end
 
   def edit
-    @document = Document.find_by(id: params[:id].to_i, user_id: current_user.id)
-    @document ||= current_user.documents.create
+    preload_linked_entities
 
-    # Uhhhhhhh, no comment
-    @linked_entities = []
-    Rails.application.config.content_types[:all].each do |content_type|
-      @linked_entities += @document.document_entities
-        .where(entity_type: content_type.name)
-        .where.not(entity_id: nil)
-        .includes(:entity, entity: [:universe, :user])
-        .includes(entity: Rails.application.config.inverse_content_relations.fetch(content_type.name, []).map do |relation, data|
-          data[:inverse_class] == content_type.name ? data[:with] : nil
-        end.compact)
-    end
-
-    # @linked_entities = @document.document_entities
-    #   .where.not(entity_id: nil)
-    #   .includes(:entity)
-    #   .order('entity_type asc')
-
-    redirect_to root_path unless @document.updatable_by?(current_user)
+    redirect_to(root_path, notice: "You don't have permission to edit that!") unless @document.updatable_by?(current_user)
   end
 
   def create
@@ -184,10 +159,8 @@ class DocumentsController < ApplicationController
   end
 
   def destroy
-    document = Document.find_by(id: params[:id])
-
-    if current_user.can_delete?(document)
-      document.destroy
+    if current_user.can_delete?(@document)
+      @document.destroy
       redirect_to(documents_path, notice: "The document was successfully deleted.")
     else
       redirect_to(root_path, notice: "You don't have permission to do that!")
@@ -252,5 +225,29 @@ class DocumentsController < ApplicationController
 
   def linked_entity_params
     params.permit(:entity_id, :entity_type, :document_entity_id, :document_id, :document_analysis_id)
+  end
+
+  def preload_linked_entities
+    # Simpler form: (8/6/19 left intact for temporary reference during release -- can delete after release)
+    # @linked_entities = @document.document_entities
+    #   .where.not(entity_id: nil)
+    #   .includes(:entity)
+    #   .order('entity_type asc')
+
+    # More complicated includes-stuff form:
+    @linked_entities = []
+    Rails.application.config.content_types[:all].each do |content_type|
+      @linked_entities += @document.document_entities
+        .where(entity_type: content_type.name)
+        .where.not(entity_id: nil)
+        .includes(:entity, entity: [:universe, :user])
+        .includes(entity: Rails.application.config.inverse_content_relations.fetch(content_type.name, []).map do |relation, data|
+          data[:inverse_class] == content_type.name ? data[:with] : nil
+        end.compact)
+    end
+  end
+
+  def set_document
+    @document = Document.find_by(id: params[:id])
   end
 end
