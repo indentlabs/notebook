@@ -25,14 +25,14 @@ class DocumentsController < ApplicationController
 
     preload_linked_entities
 
-    @navbar_actions.unshift({
-      label: 'Edit',
-      href: edit_document_path(@document),
-      class: 'right '
-    })
     if @document.user == current_user
       @navbar_actions.unshift({
-        label: 'Analyze',
+        label: 'Edit document',
+        href: edit_document_path(@document),
+        class: 'right '
+      })
+      @navbar_actions.unshift({
+        label: 'Analyze document',
         href: analysis_document_path(@document),
         class: 'right'
       })
@@ -238,6 +238,8 @@ class DocumentsController < ApplicationController
 
     # More complicated includes-stuff form:
     @linked_entities = []
+    return unless user_signed_in? && current_user.on_premium_plan?
+    
     Rails.application.config.content_types[:all].each do |content_type|
       @linked_entities += @document.document_entities
         .where(entity_type: content_type.name)
