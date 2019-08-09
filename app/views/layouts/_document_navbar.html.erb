@@ -50,10 +50,12 @@
             <% end %>
           </li>
           <li class="<%= Document.color %> lighten-5">
-            <%= link_to @document.user, class: Universe.color + '-text' do %>
+            <%= link_to '#universe-picker-modal', class: Universe.color + '-text modal-trigger' do %>
               <i class="material-icons left"><%= Universe.icon %></i>
               <span class="black-text">Set in</span>
-              No Universe Set
+              <span class="js-content-universe-name">
+                <%= @document.universe_id.nil? ? 'No Universe Set' : @document.universe.name %>
+              </span>
             <% end %>
           </li>
           <li class="divider"></li>
@@ -98,16 +100,9 @@
           <% end %>
         </li>
         <li class="right">
-          <% if @document.user.on_premium_plan? %>
-            <%= link_to analysis_document_path(@document), class: "tooltipped", data: { tooltip: 'Analyze this document', position: 'bottom' } do %>
-              <i class="material-icons left">bar_chart</i>
-              <span class="hide-on-med-and-down">Analyze</span>
-            <% end %>
-          <% else %>
-            <%= link_to subscription_path, class: "tooltipped", data: { tooltip: 'Analyze this document', position: 'bottom' } do %>
-              <i class="material-icons left">bar_chart</i>
-              <span class="hide-on-med-and-down">Analyze</span>
-            <% end %>
+          <%= link_to analysis_document_path(@document), class: "tooltipped", data: { tooltip: 'Analyze this document', position: 'bottom' } do %>
+            <i class="material-icons left">bar_chart</i>
+            <span class="hide-on-med-and-down">Analyze</span>
           <% end %>
         </li>
         <li class="left" style="margin-left: 20px">
@@ -123,4 +118,74 @@
 
 <%# Modals %>
 <%= render partial: 'content/share', locals: { shared_content: @document } %>
-<%# todo universe picker %>
+<div id="universe-picker-modal" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Set document universe</h4>
+    <p>
+      What universe does this document exist in? You can change this at any time.
+    </p>
+    <div class="row">
+      <%= form_for @document, method: :put, remote: true do |f| %>
+        <div class="col s12 m12 l4">
+          <p class="grey-text">No universe</p>
+          <p>
+            <label class="js-autosave-trigger">
+              <%= f.radio_button :universe_id, "nil", class: 'with-gap', checked: @document.universe_id.nil? %>
+              <span>No universe</span>
+            </label>
+          </p>
+        </div>
+        <% if @linked_entities.any? %>
+          <div class="col s12 m12 l4">
+            <% linked_entity_universes = @linked_entities.map(&:universe).uniq %>
+            <p class="grey-text"><%= pluralize linked_entity_universes, 'suggested universe' %></p>
+            <% linked_entitiy_universes.each do |universe| %>
+              <p>
+                <label>
+                  <%= f.radio_button :universe_id, universe.id, class: 'with-gap', checked: @document.universe_id == universe.id %>
+                  <span><%= universe.name %></span>
+                </label>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+        <% if @linkables_cache['Universe'].any? %>
+          <div class="col s12 m12 l4">
+            <p class="grey-text">All universes</p>
+            <% @linkables_cache['Universe'].each do |universe_name, universe_id| %>
+              <p>
+                <label class="js-autosave-trigger">
+                  <%= f.radio_button :universe_id, universe_id, class: 'with-gap', checked: @document.universe_id == universe_id %>
+                  <span><%= universe_name %></span>
+                </label>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+        <div class="col s12">
+          <p class="grey-text">
+            Changes are saved automatically.
+          </p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+  </div>
+</div>
+
+<%= content_for :javascript do %>
+  $(document).ready(function () {
+    var universe_picker_form = $('#universe-picker-modal').find('form');
+
+    universe_picker_form.find('.js-autosave-trigger').click(function () {
+      var selected_universe_name = $(this).text().trim();
+
+      console.log('name is now ' + selected_universe_name);
+
+      $('.js-content-universe-name').text(selected_universe_name);
+      $('#universe-picker-modal').find('form').submit();
+    });
+  });
+<% end %>

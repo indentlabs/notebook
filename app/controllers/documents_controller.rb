@@ -144,16 +144,23 @@ class DocumentsController < ApplicationController
   end
 
   def update
-    document = Document.with_deleted.find_or_initialize_by(id: params[:id], user: current_user)
+    document = Document.with_deleted.find_or_initialize_by(id: params[:id])
+    d_params = document_params.clone
 
-    DocumentMentionJob.perform_later(document.id)
-
-    unless document.user == current_user
+    unless document.updatable_by?(current_user)
       redirect_to(dashboard_path, notice: "You don't have permission to do that!")
       return
     end
 
-    if document.updatable_by?(current_user) && document.update(document_params)
+    # Only queue document mentions for analysis if the document body has changed
+    DocumentMentionJob.perform_later(document.id) if d_params.key?(:body)
+
+    # We can't pass actual-nil from HTML (for no universe), so we pass a string instead and convert it back here.
+    if d_params.fetch(:universe_id, nil) == "nil"
+      d_params[:universe_id] = nil
+    end
+
+    if document.update(d_params)
       head 200, content_type: "text/html"
     else
       head 501, content_type: "text/html"
@@ -222,7 +229,7 @@ class DocumentsController < ApplicationController
   private
 
   def document_params
-    params.require(:document).permit(:title, :body, :deleted_at, :privacy)
+    params.require(:document).permit(:title, :body, :deleted_at, :privacy, :universe_id)
   end
 
   def linked_entity_params

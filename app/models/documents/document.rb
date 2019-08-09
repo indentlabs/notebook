@@ -2,6 +2,7 @@ class Document < ApplicationRecord
   acts_as_paranoid
 
   belongs_to :user
+  belongs_to :universe
 
   has_many :document_analysis,   dependent: :destroy
   has_many :document_entities,   through: :document_analysis
