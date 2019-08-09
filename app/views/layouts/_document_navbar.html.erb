@@ -137,12 +137,12 @@
         </div>
         <% if @linked_entities.any? %>
           <div class="col s12 m12 l4">
-            <% linked_entity_universes = @linked_entities.map(&:universe).uniq %>
+            <% linked_entity_universes = @linked_entities.map { |de| de.entity.try(:universe) }.uniq.compact %>
             <p class="grey-text"><%= pluralize linked_entity_universes, 'suggested universe' %></p>
-            <% linked_entitiy_universes.each do |universe| %>
+            <% linked_entity_universes.each do |universe| %>
               <p>
                 <label>
-                  <%= f.radio_button :universe_id, universe.id, class: 'with-gap', checked: @document.universe_id == universe.id %>
+                  <%= f.radio_button :universe_id, universe.id, class: 'with-gap', checked: @document.universe_id == universe.try(:id) %>
                   <span><%= universe.name %></span>
                 </label>
               </p>

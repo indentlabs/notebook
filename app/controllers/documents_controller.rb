@@ -255,7 +255,7 @@ class DocumentsController < ApplicationController
       @linked_entities += @document.document_entities
         .where(entity_type: content_type.name)
         .where.not(entity_id: nil)
-        .includes(:entity, entity: [:universe, :user])
+        .includes(:entity, entity: [:user])
         .includes(entity: Rails.application.config.inverse_content_relations.fetch(content_type.name, []).map do |relation, data|
           data[:inverse_class] == content_type.name ? data[:with] : nil
         end.compact)
