@@ -21,15 +21,15 @@ module Documents
       end
 
       def self.forcast_grade_level(document)
-        @forcast_grade_level ||= 20 - (((document.words_with_syllables(1).length.to_f / document.words.length) * 150) / 10.0)
+        @forcast_grade_level ||= 20 - (((document.words_with_syllables(1).length.to_f / document.words.length) * 150) / 10.0).clamp(0, 16)
       end
 
       def self.coleman_liau_index(document)
         @coleman_liau_index ||= [
-          0.0588 * 100 * document.characters.length.to_f / document.words.length,
+          0.0588 * 100 * document.characters.reject { |l| [" ", "\t", "\r", "\n"].include?(l) }.length.to_f / document.words.length,
           -0.296 * 100/ (document.words.length.to_f / document.sentences.length),
           -15.8
-        ].sum
+        ].sum.clamp(0, 16)
       end
 
       def self.automated_readability_index(document)
@@ -37,12 +37,12 @@ module Documents
           4.71 * document.characters.reject(&:blank?).length.to_f / document.words.length,
           0.5 * document.words.length.to_f / document.sentences.length,
           -21.43
-        ].sum
+        ].sum.clamp(0, 16)
       end
 
       def self.gunning_fog_index(document)
         #todo GFI word/suffix exclusions
-        @gunning_fog_index ||= 0.4 * (document.words.length.to_f/ document.sentences.length + 100 * (document.complex_words.length.to_f / document.words.length))
+        @gunning_fog_index ||= 0.4 * (document.words.length.to_f/ document.sentences.length + 100 * (document.complex_words.length.to_f / document.words.length)).clamp(0, 16)
       end
 
       def self.smog_grade(document)
@@ -53,7 +53,7 @@ module Documents
         # TODO need to normalize all these scores to 1..16
         # TODO need to exclude scores here that aren't actually grade level output?
         readability_scores = [
-          analysis.automated_readability_index,
+          analysis.automated_readability_index, # todo this is an age that needs converted to grade level
           analysis.coleman_liau_index,
           analysis.flesch_kincaid_grade_level,
           analysis.forcast_grade_level,
@@ -66,13 +66,12 @@ module Documents
         readability_scores.reject! { |hasselhoff| hasselhoff.abs == Float::INFINITY }
 
         return nil unless readability_scores.compact.length > 2
-        readability_scores.compact.sort.slice(1..-2).sum.to_f / 4
+        (readability_scores.compact.sort.slice(1..-2).sum.to_f / 4).clamp(0, 16)
       end
 
       def self.readability_score(analysis)
         # TODO need to normalize all these scores to 0..100
         readability_scores = [
-          analysis.automated_readability_index,
           analysis.coleman_liau_index,
           analysis.flesch_kincaid_reading_ease,
           analysis.forcast_grade_level,
@@ -85,7 +84,7 @@ module Documents
         readability_scores.reject! { |hasselhoff| hasselhoff.abs == Float::INFINITY }
 
         return nil unless readability_scores.compact.length > 2
-        100 - readability_scores.compact.sort.slice(1..-2).sum.to_f / 4
+        (100 - readability_scores.compact.sort.slice(1..-2).sum.to_f / 4).clamp(0, 100)
       end
 
       def self.readability_score_category(score)

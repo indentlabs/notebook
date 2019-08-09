@@ -16,6 +16,10 @@ class DocumentsController < ApplicationController
 
   def index
     @documents = current_user.documents.order('updated_at desc')
+
+    if @universe_scope.present?
+      @documents = @documents.where(universe_id: @universe_scope.id)
+    end
   end
 
   def show

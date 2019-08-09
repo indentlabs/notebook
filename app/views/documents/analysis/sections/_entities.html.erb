@@ -19,7 +19,8 @@
 </script>
 
 <div class="row">
-  <% analysis.document_entities.order('entity_type asc, relevance desc').each do |entity| %>
+  <%# todo aren't document entities precached somewhere on this page? %>
+  <% analysis.document_entities.includes(:entity).order('entity_type asc, relevance desc').each do |entity| %>
     <% entity_class = entity.entity_type.constantize %>
     <div class="col s12 m6">
       <div class="card">
