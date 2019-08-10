@@ -5,6 +5,7 @@ class ContentSerializer
   attr_accessor :fields
   attr_accessor :attribute_values
   attr_accessor :page_tags
+  attr_accessor :documents
 
   attr_accessor :raw_model
   attr_accessor :class_name, :class_color, :class_icon
@@ -41,6 +42,7 @@ class ContentSerializer
     self.class_icon       = content.class.icon
 
     self.page_tags        = content.page_tags.pluck(:tag) || []
+    self.documents        = content.documents || []
 
     self.data = {
       name: content.try(:name),
@@ -63,11 +65,7 @@ class ContentSerializer
               hidden: !!field.hidden,
               position: field.position,
               old_column_source: field.old_column_source,
-              value: self.attribute_values.order('created_at desc').detect { |value| #codesmell here: we shouldn't ever have multiple attribute values but for some reason we do sometimes (in collaboration?)
-                value.entity_type == content.page_type &&
-                value.entity_id   == content.id &&
-                value.attribute_field_id == field.id
-              }.try(:value) || ""
+              value: value_for(field, content)
             }
           }.sort do |a, b|
             a_value = case a[:type]
@@ -97,5 +95,28 @@ class ContentSerializer
         }
       }
     }
+  end
+
+  def value_for(attribute_field, content)
+    case attribute_field.field_type
+    when 'link'
+      self.raw_model.send(attribute_field.old_column_source)
+        # We COULD scope down the size of what's stored here to a hash if we want
+        # .map do |page| 
+        #   {
+        #     id:        page.id,
+        #     name:      page.name,
+        #     page_type: page.class.name
+        #   }
+        # end
+
+    else # text_area, name, universe, etc
+      #codesmell here: we shouldn't ever have multiple attribute values but for some reason we do sometimes (in collaboration?)
+      self.attribute_values.order('created_at desc').detect { |value| 
+        value.entity_type        == content.page_type &&
+        value.entity_id          == content.id &&
+        value.attribute_field_id == attribute_field.id
+      }.try(:value) || ""
+    end
   end
 end

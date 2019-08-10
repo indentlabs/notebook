@@ -221,6 +221,14 @@ class User < ApplicationRecord
     end
   end
 
+  def self.icon
+    'person'
+  end
+
+  def self.color
+    'green'
+  end
+
   private
 
   # Attributes that are non-public, and should be blacklisted from any public

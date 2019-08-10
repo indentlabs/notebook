@@ -35,6 +35,7 @@ gem 'paranoia'
 # Javascript
 gem 'coffee-rails'
 gem 'rails-jquery-autocomplete'
+gem 'animate-rails'
 
 # Form enhancements
 gem 'redcarpet' #markdown formatting
@@ -53,11 +54,12 @@ gem 'medium-editor-rails'
 
 # Graphs & Charts
 gem 'chartkick'
-gem 'slack-notifier'
+gem 'd3-rails'
 
 # Analytics
 gem 'mixpanel-ruby'
 gem 'barnes'
+gem 'slack-notifier'
 
 # Apps
 #gem 'easy_translate'
@@ -127,4 +129,16 @@ group :development do
   gem 'flamegraph'
   gem 'stackprof'
   gem 'bundler-audit'
+end
+
+group :worker do
+  # These gems are only used in workers (and just so happen to slow down app startup
+  # by quite a bit), so we exclude them from all groups other than RAILS_GROUPS=worker.
+
+  # Document understanding
+  gem 'htmlentities'
+  gem 'birch', github: 'billthompson/birch', branch: 'birch-ruby22'
+
+  gem 'engtagger'
+  gem 'ibm_watson'
 end

@@ -1,0 +1,192 @@
+<h5 class="grey-text">Entities</h5>
+
+<script type="text/javascript">
+  var color = d3.scalePoint().range(["#EDC951","#CC333F","#00A0B0"]);
+  var radarChartOptions = {
+    h: 300,
+    margin: {
+      top: 10, 
+      right: 0, 
+      bottom: 10, 
+      left: 0
+    },
+    levels: 4,
+    maxValue: 100,
+    roundStrokes: true,
+    color: color,
+    dotRadius: 2
+  };
+</script>
+
+<div class="row">
+  <%# todo aren't document entities precached somewhere on this page? %>
+  <% analysis.document_entities.includes(:entity).order('entity_type asc, relevance desc').each do |entity| %>
+    <% entity_class = entity.entity_type.constantize %>
+    <div class="col s12 m6">
+      <div class="card">
+        <div class="card-image waves-effect waves-block waves-light">
+          <% if entity.entity && entity.entity.image_uploads.any? %>
+            <%= image_tag entity.entity.image_uploads.sample.src.url(:large), class: 'activator' %>
+          <% else %>
+            <%= image_tag 'card-headers/' + entity_class.name.downcase.pluralize + '.jpg', class: 'activator' %>
+          <% end %>
+        </div>
+        <div class="card-content">
+          <span class="card-title activator <%= entity_class.color %>-text">
+            <i class="material-icons left"><%= entity_class.icon %></i>
+            <%= entity.linked_name_if_possible %>
+            <i class="material-icons right black-text">more_vert</i>
+          </span>
+          <p>
+            Relevance score: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 'Calculating...' %>%
+            <div class="progress <%= entity_class.color %> lighten-5">
+              <div class="determinate <%= entity_class.color %>" style="width: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 0 %>%"></div>
+            </div>
+          </p>
+        </div>
+        <div class="card-reveal">
+          <span class="card-title <%= entity_class.color %>-text">
+            <i class="material-icons left"><%= entity_class.icon %></i>
+            <%= entity.linked_name_if_possible %>
+            <i class="material-icons right black-text">close</i>
+          </span>
+          <div class="card-title">Emotional range</div>
+          <div id="graph-character-emotions-<%= entity.id %>"></div>
+          <ul class="help-text">
+            <% [:joy, :sadness, :fear, :disgust, :anger].each do |emotion| %>
+              <% emotion_score = entity.send("#{emotion}_score") %>
+              <li>
+                <%= emotion.to_s.titleize %>: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 'Calculating...' %>
+                <div class="progress">
+                  <div class="determinate <%= EmotionService.color_for_emotion(emotion) %>" style="width: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 0 %>%"></div>
+                </div>
+              </li>
+            <% end %>
+            <li>
+              Overall sentiment: <%= entity.sentiment_label %> (<%= (entity.sentiment_score.present? ? (100 * entity.sentiment_score).round(1) : 'Calculating...') %>)
+            </li>
+          </ul>
+
+          <p class="center" style="margin-top: 40px;">
+            If you'd like, you can remove this <%= entity_class.name.downcase %> from the analysis.
+            <%= link_to "Remove this #{entity_class.name}", destroy_entity_document_path(entity), class: "btn #{entity_class.color}" %>
+          </p>
+        </div>
+        <div class="card-action">
+          <% if entity.entity_id %>
+            <% linked_entity_class = entity.entity.class %>
+            <%= link_to polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'blue-text' do %>
+              <i class="material-icons left"><%= linked_entity_class.icon %></i>
+              View
+            <% end %>
+            <%= link_to edit_polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'green-text right' do %>
+              <i class="material-icons left"><%= linked_entity_class.icon %></i>
+              Edit
+            <% end %>
+          <% else %>
+            <%= link_to new_polymorphic_path(entity_class, document_entity: entity.id), class: entity_class.color + '-text' do %>
+              <i class="material-icons left">add</i>
+              New <%= entity_class.name %>
+            <% end %>
+            <%= link_to '#', class: entity_class.color + '-text right js-link-entity', data: { id: entity.id } do %>
+              <i class="material-icons left">link</i>
+              Link existing
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      $(document).ready(function () {
+        var data = [
+          [
+            { axis: "Joy",     value: <%= (100 * (entity.joy_score.presence || 0)).round(1) %> },
+            { axis: "Sadness", value: <%= (100 * (entity.sadness_score.presence || 0)).round(1) %> },
+            { axis: "Fear",    value: <%= (100 * (entity.fear_score.presence || 0)).round(1) %> },
+            { axis: "Disgust", value: <%= (100 * (entity.disgust_score.presence || 0)).round(1) %> },
+            { axis: "Anger",   value: <%= (100 * (entity.anger_score.presence || 0)).round(1) %> }
+          ]
+        ];
+
+        RadarChart("#graph-character-emotions-<%= entity.id %>", data, radarChartOptions);
+      });
+    </script>
+
+  <% end %>
+
+  <div class="col s12 m6">
+    <%= link_to '#', class: 'white-text js-link-entity', data: { id: -1 } do %>
+      <div class="card-panel <%= Document.color %>">
+        <i class="material-icons right">add</i>
+        <div class="card-title">Link a missing page</div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div id="entity-link-modal" class="modal">
+  <div class="modal-content">
+    <h4>Link an existing page you've created</h4>
+    <p>
+      You can link a detected entity to one of your already-created pages by selecting it below.
+    </p>
+    <%= form_with url: link_entity_documents_path do |f| %>
+      <%= f.hidden_field :document_id,          value: analysis.document_id %>
+      <%= f.hidden_field :document_analysis_id, value: analysis.id %>
+      <%= f.hidden_field :entity_type,          value: nil %>
+      <%= f.hidden_field :entity_id,            value: nil %>
+      <%= f.hidden_field :document_entity_id,   value: nil %>
+
+      <% @current_user_content.each do |content_type, content_list| %>
+        <% content_type_class = content_type.constantize %>
+        <% next if content_type == 'Document' %>
+        <h5><%= content_type.pluralize %></h5>
+        <ul class="collection">
+          <% content_list.each do |content| %>
+            <a href="#" 
+               class="<%= content_type_class.color %>-text js-link-entity-selection" 
+               data-id="<%= content.id %>"
+               data-type="<%= content_type %>">
+              <li class="collection-item">
+                <i class="material-icons left"><%= content_type_class.icon %></i>
+                <%= content.name %>
+                <span class="secondary-content">
+                  <i class="material-icons">link</i>
+                </span>
+              </li>
+            </a>
+          <% end %>
+        </ul>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+
+    $('.js-link-entity').click(function () {
+      $('#entity-link-modal').find('input[name=document_entity_id]').val($(this).data('id'));
+
+      $('#entity-link-modal').modal('open');
+
+      return false;
+    });
+
+    $('.js-link-entity-selection').click(function () {
+      var entity = $(this);
+      var form   = $(this).closest('form');
+
+      form.find('input[name=entity_id]').val(entity.data('id'));
+      form.find('input[name=entity_type]').val(entity.data('type'));
+      
+      form.submit();
+      return false;
+    });
+  });
+
+</script>

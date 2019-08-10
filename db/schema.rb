@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_07_07_182422) do
+ActiveRecord::Schema.define(version: 2019_08_09_173934) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -786,7 +786,7 @@ ActiveRecord::Schema.define(version: 2019_07_07_182422) do
     t.integer "words_used_repeatedly_count"
     t.integer "simple_words_count"
     t.integer "complex_words_count"
-    t.integer "sentiment_score"
+    t.float "sentiment_score"
     t.string "sentiment_label"
     t.string "language"
     t.float "sadness_score"
@@ -798,16 +798,17 @@ ActiveRecord::Schema.define(version: 2019_07_07_182422) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "progress"
+    t.integer "progress", default: 0
     t.integer "interrogative_count"
     t.integer "proper_noun_count"
+    t.datetime "queued_at"
     t.index ["document_id"], name: "index_document_analyses_on_document_id"
   end
 
   create_table "document_categories", force: :cascade do |t|
     t.integer "document_analysis_id"
     t.string "label"
-    t.string "score"
+    t.float "score"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["document_analysis_id"], name: "index_document_categories_on_document_analysis_id"
@@ -851,6 +852,8 @@ ActiveRecord::Schema.define(version: 2019_07_07_182422) do
     t.string "privacy", default: "private"
     t.text "synopsis"
     t.datetime "deleted_at"
+    t.integer "universe_id"
+    t.index ["universe_id"], name: "index_documents_on_universe_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
   end
 
