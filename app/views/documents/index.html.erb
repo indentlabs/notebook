@@ -1,3 +1,15 @@
+<% if @universe_scope %>
+  <p class="center help-text">
+    Only showing documents
+    in the <%= link_to @universe_scope.name, @universe_scope, class: Universe.color + '-text' %> universe.
+    <%= link_to(
+      "See documents from all universes.", 
+      '?universe=all', 
+      class: Universe.color + '-text')
+    %>
+  </p>
+<% end %>
+
 <% if @documents.any? %>
   <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } %>
   <%= render partial: 'content/list/cards', locals: { content_list: @documents, content_type: Document } %>
@@ -7,7 +19,7 @@
   <div class="row">
     <div class="col s12 m8 offset-m2">
       <div class="hoverable card center" style="margin: 50px 0; padding: 50px 0; border-bottom: 10px solid <%= Document.hex_color %>">
-        <h4>You haven't created any documents yet!</h4>
+        <h4>You haven't created any documents <% if @universe_scope %>in the <%= link_to @universe_scope.name, @universe_scope, class: Universe.color + "-text" %> universe<% end %> yet!</h4>
         <h1>
           <i class="material-icons <%= Document.color %>-text" style="font-size: 200%">
             <%= Document.icon %>
