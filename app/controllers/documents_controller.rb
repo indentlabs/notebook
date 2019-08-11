@@ -132,7 +132,7 @@ class DocumentsController < ApplicationController
   end
 
   def new
-    document = current_user.documents.create
+    document = current_user.documents.create({universe: @universe_scope})
     redirect_to edit_document_path(document)
   end
 
@@ -142,6 +142,7 @@ class DocumentsController < ApplicationController
     redirect_to(root_path, notice: "You don't have permission to edit that!") unless @document.updatable_by?(current_user)
   end
 
+  # Todo does anything actually use this endpoint?
   def create
     created_document = current_user.documents.create(document_params)
     redirect_to edit_document_path(created_document), notice: "Your document has been saved!"
