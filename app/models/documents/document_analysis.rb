@@ -15,4 +15,8 @@ class DocumentAnalysis < ApplicationRecord
   def complete?
     self.completed_at.present?
   end
+
+  def has_sentiment_scores?
+    [joy_score, sadness_score, fear_score, disgust_score, anger_score].compact.any?
+  end
 end

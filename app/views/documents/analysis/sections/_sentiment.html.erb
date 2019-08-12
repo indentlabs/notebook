@@ -28,16 +28,25 @@
     </div>
   </div>
 
-  <div class="col s12 m6">
-    <div class="card">
-      <div class="card-content" style="overflow: hidden;">
-        <div class="card-title">Evoked emotions</div>
-        <div id="graph-emotions"></div>
+  <% if analysis.has_sentiment_scores? %>
+    <div class="col s12 m6">
+      <div class="card">
+        <div class="card-content" style="overflow: hidden;">
+          <div class="card-title">Evoked emotions</div>
+          <div id="graph-emotions"></div>
+        </div>
       </div>
     </div>
-  </div>
+  <% end %>
 
-  <% if analysis.document_entities.order('relevance desc').where(entity_type: 'Character').any? %>
+  <%
+    entities_in_table = analysis.document_entities
+      .order('relevance desc')
+      .where(entity_type: 'Character')
+      .reject { |e| e.dominant_emotion.first.second.nil? }
+      .reject { |e| e.recessive_emotion.first.second.nil? }
+  %>
+  <% if entities_in_table.any? %>
     <div class="col s12">
       <div class="card">
         <div class="card-content">
@@ -48,9 +57,7 @@
                 <th>Dominant emotion</th>
                 <th>Recessive emotion</th>
               </tr>
-              <% analysis.document_entities.where(entity_type: 'Character').each do |character| %>
-                <% next if character.dominant_emotion.first.second.nil? %>
-                <% next if character.recessive_emotion.first.second.nil? %>
+              <% entities_in_table.each do |character| %>
                 <tr>
                   <td><%= character.text %></td>
                   <td>
