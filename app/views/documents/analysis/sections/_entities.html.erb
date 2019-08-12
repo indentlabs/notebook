@@ -20,11 +20,11 @@
 
 <div class="row">
   <%# todo aren't document entities precached somewhere on this page? %>
-  <% analysis.document_entities.includes(:entity).order('entity_type asc, relevance desc').each do |entity| %>
+  <% analysis.document_entities.includes(:entity, entity: [:image_uploads]).order('entity_type asc, relevance desc').each do |entity| %>
     <% entity_class = entity.entity_type.constantize %>
     <div class="col s12 m6">
       <div class="card">
-        <div class="card-image waves-effect waves-block waves-light">
+        <div class="card-image waves-effect waves-block waves-light" style="max-height: 600px;">
           <% if entity.entity && entity.entity.image_uploads.any? %>
             <%= image_tag entity.entity.image_uploads.sample.src.url(:large), class: 'activator' %>
           <% else %>
@@ -68,7 +68,7 @@
           </ul>
 
           <p class="center" style="margin-top: 40px;">
-            If you'd like, you can remove this <%= entity_class.name.downcase %> from the analysis.
+            If you'd like, you can remove this <%= entity_class.name.downcase %> from the analysis.<br />
             <%= link_to "Remove this #{entity_class.name}", destroy_entity_document_path(entity), class: "btn #{entity_class.color}" %>
           </p>
         </div>
@@ -122,6 +122,10 @@
         <div class="card-title">Link a missing page</div>
       </div>
     <% end %>
+
+    <div class="card-panel <%= Document.color %> lighten-5">
+      You can click on the picture of any card in this section to view more information about it or remove it.
+    </div>
   </div>
 </div>
 

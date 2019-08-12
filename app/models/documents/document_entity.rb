@@ -49,10 +49,14 @@ class DocumentEntity < ApplicationRecord
   end
 
   def dominant_emotion
+    return { unknown: 1 } if emotions.values.uniq == [0]
+
     emotions.sort_by { |emotion, score| score }.reverse
   end
 
   def recessive_emotion
+    return { unknown: 1 } if emotions.values.uniq == [0]
+
     emotions.sort_by { |emotion, score| score }
   end
 

@@ -1,7 +1,7 @@
 class DocumentCategory < ApplicationRecord
   belongs_to :document_analysis
 
-  scope :relevant, -> { where('score > 0.8') }
+  scope :relevant, -> { where('score > 0.85') }
 
   def parent_categories
     self.label.split('/')[1..-2].join('/')

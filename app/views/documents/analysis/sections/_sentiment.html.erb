@@ -17,7 +17,19 @@
           </span>
         </span>
         <p>
-          This document expresses a generally <strong><%= analysis.sentiment_label %></strong> sentiment throughout. 
+          <% 
+            modifier = case analysis.sentiment_score * 100
+            when 0..25
+              'somewhat'
+            when 26..50
+              'mostly'
+            when 51..100
+              'very'
+            else
+              'generally'
+            end
+          %>
+          This document expresses a <%= modifier %> <strong><%= analysis.sentiment_label %></strong> sentiment throughout. 
         </p>
         <br />
         <p>
@@ -28,16 +40,25 @@
     </div>
   </div>
 
-  <div class="col s12 m6">
-    <div class="card">
-      <div class="card-content" style="overflow: hidden;">
-        <div class="card-title">Evoked emotions</div>
-        <div id="graph-emotions"></div>
+  <% if analysis.has_sentiment_scores? %>
+    <div class="col s12 m6">
+      <div class="card">
+        <div class="card-content" style="overflow: hidden;">
+          <div class="card-title">Evoked emotions</div>
+          <div id="graph-emotions"></div>
+        </div>
       </div>
     </div>
-  </div>
+  <% end %>
 
-  <% if analysis.document_entities.order('relevance desc').where(entity_type: 'Character').any? %>
+  <%
+    entities_in_table = analysis.document_entities
+      .order('relevance desc')
+      .where(entity_type: 'Character')
+      .reject { |e| e.dominant_emotion.first.second.nil? }
+      .reject { |e| e.recessive_emotion.first.second.nil? }
+  %>
+  <% if entities_in_table.any? %>
     <div class="col s12">
       <div class="card">
         <div class="card-content">
@@ -48,9 +69,7 @@
                 <th>Dominant emotion</th>
                 <th>Recessive emotion</th>
               </tr>
-              <% analysis.document_entities.where(entity_type: 'Character').each do |character| %>
-                <% next if character.dominant_emotion.first.second.nil? %>
-                <% next if character.recessive_emotion.first.second.nil? %>
+              <% entities_in_table.each do |character| %>
                 <tr>
                   <td><%= character.text %></td>
                   <td>
@@ -97,26 +116,36 @@
 <script type="text/javascript">
 $(document).ready(function () {
   var data = [
+    <% if analysis.joy_score %>
     {
         "name": "Joy",
         "value": <%= (100 * analysis.joy_score).round(1) %>,
     },
+    <% end %>
+    <% if analysis.sadness_score %>
     {
         "name": "Sadness",
         "value": <%= (100 * analysis.sadness_score).round(1) %>,
     },
+    <% end %>
+    <% if analysis.fear_score %>
     {
         "name": "Fear",
         "value": <%= (100 * analysis.fear_score).round(1) %>,
     },
+    <% end %>
+    <% if analysis.disgust_score %>
     {
         "name": "Disgust",
         "value": <%= (100 * analysis.disgust_score).round(1) %>,
     },
+    <% end %>
+    <% if analysis.anger_score %>
     {
         "name": "Anger",
         "value": <%= (100 * analysis.anger_score).round(1) %>,
     }
+    <% end %>
   ];
 
   //sort bars based on value
