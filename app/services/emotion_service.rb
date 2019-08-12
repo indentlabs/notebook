@@ -12,7 +12,7 @@ class EmotionService < Service
       when :anger
         return 'red'
       else
-        return 'black'
+        return 'white'
     end
   end
 end
