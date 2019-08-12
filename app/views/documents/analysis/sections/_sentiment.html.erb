@@ -17,7 +17,19 @@
           </span>
         </span>
         <p>
-          This document expresses a generally <strong><%= analysis.sentiment_label %></strong> sentiment throughout. 
+          <% 
+            modifier = case analysis.sentiment_score * 100
+            when 0..25
+              'somewhat'
+            when 26..50
+              'mostly'
+            when 51..100
+              'very'
+            else
+              'generally'
+            end
+          %>
+          This document expresses a <%= modifier %> <strong><%= analysis.sentiment_label %></strong> sentiment throughout. 
         </p>
         <br />
         <p>
