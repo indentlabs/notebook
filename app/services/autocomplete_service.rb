@@ -2,9 +2,7 @@ class AutocompleteService < Service
   # TODO not make this giant case so awful
   # TODO move the literal arrays into Generators that use the translation file
 
-  # Adding a field name to this switch/case will enable autocompleting
-  # for that field across any page type.
-  # DEPRECATED -- todo remove
+  # DEPRECATED -- todo remove: no longer used
   def self.for_field_name(field_name)
     case field_name
     when 'education'
@@ -48,8 +46,8 @@ class AutocompleteService < Service
     end.uniq
   end
 
-    # Adding a field label to this switch/case will enable autocompleting
-    # for that field across any page type.
+  # Adding a field label to this switch/case will enable autocompleting
+  # for that field across any page type.
   def self.for_field_label(field_label)
     case field_label.downcase
     when 'eye color', 'eyecolor', 'eyecolour', 'eye colour'
@@ -81,6 +79,6 @@ class AutocompleteService < Service
 
   # helper method so we don't have to I18n every time
   def self.t(key)
-    I18n.t(key)
+    I18n.t(key, scope: 'autocomplete')
   end
 end

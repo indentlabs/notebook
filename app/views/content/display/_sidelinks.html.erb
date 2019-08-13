@@ -12,7 +12,6 @@
     <h4><%= raw_model.class.name %></h4>
   </li>
 
-
   <% if creating || editing %>
     <li class="collection-header center">
       <button class="btn waves-effect waves-<%= raw_model.class.color %> <%= raw_model.class.color %> mp-sidebar-save" type="submit" name="action" style="margin: 20px 0;">
@@ -53,6 +52,15 @@
       <a href="#<%= category[:name].gsub("'", '') %>_panel" class="<%= 'red-text' if category[:label] == 'Overview' %>">
         <i class="material-icons left"><%= category[:icon] %></i>
         <%= category[:label].capitalize.presence || '(blank)' %>
+      </a>
+    </li>
+  <% end %>
+
+  <% if content.documents.select { |doc| (current_user || User.new).can_read?(doc) }.any? %>
+    <li class="collection-item tab">
+      <a href="#documents_panel" class="">
+        <i class="material-icons left"><%= Document.icon %></i>
+        Documents
       </a>
     </li>
   <% end %>

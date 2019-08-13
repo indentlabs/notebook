@@ -4,7 +4,7 @@ class Notebook.DocumentEditor
 
     window.editor = new MediumEditor('#editor',
       targetBlank: true
-      autoLink: true
+      autoLink: false
       buttonLabels: 'fontawesome'
       toolbar: buttons: [
         'bold'

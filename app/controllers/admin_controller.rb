@@ -30,6 +30,12 @@ class AdminController < ApplicationController
   def items
   end
 
+  def images
+    @images = ImageUpload.offset(params[:page].to_i * 500).limit(500)
+              .includes(:content)
+              #.where.not(audited: true)
+  end
+
   def masquerade
     masqueree = User.find_by(id: params[:user_id])
     sign_in masqueree
@@ -47,6 +53,10 @@ class AdminController < ApplicationController
       SubscriptionService.cancel_all_existing_subscriptions(user)
       UnsubscribedMailer.unsubscribed(user).deliver_now! if Rails.env.production?
     end
+  end
+
+  def promos
+    @codes = PageUnlockPromoCode.all.includes(:promotions)
   end
 
   private

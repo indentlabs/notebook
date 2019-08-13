@@ -51,13 +51,13 @@ class UsersController < ApplicationController
     # Make sure the user is set to Starter on Stripe so we don't keep charging them
     stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
     stripe_subscription = stripe_customer.subscriptions.data[0]
-    stripe_subscription.plan = 'starter'
-    stripe_subscription.save
+    if stripe_subscription
+      stripe_subscription.plan = 'starter'
+      stripe_subscription.save
+    end
 
     report_user_deletion_to_slack(current_user)
 
-    # Queue user for background deletion instead of doing it inline
-    # current_user.update(deleted_at: DateTime.current)
     current_user.really_destroy!
 
     redirect_to(root_path, notice: 'Your account has been deleted. We will miss you greatly!')

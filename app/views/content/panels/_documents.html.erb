@@ -1,0 +1,17 @@
+<%
+  visible_documents = content.documents.includes(:user).select { |document| (current_user || User.new).can_read?(document) }
+%>
+
+<div id="documents_panel" class="row panel">
+  <% if visible_documents.any? %>
+    <%= content.name %> appears in the following documents:
+
+    <ul>
+      <% visible_documents.each do |document| %>
+        <li>
+          <%= render partial: 'documents/reference_card', locals: { document: document } %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>

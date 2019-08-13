@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_02_16_080611) do
+ActiveRecord::Schema.define(version: 2019_08_09_173934) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -756,6 +756,93 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
+  create_table "document_analyses", force: :cascade do |t|
+    t.integer "document_id"
+    t.integer "word_count"
+    t.integer "page_count"
+    t.integer "paragraph_count"
+    t.integer "character_count"
+    t.integer "sentence_count"
+    t.integer "readability_score"
+    t.float "combined_average_reading_level"
+    t.integer "flesch_kincaid_grade_level"
+    t.integer "flesch_kincaid_age_minimum"
+    t.float "flesch_kincaid_reading_ease"
+    t.float "forcast_grade_level"
+    t.float "coleman_liau_index"
+    t.float "automated_readability_index"
+    t.float "gunning_fog_index"
+    t.float "smog_grade"
+    t.integer "adjective_count"
+    t.integer "noun_count"
+    t.integer "verb_count"
+    t.integer "pronoun_count"
+    t.integer "preposition_count"
+    t.integer "conjunction_count"
+    t.integer "adverb_count"
+    t.integer "determiner_count"
+    t.json "n_syllable_words"
+    t.integer "words_used_once_count"
+    t.integer "words_used_repeatedly_count"
+    t.integer "simple_words_count"
+    t.integer "complex_words_count"
+    t.float "sentiment_score"
+    t.string "sentiment_label"
+    t.string "language"
+    t.float "sadness_score"
+    t.float "joy_score"
+    t.float "fear_score"
+    t.float "disgust_score"
+    t.float "anger_score"
+    t.json "words_per_sentence"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "progress", default: 0
+    t.integer "interrogative_count"
+    t.integer "proper_noun_count"
+    t.datetime "queued_at"
+    t.index ["document_id"], name: "index_document_analyses_on_document_id"
+  end
+
+  create_table "document_categories", force: :cascade do |t|
+    t.integer "document_analysis_id"
+    t.string "label"
+    t.float "score"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_analysis_id"], name: "index_document_categories_on_document_analysis_id"
+  end
+
+  create_table "document_concepts", force: :cascade do |t|
+    t.integer "document_analysis_id"
+    t.string "text"
+    t.float "relevance"
+    t.string "reference_link"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_analysis_id"], name: "index_document_concepts_on_document_analysis_id"
+  end
+
+  create_table "document_entities", force: :cascade do |t|
+    t.string "entity_type"
+    t.integer "entity_id"
+    t.string "text"
+    t.float "relevance"
+    t.integer "document_analysis_id"
+    t.string "sentiment_label"
+    t.float "sentiment_score"
+    t.float "sadness_score"
+    t.float "joy_score"
+    t.float "fear_score"
+    t.float "disgust_score"
+    t.float "anger_score"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_analysis_id"], name: "index_document_entities_on_document_analysis_id"
+    t.index ["entity_type", "entity_id"], name: "index_document_entities_on_entity_type_and_entity_id"
+  end
+
   create_table "documents", force: :cascade do |t|
     t.integer "user_id"
     t.text "body"
@@ -765,6 +852,8 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.string "privacy", default: "private"
     t.text "synopsis"
     t.datetime "deleted_at"
+    t.integer "universe_id"
+    t.index ["universe_id"], name: "index_documents_on_universe_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
   end
 
@@ -845,6 +934,19 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.index ["id", "deleted_at"], name: "index_floras_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_floras_on_universe_id"
     t.index ["user_id"], name: "index_floras_on_user_id"
+  end
+
+  create_table "foods", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Food"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_foods_on_universe_id"
+    t.index ["user_id"], name: "index_foods_on_user_id"
   end
 
   create_table "friendly_id_slugs", force: :cascade do |t|
@@ -1074,7 +1176,7 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.datetime "updated_at", null: false
     t.string "src_file_name"
     t.string "src_content_type"
-    t.integer "src_file_size"
+    t.bigint "src_file_size"
     t.datetime "src_updated_at"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
@@ -1413,6 +1515,14 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.integer "notable_city_id"
   end
 
+  create_table "notice_dismissals", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "notice_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_notice_dismissals_on_user_id"
+  end
+
   create_table "officeships", force: :cascade do |t|
     t.integer "user_id"
     t.integer "group_id"
@@ -1446,6 +1556,17 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.index ["page_type", "page_id"], name: "index_page_tags_on_page_type_and_page_id"
     t.index ["user_id", "page_type"], name: "index_page_tags_on_user_id_and_page_type"
     t.index ["user_id"], name: "index_page_tags_on_user_id"
+  end
+
+  create_table "page_unlock_promo_codes", force: :cascade do |t|
+    t.string "code"
+    t.string "page_types"
+    t.integer "uses_remaining"
+    t.integer "days_active"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "internal_description"
+    t.string "description"
   end
 
   create_table "past_ownerships", force: :cascade do |t|
@@ -1620,6 +1741,17 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.index ["user_id"], name: "index_planets_on_user_id"
   end
 
+  create_table "promotions", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "page_unlock_promo_code_id"
+    t.datetime "expires_at"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["page_unlock_promo_code_id"], name: "index_promotions_on_page_unlock_promo_code_id"
+    t.index ["user_id"], name: "index_promotions_on_user_id"
+  end
+
   create_table "races", force: :cascade do |t|
     t.string "name"
     t.string "description"
@@ -1791,6 +1923,19 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.index ["user_id"], name: "index_scenes_on_user_id"
   end
 
+  create_table "schools", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "School"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_schools_on_universe_id"
+    t.index ["user_id"], name: "index_schools_on_user_id"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.string "username", null: false
     t.string "password", null: false
@@ -1810,6 +1955,19 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.integer "user_id"
     t.integer "group_id"
     t.integer "sistergroup_id"
+  end
+
+  create_table "sports", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.string "page_type", default: "Sport"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["universe_id"], name: "index_sports_on_universe_id"
+    t.index ["user_id"], name: "index_sports_on_user_id"
   end
 
   create_table "stripe_event_logs", force: :cascade do |t|
@@ -2388,13 +2546,11 @@ ActiveRecord::Schema.define(version: 2019_02_16_080611) do
     t.string "age"
     t.string "gender"
     t.string "interests"
-    t.string "slug"
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["id", "deleted_at"], name: "index_users_on_id_and_deleted_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
-    t.index ["slug"], name: "index_users_on_slug", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 

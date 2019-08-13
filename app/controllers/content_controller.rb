@@ -21,6 +21,8 @@ class ContentController < ApplicationController
 
     if @universe_scope.present? && @content_type_class != Universe
       @content = @universe_scope.send(pluralized_content_name).includes(:page_tags, :image_uploads)
+
+      @show_scope_notice = true
     else
       @content = (
         current_user.send(pluralized_content_name).includes(:page_tags, :image_uploads) +
@@ -106,8 +108,13 @@ class ContentController < ApplicationController
 
   def new
     @content = content_type_from_controller(self.class).new(user: current_user)
+    current_users_categories_and_fields = @content.class.attribute_categories(current_user)
+    if current_users_categories_and_fields.empty?
+      content_type_from_controller(self.class).create_default_attribute_categories(current_user)
+      current_users_categories_and_fields = @content.class.attribute_categories(current_user)
+    end
     @serialized_categories_and_fields = CategoriesAndFieldsSerializer.new(
-      @content.class.attribute_categories(current_user)
+      current_users_categories_and_fields
     )
     @suggested_page_tags = (
       current_user.page_tags.where(page_type: @content.class.name).pluck(:tag) +
@@ -115,8 +122,17 @@ class ContentController < ApplicationController
     ).uniq
 
     # todo this is a good spot to audit to disable and see if create permissions are ok also
-    unless (current_user || User.new).can_create?(content_type_from_controller(self.class))
+    unless (current_user || User.new).can_create?(@content.class) \
+      || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: @content.class.name)
+
       return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
+    end
+
+    if params[:document_entity]
+      @entity = DocumentEntity.find_by(id: params[:document_entity].to_i)
+      if @entity.document_owner != current_user
+        @entity = nil
+      end
     end
 
     respond_to do |format|
@@ -154,7 +170,9 @@ class ContentController < ApplicationController
     content_type = content_type_from_controller(self.class)
     initialize_object
 
-    unless current_user.can_create?(content_type)
+    unless current_user.can_create?(content_type) \
+      || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type.name)
+      
       return redirect_back(fallback_location: root_path, notice: "Creating this type of page requires an active Premium subscription.")
     end
 
@@ -183,6 +201,13 @@ class ContentController < ApplicationController
       end
 
       update_page_tags if @content.respond_to?(:page_tags)
+      
+      if content_params.key?('document_entity_id')
+        document_entity = DocumentEntity.find_by(id: content_params['document_entity_id'].to_i)
+        if document_entity.document_owner == current_user
+          document_entity.update(entity_id: @content.reload.id)
+        end
+      end
 
       successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
@@ -420,7 +445,7 @@ class ContentController < ApplicationController
       .downcase
       .to_sym
 
-    params.require(content_class).permit(content_param_list + [:deleted_at])
+    params.require(content_class).permit(content_param_list + [:deleted_at, :document_entity_id])
   end
 
   def page_tag_params
@@ -500,7 +525,8 @@ class ContentController < ApplicationController
     @navbar_actions << {
       label: "New #{content_type.name.downcase}",
       href: main_app.new_polymorphic_path(content_type)
-    } if user_signed_in? && current_user.can_create?(content_type)
+    } if user_signed_in? && current_user.can_create?(content_type) \
+    || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type.name)
 
     discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
     if discussions_link.present?

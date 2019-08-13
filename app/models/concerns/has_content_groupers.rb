@@ -48,6 +48,19 @@ module HasContentGroupers
           relation_text: singularized_relation,   #   relation_text: "Sibling"
           through_relation: singularized_relation #   through_relation: 'Sibling'
         }                                         # }
+      
+      # The same thing but keyed off inverse class, instead of linked class
+      # e.g. Character has raceships (Character -> Race) instead of Race having raceships
+      Rails.application.config.inverse_content_relations[name] ||= {}
+      Rails.application.config.inverse_content_relations[name][connecting_class.name] = \
+        {                                         # ['Character'][:siblings] = {
+          with:          with,                    #   with:          :siblingships,
+          related_class: connecting_class,        #   related_class: Siblingship,
+          inverse_class: name,                    #   inverse_class: 'Character',
+          relation_text: singularized_relation,   #   relation_text: "Sibling"
+          through_relation: singularized_relation #   through_relation: 'Sibling'
+        }                                         # }
+
 
       # Siblingships
       has_many connecting_class_name, dependent: :destroy

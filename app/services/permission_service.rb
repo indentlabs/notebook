@@ -13,7 +13,7 @@ class PermissionService < Service
   end
 
   def self.user_can_contribute_to_universe?(user:, universe:)
-    user.contributable_universes.pluck(:id).include?(universe.id)
+    user.present? && user.contributable_universes.pluck(:id).include?(universe.id)
   end
 
   def self.content_is_public?(content:)
@@ -66,5 +66,8 @@ class PermissionService < Service
     end
   end
 
+  def self.user_has_active_promotion_for_this_content_type(user:, content_type:)
+    user.active_promotions.pluck(:content_type).include?(content_type)
+  end
 
 end

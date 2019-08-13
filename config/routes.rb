@@ -1,6 +1,7 @@
 # rubocop:disable LineLength
 
 Rails.application.routes.draw do
+  get 'notice_dismissal/dismiss'
   get 'customization/content_types'
   post 'customization/toggle_content_type'
 
@@ -15,6 +16,16 @@ Rails.application.routes.draw do
   end
   get '/@:username', to: 'users#show', as: :profile_by_username
 
+  resources :documents do
+    get  '/analysis',         to: 'documents#analysis',                on: :member
+    get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
+    post '/link_entity',      to: 'documents#link_entity',             on: :collection
+
+    # todo these routes don't belong here and make for awfully weird urls (/documents/:analysis_id/destroy, etc)
+    get  '/destroy_analysis', to: 'documents#destroy_analysis',        on: :member
+    get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
+  end
+
   scope '/my' do
     get '/content',         to: 'main#dashboard', as: :dashboard
     get '/content/recent',  to: 'main#recent_content', as: :recent_content
@@ -22,6 +33,8 @@ Rails.application.routes.draw do
     get '/prompts',         to: 'main#prompts', as: :prompts
 
     get '/scratchpad',      to: 'main#notes', as: :notes
+
+    # Legacy routes: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
 
     # Billing
@@ -36,6 +49,9 @@ Rails.application.routes.draw do
 
       # This should probably be a DELETE
       get '/payment_method/delete', to: 'subscriptions#delete_payment_method', as: :delete_payment_method
+
+      # Promotional codes
+      post '/redeem', to: 'subscriptions#redeem_code'
     end
   end
   delete 'delete_my_account', to: 'users#delete_my_account'
@@ -118,6 +134,8 @@ Rails.application.routes.draw do
       get '/attributes', to: 'admin#attributes', as: :admin_attributes
       get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
       get '/unsubscribe', to: 'admin#unsubscribe', as: :mass_unsubscribe
+      get '/images', to: 'admin#images', as: :image_audit
+      get '/promos', to: 'admin#promos', as: :admin_promos
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'

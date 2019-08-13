@@ -1,0 +1,226 @@
+<%
+  sentiment_color = (analysis.sentiment_score < 0) ? 'blue' : 'green'
+%>
+
+<h5 class="grey-text">Sentiment</h5>
+<div class="row">
+  <div class="col s12 m6">
+    <div class="card">
+      <div class="card-content <%= sentiment_color %> lighten-4">
+        <div class="card-title">
+          Overall <%= analysis.sentiment_label %>
+        </div>
+        <span style="font-size: 32px; margin-right: 10px;" class="<%= sentiment_color %>-text left center">
+          <i class="material-icons large">face</i><br />
+          <span style="position: relative; top: -25px;">
+            <%= (analysis.sentiment_score * 100).round.abs %>
+          </span>
+        </span>
+        <p>
+          <% 
+            modifier = case analysis.sentiment_score * 100
+            when 0..25
+              'somewhat'
+            when 26..50
+              'mostly'
+            when 51..100
+              'very'
+            else
+              'generally'
+            end
+          %>
+          This document expresses a <%= modifier %> <strong><%= analysis.sentiment_label %></strong> sentiment throughout. 
+        </p>
+        <br />
+        <p>
+          Your score is based on a scale from 1 to 100 based on how intense this emotion appears to be, where 100 is most intense.
+        </p>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+  </div>
+
+  <% if analysis.has_sentiment_scores? %>
+    <div class="col s12 m6">
+      <div class="card">
+        <div class="card-content" style="overflow: hidden;">
+          <div class="card-title">Evoked emotions</div>
+          <div id="graph-emotions"></div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <%
+    entities_in_table = analysis.document_entities
+      .order('relevance desc')
+      .where(entity_type: 'Character')
+      .reject { |e| e.dominant_emotion.first.second.nil? }
+      .reject { |e| e.recessive_emotion.first.second.nil? }
+  %>
+  <% if entities_in_table.any? %>
+    <div class="col s12">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-title">Character emotions</div>
+            <table class="highlight">
+              <tr>
+                <th>Character</th>
+                <th>Dominant emotion</th>
+                <th>Recessive emotion</th>
+              </tr>
+              <% entities_in_table.each do |character| %>
+                <tr>
+                  <td><%= character.text %></td>
+                  <td>
+                    <div class="chip <%= EmotionService.color_for_emotion(character.dominant_emotion.first.first) %> lighten-3">
+                      <%= character.dominant_emotion.first.first.to_s.titleize %>
+                      (<%= (character.dominant_emotion.first.second * 100).round %>%)
+                    </div>
+                  </td>
+                  <td>
+                    <div class="chip <%= EmotionService.color_for_emotion(character.recessive_emotion.first.first) %> lighten-3">
+                      <%= character.recessive_emotion.first.first.to_s.titleize %>
+                      (<%= (character.recessive_emotion.first.second * 100).round %>%)
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<style>
+.bar {
+  fill: <%= Document.hex_color %>;
+}
+
+.axis {
+  font-size: 13px;
+}
+.label {
+  font-size: 11px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  display: none;
+}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function () {
+  var data = [
+    <% if analysis.joy_score %>
+    {
+        "name": "Joy",
+        "value": <%= (100 * analysis.joy_score).round(1) %>,
+    },
+    <% end %>
+    <% if analysis.sadness_score %>
+    {
+        "name": "Sadness",
+        "value": <%= (100 * analysis.sadness_score).round(1) %>,
+    },
+    <% end %>
+    <% if analysis.fear_score %>
+    {
+        "name": "Fear",
+        "value": <%= (100 * analysis.fear_score).round(1) %>,
+    },
+    <% end %>
+    <% if analysis.disgust_score %>
+    {
+        "name": "Disgust",
+        "value": <%= (100 * analysis.disgust_score).round(1) %>,
+    },
+    <% end %>
+    <% if analysis.anger_score %>
+    {
+        "name": "Anger",
+        "value": <%= (100 * analysis.anger_score).round(1) %>,
+    }
+    <% end %>
+  ];
+
+  //sort bars based on value
+  data = data.sort(function (a, b) {
+    return d3.ascending(a.value, b.value);
+  })
+
+  var margin = {
+    top: 10,
+    right: 0,
+    bottom: 30,
+    left: 60
+  };
+
+  var width = 400,
+      height = 300;
+
+  var svg = d3.select("#graph-emotions")
+    .append("svg")
+      .attr("width", '100%')
+      .attr("height", height)
+      .attr('viewBox','0 0 ' + Math.min(width, height) + ' ' + Math.min(width, height + margin.bottom))
+      .attr('preserveAspectRatio', 'xMinYMin')
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var x = d3.scaleLinear()
+    .range([0, width])
+    .domain([0, d3.max(data, function (d) {
+      return d.value;
+    })]);
+
+  var y = d3.scalePoint()
+    .rangeRound([height, 0], .1)
+    .domain(data.map(function (d) {
+      return d.name;
+    }));
+
+  //make y axis to show bar names
+  var yAxis = d3.axisLeft()
+    .scale(y)
+    .tickSize(0); // no tick marks
+
+  var gy = svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+
+  var bars = svg.selectAll(".bar")
+    .data(data)
+    .enter()
+    .append("g")
+
+  //append rects
+  bars.append("rect")
+    .attr("class", "bar")
+    .attr("y", function (d) {
+        return y(d.name) - 10;
+    })
+    .attr("height", 30)
+    .attr("x", 0)
+    .attr("width", function (d) {
+        return x(d.value);
+    });
+
+  //add a value label to the right of each bar
+  bars.append("text")
+    .attr("class", "label")
+    .attr("y", function (d) {
+        return y(d.name) + 20;
+    })
+    .attr("x", function (d) {
+        return -25;
+    })
+    .text(function (d) {
+        return d.value;
+    });
+});
+</script>

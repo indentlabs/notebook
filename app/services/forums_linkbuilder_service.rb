@@ -20,7 +20,10 @@ class ForumsLinkbuilderService < Service
       'Race': '/forum/races',
       'Religion': '/forum/religions',
       'Technology': '/forum/technology',
-      'Tradition': '/forum/traditions'
+      'Tradition': '/forum/traditions',
+      'School': '/forum/schools',
+      'Sport': '/forum/sports',
+      'Food': '/forum/food'
     }
   end
 
