@@ -8,6 +8,7 @@ class DocumentMentionJob < ApplicationJob
 
     document = Document.find(document_id)
     return unless document.present?
+    return if document.body.nil? || document.body.empty?
 
     analysis = Documents::Analysis::DocumentAnalysisService.create_placeholder_analysis(document)
 
