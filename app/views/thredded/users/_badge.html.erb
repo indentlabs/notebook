@@ -1,11 +1,14 @@
-<% badge_style = 'padding: 3px 5px; font-size: 70%; font-weight: normal;' %>
+<%
+  badge_style  = 'padding: 3px 5px; font-size: 70%; font-weight: normal;'
+  badge_text   = user.try(:forums_badge_text) # using try() on release for zdd while machines reboot and get reference to this column, can be removed after
+%>
 
 <% if user.respond_to?(:selected_billing_plan_id) %>
   <% if user.selected_billing_plan_id == 2 %>
-    <span style="<%= badge_style %>; background: #dedeff">Beta Tester</span>
+    <span style="<%= badge_style %>; background: #dedeff"><%= badge_text || 'Beta Tester' %></span>
   <% elsif user.selected_billing_plan_id == 3 %>
-    <span style="<%= badge_style %>; background: #ffdede">Early Adopter</span>
+    <span style="<%= badge_style %>; background: #ffdede"><%= badge_text || 'Early Adopter' %></span>
   <% elsif [4, 5, 6].include? user.selected_billing_plan_id %>
-    <span style="<%= badge_style %>; background: #ffffaa">Premium Supporter</span>
+    <span style="<%= badge_style %>; background: #ffffaa"><%= badge_text || 'Premium Supporter' %></span>
   <% end %>
 <% end %>
