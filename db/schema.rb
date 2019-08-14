@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_09_173934) do
+ActiveRecord::Schema.define(version: 2019_08_13_220011) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -2546,6 +2546,7 @@ ActiveRecord::Schema.define(version: 2019_08_09_173934) do
     t.string "age"
     t.string "gender"
     t.string "interests"
+    t.string "forums_badge_text"
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["email"], name: "index_users_on_email", unique: true

@@ -63,7 +63,7 @@ body {
     </div>
 
     <div class="row">
-      <div class="col s8">
+      <div class="col s7">
         <div>
           <h4>How do I use it?</h4>
           <p class="light">
@@ -81,12 +81,12 @@ body {
             items for any relevant objects or trinkets in your story.
           </p>
           <p class="light">
-            Once you've got the basics, just expand outward for your story! Right now, there are nine different page types you can
-            create in Notebook.ai.
+            Once you've got the basics, just expand outward for your story! Right now, there are <%= Rails.application.config.content_types[:all_non_universe].count %> different page types you can
+            create in Notebook.ai: <%= Rails.application.config.content_types[:all_non_universe].map { |t| t.name.downcase.pluralize }.to_sentence %>.
           </p>
         </div>
       </div>
-      <div class="col s4">
+      <div class="col s4 offset-s1">
         <%= image_tag 'screenshots/dashboard.png' %>
       </div>
     </div>
@@ -112,7 +112,7 @@ body {
   <div class="section">
 
     <div class="row">
-      <div class="col s7">
+      <div class="col s6">
         <div>
           <h4>Separate your worlds with Universes</h4>
           <p class="light">
@@ -129,7 +129,7 @@ body {
           </div>
         </div>
       </div>
-      <div class="col s5">
+      <div class="col s5 offset-s1">
         <%= image_tag 'screenshots/universe.png', class: 'left' %>
       </div>
     </div>
@@ -138,7 +138,7 @@ body {
       <div class="col s5">
         <%= image_tag 'screenshots/quick-reference.png', class: 'right' %>
       </div>
-      <div class="col s7">
+      <div class="col s6 offset-s1">
         <div>
           <h4>Build your world piece by piece with personalized writing prompts</h4>
           <p class="light">
@@ -164,7 +164,7 @@ body {
     </div>
 
     <div class="row">
-      <div class="col s7">
+      <div class="col s6">
         <div>
           <h4>Keep your readers engrossed with a rich world of consistent details</h4>
           <p class="light">
@@ -189,7 +189,7 @@ body {
           </div>
         </div>
       </div>
-      <div class="col s5">
+      <div class="col s5 offset-s1">
         <%= image_tag 'screenshots/character.png', class: 'left' %>
       </div>
     </div>
@@ -198,7 +198,7 @@ body {
       <div class="col s5">
         <%= image_tag 'screenshots/gallery.png', class: 'right' %>
       </div>
-      <div class="col s7">
+      <div class="col s6 offset-s1">
         <div>
           <h4>Upload images for inspiration or reference</h4>
           <p class="light">
@@ -224,7 +224,7 @@ body {
     </div>
 
     <div class="row">
-      <div class="col s7">
+      <div class="col s6">
         <div>
           <h4>Build family trees and organization hierarchies with ease</h4>
           <p class="light">
@@ -249,7 +249,7 @@ body {
           </div>
         </div>
       </div>
-      <div class="col s5">
+      <div class="col s5 offset-s1">
         <%= image_tag 'screenshots/family-tree.png', class: 'left' %>
       </div>
     </div>
@@ -262,10 +262,10 @@ body {
     <div class="card-panel blue white-text hoverable" style="height: 160px">
       <div class="row">
         <div class="col s9">
-          <h1 style="font-size: 26px;">
+          <h1 style="font-size: 26px; display: inline;">
             <%= link_to 'Start worldbuilding right now.', new_user_registration_path, class: 'white-text' %>
           </h1>
-          <h5 style="font-size: 16px;">No card needed. Upgrade seamlessly any time.</h5>
+          <h5 style="font-size: 16px;">No card needed. Upgrade or downgrade seamlessly any time.</h5>
         </div>
         <div class="col s3 valign-wrapper" style="height: 130px;">
           <div class="valign">
@@ -338,10 +338,10 @@ body {
 
       <div class="col s12 m4">
         <div class="icon-block center">
-          <h2 class="brown-text"><i class="material-icons">library_books</i></h2>
-          <h5><%= t('marketing.landing_page.benefits.yours.title') %></h5>
+          <h2 class="brown-text"><i class="material-icons">security</i></h2>
+          <h5><%= t('marketing.landing_page.benefits.ads.title') %></h5>
           <p class="light">
-            <%= t('marketing.landing_page.benefits.yours.text') %>
+            <%= t('marketing.landing_page.benefits.ads.text') %>
           </p>
         </div>
       </div>
@@ -358,7 +358,7 @@ body {
         <div>
           <h4>How much does it cost?</h4>
           <div class="row">
-            <div class="col s9">
+            <div class="col s7">
               <p class="light">
                 <strong>Creating core notebook pages (universes, characters, locations, and items) is free</strong> and doesn't require
                 any payment information to start creating your novel's world immediately upon signup. Free users, however,
@@ -374,12 +374,12 @@ body {
                 Additionally, a Premium subscription also increases your image upload storage from 50MB to 10GB.
               </p>
             </div>
-            <div class="col s3">
+            <div class="col s4 offset-s1">
               <% Rails.application.config.content_types[:all].each_with_index do |content_type, i| %>
-                <i class="material-icons <%= content_type.color %>-text tooltipped" style="font-size: 72px" data-delay="100" data-tooltip="<%= User.new.can_create?(content_type) ? 'All' : 'Premium' %> users can create unlimited <%= content_type.name.pluralize %>.">
+                <i class="material-icons <%= content_type.color %>-text tooltipped medium" data-delay="100" data-tooltip="<%= User.new.can_create?(content_type) ? 'All' : 'Premium' %> users can create unlimited <%= content_type.name.pluralize %>.">
                   <%= content_type.icon %>
                 </i>
-                <%= '<br />'.html_safe if (i + 1) % 4 == 0 %>
+                <%= '<br />'.html_safe if (i + 1) % 6 == 0 %>
               <% end %>
             </div>
           </div>

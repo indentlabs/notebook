@@ -17,6 +17,11 @@ class User < ApplicationRecord
     allow_blank: true,
     length: { maximum: 40 },
     format: /\A[A-Za-z0-9\-_\$\+\!\*]+\z/
+  
+  validates :forums_badge_text,
+    allow_nil: true,
+    allow_blank: true,
+    length: { maximum: 20 }
 
   has_many :subscriptions, dependent: :destroy
   has_many :billing_plans, through: :subscriptions
