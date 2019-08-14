@@ -69,22 +69,24 @@
     l_width = 6
   %>
 
-  <% unless true || current_user.notice_dismissals.where(notice_id: 1).any? %>
+  <% unless current_user.notice_dismissals.where(notice_id: 2).any? %>
     <div class="dashboard-row col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
-      <div class="cyan card" style="height: 260px; margin-bottom: 0;">
+      <div class="<%= Document.color %> card" style="height: 260px; margin-bottom: 0;">
         <div class="card-content">
           <h4 class="card-title white-text" style="margin-top: 10px">
             <span class="badge new white black-text left" style="margin: 0; margin-right: 8px; position: relative; top: 4px;"></span>
-            School, Sport, and Food pages
+            Analyze your writing with world-class AI
           </h4>
           <p class="white-text">
-            To celebrate the launch of our three new Premium pages,
-            you can now create as many <strong>School</strong> pages as you'd like during the month of June!
+            Premium users can now analyze their documents &mdash; and the characters within them &mdash; for readability, style, emotion with IBM Watson's AI. 
+          </p>
+          <br />
+          <p class="white-text">
+            Learn more at our blog post below:
           </p>
         </div>
-        <div class="card-action cyan lighten-1 hoverable">
-          <%= link_to 'Read more', 'https://www.notebook.ai/forum/announcements/new-page-types-food-sports-and-schools-and-a-special-surprise', class: 'white-text' %>
-          <%= link_to 'Customize my pages', main_app.customization_content_types_path, class: 'white-text' %>
+        <div class="card-action <%= Document.color %> lighten-1 hoverable">
+          <%= link_to 'Read more', 'https://medium.com/indent-labs/adding-the-ai-to-notebook-ai-950f44d231e5', class: 'white-text' %>
           <%= link_to 'Dismiss', notice_dismissal_dismiss_path(notice_id: 1), class: 'white-text right' %>
         </div>
       </div>
