@@ -78,6 +78,7 @@ class UsersController < ApplicationController
   private
 
   def user_params
+    # todo is this used anywhere?
     params.permit(:id, :username)
   end
 end
