@@ -538,6 +538,7 @@ class ContentController < ApplicationController
 
     @navbar_actions << {
       label: 'Customize template',
+      class: 'right',
       href: main_app.attribute_customization_path(content_type.name.downcase)
     }
   end
