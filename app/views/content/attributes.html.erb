@@ -4,6 +4,7 @@
 
 <ul class="sortable collapsible white" data-sortable-class="AttributeCategory">
   <%= render partial: 'content/attributes/general_settings', locals: { content_type: @content_type, content_type_class: @content_type_class } %>
+
   <% @attribute_categories.each do |attribute_category| %>
     <% next if ['Settings', 'Contributors', 'Gallery', 'Changelog'].include? attribute_category.label %>
     <% hidden_category = !!attribute_category.hidden %>
@@ -277,53 +278,3 @@
     </div>
   </li>
  </ul>
-
-<%= content_for :javascript do %>
-  $('.iconpicker-input').iconpicker({
-    icons: [
-      <% MATERIAL_ICONS.each do |icon_name| %>
-        { title: "<%= icon_name %>", searchTerms: ["<%= icon_name %>"] },
-      <% end %>
-    ], // list of icon objects [{title:String, searchTerms:String}]. By default, all Font Awesome icons are included.
-    fullClassFormatter: function (val) {
-      return 'material-icons ' + val;
-    }}
-  );
-  $(document).on('click','.iconpicker-item',function(e){
-    e.preventDefault();
-    return false;
-  });
-
-  $('.sortable').sortable({
-    axis: 'y',
-    cursor: 'move',
-    handle: '.sortable-handle',
-
-    update: function (event, ui) {
-      var dragged_element = $(ui.item[0]);
-
-      $.ajax({
-        type: "PUT",
-        dataType: "json",
-        url: '/plan/content/sort',
-        data: {
-          content_id:        dragged_element.data('content-id'),
-          intended_position: dragged_element.index() - 1,
-          sortable_class:    dragged_element.parent().data('sortable-class')
-        }
-      });
-    }
-  });
-
-  $('.js-update-field-name').click(function (e) {
-    var new_field_name = $(this).parent().find('.js-new-field-name').val();
-    var field_label = $(this).closest('li').find('.collapsible-header > .js-field-label');
-    field_label.text(new_field_name);
-  });
-
-  $('.js-update-category-name').click(function (e) {
-    var new_category_name = $(this).parent().find('.js-new-category-name').val();
-    var category_label = $(this).closest('.js-category-container').find('.js-category-label');
-    category_label.text(new_category_name);
-  });
-<% end %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_13_220011) do
+ActiveRecord::Schema.define(version: 2019_08_24_164634) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -46,6 +46,7 @@ ActiveRecord::Schema.define(version: 2019_08_13_220011) do
     t.boolean "hidden"
     t.datetime "deleted_at"
     t.integer "position"
+    t.index ["entity_type", "name", "user_id"], name: "index_attribute_categories_on_entity_type_and_name_and_user_id"
     t.index ["entity_type"], name: "index_attribute_categories_on_entity_type"
     t.index ["name"], name: "index_attribute_categories_on_name"
     t.index ["user_id"], name: "index_attribute_categories_on_user_id"
@@ -68,6 +69,7 @@ ActiveRecord::Schema.define(version: 2019_08_13_220011) do
     t.index ["attribute_category_id", "deleted_at"], name: "index_attribute_fields_on_attribute_category_id_and_deleted_at"
     t.index ["attribute_category_id", "label", "old_column_source", "field_type"], name: "attribute_fields_aci_label_ocs_ft"
     t.index ["attribute_category_id", "label", "old_column_source", "user_id", "field_type"], name: "attribute_fields_aci_label_ocs_ui_ft"
+    t.index ["attribute_category_id", "old_column_source", "user_id", "field_type"], name: "attribute_fields_aci_ocs_ui_ft"
     t.index ["deleted_at", "attribute_category_id"], name: "deleted_at__attribute_category_id"
     t.index ["deleted_at", "name"], name: "index_attribute_fields_on_deleted_at_and_name"
     t.index ["deleted_at", "user_id", "attribute_category_id", "label", "hidden"], name: "attribute_fields_da_ui_aci_l_h"
@@ -94,9 +96,11 @@ ActiveRecord::Schema.define(version: 2019_08_13_220011) do
     t.datetime "deleted_at"
     t.index ["attribute_field_id", "deleted_at", "entity_id", "entity_type"], name: "attributes_afi_deleted_at_entity_id_entity_type"
     t.index ["attribute_field_id", "deleted_at"], name: "index_attributes_on_attribute_field_id_and_deleted_at"
+    t.index ["attribute_field_id", "user_id", "entity_type", "entity_id", "deleted_at"], name: "attributes_afi_ui_et_ei_da"
     t.index ["deleted_at", "attribute_field_id", "entity_type", "entity_id"], name: "deleted_at__attribute_field_id__entity_type_and_id"
     t.index ["entity_type", "entity_id"], name: "index_attributes_on_entity_type_and_entity_id"
     t.index ["user_id", "attribute_field_id"], name: "index_attributes_on_user_id_and_attribute_field_id"
+    t.index ["user_id", "deleted_at"], name: "index_attributes_on_user_id_and_deleted_at"
     t.index ["user_id", "entity_type", "entity_id"], name: "index_attributes_on_user_id_and_entity_type_and_entity_id"
     t.index ["user_id"], name: "index_attributes_on_user_id"
   end
@@ -853,6 +857,7 @@ ActiveRecord::Schema.define(version: 2019_08_13_220011) do
     t.text "synopsis"
     t.datetime "deleted_at"
     t.integer "universe_id"
+    t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
   end
@@ -869,6 +874,7 @@ ActiveRecord::Schema.define(version: 2019_08_13_220011) do
     t.integer "father_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["father_id", "character_id", nil], name: "index_fatherships_on_father_id_and_character_id_and_deleted_at"
   end
 
   create_table "flora_eaten_bies", force: :cascade do |t|
@@ -1507,6 +1513,7 @@ ActiveRecord::Schema.define(version: 2019_08_13_220011) do
     t.integer "mother_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["mother_id", "character_id", nil], name: "index_motherships_on_mother_id_and_character_id_and_deleted_at"
   end
 
   create_table "notable_cities_relationships", force: :cascade do |t|
@@ -1542,6 +1549,17 @@ ActiveRecord::Schema.define(version: 2019_08_13_220011) do
     t.boolean "favorite"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "page_settings_overrides", force: :cascade do |t|
+    t.string "page_type"
+    t.string "name_override"
+    t.string "icon_override"
+    t.string "hex_color_override"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_page_settings_overrides_on_user_id"
   end
 
   create_table "page_tags", force: :cascade do |t|
