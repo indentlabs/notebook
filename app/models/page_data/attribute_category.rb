@@ -16,6 +16,9 @@ class AttributeCategory < ApplicationRecord
 
   before_validation :ensure_name
 
+  SPECIAL_CATEGORY_LABELS = %w(Settings Contributors Gallery Changelog)
+  scope :shown_on_template_editor, -> { where.not(label: SPECIAL_CATEGORY_LABELS) }
+
   def self.color
     'amber'
   end

@@ -21,6 +21,8 @@ class AttributeField < ApplicationRecord
 
   before_validation :ensure_name
 
+  UNDELETEABLE_FIELD_TYPES = %w(name universe)
+
   def self.color
     'amber'
   end

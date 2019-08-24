@@ -32,6 +32,7 @@ module IsContentPage
       return nil if user.nil?
       return nil unless user.on_premium_plan?
 
+      # todo technically we could cache a has_page_overrides on User to skip a lot of unncessessary lookups here
       user.page_settings_overrides.find_by(page_type: self.name.downcase)
     end
 
@@ -44,7 +45,7 @@ module IsContentPage
     end
 
     def self.hex_color_for(user)
-      settings_override_for(user).try(:hex_color_override).presence || self.icon
+      settings_override_for(user).try(:hex_color_override).presence || self.hex_color
     end
   end
 end

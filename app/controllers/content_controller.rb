@@ -343,7 +343,10 @@ class ContentController < ApplicationController
   end
 
   def attributes
-    @attribute_categories = @content_type_class.attribute_categories(current_user, show_hidden: true).order(:position)
+    @attribute_categories = @content_type_class
+      .attribute_categories(current_user, show_hidden: true)
+      .shown_on_template_editor
+      .order(:position)
   end
 
   def api_sort
