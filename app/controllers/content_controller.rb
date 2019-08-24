@@ -358,21 +358,17 @@ class ContentController < ApplicationController
 
     # Ugh not another one of these backfills
     if content.position.nil?
-      content_to_order_first = if content.is_a?(AttributeCategory)
-        content_type_class = content.entity_type.titleize.constantize
-        content_type_class.attribute_categories(current_user, show_hidden: true)
+      if content.is_a?(AttributeCategory)
+        content.backfill_categories_ordering!
       elsif content.is_a?(AttributeField)
-        content.attribute_category.attribute_fields
-      end
-
-      ActiveRecord::Base.transaction do
-        content_to_order_first.each.with_index do |content_to_order, index|
-          content_to_order.update_column(:position, 1 + index)
-        end
+        content.attribute_category.backfill_fields_ordering!
+      else
+        raise "Attempting to backfill ordering for a new class: #{content.class.name}"
       end
     end
 
-    if content.reload && content.insert_at(1 + sort_params[:intended_position].to_i)
+    content.reload
+    if content.insert_at(1 + sort_params[:intended_position].to_i)
       render json: 200
     else
       render json: 500
