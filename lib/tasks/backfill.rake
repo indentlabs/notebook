@@ -22,5 +22,7 @@ namespace :backfill do
         puts "Empty position backlog:\n\t-#{categories_to_position.count} categories\n\t-#{fields_to_position.count} fields"
       end
     end
+
+    puts "Done!"
   end
 end
