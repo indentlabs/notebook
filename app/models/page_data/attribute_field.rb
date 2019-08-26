@@ -23,6 +23,9 @@ class AttributeField < ApplicationRecord
 
   UNDELETEABLE_FIELD_TYPES = %w(name universe)
 
+  # todo replace old_column_source etc
+  #json :acceptable_page_link_classes
+
   def self.color
     'amber'
   end

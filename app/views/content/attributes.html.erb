@@ -44,11 +44,6 @@
         <% if hidden_category %>
           <span class="grey-text">&mdash;hidden</span>
         <% end %>
-        <!--
-        <span class="new badge <%= @content_type_class.color %>" data-badge-caption="<%= "field".pluralize(attribute_category.attribute_fields.count) %>">
-          <%= attribute_category.attribute_fields.count %>
-        </span>
-        -->
       </div>
 
       <div class="collapsible-body">
@@ -73,6 +68,7 @@
                     <% end %>
                   </div>
                 </li>
+
                 <% unless attribute_category.attribute_fields.any? { |attribute_field| ['name', 'universe'].include?(attribute_field.field_type) } %>
                   <li>
                     <div class="collapsible-header">
@@ -109,7 +105,8 @@
                   </div>
                 </li>
                 <%# todo remove this after position backfill is complete %>
-                <% attribute_category.attribute_fields.sort do |a, b|
+                <% 
+                  attribute_category.attribute_fields.sort do |a, b|
                     a_value = case a.field_type
                     when 'name'
                       0
@@ -134,11 +131,13 @@
                       a_value <=> b_value
                     end
                   end.each do |attribute_field| %>
-                    <%# this hack shouldn't be necessary, but for some reason it is #codesmell %>
+                  
+                    <%# todo this hack shouldn't be necessary, but for some reason it is #codesmell %>
                     <% next unless attribute_field.persisted? %>
 
-                  <%# todo not this %>
+                  <%# todo remove this by defaulting fields to hidden=false %>
                   <% hidden_field = !!attribute_field.hidden %>
+
                   <li data-position="<%= attribute_field.position %>" data-content-id="<%= attribute_field.id %>">
                     <div class="collapsible-header">
                       <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
@@ -148,31 +147,23 @@
                         <span class="grey-text">&mdash;hidden</span>
                       <% end %>
                     </div>
-                    <div class="collapsible-body">
-                      <% if attribute_field.field_type == 'link' %>
-                        <div class="row">
-                          <div class="col s12">
-                            <% klass = @content_type_class.new.send(attribute_field.old_column_source).klass %>
-                            <% klass_name = klass.name %>
-                            <div class="card-panel <%= klass.color %>">
-                              <div class="valign-wrapper white">
-                                <i class="material-icons" style="margin: 0 10px;">link</i>
-                                Links to <%= link_to klass_name, attribute_customization_path(content_type: klass_name.downcase), style: 'padding: 3px 10px' %> pages
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      <% end %>
 
+                    <div class="collapsible-body">
+                      <%=
+                        render(
+                          partial: 'content/attributes/fields/description/' + attribute_field.field_type, 
+                          locals: { field: attribute_field }
+                        ) if lookup_context.template_exists?(attribute_field.field_type, 'content/attributes/fields/description', true)
+                      %>
                       <div class="row">
-                        <div class="col s12 m6">
+                        <div class="col s12">
                           <%= form_for(attribute_field, method: :put, class: 'inline', remote: true) do |f| %>
                             <%= f.text_field :label, class: 'js-new-field-name' %>
                             <%= f.submit 'Rename this field', class: 'btn white black-text js-update-field-name' %>
                           <% end %>
                         </div>
 
-                        <div class="col s12 m6">
+                        <div class="col s12">
                           <div>
                             <%= form_for(attribute_field, method: :put, class: 'inline') do |f| %>
                               <%= f.hidden_field :hidden, value: !hidden_field %>
