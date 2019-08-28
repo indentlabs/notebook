@@ -58,7 +58,7 @@ class ContentController < ApplicationController
 
   def show
     content_type = content_type_from_controller(self.class)
-    return redirect_to(root_path) unless valid_content_types.map(&:name).include?(content_type.name)
+    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.map(&:name).include?(content_type.name)
 
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
