@@ -108,9 +108,10 @@ function KeyboardControlStackManager( entryTime, stackEvaluationFunction ) {
 	}
 }
 $(document).ready( function () {
-	if (document.querySelector("body[data-in-app]")){
+	if (document.querySelector("body[data-in-app]")) {
 		if ((typeof DISABLE_KEYBOARD_SHORTCUTS === 'undefined' || !DISABLE_KEYBOARD_SHORTCUTS)) {
 			keyboardControlManager(default_keyboard_controls);
+			console.log('Keyboard shortcuts are enabled on this page');
 		} else {
 			console.log('Keyboard shortcuts are disabled on this page.');
 		}
