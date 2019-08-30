@@ -137,7 +137,7 @@ group :worker do
 
   # Document understanding
   gem 'htmlentities'
-  gem 'birch', github: 'billthompson/birch', branch: 'birch-ruby22'
+  gem 'birch', git: 'https://github.com/billthompson/birch.git', branch: 'birch-ruby22'
 
   gem 'engtagger'
   gem 'ibm_watson'
