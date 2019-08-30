@@ -43,6 +43,7 @@ class Notebook.DocumentEditor
         'justifyRight'
         'justifyFull'
         'orderedlist'
+        'unorderedlist'
         'quote'
         'anchor'
         'removeFormat'
