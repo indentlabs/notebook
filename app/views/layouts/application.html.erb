@@ -23,13 +23,18 @@
   </main>
 
   <%= render 'layouts/footer' unless defined?(@show_footer) && !@show_footer %>
-  <%= render partial: 'content/keyboard_controls_help_modal' %>
 
   <script type="text/javascript">
+    <% if user_signed_in? %>
+      DISABLE_KEYBOARD_SHORTCUTS = <%= !current_user.keyboard_shortcuts_preference %>;
+    <% end %>
+
     $(document).ready(function() {
       <%= yield :javascript %>
     });
   </script>
+
+  <%= render partial: 'content/keyboard_controls_help_modal' %>
   <%= render 'layouts/ganalytics' %>
 
 </body>

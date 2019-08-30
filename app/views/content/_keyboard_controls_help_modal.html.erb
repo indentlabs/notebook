@@ -20,12 +20,16 @@
   </div>
 </div>
 
-<%= content_for :javascript do %>
-  var shortcut_list = $('#shortcut-list');
-
-  active_redirect_shortcuts.forEach(function(shortcut){
-    shortcut_list.append(
-      $('<li />').html('<strong>N+' + shortcut.key + '</strong> Jump to new ' + shortcut.page + ' form')
-    );
+<script type="text/javascript">
+  $(document).ready(function () {
+    setTimeout(function () {
+      var shortcut_list = $('#shortcut-list');
+      active_redirect_shortcuts.forEach(function(shortcut){
+        shortcut_list.append(
+          $('<li />').html('<strong>N+' + shortcut.key + '</strong> Jump to new ' + shortcut.page + ' form')
+        );
+      });
+    }, 1000);
+    // todo race condition with active_redirect_shortcuts getting set?
   });
-<% end %>
+</script>
