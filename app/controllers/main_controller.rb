@@ -3,6 +3,8 @@
 class MainController < ApplicationController
   layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_designers, :for_friends]
 
+  before_action :authenticate_user!, only: [:dashboard, :prompts, :notes, :recent_content]
+
   before_action do
     if !user_signed_in? && params[:referral]
       session[:referral] = params[:referral]
@@ -20,14 +22,10 @@ class MainController < ApplicationController
   end
 
   def dashboard
-    return redirect_to new_user_session_path unless user_signed_in?
-
     set_random_content # for questions
   end
 
   def prompts
-    return redirect_to(new_user_session_path) unless user_signed_in?
-
     @sidenav_expansion = 'writing'
     @navbar_color = '#FF9800'
 
@@ -36,7 +34,6 @@ class MainController < ApplicationController
 
   # deprecated path just kept around for bookmarks for a while
   def notes
-    return redirect_to(new_user_session_path) unless user_signed_in?
     redirect_to edit_document_path(current_user.documents.first)
   end
 
@@ -105,6 +102,7 @@ class MainController < ApplicationController
     end
   end
 
+  # todo these are helpers on a page we don't use anymore, so as soon as we remove for_friends we can get rid of these also
   def resource_name
     :user
   end
@@ -116,5 +114,4 @@ class MainController < ApplicationController
   def devise_mapping
     @devise_mapping ||= Devise.mappings[:user]
   end
-
 end
