@@ -10,7 +10,7 @@ module HasAttributes
     def self.create_default_attribute_categories(user)
       return [] if ['attribute_category', 'attribute_field'].include?(content_name)
 
-      categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
+      YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
         category = user.attribute_categories.create!(
           entity_type: self.content_name,
           name:        category_name.to_s,
