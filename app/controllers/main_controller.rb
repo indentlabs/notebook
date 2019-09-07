@@ -88,14 +88,10 @@ class MainController < ApplicationController
           # when we want to enable prompts for contributing universes we can remove the user:
           # selector here, but we will need to verify the user has permission to see the universe
           # when we do that, or else prompts could open leak
-          @content = content_type.constantize.where(user: current_user, universe: @universe_scope).includes(:user)
+          @content = content_type.constantize.where(user: current_user, universe: @universe_scope).includes(:user, :universe)
         else
-          @content = content_type.constantize.where(user: current_user).includes(:user)
+          @content = content_type.constantize.where(user: current_user).includes(:user, :universe)
         end
-      end
-
-      unless @content.klass.name == Universe.name
-        @content = @content.includes(:universe)
       end
 
       @content = @content.sample
