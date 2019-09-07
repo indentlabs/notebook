@@ -61,6 +61,7 @@ class MainController < ApplicationController
 
     @subscriber_count = 20 # manual override to match graphics
 
+    # todo it'd be nice to override the default devise authenticate_user! to set this for all pages
     session["user_return_to"] = request.original_url unless user_signed_in?
   end
   helper_method :resource_name, :resource, :devise_mapping

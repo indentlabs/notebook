@@ -1,4 +1,6 @@
 class ContentController < ApplicationController
+  # todo we should probably spin off an Api::ContentController for #api_sort and anything else api-wise we need
+
   before_action :authenticate_user!, except: [:show, :changelog, :api_sort]
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
