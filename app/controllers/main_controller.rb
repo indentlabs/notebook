@@ -54,18 +54,6 @@ class MainController < ApplicationController
   def for_designers
   end
 
-  # deprecated path todo cleanup
-  def for_friends
-    @subscriber_count = User.where(selected_billing_plan_id: [3, 4]).count
-    @drawing_date = 'June 15, 2017 12:00pm'.to_date
-
-    @subscriber_count = 20 # manual override to match graphics
-
-    # todo it'd be nice to override the default devise authenticate_user! to set this for all pages
-    session["user_return_to"] = request.original_url unless user_signed_in?
-  end
-  helper_method :resource_name, :resource, :devise_mapping
-
   def feature_voting
   end
 
@@ -97,18 +85,5 @@ class MainController < ApplicationController
       @content = @content.sample
       return if @content.present?
     end
-  end
-
-  # todo these are helpers on a page we don't use anymore, so as soon as we remove for_friends we can get rid of these also
-  def resource_name
-    :user
-  end
-
-  def resource
-    @resource ||= User.new
-  end
-
-  def devise_mapping
-    @devise_mapping ||= Devise.mappings[:user]
   end
 end
