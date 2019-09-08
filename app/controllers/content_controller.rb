@@ -1,4 +1,6 @@
 class ContentController < ApplicationController
+  # todo we should probably spin off an Api::ContentController for #api_sort and anything else api-wise we need
+
   before_action :authenticate_user!, except: [:show, :changelog, :api_sort]
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
@@ -332,11 +334,19 @@ class ContentController < ApplicationController
 
   # List all recently-deleted content
   def deleted
+    @maximum_recovery_time = current_user.on_premium_plan? ? 7.days : 48.hours
+
     @content_pages = {}
     @activated_content_types.each do |content_type|
-      @content_pages[content_type] = content_type.constantize.with_deleted.where('deleted_at > ?', 24.hours.ago).where(user_id: current_user.id)
+      @content_pages[content_type] = content_type.constantize
+        .with_deleted
+        .where('deleted_at > ?', @maximum_recovery_time.ago)
+        .where(user_id: current_user.id)
     end
-    @content_pages["Document"] = current_user.documents.with_deleted.where('deleted_at > ?', 24.hours.ago)
+    @content_pages["Document"] = current_user.documents
+      .with_deleted
+      .where('deleted_at > ?', @maximum_recovery_time.ago)
+      .includes(:user)
 
     # Override controller
     @sidenav_expansion = 'my account'
@@ -419,6 +429,7 @@ class ContentController < ApplicationController
     })
   end
 
+  # todo just do the migration for everyone so we can finally get rid of this
   def migrate_old_style_field_values
     content ||= content_type_from_controller(self.class).find_by(id: params[:id])
     TemporaryFieldMigrationService.migrate_fields_for_content(content, current_user) if content.present?

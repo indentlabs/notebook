@@ -68,12 +68,6 @@ class ContentSerializer
               value: value_for(field, content)
             }
           }.sort do |a, b|
-            # if a_value != b_value
-            #   a_value <=> b_value
-            # else
-            #   a[:label] <=> b[:label]
-            # end
-
             if a[:position] && b[:position]
               a[:position] <=> b[:position]
 
@@ -102,14 +96,6 @@ class ContentSerializer
     case attribute_field.field_type
     when 'link'
       self.raw_model.send(attribute_field.old_column_source)
-        # We COULD scope down the size of what's stored here to a hash if we want
-        # .map do |page| 
-        #   {
-        #     id:        page.id,
-        #     name:      page.name,
-        #     page_type: page.class.name
-        #   }
-        # end
 
     else # text_area, name, universe, etc
       #codesmell here: we shouldn't ever have multiple attribute values but for some reason we do sometimes (in collaboration?)
