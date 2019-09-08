@@ -1,17 +1,45 @@
 <div class="row">
-
   <div class="col s12">
-    <div class="card red lighten-5">
+    <div class="card">
       <div class="card-content">
-        <p class="grey-text text-darken-3">
-          Pages can be "un-deleted" for up to 24 hours after deletion.
-          After this time, they are permanently deleted and cannot be recovered.
-          Use this page if you've accidentally deleted a page and need to recover it.
-        </p>
+        <div class="row">
+          <div class="col s12 m7 l8">
+            <div class="card-title">Your notebook's recycle bin</div>
+            <p>
+              Hello there!
+            </p>
+            <br />
+            <p>
+              Whenever you delete a page from your notebook, it ends up here for a little while.
+              While a page is here, you can recover it at any time to add it back to your notebook.
+              If not recovered, the page will be automatically and permanently deleted.
+            </p>
+            <br />
+            <p>
+              In other words, use this page if you've accidentally deleted a page and need to recover it.
+            </p>
+            <br />
+            <p class="red-text text-darken-3">
+              Premium users can recover pages up to <strong>7 days</strong> after their deletion.<br />
+              All other users can recover pages up to <strong>2 days</strong> after deletion.
+            </p>
+          </div>
+          <div class="col hide-on-sm-only m5 l4">
+            <%= image_tag 'tristan/small.png',
+              class: 'tooltipped tristan',
+              data: {
+                position: 'left',
+                enterDelay: '500',
+                tooltip: "Hey, I'm Tristan! I'm happy to help you around Notebook.ai."
+              } %>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+</div>
 
+<div class="row">
   <div class="col s12">
     <% showed_any_content = false %>
 
@@ -53,46 +81,41 @@
                     <% end %>
                     <span class="title">
                       <%= (content.respond_to?(:label) ? content.label : list_name_lookup_cache[content.id].presence || content.name) %>
-                      <small class="grey-text">
-                        <% universe_field_value = content.universe_field_value %>
-                        <% if universe_field_value.present? %>
-                          <i class="material-icons"><%= Universe.icon %></i>
-                          <%# todo remove this hack %>
-                          <%
-                            if universe_field_value.is_a?(Integer)
-                              universe_field_value = Universe.find_by(id: universe_field_value, user: content.user)
-                            end
-                          %>
-                          <% if universe_field_value %>
-                            <%= link_to universe_field_value.try(:name), universe_field_value %>
-                          <% end %>
-                        <% end %>
-                      </small>
-                      <% if user_signed_in? && (
-                          (content.universe_field_value.present? && universe_field_value.try(:user) != current_user) ||
-                          (content.is_a?(Universe) && content.user != current_user)
-                        )
-                      %>
-                        <span class="new badge grey white-text tooltipped" style="float: inherit; margin: 0;" data-badge-caption="contributing"
-                          data-position="bottom" data-delay="100" data-tooltip="You have been added as a contributor to this universe and its content."></span>
-                      <% end %>
                     </span>
-                    <p class='grey-text'>
-                      <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.deleted_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
+                    <div class='grey-text'>
+                      <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="Deleted at <%= content.deleted_at.strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
                         <i class="material-icons">delete</i>
                         deleted <%= time_ago_in_words content.deleted_at %> ago
-                      </span>
-                      <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.deleted_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
+                      </p>
+                      <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="Recoverable until <%= (content.deleted_at + @maximum_recovery_time).strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
                         <i class="material-icons">alarm</i>
-                        recoverable for the next <%= distance_of_time_in_words(DateTime.current, content.deleted_at + 24.hours) %>
-                      </span>
-                    </p>
-                    <span class="secondary-content">
-                      <%= form_for content do |f| %>
+                        recoverable for the next <%= distance_of_time_in_words(DateTime.current, content.deleted_at + @maximum_recovery_time) %>
+                      </p>
+                      <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="<%= (content.image_uploads.sum(:src_file_size) / 1000.0).round(1) %> KB used" style="font-size: 80%">
+                        <i class="material-icons">image</i>
+                        <%= pluralize content.image_uploads.count, 'uploaded image' %>
+                      </p>
+                    </div>
+                    <br />
+                    <div>
+                      <%= form_for content, html: { style: 'float: left' } do |f| %>
                         <%= f.hidden_field :deleted_at, value: nil %>
-                        <%= f.submit 'Recover', class: 'white btn black-text' %>
+                        <%=
+                          f.submit 'Recover page', 
+                            class: "#{content_type_name.constantize.color} lighten-4 btn black-text tooltipped",
+                            data: { tooltip: "Un-delete and add this page back to your notebook." }
+                        %>
                       <% end %>
-                    </span>
+                      <%= form_for content do |f| %>
+                        <%= f.hidden_field :deleted_at, value: "1/1 1970".to_date %>
+                        <%= 
+                          f.submit 'Delete immediately', 
+                            class: 'white btn black-text tooltipped',
+                            data: { tooltip: "Delete this page immediately and remove it from your recycle bin." }
+                        %>
+                      <% end %>
+                    </div>
+                    <br />
                   </li>
                 <% end %>
 
@@ -101,16 +124,12 @@
           </div>
         </div>
       </div>
-
     <% end %>
 
     <% if !showed_any_content %>
-      <p class="grey-text">
-        Looks like you haven't deleted any pages in the past 24 hours. If you do, they will show up here for a limited time.
+      <p class="grey-text center">
+        Looks like you haven't deleted any pages recently. If you do, they will show up here for a limited time.
       </p>
     <% end %>
-
-
-
   </div>
 </div>

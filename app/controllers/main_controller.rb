@@ -3,6 +3,8 @@
 class MainController < ApplicationController
   layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_designers, :for_friends]
 
+  before_action :authenticate_user!, only: [:dashboard, :prompts, :notes, :recent_content]
+
   before_action do
     if !user_signed_in? && params[:referral]
       session[:referral] = params[:referral]
@@ -20,14 +22,10 @@ class MainController < ApplicationController
   end
 
   def dashboard
-    return redirect_to new_user_session_path unless user_signed_in?
-
     set_random_content # for questions
   end
 
   def prompts
-    return redirect_to(new_user_session_path) unless user_signed_in?
-
     @sidenav_expansion = 'writing'
     @navbar_color = '#FF9800'
 
@@ -36,7 +34,6 @@ class MainController < ApplicationController
 
   # deprecated path just kept around for bookmarks for a while
   def notes
-    return redirect_to(new_user_session_path) unless user_signed_in?
     redirect_to edit_document_path(current_user.documents.first)
   end
 
@@ -57,17 +54,6 @@ class MainController < ApplicationController
   def for_designers
   end
 
-  # deprecated path todo cleanup
-  def for_friends
-    @subscriber_count = User.where(selected_billing_plan_id: [3, 4]).count
-    @drawing_date = 'June 15, 2017 12:00pm'.to_date
-
-    @subscriber_count = 20 # manual override to match graphics
-
-    session["user_return_to"] = request.original_url unless user_signed_in?
-  end
-  helper_method :resource_name, :resource, :devise_mapping
-
   def feature_voting
   end
 
@@ -79,42 +65,25 @@ class MainController < ApplicationController
 
   def set_random_content
     @activated_content_types.shuffle.each do |content_type|
-      if content_type.downcase == "universe"
+      if content_type == Universe.name
         if @universe_scope.present?
-          # when we want to enable prompts for contributing universes we can remove the user:
-          # selector here, but we will need to verify the user has permission to see the universe
-          # when we do that, or else prompts could open leak
           @content = content_type.constantize.where(user: current_user, id: @universe_scope.id).includes(:user)
         else
           @content = content_type.constantize.where(user: current_user).includes(:user)
         end
       else
         if @universe_scope.present?
-          @content = content_type.constantize.where(user: current_user, universe: @universe_scope).includes(:user)
+          # when we want to enable prompts for contributing universes we can remove the user:
+          # selector here, but we will need to verify the user has permission to see the universe
+          # when we do that, or else prompts could open leak
+          @content = content_type.constantize.where(user: current_user, universe: @universe_scope).includes(:user, :universe)
         else
-          @content = content_type.constantize.where(user: current_user).includes(:user)
+          @content = content_type.constantize.where(user: current_user).includes(:user, :universe)
         end
-      end
-
-      unless @content.klass.name == Universe.name
-        @content = @content.includes(:universe)
       end
 
       @content = @content.sample
       return if @content.present?
     end
   end
-
-  def resource_name
-    :user
-  end
-
-  def resource
-    @resource ||= User.new
-  end
-
-  def devise_mapping
-    @devise_mapping ||= Devise.mappings[:user]
-  end
-
 end

@@ -1,4 +1,6 @@
 class ContentController < ApplicationController
+  # todo we should probably spin off an Api::ContentController for #api_sort and anything else api-wise we need
+
   before_action :authenticate_user!, except: [:show, :changelog, :api_sort]
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
@@ -332,11 +334,19 @@ class ContentController < ApplicationController
 
   # List all recently-deleted content
   def deleted
+    @maximum_recovery_time = current_user.on_premium_plan? ? 7.days : 48.hours
+
     @content_pages = {}
     @activated_content_types.each do |content_type|
-      @content_pages[content_type] = content_type.constantize.with_deleted.where('deleted_at > ?', 24.hours.ago).where(user_id: current_user.id)
+      @content_pages[content_type] = content_type.constantize
+        .with_deleted
+        .where('deleted_at > ?', @maximum_recovery_time.ago)
+        .where(user_id: current_user.id)
     end
-    @content_pages["Document"] = current_user.documents.with_deleted.where('deleted_at > ?', 24.hours.ago)
+    @content_pages["Document"] = current_user.documents
+      .with_deleted
+      .where('deleted_at > ?', @maximum_recovery_time.ago)
+      .includes(:user)
 
     # Override controller
     @sidenav_expansion = 'my account'
@@ -358,21 +368,17 @@ class ContentController < ApplicationController
 
     # Ugh not another one of these backfills
     if content.position.nil?
-      content_to_order_first = if content.is_a?(AttributeCategory)
-        content_type_class = content.entity_type.titleize.constantize
-        content_type_class.attribute_categories(current_user, show_hidden: true)
+      if content.is_a?(AttributeCategory)
+        content.backfill_categories_ordering!
       elsif content.is_a?(AttributeField)
-        content.attribute_category.attribute_fields
-      end
-
-      ActiveRecord::Base.transaction do
-        content_to_order_first.each.with_index do |content_to_order, index|
-          content_to_order.update_column(:position, 1 + index)
-        end
+        content.attribute_category.backfill_fields_ordering!
+      else
+        raise "Attempting to backfill ordering for a new class: #{content.class.name}"
       end
     end
 
-    if content.reload && content.insert_at(1 + sort_params[:intended_position].to_i)
+    content.reload
+    if content.insert_at(1 + sort_params[:intended_position].to_i)
       render json: 200
     else
       render json: 500
@@ -423,6 +429,7 @@ class ContentController < ApplicationController
     })
   end
 
+  # todo just do the migration for everyone so we can finally get rid of this
   def migrate_old_style_field_values
     content ||= content_type_from_controller(self.class).find_by(id: params[:id])
     TemporaryFieldMigrationService.migrate_fields_for_content(content, current_user) if content.present?
@@ -538,6 +545,7 @@ class ContentController < ApplicationController
 
     @navbar_actions << {
       label: 'Customize template',
+      class: 'right',
       href: main_app.attribute_customization_path(content_type.name.downcase)
     }
   end

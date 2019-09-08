@@ -69,9 +69,9 @@ Rails.application.routes.draw do
 
   # Landing pages
   scope '/for' do
-    get '/writers', to: 'main#for_writers', as: :writers_landing
+    get '/writers',     to: 'main#for_writers', as: :writers_landing
     get '/roleplayers', to: 'main#for_roleplayers', as: :roleplayers_landing
-    get '/designers', to: 'main#for_designers', as: :designers_landing
+    get '/designers',   to: 'main#for_designers', as: :designers_landing
   end
 
   # Lab apps
@@ -202,16 +202,6 @@ Rails.application.routes.draw do
         get '/shield',          to: 'equipment_generator#armor_shield'
       end
     end
-  end
-
-  # Adoption Agency
-  scope '/adoption' do
-    get '/', to: 'main#comingsoon'
-  end
-
-  # Idea Market
-  scope '/market' do
-    get '/', to: 'main#comingsoon'
   end
 
   # get '/forum', to: 'emergency#temporarily_disabled'
