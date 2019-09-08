@@ -40,12 +40,6 @@ class AttributeCategory < ApplicationRecord
     entity_type.titleize.constantize
   end
 
-  private
-
-  def ensure_name
-    self.name ||= "#{label}-#{Time.now.to_i}".underscore.gsub(' ', '_')
-  end
-
   def backfill_categories_ordering!
     content_type_class = entity_type.titleize.constantize
     category_owner = User.find(user_id)
@@ -88,5 +82,11 @@ class AttributeCategory < ApplicationRecord
         content_to_order.update_column(:position, 1 + index)
       end
     end
+  end
+
+  private
+
+  def ensure_name
+    self.name ||= "#{label}-#{Time.now.to_i}".underscore.gsub(' ', '_')
   end
 end

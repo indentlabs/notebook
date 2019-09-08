@@ -874,6 +874,7 @@ ActiveRecord::Schema.define(version: 2019_09_08_015515) do
     t.integer "father_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["father_id", "character_id", nil], name: "index_fatherships_on_father_id_and_character_id_and_deleted_at"
   end
 
   create_table "flora_eaten_bies", force: :cascade do |t|
@@ -1512,6 +1513,7 @@ ActiveRecord::Schema.define(version: 2019_09_08_015515) do
     t.integer "mother_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["mother_id", "character_id", nil], name: "index_motherships_on_mother_id_and_character_id_and_deleted_at"
   end
 
   create_table "notable_cities_relationships", force: :cascade do |t|
