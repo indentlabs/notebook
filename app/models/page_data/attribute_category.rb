@@ -48,7 +48,7 @@ class AttributeCategory < ApplicationRecord
 
     ActiveRecord::Base.transaction do
       categories.each.with_index do |content_to_order, index|
-        content_to_order.update_column(:position, 1 + index)
+        content_to_order.update_column(:position, 1 + index) if content_to_order.persisted?
 
         # While we're doing this, we might as well backfill the fields also
         content_to_order.backfill_fields_ordering!
@@ -57,7 +57,7 @@ class AttributeCategory < ApplicationRecord
   end
 
   def backfill_fields_ordering!
-    sorted_fields = attribute_fields.sort do |a, b|
+    sorted_fields = attribute_fields.select(&:persisted?).sort do |a, b|
       a_value = case a.field_type
         when 'name'     then 0
         when 'universe' then 1
@@ -79,7 +79,7 @@ class AttributeCategory < ApplicationRecord
 
     ActiveRecord::Base.transaction do
       sorted_fields.each.with_index do |content_to_order, index|
-        content_to_order.update_column(:position, 1 + index)
+        content_to_order.update_column(:position, 1 + index) if content_to_order.persisted?
       end
     end
   end

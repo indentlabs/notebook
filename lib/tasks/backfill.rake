@@ -1,7 +1,7 @@
 namespace :backfill do
   desc "Start working through old categories/fields without position set"
   task sortables_positions: :environment do
-    categories_to_position = AttributeCategory.where(position: nil).first(50).to_a
+    categories_to_position = AttributeCategory.where(position: nil).first(5000).shuffle.first(50).to_a
 
     puts "Empty position backlog:\n\t* #{AttributeCategory.where(position: nil).count} categories\n\t* #{AttributeField.where(position: nil).count} fields"
 
@@ -15,7 +15,6 @@ namespace :backfill do
       # but in case we're backfilling on multiple this fetches a recent
       # copy of updates before proceeding. Technically still a possibility
       # of Doing The Same Thing Twice, but a smaller possibility.
-      categories_to_position = AttributeCategory.where(position: nil).first(50).to_a
 
       if rand(100) < 20
         puts "Empty position backlog:\n\t* #{AttributeCategory.where(position: nil).count} categories\n\t* #{AttributeField.where(position: nil).count} fields"
@@ -25,3 +24,4 @@ namespace :backfill do
     puts "Done!"
   end
 end
+
