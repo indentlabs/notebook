@@ -42,7 +42,7 @@ class AttributeCategory < ApplicationRecord
 
   def backfill_categories_ordering!
     content_type_class = entity_type.titleize.constantize
-    category_owner = User.find(user_id)
+    category_owner = User.with_deleted.find_by(id: user_id)
 
     categories = content_type_class.attribute_categories(category_owner, show_hidden: true).to_a
 
