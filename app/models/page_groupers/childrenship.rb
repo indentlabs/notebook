@@ -56,6 +56,7 @@ class Childrenship < ApplicationRecord
 
   # todo: move this somewhere more reusable
   def gender_of_object object
+    return nil     if object.nil?
     return nil     if object.gender.nil?
     return :male   if MALE_VALUES.include? object.gender.downcase
     return :female if FEMALE_VALUES.include? object.gender.downcase
