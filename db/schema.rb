@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_29_222650) do
+ActiveRecord::Schema.define(version: 2019_09_08_015515) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
