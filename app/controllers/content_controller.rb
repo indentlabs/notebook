@@ -63,6 +63,9 @@ class ContentController < ApplicationController
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
 
+    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+
     @serialized_content = ContentSerializer.new(@content)
 
     if user_signed_in?
@@ -76,9 +79,6 @@ class ContentController < ApplicationController
         href: send("changelog_#{content_type.name.downcase}_path", @content)
       }
     end
-
-    return redirect_to(root_path) if @content.user.nil? # deleted user's content
-    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
 
     if (current_user || User.new).can_read?(@content)
       if current_user
