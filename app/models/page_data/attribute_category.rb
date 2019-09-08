@@ -44,7 +44,7 @@ class AttributeCategory < ApplicationRecord
     content_type_class = entity_type.titleize.constantize
     category_owner = User.find(user_id)
 
-    categories = content_type_class.attribute_categories(category_owner, show_hidden: true)
+    categories = content_type_class.attribute_categories(category_owner, show_hidden: true).to_a
 
     ActiveRecord::Base.transaction do
       categories.each.with_index do |content_to_order, index|
