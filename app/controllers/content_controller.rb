@@ -338,9 +338,15 @@ class ContentController < ApplicationController
 
     @content_pages = {}
     @activated_content_types.each do |content_type|
-      @content_pages[content_type] = content_type.constantize.with_deleted.where('deleted_at > ?', @maximum_recovery_time.ago).where(user_id: current_user.id)
+      @content_pages[content_type] = content_type.constantize
+        .with_deleted
+        .where('deleted_at > ?', @maximum_recovery_time.ago)
+        .where(user_id: current_user.id)
     end
-    @content_pages["Document"] = current_user.documents.with_deleted.where('deleted_at > ?', @maximum_recovery_time.ago)
+    @content_pages["Document"] = current_user.documents
+      .with_deleted
+      .where('deleted_at > ?', @maximum_recovery_time.ago)
+      .includes(:user)
 
     # Override controller
     @sidenav_expansion = 'my account'

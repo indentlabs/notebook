@@ -18,6 +18,11 @@
             <p>
               In other words, use this page if you've accidentally deleted a page and need to recover it.
             </p>
+            <br />
+            <p class="red-text text-darken-3">
+              Premium users can recover pages up to <strong>7 days</strong> after their deletion.<br />
+              All other users can recover pages up to <strong>2 days</strong> after deletion.
+            </p>
           </div>
           <div class="col hide-on-sm-only m5 l4">
             <%= image_tag 'tristan/small.png',
@@ -76,29 +81,6 @@
                     <% end %>
                     <span class="title">
                       <%= (content.respond_to?(:label) ? content.label : list_name_lookup_cache[content.id].presence || content.name) %>
-                      <small class="grey-text">
-                        <% universe_field_value = content.universe_field_value %>
-                        <% if universe_field_value.present? %>
-                          <i class="material-icons"><%= Universe.icon %></i>
-                          <%# todo remove this hack %>
-                          <%
-                            if universe_field_value.is_a?(Integer)
-                              universe_field_value = Universe.find_by(id: universe_field_value, user: content.user)
-                            end
-                          %>
-                          <% if universe_field_value %>
-                            <%= link_to universe_field_value.try(:name), universe_field_value %>
-                          <% end %>
-                        <% end %>
-                      </small>
-                      <% if user_signed_in? && (
-                          (content.universe_field_value.present? && universe_field_value.try(:user) != current_user) ||
-                          (content.is_a?(Universe) && content.user != current_user)
-                        )
-                      %>
-                        <span class="new badge grey white-text tooltipped" style="float: inherit; margin: 0;" data-badge-caption="contributing"
-                          data-position="bottom" data-delay="100" data-tooltip="You have been added as a contributor to this universe and its content."></span>
-                      <% end %>
                     </span>
                     <div class='grey-text'>
                       <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="Deleted at <%= content.deleted_at.strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
@@ -109,7 +91,7 @@
                         <i class="material-icons">alarm</i>
                         recoverable for the next <%= distance_of_time_in_words(DateTime.current, content.deleted_at + @maximum_recovery_time) %>
                       </p>
-                      <p class="timestamp" style="font-size: 80%">
+                      <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="<%= (content.image_uploads.sum(:src_file_size) / 1000.0).round(1) %> KB used" style="font-size: 80%">
                         <i class="material-icons">image</i>
                         <%= pluralize content.image_uploads.count, 'uploaded image' %>
                       </p>
@@ -127,7 +109,7 @@
                       <%= form_for content do |f| %>
                         <%= f.hidden_field :deleted_at, value: "1/1 1970".to_date %>
                         <%= 
-                          f.submit 'Delete forever', 
+                          f.submit 'Delete immediately', 
                             class: 'white btn black-text tooltipped',
                             data: { tooltip: "Delete this page immediately and remove it from your recycle bin." }
                         %>
