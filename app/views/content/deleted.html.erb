@@ -101,24 +101,36 @@
                       <% end %>
                     </span>
                     <div class='grey-text'>
-                      <p class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="Deleted at <%= content.deleted_at.strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
+                      <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="Deleted at <%= content.deleted_at.strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
                         <i class="material-icons">delete</i>
                         deleted <%= time_ago_in_words content.deleted_at %> ago
                       </p>
-                      <p class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="Deleted at <%= content.deleted_at.strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
+                      <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="Recoverable until <%= (content.deleted_at + @maximum_recovery_time).strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
                         <i class="material-icons">alarm</i>
                         recoverable for the next <%= distance_of_time_in_words(DateTime.current, content.deleted_at + @maximum_recovery_time) %>
+                      </p>
+                      <p class="timestamp" style="font-size: 80%">
+                        <i class="material-icons">image</i>
+                        <%= pluralize content.image_uploads.count, 'uploaded image' %>
                       </p>
                     </div>
                     <br />
                     <div>
                       <%= form_for content, html: { style: 'float: left' } do |f| %>
                         <%= f.hidden_field :deleted_at, value: nil %>
-                        <%= f.submit 'Recover page', class: "#{content_type_name.constantize.color} lighten-4 btn black-text" %>
+                        <%=
+                          f.submit 'Recover page', 
+                            class: "#{content_type_name.constantize.color} lighten-4 btn black-text tooltipped",
+                            data: { tooltip: "Un-delete and add this page back to your notebook." }
+                        %>
                       <% end %>
                       <%= form_for content do |f| %>
                         <%= f.hidden_field :deleted_at, value: "1/1 1970".to_date %>
-                        <%= f.submit 'Delete forever', class: 'white btn black-text' %>
+                        <%= 
+                          f.submit 'Delete forever', 
+                            class: 'white btn black-text tooltipped',
+                            data: { tooltip: "Delete this page immediately and remove it from your recycle bin." }
+                        %>
                       <% end %>
                     </div>
                     <br />
