@@ -68,18 +68,6 @@ class ContentSerializer
               value: value_for(field, content)
             }
           }.sort do |a, b|
-            a_value = case a[:type]
-              when 'name'     then 0
-              when 'universe' then 1
-              else 2 # 'text_area', 'link'
-            end
-
-            b_value = case b[:type]
-              when 'name'     then 0
-              when 'universe' then 1
-              else 2
-            end
-
             # if a_value != b_value
             #   a_value <=> b_value
             # else
@@ -88,7 +76,20 @@ class ContentSerializer
 
             if a[:position] && b[:position]
               a[:position] <=> b[:position]
+
             else
+              a_value = case a[:type]
+                when 'name'     then 0
+                when 'universe' then 1
+                else 2 # 'text_area', 'link'
+              end
+
+              b_value = case b[:type]
+                when 'name'     then 0
+                when 'universe' then 1
+                else 2
+              end
+              
               a_value <=> b_value
             end
           end

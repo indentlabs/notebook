@@ -177,7 +177,7 @@ module HasAttributes
       ).pluck(:id)
 
       # Todo these two queries should be able to be joined into one
-      name_field = AttributeField.find_by(
+      AttributeField.find_by(
         user_id: user_id,
         attribute_category_id: category_ids,
         field_type: 'name'
@@ -191,7 +191,7 @@ module HasAttributes
       ).pluck(:id)
 
       # Todo these two queries should be able to be joined into one
-      name_field = AttributeField.find_by(
+      AttributeField.find_by(
         user_id: user_id,
         attribute_category_id: category_ids,
         field_type: 'universe'
@@ -205,7 +205,7 @@ module HasAttributes
       ).pluck(:id)
 
       # Todo these two queries should be able to be joined into one
-      field = AttributeField.find_by(
+      AttributeField.find_by(
         user_id: user_id,
         attribute_category_id: category_ids,
         label: label,
