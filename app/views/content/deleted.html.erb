@@ -100,22 +100,28 @@
                           data-position="bottom" data-delay="100" data-tooltip="You have been added as a contributor to this universe and its content."></span>
                       <% end %>
                     </span>
-                    <p class='grey-text'>
-                      <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="Deleted at <%= content.deleted_at.strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
+                    <div class='grey-text'>
+                      <p class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="Deleted at <%= content.deleted_at.strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
                         <i class="material-icons">delete</i>
                         deleted <%= time_ago_in_words content.deleted_at %> ago
-                      </span>
-                      <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="Deleted at <%= content.deleted_at.strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
+                      </p>
+                      <p class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="Deleted at <%= content.deleted_at.strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
                         <i class="material-icons">alarm</i>
                         recoverable for the next <%= distance_of_time_in_words(DateTime.current, content.deleted_at + @maximum_recovery_time) %>
-                      </span>
-                    </p>
-                    <span class="secondary-content">
-                      <%= form_for content do |f| %>
+                      </p>
+                    </div>
+                    <br />
+                    <div>
+                      <%= form_for content, html: { style: 'float: left' } do |f| %>
                         <%= f.hidden_field :deleted_at, value: nil %>
-                        <%= f.submit 'Recover', class: 'white btn black-text' %>
+                        <%= f.submit 'Recover page', class: "#{content_type_name.constantize.color} lighten-4 btn black-text" %>
                       <% end %>
-                    </span>
+                      <%= form_for content do |f| %>
+                        <%= f.hidden_field :deleted_at, value: "1/1 1970".to_date %>
+                        <%= f.submit 'Delete forever', class: 'white btn black-text' %>
+                      <% end %>
+                    </div>
+                    <br />
                   </li>
                 <% end %>
 
