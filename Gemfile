@@ -12,7 +12,7 @@ gem 'filesize'
 
 # Image processing
 gem 'paperclip'
-gem 'rmagick'
+#gem 'rmagick'
 
 # Authentication
 gem 'devise'
@@ -112,11 +112,11 @@ group :test do
   gem 'simplecov', require: false
   gem 'tzinfo-data' # addresses a bug when working on Windows
   gem 'rails-perftest'
-  gem 'rspec-prof'
+  #gem 'rspec-prof'
   gem 'rspec-rails'
   gem 'webmock'
   gem 'rubocop', require: false
-  gem 'ruby-prof', '1.0.0'
+  #gem 'ruby-prof', '1.0.0'
   gem 'shoulda-matchers', '~> 4.1'
   gem 'rails-controller-testing'
 end
