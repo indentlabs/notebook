@@ -31,7 +31,7 @@ class PermissionService < Service
   end
 
   def self.content_has_no_containing_universe?(content:)
-    content.universe_field_value.nil?
+    content.universe.nil?
   end
 
   def self.user_is_on_premium_plan?(user:)
