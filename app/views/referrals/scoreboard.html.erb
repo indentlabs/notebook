@@ -1,0 +1,31 @@
+<div class="card-panel">
+  <table>
+    <thead>
+      <tr>
+        <th class="right">Rank</th>
+        <th>User</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @scoreboard_users.each_with_index do |user, i| %>
+        <%
+          trophy_color = case (1+i)
+            when 1; 'blue';
+            when 2; 'green';
+            when 3; 'red';
+            else; 'orange'
+          end
+        %>
+        <tr>
+          <td class="right"><%= 1 + i %></td>
+          <td>
+            <i class="fa fa-trophy <%= trophy_color %>-text"></i>
+            <%= link_to(user.username.presence || user.name.split('@').first, user) %>
+          </td>
+          <td><%= number_with_delimiter(user.referrals.count * 100) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -53,6 +53,11 @@ Rails.application.routes.draw do
       # Promotional codes
       post '/redeem', to: 'subscriptions#redeem_code'
     end
+
+    scope '/referrals' do
+      get '/',           to: 'referrals#index', as: :referrals
+      get '/scoreboard', to: 'referrals#scoreboard'
+    end
   end
   delete 'delete_my_account', to: 'users#delete_my_account'
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
