@@ -1,5 +1,6 @@
 <% referrals = current_user.referrals %>
-<% referral_count = 17 %>
+<% referral_count = referrals.count %>
+<% share_link = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}" %>
 
 <h3>Your referral code</h3>
 <div class="row">
@@ -7,12 +8,11 @@
     <div class="hoverable card">
       <div class="card-content">
         <p>
-          Your personalize code is below. Use it or the following URL when sharing Notebook.ai with others to make sure you get credit for referring them!
+          Use your personalized referral URL for sharing Notebook.ai with others to make sure you get credit for referring them!
         </p>
         <br />
         <p>
           Your referral link is:
-          <% share_link = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}" %>
           <input type="text"
             value="<%= share_link %>"
             style="text-align: center; font-size: 140%"
@@ -23,17 +23,21 @@
   </div>
   <div class="col s12 m3">
     <div class="hoverable card-panel center" style="border-bottom: 10px solid #2196F3">
-      <i class="fa fa-trophy left"></i>
+      <%# <i class="fa fa-trophy left"></i> %>
       you have
       <h1 style="padding: 0; margin: 0" class="blue-text">
         <strong><%= referral_count %></strong>
       </h1>
-      referrals
+      <%= 'referral'.pluralize(referral_count) %>
     </div>
   </div>
 
   <div class="col s12 m4">
-    <%= link_to '#' do %>
+    <%= link_to [
+      'http://twitter.com/share?',
+      'url=' + URI::escape(share_link),
+      '&text=' + URI::escape("I'm using Notebook.ai to create fictional worlds and I'd love for you to join me!")
+    ].join, target: '_new' do %>
       <div class="hoverable card-panel white-text" style="background: #1DA1F2">
         <i class="left fa fa-twitter" style="font-size: 150%"></i>
         Share to Twitter
@@ -110,6 +114,7 @@
     </div>
   </div>
 
+  <!--
   <div class="col s12 m6">
     <div class="hoverable card">
       <div class="card-content">
@@ -125,7 +130,9 @@
       </div>
     </div>
   </div>
+  -->
 
+  <!--
   <div class="col s12 m6">
     <div class="hoverable card">
       <div class="card-content">
@@ -150,6 +157,7 @@
       </div>
     </div>
   </div>
+  -->
 </div>
 
 <h3>
@@ -170,7 +178,7 @@
           <div class="determinate blue" style="width: <%= (referral_count) %>%"></div>
         </div>
         <div>
-          Win this with <strong><%= 100 - referral_count %> more referrals</strong>! 
+          Earn this achievement with <strong><%= 100 - referral_count %> more referrals</strong>! 
         </div>
       </div>
     </div>
@@ -189,7 +197,7 @@
           <div class="determinate blue" style="width: <%= (referral_count / 10) %>%"></div>
         </div>
         <div>
-          Win this with <strong><%= 1000 - referral_count %> more referrals</strong>! 
+          Earn this achievement with <strong><%= 1000 - referral_count %> more referrals</strong>! 
         </div>
       </div>
     </div>
