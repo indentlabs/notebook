@@ -263,7 +263,7 @@
         <div class="card-title">Your referral code & stats</div>
         <div class="row">
           <div class="col s12">
-            <p>
+            <p class="center">
               Your referral link is:
               <% share_link = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}" %>
               <input type="text"
@@ -271,18 +271,13 @@
                 style="text-align: center"
                 onClick="this.select();" />
             </p>
-            <ul>
+            <p class="center">
               <% referrals = current_user.referrals %>
-              <% converted_referrals = referrals.map(&:referree).select(&:on_premium_plan?) %>
-              <li><strong><%= pluralize referrals.count, 'user' %></strong> <%= referrals.count == 1 ? 'has' : 'have' %> signed up with your referral code.</li>
-              <% if converted_referrals.any? %>
-                <li>
-                  Of these, <strong><%= pluralize converted_referrals.count, 'user' %></strong> <%= converted_referrals.count == 1 ? 'has' : 'have' %> earned you both a Premium bonus!
-                </li>
-              <% else %>
-                <li>None have signed up for Premium yet. You receive a permanent 100MB boost to your upload storage whenever someone you refers upgrades to Premium. And they get a 100MB boost, too!</li>
-              <% end %>
-            </ul>
+              <strong><%= pluralize referrals.count, 'user' %></strong>
+              <%= referrals.count == 1 ? 'has' : 'have' %>
+              signed up with your referral code.
+              <%= link_to 'See what rewards are available.', referrals_path %>
+            </p>
           </div>
         </div>
       </div>
