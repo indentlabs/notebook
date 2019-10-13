@@ -58,7 +58,22 @@ Rails.application.routes.draw do
       get '/',           to: 'referrals#index', as: :referrals
       get '/scoreboard', to: 'referrals#scoreboard'
     end
-  end
+
+    scope '/data' do
+      get '/',           to: 'data#index',     as: :data_vault
+      get '/recyclebin', to: 'data#recyclebin'
+      get '/archive',    to: 'data#archive'
+
+      scope 'export' do
+        get '/', to: 'export#index', as: :notebook_export
+    
+        get '/outline', to: 'export#outline',             as: :notebook_outline
+        get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
+        get '/notebook.xml', to: 'export#notebook_xml',   as: :notebook_xml
+        get '/:model.csv', to: 'export#csv',              as: :notebook_csv
+      end
+    end
+end
   delete 'delete_my_account', to: 'users#delete_my_account'
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
@@ -144,15 +159,6 @@ Rails.application.routes.draw do
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
-  end
-
-  scope 'export' do
-    get '/', to: 'export#index', as: :notebook_export
-
-    get '/outline', to: 'export#outline', as: :notebook_outline
-    get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
-    get '/notebook.xml', to: 'export#notebook_xml', as: :notebook_xml
-    get '/:model.csv', to: 'export#csv', as: :notebook_csv
   end
 
   scope '/scene/:scene_id' do
