@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_08_015515) do
+ActiveRecord::Schema.define(version: 2019_10_17_182040) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -145,6 +145,7 @@ ActiveRecord::Schema.define(version: 2019_09_08_015515) do
     t.string "page_type", default: "Building"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "archived_at"
     t.index ["universe_id"], name: "index_buildings_on_universe_id"
     t.index ["user_id"], name: "index_buildings_on_user_id"
   end
