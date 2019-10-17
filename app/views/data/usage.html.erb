@@ -2,6 +2,7 @@
   full_width_breakdowns = current_user.content.keys.length > 6
 
   # todo page superlatives (most-edited page, oldest page, etc)
+  # todo image upload usage %
 %>
 
 <h4>
@@ -37,7 +38,7 @@
   <div class="col s12 <%= 'm6' unless full_width_breakdowns %>">
     <div class="hoverable card-panel">
       <h5 class="grey-text">Type breakdown</h5>
-      <%= pie_chart current_user.content.map { |n, l| [n.pluralize(l.count), l = l.count] }, download: true %>
+      <%= pie_chart current_user.content.map { |n, l| [n.pluralize(l.count), l = l.count] }, download: true, legend: "left" %>
       <span class="grey-text">You can click a page type in the key to toggle it on/off in the pie chart.</span>
     </div>
   </div>
@@ -48,7 +49,28 @@
     <div class="col s12">
       <div class="hoverable card-panel">
         <h5 class="grey-text">Posts on the forums per month</h5>
-        <%= area_chart current_user.thredded_posts.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] }, download: true %>
+        <%= area_chart [
+            { name: 'New threads', data: current_user.thredded_topics.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } },
+            { name: 'Responses',   data: current_user.thredded_posts.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } }
+          ], download: true
+        %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% if current_user.thredded_private_posts.any? %>
+  <div class="row">
+    <div class="col s12">
+      <div class="hoverable card-panel">
+        <h5 class="grey-text">Private messages per month</h5>
+        <% private_postable_ids = current_user.thredded_private_topics.pluck(:id)%>
+        <%= area_chart [
+            { name: "Sent",     data: current_user.thredded_private_posts.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } },
+            { name: "Received", data: Thredded::PrivatePost.where.not(user_id: current_user.id).where(postable_id: private_postable_ids).group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } },
+          ],
+          download: true
+        %>
       </div>
     </div>
   </div>
