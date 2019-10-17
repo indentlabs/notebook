@@ -1,18 +1,26 @@
+<h4>
+  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
+        position: 'bottom',
+        enterDelay: '500',
+        tooltip: "Back to your Data Vault"
+      } do %>
+    <i class="material-icons">arrow_back</i>
+  <% end %>
+  Your notebook's recycle bin
+</h4>
+
+
 <div class="row">
   <div class="col s12">
-    <div class="card">
+    <div class="hoverable card">
       <div class="card-content">
         <div class="row">
           <div class="col s12 m7 l8">
-            <div class="card-title">Your notebook's recycle bin</div>
-            <p>
-              Hello there!
-            </p>
-            <br />
             <p>
               Whenever you delete a page from your notebook, it ends up here for a little while.
               While a page is here, you can recover it at any time to add it back to your notebook.
-              If not recovered, the page will be automatically and permanently deleted.
+              If not recovered, the page will be automatically and permanently deleted after a certain
+              period of time.
             </p>
             <br />
             <p>
@@ -71,7 +79,7 @@
           </h4>
         </div>
         <div class="col s12 m9 l9 offset-l1">
-          <div class="card">
+          <div class="hoverable card">
             <div class="card-content" style="padding: 0;">
               <ul class="collection" style='border: 0'>
                 <% content_list.each do |content| %>
@@ -83,18 +91,18 @@
                       <%= (content.respond_to?(:label) ? content.label : list_name_lookup_cache[content.id].presence || content.name) %>
                     </span>
                     <div class='grey-text'>
-                      <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="Deleted at <%= content.deleted_at.strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
+                      <p class="timestamp tooltipped left" data-position="left" data-delay="500" data-tooltip="Deleted at <%= content.deleted_at.strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
                         <i class="material-icons">delete</i>
                         deleted <%= time_ago_in_words content.deleted_at %> ago
-                      </p>
-                      <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="Recoverable until <%= (content.deleted_at + @maximum_recovery_time).strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
+                      </p><br />
+                      <p class="timestamp tooltipped left" data-position="left" data-delay="500" data-tooltip="Recoverable until <%= (content.deleted_at + @maximum_recovery_time).strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
                         <i class="material-icons">alarm</i>
                         recoverable for the next <%= distance_of_time_in_words(DateTime.current, content.deleted_at + @maximum_recovery_time) %>
-                      </p>
-                      <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="<%= (content.image_uploads.sum(:src_file_size) / 1000.0).round(1) %> KB used" style="font-size: 80%">
+                      </p><br />
+                      <p class="timestamp tooltipped left" data-position="left" data-delay="500" data-tooltip="<%= (content.image_uploads.sum(:src_file_size) / 1000.0).round(1) %> KB used" style="font-size: 80%">
                         <i class="material-icons">image</i>
                         <%= pluralize content.image_uploads.count, 'uploaded image' %>
-                      </p>
+                      </p><br />
                     </div>
                     <br />
                     <div>
