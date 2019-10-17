@@ -6,9 +6,6 @@ class DataController < ApplicationController
   def index
   end
 
-  def recyclebin
-  end
-
   def archive
   end
 
