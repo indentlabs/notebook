@@ -22,18 +22,20 @@ class ContentController < ApplicationController
     @content_type_class.attribute_categories(current_user)
 
     if @universe_scope.present? && @content_type_class != Universe
-      @content = @universe_scope.send(pluralized_content_name).includes(:page_tags, :image_uploads)
+      @content = @universe_scope.send(pluralized_content_name)
+        .includes(:page_tags, :image_uploads)
+        .unarchived
 
       @show_scope_notice = true
     else
       @content = (
-        current_user.send(pluralized_content_name).includes(:page_tags, :image_uploads) +
-        current_user.send("contributable_#{pluralized_content_name}").includes(:page_tags, :image_uploads)
+        current_user.send(pluralized_content_name).unarchived.includes(:page_tags, :image_uploads) +
+        current_user.send("contributable_#{pluralized_content_name}").unarchived.includes(:page_tags, :image_uploads)
       )
 
       if @content_type_class != Universe
         my_universe_ids = current_user.universes.pluck(:id)
-        @content.concat(@content_type_class.where(universe_id: my_universe_ids))
+        @content.concat(@content_type_class.where(universe_id: my_universe_ids).unarchived)
       end
     end
 
