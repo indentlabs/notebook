@@ -22,18 +22,20 @@ class ContentController < ApplicationController
     @content_type_class.attribute_categories(current_user)
 
     if @universe_scope.present? && @content_type_class != Universe
-      @content = @universe_scope.send(pluralized_content_name).includes(:page_tags, :image_uploads)
+      @content = @universe_scope.send(pluralized_content_name)
+        .includes(:page_tags, :image_uploads)
+        .unarchived
 
       @show_scope_notice = true
     else
       @content = (
-        current_user.send(pluralized_content_name).includes(:page_tags, :image_uploads) +
-        current_user.send("contributable_#{pluralized_content_name}").includes(:page_tags, :image_uploads)
+        current_user.send(pluralized_content_name).unarchived.includes(:page_tags, :image_uploads) +
+        current_user.send("contributable_#{pluralized_content_name}").unarchived.includes(:page_tags, :image_uploads)
       )
 
       if @content_type_class != Universe
         my_universe_ids = current_user.universes.pluck(:id)
-        @content.concat(@content_type_class.where(universe_id: my_universe_ids))
+        @content.concat(@content_type_class.where(universe_id: my_universe_ids).unarchived)
       end
     end
 
@@ -222,7 +224,6 @@ class ContentController < ApplicationController
     @content = content_type.with_deleted.find(params[:id])
 
     unless @content.updatable_by?(current_user)
-      # todo flash error instead? (shows up 2x currently)
       flash[:notice] = "You don't have permission to edit that!"
       return redirect_back fallback_location: @content
     end
@@ -261,6 +262,36 @@ class ContentController < ApplicationController
       successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
       failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.map(&:messages).to_sentence)
+    end
+  end
+
+  def toggle_archive
+    # todo Since this method is triggered via a GET in floating_action_buttons, a malicious user could technically archive
+    # another user's content if they're able to send that user to a specifically-crafted URL or inject that URL somewhere on
+    # a page (e.g. img src="/characters/1234/toggle_archive"). Since archiving is reversible this seems fine for release, but
+    # is something that should be fixed asap before any abuse happens.
+
+    content_type = content_type_from_controller(self.class)
+    @content = content_type.with_deleted.find(params[:id])
+
+    unless @content.updatable_by?(current_user)
+      flash[:notice] = "You don't have permission to edit that!"
+      return redirect_back fallback_location: @content
+    end
+
+    verb = nil
+    success = if @content.archived?
+      verb = "unarchived"
+      @content.unarchive!
+    else
+      verb = "archived"
+      @content.archive!
+    end
+
+    if success
+      redirect_back(fallback_location: archive_path, notice: "This page has been #{verb}.")
+    else
+      redirect_back(fallback_location: root_path, notice: "Something went wrong while attempting to archive that page.")
     end
   end
 
@@ -367,6 +398,7 @@ class ContentController < ApplicationController
     return unless content.respond_to?(:position)
 
     # Ugh not another one of these backfills
+    # todo remove this necessity
     if content.position.nil?
       if content.is_a?(AttributeCategory)
         content.backfill_categories_ordering!

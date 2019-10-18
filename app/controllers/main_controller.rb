@@ -58,7 +58,7 @@ class MainController < ApplicationController
   end
 
   def privacyinfo
-    @sidenav_expansion = 'help'
+    @sidenav_expansion = 'my account'
   end
 
   private

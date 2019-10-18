@@ -11,6 +11,17 @@ module IsContentPage
     include HasChangelog
     include HasPageTags
 
+    scope :unarchived, -> { where(archived_at: nil) }
+    def archive!
+      update!(archived_at: DateTime.now)
+    end
+    def unarchive!
+      update!(archived_at: nil)
+    end
+    def archived?
+      !archived_at.nil?
+    end
+
     has_many :document_entities, as: :entity
     attr_accessor :document_entity_id
     def documents

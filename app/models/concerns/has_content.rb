@@ -25,15 +25,15 @@ module HasContent
     )
       return {} if content_types.empty?
 
-      polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :privacy]
-      where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL'
+      polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :archived_at, :privacy]
+      where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL AND archived_at IS NULL'
 
       sql = content_types.uniq.map do |page_type|
         "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
       end.join(' UNION ALL ') + ' ORDER BY page_type, id'
 
-      res = ActiveRecord::Base.connection.execute(sql)
-      @content_by_page_type ||= res.to_a.each_with_object({}) do |object, hash|
+      result = ActiveRecord::Base.connection.execute(sql)
+      @content_by_page_type ||= result.to_a.each_with_object({}) do |object, hash|
         object.keys.each do |key|
           object.except!(key) if key.is_a?(Integer)
         end
@@ -50,8 +50,8 @@ module HasContent
     )
 
       # todo we can't select for universe_id here which kind of sucks, so we need to research 1) the repercussions, 2) what to do instead
-      polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :privacy]
-      where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL'
+      polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :archived_at, :privacy]
+      where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL AND archived_at IS NULL'
 
       sql = content_types.uniq.map do |page_type|
         "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
