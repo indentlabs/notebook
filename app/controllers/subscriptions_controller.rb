@@ -20,6 +20,19 @@ class SubscriptionsController < ApplicationController
     @stripe_invoices = @stripe_customer.invoices # makes a second call to Stripe
   end
 
+  # this endpoint replaces the #new endpoint above; it's separated out for development/testing, as well as the ability
+  # to quickly flip back to the original unchanged endpoint if there are any issues post-release
+  def manage
+    @sidenav_expansion = 'my account'
+
+    @active_billing_plans = current_user.active_billing_plans
+    @active_billing_plans = [BillingPlan.find_by(stripe_plan_id: 'starter')] if @active_billing_plans.empty?
+
+    @storage_used      = Filesize.from("#{current_user.image_uploads.sum(:src_file_size)}B")
+    @storage_remaining = Filesize.from("#{current_user.upload_bandwidth_kb.abs}KB")
+    @storage_capacity  = @storage_used + @storage_remaining
+  end
+
   def show
   end
 

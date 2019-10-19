@@ -1,0 +1,240 @@
+<%
+  free_for_life_user = current_user.selected_billing_plan_id == 2
+  on_premium_plan    = current_user.on_premium_plan?
+  active_stripe_plan = @active_billing_plans.first.try(:stripe_plan_id)
+%>
+
+<div class="row">
+  <div class="col s12 m12 l10 offset-l1">
+    <h4>
+      Notebook.ai subscriptions
+    </h4>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12 m12 l10 offset-l1">
+    <div class="grey-text"><strong>Your current plan</strong></div>
+    <div class="card">
+      <div class="card-image" style="height: 160px; overflow: hidden">
+        <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80">
+        <div class="card-title" style="width: 100%">
+          <div class="right">
+            $0/month
+          </div>
+          <i class="material-icons left" style="position: relative; top: 4px;">class</i>
+          Notebook.ai Starter
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="row">
+          <div class="col s12 m6">
+            <ul class="plan-features">
+              <li>
+                <i class="material-icons green-text left">check</i>
+                Plan up to <strong>5</strong> universes
+              </li>
+              <li class="clearfix">
+                <i class="material-icons green-text left">check</i>
+                Upload <strong>50MB</strong> of images
+              </li>
+              <li class="clearfix">
+                <i class="material-icons green-text left">check</i>
+                Create <strong>basic</strong> page types
+              </li>
+            </ul>
+          </div>
+          <div class="col s12 m6">
+            <p class="grey-text">
+              Unlocked pages
+            </p>
+            <i class="material-icons <%= Universe.color %>-text tooltipped small" data-position="bottom" data-delay="0" data-tooltip="Create up to 5 <%= Universe.name.pluralize %>">
+              <%= Universe.icon %>
+            </i>
+            <% (Rails.application.config.content_types[:free]).each do |content_class| %>
+              <% next if content_class.name == "Universe" %>
+              <i class="material-icons <%= content_class.color %>-text tooltipped small" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                <%= content_class.icon %>
+              </i>
+            <% end %>
+          </div>
+        </div>
+        <hr />
+        <br />
+        <p>
+          <strong>Payment</strong>
+        </p>
+        <p>
+          <%= link_to 'BILLING HISTORY', '#', class: 'right' %>
+          Your next bill for <strong>$9.99</strong> is due on <strong>10/23/19</strong>.
+        </p>
+        <br />
+        <p>
+          <i class="material-icons left blue-text">credit_card</i>
+          Visa ending in 1234 <span class="grey-text">(expires 01/2020)</span>.
+          <%= link_to 'UPDATE CARD', '#', class: 'right' %>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12 m12 l10 offset-l1">
+    <div class="grey-text"><strong>Other plans available</strong></div>
+    <div class="card">
+      <div class="card-image" style="height: 90px; overflow: hidden">
+        <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80">
+        <div class="card-title" style="width: 100%">
+          <div class="right">
+            $9/month
+          </div>
+          <i class="material-icons left" style="position: relative; top: 4px;">star</i>
+          Notebook.ai Premium
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="row">
+          <div class="col s12 m6">
+            <ul class="plan-features">
+              <li>
+                <i class="material-icons green-text left">arrow_upward</i>
+                Plan <strong>unlimited</strong> universes
+              </li>
+              <li class="clearfix">
+                <i class="material-icons green-text left">arrow_upward</i>
+                Upload <strong>10GB</strong> of images
+              </li>
+              <li class="clearfix">
+                <i class="material-icons green-text left">arrow_upward</i>
+                Create <strong>all <%= Rails.application.config.content_types[:all].count %></strong> page types
+              </li>
+              <li class="clearfix">
+                <i class="material-icons green-text left">arrow_upward</i>
+                Analyze your writing with <strong>AI</strong>
+              </li>
+            </ul>
+          </div>
+          <div class="col s12 m6">
+            <p class="grey-text">
+              Unlocked pages
+            </p>
+            <% Rails.application.config.content_types[:all].each_with_index do |content_class, i| %>
+              <i class="material-icons <%= content_class.color %>-text tooltipped small" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                <%= content_class.icon %>
+              </i>
+            <% end %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col s12 m6 l6">
+            <%= link_to 'Upgrade to this plan', change_subscription_path('premium'), class: "btn-large waves-effect waves-light blue white-text hoverable left", style: "margin-right: 20px" %>
+          </div>
+          <div class="col s12 m6 l6">
+            <p class="grey-text text-darken-4">
+              The standard Premium membership is $9 per month. However, you can save more by choosing to prepay every three months or per year. 
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12 m12 l6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">
+          <i class="material-icons left">cloud_upload</i>
+          Upload Bandwidth
+          <div class="right">
+            <%= (current_user.upload_bandwidth_kb) > 0 ? Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty : '-' + Filesize.from("#{current_user.upload_bandwidth_kb.abs}KB").pretty %> remaining
+          </div>
+        </div>
+        <p class="clearfix">
+          You've used <strong><%= @storage_used.pretty %></strong> from <%= current_user.image_uploads.count %> uploads, 
+          with <strong><%= (current_user.upload_bandwidth_kb > 0 ? @storage_remaining : '-' + @storage_remaining).pretty %></strong>
+          of bandwidth remaining.
+        </p>
+        <br />
+        <% if @storage_used > 0 %>
+          <div class="progress">
+            <div class="determinate blue" style="width: <%= @storage_used / @storage_capacity * 100 %>%"></div>
+          </div>
+        <% end %>
+        <p class="grey-text">
+          This bandwidth can be used to upload images to your notebook pages. Deleting an uploaded image frees
+          up the same amount of bandwidth.
+          <% unless on_premium_plan %>
+            To get more bandwidth, upgrade to our Premium plan.
+          <% end %>
+        </p>
+      </div>
+      <div class="card-action">
+        <%= link_to 'Purchase more', '#', class: 'blue-text' %>
+        <%= link_to 'Earn more', '#', class: 'right blue-text' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12 m12 l6">
+    <div class="card">
+      <div class="card-content">
+
+        <div class="card-title">
+          <i class="material-icons left">redeem</i>
+          Have a promotional code to redeem?
+        </div>
+        <p>
+          Enter the code below to apply it to your account.
+        </p>
+
+        <%= form_for :promotional_code, url: redeem_path do |form| %>
+          <div class="input-field col s6">
+            <%= form.text_field :promo_code %>
+            <label for="promo_code">Code</label>
+          </div>
+          
+          <div class="input-field col s6">
+            <%= form.submit 'Redeem code', class: 'white black-text btn' %>
+          </div>
+        <% end  %>
+        <div class="clearfix"></div>
+
+        <% if current_user.active_promotions.any? %>
+          <p>
+            Your active promo codes:
+
+            <ul class="browser-default">
+              <% current_user.active_promo_codes.each do |promo_code| %>
+                <% promotion = Promotion.find_by(user: current_user, page_unlock_promo_code_id: promo_code.id) %>
+                <li>
+                  <p>
+                    <strong><%= promo_code.code %></strong> - <%= promo_code.description %>
+                    <span class="grey-text">
+                      (active for another <%= distance_of_time_in_words(DateTime.current, promotion.expires_at) %>)
+                    </span>
+                  </p>
+                  <p>
+                    Pages unlocked:
+                    <% promo_code.page_types.each do |page_type| %>
+                      <% page_type_class = page_type.constantize %>
+                      <%= link_to polymorphic_path(page_type_class) do %>
+                        <i class="material-icons <%= page_type_class.color %>-text tooltipped" data-tooltip="<%= page_type.pluralize %>">
+                          <%= page_type_class.icon %>
+                        </i>
+                      <% end %>
+                    <% end %>
+                  </p>
+                </li>
+              <% end %>
+            </ul>
+
+            <%= link_to 'Click here to turn on your new page types!', customization_content_types_path, class: 'btn blue white-text' %>
+          </p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

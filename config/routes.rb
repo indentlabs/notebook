@@ -39,8 +39,9 @@ Rails.application.routes.draw do
 
     # Billing
     scope '/billing' do
-      #get '/',             to: 'subscriptions#show', as: :billing
+      #get '/',                 to: 'subscriptions#show', as: :billing
       get '/subscription',       to: 'subscriptions#new', as: :subscription
+      get '/manage',             to: 'subscriptions#manage'
 
       get '/to/:stripe_plan_id', to: 'subscriptions#change', as: :change_subscription
 
