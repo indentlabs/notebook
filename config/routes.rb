@@ -41,8 +41,6 @@ Rails.application.routes.draw do
     scope '/billing' do
       #get '/',                 to: 'subscriptions#show', as: :billing
       get '/subscription',       to: 'subscriptions#new', as: :subscription
-      get '/manage',             to: 'subscriptions#manage'
-
       get '/to/:stripe_plan_id', to: 'subscriptions#change', as: :change_subscription
 
       get '/information',        to: 'subscriptions#information',        as: :payment_info
@@ -53,6 +51,14 @@ Rails.application.routes.draw do
 
       # Promotional codes
       post '/redeem', to: 'subscriptions#redeem_code'
+    end
+
+    # v2 billing routes
+    scope :billing, as: 'billing' do
+      get  '/manage',   to: 'subscriptions#manage'
+      post '/review',   to: 'subscriptions#review'
+
+      get  '/history',  to: 'subscriptions#history'
     end
 
     scope '/referrals' do

@@ -1,0 +1,133 @@
+<div class="row">
+  <div class="col s12 m12 l10 offset-l1">
+    <h4>
+      Subscription change
+    </h4>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12 m12 l10 offset-l1">
+    <div class="grey-text"><strong>You are upgrading to</strong></div>
+    <div class="hoverable card">
+      <div class="card-image" style="height: 160px; overflow: hidden">
+        <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80">
+        <div class="card-title" style="width: 100%">
+          <i class="material-icons left" style="position: relative; top: 4px;">class</i>
+          Notebook.ai <%= @plan.name %>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="row">
+          <div class="col s12 m6">
+            <% if @plan.premium_plan? %>
+              <ul class="plan-features">
+                <li>
+                  <i class="material-icons green-text left">arrow_upward</i>
+                  Plan <strong>unlimited</strong> universes
+                </li>
+                <li class="clearfix">
+                  <i class="material-icons green-text left">arrow_upward</i>
+                  Upload <strong>10GB</strong> of images
+                </li>
+                <li class="clearfix">
+                  <i class="material-icons green-text left">arrow_upward</i>
+                Create <strong>all <%= Rails.application.config.content_types[:all].count %></strong> page types
+                </li>
+                <li class="clearfix">
+                  <i class="material-icons green-text left">arrow_upward</i>
+                  Analyze your writing with <strong>AI</strong>
+                </li>
+              </ul>
+            <% else %>
+              <ul class="plan-features">
+                <li>
+                  <i class="material-icons red-text left">arrow_downward</i>
+                  Plan up to <strong>5</strong> universes
+                </li>
+                <li class="clearfix">
+                  <i class="material-icons red-text left">arrow_downward</i>
+                  Upload <strong>50MB</strong> of images
+                </li>
+                <li class="clearfix">
+                  <i class="material-icons red-text left">arrow_downward</i>
+                  Create <strong>basic</strong> page types
+                </li>
+              </ul>
+            <% end %>
+          </div>
+          <div class="col s12 m6">
+            <p class="grey-text">
+              Unlocked pages
+            </p>
+            <% if @plan.premium_plan? %>
+              <% Rails.application.config.content_types[:all].each_with_index do |content_class, i| %>
+                <i class="material-icons <%= content_class.color %>-text tooltipped small" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                  <%= content_class.icon %>
+                </i>
+              <% end %>
+            <% else %>
+              <i class="material-icons <%= Universe.color %>-text tooltipped small" data-position="bottom" data-delay="0" data-tooltip="Create up to 5 <%= Universe.name.pluralize %>">
+                <%= Universe.icon %>
+              </i>
+              <% (Rails.application.config.content_types[:free]).each do |content_class| %>
+                <% next if content_class.name == "Universe" %>
+                <i class="material-icons <%= content_class.color %>-text tooltipped small" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                  <%= content_class.icon %>
+                </i>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grey-text"><strong>Next step: choose your way to pay</strong></div>
+<div class="row">
+  <div class="col s12 m4">
+    <div class="hoverable blue card-panel white-text">
+      <h5 class="center">
+        $9/month
+      </h5>
+      <p class="center">
+        $9 paid per month
+      </p>
+      <p class="center">
+        Pay with
+        <i class="fa fa-credit-card"></i>
+      </p>
+    </div>
+  </div>
+  <div class="col s12 m4">
+    <div class="hoverable blue lighten-5 card-panel">
+      <h5 class="center">
+        $8/month
+      </h5>
+      <p class="center">
+        $24 paid every 3 months
+      </p>
+      <p class="center">
+        Pay with
+        <i class="fa fa-credit-card"></i> or 
+        <i class="fa fa-paypal"></i>
+      </p>
+    </div>
+  </div>
+  <div class="col s12 m4">
+    <div class="hoverable blue lighten-5 card-panel">
+      <h5 class="center">
+        $7/month
+      </h5>
+      <p class="center">
+        $84 paid per year
+      </p>
+      <p class="center">
+        Pay with
+        <i class="fa fa-credit-card"></i> or 
+        <i class="fa fa-paypal"></i>
+      </p>
+    </div>
+  </div>
+</div>

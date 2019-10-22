@@ -87,6 +87,10 @@ class SubscriptionService < Service
     end
   end
 
+  def self.valid_plan_id?(plan_id)
+    available_plans.pluck(:stripe_plan_id).include?(plan_id)
+  end
+
   def self.available_plans
     BillingPlan.where(available: true)
   end

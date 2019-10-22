@@ -33,6 +33,17 @@ class SubscriptionsController < ApplicationController
     @storage_capacity  = @storage_used + @storage_remaining
   end
 
+  def review
+    @sidenav_expansion = 'my account'
+
+    plan_id = params.require(:subscription).require(:plan_id)
+    unless SubscriptionService.valid_plan_id?(plan_id)
+      raise "Invalid billing plan ID: #{plan_id}"
+    end
+
+    @plan = BillingPlan.find_by(stripe_plan_id: plan_id)
+  end
+
   def show
   end
 
