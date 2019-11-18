@@ -1,0 +1,169 @@
+<style>
+  body { background: white }
+</style>
+
+<div class="center">
+  <%= image_tag 'logos/both-small.png', class: 'center' %>
+</div>
+
+<h1 style="font-size: 2em">Notebook.ai + Writer's Craft Super Stack</h1>
+<p>
+  We're extremely excited to be a part of a super cool project put together by our friends at Infostack.io: a gigantic bundle of high-quality writing tools
+  for a low, super-accessible price. If you've already purchased the stack for yourself (or a friend&mdash;they make great gifts!),
+  <%= link_to 'click here', '#how-to-redeem' %> for instructions on how to redeem your 6 months of Premium access here on Notebook.ai.
+</p>
+
+<blockquote class="card-panel">
+  "I built Notebook.ai because I want to see powerful writing tools in the hands of more people. I'm excited to include 6 months of free Premium alongside a ton of other hugely-discounted writing resources just for you."
+  <br /><strong>- Andrew Brown, Notebook.ai creator</strong>
+</blockquote>
+
+<p>
+  If you <em>haven't</em> bought the Writer's Craft Super Stack yet, here's a quick overview of some of my personal favorites inside:
+</p>
+<div class="row">
+  <div class="col s12 m6 l3">
+    <div class="hoverable card-panel">
+      A 16-day worldbuilding workshop from fantasy author Stephanie Bwabwa <span class="grey-text">normally $97</span>
+    </div>
+  </div>
+  <div class="col s12 m6 l3">
+    <div class="hoverable card-panel">
+      An online 48-lesson course for writing romance novels from Writing Academy <span class="grey-text">normally $299</span>
+    </div>
+  </div>
+  <div class="col s12 m6 l3">
+    <div class="hoverable card-panel">
+      An online class on writing taught by NYT best-selling author Dave Wolverton <span class="grey-text">normally $199</span>
+    </div>
+  </div>
+  <div class="col s12 m6 l3">
+    <div class="hoverable card-panel">
+      Three ebooks on worldbuilding from fantasy author Kristen Kieffer <span class="grey-text">normally $65</span>
+    </div>
+  </div>
+  <div class="col s12 m6 l3">
+    <div class="hoverable card-panel">
+      A full manuscript review of your novel from professional editor Andi Cumbo-Floyd <span class="grey-text">normally $500</span>
+    </div>
+  </div>
+  <div class="col s12 m6 l3">
+    <div class="hoverable card-panel">
+      $100 off a professional cover design for your book from the designers at 100 Covers
+    </div>
+  </div>
+  <div class="col s12 m6 l3">
+    <div class="hoverable card-panel">
+      An introductory course on how to write children's books from Darcy Pattison <span class="grey-text">normally $29</span>
+    </div>
+  </div>
+  <div class="col s12 m6 l3">
+    <div class="hoverable card-panel">
+      The Ultimate Novel Planning Workbook ebook (so you can print it over and over!) from Lana Pecherczyk <span class="grey-text">normally $11</span>
+    </div>
+  </div>
+</div>
+
+<div class="center">
+  <%= link_to 'Buy the stack ($X)', '#', class: 'hoverable btn btn-large white-text blue' %>
+</div>
+
+<div style="font-size: 1.5em; padding-top: 100px; font-weight: bold" id="how-to-redeem">Redeeming your Notebook.ai Premium</div>
+<div class="row">
+  <div class="col s12 m6 l6">
+    <p>
+      Hurrah! First off: thank you for supporting not only Notebook.ai, but all of the amazing writers and writing-related tools within the stack. I really hope you enjoy
+      each and every tool inside, and that it helps you build the amazing worlds and novels you dream of.
+    </p>
+    <p>
+      That said, redeeming your Premium here on Notebook.ai is super simple.
+    </p>
+  </div>
+  <div class="col s12 m6 l6">
+    <div style="font-size: 1.3em;">Step 1: Create an account</div>
+    <p>
+      If you already have an account on Notebook.ai, you can skip this step &mdash; just log into your existing account.
+      If you don't have an account, it takes about 30 seconds to create one.
+    </p>
+    <% if user_signed_in? %>
+      <p>
+        <i class="material-icons green-text left">check</i> You're signed in!
+      </p>
+    <% else %>
+      <p>
+        <%= link_to 'Create an account', new_user_registration_path, class: 'hoverable btn blue white-text' %>
+        <span class="grey-text">or</span> 
+        <%= link_to 'Log in', new_user_session_path, class: 'hoverable btn blue white-text' %>
+      </p>
+    <% end %>
+
+    <br/>
+    <div style="font-size: 1.3em;">Step 2: Redeem your code</div>
+    <% if user_signed_in? %>
+      <p>
+        Now that you're signed into a Notebook.ai account, you can paste the code you received from the Writer's Craft Super Stack into the box below.
+        Your account will be immediately upgraded to Premium (<span class="grey-text">normally $9/month</span>) for 6 months.
+      </p>
+      <div>
+        <%= form_for :promotional_code, url: redeem_path do |form| %>
+          <div class="input-field col s12 m6">
+            <%= form.text_field :promo_code %>
+            <label for="promo_code">Code</label>
+          </div>
+          
+          <div class="input-field col s12 m6">
+            <%= form.submit 'Redeem code', class: 'white black-text btn' %>
+          </div>
+        <% end  %>
+      </div>
+      <div class="clearfix"></div>
+
+    <% else %>
+      <p>
+        Once you've signed into a Notebook.ai account, you can paste the code you received from the Writer's Craft Super Stack into the box below.
+        Your account will be immediately upgraded to Premium (<span class="grey-text">normally $9/month</span>) for 6 months.
+      </p>
+      <div>
+        <%= form_for :promotional_code, url: redeem_path do |form| %>
+          <div class="input-field col s12 m6">
+            <%= form.text_field :promo_code, disabled: 'disabled' %>
+            <label for="promo_code">Code</label>
+          </div>
+          
+          <div class="input-field col s12 m6">
+            <%= form.submit 'Redeem code', class: 'white black-text btn', disabled: 'disabled' %>
+          </div>
+        <% end  %>
+      </div>
+      <div class="clearfix"></div>
+    <% end %>
+    <p>
+      At the end of the 6 months, you will be automatically downgraded back to the free Starter tier and won't be charged again, 
+      but you <em>will</em> be able to access any pages you've created, forever &mdash; once you create them, you're <em>your</em> pages;
+      we just host them for you. Of course, you can upgrade again at any time in the future by clicking "Billing" in the sidebar and
+      selecting a plan.
+    </p>
+
+    <div style="font-size: 1.3em;">Step 3: Enjoy Premium!</div>
+    <p>
+      Premium unlocks a ton of new kinds of pages for you to create in Notebook.ai, which let you get super specific when creating your
+      fictional worlds. You can browse the available page types and turn them on for your universe by clicking "Add more..." in your 
+      logged-in notebook sidebar, or simply <%= link_to 'click here', customization_content_types_path %> to get started. You can also see
+      a quick sampling below.
+    </p>
+  </div>
+</div>
+
+<div style="font-size: 1.5em; padding-top: 100px; font-weight: bold" id="how-to-redeem">Notebook pages available with Premium</div>
+<p>
+  Create any of these pages &mdash; and as many as you need &mdash; to start putting ideas to paper and flesh your world out one piece at a time.
+  Each page comes with a fully-customizable template that will ask you questions to get you started, but stay out of your way when you've got your
+  momentum.
+</p>
+<div class="row">
+  <% (Rails.application.config.content_types[:all]).each do |content_type| %>
+    <div class="col l4 m6 s12">
+      <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: content_type } %>
+    </div>
+  <% end %>
+</div>
