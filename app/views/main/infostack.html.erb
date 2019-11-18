@@ -148,9 +148,22 @@
     <p>
       Premium unlocks a ton of new kinds of pages for you to create in Notebook.ai, which let you get super specific when creating your
       fictional worlds. You can browse the available page types and turn them on for your universe by clicking "Add more..." in your 
-      logged-in notebook sidebar, or simply <%= link_to 'click here', customization_content_types_path %> to get started.
+      logged-in notebook sidebar, or simply <%= link_to 'click here', customization_content_types_path %> to get started. You can also see
+      a quick sampling below.
     </p>
   </div>
 </div>
 
-<div style="margin-bottom: 200px;"></div>
+<div style="font-size: 1.5em; padding-top: 100px; font-weight: bold" id="how-to-redeem">Notebook pages available with Premium</div>
+<p>
+  Create any of these pages &mdash; and as many as you need &mdash; to start putting ideas to paper and flesh your world out one piece at a time.
+  Each page comes with a fully-customizable template that will ask you questions to get you started, but stay out of your way when you've got your
+  momentum.
+</p>
+<div class="row">
+  <% (Rails.application.config.content_types[:all]).each do |content_type| %>
+    <div class="col l4 m6 s12">
+      <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: content_type } %>
+    </div>
+  <% end %>
+</div>
