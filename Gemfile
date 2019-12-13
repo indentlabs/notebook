@@ -119,6 +119,7 @@ group :test do
   gem 'ruby-prof', '1.0.0'
   gem 'shoulda-matchers', '~> 4.1'
   gem 'rails-controller-testing'
+  gem 'pg', '~> 1.1'
 end
 
 group :development do
