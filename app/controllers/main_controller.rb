@@ -25,6 +25,9 @@ class MainController < ApplicationController
     set_random_content # for questions
   end
 
+  def infostack
+  end
+
   def prompts
     @sidenav_expansion = 'writing'
     @navbar_color = '#FF9800'

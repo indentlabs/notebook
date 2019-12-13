@@ -5,6 +5,8 @@ Rails.application.routes.draw do
   get 'customization/content_types'
   post 'customization/toggle_content_type'
 
+  get '/redeem/infostack', to: 'main#infostack'
+
   # User-centric stuff
   devise_for :users, :controllers => { registrations: 'registrations' }
   resources :users do

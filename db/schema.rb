@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_10_17_191955) do
+ActiveRecord::Schema.define(version: 2019_11_13_234819) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id"
@@ -2596,10 +2596,8 @@ ActiveRecord::Schema.define(version: 2019_10_17_191955) do
     t.date "birthday"
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
-    t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["id", "deleted_at"], name: "index_users_on_id_and_deleted_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
-    t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   create_table "vehicles", force: :cascade do |t|
