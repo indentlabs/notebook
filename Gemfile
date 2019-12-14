@@ -1,9 +1,10 @@
 source 'https://rubygems.org'
 ruby "~> 2.6"
 
-gem 'rails', '~> 5.2'
+gem 'rails'
 gem 'puma', '~> 3.12'
 gem 'puma-heroku'
+gem 'bootsnap', require: false
 
 # Storage
 gem 'aws-sdk', '~> 3.0'

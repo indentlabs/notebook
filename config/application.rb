@@ -16,8 +16,9 @@ Bundler.require(*Rails.groups)
 
 module Notebook
   class Application < Rails::Application
-    config.autoload_paths += Dir[Rails.root.join('app', 'models', '{*/}')]
-    config.autoload_paths += Dir[Rails.root.join('app', 'services', '{*/}')]
+    # Rails 6 should be autoloading everything under app/ now
+    # config.autoload_paths += Dir[Rails.root.join('app', 'models', '{*/}')]
+    # config.autoload_paths += Dir[Rails.root.join('app', 'services', '{*/}')]
 
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 5.0
