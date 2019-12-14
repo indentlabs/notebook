@@ -58,7 +58,6 @@ gem 'd3-rails'
 
 # Analytics
 gem 'mixpanel-ruby'
-gem 'barnes'
 gem 'slack-notifier'
 
 # Apps

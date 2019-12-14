@@ -1,5 +1,4 @@
 # rubocop:disable LineLength
-
 Rails.application.routes.draw do
   get 'notice_dismissal/dismiss'
   get 'customization/content_types'
@@ -231,5 +230,4 @@ end
     mount Sidekiq::Web => '/sidekiq'
   end
 end
-
 # rubocop:enable LineLength
