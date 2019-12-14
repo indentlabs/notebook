@@ -17,7 +17,7 @@ class SubscriptionsController < ApplicationController
     @active_billing_plan = current_user.active_billing_plans.first || BillingPlan.find_by(stripe_plan_id: 'starter')
 
     @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
-    @stripe_invoices = @stripe_customer.invoices # makes a second call to Stripe
+    @stripe_invoices = Stripe::Invoice.list({customer: current_user.stripe_customer_id})
   end
 
   def show
@@ -37,7 +37,7 @@ class SubscriptionsController < ApplicationController
       redirect_to payment_info_path(plan: new_plan_id)
     elsif result == :failed_card
       flash[:alert] = "We couldn't upgrade you to Premium because your card was denied. Please double check that your information is correct."
-      return
+      return redirect_to payment_info_path(plan: new_plan_id)
     else
       redirect_to(subscription_path, notice: "Your plan was successfully changed.")
     end
@@ -68,7 +68,10 @@ class SubscriptionsController < ApplicationController
   # Save a payment method
   def information_change
     valid_token = params[:stripeToken]
-    raise "Invalid token" if valid_token.nil?
+    if valid_token.nil?
+      flash[:alert] = "We couldn't validate the card information you entered. Please make sure you have Javascript enabled in your browser."
+      return redirect_back fallback_location: payment_info_path
+    end
 
     stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
     stripe_subscription = stripe_customer.subscriptions.data[0]

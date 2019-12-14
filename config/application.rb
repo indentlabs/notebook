@@ -1,16 +1,13 @@
 require File.expand_path('../boot', __FILE__)
-
 require 'rails/all'
 
 DEVELOPMENT_RAILS_GROUPS = 'web,worker'
-
 if ENV['RAILS_GROUPS'].blank?
   ENV['RAILS_GROUPS'] = DEVELOPMENT_RAILS_GROUPS
   warn "RAILS_GROUPS is unset; defaulting to #{DEVELOPMENT_RAILS_GROUPS}"
 elsif ENV['RAILS_GROUPS'] != DEVELOPMENT_RAILS_GROUPS
   warn "RAILS_GROUPS is set to #{ENV['RAILS_GROUPS']} instead of #{DEVELOPMENT_RAILS_GROUPS}"
 end
-
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
