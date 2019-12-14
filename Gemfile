@@ -91,11 +91,11 @@ group :production do
   gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
   gem 'newrelic_rpm'
-  gem 'pg', '~> 1.1'
 end
 
 group :test, :production do
   gem 'mini_racer'
+  gem 'pg', '~> 1.1'
 end
 
 group :test do
@@ -119,7 +119,6 @@ group :test do
   gem 'ruby-prof', '1.0.0'
   gem 'shoulda-matchers', '~> 4.1'
   gem 'rails-controller-testing'
-  gem 'pg', '~> 1.1'
 end
 
 group :development do
