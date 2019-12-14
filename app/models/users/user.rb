@@ -51,6 +51,8 @@ class User < ApplicationRecord
 
   has_many :notice_dismissals,            dependent: :destroy
 
+  has_one_attached :avatar
+
   def contributable_universes
     @user_contributable_universes ||= begin
       # todo email confirmation needs to happy for data safety / privacy (only verified emails)
