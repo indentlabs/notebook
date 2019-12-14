@@ -70,7 +70,7 @@ gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feat
 gem 'rails-ujs'
 
 # Workers
-gem 'sidekiq'
+gem 'sidekiq', '5.2.7'
 gem 'redis'
 
 # Exports
