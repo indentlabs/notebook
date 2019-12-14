@@ -1,7 +1,7 @@
 namespace :backfill do
   desc "Start working through old categories/fields without position set"
   task sortables_positions: :environment do
-    categories_to_position = AttributeCategory.where(position: nil).first(5000).shuffle.first(50).to_a
+    categories_to_position = AttributeCategory.where(position: nil).order("RANDOM()").limit(500).to_a
 
     puts "Empty position backlog:\n\t* #{AttributeCategory.where(position: nil).count} categories\n\t* #{AttributeField.where(position: nil).count} fields"
 
