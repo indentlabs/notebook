@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 ruby "~> 2.6"
 
+# Server
 gem 'rails'
 gem 'puma', '~> 3.12'
 gem 'puma-heroku'
