@@ -52,10 +52,24 @@ class User < ApplicationRecord
   has_many :notice_dismissals,            dependent: :destroy
 
   has_one_attached :avatar
+  validates :avatar, attached: true,
+    content_type: {
+      in: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'],
+      message: 'must be a PNG, JPG, JPEG, or GIF'
+    },
+    dimension: { 
+      width: { max: 1000 },
+      height: { max: 1000 }, 
+      message: 'must be smaller than 1000x1000 pixels'
+    },
+    size: { 
+      less_than: 500.kilobytes, 
+      message: "can't be larger than 500KB"
+    }
 
   def contributable_universes
     @user_contributable_universes ||= begin
-      # todo email confirmation needs to happy for data safety / privacy (only verified emails)
+      # todo email confirmation needs to happen for data safety / privacy (only verified emails)
       contributor_ids = Contributor.where('email = ? OR user_id = ?', self.email, self.id).pluck(:universe_id)
 
       Universe.where(id: contributor_ids)

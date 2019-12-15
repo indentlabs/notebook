@@ -67,6 +67,7 @@ class RegistrationsController < Devise::RegistrationsController
   def attach_avatar
     return unless account_update_params.key?('avatar')
 
+    current_user.avatar.purge
     current_user.avatar.attach(account_update_params.fetch('avatar', nil))
   end
 
