@@ -10,6 +10,26 @@
         </div>
         <br />
 
+        <% if @user.username.present? %>
+          <div style="text-transform: uppercase;" class="grey-text">
+            Username
+          </div>
+          <div>
+            <%= link_to "@#{@user.username}", profile_by_username_path(username: @user.username) %>
+          </div>
+          <br />
+        <% end %>
+
+        <% if @user.other_names.present? %>
+          <div style="text-transform: uppercase;" class="grey-text">
+            Also known as
+          </div>
+          <div>
+            <%= @user.other_names %>
+          </div>
+          <br />
+        <% end %>
+
         <% if @user.bio.present? %>
           <div style="text-transform: uppercase;" class="grey-text">
             Bio
@@ -20,18 +40,18 @@
           <br />
         <% end %>
 
-        <% if @user.username.present? %>
+        <% if @user.website.present? %>
           <div style="text-transform: uppercase;" class="grey-text">
-            Username
+            Website
           </div>
           <div>
-            <%= link_to "@#{@user.username}", profile_by_username_path(username: @user.username) %>
+            <%= link_to @user.website, @user.website, target: '_new', data: { confirm: "You are about to visit an external website not owned by Notebook.ai. Please only continue if you trust this user." }, ref: 'nofollow' %>
           </div>
           <br />
         <% end %>
       </div>
       <div class="col s12 m5">
-        <% %w(interests favorite_genre favorite_author).each do |field| %>
+        <% %w(interests favorite_genre favorite_author favorite_book favorite_quote inspirations).each do |field| %>
           <% next unless @user.send(field).present? %>
           <div style="text-transform: uppercase;" class="grey-text">
             <%= field.titleize %>
