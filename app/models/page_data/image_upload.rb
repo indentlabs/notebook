@@ -1,7 +1,6 @@
 class ImageUpload < ApplicationRecord
-  belongs_to :user
+  belongs_to :user, optional: true
   belongs_to :content, polymorphic: true
-
 
   # This is the old way we uploaded files -- now we're transitioning to ActiveStorage's has_one_attached
   has_attached_file :src,

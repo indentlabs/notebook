@@ -2,7 +2,7 @@ class Marriage < ApplicationRecord
   include HasContentLinking
   LINK_TYPE = :two_way
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   belongs_to :character
   belongs_to :spouse, class_name: 'Character'

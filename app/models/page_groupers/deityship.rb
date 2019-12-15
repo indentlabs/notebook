@@ -1,7 +1,7 @@
 class Deityship < ApplicationRecord
   include HasContentLinking
 
-  belongs_to :user
+  belongs_to :user, optional: true
   belongs_to :religion
 
   # This is hacky because we had Deityships pointing at character "deities" before

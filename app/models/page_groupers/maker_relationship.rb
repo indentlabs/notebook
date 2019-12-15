@@ -3,7 +3,7 @@
 class MakerRelationship < ApplicationRecord
   include HasContentLinking
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   belongs_to :item
   belongs_to :maker, class_name: 'Character'
