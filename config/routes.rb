@@ -70,6 +70,7 @@ Rails.application.routes.draw do
       get '/usage',      to: 'data#usage'
       get '/recyclebin', to: 'data#recyclebin'
       get '/archive',    to: 'data#archive'
+      get '/uploads',    to: 'data#uploads'
 
       scope 'export' do
         get '/', to: 'export#index', as: :notebook_export
