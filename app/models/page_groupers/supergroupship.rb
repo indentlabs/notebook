@@ -1,7 +1,7 @@
 class Supergroupship < ApplicationRecord
   include HasContentLinking
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   belongs_to :group
   belongs_to :supergroup, class_name: Group.name

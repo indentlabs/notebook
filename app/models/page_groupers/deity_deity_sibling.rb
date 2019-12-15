@@ -3,7 +3,7 @@ class DeityDeitySibling < ApplicationRecord
 
   belongs_to :deity
   belongs_to :deity_sibling, class_name: Deity.name
-  belongs_to :user
+  belongs_to :user, optional: true
 
   after_create do
     self.reciprocate(

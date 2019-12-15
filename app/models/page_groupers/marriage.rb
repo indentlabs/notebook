@@ -2,7 +2,7 @@ class Marriage < ApplicationRecord
   include HasContentLinking
   LINK_TYPE = :two_way
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   belongs_to :character
   belongs_to :spouse, class_name: 'Character'
@@ -16,7 +16,7 @@ class Marriage < ApplicationRecord
     this_object  = Character.find_by(id: self.character_id)
     other_object = Character.find_by(id: self.spouse_id)
 
-    other_object.spouses.delete this_object
+    other_object.spouses.delete(this_object) if other_object.present? && this.object.present?
   end
 
   #todo "active" marriage?

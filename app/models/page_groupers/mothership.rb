@@ -1,7 +1,7 @@
 class Mothership < ApplicationRecord
   include HasContentLinking
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   belongs_to :character
   belongs_to :mother, class_name: 'Character'
