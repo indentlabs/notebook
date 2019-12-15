@@ -209,7 +209,8 @@ Rails.application.config.to_prepare do
 
       @navbar_actions << {
         label: 'Customize template',
-        href: main_app.attribute_customization_path(content_type.name.downcase)
+        href: main_app.attribute_customization_path(content_type.name.downcase),
+        class: 'right'
       }
     end
 

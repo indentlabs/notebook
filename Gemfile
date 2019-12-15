@@ -1,9 +1,11 @@
 source 'https://rubygems.org'
 ruby "~> 2.6"
 
-gem 'rails', '~> 5.2'
+# Server
+gem 'rails'
 gem 'puma', '~> 3.12'
 gem 'puma-heroku'
+gem 'bootsnap', require: false
 
 # Storage
 gem 'aws-sdk', '~> 3.0'
@@ -13,6 +15,8 @@ gem 'filesize'
 # Image processing
 gem 'paperclip'
 gem 'rmagick'
+gem 'image_processing'
+gem 'active_storage_validations'
 
 # Authentication
 gem 'devise'
@@ -58,12 +62,15 @@ gem 'd3-rails'
 
 # Analytics
 gem 'mixpanel-ruby'
-gem 'barnes'
 gem 'slack-notifier'
 
 # Apps
 #gem 'easy_translate'
 #gem 'levenshtein-ffi'
+
+# Feature rollout
+gem 'flipper'
+gem 'flipper-redis'
 
 # Forum
 gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'

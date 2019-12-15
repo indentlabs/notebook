@@ -1,7 +1,7 @@
 class TechnologyChildTechnology < ApplicationRecord
   include HasContentLinking
 
-  belongs_to :user
+  belongs_to :user, optional: true
   belongs_to :technology
   belongs_to :child_technology, class_name: Technology.name
 

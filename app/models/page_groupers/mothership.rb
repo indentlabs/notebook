@@ -1,7 +1,7 @@
 class Mothership < ApplicationRecord
   include HasContentLinking
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   belongs_to :character
   belongs_to :mother, class_name: 'Character'
@@ -19,6 +19,6 @@ class Mothership < ApplicationRecord
     this_object  = Character.find_by(id: self.character_id)
     other_object = Character.find_by(id: self.mother_id)
 
-    other_object.children.delete(this_object) if other_object.present?
+    other_object.children.delete(this_object) if other_object.present? && this_object.present?
   end
 end

@@ -38,6 +38,12 @@ class ExportController < ApplicationController
     xml_dump = current_user.content.except('Document').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_xml
     send_data xml_dump, filename: "notebook-#{Date.today}.xml"
   end
+  
+  def notebook_yml
+    report_to_mixpanel 'yaml', 'notebook'
+    yaml_dump = current_user.content.except('Document').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_yaml
+    send_data yaml_dump, filename: "notebook-#{Date.today}.yml"
+  end
 
   def pdf
     #todo

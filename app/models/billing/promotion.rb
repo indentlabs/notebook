@@ -1,6 +1,5 @@
 class Promotion < ApplicationRecord
   belongs_to :user
-
   belongs_to :page_unlock_promo_code
 
   # belongs_to :promo_code, polymorphic: true

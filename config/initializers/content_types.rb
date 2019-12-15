@@ -31,7 +31,6 @@ Rails.application.config.content_types = {
 
   # Content types to label as "new" around the site
   new: [
-    Sport, School, Food
   ]
 }
 
