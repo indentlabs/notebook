@@ -15,6 +15,7 @@ gem 'filesize'
 # Image processing
 gem 'paperclip'
 gem 'rmagick'
+gem 'image_processing'
 
 # Authentication
 gem 'devise'
