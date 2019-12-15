@@ -31,15 +31,15 @@ class Item < ApplicationRecord
   end
 
   def self.color
-    'amber'
+    'text-darken-2 amber'
   end
 
   def self.hex_color
-    '#FFC107'
+    '#FFA000'
   end
 
   def self.icon
-    'beach_access'
+    'emoji_events'
   end
 
   def self.content_name
