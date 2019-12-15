@@ -9,6 +9,11 @@ Rails.application.routes.draw do
   # User-centric stuff
   devise_for :users, :controllers => { registrations: 'registrations' }
   resources :users do
+    devise_scope :user do
+      get 'preferences',  to: 'registrations#preferences'
+      get 'more_actions', to: 'registrations#more_actions'
+    end
+
     # get :characters, on: :member <...etc...>
     Rails.application.config.content_types[:all].each do |content_type|
       get content_type.name.downcase.pluralize.to_sym, on: :member
