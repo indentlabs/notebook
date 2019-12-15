@@ -1,5 +1,6 @@
 class RegistrationsController < Devise::RegistrationsController
   after_action :add_account, only: [:create]
+  after_action :attach_avatar, only: [:update]
 
   before_action :set_navbar_actions, only: [:edit]
   before_action :set_navbar_color, only: [:edit]
@@ -61,6 +62,12 @@ class RegistrationsController < Devise::RegistrationsController
         ) if referral_code.present?
       end
     end
+  end
+
+  def attach_avatar
+    return unless account_update_params.key?('avatar')
+
+    current_user.avatar.attach(account_update_params.fetch('avatar', nil))
   end
 
   def report_new_account_to_slack resource

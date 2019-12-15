@@ -133,11 +133,14 @@ class User < ApplicationRecord
   end
 
   def image_url(size=80)
-    require 'digest/md5'
+    if avatar.attached? # manually-uploaded avatar
+      Rails.application.routes.url_helpers.rails_blob_path(avatar)
 
-    email_md5 = Digest::MD5.hexdigest(email.downcase)
-    # 80px is Gravatar's default size
-    "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
+    else # otherwise, grab the default from Gravatar for this email address
+      require 'digest/md5'
+      email_md5 = Digest::MD5.hexdigest(email.downcase)
+      "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
+    end
   end
 
   # TODO these (3) can probably all be scopes on the related object, no?
