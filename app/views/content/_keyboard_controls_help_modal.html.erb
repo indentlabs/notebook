@@ -2,24 +2,15 @@
   <div class="modal-content">
     <h4>Keyboard Controls</h4>
     <div class="row">
-      <p>The following keyboard controls are supported:</p>
+      <p>
+        The following keyboard controls are supported across Notebook.ai.
+        All keyboard controls are disabled when editing a document or notebook page.
+      </p>
     </div>
     <div class="row" id="keyboard-controls-help-modal-supported-keys">
-      <ul>
+      <ul id="shortcut-list">
         <li>
           <strong>?</strong> Show this dialog
-        </li>
-        <li>
-          <strong>N+c</strong> Jump to new character form
-        </li>
-        <li>
-          <strong>N+u</strong> Jump to new universe form
-        </li>
-        <li>
-          <strong>N+l</strong> Jump to new location form
-        </li>
-        <li>
-          <strong>N+i</strong> Jump to new item form
         </li>
       </ul>
     </div>
@@ -28,3 +19,17 @@
     <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">close</a>
   </div>
 </div>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    setTimeout(function () {
+      var shortcut_list = $('#shortcut-list');
+      active_redirect_shortcuts.forEach(function(shortcut){
+        shortcut_list.append(
+          $('<li />').html('<strong>N+' + shortcut.key + '</strong> Jump to new ' + shortcut.page + ' form')
+        );
+      });
+    }, 1000);
+    // todo race condition with active_redirect_shortcuts getting set?
+  });
+</script>

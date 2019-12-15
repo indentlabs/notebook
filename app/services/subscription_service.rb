@@ -5,23 +5,6 @@ class SubscriptionService < Service
     related_plan = BillingPlan.find_by(stripe_plan_id: plan_id, available: true)
     raise "Plan #{plan_id} not available for user #{user.id}" if related_plan.nil?
 
-    # Add any bonus bandwidth granted by the plan
-    user.update(
-      upload_bandwidth_kb: user.upload_bandwidth_kb + related_plan.bonus_bandwidth_kb
-    )
-
-    # Add any one-time referral bonuses
-    add_any_referral_bonuses(user, plan_id)
-
-    # We intentionally skip callbacks on this to ensure the billing plan changes even on invalid users
-    user.update_column(:selected_billing_plan_id, related_plan.id)
-
-    user.subscriptions.create(
-      billing_plan:    related_plan,
-      start_date:      DateTime.now,
-      end_date:        DateTime.now.end_of_day + 5.years
-    )
-
     # Sync with Stripe (todo pipe into StripeService)
     unless Rails.env.test?
       stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
@@ -40,12 +23,30 @@ class SubscriptionService < Service
       # Save the change
       begin
         stripe_subscription.save unless Rails.env.test?
+
+        # Add any bonus bandwidth granted by the plan
+        user.update(
+          upload_bandwidth_kb: user.upload_bandwidth_kb + related_plan.bonus_bandwidth_kb
+        )
+
+        # Add any one-time referral bonuses
+        add_any_referral_bonuses(user, plan_id)
+
+        # We intentionally skip callbacks on this to ensure the billing plan changes even on invalid users
+        user.update_column(:selected_billing_plan_id, related_plan.id)
+
+        user.subscriptions.create(
+          billing_plan:    related_plan,
+          start_date:      DateTime.now,
+          end_date:        DateTime.now.end_of_day + 5.years
+        )
+
+        report_subscription_change_to_slack(user, plan_id)
+
       rescue Stripe::CardError => e
         return :failed_card
       end
     end
-
-    report_subscription_change_to_slack(user, plan_id)
   end
 
   def self.remove_subscription(user, subscription)

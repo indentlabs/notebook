@@ -43,6 +43,50 @@ class AttributeCategory < ApplicationRecord
     entity_type.titleize.constantize
   end
 
+  def backfill_categories_ordering!
+    content_type_class = entity_type.titleize.constantize
+    category_owner = User.with_deleted.find_by(id: user_id)
+
+    categories = content_type_class.attribute_categories(category_owner, show_hidden: true).to_a
+
+    ActiveRecord::Base.transaction do
+      categories.each.with_index do |content_to_order, index|
+        content_to_order.update_column(:position, 1 + index) if content_to_order.persisted?
+
+        # While we're doing this, we might as well backfill the fields also
+        content_to_order.backfill_fields_ordering!
+      end
+    end
+  end
+
+  def backfill_fields_ordering!
+    sorted_fields = attribute_fields.select(&:persisted?).sort do |a, b|
+      a_value = case a.field_type
+        when 'name'     then 0
+        when 'universe' then 1
+        else 2 # 'text_area', 'link'
+      end
+
+      b_value = case b.field_type
+        when 'name'     then 0
+        when 'universe' then 1
+        else 2
+      end
+
+      if a.position && b.position
+        a.position <=> b.position
+      else
+        a_value <=> b_value
+      end
+    end
+
+    ActiveRecord::Base.transaction do
+      sorted_fields.each.with_index do |content_to_order, index|
+        content_to_order.update_column(:position, 1 + index) if content_to_order.persisted?
+      end
+    end
+  end
+
   private
 
   def ensure_name

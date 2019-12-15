@@ -180,10 +180,11 @@ module Documents
         end
 
         def self.new_client
-          # Authorize a client to analyze with
-          watson_client = ::IBMWatson::NaturalLanguageUnderstandingV1.new(
-            iam_apikey: ENV['WATSON_API_KEY'],
-            version:    '2018-03-16'
+          IBMWatson::NaturalLanguageUnderstandingV1.new(
+            version: "2018-03-16",
+            authenticator: IBMWatson::Authenticators::IamAuthenticator.new(
+              apikey: ENV['WATSON_API_KEY']
+            )
           )
         end
       end

@@ -1,0 +1,87 @@
+<h4>
+  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
+        position: 'bottom',
+        enterDelay: '500',
+        tooltip: "Back to your Data Vault"
+      } do %>
+    <i class="material-icons">arrow_back</i>
+  <% end %>
+  Your notebook's archive
+</h4>
+
+<div class="row">
+  <div class="col s12">
+    <ul class="collapsible white">
+      <li class="active">
+        <div class="collapsible-header blue white-text"><i class="material-icons">settings</i> Welcome to the archives!</div>
+        <div class="collapsible-body">
+          <div class="row">
+            <div class="col s12 m9">
+              <p>
+                <strong>Question</strong>: What should you do if you find your notebook cluttering up with pages you haven't used in a while, 
+                but you don't want to delete them? 
+              </p>
+              <p>
+                <strong>Answer</strong>: You can now archive those pages!
+              </p>
+              <p>
+                To archive a page, simply click the archive icon 
+                (<i class="material-icons red-text" style="position: relative; top: 5px">archive</i>)
+                when editing that page. 
+                Archived pages are still viewable when visited through the archives (or from a direct URL), but won't
+                show up around the rest of Notebook.ai, leaving you to focus on the pages that matter more to you right
+                now.
+              </p>
+              <p>
+                Of course, you an un-archive a page at any time from this page also!
+              </p>
+            </div>
+            <div class="col m3 hide-on-small-only">
+              <%= image_tag 'tristan/small.png' %>
+            </div>
+          </div>
+        </div>
+      </li>
+      <% Rails.application.config.content_types[:all].each do |content_type| %>
+        <% archived_content = current_user.send(content_type.name.downcase.pluralize).where.not(archived_at: nil) %>
+        <% next unless archived_content.any? %>
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons <%= content_type.color %>-text"><%= content_type.icon %></i>
+            <%= pluralize archived_content.count, "archived #{content_type.name.downcase}" %>
+          </div>
+          <div class="collapsible-body">
+            <div class="row">
+              <div class="col s12">
+                <table>
+                  <tr>
+                    <th><%= content_type.name %> name</th>
+                    <th>Archived</th>
+                    <th></th>
+                  </tr>
+                  <% archived_content.each do |content| %>
+                    <tr>
+                      <td>
+                        <%= link_to content, class: "#{content_type.color}-text" do %>
+                          <i class="material-icons left"><%= content_type.icon %></i>
+                          <%= content.name %>
+                        <% end %>
+                      </td>
+                      <td><%= time_ago_in_words content.archived_at %> ago</td>
+                      <td>
+                        <%= link_to send("toggle_archive_#{content_type.name.downcase}_path", content), class: "btn #{content_type.color}" do %>
+                          <i class="material-icons left">unarchive</i>
+                          Un-archive
+                        <% end %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </table>
+              </div>
+            </div>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>

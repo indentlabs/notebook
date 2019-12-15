@@ -1,0 +1,214 @@
+<% referrals = current_user.referrals %>
+<% referral_count = referrals.count %>
+<% share_link = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}" %>
+
+<h3>Your referral code</h3>
+<div class="row">
+  <div class="col s12 m9">
+    <div class="hoverable card">
+      <div class="card-content">
+        <p>
+          Use your personalized referral URL for sharing Notebook.ai with others to make sure you get credit for referring them!
+        </p>
+        <br />
+        <p>
+          Your referral link is:
+          <input type="text"
+            value="<%= share_link %>"
+            style="text-align: center; font-size: 140%"
+            onClick="this.select();" />
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="hoverable card-panel center" style="border-bottom: 10px solid #2196F3">
+      <%# <i class="fa fa-trophy left"></i> %>
+      you have
+      <h1 style="padding: 0; margin: 0" class="blue-text">
+        <strong><%= referral_count %></strong>
+      </h1>
+      <%= 'referral'.pluralize(referral_count) %>
+    </div>
+  </div>
+
+  <div class="col s12 m4">
+    <%= link_to [
+      'http://twitter.com/share?',
+      'url=' + URI::escape(share_link),
+      '&text=' + URI::escape("I'm using Notebook.ai to create fictional worlds and I'd love for you to join me!")
+    ].join, target: '_new' do %>
+      <div class="hoverable card-panel white-text" style="background: #1DA1F2">
+        <i class="left fa fa-twitter" style="font-size: 150%"></i>
+        Share to Twitter
+      </div>
+    <% end %>
+  </div>
+  <div class="col s12 m4">
+    <a 
+       href="https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=<%= URI::escape(share_link) %>&display=popup&ref=plugin&src=share_button" 
+       onclick="return !window.open(this.href, 'Facebook', 'width=640,height=580')">
+
+      <div class="hoverable card-panel white-text" style="background: #4267B2">
+        <i class="left fa fa-facebook" style="font-size: 150%"></i>
+        Share to Facebook
+      </div>
+    </a>
+  </div>
+  <div class="col s12 m4">
+    <%= link_to '#' do %>
+      <div class="hoverable card-panel white-text" style="background: #E60023">
+        <i class="left fa fa-pinterest" style="font-size: 150%"></i>
+        Share to Pinterest
+      </div>
+    <% end %>
+    <script
+      type="text/javascript"
+      async defer
+      src="//assets.pinterest.com/js/pinit.js">
+    </script>
+    <a href="https://www.pinterest.com/pin/create/button/" data-pin-do="buttonBookmark"></a>
+    </div>
+</div>
+
+<h3>
+  Referral rewards
+  <small class="grey-text">for everyone</small>
+</h3>
+<div class="row">
+  <div class="col s12 m6">
+    <div class="hoverable card">
+      <div class="card-content">
+        <div class="card-title">Earn up to 10GB in extra storage space</div>
+        <p>
+          Each user you refer to Notebook.ai earns you an extra 100MB in permanent image upload storage space, up to 10GB (100 referrals).
+        </p>
+        <br />
+        <div class="right">+10GB</div>
+        <div class="progress">
+          <div class="determinate blue" style="width: <%= (referral_count) %>%"></div>
+        </div>
+        <div>
+          You've earned
+          <% if referral_count < 10 %>
+            <strong><%= referral_count * 100 %>MB</strong>
+          <% else %>
+            <strong><%= referral_count / 10.0 %>GB</strong>
+          <% end %>
+          in extra storage space so far.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12 m6">
+    <div class="hoverable card">
+      <div class="card-content">
+        <div class="card-title">Compete on the scoreboard</div>
+        <p>
+          See how you stack up against other worldbuilders on the referral scoreboard. Every referral earns you 100 points.
+        </p>
+        <br />
+        <!--<div class="right">only 2 more referrals to reach rank 5</div>-->
+        <!--<div class="progress">
+          <div class="determinate blue" style="width: 85%"></div>
+        </div>-->
+        <div>
+          You've earned
+          <strong><%= referral_count * 100 %></strong>
+          points.
+          <%= link_to 'See the scoreboard!', scoreboard_path %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--
+  <div class="col s12 m6">
+    <div class="hoverable card">
+      <div class="card-content">
+        <div class="card-title">Share Premium with your friends</div>
+        <p>
+          Every 10 referrals earns you a personalized promo code to share with your friends that unlocks all Premium pages on their account for a week &mdash; for free!
+        </p>
+        <br />
+        <div class="right">another code in <%= 10 - referral_count % 10 %> referrals</div>
+        <div class="progress">
+          <div class="determinate blue" style="width: <%= (referral_count % 10 / 10.0 * 100) %>%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  -->
+
+  <!--
+  <div class="col s12 m6">
+    <div class="hoverable card">
+      <div class="card-content">
+        <div class="card-title">
+          <span class="badge">complete!</span>
+          Access the Ambassador Lounge
+        </div>
+        <p>
+          After you've referred 10 friends to Notebook.ai, you'll gain access to the invite-only Ambassador Lounge on the forums.
+        </p>
+        <br />
+        <div class="right">10 referrals</div>
+        <div class="progress">
+          <div class="determinate <%= referral_count >= 10 ? 'green' : 'blue' %>" style="width: <%= (referral_count / 10.0).clamp(0, 1) * 100 %>%"></div>
+        </div>
+        <div>
+          You've invited
+          <strong><%= referral_count %></strong>
+          friends.
+          <%= link_to 'Visit the lounge!', '#' %>
+        </div>
+      </div>
+    </div>
+  </div>
+  -->
+</div>
+
+<h3>
+  Ambassador challenges
+  <small class="grey-text">for our biggest fans</small>
+</h3>
+<div class="row">
+  <div class="col s12 m6">
+    <div class="hoverable card">
+      <div class="card-content">
+        <div class="card-title">Earn a year of free Premium access</div>
+        <p>
+          The <em>first</em> user to refer 100 friends will win a year of free Premium.
+        </p>
+        <br />
+        <div class="right">100 referrals</div>
+        <div class="progress">
+          <div class="determinate blue" style="width: <%= (referral_count) %>%"></div>
+        </div>
+        <div>
+          Earn this achievement with <strong><%= 100 - referral_count %> more referrals</strong>! 
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12 m6">
+    <div class="hoverable card">
+      <div class="card-content">
+        <div class="card-title">Earn a free-for-life Premium account</div>
+        <p>
+          The <em>first</em> user to refer 1,000 friends will win free Premium for life.
+        </p>
+        <br />
+        <div class="right">1,000 referrals</div>
+        <div class="progress">
+          <div class="determinate blue" style="width: <%= (referral_count / 10) %>%"></div>
+        </div>
+        <div>
+          Earn this achievement with <strong><%= 1000 - referral_count %> more referrals</strong>! 
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

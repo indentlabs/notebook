@@ -9,19 +9,19 @@
 <%# Primary FAB %>
 <% if personal_content %>
   <% if creating || editing %>
-    <button class="btn-floating btn-large halfway-fab waves-effect waves-light <%= @content.class.color %> mp-fab-save" type="submit" name="action" style="z-index: 1">
+    <button class="btn-floating btn-large halfway-fab waves-effect waves-light <%= @content.class.color %> mp-fab-save hoverable" type="submit" name="action" style="z-index: 1">
       <i class="material-icons">save</i>
     </button>
   <% else %>
     <%= link_to edit_polymorphic_path(@content),
-      class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color}",
+      class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color} hoverable",
       style: 'z-index: 1;' do %>
       <i class="material-icons">edit</i>
     <% end %>
   <% end %>
 <% elsif @content.persisted? %>
   <%= link_to '#',
-    class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color} share tooltipped",
+    class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color} share tooltipped hoverable",
     style: 'z-index: 1;',
     data: {
       position: 'bottom',
@@ -33,7 +33,7 @@
 <% end %>
 
 <%= link_to attribute_customization_path(content_type: @content.class.name.downcase),
-  class: "btn-floating btn-small halfway-fab waves-effect waves-light white lighten-3 tooltipped",
+  class: "btn-floating btn-small halfway-fab waves-effect waves-light white lighten-3 tooltipped hoverable",
   style: 'z-index: 1; margin-right: 64px;',
   data: {
     position: 'bottom',
@@ -46,7 +46,7 @@
 <% end %>
 
 <%= link_to '#',
-  class: "btn-floating btn-small halfway-fab waves-effect waves-light white expand tooltipped",
+  class: "btn-floating btn-small halfway-fab waves-effect waves-light white expand tooltipped hoverable",
   style: 'z-index: 1; margin-right: 105px;',
   data: { position: 'bottom', enterDelay: '500', tooltip: 'Expand all tabs vertically'} do %>
   <i class="material-icons black-text">format_line_spacing</i>
@@ -59,11 +59,28 @@
 <% end %>
 
 <% if @content.persisted? && editing && current_user.can_delete?(@content) %>
-  <%= link_to @content,
-    class: 'btn-floating btn-small halfway-fab waves-effect waves-light white delete left',
+  <%= link_to send("toggle_archive_#{@content.class.name.downcase}_path", @content),
+    class: 'btn-floating btn-small halfway-fab waves-effect waves-light white left tooltipped hoverable',
     style: 'z-index: 1;',
+    data: { 
+      confirm: @content.archived? ? "This will un-archive this page." : "Are you sure you want to archive this #{@content.class.name.downcase}?",
+      position: 'bottom', enterDelay: '500', tooltip: (@content.archived? ? "Un-archive" : "Archive") + " this page" 
+    } do %>
+    <i class="material-icons <%= @content.archived? ? 'black-text' : 'red-text' %> text-darken-2"><%= 'un' if @content.archived? %>archive</i>
+  <% end %>
+<% end %>
+
+<% if @content.persisted? && editing && current_user.can_delete?(@content) %>
+  <%= link_to @content,
+    class: 'btn-floating btn-small halfway-fab waves-effect waves-light white delete left tooltipped hoverable',
+    style: 'z-index: 1; left: 64px;',
     method: :delete,
-    data: { confirm: "Are you sure? This will delete this entire #{@content.class.name.downcase}!" } do %>
+    data: { 
+      confirm: "Are you sure? This will delete this entire #{@content.class.name.downcase}!",
+      position: 'bottom', enterDelay: '500', tooltip: "Delete this page" 
+    } do %>
     <i class="material-icons red-text text-lighten-2">delete</i>
   <% end %>
 <% end %>
+
+

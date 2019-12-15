@@ -5,6 +5,8 @@ Rails.application.routes.draw do
   get 'customization/content_types'
   post 'customization/toggle_content_type'
 
+  get '/redeem/infostack', to: 'main#infostack'
+
   # User-centric stuff
   devise_for :users, :controllers => { registrations: 'registrations' }
   resources :users do
@@ -53,7 +55,28 @@ Rails.application.routes.draw do
       # Promotional codes
       post '/redeem', to: 'subscriptions#redeem_code'
     end
-  end
+
+    scope '/referrals' do
+      get '/',           to: 'referrals#index', as: :referrals
+      get '/scoreboard', to: 'referrals#scoreboard'
+    end
+
+    scope '/data' do
+      get '/',           to: 'data#index',     as: :data_vault
+      get '/usage',      to: 'data#usage'
+      get '/recyclebin', to: 'data#recyclebin'
+      get '/archive',    to: 'data#archive'
+
+      scope 'export' do
+        get '/', to: 'export#index', as: :notebook_export
+    
+        get '/outline', to: 'export#outline',             as: :notebook_outline
+        get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
+        get '/notebook.xml', to: 'export#notebook_xml',   as: :notebook_xml
+        get '/:model.csv', to: 'export#csv',              as: :notebook_csv
+      end
+    end
+end
   delete 'delete_my_account', to: 'users#delete_my_account'
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
@@ -69,9 +92,9 @@ Rails.application.routes.draw do
 
   # Landing pages
   scope '/for' do
-    get '/writers', to: 'main#for_writers', as: :writers_landing
+    get '/writers',     to: 'main#for_writers', as: :writers_landing
     get '/roleplayers', to: 'main#for_roleplayers', as: :roleplayers_landing
-    get '/designers', to: 'main#for_designers', as: :designers_landing
+    get '/designers',   to: 'main#for_designers', as: :designers_landing
   end
 
   # Lab apps
@@ -100,13 +123,15 @@ Rails.application.routes.draw do
       Rails.application.config.content_types[:all_non_universe].each do |content_type|
         get content_type.name.downcase.pluralize.to_sym, on: :member
       end
-      get :changelog, on: :member
+      get :changelog,      on: :member
+      get :toggle_archive, on: :member
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
     end
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       # resources :characters do
       resources content_type.name.downcase.pluralize.to_sym do
-        get :changelog, on: :member
+        get :changelog,      on: :member
+        get :toggle_archive, on: :member
         get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
       end
     end
@@ -139,15 +164,6 @@ Rails.application.routes.draw do
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
-  end
-
-  scope 'export' do
-    get '/', to: 'export#index', as: :notebook_export
-
-    get '/outline', to: 'export#outline', as: :notebook_outline
-    get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
-    get '/notebook.xml', to: 'export#notebook_xml', as: :notebook_xml
-    get '/:model.csv', to: 'export#csv', as: :notebook_csv
   end
 
   scope '/scene/:scene_id' do
@@ -202,16 +218,6 @@ Rails.application.routes.draw do
         get '/shield',          to: 'equipment_generator#armor_shield'
       end
     end
-  end
-
-  # Adoption Agency
-  scope '/adoption' do
-    get '/', to: 'main#comingsoon'
-  end
-
-  # Idea Market
-  scope '/market' do
-    get '/', to: 'main#comingsoon'
   end
 
   # get '/forum', to: 'emergency#temporarily_disabled'

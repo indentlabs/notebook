@@ -6,7 +6,7 @@ class DocumentMentionJob < ApplicationJob
   def perform(*args)
     document_id = args.shift
 
-    document = Document.find(document_id)
+    document = Document.find_by(id: document_id)
     return unless document.present?
     return if document.body.nil? || document.body.empty?
 

@@ -1,4 +1,6 @@
 class ContentController < ApplicationController
+  # todo we should probably spin off an Api::ContentController for #api_sort and anything else api-wise we need
+
   before_action :authenticate_user!, except: [:show, :changelog, :api_sort]
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
@@ -20,18 +22,20 @@ class ContentController < ApplicationController
     @content_type_class.attribute_categories(current_user)
 
     if @universe_scope.present? && @content_type_class != Universe
-      @content = @universe_scope.send(pluralized_content_name).includes(:page_tags, :image_uploads)
+      @content = @universe_scope.send(pluralized_content_name)
+        .includes(:page_tags, :image_uploads)
+        .unarchived
 
       @show_scope_notice = true
     else
       @content = (
-        current_user.send(pluralized_content_name).includes(:page_tags, :image_uploads) +
-        current_user.send("contributable_#{pluralized_content_name}").includes(:page_tags, :image_uploads)
+        current_user.send(pluralized_content_name).unarchived.includes(:page_tags, :image_uploads) +
+        current_user.send("contributable_#{pluralized_content_name}").unarchived.includes(:page_tags, :image_uploads)
       )
 
       if @content_type_class != Universe
         my_universe_ids = current_user.universes.pluck(:id)
-        @content.concat(@content_type_class.where(universe_id: my_universe_ids))
+        @content.concat(@content_type_class.where(universe_id: my_universe_ids).unarchived)
       end
     end
 
@@ -63,6 +67,9 @@ class ContentController < ApplicationController
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
 
+    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+
     @serialized_content = ContentSerializer.new(@content)
 
     if user_signed_in?
@@ -76,9 +83,6 @@ class ContentController < ApplicationController
         href: send("changelog_#{content_type.name.downcase}_path", @content)
       }
     end
-
-    return redirect_to(root_path) if @content.user.nil? # deleted user's content
-    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
 
     if (current_user || User.new).can_read?(@content)
       if current_user
@@ -220,7 +224,6 @@ class ContentController < ApplicationController
     @content = content_type.with_deleted.find(params[:id])
 
     unless @content.updatable_by?(current_user)
-      # todo flash error instead? (shows up 2x currently)
       flash[:notice] = "You don't have permission to edit that!"
       return redirect_back fallback_location: @content
     end
@@ -259,6 +262,36 @@ class ContentController < ApplicationController
       successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
       failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.map(&:messages).to_sentence)
+    end
+  end
+
+  def toggle_archive
+    # todo Since this method is triggered via a GET in floating_action_buttons, a malicious user could technically archive
+    # another user's content if they're able to send that user to a specifically-crafted URL or inject that URL somewhere on
+    # a page (e.g. img src="/characters/1234/toggle_archive"). Since archiving is reversible this seems fine for release, but
+    # is something that should be fixed asap before any abuse happens.
+
+    content_type = content_type_from_controller(self.class)
+    @content = content_type.with_deleted.find(params[:id])
+
+    unless @content.updatable_by?(current_user)
+      flash[:notice] = "You don't have permission to edit that!"
+      return redirect_back fallback_location: @content
+    end
+
+    verb = nil
+    success = if @content.archived?
+      verb = "unarchived"
+      @content.unarchive!
+    else
+      verb = "archived"
+      @content.archive!
+    end
+
+    if success
+      redirect_back(fallback_location: archive_path, notice: "This page has been #{verb}.")
+    else
+      redirect_back(fallback_location: root_path, notice: "Something went wrong while attempting to archive that page.")
     end
   end
 
@@ -332,11 +365,19 @@ class ContentController < ApplicationController
 
   # List all recently-deleted content
   def deleted
+    @maximum_recovery_time = current_user.on_premium_plan? ? 7.days : 48.hours
+
     @content_pages = {}
     @activated_content_types.each do |content_type|
-      @content_pages[content_type] = content_type.constantize.with_deleted.where('deleted_at > ?', 24.hours.ago).where(user_id: current_user.id)
+      @content_pages[content_type] = content_type.constantize
+        .with_deleted
+        .where('deleted_at > ?', @maximum_recovery_time.ago)
+        .where(user_id: current_user.id)
     end
-    @content_pages["Document"] = current_user.documents.with_deleted.where('deleted_at > ?', 24.hours.ago)
+    @content_pages["Document"] = current_user.documents
+      .with_deleted
+      .where('deleted_at > ?', @maximum_recovery_time.ago)
+      .includes(:user)
 
     # Override controller
     @sidenav_expansion = 'my account'
@@ -360,22 +401,19 @@ class ContentController < ApplicationController
     return unless content.respond_to?(:position)
 
     # Ugh not another one of these backfills
+    # todo remove this necessity
     if content.position.nil?
-      content_to_order_first = if content.is_a?(AttributeCategory)
-        content_type_class = content.entity_type.titleize.constantize
-        content_type_class.attribute_categories(current_user, show_hidden: true)
+      if content.is_a?(AttributeCategory)
+        content.backfill_categories_ordering!
       elsif content.is_a?(AttributeField)
-        content.attribute_category.attribute_fields
-      end
-
-      ActiveRecord::Base.transaction do
-        content_to_order_first.each.with_index do |content_to_order, index|
-          content_to_order.update_column(:position, 1 + index)
-        end
+        content.attribute_category.backfill_fields_ordering!
+      else
+        raise "Attempting to backfill ordering for a new class: #{content.class.name}"
       end
     end
 
-    if content.reload && content.insert_at(1 + sort_params[:intended_position].to_i)
+    content.reload
+    if content.insert_at(1 + sort_params[:intended_position].to_i)
       render json: 200
     else
       render json: 500
@@ -426,6 +464,7 @@ class ContentController < ApplicationController
     })
   end
 
+  # todo just do the migration for everyone so we can finally get rid of this
   def migrate_old_style_field_values
     content ||= content_type_from_controller(self.class).find_by(id: params[:id])
     TemporaryFieldMigrationService.migrate_fields_for_content(content, current_user) if content.present?
@@ -541,6 +580,7 @@ class ContentController < ApplicationController
 
     @navbar_actions << {
       label: 'Customize template',
+      class: 'right',
       href: main_app.attribute_customization_path(content_type.name.downcase)
     }
   end

@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby "~> 2.5"
+ruby "~> 2.6"
 
 gem 'rails', '~> 5.2'
 gem 'puma', '~> 3.12'
@@ -77,7 +77,7 @@ gem 'redis'
 gem 'csv'
 
 # Admin
-gem 'rails_admin', '~> 1.3'
+gem 'rails_admin', '~> 2.0'
 
 # Tech debt & hacks
 gem 'binding_of_caller' # see has_changelog.rb
@@ -137,7 +137,7 @@ group :worker do
 
   # Document understanding
   gem 'htmlentities'
-  gem 'birch', github: 'billthompson/birch', branch: 'birch-ruby22'
+  gem 'birch', git: 'https://github.com/billthompson/birch.git', branch: 'birch-ruby22'
 
   gem 'engtagger'
   gem 'ibm_watson'

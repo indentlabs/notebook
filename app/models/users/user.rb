@@ -26,7 +26,7 @@ class User < ApplicationRecord
   has_many :subscriptions, dependent: :destroy
   has_many :billing_plans, through: :subscriptions
   def on_premium_plan?
-    BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id)
+    BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id) || active_promo_codes.any?
   end
   has_many :promotions, dependent: :destroy
 
