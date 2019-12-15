@@ -68,6 +68,10 @@ gem 'slack-notifier'
 #gem 'easy_translate'
 #gem 'levenshtein-ffi'
 
+# Feature rollout
+gem 'flipper'
+gem 'flipper-redis'
+
 # Forum
 gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
 gem 'rails-ujs'

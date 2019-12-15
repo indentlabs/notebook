@@ -22,32 +22,34 @@
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-content">
-        <div class="row">
-          <div class="col s12 m6 l4">
-            <label>Your current avatar</label>
-            <br /><br />
-            <%= image_tag current_user.image_url(size=160), class: 'hoverable' %>
-          </div>
-          <div class="col s12 m6 l8">
-            <label>Upload a new avatar</label>
-            <div class="file-field input-field">
-              <div class="blue btn">
-                <span>Upload</span>
-                <%= f.file_field :avatar %>
-              </div>
-              <div class="file-path-wrapper">
-                <input class="file-path validate" type="text" placeholder="Upload one or more files">
-              </div>
+    <% if Flipper.enabled?(:january_release) %>
+      <div class="card">
+        <div class="card-content">
+          <div class="row">
+            <div class="col s12 m6 l4">
+              <label>Your current avatar</label>
+              <br /><br />
+              <%= image_tag current_user.image_url(size=160), class: 'hoverable' %>
             </div>
-            <div class="help-text">
-              Supported file types: .png, .jpg, .jpeg, .gif
+            <div class="col s12 m6 l8">
+              <label>Upload a new avatar</label>
+              <div class="file-field input-field">
+                <div class="blue btn">
+                  <span>Upload</span>
+                  <%= f.file_field :avatar %>
+                </div>
+                <div class="file-path-wrapper">
+                  <input class="file-path validate" type="text" placeholder="Upload one or more files">
+                </div>
+              </div>
+              <div class="help-text">
+                Supported file types: .png, .jpg, .jpeg, .gif
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    <% end %>
 
     <div class="card">
       <div class="card-content">
