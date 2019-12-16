@@ -1,0 +1,42 @@
+<ul class="collapsible">
+  <li class="<%= 'active' if category.hidden? %>">
+    <div class="collapsible-header">
+      <i class="material-icons">build</i>
+      Hide or show this category
+    </div>
+    <div class="collapsible-body">
+      <p class="grey-text text-darken-2">
+        You can also choose to hide or show this entire category. When hiding, any existing answers you have to fields in this category will also be hidden, but not deleted.
+        You can recover them by un-hiding this category at any time.
+      </p>
+      <%= form_for(category, method: :put) do |f| %>
+        <%= f.hidden_field :hidden, value: !category.hidden? %>
+        <%= f.submit (category.hidden? ? 'Show' : 'Hide') + ' this category', class: 'btn white black-text' %>
+      <% end %>
+    </div>
+  </li>
+
+  <% unless category.attribute_fields.any? { |attribute_field| AttributeField::UNDELETEABLE_FIELD_TYPES.include?(attribute_field.field_type) } %>
+    <li>
+      <div class="collapsible-header">
+        <i class="material-icons">build</i>
+        Delete this category
+      </div>
+      <div class="collapsible-body">
+        <p class="grey-text text-darken-2">
+          <span class="red-text">This is a VERY dangerous action!</span>
+          This will delete this category, every field in this category, and every answer you've written to any of those fields! This CANNOT be undone,
+          so please make sure you have backed up any answers you will lose by deleting the field they're answering.
+        </p>
+        <% if category.persisted? && current_user.can_delete?(category) %>
+          <%= link_to category,
+            class: 'btn red black-text',
+            method: :delete,
+            data: { confirm: "Are you sure? This will delete this entire category, all of its fields, and any answer you've written to any of those fields!" } do %>
+            Delete this category
+          <% end %>
+        <% end %>
+      </div>
+    </li>
+  <% end %>
+</ul>

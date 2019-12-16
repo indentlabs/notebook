@@ -2,24 +2,20 @@
   <%= render partial: 'content/components/parallax_header', locals: { content_type: @content_type, content_class: @content_type_class } %>
 <% end %>
 
+<!-- TODO set up overrides
 <div class="row">
-  <div class="col s12 m4">
+  <div class="col s12 m6">
     <div class="hoverable card white">
       <div class="card-content">
-        <div class="card-title">Customize name</div>
-        You can rename this page.
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m4">
-    <div class="hoverable card white">
-      <div class="card-content">
-        <div class="card-title">Customize icon</div>
+        <div class="card-title">
+          <i class="material-icons left"><%= @content_type_class.icon %></i>
+          Customize icon
+        </div>
         You can customize this page.
       </div>
     </div>
   </div>
-  <div class="col s12 m4">
+  <div class="col s12 m6">
     <div class="hoverable card white-text" style="background-color: <%= @content_type_class.hex_color_for(current_user) %>">
       <div class="card-content">
         <div class="card-title">Customize color</div>
@@ -28,14 +24,12 @@
     </div>
   </div>
 </div>
+-->
 
 <ul class="hoverable sortable collapsible white" data-sortable-class="AttributeCategory">
   <%= render partial: 'content/attributes/general_settings', locals: { content_type: @content_type, content_type_class: @content_type_class } %>
 
   <% @attribute_categories.each do |attribute_category| %>
-    <%# todo we can remove this by just backfilling + defaulting `hidden` to false %>
-    <% hidden_category = !!attribute_category.hidden %>
-
     <li data-position="<%= attribute_category.position %>" data-content-id="<%= attribute_category.id %>" class="js-category-container">
       <div class="collapsible-header">
         <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
@@ -43,279 +37,28 @@
         <div class="js-category-label">
           <%= attribute_category.label %>
         </div>
-        <% if hidden_category %>
-          <span class="grey-text">&mdash;hidden</span>
+        <% if attribute_category.hidden? %>
+          <span class="grey-text">&mdash;</span>
+          <i class="material-icons grey-text tooltipped" data-tooltip="You've hidden this category.">visibility_off</i>
         <% end %>
       </div>
 
       <div class="collapsible-body">
         <div class="row">
-          <%# Only show the fields in this category if it's visible / not hidden %>
-          <% if hidden_category %>
-            <div class="col s12 m12 l7">
-              <ul class="collapsible">
-                <li class="<%= 'active' if attribute_category.hidden? %>">
-                  <div class="collapsible-header">
-                    <i class="material-icons <%= @content_type_class.color %>-text"><%= attribute_category.icon %></i>
-                    Hide or show this category
-                  </div>
-                  <div class="collapsible-body">
-                    <p class="grey-text text-darken-2">
-                      You can also choose to hide or show this entire category. When hiding, any existing answers you have to fields in this category will also be hidden, but not deleted.
-                      You can recover them by un-hiding this category at any time.
-                    </p>
-                    <%= form_for(attribute_category, method: :put) do |f| %>
-                      <%= f.hidden_field :hidden, value: !hidden_category %><%# flip the bit %>
-                      <%= f.submit (hidden_category ? 'Show' : 'Hide') + ' this category', class: 'btn white black-text' %>
-                    <% end %>
-                  </div>
-                </li>
-
-                <% unless attribute_category.attribute_fields.any? { |attribute_field| ['name', 'universe'].include?(attribute_field.field_type) } %>
-                  <li>
-                    <div class="collapsible-header">
-                      <i class="material-icons <%= @content_type_class.color %>-text"><%= attribute_category.icon %></i>
-                      Delete this category
-                    </div>
-                    <div class="collapsible-body">
-                      <p class="grey-text text-darken-2">
-                        <span class="red-text">This is a VERY dangerous action!</span>
-                        This will delete this category, every field in this category, and every answer you've written to any of those fields! This CANNOT be undone,
-                        so please make sure you have backed up any answers you will lose by deleting the field they're answering.
-                      </p>
-                      <% if attribute_category.persisted? && current_user.can_delete?(attribute_category) %>
-                        <%= link_to attribute_category,
-                          class: 'btn red black-text',
-                          method: :delete,
-                          data: { confirm: "Are you sure? This will delete this entire category, all of its fields, and any answer you've written to any of those fields!" } do %>
-                          Delete this category
-                        <% end %>
-                      <% end %>
-                    </div>
-                  </li>
-                <% end %>
-              </ul>
+          <% if attribute_category.hidden? %>
+            <div class="col s12 m12 l12">
+              <%= render partial: 'content/attributes/category_visibility_controls', locals: { category: attribute_category } %>
             </div>
 
           <% else %>
-            <div class="col s12 m12 l7">
-              <ul class="sortable collapsible" data-sortable-class="AttributeField">
-                <li>
-                  <div class="collapsible-header">
-                    <i class="material-icons <%= @content_type_class.color %>-text"><%= attribute_category.icon %></i>
-                    Customize this category's fields
-                  </div>
-                </li>
-                <%# todo remove this after position backfill is complete %>
-                <% 
-                  attribute_category.attribute_fields.sort do |a, b|
-                    a_value = case a.field_type
-                    when 'name'
-                      0
-                    when 'universe'
-                      1
-                    else
-                      2
-                    end
-
-                    b_value = case b.field_type
-                    when 'name'
-                      0
-                    when 'universe'
-                      1
-                    else
-                      2
-                    end
-
-                    if a.position && b.position
-                      a.position <=> b.position
-                    else
-                      a_value <=> b_value
-                    end
-                  end.each do |attribute_field| %>
-                  
-                    <%# todo this hack shouldn't be necessary, but for some reason it is #codesmell %>
-                    <% next unless attribute_field.persisted? %>
-
-                  <%# todo remove this by defaulting fields to hidden=false %>
-                  <% hidden_field = !!attribute_field.hidden %>
-
-                  <li data-position="<%= attribute_field.position %>" data-content-id="<%= attribute_field.id %>">
-                    <div class="collapsible-header">
-                      <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
-                      <i class="material-icons"><%= attribute_field.icon %></i>
-                      <span class="js-field-label"><%= attribute_field.label %></span>
-                      <% if hidden_field %>
-                        <span class="grey-text">&mdash;hidden</span>
-                      <% end %>
-                    </div>
-
-                    <div class="collapsible-body">
-                      <%=
-                        render(
-                          partial: 'content/attributes/fields/description/' + attribute_field.field_type, 
-                          locals: { field: attribute_field }
-                        ) if lookup_context.template_exists?(attribute_field.field_type, 'content/attributes/fields/description', true)
-                      %>
-                      <div class="row">
-                        <div class="col s12">
-                          <%= form_for(attribute_field, method: :put, class: 'inline', remote: true) do |f| %>
-                            <%= f.text_field :label, class: 'js-new-field-name' %>
-                            <%= f.submit 'Rename this field', class: 'btn white black-text js-update-field-name' %>
-                          <% end %>
-                        </div>
-
-                        <div class="col s12">
-                          <div>
-                            <%= form_for(attribute_field, method: :put, class: 'inline') do |f| %>
-                              <%= f.hidden_field :hidden, value: !hidden_field %>
-                              <%= f.submit (hidden_field ? 'Show' : 'Hide') + ' this field', class: 'btn white black-text' %>
-                            <% end %>
-                            <p class="grey-text text-darken-3">
-                              This will temporarily hide this field its answers on all pages.</strong>.
-                              After hiding, you can re-show this field at any time to recover it and all its answers.
-                            </p>
-                          </div>
-
-                          <div>
-                            <% if attribute_field.name_field? || attribute_field.universe_field? || attribute_field.tags_field? %>
-                              <div>
-                                This field cannot be deleted.
-                              </div>
-                            <% else %>
-                              <div>
-                                <%= link_to "Delete this field and answers",
-                                  attribute_field,
-                                  :class => 'red btn black-text',
-                                  :method => :delete,
-                                  :data => {
-                                    :confirm => "Are you sure? This action cannot be undone! If you have answered this field on ANY #{@content_type} page, your annswer WILL BE DELETED."
-                                  } %>
-                              </div>
-                              <p class="red-text text-darken-3">
-                                This will delete this field <strong>and</strong> its answers to <strong>every <%= @content_type %> page you've created</strong>.
-                                It cannot be undone! If you want to save your answers, you should hide this field instead.
-                              </p>
-                            <% end %>
-                          </div>
-                        </div>
-                      </div>
-
-                      <% if attribute_field.label.start_with?('Private') %>
-                        <div class="row">
-                          <div class="col s12">
-                            <i class="material-icons" style="position:relative;top:5px;">visibility_off</i>
-                            Because this field starts with the word "Private", its answers will only be visible to you even if you share your pages publicly.
-                          </div>
-                        </div>
-                      <% end %>
-                      <%# todo autocomplete notice also %>
-                    </div>
-                  </li>
-                <% end %>
-                <li>
-                  <div class="collapsible-header"><i class="material-icons">add</i>Add another field to this section</div>
-                  <div class="collapsible-body">
-                    <%= form_for(attribute_category.attribute_fields.build, method: :post) do |f| %>
-                      <%# todo the following line shouldn't be necessary %>
-                      <%= f.hidden_field :attribute_category_id, value: attribute_category.id %>
-                      <div class="row">
-                        <div class="input-field col s12">
-                          <%= f.text_area :label, class: 'materialize-textarea' %>
-                          <%= f.label :label, 'Field label' %>
-                        </div>
-                        <div class="input-field col s12">
-                          <%= f.submit 'Add new field', class: "btn #{@content_type_class.color}" %>
-                        </div>
-                      </div>
-                    <% end %>
-                  </div>
-                </li>
-              </ul>
+            <div class="col s12 m12 l8">
+              <%= render partial: 'content/attributes/category_fields_customization', locals: { category: attribute_category } %>
+            </div>
+            <div class="col s12 m12 l4">
+              <%= render partial: 'content/attributes/category_ui_customization', locals: { category: attribute_category } %>
+              <%= render partial: 'content/attributes/category_visibility_controls', locals: { category: attribute_category } %>
             </div>
 
-            <div class="col s12 m12 l5">
-              <ul class="collapsible">
-                <li>
-                  <div class="collapsible-header">
-                    <i class="material-icons <%= @content_type_class.color %>-text"><%= attribute_category.icon %></i>
-                    Rename this category
-                  </div>
-                  <div class="collapsible-body">
-                    <%= form_for(attribute_category, method: :put, class: 'inline', remote: true) do |f| %>
-                      <%= f.text_field :label, class: 'js-new-category-name' %>
-                      <%= f.submit 'Rename this category', class: 'btn white black-text js-update-category-name' %>
-                    <% end %>
-                  </div>
-                </li>
-              </ul>
-
-              <ul class="collapsible">
-                <li>
-                  <div class="collapsible-header">
-                    <i class="material-icons <%= @content_type_class.color %>-text"><%= attribute_category.icon %></i>
-                    Customize this category's icon
-                  </div>
-                  <div class="collapsible-body">
-                    <p class="grey-text text-darken-2">
-                      You can now choose one of over 350 icons to use as the icon for this category. Use the icon picker below to find the perfect icon for you, and
-                      use the code to quickly find it again or share it with others.
-                    </p>
-                    <%= form_for(attribute_category, method: :put) do |f| %>
-                      <div class="input-field input-group iconpicker-container">
-                        <i class="material-icons prefix"><%= attribute_category.icon %></i>
-                        <%= f.label :label, 'Icon code' %>
-                        <%= f.text_field :icon, class: 'form-control iconpicker-element iconpicker-input', data: { placement: 'bottom' } %>
-                      </div>
-                      <%= f.submit 'Save icon', class: 'btn white black-text' %>
-                    <% end %>
-                  </div>
-                </li>
-              </ul>
-
-              <ul class="collapsible">
-                <li class="<%= 'active' if attribute_category.hidden? %>">
-                  <div class="collapsible-header">
-                    <i class="material-icons <%= @content_type_class.color %>-text"><%= attribute_category.icon %></i>
-                    Hide or show this category
-                  </div>
-                  <div class="collapsible-body">
-                    <p class="grey-text text-darken-2">
-                      You can also choose to hide or show this entire category. When hiding, any existing answers you have to fields in this category will also be hidden, but not deleted.
-                      You can recover them by un-hiding this category at any time.
-                    </p>
-                    <%= form_for(attribute_category, method: :put) do |f| %>
-                      <%= f.hidden_field :hidden, value: !hidden_category %><%# flip the bit %>
-                      <%= f.submit (hidden_category ? 'Show' : 'Hide') + ' this category', class: 'btn white black-text' %>
-                    <% end %>
-                  </div>
-                </li>
-
-                <% unless attribute_category.attribute_fields.any? { |attribute_field| AttributeField::UNDELETEABLE_FIELD_TYPES.include?(attribute_field.field_type) } %>
-                  <li>
-                    <div class="collapsible-header">
-                      <i class="material-icons <%= @content_type_class.color %>-text"><%= attribute_category.icon %></i>
-                      Delete this category
-                    </div>
-                    <div class="collapsible-body">
-                      <p class="grey-text text-darken-2">
-                        <span class="red-text">This is a VERY dangerous action!</span>
-                        This will delete this category, every field in this category, and every answer you've written to any of those fields on <em>every page</em>! 
-                        This CANNOT be undone, so please make sure you have backed up any answers you will lose by deleting the field they're answering.
-                      </p>
-                      <% if attribute_category.persisted? && current_user.can_delete?(attribute_category) %>
-                        <%= link_to attribute_category,
-                          class: 'btn red black-text',
-                          method: :delete,
-                          data: { confirm: "Are you sure? This will delete this entire category, all of its fields, and any answer you've written to any of those fields!" } do %>
-                          Delete this category
-                        <% end %>
-                      <% end %>
-                    </div>
-                  </li>
-                <% end %>
-              </ul>
-            </div>
           <% end %>
         </div>
       </div>

@@ -1,0 +1,105 @@
+<%=
+  render(
+    partial: 'content/attributes/fields/description/' + field.field_type, 
+    locals: { field: field }
+  ) if lookup_context.template_exists?(field.field_type, 'content/attributes/fields/description', true)
+%>
+<div class="row">
+  <div class="col s12">
+    <%= form_for(field, method: :put, class: 'inline', remote: true) do |f| %>
+      <div class="row">
+        <div class="col s9">
+          <%= f.text_field :label, class: 'js-new-field-name' %>
+        </div>
+        <div class="col s3">
+          <%= f.submit 'Rename field', class: 'btn white black-text js-update-field-name' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+<div class="row">
+  <div class="col s12 center grey-text" style="text-transform: uppercase">
+    field type
+  </div>
+</div>
+<div class="row">
+  <% if AttributeField::SETTABLE_FIELD_TYPES.include?(field.field_type) %>
+    <form action="#">
+      <div class="col s12 m12 l6">
+        <% AttributeField::SETTABLE_FIELD_TYPES.each do |field_type| %>
+          <div>
+            <label>
+              <input name="group1" type="radio" <%= 'checked' if field_type == field.field_type %> />
+              <span>
+                <i class="material-icons right">help</i>
+                <%= field_type.humanize %>
+              </span>
+            </label>
+          </div>
+        <% end %>
+      </div>
+      <div class="col s12 m12 l6">
+        Changing a field type is a dangerous operation if you have any answers to this field on any pages already. It's recommended to create
+        a new field instead of changing an existing one.
+        <div>
+          <input type="submit" value="Change field type" class="btn white black-text" />
+        </div>
+      </div>
+    </form>
+  <% else %>
+    <p>This is a <strong><%= field.field_type %></strong> field. Its type cannot be changed.
+  <% end %>
+</div>
+<div class="row">
+  <div class="col s12 center grey-text" style="text-transform: uppercase">
+    more actions
+  </div>
+</div>
+<div class="row">
+  <div class="col s12 m12 l6">
+    <div>
+      <%= form_for(field, method: :put, class: 'inline') do |f| %>
+        <%= f.hidden_field :hidden, value: !field.hidden %>
+        <%= f.submit (field.hidden? ? 'Show' : 'Hide') + ' this field', class: 'btn white black-text' %>
+      <% end %>
+      <p class="grey-text text-darken-3">
+        This will temporarily hide this field its answers on all pages.</strong>.
+        After hiding, you can re-show this field at any time to recover it and all its answers.
+      </p>
+    </div>
+  </div>
+  <div class="col s12 m12 l6">
+    <div>
+      <% if field.name_field? || field.universe_field? || field.tags_field? %>
+        <div>
+          This field cannot be deleted.
+        </div>
+      <% else %>
+        <div>
+          <%= link_to "Delete this field and answers",
+            field,
+            :class => 'red btn black-text',
+            :method => :delete,
+            :data => {
+              :confirm => "Are you sure? This action cannot be undone! If you have answered this field on ANY #{@content_type} page, your annswer WILL BE DELETED."
+            } %>
+        </div>
+        <p class="red-text text-darken-3">
+          This will delete this field <strong>and</strong> its answers to <strong>every <%= @content_type %> page you've created</strong>.
+          It cannot be undone! If you want to save your answers, you should hide this field instead.
+        </p>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%# todo use privacy column here? %>
+<% if field.label.start_with?('Private') %>
+  <div class="row">
+    <div class="col s12">
+      <i class="material-icons" style="position:relative;top:5px;">visibility_off</i>
+      Because this field starts with the word "Private", its answers will only be visible to you even if you share your pages publicly.
+    </div>
+  </div>
+<% end %>

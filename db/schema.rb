@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_15_054049) do
+ActiveRecord::Schema.define(version: 2019_12_15_223411) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -64,7 +64,7 @@ ActiveRecord::Schema.define(version: 2019_12_15_054049) do
     t.text "description"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.boolean "hidden"
+    t.boolean "hidden", default: false
     t.datetime "deleted_at"
     t.integer "position"
     t.index ["entity_type", "name", "user_id"], name: "index_attribute_categories_on_entity_type_and_name_and_user_id"
@@ -83,7 +83,7 @@ ActiveRecord::Schema.define(version: 2019_12_15_054049) do
     t.string "privacy", default: "private", null: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.boolean "hidden"
+    t.boolean "hidden", default: false
     t.datetime "deleted_at"
     t.string "old_column_source"
     t.integer "position"

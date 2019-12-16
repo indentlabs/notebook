@@ -1,0 +1,45 @@
+<ul class="sortable collapsible" data-sortable-class="AttributeField">
+  <li>
+    <div class="collapsible-header <%= @content_type_class.color %> white-text">
+      <i class="material-icons"><%= category.icon %></i>
+      Customize this category's fields
+    </div>
+  </li>
+  <% category.attribute_fields.each do |attribute_field| %>
+    <%# todo this hack shouldn't be necessary, but for some reason it is #codesmell %>
+    <% next unless attribute_field.persisted? %>
+
+    <li data-position="<%= attribute_field.position %>" data-content-id="<%= attribute_field.id %>">
+      <div class="collapsible-header">
+        <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
+        <i class="material-icons"><%= attribute_field.icon %></i>
+        <span class="js-field-label"><%= attribute_field.label %></span>
+        <% if attribute_field.hidden? %>
+          <span class="grey-text">&mdash;hidden</span>
+        <% end %>
+      </div>
+
+      <div class="collapsible-body">
+        <%= render partial: 'content/attributes/field_customization', locals: { field: attribute_field } %>
+      </div>
+    </li>
+  <% end %>
+  <li>
+    <div class="collapsible-header"><i class="material-icons">add</i>Add another field to this section</div>
+    <div class="collapsible-body">
+      <%= form_for(category.attribute_fields.build, method: :post) do |f| %>
+        <%# todo the following line shouldn't be necessary %>
+        <%= f.hidden_field :category_id, value: category.id %>
+        <div class="row">
+          <div class="input-field col s12">
+            <%= f.text_area :label, class: 'materialize-textarea' %>
+            <%= f.label :label, 'Field label' %>
+          </div>
+          <div class="input-field col s12">
+            <%= f.submit 'Add new field', class: "btn #{@content_type_class.color}" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </li>
+</ul>
