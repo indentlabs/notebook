@@ -6,7 +6,7 @@ module Api
           entity_type:    params.fetch(:entity_type, '').downcase
         ).order('weight desc').limit(
           AttributeCategorySuggestion::SUGGESTIONS_RESULT_COUNT
-        ).pluck(:suggestion, :weight)
+        ).pluck(:suggestion)
 
         if suggestions.empty?
           CacheMostUsedAttributeCategoriesJob.perform_later(
