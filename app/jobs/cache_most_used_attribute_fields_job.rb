@@ -16,7 +16,7 @@ class CacheMostUsedAttributeFieldsJob < ApplicationJob
       .order('count_id DESC')
       .limit(50)
       .count(:id)
-      .reject { |_, count| count <= AttributeFieldSuggestion::USAGE_FREQUENCY_MINIMUM }
+      .reject { |_, count| count < AttributeFieldSuggestion::USAGE_FREQUENCY_MINIMUM }
 
     puts "Suggestion count: #{suggestions}"
 
