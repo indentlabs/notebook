@@ -1,0 +1,2 @@
+class AttributeFieldSuggestion < ApplicationRecord
+end
