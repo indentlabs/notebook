@@ -63,6 +63,7 @@ gem 'd3-rails'
 # Analytics
 gem 'mixpanel-ruby'
 gem 'slack-notifier'
+gem 'barnes'
 
 # Apps
 #gem 'easy_translate'
