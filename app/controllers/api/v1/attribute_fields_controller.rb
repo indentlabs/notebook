@@ -4,7 +4,7 @@ module Api
       def suggest
         suggestions = AttributeFieldSuggestion.where(
           entity_type:    params.fetch(:entity_type, '').downcase,
-          category_label: params.fetch(:category,    '').downcase
+          category_label: params.fetch(:category,    '')
         ).order('weight desc').limit(
           AttributeFieldSuggestion::SUGGESTIONS_RESULT_COUNT
         ).pluck(:suggestion)
