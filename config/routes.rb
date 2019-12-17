@@ -177,6 +177,14 @@ end
   end
 
   # API Endpoints
+  namespace :api do
+    namespace :v1 do
+      scope '/fields' do
+        get '/suggest', to: 'attribute_fields#suggest'
+      end
+    end
+  end
+
   scope '/generate' do
     # General information
 
