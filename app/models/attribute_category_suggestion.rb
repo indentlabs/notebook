@@ -6,4 +6,7 @@ class AttributeCategorySuggestion < ApplicationRecord
   # Number of suggestions to return over the API. Limiting this means the
   # most-used categories get suggested, while niche or less-used categories don't.
   SUGGESTIONS_RESULT_COUNT = 100
+
+  # Labels to never suggest
+  BLACKLISTED_LABELS = AttributeCategory::SPECIAL_CATEGORY_LABELS
 end
