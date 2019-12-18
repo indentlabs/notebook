@@ -4,7 +4,7 @@
 
 <!-- TODO set up overrides
 <div class="row">
-  <div class="col s12 m6">
+  <div class="col s12 m4">
     <div class="hoverable card white">
       <div class="card-content">
         <div class="card-title">
@@ -15,7 +15,7 @@
       </div>
     </div>
   </div>
-  <div class="col s12 m6">
+  <div class="col s12 m4">
     <div class="hoverable card white-text" style="background-color: <%= @content_type_class.hex_color_for(current_user) %>">
       <div class="card-content">
         <div class="card-title">Customize color</div>
@@ -23,65 +23,84 @@
       </div>
     </div>
   </div>
+  <div class="col s12 m4">
+    <div class="hoverable card white-text">
+      <div class="card-content">
+        <div class="card-title">Customize header image</div>
+        You can change the header image.
+      </div>
+    </div>
+  </div>
 </div>
 -->
 
-<ul class="hoverable sortable collapsible white" data-sortable-class="AttributeCategory">
-  <%= render partial: 'content/attributes/general_settings', locals: { content_type: @content_type, content_type_class: @content_type_class } %>
+<div class="attributes-editor" data-content-type="<%= @content_type %>">
+  <ul class="hoverable sortable collapsible white" data-sortable-class="AttributeCategory">
+    <%= render partial: 'content/attributes/general_settings', locals: { content_type: @content_type, content_type_class: @content_type_class } %>
 
-  <% @attribute_categories.each do |attribute_category| %>
-    <li data-position="<%= attribute_category.position %>" data-content-id="<%= attribute_category.id %>" class="js-category-container">
-      <div class="collapsible-header">
-        <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
-        <i class="material-icons"><%= attribute_category.icon %></i>
-        <div class="js-category-label">
-          <%= attribute_category.label %>
-        </div>
-        <% if attribute_category.hidden? %>
-          <span class="grey-text">&mdash;</span>
-          <i class="material-icons grey-text tooltipped" data-tooltip="You've hidden this category.">visibility_off</i>
-        <% end %>
-      </div>
-
-      <div class="collapsible-body">
-        <div class="row">
+    <% @attribute_categories.each do |attribute_category| %>
+      <li data-position="<%= attribute_category.position %>" data-content-id="<%= attribute_category.id %>" class="js-category-container">
+        <div class="collapsible-header">
+          <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
+          <i class="material-icons"><%= attribute_category.icon %></i>
+          <div class="js-category-label">
+            <%= attribute_category.label %>
+          </div>
           <% if attribute_category.hidden? %>
-            <div class="col s12 m12 l12">
-              <%= render partial: 'content/attributes/category_visibility_controls', locals: { category: attribute_category } %>
-            </div>
-
-          <% else %>
-            <div class="col s12 m12 l8">
-              <%= render partial: 'content/attributes/category_fields_customization', locals: { category: attribute_category } %>
-            </div>
-            <div class="col s12 m12 l4">
-              <%= render partial: 'content/attributes/category_ui_customization', locals: { category: attribute_category } %>
-              <%= render partial: 'content/attributes/category_visibility_controls', locals: { category: attribute_category } %>
-            </div>
-
+            <span class="grey-text">&mdash;</span>
+            <i class="material-icons grey-text tooltipped" data-tooltip="You've hidden this category.">visibility_off</i>
           <% end %>
         </div>
-      </div>
-    </li>
-  <% end %>
-  <li>
-    <div class="collapsible-header">
-      <i class="material-icons <%= @content_type_class.color %>-text">add</i>
-      Add another category
-    </div>
-    <div class="collapsible-body">
-      <%= form_for(current_user.attribute_categories.build, method: :post) do |f| %>
-        <%= f.hidden_field :entity_type, value: @content_type %>
-        <div class="row">
-          <div class="input-field col s12">
-            <%= f.text_area :label, class: 'materialize-textarea' %>
-            <%= f.label :label, 'Category label' %>
-          </div>
-          <div class="input-field col s12">
-            <%= f.submit 'Add new category', class: "btn #{@content_type_class.color}" %>
+
+        <div class="collapsible-body">
+          <div class="row">
+            <% if attribute_category.hidden? %>
+              <div class="col s12 m12 l12">
+                <%= render partial: 'content/attributes/category_visibility_controls', locals: { category: attribute_category } %>
+              </div>
+
+            <% else %>
+              <div class="col s12 m12 l8">
+                <%= render partial: 'content/attributes/category_fields_customization', locals: { category: attribute_category } %>
+              </div>
+              <div class="col s12 m12 l4">
+                <%= render partial: 'content/attributes/category_ui_customization', locals: { category: attribute_category } %>
+                <%= render partial: 'content/attributes/category_visibility_controls', locals: { category: attribute_category } %>
+              </div>
+
+            <% end %>
           </div>
         </div>
-      <% end %>
-    </div>
-  </li>
- </ul>
+      </li>
+    <% end %>
+    <li>
+      <div class="collapsible-header">
+        <i class="material-icons <%= @content_type_class.color %>-text">add</i>
+        Add another category
+      </div>
+      <div class="collapsible-body">
+        <%= form_for(current_user.attribute_categories.build, method: :post) do |f| %>
+          <%= f.hidden_field :entity_type, value: @content_type %>
+          <div class="row">
+            <div class="input-field col s12">
+              <%= f.text_area :label, class: 'materialize-textarea js-category-input' %>
+              <%= f.label :label, 'Category label' %>
+            </div>
+            <div class="input-field col s12">
+              <%= f.submit 'Add new category', class: "btn #{@content_type_class.color}" %>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="grey-text text-darken-1">
+              <strong>New:</strong> Notebook.ai can now suggest additional categories for your pages.
+            </div>
+            <p class="suggest-categories-container">
+            </p>
+            <%= f.button "Show suggestions", class: 'small btn white black-text js-show-category-suggestions' %>
+          </div>
+        <% end %>
+      </div>
+    </li>
+  </ul>
+</div>
