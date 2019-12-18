@@ -21,12 +21,13 @@ class CacheMostUsedAttributeFieldsJob < ApplicationJob
     puts "Suggestion count: #{suggestions}"
 
     suggestions.each do |suggestion, weight|
-      AttributeFieldSuggestion.find_or_create_by!(
+      suggestion = AttributeFieldSuggestion.find_or_initialize_by(
         entity_type:    entity_type,
         category_label: category_label,
-        suggestion:     suggestion,
-        weight:         weight
+        suggestion:     suggestion
       )
+      suggestion.weight = weight
+      suggestion.save!
     end
   end
 end
