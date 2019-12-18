@@ -29,7 +29,7 @@ $(document).ready(function () {
             );
           });
         } else {
-          result_container.text("It doesn't look like there are any suggestions right now. Since suggestions are constantly growing, check back later and there might be more!");
+          result_container.text("It doesn't look like there are any suggestions right now. Since our suggestions are constantly growing, check back later and there might be more!");
         }
       }
     });
