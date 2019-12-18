@@ -61,12 +61,18 @@
     <div>
       <%= form_for(field, method: :put, class: 'inline') do |f| %>
         <%= f.hidden_field :hidden, value: !field.hidden %>
-        <%= f.submit (field.hidden? ? 'Show' : 'Hide') + ' this field', class: 'btn white black-text' %>
+        <% if field.hidden? %>
+          <%= f.submit 'Show this field', class: 'btn white black-text' %>
+        <% else %>
+          <%= 
+            f.submit 'Hide this field', 
+              class: 'btn white black-text',
+              data: {
+                confirm: "This will temporarily hide this field and its answers on all #{@content_type} pages. After hiding, you can re-show this field at any time to recover it and all its answers."
+              }
+          %>
+        <% end %>
       <% end %>
-      <p class="grey-text text-darken-3">
-        This will temporarily hide this field its answers on all pages.</strong>.
-        After hiding, you can re-show this field at any time to recover it and all its answers.
-      </p>
     </div>
   </div>
   <div class="col s12 m12 l6">
@@ -82,13 +88,9 @@
             :class => 'red btn black-text',
             :method => :delete,
             :data => {
-              :confirm => "Are you sure? This action cannot be undone! If you have answered this field on ANY #{@content_type} page, your annswer WILL BE DELETED."
+              :confirm => "Are you sure? This will delete this field AND all of its answers to EVERY page you've created. This action cannot be undone! If you have answered this field on ANY #{@content_type} page, YOUR ANSWER WILL BE DELETED TOO."
             } %>
         </div>
-        <p class="red-text text-darken-3">
-          This will delete this field <strong>and</strong> its answers to <strong>every <%= @content_type %> page you've created</strong>.
-          It cannot be undone! If you want to save your answers, you should hide this field instead.
-        </p>
       <% end %>
     </div>
   </div>
