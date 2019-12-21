@@ -5,7 +5,7 @@ ruby "~> 2.6"
 gem 'rails'
 gem 'puma', '~> 3.12'
 gem 'puma-heroku'
-gem 'bootsnap', require: false
+# gem 'bootsnap', require: false
 gem 'sprockets', '~> 3.7.2'
 
 # Storage
