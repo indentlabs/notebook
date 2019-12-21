@@ -3,7 +3,7 @@
 class OriginalOwnership < ApplicationRecord
   include HasContentLinking
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   belongs_to :item
   belongs_to :original_owner, class_name: 'Character'

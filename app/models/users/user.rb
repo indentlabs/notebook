@@ -51,9 +51,25 @@ class User < ApplicationRecord
 
   has_many :notice_dismissals,            dependent: :destroy
 
+  has_one_attached :avatar
+  validates :avatar, attached: true,
+    content_type: {
+      in: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'],
+      message: 'must be a PNG, JPG, JPEG, or GIF'
+    },
+    dimension: { 
+      width: { max: 1000 },
+      height: { max: 1000 }, 
+      message: 'must be smaller than 1000x1000 pixels'
+    },
+    size: { 
+      less_than: 500.kilobytes, 
+      message: "can't be larger than 500KB"
+    }
+
   def contributable_universes
     @user_contributable_universes ||= begin
-      # todo email confirmation needs to happy for data safety / privacy (only verified emails)
+      # todo email confirmation needs to happen for data safety / privacy (only verified emails)
       contributor_ids = Contributor.where('email = ? OR user_id = ?', self.email, self.id).pluck(:universe_id)
 
       Universe.where(id: contributor_ids)
@@ -131,11 +147,14 @@ class User < ApplicationRecord
   end
 
   def image_url(size=80)
-    require 'digest/md5'
+    if avatar.attached? # manually-uploaded avatar
+      Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_limit: [size, size]).processed, only_path: true)
 
-    email_md5 = Digest::MD5.hexdigest(email.downcase)
-    # 80px is Gravatar's default size
-    "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
+    else # otherwise, grab the default from Gravatar for this email address
+      require 'digest/md5'
+      email_md5 = Digest::MD5.hexdigest(email.downcase)
+      "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
+    end
   end
 
   # TODO these (3) can probably all be scopes on the related object, no?
