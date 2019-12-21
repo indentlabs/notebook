@@ -1,7 +1,7 @@
 class Childrenship < ApplicationRecord
   include HasContentLinking
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   belongs_to :character
   belongs_to :child, class_name: 'Character'

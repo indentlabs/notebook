@@ -1,5 +1,6 @@
 class RegistrationsController < Devise::RegistrationsController
   after_action :add_account, only: [:create]
+  after_action :attach_avatar, only: [:update]
 
   before_action :set_navbar_actions, only: [:edit]
   before_action :set_navbar_color, only: [:edit]
@@ -25,7 +26,7 @@ class RegistrationsController < Devise::RegistrationsController
     params.require(:user).permit(
       :name, :email, :username, :password, :password_confirmation, :email_updates, :fluid_preference,
       :bio, :favorite_genre, :favorite_author, :interests, :age, :location, :gender, :forums_badge_text,
-      :keyboard_shortcuts_preference
+      :keyboard_shortcuts_preference, :avatar
     )
   end
 
@@ -61,6 +62,13 @@ class RegistrationsController < Devise::RegistrationsController
         ) if referral_code.present?
       end
     end
+  end
+
+  def attach_avatar
+    return unless account_update_params.key?('avatar')
+
+    current_user.avatar.purge
+    current_user.avatar.attach(account_update_params.fetch('avatar', nil))
   end
 
   def report_new_account_to_slack resource

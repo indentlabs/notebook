@@ -1,5 +1,5 @@
 class GroupCreature < ApplicationRecord
   belongs_to :group
   belongs_to :creature
-  belongs_to :user
+  belongs_to :user, optional: true
 end

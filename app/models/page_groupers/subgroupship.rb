@@ -1,7 +1,7 @@
 class Subgroupship < ApplicationRecord
   include HasContentLinking
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   belongs_to :group
   belongs_to :subgroup, class_name: 'Group'

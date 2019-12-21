@@ -2,7 +2,7 @@ class PlanetNearbyPlanet < ApplicationRecord
   include HasContentLinking
   LINK_TYPE = :two_way
 
-  belongs_to :user
+  belongs_to :user, optional: true
   belongs_to :planet
   belongs_to :nearby_planet, class_name: Planet.name
 

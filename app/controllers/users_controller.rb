@@ -58,6 +58,7 @@ class UsersController < ApplicationController
 
     report_user_deletion_to_slack(current_user)
 
+    current_user.avatar.purge
     current_user.really_destroy!
 
     redirect_to(root_path, notice: 'Your account has been deleted. We will miss you greatly!')

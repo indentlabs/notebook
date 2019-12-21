@@ -1,11 +1,10 @@
 # rubocop:disable LineLength
-
 Rails.application.routes.draw do
+  default_url_options :host => "notebook.ai"
+
   get 'notice_dismissal/dismiss'
   get 'customization/content_types'
   post 'customization/toggle_content_type'
-
-  get '/redeem/infostack', to: 'main#infostack'
 
   # User-centric stuff
   devise_for :users, :controllers => { registrations: 'registrations' }
@@ -230,6 +229,8 @@ end
   authenticate :user, lambda { |u| u.site_administrator? } do
     mount Sidekiq::Web => '/sidekiq'
   end
-end
 
+  # Promos and other temporary pages
+  get '/redeem/infostack', to: 'main#infostack'
+end
 # rubocop:enable LineLength

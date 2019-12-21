@@ -1,4 +1,4 @@
 class Contributor < ApplicationRecord
   belongs_to :universe
-  belongs_to :user
+  belongs_to :user, optional: true
 end
