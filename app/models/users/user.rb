@@ -52,7 +52,7 @@ class User < ApplicationRecord
   has_many :notice_dismissals,            dependent: :destroy
 
   has_one_attached :avatar
-  validates :avatar, attached: true,
+  validates :avatar, attached: false,
     content_type: {
       in: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'],
       message: 'must be a PNG, JPG, JPEG, or GIF'
