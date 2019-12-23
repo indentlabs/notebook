@@ -38,7 +38,7 @@ class Document < ApplicationRecord
   end
 
   def universe_field_value
-    #todo when documents belong to a universe
+    # TODO: populate value from cache when documents belong to a universe
   end
 
   def analyze!
