@@ -259,10 +259,10 @@ class ContentController < ApplicationController
     cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
     @content.update(cache_params) if cache_params.any? && update_success
 
-    if update_success
+    if update_success 
       successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
-      failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.map(&:messages).to_sentence)
+      failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.to_json)
     end
   end
 
