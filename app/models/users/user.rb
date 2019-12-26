@@ -16,7 +16,8 @@ class User < ApplicationRecord
     allow_nil: true,
     allow_blank: true,
     length: { maximum: 40 },
-    format: /\A[A-Za-z0-9\-_\$\+\!\*]+\z/
+    format: /\A[A-Za-z0-9\-_\$\+\!\*]+\z/,
+  if: Proc.new { |user| user.username_changed?}
   
   validates :forums_badge_text,
     allow_nil: true,
