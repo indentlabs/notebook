@@ -1,18 +1,17 @@
 <%
-  # Partial locals: `content` to ask a question about
-  serendipitous_asking_question = @attribute_field_to_question.present?
+  # Partial locals: `content` to ask a question about, and `field` for the field being questioned
 %>
 
-<% if serendipitous_asking_question %>
+<% if field.present? %>
   <ul class="hoverable collapsible">
     <li class="<%= 'active' if defined?(expand_by_default) && !!expand_by_default %>">
       <div class="collapsible-header <%= content.class.color %> white-text">
         <i class="material-icons tooltipped" data-tooltip="Answer this randomly-generated question to have it automatically saved to your <%= content.name_field_value %> <%= content.class.name.downcase %> page.">help</i>
         <%=
           t(
-            "serendipitous_questions.attributes.#{content.class.name.downcase}.#{@attribute_field_to_question.label.downcase}",
+            "serendipitous_questions.attributes.#{content.class.name.downcase}.#{field.label.downcase}",
             name:    content.name_field_value,
-            default: "What is #{content.name_field_value}'s #{@attribute_field_to_question.label.downcase}?"
+            default: "What is #{content.name_field_value}'s #{field.label.downcase}?"
           )
         %>
       </div>
@@ -24,8 +23,9 @@
             render 'content/form/text_input',
               f: f,
               content: content,
-              field: @attribute_field_to_question
+              field: field
           %>
+          needs link bar<br />
 
           <%= button_tag(type: 'submit', class: "js-content-question-submit waves-effect waves-light btn #{content.class.color} right") do %>
             Save answer to <%= content.name_field_value.downcase %>

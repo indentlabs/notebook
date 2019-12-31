@@ -23,6 +23,7 @@ class MainController < ApplicationController
 
   def dashboard
     set_random_content # for questions
+    @attribute_field_to_question = SerendipitousService.question_for(@content)
   end
 
   def infostack
