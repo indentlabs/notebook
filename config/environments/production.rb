@@ -91,7 +91,7 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   # Devise default url options
-  config.action_mailer.default_url_options = { host: 'www.notebook.ai', port: 80 }
+  config.action_mailer.default_url_options = { host: 'www.notebook.ai' }
   ActionMailer::Base.smtp_settings = {
     :address        => "smtp.sendgrid.net",
     :port           => 587,
