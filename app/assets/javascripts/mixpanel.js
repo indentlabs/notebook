@@ -14,7 +14,7 @@ $(document).ready(function () {
     mixpanel.track("clicked recent activity show link", {});
   });
 
-  $('.content-question-submit').click(function (link) {
+  $('.js-content-question-submit').click(function (link) {
     mixpanel.track("answered serendipitous question", {});
   });
 

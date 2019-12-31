@@ -76,7 +76,7 @@ Rails.application.configure do
 
   Bullet.enable = true
   # Bullet.sentry = true
-  Bullet.alert = true
+  Bullet.alert = false
   Bullet.bullet_logger = true
   Bullet.console = true
   Bullet.rails_logger = true
@@ -84,5 +84,5 @@ Rails.application.configure do
   # Bullet.bugsnag = true
   # Bullet.airbrake = true
   # Bullet.rollbar = true
-  Bullet.add_footer = true
+  Bullet.add_footer = false
 end

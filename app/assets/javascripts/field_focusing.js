@@ -8,7 +8,7 @@ $(document).ready(function () {
 
     $('.content-field').removeClass('focused');
     parent_content_field.addClass('focused');
-    $('.content-field-link-bar').hide();
+    $('.content-field-link-bar').hide(); // todo do we even use lin bars anymore?
     parent_content_field.find('.content-field-link-bar').show();
   });
 

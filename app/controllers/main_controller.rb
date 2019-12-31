@@ -33,6 +33,7 @@ class MainController < ApplicationController
     @navbar_color = '#FF9800'
 
     set_random_content # for question
+    @attribute_field_to_question = SerendipitousService.question_for(@content)
   end
 
   # deprecated path just kept around for bookmarks for a while
