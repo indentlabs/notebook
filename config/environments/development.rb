@@ -84,5 +84,5 @@ Rails.application.configure do
   # Bullet.bugsnag = true
   # Bullet.airbrake = true
   # Bullet.rollbar = true
-  Bullet.add_footer = false
+  Bullet.add_footer = true
 end
