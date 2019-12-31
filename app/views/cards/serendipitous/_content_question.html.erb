@@ -2,7 +2,7 @@
   # Partial locals: `content` to ask a question about, and `field` for the field being questioned
 %>
 
-<% if field.present? %>
+<% if defined?(field) && field.present? %>
   <ul class="hoverable collapsible">
     <li class="<%= 'active' if defined?(expand_by_default) && !!expand_by_default %>">
       <div class="collapsible-header <%= content.class.color %> white-text">
@@ -25,7 +25,6 @@
               content: content,
               field: field
           %>
-          needs link bar<br />
 
           <%= button_tag(type: 'submit', class: "js-content-question-submit waves-effect waves-light btn #{content.class.color} right") do %>
             Save answer to <%= content.name_field_value.downcase %>

@@ -3,6 +3,7 @@
 class MainController < ApplicationController
   layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_designers, :for_friends]
 
+  before_action :cache_linkable_content_for_each_content_type, only: [:dashboard, :prompts]
   before_action :authenticate_user!, only: [:dashboard, :prompts, :notes, :recent_content]
 
   before_action do
