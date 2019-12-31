@@ -8,9 +8,22 @@
 
 <% if @content.any? %>
 
-  <%= render partial: 'content/components/list_filter_bar', locals: { content_type: @content_type_class } %>
-  <%= render partial: 'content/list/cards', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true } %>
+  <div class="row">
+    <% if @attribute_field_to_question.present? %>
+      <div class="col s12">
+        <%= render partial: 'cards/serendipitous/content_question', locals: { 
+          content: @questioned_content,
+          field: @attribute_field_to_question 
+        } %>
+      </div>
+    <% end %>
 
+    <div class="col s12">
+      <%= render partial: 'content/components/list_filter_bar', locals: { content_type: @content_type_class } %>
+    </div>
+    <%= render partial: 'content/list/cards', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true } %>
+  </div>
+  
   <% if @show_scope_notice %>
     <p class="center help-text">
       Only showing <%= @content_type_class.name.downcase.pluralize %>
@@ -104,3 +117,32 @@
   </div>
 
 <% end %>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    var tribute = new Tribute({
+      values: [
+        <% @linkables_cache.each do |class_name, collection| %>
+          <% linkable_class = class_name.constantize %>
+          <% collection.each do |page_name, page_id| %>
+            {
+              key:   "<%= page_name.gsub('"', "\"").gsub("\n", " ").gsub("\r", " ").strip %>",
+              value: '[[<%= class_name %>-<%= page_id %>]]',
+              color: '<%= linkable_class.color %>',
+              icon:  '<%= linkable_class.icon %>'
+            },
+          <% end %>
+        <% end %>
+      ],
+      selectTemplate: function (item) {
+        // We're overriding the default here so we don't prepend a @
+        return item.original.value;
+      },
+      menuItemTemplate: function (item) {
+        return '<i class="material-icons right ' + item.original.color + '-text">' + item.original.icon + '</i>' + item.string;
+      },
+      spaceSelectsMatch: false
+    });
+    tribute.attach(document.querySelectorAll('.js-can-mention-pages'));
+  });
+</script>

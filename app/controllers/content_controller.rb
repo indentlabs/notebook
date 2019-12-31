@@ -5,7 +5,7 @@ class ContentController < ApplicationController
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
-  before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit]
+  before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit, :index]
 
   before_action :set_attributes_content_type, only: [:attributes]
 
@@ -53,6 +53,9 @@ class ContentController < ApplicationController
 
     @page_tags = @page_tags.uniq(&:tag)
     @content = @content.sort_by(&:name)
+
+    @questioned_content = @content.sample
+    @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
 
     respond_to do |format|
       format.html { render 'content/index' }
