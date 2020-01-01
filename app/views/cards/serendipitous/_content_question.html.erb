@@ -29,7 +29,12 @@
           <%= button_tag(type: 'submit', class: "js-content-question-submit waves-effect waves-light btn #{content.class.color} right") do %>
             Save answer to <%= content.name_field_value.downcase %>
           <% end %>
-          <%= link_to 'View ' + content.name_field_value, content, class: 'btn white black-text', target: '_new' %>
+          <% if !defined?(show_view_button) || !!show_view_button %>
+            <%= link_to content, class: 'btn white black-text', target: '_new' do %>
+              <i class="material-icons left <%= content.class.color %>-text"><%= content.class.icon %></i>
+              View <%= content.name_field_value %>
+            <% end %>
+          <% end %>
           <div style="clear: both;"></div>
         <% end %>
       </div>
