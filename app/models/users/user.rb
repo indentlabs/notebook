@@ -16,7 +16,8 @@ class User < ApplicationRecord
     allow_nil: true,
     allow_blank: true,
     length: { maximum: 40 },
-    format: /\A[A-Za-z0-9\-_\$\+\!\*]+\z/
+    format: /\A[A-Za-z0-9\-_\$\+\!\*]+\z/,
+  if: Proc.new { |user| user.username_changed?}
   
   validates :forums_badge_text,
     allow_nil: true,
@@ -52,7 +53,7 @@ class User < ApplicationRecord
   has_many :notice_dismissals,            dependent: :destroy
 
   has_one_attached :avatar
-  validates :avatar, attached: true,
+  validates :avatar, attached: false,
     content_type: {
       in: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'],
       message: 'must be a PNG, JPG, JPEG, or GIF'
