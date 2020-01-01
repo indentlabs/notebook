@@ -380,7 +380,7 @@ class ContentController < ApplicationController
     end
     @content_pages["Document"] = current_user.documents
       .with_deleted
-      .where('deleted_at > ?', @maximum_recovery_time.ago)
+      .where('documents.deleted_at > ?', @maximum_recovery_time.ago)
       .includes(:user)
 
     # Override controller

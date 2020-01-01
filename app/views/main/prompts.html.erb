@@ -1,7 +1,7 @@
 <% if current_user.content_count > 0 && @content %>
   <div class="row">
     <div class="col s12 m12 l8">
-
+      <% 2.times do %><br /><% end %>
       <%= render partial: 'cards/serendipitous/content_question', locals: {
         content: @content,
         field: @attribute_field_to_question,
@@ -11,29 +11,27 @@
         show_view_button: false
       } %>
       <% if @attribute_field_to_question.present? %>
-        <div class="row">
-          <div class="col s12 m6">
-            <%= link_to @content do %>
-              <div class="hoverable card <%= @content.class.color %>">
-                <div class="card-content white-text">
-                  <span class="card-title">
-                    View <%= @content.name %>
-                  </span>
-                </div>
+        <div class="col s12 m6">
+          <%= link_to @content do %>
+            <div class="hoverable card <%= @content.class.color %>">
+              <div class="card-content white-text">
+                <span class="card-title">
+                  View <%= @content.name %>
+                </span>
               </div>
-            <% end %>
-          </div>
-          <div class="col s12 m6">
-            <%= link_to prompts_path do %>
-              <div class="hoverable card orange">
-                <div class="card-content white-text">
-                  <span class="card-title">
-                    Skip this prompt
-                  </span>
-                </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="col s12 m6">
+          <%= link_to prompts_path do %>
+            <div class="hoverable card orange">
+              <div class="card-content white-text">
+                <span class="card-title">
+                  Skip this prompt
+                </span>
               </div>
-            <% end %>
-          </div>
+            </div>
+          <% end %>
         </div>
       <% end %>
     </div>
