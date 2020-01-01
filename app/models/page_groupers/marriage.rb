@@ -16,7 +16,7 @@ class Marriage < ApplicationRecord
     this_object  = Character.find_by(id: self.character_id)
     other_object = Character.find_by(id: self.spouse_id)
 
-    other_object.spouses.delete(this_object) if other_object.present? && this.object.present?
+    other_object.spouses.delete(this_object) if other_object.present? && this_object.present?
   end
 
   #todo "active" marriage?
