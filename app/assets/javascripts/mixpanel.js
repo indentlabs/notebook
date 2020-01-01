@@ -38,4 +38,12 @@ $(document).ready(function () {
     mixpanel.track('A/B 1b: clicked fab save');
   });
 
+  $('.mp-iucl-view-all').click(function (link) {
+    mixpanel.track('A/B 2a: clicked view all in IUCL')
+  });
+
+  $('.mp-iucl-view-list').click(function (link) {
+    mixpanel.track('A/B 2b: revealed list in IUCL')
+  });
+
 });
