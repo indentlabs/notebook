@@ -177,6 +177,17 @@ end
   end
 
   # API Endpoints
+  namespace :api do
+    namespace :v1 do
+      scope '/fields' do
+        get '/suggest/:entity_type/:category', to: 'attribute_fields#suggest'
+      end
+      scope '/categories' do
+        get '/suggest/:entity_type',           to: 'attribute_categories#suggest'
+      end
+    end
+  end
+
   scope '/generate' do
     # General information
 

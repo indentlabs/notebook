@@ -1,0 +1,37 @@
+<ul class="collapsible">
+  <li>
+    <div class="collapsible-header">
+      <i class="material-icons">build</i>
+      Rename this category
+    </div>
+    <div class="collapsible-body">
+      <%= form_for(category, method: :put, class: 'inline', remote: true) do |f| %>
+        <%= f.text_field :label, class: 'js-new-category-name' %>
+        <%= f.submit 'Rename this category', class: 'btn white black-text js-update-category-name' %>
+      <% end %>
+    </div>
+  </li>
+</ul>
+
+<ul class="collapsible">
+  <li>
+    <div class="collapsible-header">
+      <i class="material-icons">build</i>
+      Customize this category's icon
+    </div>
+    <div class="collapsible-body">
+      <p class="grey-text text-darken-2">
+        You can now choose one of over 350 icons to use as the icon for this category. Use the icon picker below to find the perfect icon for you, and
+        use the code to quickly find it again or share it with others.
+      </p>
+      <%= form_for(category, method: :put) do |f| %>
+        <div class="input-field input-group iconpicker-container">
+          <i class="material-icons prefix"><%= category.icon %></i>
+          <%= f.label :label, 'Icon code' %>
+          <%= f.text_field :icon, class: 'form-control iconpicker-element iconpicker-input', data: { placement: 'bottom' } %>
+        </div>
+        <%= f.submit 'Save icon', class: 'btn white black-text' %>
+      <% end %>
+    </div>
+  </li>
+</ul>

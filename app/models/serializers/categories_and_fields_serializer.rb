@@ -18,13 +18,13 @@ class CategoriesAndFieldsSerializer
         hidden: !!category.hidden,
         fields: (self.fields.select { |field| field.attribute_category_id == category.id }.map { |field|
           {
-            id:     field.name,
-            label:  field.label,
-            type:   field.field_type,
-            hidden: !!field.hidden,
+            id:       field.name,
+            label:    field.label,
+            type:     field.field_type,
+            hidden:   !!field.hidden,
             position: field.position,
-            old_column_source: field.old_column_source,
-            value: ""
+            value:    "",
+            old_column_source: field.old_column_source # deprecated -- we should remove this
           }
         }).sort do |a, b|
            if a[:position] && b[:position]	

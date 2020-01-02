@@ -38,5 +38,25 @@ module IsContentPage
         Document.where(id: document_ids)
       end
     end
+
+    def self.settings_override_for(user)
+      return nil if user.nil?
+      return nil unless user.on_premium_plan?
+
+      # todo technically we could cache a has_page_overrides on User to skip a lot of unncessessary lookups here
+      user.page_settings_overrides.find_by(page_type: self.name.downcase)
+    end
+
+    def self.name_for(user)
+      settings_override_for(user).try(:name_override).presence || self.name
+    end
+
+    def self.icon_for(user)
+      settings_override_for(user).try(:icon_override).presence || self.icon
+    end
+
+    def self.hex_color_for(user)
+      settings_override_for(user).try(:hex_color_override).presence || self.hex_color
+    end
   end
 end
