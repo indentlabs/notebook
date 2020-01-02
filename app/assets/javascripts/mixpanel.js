@@ -14,7 +14,7 @@ $(document).ready(function () {
     mixpanel.track("clicked recent activity show link", {});
   });
 
-  $('.content-question-submit').click(function (link) {
+  $('.js-content-question-submit').click(function (link) {
     mixpanel.track("answered serendipitous question", {});
   });
 
@@ -36,6 +36,14 @@ $(document).ready(function () {
 
   $('.mp-fab-save').click(function (link) {
     mixpanel.track('A/B 1b: clicked fab save');
+  });
+
+  $('.mp-iucl-view-all').click(function (link) {
+    mixpanel.track('A/B 2a: clicked view all in IUCL')
+  });
+
+  $('.mp-iucl-view-list').click(function (link) {
+    mixpanel.track('A/B 2b: revealed list in IUCL')
   });
 
 });

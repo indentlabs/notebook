@@ -29,14 +29,14 @@ class Flora < ApplicationRecord
   end
 
   def self.color
-    'text-lighten-3 lighten-3 teal'
+    'text-lighten-2 lighten-2 teal'
   end
 
   def self.hex_color
-    '#80CBC4'
+    '#4DB6AC'
   end
 
   def self.icon
-    'local_florist'
+    'eco'
   end
 end

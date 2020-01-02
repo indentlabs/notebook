@@ -38,6 +38,12 @@ class ExportController < ApplicationController
     xml_dump = current_user.content.except('Document').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_xml
     send_data xml_dump, filename: "notebook-#{Date.today}.xml"
   end
+  
+  def notebook_yml
+    report_to_mixpanel 'yaml', 'notebook'
+    yaml_dump = current_user.content.except('Document').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_yaml
+    send_data yaml_dump, filename: "notebook-#{Date.today}.yml"
+  end
 
   def pdf
     #todo
@@ -76,6 +82,8 @@ class ExportController < ApplicationController
           begin
             value = content.send(attr.name)
           rescue
+            # TODO: Since this is gonna be the default for every field now, we should probably hit them all with a single query
+            # and then pluck them out of a results hash as needed here. This causes a ton of slow queries.
             value = Attribute.where(user: current_user, attribute_field: attr, entity: content).first
             value = value.value if value
           end

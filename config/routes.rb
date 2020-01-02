@@ -9,6 +9,11 @@ Rails.application.routes.draw do
   # User-centric stuff
   devise_for :users, :controllers => { registrations: 'registrations' }
   resources :users do
+    devise_scope :user do
+      get 'preferences',  to: 'registrations#preferences'
+      get 'more_actions', to: 'registrations#more_actions'
+    end
+
     # get :characters, on: :member <...etc...>
     Rails.application.config.content_types[:all].each do |content_type|
       get content_type.name.downcase.pluralize.to_sym, on: :member
@@ -65,14 +70,16 @@ Rails.application.routes.draw do
       get '/usage',      to: 'data#usage'
       get '/recyclebin', to: 'data#recyclebin'
       get '/archive',    to: 'data#archive'
+      get '/uploads',    to: 'data#uploads'
 
       scope 'export' do
         get '/', to: 'export#index', as: :notebook_export
     
-        get '/outline', to: 'export#outline',             as: :notebook_outline
+        get '/outline',       to: 'export#outline',       as: :notebook_outline
         get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
-        get '/notebook.xml', to: 'export#notebook_xml',   as: :notebook_xml
-        get '/:model.csv', to: 'export#csv',              as: :notebook_csv
+        get '/notebook.xml',  to: 'export#notebook_xml',  as: :notebook_xml
+        get '/notebook.yml',  to: 'export#notebook_yml',  as: :notebook_yml
+        get '/:model.csv',    to: 'export#csv',           as: :notebook_csv
       end
     end
 end
