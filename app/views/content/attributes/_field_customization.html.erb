@@ -18,39 +18,41 @@
     <% end %>
   </div>
 </div>
-<div class="row">
-  <div class="col s12 center grey-text" style="text-transform: uppercase">
-    field type
+<% if false %>
+  <div class="row">
+    <div class="col s12 center grey-text" style="text-transform: uppercase">
+      field type
+    </div>
   </div>
-</div>
-<div class="row">
-  <% if AttributeField::SETTABLE_FIELD_TYPES.include?(field.field_type) %>
-    <form action="#">
-      <div class="col s12 m12 l6">
-        <% AttributeField::SETTABLE_FIELD_TYPES.each do |field_type| %>
-          <div>
-            <label>
-              <input name="group1" type="radio" <%= 'checked' if field_type == field.field_type %> />
-              <span>
-                <i class="material-icons right">help</i>
-                <%= field_type.humanize %>
-              </span>
-            </label>
-          </div>
-        <% end %>
-      </div>
-      <div class="col s12 m12 l6">
-        Changing a field type is a dangerous operation if you have any answers to this field on any pages already. It's recommended to create
-        a new field instead of changing an existing one.
-        <div>
-          <input type="submit" value="Change field type" class="btn white black-text" />
+  <div class="row">
+    <% if AttributeField::SETTABLE_FIELD_TYPES.include?(field.field_type) %>
+      <form action="#">
+        <div class="col s12 m12 l6">
+          <% AttributeField::SETTABLE_FIELD_TYPES.each do |field_type| %>
+            <div>
+              <label>
+                <input name="group1" type="radio" <%= 'checked' if field_type == field.field_type %> />
+                <span>
+                  <i class="material-icons right">help</i>
+                  <%= field_type.humanize %>
+                </span>
+              </label>
+            </div>
+          <% end %>
         </div>
-      </div>
-    </form>
-  <% else %>
-    <p>This is a <strong><%= field.field_type %></strong> field. Its type cannot be changed.
-  <% end %>
-</div>
+        <div class="col s12 m12 l6">
+          Changing a field type is a dangerous operation if you have any answers to this field on any pages already. It's recommended to create
+          a new field instead of changing an existing one.
+          <div>
+            <input type="submit" value="Change field type" class="btn white black-text" />
+          </div>
+        </div>
+      </form>
+    <% else %>
+      <p>This is a <strong><%= field.field_type %></strong> field. Its type cannot be changed.
+    <% end %>
+  </div>
+<% end %>
 <div class="row">
   <div class="col s12 center grey-text" style="text-transform: uppercase">
     more actions
@@ -82,7 +84,7 @@
           This field cannot be deleted.
         </div>
       <% else %>
-        <div>
+        <div class="right">
           <%= link_to "Delete this field and answers",
             field,
             :class => 'red btn black-text',

@@ -26,7 +26,7 @@ class CategoriesAndFieldsSerializer
             old_column_source: field.old_column_source,
             value: ""
           }
-        }).sort { |a, b| a[:position] <=> b[:position] }
+        }).sort_by(&:position)
       }
     end
 
