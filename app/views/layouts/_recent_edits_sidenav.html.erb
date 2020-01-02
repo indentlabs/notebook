@@ -1,0 +1,28 @@
+<ul id="recent-edits-sidenav" class="sidenav">
+  <li class="blue">
+    <%= link_to main_app.root_path, class: 'logo-container white-text' do %>
+      Recent updates
+    <% end %>
+  </li>
+  <li class="no-padding">
+    <% current_user.recent_content_list(limit: current_user.on_premium_plan? ? 20 : 10).each do |content| %>
+      <% content_class = content.class %>
+      <li>
+        <%= link_to main_app.polymorphic_path(content), class: "#{content_class.color}-text tooltipped", 
+          data: { 
+            position: 'left', 
+            tooltip: "Updated #{time_ago_in_words content.updated_at} ago"
+          } do %>
+          <i class="material-icons left <%= content_class.color %>-text"><%= content_class.icon %></i>
+          <%= content.name %>
+        <% end %>
+      </li>
+    <% end %>
+    <% if current_user.content_count > 0 %>
+      <li class="divider"></li>
+      <li class="grey lighten-3">
+        <%= link_to 'More...', main_app.recent_content_path, class: 'blue-text' %>
+      </li>
+    <% end %>
+  </li>
+</ul>

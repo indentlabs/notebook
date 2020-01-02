@@ -12,6 +12,11 @@ Notebook.init = ->
     edge: 'right',
     draggable: false
   }
+  $('#recent-edits-sidenav').sidenav {
+    closeOnClick: true,
+    edge: 'right',
+    draggable: false
+  }
   $('.slider').slider { height: 200, indicators: false }
   $('.dropdown-trigger').dropdown { coverTrigger: false }
   $('.tooltipped').tooltip { enterDelay: 50 }
