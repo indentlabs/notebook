@@ -21,6 +21,7 @@ Notebook.init = ->
   $('.dropdown-trigger').dropdown { coverTrigger: false }
   $('.tooltipped').tooltip { enterDelay: 50 }
   $('.with-character-counter').characterCounter();
+  $('.materialboxed').materialbox();
 
 # We're using $ -> here for document readiness, but if we ever use Turbolinks we'd want:
 # $(document).on "turbolinks:load", ->
