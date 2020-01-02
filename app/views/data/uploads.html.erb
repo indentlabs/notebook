@@ -13,7 +13,7 @@
   <div class="col s12 m6 l6">
     <span class="grey-text" style="text-transform: uppercase">used</span>
     <div style="font-size: 32px;">
-      <%= Filesize.from("#{current_user.image_uploads.sum(:src_file_size)}KB").pretty %>
+      <%= Filesize.from("#{current_user.image_uploads.sum(:src_file_size) / 1024}KB").pretty %>
     </div>
   </div>
   <div class="col s12 m6 l6">
@@ -50,7 +50,7 @@
           </li>
           <li>
             Using
-            <%= Filesize.from("#{upload.src_file_size}KB") %>
+            <%= Filesize.from("#{upload.src_file_size}KB").pretty %>
           </li>
           <li class="grey-text">
             Image type: <%= upload.src_content_type %>
