@@ -5,7 +5,7 @@ class ContentController < ApplicationController
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
-  before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit]
+  before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit, :index]
 
   before_action :set_attributes_content_type, only: [:attributes]
 
@@ -53,6 +53,9 @@ class ContentController < ApplicationController
 
     @page_tags = @page_tags.uniq(&:tag)
     @content = @content.sort_by(&:name)
+
+    @questioned_content = @content.sample
+    @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
 
     respond_to do |format|
       format.html { render 'content/index' }
@@ -259,10 +262,10 @@ class ContentController < ApplicationController
     cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
     @content.update(cache_params) if cache_params.any? && update_success
 
-    if update_success
+    if update_success 
       successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
-      failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.map(&:messages).to_sentence)
+      failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.to_json)
     end
   end
 
@@ -377,7 +380,7 @@ class ContentController < ApplicationController
     end
     @content_pages["Document"] = current_user.documents
       .with_deleted
-      .where('deleted_at > ?', @maximum_recovery_time.ago)
+      .where('documents.deleted_at > ?', @maximum_recovery_time.ago)
       .includes(:user)
 
     # Override controller

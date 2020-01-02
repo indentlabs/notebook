@@ -98,10 +98,12 @@
                         <i class="material-icons">alarm</i>
                         recoverable for the next <%= distance_of_time_in_words(DateTime.current, content.deleted_at + @maximum_recovery_time) %>
                       </p><br />
-                      <p class="timestamp tooltipped left" data-position="left" data-delay="500" data-tooltip="<%= (content.image_uploads.sum(:src_file_size) / 1000.0).round(1) %> KB used" style="font-size: 80%">
-                        <i class="material-icons">image</i>
-                        <%= pluralize content.image_uploads.count, 'uploaded image' %>
-                      </p><br />
+                      <% if content.respond_to?(:image_uploads) %>
+                        <p class="timestamp tooltipped left" data-position="left" data-delay="500" data-tooltip="<%= (content.image_uploads.sum(:src_file_size) / 1000.0).round(1) %> KB used" style="font-size: 80%">
+                          <i class="material-icons">image</i>
+                          <%= pluralize content.image_uploads.count, 'uploaded image' %>
+                        </p><br />
+                      <% end %>
                     </div>
                     <br />
                     <div>

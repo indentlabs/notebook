@@ -5,7 +5,8 @@ ruby "~> 2.6"
 gem 'rails'
 gem 'puma', '~> 3.12'
 gem 'puma-heroku'
-gem 'bootsnap', require: false
+# gem 'bootsnap', require: false
+gem 'sprockets', '~> 3.7.2'
 
 # Storage
 gem 'aws-sdk', '~> 3.0'
@@ -63,6 +64,7 @@ gem 'd3-rails'
 # Analytics
 gem 'mixpanel-ruby'
 gem 'slack-notifier'
+gem 'barnes'
 
 # Apps
 #gem 'easy_translate'
@@ -123,7 +125,7 @@ group :test do
   gem 'rspec-rails'
   gem 'webmock'
   gem 'rubocop', require: false
-  gem 'ruby-prof', '1.0.0'
+  gem 'ruby-prof', '1.1.0'
   gem 'shoulda-matchers', '~> 4.1'
   gem 'rails-controller-testing'
 end

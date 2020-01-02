@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_17_232203) do
+ActiveRecord::Schema.define(version: 2020_01_01_072655) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -2637,6 +2637,7 @@ ActiveRecord::Schema.define(version: 2019_12_17_232203) do
     t.string "inspirations"
     t.string "other_names"
     t.string "favorite_quote"
+    t.string "occupation"
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["id", "deleted_at"], name: "index_users_on_id_and_deleted_at"
