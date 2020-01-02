@@ -26,7 +26,26 @@ class CategoriesAndFieldsSerializer
             old_column_source: field.old_column_source,
             value: ""
           }
-        }).sort_by(&:position)
+        }).sort do |a, b|
+           if a[:position] && b[:position]	
+            a[:position] <=> b[:position]
+
+          else	
+            a_value = case a[:type]	
+              when 'name'     then 0	
+              when 'universe' then 1	
+              else 2 # 'text_area', 'link'	
+            end	
+
+            b_value = case b[:type]	
+              when 'name'     then 0	
+              when 'universe' then 1	
+              else 2	
+            end	
+            
+            a_value <=> b_value	
+          end	
+        end
       }
     end
 
