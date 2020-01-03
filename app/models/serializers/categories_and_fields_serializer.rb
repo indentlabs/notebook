@@ -6,9 +6,10 @@ class CategoriesAndFieldsSerializer
 
   def initialize(categories)
     self.categories = categories
-    self.fields     = AttributeField.where(attribute_category_id: categories.pluck(:id))
+    categories = categories.dup.to_a
 
-    self.class_name = self.categories.first.entity_type.titleize
+    self.fields     = AttributeField.where(attribute_category_id: categories.map(&:id)).to_a
+    self.class_name = categories.first.entity_type.titleize
 
     self.data = categories.map do |category|
       {
@@ -48,8 +49,6 @@ class CategoriesAndFieldsSerializer
         end
       }
     end
-
-    #raise self.data.inspect
   end
 
   # {
@@ -64,20 +63,4 @@ class CategoriesAndFieldsSerializer
   #     ...
   #   ]
   # }
-  # def old_style_link_fields
-  #   categories = Hash[YAML.load_file(Rails.root.join('config', 'attributes', "#{self.class_name.downcase}.yml")).map do |category_name, details|
-  #     [
-  #       category_name.to_s,
-  #       (details[:attributes] || []).select { |field| field[:field_type] == 'link'}.map do |field|
-  #         {
-  #           id:    field[:name],
-  #           label: field[:label],
-  #           type:  field[:field_type].presence || 'textarea',
-  #           old_column_source: field[:name],
-  #           value: ""
-  #         }
-  #       end
-  #     ]
-  #   end]
-  # end
 end
