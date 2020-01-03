@@ -27,10 +27,15 @@ class AttributeFieldsController < ContentController
     end
 
     if @content.attribute_category_id.nil?
-      category = current_user.attribute_categories.where(label: content_params[:attribute_category] || content_params[:label]).first_or_initialize.tap do |c|
-        c.entity_type = params[:entity_type] || content_params[:entity_type]
-        c.save!
+      category = current_user.attribute_categories.where(id: content_params[:attribute_category_id]).first
+
+      if category.nil?
+        category = current_user.attribute_categories.where(label: content_params[:attribute_category] || content_params[:label]).first_or_initialize.tap do |c|
+          c.entity_type = params[:entity_type] || content_params[:entity_type]
+          c.save!
+        end
       end
+
       @content.attribute_category_id = category.id
     end
 
@@ -71,7 +76,8 @@ class AttributeFieldsController < ContentController
       :attribute_category,
       :name, :field_type,
       :label, :description,
-      :entity_type, :attribute_category_id,
+      :entity_type, 
+      :attribute_category_id,
       :hidden
     ]
   end

@@ -2,6 +2,7 @@ class AttributeCategory < ApplicationRecord
   acts_as_paranoid
 
   validates :name, presence: true
+  # validates :entity_type, presence: true # todo turn this on, but check prod data for exceptions first
 
   belongs_to :user
   has_many   :attribute_fields, dependent: :destroy

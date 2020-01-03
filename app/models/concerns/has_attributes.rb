@@ -23,7 +23,7 @@ module HasAttributes
             old_column_source: field[:name],
             user:              user,
             field_type:        field[:field_type].presence || "text_area",
-            label:             field[:label].presence || 'Untitled field'
+            label:             field[:label].presence      || 'Untitled field'
           )
           af_field
         end if details.key?(:attributes)
