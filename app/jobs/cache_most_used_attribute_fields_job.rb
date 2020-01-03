@@ -12,6 +12,7 @@ class CacheMostUsedAttributeFieldsJob < ApplicationJob
     category_query = category_query.where(entity_type: entity_type)
     
     suggestions = AttributeField.where(attribute_category_id: category_query.pluck(:id))
+      .where.not(label: [nil, ""])
       .group(:label)
       .order('count_id DESC')
       .limit(50)

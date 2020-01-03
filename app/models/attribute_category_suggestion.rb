@@ -8,5 +8,5 @@ class AttributeCategorySuggestion < ApplicationRecord
   SUGGESTIONS_RESULT_COUNT = 100
 
   # Labels to never suggest
-  BLACKLISTED_LABELS = AttributeCategory::SPECIAL_CATEGORY_LABELS
+  BLACKLISTED_LABELS = AttributeCategory::SPECIAL_CATEGORY_LABELS + [nil, ""]
 end

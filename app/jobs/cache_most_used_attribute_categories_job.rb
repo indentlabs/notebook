@@ -6,6 +6,7 @@ class CacheMostUsedAttributeCategoriesJob < ApplicationJob
     puts "Entity type: #{entity_type}"
 
     suggestions = AttributeCategory.where(entity_type: entity_type)
+      .where.not(label: [nil, ""])
       .group(:label)
       .order('count_id DESC')
       .limit(50)
