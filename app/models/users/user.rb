@@ -69,47 +69,44 @@ class User < ApplicationRecord
       message: "can't be larger than 500KB"
     }
 
-  def contributable_universes
-    @user_contributable_universes ||= begin
-      # todo email confirmation needs to happen for data safety / privacy (only verified emails)
-      contributor_ids = Contributor.where('email = ? OR user_id = ?', self.email, self.id).pluck(:universe_id)
-
-      Universe.where(id: contributor_ids)
-    end
+  def my_universe_ids
+    @cached_universe_ids ||= universes.pluck(:id)
   end
 
-  #TODO: rename this to #{content_type}_shared_with_me and only return contributable content that others own
+  def contributable_universes
+    @cached_user_contributable_universes ||= Universe.where(id: contributable_universe_ids)
+  end
+
+  def linkable_universes
+    @cached_linkable_universes ||= Universe.where(id: my_universe_ids + contributable_universes)
+  end
+
+  def contributable_universe_ids
+    # TODO: email confirmation needs to happen for data safety / privacy (only verified emails)
+    @contributable_universe_ids ||= Contributor.where('email = ? OR user_id = ?', self.email, self.id).pluck(:universe_id)
+  end
+
+  # TODO: rename this to #{content_type}_shared_with_me
   Rails.application.config.content_types[:all_non_universe].each do |content_type|
     pluralized_content_type = content_type.name.downcase.pluralize
     define_method "contributable_#{pluralized_content_type}" do
-      contributable_universe_ids = contributable_universes.pluck(:id)
-
       content_type.where(universe_id: contributable_universe_ids)
                   .where.not(user_id: self.id)
     end
   end
 
-  #TODO: rename this to the more descriptive name contributable_#{content_type}
+  # TODO: rename this to the more descriptive name contributable_#{content_type} (except currently in use lol)
   # returns all content of that type that a user can edit/contribute to, even if it's not owned by the user
   Rails.application.config.content_types[:all_non_universe].each do |content_type|
     pluralized_content_type = content_type.name.downcase.pluralize
     define_method "linkable_#{pluralized_content_type}" do
-      my_universe_ids = universes.pluck(:id)
-      contributable_universe_ids = contributable_universes.pluck(:id)
-
+      # We append [0] to the ID list here in case both sets are empty, since IN () is invalid syntax but IN(0) is [and has the same result]
       content_type.where("""
         universe_id IN (#{(my_universe_ids + contributable_universe_ids + [0]).uniq.join(',')})
           OR
         (universe_id IS NULL AND user_id = #{self.id.to_i})
       """)
     end
-  end
-
-  def linkable_universes
-    my_universe_ids = universes.pluck(:id)
-    contributable_universe_ids = contributable_universes.pluck(:id)
-
-    Universe.where(id: my_universe_ids + contributable_universe_ids)
   end
 
   has_many :documents, dependent: :destroy
