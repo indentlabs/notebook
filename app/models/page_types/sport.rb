@@ -23,7 +23,7 @@ class Sport < ActiveRecord::Base
   end
 
   def self.icon
-    'directions_run'
+    'sports_volleyball'
   end
 
   def self.content_name

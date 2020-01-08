@@ -23,7 +23,7 @@ module HasAttributes
             old_column_source: field[:name],
             user:              user,
             field_type:        field[:field_type].presence || "text_area",
-            label:             field[:label].presence || 'Untitled field'
+            label:             field[:label].presence      || 'Untitled field'
           )
           af_field
         end if details.key?(:attributes)
@@ -32,48 +32,46 @@ module HasAttributes
 
     def self.attribute_categories(user, show_hidden: false)
       return [] if ['attribute_category', 'attribute_field'].include?(content_name)
-      # This doesn't work the way I think it does
-      #return @cached_attribute_categories_for_this_content if @cached_attribute_categories_for_this_content
-
-      # Always include  the flatfile categories (but create AR versions if they don't exist)
-      categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
-        category = AttributeCategory.with_deleted.find_or_initialize_by(
-          entity_type: self.content_name,
-          name: category_name.to_s,
-          user: user
-        )
-        # Default new categories to some sane defaults
-        unless category.persisted?
-          category.icon = details[:icon]
-          category.label = details[:label]
-        end
-
-        category.save! if user && category.new_record?
-        category.attribute_fields << details[:attributes].map do |field|
-          af_field = category.attribute_fields.with_deleted.find_or_initialize_by(
-            # label: field[:label],
-            old_column_source: field[:name],
-            user: user,
-            field_type: field[:field_type].presence || "text_area"
-          )
-          if af_field.label.nil?
-            af_field.label = field[:label]
-          end
-          if user && af_field.new_record?
-            af_field.save!
-          end
-          af_field
-        end if details.key?(:attributes)
-
-        if show_hidden
-          category
-        else
-          !!category.hidden ? nil : category
-        end
-      end.compact
 
       # Cache the result in case we call this function multiple times this request
       @cached_attribute_categories_for_this_content = begin
+        # Always include  the flatfile categories (but create AR versions if they don't exist)
+        categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
+          category = AttributeCategory.with_deleted.find_or_initialize_by(
+            entity_type: self.content_name,
+            name: category_name.to_s,
+            user: user
+          )
+          # Default new categories to some sane defaults
+          unless category.persisted?
+            category.icon  = details[:icon]
+            category.label = details[:label]
+          end
+
+          category.save! if user && category.new_record?
+          category.attribute_fields << details[:attributes].map do |field|
+            af_field = category.attribute_fields.with_deleted.find_or_initialize_by(
+              # label: field[:label],
+              old_column_source: field[:name],
+              user: user,
+              field_type: field[:field_type].presence || "text_area"
+            )
+            if af_field.label.nil?
+              af_field.label = field[:label]
+            end
+            if user && af_field.new_record?
+              af_field.save!
+            end
+            af_field
+          end if details.key?(:attributes)
+
+          if show_hidden
+            category
+          else
+            !!category.hidden ? nil : category
+          end
+        end.compact
+
         if categories.first&.user&.present?
           acceptable_hidden_values = show_hidden ? [true, false, nil] : [false, nil]
           categories
@@ -85,7 +83,8 @@ module HasAttributes
               .order('attribute_categories.position, attribute_categories.created_at, attribute_categories.id')
 
             # We need to do something like this, but... not this.
-            #.eager_load(attribute_fields: :attribute_values) # .eager_load(:attribute_fields)
+            #.eager_load(attribute_fields: :attribute_values)
+            #.eager_load(:attribute_fields)
         else
           categories
         end

@@ -5,7 +5,7 @@ class ContentController < ApplicationController
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
-  before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit]
+  before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit, :index]
 
   before_action :set_attributes_content_type, only: [:attributes]
 
@@ -54,6 +54,9 @@ class ContentController < ApplicationController
     @page_tags = @page_tags.uniq(&:tag)
     @content = @content.sort_by(&:name)
 
+    @questioned_content = @content.sample
+    @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
+
     respond_to do |format|
       format.html { render 'content/index' }
       format.json { render json: @content }
@@ -62,7 +65,7 @@ class ContentController < ApplicationController
 
   def show
     content_type = content_type_from_controller(self.class)
-    return redirect_to(root_path) unless valid_content_types.map(&:name).include?(content_type.name)
+    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.map(&:name).include?(content_type.name)
 
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
@@ -377,7 +380,7 @@ class ContentController < ApplicationController
     end
     @content_pages["Document"] = current_user.documents
       .with_deleted
-      .where('deleted_at > ?', @maximum_recovery_time.ago)
+      .where('documents.deleted_at > ?', @maximum_recovery_time.ago)
       .includes(:user)
 
     # Override controller
@@ -385,7 +388,10 @@ class ContentController < ApplicationController
   end
 
   def attributes
-    @attribute_categories = @content_type_class.attribute_categories(current_user, show_hidden: true).order(:position)
+    @attribute_categories = @content_type_class
+      .attribute_categories(current_user, show_hidden: true)
+      .shown_on_template_editor
+      .order(:position)
   end
 
   def api_sort

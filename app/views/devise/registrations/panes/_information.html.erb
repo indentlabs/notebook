@@ -2,7 +2,7 @@
   <div class="col s12 m4 grey-text">
     <h4>Public information</h4>
     <p class="flow-text">
-      This information is visible to other users.
+      This information is visible to other users on <%= link_to 'your profile', current_user %>.
     </p>
   </div>
   <div class="col s12 m8">
@@ -13,49 +13,55 @@
           <%= f.text_field :name, autofocus: true %>
         </div>
 
-        <div class="field">
-          <%= f.label 'Username (users can @mention you with your username on the forums)' %><br />
+        <div class="input-field">
           <%= f.text_field :username, data: { length: 40 }, class: 'with-character-counter' %>
+          <%= f.label 'Username (users can @mention you with your username on the forums)' %><br />
           <small class="help-text">Your Notebook.ai profile will be available at https://www.notebook.ai/@username.</small><br />
           <small class="help-text">Up to 40 numbers, letters, and/or the following symbols are allowed: <strong>- _ $ + ! *</strong></small>
         </div>
       </div>
     </div>
 
-    <% if Flipper.enabled?(:january_release) %>
-      <div class="card">
-        <div class="card-content">
-          <div class="row">
-            <div class="col s12 m6 l4">
-              <label>Your current avatar</label>
-              <br /><br />
-              <%= image_tag current_user.image_url(size=160), class: 'hoverable' %>
+    <div class="card">
+      <div class="card-content">
+        <div class="row">
+          <div class="col s12 m6 l4">
+            <label>Your current avatar</label>
+            <br /><br />
+            <%= image_tag current_user.image_url(size=160), class: 'hoverable' %>
+          </div>
+          <div class="col s12 m6 l8">
+            <label>Upload a new avatar</label>
+            <div class="file-field input-field">
+              <div class="blue btn">
+                <span>Upload</span>
+                <%= f.file_field :avatar %>
+              </div>
+              <div class="file-path-wrapper">
+                <input class="file-path validate" type="text" placeholder="Upload an image">
+              </div>
             </div>
-            <div class="col s12 m6 l8">
-              <label>Upload a new avatar</label>
-              <div class="file-field input-field">
-                <div class="blue btn">
-                  <span>Upload</span>
-                  <%= f.file_field :avatar %>
-                </div>
-                <div class="file-path-wrapper">
-                  <input class="file-path validate" type="text" placeholder="Upload an image">
-                </div>
-              </div>
-              <div class="help-text">
-                Supported file types: .png, .jpg, .jpeg, .gif
-              </div>
+            <div class="help-text">
+              Supported file types: .png, .jpg, .jpeg, .gif
+            </div>
+            <div class="help-text">
+              After selecting an image here, submit your changes with the usual "Save changes" button at the bottom of this page to save it.
             </div>
           </div>
         </div>
       </div>
-    <% end %>
+    </div>
 
     <div class="card">
       <div class="card-content">
         <div class="input-field">
           <%= f.text_area :bio, class: 'materialize-textarea with-character-counter', data: { length: 500 } %>
           <%= f.label 'Bio' %><br />
+        </div>
+
+        <div class="input-field">
+          <%= f.text_field :interests, class: 'materialize-textarea' %>
+          <%= f.label 'Interests' %><br />
         </div>
 
         <div class="input-field">
@@ -69,13 +75,33 @@
         </div>
 
         <div class="input-field">
-          <%= f.text_field :interests, class: 'materialize-textarea' %>
-          <%= f.label 'Interests' %><br />
+          <%= f.text_field :favorite_book, class: 'materialize-textarea' %>
+          <%= f.label 'Favorite book' %><br />
+        </div>
+
+        <div class="input-field">
+          <%= f.text_field :favorite_quote, class: 'materialize-textarea' %>
+          <%= f.label 'Favorite quote' %><br />
+        </div>
+
+        <div class="input-field">
+          <%= f.text_field :inspirations, class: 'materialize-textarea' %>
+          <%= f.label 'Inspirations' %><br />
+        </div>
+
+        <div class="input-field">
+          <%= f.text_field :other_names, class: 'materialize-textarea' %>
+          <%= f.label 'Other names' %><br />
+        </div>
+
+        <div class="input-field">
+          <%= f.text_field :website, class: 'materialize-textarea' %>
+          <%= f.label 'Website' %><br />
         </div>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card yellow lighten-5">
       <div class="card-content">
         <div class="field">
           <%= f.label 'Custom Premium badge text' %><br />
@@ -123,6 +149,11 @@
         <div class="input-field">
           <%= f.text_field :gender, class: 'materialize-textarea' %>
           <%= f.label 'Gender' %><br />
+        </div>
+
+        <div class="input-field">
+          <%= f.text_field :occupation, class: 'materialize-textarea' %>
+          <%= f.label 'Occupation' %><br />
         </div>
       </div>
     </div>

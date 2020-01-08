@@ -77,7 +77,7 @@ When 'I answer the Serendipitous question' do
   @previous_field_value = @model[@modified_field_name]
 
   find(:css, '.content-question-input').set('Content Question Answer')
-  find('.content-question-submit').click
+  find('.js-content-question-submit').click
 end
 
 Then 'that new field should be saved' do

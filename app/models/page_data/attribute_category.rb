@@ -2,6 +2,7 @@ class AttributeCategory < ApplicationRecord
   acts_as_paranoid
 
   validates :name, presence: true
+  # validates :entity_type, presence: true # todo turn this on, but check prod data for exceptions first
 
   belongs_to :user
   has_many   :attribute_fields, dependent: :destroy
@@ -15,6 +16,9 @@ class AttributeCategory < ApplicationRecord
   acts_as_list scope: [:user_id, :entity_type]
 
   before_validation :ensure_name
+
+  SPECIAL_CATEGORY_LABELS = %w(Settings Contributors Gallery Changelog)
+  scope :shown_on_template_editor, -> { where.not(label: SPECIAL_CATEGORY_LABELS) }
 
   def self.color
     'amber'

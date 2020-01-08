@@ -1,13 +1,42 @@
 <% if current_user.content_count > 0 && @content %>
   <div class="row">
     <div class="col s12 m12 l8">
+      <% 2.times do %><br /><% end %>
       <%= render partial: 'cards/serendipitous/content_question', locals: {
         content: @content,
+        field: @attribute_field_to_question,
         redirect_path: prompts_path,
-        show_empty_prompt: true
+        show_empty_prompt: true,
+        expand_by_default: true,
+        show_view_button: false
       } %>
+      <% if @attribute_field_to_question.present? %>
+        <div class="col s12 m6">
+          <%= link_to @content do %>
+            <div class="hoverable card <%= @content.class.color %>">
+              <div class="card-content white-text">
+                <span class="card-title">
+                  View <%= @content.name %>
+                </span>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="col s12 m6">
+          <%= link_to prompts_path do %>
+            <div class="hoverable card orange">
+              <div class="card-content white-text">
+                <span class="card-title">
+                  Skip this prompt
+                </span>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
     </div>
-    <% if @serendipitous_asking_question %>
+
+    <% if @attribute_field_to_question.present? %>
       <div class="col m4 hide-on-med-and-down center">
         <div style="padding: 0 20px; ">
           <h3 class="grey-text text-lighten-1">
@@ -31,32 +60,6 @@
     <% end %>
   </div>
 
-  <% if @serendipitous_asking_question %>
-    <div class="row">
-      <div class="col s12 m4">
-        <%= link_to @content do %>
-          <div class="hoverable card <%= @content.class.color %>">
-            <div class="card-content white-text">
-              <span class="card-title">
-                View <%= @content.name %>
-              </span>
-            </div>
-          </div>
-        <% end %>
-      </div>
-      <div class="col s12 m4">
-        <%= link_to prompts_path do %>
-          <div class="hoverable card orange">
-            <div class="card-content white-text">
-              <span class="card-title">
-                Skip this prompt
-              </span>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    </div>
-  <% end %>
 <% else %>
   <%= image_tag 'tristan/small.png',
     class: 'tooltipped tristan right',
@@ -92,3 +95,5 @@
       <% end %>
     </p>
 <% end %>
+
+<%= render partial: 'javascripts/content_linking' %>

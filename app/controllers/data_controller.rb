@@ -9,6 +9,9 @@ class DataController < ApplicationController
   def archive
   end
 
+  def uploads
+  end
+
   def usage
     @content = current_user.content
   end

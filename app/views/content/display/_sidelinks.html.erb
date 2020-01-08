@@ -28,6 +28,7 @@
     end
   %>
   <% categories.each do |category| %>
+    <% next if category[:name] == 'changelog' %>
     <%
       if creating || editing
         # Show everything on create/edit forms
@@ -56,13 +57,17 @@
     </li>
   <% end %>
 
-  <% if !editing && content.documents.select { |doc| (current_user || User.new).can_read?(doc) }.any? %>
-    <li class="collection-item tab">
-      <a href="#documents_panel" class="">
-        <i class="material-icons left"><%= Document.icon %></i>
-        Documents
-      </a>
-    </li>
+  <% if !creating && !editing %>
+    <% related_documents = content.documents.select { |doc| (current_user || User.new).can_read?(doc) } %>
+    <% if related_documents.any? %>
+      <li class="collection-item tab">
+        <a href="#documents_panel" class="">
+          <i class="material-icons left"><%= Document.icon %></i>
+          Documents
+          <span class="badge"><%= related_documents.count %></span>
+        </a>
+      </li>
+    <% end %>
   <% end %>
 
   <% if user_signed_in? && current_user.id == content.user.id %>

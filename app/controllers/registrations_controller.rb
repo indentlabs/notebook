@@ -2,8 +2,8 @@ class RegistrationsController < Devise::RegistrationsController
   after_action :add_account, only: [:create]
   after_action :attach_avatar, only: [:update]
 
-  before_action :set_navbar_actions, only: [:edit]
-  before_action :set_navbar_color, only: [:edit]
+  before_action :set_navbar_actions, only: [:edit, :preferences, :more_actions]
+  before_action :set_navbar_color, only: [:edit, :preferences, :more_actions]
 
   def new
     super
@@ -13,6 +13,14 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def edit
+    @sidenav_expansion = 'my account'
+  end
+
+  def preferences
+    @sidenav_expansion = 'my account'
+  end
+
+  def more_actions
     @sidenav_expansion = 'my account'
   end
 
@@ -26,7 +34,8 @@ class RegistrationsController < Devise::RegistrationsController
     params.require(:user).permit(
       :name, :email, :username, :password, :password_confirmation, :email_updates, :fluid_preference,
       :bio, :favorite_genre, :favorite_author, :interests, :age, :location, :gender, :forums_badge_text,
-      :keyboard_shortcuts_preference, :avatar
+      :keyboard_shortcuts_preference, :avatar, :favorite_book, :website, :inspirations, :other_names,
+      :favorite_quote, :occupation
     )
   end
 
@@ -34,12 +43,25 @@ class RegistrationsController < Devise::RegistrationsController
     resource.update_without_password(params)
   end
 
+  def after_update_path_for(resource)
+    request.referrer || edit_user_registration_path(resource)
+  end
+
   def set_navbar_color
     @navbar_color = '#000000'
   end
 
   def set_navbar_actions
-    @navbar_actions = []
+    @navbar_actions = [{
+      label: "About you",
+      href: edit_user_registration_path
+    }, {
+      label: "Preferences",
+      href: user_preferences_path(current_user)
+    }, {
+      label: "More...",
+      href: user_more_actions_path(current_user)
+    }]
   end
 
   protected

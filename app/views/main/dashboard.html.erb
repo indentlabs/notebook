@@ -1,65 +1,13 @@
 <div class="row">
-  <div class="col s12 m3">
-    <%= link_to documents_path do %>
-      <div class="hoverable card <%= Document.color %>" style="height: 88px">
-        <div class="card-content white-text">
-          <span class="card-title">
-            <span class="right white-text"><%= @current_user_content['Document'].count %></span>
-            <i class="material-icons left"><%= Document.icon %></i>
-            <span class="hide-on-large-only hide-on-small-only">Docs</span>
-            <span class="hide-on-med-and-down show-on-small">Documents</span>
-          </span>
-        </div>
-      </div>
-    <% end %>
-  </div>
-
-  <div class="col s12 m3">
-    <%= link_to thredded_path do %>
-      <div class="hoverable card blue">
-        <div class="card-content white-text" style="height: 88px">
-          <span class="card-title">
-            <span class="right white-text">
-              <%= @unread_threads %><%= "/#{@unread_private_messages}" if @unread_private_messages > 0 %>
-            </span>
-            <i class="material-icons left">forum</i>
-            <span class="hide-on-large-only hide-on-small-only">Chats</span>
-            <span class="hide-on-med-and-down show-on-small">Discussions</span>
-          </span>
-        </div>
-      </div>
-    <% end %>
-  </div>
-
-  <div class="col s12 m3">
-    <%= link_to prompts_path do %>
-      <div class="hoverable card orange" style="height: 88px">
-        <div class="card-content white-text">
-          <span class="card-title">
-            <i class="material-icons left">lightbulb_outline</i>
-            Prompts
-          </span>
-        </div>
-      </div>
-    <% end %>
-  </div>
-
-  <div class="col s12 m3">
-    <%= link_to current_user.profile_url do %>
-      <div class="hoverable card green" style="height: 88px">
-        <div class="card-content white-text">
-          <span class="card-title">
-            <i class="material-icons left">person</i>
-            Profile
-          </span>
-        </div>
-      </div>
-    <% end %>
-  </div>
+  <%= render partial: 'main/dashboard_header_links' %>
 
   <% if @content %>
     <div class="col s12">
-      <%= render partial: 'cards/serendipitous/content_question', locals: { content: @content } %>
+      <%= render partial: 'cards/serendipitous/content_question', locals: { 
+        content: @content, 
+        field: @attribute_field_to_question, 
+        expand_by_default: true 
+      } %>
     </div>
   <% end %>
 
@@ -67,27 +15,7 @@
     s_width = 12
     m_width = 6
     l_width = 6
-  %>
-
-  <% unless current_user.notice_dismissals.where(notice_id: 2).any? %>
-    <div class="dashboard-row col <%= "s#{s_width} m#{m_width} l#{l_width}" %>">
-      <div class="<%= Document.color %> card" style="height: 260px; margin-bottom: 0;">
-        <div class="card-content">
-          <h4 class="card-title white-text" style="margin-top: 10px">
-            <span class="badge new white black-text left" style="margin: 0; margin-right: 8px; position: relative; top: 4px;"></span>
-            Analyze your writing with world-class AI
-          </h4>
-          <p class="white-text">
-            Premium users can now analyze their documents &mdash; and the characters within them &mdash; for readability, style, and emotion with IBM Watson's AI. 
-          </p>
-        </div>
-        <div class="card-action <%= Document.color %> lighten-1 hoverable">
-          <%= link_to 'Read more', 'https://medium.com/indent-labs/adding-the-ai-to-notebook-ai-950f44d231e5', target: '_new', class: 'white-text' %>
-          <%= link_to 'Dismiss', notice_dismissal_dismiss_path(notice_id: 2), class: 'white-text right' %>
-        </div>
-      </div>
-    </div>
-  <% end %>
+  %>      
 
   <% current_user_universe_ids = current_user.universes.pluck(:id) %>
   <% @activated_content_types.each do |content_type| %>
@@ -129,3 +57,5 @@
 <% 5.times do %>
   <br />
 <% end %>
+
+<%= render partial: 'javascripts/content_linking' %>
