@@ -1,0 +1,55 @@
+<div class="card">
+  <div class="card-content">
+    <div class="card-title">
+      <div class="right">
+        <% account_balance = @stripe_customer.account_balance %>
+        <%= 'Outstanding balance:' if account_balance > 0 %> <%= number_to_currency(account_balance.abs / 100.0) if account_balance != 0 %> <%= 'credit' if account_balance < 0 %>
+      </div>
+      Billing history
+    </div>
+    <table class="bordered">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Amount Billed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @stripe_invoices.first(10).each do |invoice| %>
+          <tr>
+            <td>
+              <%= Time.at(invoice.date).strftime('%B %d, %Y, %I:%M:%S %p') %>
+              <%= '(Pending)' if Time.at(invoice.date) > Time.now %>
+            </td>
+            <td>
+              <ul>
+                <% invoice.lines.data.reverse.each do |line_item| %>
+                  <li>
+                    <%
+                      action = line_item.amount < 0 ? 'prorated' : 'charged'
+                      if line_item.description.nil?
+                        description = [
+                          "a #{line_item.plan.name} subscription ",
+                          "from #{Time.at(line_item.period.start).strftime('%B %d, %Y')} ",
+                          "to #{Time.at(line_item.period.end).strftime('%B %d, %Y')}"
+                        ].join
+                      else
+                        description = line_item.description
+                      end
+                    %>
+
+                    You were <%= action %> <%= number_to_currency(line_item.amount / 100) %> for <%= description %>.
+                  </li>
+                <% end %>
+              </ul>
+            </td>
+            <td>
+              <%= number_to_currency(invoice.amount_due / 100) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

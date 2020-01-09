@@ -47,6 +47,7 @@ Rails.application.routes.draw do
     scope '/billing' do
       #get '/',             to: 'subscriptions#show', as: :billing
       get '/subscription',       to: 'subscriptions#new', as: :subscription
+      get '/history',            to: 'subscriptions#history', as: :billing_history
 
       get '/to/:stripe_plan_id', to: 'subscriptions#change', as: :change_subscription
 

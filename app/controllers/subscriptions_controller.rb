@@ -1,7 +1,10 @@
 class SubscriptionsController < ApplicationController
+  protect_from_forgery except: :stripe_webhook
+
   before_action :authenticate_user!
 
-  protect_from_forgery except: :stripe_webhook
+  before_action :set_navbar_actions
+  before_action :set_sidenav_expansion
 
   # General billing page
   def new
@@ -17,7 +20,13 @@ class SubscriptionsController < ApplicationController
     @active_billing_plan = current_user.active_billing_plans.first || BillingPlan.find_by(stripe_plan_id: 'starter')
 
     @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
-    @stripe_invoices = Stripe::Invoice.list({customer: current_user.stripe_customer_id})
+  end
+
+  def history
+    @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
+    @stripe_invoices = Stripe::Invoice.list({
+      customer: current_user.stripe_customer_id
+    })
   end
 
   def show
@@ -179,5 +188,22 @@ class SubscriptionsController < ApplicationController
 
     # 2. Add a new plan, adding its benefits
     SubscriptionService.add_subscription(user, new_plan_id)
+  end
+
+  def set_sidenav_expansion
+    @sidenav_expansion = 'my account'
+  end
+
+  def set_navbar_actions
+    @navbar_actions = [{
+      label: "Your plan",
+      href: '#'
+    }, {
+      label: "Billing history",
+      href: main_app.billing_history_path
+    }, {
+      label: "Referrals",
+      href: '#'
+    }]
   end
 end
