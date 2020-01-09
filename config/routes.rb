@@ -48,6 +48,7 @@ Rails.application.routes.draw do
       #get '/',             to: 'subscriptions#show', as: :billing
       get '/subscription',       to: 'subscriptions#new', as: :subscription
       get '/history',            to: 'subscriptions#history', as: :billing_history
+      get '/referrals',          to: 'subscriptions#referrals', as: :referrals
 
       get '/to/:stripe_plan_id', to: 'subscriptions#change', as: :change_subscription
 
@@ -61,10 +62,7 @@ Rails.application.routes.draw do
       post '/redeem', to: 'subscriptions#redeem_code'
     end
 
-    scope '/referrals' do
-      get '/',           to: 'referrals#index', as: :referrals
-      get '/scoreboard', to: 'referrals#scoreboard'
-    end
+    # TODO delete deprecated/unused referrals controller/views
 
     scope '/data' do
       get '/',           to: 'data#index',     as: :data_vault

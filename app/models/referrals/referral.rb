@@ -1,9 +1,4 @@
 class Referral < ApplicationRecord
-  def referrer
-    User.find_by(id: self.referrer_id)
-  end
-
-  def referree
-    User.find_by(id: self.referred_id)
-  end
+  belongs_to :referrer, class_name: User.name
+  belongs_to :referree, class_name: User.name, foreign_key: 'referred_id'
 end
