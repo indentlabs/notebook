@@ -60,6 +60,7 @@ class SubscriptionService < Service
   end
 
   def self.cancel_all_existing_subscriptions(user)
+    user.update(selected_billing_plan_id: 1)
     user.active_subscriptions.each do |subscription|
       remove_subscription(user, subscription)
     end
