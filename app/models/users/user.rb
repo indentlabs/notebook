@@ -30,6 +30,7 @@ class User < ApplicationRecord
     BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id) || active_promo_codes.any?
   end
   has_many :promotions, dependent: :destroy
+  has_many :paypal_invoices
 
   has_many :image_uploads, dependent: :destroy
 

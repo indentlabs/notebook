@@ -1,7 +1,7 @@
 class SubscriptionsController < ApplicationController
   protect_from_forgery except: :stripe_webhook
 
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [:redeem]
 
   before_action :set_navbar_actions
   before_action :set_sidenav_expansion
@@ -30,6 +30,58 @@ class SubscriptionsController < ApplicationController
   end
 
   def show
+  end
+
+  def prepay
+    @invoices = current_user.paypal_invoices
+      .where.not(status: 'CREATED')
+      .includes(:page_unlock_promo_code)
+      .order('id desc')
+    
+    promo_code_ids = @invoices.map(&:page_unlock_promo_code_id).flatten
+    @promo_codes = PageUnlockPromoCode.where(id: promo_code_ids)
+  end
+
+  def redeem
+    @code = PageUnlockPromoCode.find_by(code: params[:code])
+  end
+
+  def prepay_redirect_to_paypal
+    months  = params[:months].to_i
+
+    # Create an invoice on Paypal to be paid
+    ppi     = PaypalService.create_prepay_invoice(months)
+
+    # Create a mirrored invoice of our own to mark paid later
+    invoice = PaypalInvoice.create!(
+      user:         current_user,
+      paypal_id:    ppi.id,
+      status:       ppi.status,
+      months:       months,
+      amount_cents: 100 * PaypalService.months_price(months),
+      approval_url: ppi.links.detect { |l| l.rel == "approve" }.href
+    )
+
+    # Send the user off to pay!
+    # redirect_to PaypalService.checkout_url(invoice, prepay_path)
+    redirect_to invoice.approval_url
+  end
+
+  def capture_paypal_prepay
+    # request = PayPalCheckoutSdk::Orders::OrdersCaptureRequest::new("APPROVED-ORDER-ID")
+
+    # begin
+    #     # Call API with your client and get a response for your call
+    #     response = client.execute(request) 
+        
+    #     # If call returns body in response, you can get the deserialized version from the result attribute of the response
+    #     order = response.result
+    #     puts order
+    # rescue PayPalHttp::HttpError => ioe
+    #     # Something went wrong server-side
+    #     puts ioe.status_code
+    #     puts ioe.headers["debug_id"]
+    # end
   end
 
   def change

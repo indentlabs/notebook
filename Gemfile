@@ -26,6 +26,8 @@ gem 'authority'
 # Billing
 gem 'stripe'
 gem 'stripe_event'
+gem 'paypal_client'
+gem 'paypal-checkout-sdk'
 
 # Design
 gem 'material_icons'

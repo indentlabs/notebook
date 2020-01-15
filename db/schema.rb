@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_03_190122) do
+ActiveRecord::Schema.define(version: 2020_01_16_072334) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1664,6 +1664,20 @@ ActiveRecord::Schema.define(version: 2020_01_03_190122) do
     t.integer "past_owner_id"
   end
 
+  create_table "paypal_invoices", force: :cascade do |t|
+    t.string "paypal_id"
+    t.string "status"
+    t.integer "user_id", null: false
+    t.integer "months"
+    t.integer "amount_cents"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "page_unlock_promo_code_id"
+    t.string "approval_url"
+    t.index ["page_unlock_promo_code_id"], name: "index_paypal_invoices_on_page_unlock_promo_code_id"
+    t.index ["user_id"], name: "index_paypal_invoices_on_user_id"
+  end
+
   create_table "planet_countries", force: :cascade do |t|
     t.integer "user_id"
     t.integer "planet_id"
@@ -2858,6 +2872,8 @@ ActiveRecord::Schema.define(version: 2020_01_03_190122) do
   add_foreign_key "location_notable_towns", "users"
   add_foreign_key "notice_dismissals", "users"
   add_foreign_key "page_tags", "users"
+  add_foreign_key "paypal_invoices", "page_unlock_promo_codes"
+  add_foreign_key "paypal_invoices", "users"
   add_foreign_key "planet_countries", "countries"
   add_foreign_key "planet_countries", "planets"
   add_foreign_key "planet_countries", "users"
