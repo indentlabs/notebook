@@ -67,22 +67,23 @@ class SubscriptionsController < ApplicationController
     redirect_to invoice.approval_url
   end
 
-  def capture_paypal_prepay
-    # request = PayPalCheckoutSdk::Orders::OrdersCaptureRequest::new("APPROVED-ORDER-ID")
+  # Delete after a successful release
+  # def capture_paypal_prepay
+  #   request = PayPalCheckoutSdk::Orders::OrdersCaptureRequest::new("APPROVED-ORDER-ID")
 
-    # begin
-    #     # Call API with your client and get a response for your call
-    #     response = client.execute(request) 
+  #   begin
+  #       # Call API with your client and get a response for your call
+  #       response = client.execute(request) 
         
-    #     # If call returns body in response, you can get the deserialized version from the result attribute of the response
-    #     order = response.result
-    #     puts order
-    # rescue PayPalHttp::HttpError => ioe
-    #     # Something went wrong server-side
-    #     puts ioe.status_code
-    #     puts ioe.headers["debug_id"]
-    # end
-  end
+  #       # If call returns body in response, you can get the deserialized version from the result attribute of the response
+  #       order = response.result
+  #       puts order
+  #   rescue PayPalHttp::HttpError => ioe
+  #       # Something went wrong server-side
+  #       puts ioe.status_code
+  #       puts ioe.headers["debug_id"]
+  #   end
+  # end
 
   def change
     new_plan_id = params[:stripe_plan_id]
