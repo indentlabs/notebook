@@ -21,7 +21,8 @@ module HasContent
     # }
     def content(
       content_types: Rails.application.config.content_types[:all].map(&:name),
-      page_scoping:  { user_id: self.id }
+      page_scoping:  { user_id: self.id },
+      universe_id:   nil
     )
       return {} if content_types.empty?
 
@@ -29,7 +30,11 @@ module HasContent
       where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL AND archived_at IS NULL'
 
       sql = content_types.uniq.map do |page_type|
-        "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
+        clause = "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
+        if universe_id.present? && page_type != 'Universe'
+          clause += " AND universe_id = #{universe_id}"
+        end
+        clause
       end.join(' UNION ALL ') + ' ORDER BY page_type, id'
 
       result = ActiveRecord::Base.connection.execute(sql)
