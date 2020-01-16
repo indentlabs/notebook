@@ -1,11 +1,11 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
 
-  before_action :cache_most_used_page_information
-  before_action :cache_forums_unread_counts
-
   before_action :set_universe_session
   before_action :set_universe_scope
+
+  before_action :cache_most_used_page_information
+  before_action :cache_forums_unread_counts
 
   before_action :set_metadata
 
@@ -53,7 +53,7 @@ class ApplicationController < ActionController::Base
     )
 
     # We always want to cache Universes, even if they aren't explicitly turned on.
-    @current_user_content = current_user.content(content_types: @activated_content_types + ['Universe'])
+    @current_user_content = current_user.content(content_types: @activated_content_types + ['Universe'], universe_id: @universe_scope.try(:id))
     @current_user_content['Document'] = current_user.documents
   end
 
