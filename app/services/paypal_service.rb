@@ -6,12 +6,20 @@ class PaypalService < Service
     request = PayPalCheckoutSdk::Orders::OrdersCreateRequest::new
     request.request_body({
       intent: "CAPTURE",
+      application_context: {
+        return_url: 'http://localhost:3000/my/billing/prepay/paid',
+        cancel_url: 'http://localhost:3000/my/billing/prepay',
+        brand_name: 'Notebook.ai by Indent Labs',
+        landing_page: 'BILLING',
+        shipping_preference: 'NO_SHIPPING',
+        user_action: 'PAY_NOW'
+      },
       purchase_units: [{
         amount: {
           currency_code:       "USD",
           value:               PaypalService.months_price(n_months),
           description:         "Notebook.ai Premium (#{n_months} month#{'s' unless n_months == 1})",
-          # payment_instruction: "placeholder text",
+          details:             "Notebook.ai Premium (#{n_months} month#{'s' unless n_months == 1})",
           soft_descriptor:     "Notebook.ai Premium"
         }
       }]
@@ -26,7 +34,7 @@ class PaypalService < Service
       # Something went wrong server-side
       # puts ioe.status_code
       # puts ioe.headers["debug_id"]
-      raise ioe.inspect
+      raise ioe.result.inspect
     end
   end
 
@@ -45,7 +53,7 @@ class PaypalService < Service
       # Something went wrong server-side
       # puts ioe.status_code
       # puts ioe.headers["debug_id"]
-      raise ioe.inspect
+      raise ioe.result.inspect
     end
   end
   
@@ -91,15 +99,15 @@ class PaypalService < Service
     request = OrdersGetRequest::new(order_id)
     response = client::execute(request)
 
-    # puts "Status Code: " + response.status_code.to_s
-    # puts "Status: " + response.result.status
-    # puts "Order ID: " + response.result.id
-    # puts "Intent: " + response.result.intent
-    # puts "Links:"
-    # for link in response.result.links
-    #   puts "\t#{link["rel"]}: #{link["href"]}\tCall Type: #{link["method"]}"
-    # end
-    # puts "Gross Amount: " + response.result.purchase_units[0].amount.currency_code + response.result.purchase_units[0].amount.value
+    puts "Status Code: " + response.status_code.to_s
+    puts "Status: " + response.result.status
+    puts "Order ID: " + response.result.id
+    puts "Intent: " + response.result.intent
+    puts "Links:"
+    for link in response.result.links
+      puts "\t#{link["rel"]}: #{link["href"]}\tCall Type: #{link["method"]}"
+    end
+    puts "Gross Amount: " + response.result.purchase_units[0].amount.currency_code + response.result.purchase_units[0].amount.value
 
     {
       order_id:    response.result.id,
@@ -107,6 +115,12 @@ class PaypalService < Service
       status_code: response.status_code.to_s,
       intent:      response.result.intent
     }
+
+  rescue PayPalHttp::HttpError => ioe
+    # Something went wrong server-side
+    # puts ioe.status_code
+    # puts ioe.headers["debug_id"]
+    raise ioe.result.inspect
   end
 
   def self.months_price(n_months)

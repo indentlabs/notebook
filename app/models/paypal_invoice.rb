@@ -2,14 +2,19 @@ class PaypalInvoice < ApplicationRecord
   belongs_to :user
   belongs_to :page_unlock_promo_code, optional: true
 
-  after_create :watch_for_approval
+  after_create :double_check_webhooks_for_24_hours
 
   def watch_for_approval
-    PaypalAcceptanceWaitJob.perform_later(self.paypal_id)
+    # We queue up a job to manually check this invoice's status after 5 minutes
+    # just in case Paypal never sends us a webhook, or the user never get redirected
+    PayPalPrepayProcessingJob
+      .set(wait: 5.minutes)
+      .perform_later(self.paypal_id)
   end
 
   def capture_funds!
     PaypalService.capture_invoice_funds(self.paypal_id)
+    PayPalPrepayProcessingJob.perform_now(self.paypal_id)
   end
 
   def generate_promo_code!

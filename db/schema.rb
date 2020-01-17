@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_16_072334) do
+ActiveRecord::Schema.define(version: 2020_01_17_224509) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1674,6 +1674,7 @@ ActiveRecord::Schema.define(version: 2020_01_16_072334) do
     t.datetime "updated_at", precision: 6, null: false
     t.integer "page_unlock_promo_code_id"
     t.string "approval_url"
+    t.string "payer_id"
     t.index ["page_unlock_promo_code_id"], name: "index_paypal_invoices_on_page_unlock_promo_code_id"
     t.index ["user_id"], name: "index_paypal_invoices_on_user_id"
   end

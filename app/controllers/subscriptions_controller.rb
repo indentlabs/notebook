@@ -42,6 +42,19 @@ class SubscriptionsController < ApplicationController
     @promo_codes = PageUnlockPromoCode.where(id: promo_code_ids)
   end
 
+  def prepay_paid
+    @invoice = current_user.paypal_invoices.find_by(paypal_id: params[:token])
+    raise "Error: no invoice found" unless @invoice.present?
+
+    # Track Paypal's PayerID returned in case we need it in the future
+    @invoice.update(payer_id: params[:PayerID])
+    
+    # Kick the process job off inline so it'll be done capturing the funds by the time we redirect
+    PayPalPrepayProcessingJob.perform_now(@invoice.paypal_id)
+
+    redirect_to :prepay
+  end
+
   def redeem
     @code = PageUnlockPromoCode.find_by(code: params[:code])
   end

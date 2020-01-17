@@ -1,16 +1,22 @@
-class PaypalAcceptanceWaitJob < ApplicationJob
+class PayPalPrepayProcessingJob < ApplicationJob
   queue_as :paypal
 
   def perform(*args)
     invoice_id = args.shift
     invoice = PaypalInvoice.find_by(paypal_id: invoice_id)
 
+    require 'pry'
+    binding.pry
+    raise "wow"
+
     info = PaypalService.order_info(invoice_id)
     if info[:status] == 'CREATED'
-      # If we're still in a CREATED state, keep requeuing for up to 24 hours
-      if DateTime.current <= invoice.created_at + 24.hours
+      # If we're still in a CREATED state, requeue once after 12 hours, just in case
+      # Paypal's webhook didn't hit our servers.
+      if DateTime.current < invoice.created_at + 24.hours
+        # This is 5 minutes for staging, but should be lowered to like 30-60 seconds, or better yet just trigger off a webhook.
         PaypalAcceptanceWaitJob
-          .set(wait: 30.seconds)
+          .set(wait: 12.hours)
           .perform_later(invoice.paypal_id)
       end
 
@@ -20,10 +26,6 @@ class PaypalAcceptanceWaitJob < ApplicationJob
         invoice.update(status: 'APPROVED')
         invoice.capture_funds!
       end
-
-      PaypalAcceptanceWaitJob
-        .set(wait: 30.seconds)
-        .perform_later(invoice.paypal_id)
 
     elsif info[:status] == 'COMPLETED'
       # Once a payment has been captured, generate the code for use!
