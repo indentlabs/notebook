@@ -4,7 +4,7 @@ class PaypalInvoice < ApplicationRecord
 
   after_create :double_check_webhooks_for_24_hours
 
-  def watch_for_approval
+  def double_check_webhooks_for_24_hours
     # We queue up a job to manually check this invoice's status after 5 minutes
     # just in case Paypal never sends us a webhook, or the user never get redirected
     PayPalPrepayProcessingJob
