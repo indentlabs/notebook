@@ -130,7 +130,7 @@ class PaypalService < Service
       client_secret = Rails.application.config.paypal[:client_secret]
   
       environment = if Rails.env.production? 
-        PayPal::PayPalEnvironment.new(client_id, client_secret)
+        PayPal::LiveEnvironment.new(client_id, client_secret)
       else
         PayPal::SandboxEnvironment.new(client_id, client_secret)
       end
