@@ -3,8 +3,8 @@ class SubscriptionsController < ApplicationController
 
   before_action :authenticate_user!, except: [:redeem]
 
-  before_action :set_navbar_actions
-  before_action :set_sidenav_expansion
+  before_action :set_navbar_actions,    except: [:redeem, :prepay_paid]
+  before_action :set_sidenav_expansion, except: [:redeem, :prepay_paid]
 
   # General billing page
   def new

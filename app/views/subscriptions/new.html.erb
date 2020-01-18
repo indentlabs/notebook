@@ -254,13 +254,40 @@
 </div>
 
 <div class="row">
-  <div class="col s12 m12 l12">
+  <div class="col s12 m12 l6">
+    <%= link_to prepay_path, class: 'black-text' do %>
+      <div class="hoverable card orange lighten-3">
+        <div class="card-content">
+          <div class="card-title">
+            <i class="fa fa-paypal left"></i>
+            New: Purchase Premium with PayPal
+          </div>
+
+          <p>
+            You can now purchase <strong>Premium Codes</strong> with PayPal!
+          </p>
+          <br />
+          <p>
+            These codes let you prepay for however many months of Premium you'd like, and can be activated afterwards
+            whenever you'd like. Each code can be used only once, but can be used by anyone you share the code with &mdash;
+            so they make great gifts, too!
+          </p>
+          <br />
+          <p>
+            Click here to learn more.
+          </p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="col s12 m12 l6">
     <div class="card">
       <div class="card-content">
 
-        <div class="card-title">Have a promotional code to redeem?</div>
+        <div class="card-title">Have a Premium Code to redeem?</div>
         <p>
-          Enter it below to apply it to your account. Codes may only be used once per account.
+          Enter your promotional code below to apply its benefits to your account. Codes may only be used once per account.
         </p>
 
         <%= form_for :promotional_code, url: redeem_path do |form| %>
@@ -277,7 +304,7 @@
 
         <% if current_user.active_promotions.any? %>
           <p>
-            Your active promo codes:
+            Your active <%= pluralize current_user.active_promotions.count, 'promo code' %>:
 
             <ul class="browser-default">
               <% current_user.active_promo_codes.each do |promo_code| %>
