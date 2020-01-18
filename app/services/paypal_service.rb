@@ -127,12 +127,16 @@ class PaypalService < Service
     case n_months
     when 1
       9.00
+      0.09
     when 3
       24.00
+      0.24
     when 6
       48.00
+      0.48
     when 12
       84.00
+      0.84
     else
       raise "Invalid month prepay: #{n_months}"
     end
