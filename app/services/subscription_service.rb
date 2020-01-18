@@ -99,28 +99,23 @@ class SubscriptionService < Service
 
   def self.report_subscription_change_to_slack(user, plan_id)
     return unless Rails.env == 'production'
-    slack_hook = ENV['SLACK_HOOK']
-    return unless slack_hook
 
-    related_plan = BillingPlan.find_by(stripe_plan_id: plan_id)
-
-    notifier = Slack::Notifier.new slack_hook,
-      channel: '#subscriptions',
-      username: 'tristan'
-
+    related_plan        = BillingPlan.find_by(stripe_plan_id: plan_id)
     total_subscriptions = 0
-    monthly_rev_cents = 0
+    monthly_rev_cents   = 0
     billing_plans_with_prices = BillingPlan.where.not(monthly_cents: 0).pluck(:id, :monthly_cents)
-    billing_plans_with_prices.each do |plan_id, monthly_cents|
-      users_on_this_plan  = User.where(selected_billing_plan_id: plan_id).count
+    billing_plans_with_prices.each do |bp_plan_id, monthly_cents|
+      users_on_this_plan  = User.where(selected_billing_plan_id: bp_plan_id).count
       total_subscriptions += users_on_this_plan
       monthly_rev_cents   += monthly_cents * users_on_this_plan
     end
 
-    notifier.ping [
-      "Subscription change for #{user.email.split('@').first}@ (##{user.id})",
-      "To: *#{related_plan.name}* (#{related_plan.stripe_plan_id}) ($#{related_plan.monthly_cents / 100.0}/month)",
-      "#{total_subscriptions} subscriptions total $#{'%.2f' % (monthly_rev_cents / 100)}/mo"
-    ].join("\n")
+    SlackService.post('#subscriptions',
+      [
+        "Subscription change for #{user.email.split('@').first}@ (##{user.id})",
+        "To: *#{related_plan.name}* (#{related_plan.stripe_plan_id}) ($#{related_plan.monthly_cents / 100.0}/month)",
+        "#{total_subscriptions} subscriptions total $#{'%.2f' % (monthly_rev_cents / 100)}/mo"
+      ].join("\n")
+    )
   end
 end

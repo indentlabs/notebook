@@ -13,6 +13,10 @@ class PaypalInvoice < ApplicationRecord
   end
 
   def capture_funds!
+    SlackService.post('#subscriptions',
+      "Capturing $#{self.amount_cents / 100.0} from a prepaid Paypal subscription"
+    )
+
     PaypalService.capture_invoice_funds(self.paypal_id)
     PayPalPrepayProcessingJob.perform_now(self.paypal_id)
   end
