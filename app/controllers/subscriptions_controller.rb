@@ -34,10 +34,12 @@ class SubscriptionsController < ApplicationController
 
   def prepay
     @invoices = current_user.paypal_invoices
-      .where.not(status: 'CREATED')
+      .where(status: 'COMPLETED')
       .includes(:page_unlock_promo_code)
       .order('id desc')
-    
+      .sort_by { |invoice| invoice.page_unlock_promo_code.uses_remaining }
+      .reverse
+
     promo_code_ids = @invoices.map(&:page_unlock_promo_code_id).flatten
     @promo_codes = PageUnlockPromoCode.where(id: promo_code_ids)
   end
