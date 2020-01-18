@@ -99,15 +99,15 @@ class PaypalService < Service
     request = OrdersGetRequest::new(order_id)
     response = client::execute(request)
 
-    puts "Status Code: " + response.status_code.to_s
-    puts "Status: " + response.result.status
-    puts "Order ID: " + response.result.id
-    puts "Intent: " + response.result.intent
-    puts "Links:"
-    for link in response.result.links
-      puts "\t#{link["rel"]}: #{link["href"]}\tCall Type: #{link["method"]}"
-    end
-    puts "Gross Amount: " + response.result.purchase_units[0].amount.currency_code + response.result.purchase_units[0].amount.value
+    # puts "Status Code: " + response.status_code.to_s
+    # puts "Status: " + response.result.status
+    # puts "Order ID: " + response.result.id
+    # puts "Intent: " + response.result.intent
+    # puts "Links:"
+    # for link in response.result.links
+    #   puts "\t#{link["rel"]}: #{link["href"]}\tCall Type: #{link["method"]}"
+    # end
+    # puts "Gross Amount: " + response.result.purchase_units[0].amount.currency_code + response.result.purchase_units[0].amount.value
 
     {
       order_id:    response.result.id,

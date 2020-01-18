@@ -5,10 +5,6 @@ class PayPalPrepayProcessingJob < ApplicationJob
     invoice_id = args.shift
     invoice = PaypalInvoice.find_by(paypal_id: invoice_id)
 
-    require 'pry'
-    binding.pry
-    raise "wow"
-
     info = PaypalService.order_info(invoice_id)
     if info[:status] == 'CREATED'
       # If we're still in a CREATED state, requeue once after 12 hours, just in case
