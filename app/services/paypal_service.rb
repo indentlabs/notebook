@@ -7,8 +7,8 @@ class PaypalService < Service
     request.request_body({
       intent: "CAPTURE",
       application_context: {
-        return_url: 'http://localhost:3000/my/billing/prepay/paid',
-        cancel_url: 'http://localhost:3000/my/billing/prepay',
+        return_url: 'https://www.notebook.ai/my/billing/prepay/paid',
+        cancel_url: 'https://www.notebook.ai/my/billing/prepay',
         brand_name: 'Notebook.ai by Indent Labs',
         landing_page: 'BILLING',
         shipping_preference: 'NO_SHIPPING',
