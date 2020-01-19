@@ -1,0 +1,89 @@
+<% if @code.nil? %>
+  <div class="red white-text card-panel center">
+    This code is no longer valid.
+  </div>
+
+<% elsif @code.uses_remaining.zero?%>
+  <div class="green white-text card-panel center">
+    This code has been activated!
+  </div>
+  <div class="center">
+    <%= link_to 'Click here to customize your notebook pages', customization_content_types_path, class: 'btn btn-large blue white-text' %>
+  </div>
+
+<% else %>
+  <h1 class="animated zoomInUp center">
+    Someone has gifted you<br />
+    <strong><%= pluralize(@code.days_active / 30, 'month') %></strong><br />
+    of Notebook.ai Premium!
+  </h1>
+
+  <div class="row">
+    <div class="col s12">
+      <div class="hoverable card">
+        <div class="card-content">
+          <div class="card-title">Activate your free Premium benefits</div>
+          <p>
+            You can activate your Premium benefits by clicking "Activate" below.
+            Your account will be immediately upgraded for <%= pluralize @code.days_active, 'day' %>
+            and will automatically downgrade back to the free tier afterwards instead of renewing monthly.
+            This code can only be used <%= pluralize @code.uses_remaining, 'time' %>, so thank your friend!
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <% if user_signed_in? %>
+      <% if current_user.on_premium_plan? %>
+        <div class="col s12">
+          <div class="card-panel green white-text">
+            <p>
+              Since you already have a Premium subscription active, you can't activate this code yet.
+              An activation link will appear again whenever you don't have Premium active.
+            </p>
+            <p>
+              Don't worry&mdash;codes don't expire!
+            </p>
+          </div>
+        </div>
+      <% else %>
+        <%= form_for :promotional_code, url: redeem_path do |form| %>
+          <%= form.hidden_field :promo_code, value: @code.code %>
+          <%= form.submit 'Activate', class: 'hoverable btn btn-large blue white-text col s12', data: { confirm: "Are you sure you wish to activate this promo code? It can only be used once." } %>
+        <% end  %>
+      <% end %>
+    <% else %>
+      <div class="center">
+        Before activating your Premium, please either create a Notebook.ai account or log in to an existing one.<br />
+      </div>
+      <div class="col s12 m6">
+        <%= link_to 'Create an account', new_user_registration_path, class: 'hoverable btn-large btn blue white-text', style: 'width: 100%' %>
+      </div>
+      <div class="col s12 m6">
+        <%= link_to 'Log in', new_user_session_path, class: 'hoverable btn-large btn blue white-text', style: 'width: 100%' %>
+      </div>
+    <% end %>
+    <% unless user_signed_in? %>
+      <div class="center">
+        When you're logged in, return to this link so you can redeem this code!
+      </div>
+    <% end %>
+
+  </div>
+
+  <div style="font-size: 1.5em; padding-top: 100px; font-weight: bold" id="how-to-redeem">Notebook pages available with Premium</div>
+  <p>
+    Create any of these pages &mdash; and as many as you need &mdash; to start putting ideas to paper and flesh your world out one piece at a time.
+    Each page comes with a fully-customizable template that will ask you questions to get you started, but stay out of your way when you've got your
+    momentum.
+  </p>
+  <div class="row">
+    <% (Rails.application.config.content_types[:all]).each do |content_type| %>
+      <div class="col l4 m6 s12">
+        <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: content_type } %>
+      </div>
+    <% end %>
+  </div>
+
+
+<% end %>

@@ -26,6 +26,8 @@ gem 'authority'
 # Billing
 gem 'stripe'
 gem 'stripe_event'
+gem 'paypal_client' # todo do we need this gem after all?
+gem 'paypal-checkout-sdk'
 
 # Design
 gem 'material_icons'

@@ -5,7 +5,7 @@
       Customize this category's fields
     </div>
   </li>
-  <% category.attribute_fields.each do |attribute_field| %>
+  <% category.attribute_fields.order(:position).each do |attribute_field| %>
     <%# todo this hack shouldn't be necessary, but for some reason it is #codesmell %>
     <% next unless attribute_field.persisted? %>
 
@@ -13,7 +13,7 @@
       <div class="collapsible-header">
         <span class="sortable-handle"><i class="material-icons grey-text">menu</i></span>
         <i class="material-icons"><%= attribute_field.icon %></i>
-        <span class="js-field-label"><%= attribute_field.label %></span>
+        <span class="js-field-label"><%= attribute_field.label %> <%# attribute_field.position %></span>
         <% if attribute_field.hidden? %>
           <span class="grey-text">&mdash;hidden</span>
         <% end %>

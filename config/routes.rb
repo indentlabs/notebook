@@ -47,6 +47,8 @@ Rails.application.routes.draw do
     scope '/billing' do
       #get '/',             to: 'subscriptions#show', as: :billing
       get '/subscription',       to: 'subscriptions#new', as: :subscription
+      get '/history',            to: 'subscriptions#history', as: :billing_history
+      get '/referrals',          to: 'subscriptions#referrals', as: :referrals
 
       get '/to/:stripe_plan_id', to: 'subscriptions#change', as: :change_subscription
 
@@ -56,14 +58,17 @@ Rails.application.routes.draw do
       # This should probably be a DELETE
       get '/payment_method/delete', to: 'subscriptions#delete_payment_method', as: :delete_payment_method
 
-      # Promotional codes
-      post '/redeem', to: 'subscriptions#redeem_code'
+      # Promotional codes & sharing
+      post '/redeem',    to: 'subscriptions#redeem_code'
+      get '/gift/:code', to: 'subscriptions#redeem', as: :gift_code
+
+      # Prepaying for subscriptions
+      get '/prepay',                    to: 'subscriptions#prepay', as: :prepay
+      get '/prepay/paid',               to: 'subscriptions#prepay_paid'
+      get '/prepay_redirect_to_paypal', to: 'subscriptions#prepay_redirect_to_paypal', as: :prepay_paypal_gateway
     end
 
-    scope '/referrals' do
-      get '/',           to: 'referrals#index', as: :referrals
-      get '/scoreboard', to: 'referrals#scoreboard'
-    end
+    # TODO delete deprecated/unused referrals controller/views
 
     scope '/data' do
       get '/',           to: 'data#index',     as: :data_vault

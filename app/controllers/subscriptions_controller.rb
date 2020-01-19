@@ -1,7 +1,10 @@
 class SubscriptionsController < ApplicationController
-  before_action :authenticate_user!
-
   protect_from_forgery except: :stripe_webhook
+
+  before_action :authenticate_user!, except: [:redeem]
+
+  before_action :set_navbar_actions,    except: [:redeem, :prepay_paid]
+  before_action :set_sidenav_expansion, except: [:redeem, :prepay_paid]
 
   # General billing page
   def new
@@ -17,11 +20,85 @@ class SubscriptionsController < ApplicationController
     @active_billing_plan = current_user.active_billing_plans.first || BillingPlan.find_by(stripe_plan_id: 'starter')
 
     @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
-    @stripe_invoices = Stripe::Invoice.list({customer: current_user.stripe_customer_id})
+  end
+
+  def history
+    @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
+    @stripe_invoices = Stripe::Invoice.list({
+      customer: current_user.stripe_customer_id
+    })
   end
 
   def show
   end
+
+  def prepay
+    @invoices = current_user.paypal_invoices
+      .where(status: 'COMPLETED')
+      .includes(:page_unlock_promo_code)
+      .order('id desc')
+      .sort_by { |invoice| invoice.page_unlock_promo_code.uses_remaining }
+      .reverse
+
+    promo_code_ids = @invoices.map(&:page_unlock_promo_code_id).flatten
+    @promo_codes = PageUnlockPromoCode.where(id: promo_code_ids)
+  end
+
+  def prepay_paid
+    @invoice = current_user.paypal_invoices.find_by(paypal_id: params[:token])
+    raise "Error: no invoice found" unless @invoice.present?
+
+    # Track Paypal's PayerID returned in case we need it in the future
+    @invoice.update(payer_id: params[:PayerID])
+    
+    # Kick the process job off inline so it'll be done capturing the funds by the time we redirect
+    PayPalPrepayProcessingJob.perform_now(@invoice.paypal_id)
+
+    redirect_to :prepay
+  end
+
+  def redeem
+    @code = PageUnlockPromoCode.find_by(code: params[:code])
+  end
+
+  def prepay_redirect_to_paypal
+    months  = params[:months].to_i
+
+    # Create an invoice on Paypal to be paid
+    ppi     = PaypalService.create_prepay_invoice(months)
+
+    # Create a mirrored invoice of our own to mark paid later
+    invoice = PaypalInvoice.create!(
+      user:         current_user,
+      paypal_id:    ppi.id,
+      status:       ppi.status,
+      months:       months,
+      amount_cents: 100 * PaypalService.months_price(months),
+      approval_url: ppi.links.detect { |l| l.rel == "approve" }.href
+    )
+
+    # Send the user off to pay!
+    # redirect_to PaypalService.checkout_url(invoice, prepay_path)
+    redirect_to invoice.approval_url
+  end
+
+  # Delete after a successful release
+  # def capture_paypal_prepay
+  #   request = PayPalCheckoutSdk::Orders::OrdersCaptureRequest::new("APPROVED-ORDER-ID")
+
+  #   begin
+  #       # Call API with your client and get a response for your call
+  #       response = client.execute(request) 
+        
+  #       # If call returns body in response, you can get the deserialized version from the result attribute of the response
+  #       order = response.result
+  #       puts order
+  #   rescue PayPalHttp::HttpError => ioe
+  #       # Something went wrong server-side
+  #       puts ioe.status_code
+  #       puts ioe.headers["debug_id"]
+  #   end
+  # end
 
   def change
     new_plan_id = params[:stripe_plan_id]
@@ -41,6 +118,12 @@ class SubscriptionsController < ApplicationController
     else
       redirect_to(subscription_path, notice: "Your plan was successfully changed.")
     end
+  end
+
+  def referrals
+    @referrals      = current_user.referrals.includes(:referree)
+    @referral_count = @referrals.count
+    @share_link     = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}"
   end
 
   # This isn't actually needed since we change the paid plan to the free plan, but will be needed when we
@@ -179,5 +262,22 @@ class SubscriptionsController < ApplicationController
 
     # 2. Add a new plan, adding its benefits
     SubscriptionService.add_subscription(user, new_plan_id)
+  end
+
+  def set_sidenav_expansion
+    @sidenav_expansion = 'my account'
+  end
+
+  def set_navbar_actions
+    @navbar_actions = [{
+      label: "Your plan",
+      href: main_app.subscription_path
+    }, {
+      label: "Billing history",
+      href: main_app.billing_history_path
+    }, {
+      label: "Referrals",
+      href: main_app.referrals_path
+    }]
   end
 end

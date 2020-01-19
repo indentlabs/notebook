@@ -1,0 +1,209 @@
+<div class="row">
+  <div class="col s12 m10 offset-m1">
+    <div class="hoverable card">
+      <div class="card-content">
+        <div class="card-title">You can now purchase sharable Premium Codes for yourself or others</div>
+        <p>
+          Making a purchase below will generate a single-use code that can be redeemed at any time for a Premium subscription on Notebook.ai.
+          You can purchase these codes for yourself if you'd like to prepay for a certain amount of months without a recurring monthly subscription,
+          or for others if you'd like to gift a Notebook.ai Premium membership to someone else! You can purchase as many codes as you'd like
+          and redeem them whenever you'd like.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h5 class="center grey-text">Choose a Premium Code to purchase</h5>
+<div class="row">
+  <div class="col s12 m6">
+    <%= link_to prepay_paypal_gateway_path(months: 1), class: 'black-text' do %>
+      <div class="hoverable card blue lighten-4" style="height: 170px;">
+        <div class="card-content">
+          <div class="card-title">
+            <i class="material-icons left">star</i>
+            1 month of Premium
+          </div>
+          <p>
+            All Premium features
+            for <strong>$9.00</strong>
+          </p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <div class="col s12 m6">
+    <%= link_to prepay_paypal_gateway_path(months: 3), class: 'black-text' do %>
+      <div class="hoverable card blue lighten-4" style="height: 170px;">
+        <div class="card-content">
+          <div class="card-title">
+            <i class="material-icons left">star</i>
+            3 months of Premium
+          </div>
+          <p>
+            All Premium features
+            for <strong>$24.00</strong><br />
+            (save $3.00 compared to monthly)
+          </p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <div class="col s12 m6">
+    <%= link_to prepay_paypal_gateway_path(months: 6), class: 'black-text' do %>
+      <div class="hoverable card blue lighten-4" style="height: 170px;">
+        <div class="card-content">
+          <div class="card-title">
+            <i class="material-icons left">star</i>
+            6 months of Premium
+          </div>
+          <p>
+            All Premium features
+            for <strong>$48.00</strong><br />
+            (save $6.00 compared to monthly)
+          </p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <div class="col s12 m6">
+    <%= link_to prepay_paypal_gateway_path(months: 12), class: 'black-text' do %>
+      <div class="hoverable card blue lighten-4" style="height: 170px;">
+        <div class="card-content">
+          <div class="card-title">
+            <i class="material-icons left">star</i>
+            12 months of Premium
+          </div>
+          <p>
+            All Premium features
+            for <strong>$84.00</strong><br />
+            (save $24.00 compared to monthly)
+          </p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12 m10 offset-m1">
+    Selecting a package will take you to PayPal to complete your purchase, where you can pay from a PayPal balance or with a credit/debit card. 
+    Afterwards, you will be redirected here where you will find the code you've purchased listed below.
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12">
+    <h5 class="center grey-text">Your purchased Premium codes</h5>
+    <p class="center grey-text">
+      Please note that codes may take up to 5 minutes to appear here after purchase.
+    </p>
+
+    <% if current_user.on_premium_plan? && @invoices.any? %>
+      <div class="card-panel green center">
+        Since you already have Premium features active, you won't be able to activate any codes on this account yet.<br />
+        Activation links will appear again whenever you don't have Premium active.
+      </div>
+    <% end %>
+  </div>
+  <% @invoices.each do |invoice| %>
+    <div class="col s12 m12 l6">
+      <div class="hoverable card medium <%= 'blue lighten-5' if invoice.activateable? %>">
+        <div class="card-content">
+          <div class="card-title">
+            <% if invoice.page_unlock_promo_code&.uses_remaining&.zero? %>
+              <span class="badge orange black-text">used</span>
+            <% end %>
+            <%= pluralize invoice.months, 'month' %> of Premium
+          </div>
+          <p>
+            <% if invoice.page_unlock_promo_code.present? %>
+              <% if invoice.activateable? %>
+                Promo code: <strong><%= invoice.page_unlock_promo_code.code %></strong>
+              <% end %>
+            <% else %>
+              <% if invoice.status == 'APPROVED' %>
+                <em>Processing payment...</em>
+              <% else %>
+                <%= link_to 'Awaiting payment', invoice.approval_url %>
+              <% end %>
+            <% end %>
+          </p>
+          <p class="grey-text">
+            <% unless invoice.page_unlock_promo_code&.uses_remaining&.zero? %>
+              <% if invoice.status == 'CREATED' %>
+                Ready for payment
+              <% else %>
+                Purchased
+              <% end %>
+              <%= time_ago_in_words invoice.created_at %> ago
+            <% end %>
+          </p>
+          <% if invoice.page_unlock_promo_code %>
+            <hr style="margin: 20px 0" />
+            <p>
+              <div>
+                Unlocks these <%= pluralize invoice.page_unlock_promo_code.page_types.count, 'page type' %>
+                for <%= invoice.months * 30 %> days:
+              </div>
+              <% invoice.page_unlock_promo_code.page_types.each do |page_type| %>
+                <% page_type_class = page_type.constantize %>
+                <%= link_to polymorphic_path(page_type_class) do %>
+                  <i class="material-icons <%= page_type_class.color %>-text tooltipped" data-tooltip="<%= page_type.pluralize %>">
+                    <%= page_type_class.icon %>
+                  </i>
+                <% end %>
+              <% end %>
+            </p>
+          <% end %>
+        </div>
+        <% if invoice.activateable? %>
+          <div class="card-action">
+            <%= link_to '#', class: 'btn hoverable black-text white right activator', onclick: 'return false' do %>
+              <i class="material-icons left">share</i>
+              Gift
+            <% end %>
+            <% unless current_user.on_premium_plan? %>
+              <%= form_for :promotional_code, url: redeem_path do |form| %>
+                <%= form.hidden_field :promo_code, value: invoice.page_unlock_promo_code.code %>
+                <%= form.submit 'Activate', class: 'hoverable btn blue white-text', data: { confirm: "Are you sure you wish to activate this promo code? It can only be used once." } %>
+              <% end  %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="card-action">
+            <% if invoice.page_unlock_promo_code && invoice.page_unlock_promo_code.uses_remaining.zero? %>
+              Activated <%= time_ago_in_words invoice.page_unlock_promo_code.promotions.last.created_at %> ago
+            <% else %>
+              <% if invoice.status == 'CREATED' %>
+                Ready for payment
+              <% else %>
+                Purchased
+              <% end %>
+              <%= time_ago_in_words invoice.created_at %> ago
+            <% end %>
+          </div>
+        <% end %>
+        <% if invoice.page_unlock_promo_code.present? %>
+          <div class="card-reveal">
+            <span class="card-title grey-text text-darken-4">
+              Share this code
+              <i class="material-icons right">close</i>
+            </span>
+            <p>
+              Anyone you send this code to can redeem it for their own account, activating the
+              <%= pluralize invoice.months, 'month' %> of Premium immediately. To share it, send
+              the following link with them:
+            </p>
+            <p>
+              <input type="text" value="<%= gift_code_url(code: invoice.page_unlock_promo_code.code, referral: current_user.referral_code.code) %>" onClick="this.select();">
+            </p>
+            <p>
+              If they don't already have a Notebook.ai account, you'll also be credited with their referral.
+            </p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

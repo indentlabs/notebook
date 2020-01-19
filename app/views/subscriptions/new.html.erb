@@ -39,7 +39,7 @@
 
 <div class="row">
   <div class="col s12 m6 l3">
-    <div class="card <%= 'light-blue lighten-5' if @active_billing_plan.stripe_plan_id == 'starter' %>" style="min-height: 470px;">
+    <div class="card <%= 'blue lighten-5' if @active_billing_plan.stripe_plan_id == 'starter' %>" style="min-height: 470px;">
       <div class="card-content">
         <h4 class="center">
           <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">class</i>
@@ -227,9 +227,6 @@
     </div>
   </div>
 
-</div>
-
-<div class="row">
   <div class="col s12 m12 l3 hide-on-small-only"></div>
   <div class="col s12 m12 l9">
     <div class="card">
@@ -248,7 +245,7 @@
         <% else %>
           <div class="card-title">Choose your way to pay</div>
           <p>
-            The standard Premium membership is $9 per month. However, you can save more by choosing to pay every three months or once a year. Purchasing an annual Premium membership gets you the 12th month free!
+            The standard Premium membership is $9 per month. However, you can save more by choosing to pay every three months or once a year.
           </p>
         <% end %>
       </div>
@@ -257,42 +254,40 @@
 </div>
 
 <div class="row">
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Your referral code & stats</div>
-        <div class="row">
-          <div class="col s12">
-            <p class="center">
-              Your referral link is:
-              <% share_link = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}" %>
-              <input type="text"
-                value="<%= share_link %>"
-                style="text-align: center"
-                onClick="this.select();" />
-            </p>
-            <p class="center">
-              <% referrals = current_user.referrals %>
-              <strong><%= pluralize referrals.count, 'user' %></strong>
-              <%= referrals.count == 1 ? 'has' : 'have' %>
-              signed up with your referral code. Rewards are coming soon!
-              <%# link_to 'See what rewards are available.', referrals_path %>
-            </p>
+  <div class="col s12 m12 l6">
+    <%= link_to prepay_path, class: 'black-text' do %>
+      <div class="hoverable card orange lighten-3">
+        <div class="card-content">
+          <div class="card-title">
+            <i class="fa fa-paypal left"></i>
+            New: Purchase Premium with PayPal
           </div>
+
+          <p>
+            You can now purchase <strong>Premium Codes</strong> with PayPal!
+          </p>
+          <br />
+          <p>
+            These codes let you prepay for however many months of Premium you'd like, and can be manually activated at any time. 
+            Each code can be used only once, but can be used by anyone you share the code with &mdash;
+            so they make great gifts, too!
+          </p>
+          <br />
+          <p>
+            Click here to learn more.
+          </p>
         </div>
       </div>
-    </div>
+    <% end %>
   </div>
-</div>
 
-<div class="row">
-  <div class="col s12 m12 l12">
+  <div class="col s12 m12 l6">
     <div class="card">
       <div class="card-content">
 
-        <div class="card-title">Have a promotional code to redeem?</div>
+        <div class="card-title">Have a Premium Code to redeem?</div>
         <p>
-          Enter it below to apply it to your account. Codes may only be used once per account.
+          Enter your promotional code below to apply its benefits to your account. Codes may only be used once per account.
         </p>
 
         <%= form_for :promotional_code, url: redeem_path do |form| %>
@@ -309,7 +304,7 @@
 
         <% if current_user.active_promotions.any? %>
           <p>
-            Your active promo codes:
+            Your active <%= pluralize current_user.active_promotions.count, 'promo code' %>:
 
             <ul class="browser-default">
               <% current_user.active_promo_codes.each do |promo_code| %>
@@ -348,53 +343,6 @@
   <div class="col s12">
     <div class="card">
       <div class="card-content">
-        <div class="card-title">Your payment method</div>
-        <div class="row">
-          <div class="col s12 m6">
-            <p>
-              <strong>For your security, we don't store your payment information on file.</strong><br /><br />
-            </p>
-            <p>
-              Instead, we rely on industry-leading payment processor Stripe to safely and securely process payments and handle your
-              subscription info.
-            </p>
-          </div>
-          <div class="col s12 m6">
-            <% if @stripe_customer.sources.total_count == 0 %>
-              <p>
-                We don't currently have a payment method on file for you. You'll be asked to add one whenever you
-                upgrade, but you can add one at any time here.
-                <br /><br />
-              </p>
-              <p class="center">
-                <%= link_to "Add payment method", payment_info_path, class: 'btn white blue-text' %>
-              </p>
-            <% else %>
-              <p>
-                We have a payment method on file for you through Stripe
-                (<%= @stripe_customer.sources.data[0].brand %> ending in <%= @stripe_customer.sources.data[0].last4 %>),
-                but since we don't store it locally, you cannot edit it. You can choose to add a new one (replacing the old),
-                or delete the existing one.
-              </p>
-            <% end %>
-          </div>
-        </div>
-      </div>
-      <% if @stripe_customer.sources.total_count > 0 %>
-      <div class="card-action">
-                <%= link_to "Add new payment method", payment_info_path %>
-                <%= link_to "Delete existing payment method", delete_payment_method_path %>
-
-      </div>
-      <% end %>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
         <div class="card-title">
           Upload Bandwidth
           <div class="right">
@@ -413,61 +361,5 @@
         </p>
       </div>
     </div>
-  </div>
-</div>
-
-<div class="card">
-  <div class="card-content">
-    <div class="card-title">
-      <div class="right">
-        <% account_balance = @stripe_customer.account_balance %>
-        <%= 'Outstanding balance:' if account_balance > 0 %> <%= number_to_currency(account_balance.abs / 100.0) if account_balance != 0 %> <%= 'credit' if account_balance < 0 %>
-      </div>
-      Billing history
-    </div>
-    <table class="bordered">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Description</th>
-          <th>Amount Billed</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @stripe_invoices.first(10).each do |invoice| %>
-          <tr>
-            <td>
-              <%= Time.at(invoice.date).strftime('%B %d, %Y, %I:%M:%S %p') %>
-              <%= '(Pending)' if Time.at(invoice.date) > Time.now %>
-            </td>
-            <td>
-              <ul>
-                <% invoice.lines.data.reverse.each do |line_item| %>
-                  <li>
-                    <%
-                      action = line_item.amount < 0 ? 'prorated' : 'charged'
-                      if line_item.description.nil?
-                        description = [
-                          "a #{line_item.plan.name} subscription ",
-                          "from #{Time.at(line_item.period.start).strftime('%B %d, %Y')} ",
-                          "to #{Time.at(line_item.period.end).strftime('%B %d, %Y')}"
-                        ].join
-                      else
-                        description = line_item.description
-                      end
-                    %>
-
-                    You were <%= action %> <%= number_to_currency(line_item.amount / 100) %> for <%= description %>.
-                  </li>
-                <% end %>
-              </ul>
-            </td>
-            <td>
-              <%= number_to_currency(invoice.amount_due / 100) %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
   </div>
 </div>
