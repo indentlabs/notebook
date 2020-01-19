@@ -126,7 +126,7 @@ class PaypalService < Service
   def self.months_price(n_months)
     case n_months
     when 1
-      0.09
+      9.00
     when 3
       24.00
     when 6
