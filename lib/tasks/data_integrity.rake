@@ -10,6 +10,7 @@ namespace :data_integrity do
       active_billing_plan = BillingPlan.find(billing_plan_id)
 
       User.where(selected_billing_plan_id: billing_plan_id).find_each do |user|
+        puts "Checking user ID #{user.id}"
         stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
         stripe_subscription = stripe_customer.subscriptions.data[0]
 
