@@ -6,9 +6,10 @@ namespace :data_integrity do
 
   desc "Ensure that all Premium subscribers are still Premium in Stripe"
   task subscription_synced_with_stripe: :environment do
-    synced_billing_plan_ids = BillingPlan::PREMIUM_IDS - [BillingPlan.find_by(stipe_plan_id: 'free-for-life')]
+    synced_billing_plan_ids = BillingPlan::PREMIUM_IDS - [BillingPlan.find_by(stripe_plan_id: 'free-for-life')]
     synced_billing_plan_ids.each do |billing_plan_id|
       active_billing_plan = BillingPlan.find(billing_plan_id)
+      puts "Syncing billing plan #{active_billing_plan.stripe_plan_id} (#{active_billing_plan.id})"
 
       User.where(selected_billing_plan_id: billing_plan_id).find_each do |user|
         puts "Checking user ID #{user.id}"
