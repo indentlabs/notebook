@@ -21,7 +21,7 @@ namespace :data_integrity do
         if stripe_subscription.nil?
           should_downgrade_user = true
         else
-          should_downgrade_user = stripe_subscription.items.data.any? do |subscription_item|
+          should_downgrade_user = stripe_subscription.items.data.none? do |subscription_item|
             subscription_item.plan.id == active_billing_plan.stripe_plan_id
           end
         end
