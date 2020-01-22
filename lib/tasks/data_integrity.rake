@@ -14,7 +14,7 @@ namespace :data_integrity do
       puts "Syncing billing plan #{active_billing_plan.stripe_plan_id} (#{active_billing_plan.id})"
 
       User.where(selected_billing_plan_id: billing_plan_id).find_each do |user|
-        puts "Checking user ID #{user.id}"
+        # puts "Checking user ID #{user.id}"
         stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
         stripe_subscription = stripe_customer.subscriptions.data[0]
 
@@ -33,10 +33,10 @@ namespace :data_integrity do
           puts "Downgrading user #{user.email} from #{active_billing_plan.stripe_plan_id} (last logged in #{user.last_sign_in_at.strftime("%F")})"
 
           SlackService.post('#subscriptions', "Automatically downgrading #{user.email} from #{active_billing_plan.stripe_plan_id}")
-          # SubscriptionService.cancel_all_existing_subscriptions(user)
+          SubscriptionService.cancel_all_existing_subscriptions(user)
         end
 
-        # Aggressively throttle (way too much) just to keep Stripe happy if we plan on doing
+        # Aggressively throttle (too much) just to keep Stripe happy if we plan on doing
         # this for every user, every day.
         sleep 1
       end
