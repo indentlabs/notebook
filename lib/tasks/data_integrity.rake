@@ -18,8 +18,12 @@ namespace :data_integrity do
 
         # Go through each of the customer's subscription items and make sure their
         # current billing plan is included as one.
-        should_downgrade_user = stripe_subscription.items.data.any? do |subscription_item|
-          subscription_item.plan.id == active_billing_plan.stripe_plan_id
+        if stripe_subscription.nil?
+          should_downgrade_user = true
+        else
+          should_downgrade_user = stripe_subscription.items.data.any? do |subscription_item|
+            subscription_item.plan.id == active_billing_plan.stripe_plan_id
+          end
         end
 
         if should_downgrade_user
