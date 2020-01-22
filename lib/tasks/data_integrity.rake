@@ -6,6 +6,8 @@ namespace :data_integrity do
 
   desc "Ensure that all Premium subscribers are still Premium in Stripe"
   task subscription_synced_with_stripe: :environment do
+    total_accounts_downgraded_this_run = 0
+
     synced_billing_plan_ids = BillingPlan::PREMIUM_IDS - [BillingPlan.find_by(stripe_plan_id: 'free-for-life').id]
     synced_billing_plan_ids.each do |billing_plan_id|
       active_billing_plan = BillingPlan.find(billing_plan_id)
@@ -27,8 +29,10 @@ namespace :data_integrity do
         end
 
         if should_downgrade_user
-          puts "Downgrading user #{user} from #{active_billing_plan.stripe_plan_id}"
-          SlackService.post('#subscription', "Automatically downgrading #{user} from #{active_billing_plan.stripe_plan_id}")
+          total_accounts_downgraded_this_run += 1
+          puts "Downgrading user #{user.email} from #{active_billing_plan.stripe_plan_id} (last logged in #{user.last_sign_in_at.strftime("%F")})"
+
+          SlackService.post('#subscriptions', "Automatically downgrading #{user.email} from #{active_billing_plan.stripe_plan_id}")
           # SubscriptionService.cancel_all_existing_subscriptions(user)
         end
 
@@ -37,6 +41,8 @@ namespace :data_integrity do
         sleep 1
       end
     end
+
+    SlackService.post('#subscriptions', total_accounts_downgraded_this_run.to_s + " total accounts downgraded from sync.")
   end
 end
 
