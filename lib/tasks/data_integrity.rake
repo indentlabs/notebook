@@ -32,7 +32,7 @@ namespace :data_integrity do
           total_accounts_downgraded_this_run += 1
           puts "Downgrading user #{user.email} from #{active_billing_plan.stripe_plan_id} (last logged in #{user.last_sign_in_at.strftime("%F")})"
 
-          SlackService.post('#subscriptions', "Automatically downgrading #{user.email} from #{active_billing_plan.stripe_plan_id}")
+          SlackService.post('#subscriptions', "Automatically downgrading #{user.email} from #{active_billing_plan.stripe_plan_id}  (last logged in #{user.last_sign_in_at.strftime("%F")})")
           SubscriptionService.cancel_all_existing_subscriptions(user)
         end
 
