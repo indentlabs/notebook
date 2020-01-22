@@ -27,6 +27,7 @@ namespace :data_integrity do
         end
 
         if should_downgrade_user
+          puts "Downgrading user #{user} from #{active_billing_plan.stripe_plan_id}"
           SlackService.post('#subscription', "Automatically downgrading #{user} from #{active_billing_plan.stripe_plan_id}")
           # SubscriptionService.cancel_all_existing_subscriptions(user)
         end
