@@ -253,6 +253,18 @@ class User < ApplicationRecord
     'green'
   end
 
+  def favorite_page_type_color
+    return User.color unless favorite_page_type? && Rails.application.config.content_types[:all].map(&:name).include?(favorite_page_type)
+    
+    favorite_page_type.constantize.color
+  end
+
+  def favorite_page_type_icon
+    return User.icon unless favorite_page_type? && Rails.application.config.content_types[:all].map(&:name).include?(favorite_page_type)
+    
+    favorite_page_type.constantize.icon
+  end
+
   private
 
   # Attributes that are non-public, and should be blacklisted from any public
