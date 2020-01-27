@@ -44,5 +44,19 @@ namespace :data_integrity do
 
     SlackService.post('#subscriptions', total_accounts_downgraded_this_run.to_s + " total accounts downgraded from sync.")
   end
+
+  desc "Clean up old orphaned links on content"
+  task remove_orphaned_page_links: :environment do
+    Rails.application.config.content_relations.each do |page_type, page_type_data|
+      puts "Cleaning orphans for #{page_type}"
+      page_type_data.each do |relation, relation_data|
+        klass        = relation_data[:related_class]
+        reference_id = relation_data[:through_relation].to_s + '_id'
+
+        orphans = klass.where({"#{reference_id}": nil})
+        puts "Orphans for relation #{relation_data[:with]}: #{orphans.count}"
+      end
+    end
+  end
 end
 

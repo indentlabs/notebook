@@ -218,7 +218,6 @@ class ContentController < ApplicationController
 
       successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
-      raise "nope"
       failed_response('new', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.to_json.to_s)
     end
   end
@@ -246,11 +245,11 @@ class ContentController < ApplicationController
       end
     end
 
-    update_page_tags if @content.respond_to?(:page_tags)
+    update_page_tags if @content.respond_to?(:page_tags) 
 
     if @content.user == current_user
       # todo this needs some extra validation probably to ensure each attribute is one associated with this page
-      update_success = @content.update_attributes(content_params)
+      update_success = @content.reload.update_attributes(content_params)
     else
       # Exclude fields only the real owner can edit
       #todo move field list somewhere when it grows
