@@ -6,6 +6,7 @@ class CreateContinents < ActiveRecord::Migration[6.0]
       t.references :universe, null: false, foreign_key: true
       t.datetime :deleted_at
       t.string :privacy
+      t.string :page_type, default: 'Continent'
 
       t.timestamps
     end

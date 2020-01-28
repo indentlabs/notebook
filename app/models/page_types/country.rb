@@ -42,6 +42,6 @@ class Country < ApplicationRecord
   end
 
   def self.icon
-    'explore'
+    'flag'
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_28_231056) do
+ActiveRecord::Schema.define(version: 2020_01_28_233630) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -403,8 +403,10 @@ ActiveRecord::Schema.define(version: 2020_01_28_231056) do
     t.integer "universe_id", null: false
     t.datetime "deleted_at"
     t.string "privacy"
+    t.string "page_type", default: "Continent"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.datetime "archived_at"
     t.index ["universe_id"], name: "index_continents_on_universe_id"
     t.index ["user_id"], name: "index_continents_on_user_id"
   end

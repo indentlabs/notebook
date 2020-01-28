@@ -4,7 +4,7 @@ Checklist to create a new content type:
   - e.g. https://github.com/indentlabs/notebook/issues/258
 
 - Generate models (with non-relation fields)
-  - `rails g model Planet name:string user:references universe:references deleted_at:datetime privacy:string`
+  - `rails g model Planet name:string user:references universe:references deleted_at:datetime archived_at:datetime privacy:string`
   - Edit the migration to add a page_type column with default value Planet
   - `rake db:migrate`
 
@@ -28,6 +28,8 @@ Checklist to create a new content type:
   - add questions for each field to serendipitous_questions
   - add line for each to content_oneliners
   - add content_descriptions (of relatively the same size)
+
+- Restart the server
 
 - Give it a shot through the UI! :)
   - fill in each field to make sure all fields are working/permitted
