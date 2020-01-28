@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_28_174509) do
+ActiveRecord::Schema.define(version: 2020_01_28_231056) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -395,6 +395,18 @@ ActiveRecord::Schema.define(version: 2020_01_28_174509) do
     t.datetime "archived_at"
     t.index ["universe_id"], name: "index_content_pages_on_universe_id"
     t.index ["user_id"], name: "index_content_pages_on_user_id"
+  end
+
+  create_table "continents", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id", null: false
+    t.integer "universe_id", null: false
+    t.datetime "deleted_at"
+    t.string "privacy"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["universe_id"], name: "index_continents_on_universe_id"
+    t.index ["user_id"], name: "index_continents_on_user_id"
   end
 
   create_table "contributors", force: :cascade do |t|
@@ -2786,6 +2798,8 @@ ActiveRecord::Schema.define(version: 2020_01_28_174509) do
   add_foreign_key "content_change_events", "users"
   add_foreign_key "content_pages", "universes"
   add_foreign_key "content_pages", "users"
+  add_foreign_key "continents", "universes"
+  add_foreign_key "continents", "users"
   add_foreign_key "contributors", "universes"
   add_foreign_key "contributors", "users"
   add_foreign_key "country_creatures", "countries"
