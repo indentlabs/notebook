@@ -51,6 +51,10 @@ class ContentController < ApplicationController
       @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
 
+    if params.key?(:favorite_only)
+      @content.select!(&:favorite?)
+    end
+
     @page_tags = @page_tags.uniq(&:tag)
     @content = @content.sort_by {|x| [x.favorite? ? 0 : 1, x.name] }
 

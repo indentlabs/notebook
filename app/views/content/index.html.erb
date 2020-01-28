@@ -39,12 +39,21 @@
 <% elsif @content.empty? %>
 
   <div class="row">
+    <% if @current_user_content.fetch(@content_type_class.name, []).count > 0 %>
+      <div class="col s12 center">
+        <%= render partial: 'content/components/list_filter_bar', locals: { content_type: @content_type_class } %>
+      </div>
+    <% end %>
+
     <div class="col s12 m8 offset-m2">
       <div class="hoverable card center" style="margin: 20px 0 0 0; padding: 50px 0; border-bottom: 10px solid <%= @content_type_class.hex_color %>">
         <h4>
           You haven't created any <%= content_type.pluralize %>
           <% if @universe_scope %>
             in the <%= link_to @universe_scope.name, @universe_scope %> universe
+          <% end %>
+          <% if params.key?(:favorite_only) || params.key?(:slug) %>
+            that match these filters
           <% end %>
           yet!
         </h4>
