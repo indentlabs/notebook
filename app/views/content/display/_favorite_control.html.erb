@@ -9,31 +9,8 @@
 %>
 
 <i class="material-icons right yellow-text favorite-button tooltipped" 
-   data-tooltip="<%= action %> this page">
+   data-tooltip="<%= action %> this page"
+   data-content-id="<%= content.id %>"
+   data-content-class="<%= content.class.name.downcase.pluralize %>">
   <%= icon %>
 </i>
-
-<%= content_for :javascript do %>
-  $('.favorite-button').click(function () {
-    var toggle = $(this);
-    var current_favorite = toggle.text().trim() == 'star';
-
-    if (current_favorite) {
-      toggle.text('star_border');
-      toggle.attr('data-tooltip', 'Favorite this page');
-
-    } else {
-      toggle.text('star');
-      toggle.attr('data-tooltip', 'Unfavorite this page');
-    }
-
-    $.ajax({
-      type: "POST",
-      url: "<%= send("toggle_favorite_" + content.class.name.downcase + "_path", id: content.id) %>",
-      data: { id: <%= content.id %> },
-      success: function () {
-        // console.log("success!");
-      }
-    });
-  });
-<% end %>
