@@ -172,6 +172,17 @@ class DocumentsController < ApplicationController
     end
   end
 
+  def toggle_favorite
+    document = Document.with_deleted.find_or_initialize_by(id: params[:id])
+
+    unless document.updatable_by?(current_user)
+      flash[:notice] = "You don't have permission to edit that!"
+      return redirect_back fallback_location: document
+    end
+
+    document.update!(favorite: !document.favorite)
+  end
+
   def destroy
     if current_user.can_delete?(@document)
       @document.destroy

@@ -77,9 +77,13 @@ $(document).ready(function () {
       toggle.attr('data-tooltip', 'Unfavorite this page');
     }
 
-    $.ajax({
+    post_url = (content_class == 'documents' 
+      ? '/documents/' + content_id + '/toggle_favorite'
+      : "/plan/" + content_class + "/" + content_id + "/toggle_favorite");
+
+      $.ajax({
       type: "POST",
-      url: "/plan/" + content_class + "/" + content_id + "/toggle_favorite",
+      url: post_url,
       data: { id: content_id },
       success: function () {
         // console.log("success!");
