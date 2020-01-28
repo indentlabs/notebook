@@ -5,13 +5,13 @@
     <div class="col s12">
       <%= render partial: 'cards/serendipitous/content_question', locals: { 
         content: @content, 
-        field: @attribute_field_to_question, 
+        field: @attribute_field_to_question,
         expand_by_default: true 
       } %>
     </div>
   <% end %>
 
-  <% unless current_user.notice_dismissals.where(notice_id: 4).any? %>
+  <% if current_user.created_at > 3.months.ago && current_user.notice_dismissals.where(notice_id: 4).none? %>
     <div class="col s12">
       <div class="hoverable card-panel orange lighten-5">
         <%= link_to 'Dismiss this notice.', notice_dismissal_dismiss_path(notice_id: 4), class: 'blue-text right' %>
