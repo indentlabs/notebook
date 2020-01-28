@@ -52,7 +52,7 @@ class ContentController < ApplicationController
     end
 
     @page_tags = @page_tags.uniq(&:tag)
-    @content = @content.sort_by(&:name)
+    @content = @content.sort_by {|x| [x.favorite? ? 0 : 1, x.name] }
 
     @questioned_content = @content.sample
     @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
