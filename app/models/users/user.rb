@@ -151,10 +151,14 @@ class User < ApplicationRecord
       Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_limit: [size, size]).processed, only_path: true)
 
     else # otherwise, grab the default from Gravatar for this email address
-      require 'digest/md5'
+      require 'digest/md5' # todo do we actually need to require this all the time?
       email_md5 = Digest::MD5.hexdigest(email.downcase)
       "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
     end
+
+  rescue ActiveStorage::FileNotFoundError
+    email_md5 = Digest::MD5.hexdigest(email.downcase)
+    "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
   end
 
   # TODO these (3) can probably all be scopes on the related object, no?
