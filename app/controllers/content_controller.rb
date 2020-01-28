@@ -268,6 +268,18 @@ class ContentController < ApplicationController
     end
   end
 
+  def toggle_favorite
+    content_type = content_type_from_controller(self.class)
+    @content = content_type.with_deleted.find(params[:id])
+
+    unless @content.updatable_by?(current_user)
+      flash[:notice] = "You don't have permission to edit that!"
+      return redirect_back fallback_location: @content
+    end
+
+    @content.update!(favorite: !@content.favorite)
+  end
+
   def toggle_archive
     # todo Since this method is triggered via a GET in floating_action_buttons, a malicious user could technically archive
     # another user's content if they're able to send that user to a specifically-crafted URL or inject that URL somewhere on

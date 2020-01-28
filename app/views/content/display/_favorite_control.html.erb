@@ -1,0 +1,41 @@
+<%
+  if content.favorite?
+    icon = 'star'
+    action = 'Unfavorite'
+  else
+    icon = 'star_border'
+    action = 'Favorite'
+  end
+%>
+
+<i class="material-icons right yellow-text favorite-button tooltipped" 
+   data-tooltip="<%= action %> this page">
+  <%= icon %>
+</i>
+
+<%= content_for :javascript do %>
+  $('.favorite-button').click(function () {
+    var toggle = $(this);
+    var current_favorite = toggle.text().trim() == 'star';
+
+    if (current_favorite) {
+      toggle.text('star_border');
+      toggle.attr('data-tooltip', 'Favorite this page');
+
+    } else {
+      toggle.text('star');
+      toggle.attr('data-tooltip', 'Unfavorite this page');
+    }
+
+    console.log('making request');
+    $.ajax({
+      type: "POST",
+      url: "<%= send("toggle_favorite_" + content.class.name.downcase + "_path") %>",
+      data: { id: <%= content.id %> },
+      success: function () {
+        console.log("success!");
+      }
+    });
+    console.log('done');
+  });
+<% end %>
