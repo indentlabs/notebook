@@ -15,6 +15,16 @@ class Continent < ActiveRecord::Base
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
+  relates :landmarks,     with: :continent_landmarks
+  relates :creatures,     with: :continent_creatures
+  relates :floras,        with: :continent_floras
+
+  relates :countries,     with: :continent_countries
+  relates :languages,     with: :continent_languages
+  relates :traditions,    with: :continent_traditions
+  relates :governments,   with: :continent_governments
+  relates :popular_foods, with: :continent_popular_foods
+
   def description
     overview_field_value('Description')
   end

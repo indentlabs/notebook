@@ -4,7 +4,7 @@ Checklist to create a new content type:
   - e.g. https://github.com/indentlabs/notebook/issues/258
 
 - Generate models (with non-relation fields)
-  - `rails g model Planet name:string user:references universe:references deleted_at:datetime archived_at:datetime privacy:string`
+  - `rails g model Planet name:string user:references universe:references deleted_at:datetime archived_at:datetime privacy:string favorite:boolean`
   - Edit the migration to add a page_type column with default value Planet
   - `rake db:migrate`
 
@@ -20,7 +20,13 @@ Checklist to create a new content type:
 - Find and add images to images/card-headers/
   - resize to 600x400 and optimize size to <100kb, ideally <50kb
 
-- Customize groupings in config/attributes/planet.yml
+- Customize categories/fields in config/attributes/continent.yml
+
+- Add links (for each link, do the following)
+  - rails g model ContinentLandmark continent:references landmark:references user:references
+  - relates :landmarks, with: :continent_landmarks
+  - add optional: true on all belongs_to :user
+- Move all link models into models/page_groupers
 
 - Add translations to en.yml
   - class name translations under activerecord.models
@@ -35,3 +41,5 @@ Checklist to create a new content type:
   - fill in each field to make sure all fields are working/permitted
   - make sure new/create and show/edit are working
   - check privacy toggling
+
+- Add lookup indexes on the new table
