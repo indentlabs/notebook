@@ -54,7 +54,8 @@ namespace :data_integrity do
         reference_id = relation_data[:through_relation].to_s + '_id'
 
         orphans = klass.where({"#{reference_id}": nil})
-        puts "Orphans for relation #{relation_data[:with]}: #{orphans.count}"
+        puts "Orphans for relation #{relation_data[:with]}: #{orphans.count} -- deleting them all!"
+        # orphans.destroy_all!
       end
     end
   end

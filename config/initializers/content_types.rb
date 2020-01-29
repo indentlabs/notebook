@@ -25,9 +25,30 @@ Rails.application.config.content_types = {
 
   # These content types require a premium subscription to create
   premium: [
-    Building, Condition, Country, Creature, Deity, Flora, Government, Group, Job, Landmark, Language,
-    Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle,
-    Sport, Food, School, Continent
+    Creature, 
+    Flora, 
+    Planet, 
+    Continent,
+    Country, 
+    Landmark, 
+    Town, 
+    Building, 
+    School,
+    Job,
+    Technology,
+    Vehicle,
+    Condition, 
+    Race, 
+    Deity, 
+    Religion, 
+    Magic, 
+    Government, 
+    Group, 
+    Language,
+    Tradition,
+    Food, 
+    Sport, 
+    Scene, 
   ],
 
   # Content types to label as "new" around the site
