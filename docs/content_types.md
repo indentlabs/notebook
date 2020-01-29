@@ -28,7 +28,8 @@ Checklist to create a new content type:
   - add optional: true on all belongs_to :user
 - Move all link models into models/page_groupers
 - Add relevant links to any existing pages
-  - This will automatically create link fields on all existing templates for users 
+  - Adding ANY fields to .yml will automatically create those fields for all existing users
+    (this seems like something we MIGHT want for links, but probably DON'T want for text fields, so be careful)
 
 - Add translations to en.yml
   - class name translations under activerecord.models
