@@ -15,7 +15,7 @@ module HasContentLinking
 
       # if some_character.siblingships.pluck(:sibling_id).include?(parent_object.id)
       if added_object.send(relation).pluck("#{added_object_ref}_id").include?(parent_object.id)
-        # Two-way relation already exists
+        # Two-way relation already exists, so we don't need to add anything
       else
         # If a two-way relation doesn't already exist, create it
         added_object.send(relation) << relation.to_s.singularize.camelize.constantize.create({
