@@ -30,6 +30,9 @@ Checklist to create a new content type:
 - Add relevant links to any existing pages
   - Adding ANY fields to .yml will automatically create those fields for all existing users
     (this seems like something we MIGHT want for links, but probably DON'T want for text fields, so be careful)
+- Add link attributes to ContinentsController
+- Plus the following, so custom fields work too:
+    custom_attribute_values:           [:name, :value],
 
 - Add translations to en.yml
   - class name translations under activerecord.models

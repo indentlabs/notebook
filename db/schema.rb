@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_29_172155) do
+ActiveRecord::Schema.define(version: 2020_01_29_181300) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -400,7 +400,7 @@ ActiveRecord::Schema.define(version: 2020_01_29_172155) do
   create_table "continent_countries", force: :cascade do |t|
     t.integer "continent_id", null: false
     t.integer "country_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["continent_id"], name: "index_continent_countries_on_continent_id"
@@ -411,7 +411,7 @@ ActiveRecord::Schema.define(version: 2020_01_29_172155) do
   create_table "continent_creatures", force: :cascade do |t|
     t.integer "continent_id", null: false
     t.integer "creature_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["continent_id"], name: "index_continent_creatures_on_continent_id"
@@ -422,7 +422,7 @@ ActiveRecord::Schema.define(version: 2020_01_29_172155) do
   create_table "continent_floras", force: :cascade do |t|
     t.integer "continent_id", null: false
     t.integer "flora_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["continent_id"], name: "index_continent_floras_on_continent_id"
@@ -433,7 +433,7 @@ ActiveRecord::Schema.define(version: 2020_01_29_172155) do
   create_table "continent_governments", force: :cascade do |t|
     t.integer "continent_id", null: false
     t.integer "government_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["continent_id"], name: "index_continent_governments_on_continent_id"
@@ -455,7 +455,7 @@ ActiveRecord::Schema.define(version: 2020_01_29_172155) do
   create_table "continent_languages", force: :cascade do |t|
     t.integer "continent_id", null: false
     t.integer "language_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["continent_id"], name: "index_continent_languages_on_continent_id"
@@ -466,18 +466,17 @@ ActiveRecord::Schema.define(version: 2020_01_29_172155) do
   create_table "continent_popular_foods", force: :cascade do |t|
     t.integer "continent_id", null: false
     t.integer "popular_food_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["continent_id"], name: "index_continent_popular_foods_on_continent_id"
-    t.index ["popular_food_id"], name: "index_continent_popular_foods_on_popular_food_id"
     t.index ["user_id"], name: "index_continent_popular_foods_on_user_id"
   end
 
   create_table "continent_traditions", force: :cascade do |t|
     t.integer "continent_id", null: false
     t.integer "tradition_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["continent_id"], name: "index_continent_traditions_on_continent_id"
@@ -488,7 +487,7 @@ ActiveRecord::Schema.define(version: 2020_01_29_172155) do
   create_table "continents", force: :cascade do |t|
     t.string "name"
     t.integer "user_id", null: false
-    t.integer "universe_id", null: false
+    t.integer "universe_id"
     t.datetime "deleted_at"
     t.string "privacy"
     t.string "page_type", default: "Continent"
@@ -547,10 +546,9 @@ ActiveRecord::Schema.define(version: 2020_01_29_172155) do
   create_table "country_bordering_countries", force: :cascade do |t|
     t.integer "country_id", null: false
     t.integer "bordering_country_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["bordering_country_id"], name: "index_country_bordering_countries_on_bordering_country_id"
     t.index ["country_id"], name: "index_country_bordering_countries_on_country_id"
     t.index ["user_id"], name: "index_country_bordering_countries_on_user_id"
   end
@@ -1813,7 +1811,7 @@ ActiveRecord::Schema.define(version: 2020_01_29_172155) do
   create_table "planet_continents", force: :cascade do |t|
     t.integer "planet_id", null: false
     t.integer "continent_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["continent_id"], name: "index_planet_continents_on_continent_id"
@@ -2930,7 +2928,6 @@ ActiveRecord::Schema.define(version: 2020_01_29_172155) do
   add_foreign_key "continent_languages", "languages"
   add_foreign_key "continent_languages", "users"
   add_foreign_key "continent_popular_foods", "continents"
-  add_foreign_key "continent_popular_foods", "popular_foods"
   add_foreign_key "continent_popular_foods", "users"
   add_foreign_key "continent_traditions", "continents"
   add_foreign_key "continent_traditions", "traditions"
@@ -2939,7 +2936,6 @@ ActiveRecord::Schema.define(version: 2020_01_29_172155) do
   add_foreign_key "continents", "users"
   add_foreign_key "contributors", "universes"
   add_foreign_key "contributors", "users"
-  add_foreign_key "country_bordering_countries", "bordering_countries"
   add_foreign_key "country_bordering_countries", "countries"
   add_foreign_key "country_bordering_countries", "users"
   add_foreign_key "country_creatures", "countries"
