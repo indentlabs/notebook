@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_29_000740) do
+ActiveRecord::Schema.define(version: 2020_01_29_172155) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -542,6 +542,17 @@ ActiveRecord::Schema.define(version: 2020_01_29_000740) do
     t.index ["universe_id"], name: "index_countries_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_countries_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_countries_on_user_id"
+  end
+
+  create_table "country_bordering_countries", force: :cascade do |t|
+    t.integer "country_id", null: false
+    t.integer "bordering_country_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["bordering_country_id"], name: "index_country_bordering_countries_on_bordering_country_id"
+    t.index ["country_id"], name: "index_country_bordering_countries_on_country_id"
+    t.index ["user_id"], name: "index_country_bordering_countries_on_user_id"
   end
 
   create_table "country_creatures", force: :cascade do |t|
@@ -2928,6 +2939,9 @@ ActiveRecord::Schema.define(version: 2020_01_29_000740) do
   add_foreign_key "continents", "users"
   add_foreign_key "contributors", "universes"
   add_foreign_key "contributors", "users"
+  add_foreign_key "country_bordering_countries", "bordering_countries"
+  add_foreign_key "country_bordering_countries", "countries"
+  add_foreign_key "country_bordering_countries", "users"
   add_foreign_key "country_creatures", "countries"
   add_foreign_key "country_creatures", "creatures"
   add_foreign_key "country_creatures", "users"

@@ -10,15 +10,16 @@ class CountriesController < ContentController
       :founding_story, :established_year, :notable_wars,
       :notes, :private_notes,
       :privacy,
-      custom_attribute_values:      [:name, :value],
-      country_towns_attributes:     [:id, :town_id, :_destroy],
-      country_locations_attributes: [:id, :location_id, :_destroy],
-      country_languages_attributes: [:id, :language_id, :_destroy],
-      country_religions_attributes: [:id, :religion_id, :_destroy],
-      country_landmarks_attributes: [:id, :landmark_id, :_destroy],
-      country_creatures_attributes: [:id, :creature_id, :_destroy],
-      country_floras_attributes:    [:id, :flora_id, :_destroy],
-      country_governments_attributes: [:id, :government_id, :_destroy]
+      custom_attribute_values:                [:name, :value],
+      country_towns_attributes:               [:id, :town_id, :_destroy],
+      country_locations_attributes:           [:id, :location_id, :_destroy],
+      country_languages_attributes:           [:id, :language_id, :_destroy],
+      country_religions_attributes:           [:id, :religion_id, :_destroy],
+      country_landmarks_attributes:           [:id, :landmark_id, :_destroy],
+      country_creatures_attributes:           [:id, :creature_id, :_destroy],
+      country_floras_attributes:              [:id, :flora_id, :_destroy],
+      country_governments_attributes:         [:id, :government_id, :_destroy],
+      country_bordering_countries_attributes: [:id, :bordering_country_id, :_destroy]
     ]
   end
 end
