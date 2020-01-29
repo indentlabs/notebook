@@ -27,6 +27,8 @@ Checklist to create a new content type:
   - relates :landmarks, with: :continent_landmarks
   - add optional: true on all belongs_to :user
 - Move all link models into models/page_groupers
+- Add relevant links to any existing pages
+  - This will automatically create link fields on all existing templates for users 
 
 - Add translations to en.yml
   - class name translations under activerecord.models

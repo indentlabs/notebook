@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_29_000115) do
+ActiveRecord::Schema.define(version: 2020_01_29_000740) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1799,6 +1799,17 @@ ActiveRecord::Schema.define(version: 2020_01_29_000115) do
     t.index ["user_id"], name: "index_paypal_invoices_on_user_id"
   end
 
+  create_table "planet_continents", force: :cascade do |t|
+    t.integer "planet_id", null: false
+    t.integer "continent_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["continent_id"], name: "index_planet_continents_on_continent_id"
+    t.index ["planet_id"], name: "index_planet_continents_on_planet_id"
+    t.index ["user_id"], name: "index_planet_continents_on_user_id"
+  end
+
   create_table "planet_countries", force: :cascade do |t|
     t.integer "user_id"
     t.integer "planet_id"
@@ -3033,6 +3044,9 @@ ActiveRecord::Schema.define(version: 2020_01_29_000115) do
   add_foreign_key "page_tags", "users"
   add_foreign_key "paypal_invoices", "page_unlock_promo_codes"
   add_foreign_key "paypal_invoices", "users"
+  add_foreign_key "planet_continents", "continents"
+  add_foreign_key "planet_continents", "planets"
+  add_foreign_key "planet_continents", "users"
   add_foreign_key "planet_countries", "countries"
   add_foreign_key "planet_countries", "planets"
   add_foreign_key "planet_countries", "users"

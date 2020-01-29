@@ -12,6 +12,7 @@ class Planet < ApplicationRecord
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
+  relates :continents,     with: :planet_continents
   relates :countries,      with: :planet_countries
   relates :locations,      with: :planet_locations
   relates :landmarks,      with: :planet_landmarks
