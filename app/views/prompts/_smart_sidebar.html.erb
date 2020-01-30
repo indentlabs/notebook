@@ -1,0 +1,102 @@
+<%# todo extract "sidebar" and call it with @content, then also do the same in documents/components/smart_sidebar %>
+<% serialized_entity = ContentSerializer.new(content) %>
+
+<ul id="quick-reference-<%= content.class.name %>-<%= content.id %>" class="sidenav quick-reference-sidenav">
+  <li>
+    <div class="user-view">
+      <div class="background">
+        <%= image_tag "card-headers/#{content.class.name.downcase.pluralize}.jpg", width: '100%' %>
+      </div>
+      <a href="#name">
+        <h1 class="white-text name bordered-text">
+          <i class="material-icons <%= content.class.color %>-text left">
+            <%= content.class.icon %>
+          </i>
+          <%= content.name %>
+        </h1>
+      </a>
+      <a href="#email">
+        <span class="white-text description bordered-text">
+          <%= truncate content.description %>
+        </span>
+      </a>
+    </div>
+  </li>
+
+  <li><a href="#" class="subheader">Quick-reference</a></li>
+
+  <% serialized_entity.data[:categories].each do |serialized_category| %>
+    <% next if serialized_category[:label].downcase == 'gallery' %>
+    <% next if serialized_category[:label].downcase == 'contributors' %>
+    <li class="no-padding">
+      <ul class="collapsible collapsible-accordion">
+        <li class="bold waves-effect">
+          <a class="collapsible-header" tabindex="0">
+            <i class="material-icons left"><%= serialized_category[:icon] %></i>
+            <%= serialized_category[:label] %>
+            <i class="material-icons chevron">chevron_right</i>
+          </a>
+          <div class="collapsible-body reference-fields-container">
+            <ul class="reference-fields-list selectable">
+              <% any_filled_in_fields = false %>
+              <% serialized_category[:fields].each do |serialized_field| %>
+                <% next unless serialized_field[:value].present? %>
+                <% any_filled_in_fields = true %>
+                <li>
+                  <a href="#" class="subheader"><%= serialized_field[:label] %></a>
+                </li>
+
+                <% if serialized_field[:type] == "text_area" %>
+                  <li><%= serialized_field[:value] %></li>
+                <% elsif serialized_field[:type] == "link" %>
+                  <% serialized_field[:value].each do |related_page| %>
+                    <li>
+                      <%= link_to related_page do %>
+                        <i class="material-icons <%= related_page.class.color %>-text left">
+                          <%= related_page.class.icon %>
+                        </i>
+                        <%= related_page.name %>
+                      <% end %>
+                    </li>
+                  <% end %>
+                <% elsif serialized_field[:type] == "name" %>
+                  <li><%= serialized_field[:value] %></li>
+
+                <% elsif serialized_field[:type] == "universe" %>
+                  <li>
+                    <%= link_to serialized_entity.universe do %>
+                      <i class="material-icons <%= Universe.color %>-text left"><%= Universe.icon %></i>
+                      <%= serialized_entity.universe.name %>
+                    <% end %>
+                  </li>
+                <% end %>
+              <% end %>
+
+              <% if !any_filled_in_fields %>
+                <li>Nothing has been answered in this category... yet!</li>
+              <% end %>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </li>
+  <% end %>
+
+  <li class="divider"></li>
+  <li><a href="#" class="subheader">Actions</a></li>
+
+  <li>
+    <%= link_to polymorphic_path(content), class: "blue-text", target: '_new' do %>
+      <i class="material-icons left <%= content.class.color %>-text"><%= content.class.icon %></i>
+      <i class="material-icons right grey-text">exit_to_app</i>
+      View <%= content.name %>
+    <% end %>
+  </li>
+  <li>
+    <%= link_to edit_polymorphic_path(content), class: "green-text" do %>
+      <i class="material-icons left <%= content.class.color %>-text"><%= content.class.icon %></i>
+      <i class="material-icons right grey-text">exit_to_app</i>
+      Edit <%= content.name %>
+    <% end %>
+  </li>
+</ul>
