@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_29_220952) do
+ActiveRecord::Schema.define(version: 2020_01_30_224044) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -495,6 +495,10 @@ ActiveRecord::Schema.define(version: 2020_01_29_220952) do
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.index ["deleted_at", "id", "universe_id"], name: "index_continents_on_deleted_at_and_id_and_universe_id"
+    t.index ["deleted_at", "id", "user_id"], name: "index_continents_on_deleted_at_and_id_and_user_id"
+    t.index ["deleted_at", "id"], name: "index_continents_on_deleted_at_and_id"
+    t.index ["deleted_at", "user_id"], name: "index_continents_on_deleted_at_and_user_id"
     t.index ["universe_id"], name: "index_continents_on_universe_id"
     t.index ["user_id"], name: "index_continents_on_user_id"
   end

@@ -1,5 +1,9 @@
 <% if current_user.content_count > 0 && @content %>
-  <% 2.times do %><br /><% end %>
+  <br />
+  <div class="grey-text" style="font-size: 20px;">
+    <strong>Writing prompts</strong>
+    from your world
+  </div>
   <div class="row">
     <div class="col s12 m12 l8">
       <%= render partial: 'cards/serendipitous/content_question', locals: {
@@ -12,8 +16,9 @@
       } %>
       
       <p class="grey-text text-lighten-1 center">
-        More types of prompts are coming soon.
+        Don't forget! You can press @ when typing to link to any of your other pages.
       </p>
+      <div class="suggest-answers-container"></div>
     </div>
 
     <% if @attribute_field_to_question.present? %>
@@ -26,7 +31,14 @@
             </div>
           </div>
         <% end %>
-        <%= link_to prompts_path do %>
+        <!--
+        <%= link_to '#', 
+              class: 'js-show-answer-suggestions', 
+              data: {
+                content_type: @content.class.name, 
+                category_id: @attribute_field_to_question.attribute_category_id, 
+                field_label: @attribute_field_to_question.label
+              } do %>
           <div class="hoverable card purple lighten-2">
             <div class="card-content white-text">
               <i class="material-icons right">adjust</i>
@@ -34,11 +46,12 @@
             </div>
           </div>
         <% end %>
+        -->
         <%= link_to prompts_path do %>
           <div class="hoverable card orange">
             <div class="card-content white-text">
               <i class="material-icons right">arrow_forward</i>
-              Skip to next prompt
+              Skip this prompt
             </div>
           </div>
         <% end %>

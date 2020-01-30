@@ -189,11 +189,14 @@ end
   # API Endpoints
   namespace :api do
     namespace :v1 do
-      scope '/fields' do
-        get '/suggest/:entity_type/:category', to: 'attribute_fields#suggest'
-      end
       scope '/categories' do
-        get '/suggest/:entity_type',           to: 'attribute_categories#suggest'
+        get '/suggest/:entity_type',              to: 'attribute_categories#suggest'
+      end
+      scope '/fields' do
+        get '/suggest/:entity_type/:category',    to: 'attribute_fields#suggest'
+      end
+      scope '/answers' do
+        get '/suggest/:entity_type/:field_label', to: 'attributes#suggest'
       end
     end
   end
