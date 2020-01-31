@@ -14,7 +14,7 @@ class UsersController < ApplicationController
   
     @accent_color = @user.favorite_page_type_color
     @accent_icon  = @user.favorite_page_type_icon
-    @favorite_content = @user.send(@user.favorite_page_type.downcase.pluralize).is_public
+    @favorite_content = @user.favorite_page_type? ? @user.send(@user.favorite_page_type.downcase.pluralize).is_public : []
 
     # todo this is really bad and needs redone/improved
     # @stream  = @user.content_change_events.order('updated_at desc').limit(100).group_by do |cce|
