@@ -55,7 +55,7 @@ namespace :data_integrity do
 
         orphans = klass.where({"#{reference_id}": nil})
         puts "Orphans for relation #{relation_data[:with]}: #{orphans.count} -- deleting them all!"
-        # orphans.destroy_all!
+        orphans.destroy_all!
       end
     end
   end

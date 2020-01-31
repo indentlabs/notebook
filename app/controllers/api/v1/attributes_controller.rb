@@ -2,6 +2,8 @@ module Api
   module V1
     class AttributesController < ApiController
       def suggest
+        raise "NotImplementedYet".inspect
+        
         entity_type = params[:entity_type]
         field_label = params[:field_label]
         return unless Rails.application.config.content_types[:all].map(&:name).include?(entity_type)
