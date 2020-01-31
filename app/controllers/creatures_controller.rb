@@ -10,8 +10,8 @@ class CreaturesController < ContentController
       similar_animals symbolisms privacy notes private_notes
       phylum class_string order family genus species
     ) + [
-      custom_attribute_values:      [:name, :value],
-      wildlifeships_attributes:     [:id, :habitat_id, :_destroy],
+      custom_attribute_values:           [:name, :value],
+      wildlifeships_attributes:          [:id, :habitat_id, :_destroy],
       creature_relationships_attributes: [:id, :related_creature_id, :_destroy]
     ]
   end

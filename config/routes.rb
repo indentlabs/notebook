@@ -27,9 +27,12 @@ Rails.application.routes.draw do
     get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
     post '/link_entity',      to: 'documents#link_entity',             on: :collection
 
+    post :toggle_favorite, on: :member
+
     # todo these routes don't belong here and make for awfully weird urls (/documents/:analysis_id/destroy, etc)
     get  '/destroy_analysis', to: 'documents#destroy_analysis',        on: :member
     get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
+
   end
 
   scope '/my' do
@@ -134,15 +137,17 @@ end
       Rails.application.config.content_types[:all_non_universe].each do |content_type|
         get content_type.name.downcase.pluralize.to_sym, on: :member
       end
-      get :changelog,      on: :member
-      get :toggle_archive, on: :member
+      get  :changelog,       on: :member
+      get  :toggle_archive,  on: :member
+      post :toggle_favorite, on: :member
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
     end
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       # resources :characters do
       resources content_type.name.downcase.pluralize.to_sym do
-        get :changelog,      on: :member
-        get :toggle_archive, on: :member
+        get  :changelog,       on: :member
+        get  :toggle_archive,  on: :member
+        post :toggle_favorite, on: :member
         get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
       end
     end
@@ -184,11 +189,14 @@ end
   # API Endpoints
   namespace :api do
     namespace :v1 do
-      scope '/fields' do
-        get '/suggest/:entity_type/:category', to: 'attribute_fields#suggest'
-      end
       scope '/categories' do
-        get '/suggest/:entity_type',           to: 'attribute_categories#suggest'
+        get '/suggest/:entity_type',              to: 'attribute_categories#suggest'
+      end
+      scope '/fields' do
+        get '/suggest/:entity_type/:category',    to: 'attribute_fields#suggest'
+      end
+      scope '/answers' do
+        get '/suggest/:entity_type/:field_label', to: 'attributes#suggest'
       end
     end
   end

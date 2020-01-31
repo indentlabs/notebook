@@ -78,13 +78,14 @@
     </div>
   <% end %>
 
-  <!-- <a class='btn grey lighten-2 black-text tooltipped'
-      href='#'
+  <a class='btn <%= params.key?(:favorite_only) ? 'yellow lighten-3' : 'white' %> black-text tooltipped'
+      href="<%= url_for(params.permit(:universe, :favorite_only).merge({favorite_only: params.key?(:favorite_only) ? nil : 1})) %>"
       data-position="bottom"
       data-delay="500"
-      data-tooltip="Favoriting pages is a new feature coming soon.">
+      data-tooltip="Filter by favorite">
     <i class="material-icons amber-text">star_outline</i>
-  </a> -->
+    <% if params.key?(:favorite_only) %>Favorites<% end %>
+  </a>
 
   &nbsp;
 

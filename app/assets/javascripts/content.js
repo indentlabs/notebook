@@ -59,4 +59,34 @@ $(document).ready(function () {
 
   $('.content-tabs .tab a').first().addClass('red-text');
 
+  $(document).on('click', '.favorite-button', function (evt) {
+    var toggle = $(this);
+    var content_id = $(this).data('content-id');
+    var content_class = $(this).data('content-class');
+    var current_favorite = toggle.text().trim() == 'star';
+
+    if (current_favorite) {
+      toggle.text('star_border');
+      toggle.attr('data-tooltip', 'Favorite this page');
+
+    } else {
+      toggle.text('star');
+      toggle.attr('data-tooltip', 'Unfavorite this page');
+    }
+
+    post_url = (content_class == 'documents' 
+      ? '/documents/' + content_id + '/toggle_favorite'
+      : "/plan/" + content_class + "/" + content_id + "/toggle_favorite");
+
+    $.ajax({
+      type: "POST",
+      url: post_url,
+      data: { id: content_id },
+      success: function () {
+        // console.log("success!");
+      }
+    });
+  });
+
 });
+

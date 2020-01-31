@@ -49,6 +49,7 @@ class Universe < ApplicationRecord
   has_many :sports
   has_many :schools
   has_many :foods
+  has_many :continents
 
   has_many :contributors, dependent: :destroy
 

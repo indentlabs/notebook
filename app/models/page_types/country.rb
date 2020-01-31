@@ -17,13 +17,14 @@ class Country < ApplicationRecord
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   relates :towns, with: :country_towns
-  relates :locations, with: :country_locations
-  relates :languages, with: :country_languages
-  relates :religions, with: :country_religions
-  relates :landmarks, with: :country_landmarks
-  relates :creatures, with: :country_creatures
-  relates :floras,    with: :country_floras
-  relates :governments, with: :country_governments
+  relates :locations,           with: :country_locations
+  relates :languages,           with: :country_languages
+  relates :religions,           with: :country_religions
+  relates :landmarks,           with: :country_landmarks
+  relates :creatures,           with: :country_creatures
+  relates :floras,              with: :country_floras
+  relates :governments,         with: :country_governments
+  relates :bordering_countries, with: :country_bordering_countries
 
   def description
     overview_field_value('Description')
@@ -42,6 +43,6 @@ class Country < ApplicationRecord
   end
 
   def self.icon
-    'explore'
+    'flag'
   end
 end

@@ -17,19 +17,25 @@
 
 <%= content_for :full_width_page_header do %>
   <div style="height: 200px; overflow: hidden;">
-    <%= image_tag "card-headers/users.png" %>
+    <% if @user.favorite_page_type? %>
+      <div class="<%= @accent_color %>" style="height: 300px; width: 100%"></div>
+
+    <% else %>
+      <%= image_tag "card-headers/users.png" %>
+    <% end %>
   </div>
 <% end %>
 
 <div class="row" style="margin-top: -140px;">
-  <div class="col s12 m3">
+  <div class="col s12 m3 l4">
     <%= render partial: 'users/profile/avatar' %>
+    <%= render partial: 'users/profile/favorite_page_type' %>
     <%= render partial: 'users/profile/public_pages' %>
+    <%= render partial: 'users/profile/info' %>
     <%= render partial: 'users/profile/actions' %>
   </div>
 
-  <div class="col s12 m9">
-    <%= render partial: 'users/profile/info' %>
+  <div class="col s12 m9 l8">
     <%= render partial: 'users/profile/recent_activity' %>
   </div>
 </div>

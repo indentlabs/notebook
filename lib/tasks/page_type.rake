@@ -16,14 +16,14 @@ namespace :page_type do
     editable_fields = klass.columns.map(&:name) - %w(id deleted_at created_at updated_at user_id)
     editable_fields.map!(&:to_sym)
 
-    # Move model from models/ to models/content_types/
+    # Move model from models/ to models/page_types/
     # (we write the file in the next step; this just removes the original)
     puts "Removing base model at models/#{page_type.downcase}.rb"
     `rm app/models/#{page_type.downcase}.rb`
 
     # Add concerns to new model
-    puts "Writing class definition to app/models/content_types/#{page_type.downcase}.rb"
-    #TODO: read from content_types/_template.erb or something?
+    puts "Writing class definition to app/models/page_types/#{page_type.downcase}.rb"
+    #TODO: read from page_types/_template.erb or something?
     class_definition = """
 class #{page_type} < ActiveRecord::Base
   acts_as_paranoid
@@ -57,7 +57,7 @@ class #{page_type} < ActiveRecord::Base
   end
 end
     """
-    File.open("app/models/content_types/#{page_type.downcase}.rb", 'w') do |file|
+    File.open("app/models/page_types/#{page_type.downcase}.rb", 'w') do |file|
       file.write(class_definition)
     end
 

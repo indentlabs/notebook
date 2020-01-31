@@ -1,7 +1,11 @@
 <% if current_user.content_count > 0 && @content %>
+  <br />
+  <div class="grey-text" style="font-size: 20px;">
+    <strong>Writing prompts</strong>
+    from your world
+  </div>
   <div class="row">
     <div class="col s12 m12 l8">
-      <% 2.times do %><br /><% end %>
       <%= render partial: 'cards/serendipitous/content_question', locals: {
         content: @content,
         field: @attribute_field_to_question,
@@ -10,55 +14,54 @@
         expand_by_default: true,
         show_view_button: false
       } %>
-      <% if @attribute_field_to_question.present? %>
-        <div class="col s12 m6">
-          <%= link_to @content do %>
-            <div class="hoverable card <%= @content.class.color %>">
-              <div class="card-content white-text">
-                <span class="card-title">
-                  View <%= @content.name %>
-                </span>
-              </div>
-            </div>
-          <% end %>
-        </div>
-        <div class="col s12 m6">
-          <%= link_to prompts_path do %>
-            <div class="hoverable card orange">
-              <div class="card-content white-text">
-                <span class="card-title">
-                  Skip this prompt
-                </span>
-              </div>
-            </div>
-          <% end %>
-        </div>
-      <% end %>
+      
+      <p class="grey-text text-lighten-1 center">
+        Don't forget! You can press @ when typing to link to any of your other pages.
+      </p>
+      <div class="suggest-answers-container"></div>
     </div>
 
     <% if @attribute_field_to_question.present? %>
-      <div class="col m4 hide-on-med-and-down center">
-        <div style="padding: 0 20px; ">
-          <h3 class="grey-text text-lighten-1">
-            <small>From</small>
-            <br />
-            Your world
-          </h3>
-          <p class="grey-text text-lighten-1 flow-text">
-            This writing prompt was generated automatically from the pages in your notebook.
-          </p>
-          <p class="grey-text text-lighten-1">
-            More types of prompts are coming soon.
-          </p>
-          <!-- <ul class="grey-text lighten-3">
-            <li>
-              <%= link_to 'View my prompt settings', '#' %>
-            </li>
-          </ul> -->
-        </div>
+      <div class="col m12 l4">
+        <%= link_to @content, class: 'entity-trigger sidenav-trigger', data: { target: "quick-reference-#{@content.class.name}-#{@content.id}"} do %>
+          <div class="hoverable card <%= @content.class.color %>">
+            <div class="card-content white-text">
+              <i class="material-icons right">vertical_split</i>
+              Quick-reference <%= @content.name %>
+            </div>
+          </div>
+        <% end %>
+        <!--
+        <%= link_to '#', 
+              class: 'js-show-answer-suggestions', 
+              data: {
+                content_type: @content.class.name, 
+                category_id: @attribute_field_to_question.attribute_category_id, 
+                field_label: @attribute_field_to_question.label
+              } do %>
+          <div class="hoverable card purple lighten-2">
+            <div class="card-content white-text">
+              <i class="material-icons right">adjust</i>
+              View answer suggestions
+            </div>
+          </div>
+        <% end %>
+        -->
+        <%= link_to prompts_path do %>
+          <div class="hoverable card orange">
+            <div class="card-content white-text">
+              <i class="material-icons right">arrow_forward</i>
+              Skip this prompt
+            </div>
+          </div>
+        <% end %>
+
       </div>
     <% end %>
   </div>
+
+  <%= render partial: 'javascripts/content_linking' %>
+  <%= render partial: 'prompts/smart_sidebar', locals: { content: @content } %>
 
 <% else %>
   <%= image_tag 'tristan/small.png',
@@ -67,33 +70,32 @@
       position: 'left',
       enterDelay: '500',
       tooltip: "Hey, I'm Tristan! Once you've created some pages in your digital notebook, I'll come up with some writing prompts for you!"
-    } %>
-    <h5>Worldbuilding prompts</h5>
-    <p>
-      <% if current_user.content_count.zero? %>
-        Once you've created some ideas in Notebook.ai, you can visit this page for writing prompts set in your world.
-        They'll star your characters, in your locations, using your items, seeing your creatures, practicing your religions, and so on &mdash; so check back frequently for the latest prompts just for you!
+    }
+  %>
+  <h5>Worldbuilding prompts</h5>
+  <p>
+    <% if current_user.content_count.zero? %>
+      Once you've created some ideas in Notebook.ai, you can visit this page for writing prompts set in your world.
+      They'll star your characters, in your locations, using your items, seeing your creatures, practicing your religions, and so on &mdash; so check back frequently for the latest prompts just for you!
+    <% else %>
+      It looks like
+      <% if @universe_scope.present? %>
+        <%= link_to @universe_scope.name, @universe_scope %>
       <% else %>
-        It looks like
-        <% if @universe_scope.present? %>
-          <%= link_to @universe_scope.name, @universe_scope %>
-        <% else %>
-          your world
-        <% end %>
-        is pretty fleshed out already, and you've answered all the questions I've come up with so far.
-        Check back later and I might have a writing prompt for you, but I bet I can come up with some sooner if you
-        <% new_content = (current_user.createable_content_types - [Universe]).sample %>
-        <%= link_to new_polymorphic_path(new_content) do %>
-          create
-          <% if current_user.send(new_content.name.downcase.pluralize).any? %>
-            another
-          <% else %>
-            <%= %w(a e i o u).include?(new_content.name.downcase[0]) ? 'an' : 'a' %>
-          <% end %>
-          <%= new_content.name.downcase %>!
-        <% end %>
+        your world
       <% end %>
-    </p>
+      is pretty fleshed out already, and you've answered all the questions I've come up with so far.
+      Check back later and I might have a writing prompt for you, but I bet I can come up with some sooner if you
+      <% new_content = (current_user.createable_content_types - [Universe]).sample %>
+      <%= link_to new_polymorphic_path(new_content) do %>
+        create
+        <% if current_user.send(new_content.name.downcase.pluralize).any? %>
+          another
+        <% else %>
+          <%= %w(a e i o u).include?(new_content.name.downcase[0]) ? 'an' : 'a' %>
+        <% end %>
+        <%= new_content.name.downcase %>!
+      <% end %>
+    <% end %>
+  </p>
 <% end %>
-
-<%= render partial: 'javascripts/content_linking' %>

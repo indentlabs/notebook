@@ -51,8 +51,12 @@ class ContentController < ApplicationController
       @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
 
+    if params.key?(:favorite_only)
+      @content.select!(&:favorite?)
+    end
+
     @page_tags = @page_tags.uniq(&:tag)
-    @content = @content.sort_by(&:name)
+    @content = @content.sort_by {|x| [x.favorite? ? 0 : 1, x.name] }
 
     @questioned_content = @content.sample
     @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
@@ -218,7 +222,6 @@ class ContentController < ApplicationController
 
       successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
-      raise "nope"
       failed_response('new', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.to_json.to_s)
     end
   end
@@ -246,11 +249,11 @@ class ContentController < ApplicationController
       end
     end
 
-    update_page_tags if @content.respond_to?(:page_tags)
+    update_page_tags if @content.respond_to?(:page_tags) 
 
     if @content.user == current_user
       # todo this needs some extra validation probably to ensure each attribute is one associated with this page
-      update_success = @content.update_attributes(content_params)
+      update_success = @content.reload.update_attributes(content_params)
     else
       # Exclude fields only the real owner can edit
       #todo move field list somewhere when it grows
@@ -267,6 +270,18 @@ class ContentController < ApplicationController
     else
       failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.to_json)
     end
+  end
+
+  def toggle_favorite
+    content_type = content_type_from_controller(self.class)
+    @content = content_type.with_deleted.find(params[:id])
+
+    unless @content.updatable_by?(current_user)
+      flash[:notice] = "You don't have permission to edit that!"
+      return redirect_back fallback_location: @content
+    end
+
+    @content.update!(favorite: !@content.favorite)
   end
 
   def toggle_archive
