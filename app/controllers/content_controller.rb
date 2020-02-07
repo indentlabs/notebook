@@ -539,7 +539,7 @@ class ContentController < ApplicationController
           redirect_to url, notice: notice
         end
       }
-      format.json { render json: @content || {}, status: :success }
+      format.json { render json: @content || {}, status: :ok }
     end
   end
 

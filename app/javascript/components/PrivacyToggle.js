@@ -25,15 +25,21 @@ class PrivacyToggle extends React.Component {
     var new_privacy_setting = (this.state.privacy == 'public' ? 'private' : 'public');
     console.log('changing privacy to --> ' + new_privacy_setting);
 
-    // await axios.patch(
-    //   this.props.submit_path,
-    //   { 
-    //     [this.props.content.page_type.toLowerCase()]: {
-    //       privacy: this.state.privacy
-    //     } 
-    //   },
-    //   { headers: { 'Content-Type': 'application/json' } }
-    // );
+    await axios.patch(
+      this.props.submit_path,
+      { 
+        [this.props.content.page_type.toLowerCase()]: {
+          privacy: new_privacy_setting
+        } 
+      },
+      { 
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept':       'application/json'
+        }
+      }
+    );
+    console.log('done sending update');
 
     this.setState({ privacy: new_privacy_setting })
   }
