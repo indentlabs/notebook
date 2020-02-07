@@ -8,27 +8,46 @@
     <div class="row">
       <div class="input-field col s12">
         <input type="text" id="share_url" readonly onclick="this.focus();this.select()" value="<%= polymorphic_url(shared_content) %>">
-        <label for="share_url">Share URL</label>
+        <label for="share_url">Public URL (only accessible when this page is public)</label>
       </div>
     </div>
 
     <% if current_user && shared_content.user == current_user %>
-
       <div class="row">
-        <p class="col s12">To be shareable, content must either be public <strong>or</strong> in a public Universe.</p>
+        <p class="col s12 center">To be shareable, content must either be public <strong>or</strong> in a public Universe.</p>
       </div>
 
-      <% if ((shared_content.respond_to? :universe) && shared_content.universe.present?) %>
-        <div class="row">
-          <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content.universe } %>
-        </div>
-      <% end %>
+      <div class="row">
+        <% if ((shared_content.respond_to? :universe) && shared_content.universe.present?) %>
+          <div class="col s12 m12 l6">
+            <div class="card purple lighten-4">
+              <div class="card-content">
+                <div class="card-title">Universe-wide sharing</div>
+                <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content.universe } %>
+                <div class="clearfix">&nbsp;</div>
+              </div>
+            </div>
+          </div>
+        <% end %>
 
-      <% if shared_content.respond_to? :privacy %>
-        <div class="row">
-          <%= render partial: 'content/form/privacy_toggle', locals: { content: shared_content } %>
-        </div>
-      <% end %>
+        <% if shared_content.respond_to? :privacy %>
+          <div class="col s12 m12 l6">
+            <div class="card red lighten-4">
+              <div class="card-content">
+                <div class="card-title">Page-specific sharing</div>
+                <%= 
+                  react_component("PrivacyToggle", {
+                    content:     shared_content.attributes.slice('id', 'name', 'page_type', 'privacy'),
+                    submit_path: polymorphic_path(shared_content),
+                    csrf_token:  form_authenticity_token
+                  })
+                %>
+              </div>
+            </div>
+            <%# render partial: 'content/form/privacy_toggle', locals: { content: shared_content } %>
+          </div>
+        <% end %>
+      </div>
 
       <% if shared_content.is_a?(Universe) %>
         <div class="row">
@@ -39,13 +58,15 @@
         </div>
       <% end %>
 
-      <div class="row">
-        <p class="col s12" style='text-align: center'>
-          <%= link_to 'https://medium.com/indent-labs/privacy-on-notebook-ai-how-it-works-c23a59faeae2', class: 'btn btn-small blue lighten-1', target: '_new' do %>
-            Click here to learn more about sharing pages on Notebook.ai
-          <% end %>
-        </p>
-      </div>
+      <!--
+        <div class="row">
+          <p class="col s12" style='text-align: center'>
+            <%= link_to 'https://medium.com/indent-labs/privacy-on-notebook-ai-how-it-works-c23a59faeae2', class: 'btn btn-small blue lighten-1', target: '_new' do %>
+              Click here to learn more about sharing pages on Notebook.ai
+            <% end %>
+          </p>
+        </div>
+      -->
 
     <% else %>
 

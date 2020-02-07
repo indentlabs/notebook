@@ -253,11 +253,11 @@ class ContentController < ApplicationController
 
     if @content.user == current_user
       # todo this needs some extra validation probably to ensure each attribute is one associated with this page
-      update_success = @content.reload.update_attributes(content_params)
+      update_success = @content.reload.update(content_params)
     else
       # Exclude fields only the real owner can edit
       #todo move field list somewhere when it grows
-      update_success = @content.update_attributes(content_params.except(:universe_id))
+      update_success = @content.update(content_params.except(:universe_id))
     end
 
     cache_params = {}
