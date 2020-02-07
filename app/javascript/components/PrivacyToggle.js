@@ -1,3 +1,16 @@
+/*
+  Usage:
+  <%= 
+    react_component("PrivacyToggle", {
+      content:       content.attributes.slice('id', 'name', 'page_type', 'privacy'),
+      content_icon:  content.class.icon,
+      content_color: content.class.color,
+      submit_path:   polymorphic_path(content),
+      csrf_token:    form_authenticity_token
+    })
+  %>
+*/
+
 import React     from "react"
 import PropTypes from "prop-types"
 
@@ -16,8 +29,6 @@ class PrivacyToggle extends React.Component {
     this.state = {
       privacy: this.props.content.privacy
     };
-    // this.autosave = this.autosave.bind(this);
-
     axios.defaults.headers.common['X-CSRF-TOKEN'] = this.props.csrf_token;
   }
 
@@ -39,21 +50,17 @@ class PrivacyToggle extends React.Component {
         }
       }
     );
-    console.log('done sending update');
 
     this.setState({ privacy: new_privacy_setting })
   }
 
   render () {
     return (
-      <form data-model={this.props.content.page_type} 
-            action={this.props.submit_path} 
-            data-remote="true"
-            method="post">
-
         <FormControl component="fieldset">
           <FormLabel component="legend">
-            <i className="material-icons red-text left">person</i>
+            <i className={`material-icons ${this.props.content_color}-text left`}>
+              {this.props.content_icon}
+            </i>
             {this.props.content.name}'s privacy:
           </FormLabel>
           <RadioGroup 
@@ -92,19 +99,20 @@ class PrivacyToggle extends React.Component {
           </FormHelperText>
           */}
         </FormControl>
-      </form>
     );
   }
 }
 
 PrivacyToggle.propTypes = {
-  content:     PropTypes.exact({
-    id:          PropTypes.number,
-    name:        PropTypes.string,
-    page_type:   PropTypes.string,
-    privacy:     PropTypes.string
+  content:       PropTypes.exact({
+    id:             PropTypes.number.isRequired,
+    name:           PropTypes.string.isRequired,
+    page_type:      PropTypes.string.isRequired,
+    privacy:        PropTypes.string.isRequired
   }).isRequired,
-  submit_path: PropTypes.string.isRequired
+  content_icon:  PropTypes.string.isRequired,
+  content_color: PropTypes.string.isRequired,
+  submit_path:   PropTypes.string.isRequired
 };
 
 export default PrivacyToggle;
