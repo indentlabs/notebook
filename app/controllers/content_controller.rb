@@ -199,7 +199,7 @@ class ContentController < ApplicationController
       'content_type': content_type.name
     }) if Rails.env.production?
 
-    if @content.update_attributes(content_params)
+    if @content.update(content_params)
       cache_params = {}
       cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField].include?(@content.class)
       cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
