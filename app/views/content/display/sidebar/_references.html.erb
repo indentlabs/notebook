@@ -1,0 +1,27 @@
+<%
+  creating = defined?(creating) && creating
+  editing  = defined?(editing)  && editing
+%>
+
+<%
+  raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
+%>
+
+<ul class="collection content-tabs">
+  <li class="active center grey-text" style="text-transform: uppercase;">
+    References
+  </li>
+
+  <% if !creating && !editing %>
+    <% related_documents = content.documents.select { |doc| (current_user || User.new).can_read?(doc) } %>
+    <% if related_documents.any? %>
+      <li class="collection-item tab">
+        <a href="#documents_panel" class="">
+          <i class="material-icons left"><%= Document.icon %></i>
+          Documents
+          <span class="badge"><%= related_documents.count %></span>
+        </a>
+      </li>
+    <% end %>
+  <% end %>
+</ul>

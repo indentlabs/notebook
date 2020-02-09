@@ -12,7 +12,7 @@
 
   <main>
     <%= yield :full_width_page_header %>
-    <div class="container<% if (user_signed_in? && current_user.fluid_preference) || request.env['REQUEST_PATH'].start_with?('/forum/') %>-fluid<% end %>">
+    <div class="container<% if (user_signed_in? && current_user.fluid_preference) || request.env['REQUEST_PATH'].start_with?('/forum/') || @full_width_page_override %>-fluid<% end %>">
       <%= render 'cards/ui/alert' %>
       <%= render 'cards/ui/notice' %>
       <div class="row">
@@ -23,7 +23,7 @@
     </div>
   </main>
 
-  <%= react_component("Footer") unless defined?(@show_footer) && !@show_footer %>
+  <%= react_component("Footer")      unless defined?(@show_footer) && !@show_footer %>
   <%= render 'layouts/quick_add_fab' unless defined?(@show_footer) && !@show_footer %>
 
   <script type="text/javascript">

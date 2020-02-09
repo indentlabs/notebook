@@ -67,7 +67,7 @@ class ContentController < ApplicationController
     end
   end
 
-  def show
+  def show    
     content_type = content_type_from_controller(self.class)
     return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.map(&:name).include?(content_type.name)
 
@@ -79,19 +79,14 @@ class ContentController < ApplicationController
 
     @serialized_content = ContentSerializer.new(@content)
 
-    if user_signed_in?
-      @navbar_actions << {
-        label: @serialized_content.name,
-        href: main_app.polymorphic_path(@content)
-      }
-
-      @navbar_actions << {
-        label: 'Changelog',
-        href: send("changelog_#{content_type.name.downcase}_path", @content)
-      }
-    end
-
     if (current_user || User.new).can_read?(@content)
+      if user_signed_in?
+        @navbar_actions.insert(2, {
+          label: @content.name,
+          href: main_app.polymorphic_path(@content)
+        })
+      end
+
       if current_user
         if @content.updated_at > 30.minutes.ago
           Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed content', {
@@ -585,7 +580,8 @@ class ContentController < ApplicationController
 
     @navbar_actions << {
       label: "New #{content_type.name.downcase}",
-      href: main_app.new_polymorphic_path(content_type)
+      href: main_app.new_polymorphic_path(content_type),
+      class: 'right'
     } if user_signed_in? && current_user.can_create?(content_type) \
     || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type.name)
 
@@ -597,11 +593,11 @@ class ContentController < ApplicationController
       }
     end
 
-    @navbar_actions << {
-      label: 'Customize template',
-      class: 'right',
-      href: main_app.attribute_customization_path(content_type.name.downcase)
-    }
+    # @navbar_actions << {
+    #   label: 'Customize template',
+    #   class: 'right',
+    #   href: main_app.attribute_customization_path(content_type.name.downcase)
+    # }
   end
 
   # For showing a specific piece of content
@@ -619,7 +615,16 @@ class ContentController < ApplicationController
 
       @navbar_actions << {
         label: "New #{content_type.name.downcase}",
-        href: main_app.new_polymorphic_path(content_type)
+        href: main_app.new_polymorphic_path(content_type),
+        class: 'right'
+      }
+    end
+
+    discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
+    if discussions_link.present?
+      @navbar_actions << {
+        label: 'Discussions',
+        href: discussions_link
       }
     end
   end
