@@ -1,12 +1,14 @@
-<%
-  quick_actions = @activated_content_types.map do |content_type_name|
-    content_class = content_type_name.constantize
-    {
-      name:  "Create new #{content_type_name}",
-      icon:  content_class.icon,
-      color: content_class.color,
-      route: main_app.new_polymorphic_path(content_class)
-    }
-  end
-%>
-<%= react_component("QuickActionsFab", { actions: quick_actions }) unless defined?(@show_footer) && !@show_footer %>
+<% if user_signed_in? %>
+  <%
+    quick_actions = @activated_content_types.map do |content_type_name|
+      content_class = content_type_name.constantize
+      {
+        name:  "Create new #{content_type_name}",
+        icon:  content_class.icon,
+        color: content_class.color,
+        route: main_app.new_polymorphic_path(content_class)
+      }
+    end
+  %>
+  <%= react_component("QuickActionsFab", { actions: quick_actions }) unless defined?(@show_footer) && !@show_footer %>
+<% end %>

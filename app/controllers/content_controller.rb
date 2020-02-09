@@ -10,8 +10,7 @@ class ContentController < ApplicationController
   before_action :set_attributes_content_type, only: [:attributes]
 
   before_action :set_navbar_color, except: [:api_sort]
-  before_action :set_general_navbar_actions, except: [:deleted, :show, :changelog, :api_sort]
-  before_action :set_specific_navbar_actions, only: [:show, :changelog]
+  before_action :set_navbar_actions, except: [:deleted, :changelog, :api_sort]
   before_action :set_sidenav_expansion, except: [:api_sort]
 
   def index
@@ -565,43 +564,43 @@ class ContentController < ApplicationController
   end
 
   # For index, new, edit
-  def set_general_navbar_actions
-    content_type = @content_type_class || content_type_from_controller(self.class)
-    return if [AttributeCategory, AttributeField, Attribute].include?(content_type)
+  # def set_general_navbar_actions
+  #   content_type = @content_type_class || content_type_from_controller(self.class)
+  #   return if [AttributeCategory, AttributeField, Attribute].include?(content_type)
     
-    @navbar_actions = []
+  #   @navbar_actions = []
 
-    if @current_user_content
-      @navbar_actions << {
-        label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
-        href: main_app.polymorphic_path(content_type)
-      }
-    end
+  #   if @current_user_content
+  #     @navbar_actions << {
+  #       label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
+  #       href: main_app.polymorphic_path(content_type)
+  #     }
+  #   end
 
-    @navbar_actions << {
-      label: "New #{content_type.name.downcase}",
-      href: main_app.new_polymorphic_path(content_type),
-      class: 'right'
-    } if user_signed_in? && current_user.can_create?(content_type) \
-    || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type.name)
+  #   @navbar_actions << {
+  #     label: "New #{content_type.name.downcase}",
+  #     href: main_app.new_polymorphic_path(content_type),
+  #     class: 'right'
+  #   } if user_signed_in? && current_user.can_create?(content_type) \
+  #   || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type.name)
 
-    discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
-    if discussions_link.present?
-      @navbar_actions << {
-        label: 'Discussions',
-        href: discussions_link
-      }
-    end
+  #   discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
+  #   if discussions_link.present?
+  #     @navbar_actions << {
+  #       label: 'Discussions',
+  #       href: discussions_link
+  #     }
+  #   end
 
-    # @navbar_actions << {
-    #   label: 'Customize template',
-    #   class: 'right',
-    #   href: main_app.attribute_customization_path(content_type.name.downcase)
-    # }
-  end
+  #   # @navbar_actions << {
+  #   #   label: 'Customize template',
+  #   #   class: 'right',
+  #   #   href: main_app.attribute_customization_path(content_type.name.downcase)
+  #   # }
+  # end
 
   # For showing a specific piece of content
-  def set_specific_navbar_actions
+  def set_navbar_actions
     content_type = @content_type_class || content_type_from_controller(self.class)
     @navbar_actions = []
 
