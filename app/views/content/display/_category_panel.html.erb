@@ -44,7 +44,13 @@
 
       <div class="col s12 m10 offset-m1">
         <div class="grey-text uppercase">
-          <span class="tooltipped" data-tooltip="Original prompt">
+          <%
+            prompt = I18n.translate "attributes.#{content.class_name.downcase}.#{serialized_field[:label].downcase.gsub(/\s/, '_')}",
+              scope: :serendipitous_questions,
+              name: content.name || "this #{content.class_name}",
+              default: ''
+          %>
+          <span class="<%= prompt.present? ? 'tooltipped' : nil %>" data-tooltip="<%= prompt %>">
             <%= serialized_field[:label] %>
           </span>
         </div>
