@@ -12,12 +12,14 @@
     Actions
   </li>
 
-  <li class="collection-item fake-tab">
-    <%= link_to attribute_customization_path(content_type: raw_model.class.name.downcase) do %>
-      <i class="material-icons left">share</i>
-      Share this page
-    <% end %>
-  </li>
+  <% if raw_model.persisted? %>
+    <li class="collection-item fake-tab">
+      <%= link_to attribute_customization_path(content_type: raw_model.class.name.downcase) do %>
+        <i class="material-icons left">share</i>
+        Share this page
+      <% end %>
+    </li>
+  <% end %>
 
   <% if user_signed_in? && current_user.id == content.user.id %>
     <li class="collection-item fake-tab">
@@ -28,24 +30,26 @@
     </li>
   <% end %>
 
-  <li class="collection-item fake-tab">
-    <%= link_to send("changelog_#{raw_model.class.name.downcase}_path", raw_model) do %>
-      <i class="material-icons left">history</i>
-      View changelog
-    <% end %>
-  </li>
+  <% if raw_model.persisted? %>
+    <li class="collection-item fake-tab">
+      <%= link_to send("changelog_#{raw_model.class.name.downcase}_path", raw_model) do %>
+        <i class="material-icons left">history</i>
+        View changelog
+      <% end %>
+    </li>
 
-  <li class="collection-item fake-tab">
-    <%= link_to attribute_customization_path(content_type: raw_model.class.name.downcase) do %>
-      <i class="material-icons left">archive</i>
-      Archive this page
-    <% end %>
-  </li>
+    <li class="collection-item fake-tab">
+      <%= link_to attribute_customization_path(content_type: raw_model.class.name.downcase) do %>
+        <i class="material-icons left">archive</i>
+        Archive this page
+      <% end %>
+    </li>
 
-  <li class="collection-item fake-tab">
-    <%= link_to attribute_customization_path(content_type: raw_model.class.name.downcase) do %>
-      <i class="material-icons left">delete</i>
-      Delete this page
-    <% end %>
-  </li>
+    <li class="collection-item fake-tab">
+      <%= link_to attribute_customization_path(content_type: raw_model.class.name.downcase) do %>
+        <i class="material-icons left">delete</i>
+        Delete this page
+      <% end %>
+    </li>
+  <% end %>
 </ul>
