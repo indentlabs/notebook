@@ -33,19 +33,25 @@
               }
           %>
         <% end %>
+
+        <%= render partial: 'content/form/images/gallery',  locals: { content: content } if @content.image_uploads.any? %>
+        <%= render partial: 'content/display/contributors', locals: { content: content } if @content.is_a?(Universe) %>
         <%= render partial: 'content/panels/documents', locals: { content: content } if @serialized_content.documents.any? %>
+        <%= render partial: 'content/panels/associations', locals: { content: content } if @serialized_content.documents.any? %>
       </div>
 
       <%= render partial: 'content/display/visitor_cta', locals: { content: @serialized_content } %>
     </div>
 
-    <div class="row">
-      <% if @content.is_a?(Universe) %>
-        <%= render partial: 'content/contexts/universe', locals: { content: @content } %>
-      <% else %>
-        <%= render partial: "content/contexts/dynamic", locals: { content: @content } %>
-      <% end %>
-    </div>
+    <% if false %>
+      <div class="row">
+        <% if @content.is_a?(Universe) %>
+          <%= render partial: 'content/contexts/universe', locals: { content: @content } %>
+        <% else %>
+          <%= render partial: "content/contexts/dynamic", locals: { content: @content } %>
+        <% end %>
+      </div>
+    <% end %>
 
   </div>
 </div>

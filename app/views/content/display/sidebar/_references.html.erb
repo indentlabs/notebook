@@ -15,13 +15,31 @@
       References
     </li>
 
+    <li class="collection-item tab">
+      <a href="#associations_panel">
+        <i class="material-icons left">link</i>
+        Associations
+        <span class="badge hide-on-med-and-down">5</span>
+      </a>
+    </li>
+
+    <% if raw_model.image_uploads.any? %>
+      <li class="collection-item tab">
+        <a href="#gallery_panel">
+          <i class="material-icons left">photo_library</i>
+          Gallery
+          <span class="badge hide-on-med-and-down"><%= raw_model.image_uploads.count %></span>
+        </a>
+      </li>
+    <% end %>
+
     <% if !creating && !editing %>
       <% if related_documents.any? %>
         <li class="collection-item tab">
-          <a href="#documents_panel" class="">
+          <a href="#documents_panel">
             <i class="material-icons left"><%= Document.icon %></i>
             Documents
-            <span class="badge"><%= related_documents.count %></span>
+            <span class="badge hide-on-med-and-down"><%= related_documents.count %></span>
           </a>
         </li>
       <% end %>
