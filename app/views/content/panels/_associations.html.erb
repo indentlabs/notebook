@@ -5,6 +5,8 @@
 <%
   relations   = Rails.application.config.content_relations[content.class.name]
   relations ||= []
+
+  @sidelinks_association_count = 0
 %>
 
 <div id="associations_panel" class="row panel">
@@ -17,23 +19,20 @@
       </div>
 
       <% relations.each do |name, params| %>
-        <div>
-          <%
-            results = params[:related_class].where("#{params[:through_relation].downcase}_id": content.id)
-              .map    { |content| content.send(params[:inverse_class].downcase) }
-              .select { |content| content && content.readable_by?(current_user || User.new) }
-          %>
-          <% next unless results.any? %>
-          <div class="uppercase grey-text">
-            <%= params[:relation_text].to_s.titleize.downcase %> of
-          </div>
-          <%= 
-            render partial: "content/display/attribute_value/link", 
-                    locals: { value: results, content: content }
-          %>
+        <%
+          results = params[:related_class].where("#{params[:through_relation].downcase}_id": content.id)
+            .map    { |content| content.send(params[:inverse_class].downcase) }
+            .select { |content| content && content.readable_by?(current_user || User.new) }
+        %>
+        <% next unless results.any? %>
+        <% @sidelinks_association_count += results.count %>
+        <div class="uppercase grey-text">
+          <%= params[:relation_text].to_s.titleize.downcase %> of
         </div>
-
-        <% next %>
+        <%=
+          render partial: "content/display/attribute_value/link", 
+                  locals: { value: results, content: content }
+        %>
       <% end %>
     </div>
   </div>

@@ -9,50 +9,50 @@
 
 <% related_documents = content.documents.select { |doc| (current_user || User.new).can_read?(doc) } %>
 
-<% if related_documents.any? %>
-  <ul class="collection content-tabs">
-    <li class="active center grey-text uppercase">
-      References
+<ul class="collection content-tabs">
+  <li class="active center grey-text uppercase">
+    References
+  </li>
+
+  <% if raw_model.is_a?(Universe) %>
+    <li class="collection-item tab">
+      <a href="#universe_contains_panel">
+        <i class="material-icons left"><%= Universe.icon %></i>
+        In this universe
+        <span class="badge hide-on-med-and-down">5</span>
+      </a>
     </li>
+  <% end %>
 
-    <% if raw_model.is_a?(Universe) %>
-      <li class="collection-item tab">
-        <a href="#universe_contains_panel">
-          <i class="material-icons left"><%= Universe.icon %></i>
-          In this universe
-          <span class="badge hide-on-med-and-down">5</span>
-        </a>
-      </li>
-    <% end %>
-
+  <% if @sidelinks_association_count > 0 %>
     <li class="collection-item tab">
       <a href="#associations_panel">
         <i class="material-icons left">link</i>
         Associations
-        <span class="badge hide-on-med-and-down">5</span>
+        <span class="badge hide-on-med-and-down"><%= @sidelinks_association_count %></span>
       </a>
     </li>
+  <% end %>
 
-    <% if raw_model.image_uploads.any? %>
+  <% if raw_model.image_uploads.any? %>
+    <li class="collection-item tab">
+      <a href="#gallery_panel">
+        <i class="material-icons left">photo_library</i>
+        Gallery
+        <span class="badge hide-on-med-and-down"><%= raw_model.image_uploads.count %></span>
+      </a>
+    </li>
+  <% end %>
+
+  <% if !creating && !editing %>
+    <% if related_documents.any? %>
       <li class="collection-item tab">
-        <a href="#gallery_panel">
-          <i class="material-icons left">photo_library</i>
-          Gallery
-          <span class="badge hide-on-med-and-down"><%= raw_model.image_uploads.count %></span>
+        <a href="#documents_panel">
+          <i class="material-icons left"><%= Document.icon %></i>
+          Documents
+          <span class="badge hide-on-med-and-down"><%= related_documents.count %></span>
         </a>
       </li>
     <% end %>
-
-    <% if !creating && !editing %>
-      <% if related_documents.any? %>
-        <li class="collection-item tab">
-          <a href="#documents_panel">
-            <i class="material-icons left"><%= Document.icon %></i>
-            Documents
-            <span class="badge hide-on-med-and-down"><%= related_documents.count %></span>
-          </a>
-        </li>
-      <% end %>
-    <% end %>
-  </ul>
-<% end %>
+  <% end %>
+</ul>

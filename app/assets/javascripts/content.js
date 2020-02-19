@@ -2,7 +2,7 @@ $(document).ready(function () {
   $('.panel').hide();
   $('.panel').first().show();
 
-  $('.tab').click(function (click) {
+  $('.content-tabs .tab').click(function (click) {
     var tab = $(click.target).closest('.tab a');
 
     // We substring(1) here to strip the # off the beginning so we can use getElementById
