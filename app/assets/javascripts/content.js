@@ -2,10 +2,12 @@ $(document).ready(function () {
   $('.panel').hide();
   $('.panel').first().show();
 
-  $('.tab a').click(function (tab) {
+  $('.tab').click(function (clicked_element) {
+    var tab = $(clicked_element.target).closest('.tab a');
+
     // We substring(1) here to strip the # off the beginning so we can use getElementById
     // (because we want to support slashes in category/field names, and jQuery does not).
-    var target_panel_id = ($(tab.target).attr('href') || '#').substring(1);
+    var target_panel_id = ($(tab).attr('href') || '#').substring(1);
     var target_panel = $(document.getElementById(target_panel_id));
 
     $('.panel').hide();
@@ -18,8 +20,8 @@ $(document).ready(function () {
       window.scrollTo(0, 0);
     }, 1);
 
-    $(tab.target).closest('.content-tabs').find('.tab a').removeClass('red-text');
-    $(tab.target).addClass('red-text');
+    $('.content-tabs').find('.tab a.red-text').removeClass('red-text');
+    $(tab).addClass('red-text');
   });
 
   $('.modal').modal();
