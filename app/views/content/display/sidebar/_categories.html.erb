@@ -21,15 +21,13 @@
   %>
   <% categories.each do |category| %>
     <% next if category[:name] == 'changelog' %>
+    <% next if category[:name] == 'gallery'   %>
     <%
       if creating || editing
         # Show everything on create/edit forms
       elsif category[:name] == 'contributors'
         # Show contributors on show page if there are any to show
         next if raw_model.contributors.empty?
-      elsif category[:name] == 'gallery'
-        # Only show gallery tab if the content has any images
-        next if raw_model.image_uploads.empty?
       else
         # Only show other tabs if it has at least one piece of data in it
         next unless category[:fields].any? do |field|
@@ -42,7 +40,7 @@
       end
     %>
     <li class="collection-item tab">
-      <a href="#<%= category[:name].gsub("'", '') %>_panel" class="<%= 'red-text' if category[:label] == 'Overview' %> tab-label">
+      <a href="#<%= category[:name].gsub("'", '') %>_panel" class="<%= 'red-text' if category[:label] == 'Overview' %> tab-label clearfix">
         <i class="material-icons left"><%= category[:icon] %></i>
         <%= category[:label].capitalize.presence || '(blank)' %>
         <% if editing && category[:percent_complete].present? %>

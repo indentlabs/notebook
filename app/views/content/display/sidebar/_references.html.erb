@@ -14,7 +14,7 @@
     References
   </li>
 
-  <% if raw_model.is_a?(Universe) %>
+  <% if !creating && !editing && raw_model.is_a?(Universe) %>
     <li class="collection-item tab">
       <a href="#universe_contains_panel">
         <i class="material-icons left"><%= Universe.icon %></i>
@@ -24,7 +24,7 @@
     </li>
   <% end %>
 
-  <% if @sidelinks_association_count > 0 %>
+  <% if !creating && !editing && @sidelinks_association_count > 0 %>
     <li class="collection-item tab">
       <a href="#associations_panel">
         <i class="material-icons left">link</i>
@@ -34,7 +34,7 @@
     </li>
   <% end %>
 
-  <% if raw_model.image_uploads.any? %>
+  <% if creating || editing || raw_model.image_uploads.any? %>
     <li class="collection-item tab">
       <a href="#gallery_panel">
         <i class="material-icons left">photo_library</i>
