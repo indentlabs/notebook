@@ -2,8 +2,8 @@ $(document).ready(function () {
   $('.panel').hide();
   $('.panel').first().show();
 
-  $('.tab').click(function (clicked_element) {
-    var tab = $(clicked_element.target).closest('.tab a');
+  $('.tab').click(function (click) {
+    var tab = $(click.target).closest('.tab a');
 
     // We substring(1) here to strip the # off the beginning so we can use getElementById
     // (because we want to support slashes in category/field names, and jQuery does not).
@@ -16,12 +16,11 @@ $(document).ready(function () {
     // Unset the expand button's "expanded" flag, if set
     $('.expand').removeClass('expanded');
 
-    setTimeout(function() {
-      window.scrollTo(0, 0);
-    }, 1);
-
     $('.content-tabs').find('.tab a.red-text').removeClass('red-text');
     $(tab).addClass('red-text');
+
+    click.preventDefault();
+    return false;
   });
 
   $('.modal').modal();
