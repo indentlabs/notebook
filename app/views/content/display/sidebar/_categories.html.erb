@@ -45,8 +45,14 @@
       <a href="#<%= category[:name].gsub("'", '') %>_panel" class="<%= 'red-text' if category[:label] == 'Overview' %>">
         <i class="material-icons left"><%= category[:icon] %></i>
         <%= category[:label].capitalize.presence || '(blank)' %>
-        <% if editing %>
-          <span class="badge"><%= rand(100) %>%</span>
+        <% if editing && category[:percent_complete].present? %>
+          <span class="badge">
+            <% if category[:percent_complete] == 100 %>
+              <i class="material-icons green-text">check</i>
+            <% else %>
+              <%= category[:percent_complete] %>%
+            <% end %>
+          </span>
         <% end %>
       </a>
     </li>
