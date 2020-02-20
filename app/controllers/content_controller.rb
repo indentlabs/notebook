@@ -10,7 +10,7 @@ class ContentController < ApplicationController
   before_action :set_attributes_content_type, only: [:attributes]
 
   before_action :set_navbar_color, except: [:api_sort]
-  before_action :set_navbar_actions, except: [:deleted, :changelog, :api_sort]
+  before_action :set_navbar_actions, except: [:deleted, :api_sort]
   before_action :set_sidenav_expansion, except: [:api_sort]
 
   def index
