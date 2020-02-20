@@ -605,6 +605,8 @@ class ContentController < ApplicationController
     content_type = @content_type_class || content_type_from_controller(self.class)
     @navbar_actions = []
 
+    return if [AttributeCategory, AttributeField].include?(content_type)
+
     if user_signed_in?
       if @current_user_content
         @navbar_actions << {
