@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # Thredded configuration
-Thredded::CollectionToStringsWithCacheRenderer.render_threads = 1
 
 # ==> User Configuration
 # The name of the class your app uses for your users.
