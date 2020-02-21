@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_30_224044) do
+ActiveRecord::Schema.define(version: 2020_02_20_223310) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1018,6 +1018,15 @@ ActiveRecord::Schema.define(version: 2020_01_30_224044) do
     t.datetime "updated_at", null: false
     t.index ["document_analysis_id"], name: "index_document_entities_on_document_analysis_id"
     t.index ["entity_type", "entity_id"], name: "index_document_entities_on_entity_type_and_entity_id"
+  end
+
+  create_table "document_notes", force: :cascade do |t|
+    t.integer "document_id", null: false
+    t.string "title"
+    t.string "notes"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["document_id"], name: "index_document_notes_on_document_id"
   end
 
   create_table "documents", force: :cascade do |t|
@@ -3006,6 +3015,7 @@ ActiveRecord::Schema.define(version: 2020_01_30_224044) do
   add_foreign_key "document_categories", "document_analyses"
   add_foreign_key "document_concepts", "document_analyses"
   add_foreign_key "document_entities", "document_analyses"
+  add_foreign_key "document_notes", "documents"
   add_foreign_key "documents", "users"
   add_foreign_key "foods", "universes"
   add_foreign_key "foods", "users"

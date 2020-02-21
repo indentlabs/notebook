@@ -111,9 +111,21 @@
       </li>
     </ul>
   <% end %>
+<% end %>
 
-  <div class="smart-sidebar hide-on-med-and-down">
-    <div class="entities-container">
+<div class="smart-sidebar hide-on-med-and-down">
+  <div class="entities-container">
+    <div class="grey-text center">Metadata</div>
+    <a href="#"
+        class="hoverable entity-trigger sidenav-trigger white-text <%= entity_class.color %>"
+        data-target="document-notes">
+      <i class="material-icons small left">
+        <%= Document.icon %>
+      </i>
+      Document notes
+    </a>
+
+    <% if current_user.on_premium_plan? %>
       <div class="grey-text center">Quick reference</div>
       <% @linked_entities.each do |entity| %>
         <% entity_class = entity.entity_type.constantize %>
@@ -136,9 +148,9 @@
         </i>
         Add a page
       </a>
-    </div>
+    <% end %>
   </div>
-<% end %>
+</div>
 
 <%# todo this could be a partial with configurable title/text and reused on analysis page %>
 <div id="entity-link-modal" class="modal">
