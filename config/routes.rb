@@ -1,5 +1,6 @@
 # rubocop:disable LineLength
 Rails.application.routes.draw do
+  get 'api_docs/index'
   default_url_options :host => "notebook.ai"
 
   get 'notice_dismissal/dismiss'
@@ -188,6 +189,8 @@ end
 
   # API Endpoints
   namespace :api do
+    get '/', to: 'api_docs#index'
+
     namespace :v1 do
       scope '/categories' do
         get '/suggest/:entity_type',              to: 'attribute_categories#suggest'
