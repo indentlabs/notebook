@@ -25,9 +25,9 @@
             </p>
             <br />
             <p>
-              To get started, you'll want to <%= link_to 'register an application', '#' %>
+              To get started, you'll want to <%= link_to 'register an application', api_applications_path %>
               and get your API key. In order to access any user's notebook, you'll first need
-              them to <%= link_to 'authenticate your application', '#' %> and give you an
+              them to <%= link_to 'authenticate your application', api_approvals_path %> and give you an
               access key specific to their notebook. 
             </p>
           </div>
@@ -46,7 +46,7 @@
                     </p>
                   </div>
                   <div class="step-actions">
-                    <%= link_to 'Register application', '#', class: 'blue white-text btn' %>
+                    <%= link_to 'Register application', api_applications_path, class: 'blue white-text btn' %>
                     <button class="waves-effect waves-dark btn white black-text next-step">Next step</button>
                   </div>
                 </div>
@@ -58,11 +58,12 @@
                     <p class="col s12">
                       In order to access or modify a user's notebook pages on their behalf, you'll first need that user to
                       approve your application. You can set up an approval flow that notifies your application whenever
-                      a user authorizes its use.
+                      a user authorizes its use, or you can direct them to <%= link_to 'their integrations page', api_integrations_path %>
+                      and have them paste their authorization code directly into your app.
                     </p>
                   </div>
                   <div class="step-actions">
-                    <%= link_to 'Create approval flow', '#', class: 'btn blue white-text' %>
+                    <%= link_to 'Create approval flow', api_approvals_path, class: 'btn blue white-text' %>
                     <button class="waves-effect waves-dark btn white black-text next-step">Next step</button>
                   </div>
                 </div>
@@ -128,14 +129,16 @@ GET /api/v1/<%= content_type.name.downcase.pluralize %>
                       The authorization token for your user.
                     </p>
                   </li>
-                  <li class="collection-item">
-                    <span class="title">
-                      <strong>universe_id</strong>
-                      <span class="blue-text">integer</span>
-                    </span>
-                    <p>
-                      Limit <%= content_type.name.downcase.pluralize%> returned to only those within a particular universe.                    </p>
-                  </li>
+                  <% unless content_type.name == Universe.name %>
+                    <li class="collection-item">
+                      <span class="title">
+                        <strong>universe_id</strong>
+                        <span class="blue-text">integer</span>
+                      </span>
+                      <p>
+                        Limit <%= content_type.name.downcase.pluralize%> returned to only those within a particular universe.                    </p>
+                    </li>
+                  <% end %>
                 </ul>
               </div>
               <div class="col s12 m6 l6">
@@ -145,7 +148,9 @@ GET /api/v1/<%= content_type.name.downcase.pluralize %>
   {
     "id": 1,
     "name": "Some <%= content_type.name %>",
+<% unless content_type.name == Universe.name %>
     "universe_id": 2,
+<% end %>
     "meta": {
       "created_at": "2020-02-01 08:24:20 UTC",
       "updated_at": "2020-02-09 06:57:12 UTC"
@@ -184,7 +189,7 @@ GET /api/v1/<%= content_type.name.downcase.pluralize %>
               <div class="col s12 m6 l6">
                 <h3>Endpoint</h3>
                 <p class="code">
-GET /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;
+GET /api/v1/<%= content_type.name.downcase.pluralize %>/<span class="green-text">&lt;id&gt;</span>
                 </p>
                 <h3>Example call</h3>
                 <ul class="collection">
@@ -208,16 +213,18 @@ GET /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;
                       The authorization token for your user.
                     </p>
                   </li>
-                  <li class="collection-item">
-                    <span class="title">
-                      <strong>id</strong>
-                      <span class="blue-text">integer</span>
-                      <span class="red-text">required</span>
-                    </span>
-                    <p>
-                      The ID of the <%= content_type.name.downcase %> you're fetching.  
-                    </p>
-                  </li>
+                  <% unless content_type.name == Universe.name %>
+                    <li class="collection-item">
+                      <span class="title">
+                        <strong class="green-text">id</strong>
+                        <span class="blue-text">integer</span>
+                        <span class="red-text">required</span>
+                      </span>
+                      <p>
+                        The ID of the <%= content_type.name.downcase %> you're fetching.  
+                      </p>
+                    </li>
+                  <% end %>
                 </ul>
               </div>
               <div class="col s12 m6 l6">
@@ -226,7 +233,9 @@ GET /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;
 {
   "id": 1,
   "name": "Some <%= content_type.name %>",
+<% unless content_type.name == Universe.name %>
   "universe_id": 2,
+<% end %>
   "meta": {
     "created_at": "2020-02-01 08:24:20 UTC",
     "updated_at": "2020-02-09 06:57:12 UTC"
@@ -263,7 +272,7 @@ GET /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;
               <div class="col s12 m6 l6">
                 <h3>Endpoint</h3>
                 <p class="code">
-POST /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;
+POST /api/v1/<%= content_type.name.downcase.pluralize %>/<span class="green-text">&lt;id&gt;</span>
                 </p>
                 <h3>Example call</h3>
                 <ul class="collection">
@@ -289,7 +298,7 @@ POST /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;
                   </li>
                   <li class="collection-item">
                     <span class="title">
-                      <strong>id</strong>
+                      <strong class="green-text">id</strong>
                       <span class="blue-text">integer</span>
                       <span class="red-text">required</span>
                     </span>
@@ -321,7 +330,9 @@ POST /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;
 {
   "id": 1,
   "name": "Some <%= content_type.name %>",
+<% unless content_type.name == Universe.name %>
   "universe_id": 2,
+<% end %>
   "meta": {
     "created_at": "2020-02-01 08:24:20 UTC",
     "updated_at": "2020-02-09 06:57:12 UTC"
@@ -355,13 +366,13 @@ POST /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;
               Add an online reference to a specific <%= content_type.name.downcase %>
             </h2>
             <p>
-              <%= link_to "Click here to read more about how online references work on Notebook.ai.", '#' %>
+              <%= link_to "Click here to read more about how online references work on Notebook.ai.", api_references_path %>
             </p>
             <div class="row">
               <div class="col s12 m6 l6">
                 <h3>Endpoint</h3>
                 <p class="code">
-POST /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;/references
+POST /api/v1/<%= content_type.name.downcase.pluralize %>/<span class="green-text">&lt;id&gt;</span>/references
                 </p>
                 <h3>Example call</h3>
                 <ul class="collection">
@@ -387,7 +398,7 @@ POST /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;/references
                   </li>
                   <li class="collection-item">
                     <span class="title">
-                      <strong>id</strong>
+                      <strong class="green-text">id</strong>
                       <span class="blue-text">integer</span>
                       <span class="red-text">required</span>
                     </span>
@@ -442,7 +453,9 @@ POST /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;/references
 {
   "id": 1,
   "name": "Some <%= content_type.name %>",
+<% unless content_type.name == Universe.name %>
   "universe_id": 2,
+<% end %>
   "meta": {
     "created_at": "2020-02-01 08:24:20 UTC",
     "updated_at": "2020-02-09 06:57:12 UTC"

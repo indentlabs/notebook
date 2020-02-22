@@ -190,6 +190,14 @@ end
   # API Endpoints
   namespace :api do
     get '/', to: 'api_docs#index'
+    get '/applications', to: 'api_docs#applications'
+    get '/approvals',    to: 'api_docs#approvals'
+    get '/integrations', to: 'api_docs#integrations'
+    
+    scope 'docs' do
+      get '/',           to: 'api_docs#index'
+      get '/references', to: 'api_docs#references'
+    end
 
     namespace :v1 do
       scope '/categories' do
