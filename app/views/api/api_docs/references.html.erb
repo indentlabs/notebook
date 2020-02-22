@@ -1,2 +1,182 @@
-<h1>Referencing pages around the Internet on Notebook.ai</h1>
+<div class="row">
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+          <div class="row">
+            <div class="col s12 m7 l8">
+              <div class="card-title">Referencing pages around the Internet on Notebook.ai</div>
+              <p>
+                Application developers can now add external links directly to individual Notebook.ai pages via <%= link_to 'the API', api_path %>.
+              </p>
+              <br />
+              <p>
+                Each application receives its own tab under the "References" sidebar when viewing any notebook page, which will list
+                all external references when clicked. Each reference must have a URL, and may optionally also have a title, description,
+                and image to accompany it.
+              </p>
+              <br />
+              <p>
+                Please use this API only to link pages in which the content of a particular Notebook.ai page appears or is predominantly featured. 
+                For a character, for example, consider adding references to stories in which they appear. For a location, consider adding references 
+                to stories set in that location.
+              </p>
+              <br />
+              <div class="center grey lighten-3">
+                <%= image_tag 'screenshots/integration-references', class: 'hoverable' %>
+              </div>
+              <br />
+              <div class="center">
+              <%= link_to 'Browse the full API documentation', api_path, class: 'blue btn white-text' %>
+              </div>
+            </div>
+            <div class="col s12 m5 l4">
+              <%= image_tag 'screenshots/integrations', class: 'hoverable' %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
+<div class="row">
+  <div class="col s12">
+    <ul class="collapsible">
+      <% content_type = Character %>
+      <li class="active">
+        <div class="collapsible-header">
+          <i class="material-icons <%= content_type.color %>-text"><%= content_type.icon %></i>
+          Example API request to add an external reference to a <%= content_type.name.downcase %>
+        </div>
+        <div class="collapsible-body">
+          <h2>
+            <i class="material-icons <%= content_type.color %>-text left"><%= content_type.icon %></i>
+            Add an online reference to a specific <%= content_type.name.downcase %>
+          </h2>
+          <div class="row">
+            <div class="col s12 m6 l6">
+              <h3>Endpoint</h3>
+              <p class="code">
+POST /api/v1/<%= content_type.name.downcase.pluralize %>/<span class="green-text">&lt;id&gt;</span>/references
+              </p>
+              <h3>Example call</h3>
+              <ul class="collection">
+                <li class="collection-item">
+                  <span class="title">
+                    <strong>application_token</strong>
+                    <span class="blue-text">string</span>
+                    <span class="red-text">required</span>
+                  </span>
+                  <p>
+                    The token for your application.
+                  </p>
+                </li>
+                <li class="collection-item">
+                  <span class="title">
+                    <strong>authorization_token</strong>
+                    <span class="blue-text">string</span>
+                    <span class="red-text">required</span>
+                  </span>
+                  <p>
+                    The authorization token for your user.
+                  </p>
+                </li>
+                <li class="collection-item">
+                  <span class="title">
+                    <strong class="green-text">id</strong>
+                    <span class="blue-text">integer</span>
+                    <span class="red-text">required</span>
+                  </span>
+                  <p>
+                    The ID of the <%= content_type.name.downcase %> you're adding a reference to.  
+                  </p>
+                </li>
+                <li class="collection-item">
+                  <span class="title">
+                    <strong>reference_url</strong>
+                    <span class="blue-text">url</span>
+                    <span class="red-text">required</span>
+                  </span>
+                  <p>
+                    The URL that this reference will link users to when they click it on Notebook.ai.
+                  </p>
+                </li>
+                <li class="collection-item">
+                  <span class="title">
+                    <strong>reference_title</strong>
+                    <span class="blue-text">string</span>
+                  </span>
+                  <p>
+                    The title that should be displayed on Notebook.ai when this reference is displayed.
+                  </p>
+                </li>
+                <li class="collection-item">
+                  <span class="title">
+                    <strong>reference_description</strong>
+                    <span class="blue-text">string</span>
+                  </span>
+                  <p>
+                    The description that should be shown next to this reference on Notebook.ai.
+                    Only used if <strong>reference_title</strong> is also given.
+                    Maximum of 300 characters; more than that will be truncated with an ellipses when displaying.
+                  </p>
+                </li>
+                <li class="collection-item">
+                  <span class="title">
+                    <strong>reference_image</strong>
+                    <span class="blue-text">url</span>
+                  </span>
+                  <p>
+                    An image may optionally be included to display with references in some views when the design permits.
+                  </p>
+                </li>
+              </ul>
+            </div>
+            <div class="col s12 m6 l6">
+              <h3>Example response</h3>
+              <p class="code">
+{
+  "id": 1,
+  "name": "Some <%= content_type.name %>",
+  <% unless content_type.name == Universe.name %>
+  "universe_id": 2,
+  <% end %>
+  "meta": {
+    "created_at": "2020-02-01 08:24:20 UTC",
+    "updated_at": "2020-02-09 06:57:12 UTC"
+  },
+  "categories": {
+    "Overview": {
+      "fields": [
+        {
+          "id": 123,
+          "label": "Description",
+          "value": "Some Description"
+        },
+        {
+          "id": 124,
+          "label": "Another Field",
+          "value": "Some other value"
+        },
+        ...
+      ],
+    },
+    ...
+  },
+  "references": [
+    {
+      "url": "https://www.example.com/something/wow",
+      "title": "Reference name",
+      "description": "This is something really cool on the Internet that this <%= content_type.name.downcase %> appears in!",
+      "reference_image": "https://www.example.com/<%= content_type.name.downcase.pluralize %>/12345.png"
+    }
+  ]
+}
+              </p>
+            </div>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>

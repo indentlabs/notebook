@@ -193,6 +193,7 @@ end
     get '/applications', to: 'api_docs#applications'
     get '/approvals',    to: 'api_docs#approvals'
     get '/integrations', to: 'api_docs#integrations'
+    get '/pricing',      to: 'api_docs#pricing'
     
     scope 'docs' do
       get '/',           to: 'api_docs#index'
