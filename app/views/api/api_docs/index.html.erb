@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col s12">
+  <div class="col s12 m10 offset-m1 l8 offset-l2">
     <%= image_tag 'logos/both-original.png', style: 'width: 100%' %>
   </div>
 
@@ -10,62 +10,487 @@
           Supercharge your projects with Notebook.ai's world-class worldbuilding resources
         </div>
 
-        <p>
-          We now offer an API for developers that would like to take advantage of the
-          features and worlds in Notebook.ai. 
-        </p>
-        <br />
-        <p>
-          To get started, you'll want to <%= link_to 'register an application', '#' %>
-          and get your API key. In order to access any user's notebook, you'll first need
-          them to <%= link_to 'authenticate your application', '#' %> and give you an
-          access key specific to their notebook. 
-        </p>
-        <br />
-        <p>
-          In other words, three easy steps to get started:
-        </p>
+        <div class="row">
+          <div class="col s12 m6 l5">
+            <br />
+            <p>
+              <% Rails.application.config.content_types[:all].each do |content_type| %>
+                <i class="material-icons small <%= content_type.color %>-text tooltipped" data-tooltip="Interact with <%= content_type.name.downcase.pluralize %>"><%= content_type.icon %></i>
+              <% end %>
+            </p>
+            <br />
+            <p>
+              We now offer an API for developers that would like to take advantage of the
+              features and worlds in Notebook.ai. 
+            </p>
+            <br />
+            <p>
+              To get started, you'll want to <%= link_to 'register an application', '#' %>
+              and get your API key. In order to access any user's notebook, you'll first need
+              them to <%= link_to 'authenticate your application', '#' %> and give you an
+              access key specific to their notebook. 
+            </p>
+          </div>
+          <div class="col s12 m6 l6 offset-l1">
+            <p>
+              In other words, three easy steps to get started:
+            </p>
 
-        <ol>
-          <li>Register your application with Notebook.ai</li>
-          <li>Receive approval from users to access their notebook</li>
-          <li>Make API calls!</li>
-        </ol>
+            <ul class="stepper">
+              <li class="step active">
+                <div data-step-label="Register your application" class="step-title waves-effect waves-dark">Step 1</div>
+                <div class="step-content">
+                  <div class="row">
+                    <p class="col s12">
+                      To receive an access token for your application, you'll first need to register it for use.
+                    </p>
+                  </div>
+                  <div class="step-actions">
+                    <%= link_to 'Register application', '#', class: 'blue white-text btn' %>
+                    <button class="waves-effect waves-dark btn white black-text next-step">Next step</button>
+                  </div>
+                </div>
+              </li>
+              <li class="step">
+                <div data-step-label="Receive user approval" class="step-title waves-effect waves-dark">Step 2</div>
+                <div class="step-content">
+                  <div class="row">
+                    <p class="col s12">
+                      In order to access or modify a user's notebook pages on their behalf, you'll first need that user to
+                      approve your application. You can set up an approval flow that notifies your application whenever
+                      a user authorizes its use.
+                    </p>
+                  </div>
+                  <div class="step-actions">
+                    <%= link_to 'Create approval flow', '#', class: 'btn blue white-text' %>
+                    <button class="waves-effect waves-dark btn white black-text next-step">Next step</button>
+                  </div>
+                </div>
+              </li>
+              <li class="step">
+                <div data-step-label="Make API calls!" class="step-title waves-effect waves-dark">Step 3</div>
+                <div class="step-content" style="display: none;">
+                  <div class="row">
+                    <p class="col s12">
+                      Once you've received an application token and your first user authorization token, you can start making
+                      API calls on that user's behalf. You will need to provide these tokens with every API call.
+                    </p>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
 
   </div>
 
   <div class="col s12">
-    <div class="grey-text uppercase">SUPPORTED API ENDPOINTS</div>
+    <div class="grey-text uppercase">SUPPORTED NOTEBOOK ENDPOINTS</div>
     <ul class="collapsible">
-      <li>
-        <div class="collapsible-header">
-          <i class="material-icons <%= User.color %>-text"><%= User.icon %></i>
-          Fetch a user's notebook pages
-        </div>
-        <div class="collapsible-body">
-          <span>Lorem ipsum dolor sit amet.</span>
-        </div>
-      </li>
-      <li>
-        <div class="collapsible-header">
-          <i class="material-icons <%= User.color %>-text"><%= User.icon %></i>
-          Fetch a specific notebook page
-        </div>
-        <div class="collapsible-body">
-          <span>Lorem ipsum dolor sit amet.</span>
-        </div>
-      </li>
-      <li>
-        <div class="collapsible-header">
-          <i class="material-icons <%= User.color %>-text"><%= User.icon %></i>
-          Update a specific notebook page
-        </div>
-        <div class="collapsible-body">
-          <span>Lorem ipsum dolor sit amet.</span>
-        </div>
-      </li>
+      <% Rails.application.config.content_types[:all].each do |content_type| %>
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons <%= content_type.color %>-text"><%= content_type.icon %></i>
+            Interacting with <%= content_type.name.downcase.pluralize %>
+          </div>
+          <div class="collapsible-body">
+            <h2>
+              <i class="material-icons <%= content_type.color %>-text left"><%= content_type.icon %></i>
+              Fetch all <%= content_type.name.downcase.pluralize %>
+            </h2>
+            <div class="row">
+              <div class="col s12 m6 l6">
+                <h3>Endpoint</h3>
+                <p class="code">
+GET /api/v1/<%= content_type.name.downcase.pluralize %>
+                </p>
+                <h3>Request options</h3>
+                <ul class="collection">
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>application_token</strong>
+                      <span class="blue-text">string</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      The token for your application.
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>authorization_token</strong>
+                      <span class="blue-text">string</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      The authorization token for your user.
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>universe_id</strong>
+                      <span class="blue-text">integer</span>
+                    </span>
+                    <p>
+                      Limit <%= content_type.name.downcase.pluralize%> returned to only those within a particular universe.                    </p>
+                  </li>
+                </ul>
+              </div>
+              <div class="col s12 m6 l6">
+                <h3>Example response</h3>
+                <p class="code">
+[
+  {
+    "id": 1,
+    "name": "Some <%= content_type.name %>",
+    "universe_id": 2,
+    "meta": {
+      "created_at": "2020-02-01 08:24:20 UTC",
+      "updated_at": "2020-02-09 06:57:12 UTC"
+    },
+    "categories": {
+      "Overview": {
+        "fields": [
+          {
+            "id": 123,
+            "label": "Description",
+            "value": "Some Description"
+          },
+          {
+            "id": 124,
+            "label": "Another Field",
+            "value": "Some other value"
+          },
+          ...
+        ],
+      },
+      ...
+    },
+    "references": [...]
+  },
+  ...
+]
+                </p>
+              </div>
+            </div>
+
+            <h2>
+              <i class="material-icons <%= content_type.color %>-text left"><%= content_type.icon %></i>
+              Fetch a specific <%= content_type.name.downcase %>
+            </h2>
+            <div class="row">
+              <div class="col s12 m6 l6">
+                <h3>Endpoint</h3>
+                <p class="code">
+GET /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;
+                </p>
+                <h3>Example call</h3>
+                <ul class="collection">
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>application_token</strong>
+                      <span class="blue-text">string</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      The token for your application.
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>authorization_token</strong>
+                      <span class="blue-text">string</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      The authorization token for your user.
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>id</strong>
+                      <span class="blue-text">integer</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      The ID of the <%= content_type.name.downcase %> you're fetching.  
+                    </p>
+                  </li>
+                </ul>
+              </div>
+              <div class="col s12 m6 l6">
+                <h3>Example response</h3>
+                <p class="code">
+{
+  "id": 1,
+  "name": "Some <%= content_type.name %>",
+  "universe_id": 2,
+  "meta": {
+    "created_at": "2020-02-01 08:24:20 UTC",
+    "updated_at": "2020-02-09 06:57:12 UTC"
+  },
+  "categories": {
+    "Overview": {
+      "fields": [
+        {
+          "id": 123,
+          "label": "Description",
+          "value": "Some Description"
+        },
+        {
+          "id": 124,
+          "label": "Another Field",
+          "value": "Some other value"
+        },
+        ...
+      ],
+    },
+    ...
+  },
+  "references": [...]
+}
+                </p>
+              </div>
+            </div>
+
+            <h2>
+              <i class="material-icons <%= content_type.color %>-text left"><%= content_type.icon %></i>
+              Modify a specific <%= content_type.name.downcase %>
+            </h2>
+            <div class="row">
+              <div class="col s12 m6 l6">
+                <h3>Endpoint</h3>
+                <p class="code">
+POST /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;
+                </p>
+                <h3>Example call</h3>
+                <ul class="collection">
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>application_token</strong>
+                      <span class="blue-text">string</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      The token for your application.
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>authorization_token</strong>
+                      <span class="blue-text">string</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      The authorization token for your user.
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>id</strong>
+                      <span class="blue-text">integer</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      The ID of the <%= content_type.name.downcase %> you're modifying.  
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>fields</strong>
+                      <span class="blue-text">hash</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      This hash should pass field IDs as keys with strings to update that field's value to. For example,
+                      <div class="code">
+{
+  "123": "Value for field with ID 123",
+  "124": "Value for another field"
+}
+                      </div>
+                    </p>
+                  </li>
+                </ul>
+              </div>
+              <div class="col s12 m6 l6">
+                <h3>Example response</h3>
+                <p class="code">
+{
+  "id": 1,
+  "name": "Some <%= content_type.name %>",
+  "universe_id": 2,
+  "meta": {
+    "created_at": "2020-02-01 08:24:20 UTC",
+    "updated_at": "2020-02-09 06:57:12 UTC"
+  },
+  "categories": {
+    "Overview": {
+      "fields": [
+        {
+          "id": 123,
+          "label": "Description",
+          "value": "Some Description"
+        },
+        {
+          "id": 124,
+          "label": "Another Field",
+          "value": "Some other value"
+        },
+        ...
+      ],
+    },
+    ...
+  },
+  "references": [...]
+}
+                </p>
+              </div>
+            </div>
+
+            <h2>
+              <i class="material-icons <%= content_type.color %>-text left"><%= content_type.icon %></i>
+              Add an online reference to a specific <%= content_type.name.downcase %>
+            </h2>
+            <p>
+              <%= link_to "Click here to read more about how online references work on Notebook.ai.", '#' %>
+            </p>
+            <div class="row">
+              <div class="col s12 m6 l6">
+                <h3>Endpoint</h3>
+                <p class="code">
+POST /api/v1/<%= content_type.name.downcase.pluralize %>/&lt;id&gt;/references
+                </p>
+                <h3>Example call</h3>
+                <ul class="collection">
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>application_token</strong>
+                      <span class="blue-text">string</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      The token for your application.
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>authorization_token</strong>
+                      <span class="blue-text">string</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      The authorization token for your user.
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>id</strong>
+                      <span class="blue-text">integer</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      The ID of the <%= content_type.name.downcase %> you're adding a reference to.  
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>reference_url</strong>
+                      <span class="blue-text">url</span>
+                      <span class="red-text">required</span>
+                    </span>
+                    <p>
+                      The URL that this reference will link users to when they click it on Notebook.ai.
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>reference_title</strong>
+                      <span class="blue-text">string</span>
+                    </span>
+                    <p>
+                      The title that should be displayed on Notebook.ai when this reference is displayed.
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>reference_description</strong>
+                      <span class="blue-text">string</span>
+                    </span>
+                    <p>
+                      The description that should be shown next to this reference on Notebook.ai.
+                      Only used if <strong>reference_title</strong> is also given.
+                      Maximum of 300 characters; more than that will be truncated with an ellipses when displaying.
+                    </p>
+                  </li>
+                  <li class="collection-item">
+                    <span class="title">
+                      <strong>reference_image</strong>
+                      <span class="blue-text">url</span>
+                    </span>
+                    <p>
+                      An image may optionally be included to display with references in some views when the design permits.
+                    </p>
+                  </li>
+                </ul>
+              </div>
+              <div class="col s12 m6 l6">
+                <h3>Example response</h3>
+                <p class="code">
+{
+  "id": 1,
+  "name": "Some <%= content_type.name %>",
+  "universe_id": 2,
+  "meta": {
+    "created_at": "2020-02-01 08:24:20 UTC",
+    "updated_at": "2020-02-09 06:57:12 UTC"
+  },
+  "categories": {
+    "Overview": {
+      "fields": [
+        {
+          "id": 123,
+          "label": "Description",
+          "value": "Some Description"
+        },
+        {
+          "id": 124,
+          "label": "Another Field",
+          "value": "Some other value"
+        },
+        ...
+      ],
+    },
+    ...
+  },
+  "references": [
+    {
+      "url": "https://www.example.com/something/wow",
+      "title": "Reference name",
+      "description": "This is something really cool on the Internet that this <%= content_type.name.downcase %> appears in!",
+      "reference_image": "https://www.example.com/<%= content_type.name.downcase.pluralize %>/12345.png"
+    }
+  ]
+}
+                </p>
+              </div>
+            </div>
+
+            <h2>
+              <i class="material-icons <%= content_type.color %>-text left"><%= content_type.icon %></i>
+              Delete a specific <%= content_type.name.downcase %>
+            </h2>
+            <p>
+              <strong>Not supported:</strong>
+              Deleting <%= content_type.name.downcase.pluralize %> is currently not supported over the API.
+              Please ask your user to delete their <%= content_type.name.downcase %> manually, or
+              <%= link_to 'contact us', 'https://github.com/indentlabs/notebook' %> if you need this permission for your application.
+            </p>
+          </div>
+        </li>
+      <% end %>
     </ul>
   </div>
 </div>

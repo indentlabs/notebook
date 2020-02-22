@@ -9,5 +9,8 @@ module Api
 
     def applications
     end
+
+    def references
+    end
   end
 end
