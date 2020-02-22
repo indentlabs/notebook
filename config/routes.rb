@@ -188,6 +188,7 @@ end
   end
 
   # API Endpoints
+  resources :application_integrations
   namespace :api do
     get '/', to: 'api_docs#index'
     get '/applications', to: 'api_docs#applications'

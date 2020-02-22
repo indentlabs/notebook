@@ -14,6 +14,7 @@ module Api
     end
 
     def applications
+      @applications = current_user.application_integrations
     end
 
     def approvals

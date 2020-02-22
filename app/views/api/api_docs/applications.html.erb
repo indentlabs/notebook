@@ -1,1 +1,32 @@
-applications
+<div class="row">
+  <div class="col s12 m10 offset-m1 l8 offset-l2">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Register a new Notebook.ai application</div>
+        <%= form_for ApplicationIntegration.new(user: current_user) do |f| %>
+          <p>
+            If you'd like to create an application that is able to use the <%= link_to 'Notebook.ai API', api_path %>, 
+            please fill out the following form to get started.
+          </p>
+          <br />
+          
+          <% [:name, :description, :organization_name, :organization_url, :website_url, :privacy_policy_url, :authorization_callback_url].each do |field| %>
+            <div class="input-field">
+              <%= f.label field.to_s.humanize %>
+              <%= f.text_field field, placeholder: field.to_s.humanize %>
+            </div>
+          <% end %>
+          <%= f.submit 'Register application', class: 'btn white-text blue' %>
+
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if @applications.any? %>
+  <h1>Your current applications</h1>
+  <% @applications.each do |application| %>
+
+  <% end %>
+<% end %>
