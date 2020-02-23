@@ -1,4 +1,24 @@
-<p id="notice"><%= notice %></p>
+<div class="row">
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">
+          <i class="material-icons left">extension</i>
+          <%= @application_integration.name %>
+        </div>
+        <% [:description, :organization_name].each do |field| %>
+          <div>
+            <%= field.to_s.humanize %>: <%= @application_integration.send(field) %>
+          </div>
+        <% end %>
+        <% [:organization_url, :website_url, :privacy_policy_url, :authorization_callback_url].each do |field| %>
+          <div>
+            <%= field.to_s.humanize %>: <%= link_to @application_integration.send(field), @application_integration.send(field) %>
+          </div>
+        <% end %>
 
-<%= link_to 'Edit', edit_application_integration_path(@application_integration) %> |
-<%= link_to 'Back', application_integrations_path %>
+        
+      </div>
+    </div>
+  </div>
+</div>

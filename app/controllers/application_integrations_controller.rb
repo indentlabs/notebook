@@ -21,7 +21,7 @@ class ApplicationIntegrationsController < ApplicationController
 
   # POST /application_integrations
   def create
-    @application_integration = ApplicationIntegration.new(application_integration_params)
+    @application_integration = ApplicationIntegration.new(application_integration_params.merge({user: current_user}))
 
     if @application_integration.save
       redirect_to @application_integration, notice: 'Application integration was successfully created.'
@@ -53,6 +53,8 @@ class ApplicationIntegrationsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def application_integration_params
-      params.fetch(:application_integration, {})
+      params.require(:application_integration).permit(
+        :name, :description, :organization_name, :organization_url, :website_url, :privacy_policy_url, :authorization_callback_url
+      )
     end
 end
