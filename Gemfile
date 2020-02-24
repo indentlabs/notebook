@@ -127,7 +127,7 @@ group :test do
   gem 'rspec-rails'
   gem 'webmock'
   gem 'rubocop', require: false
-  gem 'ruby-prof', '1.2.0'
+  gem 'ruby-prof', '1.3.0'
   gem 'shoulda-matchers', '~> 4.3'
   gem 'rails-controller-testing'
 end
