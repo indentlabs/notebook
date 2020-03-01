@@ -437,7 +437,7 @@ class ContentController < ApplicationController
   private
 
   def update_page_tags
-    tag_list = page_tag_params.fetch(:page_tags, "").split(',,,|||,,,')
+    tag_list = page_tag_params.fetch(:page_tags, "").split(PageTag::SUBMISSION_DELIMITER)
     current_tags = @content.page_tags.pluck(:tag)
 
     tags_to_add    = tag_list - current_tags

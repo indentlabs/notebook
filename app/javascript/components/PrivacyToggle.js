@@ -26,9 +26,18 @@ import axios from 'axios';
 class PrivacyToggle extends React.Component {
   constructor(props) {
     super(props);
+    
+    var initial_privacy = this.props.content.privacy;
+    if (initial_privacy == null) {
+      // Default null privacy settings to private
+      initial_privacy = 'private';
+    }
+
     this.state = {
-      privacy: this.props.content.privacy
+      privacy: initial_privacy
     };
+
+    console.log('Privacy: ' + this.state.privacy);
     axios.defaults.headers.common['X-CSRF-TOKEN'] = this.props.csrf_token;
   }
 
