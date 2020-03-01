@@ -111,6 +111,9 @@ class ContentSerializer
     when 'link'
       self.raw_model.send(attribute_field.old_column_source)
 
+    when 'tags'
+      self.raw_model.page_tags
+
     else # text_area, name, universe, etc
       #codesmell here: we shouldn't ever have multiple attribute values but for some reason we do sometimes (in collaboration?)
       self.attribute_values.order('created_at desc').detect { |value| 
