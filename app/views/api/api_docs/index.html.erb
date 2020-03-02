@@ -1,9 +1,11 @@
 <div class="row">
   <div class="col s12 m10 offset-m1 l8 offset-l2">
-    <%= image_tag 'logos/both-original.png', style: 'width: 100%' %>
+    <%= link_to api_path do %>
+      <%= image_tag 'logos/both-original.png', style: 'width: 100%' %>
+    <% end %>
   </div>
 
-  <div class="col s12">
+  <div class="col s12 m10 offset-m1 l8 offset-l2">
     <div class="card">
       <div class="card-content">
         <div class="card-title">
@@ -33,7 +35,7 @@
           </div>
           <div class="col s12 m6 l6 offset-l1">
             <p>
-              In other words, three easy steps to get started:
+              In other words, it's just three easy steps to get started:
             </p>
 
             <ul class="stepper">
@@ -84,28 +86,76 @@
         </div>
       </div>
     </div>
+  </div>
 
+  <%= link_to api_docs_path do %>
+    <div class="card hoverable blue col s12 m10 offset-m1 l8 offset-l2">
+      <div class="card-content white-text center">
+        <div class="card-title">Browse available API endpoints</div>
+        <p>Documentation for developers, by developers</p>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="card col s12 m10 offset-m1 l8 offset-l2">
+    <div class="card-content">
+      <div class="card-title">
+        Gain full access to 
+        <% Rails.application.config.content_types[:all_non_universe].each do |type| %>
+          <span class="<%= type.color %>-text"><%= type.name.downcase.pluralize %>,</span>
+        <% end %>
+        and <span class="<%= Universe.color %>-text">universes</span>.
+      </div>
+      <div class="row">
+        <div class="col s12 m12 l6">
+          <p>
+            After a user authenticates your application, you'll have full access to integrate their notebook pages into your app.
+            You can show them their characters, let them edit one of their existing creatures, pin their towns and landmarks to your maps, 
+            create new items, and more &mdash; all from within your app. 
+          </p>
+          <br />
+          <p>
+            <%= link_to 'See the available endpoints by clicking here.', api_docs_path %>
+          </p>
+        </div>
+        <div class="col s12 m12 l6">
+          <%= image_tag 'screenshots/page-types.png', width: '100%', class: 'materialboxed', data: { caption: "A few of the page types available on Notebook.ai" } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card col s12 m10 offset-m1 l8 offset-l2">
+    <div class="card-content">
+      <div class="card-title">
+        Generate two-way mentions for your content and drive traffic back to your site
+      </div>
+      <div class="row">
+        <div class="col s12 m5 l5">
+          <%= image_tag 'screenshots/integrations.png', width: '100%', class: 'materialboxed', data: { caption: "Each integration gets its own tab on Notebook.ai pages" } %>
+        </div>
+        <div class="col s12 m7 l7">
+          <p>
+            When a user links their notebook page in your app, we can automatically show a link back to your page from that notebook page, too.
+          </p>
+          <br />
+          <p>
+            For example, if a user publishes a story about Alice and Bob on your site and links their Alice and Bob pages from Notebook.ai, we'll
+            show a link to that story on both Alice and Bob's Notebook.ai pages also.
+          </p>
+          <br />
+          <p>
+            <%= link_to 'See the available endpoints by clicking here.', api_docs_path %>
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="col s12">
-    <div class="grey-text uppercase">SUPPORTED NOTEBOOK ENDPOINTS</div>
-    <ul class="collapsible">
-      <% Rails.application.config.content_types[:all].each do |content_type| %>
-        <li>
-          <div class="collapsible-header">
-            <i class="material-icons <%= content_type.color %>-text"><%= content_type.icon %></i>
-            Interacting with <%= content_type.name.downcase.pluralize %>
-          </div>
-          <div class="collapsible-body">
-            <%= render partial: 'api/api_docs/endpoints/fetch_all_content',            locals: { content_type: content_type } %>
-            <%= render partial: 'api/api_docs/endpoints/fetch_a_specific_content',     locals: { content_type: content_type } %>
-            <%= render partial: 'api/api_docs/endpoints/modify_a_specific_content',    locals: { content_type: content_type } %>
-            <%= render partial: 'api/api_docs/endpoints/create_a_new_content',         locals: { content_type: content_type } %>
-            <%= render partial: 'api/api_docs/endpoints/reference_a_specific_content', locals: { content_type: content_type } %>
-            <%= render partial: 'api/api_docs/endpoints/delete_a_specific_content',    locals: { content_type: content_type } %>
-          </div>
-        </li>
-      <% end %>
-    </ul>
+    <p class="grey-text center">
+      Want to build something our API doesn't support yet?
+      <%= link_to 'Get in touch!', 'https://github.com/indentlabs/notebook/issues' %>
+    </p>
   </div>
 </div>

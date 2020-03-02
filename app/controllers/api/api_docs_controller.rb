@@ -2,9 +2,12 @@ module Api
   class ApiDocsController < ApplicationController
     layout 'developer', except: [:integrations]
 
-    before_action :authenticate_user!, except: [:index, :references]
+    before_action :authenticate_user!, except: [:index, :docs, :references]
 
     def index
+    end
+
+    def docs
     end
 
     def integrations

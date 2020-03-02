@@ -47,6 +47,13 @@ POST /api/v1/<%= content_type.name.downcase.pluralize %>
         </p>
       </li>
     </ul>
+    <% if Rails.application.config.content_types[:premium].include?(content_type) %>
+      <div class="card-panel blue lighten-5">
+        Note: Because this is a <strong>Premium</strong> page, either you (the application)
+        or your authenticated user must have an active Premium subscription to create
+        a new <%= content_type.name.downcase %> page.
+      </div>
+    <% end %>
   </div>
   <div class="col s12 m6 l6">
     <h3>Example response</h3>
