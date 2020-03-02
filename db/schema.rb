@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_02_022930) do
+ActiveRecord::Schema.define(version: 2020_03_02_224753) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -54,6 +54,8 @@ ActiveRecord::Schema.define(version: 2020_03_02_022930) do
     t.string "authorization_callback_url"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "event_ping_url"
+    t.string "application_token"
     t.index ["user_id"], name: "index_application_integrations_on_user_id"
   end
 
@@ -2908,9 +2910,6 @@ ActiveRecord::Schema.define(version: 2020_03_02_022930) do
     t.integer "habitat_id"
   end
 
-  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "api_keys", "users"
-  add_foreign_key "application_integrations", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
   add_foreign_key "character_birthtowns", "characters"

@@ -1,32 +1,63 @@
 <div class="row">
-  <div class="col s12 m10 offset-m1 l8 offset-l2">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Register a new Notebook.ai application</div>
-        <%= form_for ApplicationIntegration.new(user: current_user) do |f| %>
-          <p>
-            If you'd like to create an application that is able to use the <%= link_to 'Notebook.ai API', api_path %>, 
-            please fill out the following form to get started.
-          </p>
-          <br />
-          
-          <% [:name, :description, :organization_name, :organization_url, :website_url, :privacy_policy_url, :authorization_callback_url].each do |field| %>
-            <div class="input-field">
-              <%= f.label field.to_s.humanize %>
-              <%= f.text_field field, placeholder: field.to_s.humanize %>
-            </div>
-          <% end %>
-          <%= f.submit 'Register application', class: 'btn white-text blue' %>
+  <div class="col s12 m10 l8">
+    <ul class="collapsible">
+      <li class="<%= 'active' unless @applications.any? %>">
+        <div class="collapsible-header blue white-text">
+          <i class="material-icons">extension</i> Register a new Notebook.ai application
+        </div>
+        <div class="collapsible-body white">
+          <%= render partial: 'api/application_integrations/form', locals: { application_integration: ApplicationIntegration.new(user: current_user) } %>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="col s12 m2 l4">
+  </div>
+</div>
 
+<div class="row">
+  <div class="col s12 m10 offset-m1 l8">
+    <% if @applications.any? %>
+      <h1>Your current applications</h1>
+      <% @applications.each do |application| %>
+        <%= link_to api_application_integration_path(application), class: 'black-text' do %>
+          <div class="card-panel hoverable">
+            <p>
+              <i class="material-icons left">extension</i>
+              <%= application.name %>
+            </p>
+            <p>
+              <%= application.description %>
+            </p>
+          </div>
         <% end %>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="col s12 m2 l4">
+    <h1>&nbsp;</h1>
+    <div class="hoverable card">
+      <div class="card-content">
+        <div class="card-title">Your available features</div>
+        <ul>
+          <li>
+            <i class="material-icons left green-text">check</i> Basic Notebook.ai endpoints
+          </li>
+          <li class="clearfix">
+            <i class="material-icons left red-text">close</i> Premium Notebook.ai endpoints
+          </li>
+        </ul>
+        <p>
+          Some helpful text here
+        </p>
+        <br />
+        <p class="green-text">
+          47% API quota left
+        </p>
+      </div>
+      <div class="card-action">
+        <%= link_to 'Manage your billing plan', '#' %>
       </div>
     </div>
   </div>
 </div>
-
-<% if @applications.any? %>
-  <h1>Your current applications</h1>
-  <% @applications.each do |application| %>
-
-  <% end %>
-<% end %>

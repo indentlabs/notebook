@@ -1,0 +1,86 @@
+<%= link_to 'Back to your applications list', api_applications_path %>
+
+<div class="row">
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">
+          <i class="material-icons left">extension</i>
+          <%= @application_integration.name %>
+        </div>
+        <div class="row">
+          <div class="col s12 m6">
+            <% [:description, :organization_name].each do |field| %>
+              <div class="grey-text uppercase">
+                <%= field.to_s.humanize %>
+              </div>
+              <div>
+                <%= @application_integration.send(field) %>
+              </div>
+              <br />
+            <% end %>
+            <% [:organization_url, :website_url, :privacy_policy_url, :authorization_callback_url, :event_ping_url].each do |field| %>
+              <div class="grey-text uppercase"><%= field.to_s.humanize %></div>
+              <div>
+                <%= link_to @application_integration.send(field), @application_integration.send(field) %>
+              </div>
+              <br />
+            <% end %>
+          </div>
+          <div class="col s12 m6">
+            <div class="grey-text uppercase">
+              Application Token
+            </div>
+            <div>
+              <%= @application_integration.application_token || 'No token set' %>
+            </div>
+            <div class="card-panel red darken-3 white-text">
+              Do <strong>NOT</strong> share this with others you do not trust or make client-side requests that expose this token. This token may be used to make API
+              calls on your application's behalf and unauthorized use puts you at risk of strangers using up your API quota. 
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col s12 m6 l4">
+    <div class="grey-text uppercase">Billing plan</div>
+    <% if current_user.on_premium_plan? %>
+      <div class="card-panel green lighten-3">
+        You're on a Premium plan. All features are unlocked.
+      </div>
+    <% else %>
+      <div class="card-panel red lighten-3">
+        You are not currently on a Premium plan. API requests that require a Premium plan will succeed for users that have Premium, but fail for other users.
+        <%= link_to 'Upgrade to a Premium plan', '#' %> to ensure your API requests succeed for all users!
+      </div>
+    <% end %>
+  </div>
+  <div class="col s12 m6 l4">
+    <div class="grey-text uppercase">API quota</div>
+    <div class="card-panel yellow lighten-4">
+      <div>
+        <strong>53% used this month</strong>
+      </div>
+      <p>
+        You've used 5,234 of your alotted 10,000 calls this month.
+        <%= link_to 'Upgrade to Premium', '#' %> to ensure you don't experience any disruptions when hitting your limit.
+      </p>
+    </div>
+  </div>
+  <div class="col s12 m6 l4">
+    <div class="grey-text uppercase">Features available</div>
+    <div class="card-panel yellow lighten-4">
+      <ul>
+        <li>
+          <i class="material-icons left green-text">check</i> Basic Notebook.ai endpoints
+        </li>
+        <li class="clearfix">
+          <i class="material-icons left red-text">close</i> Premium Notebook.ai endpoints
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
