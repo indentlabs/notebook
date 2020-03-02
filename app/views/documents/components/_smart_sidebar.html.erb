@@ -116,8 +116,8 @@
 <div class="smart-sidebar hide-on-med-and-down">
   <div class="entities-container">
     <div class="grey-text center">Metadata</div>
-    <a href="#"
-        class="hoverable entity-trigger sidenav-trigger white-text <%= entity_class.color %>"
+    <a href="#document-notes-modal"
+        class="hoverable modal-trigger entity-trigger document-notes-trigger white-text <%= Document.color %>"
         data-target="document-notes">
       <i class="material-icons small left">
         <%= Document.icon %>
@@ -195,8 +195,28 @@
   </div>
 </div>
 
+<div id="document-notes-modal" class="modal modal-fixed-footer">
+  <%= form_for(@document, remote: true) do |f| %>
+    <div class="modal-content">
+      <h4>
+        Document notes
+      </h4>
+      <p class="grey-text">This field will automatically expand as you write.</p>
+      <%= f.text_area :notes_text, class: 'materialize-textarea', placeholder: "Write as little or as much as you'd like!", style: 'min-height: 400px; border: 1px solid #ccc; padding: 10px;' %>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Discard changes</a>
+      <%= link_to 'Save changes', "#", onclick: '$("form.edit_document").submit()', class: 'modal-close waves-effect waves-green btn-flat lighten-3 ' + Document.color %>
+    </div>
+  <% end %>
+</div>
+
 <script type="text/javascript">
   $(document).ready(function () {
+    $('.document-notes-trigger').click(function () {
+      $('#document-notes-modal').modal('open');
+      return false;
+    })
 
     $('.js-link-entity').click(function () {
       $('#entity-link-modal').modal('open');

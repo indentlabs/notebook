@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_02_20_223310) do
+ActiveRecord::Schema.define(version: 2020_03_02_022930) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -39,6 +39,22 @@ ActiveRecord::Schema.define(version: 2020_02_20_223310) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_api_keys_on_user_id"
+  end
+
+  create_table "application_integrations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "name"
+    t.string "description"
+    t.string "organization_name"
+    t.string "organization_url"
+    t.string "website_url"
+    t.string "privacy_policy_url"
+    t.string "token"
+    t.datetime "last_used_at"
+    t.string "authorization_callback_url"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_application_integrations_on_user_id"
   end
 
   create_table "archenemyships", force: :cascade do |t|
@@ -1040,6 +1056,7 @@ ActiveRecord::Schema.define(version: 2020_02_20_223310) do
     t.datetime "deleted_at"
     t.integer "universe_id"
     t.boolean "favorite"
+    t.text "notes_text"
     t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
@@ -2893,6 +2910,7 @@ ActiveRecord::Schema.define(version: 2020_02_20_223310) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "api_keys", "users"
+  add_foreign_key "application_integrations", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
   add_foreign_key "character_birthtowns", "characters"
