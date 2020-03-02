@@ -3,15 +3,25 @@
 %>
 
 <div id="documents_panel" class="row panel">
-  <% if visible_documents.any? %>
-    <%= content.name %> appears in the following documents:
+  <div class="row">
+    <div class="col s12 m10 offset-m1">
+      <div class="card-panel blue lighten-5">
+        <i class="left material-icons grey-text">help</i>
+        Documents will automatically appear here whenever you add this page to a document.<br />
+        Only you can see this message. <%= link_to 'Dismiss this message', '#' %>.
+      </div>
 
-    <ul>
-      <% visible_documents.each do |document| %>
-        <li>
-          <%= render partial: 'documents/reference_card', locals: { document: document } %>
-        </li>
+      <% if visible_documents.any? %>
+        <%= content.name %> appears in the following documents:
+
+        <ul>
+          <% visible_documents.each do |document| %>
+            <li>
+              <%= render partial: 'documents/reference_card', locals: { document: document } %>
+            </li>
+          <% end %>
+        </ul>
       <% end %>
-    </ul>
-  <% end %>
+    </div>
+  </div>
 </div>
