@@ -5,5 +5,4 @@ RUN apt-get update -qq && \
 COPY . /notebook-ai
 WORKDIR /notebook-ai
 RUN bundle install
-RUN rake db:create
-RUN rake db:migrate
+RUN rails db:setup
