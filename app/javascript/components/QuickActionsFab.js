@@ -27,28 +27,51 @@ class QuickActionsFab extends React.Component {
   }
 
   render () {
-    return (        
-      <SpeedDial
-        ariaLabel="SpeedDial example"
-        icon={<SpeedDialIcon />}
-        onClose={() => this.handle_close()}
-        onOpen={() => this.handle_open()}
-        open={this.state.open}
-        direction='left'
-        className="speed-dial-fab"
-      >
-        {this.props.actions.map(action => (
-          <SpeedDialAction
-            key={action.name}
-            icon={<i className={`material-icons ${action.color}-text`}>{action.icon}</i>}
-            tooltipTitle={action.name}
-            placement="top"
-            interactive={true}
-            arrow={true}
-            onClick={() => this.handle_click(action.route)}
-          />
-        ))}
-      </SpeedDial>
+    return (
+      <React.Fragment>
+        <SpeedDial
+          ariaLabel="SpeedDial example"
+          icon={<SpeedDialIcon />}
+          onClose={() => this.handle_close()}
+          onOpen={() => this.handle_open()}
+          open={this.state.open}
+          direction='left'
+          className="speed-dial-fab hide-on-small-only"
+        >
+          {this.props.actions.map(action => (
+            <SpeedDialAction
+              key={action.name}
+              icon={<i className={`material-icons ${action.color}-text`}>{action.icon}</i>}
+              tooltipTitle={action.name}
+              placement="top"
+              interactive={true}
+              arrow={true}
+              onClick={() => this.handle_click(action.route)}
+            />
+          ))}
+        </SpeedDial>
+        <SpeedDial
+          ariaLabel="SpeedDial example"
+          icon={<SpeedDialIcon />}
+          onClose={() => this.handle_close()}
+          onOpen={() => this.handle_open()}
+          open={this.state.open}
+          direction='up'
+          className="speed-dial-fab hide-on-med-and-up"
+        >
+          {this.props.actions.map(action => (
+            <SpeedDialAction
+              key={action.name}
+              icon={<i className={`material-icons ${action.color}-text`}>{action.icon}</i>}
+              tooltipTitle={action.name}
+              placement="top"
+              interactive={true}
+              arrow={true}
+              onClick={() => this.handle_click(action.route)}
+            />
+          ))}
+        </SpeedDial>
+      </React.Fragment>
     );
   }
 }
