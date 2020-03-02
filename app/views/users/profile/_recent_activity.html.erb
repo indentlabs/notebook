@@ -25,18 +25,16 @@
             </span>
           <% end %>
           <h5 style="margin-top: 0">
-            <i class="material-icons <%= entity.class.color %>-text" style="position: relative; top: 3px">
+            <i class="material-icons <%= entity.class.color %>-text left" style="position: relative; top: 3px">
               <%= entity.class.icon %>
             </i>
-            <%= entity.name %><%
-              if entity.description.present?
-            %><small class="grey-text">, <%= entity.description %></small>
-            <%
-              end
-            %>
+            <%= ContentFormatterService.show(text: entity.name, viewing_user: current_user) %>
+            <% if entity.description.present? %>
+              <small class="grey-text"><%= entity.description %></small>
+            <% end %>
           </h5>
           <p>
-            <%= @user.name %>
+            <%= link_to @user.name, @user, class: "#{User.color}-text" %>
             updated a<%= 'n' if %(a e i o u).include?(entity.class.name.downcase.first) %>
             <%= entity.class.name.downcase %>
             <% if !entity.is_a?(Universe) && entity.universe.present? %>
@@ -48,9 +46,9 @@
           </p>
         </div>
         <div class="card-action">
-          <%= link_to "View #{entity.name}", entity, class: 'blue-text' %>
+          <%= link_to "View #{entity.class.name}", entity, class: 'blue-text' %>
           <% if user_signed_in? && current_user.can_update?(entity) %>
-            <%= link_to "Edit #{entity.name}", entity, class: 'green-text' %>
+            <%= link_to "Edit #{entity.class.name}", entity, class: 'green-text' %>
           <% end %>
         </div>
       </div>

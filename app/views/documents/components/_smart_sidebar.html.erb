@@ -199,13 +199,20 @@
   <%= form_for(@document, remote: true) do |f| %>
     <div class="modal-content">
       <h4>
+        <i class="material-icons medium <%= Document.color %>-text left">
+          <%= Document.icon %>
+        </i>
         Document notes
       </h4>
       <p class="grey-text">This field will automatically expand as you write.</p>
       <%= f.text_area :notes_text, class: 'materialize-textarea', placeholder: "Write as little or as much as you'd like!", style: 'min-height: 400px; border: 1px solid #ccc; padding: 10px;' %>
+      <p class="grey-text">
+        <strong>To save your notes, please click "Save Changes" below.</strong>
+        Closing this dialog will preserve your unsaved changes until you refresh the page, but to keep your notes you must save them!
+      </p>
     </div>
     <div class="modal-footer">
-      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Discard changes</a>
+      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Ignore changes</a>
       <%= link_to 'Save changes', "#", onclick: '$("form.edit_document").submit()', class: 'modal-close waves-effect waves-green btn-flat lighten-3 ' + Document.color %>
     </div>
   <% end %>
