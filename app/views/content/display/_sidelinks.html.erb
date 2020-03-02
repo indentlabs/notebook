@@ -7,75 +7,14 @@
   raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
 %>
 
-<ul class="hoverable collection with-header content-tabs">
-  <li class="collection-header center">
-    <h4><%= raw_model.class.name %></h4>
-  </li>
+<% if creating || editing %>
+  <button class="btn waves-effect waves-<%= raw_model.class.color %> <%= raw_model.class.color %> mp-sidebar-save" type="submit" name="action"
+          style="margin: 20px 0 10px 0; width: 100%">
+    <i class="material-icons left">save</i>
+    <%= raw_model.new_record? ? 'Create' : 'Save Changes' %>
+  </button>
+<% end %>
 
-  <% if creating || editing %>
-    <li class="collection-header center">
-      <button class="btn waves-effect waves-<%= raw_model.class.color %> <%= raw_model.class.color %> mp-sidebar-save" type="submit" name="action" style="margin: 20px 0;">
-        <%= raw_model.new_record? ? 'Create' : 'Save Changes' %>
-      </button>
-    </li>
-  <% end %>
-
-  <%
-    categories = if content.is_a?(ContentSerializer)
-      content.data[:categories]
-    else
-      @serialized_categories_and_fields.data
-    end
-  %>
-  <% categories.each do |category| %>
-    <% next if category[:name] == 'changelog' %>
-    <%
-      if creating || editing
-        # Show everything on create/edit forms
-      elsif category[:name] == 'contributors'
-        # Show contributors on show page if there are any to show
-        next if raw_model.contributors.empty?
-      elsif category[:name] == 'gallery'
-        # Only show gallery tab if the content has any images
-        next if raw_model.image_uploads.empty?
-      else
-        # Only show other tabs if it has at least one piece of data in it
-        next unless category[:fields].any? do |field|
-          (
-            # This is a link field AND it has existing links
-            field[:type] == 'link' && field[:old_column_source].present? && raw_model.send(field[:old_column_source]).any?
-          ) || field[:value].present?
-            # or: this is a text field with text in it
-        end
-      end
-    %>
-    <li class="collection-item tab">
-      <a href="#<%= category[:name].gsub("'", '') %>_panel" class="<%= 'red-text' if category[:label] == 'Overview' %>">
-        <i class="material-icons left"><%= category[:icon] %></i>
-        <%= category[:label].capitalize.presence || '(blank)' %>
-      </a>
-    </li>
-  <% end %>
-
-  <% if !creating && !editing %>
-    <% related_documents = content.documents.select { |doc| (current_user || User.new).can_read?(doc) } %>
-    <% if related_documents.any? %>
-      <li class="collection-item tab">
-        <a href="#documents_panel" class="">
-          <i class="material-icons left"><%= Document.icon %></i>
-          Documents
-          <span class="badge"><%= related_documents.count %></span>
-        </a>
-      </li>
-    <% end %>
-  <% end %>
-
-  <% if user_signed_in? && current_user.id == content.user.id %>
-    <li class="collection-item fake-tab">
-      <%= link_to attribute_customization_path(content_type: raw_model.class.name.downcase), class: 'green-text' do %>
-        <i class="material-icons left">tune</i>
-        Configure <%= raw_model.class.name.downcase %> fields
-      <% end %>
-    </li>
-  <% end %>
-</ul>
+<%= render partial: 'content/display/sidebar/categories', locals: { content: content, creating: creating, editing: editing } %>
+<%= render partial: 'content/display/sidebar/references', locals: { content: content, creating: creating, editing: editing } %>
+<%= render partial: 'content/display/sidebar/actions',    locals: { content: content, creating: creating, editing: editing } %>

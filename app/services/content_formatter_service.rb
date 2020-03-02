@@ -39,7 +39,7 @@ class ContentFormatterService < Service
   end
 
   def self.tokens_to_replace(text)
-    matches = text.scan(TOKEN_REGEX).map do |klass, id|
+    text.scan(TOKEN_REGEX).map do |klass, id|
       {
         content_type:   klass,
         content_id:     id,
@@ -56,9 +56,11 @@ class ContentFormatterService < Service
       return unknown_link_template(token)
     end
     return unknown_link_template(token) unless VALID_LINK_CLASSES.include?(content_class.name)
+
     content_id    = token[:content_id].to_i
     content_model = content_class.find_by(id: content_id)
     return unknown_link_template(token) unless content_model.present?
+
     if content_model.readable_by?(viewing_user)
       link_template(content_model)
     else

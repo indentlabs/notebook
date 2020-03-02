@@ -1,0 +1,61 @@
+<%
+  creating = defined?(creating) && creating
+  editing  = defined?(editing)  && editing
+%>
+
+<%
+  raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
+%>
+
+<ul class="collection content-tabs">
+  <li class="active center grey-text uppercase">
+    Categories
+  </li>
+
+  <%
+    categories = if content.is_a?(ContentSerializer)
+      content.data[:categories]
+    else
+      @serialized_categories_and_fields.data
+    end
+  %>
+  <% categories.each do |category| %>
+    <% next if category[:name] == 'changelog' %>
+    <% next if category[:name] == 'gallery'   %>
+    <%
+      if creating || editing
+        # Show everything on create/edit forms
+      elsif category[:name] == 'contributors'
+        # Show contributors on show page if there are any to show
+        next if raw_model.contributors.empty?
+      else
+        # Only show other tabs if it has at least one piece of data in it
+        next unless category[:fields].any? do |field|
+          (
+            # This is a link field AND it has existing links
+            field[:type] == 'link' && field[:old_column_source].present? && raw_model.send(field[:old_column_source]).any?
+          ) || field[:value].present?
+            # or: this is a text field with text in it
+        end
+      end
+    %>
+    <li class="collection-item tab">
+      <a href="#<%= category[:name].gsub("'", '') %>_panel" class="<%= 'red-text' if category[:label] == 'Overview' %> tab-label clearfix">
+        <i class="material-icons left"><%= category[:icon] %></i>
+        <%= category[:label].capitalize.presence || '(blank)' %>
+        <% if editing && category[:percent_complete].present? %>
+            <% if category[:percent_complete] == 100 %>
+              <span class="badge green-text hide-on-med-and-down">
+                <i class="material-icons">check</i>
+              </span>
+            <% else %>
+              <span class="badge grey-text hide-on-med-and-down">
+                <%= category[:percent_complete] %>%
+              </span>
+            <% end %>
+          </span>
+        <% end %>
+      </a>
+    </li>
+  <% end %>
+</ul>

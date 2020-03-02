@@ -1,0 +1,65 @@
+<%
+  creating = defined?(creating) && creating
+  editing  = defined?(editing)  && editing
+%>
+
+<%
+  raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
+%>
+
+<ul class="collection content-tabs">
+  <li class="active center grey-text uppercase">
+    Actions
+  </li>
+
+  <% if raw_model.persisted? %>
+    <li class="collection-item fake-tab">
+      <%= link_to '#', class: 'share' do %>
+        <i class="material-icons left">share</i>
+        Share this page
+      <% end %>
+    </li>
+  <% end %>
+
+  <% if user_signed_in? && current_user.id == content.user.id %>
+    <li class="collection-item fake-tab">
+      <%= link_to attribute_customization_path(content_type: raw_model.class.name.downcase) do %>
+        <i class="material-icons left">tune</i>
+        Configure <%= raw_model.class.name.downcase %> fields
+      <% end %>
+    </li>
+  <% end %>
+
+  <% if raw_model.persisted? %>
+    <li class="collection-item fake-tab">
+      <%= link_to send("changelog_#{raw_model.class.name.downcase}_path", raw_model) do %>
+        <i class="material-icons left">history</i>
+        View changelog
+      <% end %>
+    </li>
+
+    <li class="collection-item fake-tab">
+      <%= 
+        link_to send("toggle_archive_#{raw_model.class.name.downcase}_path", raw_model), 
+                data: { 	
+                  confirm: raw_model.archived? ? "This will un-archive this page." : "Are you sure you want to archive this #{raw_model.class.name.downcase}?",	
+                } do
+        %>
+        <i class="material-icons left"><%= 'un' if raw_model.archived? %>archive</i>
+        <%= raw_model.archived? ? 'Un-archive' : 'Archive' %> this page
+      <% end %>
+    </li>
+
+    <li class="collection-item fake-tab">
+      <%= 
+        link_to raw_model, 
+                method: :delete,
+                data: { 	
+                  confirm: "Are you sure? This will delete this entire #{raw_model.class.name.downcase}!",	
+                } do %>
+        <i class="material-icons left">delete</i>
+        Delete this page
+      <% end %>
+    </li>
+  <% end %>
+</ul>

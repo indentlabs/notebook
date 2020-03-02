@@ -1,15 +1,15 @@
 <% set_meta_tags title: @document.title, description: truncate(@document.body) %>
 
-<%= form_for @document do |f| %>
-  <%= content_for :navbar_left_content do %>
-    <%= render partial: 'documents/components/document_name_bar', locals: { document: @document, f: f } %>
-  <% end %>
 
   <%= content_for :full_width_page_header do %>
     <%= render partial: 'documents/components/autosave_bar', locals: { document: @document } %>
-
     <%= render partial: 'documents/components/smart_sidebar', locals: { document: @document } %>
     <div id="editor" class="editable js-can-mention-pages" data-save-url="<%= document_url(@document) %>"><%= @document.body.try(:html_safe) %></div>
+  <% end %>
+
+<%= form_for @document do |f| %>
+  <%= content_for :navbar_left_content do %>
+    <%= render partial: 'documents/components/document_name_bar', locals: { document: @document, f: f } %>
   <% end %>
 
   <div class="grey-text autosave-bar">

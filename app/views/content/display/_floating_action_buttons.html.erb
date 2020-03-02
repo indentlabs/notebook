@@ -58,29 +58,3 @@
   </a>
 <% end %>
 
-<% if @content.persisted? && editing && current_user.can_delete?(@content) %>
-  <%= link_to send("toggle_archive_#{@content.class.name.downcase}_path", @content),
-    class: 'btn-floating btn-small halfway-fab waves-effect waves-light white left tooltipped hoverable',
-    style: 'z-index: 1;',
-    data: { 
-      confirm: @content.archived? ? "This will un-archive this page." : "Are you sure you want to archive this #{@content.class.name.downcase}?",
-      position: 'bottom', enterDelay: '500', tooltip: (@content.archived? ? "Un-archive" : "Archive") + " this page" 
-    } do %>
-    <i class="material-icons <%= @content.archived? ? 'black-text' : 'red-text' %> text-darken-2"><%= 'un' if @content.archived? %>archive</i>
-  <% end %>
-<% end %>
-
-<% if @content.persisted? && editing && current_user.can_delete?(@content) %>
-  <%= link_to @content,
-    class: 'btn-floating btn-small halfway-fab waves-effect waves-light white delete left tooltipped hoverable',
-    style: 'z-index: 1; left: 64px;',
-    method: :delete,
-    data: { 
-      confirm: "Are you sure? This will delete this entire #{@content.class.name.downcase}!",
-      position: 'bottom', enterDelay: '500', tooltip: "Delete this page" 
-    } do %>
-    <i class="material-icons red-text text-lighten-2">delete</i>
-  <% end %>
-<% end %>
-
-
