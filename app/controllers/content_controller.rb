@@ -1,7 +1,8 @@
 class ContentController < ApplicationController
   # todo we should probably spin off an Api::ContentController for #api_sort and anything else api-wise we need
 
-  before_action :authenticate_user!, except: [:show, :changelog, :api_sort]
+  before_action :authenticate_user!, except: [:show, :changelog, :api_sort] \
+    + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
@@ -10,8 +11,7 @@ class ContentController < ApplicationController
   before_action :set_attributes_content_type, only: [:attributes]
 
   before_action :set_navbar_color, except: [:api_sort]
-  before_action :set_general_navbar_actions, except: [:deleted, :show, :changelog, :api_sort]
-  before_action :set_specific_navbar_actions, only: [:show, :changelog]
+  before_action :set_navbar_actions, except: [:deleted, :api_sort]
   before_action :set_sidenav_expansion, except: [:api_sort]
 
   def index
@@ -67,7 +67,7 @@ class ContentController < ApplicationController
     end
   end
 
-  def show
+  def show    
     content_type = content_type_from_controller(self.class)
     return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.map(&:name).include?(content_type.name)
 
@@ -79,19 +79,14 @@ class ContentController < ApplicationController
 
     @serialized_content = ContentSerializer.new(@content)
 
-    if user_signed_in?
-      @navbar_actions << {
-        label: @serialized_content.name,
-        href: main_app.polymorphic_path(@content)
-      }
-
-      @navbar_actions << {
-        label: 'Changelog',
-        href: send("changelog_#{content_type.name.downcase}_path", @content)
-      }
-    end
-
     if (current_user || User.new).can_read?(@content)
+      if user_signed_in?
+        @navbar_actions.insert(2, {
+          label: @content.name,
+          href: main_app.polymorphic_path(@content)
+        })
+      end
+
       if current_user
         if @content.updated_at > 30.minutes.ago
           Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed content', {
@@ -199,7 +194,7 @@ class ContentController < ApplicationController
       'content_type': content_type.name
     }) if Rails.env.production?
 
-    if @content.update_attributes(content_params)
+    if @content.update(content_params)
       cache_params = {}
       cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField].include?(@content.class)
       cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
@@ -253,11 +248,11 @@ class ContentController < ApplicationController
 
     if @content.user == current_user
       # todo this needs some extra validation probably to ensure each attribute is one associated with this page
-      update_success = @content.reload.update_attributes(content_params)
+      update_success = @content.reload.update(content_params)
     else
       # Exclude fields only the real owner can edit
       #todo move field list somewhere when it grows
-      update_success = @content.update_attributes(content_params.except(:universe_id))
+      update_success = @content.update(content_params.except(:universe_id))
     end
 
     cache_params = {}
@@ -442,7 +437,7 @@ class ContentController < ApplicationController
   private
 
   def update_page_tags
-    tag_list = page_tag_params.fetch(:page_tags, "").split(',,,|||,,,')
+    tag_list = page_tag_params.fetch(:page_tags, "").split(PageTag::SUBMISSION_DELIMITER)
     current_tags = @content.page_tags.pluck(:tag)
 
     tags_to_add    = tag_list - current_tags
@@ -539,7 +534,7 @@ class ContentController < ApplicationController
           redirect_to url, notice: notice
         end
       }
-      format.json { render json: @content || {}, status: :success }
+      format.json { render json: @content || {}, status: :ok }
     end
   end
 
@@ -570,44 +565,47 @@ class ContentController < ApplicationController
   end
 
   # For index, new, edit
-  def set_general_navbar_actions
-    content_type = @content_type_class || content_type_from_controller(self.class)
-    return if [AttributeCategory, AttributeField, Attribute].include?(content_type)
+  # def set_general_navbar_actions
+  #   content_type = @content_type_class || content_type_from_controller(self.class)
+  #   return if [AttributeCategory, AttributeField, Attribute].include?(content_type)
     
-    @navbar_actions = []
+  #   @navbar_actions = []
 
-    if @current_user_content
-      @navbar_actions << {
-        label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
-        href: main_app.polymorphic_path(content_type)
-      }
-    end
+  #   if @current_user_content
+  #     @navbar_actions << {
+  #       label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
+  #       href: main_app.polymorphic_path(content_type)
+  #     }
+  #   end
 
-    @navbar_actions << {
-      label: "New #{content_type.name.downcase}",
-      href: main_app.new_polymorphic_path(content_type)
-    } if user_signed_in? && current_user.can_create?(content_type) \
-    || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type.name)
+  #   @navbar_actions << {
+  #     label: "New #{content_type.name.downcase}",
+  #     href: main_app.new_polymorphic_path(content_type),
+  #     class: 'right'
+  #   } if user_signed_in? && current_user.can_create?(content_type) \
+  #   || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type.name)
 
-    discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
-    if discussions_link.present?
-      @navbar_actions << {
-        label: 'Discussions',
-        href: discussions_link
-      }
-    end
+  #   discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
+  #   if discussions_link.present?
+  #     @navbar_actions << {
+  #       label: 'Discussions',
+  #       href: discussions_link
+  #     }
+  #   end
 
-    @navbar_actions << {
-      label: 'Customize template',
-      class: 'right',
-      href: main_app.attribute_customization_path(content_type.name.downcase)
-    }
-  end
+  #   # @navbar_actions << {
+  #   #   label: 'Customize template',
+  #   #   class: 'right',
+  #   #   href: main_app.attribute_customization_path(content_type.name.downcase)
+  #   # }
+  # end
 
   # For showing a specific piece of content
-  def set_specific_navbar_actions
+  def set_navbar_actions
     content_type = @content_type_class || content_type_from_controller(self.class)
     @navbar_actions = []
+
+    return if [AttributeCategory, AttributeField].include?(content_type)
 
     if user_signed_in?
       if @current_user_content
@@ -619,7 +617,16 @@ class ContentController < ApplicationController
 
       @navbar_actions << {
         label: "New #{content_type.name.downcase}",
-        href: main_app.new_polymorphic_path(content_type)
+        href: main_app.new_polymorphic_path(content_type),
+        class: 'right'
+      }
+    end
+
+    discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
+    if discussions_link.present?
+      @navbar_actions << {
+        label: 'Discussions',
+        href: discussions_link
       }
     end
   end

@@ -43,6 +43,8 @@ gem 'paranoia'
 gem 'coffee-rails'
 gem 'rails-jquery-autocomplete'
 gem 'animate-rails'
+gem 'webpacker'
+gem 'react-rails'
 
 # Form enhancements
 gem 'redcarpet' #markdown formatting
