@@ -1,30 +1,32 @@
 <%# Usage: render partial: 'content/display/contributors', locals: { content: content } %>
 
-<div>
-  <ul class="collection">
-    <% content.raw_model.contributors.each do |contributor| %>
-      <% next if contributor.user.nil? && (current_user != content.user) %>
-      <li class="collection-item avatar">
-        <i class="material-icons circle white-text">person</i>
-        <span class="title">
-          <%= contributor.user ? link_to(contributor.user.name, contributor.user) : "#{contributor.email} (invited)" %>
-        </span>
-        <p class="grey-text">
-          Invited <%= time_ago_in_words contributor.created_at %> ago
-        </p>
-        <% if user_signed_in? && content.user == current_user %>
-          <p>
-            <%= link_to 'Remove this contributor', remove_contributor_path(contributor.id),
-              class: 'js-remove-contributor',
-              method: 'delete',
-              remote: true,
-              data: { confirm: "Are you sure? They will no longer have contributor access to this universe." } %>
+<% if content.contributors.any? %>
+  <div id="contributors_panel" class="row panel">
+    <ul class="collection">
+      <% content.contributors.each do |contributor| %>
+        <% next if contributor.user.nil? && (current_user != content.user) %>
+        <li class="collection-item avatar">
+          <i class="material-icons circle white-text">person</i>
+          <span class="title">
+            <%= contributor.user ? link_to(contributor.user.name, contributor.user) : "#{contributor.email} (invited)" %>
+          </span>
+          <p class="grey-text">
+            Invited <%= time_ago_in_words contributor.created_at %> ago
           </p>
-        <% end %>
-        <span class="secondary-content"><i class="material-icons grey-text">group</i></span>
-      </li>
-    <% end %>
-  </ul>
+          <% if user_signed_in? && content.user == current_user %>
+            <p>
+              <%= link_to 'Remove this contributor', remove_contributor_path(contributor.id),
+                class: 'js-remove-contributor',
+                method: 'delete',
+                remote: true,
+                data: { confirm: "Are you sure? They will no longer have contributor access to this universe." } %>
+            </p>
+          <% end %>
+          <span class="secondary-content"><i class="material-icons grey-text">group</i></span>
+        </li>
+      <% end %>
+    </ul>
 
-  <%= render partial: 'content/form/contributors/leave', locals: { content: content } %>
-</div>
+    <%= render partial: 'content/form/contributors/leave', locals: { content: content } %>
+  </div>
+<% end %>

@@ -7,11 +7,11 @@ class PayPalPrepayProcessingJob < ApplicationJob
 
     info = PaypalService.order_info(invoice_id)
     if info[:status] == 'CREATED'
-      # If we're still in a CREATED state, requeue once after 12 hours, just in case
+      # If we're still in a CREATED state, requeue once after 8 hours, just in case
       # Paypal's webhook didn't hit our servers.
-      if DateTime.current < invoice.created_at + 24.hours
+      if DateTime.current < invoice.created_at + 12.hours
         PayPalPrepayProcessingJob
-          .set(wait: 12.hours)
+          .set(wait: 8.hours)
           .perform_later(invoice.paypal_id)
       end
 

@@ -1,46 +1,30 @@
-<div class="slider" style="height: 140px;">
+<div class="slider" style="height: 200px;">
   <%= render partial: 'content/display/favorite_control', locals: { content: @content } %>
+
   <ul class="slides">
-    <% if @content.image_uploads.any? %>
-      <% @content.image_uploads.each do |image| %>
-        <li>
-          <%= image_tag image.src.url(:large) %>
-          <div class="caption center-align" style="text-shadow: 2px 2px #000000;">
-            <h3>
-              <%= simple_format ContentFormatterService.show(
-                text: @content.name_field_value,
-                viewing_user: current_user
-              ) %>
-            </h3>
-            <h5 class="light grey-text text-lighten-3">
-              <%= simple_format ContentFormatterService.show(
-                text: @content.description,
-                viewing_user: current_user
-              ) %>
-            </h5>
-          </div>
-        </li>
-      <% end %>
-    <% else %>
+    <% image_uploads = @content.image_uploads.map { |image| image.src.url(:large) } %>
+    <% image_uploads = ["card-headers/#{@content.class.name.downcase.pluralize}.jpg"] if image_uploads.empty? %>
+
+    <% image_uploads.each do |image_source| %>
       <li>
-        <%= image_tag "card-headers/#{@content.class.name.downcase.pluralize}.jpg" %>
-        <div class="caption center-align bordered-text">
+        <%= image_tag image_source %>
+        <div class="caption bordered-text">
           <h3>
             <% if @content.persisted? %>
               <%= simple_format ContentFormatterService.show(
                 text: @content.name_field_value,
                 viewing_user: current_user
               ) %>
+              <small>
+                <%= simple_format ContentFormatterService.show(
+                  text: @content.description,
+                  viewing_user: current_user
+                ) %>
+              </small>
             <% else %>
               New <%= @content.class.name %>
             <% end %>
           </h3>
-          <h5 class="light grey-text text-lighten-3">
-            <%= simple_format ContentFormatterService.show(
-                text: @content.description,
-                viewing_user: current_user
-            ) %>
-          </h5>
         </div>
       </li>
     <% end %>

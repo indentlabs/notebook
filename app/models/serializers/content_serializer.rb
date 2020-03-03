@@ -90,12 +90,29 @@ class ContentSerializer
         }
       }
     }
+
+    # Do a little number crunching
+    self.data[:categories].each do |category|
+      completed_fields = category[:fields].select { |field| field[:value].present? }.count.to_f
+      total_fields = category[:fields].count
+
+      if total_fields.zero?
+        category[:percent_complete] = nil
+      else
+        category[:percent_complete] = (completed_fields / total_fields * 100).round
+      end
+    end
+
+    self.data
   end
 
   def value_for(attribute_field, content)
     case attribute_field.field_type
     when 'link'
       self.raw_model.send(attribute_field.old_column_source)
+
+    when 'tags'
+      self.raw_model.page_tags
 
     else # text_area, name, universe, etc
       #codesmell here: we shouldn't ever have multiple attribute values but for some reason we do sometimes (in collaboration?)
