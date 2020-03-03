@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_02_224753) do
+ActiveRecord::Schema.define(version: 2020_03_03_002751) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1400,6 +1400,17 @@ ActiveRecord::Schema.define(version: 2020_03_02_224753) do
     t.datetime "src_updated_at"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
+  end
+
+  create_table "integration_authorizations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "application_integration_id", null: false
+    t.string "referral_url"
+    t.string "ip_address"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["application_integration_id"], name: "index_integration_authorizations_on_application_integration_id"
+    t.index ["user_id"], name: "index_integration_authorizations_on_user_id"
   end
 
   create_table "item_magics", force: :cascade do |t|
@@ -3056,6 +3067,8 @@ ActiveRecord::Schema.define(version: 2020_03_02_224753) do
   add_foreign_key "group_creatures", "groups"
   add_foreign_key "group_creatures", "users"
   add_foreign_key "image_uploads", "users"
+  add_foreign_key "integration_authorizations", "application_integrations"
+  add_foreign_key "integration_authorizations", "users"
   add_foreign_key "item_magics", "items"
   add_foreign_key "item_magics", "magics"
   add_foreign_key "item_magics", "users"

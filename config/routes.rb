@@ -1,6 +1,5 @@
 # rubocop:disable LineLength
 Rails.application.routes.draw do
-  get 'api_docs/index'
   default_url_options :host => "notebook.ai"
 
   get 'notice_dismissal/dismiss'
@@ -193,6 +192,10 @@ end
       get '/authenticate', on: :member, action: :authenticate
     end
 
+    scope '/authorizations' do
+      post '/create', to: 'integration_authorizations#create', as: :integration_authorizations
+    end
+      
     get '/',             to: 'api_docs#index'
     get '/docs',         to: 'api_docs#docs'
     get '/applications', to: 'api_docs#applications'
