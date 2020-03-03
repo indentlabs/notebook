@@ -1,19 +1,24 @@
 module Api
   class ApplicationIntegrationsController < ApplicationController
-    before_action :set_application_integration, only: [:show, :edit, :update, :destroy]
+    before_action :set_integration, only: [:show, :authenticate, :edit, :update, :destroy]
+
+    layout 'developer', only: [:authenticate]
 
     # GET /application_integrations
-    def index
-      @application_integrations = ApplicationIntegration.all
-    end
+    # def index
+    #   @integrations = ApplicationIntegration.all
+    # end
 
     # GET /application_integrations/1
     def show
     end
 
+    def authenticate
+    end
+
     # GET /application_integrations/new
     def new
-      @application_integration = ApplicationIntegration.new
+      @integration = ApplicationIntegration.new
     end
 
     # GET /application_integrations/1/edit
@@ -22,10 +27,10 @@ module Api
 
     # POST /application_integrations
     def create
-      @application_integration = ApplicationIntegration.new(application_integration_params.merge({user: current_user}))
+      @integration = ApplicationIntegration.new(application_integration_params.merge({user: current_user}))
 
-      if @application_integration.save
-        redirect_to @application_integration, notice: 'Application integration was successfully created.'
+      if @integration.save
+        redirect_to @integration, notice: 'Application integration was successfully created.'
       else
         render :new
       end
@@ -33,8 +38,8 @@ module Api
 
     # PATCH/PUT /application_integrations/1
     def update
-      if @application_integration.update(application_integration_params)
-        redirect_to @application_integration, notice: 'Application integration was successfully updated.'
+      if @integration.update(application_integration_params)
+        redirect_to @integration, notice: 'Application integration was successfully updated.'
       else
         render :edit
       end
@@ -42,14 +47,14 @@ module Api
 
     # DELETE /application_integrations/1
     def destroy
-      @application_integration.destroy
+      @integration.destroy
       redirect_to application_integrations_url, notice: 'Application integration was successfully destroyed.'
     end
 
     private
       # Use callbacks to share common setup or constraints between actions.
-      def set_application_integration
-        @application_integration = ApplicationIntegration.find(params[:id])
+      def set_integration
+        @integration = ApplicationIntegration.find(params[:id])
       end
 
       # Only allow a trusted parameter "white list" through.

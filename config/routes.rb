@@ -189,7 +189,9 @@ end
 
   # API Endpoints
   namespace :api do
-    resources :application_integrations
+    resources :application_integrations, path: :integration do
+      get '/authenticate', on: :member, action: :authenticate
+    end
 
     get '/',             to: 'api_docs#index'
     get '/docs',         to: 'api_docs#docs'
