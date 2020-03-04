@@ -1,9 +1,13 @@
 <%# Usage: render partial: 'content/display/contributors', locals: { content: content } %>
 
-<% if content.contributors.any? %>
+<%
+  raw_model = content.is_a?(Universe) ? content : content.raw_model
+%>
+
+<% if raw_model.contributors.any? %>
   <div id="contributors_panel" class="row panel">
     <ul class="collection">
-      <% content.contributors.each do |contributor| %>
+      <% raw_model.contributors.each do |contributor| %>
         <% next if contributor.user.nil? && (current_user != content.user) %>
         <li class="collection-item avatar">
           <i class="material-icons circle white-text">person</i>
@@ -27,6 +31,6 @@
       <% end %>
     </ul>
 
-    <%= render partial: 'content/form/contributors/leave', locals: { content: content } %>
+    <%= render partial: 'content/form/contributors/leave', locals: { content: raw_model } %>
   </div>
 <% end %>

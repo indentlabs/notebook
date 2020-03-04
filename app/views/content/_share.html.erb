@@ -44,9 +44,21 @@
             <div class="hoverable card <%= shared_content.class.color %> lighten-4">
               <div class="card-content">
                 <div class="card-title">Page-specific sharing</div>
-                <%= 
+                <%=
+                  # Big oof here.
+                  content_obj = if shared_content.is_a?(Document)
+                    {
+                      id:        shared_content.id,
+                      name:      shared_content.title,
+                      page_type: 'Document',
+                      privacy:   shared_content.privacy
+                    }
+                  else
+                     shared_content.attributes.slice('id', 'name', 'page_type', 'privacy')
+                  end
+
                   react_component("PrivacyToggle", {
-                    content:       shared_content.attributes.slice('id', 'name', 'page_type', 'privacy'),
+                    content:       content_obj,
                     content_icon:  shared_content.class.icon,
                     content_color: shared_content.class.color,
                     submit_path:   polymorphic_path(shared_content),
