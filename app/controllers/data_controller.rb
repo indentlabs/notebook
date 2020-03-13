@@ -18,9 +18,11 @@ class DataController < ApplicationController
 
   def discussions
     @topics         = Thredded::Topic.where(user_id: current_user.id)
-    @posts          = Thredded::Post.where(user_id: current_user.id)
+    @posts          = Thredded::Post.where(user_id: current_user.id).includes(:postable)
     @private_topics = Thredded::PrivateTopic.where(user_id: current_user.id)
     @private_posts  = Thredded::PrivatePost.where(user_id: current_user.id)
+
+    @threads_posted_to = Thredded::Topic.where(id: @posts.pluck(:postable_id) - @topics.pluck(:id))
   end
 
   private
