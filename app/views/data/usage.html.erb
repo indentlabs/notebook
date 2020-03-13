@@ -18,24 +18,42 @@
 
 <div class="row">
   <div class="col s12">
-    <div class="hoverable card-panel">
-      <h5 class="grey-text">Page updates this week</h5>
-      <%= area_chart current_user.content_change_events.where('updated_at > ?', DateTime.now - 7.days).group_by_day(:created_at).map { |date, count| [date.split(' ').first, count] }, download: true %>
-      <span class="grey-text">
-        Every field you edit on a page counts as one update. For example, editing a character's age and birthday counts as two updates, even if done at the same time.
-      </span>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col s12">
-    <div class="hoverable card-panel">
-      <h5 class="grey-text">Page updates per month</h5>
-      <%= area_chart current_user.content_change_events.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] }, download: true %>
-      <span class="grey-text">
-        Every field you edit on a page counts as one update. For example, editing a character's age and birthday counts as two updates, even if done at the same time.
-      </span>
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">
+          Your page updates
+        </div>
+        <p>
+          You can use the charts below to see how often you update your worldbuilding pages in Notebook.ai.
+        </p>
+      </div>
+      <div class="card-tabs">
+        <ul class="tabs tabs-fixed-width">
+          <li class="tab"><a href="#edits-this-week">This week</a></li>
+          <li class="tab"><a href="#edits-this-month">This month</a></li>
+          <li class="tab"><a href="#edits-this-year">This year</a></li>
+          <li class="tab"><a href="#edits-all-time">All time</a></li>
+        </ul>
+      </div>
+      <div class="card-content grey lighten-4">
+        <div id="edits-this-week">
+          <%= area_chart current_user.content_change_events.where('updated_at > ?', DateTime.now - 7.days).group_by_day(:created_at).map { |date, count| [date.split(' ').first, count] }, download: true %>
+        </div>
+        <div id="edits-this-month" style="display: none">
+          <%= area_chart current_user.content_change_events.where('updated_at > ?', DateTime.now - 1.month).group_by_week(:created_at).map { |date, count| [date.split(' ').first, count] }, download: true %>
+        </div>
+        <div id="edits-this-year" style="display: none">
+          <%= area_chart current_user.content_change_events.where('updated_at > ?', DateTime.now - 1.year).group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] }, download: true %>
+        </div>
+        <div id="edits-all-time" style="display: none">
+          <%= area_chart current_user.content_change_events.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] }, download: true %>        
+        </div>
+      </div>
+      <div class="card-content">
+        <p class="grey-text">
+          Every field you edit on a page counts as one update. For example, editing a character's age and birthday counts as two updates, even if done at the same time.
+        </p>
+      </div>
     </div>
   </div>
 </div>
