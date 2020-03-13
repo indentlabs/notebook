@@ -1,8 +1,5 @@
 <%
-  full_width_breakdowns = current_user.content.keys.length > 6
-
   # todo page superlatives (most-edited page, oldest page, etc)
-  # todo image upload usage %
 %>
 
 <h4>
@@ -56,20 +53,32 @@
       </div>
     </div>
   </div>
-</div>
 
-<div class="row">
-  <div class="col s12 <%= 'm6' unless full_width_breakdowns %>">
-    <div class="hoverable card-panel">
-      <h5 class="grey-text">Page type counts</h5>
-      <%= bar_chart current_user.content.map { |n, l| [n.pluralize(l.count), l = l.count] }.sort { |a, b| a[1] <=> b[1] }.reverse, download: true %>
-    </div>
-  </div>
-  <div class="col s12 <%= 'm6' unless full_width_breakdowns %>">
-    <div class="hoverable card-panel">
-      <h5 class="grey-text">Type breakdown</h5>
-      <%= pie_chart current_user.content.map { |n, l| [n.pluralize(l.count), l = l.count] }, download: true, legend: "left" %>
-      <span class="grey-text">You can click a page type in the key to toggle it on/off in the pie chart.</span>
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">
+          Page breakdown
+        </div>
+        <p>
+          This graph represents the number of pages you've created of each type.
+        </p>
+      </div>
+      <div class="card-tabs">
+        <ul class="tabs tabs-fixed-width">
+          <li class="tab"><a href="#page-types-pie">Pie graph</a></li>
+          <li class="tab"><a href="#page-types-bar">Bar graph</a></li>
+        </ul>
+      </div>
+      <div class="card-content grey lighten-4">
+        <div id="page-types-pie">
+          <%= pie_chart current_user.content.map { |n, l| [n.pluralize(l.count), l = l.count] }, download: true, legend: "left" %>
+          <span class="grey-text">You can click a page type in the key to toggle it on/off in the pie chart.</span>
+        </div>
+        <div id="page-types-bar" style="display: none">
+          <%= bar_chart current_user.content.map { |n, l| [n.pluralize(l.count), l = l.count] }.sort { |a, b| a[1] <=> b[1] }.reverse, download: true %>
+        </div>
+      </div>
     </div>
   </div>
 </div>
