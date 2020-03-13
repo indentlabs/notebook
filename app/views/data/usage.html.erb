@@ -19,6 +19,18 @@
 <div class="row">
   <div class="col s12">
     <div class="hoverable card-panel">
+      <h5 class="grey-text">Page updates this week</h5>
+      <%= area_chart current_user.content_change_events.where('updated_at > ?', DateTime.now - 7.days).group_by_day(:created_at).map { |date, count| [date.split(' ').first, count] }, download: true %>
+      <span class="grey-text">
+        Every field you edit on a page counts as one update. For example, editing a character's age and birthday counts as two updates, even if done at the same time.
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12">
+    <div class="hoverable card-panel">
       <h5 class="grey-text">Page updates per month</h5>
       <%= area_chart current_user.content_change_events.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] }, download: true %>
       <span class="grey-text">
