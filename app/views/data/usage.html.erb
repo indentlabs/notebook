@@ -82,34 +82,3 @@
     </div>
   </div>
 </div>
-
-<% if current_user.thredded_posts.any? %>
-  <div class="row">
-    <div class="col s12">
-      <div class="hoverable card-panel">
-        <h5 class="grey-text">Posts on the forums per month</h5>
-        <%= area_chart [
-            { name: 'New threads', data: current_user.thredded_topics.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } },
-            { name: 'Responses',   data: current_user.thredded_posts.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } }
-          ], download: true
-        %>
-      </div>
-    </div>
-  </div>
-<% end %>
-
-<% if current_user.thredded_private_posts.any? %>
-  <div class="row">
-    <div class="col s12">
-      <div class="hoverable card-panel">
-        <h5 class="grey-text">Private messages per month</h5>
-        <% private_postable_ids = current_user.thredded_private_topics.pluck(:id)%>
-        <%= area_chart [
-            { name: "Sent",     data: current_user.thredded_private_posts.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } },
-            { name: "Received", data: Thredded::PrivatePost.where.not(user_id: current_user.id).where(postable_id: private_postable_ids).group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } },
-          ], download: true
-        %>
-      </div>
-    </div>
-  </div>
-<% end %>
