@@ -12,6 +12,8 @@ class Document < ApplicationRecord
   include HasParseableText
   include HasPartsOfSpeech
 
+  include HasPageTags
+
   include Authority::Abilities
   self.authorizer_name = 'DocumentAuthorizer'
 

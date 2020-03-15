@@ -115,14 +115,22 @@
 
 <div class="smart-sidebar hide-on-med-and-down">
   <div class="entities-container">
-    <div class="grey-text center">Metadata</div>
+    <div class="grey-text center">Document</div>
+    <a href="#document-metadata-modal"
+        class="hoverable modal-trigger entity-trigger white-text <%= Document.color %>"
+        data-target="document-metadata-modal">
+      <i class="material-icons small left">
+        <%= Document.icon %>
+      </i>
+      Metadata
+    </a>
     <a href="#document-notes-modal"
         class="hoverable modal-trigger entity-trigger white-text <%= Document.color %>"
         data-target="document-notes-modal">
       <i class="material-icons small left">
         <%= Document.icon %>
       </i>
-      Document notes
+      Notes
     </a>
 
     <% if current_user.on_premium_plan? %>
@@ -193,6 +201,50 @@
   <div class="modal-footer">
     <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
   </div>
+</div>
+
+<div id="document-metadata-modal" class="modal modal-fixed-footer">
+  <%= form_for(document, remote: true, html: { id: 'document-metadata-form' }) do |f| %>
+    <div class="modal-content">
+      <h4>
+        <i class="material-icons medium <%= Document.color %>-text left">
+          <%= Document.icon %>
+        </i>
+        Document metadata
+      </h4>
+      <p>
+        You can customize supporting information related to your document below. In order to save any changes,
+        please click the "<span class="uppercase">SAVE CHANGES</span>" button below. 
+      </p>
+      <ul class="collapsible clearfix">
+        <li class="active">
+          <div class="collapsible-header <%= Document.color %> lighten-1 white-text">
+            <i class="material-icons">info</i>
+            Synopsis
+          </div>
+          <div class="collapsible-body white"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+        <li>
+          <div class="collapsible-header <%= Document.color %> lighten-1 white-text">
+            <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
+            Universe
+          </div>
+          <div class="collapsible-body white"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+        <li>
+          <div class="collapsible-header <%= Document.color %> lighten-1 white-text">
+            <i class="material-icons"><%= PageTag.icon %></i>
+            Tags
+          </div>
+          <div class="collapsible-body white"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+      </ul>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Ignore changes</a>
+      <%= link_to 'Save changes', "#", onclick: '$("form#document-metadata-form").submit()', class: 'modal-close waves-effect waves-green btn-flat lighten-3 ' + Document.color %>
+    </div>
+  <% end %>
 </div>
 
 <div id="document-notes-modal" class="modal modal-fixed-footer">

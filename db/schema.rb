@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_02_022930) do
+ActiveRecord::Schema.define(version: 2020_03_15_204520) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -54,6 +54,8 @@ ActiveRecord::Schema.define(version: 2020_03_02_022930) do
     t.string "authorization_callback_url"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "event_ping_url"
+    t.string "application_token"
     t.index ["user_id"], name: "index_application_integrations_on_user_id"
   end
 
@@ -1057,6 +1059,9 @@ ActiveRecord::Schema.define(version: 2020_03_02_022930) do
     t.integer "universe_id"
     t.boolean "favorite"
     t.text "notes_text"
+    t.string "format"
+    t.integer "word_count"
+    t.string "status"
     t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
@@ -1394,10 +1399,21 @@ ActiveRecord::Schema.define(version: 2020_03_02_022930) do
     t.datetime "updated_at", null: false
     t.string "src_file_name"
     t.string "src_content_type"
-    t.integer "src_file_size"
+    t.bigint "src_file_size"
     t.datetime "src_updated_at"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
+  end
+
+  create_table "integration_authorizations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "application_integration_id", null: false
+    t.string "referral_url"
+    t.string "ip_address"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["application_integration_id"], name: "index_integration_authorizations_on_application_integration_id"
+    t.index ["user_id"], name: "index_integration_authorizations_on_user_id"
   end
 
   create_table "item_magics", force: :cascade do |t|
@@ -2908,9 +2924,6 @@ ActiveRecord::Schema.define(version: 2020_03_02_022930) do
     t.integer "habitat_id"
   end
 
-  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "api_keys", "users"
-  add_foreign_key "application_integrations", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
   add_foreign_key "character_birthtowns", "characters"
@@ -3057,6 +3070,8 @@ ActiveRecord::Schema.define(version: 2020_03_02_022930) do
   add_foreign_key "group_creatures", "groups"
   add_foreign_key "group_creatures", "users"
   add_foreign_key "image_uploads", "users"
+  add_foreign_key "integration_authorizations", "application_integrations"
+  add_foreign_key "integration_authorizations", "users"
   add_foreign_key "item_magics", "items"
   add_foreign_key "item_magics", "magics"
   add_foreign_key "item_magics", "users"
