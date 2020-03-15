@@ -220,16 +220,61 @@
         <li class="active">
           <div class="collapsible-header <%= Document.color %> lighten-1 white-text">
             <i class="material-icons">info</i>
+            About this document
+          </div>
+          <div class="collapsible-body white">
+            <div class="input-field">
+              <%= f.label :title %>
+              <%= f.text_field :title %><!-- todo sync with navbar -->
+            </div>
+            <div class="input-field">
+              <%= f.label :subtitle %>
+              <%= f.text_field :subtitle %>
+            </div>
+            <div class="input-field">
+              <%= f.label :genre %>
+              <%= f.text_field :genre %><!-- todo autocomplete -->
+            </div>
+            <div class="input-field">
+              <%= f.label :status %>
+              <%= f.text_field :status %><!-- todo autocomplete -->
+            </div>
+            <!--
+            <div class="input-field">
+              <%= f.label :favorite %>
+              <%= f.check_box :favorite %>
+            </div>
+            -->
+          </div>
+        </li>
+        <li class="active">
+          <div class="collapsible-header <%= Document.color %> lighten-1 white-text">
+            <i class="material-icons">book</i>
             Synopsis
           </div>
-          <div class="collapsible-body white"><span>Lorem ipsum dolor sit amet.</span></div>
+          <div class="collapsible-body white">
+            <div class="input-field">
+              <%= f.label :synopsis %>
+              <%= f.text_area :synopsis, class: 'materialize-textarea', placeholder: "Write as little or as much as you'd like!", style: 'min-height: 300px; padding: 10px;' %>
+            </div>
+            <p>
+              A synopsis is a brief summary of this document. Writing a solid synopsis is a great way to boil your document down to some core points
+              and can be used to hook readers into wanting to read the whole thing.
+            </p>
+          </div>
         </li>
         <li>
           <div class="collapsible-header <%= Document.color %> lighten-1 white-text">
             <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
             Universe
           </div>
-          <div class="collapsible-body white"><span>Lorem ipsum dolor sit amet.</span></div>
+          <div class="collapsible-body white">
+            <p>
+              Adding your document to a universe is a great way to keep organized. You can filter your notebook to only show pages in a particular universe when you're
+              focusing on it, and viewing your universe will list all documents inside it.
+            </p>
+            <%= render partial: 'documents/components/universe_selection_form', locals: { document: @document } %>
+          </div>
         </li>
         <li>
           <div class="collapsible-header <%= Document.color %> lighten-1 white-text">

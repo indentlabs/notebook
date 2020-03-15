@@ -1,0 +1,46 @@
+<%= form_for document, method: :put, remote: true do |f| %>
+  <div class="col s12 m12 l4">
+    <p class="grey-text">No universe</p>
+    <p>
+      <label class="js-autosave-trigger">
+        <%= f.radio_button :universe_id, "nil", class: 'with-gap', checked: document.universe_id.nil? %>
+        <span>No universe</span>
+      </label>
+    </p>
+  </div>
+  <% if @linked_entities.any? %>
+    <% linked_entity_universes = @linked_entities.map { |de| de.entity.try(:universe) }.uniq.compact %>
+    <% if linked_entity_universes.any? %>
+      <div class="col s12 m12 l4">
+        <p class="grey-text"><%= pluralize linked_entity_universes.count, 'suggested universe' %></p>
+        <% linked_entity_universes.each do |universe| %>
+          <p>
+            <label>
+              <%= f.radio_button :universe_id, universe.id, class: 'with-gap', checked: document.universe_id == universe.try(:id) %>
+              <span><%= universe.name %></span>
+            </label>
+          </p>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+  <% if @linkables_cache.fetch('Universe', []).any? %>
+    <div class="col s12 m12 l4">
+      <p class="grey-text">Your universes</p>
+      <%# we can't use linkables_cache here since it can be scoped to @current_universe and therefore only return that universe %>
+      <% current_user.universes.each do |universe| %>
+        <p>
+          <label class="js-autosave-trigger">
+            <%= f.radio_button :universe_id, universe.id, class: 'with-gap', checked: document.universe_id == universe.id %>
+            <span><%= universe.name %></span>
+          </label>
+        </p>
+      <% end %>
+    </div>
+  <% end %>
+  <div class="col s12">
+    <p class="grey-text">
+      Changing a document's universe is saved automatically.
+    </p>
+  </div>
+<% end %>
