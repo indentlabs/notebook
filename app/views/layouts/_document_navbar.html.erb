@@ -31,16 +31,11 @@
 
         <ul id="about-this-document-dropdown" class="dropdown-content">
           <li style="padding: 0 20px" class="<%= Document.color %> lighten-5">
-            <h5 class="grey-text text-darken-4">
-              About this document
-            </h5>
-            <p>
-              Created <%= time_ago_in_words @document.created_at %> ago
-            </p>
-            <p class="clearfix">
-              Last edited <%= time_ago_in_words @document.updated_at %> ago
-            </p>
-            <p class="clearfix"></p>
+            <a href="#document-metadata-modal" class="modal-trigger">
+              <h5 class="grey-text text-darken-4">
+                About this document
+              </h5>
+            </a>
           </li>
           <li class="<%= Document.color %> lighten-5">
             <%= link_to @document.user, class: User.color + '-text' do %>
@@ -66,9 +61,15 @@
             <% end %>
           </li>
           <li>
+            <%= link_to '#', class: 'modal-trigger', data: { target: 'document-metadata-modal' } do %>
+              <i class="material-icons left <%= Document.color %>-text"><%= Document.icon %></i>
+              Document metadata
+            <% end %>
+          </li>
+          <li>
             <%= link_to '#', class: 'modal-trigger', data: { target: 'document-notes-modal' } do %>
               <i class="material-icons left <%= Document.color %>-text"><%= Document.icon %></i>
-              Open document notes
+              Document notes
             <% end %>
           </li>
           <li>
