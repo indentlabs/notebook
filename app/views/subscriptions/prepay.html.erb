@@ -172,7 +172,7 @@
           </div>
         <% else %>
           <div class="card-action">
-            <% if invoice.page_unlock_promo_code && invoice.page_unlock_promo_code.uses_remaining.zero? %>
+            <% if invoice.page_unlock_promo_code && invoice.page_unlock_promo_code.uses_remaining.zero? && invoice.page_unlock_promo_code.promotions.any? %>
               Activated <%= time_ago_in_words invoice.page_unlock_promo_code.promotions.last.created_at %> ago
             <% else %>
               <% if invoice.status == 'CREATED' %>
