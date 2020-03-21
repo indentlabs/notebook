@@ -74,12 +74,13 @@ Rails.application.routes.draw do
     # TODO delete deprecated/unused referrals controller/views
 
     scope '/data' do
-      get '/',            to: 'data#index',     as: :data_vault
-      get '/usage',       to: 'data#usage'
-      get '/recyclebin',  to: 'data#recyclebin'
-      get '/archive',     to: 'data#archive'
-      get '/uploads',     to: 'data#uploads'
-      get '/discussions', to: 'data#discussions'
+      get '/',              to: 'data#index',     as: :data_vault
+      get '/usage',         to: 'data#usage'
+      get '/recyclebin',    to: 'data#recyclebin'
+      get '/archive',       to: 'data#archive'
+      get '/uploads',       to: 'data#uploads'
+      get '/discussions',   to: 'data#discussions'
+      get '/collaboration', to: 'data#collaboration'
 
       scope 'export' do
         get '/', to: 'export#index', as: :notebook_export
