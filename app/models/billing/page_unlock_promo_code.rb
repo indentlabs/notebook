@@ -1,5 +1,5 @@
 class PageUnlockPromoCode < ApplicationRecord
-  has_many :promotions
+  has_many :promotions, dependent: :destroy
   has_many :users, -> { distinct }, through: :promotions
 
   serialize :page_types, Array

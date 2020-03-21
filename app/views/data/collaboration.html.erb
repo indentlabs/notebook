@@ -1,0 +1,82 @@
+<h4>
+  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
+        position: 'bottom',
+        enterDelay: '500',
+        tooltip: "Back to your Data Vault"
+      } do %>
+    <i class="material-icons">arrow_back</i>
+  <% end %>
+  Collaboration on Notebook.ai
+</h4>
+
+<div class="grey-text uppercase">Your shared universes</div>
+<% if @shared_universes.any? %>
+  <ul class="collapsible">
+    <% @shared_universes.reverse.each do |universe| %>
+      <li>
+        <div class="collapsible-header white-text <%= Universe.color %>">
+          <i class="material-icons"><%= Universe.icon %></i>
+          <%= universe.name %>
+          (<%= pluralize universe.contributors.count, 'collaborator' %>)
+        </div>
+        <div class="collapsible-body white">
+          <%= render partial: 'content/display/contributors', locals: { content: universe } %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>None yet!</p>
+<% end %>
+
+<div class="grey-text uppercase">Universes shared with you</div>
+<% if @collaborating_universes.any? %>
+  <ul class="collapsible">
+    <% @collaborating_universes.each do |universe| %>
+      <li>
+        <div class="collapsible-header white-text <%= Universe.color %>">
+          <i class="material-icons"><%= Universe.icon %></i>
+          <%= universe.name %>
+        </div>
+        <div class="collapsible-body white">
+          <%= render partial: 'content/display/contributors', locals: { content: universe } %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>None yet!</p>
+<% end %>
+
+<% if @collaborators.any? %>
+  <div class="grey-text uppercase">Your collaborators</div>
+  <ul class="collapsible">
+    <% @collaborators.group_by { |c| c.user }.each do |collaborator, collab_list| %>
+      <li>
+        <div class="collapsible-header <%= User.color %> white-text">
+          <i class="material-icons"><%= User.icon %></i>
+          <%= collaborator.name %> <%= "(@#{collaborator.username})" if collaborator.username? %>
+        </div>
+        <div class="collapsible-body">
+          Contributing on:
+          <ul>
+            <% Universe.where(id: collab_list.pluck(:universe_id)).each do |universe| %>
+              <li class="clearfix">
+                <%= link_to universe, class: "#{Universe.color}-text" do %>
+                  <i class="material-icons left"><%= Universe.icon %></i>
+                  <%= universe.name %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>None yet!</p>
+<% end %>
+
+<%= content_for :javascript do %>
+  $('.panel').show();
+<% end %>
