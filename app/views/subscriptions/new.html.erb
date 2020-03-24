@@ -42,7 +42,7 @@
   <% elsif @active_promotions.any? %>
     <p>
       You're currently subscribed to Notebook.ai's <strong><%= @active_billing_plan.name %></strong> plan, but have access to Premium features through your
-      active Premium Code (<%= @active_promo_code.description %>) for another <%= distance_of_time_in_words DateTime.current, @active_promotions.first.expires_at %>.
+      active Premium Code (<%= @active_promo_code.description %>) for <%= distance_of_time_in_words DateTime.current, @active_promotions.first.expires_at %> longer.
     </p>
   <% else %>
     You're currently subscribed to Notebook's <strong><%= @active_billing_plan.name %></strong> plan.
@@ -317,8 +317,9 @@
         </p>
 
         <% if current_user.page_unlock_promo_codes.where('uses_remaining > 0').any? %>
+          <br />
           <p>
-            <span class="grey-text uppercase">Your purchased codes, available to activate:</span>
+            <span class="grey-text">Your purchased codes, available to activate:</span>
           </p>
           <ul>
             <% current_user.page_unlock_promo_codes.where('uses_remaining > 0').each do |code| %>
@@ -350,7 +351,7 @@
                   <p>
                     <strong><%= promo_code.code %></strong> - <%= promo_code.description %>
                     <span class="grey-text">
-                      (active for another <%= distance_of_time_in_words(DateTime.current, promotion.expires_at) %>)
+                      (active for <%= distance_of_time_in_words(DateTime.current, promotion.expires_at) %> longer)
                     </span>
                   </p>
                   <p>
