@@ -1,5 +1,5 @@
 <% free_for_life_user = current_user.selected_billing_plan_id == 2 %>
-<% on_premium_plan = ['early-adopters', 'premium', 'premium-trio', 'premium-annual'].include? @active_billing_plan.try(:stripe_plan_id) %>
+<% on_premium_plan = ['early-adopters', 'premium', 'premium-trio', 'premium-annual'].include?(@active_billing_plan.try(:stripe_plan_id)) %>
 <% active_stripe_plan = @active_billing_plan.try(:stripe_plan_id) %>
 
 <%= content_for :full_width_page_header do %>
@@ -34,10 +34,15 @@
 <p>
   <% if free_for_life_user %>
     <p style="margin-top: 20px;">
-    Thank you! You were there at Notebook.ai's beginnings, so we've gifted you <strong>a free, unlimited account for life</strong>. Subscriptions below have been disabled, because you already have everything unlocked.
+      Thank you! You were there at Notebook.ai's beginnings, so we've gifted you <strong>a free, unlimited account for life</strong>. Subscriptions below have been disabled, because you already have everything unlocked.
     </p>
     <p>
       Thank you for helping make Notebook.ai what it is today.
+    </p>
+  <% elsif @active_promotions.any? %>
+    <p>
+      You're currently subscribed to Notebook.ai's <strong><%= @active_billing_plan.name %></strong> plan, but have access to Premium features through your
+      active Premium Code (<%= @active_promo_code.description %>) for another <%= distance_of_time_in_words DateTime.current, @active_promotions.first.expires_at %>.
     </p>
   <% else %>
     You're currently subscribed to Notebook's <strong><%= @active_billing_plan.name %></strong> plan.
@@ -140,6 +145,8 @@
           <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
         <% elsif on_premium_plan %>
           <%= link_to 'Change Plan', change_subscription_path('premium'), class: "btn-large waves-effect waves-light white blue-text #{'disabled' if free_for_life_user}" %>
+        <% elsif @active_promotions.any? %>
+          <%= link_to 'Premium is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
         <% else %>
           <%= link_to 'Upgrade', change_subscription_path('premium'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
         <% end %>
@@ -187,6 +194,8 @@
           <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
         <% elsif on_premium_plan %>
           <%= link_to 'Change Plan', change_subscription_path('premium-trio'), class: "btn-large waves-effect waves-light white blue-text #{'disabled' if free_for_life_user}" %>
+        <% elsif @active_promotions.any? %>
+          <%= link_to 'Premium is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
         <% else %>
           <%= link_to 'Upgrade', change_subscription_path('premium-trio'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
         <% end %>
@@ -234,6 +243,8 @@
           <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
         <% elsif on_premium_plan %>
           <%= link_to 'Change Plan', change_subscription_path('premium-annual'), class: "btn-large waves-effect waves-light white blue-text #{'disabled' if free_for_life_user}" %>
+        <% elsif @active_promotions.any? %>
+          <%= link_to 'Premium is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
         <% else %>
           <%= link_to 'Upgrade', change_subscription_path('premium-annual'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
         <% end %>
@@ -304,6 +315,17 @@
         <p>
           Enter your promotional code below to apply its benefits to your account. Codes may only be used once per account.
         </p>
+
+        <% if current_user.page_unlock_promo_codes.where('uses_remaining > 0').any? %>
+          <p>
+            <span class="grey-text uppercase">Your purchased codes, available to activate:</span>
+          </p>
+          <ul>
+            <% current_user.page_unlock_promo_codes.where('uses_remaining > 0').each do |code| %>
+              <li><strong><%= code.code %></strong> (<%= code.description %>)</li>
+            <% end %>
+          </ul>
+        <% end %>
 
         <%= form_for :promotional_code, url: redeem_path do |form| %>
           <div class="input-field col s6">
