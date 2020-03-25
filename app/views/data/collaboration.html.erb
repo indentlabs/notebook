@@ -9,73 +9,101 @@
   Collaboration on Notebook.ai
 </h4>
 
-<div class="grey-text uppercase">Your shared universes</div>
-<% if @shared_universes.any? %>
-  <ul class="collapsible">
-    <% @shared_universes.reverse.each do |universe| %>
-      <li>
-        <div class="collapsible-header white-text <%= Universe.color %>">
-          <i class="material-icons"><%= Universe.icon %></i>
-          <%= universe.name %>
-          (<%= pluralize universe.contributors.count, 'collaborator' %>)
-        </div>
-        <div class="collapsible-body white">
-          <%= render partial: 'content/display/contributors', locals: { content: universe } %>
-        </div>
-      </li>
-    <% end %>
-  </ul>
-<% else %>
-  <p>None yet!</p>
-<% end %>
+<div class="row">
+  <div class="col s12 m12 l8">
 
-<div class="grey-text uppercase">Universes shared with you</div>
-<% if @collaborating_universes.any? %>
-  <ul class="collapsible">
-    <% @collaborating_universes.each do |universe| %>
-      <li>
-        <div class="collapsible-header white-text <%= Universe.color %>">
-          <i class="material-icons"><%= Universe.icon %></i>
-          <%= universe.name %>
-        </div>
-        <div class="collapsible-body white">
-          <%= render partial: 'content/display/contributors', locals: { content: universe } %>
-        </div>
-      </li>
+    <div class="grey-text uppercase">Your shared universes</div>
+    <% if @shared_universes.any? %>
+      <ul class="collapsible">
+        <% @shared_universes.reverse.each do |universe| %>
+          <li>
+            <div class="collapsible-header white-text <%= Universe.color %>">
+              <i class="material-icons"><%= Universe.icon %></i>
+              <%= universe.name %>
+              (<%= pluralize universe.contributors.count, 'collaborator' %>)
+            </div>
+            <div class="collapsible-body white">
+              <%= render partial: 'content/display/contributors', locals: { content: universe } %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p>None yet!</p>
     <% end %>
-  </ul>
-<% else %>
-  <p>None yet!</p>
-<% end %>
 
-<% if @collaborators.any? %>
-  <div class="grey-text uppercase">Your collaborators</div>
-  <ul class="collapsible">
-    <% @collaborators.group_by { |c| c.user }.each do |collaborator, collab_list| %>
-      <li>
-        <div class="collapsible-header <%= User.color %> white-text">
-          <i class="material-icons"><%= User.icon %></i>
-          <%= collaborator.name %> <%= "(@#{collaborator.username})" if collaborator.username? %>
-        </div>
-        <div class="collapsible-body">
-          Contributing on:
-          <ul>
-            <% Universe.where(id: collab_list.pluck(:universe_id)).each do |universe| %>
-              <li class="clearfix">
-                <%= link_to universe, class: "#{Universe.color}-text" do %>
-                  <i class="material-icons left"><%= Universe.icon %></i>
-                  <%= universe.name %>
+    <div class="grey-text uppercase">Universes shared with you</div>
+    <% if @collaborating_universes.any? %>
+      <ul class="collapsible">
+        <% @collaborating_universes.each do |universe| %>
+          <li>
+            <div class="collapsible-header white-text <%= Universe.color %>">
+              <i class="material-icons"><%= Universe.icon %></i>
+              <%= universe.name %>
+            </div>
+            <div class="collapsible-body white">
+              <%= render partial: 'content/display/contributors', locals: { content: universe } %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p>None yet!</p>
+    <% end %>
+
+    <div class="grey-text uppercase">Your collaborators</div>
+    <% if @collaborators.any? %>
+      <ul class="collapsible">
+        <% @collaborators.group_by { |c| c.user }.each do |collaborator, collab_list| %>
+          <li>
+            <div class="collapsible-header <%= User.color %> white-text">
+              <i class="material-icons"><%= User.icon %></i>
+              <%= collaborator.name %> <%= "(@#{collaborator.username})" if collaborator.username? %>
+            </div>
+            <div class="collapsible-body">
+              Contributing on:
+              <ul>
+                <% Universe.where(id: collab_list.pluck(:universe_id)).each do |universe| %>
+                  <li class="clearfix">
+                    <%= link_to universe, class: "#{Universe.color}-text" do %>
+                      <i class="material-icons left"><%= Universe.icon %></i>
+                      <%= universe.name %>
+                    <% end %>
+                  </li>
                 <% end %>
-              </li>
-            <% end %>
-          </ul>
-        </div>
-      </li>
+              </ul>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p>None yet!</p>
     <% end %>
-  </ul>
-<% else %>
-  <p>None yet!</p>
-<% end %>
+  </div>
+  <div class="col s12 m12 l4">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Collaboration</div>
+        <p>
+          Whenever you edit a universe on Notebook.ai, you can add others as collaborators by entering their email address into the "Contributors" tab. 
+          They'll receive an email letting them know they've been invited, and will automatically accept if they sign up for an account with the email 
+          address you invited (or if they already have an account with that email).
+        </p>
+        <br />
+        <p>
+          Your universe's collaborators will have full access to view and edit every page within that universe (except for being able to edit what
+          universe those pages are in). You can check out the changelog for any page to see what changes your collaborators have made. 
+        </p>
+        <br />
+        <p>
+          If you have an active Premium subscription, you'll share it to your contributors for each universe you share. Contributors will be able to
+          create Premium pages within that universe even if they don't have a Premium subscription themselves. This Premium Sharing is great for small
+          groups and classrooms.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <%= content_for :javascript do %>
   $('.panel').show();
