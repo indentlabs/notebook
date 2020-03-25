@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_25_171712) do
+ActiveRecord::Schema.define(version: 2020_03_25_193619) do
+
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -1058,6 +1059,11 @@ ActiveRecord::Schema.define(version: 2020_03_25_171712) do
     t.integer "universe_id"
     t.boolean "favorite"
     t.text "notes_text"
+    t.string "subtitle"
+    t.string "format"
+    t.string "genre"
+    t.integer "word_count"
+    t.string "status"
     t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
@@ -1395,7 +1401,7 @@ ActiveRecord::Schema.define(version: 2020_03_25_171712) do
     t.datetime "updated_at", null: false
     t.string "src_file_name"
     t.string "src_content_type"
-    t.integer "src_file_size"
+    t.bigint "src_file_size"
     t.datetime "src_updated_at"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
@@ -1692,6 +1698,309 @@ ActiveRecord::Schema.define(version: 2020_03_25_171712) do
     t.index ["universe_id"], name: "index_locations_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_locations_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_locations_on_user_id"
+  end
+
+  create_table "lore_believers", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "believer_id"
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_believers_on_lore_id"
+    t.index ["user_id"], name: "index_lore_believers_on_user_id"
+  end
+
+  create_table "lore_buildings", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "building_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["building_id"], name: "index_lore_buildings_on_building_id"
+    t.index ["lore_id"], name: "index_lore_buildings_on_lore_id"
+    t.index ["user_id"], name: "index_lore_buildings_on_user_id"
+  end
+
+  create_table "lore_characters", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "character_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["character_id"], name: "index_lore_characters_on_character_id"
+    t.index ["lore_id"], name: "index_lore_characters_on_lore_id"
+    t.index ["user_id"], name: "index_lore_characters_on_user_id"
+  end
+
+  create_table "lore_conditions", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "condition_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["condition_id"], name: "index_lore_conditions_on_condition_id"
+    t.index ["lore_id"], name: "index_lore_conditions_on_lore_id"
+    t.index ["user_id"], name: "index_lore_conditions_on_user_id"
+  end
+
+  create_table "lore_continents", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "continent_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["continent_id"], name: "index_lore_continents_on_continent_id"
+    t.index ["lore_id"], name: "index_lore_continents_on_lore_id"
+    t.index ["user_id"], name: "index_lore_continents_on_user_id"
+  end
+
+  create_table "lore_countries", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "country_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["country_id"], name: "index_lore_countries_on_country_id"
+    t.index ["lore_id"], name: "index_lore_countries_on_lore_id"
+    t.index ["user_id"], name: "index_lore_countries_on_user_id"
+  end
+
+  create_table "lore_created_traditions", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "created_tradition_id"
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_created_traditions_on_lore_id"
+    t.index ["user_id"], name: "index_lore_created_traditions_on_user_id"
+  end
+
+  create_table "lore_creatures", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "creature_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["creature_id"], name: "index_lore_creatures_on_creature_id"
+    t.index ["lore_id"], name: "index_lore_creatures_on_lore_id"
+    t.index ["user_id"], name: "index_lore_creatures_on_user_id"
+  end
+
+  create_table "lore_deities", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "deity_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["deity_id"], name: "index_lore_deities_on_deity_id"
+    t.index ["lore_id"], name: "index_lore_deities_on_lore_id"
+    t.index ["user_id"], name: "index_lore_deities_on_user_id"
+  end
+
+  create_table "lore_floras", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "flora_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["flora_id"], name: "index_lore_floras_on_flora_id"
+    t.index ["lore_id"], name: "index_lore_floras_on_lore_id"
+    t.index ["user_id"], name: "index_lore_floras_on_user_id"
+  end
+
+  create_table "lore_foods", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "food_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["food_id"], name: "index_lore_foods_on_food_id"
+    t.index ["lore_id"], name: "index_lore_foods_on_lore_id"
+    t.index ["user_id"], name: "index_lore_foods_on_user_id"
+  end
+
+  create_table "lore_governments", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "government_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["government_id"], name: "index_lore_governments_on_government_id"
+    t.index ["lore_id"], name: "index_lore_governments_on_lore_id"
+    t.index ["user_id"], name: "index_lore_governments_on_user_id"
+  end
+
+  create_table "lore_groups", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "group_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["group_id"], name: "index_lore_groups_on_group_id"
+    t.index ["lore_id"], name: "index_lore_groups_on_lore_id"
+    t.index ["user_id"], name: "index_lore_groups_on_user_id"
+  end
+
+  create_table "lore_jobs", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "job_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["job_id"], name: "index_lore_jobs_on_job_id"
+    t.index ["lore_id"], name: "index_lore_jobs_on_lore_id"
+    t.index ["user_id"], name: "index_lore_jobs_on_user_id"
+  end
+
+  create_table "lore_landmarks", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "landmark_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["landmark_id"], name: "index_lore_landmarks_on_landmark_id"
+    t.index ["lore_id"], name: "index_lore_landmarks_on_lore_id"
+    t.index ["user_id"], name: "index_lore_landmarks_on_user_id"
+  end
+
+  create_table "lore_magics", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "magic_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_magics_on_lore_id"
+    t.index ["magic_id"], name: "index_lore_magics_on_magic_id"
+    t.index ["user_id"], name: "index_lore_magics_on_user_id"
+  end
+
+  create_table "lore_original_languages", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "original_language_id"
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_original_languages_on_lore_id"
+    t.index ["user_id"], name: "index_lore_original_languages_on_user_id"
+  end
+
+  create_table "lore_planets", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "planet_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_planets_on_lore_id"
+    t.index ["planet_id"], name: "index_lore_planets_on_planet_id"
+    t.index ["user_id"], name: "index_lore_planets_on_user_id"
+  end
+
+  create_table "lore_races", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "race_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_races_on_lore_id"
+    t.index ["race_id"], name: "index_lore_races_on_race_id"
+    t.index ["user_id"], name: "index_lore_races_on_user_id"
+  end
+
+  create_table "lore_related_lores", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "related_lore_id"
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_related_lores_on_lore_id"
+    t.index ["user_id"], name: "index_lore_related_lores_on_user_id"
+  end
+
+  create_table "lore_religions", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "religion_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_religions_on_lore_id"
+    t.index ["religion_id"], name: "index_lore_religions_on_religion_id"
+    t.index ["user_id"], name: "index_lore_religions_on_user_id"
+  end
+
+  create_table "lore_schools", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "school_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_schools_on_lore_id"
+    t.index ["school_id"], name: "index_lore_schools_on_school_id"
+    t.index ["user_id"], name: "index_lore_schools_on_user_id"
+  end
+
+  create_table "lore_sports", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "sport_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_sports_on_lore_id"
+    t.index ["sport_id"], name: "index_lore_sports_on_sport_id"
+    t.index ["user_id"], name: "index_lore_sports_on_user_id"
+  end
+
+  create_table "lore_technologies", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "technology_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_technologies_on_lore_id"
+    t.index ["technology_id"], name: "index_lore_technologies_on_technology_id"
+    t.index ["user_id"], name: "index_lore_technologies_on_user_id"
+  end
+
+  create_table "lore_towns", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "town_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_towns_on_lore_id"
+    t.index ["town_id"], name: "index_lore_towns_on_town_id"
+    t.index ["user_id"], name: "index_lore_towns_on_user_id"
+  end
+
+  create_table "lore_traditions", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "tradition_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_traditions_on_lore_id"
+    t.index ["tradition_id"], name: "index_lore_traditions_on_tradition_id"
+    t.index ["user_id"], name: "index_lore_traditions_on_user_id"
+  end
+
+  create_table "lore_variations", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "variation_id"
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_variations_on_lore_id"
+    t.index ["user_id"], name: "index_lore_variations_on_user_id"
+  end
+
+  create_table "lore_vehicles", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "vehicle_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_vehicles_on_lore_id"
+    t.index ["user_id"], name: "index_lore_vehicles_on_user_id"
+    t.index ["vehicle_id"], name: "index_lore_vehicles_on_vehicle_id"
   end
 
   create_table "lores", force: :cascade do |t|
@@ -2935,9 +3244,6 @@ ActiveRecord::Schema.define(version: 2020_03_25_171712) do
     t.integer "habitat_id"
   end
 
-  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "api_keys", "users"
-  add_foreign_key "application_integrations", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
   add_foreign_key "character_birthtowns", "characters"
@@ -3111,6 +3417,85 @@ ActiveRecord::Schema.define(version: 2020_03_25_171712) do
   add_foreign_key "location_largest_towns", "users"
   add_foreign_key "location_notable_towns", "locations"
   add_foreign_key "location_notable_towns", "users"
+  add_foreign_key "lore_believers", "lores"
+  add_foreign_key "lore_believers", "users"
+  add_foreign_key "lore_buildings", "buildings"
+  add_foreign_key "lore_buildings", "lores"
+  add_foreign_key "lore_buildings", "users"
+  add_foreign_key "lore_characters", "characters"
+  add_foreign_key "lore_characters", "lores"
+  add_foreign_key "lore_characters", "users"
+  add_foreign_key "lore_conditions", "conditions"
+  add_foreign_key "lore_conditions", "lores"
+  add_foreign_key "lore_conditions", "users"
+  add_foreign_key "lore_continents", "continents"
+  add_foreign_key "lore_continents", "lores"
+  add_foreign_key "lore_continents", "users"
+  add_foreign_key "lore_countries", "countries"
+  add_foreign_key "lore_countries", "lores"
+  add_foreign_key "lore_countries", "users"
+  add_foreign_key "lore_created_traditions", "lores"
+  add_foreign_key "lore_created_traditions", "users"
+  add_foreign_key "lore_creatures", "creatures"
+  add_foreign_key "lore_creatures", "lores"
+  add_foreign_key "lore_creatures", "users"
+  add_foreign_key "lore_deities", "deities"
+  add_foreign_key "lore_deities", "lores"
+  add_foreign_key "lore_deities", "users"
+  add_foreign_key "lore_floras", "floras"
+  add_foreign_key "lore_floras", "lores"
+  add_foreign_key "lore_floras", "users"
+  add_foreign_key "lore_foods", "foods"
+  add_foreign_key "lore_foods", "lores"
+  add_foreign_key "lore_foods", "users"
+  add_foreign_key "lore_governments", "governments"
+  add_foreign_key "lore_governments", "lores"
+  add_foreign_key "lore_governments", "users"
+  add_foreign_key "lore_groups", "groups"
+  add_foreign_key "lore_groups", "lores"
+  add_foreign_key "lore_groups", "users"
+  add_foreign_key "lore_jobs", "jobs"
+  add_foreign_key "lore_jobs", "lores"
+  add_foreign_key "lore_jobs", "users"
+  add_foreign_key "lore_landmarks", "landmarks"
+  add_foreign_key "lore_landmarks", "lores"
+  add_foreign_key "lore_landmarks", "users"
+  add_foreign_key "lore_magics", "lores"
+  add_foreign_key "lore_magics", "magics"
+  add_foreign_key "lore_magics", "users"
+  add_foreign_key "lore_original_languages", "lores"
+  add_foreign_key "lore_original_languages", "users"
+  add_foreign_key "lore_planets", "lores"
+  add_foreign_key "lore_planets", "planets"
+  add_foreign_key "lore_planets", "users"
+  add_foreign_key "lore_races", "lores"
+  add_foreign_key "lore_races", "races"
+  add_foreign_key "lore_races", "users"
+  add_foreign_key "lore_related_lores", "lores"
+  add_foreign_key "lore_related_lores", "users"
+  add_foreign_key "lore_religions", "lores"
+  add_foreign_key "lore_religions", "religions"
+  add_foreign_key "lore_religions", "users"
+  add_foreign_key "lore_schools", "lores"
+  add_foreign_key "lore_schools", "schools"
+  add_foreign_key "lore_schools", "users"
+  add_foreign_key "lore_sports", "lores"
+  add_foreign_key "lore_sports", "sports"
+  add_foreign_key "lore_sports", "users"
+  add_foreign_key "lore_technologies", "lores"
+  add_foreign_key "lore_technologies", "technologies"
+  add_foreign_key "lore_technologies", "users"
+  add_foreign_key "lore_towns", "lores"
+  add_foreign_key "lore_towns", "towns"
+  add_foreign_key "lore_towns", "users"
+  add_foreign_key "lore_traditions", "lores"
+  add_foreign_key "lore_traditions", "traditions"
+  add_foreign_key "lore_traditions", "users"
+  add_foreign_key "lore_variations", "lores"
+  add_foreign_key "lore_variations", "users"
+  add_foreign_key "lore_vehicles", "lores"
+  add_foreign_key "lore_vehicles", "users"
+  add_foreign_key "lore_vehicles", "vehicles"
   add_foreign_key "lores", "universes"
   add_foreign_key "lores", "users"
   add_foreign_key "notice_dismissals", "users"
