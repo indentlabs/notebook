@@ -31,6 +31,7 @@ class User < ApplicationRecord
   end
   has_many :promotions, dependent: :destroy
   has_many :paypal_invoices
+  has_many :page_unlock_promo_codes, through: :paypal_invoices
 
   has_many :image_uploads, dependent: :destroy
 

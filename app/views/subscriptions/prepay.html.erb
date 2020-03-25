@@ -1,14 +1,40 @@
 <div class="row">
-  <div class="col s12 m10 offset-m1">
+  <div class="col s12">
     <div class="hoverable card">
       <div class="card-content">
-        <div class="card-title">You can now purchase sharable Premium Codes for yourself or others</div>
-        <p>
-          Making a purchase below will generate a single-use code that can be redeemed at any time for a Premium subscription on Notebook.ai.
-          You can purchase these codes for yourself if you'd like to prepay for a certain amount of months without a recurring monthly subscription,
-          or for others if you'd like to gift a Notebook.ai Premium membership to someone else! You can purchase as many codes as you'd like
-          and redeem them whenever you'd like.
-        </p>
+        <div class="card-title">Prepaid Premium Codes</div>
+        <div class="row">
+          <div class="col s12 m8 l9">
+            <p>
+              Making a purchase below will generate a single-use code that can be redeemed at any time for a Premium subscription on Notebook.ai.
+              You can purchase these codes for yourself if you'd like to prepay for a certain amount of months without a recurring monthly subscription,
+              or for others if you'd like to gift a Notebook.ai Premium membership to someone else!
+            </p>
+            <br />
+            <p>
+              You can purchase as many codes as you'd like and redeem them whenever you'd like.
+            </p>
+            <br />
+            <p>
+              While your Premium is active, you'll have access to <%= Rails.application.config.content_types[:premium].count %> additional worldbuilding
+              pages: you'll be able to create unlimited 
+              <%=
+                Rails.application.config.content_types[:premium].map { |page|
+                  "&nbsp;<strong class='#{page.color}-text'><i class='material-icons tiny'>#{page.icon}</i> #{page.name.pluralize}</strong>"
+                }.to_sentence.html_safe
+              %>!
+            </p>
+          </div>
+          <div class="col hide-on-small-only m4 l3">
+            <%= image_tag 'tristan/small.png',
+              class: 'tooltipped tristan',
+              data: {
+                position: 'left',
+                enterDelay: '500',
+                tooltip: "Hey, I'm Tristan! I'm here to help you around the site!"
+              } %>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -18,7 +44,7 @@
 <div class="row">
   <div class="col s12 m6">
     <%= link_to prepay_paypal_gateway_path(months: 1), class: 'black-text' do %>
-      <div class="hoverable card blue lighten-4" style="height: 170px;">
+      <div class="hoverable card blue lighten-4" style="min-height: 170px;">
         <div class="card-content">
           <div class="card-title">
             <i class="material-icons left">star</i>
@@ -34,16 +60,22 @@
   </div>
   <div class="col s12 m6">
     <%= link_to prepay_paypal_gateway_path(months: 3), class: 'black-text' do %>
-      <div class="hoverable card blue lighten-4" style="height: 170px;">
+      <div class="hoverable card yellow lighten-4" style="min-height: 170px;">
         <div class="card-content">
           <div class="card-title">
             <i class="material-icons left">star</i>
             3 months of Premium
+            <span class="badge yellow">includes limited-time offer</span>
           </div>
           <p>
             All Premium features
-            for <strong>$24.00</strong><br />
+            for <strong>$24.00</strong>
             (save $3.00 compared to monthly)
+          </p>
+          <br />
+          <p>
+            Limited-time offer: Purchasing this Premium Code before <%= PromoService.end_date(:promo_bogo).strftime("%B %-d") %>
+            will generate <strong>two</strong> Premium Codes for the price of one!
           </p>
         </div>
       </div>
@@ -51,16 +83,22 @@
   </div>
   <div class="col s12 m6">
     <%= link_to prepay_paypal_gateway_path(months: 6), class: 'black-text' do %>
-      <div class="hoverable card blue lighten-4" style="height: 170px;">
+      <div class="hoverable card yellow lighten-4" style="min-height: 170px">
         <div class="card-content">
           <div class="card-title">
             <i class="material-icons left">star</i>
             6 months of Premium
+            <span class="badge yellow">includes limited-time offer</span>
           </div>
           <p>
             All Premium features
-            for <strong>$48.00</strong><br />
+            for <strong>$48.00</strong>
             (save $6.00 compared to monthly)
+          </p>
+          <br />
+          <p>
+            Limited-time offer: Purchasing this Premium Code before <%= PromoService.end_date(:promo_bogo).strftime("%B %-d") %>
+            will generate <strong>two</strong> Premium Codes for the price of one!
           </p>
         </div>
       </div>
@@ -68,7 +106,7 @@
   </div>
   <div class="col s12 m6">
     <%= link_to prepay_paypal_gateway_path(months: 12), class: 'black-text' do %>
-      <div class="hoverable card blue lighten-4" style="height: 170px;">
+      <div class="hoverable card blue lighten-4" style="min-height: 170px;">
         <div class="card-content">
           <div class="card-title">
             <i class="material-icons left">star</i>
@@ -76,7 +114,7 @@
           </div>
           <p>
             All Premium features
-            for <strong>$84.00</strong><br />
+            for <strong>$84.00</strong>
             (save $24.00 compared to monthly)
           </p>
         </div>
@@ -118,8 +156,13 @@
           </div>
           <p>
             <% if invoice.page_unlock_promo_code.present? %>
+              <p>
+                Description: <%= invoice.page_unlock_promo_code.description %>
+              </p>
               <% if invoice.activateable? %>
-                Promo code: <strong><%= invoice.page_unlock_promo_code.code %></strong>
+                <p>
+                  Promo code: <strong><%= invoice.page_unlock_promo_code.code %></strong>
+                </p>
               <% end %>
             <% else %>
               <% if invoice.status == 'APPROVED' %>
@@ -172,7 +215,7 @@
           </div>
         <% else %>
           <div class="card-action">
-            <% if invoice.page_unlock_promo_code && invoice.page_unlock_promo_code.uses_remaining.zero? %>
+            <% if invoice.page_unlock_promo_code && invoice.page_unlock_promo_code.uses_remaining.zero? && invoice.page_unlock_promo_code.promotions.any? %>
               Activated <%= time_ago_in_words invoice.page_unlock_promo_code.promotions.last.created_at %> ago
             <% else %>
               <% if invoice.status == 'CREATED' %>

@@ -1,0 +1,39 @@
+<%#
+  TODO: everything here (probably) should move to the ContentSerializer so we don't have this
+        heavy logic in a random partial
+%>
+<%
+  relations   = Rails.application.config.content_relations[content.class.name]
+  relations ||= []
+
+  @sidelinks_association_count = 0
+%>
+
+<div id="associations_panel" class="row panel">
+  <div class="row">
+    <div class="col s12 m10 offset-m1">
+      <div class="card-panel blue lighten-5">
+        <i class="left material-icons grey-text">help</i>
+        These associations are automatically created whenever you add another page to this universe.<br />
+        Only you can see this message. <%= link_to 'Dismiss this message', '#' %>.
+      </div>
+
+      <% relations.each do |name, params| %>
+        <%
+          results = params[:related_class].where("#{params[:through_relation].downcase}_id": content.id)
+            .map    { |content| content.send(params[:inverse_class].downcase) }
+            .select { |content| content && content.readable_by?(current_user || User.new) }
+        %>
+        <% next unless results.any? %>
+        <% @sidelinks_association_count += results.count %>
+        <div class="uppercase grey-text">
+          <%= params[:relation_text].to_s.titleize.downcase %> of
+        </div>
+        <%=
+          render partial: "content/display/attribute_value/link", 
+                  locals: { value: results, content: content }
+        %>
+      <% end %>
+    </div>
+  </div>
+</div>

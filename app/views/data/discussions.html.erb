@@ -1,0 +1,212 @@
+<h4>
+  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
+        position: 'bottom',
+        enterDelay: '500',
+        tooltip: "Back to your Data Vault"
+      } do %>
+    <i class="material-icons">arrow_back</i>
+  <% end %>
+  Your discussions activity
+</h4>
+
+<div class="row">
+  <div class="col s12 m12 l4">
+    <div class="card-panel">
+      <% if current_user.username.present? %>
+        <i class="material-icons left green-text">check</i>
+        You have a username set!
+        <div class="blue-text lighten-3">@<%= current_user.username %></div>
+      <% else %>
+        <i class="material-icons left red-text">close</i>
+        You don't have a username.<br />
+        <%= link_to 'Claim your username!', '#' %>
+      <% end %>
+    </div>
+  </div>
+  <div class="col s12 m6 l4">
+    <div class="card-panel">
+      <ul>
+        <div>
+          <i class="material-icons blue-text left">forum</i>
+          <%= pluralize @topics.count, 'thread' %> created
+        </div>
+        <div class="clearfix">
+          <i class="material-icons blue-text left">forum</i>
+          <%= pluralize @posts.count,  'responses' %> posted to threads
+        </div>
+      </ul>
+    </div>
+  </div>
+  <div class="col s12 m6 l4">
+    <div class="card-panel">
+      <ul>
+        <div>
+          <i class="material-icons blue-text left">forum</i>
+          <%= pluralize @private_topics.count, 'private message' %> sent 
+        </div>
+        <div class="clearfix">
+          <i class="material-icons blue-text left">forum</i>
+          <%= pluralize @private_posts.count,  'responses' %> in private messages
+        </div>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<% if @topics.any? || @posts.any? %>
+  <div class="row">
+    <div class="col s12">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-title">
+            Your posts on the forums
+          </div>
+        </div>
+        <div class="card-tabs">
+          <ul class="tabs tabs-fixed-width">
+            <li class="tab"><a href="#posts-this-week">This week</a></li>
+            <li class="tab"><a href="#posts-this-month">This month</a></li>
+            <li class="tab"><a href="#posts-this-year">This year</a></li>
+            <li class="tab"><a href="#posts-all-time">All time</a></li>
+          </ul>
+        </div>
+        <div class="card-content grey lighten-4">
+          <div id="posts-this-week">
+            <%= area_chart [
+                { name: 'New threads', data: @topics.where('created_at > ?', DateTime.now - 7.days).group_by_day(:created_at).map { |date, count| [date.split(' ').first, count] } },
+                { name: 'Responses',   data: @posts.where('created_at > ?', DateTime.now - 7.days).group_by_day(:created_at).map { |date, count| [date.split(' ').first, count] } }
+              ], download: true
+            %>
+          </div>
+          <div id="posts-this-month" style="display: none">
+            <%= area_chart [
+                { name: 'New threads', data: @topics.where('created_at > ?', DateTime.now - 1.month).group_by_day(:created_at).map { |date, count| [date.split(' ').first, count] } },
+                { name: 'Responses',   data: @posts.where('created_at > ?', DateTime.now - 1.month).group_by_day(:created_at).map { |date, count| [date.split(' ').first, count] } }
+              ], download: true
+            %>
+          </div>
+          <div id="posts-this-year" style="display: none">
+            <%= area_chart [
+                { name: 'New threads', data: @topics.where('created_at > ?', DateTime.now - 1.year).group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } },
+                { name: 'Responses',   data: @posts.where('created_at > ?', DateTime.now - 1.year).group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } }
+              ], download: true
+            %>
+          </div>
+          <div id="posts-all-time" style="display: none">
+            <%= area_chart [
+                { name: 'New threads', data: @topics.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } },
+                { name: 'Responses',   data: @posts.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } }
+              ], download: true
+            %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% if @private_topics.any? || @private_posts.any? %>
+  <div class="row">
+    <div class="col s12">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-title">
+            Your private discussions
+          </div>
+        </div>
+        <div class="card-tabs">
+          <ul class="tabs tabs-fixed-width">
+            <li class="tab"><a href="#private-this-week">This week</a></li>
+            <li class="tab"><a href="#private-this-month">This month</a></li>
+            <li class="tab"><a href="#private-this-year">This year</a></li>
+            <li class="tab"><a href="#private-all-time">All time</a></li>
+          </ul>
+        </div>
+        <div class="card-content grey lighten-4">
+          <div id="private-this-week">
+            <%= area_chart [
+                { name: 'New threads', data: @private_topics.where('created_at > ?', DateTime.now - 7.days).group_by_day(:created_at).map { |date, count| [date.split(' ').first, count] } },
+                { name: 'Responses',   data: @private_posts.where('created_at > ?', DateTime.now - 7.days).group_by_day(:created_at).map { |date, count| [date.split(' ').first, count] } }
+              ], download: true
+            %>
+          </div>
+          <div id="private-this-month" style="display: none">
+            <%= area_chart [
+                { name: 'New threads', data: @private_topics.where('created_at > ?', DateTime.now - 1.month).group_by_day(:created_at).map { |date, count| [date.split(' ').first, count] } },
+                { name: 'Responses',   data: @private_posts.where('created_at > ?', DateTime.now - 1.month).group_by_day(:created_at).map { |date, count| [date.split(' ').first, count] } }
+              ], download: true
+            %>
+          </div>
+          <div id="private-this-year" style="display: none">
+            <%= area_chart [
+                { name: 'New threads', data: @private_topics.where('created_at > ?', DateTime.now - 1.year).group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } },
+                { name: 'Responses',   data: @private_posts.where('created_at > ?', DateTime.now - 1.year).group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } }
+              ], download: true
+            %>
+          </div>
+          <div id="private-all-time" style="display: none">
+            <%= area_chart [
+                { name: 'New threads', data: @private_topics.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } },
+                { name: 'Responses',   data: @private_posts.group_by_month(:created_at).map { |date, count| [date.split(' ').first, count] } }
+              ], download: true
+            %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% if @topics.any? || @posts.any? %>
+  <div class="row">
+    <div class="col s12">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-title">
+            Activity tracker
+          </div>
+        </div>
+        <div class="card-tabs">
+          <ul class="tabs tabs-fixed-width">
+            <li class="tab"><a href="#threads-created">Threads you created</a></li>
+            <li class="tab"><a href="#threads-replied">Threads you posted to</a></li>
+          </ul>
+        </div>
+        <div class="card-content grey lighten-4">
+          <div id="threads-created">
+            <ul>
+              <% @topics.order('id desc').each do |topic| %>
+                <li class="clearfix">
+                  <div>
+                    <i class="material-icons blue-text left">forum</i>
+                    <%= link_to topic.title, thredded.messageboard_topic_path(messageboard_id: topic.messageboard_id, id: topic.slug) %>
+                    <span class="grey-text">started <%= time_ago_in_words topic.created_at %> ago</span>
+                  </div>
+                  <div>
+                    <%= pluralize topic.posts_count - 1, 'reply' %>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+          <div id="threads-replied" style="display: none">
+            <ul>
+              <% @threads_posted_to.order('id desc').each do |topic| %>
+                <li class="clearfix">
+                  <div>
+                    <i class="material-icons blue-text left">forum</i>
+                    <%= link_to topic.title, thredded.messageboard_topic_path(messageboard_id: topic.messageboard_id, id: topic.slug) %>
+                    <span class="grey-text">started <%= time_ago_in_words topic.created_at %> ago</span>
+                  </div>
+                  <div>
+                    <%= pluralize topic.posts_count - 1, 'reply' %>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

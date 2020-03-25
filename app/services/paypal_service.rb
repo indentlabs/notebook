@@ -7,12 +7,12 @@ class PaypalService < Service
     request.request_body({
       intent: "CAPTURE",
       application_context: {
-        return_url: 'https://www.notebook.ai/my/billing/prepay/paid',
-        cancel_url: 'https://www.notebook.ai/my/billing/prepay',
-        brand_name: 'Notebook.ai by Indent Labs',
-        landing_page: 'BILLING',
+        return_url:          'https://www.notebook.ai/my/billing/prepay/paid',
+        cancel_url:          'https://www.notebook.ai/my/billing/prepay',
+        brand_name:          'Notebook.ai by Indent Labs',
+        landing_page:        'BILLING',
         shipping_preference: 'NO_SHIPPING',
-        user_action: 'PAY_NOW'
+        user_action:         'PAY_NOW'
       },
       purchase_units: [{
         amount: {
@@ -143,7 +143,7 @@ class PaypalService < Service
       client_id     = Rails.application.config.paypal[:client_id]
       client_secret = Rails.application.config.paypal[:client_secret]
   
-      environment = if Rails.env.production? 
+      environment = if Rails.env.production?
         PayPal::LiveEnvironment.new(client_id, client_secret)
       else
         PayPal::SandboxEnvironment.new(client_id, client_secret)

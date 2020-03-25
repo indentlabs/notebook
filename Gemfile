@@ -43,6 +43,8 @@ gem 'paranoia'
 gem 'coffee-rails'
 gem 'rails-jquery-autocomplete'
 gem 'animate-rails'
+gem 'webpacker'
+gem 'react-rails'
 
 # Form enhancements
 gem 'redcarpet' #markdown formatting
@@ -127,7 +129,7 @@ group :test do
   gem 'rspec-rails'
   gem 'webmock'
   gem 'rubocop', require: false
-  gem 'ruby-prof', '1.2.0'
+  gem 'ruby-prof', '1.3.1'
   gem 'shoulda-matchers', '~> 4.3'
   gem 'rails-controller-testing'
 end
