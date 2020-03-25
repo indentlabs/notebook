@@ -6,6 +6,7 @@ class LoresController < ContentController
     [
       :name, :universe_id, :archived_at, :privacy, :favorite, :page_type
     ] + [ #<relations>
+      custom_attribute_values:           [:name, :value],
 
     ]
   end
