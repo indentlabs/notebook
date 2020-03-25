@@ -9,73 +9,174 @@
   Collaboration on Notebook.ai
 </h4>
 
-<div class="grey-text uppercase">Your shared universes</div>
-<% if @shared_universes.any? %>
-  <ul class="collapsible">
-    <% @shared_universes.reverse.each do |universe| %>
-      <li>
-        <div class="collapsible-header white-text <%= Universe.color %>">
-          <i class="material-icons"><%= Universe.icon %></i>
-          <%= universe.name %>
-          (<%= pluralize universe.contributors.count, 'collaborator' %>)
-        </div>
-        <div class="collapsible-body white">
-          <%= render partial: 'content/display/contributors', locals: { content: universe } %>
-        </div>
-      </li>
-    <% end %>
-  </ul>
-<% else %>
-  <p>None yet!</p>
-<% end %>
+<div class="row">
+  <div class="col s12 m12 l8">
 
-<div class="grey-text uppercase">Universes shared with you</div>
-<% if @collaborating_universes.any? %>
-  <ul class="collapsible">
-    <% @collaborating_universes.each do |universe| %>
-      <li>
-        <div class="collapsible-header white-text <%= Universe.color %>">
-          <i class="material-icons"><%= Universe.icon %></i>
-          <%= universe.name %>
-        </div>
-        <div class="collapsible-body white">
-          <%= render partial: 'content/display/contributors', locals: { content: universe } %>
-        </div>
-      </li>
+    <div class="grey-text uppercase">Your shared universes</div>
+    <% if @shared_universes.any? %>
+      <ul class="collapsible">
+        <% @shared_universes.reverse.each do |universe| %>
+          <li>
+            <div class="collapsible-header white-text <%= Universe.color %>">
+              <i class="material-icons"><%= Universe.icon %></i>
+              <%= universe.name %>
+              (<%= pluralize universe.contributors.count, 'collaborator' %>)
+            </div>
+            <div class="collapsible-body white">
+              <%= render partial: 'content/display/contributors', locals: { content: universe } %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p>None yet!</p>
     <% end %>
-  </ul>
-<% else %>
-  <p>None yet!</p>
-<% end %>
 
-<% if @collaborators.any? %>
-  <div class="grey-text uppercase">Your collaborators</div>
-  <ul class="collapsible">
-    <% @collaborators.group_by { |c| c.user }.each do |collaborator, collab_list| %>
-      <li>
-        <div class="collapsible-header <%= User.color %> white-text">
-          <i class="material-icons"><%= User.icon %></i>
-          <%= collaborator.name %> <%= "(@#{collaborator.username})" if collaborator.username? %>
-        </div>
-        <div class="collapsible-body">
-          Contributing on:
-          <ul>
-            <% Universe.where(id: collab_list.pluck(:universe_id)).each do |universe| %>
-              <li class="clearfix">
-                <%= link_to universe, class: "#{Universe.color}-text" do %>
-                  <i class="material-icons left"><%= Universe.icon %></i>
-                  <%= universe.name %>
+    <div class="grey-text uppercase">Universes shared with you</div>
+    <% if @collaborating_universes.any? %>
+      <ul class="collapsible">
+        <% @collaborating_universes.each do |universe| %>
+          <li>
+            <div class="collapsible-header white-text <%= Universe.color %>">
+              <i class="material-icons"><%= Universe.icon %></i>
+              <%= universe.name %>
+            </div>
+            <div class="collapsible-body white">
+              <%= render partial: 'content/display/contributors', locals: { content: universe } %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p>None yet!</p>
+    <% end %>
+
+    <div class="grey-text uppercase">Your collaborators</div>
+    <% if @collaborators.any? %>
+      <ul class="collapsible">
+        <% @collaborators.group_by { |c| c.user }.each do |collaborator, collab_list| %>
+          <li>
+            <div class="collapsible-header <%= User.color %> white-text">
+              <i class="material-icons"><%= User.icon %></i>
+              <%= collaborator.name %> <%= "(@#{collaborator.username})" if collaborator.username? %>
+            </div>
+            <div class="collapsible-body">
+              Contributing on:
+              <ul>
+                <% Universe.where(id: collab_list.pluck(:universe_id)).each do |universe| %>
+                  <li class="clearfix">
+                    <%= link_to universe, class: "#{Universe.color}-text" do %>
+                      <i class="material-icons left"><%= Universe.icon %></i>
+                      <%= universe.name %>
+                    <% end %>
+                  </li>
                 <% end %>
-              </li>
-            <% end %>
-          </ul>
+              </ul>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p>None yet!</p>
+    <% end %>
+
+    <div class="grey-text uppercase">Frequently-asked questions</div>
+    <ul class="collapsible">
+      <li>
+        <div class="collapsible-header"><i class="material-icons">info</i> How do I invite someone to be a contributor to one of my universes?</div>
+        <div class="collapsible-body">
+          <p>
+            To invite someone to collaborate on a universe with you, simply edit that universe page and click the "Contributors" tab.
+            From there, you'll be able to enter your friend's email address to invite them. They will receive an email letting them know
+            you'd like them to contribute to your universe, and they'll automatically accept if they sign up for an account using that invited
+            email address or if they already have an account with the invited email address.
+          </p>
         </div>
       </li>
-    <% end %>
-  </ul>
-<% else %>
-  <p>None yet!</p>
-<% end %>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">info</i> How do I remove a contributor from my universe?</div>
+        <div class="collapsible-body">
+          <p>
+            You can remove a contributor to your universes at any time from the same "Contributors" tab you add them from. Simply click
+            "Remove this contributor" to remove them. They will immediately lose access to view and/or edit any pages in that universe.
+          </p>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">info</i> What can contributors do in my universe?</div>
+        <div class="collapsible-body">
+          <p>
+            Contributors can view and edit any worldbuilding pages within your universe as if they were the owner. They are, however, unable to
+            edit what universe those pages exist in, change any page privacy settings, or add or remove contributors. They will be able to create new pages and add them
+            to the universe.
+          </p>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">info</i> How do I share my Premium subscription with my contributors?</div>
+        <div class="collapsible-body">
+          <p>
+            If you have an active Premium subscription (or are using a Premium Code to unlock Premium features), it will automatically upgrade
+            any collaborators you have in your universes <em>while they are working in your universe</em>. This means your collaborators will be
+            able to view and edit your Premium pages, and they'll also be able to create new Premium pages as long as they are added to your
+            universe.
+          </p>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">info</i> How can I see what changes my contributors have made?</div>
+        <div class="collapsible-body">
+          <p>
+            When viewing any worldbuilding page, there is a "Changelog" link you can click that will display all changes that have been made
+            to that page. It will display what field changed, what the old value was, what the new value is after the change, and who made the change.
+            You can use this changelog to recover previous data if a contributor changes something you didn't intend.
+          </p>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">info</i> How many collaborators can I add?</div>
+        <div class="collapsible-body">
+          <p>
+            You can have an unlimited number of collaborators per universe.
+          </p>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">info</i> How can I tell what universes I've been invited to collaborate on?</div>
+        <div class="collapsible-body">
+          <p>
+            Universes you've been invited to collaborate on will automatically appear on your universes list.
+            You can also check this page to see a list of universes that you've been invited to collaborate on.
+          </p>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="col s12 m12 l4">
+    <div class="card blue lighten-5">
+      <div class="card-content">
+        <div class="card-title">Collaboration</div>
+        <p>
+          Whenever you edit a universe on Notebook.ai, you can add others as collaborators by entering their email address into the "Contributors" tab. 
+          They'll receive an email letting them know they've been invited, and will automatically accept if they sign up for an account with the email 
+          address you invited (or if they already have an account with that email).
+        </p>
+        <br />
+        <p>
+          Your universe's collaborators will have full access to view and edit every page within that universe (except for being able to edit what
+          universe those pages are in), even if those pages are set to private. 
+          You can check out the changelog for any page to see what changes your collaborators have made. 
+        </p>
+        <br />
+        <p>
+          If you have an active Premium subscription, you'll share it to your contributors for each universe you share. Contributors will be able to
+          create Premium pages within that universe even if they don't have a Premium subscription themselves. This Premium Sharing is great for small
+          groups and classrooms.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <%= content_for :javascript do %>
   $('.panel').show();
