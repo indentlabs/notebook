@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_30_224044) do
+ActiveRecord::Schema.define(version: 2020_03_25_171712) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -39,6 +39,24 @@ ActiveRecord::Schema.define(version: 2020_01_30_224044) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_api_keys_on_user_id"
+  end
+
+  create_table "application_integrations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "name"
+    t.string "description"
+    t.string "organization_name"
+    t.string "organization_url"
+    t.string "website_url"
+    t.string "privacy_policy_url"
+    t.string "token"
+    t.datetime "last_used_at"
+    t.string "authorization_callback_url"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "event_ping_url"
+    t.string "application_token"
+    t.index ["user_id"], name: "index_application_integrations_on_user_id"
   end
 
   create_table "archenemyships", force: :cascade do |t|
@@ -1020,6 +1038,15 @@ ActiveRecord::Schema.define(version: 2020_01_30_224044) do
     t.index ["entity_type", "entity_id"], name: "index_document_entities_on_entity_type_and_entity_id"
   end
 
+  create_table "document_notes", force: :cascade do |t|
+    t.integer "document_id", null: false
+    t.string "title"
+    t.string "notes"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["document_id"], name: "index_document_notes_on_document_id"
+  end
+
   create_table "documents", force: :cascade do |t|
     t.integer "user_id"
     t.text "body"
@@ -1031,6 +1058,12 @@ ActiveRecord::Schema.define(version: 2020_01_30_224044) do
     t.datetime "deleted_at"
     t.integer "universe_id"
     t.boolean "favorite"
+    t.text "notes_text"
+    t.string "subtitle"
+    t.string "format"
+    t.string "genre"
+    t.integer "word_count"
+    t.string "status"
     t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
@@ -1374,6 +1407,17 @@ ActiveRecord::Schema.define(version: 2020_01_30_224044) do
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
   end
 
+  create_table "integration_authorizations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "application_integration_id", null: false
+    t.string "referral_url"
+    t.string "ip_address"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["application_integration_id"], name: "index_integration_authorizations_on_application_integration_id"
+    t.index ["user_id"], name: "index_integration_authorizations_on_user_id"
+  end
+
   create_table "item_magics", force: :cascade do |t|
     t.integer "item_id"
     t.integer "magic_id"
@@ -1654,6 +1698,21 @@ ActiveRecord::Schema.define(version: 2020_01_30_224044) do
     t.index ["universe_id"], name: "index_locations_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_locations_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_locations_on_user_id"
+  end
+
+  create_table "lores", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id", null: false
+    t.integer "universe_id", null: false
+    t.datetime "deleted_at"
+    t.datetime "archived_at"
+    t.string "privacy"
+    t.boolean "favorite"
+    t.string "page_type", default: "Lore"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["universe_id"], name: "index_lores_on_universe_id"
+    t.index ["user_id"], name: "index_lores_on_user_id"
   end
 
   create_table "magic_deityships", force: :cascade do |t|
@@ -2882,8 +2941,6 @@ ActiveRecord::Schema.define(version: 2020_01_30_224044) do
     t.integer "habitat_id"
   end
 
-  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "api_keys", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
   add_foreign_key "character_birthtowns", "characters"
@@ -3006,6 +3063,7 @@ ActiveRecord::Schema.define(version: 2020_01_30_224044) do
   add_foreign_key "document_categories", "document_analyses"
   add_foreign_key "document_concepts", "document_analyses"
   add_foreign_key "document_entities", "document_analyses"
+  add_foreign_key "document_notes", "documents"
   add_foreign_key "documents", "users"
   add_foreign_key "foods", "universes"
   add_foreign_key "foods", "users"
@@ -3029,6 +3087,8 @@ ActiveRecord::Schema.define(version: 2020_01_30_224044) do
   add_foreign_key "group_creatures", "groups"
   add_foreign_key "group_creatures", "users"
   add_foreign_key "image_uploads", "users"
+  add_foreign_key "integration_authorizations", "application_integrations"
+  add_foreign_key "integration_authorizations", "users"
   add_foreign_key "item_magics", "items"
   add_foreign_key "item_magics", "magics"
   add_foreign_key "item_magics", "users"
@@ -3054,6 +3114,8 @@ ActiveRecord::Schema.define(version: 2020_01_30_224044) do
   add_foreign_key "location_largest_towns", "users"
   add_foreign_key "location_notable_towns", "locations"
   add_foreign_key "location_notable_towns", "users"
+  add_foreign_key "lores", "universes"
+  add_foreign_key "lores", "users"
   add_foreign_key "notice_dismissals", "users"
   add_foreign_key "page_tags", "users"
   add_foreign_key "paypal_invoices", "page_unlock_promo_codes"
