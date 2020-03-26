@@ -44,7 +44,7 @@ class TemporaryFieldMigrationService < Service
       if existing_value && existing_value.created_at != existing_value.updated_at
         next
       end
-      if existing_value.value.present?
+      if existing_value.try(:value).present?
         next
       end
 
