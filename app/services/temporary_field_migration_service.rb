@@ -44,6 +44,9 @@ class TemporaryFieldMigrationService < Service
       if existing_value && existing_value.created_at != existing_value.updated_at
         next
       end
+      if existing_value.value.present?
+        next
+      end
 
       if content_model.respond_to?(attribute_field.old_column_source)
         value_from_model = content_model.send(attribute_field.old_column_source)
