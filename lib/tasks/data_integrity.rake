@@ -52,10 +52,12 @@ namespace :data_integrity do
       page_type_data.each do |relation, relation_data|
         klass        = relation_data[:related_class]
         reference_id = relation_data[:through_relation].to_s + '_id'
+        puts "Klass is #{klass.name}"
+        puts "Reference ID is #{reference_id}"
 
         orphans = klass.where({"#{reference_id}": nil})
         puts "Orphans for relation #{relation_data[:with]}: #{orphans.count} -- deleting them all!"
-        orphans.destroy_all!
+        orphans.destroy_all
       end
     end
   end
