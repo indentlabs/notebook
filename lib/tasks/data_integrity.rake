@@ -70,8 +70,8 @@ namespace :data_integrity do
     ActiveRecord::Base.logger = nil
 
     Rails.application.config.content_types[:all].each do |content_type|
-      puts "Migrating #{content_type.name}"
       pages = content_type.where(columns_migrated_from_old_style: nil).limit(RECORDS_TO_PROCESS)
+      puts "Migrating #{content_type.name} (#{pages.count} pages)"
 
       pages.each do |page|
         puts "Hey, this page shouldn't be here!" if page.columns_migrated_from_old_style == true
