@@ -67,6 +67,7 @@ namespace :data_integrity do
     RECORDS_TO_PROCESS = 100
 
     Rails.application.config.content_types[:all].each do |content_type|
+      puts "Migrating #{content_type.name}"
       pages = content_type.where(columns_migrated_from_old_style: nil).order('updated_at DESC').limit(RECORDS_TO_PROCESS)
 
       pages.find_each do |page|
@@ -77,7 +78,7 @@ namespace :data_integrity do
     puts "Pages remaining to migrate: "
     Rails.application.config.content_types[:all].each do |content_type|
       count = content_type.where(columns_migrated_from_old_style: nil).count
-      puts "#{content_type.name}: #{count}"
+      puts "#{content_type.name}: #{count} (#{content_type.where.not(columns_migrated_from_old_style: nil).count} migrated)"
     end
   end
 end
