@@ -74,8 +74,10 @@ namespace :data_integrity do
       pages = content_type.where(columns_migrated_from_old_style: nil).limit(RECORDS_TO_PROCESS)
 
       pages.each do |page|
-        puts "Hey, this page shouldn't be here!" if page.columns_migrated_from_old_style.true?
+        puts "Hey, this page shouldn't be here!" if page.columns_migrated_from_old_style == true
         TemporaryFieldMigrationService.migrate_fields_for_content(page, page.user, force: true)
+
+        page.update(columns_migrated_from_old_style: true) unless page.reload.columns_migrated_from_old_style == true
       end
     end
 
