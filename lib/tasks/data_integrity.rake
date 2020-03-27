@@ -64,7 +64,7 @@ namespace :data_integrity do
 
   desc "Migrate old content and mark it as migrated once and for all"
   task migrate_old_content: :environment do
-    RECORDS_TO_PROCESS = 100
+    RECORDS_TO_PROCESS = 300
 
     old_logger = ActiveRecord::Base.logger
     ActiveRecord::Base.logger = nil
@@ -93,7 +93,7 @@ namespace :data_integrity do
   desc "Migrate old content per user"
   task migrate_old_content_per_user: :environment do
     START_ID = 1
-    USERS_TO_PROCESS = 300
+    USERS_TO_PROCESS = 500
 
     users = User.where(id: START_ID..(START_ID+USERS_TO_PROCESS))
     puts "Processing #{users.count} users"
