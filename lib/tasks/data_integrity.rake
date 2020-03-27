@@ -66,6 +66,9 @@ namespace :data_integrity do
   task migrate_old_content: :environment do
     RECORDS_TO_PROCESS = 100
 
+    old_logger = ActiveRecord::Base.logger
+    ActiveRecord::Base.logger = nil
+
     Rails.application.config.content_types[:all].each do |content_type|
       puts "Migrating #{content_type.name}"
       pages = content_type.where(columns_migrated_from_old_style: nil).order('updated_at DESC').limit(RECORDS_TO_PROCESS)
@@ -80,6 +83,8 @@ namespace :data_integrity do
       count = content_type.where(columns_migrated_from_old_style: nil).count
       puts "#{content_type.name}: #{count} (#{content_type.where.not(columns_migrated_from_old_style: nil).count} migrated)"
     end
+
+    ActiveRecord::Base.logger = old_logger
   end
 end
 
