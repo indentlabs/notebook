@@ -93,7 +93,7 @@ namespace :data_integrity do
   desc "Migrate old content per user"
   task migrate_old_content_per_user: :environment do
     START_ID = 1
-    USERS_TO_PROCESS = 100
+    USERS_TO_PROCESS = 300
 
     users = User.where(id: START_ID..(START_ID+USERS_TO_PROCESS))
     puts "Processing #{users.count} users"
