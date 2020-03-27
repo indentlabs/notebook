@@ -14,6 +14,6 @@ class TechnologyRelatedTechnology < ApplicationRecord
     this_object  = Technology.find_by(id: self.technology_id)
     other_object = Technology.find_by(id: self.related_technology_id)
 
-    other_object.related_technologies.delete(this_object)
+    other_object.related_technologies.delete(this_object) if other_object.present?
   end
 end
