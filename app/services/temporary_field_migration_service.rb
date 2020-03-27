@@ -2,9 +2,9 @@
 # to the new-style of having values in an associated Attribute model.
 # Once all data has been moved over, we can remove these old columns and delete this service.
 class TemporaryFieldMigrationService < Service
-  def self.migrate_all_content_for_user(user)
+  def self.migrate_all_content_for_user(user, force: false)
     user.content_list.each do |content|
-      self.migrate_fields_for_content(content, user)
+      self.migrate_fields_for_content(content, user, force: force)
     end
   end
 

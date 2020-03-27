@@ -64,6 +64,8 @@ namespace :data_integrity do
 
   desc "Migrate old content and mark it as migrated once and for all"
   task migrate_old_content: :environment do
+    require 'pry'
+    
     RECORDS_TO_PROCESS = 100
 
     old_logger = ActiveRecord::Base.logger
@@ -71,9 +73,10 @@ namespace :data_integrity do
 
     Rails.application.config.content_types[:all].each do |content_type|
       puts "Migrating #{content_type.name}"
-      pages = content_type.where(columns_migrated_from_old_style: nil).order('updated_at DESC').limit(RECORDS_TO_PROCESS)
+      pages = content_type.where(columns_migrated_from_old_style: nil).limit(RECORDS_TO_PROCESS)
 
       pages.each do |page|
+        binding.pry if page.columns_migrated_from_old_style.true?
         TemporaryFieldMigrationService.migrate_fields_for_content(page, page.user, force: true)
       end
     end
@@ -85,6 +88,20 @@ namespace :data_integrity do
     end
 
     ActiveRecord::Base.logger = old_logger
+  end
+
+  desc "Migrate old content per user"
+  task migrate_old_content_per_user: :environment do
+    START_ID = 1
+    USERS_TO_PROCESS = 100
+
+    users = User.where(id: START_ID..(START_ID+USERS_TO_PROCESS))
+    puts "Processing #{users.count} users"
+
+    users.each do |user|
+      TemporaryFieldMigrationService.migrate_all_content_for_user(user)
+    end
+
   end
 end
 
