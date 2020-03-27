@@ -64,14 +64,20 @@ namespace :data_integrity do
 
   desc "Migrate old content and mark it as migrated once and for all"
   task migrate_old_content: :environment do
-    RECORDS_TO_PROCESS = 1000
+    RECORDS_TO_PROCESS = 100
 
     Rails.application.config.content_types[:all].each do |content_type|
       pages = content_type.where(columns_migrated_from_old_style: nil).order('updated_at DESC').limit(RECORDS_TO_PROCESS)
 
       pages.find_each do |page|
-        TemporaryFieldMigrationService.migrate_fields_for_content(page, page.user)
+        TemporaryFieldMigrationService.migrate_fields_for_content(page, page.user, force: true)
       end
+    end
+
+    puts "Pages remaining to migrate: "
+    Rails.application.config.content_types[:all].each do |content_type|
+      count = content_type.where(columns_migrated_from_old_style: nil).count
+      puts "#{content_type.name}: #{count}"
     end
   end
 end
