@@ -64,8 +64,6 @@ namespace :data_integrity do
 
   desc "Migrate old content and mark it as migrated once and for all"
   task migrate_old_content: :environment do
-    require 'pry'
-    
     RECORDS_TO_PROCESS = 100
 
     old_logger = ActiveRecord::Base.logger
@@ -76,7 +74,7 @@ namespace :data_integrity do
       pages = content_type.where(columns_migrated_from_old_style: nil).limit(RECORDS_TO_PROCESS)
 
       pages.each do |page|
-        binding.pry if page.columns_migrated_from_old_style.true?
+        puts "Hey, this page shouldn't be here!" if page.columns_migrated_from_old_style.true?
         TemporaryFieldMigrationService.migrate_fields_for_content(page, page.user, force: true)
       end
     end
