@@ -70,7 +70,7 @@ namespace :data_integrity do
       puts "Migrating #{content_type.name}"
       pages = content_type.where(columns_migrated_from_old_style: nil).order('updated_at DESC').limit(RECORDS_TO_PROCESS)
 
-      pages.find_each do |page|
+      pages.each do |page|
         TemporaryFieldMigrationService.migrate_fields_for_content(page, page.user, force: true)
       end
     end
