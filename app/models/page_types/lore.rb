@@ -12,12 +12,11 @@ class Lore < ActiveRecord::Base
   include Serendipitous::Concern
 
   include Authority::Abilities
-  self.authorizer_name = 'ExtendedContentAuthorizer'
+  self.authorizer_name = CoreContentAuthorizer.name
 
   relates :planets, with: :lore_planets
   relates :countries, with: :lore_countries
   relates :continents, with: :lore_continents
-  relates :countries, with: :lore_countries
   relates :landmarks, with: :lore_landmarks
   relates :towns, with: :lore_towns
   relates :buildings, with: :lore_buildings
