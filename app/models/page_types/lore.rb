@@ -59,5 +59,9 @@ class Lore < ActiveRecord::Base
   def self.content_name
     'lore'
   end
+
+  def description
+    overview_field_value('Summary')
+  end
 end
     

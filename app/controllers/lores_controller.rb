@@ -1,4 +1,3 @@
-
 class LoresController < ContentController
   private
 
@@ -8,7 +7,9 @@ class LoresController < ContentController
     ] + [ #<relations>
       custom_attribute_values:           [:name, :value],
 
+      lore_planets_attributes: [:id, :planet_id, :_destroy],
+
+      siblingships_attributes:     [:id, :sibling_id, :_destroy],
     ]
   end
 end
-    
