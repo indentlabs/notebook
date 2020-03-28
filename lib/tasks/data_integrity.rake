@@ -77,7 +77,7 @@ namespace :data_integrity do
         puts "Hey, this page shouldn't be here!" if page.columns_migrated_from_old_style == true
         TemporaryFieldMigrationService.migrate_fields_for_content(page, page.user, force: true)
 
-        page.update(columns_migrated_from_old_style: true) unless page.reload.columns_migrated_from_old_style == true
+        page.update_column(:columns_migrated_from_old_style, true) unless page.reload.columns_migrated_from_old_style == true
       end
     end
 

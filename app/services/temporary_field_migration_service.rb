@@ -73,6 +73,6 @@ class TemporaryFieldMigrationService < Service
       end
     end
 
-    content_model.update(columns_migrated_from_old_style: true)
+    content_model.update_column(:columns_migrated_from_old_style, true)
   end
 end
