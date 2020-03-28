@@ -20,6 +20,7 @@ Rails.application.routes.draw do
       # todo page tags here
     end
   end
+  resources :user_followings
   get '/@:username', to: 'users#show', as: :profile_by_username
 
   resources :documents do
