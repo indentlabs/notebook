@@ -21,6 +21,7 @@ Rails.application.routes.draw do
     end
   end
   resources :user_followings
+  resources :user_blockings
   get '/@:username', to: 'users#show', as: :profile_by_username
 
   resources :documents do

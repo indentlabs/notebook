@@ -52,6 +52,15 @@ class User < ApplicationRecord
     followed_by_users.pluck(:id).include?(user.id)
   end
 
+  has_many :user_blockings,               dependent: :destroy
+  has_many :blocked_users,                through: :user_blockings, source: :blocked_user
+  def blocked_by_users
+    User.where(id: UserBlocking.where(blocked_user_id: self.id).pluck(:user_id))    
+  end
+  def blocked_by?(user)
+    blocked_by_users.pluck(:id).include?(user.id)
+  end
+
   has_many :votes,                        dependent: :destroy
   has_many :raffle_entries,               dependent: :destroy
 
