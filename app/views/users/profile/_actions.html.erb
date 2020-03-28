@@ -6,7 +6,7 @@
       </div>
     </div>
 
-    <% if user_signed_in? %>
+    <% if user_signed_in? && !@user.blocked_by?(current_user || User.new) %>
       <% if @user.followed_by?(current_user) %>
         <%= form_for(current_user.user_followings.find_by(followed_user_id: @user.id), method: :delete) do |f| %>
           <%= f.hidden_field :followed_user_id, value: @user.id %>
