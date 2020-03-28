@@ -97,6 +97,12 @@
         <div class="collapsible-body" style="">
           <ul>
             <li>
+              <%= link_to main_app.prompts_path, class: 'waves-effect' do %>
+                <i class="material-icons left orange-text">lightbulb_outline</i>
+                Prompts
+              <% end %>
+            </li>
+            <li>
               <%= link_to main_app.documents_path, class: 'waves-effect' do %>
                 <i class="material-icons <%= Document.color %>-text">
                   <%= Document.icon %>
@@ -105,6 +111,22 @@
                 <span class="badge">
                   <%= @current_user_content['Document'].count %>
                 </span>
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li class="bold waves-effect <%= 'active' if @sidenav_expansion == 'my account' %>">
+        <a class="collapsible-header" tabindex="0">
+          Social
+          <i class="material-icons chevron">chevron_right</i>
+        </a>
+        <div class="collapsible-body">
+          <ul>
+            <li>
+              <%= link_to current_user.profile_url, class: 'waves-effect' do %>
+                <i class="material-icons left <%= User.color %>-text ">ballot</i>
+                Stream
               <% end %>
             </li>
             <li>
@@ -121,9 +143,9 @@
               <% end %>
             </li>
             <li>
-              <%= link_to main_app.prompts_path, class: 'waves-effect' do %>
-                <i class="material-icons left orange-text">lightbulb_outline</i>
-                Prompts
+              <%= link_to current_user.profile_url, class: 'waves-effect' do %>
+                <i class="material-icons left <%= User.color %>-text"><%= User.icon %></i>
+                Profile
               <% end %>
             </li>
           </ul>
@@ -136,12 +158,6 @@
         </a>
         <div class="collapsible-body">
           <ul>
-            <li>
-              <%= link_to current_user.profile_url, class: 'waves-effect' do %>
-                <i class="material-icons left <%= User.color %>-text"><%= User.icon %></i>
-                Profile
-              <% end %>
-            </li>
             <li>
               <%= link_to main_app.subscription_path, class: 'waves-effect' do %>
                 <i class="material-icons left blue-text">credit_card</i>
