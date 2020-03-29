@@ -123,7 +123,7 @@ module HasContent
                                              .first(limit)
 
       @user_recent_content_list = recently_changed_attributes.map do |entity_type, entity_id|
-        entity_type.constantize.find_by(id: entity_id)
+        entity_type.constantize.find_by(id: entity_id) rescue nil
       end.compact
     end
 
