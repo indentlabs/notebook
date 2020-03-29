@@ -218,7 +218,7 @@ Rails.application.config.to_prepare do
       if related_content_type.present?
         @sidenav_expansion = 'worldbuilding'
       else
-        @sidenav_expansion = 'writing'
+        @sidenav_expansion = 'community'
       end
     end
 

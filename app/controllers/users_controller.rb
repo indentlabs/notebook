@@ -4,7 +4,7 @@ class UsersController < ApplicationController
   end
 
   def show
-    @sidenav_expansion = 'my account'
+    @sidenav_expansion = 'community'
 
     @user    = User.find_by(user_params)
     return redirect_to(root_path, notice: 'That user does not exist.') if @user.nil?
