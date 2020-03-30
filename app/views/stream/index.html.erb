@@ -1,24 +1,75 @@
-<% 5.times do %>
+<% feed = (1..5).map { Rails.application.config.content_types[:all].sample.where(user: current_user).first } %>
+<br /><br />
 
-<% content = Character.first %>
+<% feed.each do |content| %>
 
-<div class="card row <%= content.class.color %> clearfix" style="height: 400px">
+<div class="row">
+  <div class="col s12">
+    <%= link_to content.user, class: "#{User.color}-text" do %>
+      <%= image_tag content.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+      <%= content.user.name %>
+    <% end %>
+    shared a
+    <%= content.class.name.downcase %>:
+    <%= link_to content.name, content, class: "#{content.class.color}-text text-darken-1" %>.
+    <span class="grey-text right">
+      <%= time_ago_in_words content.created_at %> ago
+    </span>
+  </div>
+</div>
+<div class="hoverable card row <%= content.class.color %> clearfix" style="height: 400px">
   <div class="col s12 m6 l6">
+    <div class="card-image" style="height: 200px">
+      <%= image_tag content.random_public_image(format: :small), style: 'height: 200px' %>
+      <span class="card-title">
+        <%= link_to content do %>
+          <i class="material-icons tiny <%= content.class.color %>-text"><%= content.class.icon %></i>
+          <span class="white-text bordered-text"><%= content.name %></i>
+        <% end %>
+      </span>
+    </div>
 
-        <div class="card-image">
-          <img src="https://materializecss.com/images/sample-1.jpg" />
-          <span class="card-title"><%= content.name %></span>
-        </div>
-
-    <div class="card-content white" style="height: 400px">
-      fuck
+    <div class="card-content white" style="height: 200px">
+      <%= content.description.presence || 'Description here' %>
     </div>
   </div>
-  <div class="col s12 m6 l6 <%= content.class.color %> lighten-4">
-    <div class="card-content" style="height: 400px">
+  <div class="col s12 m6 l6 <%= content.class.color %> lighten-5">
+    <div class="card-content white" style="height: 400px">
       right<br />
+      <!-- Modal Trigger -->
+      <a class="waves-effect waves-light btn modal-trigger" href="#modal1">Modal</a>
     </div>
   </div>
 </div>
+<br /><br />
+
 
 <% end %>
+
+<% content = feed.first %>
+
+<!-- Modal Structure -->
+<div id="modal1" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <div class="row">
+      <div class="col s12">
+        <ul class="tabs">
+          <li class="tab col s3"><a class="active" href="#test1">Test 1</a></li>
+          <li class="tab col s3"><a href="#test2">Test 2</a></li>
+          <li class="tab col s3"><a href="#test3">Disabled Tab</a></li>
+          <li class="tab col s3"><a href="#test4">Test 4</a></li>
+        </ul>
+      </div>
+      <div id="test1" class="col s12">
+        <h4><%= content.name %></h4>
+        <p>A bunch of text</p>
+      </div>
+      <div id="test2" class="col s12">Test 2</div>
+      <div id="test3" class="col s12">Test 3</div>
+      <div id="test4" class="col s12">Test 4</div>
+    </div>
+  </div>
+  <div class="modal-footer <%= content.class.color %>">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+  </div>
+</div>
