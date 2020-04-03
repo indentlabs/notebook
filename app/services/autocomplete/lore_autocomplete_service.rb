@@ -4,6 +4,8 @@ module Autocomplete
       case field_label.downcase
       when 'type'
         t('lore_types')
+      when 'genre'
+        t('genres')
       else
         []
       end.uniq
