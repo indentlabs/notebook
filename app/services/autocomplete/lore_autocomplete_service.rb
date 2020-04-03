@@ -3,7 +3,7 @@ module Autocomplete
     def self.for_field_label(field_label)
       case field_label.downcase
       when 'type'
-        []
+        t('lore_types')
       else
         []
       end.uniq
