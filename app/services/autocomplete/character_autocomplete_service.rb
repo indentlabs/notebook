@@ -2,6 +2,8 @@ module Autocomplete
   class CharacterAutocompleteService < Service
     def self.for_field_label(field_label)
       case field_label.downcase
+      when 'archetype'
+        t('archetypes')
       when 'eye color', 'eyecolor', 'eyecolour', 'eye colour'
         t('eye_colors')
       when 'bodytype', 'body type'
