@@ -1,11 +1,9 @@
 module Autocomplete
-  class LoreAutocompleteService < AutocompleteService
+  class LocationAutocompleteService < AutocompleteService
     def self.for_field_label(field_label)
       case field_label.downcase
-      when 'type'
-        t('lore_types')
-      when 'genre'
-        t('genres')
+      when 'type_of', 'type'
+        t('location_types')
       else
         []
       end.uniq

@@ -1,8 +1,8 @@
 module Autocomplete
-  class CharacterAutocompleteService < Service
+  class CharacterAutocompleteService < AutocompleteService
     def self.for_field_label(field_label)
       case field_label.downcase
-      when 'archetype'
+      when 'archetype', 'role'
         t('archetypes')
       when 'eye color', 'eyecolor', 'eyecolour', 'eye colour'
         t('eye_colors')
@@ -25,15 +25,6 @@ module Autocomplete
       else
         []
       end.uniq
-    end
-
-    def self.autocompleteable?(field_label:, content_model: nil)
-      self.for_field_label(field_label).any?
-    end
-
-    # helper method so we don't have to I18n every time
-    def self.t(key)
-      I18n.t(key, scope: 'autocomplete')
     end
   end
 end
