@@ -7,6 +7,10 @@ class AutocompleteService < Service
       Autocomplete::CharacterAutocompleteService.for_field_label(label)
     when Location.name
       Autocomplete::LocationAutocompleteService.for_field_label(label)
+    when Item.name
+      Autocomplete::ItemAutocompleteService.for_field_label(label)
+    when Building.name
+      Autocomplete::BuildingAutocompleteService.for_field_label(label)
     when Lore.name
       Autocomplete::LoreAutocompleteService.for_field_label(label)
     else
