@@ -13,6 +13,8 @@ class AutocompleteService < Service
       Autocomplete::BuildingAutocompleteService.for_field_label(label)
     when Lore.name
       Autocomplete::LoreAutocompleteService.for_field_label(label)
+    when Condition.name
+      Autocomplete::ConditionAutocompleteService.for_field_label(label)
     else
       []
     end
