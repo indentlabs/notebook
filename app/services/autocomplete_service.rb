@@ -15,6 +15,8 @@ class AutocompleteService < Service
       Autocomplete::LoreAutocompleteService.for_field_label(label)
     when Condition.name
       Autocomplete::ConditionAutocompleteService.for_field_label(label)
+    when Creature.name
+      Autocomplete::CreatureAutocompleteService.for_field_label(label)
     else
       []
     end
