@@ -23,6 +23,8 @@ class AutocompleteService < Service
       Autocomplete::JobAutocompleteService.for_field_label(label)
     when Landmark.name
       Autocomplete::LandmarkAutocompleteService.for_field_label(label)
+    when Magic.name
+      Autocomplete::MagicAutocompleteService.for_field_label(label)
     else
       []
     end
