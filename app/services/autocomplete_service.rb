@@ -19,6 +19,8 @@ class AutocompleteService < Service
       Autocomplete::CreatureAutocompleteService.for_field_label(label)
     when Food.name
       Autocomplete::FoodAutocompleteService.for_field_label(label)
+    when Job.name
+      Autocomplete::JobAutocompleteService.for_field_label(label)
     else
       []
     end
