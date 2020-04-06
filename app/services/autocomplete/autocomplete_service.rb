@@ -27,6 +27,10 @@ class AutocompleteService < Service
       Autocomplete::MagicAutocompleteService.for_field_label(label)
     when School.name
       Autocomplete::SchoolAutocompleteService.for_field_label(label)
+    when Tradition.name
+      Autocomplete::TraditionAutocompleteService.for_field_label(label)
+    when Vehicle.name
+      Autocomplete::VehicleAutocompleteService.for_field_label(label)
     else
       []
     end
