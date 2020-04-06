@@ -501,7 +501,7 @@ class ContentController < ApplicationController
       .downcase
       .to_sym
 
-    params.require(content_class).permit(content_param_list + [:deleted_at, :document_entity_id])
+    params.require(content_class).except(:page_tags, :_destroy).permit(content_param_list + [:deleted_at, :document_entity_id])
   end
 
   def page_tag_params

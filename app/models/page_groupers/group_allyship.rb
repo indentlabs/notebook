@@ -15,6 +15,6 @@ class GroupAllyship < ApplicationRecord
     this_object  = Group.find_by(id: self.group_id)
     other_object = Group.find_by(id: self.ally_id)
 
-    other_object.allies.delete this_object
+    other_object.allies.delete(this_object) if other_object.present?
   end
 end

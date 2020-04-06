@@ -18,6 +18,6 @@ class Subgroupship < ApplicationRecord
     this_object  = Group.find_by(id: self.group_id)
     other_object = Group.find_by(id: self.subgroup_id)
 
-    other_object.supergroups.delete(this_object)
+    other_object.supergroups.delete(this_object) if other_object.present?
   end
 end
