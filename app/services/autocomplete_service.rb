@@ -17,6 +17,8 @@ class AutocompleteService < Service
       Autocomplete::ConditionAutocompleteService.for_field_label(label)
     when Creature.name
       Autocomplete::CreatureAutocompleteService.for_field_label(label)
+    when Food.name
+      Autocomplete::FoodAutocompleteService.for_field_label(label)
     else
       []
     end
