@@ -170,6 +170,7 @@
           <ul class="tabs tabs-fixed-width">
             <li class="tab"><a href="#threads-created">Threads you created</a></li>
             <li class="tab"><a href="#threads-replied">Threads you posted to</a></li>
+            <li class="tab"><a href="#threads-followed">Threads you follow</a></li>
           </ul>
         </div>
         <div class="card-content grey lighten-4">
@@ -192,6 +193,23 @@
           <div id="threads-replied" style="display: none">
             <ul>
               <% @threads_posted_to.order('id desc').each do |topic| %>
+                <li class="clearfix">
+                  <div>
+                    <i class="material-icons blue-text left">forum</i>
+                    <%= link_to topic.title, thredded.messageboard_topic_path(messageboard_id: topic.messageboard_id, id: topic.slug) %>
+                    <span class="grey-text">started <%= time_ago_in_words topic.created_at %> ago</span>
+                  </div>
+                  <div>
+                    <%= pluralize topic.posts_count - 1, 'reply' %>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+          <div id="threads-followed" style="display: none">
+            <ul>
+              <% @followed_topics.order('id desc').each do |follow| %>
+                <% topic = follow.topic %>
                 <li class="clearfix">
                   <div>
                     <i class="material-icons blue-text left">forum</i>
