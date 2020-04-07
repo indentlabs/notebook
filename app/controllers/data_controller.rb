@@ -31,6 +31,8 @@ class DataController < ApplicationController
     @private_posts  = Thredded::PrivatePost.where(user_id: current_user.id)
 
     @threads_posted_to = Thredded::Topic.where(id: @posts.pluck(:postable_id) - @topics.pluck(:id))
+
+    @followed_topics = current_user.thredded_topic_follows.includes(:topic)
   end
 
   def collaboration

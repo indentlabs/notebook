@@ -18,6 +18,8 @@ module Notebook
   class Application < Rails::Application
     config.autoload_paths += Dir[Rails.root.join('app', 'models', '{*/}')]
     config.autoload_paths += Dir[Rails.root.join('app', 'services', '{*/}')]
+    
+    config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
 
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 5.0

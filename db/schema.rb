@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_26_193201) do
+ActiveRecord::Schema.define(version: 2020_03_28_005343) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1045,15 +1045,6 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
     t.index ["entity_type", "entity_id"], name: "index_document_entities_on_entity_type_and_entity_id"
   end
 
-  create_table "document_notes", force: :cascade do |t|
-    t.integer "document_id", null: false
-    t.string "title"
-    t.string "notes"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["document_id"], name: "index_document_notes_on_document_id"
-  end
-
   create_table "documents", force: :cascade do |t|
     t.integer "user_id"
     t.text "body"
@@ -1088,7 +1079,6 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
     t.integer "father_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index "\"father_id\", \"character_id\", \"deleted_at\"", name: "index_fatherships_on_father_id_and_character_id_and_deleted_at"
   end
 
   create_table "flora_eaten_bies", force: :cascade do |t|
@@ -1719,7 +1709,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_believers", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "believer_id"
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_believers_on_lore_id"
@@ -1729,7 +1719,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_buildings", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "building_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["building_id"], name: "index_lore_buildings_on_building_id"
@@ -1740,7 +1730,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_characters", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "character_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["character_id"], name: "index_lore_characters_on_character_id"
@@ -1751,7 +1741,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_conditions", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "condition_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["condition_id"], name: "index_lore_conditions_on_condition_id"
@@ -1762,7 +1752,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_continents", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "continent_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["continent_id"], name: "index_lore_continents_on_continent_id"
@@ -1773,7 +1763,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_countries", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "country_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["country_id"], name: "index_lore_countries_on_country_id"
@@ -1784,7 +1774,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_created_traditions", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "created_tradition_id"
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_created_traditions_on_lore_id"
@@ -1794,7 +1784,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_creatures", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "creature_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["creature_id"], name: "index_lore_creatures_on_creature_id"
@@ -1805,7 +1795,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_deities", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "deity_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["deity_id"], name: "index_lore_deities_on_deity_id"
@@ -1816,7 +1806,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_floras", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "flora_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["flora_id"], name: "index_lore_floras_on_flora_id"
@@ -1827,7 +1817,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_foods", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "food_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["food_id"], name: "index_lore_foods_on_food_id"
@@ -1838,7 +1828,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_governments", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "government_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["government_id"], name: "index_lore_governments_on_government_id"
@@ -1849,7 +1839,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_groups", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "group_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["group_id"], name: "index_lore_groups_on_group_id"
@@ -1860,7 +1850,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_jobs", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "job_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["job_id"], name: "index_lore_jobs_on_job_id"
@@ -1871,7 +1861,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_landmarks", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "landmark_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["landmark_id"], name: "index_lore_landmarks_on_landmark_id"
@@ -1882,7 +1872,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_magics", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "magic_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_magics_on_lore_id"
@@ -1893,7 +1883,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_original_languages", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "original_language_id"
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_original_languages_on_lore_id"
@@ -1903,7 +1893,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_planets", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "planet_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_planets_on_lore_id"
@@ -1914,7 +1904,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_races", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "race_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_races_on_lore_id"
@@ -1925,7 +1915,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_related_lores", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "related_lore_id"
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_related_lores_on_lore_id"
@@ -1935,7 +1925,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_religions", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "religion_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_religions_on_lore_id"
@@ -1946,7 +1936,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_schools", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "school_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_schools_on_lore_id"
@@ -1957,7 +1947,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_sports", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "sport_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_sports_on_lore_id"
@@ -1968,7 +1958,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_technologies", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "technology_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_technologies_on_lore_id"
@@ -1979,7 +1969,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_towns", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "town_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_towns_on_lore_id"
@@ -1990,7 +1980,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_traditions", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "tradition_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_traditions_on_lore_id"
@@ -2001,7 +1991,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_variations", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "variation_id"
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_variations_on_lore_id"
@@ -2011,7 +2001,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lore_vehicles", force: :cascade do |t|
     t.integer "lore_id", null: false
     t.integer "vehicle_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["lore_id"], name: "index_lore_vehicles_on_lore_id"
@@ -2022,7 +2012,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   create_table "lores", force: :cascade do |t|
     t.string "name"
     t.integer "user_id", null: false
-    t.integer "universe_id", null: false
+    t.integer "universe_id"
     t.datetime "deleted_at"
     t.datetime "archived_at"
     t.string "privacy"
@@ -2096,7 +2086,6 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
     t.integer "mother_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index "\"mother_id\", \"character_id\", \"deleted_at\"", name: "index_motherships_on_mother_id_and_character_id_and_deleted_at"
   end
 
   create_table "notable_cities_relationships", force: :cascade do |t|
@@ -3217,7 +3206,6 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
     t.string "interests"
     t.string "forums_badge_text"
     t.boolean "keyboard_shortcuts_preference"
-    t.date "birthday"
     t.string "favorite_book"
     t.string "website"
     t.string "inspirations"
@@ -3272,6 +3260,8 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
     t.integer "habitat_id"
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "api_keys", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
   add_foreign_key "character_birthtowns", "characters"
@@ -3328,6 +3318,8 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   add_foreign_key "continents", "users"
   add_foreign_key "contributors", "universes"
   add_foreign_key "contributors", "users"
+  add_foreign_key "countries", "universes"
+  add_foreign_key "countries", "users"
   add_foreign_key "country_bordering_countries", "countries"
   add_foreign_key "country_bordering_countries", "users"
   add_foreign_key "country_creatures", "countries"
@@ -3354,6 +3346,8 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   add_foreign_key "country_towns", "countries"
   add_foreign_key "country_towns", "towns"
   add_foreign_key "country_towns", "users"
+  add_foreign_key "deities", "universes"
+  add_foreign_key "deities", "users"
   add_foreign_key "deity_abilities", "deities"
   add_foreign_key "deity_abilities", "users"
   add_foreign_key "deity_character_children", "deities"
@@ -3394,8 +3388,10 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   add_foreign_key "document_categories", "document_analyses"
   add_foreign_key "document_concepts", "document_analyses"
   add_foreign_key "document_entities", "document_analyses"
-  add_foreign_key "document_notes", "documents"
+  add_foreign_key "documents", "universes"
   add_foreign_key "documents", "users"
+  add_foreign_key "floras", "universes"
+  add_foreign_key "floras", "users"
   add_foreign_key "foods", "universes"
   add_foreign_key "foods", "users"
   add_foreign_key "government_creatures", "creatures"
@@ -3414,6 +3410,8 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   add_foreign_key "government_technologies", "governments"
   add_foreign_key "government_technologies", "technologies"
   add_foreign_key "government_technologies", "users"
+  add_foreign_key "governments", "universes"
+  add_foreign_key "governments", "users"
   add_foreign_key "group_creatures", "creatures"
   add_foreign_key "group_creatures", "groups"
   add_foreign_key "group_creatures", "users"
@@ -3436,6 +3434,8 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   add_foreign_key "landmark_floras", "users"
   add_foreign_key "landmark_nearby_towns", "landmarks"
   add_foreign_key "landmark_nearby_towns", "users"
+  add_foreign_key "landmarks", "universes"
+  add_foreign_key "landmarks", "users"
   add_foreign_key "location_capital_towns", "locations"
   add_foreign_key "location_capital_towns", "users"
   add_foreign_key "location_landmarks", "landmarks"
@@ -3568,6 +3568,8 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   add_foreign_key "planet_towns", "planets"
   add_foreign_key "planet_towns", "towns"
   add_foreign_key "planet_towns", "users"
+  add_foreign_key "planets", "universes"
+  add_foreign_key "planets", "users"
   add_foreign_key "promotions", "page_unlock_promo_codes"
   add_foreign_key "promotions", "users"
   add_foreign_key "raffle_entries", "users"
@@ -3581,6 +3583,8 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   add_foreign_key "sports", "users"
   add_foreign_key "subscriptions", "billing_plans"
   add_foreign_key "subscriptions", "users"
+  add_foreign_key "technologies", "universes"
+  add_foreign_key "technologies", "users"
   add_foreign_key "technology_characters", "characters"
   add_foreign_key "technology_characters", "technologies"
   add_foreign_key "technology_characters", "users"
@@ -3608,6 +3612,10 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   add_foreign_key "technology_towns", "technologies"
   add_foreign_key "technology_towns", "towns"
   add_foreign_key "technology_towns", "users"
+  add_foreign_key "thredded_messageboard_users", "thredded_messageboards", on_delete: :cascade
+  add_foreign_key "thredded_messageboard_users", "thredded_user_details", on_delete: :cascade
+  add_foreign_key "thredded_user_post_notifications", "thredded_posts", column: "post_id", on_delete: :cascade
+  add_foreign_key "thredded_user_post_notifications", "users", on_delete: :cascade
   add_foreign_key "town_citizens", "towns"
   add_foreign_key "town_citizens", "users"
   add_foreign_key "town_countries", "countries"
@@ -3627,6 +3635,8 @@ ActiveRecord::Schema.define(version: 2020_03_26_193201) do
   add_foreign_key "town_languages", "users"
   add_foreign_key "town_nearby_landmarks", "towns"
   add_foreign_key "town_nearby_landmarks", "users"
+  add_foreign_key "towns", "universes"
+  add_foreign_key "towns", "users"
   add_foreign_key "traditions", "universes"
   add_foreign_key "traditions", "users"
   add_foreign_key "user_content_type_activators", "users"

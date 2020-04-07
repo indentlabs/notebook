@@ -1,7 +1,30 @@
 class AddContributableContentIndexes < ActiveRecord::Migration[6.0]
   def change
-    Rails.application.config.content_types[:all_non_universe].each do |content_type|
-      add_index(content_type.name.downcase.pluralize.to_sym, [:user_id, :universe_id, :deleted_at])
-    end
+    add_index(:characters, [:user_id, :universe_id, :deleted_at])
+    add_index(:locations, [:user_id, :universe_id, :deleted_at])
+    add_index(:items, [:user_id, :universe_id, :deleted_at])
+    add_index(:buildings, [:user_id, :universe_id, :deleted_at])
+    add_index(:conditions, [:user_id, :universe_id, :deleted_at])
+    add_index(:countries, [:user_id, :universe_id, :deleted_at])
+    add_index(:creatures, [:user_id, :universe_id, :deleted_at])
+    add_index(:deities, [:user_id, :universe_id, :deleted_at])
+    add_index(:floras, [:user_id, :universe_id, :deleted_at])
+    add_index(:foods, [:user_id, :universe_id, :deleted_at])
+    add_index(:governments, [:user_id, :universe_id, :deleted_at])
+    add_index(:groups, [:user_id, :universe_id, :deleted_at])
+    add_index(:jobs, [:user_id, :universe_id, :deleted_at])
+    add_index(:landmarks, [:user_id, :universe_id, :deleted_at])
+    add_index(:languages, [:user_id, :universe_id, :deleted_at])
+    add_index(:magics, [:user_id, :universe_id, :deleted_at])
+    add_index(:planets, [:user_id, :universe_id, :deleted_at])
+    add_index(:races, [:user_id, :universe_id, :deleted_at])
+    add_index(:religions, [:user_id, :universe_id, :deleted_at])
+    add_index(:scenes, [:user_id, :universe_id, :deleted_at])
+    add_index(:schools, [:user_id, :universe_id, :deleted_at])
+    add_index(:sports, [:user_id, :universe_id, :deleted_at])
+    add_index(:technologies, [:user_id, :universe_id, :deleted_at])
+    add_index(:towns, [:user_id, :universe_id, :deleted_at])
+    add_index(:traditions, [:user_id, :universe_id, :deleted_at])
+    add_index(:vehicles, [:user_id, :universe_id, :deleted_at])
   end
 end
