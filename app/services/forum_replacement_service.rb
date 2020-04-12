@@ -272,6 +272,7 @@ class ForumReplacementService < Service
     'whale'             => 'blubberbutt watermutt',
     'whales'            => 'blubberbutt watermutts',
     'wheeze'            => 'sneeze',
+    'wheezing'          => 'sneezing',
     'wire'              => 'electro-rope',
     'wires'             => 'electro-ropes',
     'world hunger'      => 'the hardest problem known to man',
@@ -281,10 +282,61 @@ class ForumReplacementService < Service
     'writer'            => 'scribble scrabbler',
     'writers'           => 'scribble scrabblers',
     'yuge'              => '<span style="font-size: 40px">yuge</span>',
-    'zalgo'             => 'H̶̛̼̼̪̝̞͓̞͕͇̯͚͎͚̘̳͕̱̤̠̗͔͇̙̣̰͓̖̰̯̀̓̐̑̇͊͂̀͋̒̐̓͒̒͊͊̕͜͝ͅE̴̡̧̨̨̲̥̯͎̭̻̩̞̘̞̪̞̗̭͖̻͙͕͎̮͕̺͕̲̘̻̣͚̳̥͍̙͈͚͍͉̗͙̱͖͚̾̂̇͛̉͋͊̾͛̆̀́͑͛̅̋͊̕͘͜͜͜͝ͅͅͅͅ ̸̡̡̨̡̨̛̞͎̹̩̬̗̗̞̬̰̮̙̪̖͈̣̹͔̺̫̰̓̔̉̋̈̈́͐́̿̈̀͊̿̈̉̅̃̊̽͗̈̿̈́̓̈́̎͌̄̀̆̌̎͗̋͒̋̿̋̊̈́͆̋̾̈̏̈́̋̿̕̕̚͝͝͠͠ͅͅͅC̵̛̘̳͙̪̭͖̲̞̯̰̜͇̈̾̈́͋̌̉̽̽͑̎͌̾̈́͌̑͊̊̔̀͆̌̀̇̓͊̀̂̇̿̃͑́̈́̆͂̈́̾̓́̂̂̓̂̍̍͛͆͌͌̽̎̍̀̒̆̀͗͋͘͘͘͝͠͝͝͠͝͝Ǫ̸͕̻̞̝̜͚̗̮̼͎̤͔̤̱͔̫͂̄̉̋̈͊͐͂̇̀̌̎́͑̐̀̈́͋̓̾̅͒̒̄͑̒̆̑̾͜͝͝͝͝M̷̧̧̡̨̛̛̩̭̞͍̼̝̗͕̖͇̣̣̩͆̿̑͒́̉̅̓̌̆̈́͐͒̾̐̂̿̓̚͘̚͜E̵̡̨̢̧̢̢̡̢̨̛̠̱̻̺̦͚̹͓̬͔̪̟̼̥̯̠̘͚̫̯͍̺͔̫̟͇̱̦̟̪͚͉̣̳͓͍̬̙̲͔̘͙͔̤̰̜͍̠̩͉͐̂̊̏̐̿̊̋͑̿̇̊̈́͗̎̋́́̉̓̂̐͑̇̐̐͋́̒̈́͛͑͒̂͒̂̔̀̄̈́̓͂͆̈́͒̌͆̓͗̋͐̔̑͐̕͘ͅͅͅŞ̴̧̧̡̢̧̡̢͕̝͚̝̖͚̣̞̫̻̯͔̳̗̝̰̗̰̰̥̭͕̜̜̫͍̪̳̘̣̺̠͉̗̟͕̹͇̬̘̘̪͆͗̎̕'
+    'zalgo'             => 'H̶̛̼̼̪̝̞͓̞͕͇̯͚͎͚̘̳͕̱̤̠̗͔͇̙̣̰͓̖̰̯̀̓̐̑̇͊͂̀͋̒̐̓͒̒͊͊̕͜͝ͅE̴̡̧̨̨̲̥̯͎̭̻̩̞̘̞̪̞̗̭͖̻͙͕͎̮͕̺͕̲̘̻̣͚̳̥͍̙͈͚͍͉̗͙̱͖͚̾̂̇͛̉͋͊̾͛̆̀́͑͛̅̋͊̕͘͜͜͜͝ͅͅͅͅ ̸̡̡̨̡̨̛̞͎̹̩̬̗̗̞̬̰̮̙̪̖͈̣̹͔̺̫̰̓̔̉̋̈̈́͐́̿̈̀͊̿̈̉̅̃̊̽͗̈̿̈́̓̈́̎͌̄̀̆̌̎͗̋͒̋̿̋̊̈́͆̋̾̈̏̈́̋̿̕̕̚͝͝͠͠ͅͅͅC̵̛̘̳͙̪̭͖̲̞̯̰̜͇̈̾̈́͋̌̉̽̽͑̎͌̾̈́͌̑͊̊̔̀͆̌̀̇̓͊̀̂̇̿̃͑́̈́̆͂̈́̾̓́̂̂̓̂̍̍͛͆͌͌̽̎̍̀̒̆̀͗͋͘͘͘͝͠͝͝͠͝͝Ǫ̸͕̻̞̝̜͚̗̮̼͎̤͔̤̱͔̫͂̄̉̋̈͊͐͂̇̀̌̎́͑̐̀̈́͋̓̾̅͒̒̄͑̒̆̑̾͜͝͝͝͝M̷̧̧̡̨̛̛̩̭̞͍̼̝̗͕̖͇̣̣̩͆̿̑͒́̉̅̓̌̆̈́͐͒̾̐̂̿̓̚͘̚͜E̵̡̨̢̧̢̢̡̢̨̛̠̱̻̺̦͚̹͓̬͔̪̟̼̥̯̠̘͚̫̯͍̺͔̫̟͇̱̦̟̪͚͉̣̳͓͍̬̙̲͔̘͙͔̤̰̜͍̠̩͉͐̂̊̏̐̿̊̋͑̿̇̊̈́͗̎̋́́̉̓̂̐͑̇̐̐͋́̒̈́͛͑͒̂͒̂̔̀̄̈́̓͂͆̈́͒̌͆̓͗̋͐̔̑͐̕͘ͅͅͅŞ̴̧̧̡̢̧̡̢͕̝͚̝̖͚̣̞̫̻̯͔̳̗̝̰̗̰̰̥̭͕̜̜̫͍̪̳̘̣̺̠͉̗̟͕̹͇̬̘̘̪͆͗̎̕',
+
+    ## Crazy mode
+    'depression' => 'megasadness',
+    'ice cream' => 'eyes cream',
+    'strawberry' => 'plastic tubefruit',
+    'soul' => 'inner ghost',
+    'dance' => 'woopwoop',
+    'curling iron' => 'medieval torture device',
+    'room' => 'human containment unit',
+    'gay' => 'rainbow',
+    'wednesday' => 'wendsday',
+    'taxation' => 'theft',
+    'insurance' => 'the biggest scam known to man',
+    'bird' => 'flying spy machine',
+    'birds' => 'flying spy machines',
+    'kitchen' => 'fridge-and-oven combination room',
+    'lemonade' => 'sour drank',
+    'salamander' => 'baby dragon',
+    'scrolling' => 'vertically surfing through a screen',
+    'eyes' => 'little ball peepers',
+    'la croix' => 'water that has sat next to a fruit at one point in its life',
+    'history' => 'lastpast yesteryear',
+    'tall' => 'giraffy',
+    'subtext' => 'subtweeting but IRL',
+    'how' => 'how now brown cow',
+    'midnight' => 'dayover',
+    'murder' => 'mucduc',
+    'kill' => 'deathsnuggle',
+    'babe' => 'bae',
+    'video' => 'series of images played in rapid succession to give the illusion of movement on a static screen',
+    'online' => 'on the interwebs',
+    'internet' => 'series of electrotubes',
+    'highlighted' => 'becoming better',
+    'backfired' => 'went incredibly well',
+    'an hour' => '3600 seconds',
+    'football' => 'soccer',
+    'baseball' => 'thrown soccer',
+    'basketball' => 'dribbling soccer',
+    'volleyball' => 'beach soccer',
+    'hello' => 'howdy, partner',
+    'rule' => 'law you must obey',
+    'rules' => 'laws you must obey',
+    'what is happening' => 'everything is fine',
+    'why is this happening' => 'I think this is great',
+    'two days ago' => 'a thousand years after 365002 days ago',
+    'summer' => 'hotseason',
+    'winter' => 'coldeason',
+    'spring' => 'flowerseason',
+    'autumn' => 'rainseason'
   }
 
   def self.replace(text)
+    # return text
+
     replaced_text = text.dup
 
     WORD_REPLACEMENTS.each do |trigger, replacement|
