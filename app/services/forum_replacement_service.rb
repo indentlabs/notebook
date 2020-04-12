@@ -335,7 +335,7 @@ class ForumReplacementService < Service
   }
 
   def self.replace(text)
-    # return text
+    return text
 
     replaced_text = text.dup
 
