@@ -1,6 +1,8 @@
 # rubocop:disable LineLength
 Rails.application.routes.draw do
   get 'stream', to: 'stream#index'
+  get 'community', to: 'stream#community'
+  
   default_url_options :host => "notebook.ai"
 
   get 'notice_dismissal/dismiss'
