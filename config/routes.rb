@@ -1,5 +1,7 @@
 # rubocop:disable LineLength
 Rails.application.routes.draw do
+  get 'notification/index'
+  get 'notification/show'
   default_url_options :host => "notebook.ai"
 
   get 'notice_dismissal/dismiss'

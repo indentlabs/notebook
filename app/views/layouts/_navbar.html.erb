@@ -8,6 +8,60 @@
     <div class="nav-wrapper">
       <ul class="right">
         <% if user_signed_in? %>
+          <li>
+            <a class="waves-effect waves-light tooltipped dropdown-trigger" href="#notifications-pane" data-tooltip="You have no new notifications." data-target="notifications-dropdown">
+              <i class="material-icons"><%= rand(2) == 1 ? 'notifications_none' : 'notifications_active' %></i>
+            </a>
+          </li>
+          <ul id='notifications-dropdown' class='dropdown-content'>
+            <li class="blue lighten-5">
+              <a href="#!" class="black-text text-lighten-3">
+                <i class="material-icons blue-text">forums</i>
+                <span class="blue-text text-darken-3">@andrew</span> mentioned you on the forums.
+                <blockquote>@andrew is awesome</blockquote>
+                <div><small class="grey-text">2 hours ago</small></div>
+              </a>
+            </li>
+            <li>
+              <a href="#!" class="black-text text-lighten-3">
+                <i class="material-icons blue-text">forums</i>
+                <div>
+                  You received a new private message.
+                </div>
+                <div><small class="grey-text">2 hours ago</small></div>
+              </a>
+            </li>
+            <li>
+              <a href="#!" class="black-text text-lighten-3">
+                <i class="material-icons red-text">favorite</i>
+                <div>A new feature is now available:</div>
+                <div class="blue-text text-darken-3">Adding notifications to Notebook.ai</div>
+                <div><small class="grey-text">2 hours ago</small></div>
+              </a>
+            </li>
+            <li>
+              <a href="#!" class="black-text text-lighten-3">
+                <i class="material-icons <%= Document.color %>-text"><%= Document.icon %></i>
+                <div>Your document analysis is complete.</div>
+                <div><small class="grey-text">2 hours ago</small></div>
+              </a>
+            </li>
+            <li>
+              <a href="#!" class="black-text text-lighten-3">
+                <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
+                <span class="blue-text text-darken-3">@andrew</span> added you as a contributor to the
+                <span class="purple-text text-darken-3">Super Universe</span> universe.
+                <div><small class="grey-text">2 hours ago</small></div>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li class="blue lighten-1">
+              <a href="#!" class="white-text">
+                <i class="material-icons left">notifications_active</i>
+                View all notifications
+              </a>
+            </li>
+          </ul>
           <% if current_user.recent_content_list.any? %>
             <li>
               <a class="sidenav-trigger show-on-large tooltipped" href="#" data-target="recent-edits-sidenav" data-target="recent-content-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your recently-edited pages">

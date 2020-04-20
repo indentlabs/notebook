@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_28_005343) do
+ActiveRecord::Schema.define(version: 2020_04_20_222939) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -39,24 +39,6 @@ ActiveRecord::Schema.define(version: 2020_03_28_005343) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_api_keys_on_user_id"
-  end
-
-  create_table "application_integrations", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.string "name"
-    t.string "description"
-    t.string "organization_name"
-    t.string "organization_url"
-    t.string "website_url"
-    t.string "privacy_policy_url"
-    t.string "token"
-    t.datetime "last_used_at"
-    t.string "authorization_callback_url"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.string "event_ping_url"
-    t.string "application_token"
-    t.index ["user_id"], name: "index_application_integrations_on_user_id"
   end
 
   create_table "archenemyships", force: :cascade do |t|
@@ -1057,11 +1039,6 @@ ActiveRecord::Schema.define(version: 2020_03_28_005343) do
     t.integer "universe_id"
     t.boolean "favorite"
     t.text "notes_text"
-    t.string "subtitle"
-    t.string "format"
-    t.string "genre"
-    t.integer "word_count"
-    t.string "status"
     t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
@@ -1406,17 +1383,6 @@ ActiveRecord::Schema.define(version: 2020_03_28_005343) do
     t.datetime "src_updated_at"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
-  end
-
-  create_table "integration_authorizations", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.integer "application_integration_id", null: false
-    t.string "referral_url"
-    t.string "ip_address"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["application_integration_id"], name: "index_integration_authorizations_on_application_integration_id"
-    t.index ["user_id"], name: "index_integration_authorizations_on_user_id"
   end
 
   create_table "item_magics", force: :cascade do |t|
@@ -2100,6 +2066,17 @@ ActiveRecord::Schema.define(version: 2020_03_28_005343) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_notice_dismissals_on_user_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.integer "user_id"
+    t.string "message_html"
+    t.string "icon", default: "notifications_active"
+    t.datetime "happened_at"
+    t.datetime "viewed_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "officeships", force: :cascade do |t|
@@ -3154,12 +3131,20 @@ ActiveRecord::Schema.define(version: 2020_03_28_005343) do
     t.datetime "archived_at"
     t.boolean "favorite"
     t.boolean "columns_migrated_from_old_style", default: true
-    t.index "\"user_id\", \"universe_id\", \"deleted_at\"", name: "index_universes_on_user_id_and_universe_id_and_deleted_at"
     t.index ["deleted_at", "id"], name: "index_universes_on_deleted_at_and_id"
     t.index ["deleted_at", "user_id"], name: "index_universes_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_universes_on_deleted_at"
     t.index ["id", "deleted_at"], name: "index_universes_on_id_and_deleted_at"
     t.index ["user_id"], name: "index_universes_on_user_id"
+  end
+
+  create_table "user_blockings", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "blocked_user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["blocked_user_id"], name: "index_user_blockings_on_blocked_user_id"
+    t.index ["user_id"], name: "index_user_blockings_on_user_id"
   end
 
   create_table "user_content_type_activators", force: :cascade do |t|
@@ -3168,6 +3153,15 @@ ActiveRecord::Schema.define(version: 2020_03_28_005343) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_user_content_type_activators_on_user_id"
+  end
+
+  create_table "user_followings", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "followed_user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["followed_user_id"], name: "index_user_followings_on_followed_user_id"
+    t.index ["user_id"], name: "index_user_followings_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -3416,8 +3410,6 @@ ActiveRecord::Schema.define(version: 2020_03_28_005343) do
   add_foreign_key "group_creatures", "groups"
   add_foreign_key "group_creatures", "users"
   add_foreign_key "image_uploads", "users"
-  add_foreign_key "integration_authorizations", "application_integrations"
-  add_foreign_key "integration_authorizations", "users"
   add_foreign_key "item_magics", "items"
   add_foreign_key "item_magics", "magics"
   add_foreign_key "item_magics", "users"
@@ -3639,7 +3631,9 @@ ActiveRecord::Schema.define(version: 2020_03_28_005343) do
   add_foreign_key "towns", "users"
   add_foreign_key "traditions", "universes"
   add_foreign_key "traditions", "users"
+  add_foreign_key "user_blockings", "users"
   add_foreign_key "user_content_type_activators", "users"
+  add_foreign_key "user_followings", "users"
   add_foreign_key "vehicles", "universes"
   add_foreign_key "vehicles", "users"
   add_foreign_key "votes", "users"
