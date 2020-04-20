@@ -9,11 +9,25 @@
       <ul class="right">
         <% if user_signed_in? %>
           <li>
-            <a class="waves-effect waves-light tooltipped dropdown-trigger" href="#notifications-pane" data-tooltip="You have no new notifications." data-target="notifications-dropdown">
-              <i class="material-icons"><%= rand(2) == 1 ? 'notifications_none' : 'notifications_active' %></i>
+            <a class="waves-effect waves-light tooltipped dropdown-trigger" href="#notifications" 
+               data-tooltip="You have <%= pluralize @user_notifications.reject { |n| n.viewed_at? }.count, 'unread notification' %>." 
+               data-target="notifications-dropdown">
+              <i class="material-icons"><%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'notifications_active' : 'notifications_none' %></i>
             </a>
           </li>
           <ul id='notifications-dropdown' class='dropdown-content'>
+            <% @user_notifications.each do |notification| %>
+              <li class="<%= 'blue lighten-5' unless notification.viewed_at? %>">
+                <%= link_to notification, class: 'black-text text-lighten-3' do %>
+                  <i class="material-icons <%= notification.icon_color %>-text"><%= notification.icon %></i>
+                  <%= notification.message_html.html_safe %>
+                  <div>
+                    <small class="grey-text"><%= time_ago_in_words notification.happened_at %> ago</small>
+                  </div>
+                <% end %>
+              </li>
+            <% end %>
+
             <li class="blue lighten-5">
               <a href="#!" class="black-text text-lighten-3">
                 <i class="material-icons blue-text">forums</i>
@@ -22,35 +36,26 @@
                 <div><small class="grey-text">2 hours ago</small></div>
               </a>
             </li>
-            <li class="blue lighten-5">
-              <a href="#!" class="black-text text-lighten-3">
-                <i class="material-icons blue-text">forums</i>
-                <div>
-                  You received a new private message.
-                </div>
-                <div><small class="grey-text">2 hours ago</small></div>
-              </a>
-            </li>
             <li>
               <a href="#!" class="black-text text-lighten-3">
                 <i class="material-icons red-text">favorite</i>
                 <div>A new feature is now available:</div>
-                <div class="blue-text text-darken-3">Adding notifications to Notebook.ai</div>
+                <div class="blue-text text-darken-3">Adding notifications and stuff to Notebook.ai</div>
                 <div><small class="grey-text">2 hours ago</small></div>
               </a>
             </li>
             <li>
               <a href="#!" class="black-text text-lighten-3">
                 <i class="material-icons <%= Document.color %>-text"><%= Document.icon %></i>
-                <div>Your document analysis is complete.</div>
+                <div>An analysis of <span class="<%= Document.color %>-text">Harry Potter and the Sorcerer of Sorcery</span> is ready to view.</div>
                 <div><small class="grey-text">2 hours ago</small></div>
               </a>
             </li>
             <li>
               <a href="#!" class="black-text text-lighten-3">
                 <i class="material-icons yellow-text text-darken-3">star</i>
-                <div>You signed up for Premium!</div>
-                <div>Click here to turn on Premium pages for use.</div>
+                <div class="yellow-text text-darken-4">You signed up for Premium!</div>
+                <div>Click here to turn on your Premium pages.</div>
                 <div><small class="grey-text">2 hours ago</small></div>
               </a>
             </li>
