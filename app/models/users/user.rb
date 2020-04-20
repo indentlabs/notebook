@@ -52,6 +52,7 @@ class User < ApplicationRecord
 
   has_many :api_keys,                     dependent: :destroy
 
+  has_many :notifications,                dependent: :destroy
   has_many :notice_dismissals,            dependent: :destroy
 
   has_many :page_settings_overrides,      dependent: :destroy
