@@ -63,6 +63,9 @@ Rails.application.configure do
   Stripe.api_key = "sk_test_v37uWbseyPct6PpsfjTa3y1l"
   config.stripe_publishable_key = 'pk_test_eXI4iyJ2gR9UOGJyJERvDlHF'
 
+  config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+  config.active_job.default_url_options    = { host: 'localhost', port: 3000 }
+
   # Paperclip config for image uploads
   config.paperclip_defaults = {
     storage: :s3,
