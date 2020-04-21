@@ -38,8 +38,7 @@ class DocumentAnalysisJob < ApplicationJob
       icon:             Document.icon,
       icon_color:       Document.color,
       happened_at:      DateTime.current,
-      passthrough_link: Rails.application.routes.url_helpers.analysis_document_url(analysis.document),
-      user:             analysis.document.user
+      passthrough_link: Rails.application.routes.url_helpers.analysis_document_url(analysis.document)
     )
   end
 end
