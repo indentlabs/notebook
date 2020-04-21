@@ -16,6 +16,15 @@ class ContributorsController < ApplicationController
         passthrough_link: Rails.application.routes.url_helpers.universe_path(relevant_universe)
       ) if user.present?
 
+      # Create a notification letting the universe owner know
+      relevant_universe.user.notifications.create(
+        message_html:     "<div><span class='#{User.color}-text'>#{user.display_name}</span> has stopped collaborating on your <span class='#{Universe.color}-text'>#{relevant_universe.name}</span> universe.</div>",
+        icon:             Universe.icon,
+        icon_color:       Universe.color,
+        happened_at:      DateTime.current,
+        passthrough_link: Rails.application.routes.url_helpers.universe_path(relevant_universe)
+      ) if user.present?
+
       #todo send "you've been removed as a contributor" email
     end
 

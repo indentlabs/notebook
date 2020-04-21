@@ -82,7 +82,7 @@ class RegistrationsController < Devise::RegistrationsController
             icon_color:       Universe.color,
             happened_at:      DateTime.current,
             passthrough_link: Rails.application.routes.url_helpers.universe_path(contributorship.universe)
-          ) if resource.present?
+          )
         end
       end
     end

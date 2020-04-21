@@ -41,6 +41,14 @@ class SubscriptionService < Service
           end_date:        DateTime.now.end_of_day + 5.years
         )
 
+        user.notifications.create(
+          message_html:     "<div class='yellow-text text-darken-4'>You signed up for Premium!</div><div>Click here to turn on your Premium pages.</div>",
+          icon:             'star',
+          icon_color:       'text-darken-3 yellow',
+          happened_at:      DateTime.current,
+          passthrough_link: Rails.application.routes.url_helpers.customization_content_types_path
+        ) if user.reload.on_premium_plan?
+
         report_subscription_change_to_slack(user, plan_id)
 
       rescue Stripe::CardError => e
