@@ -38,7 +38,7 @@ class SubscriptionService < Service
         user.subscriptions.create(
           billing_plan:    related_plan,
           start_date:      DateTime.now,
-          end_date:        DateTime.now.end_of_day + 5.years
+          end_date:        DateTime.now.end_of_day + 10.years
         )
 
         user.notifications.create(
