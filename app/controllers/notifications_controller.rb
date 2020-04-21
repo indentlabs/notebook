@@ -5,8 +5,8 @@ class NotificationsController < ApplicationController
 
   def show
     notification = Notification.find_by(id: params[:id])
-    return unless notification.present?
-    return unless user_signed_in? && notification.user == current_user
+    return redirect_to root_path unless notification.present?
+    return redirect_to root_path unless user_signed_in? && notification.user == current_user
 
     # Mark this notification as read
     notification.update(viewed_at: DateTime.current) unless notification.viewed_at?
