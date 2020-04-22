@@ -12,7 +12,7 @@ class Lore < ActiveRecord::Base
   include Serendipitous::Concern
 
   include Authority::Abilities
-  self.authorizer_name = CoreContentAuthorizer.name # todo replace this with CollectiveContentAuthorizer after free promo
+  self.authorizer_name = ExtendedContentAuthorizer.name
 
   relates :planets, with: :lore_planets
   relates :countries, with: :lore_countries
