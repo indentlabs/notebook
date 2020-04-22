@@ -18,6 +18,15 @@ class ContributorService < Service
     # If the user does have a Notebook.ai account, send them an email letting them know they got added as a contributor
     if related_user
       send_contributor_notice_to(inviter: universe.user, email: email, universe: universe)
+
+      # Also, create a notification letting the user know!
+      related_user.notifications.create(
+        message_html:     "<div>You have been added as a contributor to the <span class='#{Universe.color}-text'>#{universe.name}</span> universe.</div>",
+        icon:             Universe.icon,
+        icon_color:       Universe.color,
+        happened_at:      DateTime.current,
+        passthrough_link: Rails.application.routes.url_helpers.universe_path(universe)
+      ) if related_user.present?
     end
   end
 

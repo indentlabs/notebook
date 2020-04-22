@@ -92,6 +92,7 @@ Rails.application.configure do
 
   # Devise default url options
   config.action_mailer.default_url_options = { host: 'www.notebook.ai' }
+  config.active_job.default_url_options    = { host: 'www.notebook.ai' }
   ActionMailer::Base.smtp_settings = {
     :address        => "smtp.sendgrid.net",
     :port           => 587,

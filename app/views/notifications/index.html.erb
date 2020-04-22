@@ -1,0 +1,16 @@
+<h1 style="font-size: 2rem">Notifications</h1>
+<% @notifications.each do |notification| %>
+  <%= link_to notification, class: 'black-text text-lighten-3' do %>
+    <div class="hoverable card <%= 'blue lighten-5' unless notification.viewed_at? %>">
+      <div class="card-content">
+        <div class="card-title">
+          <i class="material-icons left <%= notification.icon_color %>-text"><%= notification.icon %></i>
+          <%= notification.message_html.html_safe %>
+        </div>
+        <div>
+          <small class="grey-text"><%= time_ago_in_words notification.happened_at %> ago</small>
+        </div>
+      </div>
+    </div>
+  <% end %>
+<% end %>

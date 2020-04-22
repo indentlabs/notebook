@@ -31,5 +31,14 @@ class DocumentAnalysisJob < ApplicationJob
     # - Gotcha analysis
 
     analysis.update(completed_at: DateTime.current)
+
+    # Create a notification letting the user know!
+    analysis.document.user.notifications.create(
+      message_html:     "<div>An analysis of <span class='#{Document.color}-text'>#{analysis.document.title}</span> is ready to view.</div>",
+      icon:             Document.icon,
+      icon_color:       Document.color,
+      happened_at:      DateTime.current,
+      passthrough_link: Rails.application.routes.url_helpers.analysis_document_url(analysis.document)
+    )
   end
 end

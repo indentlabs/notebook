@@ -8,6 +8,81 @@
     <div class="nav-wrapper">
       <ul class="right">
         <% if user_signed_in? %>
+          <li>
+            <a class="waves-effect waves-light tooltipped dropdown-trigger" href="#notifications" 
+               data-tooltip="You have <%= pluralize @user_notifications.reject { |n| n.viewed_at? }.count, 'unread notification' %>." 
+               data-target="notifications-dropdown">
+              <i class="material-icons"><%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'notifications_active' : 'notifications_none' %></i>
+            </a>
+          </li>
+          <ul id='notifications-dropdown' class='dropdown-content'>
+            <% @user_notifications.each do |notification| %>
+              <li class="<%= 'blue lighten-5' unless notification.viewed_at? %>">
+                <%= link_to notification, class: 'black-text text-lighten-3' do %>
+                  <i class="material-icons <%= notification.icon_color %>-text"><%= notification.icon %></i>
+                  <%= notification.message_html.html_safe %>
+                  <div>
+                    <small class="grey-text"><%= time_ago_in_words notification.happened_at %> ago</small>
+                  </div>
+                <% end %>
+              </li>
+            <% end %>
+<!--
+            <li class="blue lighten-5">
+              <a href="#!" class="black-text text-lighten-3">
+                <i class="material-icons blue-text">forums</i>
+                <span class="blue-text text-darken-3">@andrew</span> mentioned you on the forums.
+                <blockquote>@andrew is awesome</blockquote>
+                <div><small class="grey-text">2 hours ago</small></div>
+              </a>
+            </li>
+            <li>
+              <a href="#!" class="black-text text-lighten-3">
+                <i class="material-icons red-text">favorite</i>
+                <div>A new feature is now available:</div>
+                <div class="blue-text text-darken-3">Adding notifications and stuff to Notebook.ai</div>
+                <div><small class="grey-text">2 hours ago</small></div>
+              </a>
+            </li>
+            <li>
+              <a href="#!" class="black-text text-lighten-3">
+                <i class="material-icons <%= Document.color %>-text"><%= Document.icon %></i>
+                <div>An analysis of <span class="<%= Document.color %>-text">Harry Potter and the Sorcerer of Sorcery</span> is ready to view.</div>
+                <div><small class="grey-text">2 hours ago</small></div>
+              </a>
+            </li>
+            <li>
+              <a href="#!" class="black-text text-lighten-3">
+                <i class="material-icons yellow-text text-darken-3">star</i>
+                <div class="yellow-text text-darken-4">You signed up for Premium!</div>
+                <div>Click here to turn on your Premium pages.</div>
+                <div><small class="grey-text">2 hours ago</small></div>
+              </a>
+            </li>
+            <li>
+              <a href="#!" class="black-text text-lighten-3">
+                <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
+                <span class="blue-text text-darken-3">@andrew</span> added you as a contributor to the
+                <span class="purple-text text-darken-3">Super Universe</span> universe.
+                <div><small class="grey-text">2 hours ago</small></div>
+              </a>
+            </li>
+            <li>
+              <a href="#!" class="black-text text-lighten-3">
+                <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
+                You have been removed as a contributor from the
+                <span class="purple-text text-darken-3">Super Universe</span> universe.
+                <div><small class="grey-text">2 hours ago</small></div>
+              </a>
+            </li>-->
+            <li class="divider"></li>
+            <li class="blue lighten-1">
+              <%= link_to notifications_path, class: 'white-text' do %>
+                <i class="material-icons left">notifications_active</i>
+                View all notifications
+              <% end %>
+            </li>
+          </ul>
           <% if current_user.recent_content_list.any? %>
             <li>
               <a class="sidenav-trigger show-on-large tooltipped" href="#" data-target="recent-edits-sidenav" data-target="recent-content-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your recently-edited pages">
