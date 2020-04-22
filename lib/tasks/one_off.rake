@@ -7,7 +7,7 @@ namespace :one_off do
         icon:         'favorite',
         icon_color:   'red',
         happened_at:  DateTime.current,
-        passthrough_link: 'TODO'
+        passthrough_link: 'https://medium.com/indent-labs/notifications-on-notebook-ai-693544b676cb'
       )
     end
   end
