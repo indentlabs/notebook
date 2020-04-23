@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   default_url_options :host => "notebook.ai"
 
   get 'notice_dismissal/dismiss'
+  resources :notifications
+
   get 'customization/content_types'
   post 'customization/toggle_content_type'
 

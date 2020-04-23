@@ -12,8 +12,8 @@ class UsersController < ApplicationController
     @content = @user.public_content.select { |type, list| list.any? }
     @tabs    = @content.keys
   
-    @accent_color = @user.favorite_page_type_color
-    @accent_icon  = @user.favorite_page_type_icon
+    @accent_color     = @user.favorite_page_type_color
+    @accent_icon      = @user.favorite_page_type_icon
     @favorite_content = @user.favorite_page_type? ? @user.send(@user.favorite_page_type.downcase.pluralize).is_public : []
 
     # todo this is really bad and needs redone/improved

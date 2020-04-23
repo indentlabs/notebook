@@ -235,6 +235,15 @@ class SubscriptionsController < ApplicationController
 
     # If it looks like a valid code and quacks like a valid code, it's probably a valid code
     code.activate!(current_user)
+
+    current_user.notifications.create(
+      message_html:     "<div class='yellow-text text-darken-4'>You activated a Premium Code!</div><div>Click here to turn on your Premium pages.</div>",
+      icon:             'star',
+      icon_color:       'text-darken-3 yellow',
+      happened_at:      DateTime.current,
+      passthrough_link: Rails.application.routes.url_helpers.customization_content_types_path
+    )
+
     redirect_back(fallback_location: subscription_path, notice: "Promo code successfully activated!")
   end
 
