@@ -22,8 +22,17 @@ class UserFollowingsController < ApplicationController
   # POST /user_followings
   def create
     @user_following = UserFollowing.new(user_following_params.merge({user_id: current_user.id}))
-
     if @user_following.save
+
+      # Create a notification letting the user know!
+      @user_following.followed_user.notifications.create(
+        message_html:     "<div><span class='#{User.color}-text'>#{@user_following.user.display_name}</span> is now following you.</div>",
+        icon:             User.icon,
+        icon_color:       User.color,
+        happened_at:      DateTime.current,
+        passthrough_link: Rails.application.routes.url_helpers.user_path(@user_following.user)
+      )
+
       redirect_to @user_following.followed_user, notice: "You're now following #{@user_following.followed_user.name.presence || 'this user'}"
     else
       render :new
