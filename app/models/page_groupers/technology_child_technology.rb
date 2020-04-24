@@ -3,7 +3,7 @@ class TechnologyChildTechnology < ApplicationRecord
 
   belongs_to :user, optional: true
   belongs_to :technology
-  belongs_to :child_technology, class_name: Technology.name
+  belongs_to :child_technology, class_name: Technology.name, optional: true
 
   after_create do
     this_object  = Technology.find_by(id: self.technology_id)

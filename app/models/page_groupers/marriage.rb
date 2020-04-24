@@ -5,7 +5,7 @@ class Marriage < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :character
-  belongs_to :spouse, class_name: 'Character'
+  belongs_to :spouse, class_name: 'Character', optional: true
 
   after_create do
     self.reciprocate relation: :marriages, parent_object_ref: :character, added_object_ref: :spouse

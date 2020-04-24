@@ -6,5 +6,5 @@ class MakerRelationship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :item
-  belongs_to :maker, class_name: 'Character'
+  belongs_to :maker, class_name: 'Character', optional: true
 end

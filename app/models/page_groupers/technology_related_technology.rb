@@ -3,7 +3,7 @@ class TechnologyRelatedTechnology < ApplicationRecord
 
   belongs_to :user, optional: true
   belongs_to :technology
-  belongs_to :related_technology, class_name: Technology.name
+  belongs_to :related_technology, class_name: Technology.name, optional: true
 
   after_create do
     self.reciprocate relation: :technology_related_technologies, parent_object_ref: :technology, added_object_ref: :related_technology

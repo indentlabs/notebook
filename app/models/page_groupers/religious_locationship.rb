@@ -4,5 +4,5 @@ class ReligiousLocationship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :religion
-  belongs_to :practicing_location, class_name: 'Location'
+  belongs_to :practicing_location, class_name: 'Location', optional: true
 end

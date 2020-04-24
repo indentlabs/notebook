@@ -4,7 +4,7 @@ class Birthing < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :character
-  belongs_to :birthplace, class_name: 'Location'
+  belongs_to :birthplace, class_name: 'Location', optional: true
 
   # TODO: more fields here
 end

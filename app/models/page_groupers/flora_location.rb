@@ -4,5 +4,5 @@ class FloraLocation < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :flora
-  belongs_to :location
+  belongs_to :location, optional: true
 end

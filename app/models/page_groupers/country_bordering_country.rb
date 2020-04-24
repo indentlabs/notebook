@@ -3,7 +3,7 @@ class CountryBorderingCountry < ApplicationRecord
   LINK_TYPE = :two_way
 
   belongs_to :country
-  belongs_to :bordering_country, class_name: Country.name
+  belongs_to :bordering_country, class_name: Country.name, optional: true
   belongs_to :user, optional: true
 
   after_create do

@@ -6,5 +6,5 @@ class NotableCitiesRelationship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :location
-  belongs_to :notable_city, class_name: 'Location'
+  belongs_to :notable_city, class_name: 'Location', optional: true
 end

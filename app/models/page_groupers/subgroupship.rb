@@ -4,7 +4,7 @@ class Subgroupship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :group
-  belongs_to :subgroup, class_name: 'Group'
+  belongs_to :subgroup, class_name: 'Group', optional: true
 
   after_create do
     this_object  = Group.find_by(id: self.group_id)

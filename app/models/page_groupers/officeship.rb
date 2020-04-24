@@ -4,5 +4,5 @@ class Officeship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :group
-  belongs_to :office, class_name: 'Location'
+  belongs_to :office, class_name: 'Location', optional: true
 end

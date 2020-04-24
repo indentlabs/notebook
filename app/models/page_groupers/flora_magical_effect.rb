@@ -4,5 +4,5 @@ class FloraMagicalEffect < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :flora
-  belongs_to :magic, class_name: 'Magic'
+  belongs_to :magic, class_name: 'Magic', optional: true
 end

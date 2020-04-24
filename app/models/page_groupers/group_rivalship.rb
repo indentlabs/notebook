@@ -4,7 +4,7 @@ class GroupRivalship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :group
-  belongs_to :rival, class_name: 'Group'
+  belongs_to :rival, class_name: 'Group', optional: true
 
   after_create do
     self.reciprocate relation: :group_rivalships, parent_object_ref: :group, added_object_ref: :rival

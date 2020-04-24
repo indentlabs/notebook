@@ -4,5 +4,5 @@ class Headquartership < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :group
-  belongs_to :headquarter, class_name: 'Location'
+  belongs_to :headquarter, class_name: 'Location', optional: true
 end

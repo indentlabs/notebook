@@ -6,5 +6,5 @@ class CurrentOwnership < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :item
-  belongs_to :current_owner, class_name: 'Character'
+  belongs_to :current_owner, class_name: 'Character', optional: true
 end

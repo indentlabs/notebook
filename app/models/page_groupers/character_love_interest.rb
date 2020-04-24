@@ -3,5 +3,5 @@ class CharacterLoveInterest < ApplicationRecord
 
   belongs_to :user, optional: true
   belongs_to :character
-  belongs_to :love_interest, class_name: 'Character'
+  belongs_to :love_interest, class_name: 'Character', optional: true
 end

@@ -2,7 +2,7 @@ class DeityDeitySibling < ApplicationRecord
   include HasContentLinking
 
   belongs_to :deity
-  belongs_to :deity_sibling, class_name: Deity.name
+  belongs_to :deity_sibling, class_name: Deity.name, optional: true
   belongs_to :user, optional: true
 
   after_create do

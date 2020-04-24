@@ -4,5 +4,5 @@ class BestFriendship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :character
-  belongs_to :best_friend, class_name: 'Character'
+  belongs_to :best_friend, class_name: 'Character', optional: true
 end

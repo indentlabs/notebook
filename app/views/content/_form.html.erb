@@ -6,6 +6,8 @@
     categories = if content.is_a?(ContentSerializer)
       content.data[:categories]
     else
+      raise [@content.class.name, @content.id, @content.errors.messages] if !@content.valid? && @serialized_categories_and_fields == nil
+
       @serialized_categories_and_fields.data
     end
   %>

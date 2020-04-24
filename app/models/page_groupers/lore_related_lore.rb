@@ -2,7 +2,7 @@ class LoreRelatedLore < ApplicationRecord
   include HasContentLinking
 
   belongs_to :lore
-  belongs_to :related_lore, class_name: Lore.name
+  belongs_to :related_lore, class_name: Lore.name, optional: true
 
   belongs_to :user, optional: true
 
