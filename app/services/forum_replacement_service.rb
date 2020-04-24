@@ -222,6 +222,7 @@ class ForumReplacementService < Service
     'school'            => 'the setting for my coming-of-age story',
     'scream'            => 'loudy shouty',
     'sex'               => 'yiffy wiffy',
+    'Severus Snape'     => 'Sexybeast Snacc',
     'sheep'             => 'fluffy bumpkinboo',
     'shenanigans'       => 'silly fun',
     'shoe'              => 'leather winklepicker',
