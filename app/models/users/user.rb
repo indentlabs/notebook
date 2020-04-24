@@ -61,6 +61,8 @@ class User < ApplicationRecord
     blocked_by_users.pluck(:id).include?(user.id)
   end
 
+  has_many :content_page_shares,          dependent: :destroy
+
   has_many :votes,                        dependent: :destroy
   has_many :raffle_entries,               dependent: :destroy
 

@@ -24,6 +24,8 @@ Rails.application.routes.draw do
       get content_type.name.downcase.pluralize.to_sym, on: :member
       # todo page tags here
     end
+
+    resources :content_page_shares, path: 'shares'
   end
   resources :user_followings
   resources :user_blockings

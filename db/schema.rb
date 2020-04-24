@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_20_234732) do
+ActiveRecord::Schema.define(version: 2020_04_24_183225) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -383,6 +383,19 @@ ActiveRecord::Schema.define(version: 2020_04_20_234732) do
     t.datetime "updated_at", null: false
     t.index ["content_id", "content_type"], name: "index_content_change_events_on_content_id_and_content_type"
     t.index ["user_id"], name: "index_content_change_events_on_user_id"
+  end
+
+  create_table "content_page_shares", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "content_page_type"
+    t.integer "content_page_id"
+    t.datetime "shared_at"
+    t.string "privacy"
+    t.string "message"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["content_page_type", "content_page_id"], name: "cps_index"
+    t.index ["user_id"], name: "index_content_page_shares_on_user_id"
   end
 
   create_table "content_pages", force: :cascade do |t|
@@ -3285,6 +3298,7 @@ ActiveRecord::Schema.define(version: 2020_04_20_234732) do
   add_foreign_key "conditions", "universes"
   add_foreign_key "conditions", "users"
   add_foreign_key "content_change_events", "users"
+  add_foreign_key "content_page_shares", "users"
   add_foreign_key "content_pages", "universes"
   add_foreign_key "content_pages", "users"
   add_foreign_key "continent_countries", "continents"

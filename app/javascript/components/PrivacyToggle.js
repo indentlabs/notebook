@@ -89,7 +89,7 @@ class PrivacyToggle extends React.Component {
             <FormControlLabel
               value="public"
               control={<Radio color="primary" />}
-              label="Visible to anyone with the URL"
+              label="Public"
               labelPlacement="start"
               className="black-text"
             />
