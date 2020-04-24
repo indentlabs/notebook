@@ -8,6 +8,7 @@ class ContentPageSharesController < ApplicationController
 
   # GET /content_page_shares/1
   def show
+    @sidenav_expansion = 'community'
   end
 
   # GET /content_page_shares/new
