@@ -8,6 +8,7 @@ Rails.application.routes.draw do
 
   get 'notice_dismissal/dismiss'
   resources :notifications
+  resources :share_comments
 
   get 'customization/content_types'
   post 'customization/toggle_content_type'

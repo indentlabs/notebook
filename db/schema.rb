@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_24_183225) do
+ActiveRecord::Schema.define(version: 2020_04_25_201829) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -394,6 +394,7 @@ ActiveRecord::Schema.define(version: 2020_04_24_183225) do
     t.string "message"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.datetime "deleted_at"
     t.index ["content_page_type", "content_page_id"], name: "cps_index"
     t.index ["user_id"], name: "index_content_page_shares_on_user_id"
   end
@@ -2572,6 +2573,17 @@ ActiveRecord::Schema.define(version: 2020_04_24_183225) do
     t.datetime "updated_at"
   end
 
+  create_table "share_comments", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "content_page_share_id", null: false
+    t.string "message"
+    t.datetime "deleted_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["content_page_share_id"], name: "index_share_comments_on_content_page_share_id"
+    t.index ["user_id"], name: "index_share_comments_on_user_id"
+  end
+
   create_table "siblingships", force: :cascade do |t|
     t.integer "user_id"
     t.integer "character_id"
@@ -3587,6 +3599,8 @@ ActiveRecord::Schema.define(version: 2020_04_24_183225) do
   add_foreign_key "religion_deities", "users"
   add_foreign_key "schools", "universes"
   add_foreign_key "schools", "users"
+  add_foreign_key "share_comments", "content_page_shares"
+  add_foreign_key "share_comments", "users"
   add_foreign_key "sports", "universes"
   add_foreign_key "sports", "users"
   add_foreign_key "subscriptions", "billing_plans"

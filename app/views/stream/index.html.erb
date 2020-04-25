@@ -103,81 +103,60 @@
           </ul>
 
         </span>
-        <%= strip_tags content.description.presence || 'Description here' %>
+        <%= strip_tags content.description.presence || "A #{content.class.name.downcase}" %>
       </div>
     </div>
     <div class="col s12 m6 l6 <%= content.class.color %> lighten-5">
       <div class="card-content white" style="height: 400px; overflow-y: auto">
-        <%= link_to share.user, class: "#{User.color}-text" do %>
-          <%= image_tag share.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
-          <%= share.user.display_name %>
-        <% end %>
-        said:
-        <blockquote>
-          Does anyone have any questions about this page? I'm trying to fill it out more.
-        </blockquote>
-        
-        <div class="input-field comment-form">
-          <label for="comment1">Leave a message</label>
-          <textarea class="materialize-textarea" id="comment1"></textarea>
-          <%= link_to '#', class: 'btn right green white-text submit-button' do %>
-            Comment
-            <i class="material-icons right">chat</i>
-          <% end %>
+        <div class="green lighten-5" style="padding: 10px;">
+          <blockquote>
+            <%= simple_format share.message %>
+          </blockquote>
+          <div class="metadata">
+            <%= link_to share.user, class: "#{User.color}-text" do %>
+              <%= image_tag share.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+              <%= share.user.display_name %>
+            <% end %>
+            <span class="grey-text">
+              <%= time_ago_in_words (DateTime.now - 5.hours) %> ago
+            </span>
+          </div>
         </div>
         
+        <%= form_for ShareComment.new do |f| %>
+          <div class="input-field comment-form">
+            <%= f.label :message, 'Leave a message' %>
+            <%= f.hidden_field :content_page_share_id, value: share.id %>
+            <%= f.text_area :message, class: 'materialize-textarea' %>
+            <%= f.submit 'Comment', class: 'btn right green white-text submit-button' %>
+          </div>
+        <% end %>
+
+        <br /><br />
+        
         <div class="row">
-          <% 3.times do %>
-            <div class="col s12 m10 offset-m2 l9 offset-l3">
-              <div class="blue lighten-5 comment">
-                <p>
-                  Hi I'm a message from some random person
-                </p>
-                <div class="metadata">
-                  <%= link_to share.user, class: "#{User.color}-text" do %>
-                    <%= image_tag share.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
-                    <%= share.user.display_name %>
-                  <% end %>
-                  <span class="grey-text">
-                    <%= time_ago_in_words (DateTime.now - 5.hours) %> ago
-                  </span>
-                </div>
-              </div>
-            </div>
+          <% share.share_comments.each do |comment| %>
+            <% if comment.from_op?(share) %>
+              <div class="col s12 m10 l9">
+                <div class="green lighten-5 comment">
+            <% else %>
+              <div class="col s12 m10 offset-m2 l9 offset-l3">
+                <div class="blue lighten-5 comment">
+            <% end %>
 
-            <div class="col s12 m10 offset-m2 l9 offset-l3">
-              <div class="blue lighten-5 comment">
-                <p>
-                  Hi I'm a message from some random person
-                </p>
-                <div class="metadata">
-                  <%= link_to share.user, class: "#{User.color}-text" do %>
-                    <%= image_tag share.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
-                    <%= share.user.display_name %>
-                  <% end %>
-                  <span class="grey-text">
-                    <%= time_ago_in_words (DateTime.now - 5.hours) %> ago
-                  </span>
-                </div>
-              </div>
-            </div>
+                  <%= simple_format comment.message %>
+                  <div class="metadata">
+                    <%= link_to comment.user, class: "#{User.color}-text" do %>
+                      <%= image_tag comment.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+                      <%= comment.user.display_name %>
+                    <% end %>
+                    <span class="grey-text">
+                      <%= time_ago_in_words comment.created_at %> ago
+                    </span>
+                  </div>
 
-            <div class="col s12 m10 l9">
-              <div class="green lighten-5 comment">
-                <p>
-                  Hi I'm a message from OP
-                </p>
-                <div class="metadata">
-                  <%= link_to share.user, class: "#{User.color}-text" do %>
-                    <%= image_tag share.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
-                    <%= share.user.display_name %>
-                  <% end %>
-                  <span class="grey-text">
-                    <%= time_ago_in_words (DateTime.now - 5.hours) %> ago
-                  </span>
                 </div>
               </div>
-            </div>
           <% end %>
         </div>
       </div>
