@@ -11,7 +11,33 @@
         </div>
         <div class="card-content">
           <div class="card-title">
-            A <%= @share.content_page.class.name %>
+
+            <a class='dropdown-trigger right' href='#' data-target='dropdown-<%= @share.content_page.class.name %>-<%= @share.content_page.id %>'>
+              <i class="material-icons">more_vert</i>
+            </a>
+            <ul id='dropdown-<%= @share.content_page.class.name %>-<%= @share.content_page.id %>' class='dropdown-content'>
+              <li>
+                <%= link_to [@share.user, @share] do %>
+                  <i class="material-icons left">link</i>
+                  Permalink
+                <% end %>
+              </li>
+              <li>
+                <%= link_to @share.content_page do %>
+                  <i class="material-icons left"><%= @share.content_page.class.icon %></i>
+                  View this <%= @share.content_page.class.name.downcase %>
+                <% end %>
+              </li>
+              <li class="divider" tabindex="-1"></li>
+              <li>
+                <%= link_to '#' do %>
+                  <i class="material-icons">delete</i>
+                  Delete this share
+                <% end %>
+              </li>
+            </ul>
+
+            A <%= @share.content_page.class.name.downcase %>
           </div>
           <p>
             by

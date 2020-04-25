@@ -2,10 +2,10 @@
 <div class="row">
   <div class="col s12">
     <ul class="collapsible popout">
-      <li class="active">
+      <li>
         <div class="collapsible-header blue white-text">
           <i class="material-icons">share</i>
-          Click here to share a page to your followers
+          Click here to share a page
         </div>
         <div class="collapsible-body white">
           <%= form_for [current_user, ContentPageShare.new(user: current_user)] do |f| %>
@@ -23,14 +23,14 @@
                   <% end %>
                   <label>1. Select a page to share</label>
                   <div class="helper-text">
-                    Only pages designated "public" may be shared.
+                    Only pages you've marked "public" may be shared.
                   </div>
                 </div>
               </div>
               <div class="col s12 m6 l6">
                 <div class="input-field">
                   <%= f.text_area :message, class: 'materialize-textarea' %>
-                  <%= f.label :message, '2. Write a message about your page.' %>
+                  <%= f.label :message, '2. Write a question or message about your page.' %>
                 </div>
               </div>
               <div class="col s12">
@@ -44,10 +44,7 @@
   </div>
 </div>
 
-<% feed = ContentPageShare.all %>
-<br /><br />
-
-<% feed.each do |share| %>
+<% @feed.each do |share| %>
   <% content = share.content_page %>
   <div class="row">
     <div class="col s12">
@@ -78,8 +75,35 @@
       </div>
 
       <div class="card-content white" style="height: 100px">
-        <%# content.description.presence || 'Description here' TODO this causes module tree error in dev mode %>
-        Description here
+        <span class="right">
+
+          <a class='dropdown-trigger' href='#' data-target='dropdown-<%= content.class.name %>-<%= content.id %>'>
+            <i class="material-icons">more_vert</i>
+          </a>
+          <ul id='dropdown-<%= content.class.name %>-<%= content.id %>' class='dropdown-content'>
+            <li>
+              <%= link_to [share.user, share] do %>
+                <i class="material-icons left">link</i>
+                Permalink
+              <% end %>
+            </li>
+            <li>
+              <%= link_to content do %>
+                <i class="material-icons left"><%= content.class.icon %></i>
+                View this <%= content.class.name.downcase %>
+              <% end %>
+            </li>
+            <li class="divider" tabindex="-1"></li>
+            <li>
+              <%= link_to '#' do %>
+                <i class="material-icons">delete</i>
+                Delete this share
+              <% end %>
+            </li>
+          </ul>
+
+        </span>
+        <%= strip_tags content.description.presence || 'Description here' %>
       </div>
     </div>
     <div class="col s12 m6 l6 <%= content.class.color %> lighten-5">

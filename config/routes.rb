@@ -2,6 +2,7 @@
 Rails.application.routes.draw do
   get 'stream', to: 'stream#index'
   get 'community', to: 'stream#community'
+  get 'world', to: 'stream#world'
   
   default_url_options :host => "notebook.ai"
 
