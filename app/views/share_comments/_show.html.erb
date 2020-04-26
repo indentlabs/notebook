@@ -1,0 +1,22 @@
+<% if comment.from_op?(share) %>
+  <div class="col s12 m10 l9">
+    <div class="green lighten-5 comment">
+<% else %>
+  <div class="col s12 m10 offset-m2 l9 offset-l3">
+    <div class="blue lighten-5 comment">
+<% end %>
+
+    <%# Nesting from above %>
+    <%= simple_format comment.message %>
+    <div class="metadata">
+      <%= link_to comment.user, class: "#{User.color}-text" do %>
+        <%= image_tag comment.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+        <%= comment.user.display_name %>
+      <% end %>
+      <span class="grey-text">
+        <%= time_ago_in_words comment.created_at %> ago
+      </span>
+    </div>
+
+  </div>
+</div>

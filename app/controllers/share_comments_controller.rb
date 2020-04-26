@@ -24,7 +24,7 @@ class ShareCommentsController < ApplicationController
     @share_comment = ShareComment.new(share_comment_params.merge({user: current_user}))
 
     if @share_comment.save
-      redirect_to @share_comment, notice: 'Share comment was successfully created.'
+      redirect_back(fallback_location: @share_comment.content_page_share)
     else
       render :new
     end

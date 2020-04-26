@@ -4,7 +4,9 @@ class StreamController < ApplicationController
   before_action :set_sidenav_expansion
 
   def index
-    @feed = ContentPageShare.all.order('created_at DESC')
+    @feed = ContentPageShare.all
+      .order('created_at DESC')
+      .includes([:content_page, :user, :share_comments])
   end
 
   def community

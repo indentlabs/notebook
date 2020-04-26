@@ -1,17 +1,8 @@
-<%= form_with(model: share_comment, local: true) do |form| %>
-  <% if share_comment.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(share_comment.errors.count, "error") %> prohibited this share_comment from being saved:</h2>
-
-      <ul>
-        <% share_comment.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <div class="actions">
-    <%= form.submit %>
+<%= form_for ShareComment.new do |f| %>
+  <div class="input-field comment-form">
+    <%= f.label :message, 'Leave a message' %>
+    <%= f.hidden_field :content_page_share_id, value: share.id %>
+    <%= f.text_area :message, class: 'materialize-textarea' %>
+    <%= f.submit 'Comment', class: 'btn right green white-text submit-button' %>
   </div>
 <% end %>

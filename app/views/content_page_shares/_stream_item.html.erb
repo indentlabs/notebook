@@ -1,0 +1,71 @@
+<% content = share.content_page %>
+<div class="row">
+  <div class="col s12">
+    <%= link_to share.user, class: "#{User.color}-text" do %>
+      <%= image_tag share.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+      <%= share.user.display_name %>
+    <% end %>
+    shared a
+    <%= content.class.name.downcase %>:
+    <%= link_to content.name, content, class: "#{content.class.color}-text text-darken-1" %>.
+    <span class="right">
+      <%= link_to [share.user, share], class: 'grey-text' do %>
+        <%= time_ago_in_words share.created_at %> ago
+      <% end %>
+    </span>
+  </div>
+</div>
+<div class="hoverable card row <%= content.class.color %> clearfix" style="height: 400px">
+  <div class="col s12 m6 l6">
+    <div class="card-image" style="height: 300px">
+      <%= image_tag content.random_public_image(format: :small), style: 'height: 300px' %>
+      <span class="card-title">
+        <%= link_to content do %>
+          <i class="material-icons tiny <%= content.class.color %>-text"><%= content.class.icon %></i>
+          <span class="white-text bordered-text"><%= content.name %></i>
+        <% end %>
+      </span>
+    </div>
+
+    <div class="card-content white" style="height: 100px">
+      <span class="right">
+        <%= render partial: 'content_page_shares/action_dropdown', locals: { share: share, content: content } %>
+      </span>
+      <%= strip_tags content.description.presence || "A #{content.class.name.downcase}" %>
+    </div>
+  </div>
+  <div class="col s12 m6 l6 <%= content.class.color %> lighten-5">
+    <div class="card-content white" style="height: 400px; overflow-y: auto">
+      <div class="green lighten-5" style="padding: 10px;">
+        <blockquote>
+          <%= simple_format share.message %>
+        </blockquote>
+        <div class="metadata">
+          <%= link_to share.user, class: "#{User.color}-text" do %>
+            <%= image_tag share.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+            <%= share.user.display_name %>
+          <% end %>
+          <span class="grey-text">
+            <%= time_ago_in_words share.shared_at %> ago
+          </span>
+        </div>
+      </div>
+      
+      <%= render partial: 'share_comments/form', locals: { share: share } %>
+      <br /><br />
+      
+      <div class="row">
+        <% share.share_comments.each do |comment| %>
+          <%= 
+            render partial: 'share_comments/show', 
+                   locals: { comment: comment, share: share }
+          %>
+        <% end %>
+      </div>
+
+      <% if share.share_comments.count > 10 %>
+        <%= render partial: 'share_comments/form', locals: { share: share } %>
+      <% end %>
+    </div>
+  </div>
+</div>

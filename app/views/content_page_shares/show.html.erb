@@ -11,34 +11,7 @@
         </div>
         <div class="card-content">
           <div class="card-title">
-
-            <a class='dropdown-trigger right' href='#' data-target='dropdown-<%= @share.content_page.class.name %>-<%= @share.content_page.id %>'>
-              <i class="material-icons">more_vert</i>
-            </a>
-            <ul id='dropdown-<%= @share.content_page.class.name %>-<%= @share.content_page.id %>' class='dropdown-content'>
-              <li>
-                <%= link_to [@share.user, @share] do %>
-                  <i class="material-icons left">link</i>
-                  Permalink
-                <% end %>
-              </li>
-              <li>
-                <%= link_to @share.content_page do %>
-                  <i class="material-icons left"><%= @share.content_page.class.icon %></i>
-                  View this <%= @share.content_page.class.name.downcase %>
-                <% end %>
-              </li>
-              <li class="divider" tabindex="-1"></li>
-              <li>
-                <%= link_to '#' do %>
-                  <i class="material-icons">delete</i>
-                  Delete this share
-                <% end %>
-              </li>
-            </ul>
-
-            <%= @share.content_page.description %> -
-            A <%= @share.content_page.class.name.downcase %>
+            <%= @share.content_page.description.presence || "A #{@share.content_page.class.name.downcase}" %>
           </div>
           <p>
             by
@@ -84,69 +57,22 @@
           <%= simple_format @share.message %>
         </blockquote>
         
-        <div class="input-field comment-form">
-          <label for="comment1">Leave a message</label>
-          <textarea class="materialize-textarea" id="comment1"></textarea>
-          <%= link_to '#', class: 'btn right green white-text submit-button' do %>
-            Comment
-            <i class="material-icons right">chat</i>
-          <% end %>
-        </div>
-        
+        <%= render partial: 'share_comments/form', locals: { share: @share } %>
+        <br /><br />
+
         <div class="row">
-          <% 3.times do %>
-            <div class="col s12 m10 offset-m2 l9 offset-l3">
-              <div class="blue lighten-5 comment">
-                <p>
-                  Hi I'm a message from some random person
-                </p>
-                <div class="metadata">
-                  <%= link_to @share.user, class: "#{User.color}-text" do %>
-                    <%= image_tag @share.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
-                    <%= @share.user.name %>
-                  <% end %>
-                  <span class="grey-text">
-                    <%= time_ago_in_words (DateTime.now - 5.hours) %> ago
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div class="col s12 m10 offset-m2 l9 offset-l3">
-              <div class="blue lighten-5 comment">
-                <p>
-                  Hi I'm a message from some random person
-                </p>
-                <div class="metadata">
-                  <%= link_to @share.user, class: "#{User.color}-text" do %>
-                    <%= image_tag @share.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
-                    <%= @share.user.name %>
-                  <% end %>
-                  <span class="grey-text">
-                    <%= time_ago_in_words (DateTime.now - 5.hours) %> ago
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div class="col s12 m10 l9">
-              <div class="green lighten-5 comment">
-                <p>
-                  Hi I'm a message from OP
-                </p>
-                <div class="metadata">
-                  <%= link_to @share.user, class: "#{User.color}-text" do %>
-                    <%= image_tag @share.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
-                    <%= @share.user.name %>
-                  <% end %>
-                  <span class="grey-text">
-                    <%= time_ago_in_words (DateTime.now - 5.hours) %> ago
-                  </span>
-                </div>
-              </div>
-            </div>
+          <% @share.share_comments.each do |comment| %>
+            <%= 
+              render partial: 'share_comments/show', 
+                    locals: { comment: comment, share: @share }
+            %>
           <% end %>
         </div>
+
+        <% if @share.share_comments.count > 10 %>
+          <%= render partial: 'share_comments/form', locals: { share: @share } %>
+        <% end %>
+        <br /><br />
       </div>
     </div>
   </div>
