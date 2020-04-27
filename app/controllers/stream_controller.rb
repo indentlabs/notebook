@@ -5,7 +5,7 @@ class StreamController < ApplicationController
 
   def index
     followed_users = current_user.followed_users.pluck(:id)
-    @feed = ContentPageShare.where(user_id: followed_users)
+    @feed = ContentPageShare.where(user_id: followed_users + [current_user.id])
       .order('created_at DESC')
       .includes([:content_page, :user, :share_comments])
       .limit(100)

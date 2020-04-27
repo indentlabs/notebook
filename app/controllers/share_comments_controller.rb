@@ -24,7 +24,19 @@ class ShareCommentsController < ApplicationController
     @share_comment = ShareComment.new(share_comment_params.merge({user: current_user}))
 
     if @share_comment.save
-      redirect_back(fallback_location: @share_comment.content_page_share)
+      # Notification for share owner
+      @share_comment.content_page_share.user.notifications.create(
+        message_html:     "<div><span class='#{User.color}-text'>#{@share_comment.user.display_name}</span> commented on your shared #{@share_comment.content_page_share.content_page.class.name.downcase} <span class='#{@share_comment.content_page_share.content_page.class.color}-text'>#{@share_comment.content_page_share.content_page.name}</span>.</div>",
+        icon:             @share_comment.content_page_share.content_page.class.icon,
+        icon_color:       @share_comment.content_page_share.content_page.class.color,
+        happened_at:      DateTime.current,
+        passthrough_link: Rails.application.routes.url_helpers.user_content_page_share_path(
+          id:      @share_comment.content_page_share.id,
+          user_id: @share_comment.content_page_share.user_id
+        )
+      ) unless @share_comment.user == @share_comment.content_page_share.user
+
+      redirect_back(fallback_location: @share_comment.content_page_share, notice: "Comment posted successfully.")
     else
       render :new
     end
