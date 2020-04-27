@@ -4,15 +4,21 @@ class StreamController < ApplicationController
   before_action :set_sidenav_expansion
 
   def index
-    @feed = ContentPageShare.all
+    followed_users = current_user.followed_users.pluck(:id)
+    @feed = ContentPageShare.where(user_id: followed_users)
       .order('created_at DESC')
       .includes([:content_page, :user, :share_comments])
+      .limit(100)
   end
 
   def community
   end
 
   def global
+    @feed = ContentPageShare.all
+      .order('created_at DESC')
+      .includes([:content_page, :user, :share_comments])
+      .limit(100)
   end
 
   def set_navbar_color
@@ -24,11 +30,11 @@ class StreamController < ApplicationController
     @navbar_actions = [
       {
         label: 'From Your Network',
-        href: '#'
+        href: main_app.stream_path
       },
       {
         label: 'Around the world',
-        href: '#'
+        href: main_app.stream_world_path
       }
     ]
   end

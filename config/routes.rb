@@ -1,8 +1,11 @@
 # rubocop:disable LineLength
 Rails.application.routes.draw do
-  get 'stream', to: 'stream#index'
-  get 'community', to: 'stream#community'
-  get 'world', to: 'stream#world'
+
+  scope :stream, path: '/stream', as: :stream do
+    get '/',         to: 'stream#index'
+    get 'world',     to: 'stream#global'
+    get 'community', to: 'stream#community'
+  end
   
   default_url_options :host => "notebook.ai"
 
