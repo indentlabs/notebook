@@ -11,6 +11,8 @@ Rails.application.routes.draw do
 
   get 'notice_dismissal/dismiss'
   resources :notifications
+  # TODO this should probably be a POST or something
+  get '/mark_all_read', to: 'notifications#mark_all_read'
   resources :share_comments
 
   get 'customization/content_types'
