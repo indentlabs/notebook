@@ -51,10 +51,19 @@
           Actions
         </li>
         <li>
-          <%= link_to '#' do %>
-            Delete this share
+          <% if @share.followed_by?(current_user) %>
+            <%= link_to 'Unfollow this share', '#' %>
+          <% else %>
+            <%= link_to 'Follow this share', '#' %>
           <% end %>
         </li>
+        <% if @share.user == current_user %>
+          <li>
+            <%= link_to '#' do %>
+              Delete this share
+            <% end %>
+          </li>
+        <% end %>
       </ul>
     </div>
   </div>
