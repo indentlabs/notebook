@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_27_005200) do
+ActiveRecord::Schema.define(version: 2020_04_30_194458) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -2125,6 +2125,20 @@ ActiveRecord::Schema.define(version: 2020_04_27_005200) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "page_collections", force: :cascade do |t|
+    t.string "title"
+    t.string "subtitle"
+    t.integer "user_id"
+    t.string "privacy"
+    t.string "page_types"
+    t.string "color"
+    t.string "cover_image"
+    t.boolean "auto_accept"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_page_collections_on_user_id"
+  end
+
   create_table "page_settings_overrides", force: :cascade do |t|
     t.string "page_type"
     t.string "name_override"
@@ -3558,6 +3572,7 @@ ActiveRecord::Schema.define(version: 2020_04_27_005200) do
   add_foreign_key "lores", "universes"
   add_foreign_key "lores", "users"
   add_foreign_key "notice_dismissals", "users"
+  add_foreign_key "page_collections", "users"
   add_foreign_key "page_tags", "users"
   add_foreign_key "paypal_invoices", "page_unlock_promo_codes"
   add_foreign_key "paypal_invoices", "users"

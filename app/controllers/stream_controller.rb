@@ -1,6 +1,6 @@
 class StreamController < ApplicationController
-  before_action :set_navbar_actions
-  before_action :set_navbar_color
+  before_action :set_navbar_actions, only: [:index, :global]
+  before_action :set_navbar_color, only: [:index, :global]
   before_action :set_sidenav_expansion
 
   def index
