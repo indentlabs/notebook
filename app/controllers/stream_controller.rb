@@ -21,6 +21,9 @@ class StreamController < ApplicationController
       .limit(100)
   end
 
+  def explore
+  end
+
   def set_navbar_color
     @navbar_color = '#CE93D8'
   end
