@@ -6,7 +6,9 @@ Rails.application.routes.draw do
     get 'world',     to: 'stream#global'
     get 'community', to: 'stream#community'
   end
-  get 'explore', to: 'stream#explore'
+  resources :page_collections, path: '/collections' do
+    get '/explore', to: 'page_collections#explore', on: :collection
+  end
   
   default_url_options :host => "notebook.ai"
 

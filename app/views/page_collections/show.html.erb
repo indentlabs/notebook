@@ -1,4 +1,22 @@
-<p id="notice"><%= notice %></p>
-
-<%= link_to 'Edit', edit_page_collection_path(@page_collection) %> |
-<%= link_to 'Back', page_collections_path %>
+<div class="row">
+  <div class="col s12 m9 l8">
+    <div class="uppercase" style="font-size: 1.2em"><%= @page_collection.title %></div>
+    <div class="uppercase grey-text"><%= @page_collection.subtitle %></div>
+    <div>
+      <% @page_collection.page_types.each do |pt| %>
+        <% klass = pt.constantize %>
+        <%= link_to '#' + pt do %>
+          <span class="left badge hoverable black-text <%= klass.color %>"><%= pt.downcase %></span>
+        <% end %>
+      <% end %>
+    </div>
+    <div class="clearfix"></div>
+    
+    <div>sort options</div>
+    <div class="card-panel">pages already in</div>
+  </div>
+  <div class="col s12 m3 l4">
+    <div class="card-panel">submit a page</div>
+    <div>other collection actions</div>
+  </div>
+</div>

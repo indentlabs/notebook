@@ -45,6 +45,10 @@ class PageCollectionsController < ApplicationController
     redirect_to page_collections_url, notice: 'Page collection was successfully destroyed.'
   end
 
+  def explore
+    @collections = PageCollection.first(6)
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_page_collection

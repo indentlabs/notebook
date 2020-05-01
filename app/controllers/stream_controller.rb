@@ -1,6 +1,6 @@
 class StreamController < ApplicationController
-  before_action :set_navbar_actions, only: [:index, :global]
-  before_action :set_navbar_color, only: [:index, :global]
+  before_action :set_stream_navbar_actions, only: [:index, :global]
+  before_action :set_stream_navbar_color, only: [:index, :global]
   before_action :set_sidenav_expansion
 
   def index
@@ -21,15 +21,12 @@ class StreamController < ApplicationController
       .limit(100)
   end
 
-  def explore
-  end
-
-  def set_navbar_color
+  def set_stream_navbar_color
     @navbar_color = '#CE93D8'
   end
 
   # For showing a specific piece of content
-  def set_navbar_actions
+  def set_stream_navbar_actions
     @navbar_actions = [
       {
         label: 'From Your Network',

@@ -2128,12 +2128,12 @@ ActiveRecord::Schema.define(version: 2020_04_30_194458) do
   create_table "page_collections", force: :cascade do |t|
     t.string "title"
     t.string "subtitle"
-    t.integer "user_id"
+    t.integer "user_id", null: false
     t.string "privacy"
     t.string "page_types"
     t.string "color"
     t.string "cover_image"
-    t.boolean "auto_accept"
+    t.boolean "auto_accept", default: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["user_id"], name: "index_page_collections_on_user_id"
