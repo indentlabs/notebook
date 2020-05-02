@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_30_194458) do
+ActiveRecord::Schema.define(version: 2020_05_02_021338) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -2125,6 +2125,17 @@ ActiveRecord::Schema.define(version: 2020_04_30_194458) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "page_collection_submissions", force: :cascade do |t|
+    t.string "content_type", null: false
+    t.integer "content_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "accepted_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["content_type", "content_id"], name: "polycontent_collection_index"
+    t.index ["user_id"], name: "index_page_collection_submissions_on_user_id"
+  end
+
   create_table "page_collections", force: :cascade do |t|
     t.string "title"
     t.string "subtitle"
@@ -3572,6 +3583,7 @@ ActiveRecord::Schema.define(version: 2020_04_30_194458) do
   add_foreign_key "lores", "universes"
   add_foreign_key "lores", "users"
   add_foreign_key "notice_dismissals", "users"
+  add_foreign_key "page_collection_submissions", "users"
   add_foreign_key "page_collections", "users"
   add_foreign_key "page_tags", "users"
   add_foreign_key "paypal_invoices", "page_unlock_promo_codes"
