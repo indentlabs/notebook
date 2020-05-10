@@ -5,25 +5,26 @@ class ForumsLinkbuilderService < Service
 
   def self.content_to_url_map
     {
-      'Character': '/forum/characters-board',
-      'Condition': '/forum/conditions',
-      'Creature': '/forum/characters', # [sic]
-      'Flora': '/forum/flora',
+      'Character':  '/forum/characters-board',
+      'Condition':  '/forum/conditions',
+      'Creature':   '/forum/characters', # uh, wtf did I do here
+      'Flora':      '/forum/flora',
       'Government': '/forum/governments',
-      'Item': '/forum/items',
-      'Job': '/forum/jobs',
-      'Landmark': '/forum/landmarks',
-      'Language': '/forum/languages', # wtf did I do
-      'Location': '/forum/locations',
-      'Magic': '/forum/magic',
-      'Planet': '/forum/planets',
-      'Race': '/forum/races',
-      'Religion': '/forum/religions',
+      'Item':       '/forum/items',
+      'Job':        '/forum/jobs',
+      'Landmark':   '/forum/landmarks',
+      'Language':   '/forum/languages',
+      'Location':   '/forum/locations',
+      'Lore':       '/forum/lores',
+      'Magic':      '/forum/magic',
+      'Planet':     '/forum/planets',
+      'Race':       '/forum/races',
+      'Religion':   '/forum/religions',
       'Technology': '/forum/technology',
-      'Tradition': '/forum/traditions',
-      'School': '/forum/schools',
-      'Sport': '/forum/sports',
-      'Food': '/forum/food'
+      'Tradition':  '/forum/traditions',
+      'School':     '/forum/schools',
+      'Sport':      '/forum/sports',
+      'Food':       '/forum/food'
     }
   end
 
