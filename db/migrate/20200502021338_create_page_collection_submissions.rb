@@ -4,6 +4,7 @@ class CreatePageCollectionSubmissions < ActiveRecord::Migration[6.0]
       t.references :content, polymorphic: true, null: false, index: { name: :polycontent_collection_index }
       t.references :user, null: false, foreign_key: true
       t.datetime :accepted_at
+      t.datetime :submitted_at
 
       t.timestamps
     end

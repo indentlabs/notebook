@@ -46,13 +46,19 @@ class PageCollectionSubmissionsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_page_collection_submission
-      @page_collection_submission = PageCollectionSubmission.find(params[:id])
-    end
 
-    # Only allow a trusted parameter "white list" through.
-    def page_collection_submission_params
-      params.fetch(:page_collection_submission, {})
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_page_collection_submission
+    @page_collection_submission = PageCollectionSubmission.find(params[:id])
+  end
+
+  # Only allow a trusted parameter "white list" through.
+  def page_collection_submission_params
+    {
+      content_type: params.require(:page_collection_submission).require(:content).split('-').first,
+      content_id:   params.require(:page_collection_submission).require(:content).split('-').second,
+      user_id:      current_user.id,
+      submitted_at: DateTime.current
+    }
+  end
 end

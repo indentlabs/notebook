@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   resources :page_collections, path: '/collections' do
     get '/explore', to: 'page_collections#explore', on: :collection
   end
+  resources :page_collection_submissions
   
   default_url_options :host => "notebook.ai"
 

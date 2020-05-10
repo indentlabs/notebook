@@ -2130,6 +2130,7 @@ ActiveRecord::Schema.define(version: 2020_05_02_021338) do
     t.integer "content_id", null: false
     t.integer "user_id", null: false
     t.datetime "accepted_at"
+    t.datetime "submitted_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["content_type", "content_id"], name: "polycontent_collection_index"
