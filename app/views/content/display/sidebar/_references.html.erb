@@ -14,8 +14,9 @@
   show_associations_tab     = !creating && !editing && @sidelinks_association_count > 0
   show_gallery_tab          = creating || editing || raw_model.image_uploads.any?
   show_documents_tab        = !creating && !editing && related_documents.any?
+  show_shares_tab           = !creating && !editing && raw_model.content_page_shares.any?
 
-  show_references_section = [show_in_this_universe_tab, show_associations_tab, show_gallery_tab, show_documents_tab].any?
+  show_references_section = [show_in_this_universe_tab, show_associations_tab, show_gallery_tab, show_documents_tab, show_shares_tab].any?
 %>
 
 <% if show_references_section %>
@@ -60,6 +61,16 @@
           <i class="material-icons left"><%= Document.icon %></i>
           Documents
           <span class="badge hide-on-med-and-down"><%= related_documents.count %></span>
+        </a>
+      </li>
+    <% end %>
+
+    <% if show_shares_tab %>
+      <li class="collection-item tab">
+        <a href="#shares_panel">
+          <i class="material-icons left">ballot</i>
+          Shares
+          <span class="badge hide-on-med-and-down"><%= raw_model.content_page_shares.count %></span>
         </a>
       </li>
     <% end %>

@@ -11,6 +11,8 @@ module IsContentPage
     include HasChangelog
     include HasPageTags
 
+    has_many :content_page_shares, as: :content_page
+
     scope :unarchived, -> { where(archived_at: nil) }
     def archive!
       update!(archived_at: DateTime.now)
