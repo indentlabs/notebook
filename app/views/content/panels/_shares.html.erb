@@ -10,10 +10,17 @@
       <% if content.content_page_shares.any? %>
         <ul>
           <% content.content_page_shares.each do |share| %>
-            <%= link_to [share.user, share] do %>
-              <li class="card-panel hoverable">
+            <%= link_to [share.user, share], class: 'black-text' do %>
+              <li class="card-panel hoverable <%= content.class.color %> lighten-5">
+                <div class="right grey-text">
+                  <%= time_ago_in_words share.shared_at %> ago
+                </div>
+                <div><span class="<%= User.color %>-text">@andrew</span> shared this page with the message:</div>
                 <blockquote><%= share.message %></blockquote>
-                <div class="grey-text">shared <%= time_ago_in_words share.shared_at %> ago</div>
+                <div>
+                  <i class="material-icons left">forum</i>
+                  <%= pluralize share.share_comments.count, 'comment' %>
+                </div>
               </li>
             <% end %>
           <% end %>
