@@ -5,6 +5,7 @@ class CreatePageCollectionSubmissions < ActiveRecord::Migration[6.0]
       t.references :user, null: false, foreign_key: true
       t.datetime :accepted_at
       t.datetime :submitted_at
+      t.references :page_collection, null: false
 
       t.timestamps
     end

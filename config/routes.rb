@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   end
   resources :page_collections, path: '/collections' do
     get '/explore', to: 'page_collections#explore', on: :collection
+    get '/submissions', to: 'page_collection_submissions#index', as: 'pending_submissions'
   end
   resources :page_collection_submissions
   

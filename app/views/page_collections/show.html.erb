@@ -30,6 +30,7 @@
         </div>
         <div class="collapsible-body white">
           <%= form_for PageCollectionSubmission.new do |f| %>
+            <%= f.hidden_field :page_collection_id, value: @page_collection.id %>
             <div class="input-field">
               <%= f.select :content do %>
                 <% @current_user_content.each do |content_type, content_list| %>
@@ -43,29 +44,52 @@
               <% end %>
               <label>Select a page to <%= @page_collection.user == current_user ? 'add' : 'submit' %></label>
               <div class="helper-text">
-                Only pages you've marked "public" may be shared.
+                Only pages you've marked "public" may be submitted.
               </div>
             </div>
-            <%= f.submit (@page_collection.user == current_user ? 'Add' : 'Submit'), class: 'btn green white-text' %>
+            <%= f.submit (@page_collection.user == current_user ? 'Add' : 'Submit'), class: "btn #{PageCollection.color} white-text" %>
           <% end %>
         </div>
       </li>
     </ul>
 
     <div class="card-panel">Collection description (editable)</div>
-    <div class="card-panel">
+
+    <div class="grey-text uppercase">In this collection</div>
+    <div class="collection">
       <% @page_collection.page_types.each do |pt| %>
         <% klass = pt.constantize %>
-        <%= link_to '#' + pt do %>
-          <span class="badge hoverable black-text <%= klass.color %> left"><%= pt.downcase %></span>
+        <%= link_to('#' + pt, class: "collection-item #{klass.color} white-text") do %>
+          <i class="material-icons left"><%= klass.icon %></i>
+          <%= pt.pluralize %>
         <% end %>
       <% end %>
     </div>
-    <div class="card-panel">
-      Contributors
+
+    <div class="grey-text uppercase">Curator</div>
+    <div>
+      <%= link_to @page_collection.user, class: "#{User.color}-text" do %>
+        <%= image_tag @page_collection.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+        <%= @page_collection.user.display_name %>
+      <% end %>
     </div>
+    <br />
+
+    <% if @page_collection.contributors.any? %>
+      <div class="grey-text uppercase">Contributors</div>
+      <% @page_collection.contributors.each do |user| %>
+        <div>
+          <%= link_to user, class: "#{User.color}-text" do %>
+            <%= image_tag user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+            <%= user.display_name %>
+          <% end %>
+        </div>
+      <% end %>
+      <br />
+    <% end %>
+
     <ul>
-      <li><%= link_to pluralize(0, 'pending submission'), '#' %></li>
+      <li><%= link_to pluralize(@page_collection.pending_submissions.count, 'pending submission'), page_collection_pending_submissions_path(page_collection_id: @page_collection.id) %></li>
       <li><%= link_to 'Edit this collection', '#' %></li>
     </ul>
   </div>
