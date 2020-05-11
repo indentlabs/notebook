@@ -17,4 +17,12 @@ class ContentPageShare < ApplicationRecord
   def subscribe(user)
     user.content_page_share_followings.find_or_create_by(content_page_share_id: self.id)
   end
+
+  def self.color
+    'text-lighten-3 purple'
+  end
+
+  def self.icon
+    'ballot'
+  end
 end
