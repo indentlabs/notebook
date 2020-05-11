@@ -1,5 +1,5 @@
 class TechnologyCharacter < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :technology
-  belongs_to :character
+  belongs_to :character, optional: true
 end

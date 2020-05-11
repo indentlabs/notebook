@@ -4,7 +4,7 @@ class Supergroupship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :group
-  belongs_to :supergroup, class_name: Group.name
+  belongs_to :supergroup, class_name: Group.name, optional: true
 
   after_create do
     this_object  = Group.find_by(id: self.group_id)

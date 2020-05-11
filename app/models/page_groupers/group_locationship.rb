@@ -4,5 +4,5 @@ class GroupLocationship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :group
-  belongs_to :location
+  belongs_to :location, optional: true
 end

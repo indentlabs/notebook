@@ -1,5 +1,5 @@
 class PlanetFlora < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :planet
-  belongs_to :flora
+  belongs_to :flora, optional: true
 end

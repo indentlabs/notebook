@@ -5,7 +5,7 @@ class CreatureRelationship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :creature
-  belongs_to :related_creature, class_name: 'Creature'
+  belongs_to :related_creature, class_name: 'Creature', optional: true
 
   after_create do
     self.reciprocate(

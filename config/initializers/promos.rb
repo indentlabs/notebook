@@ -9,7 +9,7 @@ Rails.application.config.promos[:promo_bogo][:end_date] = Rails.application.conf
 # Lore free during the month of April
 # Need to change Lore.rb authorizer at the end lol
 if Date.current >= 'March 1, 2020'.to_date
-  if Date.current < 'May 1, 2020'.to_date
+  if Date.current < 'April 1, 2020'.to_date
     Rails.application.config.content_types[:free] << Lore
     Rails.application.config.content_types[:premium] -= [Lore]
   end

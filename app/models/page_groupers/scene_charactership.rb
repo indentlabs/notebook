@@ -4,5 +4,5 @@ class SceneCharactership < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :scene
-  belongs_to :scene_character, class_name: 'Character'
+  belongs_to :scene_character, class_name: 'Character', optional: true
 end

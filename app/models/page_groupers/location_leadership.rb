@@ -4,5 +4,5 @@ class LocationLeadership < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :location
-  belongs_to :leader, class_name: 'Character'
+  belongs_to :leader, class_name: 'Character', optional: true
 end

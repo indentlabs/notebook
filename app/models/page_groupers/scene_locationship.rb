@@ -4,5 +4,5 @@ class SceneLocationship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :scene
-  belongs_to :scene_location, class_name: 'Location'
+  belongs_to :scene_location, class_name: 'Location', optional: true
 end

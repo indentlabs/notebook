@@ -4,5 +4,5 @@ class Artifactship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :religion
-  belongs_to :artifact, class_name: 'Item'
+  belongs_to :artifact, class_name: 'Item', optional: true
 end

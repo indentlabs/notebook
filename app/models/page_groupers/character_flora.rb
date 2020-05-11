@@ -1,5 +1,5 @@
 class CharacterFlora < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :character
-  belongs_to :flora
+  belongs_to :flora, optional: true
 end

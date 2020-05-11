@@ -4,5 +4,5 @@ class MagicDeityship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :magic
-  belongs_to :deity, class_name: 'Character'
+  belongs_to :deity, class_name: 'Character', optional: true
 end

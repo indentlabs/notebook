@@ -4,7 +4,7 @@ class Mothership < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :character
-  belongs_to :mother, class_name: 'Character'
+  belongs_to :mother, class_name: 'Character', optional: true
 
   after_create do
     this_object  = Character.find_by(id: self.character_id)

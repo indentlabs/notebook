@@ -4,5 +4,5 @@ class FamousFigureship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :race
-  belongs_to :famous_figure, class_name: 'Character'
+  belongs_to :famous_figure, class_name: 'Character', optional: true
 end

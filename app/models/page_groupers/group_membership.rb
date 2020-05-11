@@ -4,5 +4,5 @@ class GroupMembership < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :group
-  belongs_to :member, class_name: 'Character'
+  belongs_to :member, class_name: 'Character', optional: true
 end

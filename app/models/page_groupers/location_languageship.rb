@@ -4,5 +4,5 @@ class LocationLanguageship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :location
-  belongs_to :language
+  belongs_to :language, optional: true
 end
