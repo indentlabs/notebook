@@ -41,18 +41,34 @@
               <% end %>
             </li>
           </ul>
-          <% if current_user.recent_content_list.any? %>
+
+          <%= link_to '#', class: 'dropdown-trigger right tooltipped', data: { target: 'navbar-actions', tooltip: 'Quick actions' } do %>
+            <i class="material-icons">flash_on</i>
+          <% end %>
+
+          <!-- Dropdown Structure -->
+          <ul id='navbar-actions' class='dropdown-content blue'>
             <li>
-              <a class="sidenav-trigger show-on-large tooltipped" href="#" data-target="recent-edits-sidenav" data-target="recent-content-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your recently-edited pages">
-                <i class="material-icons">recent_actors</i>
+              <a class="waves-effect waves-light modal-trigger white-text" href="#search-modal">
+                <i class="material-icons left">search</i>
+                Search your notebook
               </a>
             </li>
-          <% end %>
-          <li>
-            <a class="waves-effect waves-light modal-trigger tooltipped" href="#search-modal" data-tooltip="Search your notebook">
-              <i class="material-icons">search</i>
-            </a>
-          </li>
+            <li>
+              <a class="waves-effect waves-light sidenav-trigger white-text" href="#" data-target="recent-edits-sidenav">
+                <i class="material-icons left">recent_actors</i>
+                Jump to recent page
+              </a>
+            </li>
+            <li>
+              <a class="waves-effect waves-light white-text dark-toggle" 
+                 href="#" 
+                 onclick="localStorage.setItem('mode', (localStorage.getItem('mode') || 'dark') === 'dark' ? 'light' : 'dark'); localStorage.getItem('mode') === 'dark' ? document.querySelector('body').classList.add('dark') : document.querySelector('body').classList.remove('dark')" >
+                <i class="material-icons left"><%= rand(2) == 1 ? 'brightness_high' : 'brightness_4' %></i>
+                Toggle dark theme
+              </a>
+            </li>
+          </ul>
         <% else %>
           <li>
             <%= link_to 'Sign in', main_app.new_user_session_path %>
