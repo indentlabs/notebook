@@ -4,26 +4,26 @@
       <br />
       Shared page
     </div>
-    <%= link_to @share.content_page, class: 'black-text' do %>
-      <div class="hoverable card">
-        <div class="card-image">
+    <div class="hoverable card">
+      <div class="card-image">
+        <%= link_to @share.content_page do %>
           <%= image_tag @share.content_page.random_public_image %>
-          <span class="card-title">
+          <span class="card-title bordered-text">
             <i class="material-icons <%= @share.content_page.class.color %>-text left small"><%= @share.content_page.class.icon %></i>
             <%= @share.content_page.name %>
           </span>
-        </div>
-        <div class="card-content">
-          <div class="card-title">
-            <%= @share.content_page.description.presence || "A #{@share.content_page.class.name.downcase}" %>
-          </div>
-          <p>
-            by
-            <%= link_to @share.user.display_name, @share.user, class: "#{User.color}-text" %>
-          </p>
-        </div>
+        <% end %>
       </div>
-    <% end %>
+      <div class="card-content">
+        <div class="card-title">
+          <%= @share.content_page.description.presence || "A #{@share.content_page.class.name.downcase}" %>
+        </div>
+        <p class="metadata">
+          by
+          <%= link_to @share.user.display_name, @share.user, class: "#{User.color}-text" %>
+        </p>
+      </div>
+    </div>
     <!--
     <div>
       <ul class="uppercase">
