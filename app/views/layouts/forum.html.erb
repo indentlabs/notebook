@@ -9,11 +9,10 @@
   <%= javascript_include_tag :application %>
   <%= javascript_include_tag 'thredded',
                              async: !Rails.application.config.assets.debug,
-                             defer: true,
-                             'data-turbolinks-track': 'reload'%>
+                             defer: true %>
   <%== Gravatar.prefetch_dns %>
 </head>
-<body data-in-app="true" class="<%= 'has-fixed-sidenav' if user_signed_in? %> dark">
+<body data-in-app="true" class="<%= 'has-fixed-sidenav' if user_signed_in? %> <%= 'dark' if current_user.dark_mode_enabled? %>">
   <%= render 'layouts/sidenav' if user_signed_in? %>
   <%= render 'layouts/recent_edits_sidenav' if user_signed_in? %>
   <%= render 'layouts/navbar' %>
