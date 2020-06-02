@@ -103,6 +103,11 @@ Rails.application.configure do
     :enable_starttls_auto => true
   }
 
+  # Settings for API key usage:
+  # authentication: :plain,
+  # user_name:      'apikey',
+  # password:       ENV['SENDGRID_API_KEY']
+
   # S3 settings for Paperclip uploads
   config.paperclip_defaults = {
     storage: :s3,
