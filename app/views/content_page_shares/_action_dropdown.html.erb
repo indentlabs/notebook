@@ -1,7 +1,7 @@
-<a class='dropdown-trigger' href='#' data-target='dropdown-<%= content.class.name %>-<%= content.id %>'>
+<a class='dropdown-trigger' href='#' data-target='dropdown-share-<%= share.id %>'>
   <i class="material-icons">more_vert</i>
 </a>
-<ul id='dropdown-<%= content.class.name %>-<%= content.id %>' class='dropdown-content'>
+<ul id='dropdown-share-<%= share.id %>' class='dropdown-content'>
   <li>
     <%= link_to [share.user, share] do %>
       <i class="material-icons left">link</i>
@@ -28,14 +28,24 @@
     <% end %>
   </li>
   <li class="divider" tabindex="-1"></li>
-  <li>
-    <%= 
-      link_to user_content_page_share_path(user_id: share.user.id, id: share.id), 
-        method: :DELETE,
-        data: { confirm: "Are you sure? This will delete this share and any comments that have been posted to it!" } do
-    %>
-      <i class="material-icons">delete</i>
-      Delete this share
-    <% end %>
-  </li>
+  <% if current_user == share.user %>
+    <li>
+      <%= 
+        link_to user_content_page_share_path(user_id: share.user.id, id: share.id), 
+          method: :DELETE,
+          data: { confirm: "Are you sure? This will delete this share and any comments that have been posted to it!" } do
+      %>
+        <i class="material-icons">delete</i>
+        Delete this share
+      <% end %>
+    </li>
+  <% else %>
+    <li>
+      <%= link_to report_user_content_page_share_path(user_id: share.user.id, id: share.id) do %>
+        <i class="material-icons">flag</i>
+        Report this share
+      <% end %>
+    </li>
+
+  <% end %>
 </ul>

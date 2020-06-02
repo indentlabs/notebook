@@ -40,6 +40,7 @@ Rails.application.routes.draw do
     resources :content_page_shares, path: 'shares' do
       get 'follow',   on: :member
       get 'unfollow', on: :member
+      get 'report',   on: :member
     end
   end
   resources :user_followings

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_06_02_013522) do
+ActiveRecord::Schema.define(version: 2020_06_02_062847) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -392,6 +392,16 @@ ActiveRecord::Schema.define(version: 2020_06_02_013522) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["content_page_share_id"], name: "index_content_page_share_followings_on_content_page_share_id"
     t.index ["user_id"], name: "index_content_page_share_followings_on_user_id"
+  end
+
+  create_table "content_page_share_reports", force: :cascade do |t|
+    t.integer "content_page_share_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "approved_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["content_page_share_id"], name: "index_content_page_share_reports_on_content_page_share_id"
+    t.index ["user_id"], name: "index_content_page_share_reports_on_user_id"
   end
 
   create_table "content_page_shares", force: :cascade do |t|
@@ -3352,6 +3362,8 @@ ActiveRecord::Schema.define(version: 2020_06_02_013522) do
   add_foreign_key "content_change_events", "users"
   add_foreign_key "content_page_share_followings", "content_page_shares"
   add_foreign_key "content_page_share_followings", "users"
+  add_foreign_key "content_page_share_reports", "content_page_shares"
+  add_foreign_key "content_page_share_reports", "users"
   add_foreign_key "content_page_shares", "users"
   add_foreign_key "content_pages", "universes"
   add_foreign_key "content_pages", "users"

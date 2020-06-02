@@ -4,6 +4,7 @@ class ContentPageShare < ApplicationRecord
 
   has_many :share_comments,                dependent: :destroy
   has_many :content_page_share_followings, dependent: :destroy
+  has_many :content_page_share_reports,    dependent: :destroy
 
   after_create do
     # Subscribe the OP to new notifications whenever a post is created

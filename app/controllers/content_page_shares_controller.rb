@@ -1,6 +1,9 @@
 class ContentPageSharesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_content_page_share, only: [:show, :edit, :update, :destroy, :follow, :unfollow]
+  before_action :set_content_page_share, only: [
+    :show, :edit, :update, :destroy, 
+    :follow, :unfollow, :report
+  ]
 
   # GET /content_page_shares
   def index
@@ -40,6 +43,11 @@ class ContentPageSharesController < ApplicationController
   def unfollow
     @share.content_page_share_followings.find_by(user_id: current_user.id).try(:destroy)
     redirect_to [@share.user, @share], notice: 'You will no longer receive notifications about this share.'
+  end
+
+  def report
+    @share.content_page_share_reports.create(user_id: current_user.id)
+    redirect_to stream_path, notice: "That share has been reported to site administration. Thank you!"
   end
 
   # PATCH/PUT /content_page_shares/1
