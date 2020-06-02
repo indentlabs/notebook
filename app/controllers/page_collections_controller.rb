@@ -49,7 +49,7 @@ class PageCollectionsController < ApplicationController
   end
 
   def explore
-    @collections = PageCollection.first(6)
+    @collections = PageCollection.first(8)
   end
 
   private

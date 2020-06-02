@@ -27,6 +27,26 @@ namespace :one_off do
     )
 
     PageCollection.find_or_create_by(
+      title: 'Superheroes',
+      # subtitle: 'Browse public creatures and floras',
+      privacy: 'public',
+      page_types: ['Character'],
+      color: Character.color,
+      user_id: OWNER_USER_ID,
+      cover_image: "card-headers/characters.jpg"
+    )
+
+    PageCollection.find_or_create_by(
+      title: 'Supervillains',
+      # subtitle: 'Browse public creatures and floras',
+      privacy: 'public',
+      page_types: ['Character'],
+      color: Character.color,
+      user_id: OWNER_USER_ID,
+      cover_image: "card-headers/characters.jpg"
+    )
+
+    PageCollection.find_or_create_by(
       title: 'Bestiary',
       # subtitle: 'Browse public creatures and floras',
       privacy: 'public',
