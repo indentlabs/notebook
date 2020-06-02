@@ -113,6 +113,7 @@ Rails.application.routes.draw do
         get '/:model.csv',    to: 'export#csv',           as: :notebook_csv
       end
     end
+    get '/help', to: 'help#index', as: :help_center
 end
   delete 'delete_my_account', to: 'users#delete_my_account'
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
