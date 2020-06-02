@@ -14,9 +14,26 @@
       View this <%= content.class.name.downcase %>
     <% end %>
   </li>
+  <li>
+    <% if share.followed_by?(current_user) %>
+      <%= link_to unfollow_user_content_page_share_path(user_id: share.user.id, id: share.id) do %>
+        <i class="material-icons left">notifications_none</i>
+        Unfollow this share
+      <% end %>
+    <% else %>
+      <%= link_to follow_user_content_page_share_path(user_id: share.user.id, id: share.id) do %>
+        <i class="material-icons left">notifications_none</i>
+        Follow this share
+      <% end %>
+    <% end %>
+  </li>
   <li class="divider" tabindex="-1"></li>
   <li>
-    <%= link_to '#' do %>
+    <%= 
+      link_to user_content_page_share_path(user_id: share.user.id, id: share.id), 
+        method: :DELETE,
+        data: { confirm: "Are you sure? This will delete this share and any comments that have been posted to it!" } do
+    %>
       <i class="material-icons">delete</i>
       Delete this share
     <% end %>

@@ -1,4 +1,4 @@
-<div class="row">
+<div class="stream-item row">
   <div class="col s12 m12 l4">
     <div class="grey-text uppercase">
       <br />
@@ -14,15 +14,48 @@
           </span>
         <% end %>
       </div>
-      <div class="card-content">
-        <div class="card-title">
-          <%= @share.content_page.description.presence || "A #{@share.content_page.class.name.downcase}" %>
+    </div>
+    <div class="grey-text uppercase">
+      <br />
+      Created by
+    </div>
+    <%= link_to @share.user do %>
+      <div class="hoverable card <%= User.color %>">
+        <!-- todo vertical card stack user avatar -->
+        <div class="card-content">
+          <div class="card-title white-text">
+            <i class="material-icons left"><%= User.icon %></i>
+            <%= @share.user.display_name %>
+          </div>
+          <%= render partial: 'thredded/users/badge', locals: { user: @share.user } %>
         </div>
-        <p class="metadata">
-          by
-          <%= link_to @share.user.display_name, @share.user, class: "#{User.color}-text" %>
-        </p>
       </div>
+    <% end %>
+    <br />
+    <div>
+      <ul>
+        <li class="uppercase grey-text">
+          Share Actions
+        </li>
+        <li>
+          <% if @share.followed_by?(current_user) %>
+            <%= link_to 'Unfollow this share', unfollow_user_content_page_share_path(user_id: @share.user.id, id: @share.id) %>
+          <% else %>
+            <%= link_to 'Follow this share', follow_user_content_page_share_path(user_id: @share.user.id, id: @share.id) %>
+          <% end %>
+        </li>
+        <% if @share.user == current_user %>
+          <li>
+            <%= 
+              link_to user_content_page_share_path(user_id: @share.user.id, id: @share.id),
+                method: :DELETE,
+                data: { confirm: "Are you sure? This will delete this share and any comments that have been posted to it!" } do
+            %>
+              Delete this share
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
     </div>
     <!--
     <div>
@@ -45,34 +78,13 @@
       </ul>
     </div>
     -->
-    <div>
-      <ul>
-        <li class="uppercase grey-text">
-          Actions
-        </li>
-        <li>
-          <% if @share.followed_by?(current_user) %>
-            <%= link_to 'Unfollow this share', '#' %>
-          <% else %>
-            <%= link_to 'Follow this share', '#' %>
-          <% end %>
-        </li>
-        <% if @share.user == current_user %>
-          <li>
-            <%= link_to '#' do %>
-              Delete this share
-            <% end %>
-          </li>
-        <% end %>
-      </ul>
-    </div>
   </div>
   <div class="col s12 m12 l7">
     <div class="card">
       <div class="card-content">
         <p>
           <%= link_to @share.user, class: "#{User.color}-text" do %>
-            <%= image_tag @share.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+            <%= image_tag @share.user.image_url(size=20), class: 'left circle avatar' %>
             <%= @share.user.name %>
           <% end %>
           said:
@@ -80,13 +92,16 @@
             <%= time_ago_in_words @share.shared_at %> ago
           </span>
         </p>
-        <blockquote>
+        <blockquote class="original-comment">
           <%= simple_format @share.message %>
         </blockquote>
         
         <%= render partial: 'share_comments/form', locals: { share: @share } %>
         <br /><br />
 
+        <div class="uppercase grey-text center">
+          <%= pluralize @share.share_comments.count, 'comment' %>
+        </div>
         <div class="row">
           <% @share.share_comments.each do |comment| %>
             <%= 

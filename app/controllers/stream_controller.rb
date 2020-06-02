@@ -1,4 +1,5 @@
 class StreamController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_stream_navbar_actions, only: [:index, :global]
   before_action :set_stream_navbar_color, only: [:index, :global]
   before_action :set_sidenav_expansion

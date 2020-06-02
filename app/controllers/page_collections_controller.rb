@@ -1,4 +1,7 @@
 class PageCollectionsController < ApplicationController
+  before_action :authenticate_user!, except: [:index, :show]
+
+  before_action :set_sidenav_expansion
   before_action :set_page_collection, only: [:show, :edit, :update, :destroy]
 
   # GET /page_collections
@@ -50,13 +53,18 @@ class PageCollectionsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_page_collection
-      @page_collection = PageCollection.find(params[:id])
-    end
 
-    # Only allow a trusted parameter "white list" through.
-    def page_collection_params
-      params.fetch(:page_collection, {})
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_page_collection
+    @page_collection = PageCollection.find(params[:id])
+  end
+
+  # Only allow a trusted parameter "white list" through.
+  def page_collection_params
+    params.fetch(:page_collection, {})
+  end
+
+  def set_sidenav_expansion
+    @sidenav_expansion = 'community'
+  end
 end

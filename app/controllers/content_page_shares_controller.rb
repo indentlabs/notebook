@@ -1,5 +1,6 @@
 class ContentPageSharesController < ApplicationController
-  before_action :set_content_page_share, only: [:show, :edit, :update, :destroy]
+  before_action :authenticate_user!
+  before_action :set_content_page_share, only: [:show, :edit, :update, :destroy, :follow, :unfollow]
 
   # GET /content_page_shares
   def index
@@ -31,6 +32,16 @@ class ContentPageSharesController < ApplicationController
     end
   end
 
+  def follow
+    @share.content_page_share_followings.find_or_create_by(user_id: current_user.id)
+    redirect_to [@share.user, @share], notice: 'You will now receive notifications about this share.'
+  end
+
+  def unfollow
+    @share.content_page_share_followings.find_by(user_id: current_user.id).try(:destroy)
+    redirect_to [@share.user, @share], notice: 'You will no longer receive notifications about this share.'
+  end
+
   # PATCH/PUT /content_page_shares/1
   def update
     if @share.update(content_page_share_params)
@@ -43,7 +54,7 @@ class ContentPageSharesController < ApplicationController
   # DELETE /content_page_shares/1
   def destroy
     @share.destroy
-    redirect_to content_page_shares_url, notice: 'Content page share was successfully destroyed.'
+    redirect_to(content_page_shares_url, notice: 'The share was successfully deleted.')
   end
 
   private

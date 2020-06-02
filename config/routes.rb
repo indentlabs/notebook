@@ -37,7 +37,10 @@ Rails.application.routes.draw do
       # todo page tags here
     end
 
-    resources :content_page_shares, path: 'shares'
+    resources :content_page_shares, path: 'shares' do
+      get 'follow',   on: :member
+      get 'unfollow', on: :member
+    end
   end
   resources :user_followings
   resources :user_blockings
