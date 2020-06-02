@@ -116,55 +116,57 @@
           </ul>
         </div>
       </li>
-      <li class="bold waves-effect <%= 'active' if @sidenav_expansion == 'community' %>">
-        <a class="collapsible-header" tabindex="0">
-          Community
-          <i class="material-icons chevron">chevron_right</i>
-        </a>
-        <div class="collapsible-body">
-          <ul>
-            <li>
-              <%= link_to main_app.thredded_path, class: 'waves-effect' do %>
-                <i class="material-icons blue-text">
-                  forum
-                </i>
-                Discussions
-                <% if @unread_threads > 0 || @unread_private_messages > 0 %>
-                  <span class="badge <%= 'blue white-text' if @unread_private_messages > 0 %>">
-                    <%= @unread_threads %><%= "/#{@unread_private_messages}" if @unread_private_messages > 0 %>
-                  </span>
+      <% if current_user.community_features_enabled? %>
+        <li class="bold waves-effect <%= 'active' if @sidenav_expansion == 'community' %>">
+          <a class="collapsible-header" tabindex="0">
+            Community
+            <i class="material-icons chevron">chevron_right</i>
+          </a>
+          <div class="collapsible-body">
+            <ul>
+              <li>
+                <%= link_to main_app.thredded_path, class: 'waves-effect' do %>
+                  <i class="material-icons blue-text">
+                    forum
+                  </i>
+                  Discussions
+                  <% if @unread_threads > 0 || @unread_private_messages > 0 %>
+                    <span class="badge <%= 'blue white-text' if @unread_private_messages > 0 %>">
+                      <%= @unread_threads %><%= "/#{@unread_private_messages}" if @unread_private_messages > 0 %>
+                    </span>
+                  <% end %>
                 <% end %>
-              <% end %>
-            </li>
-            <li>
-              <%= link_to main_app.stream_path, class: 'waves-effect' do %>
-                <i class="material-icons left <%= ContentPageShare.color %>-text"><%= ContentPageShare.icon %></i>
-                Stream
-              <% end %>
-            </li>
-            <!--
-            <li>
-              <%= link_to main_app.stream_community_path, class: 'waves-effect' do %>
-                <i class="material-icons left red-text">whatshot</i>
-                What's new
-              <% end %>
-            </li>
-            -->
-            <li>
-              <%= link_to main_app.explore_page_collections_path, class: 'waves-effect' do %>
-                <i class="material-icons left <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
-                Explore
-              <% end %>
-            </li>
-            <li>
-              <%= link_to current_user.profile_url, class: 'waves-effect' do %>
-                <i class="material-icons left <%= User.color %>-text"><%= User.icon %></i>
-                Profile
-              <% end %>
-            </li>
-          </ul>
-        </div>
-      </li>
+              </li>
+              <li>
+                <%= link_to main_app.stream_path, class: 'waves-effect' do %>
+                  <i class="material-icons left <%= ContentPageShare.color %>-text"><%= ContentPageShare.icon %></i>
+                  Stream
+                <% end %>
+              </li>
+              <!--
+              <li>
+                <%= link_to main_app.stream_community_path, class: 'waves-effect' do %>
+                  <i class="material-icons left red-text">whatshot</i>
+                  What's new
+                <% end %>
+              </li>
+              -->
+              <li>
+                <%= link_to main_app.explore_page_collections_path, class: 'waves-effect' do %>
+                  <i class="material-icons left <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
+                  Explore
+                <% end %>
+              </li>
+              <li>
+                <%= link_to current_user.profile_url, class: 'waves-effect' do %>
+                  <i class="material-icons left <%= User.color %>-text"><%= User.icon %></i>
+                  Profile
+                <% end %>
+              </li>
+            </ul>
+          </div>
+        </li>
+      <% end %>
       <li class="bold waves-effect <%= 'active' if @sidenav_expansion == 'my account' %>">
         <a class="collapsible-header" tabindex="0">
           My Account
