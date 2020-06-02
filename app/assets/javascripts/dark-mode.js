@@ -1,6 +1,5 @@
 $(document).ready(function(){
-  $('.dark-toggle > *').on('click', function() {
-    alert('togglin');
+  $('.dark-toggle').on('click', function() {
     var toggle_icon = $(this).find('i');
     var light_mode_icon = 'brightness_high',
         dark_mode_icon  = 'brightness_4';
@@ -29,6 +28,5 @@ $(document).ready(function(){
     });
 
     console.log('dark mode is now ' + !dark_mode_enabled);
-
   });
 });
