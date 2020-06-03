@@ -51,6 +51,16 @@ class PageCollectionSubmissionsController < ApplicationController
   def approve
     return raise "Not allowed: approve" unless user_signed_in? && current_user == @page_collection_submission.page_collection.user
     @page_collection_submission.update(accepted_at: DateTime.current)
+
+    # Create a notification for the submitter to let them know it's been accepted
+    @page_collection_submission.user.notifications.create(
+      message_html:     "<div>Your <span class='#{@page_collection_submission.content.class.color}-text'>#{@page_collection_submission.content.name}</span> #{@page_collection_submission.content_type.downcase} submission to <span class='#{PageCollection.color}-text'>#{@page_collection_submission.page_collection.title}</span> was approved!</div>",
+      icon:             PageCollection.icon,
+      icon_color:       PageCollection.color,
+      happened_at:      DateTime.current,
+      passthrough_link: Rails.application.routes.url_helpers.page_collection_path(@page_collection_submission.page_collection)
+    )
+
     redirect_to(page_collection_pending_submissions_path(@page_collection_submission.page_collection), notice: "Submission approved!")
   end
 

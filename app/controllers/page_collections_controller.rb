@@ -61,7 +61,7 @@ class PageCollectionsController < ApplicationController
       @pages = @page_collection.accepted_submissions.where(content_type: content_type.name)
       sort_pages
 
-      render :page_list
+      render :show
     end
   end
 
@@ -88,7 +88,7 @@ class PageCollectionsController < ApplicationController
     when 'chronological'
       @pages = @pages.order('accepted_at ASC')
     when 'recent'
-      @pages = @paages.order('accepted_at DESC')
+      @pages = @pages.order('accepted_at DESC')
     when nil
     end
   end
