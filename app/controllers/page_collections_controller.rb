@@ -12,14 +12,7 @@ class PageCollectionsController < ApplicationController
   # GET /page_collections/1
   def show
     @pages = @page_collection.accepted_submissions
-
-    case params.permit(:sort).fetch('sort', nil)
-    when 'alphabetical'
-      @pages = @pages.order('cached_content_name ASC')
-    when 'chronological'
-      @pages = @pages.order('accepted_at DESC')
-    when nil
-    end
+    sort_pages
   end
 
   # GET /page_collections/new
@@ -61,6 +54,17 @@ class PageCollectionsController < ApplicationController
     @collections = PageCollection.first(8)
   end
 
+  Rails.application.config.content_types[:all].each do |content_type|
+    define_method(content_type.name.downcase.pluralize.to_sym) do
+      set_page_collection
+
+      @pages = @page_collection.accepted_submissions.where(content_type: content_type.name)
+      sort_pages
+
+      render :page_list
+    end
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.
@@ -75,5 +79,17 @@ class PageCollectionsController < ApplicationController
 
   def set_sidenav_expansion
     @sidenav_expansion = 'community'
+  end
+
+  def sort_pages
+    case params.permit(:sort).fetch('sort', nil)
+    when 'alphabetical'
+      @pages = @pages.order('cached_content_name ASC')
+    when 'chronological'
+      @pages = @pages.order('accepted_at ASC')
+    when 'recent'
+      @pages = @paages.order('accepted_at DESC')
+    when nil
+    end
   end
 end

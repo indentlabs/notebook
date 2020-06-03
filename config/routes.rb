@@ -8,8 +8,11 @@ Rails.application.routes.draw do
     get 'community', to: 'stream#community'
   end
   resources :page_collections, path: '/collections' do
-    get '/explore', to: 'page_collections#explore', on: :collection
     get '/submissions', to: 'page_collection_submissions#index', as: 'pending_submissions'
+    get '/explore',     to: 'page_collections#explore',          on: :collection
+    Rails.application.config.content_types[:all].each do |content_type|
+      get content_type.name.downcase.pluralize.to_sym, on: :member
+    end
   end
   resources :page_collection_submissions do
     get 'approve', on: :member
