@@ -6,7 +6,9 @@ class StreamController < ApplicationController
 
   def index
     followed_users = current_user.followed_users.pluck(:id)
-    @feed = ContentPageShare.where(user_id: followed_users + [current_user.id])
+    blocked_users  = current_user.blocked_users.pluck(:id)
+
+    @feed = ContentPageShare.where(user_id: followed_users + [current_user.id] - blocked_users)
       .order('created_at DESC')
       .includes([:content_page, :user, :share_comments])
       .limit(100)
@@ -17,6 +19,7 @@ class StreamController < ApplicationController
 
   def global
     @feed = ContentPageShare.all
+      .where.not(user_id: current_user.blocked_users.pluck(:id))
       .order('created_at DESC')
       .includes([:content_page, :user, :share_comments])
       .limit(100)
