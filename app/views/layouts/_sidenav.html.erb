@@ -157,12 +157,14 @@
                   Collections
                 <% end %>
               </li>
-              <li>
-                <%= link_to current_user.profile_url, class: 'waves-effect' do %>
-                  <i class="material-icons left <%= User.color %>-text"><%= User.icon %></i>
-                  Profile
-                <% end %>
-              </li>
+              <% unless current_user.private_profile? %>
+                <li>
+                  <%= link_to current_user.profile_url, class: 'waves-effect' do %>
+                    <i class="material-icons left <%= User.color %>-text"><%= User.icon %></i>
+                    Profile
+                  <% end %>
+                </li>
+              <% end %>
             </ul>
           </div>
         </li>

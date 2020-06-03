@@ -8,6 +8,7 @@ class UsersController < ApplicationController
 
     @user    = User.find_by(user_params)
     return redirect_to(root_path, notice: 'That user does not exist.') if @user.nil?
+    return redirect_to(root_path, notice: 'That user does not exist.') if @user.private_profile?
 
     @content = @user.public_content.select { |type, list| list.any? }
     @tabs    = @content.keys
