@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_06_02_062847) do
+ActiveRecord::Schema.define(version: 2020_06_03_044417) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -2144,6 +2144,8 @@ ActiveRecord::Schema.define(version: 2020_06_02_062847) do
     t.integer "page_collection_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "explanation"
+    t.string "cached_content_name"
     t.index ["content_type", "content_id"], name: "polycontent_collection_index"
     t.index ["page_collection_id"], name: "index_page_collection_submissions_on_page_collection_id"
     t.index ["user_id"], name: "index_page_collection_submissions_on_user_id"
@@ -2160,6 +2162,7 @@ ActiveRecord::Schema.define(version: 2020_06_02_062847) do
     t.boolean "auto_accept", default: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "description"
     t.index ["user_id"], name: "index_page_collections_on_user_id"
   end
 

@@ -11,6 +11,15 @@ class PageCollectionsController < ApplicationController
 
   # GET /page_collections/1
   def show
+    @pages = @page_collection.accepted_submissions
+
+    case params.permit(:sort).fetch('sort', nil)
+    when 'alphabetical'
+      @pages = @pages.order('cached_content_name ASC')
+    when 'chronological'
+      @pages = @pages.order('accepted_at DESC')
+    when nil
+    end
   end
 
   # GET /page_collections/new
@@ -35,8 +44,8 @@ class PageCollectionsController < ApplicationController
 
   # PATCH/PUT /page_collections/1
   def update
-    if @page_collection.update(page_collection_params)
-      redirect_to @page_collection, notice: 'Page collection was successfully updated.'
+    if user_signed_in? && current_user == @page_collection.user && @page_collection.update(page_collection_params)
+      redirect_to @page_collection, notice: 'Collection settings updated successfully.'
     else
       render :edit
     end
@@ -61,7 +70,7 @@ class PageCollectionsController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def page_collection_params
-    params.fetch(:page_collection, {})
+    params.require(:page_collection).permit(:title, :subtitle, :description, :color, :cover_image, :auto_accept)
   end
 
   def set_sidenav_expansion

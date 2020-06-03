@@ -1,5 +1,6 @@
 # rubocop:disable LineLength
 Rails.application.routes.draw do
+  default_url_options :host => "notebook.ai"
 
   scope :stream, path: '/stream', as: :stream do
     get '/',         to: 'stream#index'
@@ -10,9 +11,10 @@ Rails.application.routes.draw do
     get '/explore', to: 'page_collections#explore', on: :collection
     get '/submissions', to: 'page_collection_submissions#index', as: 'pending_submissions'
   end
-  resources :page_collection_submissions
-  
-  default_url_options :host => "notebook.ai"
+  resources :page_collection_submissions do
+    get 'approve', on: :member
+    get 'pass',    on: :member
+  end
 
   get 'notice_dismissal/dismiss'
   resources :notifications

@@ -1,6 +1,6 @@
 class PageCollectionSubmissionsController < ApplicationController
   before_action :set_page_collection, only: [:index]
-  before_action :set_page_collection_submission, only: [:show, :edit, :update, :destroy]
+  before_action :set_page_collection_submission, only: [:show, :edit, :update, :destroy, :approve, :pass]
 
   # GET /page_collection_submissions
   def index
@@ -48,6 +48,18 @@ class PageCollectionSubmissionsController < ApplicationController
     redirect_to page_collection_submissions_url, notice: 'Page collection submission was successfully destroyed.'
   end
 
+  def approve
+    return raise "Not allowed: approve" unless user_signed_in? && current_user == @page_collection_submission.page_collection.user
+    @page_collection_submission.update(accepted_at: DateTime.current)
+    redirect_to(page_collection_pending_submissions_path(@page_collection_submission.page_collection), notice: "Submission approved!")
+  end
+
+  def pass
+    return raise "Not allowed: pass" unless user_signed_in? && current_user == @page_collection_submission.page_collection.user
+    @page_collection_submission.destroy
+    redirect_to(page_collection_pending_submissions_path(@page_collection_submission.page_collection), notice: "Submission passed on!")
+  end
+
   private
 
   def set_page_collection
@@ -64,6 +76,7 @@ class PageCollectionSubmissionsController < ApplicationController
     {
       content_type: params.require(:page_collection_submission).require(:content).split('-').first,
       content_id:   params.require(:page_collection_submission).require(:content).split('-').second,
+      explanation:  params.require(:page_collection_submission).fetch(:explanation, ''),
       user_id:      current_user.id,
       submitted_at: DateTime.current,
       page_collection_id: params.require(:page_collection_submission).require(:page_collection_id)
