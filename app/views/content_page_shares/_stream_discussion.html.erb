@@ -1,0 +1,31 @@
+<div class="stream-item">
+  <div class="row">
+    <div class="col s12">
+        <span class="right">
+          <%= render partial: 'content_page_shares/action_dropdown', locals: { share: share, content: content } %>
+        </span>
+      <%= link_to share.user, class: "#{User.color}-text" do %>
+        <%= image_tag share.user.image_url(size=20), class: 'left circle avatar' %>
+        <%= share.user.display_name %>
+      <% end %>
+      started a new 
+      <%= link_to 'discussion', share.content_page %>
+      on the forums.
+      <span class="right">
+        <%= link_to [share.user, share], class: 'grey-text' do %>
+          <%= time_ago_in_words share.created_at %> ago
+        <% end %>
+      </span>
+    </div>
+  </div>
+
+  <%= link_to share.content_page, class: 'white-text' do %>
+    <div class="hoverable card <%= Thredded::Topic.color %>">
+      <div class="card-content">
+        <div class="card-title"><%= content.title %></div>
+        Join this discussion on the forums.
+      </div>
+    </div>
+  <% end %>
+
+</div>

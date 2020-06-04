@@ -287,7 +287,9 @@ end
   # get '/forum', to: 'emergency#temporarily_disabled'
   # get '/forum/:wildcard', to: 'emergency#temporarily_disabled'
   # get '/forum/:wildcard/:another', to: 'emergency#temporarily_disabled'
-  mount Thredded::Engine => '/forum'
+  mount Thredded::Engine,    at: '/forum',               as: :thredded
+  get '/topic/:id',          to: 'thredded_proxy#topic', as: :topic
+
   mount StripeEvent::Engine, at: '/webhooks/stripe'
 
   require 'sidekiq/web'

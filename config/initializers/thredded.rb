@@ -174,8 +174,6 @@ Rails.application.config.to_prepare do
     before_action :set_sidenav_expansion
 
     def set_navbar_color
-      current_path = request.env['REQUEST_PATH']
-
       if content_type = related_content_type
         @navbar_color = content_type.to_s.constantize.hex_color
       end
@@ -235,5 +233,15 @@ Rails.application.config.to_prepare do
       end
     end
 
+  end
+end
+
+require 'extensions/thredded/topic'
+Rails.application.config.to_prepare do
+  begin
+    if ActiveRecord::Base.connection.table_exists?(:thredded_topics)
+      Thredded::Topic.include(Extensions::Thredded::Topic)
+    end
+  rescue ActiveRecord::NoDatabaseError
   end
 end
