@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_06_03_220044) do
+ActiveRecord::Schema.define(version: 2020_06_10_173208) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3067,6 +3067,32 @@ ActiveRecord::Schema.define(version: 2020_06_03_220044) do
     t.index ["user_id", "postable_id"], name: "thredded_user_topic_read_states_user_postable", unique: true
   end
 
+  create_table "timeline_events", force: :cascade do |t|
+    t.integer "timeline_id", null: false
+    t.string "time_label"
+    t.string "title"
+    t.string "description"
+    t.string "notes"
+    t.integer "position"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["timeline_id"], name: "index_timeline_events_on_timeline_id"
+  end
+
+  create_table "timelines", force: :cascade do |t|
+    t.string "name"
+    t.integer "universe_id"
+    t.integer "user_id", null: false
+    t.string "page_type", default: "Timeline"
+    t.datetime "deleted_at"
+    t.datetime "archived_at"
+    t.string "privacy", default: "private"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["universe_id"], name: "index_timelines_on_universe_id"
+    t.index ["user_id"], name: "index_timelines_on_user_id"
+  end
+
   create_table "town_citizens", force: :cascade do |t|
     t.integer "user_id"
     t.integer "town_id"
@@ -3698,6 +3724,9 @@ ActiveRecord::Schema.define(version: 2020_06_03_220044) do
   add_foreign_key "thredded_messageboard_users", "thredded_user_details", on_delete: :cascade
   add_foreign_key "thredded_user_post_notifications", "thredded_posts", column: "post_id", on_delete: :cascade
   add_foreign_key "thredded_user_post_notifications", "users", on_delete: :cascade
+  add_foreign_key "timeline_events", "timelines"
+  add_foreign_key "timelines", "universes"
+  add_foreign_key "timelines", "users"
   add_foreign_key "town_citizens", "towns"
   add_foreign_key "town_citizens", "users"
   add_foreign_key "town_countries", "countries"
