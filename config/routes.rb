@@ -73,7 +73,7 @@ Rails.application.routes.draw do
 
     get '/scratchpad',      to: 'main#notes', as: :notes
 
-    # Legacy routes: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
+    # Legacy route: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
 
     # Billing
@@ -184,6 +184,7 @@ end
         get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
       end
     end
+    resources :timelines
 
     # Content attributes
     put '/content/sort', to: 'content#api_sort'
@@ -195,9 +196,6 @@ end
 
     # Attributes
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
-
-    # Coming Soon TM
-    get '/plots',     to: 'main#comingsoon'
   end
   get 'search/', to: 'search#results'
 

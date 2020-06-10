@@ -97,20 +97,29 @@
         <div class="collapsible-body" style="">
           <ul>
             <li>
-              <%= link_to main_app.prompts_path, class: 'waves-effect' do %>
-                <i class="material-icons left orange-text">lightbulb_outline</i>
-                Prompts
-              <% end %>
-            </li>
-            <li>
               <%= link_to main_app.documents_path, class: 'waves-effect' do %>
                 <i class="material-icons <%= Document.color %>-text">
                   <%= Document.icon %>
                 </i>
                 Documents
                 <span class="badge">
-                  <%= @current_user_content['Document'].count %>
+                  <%= @current_user_content.fetch('Document', []).count %>
                 </span>
+              <% end %>
+            </li>
+            <li>
+              <%= link_to main_app.timelines_path, class: 'waves-effect' do %>
+                <i class="material-icons left <%= Timeline.color %>-text"><%= Timeline.icon %></i>
+                Timelines
+                <span class="badge">
+                  <%= @current_user_content.fetch('Timeline', []).count %>
+                </span>
+              <% end %>
+            </li>
+            <li>
+              <%= link_to main_app.prompts_path, class: 'waves-effect' do %>
+                <i class="material-icons left orange-text">lightbulb_outline</i>
+                Prompts
               <% end %>
             </li>
           </ul>

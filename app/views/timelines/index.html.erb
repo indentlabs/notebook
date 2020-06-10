@@ -1,0 +1,92 @@
+<%= content_for :full_width_page_header do %>
+  <%= render partial: 'content/components/parallax_header', locals: { content_type: 'Timeline', content_class: Timeline } %>
+<% end %>
+
+<% if @timelines.any? %>
+
+  <div class="row">
+    <div class="col s12">
+      <%# render partial: 'content/components/list_filter_bar', locals: { content_type: Timeline } %>
+    </div>
+    <%# render partial: 'content/list/cards', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true, show_template_editor_form: true } %>
+  </div>
+  
+  <% if @show_scope_notice %>
+    <p class="center help-text">
+      Only showing timelines
+      in the <%= link_to @universe_scope.name, @universe_scope, class: Universe.color + '-text' %> universe.
+      <%= link_to(
+        "See timelines from all universes.", 
+        '?universe=all', 
+        class: Timeline.color + '-text')
+      %>
+    </p>
+  <% end %>
+
+<% elsif @timelines.empty? %>
+
+  <div class="row">
+    <% if @current_user_content.fetch('Timeline', []).count > 0 %>
+      <div class="col s12 center">
+        <%# render partial: 'content/components/list_filter_bar', locals: { content_type: Timeline } %>
+      </div>
+    <% end %>
+
+    <div class="col s12 m8 offset-m2">
+      <div class="hoverable card center" style="margin: 20px 0 0 0; padding: 50px 0; border-bottom: 10px solid <%= Timeline.hex_color %>">
+        <h4>
+          You haven't created any timelines
+          <% if @universe_scope %>
+            in the <%= link_to @universe_scope.name, @universe_scope %> universe
+          <% end %>
+          <% if params.key?(:favorite_only) || params.key?(:slug) %>
+            that match these filters
+          <% end %>
+          yet!
+        </h4>
+        <h1>
+          <i class="material-icons <%= Timeline.color %>-text" style="font-size: 200%">
+            <%= Timeline.icon %>
+          </i>
+        </h1>
+        <p>
+          <%= t("content_descriptions.timelines") %>
+        </p>
+
+        <% if current_user.can_create?(Timeline) || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: 'Timeline') %>
+          <%= link_to "Create your first timeline", new_timeline_path(), class: "btn-large #{Timeline.color} darken-1" %>
+        <% else %>
+          <%= link_to "Upgrade to Premium to create your first timeline", subscription_path %>
+        <% end %>
+
+        <p class="grey-text text-lighten-2" style="padding-top: 20px;">
+          <% 5.times { %><i class="material-icons"><%= Timeline.icon %></i>&nbsp;&nbsp;&nbsp;&nbsp;<%}%>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <% if @universe_scope %>
+      <div class="col s12 m4">
+        <div class="hoverable card">
+          <div class="card-content">
+            <div class="card-title">
+              Focus on another universe
+            </div>
+            <p>
+              You're currently focused on the 
+              <%= link_to @universe_scope.name, @universe_scope, class: Universe.color + '-text' %>
+              universe and only seeing timelines in that
+              universe.
+            </p>
+            <br />
+            <p>
+              You can change what universe you're focused on by selecting a different one in the sidebar.
+            </p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

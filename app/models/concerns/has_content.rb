@@ -10,6 +10,7 @@ module HasContent
       #has_many :characters, :locations, etc
       has_many content_type_sym, dependent: :destroy
     end
+    has_many :timelines
 
     has_many :attribute_fields
     has_many :attribute_categories
