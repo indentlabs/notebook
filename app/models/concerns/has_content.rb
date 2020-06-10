@@ -34,9 +34,11 @@ module HasContent
           # Even though we're selecting universe_id here, it's still absent from all of the result rows. No idea why.
           # Removing Universe from `content_types` and adding universe_id to the content_fields works, so maybe it's something to
           # do with UNIONing the NULL column?
-          clause = "SELECT #{polymorphic_content_fields.join(',')},universe_id FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
+          # clause = "SELECT #{polymorphic_content_fields.join(',')},universe_id FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
+          clause = "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
         else
-          clause = "SELECT #{polymorphic_content_fields.join(',')},id          FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
+          # clause = "SELECT #{polymorphic_content_fields.join(',')},id          FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
+          clause = "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
         end
 
         if universe_id.present? && page_type != 'Universe'
