@@ -185,6 +185,7 @@ end
       end
     end
     resources :timelines
+    resources :timeline_events
 
     # Content attributes
     put '/content/sort', to: 'content#api_sort'

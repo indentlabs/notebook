@@ -16,11 +16,13 @@ class TimelinesController < ApplicationController
 
   # GET /timelines/new
   def new
-    @timeline = Timeline.new
+    timeline = current_user.timelines.create.reload
+    redirect_to edit_timeline_path(timeline)
   end
 
   # GET /timelines/1/edit
   def edit
+
   end
 
   # POST /timelines
@@ -58,6 +60,7 @@ class TimelinesController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def timeline_params
+    params.require(:timeline).permit(:name, :description, :universe_id, :deleted_at, :archived_at, :privacy)
     params.fetch(:timeline, {})
   end
 

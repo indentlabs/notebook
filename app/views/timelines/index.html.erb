@@ -4,12 +4,30 @@
 
 <% if @timelines.any? %>
 
-  <div class="row">
-    <div class="col s12">
-      <%# render partial: 'content/components/list_filter_bar', locals: { content_type: Timeline } %>
+  <% @timelines.each do |timeline| %>
+    <div class="row">
+      <div class="col s12">
+
+        <%= link_to edit_timeline_path(timeline) do %>
+          <div class="hoverable card">
+            <div class="card-image"  style="height: 140px;">
+              <img src="https://images.unsplash.com/photo-1486927181919-3ac1fc3a8082?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1401&q=80" style="height: 140px;">
+              <span class="card-title"><%= timeline.name.presence || 'Untitled Timeline' %></span>
+              <a class="btn-floating halfway-fab waves-effect waves-light red">
+                <i class="material-icons">search</i>
+              </a>
+            </div>
+            <div class="card-content">
+              <p>
+                I am a very simple card. I am good at containing small bits of information. I am convenient because I require little markup to use effectively.
+              </p>
+            </div>
+          </div>
+        <% end %>
+
+      </div>
     </div>
-    <%# render partial: 'content/list/cards', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true, show_template_editor_form: true } %>
-  </div>
+  <% end %>
   
   <% if @show_scope_notice %>
     <p class="center help-text">

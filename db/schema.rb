@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_06_10_173208) do
+ActiveRecord::Schema.define(version: 2020_06_15_072527) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3089,6 +3089,10 @@ ActiveRecord::Schema.define(version: 2020_06_10_173208) do
     t.string "privacy", default: "private"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "description"
+    t.string "subtitle"
+    t.string "notes"
+    t.string "private_notes"
     t.index ["universe_id"], name: "index_timelines_on_universe_id"
     t.index ["user_id"], name: "index_timelines_on_user_id"
   end

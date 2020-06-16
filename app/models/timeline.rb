@@ -5,8 +5,10 @@ class Timeline < ApplicationRecord
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
-  belongs_to :universe
+  belongs_to :universe, optional: true
   belongs_to :user
+
+  has_many :timeline_events
 
   validates :user_id, presence: true
 
