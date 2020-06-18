@@ -10,6 +10,11 @@ class UsersController < ApplicationController
     return redirect_to(root_path, notice: 'That user does not exist.') if @user.nil?
     return redirect_to(root_path, notice: 'That user does not exist.') if @user.private_profile?
 
+    @feed = ContentPageShare.where(user_id: @user.id)
+      .order('created_at DESC')
+      .includes([:content_page, :user, :share_comments])
+      .limit(100)
+
     @content = @user.public_content.select { |type, list| list.any? }
     @tabs    = @content.keys
   
