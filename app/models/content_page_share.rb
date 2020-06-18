@@ -12,6 +12,8 @@ class ContentPageShare < ApplicationRecord
   end
 
   def followed_by?(user)
+    return false if user.nil?
+    
     user.content_page_share_followings.find_by(content_page_share_id: self.id).present?
   end
 
