@@ -1,4 +1,5 @@
 <br />
+
 <div class="row">
   <div class="col s12">
     <%= render partial: 'content_page_shares/form' %>
@@ -6,7 +7,13 @@
 </div>
 
 <% @feed.each do |share| %>
-  <%= render partial: 'content_page_shares/stream_item', locals: { share: share, content: share.content_page } %>
+  <% if Rails.application.config.content_types[:all].map(&:name).include?(share.content_page_type) %>
+    <%= render partial: 'content_page_shares/stream_item', locals: { share: share, content: share.content_page } %>
+  <% elsif share.content_page_type == Thredded::Topic.name %>
+    <%= render partial: 'content_page_shares/stream_discussion', locals: { share: share, content: share.content_page } %>
+  <% else %>
+    <strong>Error loading stream item</strong>
+  <% end %>
   <br /><br />
 <% end %>
 

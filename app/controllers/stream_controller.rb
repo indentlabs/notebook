@@ -33,7 +33,7 @@ class StreamController < ApplicationController
   def set_stream_navbar_actions
     @navbar_actions = [
       {
-        label: 'From Your Network',
+        label: 'You & Your Network',
         href: main_app.stream_path
       },
       {
