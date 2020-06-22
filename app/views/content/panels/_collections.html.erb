@@ -1,0 +1,33 @@
+<div id="collections_panel" class="row panel">
+  <div class="row">
+    <div class="col s12 m10 offset-m1">
+      <div class="card-panel blue lighten-5">
+        <i class="left material-icons grey-text">help</i>
+        Links will automatically appear here whenever you add this page to a public collection.<br />
+        Only you can see this message. <%= link_to 'Dismiss this message', '#' %>.
+      </div>
+
+      <% content.page_collection_submissions.accepted.each do |submission| %>
+        <% collection = submission.page_collection %>
+        <%= link_to collection do %>
+          <div class="hoverable card">
+            <div class="card-image">
+              <%= image_tag collection.cover_image, style: 'max-height: 300px;' %>
+              <span class="card-title">
+                <%= collection.title %>
+                <br />
+                <small>
+                  <% if collection.subtitle? %>
+                    <%= collection.subtitle %>
+                  <% else %>
+                    <%= @content.name %> is included in this collection
+                  <% end %>              
+                </small>
+              </span>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

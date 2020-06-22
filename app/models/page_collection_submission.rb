@@ -5,6 +5,8 @@ class PageCollectionSubmission < ApplicationRecord
 
   after_create :cache_content_name
 
+  scope :accepted, -> { where.not(accepted_at: nil).uniq(&:page_collection_id) }
+
   after_create do
     # If the submission was created by the collection owner, we want to automatically approve it.
     # If the collection has opted to automatically accept submissions, we also want to approve it.

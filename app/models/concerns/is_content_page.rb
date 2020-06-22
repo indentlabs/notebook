@@ -11,7 +11,8 @@ module IsContentPage
     include HasChangelog
     include HasPageTags
 
-    has_many :content_page_shares, as: :content_page, dependent: :destroy
+    has_many :content_page_shares,         as: :content_page, dependent: :destroy
+    has_many :page_collection_submissions, as: :content,      dependent: :destroy
 
     scope :unarchived, -> { where(archived_at: nil) }
     def archive!
