@@ -45,6 +45,9 @@ class AdminController < ApplicationController
   def unsubscribe
   end
 
+  def churn
+  end
+
   def perform_unsubscribe
     emails = params[:emails].split(/[\r|\n]+/)
     @users = User.where(email: emails)
