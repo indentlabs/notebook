@@ -48,11 +48,13 @@ class AdminController < ApplicationController
   def perform_unsubscribe
     emails = params[:emails].split(/[\r|\n]+/)
     @users = User.where(email: emails)
-    @users.update_all(selected_billing_plan_id: 1)
     @users.each do |user|
-      SubscriptionService.cancel_all_existing_subscriptions(user)
-      UnsubscribedMailer.unsubscribed(user).deliver_now! if Rails.env.production?
+      if user.on_premium_plan?
+        SubscriptionService.cancel_all_existing_subscriptions(user)
+        UnsubscribedMailer.unsubscribed(user).deliver_now! if Rails.env.production?
+      end
     end
+    @users.update_all(selected_billing_plan_id: 1)
   end
 
   def promos
