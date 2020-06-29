@@ -43,10 +43,10 @@ class User < ApplicationRecord
   end
 
   has_many :user_followings,              dependent: :destroy
-  has_many :followed_users,               through: :user_followings, source: :followed_user
+  has_many :followed_users, -> { distinct }, through: :user_followings, source: :followed_user
   # has_many :followed_by_users,            through: :user_followings, source: :user # todo unsure how to actually write this, so we do it manually below
   def followed_by_users
-    User.where(id: UserFollowing.where(followed_user_id: self.id).pluck(:user_id))    
+    User.where(id: UserFollowing.where(followed_user_id: self.id).pluck(:user_id)) 
   end
   def followed_by?(user)
     followed_by_users.pluck(:id).include?(user.id)
@@ -244,7 +244,7 @@ class User < ApplicationRecord
   end
 
   def follow_andrew
-    andrew = User.find_by(id: 1)
+    andrew = User.find_by(id: 5)
     return unless andrew.present?
 
     followed_users << andrew

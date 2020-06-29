@@ -97,4 +97,13 @@ namespace :one_off do
     )
 
   end
+
+  desc "Create initial public collections"
+  task make_everyone_follow_andrew: :environment do
+    # Start at the end to minimize overlap with new users since the task started (since new code autofollows)
+    User.all.order('id DESC').find_each do |user|
+      UserFollowing.create(user.id, followed_user_id: 5)
+    end
+
+  end
 end
