@@ -5,14 +5,14 @@
     end]
   %>
 
-  <% if submittable_content.values.flatten.any? %>
-    <ul class="collapsible">
-      <li>
-        <div class="collapsible-header blue white-text">
-          <i class="material-icons <%= PageCollection.color %>-text text-darken-2"><%= PageCollection.icon %></i>
-          <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page
-        </div>
-        <div class="collapsible-body">
+  <ul class="collapsible">
+    <li>
+      <div class="collapsible-header blue white-text">
+        <i class="material-icons <%= PageCollection.color %>-text text-darken-2"><%= PageCollection.icon %></i>
+        <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page
+      </div>
+      <div class="collapsible-body">
+        <% if submittable_content.values.flatten.any? %>
           <%= form_for PageCollectionSubmission.new do |f| %>
             <%= f.hidden_field :page_collection_id, value: @page_collection.id %>
             <div class="input-field">
@@ -34,12 +34,22 @@
             <div class="input-field">
               <%= f.text_area :explanation, class: 'materialize-textarea' %>
               <%= f.label :explanation, 'Optional: add a message' %>
+              <div class="help-text">
+                If this submission is accepted, this message will be visible to everyone.
+              </div>
             </div>
             
             <%= f.submit (@page_collection.user == current_user ? 'Add' : 'Submit'), class: "btn #{PageCollection.color} white-text" %>
           <% end %>
-        </div>
-      </li>
-    </ul>
-  <% end %>
+        <% else %>
+          <p>
+            You don't have any public pages to submit to this collection.
+          </p>
+          <p>
+            The individual page to be submitted must be made public, not just be in a public universe.
+          </p>
+        <% end %>
+      </div>
+    </li>
+  </ul>
 <% end %>
