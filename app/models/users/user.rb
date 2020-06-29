@@ -140,6 +140,8 @@ class User < ApplicationRecord
   after_create :initialize_referral_code
   after_create :initialize_secure_code
   after_create :initialize_content_type_activators
+  after_create :follow_andrew
+
   # TODO we should do this, but we need to figure out how to make it fast first
   # after_create :initialize_categories_and_fields
 
@@ -239,6 +241,14 @@ class User < ApplicationRecord
     to_activate.uniq.each do |content_type|
       user_content_type_activators.create(content_type: content_type.name)
     end
+  end
+
+  def follow_andrew
+    andrew = User.find_by(id: 1)
+    return unless andrew.present?
+
+    followed_users << andrew
+    save
   end
 
   def update_without_password(params, *options)

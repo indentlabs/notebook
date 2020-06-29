@@ -13,6 +13,37 @@
     </div>
   <% end %>
 
+  <div class="col s12 m4 l3">
+    <div class="hoverable card-panel">
+      <div class="grey-text uppercase">
+        Joined Notebook.ai
+      </div>
+      <div>
+        <%= time_ago_in_words @user.created_at %> ago
+      </div>
+      <br />
+
+      <div class="grey-text uppercase">
+        Following
+      </div>
+      <div>
+        <%= link_to following_user_path(@user) do %>
+          <%= pluralize @user.followed_users.count, 'worldbuilder' %>
+        <% end %>
+      </div>
+      <br />
+
+      <div class="grey-text uppercase">
+        Followed by
+      </div>
+      <div>
+        <%= link_to followers_user_path(@user) do %>
+          <%= pluralize @user.followed_by_users.count, 'worldbuilder' %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
   <% if @user.username.present? || @user.other_names.present? %>
     <div class="col s12 m4 l3">
       <div class="hoverable card-panel">
@@ -39,9 +70,9 @@
     </div>
   <% end %>
 
-  <div class="col s12 m4 l3">
-    <div class="hoverable card-panel">
-      <% if @user.website.present? %>
+  <% if @user.website.present? %>
+    <div class="col s12 m4 l3">
+      <div class="hoverable card-panel">
         <div class="grey-text uppercase">
           Website
         </div>
@@ -49,9 +80,9 @@
           <%= link_to @user.website, @user.website, target: '_new', data: { confirm: "You are about to visit an external website not owned by Notebook.ai. Please only continue if you trust this user." }, ref: 'nofollow' %>
         </div>
         <br />
-      <% end %>
+      </div>
     </div>
-  </div>
+  <% end %>
 
   <% if @user.favorite_page_type? && @favorite_content.count > 0 %>
     <div class="col s12 m4 l3">
@@ -67,17 +98,6 @@
       <% end %>
     </div>
   <% end %>
-
-  <div class="col s12 m4 l3">
-    <div class="hoverable card-panel">
-      <div class="grey-text uppercase">
-        Joined Notebook.ai
-      </div>
-      <div>
-        <%= time_ago_in_words @user.created_at %> ago
-      </div>
-    </div>
-  </div>
 
   <% if @user.bio.present? %>
     <div class="col s12">

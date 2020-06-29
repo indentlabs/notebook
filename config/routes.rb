@@ -36,6 +36,9 @@ Rails.application.routes.draw do
       get 'more_actions', to: 'registrations#more_actions'
     end
 
+    get 'followers', on: :member
+    get 'following', on: :member
+
     # get :characters, on: :member <...etc...>
     Rails.application.config.content_types[:all].each do |content_type|
       get content_type.name.downcase.pluralize.to_sym, on: :member
@@ -50,7 +53,11 @@ Rails.application.routes.draw do
   end
   resources :user_followings
   resources :user_blockings
+
+  # Username URL aliases
   get '/@:username', to: 'users#show', as: :profile_by_username
+  get '/@:username/followers', to: 'users#followers'
+  get '/@:username/following', to: 'users#following'
 
   resources :documents do
     get  '/analysis',         to: 'documents#analysis',                on: :member

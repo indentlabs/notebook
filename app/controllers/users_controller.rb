@@ -86,6 +86,18 @@ class UsersController < ApplicationController
     notifier.ping ":bomb: :bomb: :bomb: #{user.email.split('@').first}@ (##{user.id}) just deleted their account."
   end
 
+  def followers
+    @user    = User.find_by(user_params)
+    @accent_color     = @user.favorite_page_type_color
+    @accent_icon      = @user.favorite_page_type_icon
+  end
+
+  def following
+    @user    = User.find_by(user_params)
+    @accent_color     = @user.favorite_page_type_color
+    @accent_icon      = @user.favorite_page_type_icon
+  end
+
   private
 
   def user_params
