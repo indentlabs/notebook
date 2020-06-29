@@ -7,11 +7,27 @@ class PageCollectionSubmission < ApplicationRecord
 
   scope :accepted, -> { where.not(accepted_at: nil).uniq(&:page_collection_id) }
 
+  def accept!
+    update(accepted_at: DateTime.current)
+
+    # TODO Create a "this user got accepted into a submission!" event
+    # ContentPageShare.create(
+    #   user_id:           self.user_id,
+    #   content_page_type: self.class.name,
+    #   content_page_id:   self.id,
+    #   shared_at:         self.created_at,
+    #   privacy:           'public',
+    #   message:           self.title,
+    # )
+  end
+
   after_create do
     # If the submission was created by the collection owner, we want to automatically approve it.
     # If the collection has opted to automatically accept submissions, we also want to approve it.
     if user == page_collection.user || page_collection.auto_accept?
       update(accepted_at: DateTime.current)
+
+      # TODO Create a "user added a page to their collection" event
     end
   end
 

@@ -50,7 +50,7 @@ class PageCollectionSubmissionsController < ApplicationController
 
   def approve
     return raise "Not allowed: approve" unless user_signed_in? && current_user == @page_collection_submission.page_collection.user
-    @page_collection_submission.update(accepted_at: DateTime.current)
+    @page_collection_submission.accept!
 
     # Create a notification for the submitter to let them know it's been accepted
     @page_collection_submission.user.notifications.create(
