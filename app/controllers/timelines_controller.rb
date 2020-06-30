@@ -60,8 +60,7 @@ class TimelinesController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def timeline_params
-    params.require(:timeline).permit(:name, :description, :universe_id, :deleted_at, :archived_at, :privacy)
-    params.fetch(:timeline, {})
+    params.require(:timeline).permit(:name, :subtitle, :description, :notes, :private_notes, :universe_id, :deleted_at, :archived_at, :privacy)
   end
 
   def set_navbar_color
