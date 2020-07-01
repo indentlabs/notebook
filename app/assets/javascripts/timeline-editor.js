@@ -1,4 +1,8 @@
 $(document).ready(function () {
+  function get_event_id_from_url(url) {
+    return url.split('/')[4];
+  }
+
   $('.js-trigger-autosave-on-change').change(function () {
     
   });
@@ -10,14 +14,75 @@ $(document).ready(function () {
     $.get(
       "/plan/move/timeline_events/" + event_id + "/top"
     ).done(function () {
-      alert('success');
+      // Move in the UI
+      var event_id = get_event_id_from_url(this.url);
+      var event_container = $('.timeline-events-container').find('.timeline-event-container[data-event-id="' + event_id + '"]');
+      var events_list     = $('.timeline-events-container').find('.timeline-event-container');
 
-      // Move to top
-      debugger;
+      event_container.insertBefore(events_list[0]);
     }).fail(function() {
       alert("Something went wrong and your change didn't save. Please try again.");
     });
 
+    return false;
+  });
+
+  $('.js-move-event-up').click(function () {
+    var event_container = $(this).closest('.timeline-event-container');
+    var event_id = event_container.data('event-id');
+
+    $.get(
+      "/plan/move/timeline_events/" + event_id + "/up"
+    ).done(function () {
+      // Move in the UI
+      var event_id = get_event_id_from_url(this.url);
+      var event_container = $('.timeline-events-container').find('.timeline-event-container[data-event-id="' + event_id + '"]');
+
+      event_container.insertBefore(event_container.prev());
+    }).fail(function() {
+      alert("Something went wrong and your change didn't save. Please try again.");
+    });
+
+    return false;
+  });
+
+  $('.js-move-event-down').click(function () {
+    var event_container = $(this).closest('.timeline-event-container');
+    var event_id = event_container.data('event-id');
+
+    $.get(
+      "/plan/move/timeline_events/" + event_id + "/down"
+    ).done(function () {
+      // Move in the UI
+      var event_id = get_event_id_from_url(this.url);
+      var event_container = $('.timeline-events-container').find('.timeline-event-container[data-event-id="' + event_id + '"]');
+
+      event_container.insertAfter(event_container.next());
+    }).fail(function() {
+      alert("Something went wrong and your change didn't save. Please try again.");
+    });
+
+    return false;
+  });
+
+  $('.js-move-event-to-bottom').click(function () {
+    var event_container = $(this).closest('.timeline-event-container');
+    var event_id = event_container.data('event-id');
+
+    $.get(
+      "/plan/move/timeline_events/" + event_id + "/bottom"
+    ).done(function () {
+      // Move in the UI
+      var event_id = get_event_id_from_url(this.url);
+      var event_container = $('.timeline-events-container').find('.timeline-event-container[data-event-id="' + event_id + '"]');
+      var events_list     = $('.timeline-events-container').find('.timeline-event-container');
+
+      event_container.insertAfter(events_list[events_list.length - 1]);
+    }).fail(function() {
+      alert("Something went wrong and your change didn't save. Please try again.");
+    });
+
+    return false;
   });
 
   $('#js-create-timeline-event').click(function () {
