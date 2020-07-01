@@ -1,5 +1,8 @@
 class TimelineEventsController < ApplicationController
-  before_action :set_timeline_event, only: [:show, :edit, :update, :destroy]
+  before_action :set_timeline_event, only: [
+    :show, :edit, :update, :destroy,
+    :move_up, :move_to_top, :move_down, :move_to_bottom
+  ]
 
   # GET /timeline_events
   def index
@@ -21,12 +24,14 @@ class TimelineEventsController < ApplicationController
 
   # POST /timeline_events
   def create
-    @timeline_event = TimelineEvent.new(timeline_event_params)
+    raise "NoAccess" unless user_signed_in? && current_user.timelines.pluck(:id).include?(timeline_event_params.fetch('timeline_id').to_i)
+
+    @timeline_event = TimelineEvent.new(timeline_event_params) 
 
     if @timeline_event.save
-      redirect_to @timeline_event, notice: 'Timeline event was successfully created.'
+      render json: { status: 'success', id: @timeline_event.reload.id }
     else
-      render :new
+      raise "Failed to create TimelineEvent"
     end
   end
 
@@ -43,6 +48,23 @@ class TimelineEventsController < ApplicationController
   def destroy
     @timeline_event.destroy
     redirect_to timeline_events_url, notice: 'Timeline event was successfully destroyed.'
+  end
+
+  # Move functions
+  def move_up
+    @timeline_event.move_higher if @timeline_event.can_be_modified_by?(current_user)
+  end
+
+  def move_down
+    @timeline_event.move_lower if @timeline_event.can_be_modified_by?(current_user)
+  end
+
+  def move_to_top
+    @timeline_event.move_to_top if @timeline_event.can_be_modified_by?(current_user)
+  end
+
+  def move_to_bottom
+    @timeline_event.move_to_bottom if @timeline_event.can_be_modified_by?(current_user)
   end
 
   private

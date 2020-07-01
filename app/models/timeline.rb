@@ -5,12 +5,14 @@ class Timeline < ApplicationRecord
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
+  validates :user_id, presence: true
+
   belongs_to :universe, optional: true
   belongs_to :user
 
-  has_many :timeline_events
+  has_many :timeline_events, -> { order(position: :asc) }
 
-  validates :user_id, presence: true
+  after_create :initialize_first_event
 
   def self.content_name
     'timeline'
@@ -30,5 +32,9 @@ class Timeline < ApplicationRecord
 
   def self.icon
     'timeline'
+  end
+
+  def initialize_first_event
+    timeline_events.create(title: "Untitled Event", position: 1)
   end
 end

@@ -192,7 +192,14 @@ end
       end
     end
     resources :timelines
-    resources :timeline_events
+    resources :timeline_events do
+      scope '/move', as: :move do
+        get 'up',     to: 'timeline_events#move_up',        on: :member
+        get 'down',   to: 'timeline_events#move_down',      on: :member
+        get 'top',    to: 'timeline_events#move_to_top',    on: :member
+        get 'bottom', to: 'timeline_events#move_to_bottom', on: :member
+      end
+    end
 
     # Content attributes
     put '/content/sort', to: 'content#api_sort'

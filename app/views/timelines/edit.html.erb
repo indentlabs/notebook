@@ -2,12 +2,13 @@
 <br />
 <%= form_for @timeline do |f| %>
   <div class="row">
-    <div class="col s12 m8 l9">
+    <div class="col s12 m7 l9">
       <div class="input-field">
         <%= f.text_field :name, class: 'materialize-textarea' %>
         <%= f.label :name, 'Timeline name' %>
       </div>
     </div>
+    <!--
     <div class="col s12 m4 l3 right">
       <%= link_to '#', class: 'hoverable btn right ' + Timeline.color do %>
         <i class="material-icons small">star</i>
@@ -19,6 +20,7 @@
         <i class="material-icons small">share</i>
       <% end %>
     </div>
+    -->
     <div class="col s12">
       <ul class="collapsible">
         <li>
@@ -35,16 +37,19 @@
               <%= f.text_area :description, class: 'materialize-textarea' %>
               <%= f.label :description, 'Description' %>
             </div>
-            <div>
-              Universe picker
+            <div class="input-field">
+                <%= f.select :universe_id, current_user.universes.pluck(:name, :id), include_blank: true, class: 'materialize-textarea' %>
+                <%= f.label 'Universe' %>
             </div>
-            <div>
-              <%= f.select :privacy, [['Private', 'private'], ['Public', 'public']] %>
+            <div class="input-field">
+              <%= f.select :privacy, [['Private', 'private'], ['Public', 'public']], class: 'materialize-textarea' %>
               <%= f.label :privacy %>
             </div>
+            <!--
             <div>
               tags
             </div>
+            -->
             <div class="input-field">
               <%= f.text_area :notes, class: 'materialize-textarea' %>
               <%= f.label :notes %>
@@ -66,102 +71,149 @@
   </div>
 <% end %>
 
-<div class="timeline-editor">
+<div class="timeline-editor" data-timeline-id="<%= @timeline.id %>">
   <!--
   <div class="filter-bar">
     (filter events by character, location, etc)
   </div>
   -->
 
-  <% 3.times do %>
-    <div class="timeline-event-template">
-      <%= form_for @timeline.timeline_events.new(title: 'Untitled Event' ) do |f| %>
-        <%= f.hidden_field :timeline_id %>
-        <div class="row">
-          <div class="col l2">
-            <div class="input-field align-right">
-              <%= f.text_area :time_label, class: 'materialize-textarea' %>
-              <%= f.label :time_label, 'Time label' %>
+  <div class="timeline-events-container" data-timeline-id="<%= @timeline.id %>">
+    <% @timeline.timeline_events.each do |event| %>
+      <div class="timeline-event-container" data-event-id="<%= event.id %>">
+        <%= form_for event do |f| %>
+          <%= f.hidden_field :timeline_id %>
+          <div class="row">
+            <div class="col l2">
+              <div class="input-field align-right">
+                <%= f.text_area :time_label, class: 'materialize-textarea' %>
+                <%= f.label :time_label, 'Time label' %>
+              </div>
+              <div class="grey-text right">
+                #<%= event.position %>
+              </div>
+              <div class="clearfix"></div>
+              <ul>
+                <li>
+                  <%= link_to '#', class: 'js-move-event-to-top' do %>
+                    <i class="material-icons tiny right">keyboard_arrow_up</i>
+                    Move to top
+                  <% end %>
+                </li>
+                <li>
+                  <%= link_to '#', class: 'js-move-event-up' do %>
+                    <i class="material-icons tiny right">keyboard_arrow_up</i>
+                    Move up
+                  <% end %>
+                </li>
+                <li>
+                  <%= link_to '#', class: 'js-move-event-down' do %>
+                    <i class="material-icons tiny right">keyboard_arrow_down</i>
+                    Move down
+                  <% end %>
+                </li>
+                <li>
+                  <%= link_to '#', class: 'js-move-event-to-bottom' do %>
+                    <i class="material-icons tiny right">keyboard_arrow_down</i>
+                    Move to bottom
+                  <% end %>
+                </li>
+              </ul>
             </div>
-            <ul>
-              <li><%= link_to '#' do %><i class="material-icons tiny right">keyboard_arrow_up</i>Move up<% end %></li>
-              <li><%= link_to '#' do %><i class="material-icons tiny right">keyboard_arrow_down</i>Move down<% end %></li>
-            </ul>
-          </div>
-          <div class="col l1 cfenter" style="margin-bottom: -60px; margin-left: -7px; margin-right: -40px;">
-            <%= image_tag 'graphics/timeline-line.png' %>
-          </div>
-          <div class="col l6">
-            <div class="card <%# Timeline.color %>" style="border-top: 5px solid <%= Timeline.hex_color %>">
-              <div class="card-content white-text">
-                <span class="card-title">
+            <div class="col l1 cfenter" style="margin-bottom: -60px; margin-left: -7px; margin-right: -40px;">
+              <%= image_tag 'graphics/timeline-line.png' %>
+            </div>
+            <div class="col l6">
+              <div class="hoverable card <%# Timeline.color %>" style="border-top: 5px solid <%= Timeline.hex_color %>">
+                <div class="card-content white-text">
+                  <span class="card-title">
+                    <div class="input-field">
+                      <%= f.text_field :title, class: 'materialize-textarea' %>
+                      <%= f.label :title, 'Event Title' %>
+                    </div>
+                  </span>
                   <div class="input-field">
-                    <%= f.text_field :title, class: 'materialize-textarea' %>
-                    <%= f.label :title, 'Event Title' %>
+                    <%= f.text_area :description, class: 'materialize-textarea' %>
+                    <%= f.label :description %>
                   </div>
-                </span>
-                <div class="input-field">
-                  <%= f.text_area :description, class: 'materialize-textarea' %>
-                  <%= f.label :description %>
+                  <div class="input-field">
+                    <%= f.text_area :notes, class: 'materialize-textarea' %>
+                    <%= f.label :notes %>
+                  </div>
                 </div>
-                <div class="input-field">
-                  <%= f.text_area :notes, class: 'materialize-textarea' %>
-                  <%= f.label :notes %>
+                <!--
+                <div class="card-action">
+                  <a href="#" class="left">Manage changes</a>
+                  <a href="#" class="right">This is a link</a>
+                  <div class="clearfix"></div>
                 </div>
+                -->
               </div>
-              <!--
-              <div class="card-action">
-                <a href="#" class="left">Manage changes</a>
-                <a href="#" class="right">This is a link</a>
-                <div class="clearfix"></div>
+            </div>
+            <div class="col l3">
+              <div class="grey-text uppercase">
+                In this event
               </div>
-              -->
-            </div>
-          </div>
-          <div class="col l3">
-            <div class="grey-text uppercase">
-              In this event
-            </div>
-            <ul class="collapsible">
-              <li>
-                <div class="collapsible-header">
-                  <i class="material-icons <%= Character.color %>-text"><%= Character.icon %></i>
-                  Characters
-                  <span class="badge">5</span>
-                </div>
-                <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-              </li>
-              <li>
-                <div class="collapsible-header">
-                  <i class="material-icons <%= Location.color %>-text"><%= Location.icon %></i>
-                  Locations
-                  <span class="badge">3</span>
-                </div>
-                <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-              </li>
-              <li>
-                <div class="collapsible-header">
-                  <i class="material-icons <%= Item.color %>-text"><%= Item.icon %></i>
-                  Items
-                  <span class="badge">5</span>
-                </div>
-                <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-              </li>
-            </ul>
-            <p class="center">
-              <small>
-                <%= link_to 'Link a page', '#' %>
-              </small>
-            </p>
+              <ul class="collapsible">
+                <li>
+                  <div class="collapsible-header">
+                    <i class="material-icons <%= Character.color %>-text"><%= Character.icon %></i>
+                    Characters
+                    <span class="badge">5</span>
+                  </div>
+                  <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+                </li>
+                <li>
+                  <div class="collapsible-header">
+                    <i class="material-icons <%= Location.color %>-text"><%= Location.icon %></i>
+                    Locations
+                    <span class="badge">3</span>
+                  </div>
+                  <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+                </li>
+                <li>
+                  <div class="collapsible-header">
+                    <i class="material-icons <%= Item.color %>-text"><%= Item.icon %></i>
+                    Items
+                    <span class="badge">5</span>
+                  </div>
+                  <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+                </li>
+              </ul>
+              <p class="center">
+                <small>
+                  <%= link_to 'Link a page', '#' %>
+                </small>
+              </p>
 
+            </div>
           </div>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="timeline-event-template">
+    <p>Template goes here</p>
+  </div>
+    
   <div class="row">
     <div class="col s12 center">
-      <%= link_to 'Add an event', '#', class: 'btn black white-text' %>
+      <div class="loading-indicator">
+        <div class="preloader-wrapper small active">
+          <div class="spinner-layer spinner-green-only">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div><div class="gap-patch">
+              <div class="circle"></div>
+            </div><div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%= link_to 'Add an event', '#', class: 'btn black white-text', id: 'js-create-timeline-event' %>
     </div>
   </div>
 
