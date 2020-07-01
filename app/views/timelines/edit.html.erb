@@ -185,7 +185,7 @@
               </ul>
               <p class="center">
                 <small>
-                  <%= link_to 'Link a page', '#' %>
+                  <%= link_to 'Link a page', '#', class: 'js-link-entity' %>
                 </small>
               </p>
 
@@ -220,4 +220,43 @@
     </div>
   </div>
 
+</div>
+
+<div id="entity-link-modal" class="modal">
+  <input id="linking-event-id" value="-1" />
+  <div class="modal-content">
+    <h4>Link a page to this event</h4>
+    <p>
+      Select from your pages below.
+    </p>
+    <%= form_with url: '#', method: :post do |f| %>
+      <%= f.hidden_field :timeline_id,          value: @timeline.id %>
+      <%= f.hidden_field :entity_type,          value: nil %>
+      <%= f.hidden_field :entity_id,            value: nil %>
+
+      <% @current_user_content.each do |content_type, content_list| %>
+        <% content_type_class = content_type.constantize %>
+        <h5><%= content_type.pluralize %></h5>
+        <ul class="collection">
+          <% content_list.each do |content| %>
+            <a href="#" 
+               class="<%= content_type_class.color %>-text js-link-entity-selection" 
+               data-id="<%= content.id %>"
+               data-type="<%= content_type %>">
+              <li class="collection-item hoverable">
+                <i class="material-icons left"><%= content_type_class.icon %></i>
+                <%= content.name %>
+                <span class="secondary-content">
+                  <i class="material-icons">link</i>
+                </span>
+              </li>
+            </a>
+          <% end %>
+        </ul>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+  </div>
 </div>

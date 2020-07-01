@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_06_15_072527) do
+ActiveRecord::Schema.define(version: 2020_07_01_020228) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3067,6 +3067,17 @@ ActiveRecord::Schema.define(version: 2020_06_15_072527) do
     t.index ["user_id", "postable_id"], name: "thredded_user_topic_read_states_user_postable", unique: true
   end
 
+  create_table "timeline_event_entities", force: :cascade do |t|
+    t.string "entity_type", null: false
+    t.integer "entity_id", null: false
+    t.integer "timeline_event_id", null: false
+    t.string "notes"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["entity_type", "entity_id"], name: "index_timeline_event_entities_on_entity_type_and_entity_id"
+    t.index ["timeline_event_id"], name: "index_timeline_event_entities_on_timeline_event_id"
+  end
+
   create_table "timeline_events", force: :cascade do |t|
     t.integer "timeline_id", null: false
     t.string "time_label"
@@ -3728,6 +3739,7 @@ ActiveRecord::Schema.define(version: 2020_06_15_072527) do
   add_foreign_key "thredded_messageboard_users", "thredded_user_details", on_delete: :cascade
   add_foreign_key "thredded_user_post_notifications", "thredded_posts", column: "post_id", on_delete: :cascade
   add_foreign_key "thredded_user_post_notifications", "users", on_delete: :cascade
+  add_foreign_key "timeline_event_entities", "timeline_events"
   add_foreign_key "timeline_events", "timelines"
   add_foreign_key "timelines", "universes"
   add_foreign_key "timelines", "users"

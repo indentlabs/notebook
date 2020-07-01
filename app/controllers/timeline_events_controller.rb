@@ -1,7 +1,8 @@
 class TimelineEventsController < ApplicationController
   before_action :set_timeline_event, only: [
     :show, :edit, :update, :destroy,
-    :move_up, :move_to_top, :move_down, :move_to_bottom
+    :move_up, :move_to_top, :move_down, :move_to_bottom,
+    :link_entity, :unlink_entity
   ]
 
   # GET /timeline_events
@@ -24,7 +25,7 @@ class TimelineEventsController < ApplicationController
 
   # POST /timeline_events
   def create
-    raise "NoAccess" unless user_signed_in? && current_user.timelines.pluck(:id).include?(timeline_event_params.fetch('timeline_id').to_i)
+    raise "No Access: (signed in: #{user_signed_in?})" unless user_signed_in? && current_user.timelines.pluck(:id).include?(timeline_event_params.fetch('timeline_id').to_i)
 
     @timeline_event = TimelineEvent.new(timeline_event_params) 
 
@@ -48,6 +49,18 @@ class TimelineEventsController < ApplicationController
   def destroy
     @timeline_event.destroy
     redirect_to timeline_events_url, notice: 'Timeline event was successfully destroyed.'
+  end
+
+  def link_entity
+    return unless @timeline_event.can_be_modified_by?(current_user)
+    require 'pry'
+    binding.pry
+    @timeline_event.timeline_event_entities.find_or_create_by(timeline_event_entity_params)
+  end
+
+  def unlink_entity
+    return unless @timeline_event.can_be_modified_by?(current_user)
+    @timeline_event.timeline_event_entities.find_by(timeline_event_entity_params).try(:destroy)
   end
 
   # Move functions
@@ -77,5 +90,9 @@ class TimelineEventsController < ApplicationController
   # Only allow a trusted parameter "white list" through.
   def timeline_event_params
     params.require(:timeline_event).permit(:time_label, :title, :description, :notes, :timeline_id)
+  end
+
+  def timeline_event_entity_params
+    params.permit(:entity_type, :entity_id)
   end
 end
