@@ -4,7 +4,10 @@ $(document).ready(function () {
   }
 
   $('.js-trigger-autosave-on-change').change(function () {
-    
+    $(this).closest('.autosave-form').submit();
+    M.toast({
+      html: "Autosaving..."
+    });
   });
 
   $('.js-move-event-to-top').click(function () {
@@ -148,9 +151,12 @@ $(document).ready(function () {
         "entity_id":   entity_id
       }
     ).done(function () {
-      debugger;
       // todo update the UI somehow
+      M.toast({
+        html: 'Your ' + entity_type + ' was added successfully and will be visible the next time you reload this page.'
+      });
 
+      return false;
     }).fail(function() {
       alert("Something went wrong and your change didn't save. Please try again.");
     });

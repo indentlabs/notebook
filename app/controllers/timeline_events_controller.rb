@@ -53,8 +53,6 @@ class TimelineEventsController < ApplicationController
 
   def link_entity
     return unless @timeline_event.can_be_modified_by?(current_user)
-    require 'pry'
-    binding.pry
     @timeline_event.timeline_event_entities.find_or_create_by(timeline_event_entity_params)
   end
 

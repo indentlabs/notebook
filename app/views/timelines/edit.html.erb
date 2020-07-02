@@ -1,10 +1,10 @@
 <%= render partial: 'notice_dismissal/messages/13' %>
 <br />
-<%= form_for @timeline do |f| %>
+<%= form_for @timeline, html: { class: 'autosave-form' } do |f| %>
   <div class="row">
     <div class="col s12 m7 l9">
       <div class="input-field">
-        <%= f.text_field :name, class: 'materialize-textarea' %>
+        <%= f.text_field :name, class: 'materialize-textarea js-trigger-autosave-on-change' %>
         <%= f.label :name, 'Timeline name' %>
       </div>
     </div>
@@ -30,19 +30,19 @@
           </div>
           <div class="collapsible-body">
             <div class="input-field">
-              <%= f.text_area :subtitle, class: 'materialize-textarea' %>
+              <%= f.text_area :subtitle, class: 'materialize-textarea js-trigger-autosave-on-change' %>
               <%= f.label :subtitle, 'Subtitle' %>
             </div>
             <div class="input-field">
-              <%= f.text_area :description, class: 'materialize-textarea' %>
+              <%= f.text_area :description, class: 'materialize-textarea js-trigger-autosave-on-change' %>
               <%= f.label :description, 'Description' %>
             </div>
             <div class="input-field">
-                <%= f.select :universe_id, current_user.universes.pluck(:name, :id), include_blank: true, class: 'materialize-textarea' %>
+                <%= f.select :universe_id, current_user.universes.pluck(:name, :id), include_blank: true, class: 'materialize-textarea js-trigger-autosave-on-change' %>
                 <%= f.label 'Universe' %>
             </div>
             <div class="input-field">
-              <%= f.select :privacy, [['Private', 'private'], ['Public', 'public']], class: 'materialize-textarea' %>
+              <%= f.select :privacy, [['Private', 'private'], ['Public', 'public']], class: 'materialize-textarea js-trigger-autosave-on-change' %>
               <%= f.label :privacy %>
             </div>
             <!--
@@ -51,11 +51,11 @@
             </div>
             -->
             <div class="input-field">
-              <%= f.text_area :notes, class: 'materialize-textarea' %>
+              <%= f.text_area :notes, class: 'materialize-textarea js-trigger-autosave-on-change' %>
               <%= f.label :notes %>
             </div>
             <div class="input-field">
-              <%= f.text_area :private_notes, class: 'materialize-textarea' %>
+              <%= f.text_area :private_notes, class: 'materialize-textarea js-trigger-autosave-on-change' %>
               <%= f.label :private_notes %>
             </div>
             <!--
@@ -79,7 +79,7 @@
   -->
 
   <div class="timeline-events-container" data-timeline-id="<%= @timeline.id %>">
-    <% @timeline.timeline_events.each do |event| %>
+    <% @timeline.timeline_events.includes(:timeline_event_entities).each do |event| %>
       <div class="timeline-event-container" data-event-id="<%= event.id %>">
         <%= form_for event do |f| %>
           <%= f.hidden_field :timeline_id %>
@@ -158,30 +158,26 @@
                 In this event
               </div>
               <ul class="collapsible">
-                <li>
-                  <div class="collapsible-header">
-                    <i class="material-icons <%= Character.color %>-text"><%= Character.icon %></i>
-                    Characters
-                    <span class="badge">5</span>
-                  </div>
-                  <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-                </li>
-                <li>
-                  <div class="collapsible-header">
-                    <i class="material-icons <%= Location.color %>-text"><%= Location.icon %></i>
-                    Locations
-                    <span class="badge">3</span>
-                  </div>
-                  <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-                </li>
-                <li>
-                  <div class="collapsible-header">
-                    <i class="material-icons <%= Item.color %>-text"><%= Item.icon %></i>
-                    Items
-                    <span class="badge">5</span>
-                  </div>
-                  <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-                </li>
+                <% event.timeline_event_entities.order('entity_type').preload(:entity).group_by(&:entity_type).each do |entity_type, entity_list| %>
+                  <li>
+                    <% klass = entity_type.constantize %>
+                    <div class="collapsible-header">
+                      <i class="material-icons <%= klass.color %>-text"><%= klass.icon %></i>
+                      <%= entity_type.pluralize %>
+                      <span class="badge"><%= entity_list.count %></span>
+                    </div>
+                    <div class="collapsible-body">
+                      <% entity_list.each do |te_entity| %>
+                        <div class="chip">
+                          <%= link_to te_entity.entity.name, te_entity.entity %>
+                          <%= link_to '#' do %>
+                            <i class="close material-icons">close</i>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                  </li>
+                <% end %>
               </ul>
               <p class="center">
                 <small>
