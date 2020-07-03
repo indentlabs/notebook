@@ -18,10 +18,6 @@ class Timeline < ApplicationRecord
     'timeline'
   end
 
-  def description
-    'A timeline'
-  end
-
   def self.color
     'green'
   end
