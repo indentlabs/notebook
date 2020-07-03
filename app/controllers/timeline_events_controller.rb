@@ -58,7 +58,7 @@ class TimelineEventsController < ApplicationController
 
   def unlink_entity
     return unless @timeline_event.can_be_modified_by?(current_user)
-    @timeline_event.timeline_event_entities.find_by(timeline_event_entity_params).try(:destroy)
+    @timeline_event.timeline_event_entities.find_by(id: params[:entity_id].to_i).try(:destroy)
   end
 
   # Move functions

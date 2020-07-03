@@ -170,7 +170,7 @@
                       <% entity_list.each do |te_entity| %>
                         <div class="chip">
                           <%= link_to te_entity.entity.name, te_entity.entity %>
-                          <%= link_to '#' do %>
+                          <%= link_to unlink_entity_timeline_event_path(id: event.id, entity_id: te_entity.id), method: :POST, remote: true do %>
                             <i class="close material-icons">close</i>
                           <% end %>
                         </div>
@@ -236,7 +236,7 @@
         <ul class="collection">
           <% content_list.each do |content| %>
             <a href="#" 
-               class="<%= content_type_class.color %>-text js-link-entity-selection" 
+               class="<%= content_type_class.color %>-text js-link-entity-selection modal-close" 
                data-id="<%= content.id %>"
                data-type="<%= content_type %>">
               <li class="collection-item hoverable">

@@ -156,6 +156,8 @@ $(document).ready(function () {
         html: 'Your ' + entity_type + ' was added successfully and will be visible the next time you reload this page.'
       });
 
+      $('.modal').close();
+
       return false;
     }).fail(function() {
       alert("Something went wrong and your change didn't save. Please try again.");

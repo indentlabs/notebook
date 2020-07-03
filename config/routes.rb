@@ -199,8 +199,8 @@ end
         get 'top',    to: 'timeline_events#move_to_top',    on: :member
         get 'bottom', to: 'timeline_events#move_to_bottom', on: :member
       end
-      post 'link',    to: 'timeline_events#link_entity',    on: :member
-      post 'unlink',  to: 'timeline_events#unlink_entity',  on: :member
+      post 'link',              to: 'timeline_events#link_entity',    on: :member
+      post 'unlink/:entity_id', to: 'timeline_events#unlink_entity',  on: :member, as: :unlink_entity
     end
 
     # Content attributes
