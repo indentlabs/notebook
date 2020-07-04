@@ -33,12 +33,14 @@ $(document).ready(function () {
   $('.js-move-event-up').click(function () {
     var event_container = $(this).closest('.timeline-event-container');
     var event_id = event_container.data('event-id');
+    debugger;
 
     $.get(
       "/plan/move/timeline_events/" + event_id + "/up"
     ).done(function () {
       // Move in the UI
       var event_id = get_event_id_from_url(this.url);
+      debugger;
       var event_container = $('.timeline-events-container').find('.timeline-event-container[data-event-id="' + event_id + '"]');
 
       event_container.insertBefore(event_container.prev());
@@ -106,11 +108,20 @@ $(document).ready(function () {
         }
       }
     ).done(function (data) {
-      var new_event_id = data["id"];      
-      var template = $('.timeline-event-template');
+      var new_event_id = data["id"];
+      var template = $('.timeline-event-template > .timeline-event-container');
       var cloned_template = template.clone(true).removeClass('timeline-event-template');
+      var timeline_id = cloned_template.find('.timeline-event-container').first().data('timeline-id');
+      console.log('new event id = ' + new_event_id);
+      console.log('timeline_id = ' + timeline_id);
 
-      cloned_template.find('input[name="timeline_event[timeline_id]"]').val(new_event_id);
+      // Update IDs to the newly-created event
+      cloned_template.find('.timeline-event-container').data('event-id', new_event_id);
+      cloned_template.find('.timeline-event-container').attr('data-event-id', new_event_id);
+      cloned_template.find('input[name="timeline_event[timeline_id]"]').val(timeline_id);
+      cloned_template.find('.js-delete-timeline-event').attr('href', '/plan/timeline_events/' + new_event_id);
+      cloned_template.find('.autosave-form').attr('action', '/plan/timeline_events/' + new_event_id);
+
       cloned_template.appendTo(events_container);
 
       loading_indicator.hide();

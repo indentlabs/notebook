@@ -41,7 +41,9 @@ class TimelineEventsController < ApplicationController
     if @timeline_event.update(timeline_event_params)
       redirect_to @timeline_event, notice: 'Timeline event was successfully updated.'
     else
-      render :edit
+      require 'pry'
+      binding.pry
+      render json: :failure
     end
   end
 

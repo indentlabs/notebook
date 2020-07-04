@@ -82,7 +82,7 @@
 
   <div class="timeline-events-container" data-timeline-id="<%= @timeline.id %>">
     <% @timeline.timeline_events.includes(:timeline_event_entities).each do |event| %>
-      <div class="timeline-event-container" data-event-id="<%= event.id %>">
+      <div class="timeline-event-container" data-event-id="<%= event.id %>"  data-timeline-id="<%= @timeline.id %>">
         <%= form_for event, html: { class: 'autosave-form' }, remote: true do |f| %>
           <%= f.hidden_field :timeline_id %>
           <div class="row">
@@ -200,7 +200,114 @@
   </div>
 
   <div class="timeline-event-template">
-    <p>Template goes here</p>
+  
+    <% event = TimelineEvent.new %>
+    <div class="timeline-event-container" data-event-id="-1" data-timeline-id="<%= @timeline.id %>">
+      <%# we have to do method: :patch in the template since event isn't persisted; we don't want it to POST instead %>
+      <%= form_for event, html: { class: 'autosave-form' }, remote: true, method: :patch do |f| %>
+        <%= f.hidden_field :timeline_id, value: @timeline.id %>
+        <div class="row">
+          <div class="col l2">
+            <div class="input-field align-right">
+              <%= f.text_area :time_label, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+              <%= f.label :time_label, 'Time label' %>
+            </div>
+            <div class="clearfix"></div>
+            <ul>
+              <li class="grey-text">Move this...</li>
+              <li>
+                <%= link_to '#', class: 'js-move-event-to-top' do %>
+                  <i class="material-icons tiny left">arrow_upward</i>
+                  top
+                <% end %>
+              </li>
+              <li>
+                <%= link_to '#', class: 'js-move-event-up' do %>
+                  <i class="material-icons tiny left">keyboard_arrow_up</i>
+                  up
+                <% end %>
+              </li>
+              <li>
+                <%= link_to '#', class: 'js-move-event-down' do %>
+                  <i class="material-icons tiny left">keyboard_arrow_down</i>
+                  down
+                <% end %>
+              </li>
+              <li>
+                <%= link_to '#', class: 'js-move-event-to-bottom' do %>
+                  <i class="material-icons tiny left">arrow_downward</i>
+                  bottom
+                <% end %>
+              </li>
+            </ul>
+          </div>
+          <div class="col l1 cfenter" style="margin-bottom: -60px; margin-left: -7px; margin-right: -40px;">
+            <%= image_tag 'graphics/timeline-line.png' %>
+          </div>
+          <div class="col l6">
+            <div class="hoverable clearfix card" style="border-top: 5px solid <%= Timeline.hex_color %>">
+              <div class="card-content white-text">
+                <span class="card-title">
+                  <div class="input-field">
+                    <%= f.text_field :title, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+                    <%= f.label :title, 'Event Title' %>
+                  </div>
+                </span>
+                <div class="input-field">
+                  <%= f.text_area :description, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+                  <%= f.label :description %>
+                </div>
+                <div class="input-field">
+                  <%= f.text_area :notes, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+                  <%= f.label :notes %>
+                </div>
+              </div>
+            </div>
+            <div class="right">
+              <%= link_to timeline_event_path(id: event.id || 0), class: 'js-delete-timeline-event red-text', method: :delete, data: { confirm: "Are you sure you want to delete this event? It cannot be recovered!" } do %>
+                <small>Delete this event</small>
+              <% end %>
+            </div>
+          </div>
+          <div class="col l3">
+            <div class="grey-text uppercase">
+              In this event
+            </div>
+            <ul class="collapsible">
+              <% event.timeline_event_entities.order('entity_type').preload(:entity).group_by(&:entity_type).each do |entity_type, entity_list| %>
+                <li>
+                  <% klass = entity_type.constantize %>
+                  <div class="collapsible-header">
+                    <i class="material-icons <%= klass.color %>-text"><%= klass.icon %></i>
+                    <%= entity_type.pluralize %>
+                    <span class="badge"><%= entity_list.count %></span>
+                  </div>
+                  <div class="collapsible-body">
+                    <% entity_list.each do |te_entity| %>
+                      <div class="chip">
+                        <%= link_to te_entity.entity.name, te_entity.entity %>
+                        <%= link_to unlink_entity_timeline_event_path(id: event.id, entity_id: te_entity.id), method: :POST, remote: true do %>
+                          <i class="close material-icons">close</i>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+            <p class="center">
+              <small>
+                <%= link_to 'Link a page', '#', class: 'js-link-entity' %>
+              </small>
+            </p>
+
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+
+
   </div>
     
   <div class="row">
