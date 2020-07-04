@@ -47,8 +47,9 @@ class TimelineEventsController < ApplicationController
 
   # DELETE /timeline_events/1
   def destroy
+    timeline = @timeline_event.timeline
     @timeline_event.destroy
-    redirect_to timeline_events_url, notice: 'Timeline event was successfully destroyed.'
+    redirect_to edit_timeline_path(timeline), notice: 'Timeline event was successfully removed.'
   end
 
   def link_entity

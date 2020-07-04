@@ -83,12 +83,12 @@
   <div class="timeline-events-container" data-timeline-id="<%= @timeline.id %>">
     <% @timeline.timeline_events.includes(:timeline_event_entities).each do |event| %>
       <div class="timeline-event-container" data-event-id="<%= event.id %>">
-        <%= form_for event do |f| %>
+        <%= form_for event, html: { class: 'autosave-form' }, remote: true do |f| %>
           <%= f.hidden_field :timeline_id %>
           <div class="row">
             <div class="col l2">
               <div class="input-field align-right">
-                <%= f.text_area :time_label, class: 'materialize-textarea' %>
+                <%= f.text_area :time_label, class: 'materialize-textarea js-trigger-autosave-on-change' %>
                 <%= f.label :time_label, 'Time label' %>
               </div>
               <div class="clearfix"></div>
@@ -96,7 +96,7 @@
                 <li class="grey-text">Move this...</li>
                 <li>
                   <%= link_to '#', class: 'js-move-event-to-top' do %>
-                    <i class="material-icons tiny left">keyboard_arrow_up</i>
+                    <i class="material-icons tiny left">arrow_upward</i>
                     top
                   <% end %>
                 </li>
@@ -114,7 +114,7 @@
                 </li>
                 <li>
                   <%= link_to '#', class: 'js-move-event-to-bottom' do %>
-                    <i class="material-icons tiny left">keyboard_arrow_down</i>
+                    <i class="material-icons tiny left">arrow_downward</i>
                     bottom
                   <% end %>
                 </li>
@@ -133,16 +133,16 @@
                 <div class="card-content white-text">
                   <span class="card-title">
                     <div class="input-field">
-                      <%= f.text_field :title, class: 'materialize-textarea' %>
+                      <%= f.text_field :title, class: 'materialize-textarea js-trigger-autosave-on-change' %>
                       <%= f.label :title, 'Event Title' %>
                     </div>
                   </span>
                   <div class="input-field">
-                    <%= f.text_area :description, class: 'materialize-textarea' %>
+                    <%= f.text_area :description, class: 'materialize-textarea js-trigger-autosave-on-change' %>
                     <%= f.label :description %>
                   </div>
                   <div class="input-field">
-                    <%= f.text_area :notes, class: 'materialize-textarea' %>
+                    <%= f.text_area :notes, class: 'materialize-textarea js-trigger-autosave-on-change' %>
                     <%= f.label :notes %>
                   </div>
                 </div>
@@ -153,6 +153,11 @@
                   <div class="clearfix"></div>
                 </div>
                 -->
+              </div>
+              <div class="right">
+                <%= link_to timeline_event_path(event), class: 'red-text', method: :delete, data: { confirm: "Are you sure you want to delete this event? It cannot be recovered!" } do %>
+                  <small>Delete this event</small>
+                <% end %>
               </div>
             </div>
             <div class="col l3">

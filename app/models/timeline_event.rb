@@ -1,7 +1,7 @@
 class TimelineEvent < ApplicationRecord
   belongs_to :timeline
 
-  has_many :timeline_event_entities
+  has_many :timeline_event_entities, dependent: :destroy
 
   acts_as_list scope: [:timeline_id]
 
