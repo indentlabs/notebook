@@ -2,16 +2,15 @@ class TimelinesController < ApplicationController
   before_action :set_timeline, only: [:show, :edit, :update, :destroy]
 
   before_action :set_navbar_color
-  before_action :set_navbar_actions
   before_action :set_sidenav_expansion
 
   # GET /timelines
   def index
     @timelines = current_user.timelines
-  end
 
-  # GET /timelines/1
-  def show
+    if @universe_scope
+      @timelines = @timelines.where(universe: @universe_scope)
+    end
   end
 
   # GET /timelines/new
@@ -65,36 +64,6 @@ class TimelinesController < ApplicationController
 
   def set_navbar_color
     @navbar_color = Timeline.hex_color.presence || '#2196F3'
-  end
-
-  def set_navbar_actions
-    # content_type = @content_type_class || content_type_from_controller(self.class)
-    # @navbar_actions = []
-
-    # return if [AttributeCategory, AttributeField].include?(content_type)
-
-    # if user_signed_in?
-    #   if @current_user_content
-    #     @navbar_actions << {
-    #       label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
-    #       href: main_app.polymorphic_path(content_type)
-    #     }
-    #   end
-
-    #   @navbar_actions << {
-    #     label: "New #{content_type.name.downcase}",
-    #     href: main_app.new_polymorphic_path(content_type),
-    #     class: 'right'
-    #   }
-    # end
-
-    # discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
-    # if discussions_link.present?
-    #   @navbar_actions << {
-    #     label: 'Discussions',
-    #     href: discussions_link
-    #   }
-    # end
   end
 
   def set_sidenav_expansion

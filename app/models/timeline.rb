@@ -12,6 +12,8 @@ class Timeline < ApplicationRecord
 
   has_many :timeline_events, -> { order(position: :asc) }
 
+  include HasImageUploads
+
   after_create :initialize_first_event
 
   def self.content_name
