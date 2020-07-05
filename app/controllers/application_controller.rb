@@ -56,6 +56,9 @@ class ApplicationController < ActionController::Base
     @current_user_content = current_user.content(content_types: @activated_content_types + ['Universe'], universe_id: @universe_scope.try(:id))
     @current_user_content['Document'] = current_user.documents
 
+    # Likewise, we should also always cache Timelines
+    @current_user_content['Timeline'] = current_user.timelines.where(universe_id: @universe_scope.try(:id))
+
     # Fetch notifications
     @user_notifications = current_user.notifications.order('happened_at DESC').limit(10)
   end
