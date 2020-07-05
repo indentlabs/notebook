@@ -130,7 +130,7 @@ Rails.application.routes.draw do
       end
     end
     get '/help', to: 'help#index', as: :help_center
-end
+  end
   delete 'delete_my_account', to: 'users#delete_my_account'
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
@@ -188,7 +188,7 @@ end
         get  :changelog,       on: :member
         get  :toggle_archive,  on: :member
         post :toggle_favorite, on: :member
-        get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
+        get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
       end
     end
     resources :timelines
@@ -230,6 +230,11 @@ end
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
+  end
+
+  # Fancy shmancy informative pages
+  scope '/worldbuilding' do
+    
   end
 
   scope '/scene/:scene_id' do

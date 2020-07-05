@@ -40,7 +40,6 @@ $(document).ready(function () {
     ).done(function () {
       // Move in the UI
       var event_id = get_event_id_from_url(this.url);
-      debugger;
       var event_container = $('.timeline-events-container').find('.timeline-event-container[data-event-id="' + event_id + '"]');
 
       event_container.insertBefore(event_container.prev());
@@ -116,9 +115,9 @@ $(document).ready(function () {
       console.log('timeline_id = ' + timeline_id);
 
       // Update IDs to the newly-created event
-      cloned_template.find('.timeline-event-container').data('event-id', new_event_id);
-      cloned_template.find('.timeline-event-container').attr('data-event-id', new_event_id);
-      cloned_template.find('input[name="timeline_event[timeline_id]"]').val(timeline_id);
+      cloned_template.data('event-id', new_event_id);
+      cloned_template.attr('data-event-id', new_event_id);
+      //cloned_template.find('input[name="timeline_event[timeline_id]"]').val(timeline_id);
       cloned_template.find('.js-delete-timeline-event').attr('href', '/plan/timeline_events/' + new_event_id);
       cloned_template.find('.autosave-form').attr('action', '/plan/timeline_events/' + new_event_id);
 
