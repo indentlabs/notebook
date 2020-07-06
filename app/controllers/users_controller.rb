@@ -4,10 +4,16 @@ class UsersController < ApplicationController
   end
 
   def show
-    @sidenav_expansion = 'my account'
+    @sidenav_expansion = 'community'
 
     @user    = User.find_by(user_params)
     return redirect_to(root_path, notice: 'That user does not exist.') if @user.nil?
+    return redirect_to(root_path, notice: 'That user does not exist.') if @user.private_profile?
+
+    @feed = ContentPageShare.where(user_id: @user.id)
+      .order('created_at DESC')
+      .includes([:content_page, :user, :share_comments])
+      .limit(100)
 
     @content = @user.public_content.select { |type, list| list.any? }
     @tabs    = @content.keys
@@ -78,6 +84,18 @@ class UsersController < ApplicationController
       username: 'tristan'
 
     notifier.ping ":bomb: :bomb: :bomb: #{user.email.split('@').first}@ (##{user.id}) just deleted their account."
+  end
+
+  def followers
+    @user    = User.find_by(user_params)
+    @accent_color     = @user.favorite_page_type_color
+    @accent_icon      = @user.favorite_page_type_icon
+  end
+
+  def following
+    @user    = User.find_by(user_params)
+    @accent_color     = @user.favorite_page_type_color
+    @accent_icon      = @user.favorite_page_type_icon
   end
 
   private
