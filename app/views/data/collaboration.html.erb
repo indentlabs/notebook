@@ -22,7 +22,7 @@
               <%= universe.name %>
               (<%= pluralize universe.contributors.count, 'collaborator' %>)
             </div>
-            <div class="collapsible-body white">
+            <div class="collapsible-body">
               <%= render partial: 'content/display/contributors', locals: { content: universe } %>
             </div>
           </li>
@@ -41,7 +41,7 @@
               <i class="material-icons"><%= Universe.icon %></i>
               <%= universe.name %>
             </div>
-            <div class="collapsible-body white">
+            <div class="collapsible-body">
               <%= render partial: 'content/display/contributors', locals: { content: universe } %>
             </div>
           </li>
@@ -55,6 +55,7 @@
     <% if @collaborators.any? %>
       <ul class="collapsible">
         <% @collaborators.group_by { |c| c.user }.each do |collaborator, collab_list| %>
+          <% next if collaborator.nil? %>
           <li>
             <div class="collapsible-header <%= User.color %> white-text">
               <i class="material-icons"><%= User.icon %></i>
@@ -153,22 +154,22 @@
     </ul>
   </div>
   <div class="col s12 m12 l4">
-    <div class="card blue lighten-5">
+    <div class="card blue lighten-4">
       <div class="card-content">
-        <div class="card-title">Collaboration</div>
-        <p>
+        <div class="card-title black-text">Collaboration</div>
+        <p class="black-text">
           Whenever you edit a universe on Notebook.ai, you can add others as collaborators by entering their email address into the "Contributors" tab. 
           They'll receive an email letting them know they've been invited, and will automatically accept if they sign up for an account with the email 
           address you invited (or if they already have an account with that email).
         </p>
         <br />
-        <p>
+        <p class="black-text">
           Your universe's collaborators will have full access to view and edit every page within that universe (except for being able to edit what
           universe those pages are in), even if those pages are set to private. 
           You can check out the changelog for any page to see what changes your collaborators have made. 
         </p>
         <br />
-        <p>
+        <p class="black-text">
           If you have an active Premium subscription, you'll share it to your contributors for each universe you share. Contributors will be able to
           create Premium pages within that universe even if they don't have a Premium subscription themselves. This Premium Sharing is great for small
           groups and classrooms.

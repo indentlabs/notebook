@@ -50,7 +50,7 @@ Thredded.admin_column = :forum_administrator
 Thredded.content_visible_while_pending_moderation = true
 
 # Whether users that are following a topic are listed on topic page.
-Thredded.show_topic_followers = false
+Thredded.show_topic_followers = true
 
 # This model can be customized further by overriding a handful of methods on the User model.
 # For more information, see app/models/thredded/user_extender.rb.
@@ -174,8 +174,6 @@ Rails.application.config.to_prepare do
     before_action :set_sidenav_expansion
 
     def set_navbar_color
-      current_path = request.env['REQUEST_PATH']
-
       if content_type = related_content_type
         @navbar_color = content_type.to_s.constantize.hex_color
       end
@@ -218,7 +216,7 @@ Rails.application.config.to_prepare do
       if related_content_type.present?
         @sidenav_expansion = 'worldbuilding'
       else
-        @sidenav_expansion = 'writing'
+        @sidenav_expansion = 'community'
       end
     end
 
@@ -235,5 +233,15 @@ Rails.application.config.to_prepare do
       end
     end
 
+  end
+end
+
+require 'extensions/thredded/topic'
+Rails.application.config.to_prepare do
+  begin
+    if ActiveRecord::Base.connection.table_exists?(:thredded_topics)
+      Thredded::Topic.include(Extensions::Thredded::Topic)
+    end
+  rescue ActiveRecord::NoDatabaseError
   end
 end
