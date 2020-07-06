@@ -28,7 +28,7 @@ class TimelinesController < ApplicationController
   def create
     @timeline = Timeline.new(timeline_params)
 
-    if @timeline.save
+    if current_user.on_premium_plan? && @timeline.save
       redirect_to @timeline, notice: 'Timeline was successfully created.'
     else
       render :new
