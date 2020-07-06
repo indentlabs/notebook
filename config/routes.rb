@@ -177,6 +177,8 @@ Rails.application.routes.draw do
       Rails.application.config.content_types[:all_non_universe].each do |content_type|
         get content_type.name.downcase.pluralize.to_sym, on: :member
       end
+      get :timelines, on: :member
+
       get  :changelog,       on: :member
       get  :toggle_archive,  on: :member
       post :toggle_favorite, on: :member

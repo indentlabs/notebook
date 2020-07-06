@@ -184,7 +184,7 @@
                     <div class="collapsible-body">
                       <% entity_list.each do |te_entity| %>
                         <div class="chip">
-                          <%= link_to te_entity.entity.name, te_entity.entity %>
+                          <%= link_to(te_entity.entity.name.presence || "Untitled #{te_entity.entity_type}", te_entity.entity) %>
                           <%= link_to unlink_entity_timeline_event_path(id: event.id, entity_id: te_entity.id), method: :POST, remote: true do %>
                             <i class="close material-icons">close</i>
                           <% end %>
@@ -293,7 +293,7 @@
                   <div class="collapsible-body">
                     <% entity_list.each do |te_entity| %>
                       <div class="chip">
-                        <%= link_to te_entity.entity.name, te_entity.entity %>
+                        <%= link_to("test", te_entity.entity) %>
                         <%= link_to unlink_entity_timeline_event_path(id: event.id, entity_id: te_entity.id), method: :POST, remote: true do %>
                           <i class="close material-icons">close</i>
                         <% end %>
@@ -341,7 +341,7 @@
 </div>
 
 <div id="entity-link-modal" class="modal">
-  <input id="linking-event-id" value="-1" />
+  <input type="hidden" id="linking-event-id" value="-1" />
   <div class="modal-content">
     <h4>Link a page to this event</h4>
     <p>
@@ -363,7 +363,7 @@
                data-type="<%= content_type %>">
               <li class="collection-item hoverable">
                 <i class="material-icons left"><%= content_type_class.icon %></i>
-                <%= content.name %>
+                <%= content.name.presence || "Untitled #{content_type}" %>
                 <span class="secondary-content">
                   <i class="material-icons">link</i>
                 </span>

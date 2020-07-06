@@ -101,7 +101,7 @@
           <td>
             <%= link_to polymorphic_path(content.page_type.downcase, id: content.id) do %>
               <i class="material-icons left <%= content_type_class.color %>-text"><%= content_type_class.icon %></i>
-              <%= list_name_lookup_cache[content.id].presence || content.name %>
+              <%= list_name_lookup_cache[content.id].presence || content.name.presence || "Untitled #{content.page_type}" %>
             <% end %>
           </td>
           <td class="hide-on-small-only"><%= truncate(content.description, length: 200) %></td>

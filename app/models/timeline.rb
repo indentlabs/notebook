@@ -10,7 +10,7 @@ class Timeline < ApplicationRecord
   belongs_to :universe, optional: true
   belongs_to :user
 
-  has_many :timeline_events, -> { order(position: :asc) }
+  has_many :timeline_events, -> { order(position: :asc) }, dependent: :destroy
 
   include HasImageUploads
 
