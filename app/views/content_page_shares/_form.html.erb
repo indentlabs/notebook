@@ -1,0 +1,45 @@
+<ul class="collapsible popout">
+  <li>
+    <div class="collapsible-header blue white-text">
+      <i class="material-icons">share</i>
+      Click here to share a page
+    </div>
+    <div class="collapsible-body">
+      <%= form_for [current_user, ContentPageShare.new(user: current_user)] do |f| %>
+        <div class="row">
+          <div class="col s12 m6 l6">
+            <div class="input-field col s12">
+              <%= f.select :content_page do %>
+                <% @current_user_content.each do |content_type, content_list| %>
+                  <optgroup label="<%= content_type.pluralize %>">
+                    <% content_list.each do |content| %>
+                      <option value="<%= content_type %>-<%= content.id %>"><%= content.name %></option>
+                    <% end %>
+                  </optgroup>
+                <% end %>
+              <% end %>
+              <label>1. Select a page to share</label>
+              <div class="helper-text">
+                By default, your notebook pages are all private. Don't forget to change your page to "public" if you want others to be able to see it!
+              </div>
+              <!--
+              <div class="helper-text">
+                Only pages you've marked "public" may be shared.
+              </div>
+              -->
+            </div>
+          </div>
+          <div class="col s12 m6 l6">
+            <div class="input-field">
+              <%= f.text_area :message, class: 'materialize-textarea' %>
+              <%= f.label :message, '2. Write a question or message about your page.' %>
+            </div>
+          </div>
+          <div class="col s12">
+            <%= f.submit 'Share', class: 'btn green white-text right' %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </li>
+</ul>

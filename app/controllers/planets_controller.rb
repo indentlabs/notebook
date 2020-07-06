@@ -14,6 +14,7 @@ class PlanetsController < ContentController
       #   #{with_relation}_attributes: [:id, :#{relates_relation.singularize}_id, :_destroy]
       # end
       planet_countries_attributes: [:id, :country_id, :_destroy],
+      planet_continents_attributes: [:id, :continent_id, :_destroy],
       planet_locations_attributes: [:id, :location_id, :_destroy],
       planet_landmarks_attributes: [:id, :landmark_id, :_destroy],
       planet_races_attributes: [:id, :race_id, :_destroy],

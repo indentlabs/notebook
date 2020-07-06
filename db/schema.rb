@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_20_234732) do
+ActiveRecord::Schema.define(version: 2020_07_01_020228) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -383,6 +383,39 @@ ActiveRecord::Schema.define(version: 2020_04_20_234732) do
     t.datetime "updated_at", null: false
     t.index ["content_id", "content_type"], name: "index_content_change_events_on_content_id_and_content_type"
     t.index ["user_id"], name: "index_content_change_events_on_user_id"
+  end
+
+  create_table "content_page_share_followings", force: :cascade do |t|
+    t.integer "content_page_share_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["content_page_share_id"], name: "index_content_page_share_followings_on_content_page_share_id"
+    t.index ["user_id"], name: "index_content_page_share_followings_on_user_id"
+  end
+
+  create_table "content_page_share_reports", force: :cascade do |t|
+    t.integer "content_page_share_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "approved_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["content_page_share_id"], name: "index_content_page_share_reports_on_content_page_share_id"
+    t.index ["user_id"], name: "index_content_page_share_reports_on_user_id"
+  end
+
+  create_table "content_page_shares", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "content_page_type"
+    t.integer "content_page_id"
+    t.datetime "shared_at"
+    t.string "privacy"
+    t.string "message"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "deleted_at"
+    t.index ["content_page_type", "content_page_id"], name: "cps_index"
+    t.index ["user_id"], name: "index_content_page_shares_on_user_id"
   end
 
   create_table "content_pages", force: :cascade do |t|
@@ -2102,6 +2135,37 @@ ActiveRecord::Schema.define(version: 2020_04_20_234732) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "page_collection_submissions", force: :cascade do |t|
+    t.string "content_type", null: false
+    t.integer "content_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "accepted_at"
+    t.datetime "submitted_at"
+    t.integer "page_collection_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "explanation"
+    t.string "cached_content_name"
+    t.index ["content_type", "content_id"], name: "polycontent_collection_index"
+    t.index ["page_collection_id"], name: "index_page_collection_submissions_on_page_collection_id"
+    t.index ["user_id"], name: "index_page_collection_submissions_on_user_id"
+  end
+
+  create_table "page_collections", force: :cascade do |t|
+    t.string "title"
+    t.string "subtitle"
+    t.integer "user_id", null: false
+    t.string "privacy"
+    t.string "page_types"
+    t.string "color"
+    t.string "cover_image"
+    t.boolean "auto_accept", default: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "description"
+    t.index ["user_id"], name: "index_page_collections_on_user_id"
+  end
+
   create_table "page_settings_overrides", force: :cascade do |t|
     t.string "page_type"
     t.string "name_override"
@@ -2559,6 +2623,17 @@ ActiveRecord::Schema.define(version: 2020_04_20_234732) do
     t.datetime "updated_at"
   end
 
+  create_table "share_comments", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "content_page_share_id", null: false
+    t.string "message"
+    t.datetime "deleted_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["content_page_share_id"], name: "index_share_comments_on_content_page_share_id"
+    t.index ["user_id"], name: "index_share_comments_on_user_id"
+  end
+
   create_table "siblingships", force: :cascade do |t|
     t.integer "user_id"
     t.integer "character_id"
@@ -2992,6 +3067,47 @@ ActiveRecord::Schema.define(version: 2020_04_20_234732) do
     t.index ["user_id", "postable_id"], name: "thredded_user_topic_read_states_user_postable", unique: true
   end
 
+  create_table "timeline_event_entities", force: :cascade do |t|
+    t.string "entity_type", null: false
+    t.integer "entity_id", null: false
+    t.integer "timeline_event_id", null: false
+    t.string "notes"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["entity_type", "entity_id"], name: "index_timeline_event_entities_on_entity_type_and_entity_id"
+    t.index ["timeline_event_id"], name: "index_timeline_event_entities_on_timeline_event_id"
+  end
+
+  create_table "timeline_events", force: :cascade do |t|
+    t.integer "timeline_id", null: false
+    t.string "time_label"
+    t.string "title"
+    t.string "description"
+    t.string "notes"
+    t.integer "position"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["timeline_id"], name: "index_timeline_events_on_timeline_id"
+  end
+
+  create_table "timelines", force: :cascade do |t|
+    t.string "name"
+    t.integer "universe_id"
+    t.integer "user_id", null: false
+    t.string "page_type", default: "Timeline"
+    t.datetime "deleted_at"
+    t.datetime "archived_at"
+    t.string "privacy", default: "private"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "description"
+    t.string "subtitle"
+    t.string "notes"
+    t.string "private_notes"
+    t.index ["universe_id"], name: "index_timelines_on_universe_id"
+    t.index ["user_id"], name: "index_timelines_on_user_id"
+  end
+
   create_table "town_citizens", force: :cascade do |t|
     t.integer "user_id"
     t.integer "town_id"
@@ -3209,6 +3325,10 @@ ActiveRecord::Schema.define(version: 2020_04_20_234732) do
     t.string "favorite_quote"
     t.string "occupation"
     t.string "favorite_page_type"
+    t.boolean "dark_mode_enabled"
+    t.boolean "notification_updates", default: true
+    t.boolean "community_features_enabled", default: true
+    t.boolean "private_profile", default: false
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["id", "deleted_at"], name: "index_users_on_id_and_deleted_at"
@@ -3285,6 +3405,11 @@ ActiveRecord::Schema.define(version: 2020_04_20_234732) do
   add_foreign_key "conditions", "universes"
   add_foreign_key "conditions", "users"
   add_foreign_key "content_change_events", "users"
+  add_foreign_key "content_page_share_followings", "content_page_shares"
+  add_foreign_key "content_page_share_followings", "users"
+  add_foreign_key "content_page_share_reports", "content_page_shares"
+  add_foreign_key "content_page_share_reports", "users"
+  add_foreign_key "content_page_shares", "users"
   add_foreign_key "content_pages", "universes"
   add_foreign_key "content_pages", "users"
   add_foreign_key "continent_countries", "continents"
@@ -3521,6 +3646,8 @@ ActiveRecord::Schema.define(version: 2020_04_20_234732) do
   add_foreign_key "lores", "universes"
   add_foreign_key "lores", "users"
   add_foreign_key "notice_dismissals", "users"
+  add_foreign_key "page_collection_submissions", "users"
+  add_foreign_key "page_collections", "users"
   add_foreign_key "page_tags", "users"
   add_foreign_key "paypal_invoices", "page_unlock_promo_codes"
   add_foreign_key "paypal_invoices", "users"
@@ -3573,6 +3700,8 @@ ActiveRecord::Schema.define(version: 2020_04_20_234732) do
   add_foreign_key "religion_deities", "users"
   add_foreign_key "schools", "universes"
   add_foreign_key "schools", "users"
+  add_foreign_key "share_comments", "content_page_shares"
+  add_foreign_key "share_comments", "users"
   add_foreign_key "sports", "universes"
   add_foreign_key "sports", "users"
   add_foreign_key "subscriptions", "billing_plans"
@@ -3610,6 +3739,10 @@ ActiveRecord::Schema.define(version: 2020_04_20_234732) do
   add_foreign_key "thredded_messageboard_users", "thredded_user_details", on_delete: :cascade
   add_foreign_key "thredded_user_post_notifications", "thredded_posts", column: "post_id", on_delete: :cascade
   add_foreign_key "thredded_user_post_notifications", "users", on_delete: :cascade
+  add_foreign_key "timeline_event_entities", "timeline_events"
+  add_foreign_key "timeline_events", "timelines"
+  add_foreign_key "timelines", "universes"
+  add_foreign_key "timelines", "users"
   add_foreign_key "town_citizens", "towns"
   add_foreign_key "town_citizens", "users"
   add_foreign_key "town_countries", "countries"

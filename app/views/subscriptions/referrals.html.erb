@@ -82,6 +82,7 @@
             <tr>
               <th>User</th>
               <th>Signed up</th>
+              <th></th>
             <tr>
             <% @referrals.each do |referral| %>
               <tr>
@@ -92,6 +93,25 @@
                   <% end %>
                 </td>
                 <td><%= time_ago_in_words referral.created_at %> ago</td>
+                <td class="right">
+                  <% if user_signed_in? && !referral.referree.blocked_by?(current_user) %>
+                    <% if referral.referree.followed_by?(current_user) %>
+                      <%= form_for(current_user.user_followings.find_by(followed_user_id: referral.referree.id), method: :delete) do |f| %>
+                        <%= f.hidden_field :followed_user_id, value: referral.referree.id %>
+                        <%= link_to '#', onclick: "$('.edit_user_following').first().submit()", class: 'collection-item blue white-text btn waves-effect waves-light' do %>
+                          Unfollow
+                        <% end %>
+                      <% end %>
+                    <% else %>
+                      <%= form_for UserFollowing.new, method: :post do |f| %>
+                        <%= f.hidden_field :followed_user_id, value: referral.referree.id %>
+                        <%= link_to '#', onclick: "$('#new_user_following').submit()", class: 'collection-item blue white-text btn waves-effect' do %>
+                          Follow
+                        <% end %>
+                      <% end %>
+                    <% end %>
+                  <% end %>
+                </td>
               </tr>
             <% end %>
           </table>
