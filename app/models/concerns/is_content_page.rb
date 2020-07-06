@@ -11,6 +11,12 @@ module IsContentPage
     include HasChangelog
     include HasPageTags
 
+    has_many :content_page_shares,         as: :content_page, dependent: :destroy
+    has_many :page_collection_submissions, as: :content,      dependent: :destroy
+    has_many :timeline_event_entities,     as: :entity,       dependent: :destroy
+    has_many :timeline_events,             through: :timeline_event_entities
+    has_many :timelines, -> { distinct },  through: :timeline_events
+
     scope :unarchived, -> { where(archived_at: nil) }
     def archive!
       update!(archived_at: DateTime.now)
@@ -40,6 +46,7 @@ module IsContentPage
     end
 
     def self.settings_override_for(user)
+      return nil # disabled for now
       return nil if user.nil?
       return nil unless user.on_premium_plan?
 
@@ -58,5 +65,16 @@ module IsContentPage
     def self.hex_color_for(user)
       settings_override_for(user).try(:hex_color_override).presence || self.hex_color
     end
+
+    # def self.color_for(user)
+    #   if user.nil?
+    #     self.color
+    #   elsif user.on_premium_plan?
+    #     color = user.content_page_setting_overrides.find_by(page_type: self.class.name).try(:color)
+    #     color.presence || self.color
+    #   else
+    #     self.color
+    #   end
+    # end
   end
 end

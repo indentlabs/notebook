@@ -14,4 +14,10 @@ class NotificationsController < ApplicationController
     # Redirect to the notification's link
     redirect_to notification.passthrough_link
   end
+
+  def mark_all_read
+    current_user.notifications.where(viewed_at: nil).update_all(viewed_at: DateTime.current)
+
+    redirect_back(fallback_location: root_path, notice: "Your notifications have all been marked read.")
+  end
 end

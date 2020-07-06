@@ -17,7 +17,7 @@ class ApplicationController < ActionController::Base
 
   def set_metadata
     @page_title ||= ''
-    @page_keywords ||= %w[writing author nanowrimo novel character fiction fantasy universe creative dnd roleplay larp game design]
+    @page_keywords ||= %w[writing author nanowrimo novel character fiction fantasy universe creative dnd roleplay game design]
     @page_description ||= 'Notebook.ai is a set of tools for writers, game designers, and roleplayers to create magnificent universes — and everything within them.'
   end
 
@@ -55,6 +55,13 @@ class ApplicationController < ActionController::Base
     # We always want to cache Universes, even if they aren't explicitly turned on.
     @current_user_content = current_user.content(content_types: @activated_content_types + ['Universe'], universe_id: @universe_scope.try(:id))
     @current_user_content['Document'] = current_user.documents
+
+    # Likewise, we should also always cache Timelines
+    if @universe_scope
+      @current_user_content['Timeline'] = current_user.timelines.where(universe_id: @universe_scope.try(:id))
+    else
+      @current_user_content['Timeline'] = current_user.timelines
+    end
 
     # Fetch notifications
     @user_notifications = current_user.notifications.order('happened_at DESC').limit(10)

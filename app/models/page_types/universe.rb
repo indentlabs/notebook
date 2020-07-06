@@ -15,7 +15,7 @@ class Universe < ApplicationRecord
   include Authority::Abilities
   self.authorizer_name = 'UniverseCoreContentAuthorizer'
 
-  validates :name, presence: true
+  validates :name,    presence: true
   validates :user_id, presence: true
 
   belongs_to :user
