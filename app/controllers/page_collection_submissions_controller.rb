@@ -4,7 +4,7 @@ class PageCollectionSubmissionsController < ApplicationController
 
   # GET /page_collection_submissions
   def index
-    @page_collection_submissions = @page_collection.page_collection_submissions
+    @page_collection_submissions = @page_collection.page_collection_submissions.where(accepted_at: nil)
   end
 
   # GET /page_collection_submissions/1

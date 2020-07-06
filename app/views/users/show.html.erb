@@ -69,9 +69,11 @@
       <% else %>
         <% @feed.each do |share| %>
           <% if Rails.application.config.content_types[:all].map(&:name).include?(share.content_page_type) %>
-            <%= render partial: 'content_page_shares/stream_item', locals: { share: share, content: share.content_page } %>
+            <%= render partial: 'content_page_shares/stream_page_share', locals: { share: share, content: share.content_page } %>
           <% elsif share.content_page_type == Thredded::Topic.name %>
             <%= render partial: 'content_page_shares/stream_discussion', locals: { share: share, content: share.content_page } %>
+          <% elsif share.content_page_type == PageCollection.name %>
+            page collection
           <% else %>
             <strong>Error loading stream item</strong>
           <% end %>

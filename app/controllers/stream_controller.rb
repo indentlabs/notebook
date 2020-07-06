@@ -11,7 +11,7 @@ class StreamController < ApplicationController
     @feed = ContentPageShare.where(user_id: followed_users + [current_user.id] - blocked_users)
       .order('created_at DESC')
       .includes([:content_page, :user, :share_comments])
-      .limit(100)
+      .limit(50)
   end
 
   def community
@@ -22,7 +22,7 @@ class StreamController < ApplicationController
       .where.not(user_id: current_user.blocked_users.pluck(:id))
       .order('created_at DESC')
       .includes([:content_page, :user, :share_comments])
-      .limit(100)
+      .limit(50)
   end
 
   def set_stream_navbar_color
