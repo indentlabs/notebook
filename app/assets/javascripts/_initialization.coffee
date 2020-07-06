@@ -9,13 +9,13 @@ Notebook.init = ->
   $('.sidenav').sidenav()
   $('.quick-reference-sidenav').sidenav {
     closeOnClick: true,
-    edge: 'right',
-    draggable: false
+    edge:         'right',
+    draggable:    false
   }
   $('#recent-edits-sidenav').sidenav {
     closeOnClick: true,
-    edge: 'right',
-    draggable: false
+    edge:         'right',
+    draggable:    false
   }
   $('.slider').slider { height: 200, indicators: false }
   $('.dropdown-trigger').dropdown { coverTrigger: false }

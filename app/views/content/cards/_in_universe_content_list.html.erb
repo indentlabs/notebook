@@ -76,7 +76,7 @@
   <div class="card-content">
   </div>
   <div class="card-reveal">
-    <span class="card-title grey-text text-darken-4">
+    <span class="card-title">
       <% if content_list.any? %>
         <i class="material-icons <%= content_type_class.color %>-text" style="position: relative; top: 3px">
           <%= content_type_class.icon %>
@@ -101,7 +101,7 @@
           <td>
             <%= link_to polymorphic_path(content.page_type.downcase, id: content.id) do %>
               <i class="material-icons left <%= content_type_class.color %>-text"><%= content_type_class.icon %></i>
-              <%= list_name_lookup_cache[content.id].presence || content.name %>
+              <%= list_name_lookup_cache[content.id].presence || content.name.presence || "Untitled #{content.page_type}" %>
             <% end %>
           </td>
           <td class="hide-on-small-only"><%= truncate(content.description, length: 200) %></td>
