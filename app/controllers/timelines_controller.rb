@@ -21,7 +21,7 @@ class TimelinesController < ApplicationController
 
   # GET /timelines/1/edit
   def edit
-
+    raise "No Access" unless user_signed_in? && current_user == @timeline.user
   end
 
   # POST /timelines
