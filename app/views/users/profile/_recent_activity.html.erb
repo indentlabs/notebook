@@ -1,8 +1,5 @@
-<% if @stream.any? %>
-  <div style="margin: 30px 0 0 0;" class="grey-text uppercase center">
-    Recent worldbuilding activity
-  </div>
-
+<%# todo this looks like an unused partial %>
+<% if @stream.any? && !@user.blocked_by?(current_user)  %>
   <% @stream.each do |entity| %>
     <% next unless User.new.can_read?(entity) || (user_signed_in? && current_user.can_read?(entity)) %>
     <div class="hoverable card horizontal" style="border: 1px solid <%= entity.class.hex_color %>">
@@ -55,7 +52,14 @@
     </div>
   <% end %>
 <% else %>
-  <div class="grey-text">
-    It seems <%= @user.name %> isn't sharing any public activity.
-  </div>
+  <% if user_signed_in? && @user.blocked_by?(current_user) %>
+    <div class="grey-text">
+      You've blocked this user.
+    </div>
+  <% else %>
+    <div class="grey-text">
+      It seems <%= @user.name %> isn't sharing any public activity.
+    </div>
+  <% end %>
+
 <% end %>

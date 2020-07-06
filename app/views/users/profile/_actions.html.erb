@@ -2,15 +2,65 @@
   <div class="collection with-header hoverable">
     <div class="collection-header blue lighten-1 white-text">
       <div style="padding: 5px 10px">
-        Actions
+        Social Actions
       </div>
     </div>
 
-    <%= link_to Thredded::UrlsHelper.send_private_message_path(current_user: current_user, to: @user), class: 'collection-item' do %>
-      Send a message
-      <span class="secondary-content">
-        <i class="material-icons black-text">forum</i>
-      </span>
+    <% if user_signed_in? && !@user.blocked_by?(current_user || User.new) %>
+      <% if @user.followed_by?(current_user) %>
+        <%= form_for(current_user.user_followings.find_by(followed_user_id: @user.id), method: :delete) do |f| %>
+          <%= f.hidden_field :followed_user_id, value: @user.id %>
+          <%= link_to '#', onclick: "$('.edit_user_following').first().submit()", class: 'collection-item blue-text' do %>
+            Unfollow this user
+            <span class="secondary-content">
+              <i class="material-icons green-text">how_to_reg</i>
+            </span>
+          <% end %>
+        <% end %>
+      <% else %>
+        <%= form_for UserFollowing.new, method: :post do |f| %>
+          <%= f.hidden_field :followed_user_id, value: @user.id %>
+          <%= link_to '#', onclick: "$('#new_user_following').submit()", class: 'collection-item blue-text' do %>
+            Follow this user
+            <span class="secondary-content">
+              <i class="material-icons green-text"><%= User.icon %></i>
+            </span>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <div>
+      <%= link_to Thredded::UrlsHelper.send_private_message_path(current_user: current_user, to: @user), class: 'collection-item blue-text' do %>
+        Send a message
+        <span class="secondary-content">
+          <i class="material-icons blue-text">forum</i>
+        </span>
+      <% end %>
+    </div>
+
+    <% if user_signed_in? %>
+      <% if @user.blocked_by?(current_user) %>
+        <%= form_for(current_user.user_blockings.find_by(blocked_user_id: @user.id), method: :delete) do |f| %>
+          <%= f.hidden_field :blocked_user_id, value: @user.id %>
+          <%= link_to '#', onclick: "$('.edit_user_blocking').first().submit()", class: 'collection-item blue-text' do %>
+            Unblock this user
+            <span class="secondary-content">
+              <i class="material-icons red-text text-lighten-2">cancel</i>
+            </span>
+          <% end %>
+        <% end %>
+      <% else %>
+        <%= form_for UserBlocking.new, method: :post do |f| %>
+          <%= f.hidden_field :blocked_user_id, value: @user.id %>
+          <%= link_to '#', onclick: "$('#new_user_blocking').submit()", class: 'collection-item blue-text' do %>
+            Block this user
+            <span class="secondary-content">
+              <i class="material-icons red-text text-lighten-2">close</i>
+            </span>
+          <% end %>
+        <% end %>
+      <% end %>
     <% end %>
   </div>
 <% end %>
