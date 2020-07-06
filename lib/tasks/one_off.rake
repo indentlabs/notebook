@@ -14,7 +14,7 @@ namespace :one_off do
 
   desc "Create initial public collections"
   task initial_public_collections: :environment do
-    OWNER_USER_ID = 1
+    OWNER_USER_ID = 5
 
     PageCollection.find_or_create_by(
       title: 'The Multiverse',
