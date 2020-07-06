@@ -67,7 +67,7 @@ namespace :one_off do
     )
 
     PageCollection.find_or_create_by(
-      title: 'Pantheon',
+      title: 'The Pantheon',
       # subtitle: 'Browse public religions and deities',
       privacy: 'public',
       page_types: ['Religion', 'Deity'],
@@ -87,7 +87,7 @@ namespace :one_off do
     )
 
     PageCollection.find_or_create_by(
-      title: 'Calendar',
+      title: 'World Calendar',
       # subtitle: 'Browse public universes',
       privacy: 'public',
       page_types: ['Tradition'],
