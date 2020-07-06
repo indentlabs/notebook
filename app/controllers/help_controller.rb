@@ -1,0 +1,12 @@
+class HelpController < ApplicationController
+  before_action :authenticate_user!
+
+  before_action :set_sidenav_expansion
+
+  def index
+  end
+  
+  def set_sidenav_expansion
+    @sidenav_expansion = 'my account'
+  end
+end

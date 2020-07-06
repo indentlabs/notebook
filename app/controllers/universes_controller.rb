@@ -1,7 +1,7 @@
 class UniversesController < ContentController
 
   # TODO: pull list of content types out from some centralized list somewhere
-  Rails.application.config.content_types[:all_non_universe].each do |content_type|
+  (Rails.application.config.content_types[:all_non_universe] + [Timeline]).each do |content_type|
     content_type_name = content_type.name.downcase.pluralize.to_sym
     define_method content_type_name do
       @content_type = content_type_name.to_s.singularize.capitalize.constantize
