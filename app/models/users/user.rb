@@ -64,20 +64,27 @@ class User < ApplicationRecord
   has_many :content_page_shares,           dependent: :destroy
   has_many :content_page_share_followings, dependent: :destroy
 
-  has_many :votes,                        dependent: :destroy
-  has_many :raffle_entries,               dependent: :destroy
+  has_many :page_collections,              dependent: :destroy
+  has_many :page_collection_submissions,   dependent: :destroy
+  def published_in_page_collections
+    ids = page_collection_submissions.accepted.pluck(:page_collection_id)
+    @published_in_page_collections ||= PageCollection.where(id: ids)
+  end
 
-  has_many :content_change_events,        dependent: :destroy
-  has_many :page_tags,                    dependent: :destroy
+  has_many :votes,                         dependent: :destroy
+  has_many :raffle_entries,                dependent: :destroy
 
-  has_many :user_content_type_activators, dependent: :destroy
+  has_many :content_change_events,         dependent: :destroy
+  has_many :page_tags,                     dependent: :destroy
 
-  has_many :api_keys,                     dependent: :destroy
+  has_many :user_content_type_activators,  dependent: :destroy
 
-  has_many :notifications,                dependent: :destroy
-  has_many :notice_dismissals,            dependent: :destroy
+  has_many :api_keys,                      dependent: :destroy
 
-  has_many :page_settings_overrides,      dependent: :destroy
+  has_many :notifications,                 dependent: :destroy
+  has_many :notice_dismissals,             dependent: :destroy
+
+  has_many :page_settings_overrides,       dependent: :destroy
   has_one_attached :avatar
   validates :avatar, attached: false,
     content_type: {

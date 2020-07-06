@@ -1,7 +1,7 @@
 <script type="application/ld+json">
   <%
-    set_meta_tags title: @user.name,
-    description: "#{@user.name}’s profile on Notebook.ai",
+    set_meta_tags title: "#{@user.name}'s profile on Notebook.ai",
+    description: "#{@user.name} is creating fictional worlds on Notebook.ai.",
     image_src: @user.image_url(120)
 
     content_jsonld = {
@@ -14,6 +14,10 @@
   %>
   <%= content_jsonld.to_json.html_safe %> %>
 </script>
+
+<%
+  show_collections_tab = @user.page_collections.any? || @user.published_in_page_collections.any?
+%>
 
 <%= content_for :full_width_page_header do %>
   <div class="user-profile-ui card">
@@ -38,6 +42,9 @@
       <li class="tab col s3"><a class="active blue-text" href="#tab-recent-activity">Recent Activity</a></li>
       <li class="tab col s3"><a class="blue-text" href="#tab-universes">Universes</a></li>
       <!--<li class="tab col s3"><a class="blue-text" href="#tab-documents">Documents</a></li>-->
+      <% if show_collections_tab %>
+        <li class="tab col s3"><a class="blue-text" href="#tab-collections">Collections</a></li>
+      <% end %>
       </ul>
     </div>
   </div>
@@ -123,6 +130,66 @@
           <div class="col s12 m8 l8">
             <%= render partial: 'users/profile/public_pages' %>
           </div>
+        </div>
+      <% end %>
+    </div>
+    <div id="tab-collections">
+      <% if user_signed_in? && @user.blocked_by?(current_user) %>
+        <p class="card-panel red center lighten-5 black-text">
+          You've blocked this user.
+        </p>
+      <% else %>
+        <div class="row">
+
+          <% if @user.published_in_page_collections.any? %>
+            <h3 class="grey-text center">Published in</h3>
+            <% @user.published_in_page_collections.each do |page_collection| %>
+              <div class="col s12 m6 l4">
+                <%= link_to page_collection do %>
+                  <div class="hoverable card">
+                    <div class="card-image">
+                      <%= image_tag page_collection.cover_image %>
+                      <span class="card-title">
+                        <i class="material-icons bordered-text <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
+                        <%= page_collection.title %><br />
+                        <%= page_collection.subtitle %>
+                      </span>
+                    </div>
+                    <div class="card-content <%= PageCollection.color %> white-text fixed-card-content">
+                      <p><%= truncate(page_collection.description, length: 140) %></p>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+        
+        </div>
+        <div class="row">
+
+          <% if @user.page_collections.any? %>
+            <h3 class="grey-text center">My Collections</h3>
+            <% @user.page_collections.each do |page_collection| %>
+              <div class="col s12 m6 l4">
+                <%= link_to page_collection do %>
+                  <div class="hoverable card">
+                    <div class="card-image">
+                      <%= image_tag page_collection.cover_image %>
+                      <span class="card-title">
+                        <i class="material-icons bordered-text <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
+                        <%= page_collection.title %><br />
+                        <%= page_collection.subtitle %>
+                      </span>
+                    </div>
+                    <div class="card-content <%= PageCollection.color %> white-text fixed-card-content">
+                      <p><%= truncate(page_collection.description, length: 140) %></p>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+
         </div>
       <% end %>
     </div>
