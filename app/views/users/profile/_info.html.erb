@@ -99,32 +99,38 @@
     </div>
   <% end %>
 
-  <% if @user.bio.present? %>
-    <div class="col s12">
-      <div class="hoverable card-panel">
-        <div class="grey-text uppercase">
-          Bio
-        </div>
-        <div>
-          <%= simple_format truncate(@user.bio, length: 500) %>
-        </div>
-      </div>
-    </div>
-  <% end %>
-
-  <% %w(interests favorite_genre favorite_author favorite_book favorite_quote inspirations).each do |field| %>
-    <% next unless @user.send(field).present? %>
-    <div class="col s12 m12 l6">
-
-      <div class="hoverable card-panel">
-        <div class="grey-text uppercase">
-          <%= field.titleize %>
-        </div>
-        <div>
-          <%= simple_format @user.send(field) %>
+  <% if user_signed_in? && @user.blocked_by?(current_user) %>
+    <div class="clearfix"></div>
+    <p class="card-panel red center lighten-5 black-text">
+      You've blocked this user.
+    </p>
+  <% else %>
+    <% if @user.bio.present? %>
+      <div class="col s12">
+        <div class="hoverable card-panel">
+          <div class="grey-text uppercase">
+            Bio
+          </div>
+          <div>
+            <%= simple_format truncate(@user.bio, length: 500) %>
+          </div>
         </div>
       </div>
-    </div>
-  <% end %>
+    <% end %>
 
+    <% %w(interests favorite_genre favorite_author favorite_book favorite_quote inspirations).each do |field| %>
+      <% next unless @user.send(field).present? %>
+      <div class="col s12 m12 l6">
+
+        <div class="hoverable card-panel">
+          <div class="grey-text uppercase">
+            <%= field.titleize %>
+          </div>
+          <div>
+            <%= simple_format @user.send(field) %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
 </div>

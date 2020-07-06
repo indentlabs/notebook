@@ -55,64 +55,76 @@
       <%= render partial: 'users/profile/info' %>
     </div>
     <div id="tab-recent-activity">
-      <% @feed.each do |share| %>
-        <% if Rails.application.config.content_types[:all].map(&:name).include?(share.content_page_type) %>
-          <%= render partial: 'content_page_shares/stream_item', locals: { share: share, content: share.content_page } %>
-        <% elsif share.content_page_type == Thredded::Topic.name %>
-          <%= render partial: 'content_page_shares/stream_discussion', locals: { share: share, content: share.content_page } %>
-        <% else %>
-          <strong>Error loading stream item</strong>
+      <% if user_signed_in? && @user.blocked_by?(current_user) %>
+        <p class="card-panel red center lighten-5 black-text">
+          You've blocked this user.
+        </p>
+      <% else %>
+        <% @feed.each do |share| %>
+          <% if Rails.application.config.content_types[:all].map(&:name).include?(share.content_page_type) %>
+            <%= render partial: 'content_page_shares/stream_item', locals: { share: share, content: share.content_page } %>
+          <% elsif share.content_page_type == Thredded::Topic.name %>
+            <%= render partial: 'content_page_shares/stream_discussion', locals: { share: share, content: share.content_page } %>
+          <% else %>
+            <strong>Error loading stream item</strong>
+          <% end %>
+          <br /><br />
         <% end %>
-        <br /><br />
-      <% end %>
-      <% if @feed.empty? %>
-        <div class="row">
-          <div class='col s12'>
-            <div class="hoverable card">
-              <div class="card-content">
-                <p class="card-title">
-                  There are no posts here yet!
-                </p>
-                <p>
-                  You can follow other worldbuilders from their profiles.
-                  Whenever a user you follow shares one of their public pages,
-                  it will appear here for you to comment on!
-                </p>
+        <% if @feed.empty? %>
+          <div class="row">
+            <div class='col s12'>
+              <div class="hoverable card">
+                <div class="card-content">
+                  <p class="card-title">
+                    There are no posts here yet!
+                  </p>
+                  <p>
+                    You can follow other worldbuilders from their profiles.
+                    Whenever a user you follow shares one of their public pages,
+                    it will appear here for you to comment on!
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        <% end %>
       <% end %>
     </div>
     <div id="tab-universes">
-      <div class="row">
-        <% @user.universes.is_public.each do |universe| %>
-          <div class="col s12 m12 l6">
-            <%= link_to universe do %>
-              <div class="hoverable card">
-                <div class="card-image">
-                  <%= image_tag universe.random_public_image %>
-                  <span class="card-title"><%= universe.name %></span>
+      <% if user_signed_in? && @user.blocked_by?(current_user) %>
+        <p class="card-panel red center lighten-5 black-text">
+          You've blocked this user.
+        </p>
+      <% else %>
+        <div class="row">
+          <% @user.universes.is_public.each do |universe| %>
+            <div class="col s12 m12 l6">
+              <%= link_to universe do %>
+                <div class="hoverable card">
+                  <div class="card-image">
+                    <%= image_tag universe.random_public_image %>
+                    <span class="card-title"><%= universe.name %></span>
+                  </div>
+                  <div class="card-content <%= Universe.color %> white-text">
+                    <p><%= universe.description %></p>
+                  </div>
                 </div>
-                <div class="card-content <%= Universe.color %> white-text">
-                  <p><%= universe.description %></p>
-                </div>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
-      <div class="row">
-        <div class="col s12 m4 l4">
-          You can also browse this user's public pages directly.
-          <% if @content.empty? %>
-            However, they haven't made anything public yet!
+              <% end %>
+            </div>
           <% end %>
         </div>
-        <div class="col s12 m8 l8">
-          <%= render partial: 'users/profile/public_pages' %>
+        <div class="row">
+          <div class="col s12 m4 l4">
+            You can also browse this user's public pages directly.
+            <% if @content.empty? %>
+              However, they haven't made anything public yet!
+            <% end %>
+          </div>
+          <div class="col s12 m8 l8">
+            <%= render partial: 'users/profile/public_pages' %>
+          </div>
         </div>
-      </div>
+      <% end %>
     </div>
     <!--
     <div id="tab-documents">
