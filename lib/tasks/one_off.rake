@@ -34,7 +34,7 @@ namespace :one_off do
       page_types: ['Character'],
       color: Character.color,
       user_id: OWNER_USER_ID,
-      cover_image: "card-headers/characters.jpg",
+      cover_image: "https://i.imgur.com/nuRMRNV.jpg",
       description: "Who's the most super of the superheroes in your world? Let's build a collection of the best of the best!"
     )
 
@@ -45,7 +45,7 @@ namespace :one_off do
       page_types: ['Character'],
       color: Character.color,
       user_id: OWNER_USER_ID,
-      cover_image: "card-headers/characters.jpg",
+      cover_image: "https://i.imgur.com/JGZTuuE.jpg",
       description: "Who' the baddest baddie you've got? Fill out your supervillain's notebook page and then submit them here; let's build a collection of every world's worst villains!"
     )
 
@@ -89,7 +89,7 @@ namespace :one_off do
       page_types: ['Item', 'Technology', 'Vehicle'],
       color: Item.color,
       user_id: OWNER_USER_ID,
-      cover_image: "card-headers/items.jpg",
+      cover_image: "https://i.imgur.com/8RI3EzY.jpg",
       description: "The Armory is a massive arsenal of items, technology, and vehicles. Submit your weapons, armor, tech, and all other implements of war!"
     )
 
