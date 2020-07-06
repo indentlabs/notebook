@@ -12,19 +12,7 @@
 <div id="associations_panel" class="row panel">
   <div class="row">
     <div class="col s12 m10 offset-m1">
-      <% if user_signed_in? && current_user.notice_dismissals.where(notice_id: 7).none? %>
-        <div class="col s12">
-          <div class="hoverable card-panel blue lighten-5">
-            <%= link_to prepay_path, class: 'black-text' do %>
-              <i class="material-icons grey-text left">help</i>
-              These associations are automatically created whenever you add another page to this universe.
-              Only you can see this message.
-
-              <%= link_to 'Dismiss this notice.', notice_dismissal_dismiss_path(notice_id: 7), class: 'blue-text' %>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
+      <%= render partial: 'notice_dismissal/messages/07' %>
 
       <% relations.each do |name, params| %>
         <%
