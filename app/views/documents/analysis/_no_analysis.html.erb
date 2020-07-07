@@ -11,12 +11,12 @@
     </p>
     <p>
       Our automated document analysis is a Premium-only feature currently in beta. 
-      <% unless current_user.on_premium_plan? %>
+      <% unless user_signed_in? && current_user.on_premium_plan? %>
         To request an analysis for your document, please <%= link_to 'upgrade to a Premium account', subscription_path %>.
       <% end %>
     </p>
     <p>
-      <% if current_user.on_premium_plan? %>
+      <% if user_signed_in? && current_user.on_premium_plan? %>
         <%=
           link_to 'Request an analysis',
                   queue_analysis_document_path(@document),

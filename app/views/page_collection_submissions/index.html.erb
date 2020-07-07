@@ -11,9 +11,9 @@
   </div>
 
   <% @page_collection_submissions.each do |page_collection_submission| %>
-    <div class="col s12 m12 l6">
+    <div class="col s12 m12 l12">
       <% content = page_collection_submission.content %>
-      <div class="horizontal card <%= content.class.color %> lighten-5">
+      <div class="horizontal card <%= content.class.color %> lighten-5 black-text">
         <div class="card-image">
           <%= link_to content do %>
             <%= image_tag content.random_public_image %>
@@ -21,19 +21,18 @@
         </div>
         <div class="card-stacked">
           <div class="card-content">
-            <div class="card-title">
+            <div class="card-title black-text">
               <i class="material-icons left <%= content.class.color %>-text"><%= content.class.icon %></i>
               <%= content.name %>
             </div>
-            <p>
-              <%= simple_format page_collection_submission.explanation %>
-            </p>
+            <blockquote>
+              <%= simple_format page_collection_submission.explanation, class: 'black-text' %>
+            </blockquote>
             <div>
               Submitted by
               <%= link_to content.user, class: "#{User.color}-text" do %>
                 <%= content.user.display_name %>
               <% end %>
-              <br />
               <%= time_ago_in_words page_collection_submission.submitted_at %> ago
             </div>
           </div>

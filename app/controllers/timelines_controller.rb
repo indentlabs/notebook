@@ -1,4 +1,5 @@
 class TimelinesController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_timeline, only: [:show, :edit, :update, :destroy]
 
   before_action :set_navbar_color
@@ -21,7 +22,7 @@ class TimelinesController < ApplicationController
 
   # GET /timelines/1/edit
   def edit
-    raise "No Access" unless user_signed_in? && current_user == @timeline.user
+    raise "No Access"   unless user_signed_in? && current_user == @timeline.user
   end
 
   # POST /timelines

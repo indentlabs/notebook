@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_01_020228) do
+ActiveRecord::Schema.define(version: 2020_07_06_233002) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -414,7 +414,10 @@ ActiveRecord::Schema.define(version: 2020_07_01_020228) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "deleted_at"
+    t.string "secondary_content_page_type"
+    t.integer "secondary_content_page_id"
     t.index ["content_page_type", "content_page_id"], name: "cps_index"
+    t.index ["secondary_content_page_type", "secondary_content_page_id"], name: "index_secondary_content_page_share"
     t.index ["user_id"], name: "index_content_page_shares_on_user_id"
   end
 

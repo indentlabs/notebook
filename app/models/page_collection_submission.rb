@@ -10,15 +10,16 @@ class PageCollectionSubmission < ApplicationRecord
   def accept!
     update(accepted_at: DateTime.current)
 
-    # TODO Create a "this user got accepted into a submission!" event
-    # ContentPageShare.create(
-    #   user_id:           self.user_id,
-    #   content_page_type: self.class.name,
-    #   content_page_id:   self.id,
-    #   shared_at:         self.created_at,
-    #   privacy:           'public',
-    #   message:           self.title,
-    # )
+    ContentPageShare.create(
+      user_id:                     self.user_id,
+      content_page_type:           PageCollection.name,
+      content_page_id:             page_collection_id,
+      secondary_content_page_type: content.class.name,
+      secondary_content_page_id:   content.id,
+      shared_at:                   self.created_at,
+      privacy:                     'public',
+      message:                     self.explanation
+    )
   end
 
   after_create do

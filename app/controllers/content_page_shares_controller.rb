@@ -31,7 +31,7 @@ class ContentPageSharesController < ApplicationController
     if @share.save
       redirect_to [@share.user, @share], notice: 'Content page share was successfully created.'
     else
-      render :new
+      raise @share.errors.inspect
     end
   end
 
