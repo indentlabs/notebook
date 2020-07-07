@@ -79,7 +79,7 @@ class ContentPageSharesController < ApplicationController
     {
       content_page_type: params.require(:content_page_share).require(:content_page).split('-').first,
       content_page_id:   params.require(:content_page_share).require(:content_page).split('-').second,
-      message:           params.require(:content_page_share).require(:message),
+      message:           params.require(:content_page_share).permit(:message).fetch('message', ''),
       user_id:           current_user.id,
       shared_at:         DateTime.current
     }

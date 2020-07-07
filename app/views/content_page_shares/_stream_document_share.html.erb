@@ -36,19 +36,23 @@
 
     <div class="col s12 m6 l6">
       <div class="card-content discussion-container">
-        <div class="metadata">
-          <%= link_to share.user, class: "#{User.color}-text" do %>
-            <%= image_tag share.user.image_url(size=20), class: 'left circle avatar' %>
-            <%= share.user.display_name %>
-          <% end %>
-          <span class="helper-text">
-            said 
-            <%= link_to [share.user, share] do %><%= time_ago_in_words share.shared_at %> ago<% end %>:
-          </span>
-        </div>
-        <blockquote class="original-comment">
-          <%= simple_format share.message %>
-        </blockquote>
+        <% if share.message.present? %>
+          <div class="metadata">
+            <%= link_to share.user, class: "#{User.color}-text" do %>
+              <%= image_tag share.user.image_url(size=20), class: 'left circle avatar' %>
+              <%= share.user.display_name %>
+            <% end %>
+            <span class="helper-text">
+              said 
+              <%= link_to [share.user, share] do %><%= time_ago_in_words share.shared_at %> ago<% end %>:
+            </span>
+          </div>
+          <blockquote class="original-comment">
+            <%= simple_format share.message %>
+          </blockquote>
+        <% end %>
+
+        Click here to read the document: <%= link_to share.content_page.title, share.content_page, class: "#{Document.color}-text" %>
 
         <%= render partial: 'share_comments/form', locals: { share: share } %>
         <br /><br />
