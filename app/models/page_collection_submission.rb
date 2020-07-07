@@ -10,7 +10,7 @@ class PageCollectionSubmission < ApplicationRecord
   def accept!
     update(accepted_at: DateTime.current)
 
-    ContentPageShare.create(
+    share = ContentPageShare.create(
       user_id:                     self.user_id,
       content_page_type:           PageCollection.name,
       content_page_id:             page_collection_id,
@@ -20,6 +20,9 @@ class PageCollectionSubmission < ApplicationRecord
       privacy:                     'public',
       message:                     self.explanation
     )
+
+    # Auto-follow the page collection owner to the share also
+    page_collection.user.content_page_share_followings.create({content_page_share: share})
   end
 
   after_create do
