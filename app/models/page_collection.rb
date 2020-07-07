@@ -15,6 +15,14 @@ class PageCollection < ApplicationRecord
     User.where(id: accepted_submissions.pluck(:user_id) - [user.id])
   end
 
+  # Some quick aliases so we can treat this like a content page in streams:
+  def random_public_image
+    cover_image
+  end
+  def name
+    title
+  end
+
   serialize :page_types, Array
 
   def self.color

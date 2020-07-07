@@ -27,7 +27,7 @@ class PageCollectionSubmissionsController < ApplicationController
     if @page_collection_submission.save
       redirect_to @page_collection_submission.page_collection, notice: 'Page submitted!'
     else
-      raise "railsed create"
+      raise "failed create"
       # render :new
     end
   end

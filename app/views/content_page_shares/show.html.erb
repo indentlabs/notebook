@@ -101,9 +101,11 @@
             <%= time_ago_in_words @share.shared_at %> ago
           </span>
         </p>
-        <blockquote class="original-comment">
-          <%= simple_format @share.message %>
-        </blockquote>
+        <% if @share.message.present? %>
+          <blockquote class="original-comment">
+            <%= simple_format @share.message %>
+          </blockquote>
+        <% end %>
         
         <%= render partial: 'share_comments/form', locals: { share: @share } %>
         <br /><br />
