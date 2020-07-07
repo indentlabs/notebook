@@ -1,7 +1,7 @@
 class ContentPageShare < ApplicationRecord
   belongs_to :user
-  belongs_to :content_page,           polymorphic: true
-  belongs_to :secondary_content_page, polymorphic: true
+  belongs_to :content_page,           polymorphic: true, optional: true
+  belongs_to :secondary_content_page, polymorphic: true, optional: true
 
 
   has_many :share_comments,                dependent: :destroy
