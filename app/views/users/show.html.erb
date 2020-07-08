@@ -67,20 +67,7 @@
           You've blocked this user.
         </p>
       <% else %>
-        <% @feed.each do |share| %>
-          <% if Rails.application.config.content_types[:all].map(&:name).include?(share.content_page_type) %>
-            <%= render partial: 'content_page_shares/stream_page_share', locals: { share: share, content: share.content_page } %>
-          <% elsif share.content_page_type == Thredded::Topic.name %>
-            <%= render partial: 'content_page_shares/stream_discussion', locals: { share: share, content: share.content_page } %>
-          <% elsif share.content_page_type == PageCollection.name %>
-            <%= render partial: 'content_page_shares/stream_page_collection', locals: { share: share, content: share.content_page } %>
-          <% elsif share.content_page_type == Document.name %>
-            <%= render partial: 'content_page_shares/stream_document_share', locals: { share: share, content: share.content_page } %>
-          <% else %>
-            <strong>Error loading stream item</strong>
-          <% end %>
-          <br /><br />
-        <% end %>
+        <%= render partial: 'stream/share', collection: @feed %>
         <% if @feed.empty? %>
           <div class="row">
             <div class='col s12'>
