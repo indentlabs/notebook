@@ -1,5 +1,5 @@
 class ContentPageSharesController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [:show]
   before_action :set_content_page_share, only: [
     :show, :edit, :update, :destroy, 
     :follow, :unfollow, :report
