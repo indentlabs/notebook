@@ -1,5 +1,5 @@
 class TimelinesController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [:show]
   before_action :set_timeline, only: [:show, :edit, :update, :destroy]
 
   before_action :set_navbar_color
@@ -44,10 +44,12 @@ class TimelinesController < ApplicationController
 
   # PATCH/PUT /timelines/1
   def update
+    return unless user_signed_in? && current_user == @timeline.user
+
     if @timeline.update(timeline_params)
-      redirect_to @timeline, notice: 'Timeline was successfully updated.'
+      render status: 200, json: @timeline.reload
     else
-      render :edit
+      render status: 501, json: @timeline.errors
     end
   end
 
