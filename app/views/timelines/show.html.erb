@@ -1,4 +1,126 @@
-<p id="notice"><%= notice %></p>
+<%= form_for @timeline, html: { class: 'autosave-form' }, remote: true do |f| %>
+  <div class="row">
+    <div class="col s12">
+      <h1 style="font-size: 3em;">
+        <% if @timeline.universe %>
+          <%= link_to @timeline.universe do %>
+            <i class="material-icons right medium <%= Universe.color %>-text tooltipped" data-tooltip="A timeline in the <%= @timeline.universe.name %> universe."><%= Universe.icon %></i>
+          <% end %>
+        <% end %>
+        <% if user_signed_in? && current_user == @timeline.user %>
+          <%= link_to edit_timeline_path(@timeline) do %>
+            <i class="material-icons right medium <%= Timeline.color %>-text tooltipped" data-tooltip="Edit this timeline">edit</i>
+          <% end %>
+        <% end %>
+        <%= @timeline.name %><br />
+        <small class="grey-text"><%= @timeline.subtitle %></small>
+      </h1>
+      <%= simple_format @timeline.description %>
+    </div>
+    <div class="col s12">
+      <% if @timeline.notes.present? || (@timeline.private_notes.present? && user_signed_in && current_user == @timeline.user) %>
+        <ul class="hoverable collapsible">
+          <li>
+            <div class=" collapsible-header">
+              <i class="material-icons <%= Timeline.color %>-text"><%= Timeline.icon %></i>
+              Timeline notes
+            </div>
+            <div class="collapsible-body">
+              <% if @timeline.notes.present? %>
+                <div class='grey-text uppercase'>Notes</div>
+                <%= simple_format @timeline.notes %>
+              <% end %>
 
-<%= link_to 'Edit', edit_timeline_path(@timeline) %> |
-<%= link_to 'Back', timelines_path %>
+              <% if @timeline.private_notes.present? && user_signed_in? && current_user == @timeline.user %>
+                <div class="grey-text uppercase">Private notes (only visible to you)</div>
+                <%= simple_format @timeline.private_notes %>
+              <% end %>
+              <div class="clearfix"></div>
+            </div>
+          </li>
+        </ul>
+      <% end %>          
+    </div>
+  </div>
+<% end %>
+
+<div class="timeline-viewer" data-timeline-id="<%= @timeline.id %>">
+  <!--
+  <div class="filter-bar">
+    (filter events by character, location, etc)
+  </div>
+  -->
+
+  <div class="timeline-events-container" data-timeline-id="<%= @timeline.id %>">
+    <% @timeline.timeline_events.includes(:timeline_event_entities).each do |event| %>
+      <div class="timeline-event-container" data-event-id="<%= event.id %>"  data-timeline-id="<%= @timeline.id %>">
+        <%= form_for event, html: { class: 'autosave-form' }, remote: true do |f| %>
+          <%= f.hidden_field :timeline_id %>
+          <div class="row">
+            <div class="col l2">
+              <% if event.time_label.present? %>
+                <div class="grey-text uppercase">Time label</div>
+                <%= simple_format event.time_label %>
+              <% end %>
+            </div>
+            <div class="col l1" style="margin-bottom: -60px; margin-left: -7px; margin-right: -40px;">
+              <%= image_tag 'graphics/timeline-line.png' %>
+            </div>
+            <div class="col l6">
+              <div class="hoverable clearfix card" style="border-top: 5px solid <%= Timeline.hex_color %>">
+                <div class="card-content">
+                  <span class="card-title">
+                    <%= simple_format(event.title.presence || 'Untitled event') %>
+                  </span>
+                  <% if event.description.present? %>
+                    <div class="grey-text uppercase">Description</div>
+                    <%= simple_format(event.description) %>
+                  <% end %>
+
+                  <br />
+
+                  <% if event.notes.present? %>
+                    <div class="grey-text uppercase">Notes</div>
+                    <%= simple_format(event.notes) %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+            <div class="col l3">
+              <%
+                event_entities = event.timeline_event_entities.order('entity_type').preload(:entity).group_by(&:entity_type)
+              %>
+              <% unless event_entities == {} %>
+                <div class="grey-text uppercase">
+                  In this event
+                </div>
+                <ul class="collapsible">
+                  <% event_entities.each do |entity_type, entity_list| %>
+                    <li>
+                      <% klass = entity_type.constantize %>
+                      <div class="collapsible-header">
+                        <i class="material-icons <%= klass.color %>-text"><%= klass.icon %></i>
+                        <%= entity_type.pluralize %>
+                        <span class="badge"><%= entity_list.count %></span>
+                      </div>
+                      <div class="collapsible-body">
+                        <% entity_list.each do |te_entity| %>
+                          <div class="chip">
+                            <%= link_to(te_entity.entity.name.presence || "Untitled #{te_entity.entity_type}", te_entity.entity) %>
+                          </div>
+                        <% end %>
+                      </div>
+                    </li>
+                  <% end %>
+                </ul>
+              <% end %>
+
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+</div>
+

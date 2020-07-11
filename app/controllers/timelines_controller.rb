@@ -14,6 +14,12 @@ class TimelinesController < ApplicationController
     end
   end
 
+  def show
+    unless @timeline.privacy == 'public' || (user_signed_in? && current_user == @timeline.user)
+      return redirect_back(fallback_location: root_path, notice: "You don't have permission to view that timeline!")
+    end
+  end
+
   # GET /timelines/new
   def new
     timeline = current_user.timelines.create.reload
