@@ -22,7 +22,7 @@ class TimelinesController < ApplicationController
 
   # GET /timelines/new
   def new
-    timeline = current_user.timelines.create(title: 'Untitled Timeline').reload
+    timeline = current_user.timelines.create(name: 'Untitled Timeline').reload
     redirect_to edit_timeline_path(timeline)
   end
 
