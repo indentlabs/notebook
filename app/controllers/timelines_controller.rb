@@ -22,7 +22,7 @@ class TimelinesController < ApplicationController
 
   # GET /timelines/new
   def new
-    timeline = current_user.timelines.create.reload
+    timeline = current_user.timelines.create(title: 'Untitled Timeline').reload
     redirect_to edit_timeline_path(timeline)
   end
 
@@ -33,6 +33,7 @@ class TimelinesController < ApplicationController
 
   # POST /timelines
   def create
+    # TODO this endpoint is probably just API-only, right?
     @timeline = Timeline.new(timeline_params)
 
     if current_user.on_premium_plan? && @timeline.save
