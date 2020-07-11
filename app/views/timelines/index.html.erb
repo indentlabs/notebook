@@ -20,8 +20,8 @@
 
         <%= link_to edit_timeline_path(timeline) do %>
           <div class="hoverable card">
-            <div class="card-image"  style="height: 140px;">
-              <%= image_tag timeline.random_public_image(format: :medium), style: 'height: 140px' %>
+            <div class="card-image"  style="height: 140px; overflow: hidden;">
+              <%= image_tag timeline.random_public_image(format: :medium) %>
               <span class="card-title">
                 <%= timeline.name.presence || 'Untitled Timeline' %>
               </span>
@@ -52,6 +52,17 @@
 
               <div class="clearfix"></div>
             </div>
+            <div class="card-action">
+              <%= link_to timeline_path(timeline), class: 'blue-text left' do %>
+                <i class="material-icons left"><%= Timeline.icon %></i>
+                View
+              <% end %>
+              <%= link_to edit_timeline_path(timeline), class: 'green-text right' do %>
+                <i class="material-icons left">edit</i>
+                Edit
+              <% end %>
+              <div class="clearfix"></div>
+            </div>
           </div>
         <% end %>
 
@@ -70,6 +81,11 @@
       %>
     </p>
   <% end %>
+
+  <br />
+  <br />
+  <br />
+  <br />
 
 <% elsif @timelines.empty? %>
 
