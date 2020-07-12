@@ -63,6 +63,7 @@ class User < ApplicationRecord
 
   has_many :content_page_shares,           dependent: :destroy
   has_many :content_page_share_followings, dependent: :destroy
+  has_many :content_page_share_reports,    dependent: :destroy
 
   has_many :page_collections,              dependent: :destroy
   has_many :page_collection_submissions,   dependent: :destroy
@@ -70,6 +71,8 @@ class User < ApplicationRecord
     ids = page_collection_submissions.accepted.pluck(:page_collection_id)
     @published_in_page_collections ||= PageCollection.where(id: ids)
   end
+  has_many :page_collection_followings,    dependent: :destroy
+  has_many :page_collection_reports,       dependent: :destroy
 
   has_many :votes,                         dependent: :destroy
   has_many :raffle_entries,                dependent: :destroy

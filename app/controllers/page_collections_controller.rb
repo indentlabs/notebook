@@ -2,7 +2,7 @@ class PageCollectionsController < ApplicationController
   before_action :authenticate_user!, except: [:index, :show]
 
   before_action :set_sidenav_expansion
-  before_action :set_page_collection, only: [:show, :edit, :update, :destroy]
+  before_action :set_page_collection, only: [:show, :edit, :update, :destroy, :follow, :unfollow, :report]
 
   # GET /page_collections
   def index
@@ -63,6 +63,21 @@ class PageCollectionsController < ApplicationController
 
       render :show
     end
+  end
+
+  def follow
+    @page_collection.page_collection_followings.find_or_create_by(user_id: current_user.id)
+    redirect_to @page_collection, notice: 'You will now receive notifications about this Collection.'
+  end
+
+  def unfollow
+    @page_collection.page_collection_followings.find_by(user_id: current_user.id).try(:destroy)
+    redirect_to @page_collection, notice: 'You will no longer receive notifications about this Collection.'
+  end
+
+  def report
+    @page_collection.page_collection_reports.create(user_id: current_user.id)
+    redirect_to root_path, notice: "That Collection has been reported to site administration. Thank you!"
   end
 
   private

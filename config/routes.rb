@@ -13,6 +13,9 @@ Rails.application.routes.draw do
     Rails.application.config.content_types[:all].each do |content_type|
       get content_type.name.downcase.pluralize.to_sym, on: :member
     end
+    get 'follow',   on: :member
+    get 'unfollow', on: :member
+    get 'report',   on: :member
   end
   resources :page_collection_submissions do
     get 'approve', on: :member
