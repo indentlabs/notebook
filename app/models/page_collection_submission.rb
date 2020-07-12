@@ -10,6 +10,7 @@ class PageCollectionSubmission < ApplicationRecord
   def accept!
     update(accepted_at: DateTime.current)
 
+    # Create a stream event for the user that got accepted
     share = ContentPageShare.create(
       user_id:                     self.user_id,
       content_page_type:           PageCollection.name,
@@ -20,6 +21,17 @@ class PageCollectionSubmission < ApplicationRecord
       privacy:                     'public',
       message:                     self.explanation
     )
+
+    # Send a notification to all the users following this collection
+    page_collection.followers.each do |user|
+      user.notifications.create(
+        message_html:     "<div><span class='#{content.class.color}-text'>#{content.name}</span> by <span class='#{User.color}-text'>#{content.user.display_name}</span> was added to the <span class='#{PageCollection.color}-text'>#{page_collection.title}</span> Collection.</div>",
+        icon:             PageCollection.icon,
+        icon_color:       PageCollection.color,
+        happened_at:      DateTime.current,
+        passthrough_link: Rails.application.routes.url_helpers.page_collection_path(page_collection)
+      )
+    end
 
     # Auto-follow the page collection owner to the share also
     page_collection.user.content_page_share_followings.create({content_page_share: share})

@@ -2,7 +2,10 @@ class PageCollection < ApplicationRecord
   belongs_to :user
 
   has_many :page_collection_submissions
+
   has_many :page_collection_followings
+  has_many :followers, through: :page_collection_followings, source: :user
+
   has_many :page_collection_reports
 
   def pending_submissions
