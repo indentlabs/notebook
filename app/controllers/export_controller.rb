@@ -29,19 +29,19 @@ class ExportController < ApplicationController
 
   def notebook_json
     report_to_mixpanel 'json', 'notebook'
-    json_dump = current_user.content.except('Document').map { |category, content| {"#{category}": fill_relations(category.constantize, content)} }.to_json
+    json_dump = current_user.content.except('Document').except('Timeline').map { |category, content| {"#{category}": fill_relations(category.constantize, content)} }.to_json
     send_data json_dump, filename: "notebook-#{Date.today}.json"
   end
 
   def notebook_xml
     report_to_mixpanel 'xml', 'notebook'
-    xml_dump = current_user.content.except('Document').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_xml
+    xml_dump = current_user.content.except('Document').except('Timeline').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_xml
     send_data xml_dump, filename: "notebook-#{Date.today}.xml"
   end
   
   def notebook_yml
     report_to_mixpanel 'yaml', 'notebook'
-    yaml_dump = current_user.content.except('Document').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_yaml
+    yaml_dump = current_user.content.except('Document').except('Timeline').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_yaml
     send_data yaml_dump, filename: "notebook-#{Date.today}.yml"
   end
 
@@ -131,7 +131,7 @@ class ExportController < ApplicationController
   end
 
   def content_to_outline
-    content_types = current_user.content.except('Document').keys
+    content_types = current_user.content.except('Document').except('Timeline').keys
 
     text = ""
     content_types.each do |content_type|
