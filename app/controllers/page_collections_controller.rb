@@ -99,11 +99,11 @@ class PageCollectionsController < ApplicationController
   def sort_pages
     case params.permit(:sort).fetch('sort', nil)
     when 'alphabetical'
-      @pages = @pages.order('cached_content_name ASC')
+      @pages = @pages.reorder('cached_content_name ASC')
     when 'chronological'
-      @pages = @pages.order('accepted_at ASC')
+      @pages = @pages.reorder('accepted_at ASC')
     when 'recent'
-      @pages = @pages.order('accepted_at DESC')
+      @pages = @pages.reorder('accepted_at DESC')
     when nil
     end
   end
