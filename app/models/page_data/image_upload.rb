@@ -6,12 +6,12 @@ class ImageUpload < ApplicationRecord
   has_attached_file :src,
     path: 'content/uploads/:style/:filename',
     styles: {
-      thumb: '100x100>',
-      small: '190x190#',
+      thumb:  '100x100>',
+      small:  '190x190#',
       square: '280x280#',
       medium: '300x300>',
-      large: '600x600>',
-      hero: '800x800>'
+      large:  '600x600>',
+      hero:   '800x800>'
     },
     filename_cleaner: -> (filename) {
       [
@@ -22,6 +22,7 @@ class ImageUpload < ApplicationRecord
   # has_one_attached :upload
 
   validates_attachment_content_type :src, content_type: /\Aimage\/.*\Z/
+  # TODO add size validation
 
   before_destroy :delete_s3_image
 
