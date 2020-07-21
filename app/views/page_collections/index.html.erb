@@ -1,1 +1,100 @@
-unused page
+<div class="row">
+  <h1 class="grey-text center" style="font-size: 2em">Your collections</h1>
+  <% @my_collections.each do |collection| %>
+    <div class="col s12 m6 l4">
+      <%= link_to collection do %>
+        <div class="hoverable card" style="height: 240px">
+          <div class="card-image">
+            <%= image_tag collection.cover_image, style: 'max-height: 300px;' %>
+            <span class="card-title">
+              <%= collection.title %>
+              <br />
+              <small>
+                <% if collection.subtitle? %>
+                  <%= collection.subtitle %>
+                <% else %>
+                  <% collection.page_types.each do |icon| %>
+                    <% klass = icon.constantize %>
+                    <i class="material-icons left tooltipped" data-tooltip="<%= icon.pluralize %>"><%= klass.icon %></i>
+                  <% end %>
+                <% end %>              
+              </small>
+            </span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+  <div class="col s12 m6 l4">
+    <%= link_to new_page_collection_path do %>
+      <div class="card-panel <%= PageCollection.color %> white-text hoverable center" style="height: 246px;">
+        <br /><br />
+
+        <i class="material-icons large">add</i><br />
+        Create a collection
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<% if @network_collections.any? %>
+  <div class="row">
+    <h1 class="grey-text center" style="font-size: 2em">Collections from your network</h1>
+    <% @network_collections.each do |collection| %>
+      <div class="col s12 m6 l4">
+        <%= link_to collection do %>
+          <div class="hoverable card">
+            <div class="card-image">
+              <%= image_tag collection.cover_image, style: 'max-height: 300px;' %>
+              <span class="card-title">
+                <%= collection.title %>
+                <br />
+                <small>
+                  <% if collection.subtitle? %>
+                    <%= collection.subtitle %>
+                  <% else %>
+                    <% collection.page_types.each do |icon| %>
+                      <% klass = icon.constantize %>
+                      <i class="material-icons left tooltipped" data-tooltip="<%= icon.pluralize %>"><%= klass.icon %></i>
+                    <% end %>
+                  <% end %>              
+                </small>
+              </span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @random_collections.any? %>
+  <div class="row">
+    <h1 class="grey-text center" style="font-size: 2em">Discover more collections</h1>
+    <% @random_collections.each do |collection| %>
+      <div class="col s12 m6 l4">
+        <%= link_to collection do %>
+          <div class="hoverable card">
+            <div class="card-image">
+              <%= image_tag collection.cover_image, style: 'max-height: 300px;' %>
+              <span class="card-title">
+                <%= collection.title %>
+                <br />
+                <small>
+                  <% if collection.subtitle? %>
+                    <%= collection.subtitle %>
+                  <% else %>
+                    <% collection.page_types.each do |icon| %>
+                      <% klass = icon.constantize %>
+                      <i class="material-icons left tooltipped" data-tooltip="<%= icon.pluralize %>"><%= klass.icon %></i>
+                    <% end %>
+                  <% end %>              
+                </small>
+              </span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

@@ -6,7 +6,12 @@ class PageCollectionsController < ApplicationController
 
   # GET /page_collections
   def index
-    @page_collections = PageCollection.all
+    @my_collections = current_user.page_collections
+
+    followed_user_ids = UserFollowing.where(user_id: current_user.id).pluck(:followed_user_id)
+    @network_collections = PageCollection.where(user_id: followed_user_ids, privacy: 'public')
+
+    @random_collections = PageCollection.all.sample(9)
   end
 
   # GET /page_collections/1
@@ -27,6 +32,8 @@ class PageCollectionsController < ApplicationController
   # POST /page_collections
   def create
     @page_collection = PageCollection.new(page_collection_params)
+
+    # TODO publish new collection to followers if public
 
     if @page_collection.save
       redirect_to @page_collection, notice: 'Page collection was successfully created.'
