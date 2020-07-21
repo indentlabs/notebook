@@ -21,7 +21,7 @@ class UserFollowingsController < ApplicationController
 
   # POST /user_followings
   def create
-    user = User.find_by(id: params[:followed_user_id])
+    user = User.find_by(id: user_following_params.fetch(:followed_user_id))
     return unless user.present?
     return if user_signed_in? && current_user.blocked_by?(user)
 
