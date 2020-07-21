@@ -191,6 +191,8 @@ class ForumReplacementService < Service
     'offensive'         => 'bogue',
     'oof'               => 'oooooooooooooooooooooooooooooooooooooof',
     'owo'               => '(◕‿◕✿)',
+    'pancake'           => 'roundy-yum',
+    'pancakes'          => 'roundy-yums',
     'parties'           => "poppin' brouhahas",
     'party'             => "poppin' brouhaha",
     'peanut butter'     => 'nutty-gum',
