@@ -1,5 +1,5 @@
 class PageCollectionsController < ApplicationController
-  before_action :authenticate_user!, except: [:index, :show]
+  before_action :authenticate_user!, except: [:show]
 
   before_action :set_sidenav_expansion
   before_action :set_page_collection, only: [:show, :edit, :update, :destroy, :follow, :unfollow, :report]
@@ -16,6 +16,10 @@ class PageCollectionsController < ApplicationController
 
   # GET /page_collections/1
   def show
+    unless (@page_collection.privacy == 'public' || (user_signed_in? && @page_collection.user == current_user))
+      return redirect_to page_collections_path, notice: "That Collection is not public."
+    end
+
     @pages = @page_collection.accepted_submissions
     sort_pages
 
@@ -40,7 +44,7 @@ class PageCollectionsController < ApplicationController
     @page_collection = PageCollection.new(page_collection_params.merge({user: current_user}))
 
     # Build page types from params checkbox list
-    @page_collection.page_types = page_collection_page_types_param
+    @page_collection.page_types = page_collection_page_types_param if params.require(:page_collection).key?(:page_types)
 
     if @page_collection.save
       # Add a stream event for every user following this user if the collection is public
@@ -62,7 +66,7 @@ class PageCollectionsController < ApplicationController
   # PATCH/PUT /page_collections/1
   def update
     if user_signed_in? && current_user == @page_collection.user    
-      @page_collection.page_types = page_collection_page_types_param
+      @page_collection.page_types = page_collection_page_types_param if params.require(:page_collection).key?(:page_types)
       if @page_collection.update(page_collection_params)
         redirect_to @page_collection, notice: 'Collection settings updated successfully.'
       else
@@ -122,7 +126,7 @@ class PageCollectionsController < ApplicationController
   end
 
   def page_collection_page_types_param
-    list = params.require(:page_collection).fetch('page_types', []).select { |t, enabled| enabled == "1" }.keys
+    list = params.require(:page_collection).fetch('page_types', {}).select { |t, enabled| enabled == "1" }.keys
 
     # Make sure we AND with a whitelist of approved page types
     list & Rails.application.config.content_types[:all].map(&:name)
