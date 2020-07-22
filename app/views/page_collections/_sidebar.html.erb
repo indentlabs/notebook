@@ -1,3 +1,25 @@
+<% if user_signed_in? %>
+  <% if current_user != @page_collection.user %>
+    <% if @page_collection.followed_by?(current_user) %>
+      <%= link_to unfollow_page_collection_path(@page_collection), class: "hoverable btn #{PageCollection.color}", style: 'width: 100%' do %>
+        <i class="material-icons"><%= PageCollection.icon %></i>
+        &nbsp;
+        Unfollow
+      <% end %>
+
+    <% else %>
+      <%= link_to follow_page_collection_path(@page_collection), class: "hoverable btn #{PageCollection.color}", style: 'width: 100%' do %>
+        <i class="material-icons"><%= PageCollection.icon %></i>
+        &nbsp;
+        Follow for updates
+      <% end %>
+    <% end %>
+  <% end %>
+<% else %>
+  <%= link_to follow_page_collection_path(@page_collection), class: "hoverable btn #{PageCollection.color} disabled", style: 'width: 100%' do %>
+    Sign in to follow this Collection
+  <% end %>
+<% end %>
 
 <%= render partial: 'page_collections/quick_add' %>
 

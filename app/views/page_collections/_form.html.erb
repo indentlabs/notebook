@@ -1,17 +1,124 @@
-<%= form_with(model: page_collection, local: true) do |form| %>
+<%= form_with(model: page_collection, local: true) do |f| %>
   <% if page_collection.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(page_collection.errors.count, "error") %> prohibited this page_collection from being saved:</h2>
+      <h2 style="font-size: 1.5em"><%= pluralize(page_collection.errors.count, "error") %> prohibited this Collection from being saved:</h2>
 
-      <ul>
+      <ul class="browser-default">
         <% page_collection.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
+          <li class="red-text"><%= message %></li>
         <% end %>
       </ul>
     </div>
   <% end %>
 
+  <div class="card">
+    <div class="card-content">
+      <div class="card-title">Basic information</div>
+
+      <div class="input-field">
+        <%= f.label :title %>
+        <%= f.text_field :title %>
+      </div>
+
+      <div class="input-field">
+        <%= f.label :subtitle %>
+        <%= f.text_field :subtitle %>
+      </div>
+
+      <div class="input-field">
+        <%= f.label :description %>
+        <%= f.text_field :description %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-content">
+      <div class="card-title">Header image</div>
+
+      <div>
+        <label>This image will be used as a header for the page.</label>
+        <div class="file-field input-field">
+          <div class="blue btn">
+            <span>Upload</span>
+            <%= f.file_field :header_image %>
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" placeholder="Upload an image">
+          </div>
+        </div>
+        <div class="help-text">
+          Supported file types: .png, .jpg, .jpeg, .gif
+        </div>
+        <div class="help-text">
+          Don't forget to save your changes below for any new upload to take effect.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-content">
+      <div class="card-title">Acceptable pages</div>
+
+      <p class="grey-text">
+        Please check the types of pages you would like to allow in this collection. A small number of page types is recommended.
+      </p>
+      <br />
+
+      <div class="row">
+        <% Rails.application.config.content_types[:all].each do |content_type| %>
+          <p class="col s12 m6 l4">
+            <label>
+              <%= f.check_box "page_types[#{content_type.name}]", checked: page_collection.page_types.include?(content_type.name) %>
+              <span class="<%= content_type.color %>-text">
+                <i class="material-icons left"><%= content_type.icon %></i>
+                <%= content_type.name.pluralize %>
+              </span>
+            </label>
+          </p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-content">
+      <div class="card-title">Privacy & collaboration</div>
+
+      <div>
+        <label>
+          Make this collection...
+          <%= f.select :privacy, [["Private", "private"], ["Public", "public"]] %>
+      </div>
+
+      <br />
+      <div>
+        If you choose to make this collection public, you can also use the following controls:
+      </div>
+      <br />
+
+      <div>
+        <label>
+          <%= f.check_box :allow_submissions %>
+          <span class="black-text">
+            Allow other users to submit pages to this collection. You can then choose to approve or deny those submissions.
+          </span>
+        </label>
+      </div>
+
+      <div>
+        <label>
+          <%= f.check_box :auto_accept %>
+          <span class="black-text">
+            Automatically approve all incoming submissions.
+          </span>
+        </label>
+      </div>
+    </div>
+  </div>
+
   <div class="actions">
-    <%= form.submit %>
+    <%= f.submit nil, class: "btn #{PageCollection.color} white-text" %>
   </div>
 <% end %>

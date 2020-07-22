@@ -114,4 +114,17 @@ namespace :one_off do
     end
 
   end
+
+  desc "Let premium users know they can make collections"
+  task premium_user_collections_notification: :environment do
+    User.where(selected_billing_plan_id: [2, 3, 4, 5, 6]).find_each do |user|
+      user.notifications.create(
+        message_html: '<div>A new feature is now available:</div><div class="blue-text text-darken-3">Users with a Premium subscription can now create Collections.</div>',
+        icon:         'favorite',
+        icon_color:   PageCollection.color,
+        happened_at:  DateTime.current,
+        passthrough_link: 'https://www.notebook.ai/collections'
+      )
+    end
+  end
 end

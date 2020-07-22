@@ -1,18 +1,33 @@
 class PageCollectionsController < ApplicationController
-  before_action :authenticate_user!, except: [:index, :show]
+  before_action :authenticate_user!, except: [:show]
 
   before_action :set_sidenav_expansion
-  before_action :set_page_collection, only: [:show, :edit, :update, :destroy]
+  before_action :set_page_collection, only: [:show, :edit, :update, :destroy, :follow, :unfollow, :report]
 
   # GET /page_collections
   def index
-    @page_collections = PageCollection.all
+    @my_collections = current_user.page_collections
+
+    followed_user_ids = UserFollowing.where(user_id: current_user.id).pluck(:followed_user_id)
+    @network_collections = PageCollection.where(user_id: followed_user_ids, privacy: 'public')
+
+    @random_collections = PageCollection.all.sample(9)
   end
 
   # GET /page_collections/1
   def show
+    unless (@page_collection.privacy == 'public' || (user_signed_in? && @page_collection.user == current_user))
+      return redirect_to page_collections_path, notice: "That Collection is not public."
+    end
+
     @pages = @page_collection.accepted_submissions
     sort_pages
+
+    @submittable_content = if user_signed_in?
+      @current_user_content.slice(*@page_collection.page_types)
+    else
+      []
+    end
   end
 
   # GET /page_collections/new
@@ -26,10 +41,23 @@ class PageCollectionsController < ApplicationController
 
   # POST /page_collections
   def create
-    @page_collection = PageCollection.new(page_collection_params)
+    @page_collection = PageCollection.new(page_collection_params.merge({user: current_user}))
+
+    # Build page types from params checkbox list
+    @page_collection.page_types = page_collection_page_types_param if params.require(:page_collection).key?(:page_types)
 
     if @page_collection.save
-      redirect_to @page_collection, notice: 'Page collection was successfully created.'
+      # Add a stream event for every user following this user if the collection is public
+      ContentPageShare.create(
+        user_id:                     current_user.id,
+        content_page_type:           PageCollection.name,
+        content_page_id:             @page_collection.reload.id,
+        shared_at:                   @page_collection.created_at,
+        privacy:                     'public',
+        message:                     "I created a new Collection!"
+      )
+
+      redirect_to @page_collection, notice: 'Your collection was successfully created.'
     else
       render :new
     end
@@ -37,8 +65,13 @@ class PageCollectionsController < ApplicationController
 
   # PATCH/PUT /page_collections/1
   def update
-    if user_signed_in? && current_user == @page_collection.user && @page_collection.update(page_collection_params)
-      redirect_to @page_collection, notice: 'Collection settings updated successfully.'
+    if user_signed_in? && current_user == @page_collection.user    
+      @page_collection.page_types = page_collection_page_types_param if params.require(:page_collection).key?(:page_types)
+      if @page_collection.update(page_collection_params)
+        redirect_to @page_collection, notice: 'Collection settings updated successfully.'
+      else
+        render :edit
+      end
     else
       render :edit
     end
@@ -65,6 +98,21 @@ class PageCollectionsController < ApplicationController
     end
   end
 
+  def follow
+    @page_collection.page_collection_followings.find_or_create_by(user_id: current_user.id)
+    redirect_to @page_collection, notice: 'You will now receive notifications about this Collection.'
+  end
+
+  def unfollow
+    @page_collection.page_collection_followings.find_by(user_id: current_user.id).try(:destroy)
+    redirect_to @page_collection, notice: 'You will no longer receive notifications about this Collection.'
+  end
+
+  def report
+    @page_collection.page_collection_reports.create(user_id: current_user.id)
+    redirect_to root_path, notice: "That Collection has been reported to site administration. Thank you!"
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.
@@ -74,7 +122,14 @@ class PageCollectionsController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def page_collection_params
-    params.require(:page_collection).permit(:title, :subtitle, :description, :color, :cover_image, :auto_accept)
+    params.require(:page_collection).permit(:title, :subtitle, :description, :color, :privacy, :allow_submissions, :auto_accept, :header_image)
+  end
+
+  def page_collection_page_types_param
+    list = params.require(:page_collection).fetch('page_types', {}).select { |t, enabled| enabled == "1" }.keys
+
+    # Make sure we AND with a whitelist of approved page types
+    list & Rails.application.config.content_types[:all].map(&:name)
   end
 
   def set_sidenav_expansion
@@ -84,11 +139,11 @@ class PageCollectionsController < ApplicationController
   def sort_pages
     case params.permit(:sort).fetch('sort', nil)
     when 'alphabetical'
-      @pages = @pages.order('cached_content_name ASC')
+      @pages = @pages.reorder('cached_content_name ASC')
     when 'chronological'
-      @pages = @pages.order('accepted_at ASC')
+      @pages = @pages.reorder('accepted_at ASC')
     when 'recent'
-      @pages = @pages.order('accepted_at DESC')
+      @pages = @pages.reorder('accepted_at DESC')
     when nil
     end
   end

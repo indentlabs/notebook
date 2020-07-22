@@ -1,10 +1,4 @@
-<% if user_signed_in? %>
-  <%
-    submittable_content = Hash[@current_user_content.slice(*@page_collection.page_types).map do |content_type, content_list|
-      [content_type, content_list.select { |content| content.privacy == 'public' || content.universe.try(:privacy) == 'public' }]
-    end]
-  %>
-
+<% if user_signed_in? && (@page_collection.allow_submissions? || @page_collection.user == current_user) %>
   <ul class="collapsible">
     <li>
       <div class="collapsible-header blue white-text">
@@ -12,12 +6,12 @@
         <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page
       </div>
       <div class="collapsible-body">
-        <% if submittable_content.values.flatten.any? %>
+        <% if @submittable_content.values.flatten.any? %>
           <%= form_for PageCollectionSubmission.new do |f| %>
             <%= f.hidden_field :page_collection_id, value: @page_collection.id %>
             <div class="input-field">
               <%= f.select :content do %>
-                <% submittable_content.each do |content_type, content_list| %>
+                <% @submittable_content.each do |content_type, content_list| %>
                   <optgroup label="<%= content_type.pluralize %>">
                     <% content_list.each do |content| %>
                       <option value="<%= content_type %>-<%= content.id %>"><%= content.name %></option>
@@ -27,14 +21,14 @@
               <% end %>
               <label>Select a page to <%= @page_collection.user == current_user ? 'add' : 'submit' %></label>
               <div class="helper-text">
-                Only pages you've marked "public" may be submitted.
+                Submitting a page will automatically change its privacy to "public".
               </div>
             </div>
 
             <div class="input-field">
               <%= f.text_area :explanation, class: 'materialize-textarea' %>
               <%= f.label :explanation, 'Optional: add a message' %>
-              <div class="help-text">
+              <div class="helper-text">
                 If this submission is accepted, this message will be visible to everyone.
               </div>
             </div>
@@ -43,10 +37,7 @@
           <% end %>
         <% else %>
           <p>
-            You don't have any public pages to submit to this collection.
-          </p>
-          <p>
-            The individual page to be submitted must be made public, not just be in a public universe.
+            You don't have any pages to submit to this collection.
           </p>
         <% end %>
       </div>
