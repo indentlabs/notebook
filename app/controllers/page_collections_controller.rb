@@ -47,8 +47,13 @@ class PageCollectionsController < ApplicationController
 
   # PATCH/PUT /page_collections/1
   def update
-    if user_signed_in? && current_user == @page_collection.user && @page_collection.update(page_collection_params)
-      redirect_to @page_collection, notice: 'Collection settings updated successfully.'
+    if user_signed_in? && current_user == @page_collection.user    
+      @page_collection.page_types = page_collection_page_types_param
+      if @page_collection.update(page_collection_params)
+        redirect_to @page_collection, notice: 'Collection settings updated successfully.'
+      else
+        render :edit
+      end
     else
       render :edit
     end
