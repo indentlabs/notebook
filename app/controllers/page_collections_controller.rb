@@ -36,10 +36,18 @@ class PageCollectionsController < ApplicationController
     # Build page types from params checkbox list
     @page_collection.page_types = page_collection_page_types_param
 
-    # TODO publish new collection to followers if public
-
     if @page_collection.save
-      redirect_to @page_collection, notice: 'Page collection was successfully created.'
+      # Add a stream event for every user following this user if the collection is public
+      ContentPageShare.create(
+        user_id:                     current_user.id,
+        content_page_type:           PageCollection.name,
+        content_page_id:             @page_collection.reload.id,
+        shared_at:                   @page_collection.created_at,
+        privacy:                     'public',
+        message:                     "I created a new Collection!"
+      )
+
+      redirect_to @page_collection, notice: 'Your collection was successfully created.'
     else
       render :new
     end

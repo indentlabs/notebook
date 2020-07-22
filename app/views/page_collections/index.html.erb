@@ -1,44 +1,44 @@
-<div class="row">
-  <h1 class="center" style="font-size: 2em">
-    <i class="material-icons <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
-    Your collections
-  </h1>
-  <% @my_collections.each do |collection| %>
-    <div class="col s12 m6 l4">
-      <%= link_to collection do %>
-        <div class="hoverable card" style="height: 240px">
-          <div class="card-image">
-            <%= image_tag collection.cover_image, style: 'max-height: 300px;' %>
-            <span class="card-title">
-              <%= collection.title %>
-              <br />
-              <small>
-                <% if collection.subtitle? %>
-                  <%= collection.subtitle %>
-                <% else %>
+<% if @my_collections.any? || current_user.on_premium_plan? %>
+  <div class="row">
+    <h1 class="center" style="font-size: 2em">
+      <i class="material-icons <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
+      Your collections
+    </h1>
+    <% @my_collections.each do |collection| %>
+      <div class="col s12 m6 l4">
+        <%= link_to collection do %>
+          <div class="hoverable card <%= PageCollection.color %>" style="height: 250px">
+            <div class="card-image">
+              <%= image_tag collection.cover_image || collection.header_image, style: 'max-height: 300px;' %>
+              <span class="card-title">
+                <%= collection.title %>
+                <br />
+                <small>
                   <% collection.page_types.each do |icon| %>
                     <% klass = icon.constantize %>
                     <i class="material-icons left tooltipped tiny bordered-text <%= klass.color %>-text" data-tooltip="<%= icon.pluralize %>"><%= klass.icon %></i>
                   <% end %>
-                <% end %>              
-              </small>
-            </span>
+                </small>
+              </span>
+            </div>
           </div>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
-  <div class="col s12 m6 l4">
-    <%= link_to new_page_collection_path do %>
-      <div class="card-panel <%= PageCollection.color %> white-text hoverable center" style="height: 246px;">
-        <br /><br />
+        <% end %>
+      </div>
+    <% end %>
+    <% if current_user.on_premium_plan? %>
+      <div class="col s12 m6 l4">
+        <%= link_to new_page_collection_path do %>
+          <div class="card-panel <%= PageCollection.color %> white-text hoverable center" style="height: 246px;">
+            <br /><br />
 
-        <i class="material-icons large">add</i><br />
-        Create a collection
+            <i class="material-icons large">add</i><br />
+            Create a collection
+          </div>
+        <% end %>
       </div>
     <% end %>
   </div>
-</div>
+<% end %>
 
 <% if @network_collections.any? %>
   <div class="row">
@@ -49,9 +49,9 @@
     <% @network_collections.each do |collection| %>
       <div class="col s12 m6 l4">
         <%= link_to collection do %>
-          <div class="hoverable card" style="height: 240px">
+          <div class="hoverable card <%= PageCollection.color %>" style="height: 250px">
             <div class="card-image">
-              <%= image_tag collection.cover_image, style: 'max-height: 300px;' %>
+              <%= image_tag collection.cover_image || collection.header_image, style: 'max-height: 300px;' %>
               <span class="card-title">
                 <%= collection.title %>
                 <br />
@@ -83,21 +83,17 @@
     <% @random_collections.each do |collection| %>
       <div class="col s12 m6 l4">
         <%= link_to collection do %>
-          <div class="hoverable card" style="height: 240px">
+          <div class="hoverable card <%= PageCollection.color %>" style="height: 250px">
             <div class="card-image">
-              <%= image_tag collection.cover_image, style: 'max-height: 300px;' %>
+              <%= image_tag collection.cover_image || collection.header_image, style: 'max-height: 300px;' %>
               <span class="card-title">
                 <%= collection.title %>
                 <br />
                 <small>
-                  <% if collection.subtitle? %>
-                    <%= collection.subtitle %>
-                  <% else %>
-                    <% collection.page_types.each do |icon| %>
-                      <% klass = icon.constantize %>
-                      <i class="material-icons left tooltipped tiny bordered-text <%= klass.color %>-text" data-tooltip="<%= icon.pluralize %>"><%= klass.icon %></i>
-                    <% end %>
-                  <% end %>              
+                  <% collection.page_types.each do |icon| %>
+                    <% klass = icon.constantize %>
+                    <i class="material-icons left tooltipped tiny bordered-text <%= klass.color %>-text" data-tooltip="<%= icon.pluralize %>"><%= klass.icon %></i>
+                  <% end %>           
                 </small>
               </span>
             </div>

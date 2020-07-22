@@ -139,7 +139,7 @@
                 <%= link_to page_collection do %>
                   <div class="hoverable card">
                     <div class="card-image">
-                      <%= image_tag page_collection.cover_image %>
+                      <%= image_tag page_collection.random_public_image %>
                       <span class="card-title">
                         <i class="material-icons bordered-text <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
                         <%= page_collection.title %><br />
@@ -160,12 +160,12 @@
 
           <% if @user.page_collections.any? %>
             <h3 class="grey-text center">My Collections</h3>
-            <% @user.page_collections.each do |page_collection| %>
+            <% @user.page_collections.each.with_index do |page_collection, i| %>
               <div class="col s12 m6 l4">
                 <%= link_to page_collection do %>
-                  <div class="hoverable card">
+                  <div class="hoverable card"">
                     <div class="card-image">
-                      <%= image_tag page_collection.cover_image %>
+                      <%= image_tag page_collection.random_public_image, height: 250 %>
                       <span class="card-title">
                         <i class="material-icons bordered-text <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
                         <%= page_collection.title %><br />

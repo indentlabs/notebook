@@ -9,7 +9,7 @@ class PageCollection < ApplicationRecord
   has_many :page_collection_reports
 
   has_one_attached :header_image, dependent: :destroy
-  validates :header_image, attached: false,
+  validates :header_image, attached: false, presence: true,
     content_type: {
       in: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'],
       message: 'must be a PNG, JPG, JPEG, or GIF'
@@ -23,6 +23,8 @@ class PageCollection < ApplicationRecord
       less_than: 500.kilobytes, 
       message: "can't be larger than 500KB"
     }
+  
+  validates :title, presence: true
 
   def pending_submissions
     page_collection_submissions.where(accepted_at: nil).order('submitted_at ASC')
@@ -36,9 +38,8 @@ class PageCollection < ApplicationRecord
     User.where(id: accepted_submissions.pluck(:user_id) - [user.id])
   end
 
-  # Some quick aliases so we can treat this like a content page in streams:
   def random_public_image
-    cover_image
+    cover_image || header_image
   end
   def name
     title

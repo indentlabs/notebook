@@ -1,0 +1,83 @@
+<div class="stream-item">
+  <div class="row">
+    <div class="col s12">
+        <span class="right">
+          <%= render partial: 'content_page_shares/action_dropdown', locals: { share: share, content: content } %>
+        </span>
+      <%= link_to share.user, class: "#{User.color}-text" do %>
+        <%= image_tag share.user.image_url(size=20), class: 'left circle avatar' %>
+        <%= share.user.display_name %>
+      <% end %>
+      created the
+      <%= link_to content.title, content, class: "#{content.class.color}-text text-darken-1" %>
+      Collection.
+      <span class="right">
+        <%= link_to [share.user, share], class: 'grey-text' do %>
+          <%= time_ago_in_words share.created_at %> ago
+        <% end %>
+      </span>
+    </div>
+  </div>
+
+  <div class="main-container hoverable card row clearfix">
+    <div class="col s12 m6 l6">
+      <div class="card-image">
+        <%= link_to [share.user, share] do %>
+          <%= image_tag content.random_public_image %>
+        <% end %>
+        <span class="card-title">
+          <%= link_to content do %>
+            <i class="material-icons tiny <%= content.class.color %>-text"><%= content.class.icon %></i>
+            <span class="white-text bordered-text"><%= content.title %></i>
+          <% end %>
+        </span>
+      </div>
+    </div>
+
+    <div class="col s12 m6 l6">
+      <div class="card-content discussion-container">
+        <div class="metadata">
+          <%= link_to share.user, class: "#{User.color}-text" do %>
+            <%= image_tag share.user.image_url(size=20), class: 'left circle avatar' %>
+            <%= share.user.display_name %>
+          <% end %>
+          <span class="helper-text">
+            <%= share.content_page.description %>
+          </span>
+        </div>
+        <% if content.description.present? %>
+          <blockquote class="original-comment">
+            <%= simple_format content.description %>
+          </blockquote>
+        <% end %>
+
+        <% if content.page_types.any? %>
+          <br />
+          <p>
+            <% if content.allow_submissions? %>
+              Now accepting submissions for
+            <% else %>
+              This Collection is for
+            <% end %>
+            <%= content.page_types.to_sentence %>
+            pages.
+          </p>
+        <% end %>
+
+        <%= render partial: 'share_comments/form', locals: { share: share } %>
+        <br /><br />
+        
+        <div class="uppercase grey-text center"><%= pluralize share.share_comments.count, 'comment' %></div>
+        <div class="row">
+          <% share.share_comments.each do |comment| %>
+            <%= render partial: 'share_comments/show', locals: { comment: comment, share: share } %>
+          <% end %>
+        </div>
+
+        <% if share.share_comments.count > 10 %>
+          <%= render partial: 'share_comments/form', locals: { share: share } %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
