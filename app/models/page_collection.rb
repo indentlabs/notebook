@@ -8,6 +8,22 @@ class PageCollection < ApplicationRecord
 
   has_many :page_collection_reports
 
+  has_one_attached :header_image, dependent: :destroy
+  validates :header_image, attached: false,
+    content_type: {
+      in: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'],
+      message: 'must be a PNG, JPG, JPEG, or GIF'
+    },
+    dimension: { 
+      width: { max: 2000 },
+      height: { max: 1000 }, 
+      message: 'must be smaller than 2000x1000 pixels'
+    },
+    size: { 
+      less_than: 500.kilobytes, 
+      message: "can't be larger than 500KB"
+    }
+
   def pending_submissions
     page_collection_submissions.where(accepted_at: nil).order('submitted_at ASC')
   end

@@ -31,7 +31,10 @@ class PageCollectionsController < ApplicationController
 
   # POST /page_collections
   def create
-    @page_collection = PageCollection.new(page_collection_params)
+    @page_collection = PageCollection.new(page_collection_params.merge({user: current_user}))
+
+    # Build page types from params checkbox list
+    @page_collection.page_types = page_collection_page_types_param
 
     # TODO publish new collection to followers if public
 
@@ -96,7 +99,14 @@ class PageCollectionsController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def page_collection_params
-    params.require(:page_collection).permit(:title, :subtitle, :description, :color, :cover_image, :auto_accept)
+    params.require(:page_collection).permit(:title, :subtitle, :description, :color, :privacy, :allow_submissions, :auto_accept, :header_image)
+  end
+
+  def page_collection_page_types_param
+    list = params.require(:page_collection).fetch('page_types', []).select { |t, enabled| enabled == "1" }.keys
+
+    # Make sure we AND with a whitelist of approved page types
+    list & Rails.application.config.content_types[:all].map(&:name)
   end
 
   def set_sidenav_expansion
