@@ -18,6 +18,12 @@ class PageCollectionsController < ApplicationController
   def show
     @pages = @page_collection.accepted_submissions
     sort_pages
+
+    @submittable_content = if user_signed_in?
+      @current_user_content.slice(*@page_collection.page_types)
+    else
+      []
+    end
   end
 
   # GET /page_collections/new

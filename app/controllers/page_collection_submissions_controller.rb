@@ -25,6 +25,8 @@ class PageCollectionSubmissionsController < ApplicationController
     @page_collection_submission = PageCollectionSubmission.new(page_collection_submission_params)
 
     if @page_collection_submission.save
+      @page_collection_submission.content.update(privacy: 'public')
+
       redirect_to @page_collection_submission.page_collection, notice: 'Page submitted!'
     else
       raise "failed create"
