@@ -9,7 +9,7 @@ class PageCollection < ApplicationRecord
   has_many :page_collection_reports
 
   has_one_attached :header_image, dependent: :destroy
-  validates :header_image, attached: false, presence: true,
+  validates :header_image, attached: false,
     content_type: {
       in: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'],
       message: 'must be a PNG, JPG, JPEG, or GIF'
@@ -39,7 +39,14 @@ class PageCollection < ApplicationRecord
   end
 
   def random_public_image
-    cover_image || header_image
+    return cover_image if cover_image.present?
+
+    if header_image.attachment.present?
+      return header_image
+    end
+
+    # If all else fails, fall back on default header
+    "card-headers/#{self.class.name.downcase.pluralize}.jpg"
   end
   def name
     title
