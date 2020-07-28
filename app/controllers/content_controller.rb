@@ -194,13 +194,11 @@ class ContentController < ApplicationController
       'content_type': content_type.name
     }) if Rails.env.production?
 
-    if @content.update(content_params)
+    if @content.save
       cache_params = {}
       cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField].include?(@content.class)
       cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
-
       @content.update(cache_params) if cache_params.any?
-      # Cache the name/universe also (todo stick this in the same save as above)
 
       if params.key? 'image_uploads'
         upload_files params['image_uploads'], content_type.name, @content.id
@@ -490,18 +488,9 @@ class ContentController < ApplicationController
 
   def initialize_object
     content_type = content_type_from_controller(self.class)
-    @content = content_type.new(base_content_params).tap do |c|
+    @content = content_type.new(content_params).tap do |c|
       c.user_id = current_user.id
     end
-  end
-
-  def base_content_params
-    content_class = content_type_from_controller(self.class)
-      .name
-      .downcase
-      .to_sym
-    
-    params.require(content_class).permit(:name, :description, :user_id, :universe_id)
   end
 
   def content_params

@@ -1,6 +1,11 @@
 $(document).ready(function () {
+  // Hide all panels by default
   $('.panel').hide();
-  $('.panel').first().show();
+
+  // Show the first panel that has any filled-out fields in it
+  $('.panel').filter(function( index ) {
+    return $(this).find('.field-value').length === 1;
+  }).first().show();
 
   $('.content-tabs .tab').click(function (click) {
     var tab = $(click.target).closest('.tab a');
