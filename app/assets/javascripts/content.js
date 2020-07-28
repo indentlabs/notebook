@@ -4,7 +4,7 @@ $(document).ready(function () {
 
   // Show the first panel that has any filled-out fields in it
   $('.panel').filter(function( index ) {
-    return $(this).find('.field-value').length === 1;
+    return $(this).find('.field-value').length > 0;
   }).first().show();
 
   $('.content-tabs .tab').click(function (click) {
