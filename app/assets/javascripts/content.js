@@ -2,10 +2,16 @@ $(document).ready(function () {
   // Hide all panels by default
   $('.panel').hide();
 
-  // Show the first panel that has any filled-out fields in it
-  $('.panel').filter(function( index ) {
+  // Show the first panel that has any filled-out fields in it; if no fields are filled out, just show the first panel
+  var panel_search = $('.panel').filter(function( index ) {
     return $(this).find('.field-value').length > 0;
-  }).first().show();
+  });
+
+  if (panel_search.length == 0) {
+    panel_search = $('.panel');
+  }
+
+  panel_search.first().show();
 
   $('.content-tabs .tab').click(function (click) {
     var tab = $(click.target).closest('.tab a');
