@@ -22,7 +22,8 @@ class User < ApplicationRecord
   validates :forums_badge_text,
     allow_nil: true,
     allow_blank: true,
-    length: { maximum: 20 }
+    length: { maximum: 20 },
+  if: Proc.new { |user| user.forums_badge_text_changed? }
 
   has_many :subscriptions, dependent: :destroy
   has_many :billing_plans, through: :subscriptions
@@ -34,6 +35,8 @@ class User < ApplicationRecord
   has_many :page_unlock_promo_codes, through: :paypal_invoices
 
   has_many :image_uploads, dependent: :destroy
+
+  has_many :contributors, dependent: :destroy
 
   has_one :referral_code, dependent: :destroy
   has_many :referrals, foreign_key: :referrer_id, dependent: :destroy
