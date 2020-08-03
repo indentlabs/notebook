@@ -29,6 +29,13 @@ module Extensions
           message:           self.title,
         )
       end
+
+      def random_public_image
+        "card-headers/discussions.jpg"
+      end
+      def name
+        self.title
+      end
     end
   end
 end
