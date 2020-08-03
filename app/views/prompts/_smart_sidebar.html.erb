@@ -63,12 +63,14 @@
                   <li><%= serialized_field[:value] %></li>
 
                 <% elsif serialized_field[:type] == "universe" %>
-                  <li>
-                    <%= link_to serialized_entity.universe do %>
-                      <i class="material-icons <%= Universe.color %>-text left"><%= Universe.icon %></i>
-                      <%= serialized_entity.universe.name %>
-                    <% end %>
-                  </li>
+                  <% if serialized_entity.universe.present? %>
+                    <li>
+                      <%= link_to serialized_entity.universe do %>
+                        <i class="material-icons <%= Universe.color %>-text left"><%= Universe.icon %></i>
+                        <%= serialized_entity.universe.name %>
+                      <% end %>
+                    </li>
+                  <% end %>
                 <% end %>
               <% end %>
 
