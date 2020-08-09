@@ -59,7 +59,7 @@ class UsersController < ApplicationController
     end
 
     # Make sure the user is set to Starter on Stripe so we don't keep charging them
-    stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
+    stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
     stripe_subscription = stripe_customer.subscriptions.data[0]
     if stripe_subscription
       stripe_subscription.plan = 'starter'
