@@ -69,7 +69,13 @@ class UsersController < ApplicationController
     report_user_deletion_to_slack(current_user)
 
     current_user.avatar.purge
-    current_user.really_destroy!
+    
+    # Immediately mark the user as deleted and inactive
+    current_user.update(deleted_at: DateTime.current)
+
+    # Destroy the user and all of its content
+    # TODO this can take quite a while for active users, so it should be moved to a background job
+    current_user.destroy!
 
     redirect_to(root_path, notice: 'Your account has been deleted. We will miss you greatly!')
   end
