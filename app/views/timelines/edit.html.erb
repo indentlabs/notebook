@@ -1,0 +1,382 @@
+<%= render partial: 'notice_dismissal/messages/13' %>
+<br />
+<%= form_for @timeline, html: { class: 'autosave-form' }, remote: true do |f| %>
+  <div class="row">
+    <div class="col s12 m7 l9">
+      <div class="input-field">
+        <%= f.text_field :name, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+        <%= f.label :name, 'Timeline name' %>
+      </div>
+    </div>
+    <div class="col s12 m4 l3 right">
+      <!--
+      <%= link_to '#', class: 'hoverable btn right ' + Timeline.color do %>
+        <i class="material-icons small">star</i>
+      <% end %>
+      <%= link_to '#', class: 'hoverable btn right ' + Timeline.color do %>
+        <i class="material-icons small"><%= Universe.icon %></i>
+      <% end %>
+      -->
+      <%= link_to '#', class: 'share hoverable btn right ' + Timeline.color do %>
+        <i class="material-icons small">share</i>
+      <% end %>
+    </div>
+    <div class="col s12">
+      <ul class="collapsible">
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons <%= Timeline.color %>-text"><%= Timeline.icon %></i>
+            About this timeline
+          </div>
+          <div class="collapsible-body">
+            <div class="input-field">
+              <%= f.text_area :subtitle, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+              <%= f.label :subtitle, 'Subtitle' %>
+            </div>
+            <div class="input-field">
+              <%= f.text_area :description, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+              <%= f.label :description, 'Description' %>
+            </div>
+            <div class="input-field">
+                <%= f.select :universe_id, current_user.universes.pluck(:name, :id), { include_blank: true }, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+                <%= f.label 'Universe' %>
+            </div>
+            <!--
+            <div class="input-field">
+              <%= f.select :privacy, [['Private', 'private'], ['Public', 'public']], class: 'materialize-textarea js-trigger-autosave-on-change' %>
+              <%= f.label :privacy %>
+            </div>
+            -->
+            <!--
+            <div>
+              tags
+            </div>
+            -->
+            <div class="input-field">
+              <%= f.text_area :notes, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+              <%= f.label :notes %>
+            </div>
+            <div class="input-field">
+              <%= f.text_area :private_notes, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+              <%= f.label :private_notes %>
+            </div>
+            <!--
+            <div>
+              Relevant links (view, edit, wiki view)
+            </div>
+            -->
+
+            <div class="right">
+              <%= link_to timeline_path(@timeline), method: :delete, data: { confirm: "Are you sure you want to delete this timeline? This cannot be undone!" } do %>
+                <i class="material-icons left red-text">delete</i>
+                <span class="red-text">Delete this timeline</span>
+              <% end %>
+            </div>
+            <div class="clearfix"></div>
+          </div>
+        </li>
+      </ul>
+        
+    </div>
+  </div>
+<% end %>
+
+<div class="timeline-editor" data-timeline-id="<%= @timeline.id %>">
+  <!--
+  <div class="filter-bar">
+    (filter events by character, location, etc)
+  </div>
+  -->
+
+  <div class="timeline-events-container" data-timeline-id="<%= @timeline.id %>">
+    <% @timeline.timeline_events.includes(:timeline_event_entities).each do |event| %>
+      <div class="timeline-event-container" data-event-id="<%= event.id %>"  data-timeline-id="<%= @timeline.id %>">
+        <%= form_for event, html: { class: 'autosave-form' }, remote: true do |f| %>
+          <%= f.hidden_field :timeline_id %>
+          <div class="row">
+            <div class="col l2">
+              <div class="input-field align-right">
+                <%= f.text_area :time_label, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+                <%= f.label :time_label, 'Time label' %>
+              </div>
+              <div class="clearfix"></div>
+              <ul>
+                <li class="grey-text">Move this...</li>
+                <li>
+                  <%= link_to '#', class: 'js-move-event-to-top' do %>
+                    <i class="material-icons tiny left">arrow_upward</i>
+                    top
+                  <% end %>
+                </li>
+                <li>
+                  <%= link_to '#', class: 'js-move-event-up' do %>
+                    <i class="material-icons tiny left">keyboard_arrow_up</i>
+                    up
+                  <% end %>
+                </li>
+                <li>
+                  <%= link_to '#', class: 'js-move-event-down' do %>
+                    <i class="material-icons tiny left">keyboard_arrow_down</i>
+                    down
+                  <% end %>
+                </li>
+                <li>
+                  <%= link_to '#', class: 'js-move-event-to-bottom' do %>
+                    <i class="material-icons tiny left">arrow_downward</i>
+                    bottom
+                  <% end %>
+                </li>
+              </ul>
+            </div>
+            <div class="col l1 cfenter" style="margin-bottom: -60px; margin-left: -7px; margin-right: -40px;">
+              <%= image_tag 'graphics/timeline-line.png' %>
+            </div>
+            <div class="col l6">
+              <!--
+              <div class="grey-text center">
+                #<%= event.position %>
+              </div>
+              -->
+              <div class="hoverable clearfix card <%# Timeline.color %>" style="border-top: 5px solid <%= Timeline.hex_color %>">
+                <div class="card-content white-text">
+                  <span class="card-title">
+                    <div class="input-field">
+                      <%= f.text_field :title, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+                      <%= f.label :title, 'Event Title' %>
+                    </div>
+                  </span>
+                  <div class="input-field">
+                    <%= f.text_area :description, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+                    <%= f.label :description %>
+                  </div>
+                  <div class="input-field">
+                    <%= f.text_area :notes, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+                    <%= f.label :notes %>
+                  </div>
+                </div>
+                <!--
+                <div class="card-action">
+                  <a href="#" class="left">Manage changes</a>
+                  <a href="#" class="right">This is a link</a>
+                  <div class="clearfix"></div>
+                </div>
+                -->
+              </div>
+              <div class="right">
+                <%= link_to timeline_event_path(event), class: 'red-text', method: :delete, data: { confirm: "Are you sure you want to delete this event? It cannot be recovered!" } do %>
+                  <small>Delete this event</small>
+                <% end %>
+              </div>
+            </div>
+            <div class="col l3">
+              <div class="grey-text uppercase">
+                In this event
+              </div>
+              <ul class="collapsible">
+                <% event.timeline_event_entities.order('entity_type').preload(:entity).group_by(&:entity_type).each do |entity_type, entity_list| %>
+                  <li>
+                    <% klass = entity_type.constantize %>
+                    <div class="collapsible-header">
+                      <i class="material-icons <%= klass.color %>-text"><%= klass.icon %></i>
+                      <%= entity_type.pluralize %>
+                      <span class="badge"><%= entity_list.count %></span>
+                    </div>
+                    <div class="collapsible-body">
+                      <% entity_list.each do |te_entity| %>
+                        <div class="chip">
+                          <%= link_to(te_entity.entity.name.presence || "Untitled #{te_entity.entity_type}", te_entity.entity) %>
+                          <%= link_to unlink_entity_timeline_event_path(id: event.id, entity_id: te_entity.id), method: :POST, remote: true do %>
+                            <i class="close material-icons">close</i>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                  </li>
+                <% end %>
+              </ul>
+              <p class="center">
+                <small>
+                  <%= link_to 'Link a page', '#', class: 'js-link-entity' %>
+                </small>
+              </p>
+
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="timeline-event-template">
+  
+    <% event = TimelineEvent.new %>
+    <div class="timeline-event-container" data-event-id="-1" data-timeline-id="<%= @timeline.id %>">
+      <%# we have to do method: :patch in the template since event isn't persisted; we don't want it to POST instead %>
+      <%= form_for event, html: { class: 'autosave-form' }, remote: true, method: :patch do |f| %>
+        <%= f.hidden_field :timeline_id, value: @timeline.id %>
+        <div class="row">
+          <div class="col l2">
+            <div class="input-field align-right">
+              <%= f.text_area :time_label, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+              <%= f.label :time_label, 'Time label' %>
+            </div>
+            <div class="clearfix"></div>
+            <ul>
+              <li class="grey-text">Move this...</li>
+              <li>
+                <%= link_to '#', class: 'js-move-event-to-top' do %>
+                  <i class="material-icons tiny left">arrow_upward</i>
+                  top
+                <% end %>
+              </li>
+              <li>
+                <%= link_to '#', class: 'js-move-event-up' do %>
+                  <i class="material-icons tiny left">keyboard_arrow_up</i>
+                  up
+                <% end %>
+              </li>
+              <li>
+                <%= link_to '#', class: 'js-move-event-down' do %>
+                  <i class="material-icons tiny left">keyboard_arrow_down</i>
+                  down
+                <% end %>
+              </li>
+              <li>
+                <%= link_to '#', class: 'js-move-event-to-bottom' do %>
+                  <i class="material-icons tiny left">arrow_downward</i>
+                  bottom
+                <% end %>
+              </li>
+            </ul>
+          </div>
+          <div class="col l1 cfenter" style="margin-bottom: -60px; margin-left: -7px; margin-right: -40px;">
+            <%= image_tag 'graphics/timeline-line.png' %>
+          </div>
+          <div class="col l6">
+            <div class="hoverable clearfix card" style="border-top: 5px solid <%= Timeline.hex_color %>">
+              <div class="card-content white-text">
+                <span class="card-title">
+                  <div class="input-field">
+                    <%= f.text_field :title, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+                    <%= f.label :title, 'Event Title' %>
+                  </div>
+                </span>
+                <div class="input-field">
+                  <%= f.text_area :description, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+                  <%= f.label :description %>
+                </div>
+                <div class="input-field">
+                  <%= f.text_area :notes, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+                  <%= f.label :notes %>
+                </div>
+              </div>
+            </div>
+            <div class="right">
+              <%= link_to timeline_event_path(id: event.id || 0), class: 'js-delete-timeline-event red-text', method: :delete, data: { confirm: "Are you sure you want to delete this event? It cannot be recovered!" } do %>
+                <small>Delete this event</small>
+              <% end %>
+            </div>
+          </div>
+          <div class="col l3">
+            <div class="grey-text uppercase">
+              In this event
+            </div>
+            <ul class="collapsible">
+              <% event.timeline_event_entities.order('entity_type').preload(:entity).group_by(&:entity_type).each do |entity_type, entity_list| %>
+                <li>
+                  <% klass = entity_type.constantize %>
+                  <div class="collapsible-header">
+                    <i class="material-icons <%= klass.color %>-text"><%= klass.icon %></i>
+                    <%= entity_type.pluralize %>
+                    <span class="badge"><%= entity_list.count %></span>
+                  </div>
+                  <div class="collapsible-body">
+                    <% entity_list.each do |te_entity| %>
+                      <div class="chip">
+                        <%= link_to("test", te_entity.entity) %>
+                        <%= link_to unlink_entity_timeline_event_path(id: event.id, entity_id: te_entity.id), method: :POST, remote: true do %>
+                          <i class="close material-icons">close</i>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+            <p class="center">
+              <small>
+                <%= link_to 'Link a page', '#', class: 'js-link-entity' %>
+              </small>
+            </p>
+
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+
+
+  </div>
+    
+  <div class="row">
+    <div class="col s12 center">
+      <div class="loading-indicator">
+        <div class="preloader-wrapper small active">
+          <div class="spinner-layer spinner-green-only">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div><div class="gap-patch">
+              <div class="circle"></div>
+            </div><div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%= link_to 'Add an event', '#', class: 'btn black white-text', id: 'js-create-timeline-event' %>
+    </div>
+  </div>
+
+</div>
+
+<div id="entity-link-modal" class="modal">
+  <input type="hidden" id="linking-event-id" value="-1" />
+  <div class="modal-content">
+    <h4>Link a page to this event</h4>
+    <p>
+      Select from your pages below.
+    </p>
+    <%= form_with url: '#', method: :post do |f| %>
+      <%= f.hidden_field :timeline_id,          value: @timeline.id %>
+      <%= f.hidden_field :entity_type,          value: nil %>
+      <%= f.hidden_field :entity_id,            value: nil %>
+
+      <% @current_user_content.each do |content_type, content_list| %>
+        <% content_type_class = content_type.constantize %>
+        <h5><%= content_type.pluralize %></h5>
+        <ul class="collection">
+          <% content_list.each do |content| %>
+            <a href="#" 
+               class="<%= content_type_class.color %>-text js-link-entity-selection modal-close" 
+               data-id="<%= content.id %>"
+               data-type="<%= content_type %>">
+              <li class="collection-item hoverable">
+                <i class="material-icons left"><%= content_type_class.icon %></i>
+                <%= content.name.presence || "Untitled #{content_type}" %>
+                <span class="secondary-content">
+                  <i class="material-icons">link</i>
+                </span>
+              </li>
+            </a>
+          <% end %>
+        </ul>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+  </div>
+</div>
+
+<%= render partial: 'content/share', locals: { shared_content: @timeline } %>

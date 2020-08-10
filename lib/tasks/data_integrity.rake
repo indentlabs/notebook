@@ -32,8 +32,9 @@ namespace :data_integrity do
           total_accounts_downgraded_this_run += 1
           puts "Downgrading user #{user.email} from #{active_billing_plan.stripe_plan_id} (last logged in #{user.last_sign_in_at.strftime("%F")})"
 
-          SlackService.post('#subscriptions', "Automatically downgrading #{user.email} from #{active_billing_plan.stripe_plan_id}  (last logged in #{user.last_sign_in_at.strftime("%F")})")
           SubscriptionService.cancel_all_existing_subscriptions(user)
+          UnsubscribedMailer.unsubscribed(user).deliver_now! if Rails.env.production?
+          SlackService.post('#subscriptions', "Automatically downgrading #{user.email} from #{active_billing_plan.stripe_plan_id}  (last logged in #{user.last_sign_in_at.strftime("%F")})")
         end
 
         # Aggressively throttle (too much) just to keep Stripe happy if we plan on doing
@@ -52,12 +53,56 @@ namespace :data_integrity do
       page_type_data.each do |relation, relation_data|
         klass        = relation_data[:related_class]
         reference_id = relation_data[:through_relation].to_s + '_id'
+        puts "Klass is #{klass.name}"
+        puts "Reference ID is #{reference_id}"
 
         orphans = klass.where({"#{reference_id}": nil})
         puts "Orphans for relation #{relation_data[:with]}: #{orphans.count} -- deleting them all!"
-        orphans.destroy_all!
+        orphans.destroy_all
       end
     end
+  end
+
+  desc "Migrate old content and mark it as migrated once and for all"
+  task migrate_old_content: :environment do
+    RECORDS_TO_PROCESS = 300
+
+    old_logger = ActiveRecord::Base.logger
+    ActiveRecord::Base.logger = nil
+
+    Rails.application.config.content_types[:all].each do |content_type|
+      pages = content_type.where(columns_migrated_from_old_style: nil).limit(RECORDS_TO_PROCESS)
+      puts "Migrating #{content_type.name} (#{pages.count} pages)"
+
+      pages.each do |page|
+        puts "Hey, this page shouldn't be here!" if page.columns_migrated_from_old_style == true
+        TemporaryFieldMigrationService.migrate_fields_for_content(page, page.user, force: true)
+
+        page.update_column(:columns_migrated_from_old_style, true) unless page.reload.columns_migrated_from_old_style == true
+      end
+    end
+
+    puts "Pages remaining to migrate: "
+    Rails.application.config.content_types[:all].each do |content_type|
+      count = content_type.where(columns_migrated_from_old_style: nil).count
+      puts "#{content_type.name}: #{count} (#{content_type.where.not(columns_migrated_from_old_style: nil).count} migrated)"
+    end
+
+    ActiveRecord::Base.logger = old_logger
+  end
+
+  desc "Migrate old content per user"
+  task migrate_old_content_per_user: :environment do
+    START_ID = 1
+    USERS_TO_PROCESS = 500
+
+    users = User.where(id: START_ID..(START_ID+USERS_TO_PROCESS))
+    puts "Processing #{users.count} users"
+
+    users.each do |user|
+      TemporaryFieldMigrationService.migrate_all_content_for_user(user)
+    end
+
   end
 end
 

@@ -1,5 +1,5 @@
 <% free_for_life_user = current_user.selected_billing_plan_id == 2 %>
-<% on_premium_plan = ['early-adopters', 'premium', 'premium-trio', 'premium-annual'].include? @active_billing_plan.try(:stripe_plan_id) %>
+<% on_premium_plan = ['early-adopters', 'premium', 'premium-trio', 'premium-annual'].include?(@active_billing_plan.try(:stripe_plan_id)) %>
 <% active_stripe_plan = @active_billing_plan.try(:stripe_plan_id) %>
 
 <%= content_for :full_width_page_header do %>
@@ -14,15 +14,21 @@
   </p>
 <% end %>
 
-<h4>Subscription Plan</h4>
+<%= render partial: 'notice_dismissal/messages/06' %>
 
+<h4>Subscription Plan</h4>
 <p>
   <% if free_for_life_user %>
     <p style="margin-top: 20px;">
-    Thank you! You were there at Notebook.ai's beginnings, so we've gifted you <strong>a free, unlimited account for life</strong>. Subscriptions below have been disabled, because you already have everything unlocked.
+      Thank you! You were there at Notebook.ai's beginnings, so we've gifted you <strong>a free, unlimited account for life</strong>. Subscriptions below have been disabled, because you already have everything unlocked.
     </p>
     <p>
       Thank you for helping make Notebook.ai what it is today.
+    </p>
+  <% elsif @active_promotions.any? %>
+    <p>
+      You're currently subscribed to Notebook.ai's <strong><%= @active_billing_plan.name %></strong> plan, but have access to Premium features through your
+      active Premium Code (<%= @active_promo_code.description %>) for <%= distance_of_time_in_words DateTime.current, @active_promotions.first.expires_at %> longer.
     </p>
   <% else %>
     You're currently subscribed to Notebook's <strong><%= @active_billing_plan.name %></strong> plan.
@@ -39,7 +45,7 @@
 
 <div class="row">
   <div class="col s12 m6 l3">
-    <div class="card <%= 'blue lighten-5' if @active_billing_plan.stripe_plan_id == 'starter' %>" style="min-height: 470px;">
+    <div class="card black-text <%= 'blue lighten-5' if @active_billing_plan.stripe_plan_id == 'starter' %>" style="min-height: 470px;">
       <div class="card-content">
         <h4 class="center">
           <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">class</i>
@@ -87,7 +93,7 @@
   </div>
 
   <div class="col s12 m6 l3">
-    <div class="card <%= 'light-blue lighten-5' if active_stripe_plan == 'premium' %>" style="min-height: 470px;">
+    <div class="card black-text <%= 'light-blue lighten-5' if active_stripe_plan == 'premium' %>" style="min-height: 470px;">
       <div class="card-content">
         <h4 class="center">
           <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">grade</i>
@@ -125,6 +131,8 @@
           <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
         <% elsif on_premium_plan %>
           <%= link_to 'Change Plan', change_subscription_path('premium'), class: "btn-large waves-effect waves-light white blue-text #{'disabled' if free_for_life_user}" %>
+        <% elsif @active_promotions.any? %>
+          <%= link_to 'Premium is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
         <% else %>
           <%= link_to 'Upgrade', change_subscription_path('premium'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
         <% end %>
@@ -134,7 +142,7 @@
   </div>
 
   <div class="col s12 m6 l3">
-    <div class="card <%= 'light-blue lighten-5' if active_stripe_plan == 'premium-trio' %>" style="min-height: 470px;">
+    <div class="card black-text <%= 'light-blue lighten-5' if active_stripe_plan == 'premium-trio' %>" style="min-height: 470px;">
       <div class="card-content">
         <h4 class="center">
           <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">grade</i>
@@ -172,6 +180,8 @@
           <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
         <% elsif on_premium_plan %>
           <%= link_to 'Change Plan', change_subscription_path('premium-trio'), class: "btn-large waves-effect waves-light white blue-text #{'disabled' if free_for_life_user}" %>
+        <% elsif @active_promotions.any? %>
+          <%= link_to 'Premium is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
         <% else %>
           <%= link_to 'Upgrade', change_subscription_path('premium-trio'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
         <% end %>
@@ -181,7 +191,7 @@
   </div>
 
   <div class="col s12 m6 l3">
-    <div class="card <%= 'light-blue lighten-5' if active_stripe_plan == 'premium-annual' %>" style="min-height: 470px;">
+    <div class="card black-text <%= 'light-blue lighten-5' if active_stripe_plan == 'premium-annual' %>" style="min-height: 470px;">
       <div class="card-content">
         <h4 class="center">
           <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">grade</i>
@@ -219,6 +229,8 @@
           <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
         <% elsif on_premium_plan %>
           <%= link_to 'Change Plan', change_subscription_path('premium-annual'), class: "btn-large waves-effect waves-light white blue-text #{'disabled' if free_for_life_user}" %>
+        <% elsif @active_promotions.any? %>
+          <%= link_to 'Premium is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
         <% else %>
           <%= link_to 'Upgrade', change_subscription_path('premium-annual'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
         <% end %>
@@ -258,22 +270,22 @@
     <%= link_to prepay_path, class: 'black-text' do %>
       <div class="hoverable card orange lighten-3">
         <div class="card-content">
-          <div class="card-title">
+          <div class="card-title black-text">
             <i class="fa fa-paypal left"></i>
             New: Purchase Premium with PayPal
           </div>
 
-          <p>
+          <p class="black-text">
             You can now purchase <strong>Premium Codes</strong> with PayPal!
           </p>
           <br />
-          <p>
+          <p class="black-text">
             These codes let you prepay for however many months of Premium you'd like, and can be manually activated at any time. 
             Each code can be used only once, but can be used by anyone you share the code with &mdash;
             so they make great gifts, too!
           </p>
           <br />
-          <p>
+          <p class="black-text">
             Click here to learn more.
           </p>
         </div>
@@ -290,6 +302,18 @@
           Enter your promotional code below to apply its benefits to your account. Codes may only be used once per account.
         </p>
 
+        <% if current_user.page_unlock_promo_codes.where('uses_remaining > 0').any? %>
+          <br />
+          <p>
+            <span class="grey-text">Your purchased codes, available to activate:</span>
+          </p>
+          <ul>
+            <% current_user.page_unlock_promo_codes.where('uses_remaining > 0').each do |code| %>
+              <li><strong><%= code.code %></strong> (<%= code.description %>)</li>
+            <% end %>
+          </ul>
+        <% end %>
+
         <%= form_for :promotional_code, url: redeem_path do |form| %>
           <div class="input-field col s6">
             <%= form.text_field :promo_code %>
@@ -304,7 +328,7 @@
 
         <% if current_user.active_promotions.any? %>
           <p>
-            Your active <%= pluralize current_user.active_promotions.count, 'promo code' %>:
+            Your <%= pluralize current_user.active_promo_codes.count, 'active promo code' %>:
 
             <ul class="browser-default">
               <% current_user.active_promo_codes.each do |promo_code| %>
@@ -313,7 +337,7 @@
                   <p>
                     <strong><%= promo_code.code %></strong> - <%= promo_code.description %>
                     <span class="grey-text">
-                      (active for another <%= distance_of_time_in_words(DateTime.current, promotion.expires_at) %>)
+                      (active for <%= distance_of_time_in_words(DateTime.current, promotion.expires_at) %> longer)
                     </span>
                   </p>
                   <p>
@@ -362,4 +386,8 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="center help-text">
+  All prices are in US Dollars. Making payments using another currency will automatically exchange into US Dollars at the current exchange rates.
 </div>

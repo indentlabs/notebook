@@ -1,0 +1,63 @@
+<script type="application/ld+json">
+  <%
+    set_meta_tags title: @user.name,
+    description: "#{@user.name}’s profile on Notebook.ai",
+    image_src: @user.image_url(120)
+
+    content_jsonld = {
+      '@id': user_url(id: @user.id),
+      '@type': 'https://schema.org/Person',
+      'https://schema.org/name': @user.name,
+      'https://schema.org/description': "#{@user.name}’s worldbuilding profile on Notebook.ai",
+      'https://schema.org/image': @user.image_url(120)
+    }
+  %>
+  <%= content_jsonld.to_json.html_safe %> %>
+</script>
+
+<%= content_for :full_width_page_header do %>
+  <div class="user-profile-ui card">
+    <div class="card-image">
+      <% if @user.favorite_page_type? %>
+        <div class="<%= @accent_color %> darken-4" style="height: 200px; width: 100%"></div>
+      <% else %>
+        <%= image_tag "card-headers/users.png", style: 'height: 200px;' %>
+      <% end %>
+      <span class="card-title">
+        <%= image_tag @user.image_url.html_safe, class: 'header-avatar materialboxed', data: { caption: "#{@user.display_name}'s avatar" } %>
+
+        <%= link_to @user.name, @user, class: 'white-text' %>
+        <span class="black-text">
+          <%= render partial: 'thredded/users/badge', locals: { user: @user } %>
+        </span>
+      </span>
+    </div>
+  </div>
+<% end %>
+
+<h5 class="grey-text">Following <%= pluralize @user.followed_users.count, 'worldbuilder' %></h5>
+<div class="row">
+  <% @user.followed_users.each do |user| %>
+    <div class="col s12 m12 l6">
+      <%= link_to user, class: 'black-text' do %>
+        <div class="hoverable card horizontal">
+          <div class="card-image">
+            <%= image_tag user.image_url.html_safe, class: 'following-avatar materialboxed' %>
+          </div>
+          <div class="card-content">
+            <div class="card-title">
+              <%= user.display_name %>
+              <br />
+              <span class="black-text">
+                <%= render partial: 'thredded/users/badge', locals: { user: user } %>
+              </span>
+            </div>
+            <p>
+              <%= truncate(user.bio, length: 140) %>
+            </p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

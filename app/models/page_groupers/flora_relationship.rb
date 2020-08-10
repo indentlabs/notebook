@@ -5,7 +5,7 @@ class FloraRelationship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :flora
-  belongs_to :related_flora, class_name: 'Flora'
+  belongs_to :related_flora, class_name: 'Flora', optional: true
 
   after_create do
     self.reciprocate relation: :flora_relationships, parent_object_ref: :flora, added_object_ref: :related_flora

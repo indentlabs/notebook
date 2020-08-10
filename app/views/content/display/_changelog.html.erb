@@ -77,9 +77,11 @@
       <% end %>
     <% end %>
 
-    <div class="card-panel">
-      <%= content.class_name %> <%= content.name %> was created by <%= link_to content.user.name, content.user %>
-      <span class='grey-text'><%= time_ago_in_words content.raw_model.created_at %> ago</span>.
-    </div>
+    <% if content.user.present? %>
+      <div class="card-panel">
+        <%= content.class_name %> <%= content.name %> was created by <%= link_to content.user.name, content.user %>
+        <span class='grey-text'><%= time_ago_in_words content.raw_model.created_at %> ago</span>.
+      </div>
+    <% end %>
   </div>
 </div>

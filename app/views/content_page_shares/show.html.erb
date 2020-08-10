@@ -1,0 +1,132 @@
+<div class="stream-item row">
+  <div class="col s12 m12 l4">
+    <div class="grey-text uppercase">
+      <br />
+      Shared page
+    </div>
+    <div class="hoverable card">
+      <div class="card-image">
+        <%= link_to @share.content_page do %>
+          <%= image_tag @share.content_page.random_public_image %>
+          <span class="card-title bordered-text">
+            <i class="material-icons <%= @share.content_page.class.color %>-text left small"><%= @share.content_page.class.icon %></i>
+            <%= @share.content_page.name %>
+          </span>
+        <% end %>
+      </div>
+    </div>
+    <div class="grey-text uppercase">
+      <br />
+      Created by
+    </div>
+    <%= link_to @share.user do %>
+      <div class="hoverable card <%= User.color %>">
+        <!-- todo vertical card stack user avatar -->
+        <div class="card-content">
+          <div class="card-title white-text">
+            <i class="material-icons left"><%= User.icon %></i>
+            <%= @share.user.display_name %>
+          </div>
+          <%= render partial: 'thredded/users/badge', locals: { user: @share.user } %>
+        </div>
+      </div>
+    <% end %>
+    <br />
+    <div>
+      <ul>
+        <li class="uppercase grey-text">
+          Share Actions
+        </li>
+        <li>
+          <% if @share.followed_by?(current_user) %>
+            <%= link_to 'Unfollow this share', unfollow_user_content_page_share_path(user_id: @share.user.id, id: @share.id) %>
+          <% else %>
+            <%= link_to 'Follow this share', follow_user_content_page_share_path(user_id: @share.user.id, id: @share.id) %>
+          <% end %>
+        </li>
+        <% if @share.user == current_user %>
+          <li>
+            <%= 
+              link_to user_content_page_share_path(user_id: @share.user.id, id: @share.id),
+                method: :DELETE,
+                data: { confirm: "Are you sure? This will delete this share and any comments that have been posted to it!" } do
+            %>
+              Delete this share
+            <% end %>
+          </li>
+        <% else %>
+          <li>
+            <%= link_to report_user_content_page_share_path(user_id: @share.user.id, id: @share.id) do %>
+              Report this share
+            <% end %>
+          </li>
+        <% end %>
+        <li>
+          <%= link_to 'Back to your stream', main_app.stream_path %>
+        </li>
+      </ul>
+    </div>
+    <!--
+    <div>
+      <ul class="uppercase">
+        <li class="grey-text">
+          Reshare this post to...
+        </li>
+        <li>
+          <%= link_to '#', class: 'btn-flat blue-text' do %>
+            <i class="material-icons tiny left">share</i>
+            Twitter
+          <% end %>
+        </li>
+        <li>
+          <%= link_to '#', class: 'btn-flat blue-text' do %>
+            <i class="material-icons tiny left">share</i>
+            Facebook
+          <% end %>
+        </li>
+      </ul>
+    </div>
+    -->
+  </div>
+  <div class="col s12 m12 l7">
+    <div class="card">
+      <div class="card-content">
+        <p>
+          <%= link_to @share.user, class: "#{User.color}-text" do %>
+            <%= image_tag @share.user.image_url(size=20), class: 'left circle avatar' %>
+            <%= @share.user.name %>
+          <% end %>
+          said:
+          <span class="grey-text right">
+            <%= time_ago_in_words @share.shared_at %> ago
+          </span>
+        </p>
+        <% if @share.message.present? %>
+          <blockquote class="original-comment">
+            <%= simple_format @share.message %>
+          </blockquote>
+        <% end %>
+        
+        <%= render partial: 'share_comments/form', locals: { share: @share } %>
+        <br /><br />
+
+        <div class="uppercase grey-text center">
+          <%= pluralize @share.share_comments.count, 'comment' %>
+        </div>
+        <div class="row">
+          <% @share.share_comments.each do |comment| %>
+            <%= 
+              render partial: 'share_comments/show', 
+                    locals: { comment: comment, share: @share }
+            %>
+          <% end %>
+        </div>
+
+        <% if @share.share_comments.count > 10 %>
+          <%= render partial: 'share_comments/form', locals: { share: @share } %>
+        <% end %>
+        <br /><br />
+      </div>
+    </div>
+  </div>
+</div>

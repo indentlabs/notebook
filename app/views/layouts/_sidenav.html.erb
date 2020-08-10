@@ -82,7 +82,7 @@
             <li>
               <%= link_to main_app.customization_content_types_path, class: 'waves-effect' do %>
                 <i class="material-icons black-text">add</i>
-                <%# <span class="new badge"></span> %>
+                <!-- <span class="new badge <%= Lore.color %> black-text"></span> -->
                 Add more...
               <% end %>
             </li>
@@ -103,21 +103,17 @@
                 </i>
                 Documents
                 <span class="badge">
-                  <%= @current_user_content['Document'].count %>
+                  <%= @current_user_content.fetch('Document', []).count %>
                 </span>
               <% end %>
             </li>
             <li>
-              <%= link_to main_app.thredded_path, class: 'waves-effect' do %>
-                <i class="material-icons blue-text">
-                  forum
-                </i>
-                Discussions
-                <% if @unread_threads > 0 || @unread_private_messages > 0 %>
-                  <span class="badge <%= 'blue white-text' if @unread_private_messages > 0 %>">
-                    <%= @unread_threads %><%= "/#{@unread_private_messages}" if @unread_private_messages > 0 %>
-                  </span>
-                <% end %>
+              <%= link_to main_app.timelines_path, class: 'waves-effect' do %>
+                <i class="material-icons left <%= Timeline.color %>-text"><%= Timeline.icon %></i>
+                Timelines
+                <span class="badge">
+                  <%= @current_user_content.fetch('Timeline', []).count %>
+                </span>
               <% end %>
             </li>
             <li>
@@ -129,6 +125,60 @@
           </ul>
         </div>
       </li>
+      <% if current_user.community_features_enabled? %>
+        <li class="bold waves-effect <%= 'active' if @sidenav_expansion == 'community' %>">
+          <a class="collapsible-header" tabindex="0">
+            Community
+            <i class="material-icons chevron">chevron_right</i>
+          </a>
+          <div class="collapsible-body">
+            <ul>
+              <li>
+                <%= link_to main_app.stream_path, class: 'waves-effect' do %>
+                  <i class="material-icons left <%= ContentPageShare.color %>-text"><%= ContentPageShare.icon %></i>
+                  Stream
+                <% end %>
+              </li>
+              <!--
+              <li>
+                <%= link_to main_app.stream_community_path, class: 'waves-effect' do %>
+                  <i class="material-icons left red-text">whatshot</i>
+                  What's new
+                <% end %>
+              </li>
+              -->
+              <li>
+                <%= link_to main_app.page_collections_path, class: 'waves-effect' do %>
+                  <i class="material-icons left <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
+                  <!--<span class="new badge <%= PageCollection.color %> white-text"></span>-->
+                  Collections
+                <% end %>
+              </li>
+              <li>
+                <%= link_to main_app.thredded_path, class: 'waves-effect' do %>
+                  <i class="material-icons blue-text">
+                    forum
+                  </i>
+                  Discussions
+                  <% if @unread_threads > 0 || @unread_private_messages > 0 %>
+                    <span class="badge <%= 'blue white-text' if @unread_private_messages > 0 %>">
+                      <%= @unread_threads %><%= "/#{@unread_private_messages}" if @unread_private_messages > 0 %>
+                    </span>
+                  <% end %>
+                <% end %>
+              </li>
+              <% unless current_user.private_profile? %>
+                <li>
+                  <%= link_to current_user.profile_url, class: 'waves-effect' do %>
+                    <i class="material-icons left <%= User.color %>-text"><%= User.icon %></i>
+                    Profile
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </li>
+      <% end %>
       <li class="bold waves-effect <%= 'active' if @sidenav_expansion == 'my account' %>">
         <a class="collapsible-header" tabindex="0">
           My Account
@@ -136,12 +186,6 @@
         </a>
         <div class="collapsible-body">
           <ul>
-            <li>
-              <%= link_to current_user.profile_url, class: 'waves-effect' do %>
-                <i class="material-icons left <%= User.color %>-text"><%= User.icon %></i>
-                Profile
-              <% end %>
-            </li>
             <li>
               <%= link_to main_app.subscription_path, class: 'waves-effect' do %>
                 <i class="material-icons left blue-text">credit_card</i>
@@ -159,7 +203,12 @@
               <%= link_to main_app.edit_user_registration_path, class: 'waves-effect' do %>
                 <i class="material-icons left black-text">settings</i>
                 Settings
-                <span class="badge right">&nbsp;</span>
+              <% end %>
+            </li>
+            <li>
+              <%= link_to main_app.help_center_path, class: 'waves-effect' do %>
+                <i class="material-icons left pink-text text-lighten-3">help</i>
+                Help center
               <% end %>
             </li>
             <li class="divider"></li>
@@ -167,34 +216,6 @@
               <%= link_to main_app.destroy_user_session_path, class: 'waves-effect' do %>
                 <i class="material-icons left">power_settings_new</i>
                 Sign out
-              <% end %>
-            </li>
-          </ul>
-        </div>
-      </li>
-      <li class="bold waves-effect <%= 'active' if @sidenav_expansion == 'help' %>">
-        <a class="collapsible-header" tabindex="0">
-          Help
-          <i class="material-icons chevron">chevron_right</i>
-        </a>
-        <div class="collapsible-body">
-          <ul>
-            <li>
-              <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new', class: 'waves-effect' do %>
-                <i class="material-icons left">exit_to_app</i>
-                Report a problem
-              <% end %>
-            </li>
-            <li>
-              <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new', class: 'waves-effect' do %>
-                <i class="material-icons left">exit_to_app</i>
-                Request a feature
-              <% end %>
-            </li>
-            <li>
-              <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new', class: 'waves-effect' do %>
-                <i class="material-icons left">exit_to_app</i>
-                Leave feedback
               <% end %>
             </li>
           </ul>

@@ -1,0 +1,33 @@
+<% pages.each do |page| %>
+  <% content = page.content %>
+  <% next unless (current_user || User.new).can_read?(content) %>
+  <div class="hoverable card horizontal">
+    <div class="card-image">
+      <%= link_to content do %>
+        <%= image_tag content.random_public_image %>
+      <% end %>
+    </div>
+    <div class="card-stacked">
+      <div class="card-content">
+        <div class="card-title">
+          <%= link_to content.name, content %>
+        </div>
+        <% if page.explanation? %>
+          <div>
+            <%= simple_format page.explanation %>
+          </div>
+        <% end %>
+        <ul>
+          <li class="help-text">
+            Submitted by 
+            <%= link_to content.user, class: "#{User.color}-text" do %>
+              <%= image_tag content.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+              <%= content.user.display_name %>
+            <% end %>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+<% end %>

@@ -4,7 +4,7 @@ class PlanetNearbyPlanet < ApplicationRecord
 
   belongs_to :user, optional: true
   belongs_to :planet
-  belongs_to :nearby_planet, class_name: Planet.name
+  belongs_to :nearby_planet, class_name: Planet.name, optional: true
 
   after_create do
     self.reciprocate(

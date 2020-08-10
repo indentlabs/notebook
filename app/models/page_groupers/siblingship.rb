@@ -5,7 +5,7 @@ class Siblingship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :character
-  belongs_to :sibling, class_name: 'Character'
+  belongs_to :sibling, class_name: 'Character', optional: true
 
   after_create do
     self.reciprocate(

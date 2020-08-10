@@ -2,7 +2,32 @@
 Rails.application.routes.draw do
   default_url_options :host => "notebook.ai"
 
+  scope :stream, path: '/stream', as: :stream do
+    get '/',         to: 'stream#index'
+    get 'world',     to: 'stream#global'
+    get 'community', to: 'stream#community'
+  end
+  resources :page_collections, path: '/collections' do
+    get '/submissions', to: 'page_collection_submissions#index', as: 'pending_submissions'
+    get '/explore',     to: 'page_collections#explore',          on: :collection
+    Rails.application.config.content_types[:all].each do |content_type|
+      get content_type.name.downcase.pluralize.to_sym, on: :member
+    end
+    get 'follow',   on: :member
+    get 'unfollow', on: :member
+    get 'report',   on: :member
+  end
+  resources :page_collection_submissions do
+    get 'approve', on: :member
+    get 'pass',    on: :member
+  end
+
   get 'notice_dismissal/dismiss'
+  resources :notifications
+  # TODO this should probably be a POST or something
+  get '/mark_all_read', to: 'notifications#mark_all_read'
+  resources :share_comments
+
   get 'customization/content_types'
   post 'customization/toggle_content_type'
 
@@ -14,13 +39,28 @@ Rails.application.routes.draw do
       get 'more_actions', to: 'registrations#more_actions'
     end
 
+    get 'followers', on: :member
+    get 'following', on: :member
+
     # get :characters, on: :member <...etc...>
     Rails.application.config.content_types[:all].each do |content_type|
       get content_type.name.downcase.pluralize.to_sym, on: :member
       # todo page tags here
     end
+
+    resources :content_page_shares, path: 'shares' do
+      get 'follow',   on: :member
+      get 'unfollow', on: :member
+      get 'report',   on: :member
+    end
   end
+  resources :user_followings
+  resources :user_blockings
+
+  # Username URL aliases
   get '/@:username', to: 'users#show', as: :profile_by_username
+  get '/@:username/followers', to: 'users#followers'
+  get '/@:username/following', to: 'users#following'
 
   resources :documents do
     get  '/analysis',         to: 'documents#analysis',                on: :member
@@ -43,7 +83,7 @@ Rails.application.routes.draw do
 
     get '/scratchpad',      to: 'main#notes', as: :notes
 
-    # Legacy routes: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
+    # Legacy route: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
 
     # Billing
@@ -74,11 +114,13 @@ Rails.application.routes.draw do
     # TODO delete deprecated/unused referrals controller/views
 
     scope '/data' do
-      get '/',           to: 'data#index',     as: :data_vault
-      get '/usage',      to: 'data#usage'
-      get '/recyclebin', to: 'data#recyclebin'
-      get '/archive',    to: 'data#archive'
-      get '/uploads',    to: 'data#uploads'
+      get '/',              to: 'data#index',     as: :data_vault
+      get '/usage',         to: 'data#usage'
+      get '/recyclebin',    to: 'data#recyclebin'
+      get '/archive',       to: 'data#archive'
+      get '/uploads',       to: 'data#uploads'
+      get '/discussions',   to: 'data#discussions'
+      get '/collaboration', to: 'data#collaboration'
 
       scope 'export' do
         get '/', to: 'export#index', as: :notebook_export
@@ -90,7 +132,8 @@ Rails.application.routes.draw do
         get '/:model.csv',    to: 'export#csv',           as: :notebook_csv
       end
     end
-end
+    get '/help', to: 'help#index', as: :help_center
+  end
   delete 'delete_my_account', to: 'users#delete_my_account'
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
@@ -137,6 +180,8 @@ end
       Rails.application.config.content_types[:all_non_universe].each do |content_type|
         get content_type.name.downcase.pluralize.to_sym, on: :member
       end
+      get :timelines, on: :member
+
       get  :changelog,       on: :member
       get  :toggle_archive,  on: :member
       post :toggle_favorite, on: :member
@@ -148,8 +193,19 @@ end
         get  :changelog,       on: :member
         get  :toggle_archive,  on: :member
         post :toggle_favorite, on: :member
-        get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
+        get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
       end
+    end
+    resources :timelines, only: [:index, :show, :new, :update, :edit, :destroy]
+    resources :timeline_events do
+      scope '/move', as: :move do
+        get 'up',     to: 'timeline_events#move_up',        on: :member
+        get 'down',   to: 'timeline_events#move_down',      on: :member
+        get 'top',    to: 'timeline_events#move_to_top',    on: :member
+        get 'bottom', to: 'timeline_events#move_to_bottom', on: :member
+      end
+      post 'link',              to: 'timeline_events#link_entity',    on: :member
+      post 'unlink/:entity_id', to: 'timeline_events#unlink_entity',  on: :member, as: :unlink_entity
     end
 
     # Content attributes
@@ -162,9 +218,6 @@ end
 
     # Attributes
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
-
-    # Coming Soon TM
-    get '/plots',     to: 'main#comingsoon'
   end
   get 'search/', to: 'search#results'
 
@@ -177,9 +230,16 @@ end
       get '/unsubscribe', to: 'admin#unsubscribe', as: :mass_unsubscribe
       get '/images', to: 'admin#images', as: :image_audit
       get '/promos', to: 'admin#promos', as: :admin_promos
+      get '/shares/reported', to: 'admin#reported_shares'
+      get '/churn',  to: 'admin#churn'
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
+  end
+
+  # Fancy shmancy informative pages
+  scope '/worldbuilding' do
+    
   end
 
   scope '/scene/:scene_id' do
@@ -273,7 +333,9 @@ end
   # get '/forum', to: 'emergency#temporarily_disabled'
   # get '/forum/:wildcard', to: 'emergency#temporarily_disabled'
   # get '/forum/:wildcard/:another', to: 'emergency#temporarily_disabled'
-  mount Thredded::Engine => '/forum'
+  mount Thredded::Engine,    at: '/forum',               as: :thredded
+  get '/topic/:slug',        to: 'thredded_proxy#topic', as: :topic
+
   mount StripeEvent::Engine, at: '/webhooks/stripe'
 
   require 'sidekiq/web'

@@ -194,13 +194,11 @@ class ContentController < ApplicationController
       'content_type': content_type.name
     }) if Rails.env.production?
 
-    if @content.update(content_params)
+    if @content.save
       cache_params = {}
       cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField].include?(@content.class)
       cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
-
       @content.update(cache_params) if cache_params.any?
-      # Cache the name/universe also (todo stick this in the same save as above)
 
       if params.key? 'image_uploads'
         upload_files params['image_uploads'], content_type.name, @content.id
@@ -363,7 +361,7 @@ class ContentController < ApplicationController
     content_type = content_type_from_controller(self.class)
     @content = content_type.find_by(id: params[:id])
 
-    unless current_user.can_delete? @content
+    unless current_user.can_delete?(@content)
       return redirect_to :back, notice: "You don't have permission to do that!"
     end
 
@@ -501,7 +499,7 @@ class ContentController < ApplicationController
       .downcase
       .to_sym
 
-    params.require(content_class).permit(content_param_list + [:deleted_at, :document_entity_id])
+    params.require(content_class).except(:page_tags, :_destroy).permit(content_param_list + [:deleted_at, :document_entity_id])
   end
 
   def page_tag_params

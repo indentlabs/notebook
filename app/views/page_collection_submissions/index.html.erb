@@ -1,0 +1,59 @@
+<div class="row">
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Pending submissions</div>
+        <p>
+          Submitters will be notified if you accept their content.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <% @page_collection_submissions.each do |page_collection_submission| %>
+    <div class="col s12 m12 l12">
+      <% content = page_collection_submission.content %>
+      <div class="horizontal card <%= content.class.color %> lighten-5 black-text">
+        <div class="card-image">
+          <%= link_to content do %>
+            <%= image_tag content.random_public_image %>
+          <% end %>
+        </div>
+        <div class="card-stacked">
+          <div class="card-content">
+            <div class="card-title black-text">
+              <i class="material-icons left <%= content.class.color %>-text"><%= content.class.icon %></i>
+              <%= content.name %>
+            </div>
+            <blockquote>
+              <%= simple_format page_collection_submission.explanation, class: 'black-text' %>
+            </blockquote>
+            <div>
+              Submitted by
+              <%= link_to content.user, class: "#{User.color}-text" do %>
+                <%= content.user.display_name %>
+              <% end %>
+              <%= time_ago_in_words page_collection_submission.submitted_at %> ago
+            </div>
+          </div>
+          <div class="card-action">
+            <%= link_to approve_page_collection_submission_path(page_collection_submission), class: 'green-text' do %>
+              <i class="material-icons left">check</i>
+              Approve
+            <% end %>
+            <%= link_to pass_page_collection_submission_path(page_collection_submission), class: 'red-text right' do %>
+              <i class="material-icons left">close</i>
+              Pass
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="col s12">
+    <p class="center">
+      <%= link_to "Back to #{@page_collection.title}", @page_collection, class: "#{PageCollection.color}-text" %>
+    </p>
+  </div>
+</div>

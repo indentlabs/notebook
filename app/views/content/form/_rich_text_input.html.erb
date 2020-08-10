@@ -13,7 +13,7 @@
     <% unless defined?(show_label) && !show_label %>
       <%= f.label field do %>
         <%= field[:label].present? ? field[:label] : ' ' %>
-        <% if defined?(autocomplete) && autocomplete %>
+        <% if defined?(autocomplete) && autocomplete && autocomplete.any? %>
           <i class="material-icons grey-text lighten-2 tooltipped"
              style="font-size: 100%"
              data-tooltip="This field may suggest some ideas for you when you start typing."
@@ -51,7 +51,7 @@
   </div>
 </div>
 
-<% if defined?(autocomplete) && autocomplete %>
+<% if defined?(autocomplete) && autocomplete && autocomplete.any? %>
   <%= content_for :javascript do %>
     $(function() {
       $('.js-autocomplete-<%= field[:id].to_s %>').autocomplete({

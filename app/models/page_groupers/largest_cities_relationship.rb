@@ -4,5 +4,5 @@ class LargestCitiesRelationship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :location
-  belongs_to :largest_city, class_name: 'Location'
+  belongs_to :largest_city, class_name: 'Location', optional: true
 end

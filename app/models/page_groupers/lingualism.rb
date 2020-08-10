@@ -4,5 +4,5 @@ class Lingualism < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :character
-  belongs_to :spoken_language, class_name: 'Language'
+  belongs_to :spoken_language, class_name: 'Language', optional: true
 end

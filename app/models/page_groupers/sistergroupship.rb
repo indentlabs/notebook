@@ -4,7 +4,7 @@ class Sistergroupship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :group
-  belongs_to :sistergroup, class_name: Group.name
+  belongs_to :sistergroup, class_name: Group.name, optional: true
 
   after_create do
     self.reciprocate relation: :sistergroupships, parent_object_ref: :group, added_object_ref: :sistergroup
@@ -15,6 +15,6 @@ class Sistergroupship < ApplicationRecord
     this_object  = Group.find_by(id: self.group_id)
     other_object = Group.find_by(id: self.sistergroup_id)
 
-    other_object.sistergroups.delete this_object
+    other_object.sistergroups.delete(this_object) if other_object.present?
   end
 end

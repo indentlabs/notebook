@@ -4,7 +4,7 @@ class Childrenship < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :character
-  belongs_to :child, class_name: 'Character'
+  belongs_to :child, class_name: 'Character', optional: true
 
   # These values are used for detecting whether a related character is a male or female
   #todo: proper gender extraction

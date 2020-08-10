@@ -18,6 +18,8 @@ class SubscriptionsController < ApplicationController
     # We only support a single billing plan right now, so just grab the first one. If they don't have an active plan,
     # we also treat them as if they have a Starter plan.
     @active_billing_plan = current_user.active_billing_plans.first || BillingPlan.find_by(stripe_plan_id: 'starter')
+    @active_promotions   = current_user.active_promotions
+    @active_promo_code   = @active_promotions.first.try(:page_unlock_promo_code)
 
     @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
   end
@@ -233,6 +235,15 @@ class SubscriptionsController < ApplicationController
 
     # If it looks like a valid code and quacks like a valid code, it's probably a valid code
     code.activate!(current_user)
+
+    current_user.notifications.create(
+      message_html:     "<div class='yellow-text text-darken-4'>You activated a Premium Code!</div><div>Click here to turn on your Premium pages.</div>",
+      icon:             'star',
+      icon_color:       'text-darken-3 yellow',
+      happened_at:      DateTime.current,
+      passthrough_link: Rails.application.routes.url_helpers.customization_content_types_path
+    )
+
     redirect_back(fallback_location: subscription_path, notice: "Promo code successfully activated!")
   end
 

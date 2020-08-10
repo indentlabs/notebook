@@ -168,11 +168,12 @@
         <%= f.hidden_field :document_entity_id, value: @entity.id %>
 
       <% else %>
-        <% if AutocompleteService.autocompleteable?(field[:label]) %>
-          <%= render 'content/form/rich_text_input', f: f, content: content, field: field, autocomplete: AutocompleteService.for_field_label(field[:label]) %>
-        <% else %>
-          <%= render 'content/form/rich_text_input', f: f, content: content, field: field %>
-        <% end %>
+        <%= render 'content/form/rich_text_input', 
+                   f: f, 
+                   content: content, 
+                   field: field, 
+                   autocomplete: AutocompleteService.for_field_label(content_model: raw_model.class, label: field[:label]) 
+        %>
       <% end %>
 
     </div>

@@ -1,0 +1,36 @@
+<% if user_signed_in? && current_user.notice_dismissals.where(notice_id: 13).none? %>
+  <%
+    example_character_name = @current_user_content.fetch('Character', []).sample.try(:name) || 'Alice'
+  %>
+
+  <div class="row">
+    <div class="col s12">
+      <div class="card-panel <%= Timeline.color %> lighten-4 black-text">
+        <p>
+          <strong>Welcome to the new Timeline Editor!</strong>
+        </p>
+        <p>
+          This editor is still in beta, so any 
+          <%= link_to 'feedback', 'https://docs.google.com/forms/d/e/1FAIpQLSfHHcOpU-CD9EFILPVMd4ZtgWIFkxmzLMW1mdvanJqqLKgMAA/viewform?usp=sf_link' %>
+          you have is highly appreciated.
+        </p>
+        <p>
+          You are starting with a blank timeline and can add as many events as you'd like. Each event allows you to
+          write a customized label for when it happens so you can be as exact or as vague as you'd like, and you can
+          fully control the ordering of events by clicking the links to move them up, down, to the top, or to the end
+          of your timeline.
+        </p>
+        <p>
+          You can also link your existing worldbuilding pages to each event. For example, if you create an event about
+          <%= example_character_name %> finding a mysterious egg, you can link <%= example_character_name %>'s page
+          directly, as well as any other pages relevant to that scene (such as an Item page for the egg, the location it's
+          happening at, or other characters there). Those worldbuilding pages will automatically have a "Timelines" tab
+          created (visible only to you) that lists all timelines they appear in.
+        </p>
+        <p>
+          <%= link_to 'Dismiss this message', notice_dismissal_dismiss_path(notice_id: 13) %>.
+        </p>
+      </div>
+    </div>
+  </div>
+<% end %>

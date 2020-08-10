@@ -4,16 +4,22 @@ class UsersController < ApplicationController
   end
 
   def show
-    @sidenav_expansion = 'my account'
+    @sidenav_expansion = 'community'
 
     @user    = User.find_by(user_params)
     return redirect_to(root_path, notice: 'That user does not exist.') if @user.nil?
+    return redirect_to(root_path, notice: 'That user does not exist.') if @user.private_profile?
+
+    @feed = ContentPageShare.where(user_id: @user.id)
+      .order('created_at DESC')
+      .includes([:content_page, :user, :share_comments])
+      .limit(100)
 
     @content = @user.public_content.select { |type, list| list.any? }
     @tabs    = @content.keys
   
-    @accent_color = @user.favorite_page_type_color
-    @accent_icon  = @user.favorite_page_type_icon
+    @accent_color     = @user.favorite_page_type_color
+    @accent_icon      = @user.favorite_page_type_icon
     @favorite_content = @user.favorite_page_type? ? @user.send(@user.favorite_page_type.downcase.pluralize).is_public : []
 
     # todo this is really bad and needs redone/improved
@@ -53,7 +59,7 @@ class UsersController < ApplicationController
     end
 
     # Make sure the user is set to Starter on Stripe so we don't keep charging them
-    stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
+    stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
     stripe_subscription = stripe_customer.subscriptions.data[0]
     if stripe_subscription
       stripe_subscription.plan = 'starter'
@@ -63,7 +69,13 @@ class UsersController < ApplicationController
     report_user_deletion_to_slack(current_user)
 
     current_user.avatar.purge
-    current_user.really_destroy!
+    
+    # Immediately mark the user as deleted and inactive
+    current_user.update(deleted_at: DateTime.current)
+
+    # Destroy the user and all of its content
+    # TODO this can take quite a while for active users, so it should be moved to a background job
+    current_user.destroy!
 
     redirect_to(root_path, notice: 'Your account has been deleted. We will miss you greatly!')
   end
@@ -78,6 +90,18 @@ class UsersController < ApplicationController
       username: 'tristan'
 
     notifier.ping ":bomb: :bomb: :bomb: #{user.email.split('@').first}@ (##{user.id}) just deleted their account."
+  end
+
+  def followers
+    @user    = User.find_by(user_params)
+    @accent_color     = @user.favorite_page_type_color
+    @accent_icon      = @user.favorite_page_type_icon
+  end
+
+  def following
+    @user    = User.find_by(user_params)
+    @accent_color     = @user.favorite_page_type_color
+    @accent_icon      = @user.favorite_page_type_icon
   end
 
   private

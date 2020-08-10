@@ -22,7 +22,8 @@ class User < ApplicationRecord
   validates :forums_badge_text,
     allow_nil: true,
     allow_blank: true,
-    length: { maximum: 20 }
+    length: { maximum: 20 },
+  if: Proc.new { |user| user.forums_badge_text_changed? }
 
   has_many :subscriptions, dependent: :destroy
   has_many :billing_plans, through: :subscriptions
@@ -31,8 +32,11 @@ class User < ApplicationRecord
   end
   has_many :promotions, dependent: :destroy
   has_many :paypal_invoices
+  has_many :page_unlock_promo_codes, through: :paypal_invoices
 
   has_many :image_uploads, dependent: :destroy
+
+  has_many :contributors, dependent: :destroy
 
   has_one :referral_code, dependent: :destroy
   has_many :referrals, foreign_key: :referrer_id, dependent: :destroy
@@ -41,19 +45,52 @@ class User < ApplicationRecord
     referral.referrer unless referral.nil?
   end
 
-  has_many :votes,                        dependent: :destroy
-  has_many :raffle_entries,               dependent: :destroy
+  has_many :user_followings,              dependent: :destroy
+  has_many :followed_users, -> { distinct }, through: :user_followings, source: :followed_user
+  # has_many :followed_by_users,            through: :user_followings, source: :user # todo unsure how to actually write this, so we do it manually below
+  def followed_by_users
+    User.where(id: UserFollowing.where(followed_user_id: self.id).pluck(:user_id)) 
+  end
+  def followed_by?(user)
+    followed_by_users.pluck(:id).include?(user.id)
+  end
 
-  has_many :content_change_events,        dependent: :destroy
-  has_many :page_tags,                    dependent: :destroy
+  has_many :user_blockings,               dependent: :destroy
+  has_many :blocked_users,                through: :user_blockings, source: :blocked_user
+  def blocked_by_users
+    User.where(id: UserBlocking.where(blocked_user_id: self.id).pluck(:user_id))    
+  end
+  def blocked_by?(user)
+    blocked_by_users.pluck(:id).include?(user.id)
+  end
 
-  has_many :user_content_type_activators, dependent: :destroy
+  has_many :content_page_shares,           dependent: :destroy
+  has_many :content_page_share_followings, dependent: :destroy
+  has_many :content_page_share_reports,    dependent: :destroy
 
-  has_many :api_keys,                     dependent: :destroy
+  has_many :page_collections,              dependent: :destroy
+  has_many :page_collection_submissions,   dependent: :destroy
+  def published_in_page_collections
+    ids = page_collection_submissions.accepted.pluck(:page_collection_id)
+    @published_in_page_collections ||= PageCollection.where(id: ids)
+  end
+  has_many :page_collection_followings,    dependent: :destroy
+  has_many :page_collection_reports,       dependent: :destroy
 
-  has_many :notice_dismissals,            dependent: :destroy
+  has_many :votes,                         dependent: :destroy
+  has_many :raffle_entries,                dependent: :destroy
 
-  has_many :page_settings_overrides,      dependent: :destroy
+  has_many :content_change_events,         dependent: :destroy
+  has_many :page_tags,                     dependent: :destroy
+
+  has_many :user_content_type_activators,  dependent: :destroy
+
+  has_many :api_keys,                      dependent: :destroy
+
+  has_many :notifications,                 dependent: :destroy
+  has_many :notice_dismissals,             dependent: :destroy
+
+  has_many :page_settings_overrides,       dependent: :destroy
   has_one_attached :avatar
   validates :avatar, attached: false,
     content_type: {
@@ -118,6 +155,8 @@ class User < ApplicationRecord
   after_create :initialize_referral_code
   after_create :initialize_secure_code
   after_create :initialize_content_type_activators
+  after_create :follow_andrew
+
   # TODO we should do this, but we need to figure out how to make it fast first
   # after_create :initialize_categories_and_fields
 
@@ -153,12 +192,18 @@ class User < ApplicationRecord
       Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_limit: [size, size]).processed, only_path: true)
 
     else # otherwise, grab the default from Gravatar for this email address
-      require 'digest/md5' # todo do we actually need to require this all the time?
-      email_md5 = Digest::MD5.hexdigest(email.downcase)
-      "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
+      gravatar_fallback_url(size)
     end
 
   rescue ActiveStorage::FileNotFoundError
+    gravatar_fallback_url(size)
+
+  rescue ImageProcessing::Error
+    gravatar_fallback_url(size)
+  end
+
+  def gravatar_fallback_url(size=80)
+    require 'digest/md5' # todo do we actually need to require this all the time?
     email_md5 = Digest::MD5.hexdigest(email.downcase)
     "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
   end
@@ -213,6 +258,14 @@ class User < ApplicationRecord
     end
   end
 
+  def follow_andrew
+    andrew = User.find_by(id: 5)
+    return unless andrew.present?
+
+    followed_users << andrew
+    save
+  end
+
   def update_without_password(params, *options)
     if params[:password].blank?
       params.delete(:password)
@@ -228,12 +281,15 @@ class User < ApplicationRecord
     result
   end
 
-  def forum_username
+  def display_name
     username = self.username.present? ? "@#{self.username}" : nil
     username ||= self.name.present? ? self.name : nil
     username ||= 'Anonymous Author'
 
     username
+  end
+  def forum_username
+    display_name
   end
 
   def self.from_api_key(key)

@@ -23,8 +23,10 @@ Checklist to create a new content type:
 - Customize categories/fields in config/attributes/continent.yml
 
 - Add links (for each link, do the following)
-  - If using a non-table-name for the relating model (e.g. popular_food instead of food), use :integer instead of :references
+  - If using a non-table-name for the relating model (e.g. popular_food instead of food), use *_id and :integer instead of :references
   - rails g model ContinentLandmark continent:references landmark:references user:references
+- rake db:migrate
+- add relations to Continent model
   - relates :landmarks, with: :continent_landmarks
   - add optional: true on all belongs_to :user
 - Move all link models into models/page_groupers

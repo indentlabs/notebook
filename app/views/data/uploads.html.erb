@@ -13,53 +13,103 @@
   <div class="col s12 m6 l6">
     <span class="grey-text uppercase">used</span>
     <div style="font-size: 32px;">
-      <%= Filesize.from("#{current_user.image_uploads.sum(:src_file_size) / 1000}KB").pretty %>
+      <%= Filesize.from("#{@used_kb}KB").pretty %>
     </div>
   </div>
-  <div class="col s12 m6 l6">
+  <div class="col s12 m6 l6" style="text-align: right">
     <span class="grey-text uppercase">remaining</span>
     <div style="font-size: 32px;">
-      <%= (current_user.upload_bandwidth_kb) > 0 ? Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty : '-' + Filesize.from("#{current_user.upload_bandwidth_kb.abs}KB").pretty %>
+      <%= (current_user.upload_bandwidth_kb) > 0 ? Filesize.from("#{@remaining_kb}KB").pretty : '-' + Filesize.from("#{@remaining_kb}KB").pretty %>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <% percent = current_user.upload_bandwidth_kb %>
+    <div class="progress blue lighten-4 tooltipped" data-tooltip="<%= @percent_used %>% used">
+      <div class="determinate blue darken-3" style="width: <%= @percent_used %>%"></div>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <div class="card-panel blue">
+      <strong>Did you know?</strong>
+      Premium users get an extra 10GB of storage space, but all users can earn even more storage space by referring their friends to Notebook.ai.
+      <%= link_to 'Learn more.', referrals_path, class: 'orange-text text-lighten-3' %>
     </div>
   </div>
 </div>
+
+<div class="row">
   <% if current_user.image_uploads.empty? %>
-    <div>
-      Whenever you upload any images to your notebook pages, you'll be able to view them all
-      in a single place from here.
+    <div class="col s12">
+      <div class="card-panel">
+        Whenever you upload any images to your notebook pages, you'll be able to view them all
+        in a single place from here.
+      </div>
     </div>
   <% end %>
 
   <% current_user.image_uploads.includes(:content).each do |upload| %>
-    <div class="row">
-      <div class="col s12 m4 l3">
-        <div class="card">
-          <div class="card-image">
-            <%= image_tag upload.src(:medium), class: 'hoverable materialboxed' %>
-          </div>
+    <% next unless upload.content.present? %>
+    <div class="col s12 m4 m3">
+      <div class="card">
+        <div class="card-image">
+          <%= image_tag upload.src(:medium), class: 'activator' %>
+          <span class="card-title bordered-text"><%= upload.content.name %></span>
+          <a class="btn-floating halfway-fab waves-effect waves-light <%= upload.content.class.color %> tooltipped" data-tooltip="View <%= upload.content.name %>">
+            <i class="material-icons"><%= upload.content.class.icon %></i>
+          </a>
         </div>
-      </div>
-      <div class="col s12 m8 l9">
-        <ul>
-          <li>Uploaded to <%= link_to upload.content.name, upload.content %></li>
-          <li>
-            Uploaded <%= time_ago_in_words upload.created_at %> ago
-            <span class="grey-text">
-              (<%= upload.created_at.strftime("%m/%d/%Y")%>)
-            </span>
-          </li>
-          <li>
-            Using
-            <%= Filesize.from("#{upload.src_file_size / 1000}KB").pretty %>
-          </li>
-          <li class="grey-text">
-            Image type: <%= upload.src_content_type %>
-          </li>
-          <li>
-            <%= link_to 'View full size', upload.src(:original), class: 'small btn', target: '_new' %>
-            <%= link_to 'Delete this image', image_deletion_path(upload.id), class: 'small btn', method: 'delete', data: { confirm: "Are you sure you want to delete this image? This cannot be undone." } %>
-          </li>
-        </ul>
+        <div class="card-content">
+          <ul>
+            <li>
+              Uploaded <%= time_ago_in_words upload.created_at %> ago
+              <span class="grey-text">
+                (<%= upload.created_at.strftime("%m/%d/%Y")%>)
+              </span>
+            </li>
+            <li>
+              Using
+              <%= Filesize.from("#{upload.src_file_size / 1000}KB").pretty %>
+            </li>
+          </ul>
+        </div>
+        <div class="card-reveal">
+          <span class="card-title">
+            Image details
+            <i class="material-icons right">close</i>
+          </span>
+          <ul>
+            <li>
+              <div class="uppercase grey-text">Original filename</div>
+              <%= upload.src_file_name %>
+            </li>
+            <li>
+              <br />
+              <div class="uppercase grey-text">Image type</div>
+              <%= upload.src_content_type %>
+            </li>
+            <li>
+              <br />
+              <div class="uppercase grey-text">Image size</div>
+              <%= Filesize.from("#{upload.src_file_size / 1000}KB").pretty %> (<%= upload.src_file_size %> bytes)
+            </li>
+            <li>
+              <br />
+              <div class="uppercase grey-text">Uploaded</div>
+              <%= upload.created_at.strftime("%m/%d/%Y") %> (<%= time_ago_in_words upload.created_at %> ago)
+            </li>
+            <li>
+              <br />
+              <div class="uppercase grey-text">Attached to</div>
+              <%= link_to upload.content.name, upload.content %>
+            </li>
+          </ul>
+        </div>
+        <div class="card-action">
+          <%= link_to 'View original', upload.src(:original), class: 'small', target: '_new' %>
+          <%= link_to 'Delete image', image_deletion_path(upload.id), class: 'small right', method: 'delete', data: { confirm: "Are you sure you want to delete this image? This cannot be undone." } %>
+        </div>
       </div>
     </div>
   <% end %>

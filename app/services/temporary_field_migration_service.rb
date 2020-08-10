@@ -2,16 +2,17 @@
 # to the new-style of having values in an associated Attribute model.
 # Once all data has been moved over, we can remove these old columns and delete this service.
 class TemporaryFieldMigrationService < Service
-  def self.migrate_all_content_for_user(user)
+  def self.migrate_all_content_for_user(user, force: false)
     user.content_list.each do |content|
-      self.migrate_fields_for_content(content, user)
+      self.migrate_fields_for_content(content, user, force: force)
     end
   end
 
-  def self.migrate_fields_for_content(content_model, user)
+  def self.migrate_fields_for_content(content_model, user, force: false)
     return unless content_model.present? && user.present?
     return unless content_model.user == user
-    return if content_model.persisted? && content_model.updated_at > 'September 1, 2018'.to_datetime
+    return if !force && content_model.persisted? && content_model.created_at > 'May 1, 2018'.to_datetime
+    return if !!content_model.columns_migrated_from_old_style?
 
     # todo we might be able to do this in a single left outer join
     attribute_categories = content_model.class.attribute_categories(content_model.user)
@@ -44,6 +45,9 @@ class TemporaryFieldMigrationService < Service
       if existing_value && existing_value.created_at != existing_value.updated_at
         next
       end
+      if existing_value.try(:value).present?
+        next
+      end
 
       if content_model.respond_to?(attribute_field.old_column_source)
         value_from_model = content_model.send(attribute_field.old_column_source)
@@ -68,5 +72,7 @@ class TemporaryFieldMigrationService < Service
         end
       end
     end
+
+    content_model.update_column(:columns_migrated_from_old_style, true)
   end
 end

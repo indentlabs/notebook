@@ -8,18 +8,66 @@
     <div class="nav-wrapper">
       <ul class="right">
         <% if user_signed_in? %>
-          <% if current_user.recent_content_list.any? %>
-            <li>
-              <a class="sidenav-trigger show-on-large tooltipped" href="#" data-target="recent-edits-sidenav" data-target="recent-content-dropdown" data-position="bottom" data-delay="100" data-tooltip="Your recently-edited pages">
-                <i class="material-icons">recent_actors</i>
-              </a>
-            </li>
-          <% end %>
           <li>
-            <a class="waves-effect waves-light modal-trigger tooltipped" href="#search-modal" data-tooltip="Search your notebook">
-              <i class="material-icons">search</i>
+            <a class="waves-effect waves-light tooltipped dropdown-trigger" href="#notifications" 
+               data-tooltip="You have <%= pluralize @user_notifications.reject { |n| n.viewed_at? }.count, 'unread notification' %>." 
+               data-target="notifications-dropdown">
+              <i class="material-icons"><%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'notifications_active' : 'notifications_none' %></i>
             </a>
           </li>
+          <ul id='notifications-dropdown' class='dropdown-content'>
+            <% @user_notifications.each do |notification| %>
+              <li class="<%= 'unread-notification' unless notification.viewed_at? %>">
+                <%= link_to main_app.notification_path(notification), class: 'notification-link' do %>
+                  <i class="material-icons <%= notification.icon_color %>-text"><%= notification.icon %></i>
+                  <%= notification.message_html.html_safe %>
+                  <div>
+                    <small class="grey-text"><%= time_ago_in_words notification.happened_at %> ago</small>
+                  </div>
+                <% end %>
+              </li>
+              <li class="divider"></li>
+            <% end %>
+            <li class="divider"></li>
+            <li class="blue lighten-1">
+              <%= link_to main_app.notifications_path, class: 'white-text' do %>
+                <i class="material-icons left">notifications</i>
+                View all notifications
+              <% end %>
+            </li>
+            <li class="blue lighten-2">
+              <%= link_to main_app.mark_all_read_path, class: 'white-text' do %>
+                <i class="material-icons left">notifications_none</i>
+                Mark all as read
+              <% end %>
+            </li>
+          </ul>
+
+          <%= link_to '#', class: 'dropdown-trigger right tooltipped', data: { target: 'navbar-actions', tooltip: 'Quick actions' } do %>
+            <i class="material-icons">flash_on</i>
+          <% end %>
+
+          <!-- Dropdown Structure -->
+          <ul id='navbar-actions' class='dropdown-content'>
+            <li>
+              <a class="modal-trigger" href="#search-modal">
+                <i class="material-icons left">search</i>
+                Search your notebook
+              </a>
+            </li>
+            <li>
+              <a class="sidenav-trigger" href="#" data-target="recent-edits-sidenav" style="height: 50px; width: 100%;">
+                <i class="material-icons left">recent_actors</i>
+                Jump to recent page
+              </a>
+            </li>
+            <li>
+              <a class="dark-toggle" href="#">
+                <i class="material-icons left"><%= current_user.dark_mode_enabled? ? 'brightness_high' : 'brightness_4' %></i>
+                Toggle dark theme
+              </a>
+            </li>
+          </ul>
         <% else %>
           <li>
             <%= link_to 'Sign in', main_app.new_user_session_path %>

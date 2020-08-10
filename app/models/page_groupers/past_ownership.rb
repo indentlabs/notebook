@@ -6,5 +6,5 @@ class PastOwnership < ApplicationRecord
   belongs_to :user, optional: true
 
   belongs_to :item
-  belongs_to :past_owner, class_name: 'Character'
+  belongs_to :past_owner, class_name: 'Character', optional: true
 end

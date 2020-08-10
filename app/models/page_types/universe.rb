@@ -15,7 +15,7 @@ class Universe < ApplicationRecord
   include Authority::Abilities
   self.authorizer_name = 'UniverseCoreContentAuthorizer'
 
-  validates :name, presence: true
+  validates :name,    presence: true
   validates :user_id, presence: true
 
   belongs_to :user
@@ -50,6 +50,7 @@ class Universe < ApplicationRecord
   has_many :schools
   has_many :foods
   has_many :continents
+  has_many :lores
 
   has_many :contributors, dependent: :destroy
 

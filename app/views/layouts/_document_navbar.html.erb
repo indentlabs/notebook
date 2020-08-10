@@ -31,7 +31,7 @@
 
         <ul id="about-this-document-dropdown" class="dropdown-content">
           <li style="padding: 0 20px" class="<%= Document.color %> lighten-5">
-            <h5 class="grey-text text-darken-4">
+            <h5>
               About this document
             </h5>
             <p>
@@ -60,9 +60,21 @@
           </li>
           <li class="divider"></li>
           <li>
+            <%= link_to @document, target: '_blank' do %>
+              <i class="material-icons left <%= Document.color %>-text"><%= Document.icon %></i>
+              View formatted document
+            <% end %>
+          </li>
+          <li>
             <%= link_to analysis_document_path(@document) do %>
               <i class="material-icons left orange-text">bar_chart</i>
               Analyze this document
+            <% end %>
+          </li>
+          <li>
+            <%= link_to '#', class: 'modal-trigger', data: { target: 'document-notes-modal' } do %>
+              <i class="material-icons left <%= Document.color %>-text">edit</i>
+              Open document notes
             <% end %>
           </li>
           <li>

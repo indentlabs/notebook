@@ -13,9 +13,10 @@
           <%= f.text_field :name, autofocus: true %>
         </div>
 
+        <%= f.label 'Username' %><br />
         <div class="input-field">
-          <%= f.text_field :username, data: { length: 40 }, class: 'with-character-counter' %>
-          <%= f.label 'Username (users can @mention you with your username on the forums)' %><br />
+          <i class="material-icons prefix black-text">alternate_email</i>
+          <%= f.text_field :username, data: { length: 40 }, placeholder: 'your-username-here', class: 'with-character-counter' %>
           <small class="help-text">Your Notebook.ai profile will be available at https://www.notebook.ai/@username.</small><br />
           <small class="help-text">Up to 40 numbers, letters, and/or the following symbols are allowed: <strong>- _ $ + ! *</strong></small>
         </div>
@@ -28,7 +29,7 @@
           <div class="col s12 m6 l4">
             <label>Your current avatar</label>
             <br /><br />
-            <%= image_tag current_user.image_url(size=160), class: 'hoverable' %>
+            <%= image_tag current_user.image_url(size=160), class: 'hoverable materialboxed' %>
           </div>
           <div class="col s12 m6 l8">
             <label>Upload a new avatar</label>
@@ -105,7 +106,7 @@
       <div class="card-content">
         <div class="field">
           <%= f.label 'Favorite page type' %><br />
-          <%= f.select(:favorite_page_type, Rails.application.config.content_types[:all].map { |type| [type.name.pluralize, type.name] }, :prompt => 'No page type selected') %>
+          <%= f.select(:favorite_page_type, Rails.application.config.content_types[:all].map { |type| [type.name.pluralize, type.name] }, include_blank: 'None') %>
           <small class="help-text">Selecting a page here will prominently display it on your profile and somewhattheme your profile page to match.</small><br />
         </div>
       </div>
@@ -115,7 +116,7 @@
       <div class="card-content">
         <div class="field">
           <%= f.label 'Custom Premium badge text' %><br />
-          <%= f.text_field :forums_badge_text, data: { length: 20 }, class: 'with-character-counter', placeholder: 'Premium Supporter' %>
+          <%= f.text_field :forums_badge_text, data: { length: 20 }, class: 'with-character-counter black-text', placeholder: 'Premium Supporter' %>
           <small class="help-text">Premium users can customize the badge that appears under their name on their profile and next to their name on the forums.</small><br />
         </div>
       </div>

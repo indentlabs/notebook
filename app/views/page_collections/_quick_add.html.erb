@@ -1,0 +1,46 @@
+<% if user_signed_in? && (@page_collection.allow_submissions? || @page_collection.user == current_user) %>
+  <ul class="collapsible">
+    <li>
+      <div class="collapsible-header blue white-text">
+        <i class="material-icons <%= PageCollection.color %>-text text-darken-2"><%= PageCollection.icon %></i>
+        <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page
+      </div>
+      <div class="collapsible-body">
+        <% if @submittable_content.values.flatten.any? %>
+          <%= form_for PageCollectionSubmission.new do |f| %>
+            <%= f.hidden_field :page_collection_id, value: @page_collection.id %>
+            <div class="input-field">
+              <%= f.select :content do %>
+                <% @submittable_content.each do |content_type, content_list| %>
+                  <optgroup label="<%= content_type.pluralize %>">
+                    <% content_list.each do |content| %>
+                      <option value="<%= content_type %>-<%= content.id %>"><%= content.name %></option>
+                    <% end %>
+                  </optgroup>
+                <% end %>
+              <% end %>
+              <label>Select a page to <%= @page_collection.user == current_user ? 'add' : 'submit' %></label>
+              <div class="helper-text">
+                Submitting a page will automatically change its privacy to "public".
+              </div>
+            </div>
+
+            <div class="input-field">
+              <%= f.text_area :explanation, class: 'materialize-textarea' %>
+              <%= f.label :explanation, 'Optional: add a message' %>
+              <div class="helper-text">
+                If this submission is accepted, this message will be visible to everyone.
+              </div>
+            </div>
+            
+            <%= f.submit (@page_collection.user == current_user ? 'Add' : 'Submit'), class: "btn #{PageCollection.color} white-text" %>
+          <% end %>
+        <% else %>
+          <p>
+            You don't have any pages to submit to this collection.
+          </p>
+        <% end %>
+      </div>
+    </li>
+  </ul>
+<% end %>

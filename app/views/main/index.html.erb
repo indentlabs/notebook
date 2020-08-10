@@ -254,7 +254,7 @@
             <div class="card card-avatar center">
                 <div class="center brown-text"><br /><i class="material-icons" style="font-size: 250%">class</i></div>
                 <div class="card-content">
-                    <span class="card-title activator grey-text text-darken-4">
+                    <span class="card-title activator">
                       <%= t('marketing.landing_page.pricing.starter_plan.title') %>
                       <br />
                       <small><em><a class="red-text text-darken-1">
@@ -290,7 +290,7 @@
                   <i class="material-icons" style="font-size: 250%">book</i>
                 </div>
                 <div class="card-content center">
-                    <span class="card-title activator grey-text text-darken-4">
+                    <span class="card-title activator">
                       <%= t('marketing.landing_page.pricing.premium_plan.title') %>
                       <br />
                       <small><em class="red-text text-darken-1">
@@ -298,14 +298,21 @@
                       </em></small>
                     </span>
                     <div class="row plan-features">
-                      <% Rails.application.config.content_types[:all].each do |content_type| %>
-                        <div class="col s12 m6">
-                          <i class="material-icons <%= content_type.color %>-text">
+                      <div>Create <strong>unlimited</strong>...</div>
+                      <% Rails.application.config.content_types[:all].each_with_index do |content_type, i| %>
+                        <span class="content-type-container">
+                          <i class="material-icons <%= content_type.color %>-text medium">
                             <%= content_type.icon %>
-                          </i>
-                          <%= t("marketing.landing_page.pricing.premium_plan.#{content_type.name.downcase.pluralize}_html") %>
-                        </div>
+                          </i><br />
+                          <%= content_type.name.pluralize %>
+                        </span>
+                        <% if (i + 1) % 5 == 0 && i != 0 %>
+                          <br />
+                        <% end %>
                       <% end %>
+                      <div>
+                        and...
+                      </div>
                       <div>
                         <i class="material-icons black-text">cloud_upload</i>
                         <%= t('marketing.landing_page.pricing.premium_plan.upload_html') %>
@@ -316,6 +323,7 @@
                                   new_user_registration_path,
                                   class: 'btn-large waves-effect waves-light blue lighten-1' %>
                     </div>
+
                 </div>
             </div>
         </div>

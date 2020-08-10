@@ -92,6 +92,7 @@ Rails.application.configure do
 
   # Devise default url options
   config.action_mailer.default_url_options = { host: 'www.notebook.ai' }
+  config.active_job.default_url_options    = { host: 'www.notebook.ai' }
   ActionMailer::Base.smtp_settings = {
     :address        => "smtp.sendgrid.net",
     :port           => 587,
@@ -101,6 +102,11 @@ Rails.application.configure do
     :domain         => ENV['SENDGRID_DOMAIN'],
     :enable_starttls_auto => true
   }
+
+  # Settings for API key usage:
+  # authentication: :plain,
+  # user_name:      'apikey',
+  # password:       ENV['SENDGRID_API_KEY']
 
   # S3 settings for Paperclip uploads
   config.paperclip_defaults = {

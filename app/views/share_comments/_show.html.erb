@@ -1,0 +1,23 @@
+<% if comment.from_op?(share) %>
+  <div class="col s12 m10 l9">
+    <div class="purple lighten-4 comment black-text">
+<% else %>
+  <div class="col s12 m10 offset-m2 l9 offset-l3">
+    <div class="blue lighten-3 comment black-text">
+<% end %>
+
+    <%# Nesting from above %>
+    <%= simple_format comment.message, class: 'black-text' %>
+
+    <div class="metadata">
+      <%= link_to comment.user, class: "#{User.color}-text text-darken-4" do %>
+        <%= image_tag comment.user.image_url(size=20), class: 'left circle avatar' %>
+        <%= comment.user.display_name %>
+      <% end %>
+      <span class="timestamp">
+        <%= time_ago_in_words comment.created_at %> ago
+      </span>
+    </div>
+
+  </div>
+</div>

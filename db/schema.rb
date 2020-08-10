@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_03_002751) do
+ActiveRecord::Schema.define(version: 2020_07_22_004641) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -203,6 +203,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_buildings_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_buildings_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_buildings_on_user_id"
@@ -356,6 +357,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Character"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_characters_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_characters_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_characters_on_deleted_at_and_user_id"
@@ -383,6 +385,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_conditions_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_conditions_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_conditions_on_user_id"
@@ -398,6 +401,42 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.datetime "updated_at", null: false
     t.index ["content_id", "content_type"], name: "index_content_change_events_on_content_id_and_content_type"
     t.index ["user_id"], name: "index_content_change_events_on_user_id"
+  end
+
+  create_table "content_page_share_followings", force: :cascade do |t|
+    t.integer "content_page_share_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["content_page_share_id"], name: "index_content_page_share_followings_on_content_page_share_id"
+    t.index ["user_id"], name: "index_content_page_share_followings_on_user_id"
+  end
+
+  create_table "content_page_share_reports", force: :cascade do |t|
+    t.integer "content_page_share_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "approved_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["content_page_share_id"], name: "index_content_page_share_reports_on_content_page_share_id"
+    t.index ["user_id"], name: "index_content_page_share_reports_on_user_id"
+  end
+
+  create_table "content_page_shares", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "content_page_type"
+    t.integer "content_page_id"
+    t.datetime "shared_at"
+    t.string "privacy"
+    t.string "message"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "deleted_at"
+    t.string "secondary_content_page_type"
+    t.integer "secondary_content_page_id"
+    t.index ["content_page_type", "content_page_id"], name: "cps_index"
+    t.index ["secondary_content_page_type", "secondary_content_page_id"], name: "index_secondary_content_page_share"
+    t.index ["user_id"], name: "index_content_page_shares_on_user_id"
   end
 
   create_table "content_pages", force: :cascade do |t|
@@ -513,6 +552,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id", "universe_id"], name: "index_continents_on_deleted_at_and_id_and_universe_id"
     t.index ["deleted_at", "id", "user_id"], name: "index_continents_on_deleted_at_and_id_and_user_id"
     t.index ["deleted_at", "id"], name: "index_continents_on_deleted_at_and_id"
@@ -556,6 +596,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Country"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_countries_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_countries_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_countries_on_deleted_at_and_user_id"
@@ -713,6 +754,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Creature"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_creatures_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_creatures_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_creatures_on_deleted_at_and_user_id"
@@ -757,6 +799,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Deity"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_deities_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_deities_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_deities_on_deleted_at_and_user_id"
@@ -1038,15 +1081,6 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.index ["entity_type", "entity_id"], name: "index_document_entities_on_entity_type_and_entity_id"
   end
 
-  create_table "document_notes", force: :cascade do |t|
-    t.integer "document_id", null: false
-    t.string "title"
-    t.string "notes"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["document_id"], name: "index_document_notes_on_document_id"
-  end
-
   create_table "documents", force: :cascade do |t|
     t.integer "user_id"
     t.text "body"
@@ -1076,7 +1110,6 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.integer "father_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index "\"father_id\", \"character_id\", \"deleted_at\"", name: "index_fatherships_on_father_id_and_character_id_and_deleted_at"
   end
 
   create_table "flora_eaten_bies", force: :cascade do |t|
@@ -1137,6 +1170,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Flora"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_floras_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_floras_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_floras_on_deleted_at_and_user_id"
@@ -1158,6 +1192,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_foods_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_foods_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_foods_on_user_id"
@@ -1276,6 +1311,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Government"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_governments_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_governments_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_governments_on_deleted_at_and_user_id"
@@ -1371,6 +1407,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Group"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_groups_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_groups_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_groups_on_deleted_at_and_user_id"
@@ -1446,6 +1483,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Item"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_items_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_items_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_items_on_deleted_at_and_user_id"
@@ -1467,6 +1505,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_jobs_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_jobs_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_jobs_on_user_id"
@@ -1541,6 +1580,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Landmark"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_landmarks_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_landmarks_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_landmarks_on_deleted_at_and_user_id"
@@ -1572,6 +1612,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Language"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_languages_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_languages_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_languages_on_deleted_at_and_user_id"
@@ -1685,6 +1726,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Location"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_locations_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_locations_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_locations_on_deleted_at_and_user_id"
@@ -1693,6 +1735,324 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.index ["universe_id"], name: "index_locations_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_locations_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_locations_on_user_id"
+  end
+
+  create_table "lore_believers", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "believer_id"
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_believers_on_lore_id"
+    t.index ["user_id"], name: "index_lore_believers_on_user_id"
+  end
+
+  create_table "lore_buildings", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "building_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["building_id"], name: "index_lore_buildings_on_building_id"
+    t.index ["lore_id"], name: "index_lore_buildings_on_lore_id"
+    t.index ["user_id"], name: "index_lore_buildings_on_user_id"
+  end
+
+  create_table "lore_characters", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "character_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["character_id"], name: "index_lore_characters_on_character_id"
+    t.index ["lore_id"], name: "index_lore_characters_on_lore_id"
+    t.index ["user_id"], name: "index_lore_characters_on_user_id"
+  end
+
+  create_table "lore_conditions", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "condition_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["condition_id"], name: "index_lore_conditions_on_condition_id"
+    t.index ["lore_id"], name: "index_lore_conditions_on_lore_id"
+    t.index ["user_id"], name: "index_lore_conditions_on_user_id"
+  end
+
+  create_table "lore_continents", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "continent_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["continent_id"], name: "index_lore_continents_on_continent_id"
+    t.index ["lore_id"], name: "index_lore_continents_on_lore_id"
+    t.index ["user_id"], name: "index_lore_continents_on_user_id"
+  end
+
+  create_table "lore_countries", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "country_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["country_id"], name: "index_lore_countries_on_country_id"
+    t.index ["lore_id"], name: "index_lore_countries_on_lore_id"
+    t.index ["user_id"], name: "index_lore_countries_on_user_id"
+  end
+
+  create_table "lore_created_traditions", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "created_tradition_id"
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_created_traditions_on_lore_id"
+    t.index ["user_id"], name: "index_lore_created_traditions_on_user_id"
+  end
+
+  create_table "lore_creatures", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "creature_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["creature_id"], name: "index_lore_creatures_on_creature_id"
+    t.index ["lore_id"], name: "index_lore_creatures_on_lore_id"
+    t.index ["user_id"], name: "index_lore_creatures_on_user_id"
+  end
+
+  create_table "lore_deities", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "deity_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["deity_id"], name: "index_lore_deities_on_deity_id"
+    t.index ["lore_id"], name: "index_lore_deities_on_lore_id"
+    t.index ["user_id"], name: "index_lore_deities_on_user_id"
+  end
+
+  create_table "lore_floras", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "flora_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["flora_id"], name: "index_lore_floras_on_flora_id"
+    t.index ["lore_id"], name: "index_lore_floras_on_lore_id"
+    t.index ["user_id"], name: "index_lore_floras_on_user_id"
+  end
+
+  create_table "lore_foods", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "food_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["food_id"], name: "index_lore_foods_on_food_id"
+    t.index ["lore_id"], name: "index_lore_foods_on_lore_id"
+    t.index ["user_id"], name: "index_lore_foods_on_user_id"
+  end
+
+  create_table "lore_governments", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "government_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["government_id"], name: "index_lore_governments_on_government_id"
+    t.index ["lore_id"], name: "index_lore_governments_on_lore_id"
+    t.index ["user_id"], name: "index_lore_governments_on_user_id"
+  end
+
+  create_table "lore_groups", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "group_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["group_id"], name: "index_lore_groups_on_group_id"
+    t.index ["lore_id"], name: "index_lore_groups_on_lore_id"
+    t.index ["user_id"], name: "index_lore_groups_on_user_id"
+  end
+
+  create_table "lore_jobs", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "job_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["job_id"], name: "index_lore_jobs_on_job_id"
+    t.index ["lore_id"], name: "index_lore_jobs_on_lore_id"
+    t.index ["user_id"], name: "index_lore_jobs_on_user_id"
+  end
+
+  create_table "lore_landmarks", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "landmark_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["landmark_id"], name: "index_lore_landmarks_on_landmark_id"
+    t.index ["lore_id"], name: "index_lore_landmarks_on_lore_id"
+    t.index ["user_id"], name: "index_lore_landmarks_on_user_id"
+  end
+
+  create_table "lore_magics", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "magic_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_magics_on_lore_id"
+    t.index ["magic_id"], name: "index_lore_magics_on_magic_id"
+    t.index ["user_id"], name: "index_lore_magics_on_user_id"
+  end
+
+  create_table "lore_original_languages", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "original_language_id"
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_original_languages_on_lore_id"
+    t.index ["user_id"], name: "index_lore_original_languages_on_user_id"
+  end
+
+  create_table "lore_planets", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "planet_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_planets_on_lore_id"
+    t.index ["planet_id"], name: "index_lore_planets_on_planet_id"
+    t.index ["user_id"], name: "index_lore_planets_on_user_id"
+  end
+
+  create_table "lore_races", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "race_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_races_on_lore_id"
+    t.index ["race_id"], name: "index_lore_races_on_race_id"
+    t.index ["user_id"], name: "index_lore_races_on_user_id"
+  end
+
+  create_table "lore_related_lores", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "related_lore_id"
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_related_lores_on_lore_id"
+    t.index ["user_id"], name: "index_lore_related_lores_on_user_id"
+  end
+
+  create_table "lore_religions", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "religion_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_religions_on_lore_id"
+    t.index ["religion_id"], name: "index_lore_religions_on_religion_id"
+    t.index ["user_id"], name: "index_lore_religions_on_user_id"
+  end
+
+  create_table "lore_schools", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "school_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_schools_on_lore_id"
+    t.index ["school_id"], name: "index_lore_schools_on_school_id"
+    t.index ["user_id"], name: "index_lore_schools_on_user_id"
+  end
+
+  create_table "lore_sports", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "sport_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_sports_on_lore_id"
+    t.index ["sport_id"], name: "index_lore_sports_on_sport_id"
+    t.index ["user_id"], name: "index_lore_sports_on_user_id"
+  end
+
+  create_table "lore_technologies", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "technology_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_technologies_on_lore_id"
+    t.index ["technology_id"], name: "index_lore_technologies_on_technology_id"
+    t.index ["user_id"], name: "index_lore_technologies_on_user_id"
+  end
+
+  create_table "lore_towns", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "town_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_towns_on_lore_id"
+    t.index ["town_id"], name: "index_lore_towns_on_town_id"
+    t.index ["user_id"], name: "index_lore_towns_on_user_id"
+  end
+
+  create_table "lore_traditions", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "tradition_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_traditions_on_lore_id"
+    t.index ["tradition_id"], name: "index_lore_traditions_on_tradition_id"
+    t.index ["user_id"], name: "index_lore_traditions_on_user_id"
+  end
+
+  create_table "lore_variations", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "variation_id"
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_variations_on_lore_id"
+    t.index ["user_id"], name: "index_lore_variations_on_user_id"
+  end
+
+  create_table "lore_vehicles", force: :cascade do |t|
+    t.integer "lore_id", null: false
+    t.integer "vehicle_id", null: false
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["lore_id"], name: "index_lore_vehicles_on_lore_id"
+    t.index ["user_id"], name: "index_lore_vehicles_on_user_id"
+    t.index ["vehicle_id"], name: "index_lore_vehicles_on_vehicle_id"
+  end
+
+  create_table "lores", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id", null: false
+    t.integer "universe_id"
+    t.datetime "deleted_at"
+    t.datetime "archived_at"
+    t.string "privacy"
+    t.boolean "favorite"
+    t.string "page_type", default: "Lore"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["universe_id"], name: "index_lores_on_universe_id"
+    t.index ["user_id"], name: "index_lores_on_user_id"
   end
 
   create_table "magic_deityships", force: :cascade do |t|
@@ -1726,6 +2086,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Magic"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_magics_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_magics_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_magics_on_deleted_at_and_user_id"
@@ -1756,7 +2117,6 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.integer "mother_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index "\"mother_id\", \"character_id\", \"deleted_at\"", name: "index_motherships_on_mother_id_and_character_id_and_deleted_at"
   end
 
   create_table "notable_cities_relationships", force: :cascade do |t|
@@ -1771,6 +2131,19 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_notice_dismissals_on_user_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.integer "user_id"
+    t.string "message_html"
+    t.string "icon", default: "notifications_active"
+    t.datetime "happened_at"
+    t.datetime "viewed_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "icon_color", default: "blue"
+    t.string "passthrough_link"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "officeships", force: :cascade do |t|
@@ -1792,6 +2165,58 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.boolean "favorite"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "page_collection_followings", force: :cascade do |t|
+    t.integer "page_collection_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["page_collection_id"], name: "index_page_collection_followings_on_page_collection_id"
+    t.index ["user_id"], name: "index_page_collection_followings_on_user_id"
+  end
+
+  create_table "page_collection_reports", force: :cascade do |t|
+    t.integer "page_collection_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "approved_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["page_collection_id"], name: "index_page_collection_reports_on_page_collection_id"
+    t.index ["user_id"], name: "index_page_collection_reports_on_user_id"
+  end
+
+  create_table "page_collection_submissions", force: :cascade do |t|
+    t.string "content_type", null: false
+    t.integer "content_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "accepted_at"
+    t.datetime "submitted_at"
+    t.integer "page_collection_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "explanation"
+    t.string "cached_content_name"
+    t.index ["content_type", "content_id"], name: "polycontent_collection_index"
+    t.index ["page_collection_id"], name: "index_page_collection_submissions_on_page_collection_id"
+    t.index ["user_id"], name: "index_page_collection_submissions_on_user_id"
+  end
+
+  create_table "page_collections", force: :cascade do |t|
+    t.string "title"
+    t.string "subtitle"
+    t.integer "user_id", null: false
+    t.string "privacy"
+    t.string "page_types"
+    t.string "color"
+    t.string "cover_image"
+    t.boolean "auto_accept", default: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "description"
+    t.boolean "allow_submissions"
+    t.string "slug"
+    t.index ["user_id"], name: "index_page_collections_on_user_id"
   end
 
   create_table "page_settings_overrides", force: :cascade do |t|
@@ -2022,6 +2447,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Planet"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_planets_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_planets_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_planets_on_deleted_at_and_user_id"
@@ -2075,6 +2501,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Race"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_races_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_races_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_races_on_deleted_at_and_user_id"
@@ -2148,6 +2575,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Religion"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_religions_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_religions_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_religions_on_deleted_at_and_user_id"
@@ -2213,6 +2641,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Scene"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_scenes_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_scenes_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_scenes_on_deleted_at_and_user_id"
@@ -2234,6 +2663,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_schools_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_schools_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_schools_on_user_id"
@@ -2244,6 +2674,17 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "password", null: false
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "share_comments", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "content_page_share_id", null: false
+    t.string "message"
+    t.datetime "deleted_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["content_page_share_id"], name: "index_share_comments_on_content_page_share_id"
+    t.index ["user_id"], name: "index_share_comments_on_user_id"
   end
 
   create_table "siblingships", force: :cascade do |t|
@@ -2271,6 +2712,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_sports_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_sports_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_sports_on_user_id"
@@ -2334,6 +2776,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Technology"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_technologies_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_technologies_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_technologies_on_deleted_at_and_user_id"
@@ -2677,6 +3120,47 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.index ["user_id", "postable_id"], name: "thredded_user_topic_read_states_user_postable", unique: true
   end
 
+  create_table "timeline_event_entities", force: :cascade do |t|
+    t.string "entity_type", null: false
+    t.integer "entity_id", null: false
+    t.integer "timeline_event_id", null: false
+    t.string "notes"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["entity_type", "entity_id"], name: "index_timeline_event_entities_on_entity_type_and_entity_id"
+    t.index ["timeline_event_id"], name: "index_timeline_event_entities_on_timeline_event_id"
+  end
+
+  create_table "timeline_events", force: :cascade do |t|
+    t.integer "timeline_id", null: false
+    t.string "time_label"
+    t.string "title"
+    t.string "description"
+    t.string "notes"
+    t.integer "position"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["timeline_id"], name: "index_timeline_events_on_timeline_id"
+  end
+
+  create_table "timelines", force: :cascade do |t|
+    t.string "name"
+    t.integer "universe_id"
+    t.integer "user_id", null: false
+    t.string "page_type", default: "Timeline"
+    t.datetime "deleted_at"
+    t.datetime "archived_at"
+    t.string "privacy", default: "private"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "description"
+    t.string "subtitle"
+    t.string "notes"
+    t.string "private_notes"
+    t.index ["universe_id"], name: "index_timelines_on_universe_id"
+    t.index ["user_id"], name: "index_timelines_on_user_id"
+  end
+
   create_table "town_citizens", force: :cascade do |t|
     t.integer "user_id"
     t.integer "town_id"
@@ -2772,6 +3256,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Town"
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_towns_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_towns_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_towns_on_deleted_at_and_user_id"
@@ -2792,6 +3277,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_traditions_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_traditions_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_traditions_on_user_id"
@@ -2815,12 +3301,21 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "page_type", default: "Universe"
     t.datetime "archived_at"
     t.boolean "favorite"
-    t.index "\"user_id\", \"universe_id\", \"deleted_at\"", name: "index_universes_on_user_id_and_universe_id_and_deleted_at"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_universes_on_deleted_at_and_id"
     t.index ["deleted_at", "user_id"], name: "index_universes_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_universes_on_deleted_at"
     t.index ["id", "deleted_at"], name: "index_universes_on_id_and_deleted_at"
     t.index ["user_id"], name: "index_universes_on_user_id"
+  end
+
+  create_table "user_blockings", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "blocked_user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["blocked_user_id"], name: "index_user_blockings_on_blocked_user_id"
+    t.index ["user_id"], name: "index_user_blockings_on_user_id"
   end
 
   create_table "user_content_type_activators", force: :cascade do |t|
@@ -2829,6 +3324,15 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_user_content_type_activators_on_user_id"
+  end
+
+  create_table "user_followings", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "followed_user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["followed_user_id"], name: "index_user_followings_on_followed_user_id"
+    t.index ["user_id"], name: "index_user_followings_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -2867,7 +3371,6 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "interests"
     t.string "forums_badge_text"
     t.boolean "keyboard_shortcuts_preference"
-    t.date "birthday"
     t.string "favorite_book"
     t.string "website"
     t.string "inspirations"
@@ -2875,6 +3378,10 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.string "favorite_quote"
     t.string "occupation"
     t.string "favorite_page_type"
+    t.boolean "dark_mode_enabled"
+    t.boolean "notification_updates", default: true
+    t.boolean "community_features_enabled", default: true
+    t.boolean "private_profile", default: false
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["id", "deleted_at"], name: "index_users_on_id_and_deleted_at"
@@ -2892,6 +3399,7 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
     t.boolean "favorite"
+    t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_vehicles_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_vehicles_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_vehicles_on_user_id"
@@ -2921,6 +3429,8 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
     t.integer "habitat_id"
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "api_keys", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
   add_foreign_key "character_birthtowns", "characters"
@@ -2948,6 +3458,11 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
   add_foreign_key "conditions", "universes"
   add_foreign_key "conditions", "users"
   add_foreign_key "content_change_events", "users"
+  add_foreign_key "content_page_share_followings", "content_page_shares"
+  add_foreign_key "content_page_share_followings", "users"
+  add_foreign_key "content_page_share_reports", "content_page_shares"
+  add_foreign_key "content_page_share_reports", "users"
+  add_foreign_key "content_page_shares", "users"
   add_foreign_key "content_pages", "universes"
   add_foreign_key "content_pages", "users"
   add_foreign_key "continent_countries", "continents"
@@ -2977,6 +3492,8 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
   add_foreign_key "continents", "users"
   add_foreign_key "contributors", "universes"
   add_foreign_key "contributors", "users"
+  add_foreign_key "countries", "universes"
+  add_foreign_key "countries", "users"
   add_foreign_key "country_bordering_countries", "countries"
   add_foreign_key "country_bordering_countries", "users"
   add_foreign_key "country_creatures", "countries"
@@ -3003,6 +3520,8 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
   add_foreign_key "country_towns", "countries"
   add_foreign_key "country_towns", "towns"
   add_foreign_key "country_towns", "users"
+  add_foreign_key "deities", "universes"
+  add_foreign_key "deities", "users"
   add_foreign_key "deity_abilities", "deities"
   add_foreign_key "deity_abilities", "users"
   add_foreign_key "deity_character_children", "deities"
@@ -3043,8 +3562,10 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
   add_foreign_key "document_categories", "document_analyses"
   add_foreign_key "document_concepts", "document_analyses"
   add_foreign_key "document_entities", "document_analyses"
-  add_foreign_key "document_notes", "documents"
+  add_foreign_key "documents", "universes"
   add_foreign_key "documents", "users"
+  add_foreign_key "floras", "universes"
+  add_foreign_key "floras", "users"
   add_foreign_key "foods", "universes"
   add_foreign_key "foods", "users"
   add_foreign_key "government_creatures", "creatures"
@@ -3063,6 +3584,8 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
   add_foreign_key "government_technologies", "governments"
   add_foreign_key "government_technologies", "technologies"
   add_foreign_key "government_technologies", "users"
+  add_foreign_key "governments", "universes"
+  add_foreign_key "governments", "users"
   add_foreign_key "group_creatures", "creatures"
   add_foreign_key "group_creatures", "groups"
   add_foreign_key "group_creatures", "users"
@@ -3085,6 +3608,8 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
   add_foreign_key "landmark_floras", "users"
   add_foreign_key "landmark_nearby_towns", "landmarks"
   add_foreign_key "landmark_nearby_towns", "users"
+  add_foreign_key "landmarks", "universes"
+  add_foreign_key "landmarks", "users"
   add_foreign_key "location_capital_towns", "locations"
   add_foreign_key "location_capital_towns", "users"
   add_foreign_key "location_landmarks", "landmarks"
@@ -3094,7 +3619,94 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
   add_foreign_key "location_largest_towns", "users"
   add_foreign_key "location_notable_towns", "locations"
   add_foreign_key "location_notable_towns", "users"
+  add_foreign_key "lore_believers", "lores"
+  add_foreign_key "lore_believers", "users"
+  add_foreign_key "lore_buildings", "buildings"
+  add_foreign_key "lore_buildings", "lores"
+  add_foreign_key "lore_buildings", "users"
+  add_foreign_key "lore_characters", "characters"
+  add_foreign_key "lore_characters", "lores"
+  add_foreign_key "lore_characters", "users"
+  add_foreign_key "lore_conditions", "conditions"
+  add_foreign_key "lore_conditions", "lores"
+  add_foreign_key "lore_conditions", "users"
+  add_foreign_key "lore_continents", "continents"
+  add_foreign_key "lore_continents", "lores"
+  add_foreign_key "lore_continents", "users"
+  add_foreign_key "lore_countries", "countries"
+  add_foreign_key "lore_countries", "lores"
+  add_foreign_key "lore_countries", "users"
+  add_foreign_key "lore_created_traditions", "lores"
+  add_foreign_key "lore_created_traditions", "users"
+  add_foreign_key "lore_creatures", "creatures"
+  add_foreign_key "lore_creatures", "lores"
+  add_foreign_key "lore_creatures", "users"
+  add_foreign_key "lore_deities", "deities"
+  add_foreign_key "lore_deities", "lores"
+  add_foreign_key "lore_deities", "users"
+  add_foreign_key "lore_floras", "floras"
+  add_foreign_key "lore_floras", "lores"
+  add_foreign_key "lore_floras", "users"
+  add_foreign_key "lore_foods", "foods"
+  add_foreign_key "lore_foods", "lores"
+  add_foreign_key "lore_foods", "users"
+  add_foreign_key "lore_governments", "governments"
+  add_foreign_key "lore_governments", "lores"
+  add_foreign_key "lore_governments", "users"
+  add_foreign_key "lore_groups", "groups"
+  add_foreign_key "lore_groups", "lores"
+  add_foreign_key "lore_groups", "users"
+  add_foreign_key "lore_jobs", "jobs"
+  add_foreign_key "lore_jobs", "lores"
+  add_foreign_key "lore_jobs", "users"
+  add_foreign_key "lore_landmarks", "landmarks"
+  add_foreign_key "lore_landmarks", "lores"
+  add_foreign_key "lore_landmarks", "users"
+  add_foreign_key "lore_magics", "lores"
+  add_foreign_key "lore_magics", "magics"
+  add_foreign_key "lore_magics", "users"
+  add_foreign_key "lore_original_languages", "lores"
+  add_foreign_key "lore_original_languages", "users"
+  add_foreign_key "lore_planets", "lores"
+  add_foreign_key "lore_planets", "planets"
+  add_foreign_key "lore_planets", "users"
+  add_foreign_key "lore_races", "lores"
+  add_foreign_key "lore_races", "races"
+  add_foreign_key "lore_races", "users"
+  add_foreign_key "lore_related_lores", "lores"
+  add_foreign_key "lore_related_lores", "users"
+  add_foreign_key "lore_religions", "lores"
+  add_foreign_key "lore_religions", "religions"
+  add_foreign_key "lore_religions", "users"
+  add_foreign_key "lore_schools", "lores"
+  add_foreign_key "lore_schools", "schools"
+  add_foreign_key "lore_schools", "users"
+  add_foreign_key "lore_sports", "lores"
+  add_foreign_key "lore_sports", "sports"
+  add_foreign_key "lore_sports", "users"
+  add_foreign_key "lore_technologies", "lores"
+  add_foreign_key "lore_technologies", "technologies"
+  add_foreign_key "lore_technologies", "users"
+  add_foreign_key "lore_towns", "lores"
+  add_foreign_key "lore_towns", "towns"
+  add_foreign_key "lore_towns", "users"
+  add_foreign_key "lore_traditions", "lores"
+  add_foreign_key "lore_traditions", "traditions"
+  add_foreign_key "lore_traditions", "users"
+  add_foreign_key "lore_variations", "lores"
+  add_foreign_key "lore_variations", "users"
+  add_foreign_key "lore_vehicles", "lores"
+  add_foreign_key "lore_vehicles", "users"
+  add_foreign_key "lore_vehicles", "vehicles"
+  add_foreign_key "lores", "universes"
+  add_foreign_key "lores", "users"
   add_foreign_key "notice_dismissals", "users"
+  add_foreign_key "page_collection_followings", "page_collections"
+  add_foreign_key "page_collection_followings", "users"
+  add_foreign_key "page_collection_reports", "page_collections"
+  add_foreign_key "page_collection_reports", "users"
+  add_foreign_key "page_collection_submissions", "users"
+  add_foreign_key "page_collections", "users"
   add_foreign_key "page_tags", "users"
   add_foreign_key "paypal_invoices", "page_unlock_promo_codes"
   add_foreign_key "paypal_invoices", "users"
@@ -3136,6 +3748,8 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
   add_foreign_key "planet_towns", "planets"
   add_foreign_key "planet_towns", "towns"
   add_foreign_key "planet_towns", "users"
+  add_foreign_key "planets", "universes"
+  add_foreign_key "planets", "users"
   add_foreign_key "promotions", "page_unlock_promo_codes"
   add_foreign_key "promotions", "users"
   add_foreign_key "raffle_entries", "users"
@@ -3145,10 +3759,14 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
   add_foreign_key "religion_deities", "users"
   add_foreign_key "schools", "universes"
   add_foreign_key "schools", "users"
+  add_foreign_key "share_comments", "content_page_shares"
+  add_foreign_key "share_comments", "users"
   add_foreign_key "sports", "universes"
   add_foreign_key "sports", "users"
   add_foreign_key "subscriptions", "billing_plans"
   add_foreign_key "subscriptions", "users"
+  add_foreign_key "technologies", "universes"
+  add_foreign_key "technologies", "users"
   add_foreign_key "technology_characters", "characters"
   add_foreign_key "technology_characters", "technologies"
   add_foreign_key "technology_characters", "users"
@@ -3176,6 +3794,14 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
   add_foreign_key "technology_towns", "technologies"
   add_foreign_key "technology_towns", "towns"
   add_foreign_key "technology_towns", "users"
+  add_foreign_key "thredded_messageboard_users", "thredded_messageboards", on_delete: :cascade
+  add_foreign_key "thredded_messageboard_users", "thredded_user_details", on_delete: :cascade
+  add_foreign_key "thredded_user_post_notifications", "thredded_posts", column: "post_id", on_delete: :cascade
+  add_foreign_key "thredded_user_post_notifications", "users", on_delete: :cascade
+  add_foreign_key "timeline_event_entities", "timeline_events"
+  add_foreign_key "timeline_events", "timelines"
+  add_foreign_key "timelines", "universes"
+  add_foreign_key "timelines", "users"
   add_foreign_key "town_citizens", "towns"
   add_foreign_key "town_citizens", "users"
   add_foreign_key "town_countries", "countries"
@@ -3195,9 +3821,13 @@ ActiveRecord::Schema.define(version: 2020_03_03_002751) do
   add_foreign_key "town_languages", "users"
   add_foreign_key "town_nearby_landmarks", "towns"
   add_foreign_key "town_nearby_landmarks", "users"
+  add_foreign_key "towns", "universes"
+  add_foreign_key "towns", "users"
   add_foreign_key "traditions", "universes"
   add_foreign_key "traditions", "users"
+  add_foreign_key "user_blockings", "users"
   add_foreign_key "user_content_type_activators", "users"
+  add_foreign_key "user_followings", "users"
   add_foreign_key "vehicles", "universes"
   add_foreign_key "vehicles", "users"
   add_foreign_key "votes", "users"

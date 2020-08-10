@@ -3,7 +3,7 @@ class TechnologyParentTechnology < ApplicationRecord
 
   belongs_to :user, optional: true
   belongs_to :technology
-  belongs_to :parent_technology, class_name: Technology.name
+  belongs_to :parent_technology, class_name: Technology.name, optional: true
 
   after_create do
     this_object  = Technology.find_by(id: self.technology_id)
@@ -20,6 +20,6 @@ class TechnologyParentTechnology < ApplicationRecord
     this_object  = Technology.find_by(id: self.technology_id)
     other_object = Technology.find_by(id: self.parent_technology_id)
 
-    other_object.child_technologies.delete(this_object)
+    other_object.child_technologies.delete(this_object) if other_object.present?
   end
 end
