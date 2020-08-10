@@ -29,16 +29,16 @@ class PageLookupSidebar extends React.Component {
     super(props);
 
     this.state = {
-      open:      true,
+      open:      false,
       loading:   false,
       show_data: false,
       category_open: {}
     };
-
-    this.loadPage('Character', 1);
   }
 
   loadPage(page_type, page_id) {
+    this.setDrawerVisible(true);
+    
     // show loading icon
 
     // make api request
@@ -48,7 +48,7 @@ class PageLookupSidebar extends React.Component {
     // load response into list
     this.setState({
       page_data: {
-        name: 'Bob',
+        name: page_type + ' ' + 'Bob',
         categories: [
           {
             id:    1,
@@ -56,18 +56,26 @@ class PageLookupSidebar extends React.Component {
             fields: [
               {
                 label: 'Name',
-                value: 'Bob'
+                value: 'Bob',
+                type:  'text'
               },
               {
                 label: 'Age',
-                value: '55'
+                value: '55',
+                type:  'text'
               }
             ]
           },
           {
             id:    2,
-            label: 'Appearance',
+            label: 'Family',
             fields: [
+              {
+                label: 'Mom',
+                value: 'Robin',
+                type:  'link',
+                link:  ['Character', 534]
+              }
 
             ]
           }
@@ -75,7 +83,9 @@ class PageLookupSidebar extends React.Component {
       }
     });
 
+    console.log("setting show_data = true");
     this.setState({ show_data: true });
+    // this.state.show_data = true;
     console.log("show data? " + this.state.show_data);
   };
 
@@ -119,8 +129,13 @@ class PageLookupSidebar extends React.Component {
                 <Collapse in={!!this.state.category_open[category.label]} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
                     {category.fields.map((field) => (
-                      <ListItem>
-                        <ListItemText primary={field.label} secondary={field.value} />
+                      <ListItem button={field.type == 'link'}>
+                        {field.type == 'text' && 
+                          <ListItemText primary={field.label} secondary={field.value} />
+                        }
+                        {field.type == 'link' &&
+                          <ListItemText primary={field.label} secondary={field.value} />
+                        }
                       </ListItem>
                     ))}
                   </List>
@@ -156,7 +171,7 @@ class PageLookupSidebar extends React.Component {
   render () {
     return (
       <React.Fragment>
-        <Button onClick={() => this.setDrawerVisible(true)}>
+        <Button onClick={() => this.loadPage('Character', 1) }>
           toggle drawer
         </Button>
         <Drawer anchor='right' 
