@@ -278,6 +278,8 @@ Rails.application.routes.draw do
       scope '/answers' do
         get '/suggest/:entity_type/:field_label', to: 'attributes#suggest'
       end
+
+      get 'character/:id', to: 'api#character'
     end
   end
 

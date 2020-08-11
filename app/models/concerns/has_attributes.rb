@@ -48,7 +48,7 @@ module HasAttributes
       @cached_attribute_categories_for_this_content = begin
         # Always include  the flatfile categories (but create AR versions if they don't exist)
         categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
-          category = AttributeCategory.with_deleted.find_or_initialize_by(
+          category = ::AttributeCategory.with_deleted.find_or_initialize_by(
             entity_type: self.content_name,
             name: category_name.to_s,
             user: user
