@@ -23,6 +23,8 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import StarBorder from '@material-ui/icons/StarBorder';
 import Collapse from '@material-ui/core/Collapse';
 
+import axios from 'axios';
+
 class PageLookupSidebar extends React.Component {
 
   constructor(props) {
@@ -36,56 +38,36 @@ class PageLookupSidebar extends React.Component {
     };
   }
 
-  loadPage(page_type, page_id) {
+  async loadPage(page_type, page_id) {
     this.setDrawerVisible(true);
     
     // show loading icon
 
     // make api request
-
-    // hide loading icon
-
-    // load response into list
-    this.setState({
-      page_data: {
-        name: page_type + ' ' + 'Bob',
-        categories: [
-          {
-            id:    1,
-            label: 'General',
-            fields: [
-              {
-                label: 'Name',
-                value: 'Bob',
-                type:  'text'
-              },
-              {
-                label: 'Age',
-                value: '55',
-                type:  'text'
-              }
-            ]
-          },
-          {
-            id:    2,
-            label: 'Family',
-            fields: [
-              {
-                label: 'Mom',
-                value: 'Robin',
-                type:  'link',
-                link:  ['Character', 534]
-              }
-
-            ]
-          }
-        ]
+    await axios.get(
+      "/api/v1/character/" + page_id,
+      { 
+        include_blank_fields: true
+      },
+      { 
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept':       'application/json'
+        }
       }
+    ).then(response => {
+      console.log("get request");
+      console.log(response.data);
+
+      // hide loading icon
+
+      // load response into list
+      this.setState({ page_data: response.data });
+
+      console.log("setting show_data = true");
+      this.setState({ show_data: true });
     });
 
-    console.log("setting show_data = true");
-    this.setState({ show_data: true });
-    // this.state.show_data = true;
     console.log("show data? " + this.state.show_data);
   };
 
@@ -97,6 +79,38 @@ class PageLookupSidebar extends React.Component {
     this.setState({ category_open: {
       [category]: !this.state.category_open[category]
     }});
+  }
+
+  fieldData(field) {
+    console.log(field);
+    switch (field.type) {
+      case "name":
+      case "text_area":
+        return (
+          <ListItem key={field.id}>
+            <ListItemText primary={field.label} secondary={field.value} />
+          </ListItem>
+        );
+      
+      case "link":
+        return(
+          <React.Fragment key={field.id}>
+            <ListSubheader component="div">
+              {field.label}
+            </ListSubheader>
+            {field.value.map((link) => (
+              <ListItem button key={link.id}>
+                <ListItemText primary={link.name} />
+              </ListItem>
+            ))}
+          </React.Fragment>
+        );
+      
+      default:
+        return(
+          <div>error loading {field.label}</div>
+        );
+    }
   }
 
   pageData() {
@@ -112,13 +126,14 @@ class PageLookupSidebar extends React.Component {
                 Quick-reference
               </ListSubheader>
             }
+            id="page-lookup-list"
           >
             <ListItem button>
               <ListItemText primary={this.state.page_data.name} />
             </ListItem>
 
             {this.state.page_data.categories.map((category) => (
-              <React.Fragment>
+              <React.Fragment key={category.id}>
                 <ListItem button onClick={() => this.toggleCategoryOpen(category.label)}>
                   <ListItemIcon>
                     <InboxIcon />
@@ -129,14 +144,7 @@ class PageLookupSidebar extends React.Component {
                 <Collapse in={!!this.state.category_open[category.label]} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
                     {category.fields.map((field) => (
-                      <ListItem button={field.type == 'link'}>
-                        {field.type == 'text' && 
-                          <ListItemText primary={field.label} secondary={field.value} />
-                        }
-                        {field.type == 'link' &&
-                          <ListItemText primary={field.label} secondary={field.value} />
-                        }
-                      </ListItem>
+                      this.fieldData(field)
                     ))}
                   </List>
                 </Collapse>
@@ -145,6 +153,7 @@ class PageLookupSidebar extends React.Component {
           </List>
         </div>
       );
+      // also add divider + view/edit links
 
     } else { // No data to show yet
       return (
@@ -176,7 +185,8 @@ class PageLookupSidebar extends React.Component {
         </Button>
         <Drawer anchor='right' 
                 open={this.state['open']}
-                onClose={() => this.setDrawerVisible(false)}>
+                onClose={() => this.setDrawerVisible(false)}
+        >
           {this.pageData()}
         </Drawer>
       </React.Fragment>
