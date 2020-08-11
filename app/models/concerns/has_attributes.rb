@@ -8,25 +8,36 @@ module HasAttributes
     after_save :update_custom_attributes
 
     def self.create_default_attribute_categories(user)
+      # Don't create any attribute categories for AttributeCategories or AttributeFields that share the ContentController
       return [] if ['attribute_category', 'attribute_field'].include?(content_name)
 
-      YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
-        category = user.attribute_categories.create!(
+      YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, defaults|
+        # First, query for the category to see if it already exists
+        category = user.attribute_categories.find_or_initialize_by(
           entity_type: self.content_name,
-          name:        category_name.to_s,
-          icon:        details[:icon],
-          label:       details[:label]
+          name:        category_name.to_s
         )
+        creating_new_category = category.new_record?
 
-        category.attribute_fields << details[:attributes].map do |field|
-          af_field = category.attribute_fields.with_deleted.create!(
-            old_column_source: field[:name],
-            user:              user,
-            field_type:        field[:field_type].presence || "text_area",
-            label:             field[:label].presence      || 'Untitled field'
-          )
-          af_field
-        end if details.key?(:attributes)
+        # If the category didn't already exist, go ahead and set defaults on it and save
+        if creating_new_category
+          category.label = defaults[:label]
+          category.icon  = defaults[:icon]
+          category.save!
+        end
+
+        # If we created this category for the first time, we also want to make sure we create its default fields, too
+        if creating_new_category && defaults.key?(:attributes)
+          category.attribute_fields << defaults[:attributes].map do |field|
+            af_field = category.attribute_fields.with_deleted.create!(
+              old_column_source: field[:name],
+              user:              user,
+              field_type:        field[:field_type].presence || "text_area",
+              label:             field[:label].presence      || 'Untitled field'
+            )
+            af_field
+          end
+        end
       end.compact
     end
 
@@ -102,19 +113,19 @@ module HasAttributes
 
     #   # Always include  the flatfile categories (but create AR versions if they don't exist)
     #   categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
-    #     category = AttributeCategory.with_deleted.find_by(
+    #     category = ::AttributeCategory.with_deleted.find_by(
     #       entity_type: self.content_name,
     #       name:        category_name.to_s,
     #       user:        user
     #     )
 
-    #     category.attribute_fields << details[:attributes].map do |field|
-    #       category.attribute_fields.with_deleted.find_by(
-    #         user:              user,
-    #         old_column_source: field[:name],
-    #         field_type:        field[:field_type].presence || "text_area"
-    #       )
-    #     end if details.key?(:attributes)
+    #     # category.attribute_fields << details[:attributes].map do |field|
+    #     #   category.attribute_fields.with_deleted.find_by(
+    #     #     user:              user,
+    #     #     old_column_source: field[:name],
+    #     #     field_type:        field[:field_type].presence || "text_area"
+    #     #   )
+    #     # end if details.key?(:attributes)
 
     #     if show_hidden
     #       category
