@@ -40,15 +40,11 @@ class PageLookupSidebar extends React.Component {
 
   async loadPage(page_type, page_id) {
     this.setDrawerVisible(true);
-    
-    // show loading icon
+    this.setState({ show_data: false });
 
     // make api request
     await axios.get(
-      "/api/v1/character/" + page_id,
-      { 
-        include_blank_fields: true
-      },
+      "/api/v1/" + page_type.toLowerCase() + "/" + page_id,
       { 
         headers: { 
           'Content-Type': 'application/json',
@@ -59,13 +55,15 @@ class PageLookupSidebar extends React.Component {
       console.log("get request");
       console.log(response.data);
 
-      // hide loading icon
-
       // load response into list
-      this.setState({ page_data: response.data });
+      this.setState({ 
+        page_data: response.data,
+        show_data: true
+      });
 
-      console.log("setting show_data = true");
-      this.setState({ show_data: true });
+    }).catch(err => {
+      console.log(err);
+      return null;
     });
 
     console.log("show data? " + this.state.show_data);
@@ -82,7 +80,6 @@ class PageLookupSidebar extends React.Component {
   }
 
   fieldData(field) {
-    console.log(field);
     switch (field.type) {
       case "name":
       case "text_area":
@@ -120,17 +117,14 @@ class PageLookupSidebar extends React.Component {
           role="presentation"
         >
           <List
-            aria-labelledby="nested-list-subheader"
             subheader={
-              <ListSubheader component="div" id="nested-list-subheader">
-                Quick-reference
-              </ListSubheader>
+              <h5>&nbsp;&nbsp;&nbsp;{this.state.page_data.name}</h5>
             }
             id="page-lookup-list"
           >
-            <ListItem button>
-              <ListItemText primary={this.state.page_data.name} />
-            </ListItem>
+            <ListSubheader component="div">
+              Quick-reference
+            </ListSubheader>
 
             {this.state.page_data.categories.map((category) => (
               <React.Fragment key={category.id}>
@@ -161,9 +155,8 @@ class PageLookupSidebar extends React.Component {
           role="presentation"
         >
           <List
-            aria-labelledby="nested-list-subheader"
             subheader={
-              <ListSubheader component="div" id="nested-list-subheader">
+              <ListSubheader component="div">
                 Quick-reference
               </ListSubheader>
             }
@@ -172,6 +165,9 @@ class PageLookupSidebar extends React.Component {
               <ListItemText primary="Loading data..." />
             </ListItem>
           </List>
+          <div class="progress">
+            <div class="indeterminate"></div>
+          </div>
         </div>
       );
     }
@@ -194,7 +190,7 @@ class PageLookupSidebar extends React.Component {
   }
 }
 
-// PrivacyToggle.propTypes = {
+// PageLookupSidebar.propTypes = {
 //   content:       PropTypes.exact({
 //     id:             PropTypes.number.isRequired,
 //     name:           PropTypes.string.isRequired,
