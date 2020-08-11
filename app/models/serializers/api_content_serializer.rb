@@ -15,7 +15,7 @@ class ApiContentSerializer
 
   attr_accessor :data
 
-  def initialize(content)
+  def initialize(content, include_blank_fields: false)
     self.categories       = content.class.attribute_categories(content.user).where(hidden: false).eager_load(attribute_fields: :attribute_values)
     self.fields           = AttributeField.where(attribute_category_id: self.categories.map(&:id), hidden: false)
     self.attribute_values = Attribute.where(attribute_field_id: self.fields.map(&:id), entity_type: content.page_type, entity_id: content.id).order('created_at desc')
@@ -48,9 +48,9 @@ class ApiContentSerializer
               type:   field.field_type,
               value:  value_for(field, content)
             }
-          }
+          }.reject { |field| !include_blank_fields && field[:value].empty? }
         }
-      },
+      }.reject { |category| !include_blank_fields && category[:fields].empty? },
       references: []
     }
   end

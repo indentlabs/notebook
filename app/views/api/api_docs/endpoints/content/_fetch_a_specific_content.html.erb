@@ -37,7 +37,18 @@ GET /api/v1/<%= content_type.name.downcase.pluralize %>/<span class="green-text"
           <span class="red-text">required</span>
         </span>
         <p>
-          The ID of the <%= content_type.name.downcase %> you're fetching.  
+          The ID of the <%= content_type.name.downcase %> you're requesting.  
+        </p>
+      </li>
+      <li class="collection-item">
+        <span class="title">
+          <strong>include_blank_fields</strong>
+          <span class="blue-text">boolean</span>
+          <span class="grey-text text-darken-3">(default = false)</span>
+        </span>
+        <p>
+          The API only returns fields that have been answered by the user. If you wish to return all fields regardless
+          of whether they have an answer or not, you can set <strong>include_blank_fields</strong> to <strong class="grey-text text-darken-3">true</strong>. 
         </p>
       </li>
     </ul>
@@ -46,34 +57,49 @@ GET /api/v1/<%= content_type.name.downcase.pluralize %>/<span class="green-text"
     <h3>Example response</h3>
     <p class="code">
 {
-  "id": 1,
-  "name": "Some <%= content_type.name %>",
+  "id":   <span class="<%= content_type.color %>-text text-lighten-3">1</span>,
+  "name": <span class="<%= content_type.color %>-text text-lighten-3">"Some <%= content_type.name %>"</span>,
+  "description": <span class="<%= content_type.color %>-text text-lighten-3">"A description of this page"</span>,
 <% unless content_type.name == Universe.name %>
-  "universe_id": 2,
+  "universe": {
+    "id": <span class="<%= content_type.color %>-text text-lighten-3">134</span>,
+    "name": <span class="<%= content_type.color %>-text text-lighten-3">My Super Amazing Universe</span>
+  },
 <% end %>
   "meta": {
-    "created_at": "2020-02-01 08:24:20 UTC",
-    "updated_at": "2020-02-09 06:57:12 UTC"
+    "created_at": <span class="<%= content_type.color %>-text text-lighten-3">"2020-02-01 08:24:20 UTC"</span>,
+    "updated_at": <span class="<%= content_type.color %>-text text-lighten-3">"2020-02-09 06:57:12 UTC"</span>
   },
-  "categories": {
-    "Overview": {
+  "categories": [
+    {
+      "id":    <span class="<%= content_type.color %>-text text-lighten-3">123</span>,
+      "label": <span class="<%= content_type.color %>-text text-lighten-3">"Overview"</span>,
       "fields": [
         {
-          "id": 123,
-          "label": "Description",
-          "value": "Some Description"
+          "id":    <span class="<%= content_type.color %>-text text-lighten-3">123</span>,
+          "type":  <span class="<%= content_type.color %>-text text-lighten-3">"text_area"</span>,
+          "label": <span class="<%= content_type.color %>-text text-lighten-3">"Coolness factor"</span>,
+          "value": <span class="<%= content_type.color %>-text text-lighten-3">"Off the charts"</span>
         },
         {
-          "id": 124,
-          "label": "Another Field",
-          "value": "Some other value"
+          "id":    <span class="<%= content_type.color %>-text text-lighten-3">124</span>,
+          "label": <span class="<%= content_type.color %>-text text-lighten-3">"Related Buildings"</span>,
+          "type":  <span class="<%= content_type.color %>-text text-lighten-3">"link"</span>,
+          "value": [
+            {
+              "id":   <span class="<%= content_type.color %>-text text-lighten-3">345</span>,
+              "type": <span class="<%= content_type.color %>-text text-lighten-3">"Building"</span>,
+              "name": <span class="<%= content_type.color %>-text text-lighten-3">"The Office of Examples"</span>,
+            },
+            ...
+          ]
         },
         ...
       ],
     },
     ...
-  },
-  "references": [...]
+  ],
+  "references": [TBD]
 }
     </p>
   </div>

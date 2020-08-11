@@ -279,7 +279,15 @@ Rails.application.routes.draw do
         get '/suggest/:entity_type/:field_label', to: 'attributes#suggest'
       end
 
-      get 'character/:id', to: 'api#character'
+      # Content index path
+      Rails.application.config.content_types[:all].each do |content_type|
+        get "#{content_type.name.downcase.pluralize}", to: "api##{content_type.name.downcase.pluralize}"
+      end
+
+      # Content show paths
+      Rails.application.config.content_types[:all].each do |content_type|
+        get "#{content_type.name.downcase}/:id", to: "api##{content_type.name.downcase}"
+      end
     end
   end
 
