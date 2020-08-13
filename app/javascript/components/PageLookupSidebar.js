@@ -13,14 +13,13 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import Button from '@material-ui/core/Button';
 import ListSubheader from '@material-ui/core/ListSubheader';
 
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import StarBorder from '@material-ui/icons/StarBorder';
+import HelpIcon from '@material-ui/icons/Help';
 import Collapse from '@material-ui/core/Collapse';
 
 import axios from 'axios';
@@ -58,7 +57,8 @@ class PageLookupSidebar extends React.Component {
       // load response into list
       this.setState({ 
         page_data: response.data,
-        show_data: true
+        show_data: true,
+        page_type: page_type
       });
 
     }).catch(err => {
@@ -122,6 +122,7 @@ class PageLookupSidebar extends React.Component {
             }
             id="page-lookup-list"
           >
+            <Divider></Divider>
             <ListSubheader component="div">
               Quick-reference
             </ListSubheader>
@@ -130,7 +131,7 @@ class PageLookupSidebar extends React.Component {
               <React.Fragment key={category.id}>
                 <ListItem button onClick={() => this.toggleCategoryOpen(category.label)}>
                   <ListItemIcon>
-                    <InboxIcon />
+                    <HelpIcon />
                   </ListItemIcon>
                   <ListItemText primary={category.label} />
                   {!!this.state.category_open[category.label] ? <ExpandLess /> : <ExpandMore />}
@@ -144,6 +145,19 @@ class PageLookupSidebar extends React.Component {
                 </Collapse>
               </React.Fragment>
             ))}
+            <Divider></Divider>
+            <ListItem button>
+              <ListItemIcon>
+                <HelpIcon />
+                <ListItemText primary={"View this " + this.state.page_type} />
+              </ListItemIcon>
+            </ListItem>
+            <ListItem button>
+              <ListItemIcon>
+                <HelpIcon />
+                <ListItemText primary={"Edit this " + this.state.page_type} />
+              </ListItemIcon>
+            </ListItem>
           </List>
         </div>
       );
@@ -165,8 +179,48 @@ class PageLookupSidebar extends React.Component {
               <ListItemText primary="Loading data..." />
             </ListItem>
           </List>
-          <div class="progress">
-            <div class="indeterminate"></div>
+          <div className="center">
+            <div className="preloader-wrapper big active">
+              <div className="spinner-layer spinner-blue">
+                <div className="circle-clipper left">
+                  <div className="circle"></div>
+                </div><div className="gap-patch">
+                  <div className="circle"></div>
+                </div><div className="circle-clipper right">
+                  <div className="circle"></div>
+                </div>
+              </div>
+
+              <div className="spinner-layer spinner-red">
+                <div className="circle-clipper left">
+                  <div className="circle"></div>
+                </div><div className="gap-patch">
+                  <div className="circle"></div>
+                </div><div className="circle-clipper right">
+                  <div className="circle"></div>
+                </div>
+              </div>
+
+              <div className="spinner-layer spinner-yellow">
+                <div className="circle-clipper left">
+                  <div className="circle"></div>
+                </div><div className="gap-patch">
+                  <div className="circle"></div>
+                </div><div className="circle-clipper right">
+                  <div className="circle"></div>
+                </div>
+              </div>
+
+              <div className="spinner-layer spinner-green">
+                <div className="circle-clipper left">
+                  <div className="circle"></div>
+                </div><div className="gap-patch">
+                  <div className="circle"></div>
+                </div><div className="circle-clipper right">
+                  <div className="circle"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       );
