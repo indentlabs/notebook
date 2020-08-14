@@ -11,8 +11,12 @@
 
     <div class="metadata">
       <%= link_to comment.user, class: "#{User.color}-text text-darken-4" do %>
-        <%= image_tag comment.user.image_url(size=20), class: 'left circle avatar' %>
-        <%= comment.user.display_name %>
+        <% if comment.user %>
+          <%= image_tag comment.user.image_url(size=20), class: 'left circle avatar' %>
+          <%= comment.user.display_name %>
+        <% else %>
+          <em>Deleted user</em>
+        <% end %>
       <% end %>
       <span class="timestamp">
         <%= time_ago_in_words comment.created_at %> ago
