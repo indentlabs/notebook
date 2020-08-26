@@ -183,6 +183,11 @@ class DocumentsController < ApplicationController
     document.update!(favorite: !document.favorite)
   end
 
+  def continue
+    require 'pry'
+    binding.pry
+  end
+
   def destroy
     if current_user.can_delete?(@document)
       @document.destroy
