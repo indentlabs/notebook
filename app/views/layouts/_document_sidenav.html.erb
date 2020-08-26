@@ -1,0 +1,53 @@
+<ul id="document-sidenav-left" class="sidenav <%= 'sidenav-fixed' unless defined?(locals) && locals.key?(:fixed) && !locals[:fixed] %>">
+  <li class="<%= Document.color %>">
+    <%= link_to main_app.root_path, class: 'logo-container white-text' do %>
+      <i class="material-icons white-text right">
+        <%= Document.icon %>
+      </i>
+      Documents
+    <% end %>
+  </li>
+  <li class="no-padding">
+    <ul class="collapsible collapsible-accordion">
+      <li>
+        <%= link_to main_app.new_document_path, class: 'waves-effect' do %>
+          <i class="material-icons <%= Document.color %>-text">
+            note_add
+          </i>
+          New document
+        <% end %>
+      </li>
+      <li>
+        <%= link_to main_app.documents_path, class: 'waves-effect' do %>
+          <i class="material-icons <%= Document.color %>-text">
+            file_copy
+          </i>
+          View all documents
+          <span class="badge">
+            <%= @current_user_content.fetch('Document', []).count %>
+          </span>
+        <% end %>
+      </li>
+      <li class="bold waves-effect active">
+        <a class="collapsible-header" tabindex="0">
+          Quick jump...
+          <i class="material-icons chevron">chevron_right</i>
+        </a>
+        <div class="collapsible-body" style="">
+          <ul>
+            <% @current_user_content['Document'].each do |document| %>
+              <li>
+                <%= link_to edit_document_path(document), class: 'waves-effect' do %>
+                  <i class="material-icons <%= Document.color %>-text">
+                    <%= Document.icon %>
+                  </i>
+                  <%= document.title %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+</ul>
