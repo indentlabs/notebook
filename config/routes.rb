@@ -65,7 +65,7 @@ Rails.application.routes.draw do
   resources :documents do
     get  '/analysis',         to: 'documents#analysis',                on: :member
     get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
-    get  '/continuation',     to: 'documents#continue',                on: :member
+    post '/continuation',     to: 'documents#continue',                on: :member
     post '/link_entity',      to: 'documents#link_entity',             on: :collection
 
     post :toggle_favorite, on: :member

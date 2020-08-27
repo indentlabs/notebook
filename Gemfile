@@ -57,6 +57,7 @@ gem 'meta-tags'
 # Smarts
 # gem 'serendipitous', :path => "../serendipitous-gem"
 gem 'serendipitous', git: 'https://github.com/indentlabs/serendipitous-gem.git'
+gem 'gpt3'
 
 # Editor
 gem 'medium-editor-rails'

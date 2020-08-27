@@ -5,6 +5,66 @@
     <%= render partial: 'documents/components/autosave_bar', locals: { document: @document } %>
     <%= render partial: 'documents/components/smart_sidebar', locals: { document: @document } %>
     <div id="editor" class="editable js-can-mention-pages" data-save-url="<%= document_url(@document) %>"><%= @document.body.try(:html_safe) %></div>
+    <div class="center grey-text">
+      <a href="#" id="mental-unblocker">
+        <strong>Writer's block?</strong> Click here for some ideas on what to write next.
+      </a>
+      <div class="center" id="progress-text"><strong>Thinking...</strong></div>
+      <div class="progress" id="progress-bar">
+        <div class="indeterminate"></div>
+      </div>
+
+      <div id="suggestions" class="suggestions container-fluid">
+        <div class="row">
+          <div class="col l4">
+            <div class="grey-text center uppertext">Suggestion #1</div>
+            <div class="hoverable card suggestion-card">
+              <div class="card-content suggestion" contentEditable="true">
+              </div>
+              <div class="card-action center teal use-suggestion">
+                <a href="#" class="white-text">Use this suggestion</a>
+              </div>
+            </div>
+          </div>
+          <div class="col l4">
+            <div class="grey-text center uppertext">Suggestion #2</div>
+            <div class="hoverable card suggestion-card">
+              <div class="card-content suggestion" contentEditable="true">
+              </div>
+              <div class="card-action center teal use-suggestion">
+                <a href="#" class="white-text">Use this suggestion</a>
+              </div>
+            </div>
+          </div>
+          <div class="col l4">
+            <div class="grey-text center uppertext">Suggestion #3</div>
+            <div class="hoverable card suggestion-card">
+              <div class="card-content suggestion" contentEditable="true">
+              </div>
+              <div class="card-action center teal use-suggestion">
+                <a href="#" class="white-text">Use this suggestion</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col l4 offset-l4 center">
+            <ul>
+              <li>
+                <a href="#" class="regenerate-suggestions">Generate new suggestions</a>
+              </li>
+              <li>
+                <a href="#" class="clear-suggestions">Clear these suggestions</a>
+              </li>
+              <li>
+                <a href="#" class="about-suggestions">About these suggestions</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% 5.times do %><br /><% end %>
   <% end %>
 
 <%= form_for @document do |f| %>

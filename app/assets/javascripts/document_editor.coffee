@@ -56,7 +56,7 @@ class Notebook.DocumentEditor
     autosave_event = null
     last_autosave  = null
 
-    autosave = ->
+    window.autosave = ->
       if autosave_event == null
 
         console.log 'Queueing autosave'

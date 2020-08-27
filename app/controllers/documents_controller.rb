@@ -4,7 +4,7 @@ class DocumentsController < ApplicationController
   # todo Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
   skip_before_action :verify_authenticity_token, only: [:link_entity]
 
-  before_action :set_document, only: [:show, :analysis, :queue_analysis, :edit, :destroy]
+  before_action :set_document, only: [:show, :analysis, :queue_analysis, :continue, :edit, :destroy]
   before_action :set_sidenav_expansion
   before_action :set_navbar_color
   before_action :set_navbar_actions, except: [:edit]
@@ -139,6 +139,8 @@ class DocumentsController < ApplicationController
   def edit
     preload_linked_entities
 
+    @use_gpt = current_user.site_administrator?
+
     redirect_to(root_path, notice: "You don't have permission to edit that!") unless @document.updatable_by?(current_user)
   end
 
@@ -184,8 +186,9 @@ class DocumentsController < ApplicationController
   end
 
   def continue
-    require 'pry'
-    binding.pry
+    return unless current_user.site_administrator?
+
+    render json: Openai::Gpt3Service.autocomplete("#{@document.title}\nby #{@document.user.display_name}\n\n" + params.require(:prompt))
   end
 
   def destroy
