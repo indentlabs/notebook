@@ -47,8 +47,13 @@
               <%= link_to [share.user, share] do %><%= time_ago_in_words share.shared_at %> ago<% end %>:
             </span>
           </div>
-          <blockquote class="original-comment">
-            <%= simple_format share.message %>
+          <blockquote class="original-comment black-text">
+            <%=
+              simple_format ContentFormatterService.show(
+                text:         share.message,
+                viewing_user: current_user
+              )
+            %>
           </blockquote>
         <% end %>
 
