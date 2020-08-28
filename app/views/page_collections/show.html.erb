@@ -10,6 +10,12 @@
       </div>
     <% else %>
       <%= render partial: 'page_collections/sort_bar' %>
+      <% if !!@show_contributor_highlight %>
+        <div class="card-panel <%= PageCollection.color %> darken-3 white-text">
+          Showing all submitted pages from <%= link_to @highlighted_contributor.display_name, @highlighted_contributor, class: "#{User.color}-text" %>. 
+          Click <%= link_to 'here', @page_collection, class: 'blue-text text-lighten-3' %> to see all pages regardless of author.
+        </div>
+      <% end %>
       <%= render partial: 'page_collections/stream', locals: { pages: @pages } %>
     <% end %>
   </div>

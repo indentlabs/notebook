@@ -16,6 +16,8 @@ Rails.application.routes.draw do
     get 'follow',   on: :member
     get 'unfollow', on: :member
     get 'report',   on: :member
+
+    get 'by/:user_id', to: 'page_collections#by_user', as: :submissions_by_user
   end
   resources :page_collection_submissions do
     get 'approve', on: :member

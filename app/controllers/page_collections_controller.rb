@@ -118,6 +118,27 @@ class PageCollectionsController < ApplicationController
     redirect_to root_path, notice: "That Collection has been reported to site administration. Thank you!"
   end
 
+  def by_user
+    @page_collection = PageCollection.find(params[:page_collection_id])
+
+    unless (@page_collection.privacy == 'public' || (user_signed_in? && @page_collection.user == current_user))
+      return redirect_to page_collections_path, notice: "That Collection is not public."
+    end
+
+    @pages = @page_collection.accepted_submissions.where(user_id: params[:user_id])
+    sort_pages
+
+    @submittable_content = if user_signed_in?
+      @current_user_content.slice(*@page_collection.page_types)
+    else
+      []
+    end
+
+    @show_contributor_highlight = true
+    @highlighted_contributor = User.find_by(id: params[:user_id].to_i)
+    render :show
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.
