@@ -79,6 +79,11 @@ class PageCollectionsController < ApplicationController
 
   # DELETE /page_collections/1
   def destroy
+    unless user_signed_in? && current_user == @page_collection.user
+      raise "Permission denied"
+      return
+    end
+
     @page_collection.destroy
     redirect_to page_collections_url, notice: 'Page collection was successfully destroyed.'
   end
