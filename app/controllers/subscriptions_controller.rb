@@ -286,9 +286,6 @@ class SubscriptionsController < ApplicationController
     }, {
       label: "Billing history",
       href: main_app.billing_history_path
-    }, {
-      label: "Referrals",
-      href: main_app.referrals_path
     }]
   end
 end

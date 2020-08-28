@@ -86,12 +86,13 @@ Rails.application.routes.draw do
     # Legacy route: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
 
+    get '/referrals',          to: 'subscriptions#referrals', as: :referrals
+
     # Billing
     scope '/billing' do
       #get '/',             to: 'subscriptions#show', as: :billing
       get '/subscription',       to: 'subscriptions#new', as: :subscription
       get '/history',            to: 'subscriptions#history', as: :billing_history
-      get '/referrals',          to: 'subscriptions#referrals', as: :referrals
 
       get '/to/:stripe_plan_id', to: 'subscriptions#change', as: :change_subscription
 
