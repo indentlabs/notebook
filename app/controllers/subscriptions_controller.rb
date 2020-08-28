@@ -122,12 +122,6 @@ class SubscriptionsController < ApplicationController
     end
   end
 
-  def referrals
-    @referrals      = current_user.referrals.includes(:referree)
-    @referral_count = @referrals.count
-    @share_link     = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}"
-  end
-
   # This isn't actually needed since we change the paid plan to the free plan, but will be needed when we
   # add a way to deactivate/delete accounts, so the logic is here for when it's needed.
   # def cancel
