@@ -1,4 +1,6 @@
 class PaypalInvoice < ApplicationRecord
+  acts_as_paranoid
+
   belongs_to :user
   belongs_to :page_unlock_promo_code, optional: true
 
