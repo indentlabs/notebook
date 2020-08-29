@@ -66,27 +66,34 @@
         </li>
       </ul>
     </div>
-    <!--
     <div>
-      <ul class="uppercase">
-        <li class="grey-text">
-          Reshare this post to...
+      <ul class="">
+        <li class="grey-text uppercase">
+          Reshare to...
         </li>
         <li>
-          <%= link_to '#', class: 'btn-flat blue-text' do %>
-            <i class="material-icons tiny left">share</i>
+          <%= link_to [
+            'http://twitter.com/share?',
+            'url=' + URI::escape(user_content_page_share_url(user_id: @share.user.id, id: @share.id)),
+            '&text=' + URI::escape(@share.message)
+          ].join, class: 'blue-text', target: '_blank' do %>
+            <i class="material-icons tiny left" style="margin-top: 4px;">share</i>
             Twitter
           <% end %>
         </li>
         <li>
-          <%= link_to '#', class: 'btn-flat blue-text' do %>
-            <i class="material-icons tiny left">share</i>
+          <%= 
+            link_to "https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=#{URI::escape(user_content_page_share_url(user_id: @share.user.id, id: @share.id))}&display=popup&ref=plugin&src=share_button", 
+              class: 'blue-text',
+              onclick: "return !window.open(this.href, 'Facebook', 'width=640,height=580')" do
+          %>
+            <i class="material-icons tiny left" style="margin-top: 4px">share</i>
             Facebook
           <% end %>
         </li>
+
       </ul>
     </div>
-    -->
   </div>
   <div class="col s12 m12 l7">
     <div class="card">
