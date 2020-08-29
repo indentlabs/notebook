@@ -1,4 +1,6 @@
 class ContentPageShare < ApplicationRecord
+  acts_as_paranoid
+  
   belongs_to :user
   belongs_to :content_page,           polymorphic: true, optional: true
   belongs_to :secondary_content_page, polymorphic: true, optional: true

@@ -16,6 +16,13 @@
       <div class="row">
         <div class="col s12 center">
           To be shared, content must either be public <strong>or</strong> in a public Universe.
+
+          <%= link_to 'https://medium.com/indent-labs/privacy-on-notebook-ai-how-it-works-c23a59faeae2', class: 'blue-text lighten-1', target: '_new' do %>
+            Learn more about sharing on Notebook.ai.
+          <% end %>
+        </div>
+        <div class="col s12 center grey-text">
+          Changes are saved automatically and can be changed at any time.
         </div>
       </div>
 
@@ -69,10 +76,6 @@
             </div>
           </div>
         <% end %>
-
-        <div class="col s12 center grey-text">
-          Changes are saved automatically and can be changed at any time.
-        </div>
       </div>
 
       <% if shared_content.is_a?(Universe) %>
@@ -84,12 +87,29 @@
         </div>
       <% end %>
 
-      <div class="row">
-        <p class="col s12" style='text-align: center'>
-          <%= link_to 'https://medium.com/indent-labs/privacy-on-notebook-ai-how-it-works-c23a59faeae2', class: 'blue-text lighten-1', target: '_new' do %>
-            Click here to learn more about sharing pages on Notebook.ai
-          <% end %>
-        </p>
+
+      <div class="col s12 m6">
+        <%= link_to [
+          'http://twitter.com/share?',
+          'url=' + URI::escape(send("#{shared_content.class.name.downcase}_url", shared_content)),
+          '&text=' + URI::escape("I'm using Notebook.ai to create fictional worlds! You can see my #{shared_content.class.name.downcase} #{shared_content.name} at this link:")
+        ].join, target: '_new' do %>
+          <div class="hoverable card-panel white-text" style="background: #1DA1F2">
+            <i class="left fa fa-twitter" style="font-size: 150%"></i>
+            Share to Twitter
+          </div>
+        <% end %>
+      </div>
+      <div class="col s12 m6">
+        <a 
+            href="https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=<%= URI::escape(send("#{shared_content.class.name.downcase}_url", shared_content)) %>&display=popup&ref=plugin&src=share_button" 
+            onclick="return !window.open(this.href, 'Facebook', 'width=640,height=580')">
+
+          <div class="hoverable card-panel white-text" style="background: #4267B2">
+            <i class="left fa fa-facebook" style="font-size: 150%"></i>
+            Share to Facebook
+          </div>
+        </a>
       </div>
 
     <% else %>

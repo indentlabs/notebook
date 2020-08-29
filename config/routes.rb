@@ -16,6 +16,8 @@ Rails.application.routes.draw do
     get 'follow',   on: :member
     get 'unfollow', on: :member
     get 'report',   on: :member
+
+    get 'by/:user_id', to: 'page_collections#by_user', as: :submissions_by_user
   end
   resources :page_collection_submissions do
     get 'approve', on: :member
@@ -86,12 +88,13 @@ Rails.application.routes.draw do
     # Legacy route: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
 
+    get '/referrals',          to: 'data#referrals', as: :referrals
+
     # Billing
     scope '/billing' do
       #get '/',             to: 'subscriptions#show', as: :billing
       get '/subscription',       to: 'subscriptions#new', as: :subscription
       get '/history',            to: 'subscriptions#history', as: :billing_history
-      get '/referrals',          to: 'subscriptions#referrals', as: :referrals
 
       get '/to/:stripe_plan_id', to: 'subscriptions#change', as: :change_subscription
 
