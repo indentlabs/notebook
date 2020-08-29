@@ -1,4 +1,6 @@
 class TimelineEvent < ApplicationRecord
+  acts_as_paranoid
+
   belongs_to :timeline
 
   has_many :timeline_event_entities, dependent: :destroy

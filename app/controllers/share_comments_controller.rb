@@ -21,7 +21,7 @@ class ShareCommentsController < ApplicationController
   # PATCH/PUT /share_comments/1
   # TODO this
   def update
-    if @share_comment.update(share_comment_params)
+    if user_signed_in? && current_user == @share_comment.user && @share_comment.update(share_comment_params)
       redirect_to @share_comment, notice: 'Share comment was successfully updated.'
     else
       render :edit
@@ -31,9 +31,14 @@ class ShareCommentsController < ApplicationController
   # DELETE /share_comments/1
   # TODO this
   def destroy
+    share = @share_comment.content_page_share
+    unless user_signed_in? && (share.user == current_user || @share_comment.user == current_user)
+      return raise "Tried to delete comment without authorization"
+    end
+
     @share_comment.destroy
   
-    redirect_to share_comments_url, notice: 'Share comment was successfully destroyed.'
+    redirect_to [share.user, share], notice: 'Comment was successfully destroyed.'
   end
 
   private

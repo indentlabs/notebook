@@ -46,8 +46,14 @@ class PageCollectionSubmissionsController < ApplicationController
 
   # DELETE /page_collection_submissions/1
   def destroy
+    unless user_signed_in? && current_user == @page_collection_submission.page_collection.user
+      raise "Not allowed"
+      return
+    end
+
+    page_collection = @page_collection_submission.page_collection
     @page_collection_submission.destroy
-    redirect_to page_collection_submissions_url, notice: 'Page collection submission was successfully destroyed.'
+    redirect_to page_collection, notice: 'The page was successfully removed from this collection.'
   end
 
   def approve

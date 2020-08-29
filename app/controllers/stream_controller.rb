@@ -3,6 +3,7 @@ class StreamController < ApplicationController
   before_action :set_stream_navbar_actions, only: [:index, :global]
   before_action :set_stream_navbar_color, only: [:index, :global]
   before_action :set_sidenav_expansion
+  before_action :cache_linkable_content_for_each_content_type, only: [:index]
 
   def index
     followed_users = current_user.followed_users.pluck(:id)
