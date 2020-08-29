@@ -7,7 +7,10 @@
 <% end %>
 
     <%# Nesting from above %>
-    <%= simple_format comment.message, class: 'black-text' %>
+    <%= simple_format ContentFormatterService.show(
+      text:         comment.message,
+      viewing_user: current_user
+    ), class: 'black-text' %>
 
     <div class="metadata">
       <%= link_to comment.user, class: "#{User.color}-text text-darken-4" do %>

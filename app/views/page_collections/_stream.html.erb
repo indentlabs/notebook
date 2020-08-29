@@ -11,6 +11,21 @@
       <div class="card-content">
         <div class="card-title">
           <%= link_to content.name, content %>
+
+          <% if user_signed_in? && current_user == @page_collection.user %>
+            <a class='dropdown-trigger right' href='#' data-target='dropdown-<%= page.id %>'>
+              <i class="material-icons">more_vert</i>
+            </a>
+            <ul id='dropdown-<%= page.id %>' class='dropdown-content'>
+              <li>
+                <%= link_to 'All pages from this user', page_collection_submissions_by_user_path(page_collection_id: @page_collection.id, user_id: page.user_id) %>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <%= link_to 'Remove from collection', page_collection_submission_path(page), method: :delete %>
+              </li>
+            </ul>
+          <% end %>
         </div>
         <% if page.explanation? %>
           <div>
