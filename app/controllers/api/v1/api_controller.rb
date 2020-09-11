@@ -1,7 +1,20 @@
 module Api
   module V1
     class ApiController < ApplicationController
+      before_action :authenticate_application!
       before_action :authenticate_api_user!
+
+      def authenticate_application!
+        @application_integration = ApplicationIntegration.find_by(application_token: params[:application_token])
+
+        unless @application_integration
+          render json: {
+            "Error" => "Invalid application_token",
+            "Token" => params[:application_token]
+          }
+          return
+        end
+      end
 
       def authenticate_api_user!
         # authenticate API credentials and assign @current_api_user
