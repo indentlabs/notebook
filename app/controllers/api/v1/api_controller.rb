@@ -42,7 +42,7 @@ module Api
               id:          page.id,
               name:        page.name,
               description: page.description,
-              universe:    page.universe.nil? ? nil : {
+              universe:    page.try(:universe).nil? ? nil : {
                 id:   page.universe_id,
                 name: page.universe.name
               },
