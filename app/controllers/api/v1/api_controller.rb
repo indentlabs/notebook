@@ -8,8 +8,10 @@ module Api
         @application_integration = ApplicationIntegration.find_by(application_token: params[:application_token])
 
         unless @application_integration
+          # todo log error
           render json: {
             "Error" => "Invalid application_token",
+            "Param" => "application_token",
             "Token" => params[:application_token]
           }
           return
@@ -17,8 +19,17 @@ module Api
       end
 
       def authenticate_api_user!
-        # authenticate API credentials and assign @current_api_user
-        @current_api_user = current_user
+        @current_api_user = @application_integration.integration_authorizations.find_by(user_token: params[:authorization_token]).try(:user)
+
+        unless @current_api_user
+          # todo log app error
+          render json: {
+            "Error" => "Invalid authorization_token",
+            "Param" => "authorization_token",
+            "Token" => params[:authorization_token]
+          }
+          return
+        end
       end
 
       # Content page list endpoints
