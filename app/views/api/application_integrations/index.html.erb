@@ -1,23 +1,78 @@
-<p id="notice"><%= notice %></p>
+<div class="row">
+  <div class="col s12 m10 l8">
+    <ul class="collapsible">
+      <li class="<%= 'active' unless @applications.any? %>">
+        <div class="collapsible-header blue white-text">
+          <i class="material-icons">extension</i> Register <%= @applications.any? ? 'another' : 'a' %> Notebook.ai application
+        </div>
+        <div class="collapsible-body white">
+          <%= render partial: 'api/application_integrations/form', locals: { application_integration: ApplicationIntegration.new(user: current_user) } %>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="col s12 m2 l4">
+  </div>
+</div>
 
-<h1>Application Integrations</h1>
-
-<table>
-  <thead>
-    <tr>
-      <th colspan="3"></th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <% @application_integrations.each do |application_integration| %>
-      <tr>
-        <td><%= link_to 'Show', api_application_integration_path(application_integration) %></td>
-        <td><%= link_to 'Edit', edit_api_application_integration_path(application_integration) %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<br>
-
+<% if @applications.any? %>
+  <div class="row">
+    <div class="col s12 m10 offset-m1 l8">
+      <h1 style="font-size: 2em" class="grey-text">Your applications</h1>
+      <% @applications.each do |application| %>
+        <%= link_to api_application_path(application), class: 'black-text' do %>
+          <div class="card-panel hoverable">
+            <p>
+              <i class="material-icons left medium <%= ApplicationIntegration.color %>-text"><%= ApplicationIntegration.icon %></i>
+              <strong><%= application.name %></strong>
+              <!-- (App ID: <%= application.id %>) -->
+              <span class="orange white-text badge">live</span>
+            </p>
+            <p>
+              <%= application.description %>
+            </p>
+            <br />
+            <div class="row grey-text text-darken-3">
+              <div class="col s12 m4">
+                <i class="material-icons left <%= User.color %>-text"><%= User.icon %></i>
+                <%= pluralize application.integration_authorizations.count, 'user' %>
+              </div>
+              <div class="col s12 m4">
+                <%= pluralize 12345, 'successful call' %>
+              </div>
+              <div class="col s12 m4">
+                <%= pluralize 0, 'error' %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+    <div class="col s12 m2 l4">
+      <h1 style="font-size: 2em">&nbsp;</h1>
+      <div class="hoverable card">
+        <div class="card-content">
+          <div class="card-title">Your available features</div>
+          <ul>
+            <li>
+              <i class="material-icons left green-text">check</i> Basic Notebook.ai endpoints
+            </li>
+            <li class="clearfix">
+              <i class="material-icons left red-text">close</i> Premium Notebook.ai endpoints
+            </li>
+          </ul>
+          <p>
+            Some helpful text here
+          </p>
+          <br />
+          <p class="green-text">
+            47% API quota left
+          </p>
+        </div>
+        <div class="card-action">
+          <%= link_to 'Manage your billing plan', '#' %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

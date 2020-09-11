@@ -248,8 +248,8 @@ Rails.application.routes.draw do
 
   # API Endpoints
   namespace :api do
-    resources :application_integrations, path: :integration do
-      get '/authenticate', on: :member, action: :authenticate
+    resources :application_integrations, path: :applications, as: :applications do
+      get '/authorize',    action: :authorize,    on: :member
     end
 
     scope '/authorizations' do
@@ -258,7 +258,7 @@ Rails.application.routes.draw do
       
     get '/',             to: 'api_docs#index'
     get '/docs',         to: 'api_docs#docs'
-    get '/applications', to: 'api_docs#applications'
+    # get '/applications', to: 'api_docs#applications'
     get '/approvals',    to: 'api_docs#approvals'
     get '/integrations', to: 'api_docs#integrations'
     get '/pricing',      to: 'api_docs#pricing'

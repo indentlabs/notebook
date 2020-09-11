@@ -1,19 +1,20 @@
 module Api
   class ApplicationIntegrationsController < ApplicationController
-    before_action :set_integration, only: [:show, :authenticate, :edit, :update, :destroy]
+    before_action :authenticate_user!
+    before_action :set_integration, only: [:show, :authorize, :edit, :update, :destroy]
 
     layout 'developer', only: [:authenticate]
 
     # GET /application_integrations
-    # def index
-    #   @integrations = ApplicationIntegration.all
-    # end
+    def index
+      @applications = current_user.application_integrations
+    end
 
     # GET /application_integrations/1
     def show
     end
 
-    def authenticate
+    def authorize
     end
 
     # GET /application_integrations/new
@@ -30,7 +31,7 @@ module Api
       @integration = ApplicationIntegration.new(application_integration_params.merge({user: current_user}))
 
       if @integration.save
-        redirect_to @integration, notice: 'Application integration was successfully created.'
+        redirect_to api_application_path(@integration), notice: 'Application integration was successfully created.'
       else
         render :new
       end
@@ -52,16 +53,17 @@ module Api
     end
 
     private
-      # Use callbacks to share common setup or constraints between actions.
-      def set_integration
-        @integration = ApplicationIntegration.find(params[:id])
-      end
 
-      # Only allow a trusted parameter "white list" through.
-      def application_integration_params
-        params.require(:application_integration).permit(
-          :name, :description, :organization_name, :organization_url, :website_url, :privacy_policy_url, :authorization_callback_url
-        )
-      end
+    # Use callbacks to share common setup or constraints between actions.
+    def set_integration
+      @application_integration = current_user.application_integrations.find_by(id: params[:id])
+    end
+
+    # Only allow a trusted parameter "white list" through.
+    def application_integration_params
+      params.require(:application_integration).permit(
+        :name, :description, :organization_name, :organization_url, :website_url, :privacy_policy_url, :authorization_callback_url
+      )
+    end
   end
 end

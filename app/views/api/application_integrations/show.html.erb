@@ -1,25 +1,46 @@
-<%= link_to 'Back to your applications list', api_applications_path %>
+<h5>
+  <%= link_to api_applications_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
+        position: 'bottom',
+        enterDelay: '500',
+        tooltip: "Back to your application list"
+      } do %>
+    <i class="material-icons">arrow_back</i>
+  <% end %>
+  Your applications
+</h5>
 
 <div class="row">
   <div class="col s12">
     <div class="card">
       <div class="card-content">
         <div class="card-title">
-          <i class="material-icons left">extension</i>
-          <%= @application_integration.name %>
+          <span class="badge orange white-text">live</span>
+          <span class="orange-text">
+            <i class="material-icons left">extension</i>
+            <%= @application_integration.name %>
+          </span>
+          <small>(App ID: <%= @application_integration.id %>)</small>
         </div>
+        <br />
         <div class="row">
           <div class="col s12 m6">
-            <% [:description, :organization_name].each do |field| %>
+            <% [:description].each do |field| %>
               <div class="grey-text uppercase">
                 <%= field.to_s.humanize %>
               </div>
               <div>
-                <%= @application_integration.send(field) %>
+                <%= simple_format @application_integration.send(field) %>
               </div>
               <br />
             <% end %>
-            <% [:organization_url, :website_url, :privacy_policy_url, :authorization_callback_url, :event_ping_url].each do |field| %>
+            <div class="grey-text uppercase">
+              Organization
+            </div>
+            <div>
+              <%= link_to @application_integration.organization_name, @application_integration.organization_url %>
+            </div>
+            <br />
+            <% [:website_url, :privacy_policy_url, :authorization_callback_url, :event_ping_url].each do |field| %>
               <div class="grey-text uppercase"><%= field.to_s.humanize %></div>
               <div>
                 <%= link_to @application_integration.send(field), @application_integration.send(field) %>
@@ -31,10 +52,8 @@
             <div class="grey-text uppercase">
               Application Token
             </div>
-            <div>
-              <%= @application_integration.application_token || 'No token set' %>
-            </div>
-            <div class="card-panel red darken-3 white-text">
+            <pre class="black white-text" style="padding: 1em"><%= @application_integration.application_token || 'No token set' %></pre>
+            <div class="red-text">
               Do <strong>NOT</strong> share this with others you do not trust or make client-side requests that expose this token. This token may be used to make API
               calls on your application's behalf and unauthorized use puts you at risk of strangers using up your API quota. 
             </div>
