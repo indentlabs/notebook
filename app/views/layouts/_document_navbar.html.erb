@@ -96,6 +96,12 @@
           <% end %>
         </li>
         <li class="right">
+          <a class="sidenav-trigger show-on-large left tooltipped" href="#" data-target="document-entities-right" data-tooltip="Entities in this document">
+            <i class="material-icons white-text left">book</i>
+            <span class="hide-on-med-and-down">Entities</span>
+          </a>
+        </li>
+        <li class="right">
           <%= link_to analysis_document_path(@document), class: "tooltipped orange btn", data: { tooltip: 'Analyze this document', position: 'bottom' } do %>
             <i class="material-icons hide-on-large-only">bar_chart</i>
             <i class="material-icons left hide-on-med-and-down">bar_chart</i>
@@ -133,7 +139,7 @@
           </p>
         </div>
         <% if @linked_entities.any? %>
-          <% linked_entity_universes = @linked_entities.map { |de| de.entity.try(:universe) }.uniq.compact %>
+          <% linked_entity_universes = @linked_entities.values.flatten.map { |de| de.entity.try(:universe) }.uniq.compact %>
           <% if linked_entity_universes.any? %>
             <div class="col s12 m12 l4">
               <p class="grey-text"><%= pluralize linked_entity_universes.count, 'suggested universe' %></p>

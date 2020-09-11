@@ -259,20 +259,24 @@ class DocumentsController < ApplicationController
     #   .includes(:entity)
     #   .order('entity_type asc')
 
+    @linked_entities = @document.document_entities
+      .where.not(entity_id: nil)
+      .group_by(&:entity_type)
+
     # More complicated includes-stuff form:
-    @linked_entities = []
-    return unless user_signed_in? && current_user.on_premium_plan?
+    # @linked_entities = []
+    # return unless user_signed_in? && current_user.on_premium_plan?
     
-    Rails.application.config.content_types[:all].each do |content_type|
-      @linked_entities += @document.document_entities
-        .where(entity_type: content_type.name)
-        .where.not(entity_id: nil)
-        .order('text ASC')
-        .includes(:entity, entity: [:user])
-        .includes(entity: Rails.application.config.inverse_content_relations.fetch(content_type.name, []).map do |relation, data|
-          data[:inverse_class] == content_type.name ? data[:with] : nil
-        end.compact)
-    end
+    # Rails.application.config.content_types[:all].each do |content_type|
+    #   @linked_entities += @document.document_entities
+    #     .where(entity_type: content_type.name)
+    #     .where.not(entity_id: nil)
+    #     .order('text ASC')
+    #     .includes(:entity, entity: [:user])
+    #     .includes(entity: Rails.application.config.inverse_content_relations.fetch(content_type.name, []).map do |relation, data|
+    #       data[:inverse_class] == content_type.name ? data[:with] : nil
+    #     end.compact)
+    # end
   end
 
   def set_document
