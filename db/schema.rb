@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_11_231223) do
+ActiveRecord::Schema.define(version: 2020_09_12_000306) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -39,6 +39,17 @@ ActiveRecord::Schema.define(version: 2020_09_11_231223) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_api_keys_on_user_id"
+  end
+
+  create_table "api_requests", force: :cascade do |t|
+    t.integer "application_integration_id", null: false
+    t.integer "integration_authorization_id", null: false
+    t.string "result"
+    t.integer "updates_used", default: 0
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["application_integration_id"], name: "index_api_requests_on_application_integration_id"
+    t.index ["integration_authorization_id"], name: "index_api_requests_on_integration_authorization_id"
   end
 
   create_table "application_integrations", force: :cascade do |t|
@@ -3439,6 +3450,8 @@ ActiveRecord::Schema.define(version: 2020_09_11_231223) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "api_keys", "users"
+  add_foreign_key "api_requests", "application_integrations"
+  add_foreign_key "api_requests", "integration_authorizations"
   add_foreign_key "application_integrations", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"

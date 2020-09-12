@@ -3,6 +3,9 @@ module Api
     class ApiController < ApplicationController
       before_action :authenticate_application!
       before_action :authenticate_api_user!
+      before_action :initialize_updates_used_tracker
+
+      after_action  :log_api_request
 
       def authenticate_application!
         @application_integration = ApplicationIntegration.find_by(application_token: params[:application_token])
@@ -14,13 +17,16 @@ module Api
             "Param" => "application_token",
             "Token" => params[:application_token]
           }
+          @request_success = :error
           return
         end
       end
 
       def authenticate_api_user!
-        @current_api_user = @application_integration.integration_authorizations.find_by(user_token: params[:authorization_token]).try(:user)
+        @authorization = @application_integration.integration_authorizations.find_by(user_token: params[:authorization_token])
+        # todo error on this if not set
 
+        @current_api_user = @authorization.try(:user)
         unless @current_api_user
           # todo log app error
           render json: {
@@ -28,8 +34,22 @@ module Api
             "Param" => "authorization_token",
             "Token" => params[:authorization_token]
           }
+          @request_success = :error
           return
         end
+      end
+
+      def initialize_updates_used_tracker
+        @updates_used_this_request = 0
+      end
+
+      def log_api_request
+        ApiRequest.create(
+          application_integration:   @application_integration,
+          integration_authorization: @authorization,
+          result:                    @request_success || :success,
+          updates_used:              @updates_used_this_request
+        )
       end
 
       # Content page list endpoints
