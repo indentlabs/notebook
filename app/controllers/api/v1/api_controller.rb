@@ -51,7 +51,8 @@ module Api
           application_integration:   @application_integration,
           integration_authorization: @authorization,
           result:                    @request_success || :success,
-          updates_used:              @updates_used_this_request
+          updates_used:              @updates_used_this_request,
+          ip_address:                request.remote_ip
         )
       end
 

@@ -5,6 +5,7 @@ class CreateApiRequests < ActiveRecord::Migration[6.0]
       t.references :integration_authorization, null: true, foreign_key: true
       t.string :result
       t.integer :updates_used, default: 0
+      t.string :ip_address
 
       t.timestamps
     end

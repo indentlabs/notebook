@@ -46,6 +46,7 @@ ActiveRecord::Schema.define(version: 2020_09_12_000306) do
     t.integer "integration_authorization_id"
     t.string "result"
     t.integer "updates_used", default: 0
+    t.string "ip_address"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["application_integration_id"], name: "index_api_requests_on_application_integration_id"
