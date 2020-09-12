@@ -1,9 +1,10 @@
 module Api
   module V1
     class ApiController < ApplicationController
+      before_action :initialize_updates_used_tracker
+
       before_action :authenticate_application!
       before_action :authenticate_api_user!
-      before_action :initialize_updates_used_tracker
 
       after_action  :log_api_request
 
@@ -11,13 +12,14 @@ module Api
         @application_integration = ApplicationIntegration.find_by(application_token: params[:application_token])
 
         unless @application_integration
-          # todo log error
+          @request_success = :error
+          log_api_request
+
           render json: {
             "Error" => "Invalid application_token",
             "Param" => "application_token",
             "Token" => params[:application_token]
           }
-          @request_success = :error
           return
         end
       end
@@ -28,13 +30,14 @@ module Api
 
         @current_api_user = @authorization.try(:user)
         unless @current_api_user
-          # todo log app error
+          @request_success = :error
+          log_api_request
+
           render json: {
             "Error" => "Invalid authorization_token",
             "Param" => "authorization_token",
             "Token" => params[:authorization_token]
           }
-          @request_success = :error
           return
         end
       end
@@ -44,7 +47,7 @@ module Api
       end
 
       def log_api_request
-        ApiRequest.create(
+        ApiRequest.create!(
           application_integration:   @application_integration,
           integration_authorization: @authorization,
           result:                    @request_success || :success,

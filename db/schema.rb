@@ -42,8 +42,8 @@ ActiveRecord::Schema.define(version: 2020_09_12_000306) do
   end
 
   create_table "api_requests", force: :cascade do |t|
-    t.integer "application_integration_id", null: false
-    t.integer "integration_authorization_id", null: false
+    t.integer "application_integration_id"
+    t.integer "integration_authorization_id"
     t.string "result"
     t.integer "updates_used", default: 0
     t.datetime "created_at", precision: 6, null: false
