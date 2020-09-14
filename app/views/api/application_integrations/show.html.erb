@@ -67,8 +67,8 @@
   <div class="col s12 m6 l4">
     <div class="grey-text uppercase">Billing plan</div>
     <% if current_user.on_premium_plan? %>
-      <div class="card-panel green lighten-3">
-        You're on a Premium plan. All features are unlocked.
+      <div class="card-panel green lighten-3 black-text">
+        You're on a Premium plan. All endpoints are available.
       </div>
     <% else %>
       <div class="card-panel red lighten-3">
@@ -79,27 +79,28 @@
   </div>
   <div class="col s12 m6 l4">
     <div class="grey-text uppercase">API quota</div>
-    <div class="card-panel yellow lighten-4">
+    <div class="card-panel yellow lighten-4 black-text">
       <div>
-        <strong>53% used this month</strong>
+        <strong><%= @application_integration.current_quota_usage_percentage %>% used in this billing period</strong>
+      </div>
+      <div class="progress tooltipped green lighten-5" data-tooltip="<%= @application_integration.current_quota_usage_percentage %>% of requests used">
+        <div class="determinate green" style="width: <%= @application_integration.current_quota_usage_percentage %>%"></div>
       </div>
       <p>
-        You've used 5,234 of your alotted 10,000 calls this month.
+        You've used <%= number_with_delimiter @application_integration.api_requests.successful.count %> of your alotted 10,000 calls this month.
         <%= link_to 'Upgrade to Premium', '#' %> to ensure you don't experience any disruptions when hitting your limit.
       </p>
     </div>
   </div>
   <div class="col s12 m6 l4">
-    <div class="grey-text uppercase">Features available</div>
-    <div class="card-panel yellow lighten-4">
-      <ul>
-        <li>
-          <i class="material-icons left green-text">check</i> Basic Notebook.ai endpoints
-        </li>
-        <li class="clearfix">
-          <i class="material-icons left red-text">close</i> Premium Notebook.ai endpoints
-        </li>
-      </ul>
+    <div class="grey-text uppercase">Errors</div>
+    <div class="card-panel <%= @application_integration.error_rate_color %> lighten-4 black-text">
+      <div><strong><%= (@application_integration.request_error_rate * 100).round(2) %>% error rate</strong></div>
+      <div class="progress red lighten-5">
+        <div class="determinate red" style="width: <%= (@application_integration.request_error_rate * 100).round(2) %>%"></div>
+      </div>
+      <!-- Browse recent errors -->
+      <!-- Set up error callback URL -->
     </div>
   </div>
 </div>

@@ -1,9 +1,9 @@
 module Api
   class ApplicationIntegrationsController < ApplicationController
+    layout 'developer'
+
     before_action :authenticate_user!
     before_action :set_integration, only: [:show, :authorize, :edit, :update, :destroy]
-
-    layout 'developer', only: [:authenticate]
 
     # GET /application_integrations
     def index
