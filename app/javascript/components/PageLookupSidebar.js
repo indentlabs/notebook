@@ -13,15 +13,16 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import Button from '@material-ui/core/Button';
 import ListSubheader from '@material-ui/core/ListSubheader';
 
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import StarBorder from '@material-ui/icons/StarBorder';
+import HelpIcon from '@material-ui/icons/Help';
 import Collapse from '@material-ui/core/Collapse';
+
+import axios from 'axios';
 
 class PageLookupSidebar extends React.Component {
 
@@ -36,56 +37,37 @@ class PageLookupSidebar extends React.Component {
     };
   }
 
-  loadPage(page_type, page_id) {
+  async loadPage(page_type, page_id) {
     this.setDrawerVisible(true);
-    
-    // show loading icon
+    this.setState({ show_data: false });
 
     // make api request
-
-    // hide loading icon
-
-    // load response into list
-    this.setState({
-      page_data: {
-        name: page_type + ' ' + 'Bob',
-        categories: [
-          {
-            id:    1,
-            label: 'General',
-            fields: [
-              {
-                label: 'Name',
-                value: 'Bob',
-                type:  'text'
-              },
-              {
-                label: 'Age',
-                value: '55',
-                type:  'text'
-              }
-            ]
-          },
-          {
-            id:    2,
-            label: 'Family',
-            fields: [
-              {
-                label: 'Mom',
-                value: 'Robin',
-                type:  'link',
-                link:  ['Character', 534]
-              }
-
-            ]
-          }
-        ]
+    await axios.get(
+      "/api/v1/" + page_type.toLowerCase() + "/" + page_id
+        + '?application_token=4756de490e82956dc6329e6650aaec664e27ccd27e153e2f'
+        + '&authorization_token=167bb93139303904cf67f6480a29e71c9f1eaf7a28e902e1',
+      { 
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept':       'application/json'
+        }
       }
+    ).then(response => {
+      console.log("get request");
+      console.log(response.data);
+
+      // load response into list
+      this.setState({ 
+        page_data: response.data,
+        show_data: true,
+        page_type: page_type
+      });
+
+    }).catch(err => {
+      console.log(err);
+      return null;
     });
 
-    console.log("setting show_data = true");
-    this.setState({ show_data: true });
-    // this.state.show_data = true;
     console.log("show data? " + this.state.show_data);
   };
 
@@ -99,6 +81,37 @@ class PageLookupSidebar extends React.Component {
     }});
   }
 
+  fieldData(field) {
+    switch (field.type) {
+      case "name":
+      case "text_area":
+        return (
+          <ListItem key={field.id}>
+            <ListItemText primary={field.label} secondary={field.value} />
+          </ListItem>
+        );
+      
+      case "link":
+        return(
+          <React.Fragment key={field.id}>
+            <ListSubheader component="div">
+              {field.label}
+            </ListSubheader>
+            {field.value.map((link) => (
+              <ListItem button key={link.id}>
+                <ListItemText primary={link.name} />
+              </ListItem>
+            ))}
+          </React.Fragment>
+        );
+      
+      default:
+        return(
+          <div>error loading {field.label}</div>
+        );
+    }
+  }
+
   pageData() {
     if (this.state.show_data) {
       return (
@@ -106,22 +119,21 @@ class PageLookupSidebar extends React.Component {
           role="presentation"
         >
           <List
-            aria-labelledby="nested-list-subheader"
             subheader={
-              <ListSubheader component="div" id="nested-list-subheader">
-                Quick-reference
-              </ListSubheader>
+              <h5>&nbsp;&nbsp;&nbsp;{this.state.page_data.name}</h5>
             }
+            id="page-lookup-list"
           >
-            <ListItem button>
-              <ListItemText primary={this.state.page_data.name} />
-            </ListItem>
+            <Divider></Divider>
+            <ListSubheader component="div">
+              Quick-reference
+            </ListSubheader>
 
             {this.state.page_data.categories.map((category) => (
-              <React.Fragment>
+              <React.Fragment key={category.id}>
                 <ListItem button onClick={() => this.toggleCategoryOpen(category.label)}>
                   <ListItemIcon>
-                    <InboxIcon />
+                    <HelpIcon />
                   </ListItemIcon>
                   <ListItemText primary={category.label} />
                   {!!this.state.category_open[category.label] ? <ExpandLess /> : <ExpandMore />}
@@ -129,22 +141,29 @@ class PageLookupSidebar extends React.Component {
                 <Collapse in={!!this.state.category_open[category.label]} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
                     {category.fields.map((field) => (
-                      <ListItem button={field.type == 'link'}>
-                        {field.type == 'text' && 
-                          <ListItemText primary={field.label} secondary={field.value} />
-                        }
-                        {field.type == 'link' &&
-                          <ListItemText primary={field.label} secondary={field.value} />
-                        }
-                      </ListItem>
+                      this.fieldData(field)
                     ))}
                   </List>
                 </Collapse>
               </React.Fragment>
             ))}
+            <Divider></Divider>
+            <ListItem button>
+              <ListItemIcon>
+                <HelpIcon />
+                <ListItemText primary={"View this " + this.state.page_type} />
+              </ListItemIcon>
+            </ListItem>
+            <ListItem button>
+              <ListItemIcon>
+                <HelpIcon />
+                <ListItemText primary={"Edit this " + this.state.page_type} />
+              </ListItemIcon>
+            </ListItem>
           </List>
         </div>
       );
+      // also add divider + view/edit links
 
     } else { // No data to show yet
       return (
@@ -152,9 +171,8 @@ class PageLookupSidebar extends React.Component {
           role="presentation"
         >
           <List
-            aria-labelledby="nested-list-subheader"
             subheader={
-              <ListSubheader component="div" id="nested-list-subheader">
+              <ListSubheader component="div">
                 Quick-reference
               </ListSubheader>
             }
@@ -163,6 +181,49 @@ class PageLookupSidebar extends React.Component {
               <ListItemText primary="Loading data..." />
             </ListItem>
           </List>
+          <div className="center">
+            <div className="preloader-wrapper big active">
+              <div className="spinner-layer spinner-blue">
+                <div className="circle-clipper left">
+                  <div className="circle"></div>
+                </div><div className="gap-patch">
+                  <div className="circle"></div>
+                </div><div className="circle-clipper right">
+                  <div className="circle"></div>
+                </div>
+              </div>
+
+              <div className="spinner-layer spinner-red">
+                <div className="circle-clipper left">
+                  <div className="circle"></div>
+                </div><div className="gap-patch">
+                  <div className="circle"></div>
+                </div><div className="circle-clipper right">
+                  <div className="circle"></div>
+                </div>
+              </div>
+
+              <div className="spinner-layer spinner-yellow">
+                <div className="circle-clipper left">
+                  <div className="circle"></div>
+                </div><div className="gap-patch">
+                  <div className="circle"></div>
+                </div><div className="circle-clipper right">
+                  <div className="circle"></div>
+                </div>
+              </div>
+
+              <div className="spinner-layer spinner-green">
+                <div className="circle-clipper left">
+                  <div className="circle"></div>
+                </div><div className="gap-patch">
+                  <div className="circle"></div>
+                </div><div className="circle-clipper right">
+                  <div className="circle"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       );
     }
@@ -176,7 +237,8 @@ class PageLookupSidebar extends React.Component {
         </Button>
         <Drawer anchor='right' 
                 open={this.state['open']}
-                onClose={() => this.setDrawerVisible(false)}>
+                onClose={() => this.setDrawerVisible(false)}
+        >
           {this.pageData()}
         </Drawer>
       </React.Fragment>
@@ -184,7 +246,7 @@ class PageLookupSidebar extends React.Component {
   }
 }
 
-// PrivacyToggle.propTypes = {
+// PageLookupSidebar.propTypes = {
 //   content:       PropTypes.exact({
 //     id:             PropTypes.number.isRequired,
 //     name:           PropTypes.string.isRequired,

@@ -1,0 +1,87 @@
+<div class="row">
+  <div class="col s12 m10 l8">
+    <ul class="collapsible">
+      <li class="<%= 'active' unless @applications.any? %>">
+        <div class="collapsible-header blue white-text">
+          <i class="material-icons">extension</i> Register <%= @applications.any? ? 'another' : 'a' %> Notebook.ai application
+        </div>
+        <div class="collapsible-body white">
+          <%= render partial: 'api/application_integrations/form', locals: { application_integration: ApplicationIntegration.new(user: current_user) } %>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="col s12 m2 l4">
+  </div>
+</div>
+
+<% if @applications.any? %>
+  <div class="row">
+    <div class="col s12 m10 offset-m1 l8">
+      <h1 style="font-size: 2em" class="grey-text">Your applications</h1>
+      <% @applications.each do |application| %>
+        <%= link_to api_application_path(application), class: 'black-text' do %>
+          <div class="card-panel hoverable">
+            <p>
+              <i class="material-icons left medium <%= ApplicationIntegration.color %>-text"><%= ApplicationIntegration.icon %></i>
+              <strong><%= application.name %></strong>
+              <!-- (App ID: <%= application.id %>) -->
+              <span class="orange white-text badge">live</span>
+            </p>
+            <p>
+              <%= truncate(application.description, length: 400) %>
+            </p>
+            <br />
+            <div class="row grey-text text-darken-3">
+              <div class="col s12 m12 l4">
+                <i class="material-icons left <%= User.color %>-text"><%= User.icon %></i>
+                <%= pluralize application.integration_authorizations.count, 'user' %>
+              </div>
+              <div class="col s12 m12 l4">
+                <%= pluralize application.api_requests.successful.count, 'successful request' %>
+                <div class="progress tooltipped green lighten-5" data-tooltip="<%= application.current_quota_usage_percentage %>% of requests used">
+                  <div class="determinate green" style="width: <%= application.current_quota_usage_percentage %>%"></div>
+                </div>
+              </div>
+              <div class="col s12 m12 l4 <%= application.error_rate_color %>-text text-darken-3">
+                <span class="badge <%= application.error_rate_color %> lighten-5"><%= (application.request_error_rate * 100).round(2) %>% error rate</span>
+                <%= pluralize application.api_requests.errored.count, 'error' %>
+                <!--
+                <div class="progress red lighten-5">
+                  <div class="determinate red" style="width: 5%"></div>
+                </div>
+                -->
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+    <div class="col s12 m2 l4">
+      <h1 style="font-size: 2em">&nbsp;</h1>
+      <div class="hoverable card">
+        <div class="card-content">
+          <div class="card-title">Your available features</div>
+          <ul>
+            <li>
+              <i class="material-icons left green-text">check</i> Basic Notebook.ai endpoints
+            </li>
+            <li class="clearfix">
+              <i class="material-icons left red-text">close</i> Premium Notebook.ai endpoints
+            </li>
+          </ul>
+          <p>
+            Some helpful text here
+          </p>
+          <br />
+          <p class="green-text">
+            47% API quota left
+          </p>
+        </div>
+        <div class="card-action">
+          <%= link_to 'Manage your billing plan', '#' %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

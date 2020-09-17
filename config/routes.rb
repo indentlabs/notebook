@@ -248,6 +248,26 @@ Rails.application.routes.draw do
 
   # API Endpoints
   namespace :api do
+    resources :application_integrations, path: :applications, as: :applications do
+      get '/authorize',    action: :authorize,    on: :member
+    end
+
+    scope '/authorizations' do
+      post '/create', to: 'integration_authorizations#create', as: :integration_authorizations
+    end
+      
+    get '/',             to: 'api_docs#index'
+    get '/docs',         to: 'api_docs#docs'
+    # get '/applications', to: 'api_docs#applications'
+    get '/approvals',    to: 'api_docs#approvals'
+    get '/integrations', to: 'api_docs#integrations'
+    get '/pricing',      to: 'api_docs#pricing'
+    
+    scope 'docs' do
+      get '/',           to: 'api_docs#index'
+      get '/references', to: 'api_docs#references'
+    end
+
     namespace :v1 do
       scope '/categories' do
         get '/suggest/:entity_type',              to: 'attribute_categories#suggest'
@@ -257,6 +277,16 @@ Rails.application.routes.draw do
       end
       scope '/answers' do
         get '/suggest/:entity_type/:field_label', to: 'attributes#suggest'
+      end
+
+      # Content index path
+      Rails.application.config.content_types[:all].each do |content_type|
+        get "#{content_type.name.downcase.pluralize}", to: "api##{content_type.name.downcase.pluralize}"
+      end
+
+      # Content show paths
+      Rails.application.config.content_types[:all].each do |content_type|
+        get "#{content_type.name.downcase}/:id", to: "api##{content_type.name.downcase}"
       end
     end
   end

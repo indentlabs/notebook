@@ -1,0 +1,102 @@
+<% if user_signed_in? %>
+  <%= render partial: 'layouts/navbar/recent_content_dropdown' %>
+  <%= render partial: 'layouts/modals/search' %>
+<% end %>
+
+<div class="navbar-fixed">
+  <nav class="navbar nav-extended <%= 'logged-in' if user_signed_in? %>" style="background-color: <%= @navbar_color.presence || '#2196F3' %>">
+    <div class="nav-wrapper">
+      <ul>
+        <li>
+          <%= link_to 'My Applications', api_applications_path %>
+        </li>
+        <li>
+          <%= link_to 'API Documentation', api_docs_path %>
+        </li>
+      </ul>
+      <ul class="right">
+        <% if user_signed_in? %>
+          <li>
+            <a class="waves-effect waves-light tooltipped dropdown-trigger" href="#notifications" 
+               data-tooltip="You have <%= pluralize @user_notifications.reject { |n| n.viewed_at? }.count, 'unread notification' %>." 
+               data-target="notifications-dropdown">
+              <i class="material-icons"><%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'notifications_active' : 'notifications_none' %></i>
+            </a>
+          </li>
+          <ul id='notifications-dropdown' class='dropdown-content'>
+            <% @user_notifications.each do |notification| %>
+              <li class="<%= 'unread-notification' unless notification.viewed_at? %>">
+                <%= link_to main_app.notification_path(notification), class: 'notification-link' do %>
+                  <i class="material-icons <%= notification.icon_color %>-text"><%= notification.icon %></i>
+                  <%= notification.message_html.html_safe %>
+                  <div>
+                    <small class="grey-text"><%= time_ago_in_words notification.happened_at %> ago</small>
+                  </div>
+                <% end %>
+              </li>
+              <li class="divider"></li>
+            <% end %>
+            <li class="divider"></li>
+            <li class="blue lighten-1">
+              <%= link_to main_app.notifications_path, class: 'white-text' do %>
+                <i class="material-icons left">notifications</i>
+                View all notifications
+              <% end %>
+            </li>
+            <li class="blue lighten-2">
+              <%= link_to main_app.mark_all_read_path, class: 'white-text' do %>
+                <i class="material-icons left">notifications_none</i>
+                Mark all as read
+              <% end %>
+            </li>
+          </ul>
+
+        <% else %>
+          <li>
+            <%= link_to 'Sign in', main_app.new_user_session_path %>
+          </li>
+          <li>
+            <%= link_to 'Sign up', main_app.new_user_registration_path %>
+          </li>
+        <% end %>
+      </ul>
+      <ul class="left">
+        <% if user_signed_in? %>
+          <li>
+            <a class="sidenav-trigger" href="#" data-target="sidenav-left">
+              <i class="material-icons">menu</i>
+            </a>
+          </li>
+          <li class="hide-on-large-only">
+            <%= link_to main_app.root_path, class: 'tooltipped', data: { tooltip: 'Your dashboard' } do %>
+              <i class="material-icons">dashboard</i>
+            <% end %>
+          </li>
+        <% else %>
+          <li>
+            <%= link_to 'Notebook.ai', main_app.root_path %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+
+    <% if @navbar_actions.present? && @navbar_actions.any? %>
+      <style>
+        main {
+          padding-top: 50px;
+        }
+      </style>
+      <div class="nav-content">
+        <ul class="tabs tabs-transparent">
+          <% @navbar_actions.each do |action| %>
+            <li class="tab <%= action[:class] %>">
+              <a class="white-text <%= 'active' if action[:href] == request.env['REQUEST_PATH'] %>" href="<%= action[:href] %>" target="<%= action[:target] || '_self' %>">
+                <%= action[:label] %>
+              </a>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  </nav>
+</div>

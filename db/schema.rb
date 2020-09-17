@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_22_004641) do
+ActiveRecord::Schema.define(version: 2020_09_12_000306) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -39,6 +39,36 @@ ActiveRecord::Schema.define(version: 2020_07_22_004641) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_api_keys_on_user_id"
+  end
+
+  create_table "api_requests", force: :cascade do |t|
+    t.integer "application_integration_id"
+    t.integer "integration_authorization_id"
+    t.string "result"
+    t.integer "updates_used", default: 0
+    t.string "ip_address"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["application_integration_id"], name: "index_api_requests_on_application_integration_id"
+    t.index ["integration_authorization_id"], name: "index_api_requests_on_integration_authorization_id"
+  end
+
+  create_table "application_integrations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "name"
+    t.string "description"
+    t.string "organization_name"
+    t.string "organization_url"
+    t.string "website_url"
+    t.string "privacy_policy_url"
+    t.string "token"
+    t.datetime "last_used_at"
+    t.string "authorization_callback_url"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "event_ping_url"
+    t.string "application_token"
+    t.index ["user_id"], name: "index_application_integrations_on_user_id"
   end
 
   create_table "archenemyships", force: :cascade do |t|
@@ -1421,6 +1451,21 @@ ActiveRecord::Schema.define(version: 2020_07_22_004641) do
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
   end
 
+  create_table "integration_authorizations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "application_integration_id", null: false
+    t.string "referral_url"
+    t.string "ip_address"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "origin"
+    t.string "content_type"
+    t.string "user_agent"
+    t.string "user_token"
+    t.index ["application_integration_id"], name: "index_integration_authorizations_on_application_integration_id"
+    t.index ["user_id"], name: "index_integration_authorizations_on_user_id"
+  end
+
   create_table "item_magics", force: :cascade do |t|
     t.integer "item_id"
     t.integer "magic_id"
@@ -2168,6 +2213,7 @@ ActiveRecord::Schema.define(version: 2020_07_22_004641) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "explanation"
     t.string "cached_content_name"
+    t.datetime "deleted_at"
     t.index ["content_type", "content_id"], name: "polycontent_collection_index"
     t.index ["page_collection_id"], name: "index_page_collection_submissions_on_page_collection_id"
     t.index ["user_id"], name: "index_page_collection_submissions_on_user_id"
@@ -2187,6 +2233,7 @@ ActiveRecord::Schema.define(version: 2020_07_22_004641) do
     t.string "description"
     t.boolean "allow_submissions"
     t.string "slug"
+    t.datetime "deleted_at"
     t.index ["user_id"], name: "index_page_collections_on_user_id"
   end
 
@@ -2243,6 +2290,7 @@ ActiveRecord::Schema.define(version: 2020_07_22_004641) do
     t.integer "page_unlock_promo_code_id"
     t.string "approval_url"
     t.string "payer_id"
+    t.datetime "deleted_at"
     t.index ["page_unlock_promo_code_id"], name: "index_paypal_invoices_on_page_unlock_promo_code_id"
     t.index ["user_id"], name: "index_paypal_invoices_on_user_id"
   end
@@ -3111,6 +3159,7 @@ ActiveRecord::Schema.define(version: 2020_07_22_004641) do
     t.integer "position"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.datetime "deleted_at"
     t.index ["timeline_id"], name: "index_timeline_events_on_timeline_id"
   end
 
@@ -3402,6 +3451,9 @@ ActiveRecord::Schema.define(version: 2020_07_22_004641) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "api_keys", "users"
+  add_foreign_key "api_requests", "application_integrations"
+  add_foreign_key "api_requests", "integration_authorizations"
+  add_foreign_key "application_integrations", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
   add_foreign_key "character_birthtowns", "characters"
@@ -3561,6 +3613,8 @@ ActiveRecord::Schema.define(version: 2020_07_22_004641) do
   add_foreign_key "group_creatures", "groups"
   add_foreign_key "group_creatures", "users"
   add_foreign_key "image_uploads", "users"
+  add_foreign_key "integration_authorizations", "application_integrations"
+  add_foreign_key "integration_authorizations", "users"
   add_foreign_key "item_magics", "items"
   add_foreign_key "item_magics", "magics"
   add_foreign_key "item_magics", "users"

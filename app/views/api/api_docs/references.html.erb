@@ -1,0 +1,57 @@
+<div class="row">
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+          <div class="row">
+            <div class="col s12 m7 l8">
+              <div class="card-title">Referencing pages around the Internet on Notebook.ai</div>
+              <p>
+                Application developers can now add external links directly to individual Notebook.ai pages via <%= link_to 'the API', api_path %>.
+              </p>
+              <br />
+              <p>
+                Each application receives its own tab under the "References" sidebar when viewing any notebook page, which will list
+                all external references when clicked. Each reference must have a URL, and may optionally also have a title, description,
+                and image to accompany it.
+              </p>
+              <br />
+              <p>
+                Please use this API only to link pages in which the content of a particular Notebook.ai page appears or is predominantly featured. 
+                For a character, for example, consider adding references to stories in which they appear. For a location, consider adding references 
+                to stories set in that location.
+              </p>
+              <br />
+              <div class="center grey lighten-3">
+                <%= image_tag 'screenshots/integration-references.png', class: 'hoverable' %>
+              </div>
+              <br />
+              <div class="center">
+              <%= link_to 'Browse the full API documentation', api_path, class: 'blue btn white-text' %>
+              </div>
+            </div>
+            <div class="col s12 m5 l4">
+              <%= image_tag 'screenshots/integrations.png', class: 'hoverable' %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12">
+    <ul class="collapsible">
+      <% content_type = Character %>
+      <li class="active">
+        <div class="collapsible-header">
+          <i class="material-icons <%= content_type.color %>-text"><%= content_type.icon %></i>
+          Example API request to add an external reference to a <%= content_type.name.downcase %>
+        </div>
+        <div class="collapsible-body">
+          <%= render partial: 'api/api_docs/endpoints/reference_a_specific_content', locals: { content_type: Character } %>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
