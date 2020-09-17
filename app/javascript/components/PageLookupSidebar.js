@@ -43,7 +43,9 @@ class PageLookupSidebar extends React.Component {
 
     // make api request
     await axios.get(
-      "/api/v1/" + page_type.toLowerCase() + "/" + page_id,
+      "/api/v1/" + page_type.toLowerCase() + "/" + page_id
+        + '?application_token=4756de490e82956dc6329e6650aaec664e27ccd27e153e2f'
+        + '&authorization_token=167bb93139303904cf67f6480a29e71c9f1eaf7a28e902e1',
       { 
         headers: { 
           'Content-Type': 'application/json',
