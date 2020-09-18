@@ -6,15 +6,13 @@
 <body data-in-app="true" class="<%= controller_name %> <%= action_name %>  <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>">
   <%= render 'layouts/sidenav', locals: { fixed: false } if user_signed_in? %>
   <%= render 'layouts/document_sidenav', locals: { fixed: false } if user_signed_in? %>
-  <%= render 'layouts/document_entities_sidenav', locals: { fixed: false } if user_signed_in? %>
+  <%# render 'layouts/document_entities_sidenav', locals: { fixed: false } if user_signed_in? %>
+  <%= react_component("DocumentEntitiesSidebar", { linked_entities: @linked_entities }) %>
   <%= render 'layouts/document_navbar' %>
 
   <main>
     <div class="mobile-navbar-spacer hide-on-med-and-up">&nbsp;</div>
-    <%=
-      react_component("PageLookupSidebar", {
-      })
-    %>
+    <%= react_component("PageLookupSidebar", {}) %>
     <%= yield :full_width_page_header %>
     <div class="container-fluid">
       <div class="row">

@@ -142,6 +142,8 @@ $(document).ready(function () {
     var event_id = $(this).closest('.timeline-event-container').data('event-id');
     $('#linking-event-id').val(event_id);
 
+    console.log('OH NO');
+
     // Open the modal
     $('#entity-link-modal').modal('open');
     return false;

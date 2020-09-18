@@ -17,11 +17,6 @@ Notebook.init = ->
     edge:         'right',
     draggable:    false
   }
-  $('#document-entities-right').sidenav {
-    closeOnClick: true,
-    edge:         'right',
-    draggable:    false
-  }
   $('.slider').slider { height: 200, indicators: false }
   $('.dropdown-trigger').dropdown { coverTrigger: false }
   $('.tooltipped').tooltip { enterDelay: 50 }
