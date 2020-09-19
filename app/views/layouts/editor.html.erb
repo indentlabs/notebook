@@ -7,7 +7,13 @@
   <%= render 'layouts/sidenav', locals: { fixed: false } if user_signed_in? %>
   <%= render 'layouts/document_sidenav', locals: { fixed: false } if user_signed_in? %>
   <%# render 'layouts/document_entities_sidenav', locals: { fixed: false } if user_signed_in? %>
-  <%= react_component("DocumentEntitiesSidebar", { linked_entities: @linked_entities }) %>
+  <%= 
+    react_component("DocumentEntitiesSidebar", { 
+      linked_entities: @linked_entities, 
+      link_form_path:  link_entity_documents_path, 
+      user_content:    @current_user_content
+    })
+  %>
   <%= render 'layouts/document_navbar' %>
 
   <main>

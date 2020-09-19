@@ -1,7 +1,10 @@
 /*
   Usage:
   <%=
-    react_component("DocumentEntityLinkModal", {})
+    react_component("DocumentEntityLinkModal", {
+      form_path:    link_entity_documents_path,
+      content_list: @current_user_content
+    })
   %>
 */
 
@@ -9,20 +12,8 @@ import React     from "react"
 import PropTypes from "prop-types"
 import { makeStyles } from '@material-ui/core/styles';
 
-import Drawer from '@material-ui/core/Drawer';
-import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Button from '@material-ui/core/Button';
-import ListSubheader from '@material-ui/core/ListSubheader';
-
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import StarBorder from '@material-ui/icons/StarBorder';
-import HelpIcon from '@material-ui/icons/Help';
-import Collapse from '@material-ui/core/Collapse';
+import CheckIcon from '@material-ui/icons/Check';
+import ToggleButton from '@material-ui/lab/ToggleButton';
 
 var pluralize = require('pluralize');
 
@@ -32,6 +23,10 @@ class DocumentEntityLinkModal extends React.Component {
 
   constructor(props) {
     super(props);
+
+    this.state = {
+      selected: false
+    };
   }
 
   componentDidMount() {
@@ -52,62 +47,91 @@ class DocumentEntityLinkModal extends React.Component {
     });
   }
 
+  classIcon(class_name) {
+    console.log(class_name);
+    return window.ContentTypeData[class_name].icon;
+  }
+
+  classColor(class_name) {
+    console.log(class_name);
+    return window.ContentTypeData[class_name].color;
+  }
+
+  toggleEntityLink(entity) {
+    console.log('linking');
+    console.log(entity);
+  }
+
   render () {
     return (
-      <ul id="document-entities-right" className="sidenav">
-        <li className="teal">
-          <a href="#" className="logo-container white-text">
-            <i className="material-icons white-text right">
-              book
-            </i>
-            In this document...
-          </a>
-        </li>
-        <li className="no-padding">
-          <ul className="collapsible collapsible-accordion">
-            {Object.keys(this.state.linked_entities).map((entity_type, i) => {
-              return (
-                <li className="bold waves-effect" key={i}>
-                  <a className="collapsible-header" tabIndex="0">
-                    {pluralize(entity_type, this.state.linked_entities[entity_type].length, true)}
-                    <i className="material-icons chevron">chevron_right</i>
-                  </a>
-                  <div className="collapsible-body">
-                    <ul>
-                      {this.state.linked_entities[entity_type].map((entity, j) => {
+      <div id="entity-link-modal" className="modal">
+        <div className="modal-content">
+          <h4>Add a quick reference</h4>
+          <p>
+            Select the page below you'd like to link to this document. 
+            You can then click it at any time to quickly view that page without leaving your document.
+          </p>
+          
+          <form action={this.props.form_path} acceptCharset="UTF-8" method="post">
+            <input name="utf8" type="hidden" value="✓" />
+            <input value="8" type="hidden" name="document_id" />
+            <input value="-1" type="hidden" name="document_analysis_id" />
+            <input value="-1" type="hidden" name="document_entity_id" />
+            <input type="hidden" name="entity_type" />
+            <input type="hidden" name="entity_id" />
+
+            {Object.keys(this.props.content_list).map((content_type, i) => {
+              if (content_type !== "Document") {
+                var content_list = this.props.content_list[content_type];
+                return(
+                  <React.Fragment key={i}>
+                    <h5>{ pluralize(content_type) }</h5>
+                    <ul className="collection">
+                      {content_list.map((content, j) => {
                         return(
-                          <li key={j}>
-                            <a href="#">
-                              <i className={"material-icons left " + this.classColor(entity_type) + "-text"}>
-                                { this.classIcon(entity_type) }
-                              </i>
-                              { entity.text }
+                          <React.Fragment>
+                            {/*
+                            <ToggleButton
+                              value="check"
+                              selected={false}
+                              onChange={() => {
+                                this.toggleEntityLink(content);
+                              }}
+                            >
+                              { content.name || "Untitled" }
+                            </ToggleButton>
+                            */}
+
+                            <a href="#" className={this.classColor(content_type) + "-text js-link-entity-selection"} data-id={content.id} data-type={content_type} key={j}>
+                              <li className="collection-item hoverable">
+                                <i className="material-icons left">{ this.classIcon(content_type) }</i>
+                                {content.name || "Untitled"}
+                                <span className="secondary-content">
+                                  <i className="material-icons">link</i>
+                                </span>
+                              </li>
                             </a>
-                          </li>
+                          </React.Fragment>
                         );
                       })}
                     </ul>
-                  </div>
-                </li>
-              );
+                  </React.Fragment>
+                );
+              }
             })}
-          </ul>
-        </li>
-        <li className="divider"></li>
-        <li>
-          <a href="#"
-              className="entity-trigger orange-text text-darken-3 js-link-entity">
-            <i className="material-icons small orange-text text-darken-3 left">add</i>
-            Add an entity
-          </a>
-        </li>
-      </ul>
+          </form>
+        </div>
+        <div className="modal-footer">
+          <a href="#!" className="modal-close waves-effect waves-green btn-flat">Cancel</a>
+        </div>
+      </div>
     );
   }
 }
 
-// DocumentEntityLinkModal.propTypes = {
-//  linked_entities: PropTypes.object.isRequired
-// };
+DocumentEntityLinkModal.propTypes = {
+  form_path:    PropTypes.string.isRequired,
+  content_list: PropTypes.object.isRequired
+};
 
 export default DocumentEntityLinkModal;

@@ -29,6 +29,8 @@ import StarBorder from '@material-ui/icons/StarBorder';
 import HelpIcon from '@material-ui/icons/Help';
 import Collapse from '@material-ui/core/Collapse';
 
+import DocumentEntityLinkModal from './DocumentEntityLinkModal.js';
+
 import axios from 'axios';
 
 var pluralize = require('pluralize');
@@ -76,60 +78,64 @@ class DocumentEntitiesSidebar extends React.Component {
 
   render () {
     return (
-      <ul id="document-entities-right" className="sidenav">
-        <li className="teal">
-          <a href="#" className="logo-container white-text">
-            <i className="material-icons white-text right">
-              book
-            </i>
-            In this document...
-          </a>
-        </li>
-        <li className="no-padding">
-          <ul className="collapsible collapsible-accordion">
-            {Object.keys(this.state.linked_entities).map((entity_type, i) => {
-              return (
-                <li className="bold waves-effect" key={i}>
-                  <a className="collapsible-header" tabIndex="0">
-                    {pluralize(entity_type, this.state.linked_entities[entity_type].length, true)}
-                    <i className="material-icons chevron">chevron_right</i>
-                  </a>
-                  <div className="collapsible-body">
-                    <ul>
-                      {this.state.linked_entities[entity_type].map((entity, j) => {
-                        return(
-                          <li key={j}>
-                            <a href="#">
-                              <i className={"material-icons left " + this.classColor(entity_type) + "-text"}>
-                                { this.classIcon(entity_type) }
-                              </i>
-                              { entity.text }
-                            </a>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </li>
-        <li className="divider"></li>
-        <li>
-          <a href="#"
-              className="entity-trigger orange-text text-darken-3 js-link-entity">
-            <i className="material-icons small orange-text text-darken-3 left">add</i>
-            Add an entity
-          </a>
-        </li>
-      </ul>
+      <React.Fragment>
+        <ul id="document-entities-right" className="sidenav">
+          <li className="teal">
+            <a href="#" className="logo-container white-text">
+              <i className="material-icons white-text right">
+                book
+              </i>
+              In this document...
+            </a>
+          </li>
+          <li className="no-padding">
+            <ul className="collapsible collapsible-accordion">
+              {Object.keys(this.state.linked_entities).map((entity_type, i) => {
+                return (
+                  <li className="bold waves-effect" key={i}>
+                    <a className="collapsible-header" tabIndex="0">
+                      {pluralize(entity_type, this.state.linked_entities[entity_type].length, true)}
+                      <i className="material-icons chevron">chevron_right</i>
+                    </a>
+                    <div className="collapsible-body">
+                      <ul>
+                        {this.state.linked_entities[entity_type].map((entity, j) => {
+                          return(
+                            <li key={j}>
+                              <a href="#">
+                                <i className={"material-icons left " + this.classColor(entity_type) + "-text"}>
+                                  { this.classIcon(entity_type) }
+                                </i>
+                                { entity.text }
+                              </a>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
+          <li className="divider"></li>
+          <li>
+            <a href="#"
+                className="entity-trigger orange-text text-darken-3 js-link-entity">
+              <i className="material-icons small orange-text text-darken-3 left">add</i>
+              Manage links
+            </a>
+          </li>
+        </ul>
+        <DocumentEntityLinkModal form_path={this.props.link_form_path} content_list={this.props.user_content} />
+      </React.Fragment>
     );
   }
 }
 
 DocumentEntitiesSidebar.propTypes = {
- linked_entities: PropTypes.object.isRequired
+ linked_entities: PropTypes.object.isRequired,
+ link_form_path:  PropTypes.string.isRequired
 };
 
 export default DocumentEntitiesSidebar;
