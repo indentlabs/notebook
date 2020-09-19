@@ -24,6 +24,4 @@ Notebook.init = function() {
   $('.materialboxed').materialbox();
 };
 
-// We're using $ -> here for document readiness, but if we ever use Turbolinks we'd want:
-// $(document).on "turbolinks:load", ->
 $(() => Notebook.init());
