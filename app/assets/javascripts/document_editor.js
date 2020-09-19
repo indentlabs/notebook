@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 Notebook.DocumentEditor = class DocumentEditor {
   constructor(el) {
     this.el = el;
@@ -113,7 +108,6 @@ Notebook.DocumentEditor = class DocumentEditor {
       } else {
         console.log('Waiting for existing autosave');
       }
-
     };
 
     editor.subscribe('editableInput', autosave);
@@ -127,7 +121,6 @@ Notebook.DocumentEditor = class DocumentEditor {
       if (keyCode === 9) {
         e.preventDefault();
       }
-
     });
   }
 };

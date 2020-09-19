@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 //# This file is prepended with an underscore to ensure it comes alphabetically-first
 //# when application.js includes all JS files in the directory with require_tree.
 //# Here be dragons.
@@ -26,7 +21,7 @@ Notebook.init = function() {
   $('.dropdown-trigger').dropdown({ coverTrigger: false });
   $('.tooltipped').tooltip({ enterDelay: 50 });
   $('.with-character-counter').characterCounter();
-  return $('.materialboxed').materialbox();
+  $('.materialboxed').materialbox();
 };
 
 // We're using $ -> here for document readiness, but if we ever use Turbolinks we'd want:
