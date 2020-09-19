@@ -30,8 +30,6 @@ class DocumentEntityLinkModal extends React.Component {
   }
 
   componentDidMount() {
-    console.log('initializing linker');
-
     $('.js-link-entity').click(function () {
       $('#entity-link-modal').modal('open');
       return false;
@@ -48,12 +46,10 @@ class DocumentEntityLinkModal extends React.Component {
   }
 
   classIcon(class_name) {
-    console.log(class_name);
     return window.ContentTypeData[class_name].icon;
   }
 
   classColor(class_name) {
-    console.log(class_name);
     return window.ContentTypeData[class_name].color;
   }
 

@@ -5,7 +5,7 @@ class PermissionService < Service
   end
 
   def self.user_owns_content?(user:, content:)
-    content.user == user
+    content.user.id == user.id
   end
 
   def self.user_owns_any_containing_universe?(user:, content:)

@@ -30,6 +30,7 @@ import HelpIcon from '@material-ui/icons/Help';
 import Collapse from '@material-ui/core/Collapse';
 
 import DocumentEntityLinkModal from './DocumentEntityLinkModal.js';
+import PageLookupSidebar from './PageLookupSidebar.js';
 
 import axios from 'axios';
 
@@ -76,7 +77,13 @@ class DocumentEntitiesSidebar extends React.Component {
     }, 1000);
   }
 
+  lookupPage(content_type, content_id) {
+    console.log('loading page: ' + content_type + ' ' + content_id);
+    this.refs.PageLookupSidebar.loadPage(content_type, content_id);
+  }
+
   render () {
+    console.log(this.state.linked_entities);
     return (
       <React.Fragment>
         <ul id="document-entities-right" className="sidenav">
@@ -101,7 +108,7 @@ class DocumentEntitiesSidebar extends React.Component {
                       <ul>
                         {this.state.linked_entities[entity_type].map((entity, j) => {
                           return(
-                            <li key={j}>
+                            <li key={j} onClick={() => { this.lookupPage(entity_type, entity.entity_id) }}>
                               <a href="#">
                                 <i className={"material-icons left " + this.classColor(entity_type) + "-text"}>
                                   { this.classIcon(entity_type) }
@@ -128,6 +135,7 @@ class DocumentEntitiesSidebar extends React.Component {
           </li>
         </ul>
         <DocumentEntityLinkModal form_path={this.props.link_form_path} content_list={this.props.user_content} />
+        <PageLookupSidebar ref="PageLookupSidebar" />
       </React.Fragment>
     );
   }

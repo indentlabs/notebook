@@ -59,7 +59,7 @@ class PageLookupSidebar extends React.Component {
       // load response into list
       this.setState({ 
         page_data: response.data,
-        show_data: true,
+        show_data: !response.data.hasOwnProperty('error'),
         page_type: page_type
       });
 
@@ -232,9 +232,11 @@ class PageLookupSidebar extends React.Component {
   render () {
     return (
       <React.Fragment>
+        {/*
         <Button onClick={() => this.loadPage('Character', 1) }>
           toggle drawer
         </Button>
+        */}
         <Drawer anchor='right' 
                 open={this.state['open']}
                 onClose={() => this.setDrawerVisible(false)}
