@@ -1,0 +1,34 @@
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+//# This file is prepended with an underscore to ensure it comes alphabetically-first
+//# when application.js includes all JS files in the directory with require_tree.
+//# Here be dragons.
+
+if (!window.Notebook) { window.Notebook = {}; }
+Notebook.init = function() {
+  // Initialize MaterializeCSS stuff
+  M.AutoInit();
+  $('.sidenav').sidenav();
+  $('.quick-reference-sidenav').sidenav({
+    closeOnClick: true,
+    edge:         'right',
+    draggable:    false
+  });
+  $('#recent-edits-sidenav').sidenav({
+    closeOnClick: true,
+    edge:         'right',
+    draggable:    false
+  });
+  $('.slider').slider({ height: 200, indicators: false });
+  $('.dropdown-trigger').dropdown({ coverTrigger: false });
+  $('.tooltipped').tooltip({ enterDelay: 50 });
+  $('.with-character-counter').characterCounter();
+  return $('.materialboxed').materialbox();
+};
+
+// We're using $ -> here for document readiness, but if we ever use Turbolinks we'd want:
+// $(document).on "turbolinks:load", ->
+$(() => Notebook.init());
