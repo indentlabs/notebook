@@ -23,7 +23,7 @@ class ApiContentSerializer
 
     self.raw_model        = content
 
-    self.page_tags        = content.page_tags.pluck(:tag) || []
+    self.page_tags        = content.page_tags.select(:id, :tag, :slug) || []
     self.documents        = content.documents             || []
 
     self.data = {
@@ -41,6 +41,7 @@ class ApiContentSerializer
         {
           id:     category.id,
           label:  category.label,
+          icon:   category.icon,
           fields: category.attribute_fields.order(:position).map { |field|
             {
               id:     field.id,

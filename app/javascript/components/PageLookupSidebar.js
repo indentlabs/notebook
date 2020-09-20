@@ -15,12 +15,15 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Button from '@material-ui/core/Button';
 import ListSubheader from '@material-ui/core/ListSubheader';
+import Link from '@material-ui/core/Link';
+import Chip from '@material-ui/core/Chip';
+import SimpleFormat from './SimpleFormat.js';
 
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import StarBorder from '@material-ui/icons/StarBorder';
-import HelpIcon from '@material-ui/icons/Help';
 import Collapse from '@material-ui/core/Collapse';
+
+var pluralize = require('pluralize');
 
 import axios from 'axios';
 
@@ -37,9 +40,28 @@ class PageLookupSidebar extends React.Component {
     };
   }
 
+  debug() {
+    this.loadPage('Character', 1);
+  }
+
+  componentDidMount() {
+    this.debug();
+  }
+
+  classIcon(class_name) {
+    return window.ContentTypeData[class_name].icon;
+  }
+
+  classColor(class_name) {
+    return window.ContentTypeData[class_name].color;
+  }
+
   async loadPage(page_type, page_id) {
     this.setDrawerVisible(true);
-    this.setState({ show_data: false });
+    this.setState({
+      show_data:     false,
+      category_open: {}
+    });
 
     // make api request
     await axios.get(
@@ -53,23 +75,33 @@ class PageLookupSidebar extends React.Component {
         }
       }
     ).then(response => {
-      console.log("get request");
-      console.log(response.data);
-
       // load response into list
       this.setState({ 
         page_data: response.data,
         show_data: !response.data.hasOwnProperty('error'),
-        page_type: page_type
+        page_type: page_type,
+        page_id:   page_id
       });
 
     }).catch(err => {
       console.log(err);
+      this.setDrawerVisible(false);
+
       return null;
     });
-
-    console.log("show data? " + this.state.show_data);
   };
+
+  content_page_view_path(content_type, content_id) {
+    return '/plan/' + pluralize(content_type.toLowerCase()) + '/' + content_id;
+  };
+
+  content_page_edit_path(content_type, content_id) {
+    return '/plan/' + pluralize(content_type.toLowerCase()) + '/' + content_id + '/edit';
+  };
+
+  content_page_tag_path(content_type, tag_slug) {
+    return '/plan/' + pluralize(content_type.toLowerCase()) + '/tagged/' + tag_slug;
+  }
 
   setDrawerVisible(open) {
     this.setState({ open: open });
@@ -79,29 +111,86 @@ class PageLookupSidebar extends React.Component {
     this.setState({ category_open: {
       [category]: !this.state.category_open[category]
     }});
-  }
+  };
 
   fieldData(field) {
     switch (field.type) {
       case "name":
       case "text_area":
+        console.log(field.value);
         return (
-          <ListItem key={field.id}>
-            <ListItemText primary={field.label} secondary={field.value} />
-          </ListItem>
+          <React.Fragment key={field.id}>
+            <ListSubheader component="div" style={{lineHeight: '1.5em'}}>
+              {field.label}
+            </ListSubheader>
+            <ListItem>
+              <SimpleFormat text={ field.value } />
+            </ListItem>
+          </React.Fragment>
         );
       
       case "link":
         return(
           <React.Fragment key={field.id}>
-            <ListSubheader component="div">
-              {field.label}
+            <ListSubheader component="div" style={{lineHeight: '1.5em'}}>
+              { pluralize(field.label, field.value.length, true) }
             </ListSubheader>
             {field.value.map((link) => (
-              <ListItem button key={link.id}>
-                <ListItemText primary={link.name} />
+              <ListItem button key={link.id} onClick={() => { this.loadPage(link.page_type, link.id); }}>
+                <ListItemText primary={
+                  <div>
+                    <i className={this.classColor(link.page_type) + '-text material-icons left'}>
+                      {this.classIcon(link.page_type)}
+                    </i>
+                    { link.name }
+                  </div>
+                } />
               </ListItem>
             ))}
+          </React.Fragment>
+        );
+      
+      case "universe":
+        console.log(field.value);
+        return(
+          <React.Fragment key={field.value.id}>
+            <ListSubheader component="div" style={{lineHeight: '1.5em'}}>
+              Universe
+            </ListSubheader>
+            <ListItem button onClick={() => { this.loadPage('Universe', field.id); }}>
+              <ListItemText primary={
+                <div>
+                  <i className={this.classColor('Universe') + '-text material-icons left'}>
+                    {this.classIcon('Universe')}
+                  </i>
+                  { this.state.page_data.universe.name }
+                </div>
+              } />
+            </ListItem>
+          </React.Fragment>
+        );
+
+      case "tags":
+        return(
+          <React.Fragment>
+            <ListSubheader component="div" style={{lineHeight: '1.5em'}}>
+              Tags
+            </ListSubheader>
+            <ListItem>
+              {field.value.map((tag) => {
+                return(
+                  <Chip
+                    variant="outlined"
+                    size="small"
+                    label={tag.tag}
+                    component="a"
+                    href={this.content_page_tag_path(this.state.page_type, tag.slug)}
+                    style={{marginRight: '0.25em'}}
+                    clickable
+                  />
+                );
+              })}
+            </ListItem>
           </React.Fragment>
         );
       
@@ -120,7 +209,13 @@ class PageLookupSidebar extends React.Component {
         >
           <List
             subheader={
-              <h5>&nbsp;&nbsp;&nbsp;{this.state.page_data.name}</h5>
+              <h5>
+                <i className="right">&nbsp;</i>
+                <i className={"material-icons right " + this.classColor(this.state.page_type) + '-text'}>
+                  {this.classIcon(this.state.page_type)}
+                </i>
+                &nbsp;&nbsp;&nbsp;{this.state.page_data.name}
+              </h5>
             }
             id="page-lookup-list"
           >
@@ -132,10 +227,10 @@ class PageLookupSidebar extends React.Component {
             {this.state.page_data.categories.map((category) => (
               <React.Fragment key={category.id}>
                 <ListItem button onClick={() => this.toggleCategoryOpen(category.label)}>
-                  <ListItemIcon>
-                    <HelpIcon />
-                  </ListItemIcon>
-                  <ListItemText primary={category.label} />
+                  <i className="material-icons left">
+                    { category.icon }
+                  </i>
+                  <ListItemText primary={ category.label } />
                   {!!this.state.category_open[category.label] ? <ExpandLess /> : <ExpandMore />}
                 </ListItem>
                 <Collapse in={!!this.state.category_open[category.label]} timeout="auto" unmountOnExit>
@@ -147,19 +242,23 @@ class PageLookupSidebar extends React.Component {
                 </Collapse>
               </React.Fragment>
             ))}
-            <Divider></Divider>
-            <ListItem button>
-              <ListItemIcon>
-                <HelpIcon />
+            <Divider />
+            <a href={this.content_page_view_path(this.state.page_type, this.state.page_id)}>
+              <ListItem button>
+                <i className={"blue-text material-icons left"}>
+                  { this.classIcon(this.state.page_type) }
+                </i>
                 <ListItemText primary={"View this " + this.state.page_type} />
-              </ListItemIcon>
-            </ListItem>
-            <ListItem button>
-              <ListItemIcon>
-                <HelpIcon />
+              </ListItem>
+            </a>
+            <a href={this.content_page_edit_path(this.state.page_type, this.state.page_id)}>
+              <ListItem button>
+                <i className={"green-text material-icons left"}>
+                  { this.classIcon(this.state.page_type) }
+                </i>
                 <ListItemText primary={"Edit this " + this.state.page_type} />
-              </ListItemIcon>
-            </ListItem>
+              </ListItem>
+            </a>
           </List>
         </div>
       );
@@ -178,7 +277,7 @@ class PageLookupSidebar extends React.Component {
             }
           >
             <ListItem>
-              <ListItemText primary="Loading data..." />
+              <ListItemText primary="Loading page..." />
             </ListItem>
           </List>
           <div className="center">
@@ -231,19 +330,13 @@ class PageLookupSidebar extends React.Component {
 
   render () {
     return (
-      <React.Fragment>
-        {/*
-        <Button onClick={() => this.loadPage('Character', 1) }>
-          toggle drawer
-        </Button>
-        */}
-        <Drawer anchor='right' 
-                open={this.state['open']}
-                onClose={() => this.setDrawerVisible(false)}
-        >
-          {this.pageData()}
-        </Drawer>
-      </React.Fragment>
+      <Drawer anchor='right'
+              open={this.state['open']}
+              onClose={() => this.setDrawerVisible(false)}
+              style={{width: '30% !important'}}
+      >
+        {this.pageData()}
+      </Drawer>
     )
   }
 }
