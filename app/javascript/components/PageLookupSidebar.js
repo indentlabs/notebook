@@ -333,7 +333,6 @@ class PageLookupSidebar extends React.Component {
       <Drawer anchor='right'
               open={this.state['open']}
               onClose={() => this.setDrawerVisible(false)}
-              style={{width: '30% !important'}}
       >
         {this.pageData()}
       </Drawer>
