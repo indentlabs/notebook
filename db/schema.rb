@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_12_000306) do
+ActiveRecord::Schema.define(version: 2020_09_22_011854) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1091,6 +1091,19 @@ ActiveRecord::Schema.define(version: 2020_09_12_000306) do
     t.datetime "updated_at", null: false
     t.index ["document_analysis_id"], name: "index_document_entities_on_document_analysis_id"
     t.index ["entity_type", "entity_id"], name: "index_document_entities_on_entity_type_and_entity_id"
+  end
+
+  create_table "document_revisions", force: :cascade do |t|
+    t.integer "document_id", null: false
+    t.string "title"
+    t.string "body"
+    t.string "synopsis"
+    t.integer "universe_id"
+    t.string "notes_text"
+    t.datetime "deleted_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["document_id"], name: "index_document_revisions_on_document_id"
   end
 
   create_table "documents", force: :cascade do |t|
@@ -3585,6 +3598,7 @@ ActiveRecord::Schema.define(version: 2020_09_12_000306) do
   add_foreign_key "document_categories", "document_analyses"
   add_foreign_key "document_concepts", "document_analyses"
   add_foreign_key "document_entities", "document_analyses"
+  add_foreign_key "document_revisions", "documents"
   add_foreign_key "documents", "universes"
   add_foreign_key "documents", "users"
   add_foreign_key "floras", "universes"

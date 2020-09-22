@@ -40,14 +40,6 @@ class PageLookupSidebar extends React.Component {
     };
   }
 
-  debug() {
-    this.loadPage('Character', 1);
-  }
-
-  componentDidMount() {
-    this.debug();
-  }
-
   classIcon(class_name) {
     return window.ContentTypeData[class_name].icon;
   }

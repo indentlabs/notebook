@@ -1,0 +1,32 @@
+<div class="card">
+  <div class="card-content">
+    <div class="card-title">Revision log</div>
+    <table>
+      <thead>
+        <tr>
+            <th>Title</th>
+            <th>Backed up</th>
+            <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td><%= @document.title %></td>
+          <td>Latest version</td>
+          <td><%= link_to 'Edit document', edit_document_path(@document), class: 'btn' %></td>
+        </tr>
+        <% @document_revisions.each do |document_revision| %>
+          <tr>
+            <td><%= document_revision.title %></td>
+            <td><span class="tooltipped" data-tooltip="Backed up at <%= document_revision.created_at %>"><%= time_ago_in_words document_revision.created_at %> ago</span></td>
+            <td>
+              <%= link_to 'View', document_document_revision_path(id: document_revision.id), class: 'btn' %>
+              <%= link_to 'Delete', document_document_revision_path(document: @document, id: document_revision.id), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn red lighten-5 red-text' %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

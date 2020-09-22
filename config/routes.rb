@@ -66,6 +66,7 @@ Rails.application.routes.draw do
     get  '/analysis',         to: 'documents#analysis',                on: :member
     get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
     post '/link_entity',      to: 'documents#link_entity',             on: :collection
+    resources :document_revisions, path: 'revisions', on: :member
 
     post :toggle_favorite, on: :member
 

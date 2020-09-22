@@ -3,9 +3,5 @@
 <%= content_for :full_width_page_header do %>
   <%= render partial: 'documents/components/document_name_bar', locals: { document: @document } %>
   <%= render partial: 'documents/components/autosave_bar', locals: { document: @document } %>
-
-  <% if user_signed_in? && current_user.can_update?(@document) %>
-    <%= render partial: 'documents/components/smart_sidebar', locals: { document: @document } %>
-  <% end %>
   <div id="editor"><%= ContentFormatterService.substitute_content_links(@document.body.try(:html_safe) || "", current_user).html_safe %></div>
 <% end %>

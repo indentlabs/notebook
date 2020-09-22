@@ -1,0 +1,14 @@
+<% set_meta_tags title: @document_revision.title, description: truncate(@document_revision.body) %>
+
+<%= content_for :full_width_page_header do %>
+
+  <%= render partial: 'documents/components/document_name_bar', locals: { document: @document_revision } %>
+  <%= render partial: 'documents/components/autosave_bar', locals: { document: @document_revision } %>
+
+  <div class="card-panel yellow lighten-5">
+    You are viewing a revision of "<%= @document.title %>" that was backed up <span class="tooltipped" data-tooltip="Backed up at <%= @document_revision.created_at %>"><%= time_ago_in_words @document_revision.created_at %> ago</span>.
+    <%= link_to 'Click here to return to the latest version of this document', edit_document_path(@document) %>.
+  </div>
+
+  <div id="editor"><%= ContentFormatterService.substitute_content_links(@document_revision.body.try(:html_safe) || "", current_user).html_safe %></div>
+<% end %>
