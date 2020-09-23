@@ -86,18 +86,6 @@ class DocumentEntityLinkModal extends React.Component {
                       {content_list.map((content, j) => {
                         return(
                           <React.Fragment>
-                            {/*
-                            <ToggleButton
-                              value="check"
-                              selected={false}
-                              onChange={() => {
-                                this.toggleEntityLink(content);
-                              }}
-                            >
-                              { content.name || "Untitled" }
-                            </ToggleButton>
-                            */}
-
                             <a href="#" className={this.classColor(content_type) + "-text js-link-entity-selection"} data-id={content.id} data-type={content_type} key={j}>
                               <li className="collection-item hoverable">
                                 <i className="material-icons left">{ this.classIcon(content_type) }</i>

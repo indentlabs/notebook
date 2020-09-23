@@ -1,10 +1,10 @@
 class DocumentRevisionsController < ApplicationController
-  before_action :set_document, only: [:index, :show]
+  before_action :set_document, only: [:index, :show, :destroy]
   before_action :set_document_revision, only: [:show, :edit, :update, :destroy]
 
   # GET /document_revisions
   def index
-    @document_revisions = @document.document_revisions
+    @document_revisions = @document.document_revisions.order('created_at DESC')
   end
 
   # GET /document_revisions/1
@@ -43,7 +43,7 @@ class DocumentRevisionsController < ApplicationController
   # DELETE /document_revisions/1
   def destroy
     @document_revision.destroy
-    redirect_to document_revisions_url, notice: 'Document revision was successfully destroyed.'
+    redirect_to document_document_revisions_path(@document), notice: 'Document revision was successfully deleted.'
   end
 
   private
