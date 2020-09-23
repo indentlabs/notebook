@@ -1,6 +1,6 @@
 /*
   Usage:
-  <%= react_component("PageLookupSidebar", {}) %>
+  <%= react_component("PageLookupSidebar", {document_id: @document.id}) %>
 */
 
 import React     from "react"
@@ -93,6 +93,10 @@ class PageLookupSidebar extends React.Component {
 
   content_page_tag_path(content_type, tag_slug) {
     return '/plan/' + pluralize(content_type.toLowerCase()) + '/tagged/' + tag_slug;
+  }
+
+  link_destroy_path(document_id, page_type, page_id) {
+    return '/documents/' + document_id + '/unlink/' + page_type + '/' + page_id;
   }
 
   setDrawerVisible(open) {
@@ -251,6 +255,14 @@ class PageLookupSidebar extends React.Component {
                 <ListItemText primary={"Edit this " + this.state.page_type} />
               </ListItem>
             </a>
+            <a href={this.link_destroy_path(this.props.document_id, this.state.page_type, this.state.page_id)}>
+              <ListItem button>
+                <i className={"red-text material-icons left"}>
+                  remove
+                </i>
+                <ListItemText primary={"Remove this link"} />
+              </ListItem>
+            </a>
           </List>
         </div>
       );
@@ -332,16 +344,8 @@ class PageLookupSidebar extends React.Component {
   }
 }
 
-// PageLookupSidebar.propTypes = {
-//   content:       PropTypes.exact({
-//     id:             PropTypes.number.isRequired,
-//     name:           PropTypes.string.isRequired,
-//     page_type:      PropTypes.string.isRequired,
-//     privacy:        PropTypes.string.isRequired
-//   }).isRequired,
-//   content_icon:  PropTypes.string.isRequired,
-//   content_color: PropTypes.string.isRequired,
-//   submit_path:   PropTypes.string.isRequired
-// };
+PageLookupSidebar.propTypes = {
+  document_id: PropTypes.integer
+};
 
 export default PageLookupSidebar;

@@ -202,6 +202,22 @@ class DocumentsController < ApplicationController
     redirect_back(fallback_location: analysis_document_path(document), notice: "Entity removed from analysis.")
   end
 
+  def unlink_entity
+    document = Document.find_by(id: params[:id])
+    return unless document.present?
+
+    entity   = document.document_entities.find_by(
+      entity_type: params[:page_type],
+      entity_id:   params[:page_id]
+    )
+    return unless entity.present?
+
+    return unless user_signed_in? && document.user == current_user
+    entity.destroy
+
+    redirect_back(fallback_location: document, notice: "Page unlinked.")
+  end
+
   def destroy_analysis
     document = Document.find_by(id: params[:id])
     return unless document.user == current_user

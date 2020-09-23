@@ -72,7 +72,11 @@ Rails.application.routes.draw do
 
     # todo these routes don't belong here and make for awfully weird urls (/documents/:analysis_id/destroy, etc)
     get  '/destroy_analysis', to: 'documents#destroy_analysis',        on: :member
+
+    # deprecated route:
     get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
+    # new route:
+    get  '/unlink/:page_type/:page_id', to: 'documents#unlink_entity', on: :member
 
   end
 

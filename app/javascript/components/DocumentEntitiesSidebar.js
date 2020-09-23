@@ -2,6 +2,7 @@
   Usage:
   <%=
     react_component("DocumentEntitiesSidebar", {
+      document_id:     3,
       linked_entities: { 
         'Character' => [], 
         ...
@@ -135,7 +136,7 @@ class DocumentEntitiesSidebar extends React.Component {
           </li>
         </ul>
         <DocumentEntityLinkModal form_path={this.props.link_form_path} content_list={this.props.user_content} />
-        <PageLookupSidebar ref="PageLookupSidebar" />
+        <PageLookupSidebar ref="PageLookupSidebar" document_id={this.props.document_id} />
       </React.Fragment>
     );
   }
