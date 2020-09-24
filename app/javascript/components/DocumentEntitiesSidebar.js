@@ -131,7 +131,7 @@ class DocumentEntitiesSidebar extends React.Component {
             <a href="#"
                 className="entity-trigger orange-text text-darken-3 js-link-entity">
               <i className="material-icons small orange-text text-darken-3 left">add</i>
-              Manage links
+              Link a page
             </a>
           </li>
         </ul>

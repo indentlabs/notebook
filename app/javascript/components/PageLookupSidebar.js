@@ -345,7 +345,7 @@ class PageLookupSidebar extends React.Component {
 }
 
 PageLookupSidebar.propTypes = {
-  document_id: PropTypes.integer
+  document_id: PropTypes.number
 };
 
 export default PageLookupSidebar;
