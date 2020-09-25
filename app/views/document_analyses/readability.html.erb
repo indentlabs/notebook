@@ -93,6 +93,14 @@
               </div>
             </li>
           <% end %>
+          <% if @analysis.smog_grade %>
+            <li>
+              SMOG grade: <%= @analysis.smog_grade.try(:round) %> / 16
+              <div class="progress">
+                <div class="determinate" style="width: <%= 100 * @analysis.smog_grade.try(:round) / 16 %>%"></div>
+              </div>
+            </li>
+          <% end %>
           <% if @analysis.combined_average_reading_level %>
             <li>
               Combined average reading level: <%= @analysis.combined_average_reading_level.try(:round) %> / 16
@@ -109,6 +117,7 @@
 
 <h5 class="grey-text">Readability scales</h5>
 <%= render partial: 'document_analyses/readability/flesch_kincaid',              locals: { analysis: @analysis } %>
+<%= render partial: 'document_analyses/readability/smog_grade',                  locals: { analysis: @analysis } %>
 <%= render partial: 'document_analyses/readability/coleman_liau',                locals: { analysis: @analysis } %>
 <%= render partial: 'document_analyses/readability/gunning_fog',                 locals: { analysis: @analysis } %>
 <%= render partial: 'document_analyses/readability/automated_readability_index', locals: { analysis: @analysis } %>

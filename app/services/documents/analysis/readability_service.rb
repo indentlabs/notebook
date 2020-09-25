@@ -13,6 +13,7 @@ module Documents
         analysis.coleman_liau_index             = self.coleman_liau_index(document)
         analysis.automated_readability_index    = self.automated_readability_index(document)
         analysis.gunning_fog_index              = self.gunning_fog_index(document)
+        analysis.smog_grade                     = self.smog_grade(document)
 
         analysis.combined_average_reading_level = self.combined_average_grade_level(analysis)
         analysis.readability_score              = self.readability_score(analysis)

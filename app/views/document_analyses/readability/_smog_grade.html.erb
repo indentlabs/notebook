@@ -1,40 +1,40 @@
-<% if analysis.forcast_grade_level %>
+<% if analysis.smog_grade %>
   <div class="row">
     <div class="col s12 m12 l12">
       <div class="card">
         <div class="card-content">
           <div class="card-title">
-            <span class="right"><%= analysis.forcast_grade_level.try(:round) %> / 16</span>
+            <span class="right"><%= analysis.smog_grade.try(:round) %> / 16</span>
             <i class="left material-icons orange-text">bubble_chart</i>
-            FORCAST Readability Formula
+            SMOG grade
           </div>
           <div class="progress">
-            <div class="determinate" style="width: <%= 100 * analysis.forcast_grade_level.try(:round) / 16 %>%"></div>
+            <div class="determinate" style="width: <%= 100 * analysis.smog_grade.try(:round) / 16 %>%"></div>
           </div>
           <div class="row">
             <div class="col s12 m12 l7">
               <p>
                 According to this scale, your document is
-                <% if analysis.forcast_grade_level.round > 12 %>
+                <% if analysis.smog_grade.round > 12 %>
                   <strong>
-                    Understandable by a <%= (analysis.forcast_grade_level.round - 12).ordinalize %>-year college student.
+                    Understandable by a <%= (analysis.smog_grade.round - 12).ordinalize %>-year college student.
                   </strong>
                 <% else %>
                   <strong>
-                    Understandable by a <%= analysis.forcast_grade_level.round.ordinalize %>-grade reader.
+                    Understandable by a <%= analysis.smog_grade.round.ordinalize %>-grade reader.
                   </strong>
                 <% end %>
               </p>
               <br />
               <p>
-                The FORCAST Readability Formula was first published by UNESCO’s International Institute for Adult Literacy in 1973 in
-                the <em>Literacy Discussion</em> journal. It focuses on functional literacy and how likely it is the average reader will
-                completely understand a passage.
+                Don't let the silly acryonym (The Simple Measure of Gobbledygook) sidetrack you; the SMOG readability formula was first
+                published by Dr. G. Harry McLaughlin in 1969 as an improvement to the Fog index. Like other readability scales, SMOG aims
+                to measure at what U.S. grade level a reader will fully understand a work of text.
               </p>
               <br />
               <p>
-                This formula is recommended for short-form nonfiction applications such as multiple-choice quizzes, tests, entrance forms,
-                and technical regulations, as well as when documents include many tables or lists.
+                SMOG has been validated against reading comprehension tests, predicting with 98.5% accuracy (and a standard error of 1.5%)
+                which students had a 100% comprehension rate on a given piece of text.
               </p>
               <br />
               <p>
@@ -48,7 +48,11 @@
               <ul>
                 <li>
                   <i class="material-icons left red-text">arrow_drop_up</i>
-                  Use more polysyllabic words.
+                  Use more words of at least three syllables.
+                </li>
+                <li class="clearfix">
+                  <i class="material-icons left red-text">arrow_drop_up</i>
+                  Use more sentences.
                 </li>
               </ul>
               <br />
@@ -58,7 +62,11 @@
               <ul>
                 <li>
                   <i class="material-icons left green-text">arrow_drop_down</i>
-                  Use more monosyllabic words.
+                  Use more one- and two-syllable words.
+                </li>
+                <li class="clearfix">
+                  <i class="material-icons left green-text">arrow_drop_up</i>
+                  Use fewer sentences.
                 </li>
               </ul>
               <br />
