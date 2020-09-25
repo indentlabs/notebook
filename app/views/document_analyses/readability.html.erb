@@ -173,7 +173,7 @@
         </p>
         <%=
           pie_chart({
-            'simple words'  => @analysis.simple_words_count,
+            "simple words"  => @analysis.simple_words_count,
             'complex words' => @analysis.complex_words_count
           }, colors: [Document.hex_color, "#FF6977"])
         %>
@@ -223,98 +223,114 @@
   <%# TODO: Order these cards by % %>
   <%# TODO: Darken/lighten card based on % %>
   <div class="col s12 m3">
-    <div class="card blue">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:adjective).round / 5).clamp(1, 3) %>">
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
             <%= @analysis.pos_percentage(:adjective) %>%
           </div>
-          Adjectives
+          <strong>Adjectives</strong>
         </span>
+        <p>~<%= (@analysis.adjective_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.adjective_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
       </div>
     </div>
   </div>
   <div class="col s12 m3">
-    <div class="card blue lighten-1">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:noun).round / 5).clamp(1, 3) %>">
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
             <%= @analysis.pos_percentage(:noun) %>%
           </div>
-          Nouns
+          <strong>Nouns</strong>
         </span>
+        <p>~<%= (@analysis.noun_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.noun_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
       </div>
     </div>
   </div>
   <div class="col s12 m3">
-    <div class="card blue lighten-2">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:verb).round / 5).clamp(1, 3) %>">
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
             <%= @analysis.pos_percentage(:verb) %>%
           </div>
-          Verbs
+          <strong>Verbs</strong>
         </span>
+        <p>~<%= (@analysis.verb_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.verb_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
       </div>
     </div>
   </div>
   <div class="col s12 m3">
-    <div class="card blue lighten-3">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:pronoun).round / 5).clamp(1, 3) %>">
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
             <%= @analysis.pos_percentage(:pronoun) %>%
           </div>
-          Pronouns
+          <strong>Pronouns</strong>
         </span>
+        <p>~<%= (@analysis.pronoun_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.pronoun_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
       </div>
     </div>
   </div>
   <div class="col s12 m3">
-    <div class="card blue lighten-3">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:proper_noun).round / 5).clamp(1, 3) %>">
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
             <%= @analysis.pos_percentage(:proper_noun) %>%
           </div>
-          Proper nouns
+          <strong>Proper nouns</strong>
         </span>
+        <p>~<%= (@analysis.proper_noun_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.proper_noun_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
       </div>
     </div>
   </div>
   <div class="col s12 m3">
-    <div class="card blue lighten-3">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:conjunction).round / 5).clamp(1, 3) %>">
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
             <%= @analysis.pos_percentage(:conjunction) %>%
           </div>
-          Conjunctions
+          <strong>Conjunctions</strong>
         </span>
+        <p>~<%= (@analysis.conjunction_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.conjunction_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
       </div>
     </div>
   </div>
   <div class="col s12 m3">
-    <div class="card blue lighten-2">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:adverb).round / 5).clamp(1, 3) %>">
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
             <%= @analysis.pos_percentage(:adverb) %>%
           </div>
-          Adverbs
+          <strong>Adverbs</strong>
         </span>
+        <p>~<%= (@analysis.adverb_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.adverb_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
       </div>
     </div>
   </div>
   <div class="col s12 m3">
-    <div class="card blue lighten-1">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:interrogative).round / 5).clamp(1, 3) %>">
       <div class="card-content white-text center">
         <span class="card-title">
           <div class="white-text">
             <%= @analysis.pos_percentage(:interrogative) %>%
           </div>
-          Interrogatives
+          <strong>Interrogatives</strong>
         </span>
+        <p>~<%= (@analysis.interrogative_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.interrogative_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
       </div>
     </div>
   </div>
@@ -368,6 +384,58 @@
             ["Typical Writing",     22]
           ], colors: [Document.hex_color])
         %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Averaged structure ratios</div>
+        <table>
+          <tr>
+            <th></th>
+            <th>... per word</th>
+            <th>... per sentence</th>
+            <th>... per paragraph</th>
+          </tr>
+          <tr>
+            <th>Letters...</th>
+            <td><%= (@analysis.character_count.to_f / @analysis.word_count).round(4) %></td>
+            <td><%= (@analysis.character_count.to_f / @analysis.sentence_count).round(4) %></td>
+            <td><%= (@analysis.character_count.to_f / @analysis.paragraph_count).round(4) %></td>
+          </tr>
+          <tr>
+            <th>Words...</th>
+            <td><%= (@analysis.word_count.to_f / @analysis.word_count).round(4) %></td>
+            <td><%= (@analysis.word_count.to_f / @analysis.sentence_count).round(4) %></td>
+            <td><%= (@analysis.word_count.to_f / @analysis.paragraph_count).round(4) %></td>
+          </tr>
+          <tr>
+            <th>Simple words...</th>
+            <td><%= (@analysis.simple_words_count.to_f / @analysis.word_count).round(4) %></td>
+            <td><%= (@analysis.simple_words_count.to_f / @analysis.sentence_count).round(4) %></td>
+            <td><%= (@analysis.simple_words_count.to_f / @analysis.paragraph_count).round(4) %></td>
+          </tr>
+          <tr>
+            <th>Complex words...</th>
+            <td><%= (@analysis.complex_words_count.to_f / @analysis.word_count).round(4) %></td>
+            <td><%= (@analysis.complex_words_count.to_f / @analysis.sentence_count).round(4) %></td>
+            <td><%= (@analysis.complex_words_count.to_f / @analysis.paragraph_count).round(4) %></td>
+          </tr>
+          <tr>
+            <th>Sentences...</th>
+            <td><%= (@analysis.sentence_count.to_f / @analysis.word_count).round(4) %></td>
+            <td><%= (@analysis.sentence_count.to_f / @analysis.sentence_count).round(4) %></td>
+            <td><%= (@analysis.sentence_count.to_f / @analysis.paragraph_count).round(4) %></td>
+          </tr>
+          <tr>
+            <th>Paragraphs...</th>
+            <td><%= (@analysis.paragraph_count.to_f / @analysis.word_count).round(4) %></td>
+            <td><%= (@analysis.paragraph_count.to_f / @analysis.sentence_count).round(4) %></td>
+            <td><%= (@analysis.paragraph_count.to_f / @analysis.paragraph_count).round(4) %></td>
+          </tr>
+        </table>
       </div>
     </div>
   </div>
