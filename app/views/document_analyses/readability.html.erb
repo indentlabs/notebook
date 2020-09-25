@@ -131,7 +131,7 @@
     <div class="card">
       <div class="card-content">
         <div class="card-title">Word variety</div>
-        <p>Number of words used...</p>
+        <p>Number of unique words used...</p>
         <%= 
           pie_chart({
             'exactly once'   => @analysis.words_used_once_count, 
@@ -168,13 +168,11 @@
     <div class="card">
       <div class="card-content">
         <div class="card-title">Word complexity</div>
-        <p>
-          Number of unique...
-        </p>
+        <p>Of all your words...</p>
         <%=
           pie_chart({
-            "simple words"  => @analysis.simple_words_count,
-            'complex words' => @analysis.complex_words_count
+            "simple words (#{(@analysis.simple_words_count.to_f / @analysis.word_count * 100).round}%)"  => @analysis.simple_words_count,
+            "complex words (#{(@analysis.complex_words_count.to_f / @analysis.word_count * 100).round}%)" => @analysis.complex_words_count,
           }, colors: [Document.hex_color, "#FF6977"])
         %>
       </div>

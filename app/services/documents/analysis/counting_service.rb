@@ -30,8 +30,8 @@ module Documents
         analysis.words_used_once_count = analysis.word_count - analysis.words_used_repeatedly_count
 
         # Complexity counters
-        analysis.complex_words_count = document.complex_words.count
-        analysis.simple_words_count  = document.simple_words.count
+        analysis.complex_words_count = document.words.select { |word| document.complex_words.include?(word) }.count
+        analysis.simple_words_count  = document.words.select { |word| document.simple_words.include?(word) }.count
         analysis.words_per_sentence  = document.sentences.map { |sentence| sentence.split(' ').count }
 
         # Ensure we save or else throw an exception
