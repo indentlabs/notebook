@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_29_011900) do
+ActiveRecord::Schema.define(version: 2020_09_25_095907) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -39,6 +39,18 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_api_keys_on_user_id"
+  end
+
+  create_table "api_requests", force: :cascade do |t|
+    t.integer "application_integration_id"
+    t.integer "integration_authorization_id"
+    t.string "result"
+    t.integer "updates_used", default: 0
+    t.string "ip_address"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["application_integration_id"], name: "index_api_requests_on_application_integration_id"
+    t.index ["integration_authorization_id"], name: "index_api_requests_on_integration_authorization_id"
   end
 
   create_table "application_integrations", force: :cascade do |t|
@@ -1040,6 +1052,8 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
     t.integer "interrogative_count"
     t.integer "proper_noun_count"
     t.datetime "queued_at"
+    t.float "linsear_write_grade"
+    t.float "dale_chall_grade"
     t.index ["document_id"], name: "index_document_analyses_on_document_id"
   end
 
@@ -1079,6 +1093,19 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
     t.datetime "updated_at", null: false
     t.index ["document_analysis_id"], name: "index_document_entities_on_document_analysis_id"
     t.index ["entity_type", "entity_id"], name: "index_document_entities_on_entity_type_and_entity_id"
+  end
+
+  create_table "document_revisions", force: :cascade do |t|
+    t.integer "document_id", null: false
+    t.string "title"
+    t.string "body"
+    t.string "synopsis"
+    t.integer "universe_id"
+    t.string "notes_text"
+    t.datetime "deleted_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["document_id"], name: "index_document_revisions_on_document_id"
   end
 
   create_table "documents", force: :cascade do |t|
@@ -1446,6 +1473,10 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
     t.string "ip_address"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "origin"
+    t.string "content_type"
+    t.string "user_agent"
+    t.string "user_token"
     t.index ["application_integration_id"], name: "index_integration_authorizations_on_application_integration_id"
     t.index ["user_id"], name: "index_integration_authorizations_on_user_id"
   end
@@ -3435,6 +3466,8 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "api_keys", "users"
+  add_foreign_key "api_requests", "application_integrations"
+  add_foreign_key "api_requests", "integration_authorizations"
   add_foreign_key "application_integrations", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
@@ -3567,6 +3600,7 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
   add_foreign_key "document_categories", "document_analyses"
   add_foreign_key "document_concepts", "document_analyses"
   add_foreign_key "document_entities", "document_analyses"
+  add_foreign_key "document_revisions", "documents"
   add_foreign_key "documents", "universes"
   add_foreign_key "documents", "users"
   add_foreign_key "floras", "universes"

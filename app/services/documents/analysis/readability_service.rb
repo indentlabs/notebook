@@ -14,6 +14,8 @@ module Documents
         analysis.automated_readability_index    = self.automated_readability_index(document)
         analysis.gunning_fog_index              = self.gunning_fog_index(document)
         analysis.smog_grade                     = self.smog_grade(document)
+        analysis.linsear_write_grade            = self.linsear_write_grade(document)
+        # todo clamp/scale these from 0..16?
 
         analysis.combined_average_reading_level = self.combined_average_grade_level(analysis)
         analysis.readability_score              = self.readability_score(analysis)
@@ -48,6 +50,10 @@ module Documents
 
       def self.smog_grade(document)
         @smog_grade ||= 1.043 * Math.sqrt(document.complex_words.length.to_f * (30.0 / document.sentences.length)) + 3.1291
+      end
+
+      def self.linsear_write_grade(document)
+        @linsear_write_grade ||= TextStat.linsear_write_formula(document.plaintext)
       end
 
       def self.combined_average_grade_level(analysis)
