@@ -1054,6 +1054,8 @@ ActiveRecord::Schema.define(version: 2020_09_25_095907) do
     t.datetime "queued_at"
     t.float "linsear_write_grade"
     t.float "dale_chall_grade"
+    t.integer "unique_complex_words_count"
+    t.integer "unique_simple_words_count"
     t.index ["document_id"], name: "index_document_analyses_on_document_id"
   end
 

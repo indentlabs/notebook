@@ -32,6 +32,8 @@ module Documents
         # Complexity counters
         analysis.complex_words_count = document.words.select { |word| document.complex_words.include?(word) }.count
         analysis.simple_words_count  = document.words.select { |word| document.simple_words.include?(word) }.count
+        analysis.unique_complex_words_count = document.complex_words.count
+        analysis.unique_simple_words_count  = document.simple_words.count
         analysis.words_per_sentence  = document.sentences.map { |sentence| sentence.split(' ').count }
 
         # Ensure we save or else throw an exception

@@ -218,8 +218,80 @@
     </div>
   </div>
 
+<div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Lexical richness: % unique words per passage</div>
+
+        <%= 
+          column_chart([
+            ['This document',       @analysis.pos_percentage(:words_used_once)],
+            ['Hemingway',           12.5],
+            ['The Grapes of Wrath', 14.5],
+            ['The Great Gatsby',    16],
+            ["Swann's Way",         17],
+            ["Typical Writing",     22]
+          ], colors: [Document.hex_color])
+        %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Averaged structure ratios</div>
+        <table>
+          <tr>
+            <th></th>
+            <th>... per word</th>
+            <th>... per sentence</th>
+            <th>... per paragraph</th>
+          </tr>
+          <tr>
+            <th>Letters...</th>
+            <td><%= (@analysis.character_count.to_f / @analysis.word_count).round(4) %></td>
+            <td><%= (@analysis.character_count.to_f / @analysis.sentence_count).round(4) %></td>
+            <td><%= (@analysis.character_count.to_f / @analysis.paragraph_count).round(4) %></td>
+          </tr>
+          <tr>
+            <th>Words...</th>
+            <td><%= (@analysis.word_count.to_f / @analysis.word_count).round(4) %></td>
+            <td><%= (@analysis.word_count.to_f / @analysis.sentence_count).round(4) %></td>
+            <td><%= (@analysis.word_count.to_f / @analysis.paragraph_count).round(4) %></td>
+          </tr>
+          <tr>
+            <th>Simple words...</th>
+            <td><%= (@analysis.simple_words_count.to_f / @analysis.word_count).round(4) %></td>
+            <td><%= (@analysis.simple_words_count.to_f / @analysis.sentence_count).round(4) %></td>
+            <td><%= (@analysis.simple_words_count.to_f / @analysis.paragraph_count).round(4) %></td>
+          </tr>
+          <tr>
+            <th>Complex words...</th>
+            <td><%= (@analysis.complex_words_count.to_f / @analysis.word_count).round(4) %></td>
+            <td><%= (@analysis.complex_words_count.to_f / @analysis.sentence_count).round(4) %></td>
+            <td><%= (@analysis.complex_words_count.to_f / @analysis.paragraph_count).round(4) %></td>
+          </tr>
+          <tr>
+            <th>Sentences...</th>
+            <td><%= (@analysis.sentence_count.to_f / @analysis.word_count).round(4) %></td>
+            <td><%= (@analysis.sentence_count.to_f / @analysis.sentence_count).round(4) %></td>
+            <td><%= (@analysis.sentence_count.to_f / @analysis.paragraph_count).round(4) %></td>
+          </tr>
+          <tr>
+            <th>Paragraphs...</th>
+            <td><%= (@analysis.paragraph_count.to_f / @analysis.word_count).round(4) %></td>
+            <td><%= (@analysis.paragraph_count.to_f / @analysis.sentence_count).round(4) %></td>
+            <td><%= (@analysis.paragraph_count.to_f / @analysis.paragraph_count).round(4) %></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <h5 class="grey-text">Style</h5>
+
   <%# TODO: Order these cards by % %>
-  <%# TODO: Darken/lighten card based on % %>
   <div class="col s12 m3">
     <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:adjective).round / 5).clamp(1, 3) %>">
       <div class="card-content white-text center">
@@ -367,74 +439,4 @@
     </div>
   </div>
 
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Lexical richness: % unique words per passage</div>
-
-        <%= 
-          column_chart([
-            ['This document',       @analysis.pos_percentage(:words_used_once)],
-            ['Hemingway',           12.5],
-            ['The Grapes of Wrath', 14.5],
-            ['The Great Gatsby',    16],
-            ["Swann's Way",         17],
-            ["Typical Writing",     22]
-          ], colors: [Document.hex_color])
-        %>
-      </div>
-    </div>
-  </div>
-
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Averaged structure ratios</div>
-        <table>
-          <tr>
-            <th></th>
-            <th>... per word</th>
-            <th>... per sentence</th>
-            <th>... per paragraph</th>
-          </tr>
-          <tr>
-            <th>Letters...</th>
-            <td><%= (@analysis.character_count.to_f / @analysis.word_count).round(4) %></td>
-            <td><%= (@analysis.character_count.to_f / @analysis.sentence_count).round(4) %></td>
-            <td><%= (@analysis.character_count.to_f / @analysis.paragraph_count).round(4) %></td>
-          </tr>
-          <tr>
-            <th>Words...</th>
-            <td><%= (@analysis.word_count.to_f / @analysis.word_count).round(4) %></td>
-            <td><%= (@analysis.word_count.to_f / @analysis.sentence_count).round(4) %></td>
-            <td><%= (@analysis.word_count.to_f / @analysis.paragraph_count).round(4) %></td>
-          </tr>
-          <tr>
-            <th>Simple words...</th>
-            <td><%= (@analysis.simple_words_count.to_f / @analysis.word_count).round(4) %></td>
-            <td><%= (@analysis.simple_words_count.to_f / @analysis.sentence_count).round(4) %></td>
-            <td><%= (@analysis.simple_words_count.to_f / @analysis.paragraph_count).round(4) %></td>
-          </tr>
-          <tr>
-            <th>Complex words...</th>
-            <td><%= (@analysis.complex_words_count.to_f / @analysis.word_count).round(4) %></td>
-            <td><%= (@analysis.complex_words_count.to_f / @analysis.sentence_count).round(4) %></td>
-            <td><%= (@analysis.complex_words_count.to_f / @analysis.paragraph_count).round(4) %></td>
-          </tr>
-          <tr>
-            <th>Sentences...</th>
-            <td><%= (@analysis.sentence_count.to_f / @analysis.word_count).round(4) %></td>
-            <td><%= (@analysis.sentence_count.to_f / @analysis.sentence_count).round(4) %></td>
-            <td><%= (@analysis.sentence_count.to_f / @analysis.paragraph_count).round(4) %></td>
-          </tr>
-          <tr>
-            <th>Paragraphs...</th>
-            <td><%= (@analysis.paragraph_count.to_f / @analysis.word_count).round(4) %></td>
-            <td><%= (@analysis.paragraph_count.to_f / @analysis.sentence_count).round(4) %></td>
-            <td><%= (@analysis.paragraph_count.to_f / @analysis.paragraph_count).round(4) %></td>
-          </tr>
-        </table>
-      </div>
-    </div>
-  </div>
 </div>
