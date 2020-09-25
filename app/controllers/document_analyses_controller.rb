@@ -65,6 +65,10 @@ class DocumentAnalysesController < ApplicationController
       {
         label: "Readability",
         href:  analysis_readability_document_path(@document)
+      },
+      {
+        label: "Style",
+        href:  analysis_style_document_path(@document)
       }
     ]
   end

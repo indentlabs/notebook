@@ -68,6 +68,7 @@ Rails.application.routes.draw do
     # Document Analysis routes
     get '/analysis/',            to: 'document_analyses#show',        on: :member      
     get '/analysis/readability', to: 'document_analyses#readability', on: :member
+    get '/analysis/style',       to: 'document_analyses#style',       on: :member
 
     get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
 

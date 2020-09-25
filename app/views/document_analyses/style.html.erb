@@ -1,0 +1,435 @@
+<h5 class="grey-text">Style</h5>
+
+<style>
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+.zoom {
+  cursor: move;
+  fill: none;
+  pointer-events: all;
+}
+span.sentence {
+  padding: 0.25em 0.5em;
+  line-height: 1.9em;
+}
+</style>
+
+<% if @analysis.sentence_count > 1 %>
+<div class="row">
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Words per sentence</div>
+        <div id="words-per-sentence" ></div>
+      </div>
+      <div class="card-action">
+        <a class="activator blue-text text-darken-4">
+          How to use this chart
+        </a>
+      </div>
+      <div class="card-reveal">
+        <span class="card-title">
+          Words per sentence
+          <i class="material-icons right">close</i>
+        </span>
+        <div class="row">
+          <div class="col s12 m6 l4">
+            <p>
+              Sentence length can be a powerful tool in your writing and you should
+              use it purposefully. Longer sentences can lure a reader in, while shorter,
+              more stacatto sentences keep that attention with fast-paced action.
+            </p>
+            <p>
+              This chart shows the length, in words, of each sentence through your
+              document. Groups of shorter sentences likely read faster, while groups
+              of longer sentences may be dense or hard to read.
+            </p>
+            <p>
+              Selecting an area on the chart will zoom in to focus on just that area.
+              Double-clicking the chart will reset the zoom back to your entire document.
+            </p>
+          </div>
+          <div class="col s12 m6 l7 offset-l1">
+            <blockquote style="font-size: 110%">
+              <p>
+                <span class="black-text red lighten-4">This sentence has five words.</span>
+                <span class="black-text red lighten-4">Here are five more words.</span>
+                <span class="black-text red lighten-4">Five-word sentences are fine.</span>
+                <span class="black-text red lighten-4">But several together become monotonous.</span>
+                <span class="black-text red lighten-4">Listen to what is happening.</span>
+                <span class="black-text red lighten-4">The writing is getting boring.</span>
+                <span class="black-text red lighten-4">The sound of it drones.</span>
+                <span class="black-text red lighten-4">It’s like a stuck record.</span>
+                <span class="black-text red lighten-4">The ear demands some variety.</span>
+              </p>
+
+              <p>
+                <span class="black-text yellow lighten-4">Now listen.</span>
+                <span class="black-text green lighten-4">I vary the sentence length, and I create music.</span>
+                <span class="black-text yellow lighten-4">Music.</span>
+                <span class="black-text blue lighten-4">The writing sings.</span>
+                <span class="black-text green lighten-4">It has a pleasant rhythm, a lilt, a harmony.</span>
+                <span class="black-text blue lighten-4">I use short sentences.</span>
+                <span class="black-text green lighten-4">And I use sentences of medium length.</span>
+
+                <span class="black-text purple lighten-4">And sometimes, when I am certain the reader is rested, I will engage him with a sentence of considerable length, 
+                a sentence that burns with energy and builds with all the impetus of a crescendo, 
+                the roll of the drums, the crash of the cymbals–sounds that say listen to this, it is important.</span>
+              </p>
+
+              <p>
+                <span class="black-text green lighten-4">So write with a combination of short, medium, and long sentences.</span>
+                <span class="black-text green lighten-4">Create a sound that pleases the reader's ear.</span>
+                <span class="black-text blue lighten-4">Don't just write words.</span>
+                <span class="black-text yellow lighten-4">Write music.</span>
+              </p>
+
+              <p class="right-align">
+                &mdash; Gary Provost, <em>100 Ways to Improve Your Writing</em>
+              </p>
+            </blockquote>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <ul class="collapsible">
+      <li>
+        <div class="collapsible-header <%= Document.color %> white-text"><i class="material-icons">filter_drama</i> View this document with colorized lengths</div>
+        <div class="collapsible-body">
+          <% @document.sentences_with_newlines.each_with_index do |sentence, i| %>
+            <span class="sentence" data-sentence-id="<%= i + 1 %>"><%= sentence.gsub("\n", "<br />").html_safe %></span>
+          <% end %>        
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('span.sentence').each(function (sentence_id) {
+        var word_count = $(this).text().trim().split(' ').length;
+        console.log($(this).text());
+        console.log("words = " + word_count);
+        switch(word_count) {
+          case 0:
+            break;
+          case 1:
+          case 2:
+            $(this).addClass('yellow lighten-4');
+            break;
+          case 3:
+          case 4:
+            $(this).addClass('blue lighten-4');
+            break;
+          case 5:
+          case 6:
+            $(this).addClass('red lighten-4');
+            break;
+          case 7:
+          case 8:
+            $(this).addClass('green lighten-4');
+            break;
+          default:
+            $(this).addClass('purple lighten-4');
+            break;
+        }
+      });
+    });
+  </script>
+</div>
+<% end %>
+
+<div class="row">
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Words per sentence baseline comparison</div>
+
+        <%= 
+          column_chart([
+            ['This document',       (@analysis.word_count.to_f / @analysis.sentence_count).round],
+            ['The Grapes of Wrath', 11],
+            ['Hemingway',           12.5],
+            ["Typical Writing",     16],
+            ['The Great Gatsby',    17],
+            ["Swann's Way",         36],
+          ], colors: [Document.hex_color])
+        %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    var word_count_data = $.map(<%= @analysis.words_per_sentence %>, function( val, i ) {
+      return { sentence_index: i, value: val };
+    });
+
+    var margin = {top: 10, right: 0, bottom: 30, left: 80},
+        width = 1100 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#words-per-sentence")
+      .append("svg")
+        .attr("width", '100%')
+        .attr("height", height)
+        .attr('viewBox','0 0 ' + Math.min(width, height) + ' ' + Math.min(width, height + margin.bottom))
+        .attr('preserveAspectRatio', 'xMinYMin')
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleLinear()
+      .domain(d3.extent(word_count_data, function(d) { return d.sentence_index; }))
+      .range([ 0, width ]);
+    xAxis = svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain([0, d3.max(word_count_data, function(d) { return +d.value; })])
+      .range([ height, 0 ]);
+    yAxis = svg.append("g")
+      .call(d3.axisLeft(y));
+
+    // Add a clipPath: everything out of this area won't be drawn.
+    var clip = svg.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("width", width )
+        .attr("height", height )
+        .attr("x", 0)
+        .attr("y", 0);
+
+    // Add brushing
+    var brush = d3.brushX()                   // Add the brush feature using the d3.brush function
+        .extent( [ [0,0], [width,height] ] )  // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+        .on("end", updateChart)               // Each time the brush selection changes, trigger the 'updateChart' function
+
+    // Create the line variable: where both the line and the brush take place
+    var line = svg.append('g')
+      .attr("clip-path", "url(#clip)")
+
+    // Add the line
+    line.append("path")
+      .datum(word_count_data)
+      .attr("class", "line")  // I add the class line to be able to modify this line later on.
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.sentence_index) })
+        .y(function(d) { return y(d.value) })
+        )
+
+    // Add the brushing
+    line
+      .append("g")
+        .attr("class", "brush")
+        .call(brush);
+
+    // A function that set idleTimeOut to null
+    var idleTimeout
+    function idled() { idleTimeout = null; }
+
+    // A function that update the chart for given boundaries
+    function updateChart() {
+
+      // What are the selected boundaries?
+      extent = d3.event.selection
+
+      // If no selection, back to initial coordinate. Otherwise, update X axis domain
+      if(!extent){
+        if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
+        x.domain([ 4,8])
+      }else{
+        x.domain([ x.invert(extent[0]), x.invert(extent[1]) ])
+        line.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
+      }
+
+      // Update axis and line position
+      xAxis.transition().duration(1000).call(d3.axisBottom(x))
+      line
+          .select('.line')
+          .transition()
+          .duration(1000)
+          .attr("d", d3.line()
+            .x(function(d) { return x(d.sentence_index) })
+            .y(function(d) { return y(d.value) })
+          )
+    }
+
+    // If user double click, reinitialize the chart
+    svg.on("dblclick",function(){
+      x.domain(d3.extent(word_count_data, function(d) { return d.sentence_index; }))
+      xAxis.transition().call(d3.axisBottom(x))
+      line
+        .select('.line')
+        .transition()
+        .attr("d", d3.line()
+          .x(function(d) { return x(d.sentence_index) })
+          .y(function(d) { return y(d.value) })
+      )
+    });
+  });
+</script>
+
+
+
+
+  <%# TODO: Order these cards by % %>
+  <div class="col s12 m3">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:adjective).round / 5).clamp(1, 3) %>">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:adjective) %>%
+          </div>
+          <strong>Adjectives</strong>
+        </span>
+        <p>~<%= (@analysis.adjective_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.adjective_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:noun).round / 5).clamp(1, 3) %>">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:noun) %>%
+          </div>
+          <strong>Nouns</strong>
+        </span>
+        <p>~<%= (@analysis.noun_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.noun_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:verb).round / 5).clamp(1, 3) %>">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:verb) %>%
+          </div>
+          <strong>Verbs</strong>
+        </span>
+        <p>~<%= (@analysis.verb_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.verb_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:pronoun).round / 5).clamp(1, 3) %>">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:pronoun) %>%
+          </div>
+          <strong>Pronouns</strong>
+        </span>
+        <p>~<%= (@analysis.pronoun_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.pronoun_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:proper_noun).round / 5).clamp(1, 3) %>">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:proper_noun) %>%
+          </div>
+          <strong>Proper nouns</strong>
+        </span>
+        <p>~<%= (@analysis.proper_noun_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.proper_noun_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:conjunction).round / 5).clamp(1, 3) %>">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:conjunction) %>%
+          </div>
+          <strong>Conjunctions</strong>
+        </span>
+        <p>~<%= (@analysis.conjunction_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.conjunction_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:adverb).round / 5).clamp(1, 3) %>">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:adverb) %>%
+          </div>
+          <strong>Adverbs</strong>
+        </span>
+        <p>~<%= (@analysis.adverb_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.adverb_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:interrogative).round / 5).clamp(1, 3) %>">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:interrogative) %>%
+          </div>
+          <strong>Interrogatives</strong>
+        </span>
+        <p>~<%= (@analysis.interrogative_count.to_f / @analysis.sentence_count).round %> per sentence</p>
+        <p>~<%= (@analysis.interrogative_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Stylistic baseline comparison</div>
+      </div>
+
+      <%= 
+        column_chart([
+          { name: 'This document',   data: [
+            ['% Adjectives', @analysis.pos_percentage(:adjective)],
+            ['% Adverbs',    @analysis.pos_percentage(:adverb)],
+            ['% Nouns',      @analysis.pos_percentage(:noun)],
+            ['% Pronouns',   @analysis.pos_percentage(:pronoun)],
+            ['% Verbs',      @analysis.pos_percentage(:verb)]
+          ] }, 
+          { name: 'Average writing', data: [
+            ['% Adjectives', 8],
+            ['% Adverbs', 5],
+            ['% Nouns', 25],
+            ['% Pronouns', 5], 
+            ['% Verbs', 17]
+          ] }, 
+          { name: 'Hemingway',       data: [
+            ['% Adjectives', 5],
+            ['% Adverbs', 7],
+            ['% Nouns', 18],
+            ['% Pronouns', 12], 
+            ['% Verbs', 23]
+          ] }
+        ])
+      %>
+    </div>
+  </div>
