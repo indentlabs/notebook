@@ -15,9 +15,12 @@ module Documents
         analysis.gunning_fog_index              = self.gunning_fog_index(document)
         analysis.smog_grade                     = self.smog_grade(document)
         analysis.linsear_write_grade            = self.linsear_write_grade(document)
+        analysis.dale_chall_grade               = self.dale_chall_grade(document)
         # todo clamp/scale these from 0..16?
 
-        analysis.combined_average_reading_level = self.combined_average_grade_level(analysis)
+        # analysis.combined_average_reading_level = self.combined_average_grade_level(analysis)
+        analysis.combined_average_reading_level = TextStat.text_standard(document.plaintext, float_output=true)
+
         analysis.readability_score              = self.readability_score(analysis)
 
         analysis.save!
@@ -56,6 +59,11 @@ module Documents
         @linsear_write_grade ||= TextStat.linsear_write_formula(document.plaintext)
       end
 
+      def self.dale_chall_grade(document)
+        @dale_chall_grade ||= TextStat.dale_chall_readability_score(document.plaintext)
+      end
+
+      # deprecated in favor of TextStat.text_standard(text, float_output=False)
       def self.combined_average_grade_level(analysis)
         # TODO need to normalize all these scores to 1..16
         # TODO need to exclude scores here that aren't actually grade level output?
