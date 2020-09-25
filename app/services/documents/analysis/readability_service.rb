@@ -20,14 +20,13 @@ module Documents
 
         # analysis.combined_average_reading_level = self.combined_average_grade_level(analysis)
         analysis.combined_average_reading_level = TextStat.text_standard(document.plaintext, float_output=true)
-
         analysis.readability_score              = self.readability_score(analysis)
 
         analysis.save!
       end
 
       def self.forcast_grade_level(document)
-        @forcast_grade_level ||= 20 - (((document.words_with_syllables(1).length.to_f / document.words.length) * 150) / 10.0).clamp(0, 16)
+        @forcast_grade_level ||= 20 - (((document.words_with_syllables(1).length.to_f / document.words.length) * 150) / 10.0).clamp(1, 16)
       end
 
       def self.coleman_liau_index(document)
@@ -35,7 +34,7 @@ module Documents
           0.0588 * 100 * document.characters.reject { |l| [" ", "\t", "\r", "\n"].include?(l) }.length.to_f / document.words.length,
           -0.296 * 100/ (document.words.length.to_f / document.sentences.length),
           -15.8
-        ].sum.clamp(0, 16)
+        ].sum.clamp(1, 16)
       end
 
       def self.automated_readability_index(document)
@@ -43,24 +42,24 @@ module Documents
           4.71 * document.characters.reject(&:blank?).length.to_f / document.words.length,
           0.5 * document.words.length.to_f / document.sentences.length,
           -21.43
-        ].sum.clamp(0, 16)
+        ].sum.clamp(1, 16)
       end
 
       def self.gunning_fog_index(document)
         #todo GFI word/suffix exclusions
-        @gunning_fog_index ||= 0.4 * (document.words.length.to_f/ document.sentences.length + 100 * (document.complex_words.length.to_f / document.words.length)).clamp(0, 16)
+        @gunning_fog_index ||= 0.4 * (document.words.length.to_f/ document.sentences.length + 100 * (document.complex_words.length.to_f / document.words.length)).clamp(1, 16)
       end
 
       def self.smog_grade(document)
-        @smog_grade ||= 1.043 * Math.sqrt(document.complex_words.length.to_f * (30.0 / document.sentences.length)) + 3.1291
+        @smog_grade ||= (1.043 * Math.sqrt(document.complex_words.length.to_f * (30.0 / document.sentences.length)) + 3.1291).clamp(1, 16)
       end
 
       def self.linsear_write_grade(document)
-        @linsear_write_grade ||= TextStat.linsear_write_formula(document.plaintext)
+        @linsear_write_grade ||= TextStat.linsear_write_formula(document.plaintext).clamp(1, 16)
       end
 
       def self.dale_chall_grade(document)
-        @dale_chall_grade ||= TextStat.dale_chall_readability_score(document.plaintext)
+        @dale_chall_grade ||= TextStat.dale_chall_readability_score(document.plaintext).clamp(1, 10)
       end
 
       # deprecated in favor of TextStat.text_standard(text, float_output=False)
@@ -91,12 +90,15 @@ module Documents
           analysis.flesch_kincaid_reading_ease,
           analysis.forcast_grade_level,
           analysis.gunning_fog_index,
-          analysis.smog_grade
+          analysis.smog_grade,
+          analysis.linsear_write_grade
         ]
 
         readability_scores.reject! &:nil?
         readability_scores.select! { |value| value.is_a?(Numeric) }
         readability_scores.reject! { |hasselhoff| hasselhoff.abs == Float::INFINITY }
+
+        readability_scores.map! { |score| score * 8 } # multiply by a factor of 8 for rough 1..100 normalization scale
 
         return nil unless readability_scores.compact.length > 2
         (100 - readability_scores.compact.sort.slice(1..-2).sum.to_f / 4).clamp(0, 100)
