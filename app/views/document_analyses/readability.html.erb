@@ -1,0 +1,363 @@
+<div class="row">
+  <div class="col s12">
+    <div class="green card">
+      <div class="card-content">
+        <div class="row">
+          <div class="col s12 m3 white-text center">
+            <h2><%= @analysis.readability_score %></h2>
+            READABILITY
+          </div>
+          <div class="col s12 m9 white-text">
+            <h4>
+              <% Documents::Analysis::ReadabilityService.readability_score_category(@analysis.readability_score) %>
+            </h4>
+            <p>
+              <%= Documents::Analysis::ReadabilityService.readability_score_text(@analysis) %>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="card-action green lighten-1">
+        <a class="activator white-text text-darken-4">
+          How is this calculated?
+        </a>
+      </div>
+      <div class="card-reveal">
+        <span class="card-title">
+          Readability scales
+          <i class="material-icons right">close</i>
+        </span>
+        <p>
+          In order to provide you with a generalized score in Notebook.ai, we compute
+          several of the most well-known readability scores on your text. 
+          For all scales other than the Flesch-Kincaid reading ease, a higher score means
+          a greater difficulty reading. Conversely, lower scores mean text is easier to read.
+        </p>
+        <p>
+          We take a weighted composite score of all readability scales to give you a singular readability score.
+        </p>
+        <ul>
+          <% if @analysis.flesch_kincaid_reading_ease %>
+            <li>
+              Flesch-Kincaid reading ease: <%= @analysis.flesch_kincaid_reading_ease.try(:round) %> / 100
+              <div class="progress">
+                <div class="determinate" style="width: <%= 100 * @analysis.flesch_kincaid_reading_ease.try(:round) / 100 %>%"></div>
+              </div>
+            </li>
+          <% end %>
+          <% if @analysis.flesch_kincaid_grade_level %>
+            <li>
+              Flesch-Kincaid grade level: <%= @analysis.flesch_kincaid_grade_level.try(:round) %> / 16
+              <div class="progress">
+                <div class="determinate" style="width: <%= 100 * @analysis.flesch_kincaid_grade_level.try(:round) / 16 %>%"></div>
+              </div>
+            </li>
+          <% end %>
+          <% if @analysis.flesch_kincaid_age_minimum %>
+            <li>
+              Flesch-Kincaid age minimum: <%= @analysis.flesch_kincaid_age_minimum.try(:round) %> / 20
+              <div class="progress">
+                <div class="determinate" style="width: <%= 100 * @analysis.flesch_kincaid_age_minimum.try(:round) / 20 %>%"></div>
+              </div>
+            </li>
+          <% end %>
+          <% if @analysis.forcast_grade_level %>
+            <li>
+              Forcast grade level: <%= @analysis.forcast_grade_level.try(:round) %> / 16
+              <div class="progress">
+                <div class="determinate" style="width: <%= 100 * @analysis.forcast_grade_level.try(:round) / 16 %>%"></div>
+              </div>
+            </li>
+          <% end %>
+          <% if @analysis.coleman_liau_index %>
+            <li>
+              Coleman liau index: <%= @analysis.coleman_liau_index.try(:round) %> / 16
+              <div class="progress">
+                <div class="determinate" style="width: <%= 100 * @analysis.coleman_liau_index.try(:round) / 16 %>%"></div>
+              </div>
+            </li>
+          <% end %>
+          <% if @analysis.automated_readability_index %>
+            <li>
+              Automated readability index: <%= @analysis.automated_readability_index.try(:round) %> / 16
+              <div class="progress">
+                <div class="determinate" style="width: <%= 100 * @analysis.automated_readability_index.try(:round) / 16 %>%"></div>
+              </div>
+            </li>
+          <% end %>
+          <% if @analysis.gunning_fog_index %>
+            <li>
+              Gunning fog index: <%= @analysis.gunning_fog_index.try(:round) %> / 16
+              <div class="progress">
+                <div class="determinate" style="width: <%= 100 * @analysis.gunning_fog_index.try(:round) / 16 %>%"></div>
+              </div>
+            </li>
+          <% end %>
+          <% if @analysis.combined_average_reading_level %>
+            <li>
+              Combined average reading level: <%= @analysis.combined_average_reading_level.try(:round) %> / 16
+              <div class="progress">
+                <div class="determinate" style="width: <%= 100 * @analysis.combined_average_reading_level.try(:round) / 16 %>%"></div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h5 class="grey-text">Readability scales</h5>
+<%= render partial: 'document_analyses/readability/flesch_kincaid',              locals: { analysis: @analysis } %>
+<%= render partial: 'document_analyses/readability/coleman_liau',                locals: { analysis: @analysis } %>
+<%= render partial: 'document_analyses/readability/gunning_fog',                 locals: { analysis: @analysis } %>
+<%= render partial: 'document_analyses/readability/automated_readability_index', locals: { analysis: @analysis } %>
+<%= render partial: 'document_analyses/readability/forcast',                     locals: { analysis: @analysis } %>
+
+<h5 class="grey-text">Lexical richness</h5>
+<div class="row">
+  <div class="col s12 m6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Word variety</div>
+        <p>Number of words used...</p>
+        <%= 
+          pie_chart({
+            'exactly once'   => @analysis.words_used_once_count, 
+            'multiple times' => @analysis.words_used_repeatedly_count
+          }, colors: ["#FF6977", Document.hex_color])
+        %>
+      </div>
+      <div class="card-action">
+        <a class="activator blue-text text-darken-4">
+          Why is this important?
+        </a>
+      </div>
+      <div class="card-reveal">
+        <span class="card-title">
+          Why is this important?
+          <i class="material-icons right">close</i>
+        </span>
+        <p>
+          The higher percentage of reused words you have, the more likely a reader will
+          be able to understand new words from context alone, as they'll have more instances
+          in which they can infer a meaning from that word's surroundings.
+        </p>
+        <p>
+          Having a higher number of reused words can make text much easier to read and understand,
+          but a limited vocabularity may result in repetition and bland writing. Having a higher
+          number of unique words may indicate more effective word choice, but can also be indicative
+          of jargon.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12 m6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Word complexity</div>
+        <p>
+          Number of unique...
+        </p>
+        <%=
+          pie_chart({
+            'simple words'  => @analysis.simple_words_count,
+            'complex words' => @analysis.complex_words_count
+          }, colors: [Document.hex_color, "#FF6977"])
+        %>
+      </div>
+      <div class="card-action">
+        <a class="activator blue-text text-darken-4">
+          Why is this important?
+        </a>
+      </div>
+      <div class="card-reveal">
+        <span class="card-title">
+          Why is this important?
+          <i class="material-icons right">close</i>
+        </span>
+        <p>
+          A <em>complex word</em> is a word made up of at least three morphemes, or <em>parts</em>.
+          Conversely, a <em>simple word</em> consists of only one. 
+          For example, "bookishness" is a complex word with morphemes "book", "ish", and "ness";
+          while "math" is a simple word with just one morpheme: "math".
+        </p>
+        <p>
+          Having a healthy mixture of simple and complex words is an important aspect of variety
+          in your writing. Replacing complex words with simple words can make your story easier
+          to understand, while replacing simple words with complex words can enable you to more 
+          efficiently pack more context and information into the words you choose to use.
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Number of N-syllable words</div>
+        <%= 
+          column_chart(
+            @analysis.n_syllable_words.map { |k, v| [k.to_s + "-syllable words", v] },
+            colors: [Document.hex_color],
+            # todo more readable tooltips
+          ) 
+        %>
+      </div>
+    </div>
+  </div>
+
+  <%# TODO: Order these cards by % %>
+  <%# TODO: Darken/lighten card based on % %>
+  <div class="col s12 m3">
+    <div class="card blue">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:adjective) %>%
+          </div>
+          Adjectives
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-1">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:noun) %>%
+          </div>
+          Nouns
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-2">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:verb) %>%
+          </div>
+          Verbs
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-3">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:pronoun) %>%
+          </div>
+          Pronouns
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-3">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:proper_noun) %>%
+          </div>
+          Proper nouns
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-3">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:conjunction) %>%
+          </div>
+          Conjunctions
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-2">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:adverb) %>%
+          </div>
+          Adverbs
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m3">
+    <div class="card blue lighten-1">
+      <div class="card-content white-text center">
+        <span class="card-title">
+          <div class="white-text">
+            <%= @analysis.pos_percentage(:interrogative) %>%
+          </div>
+          Interrogatives
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Stylistic baseline comparison</div>
+      </div>
+
+      <%= 
+        column_chart([
+          { name: 'This document',   data: [
+            ['% Adjectives', @analysis.pos_percentage(:adjective)],
+            ['% Adverbs',    @analysis.pos_percentage(:adverb)],
+            ['% Nouns',      @analysis.pos_percentage(:noun)],
+            ['% Pronouns',   @analysis.pos_percentage(:pronoun)],
+            ['% Verbs',      @analysis.pos_percentage(:verb)]
+          ] }, 
+          { name: 'Average writing', data: [
+            ['% Adjectives', 8],
+            ['% Adverbs', 5],
+            ['% Nouns', 25],
+            ['% Pronouns', 5], 
+            ['% Verbs', 17]
+          ] }, 
+          { name: 'Hemingway',       data: [
+            ['% Adjectives', 5],
+            ['% Adverbs', 7],
+            ['% Nouns', 18],
+            ['% Pronouns', 12], 
+            ['% Verbs', 23]
+          ] }
+        ])
+      %>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Lexical richness: % unique words per passage</div>
+
+        <%= 
+          column_chart([
+            ['This document',       @analysis.pos_percentage(:words_used_once)],
+            ['Hemingway',           12.5],
+            ['The Grapes of Wrath', 14.5],
+            ['The Great Gatsby',    16],
+            ["Swann's Way",         17],
+            ["Typical Writing",     22]
+          ], colors: [Document.hex_color])
+        %>
+      </div>
+    </div>
+  </div>
+</div>

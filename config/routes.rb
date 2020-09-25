@@ -65,8 +65,12 @@ Rails.application.routes.draw do
   get '/@:username/following', to: 'users#following'
 
   resources :documents do
-    get  '/analysis',         to: 'documents#analysis',                on: :member
+    # Document Analysis routes
+    get '/analysis/',            to: 'document_analyses#show',        on: :member      
+    get '/analysis/readability', to: 'document_analyses#readability', on: :member
+
     get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
+
     post '/link_entity',      to: 'documents#link_entity',             on: :collection
 
     post :toggle_favorite, on: :member
@@ -74,7 +78,6 @@ Rails.application.routes.draw do
     # todo these routes don't belong here and make for awfully weird urls (/documents/:analysis_id/destroy, etc)
     get  '/destroy_analysis', to: 'documents#destroy_analysis',        on: :member
     get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
-
   end
 
   scope '/my' do

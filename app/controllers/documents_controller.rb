@@ -203,6 +203,7 @@ class DocumentsController < ApplicationController
   end
 
   def destroy_analysis
+    # todo move this to analysis controller
     document = Document.find_by(id: params[:id])
     return unless document.user == current_user
 
