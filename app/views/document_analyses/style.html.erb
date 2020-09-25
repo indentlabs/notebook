@@ -114,8 +114,6 @@ span.sentence {
     $(document).ready(function () {
       $('span.sentence').each(function (sentence_id) {
         var word_count = $(this).text().trim().split(' ').length;
-        console.log($(this).text());
-        console.log("words = " + word_count);
         switch(word_count) {
           case 0:
             break;
@@ -133,13 +131,19 @@ span.sentence {
             break;
           case 7:
           case 8:
+          case 9:
+          case 10:
+          case 11:
             $(this).addClass('green lighten-4');
             break;
           default:
             $(this).addClass('purple lighten-4');
             break;
         }
+        // Also add word counts on hover
+        $(this).addClass('tooltipped').attr('data-tooltip', word_count + ' word' + (word_count == 1 ? '' : 's') + ' (sentence #' + (1 + sentence_id) + ')').attr('data-position', 'right');
       });
+      $('.tooltipped').tooltip();
     });
   </script>
 </div>
