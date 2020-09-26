@@ -29,22 +29,8 @@ class DocumentsController < ApplicationController
 
     preload_linked_entities
 
-    if @document.user == current_user
-      @navbar_actions.unshift({
-        label: 'Edit document',
-        href: edit_document_path(@document),
-        class: 'right '
-      })
-      @navbar_actions.unshift({
-        label: 'Analyze document',
-        href: analysis_document_path(@document),
-        class: 'right'
-      })
-    end
-    @navbar_actions.unshift({
-      label: (@document.name || 'Untitled document'),
-      href: document_path(@document)
-    })
+    # Put the focus on the document by removing Notebook.ai actions
+    @navbar_actions = []
   end
 
   def analysis

@@ -1,23 +1,15 @@
 <% set_meta_tags title: @document.title, description: truncate(@document.body) %>
 
+<%= content_for :full_width_page_header do %>
+  <%= render partial: 'documents/components/autosave_bar', locals: { document: @document } %>
 
-  <%= content_for :full_width_page_header do %>
-    <%= render partial: 'documents/components/autosave_bar', locals: { document: @document } %>
-    <div id="editor" class="editable js-can-mention-pages" data-save-url="<%= document_url(@document) %>"><%= @document.body.try(:html_safe) %></div>
-  <% end %>
-
-<%= form_for @document do |f| %>
-  <%= content_for :navbar_left_content do %>
-    <%= render partial: 'documents/components/document_name_bar', locals: { document: @document, f: f } %>
-  <% end %>
-
-  <div class="grey-text autosave-bar">
-    <i class="material-icons js-autosave-icon grey-text">save</i>
-    <span class="js-autosave-status">
-      This document will automatically save as you make changes.
-      Highlight any text to bring up formatting options.
-    </span>
+  <div class="container" style="max-width: 50em;">
+    <%= form_for @document do |f| %>
+      <%= render partial: 'documents/components/document_name_bar', locals: { document: @document, f: f } %>
+    <% end %>
   </div>
+
+  <div id="editor" class="editable js-can-mention-pages" data-save-url="<%= document_url(@document) %>"><%= @document.body.try(:html_safe) %></div>
 <% end %>
 
 <div style="clear: both"></div>
