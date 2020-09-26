@@ -10,14 +10,8 @@
 
 import React     from "react"
 import PropTypes from "prop-types"
-import { makeStyles } from '@material-ui/core/styles';
-
-import CheckIcon from '@material-ui/icons/Check';
-import ToggleButton from '@material-ui/lab/ToggleButton';
 
 var pluralize = require('pluralize');
-
-import axios from 'axios';
 
 class DocumentEntityLinkModal extends React.Component {
 

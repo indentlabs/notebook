@@ -13,27 +13,9 @@
 
 import React     from "react"
 import PropTypes from "prop-types"
-import { makeStyles } from '@material-ui/core/styles';
-
-import Drawer from '@material-ui/core/Drawer';
-import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Button from '@material-ui/core/Button';
-import ListSubheader from '@material-ui/core/ListSubheader';
-
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import StarBorder from '@material-ui/icons/StarBorder';
-import HelpIcon from '@material-ui/icons/Help';
-import Collapse from '@material-ui/core/Collapse';
 
 import DocumentEntityLinkModal from './DocumentEntityLinkModal.js';
 import PageLookupSidebar from './PageLookupSidebar.js';
-
-import axios from 'axios';
 
 var pluralize = require('pluralize');
 
