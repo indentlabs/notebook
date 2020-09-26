@@ -155,4 +155,5 @@ group :worker do
   gem 'engtagger'
   gem 'ibm_watson'
   gem 'textstat'
+  gem 'language_filter'
 end

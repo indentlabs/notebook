@@ -16,6 +16,10 @@ class DocumentAnalysisJob < ApplicationJob
     Documents::Analysis::ReadabilityService.analyze(analysis.id)
     analysis.update(progress: 50)
 
+    puts "Analyzing: Content"
+    Documents::Analysis::ContentService.analyze(analysis.id)
+    analysis.update(progress: 60)
+
     puts "Analysing: Parts of Speech"
     Documents::Analysis::PartsOfSpeechService.analyze(analysis.id)
     analysis.update(progress: 75)

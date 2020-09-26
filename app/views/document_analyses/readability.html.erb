@@ -294,4 +294,87 @@
       </div>
     </div>
   </div>
+
+  <div class="col s12">
+    <div class="card <%= @analysis.adult_content_flag? ? 'yellow' : 'green' %> lighten-4">
+      <div class="card-content">
+        <div class="card-title">
+          <% if @analysis.adult_content_flag? %>
+            Potential adult content detected
+          <% else %>
+            No adult content detected
+          <% end %>
+        </div>
+
+        <div class="col s12 m12 l6">
+          <% if @analysis.profanity_content_flag? %>
+            <div>
+              <i class="material-icons left yellow-text text-darken-3">warning</i>
+              <%= pluralize @analysis.profanity_trigger_words.count, 'potentially profane word' %> detected:
+            </div>
+            <% @analysis.profanity_trigger_words.each do |word| %>
+              <span class="red lighten-4 badge left"><%= word %></span>
+            <% end %>
+            <div class="clearfix"></div>
+          <% else %>
+            <i class="material-icons left green-text">check</i>
+            No profane words detected.
+          <% end %>
+          <br />
+        </div>
+
+        <div class="col s12 m12 l6">
+          <% if @analysis.violence_content_flag? %>
+            <div>
+              <i class="material-icons left yellow-text text-darken-3">warning</i>
+              <%= pluralize @analysis.violence_trigger_words.count, 'potentially violent word' %> detected:
+            </div>
+            <% @analysis.violence_trigger_words.each do |word| %>
+              <span class="red lighten-4 badge left"><%= word %></span>
+            <% end %>
+            <div class="clearfix"></div>
+          <% else %>
+            <i class="material-icons left green-text">check</i>
+            No violent words detected.
+          <% end %>
+          <br />
+        </div>
+
+        <div class="col s12 m12 l6">
+          <% if @analysis.hate_content_flag? %>
+            <div>
+              <i class="material-icons left yellow-text text-darken-3">warning</i>
+              <%= pluralize @analysis.hate_trigger_words.count, 'potentially hateful word' %> detected:
+            </div>
+            <% @analysis.hate_trigger_words.each do |word| %>
+              <span class="red lighten-4 badge left"><%= word %></span>
+            <% end %>
+            <div class="clearfix"></div>
+          <% else %>
+            <i class="material-icons left green-text">check</i>
+            No hateful words detected.
+          <% end %>
+          <br />
+        </div>
+
+        <div class="col s12 m12 l6">
+          <% if @analysis.sex_content_flag? %>
+            <div>
+              <i class="material-icons left yellow-text text-darken-3">warning</i>
+              <%= pluralize @analysis.sex_trigger_words.count, 'potentially sexual word' %> detected:
+            </div>
+            <% @analysis.sex_trigger_words.each do |word| %>
+              <span class="red lighten-4 badge left"><%= word %></span>
+            <% end %>
+            <div class="clearfix"></div>
+          <% else %>
+            <i class="material-icons left green-text">check</i>
+            No sexual words detected.
+          <% end %>
+          <br />
+        </div>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+  </div>
 </div>

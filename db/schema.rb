@@ -1056,6 +1056,15 @@ ActiveRecord::Schema.define(version: 2020_09_25_095907) do
     t.float "dale_chall_grade"
     t.integer "unique_complex_words_count"
     t.integer "unique_simple_words_count"
+    t.boolean "hate_content_flag", default: false
+    t.string "hate_trigger_words"
+    t.boolean "profanity_content_flag", default: false
+    t.string "profanity_trigger_words"
+    t.boolean "sex_content_flag", default: false
+    t.string "sex_trigger_words"
+    t.boolean "violence_content_flag", default: false
+    t.string "violence_trigger_words"
+    t.boolean "adult_content_flag", default: false
     t.index ["document_id"], name: "index_document_analyses_on_document_id"
   end
 
