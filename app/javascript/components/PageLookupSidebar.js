@@ -113,7 +113,7 @@ class PageLookupSidebar extends React.Component {
     switch (field.type) {
       case "name":
       case "text_area":
-        console.log(field.value);
+        // console.log(field.value);
         return (
           <React.Fragment key={field.id}>
             <ListSubheader component="div" style={{lineHeight: '1.5em'}}>
@@ -147,7 +147,7 @@ class PageLookupSidebar extends React.Component {
         );
       
       case "universe":
-        console.log(field.value);
+        // console.log(field.value);
         return(
           <React.Fragment key={field.value.id}>
             <ListSubheader component="div" style={{lineHeight: '1.5em'}}>

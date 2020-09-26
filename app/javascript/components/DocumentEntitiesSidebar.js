@@ -79,12 +79,12 @@ class DocumentEntitiesSidebar extends React.Component {
   }
 
   lookupPage(content_type, content_id) {
-    console.log('loading page: ' + content_type + ' ' + content_id);
+    // console.log('loading page: ' + content_type + ' ' + content_id);
     this.refs.PageLookupSidebar.loadPage(content_type, content_id);
   }
 
   render () {
-    console.log(this.state.linked_entities);
+    // console.log(this.state.linked_entities);
     return (
       <React.Fragment>
         <ul id="document-entities-right" className="sidenav">

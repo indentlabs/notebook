@@ -54,8 +54,8 @@ class DocumentEntityLinkModal extends React.Component {
   }
 
   toggleEntityLink(entity) {
-    console.log('linking');
-    console.log(entity);
+    // console.log('linking');
+    // console.log(entity);
   }
 
   render () {
