@@ -240,6 +240,7 @@ Rails.application.routes.draw do
       get '/promos', to: 'admin#promos', as: :admin_promos
       get '/shares/reported', to: 'admin#reported_shares'
       get '/churn',  to: 'admin#churn'
+      get '/hatewatch/:matchlist', to: 'admin#hate'
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'

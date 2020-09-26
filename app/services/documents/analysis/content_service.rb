@@ -22,6 +22,9 @@ module Documents
         analysis.save!
       end
 
+      def self.adult_content?(matchlist=:hate, content)
+        LanguageFilter::Filter.new(matchlist: matchlist).matched(content)
+      end
     end
   end
 end
