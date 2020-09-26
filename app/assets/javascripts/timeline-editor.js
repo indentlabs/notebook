@@ -136,43 +136,4 @@ $(document).ready(function () {
     // return false so we don't jump to the top of the page
     return false;
   });
-
-  $('.js-link-entity').click(function () {
-    // Store the linking event ID for reference
-    var event_id = $(this).closest('.timeline-event-container').data('event-id');
-    $('#linking-event-id').val(event_id);
-
-    // Open the modal
-    $('#entity-link-modal').modal('open');
-    return false;
-  });
-
-  $('.js-link-entity-selection').click(function () {
-    var entity      = $(this);
-    var entity_type = entity.data('type');
-    var entity_id   = entity.data('id');
-
-    var event_id = $('#linking-event-id').val();
-    
-    $.post(
-      "/plan/timeline_events/" + event_id + "/link",
-      {
-        "entity_type": entity_type,
-        "entity_id":   entity_id
-      }
-    ).done(function () {
-      // todo update the UI somehow
-      M.toast({
-        html: 'Your ' + entity_type + ' was added successfully and will be visible the next time you reload this page.'
-      });
-
-      $('.modal').close();
-
-      return false;
-    }).fail(function() {
-      alert("Something went wrong and your change didn't save. Please try again.");
-    });
-
-    // todo close the modal
-  });
 });
