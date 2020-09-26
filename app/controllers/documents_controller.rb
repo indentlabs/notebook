@@ -27,8 +27,6 @@ class DocumentsController < ApplicationController
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     end
 
-    preload_linked_entities
-
     # Put the focus on the document by removing Notebook.ai actions
     @navbar_actions = []
   end
@@ -123,9 +121,11 @@ class DocumentsController < ApplicationController
   end
 
   def edit
-    preload_linked_entities
-
     redirect_to(root_path, notice: "You don't have permission to edit that!") unless @document.updatable_by?(current_user)
+
+    @linked_entities = @document.document_entities
+      .where.not(entity_id: nil)
+      .group_by(&:entity_type)
   end
 
   # Todo does anything actually use this endpoint?
@@ -252,33 +252,6 @@ class DocumentsController < ApplicationController
 
   def linked_entity_params
     params.permit(:entity_id, :entity_type, :document_entity_id, :document_id, :document_analysis_id)
-  end
-
-  def preload_linked_entities
-    # Simpler form: (8/6/19 left intact for temporary reference during release -- can delete after release)
-    # @linked_entities = @document.document_entities
-    #   .where.not(entity_id: nil)
-    #   .includes(:entity)
-    #   .order('entity_type asc')
-
-    @linked_entities = @document.document_entities
-      .where.not(entity_id: nil)
-      .group_by(&:entity_type)
-
-    # More complicated includes-stuff form:
-    # @linked_entities = []
-    # return unless user_signed_in? && current_user.on_premium_plan?
-    
-    # Rails.application.config.content_types[:all].each do |content_type|
-    #   @linked_entities += @document.document_entities
-    #     .where(entity_type: content_type.name)
-    #     .where.not(entity_id: nil)
-    #     .order('text ASC')
-    #     .includes(:entity, entity: [:user])
-    #     .includes(entity: Rails.application.config.inverse_content_relations.fetch(content_type.name, []).map do |relation, data|
-    #       data[:inverse_class] == content_type.name ? data[:with] : nil
-    #     end.compact)
-    # end
   end
 
   def set_document
