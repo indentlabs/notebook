@@ -100,8 +100,9 @@ span.sentence {
   <div class="col s12">
     <ul class="collapsible">
       <li>
-        <div class="collapsible-header <%= Document.color %> white-text"><i class="material-icons">filter_drama</i> View this document with colorized lengths</div>
+        <div class="collapsible-header <%= Document.color %> white-text"><i class="material-icons">palette</i> View this document with colorized lengths</div>
         <div class="collapsible-body">
+          <h5><%= @document.title %></h5>
           <% @document.sentences_with_newlines.each_with_index do |sentence, i| %>
             <span class="sentence" data-sentence-id="<%= i + 1 %>"><%= sentence.gsub("\n", "<br />").html_safe %></span>
           <% end %>        
@@ -159,11 +160,11 @@ span.sentence {
           column_chart([
             ['This document',       (@analysis.word_count.to_f / @analysis.sentence_count).round],
             ['The Grapes of Wrath', 11],
-            ['Hemingway',           12.5],
             ["Typical Writing",     16],
             ['The Great Gatsby',    17],
             ["Swann's Way",         36],
-          ], colors: [Document.hex_color])
+            ["Green Eggs and Ham",  5.7]
+          ].sort_by(&:second), colors: [Document.hex_color])
         %>
       </div>
     </div>
@@ -437,3 +438,4 @@ span.sentence {
       %>
     </div>
   </div>
+</div>
