@@ -69,6 +69,7 @@ Rails.application.routes.draw do
     get '/analysis/',            to: 'document_analyses#show',        on: :member      
     get '/analysis/readability', to: 'document_analyses#readability', on: :member
     get '/analysis/style',       to: 'document_analyses#style',       on: :member
+    get '/analysis/sentiment',   to: 'document_analyses#sentiment',   on: :member
 
     get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
 

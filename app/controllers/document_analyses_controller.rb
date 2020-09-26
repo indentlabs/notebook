@@ -12,20 +12,29 @@ class DocumentAnalysesController < ApplicationController
   #   @document_analyses = DocumentAnalysis.all
   # end
 
-  # GET /document_analyses/1
   def show
   end
 
   def readability
   end
 
-  def entities
+  def style
   end
+
+  # def entities
+  # end
 
   def sentiment
-  end
-
-  def style
+    @document_sentiment_color = (@analysis.sentiment_score < 0) ? 'blue' : 'green'
+    @document_emotion_data = Hash[{
+      "Anger"   => (100 * @analysis.anger_score).round(1),
+      "Fear"    => (100 * @analysis.fear_score).round(1),
+      "Sadness" => (100 * @analysis.sadness_score).round(1),
+      "Disgust" => (100 * @analysis.disgust_score).round(1),
+      "Joy"     => (100 * @analysis.joy_score).round(1)
+    }.sort_by(&:second).reverse]
+    @document_dominant_emotion  = @document_emotion_data.keys.first
+    @document_secondary_emotion = @document_emotion_data.keys.second
   end
 
   # def destroy
@@ -69,6 +78,10 @@ class DocumentAnalysesController < ApplicationController
       {
         label: "Style",
         href:  analysis_style_document_path(@document)
+      },
+      {
+        label: "Sentiment",
+        href:  analysis_sentiment_document_path(@document)
       }
     ]
   end
