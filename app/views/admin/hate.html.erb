@@ -6,13 +6,13 @@
   </tr>
   <tr>
 
-  <tr>
-    <% @posts.each do |post| %>
-      <% triggers = Documents::Analysis::ContentService.adult_content?(@list, post.content) %>
-      <% next unless triggers.any? %>
-      <td><%= post.postable.title %></td>
-      <td><%= triggers.inspect %></td>
-      <td><%= post.content %></td>
-    <% end %>
-  </tr>
+  <% @posts.each do |post| %>
+    <tr>
+        <% triggers = Documents::Analysis::ContentService.adult_content?(@list, post.content) %>
+        <% next unless triggers.any? %>
+        <td><%= post.postable.title %> (<%= post.postable_id %>)</td>
+        <td><%= triggers.inspect %></td>
+        <td><%= post.content %></td>
+    </tr>
+  <% end %>
 </table>
