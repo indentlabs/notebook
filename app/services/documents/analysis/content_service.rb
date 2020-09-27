@@ -23,7 +23,7 @@ module Documents
       end
 
       def self.adult_content?(matchlist=:hate, content)
-        LanguageFilter::Filter.new(matchlist: matchlist).matched(content)
+        LanguageFilter::Filter.new(matchlist: matchlist.to_sym).matched(content)
       end
     end
   end
