@@ -5,7 +5,7 @@
 				<div class="card-title">
 					90-day signups
 				</div>
-				<%= area_chart @reports.select(:user_signups).group_by_day(:day) %>
+				<%= area_chart @reports.pluck(:day, :user_signups) %>
 			</div>
 		</div>
 	</div>
@@ -15,7 +15,7 @@
 				<div class="card-title">
 					Monthly subscriptions
 				</div>
-				<%= area_chart @reports.select(:new_monthly_subscriptions, :ended_monthly_subscriptions).group_by_day(:day) %>
+				<%= area_chart @reports.pluck(:day, :new_monthly_subscriptions, :ended_monthly_subscriptions) %>
 			</div>
 		</div>
 	</div>
@@ -25,7 +25,7 @@
 				<div class="card-title">
 					Trimonthly subscriptons
 				</div>
-				<%= area_chart @reports.select(:new_trimonthly_subscriptions, :ended_trimonthly_subscriptions).group_by_day(:day) %>
+				<%= area_chart @reports.pluck(:day, :new_trimonthly_subscriptions, :ended_trimonthly_subscriptions) %>
 			</div>
 		</div>
 	</div>
@@ -35,7 +35,7 @@
 				<div class="card-title">
 					Annual subscriptions
 				</div>
-				<%= area_chart @reports.select(:new_annual_subscriptions, :ended_annual_subscriptions).group_by_day(:day) %>
+				<%= area_chart @reports.pluck(:day, :new_annual_subscriptions, :ended_annual_subscriptions) %>
 			</div>
 		</div>
 	</div>
@@ -47,9 +47,103 @@
 					<div class="card-title">
 						New <%= content_type.name.pluralize %>
 					</div>
-					<%= area_chart @reports.select("#{content_type.name.downcase.pluralize}_created").group_by_day(:day) %>
+					<%= area_chart @reports.pluck(:day, "#{content_type.name.downcase.pluralize}_created") %>
 				</div>
 			</div>
 		</div>
 	<% end %>
+	<div class="col s12 m12 l4">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					New timelines
+				</div>
+				<%= area_chart @reports.pluck(:day, :timelines_created) %>
+			</div>
+		</div>
+	</div>
+
+	<div class="col s12 m12 l6">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					New stream shares
+				</div>
+				<%= area_chart @reports.pluck(:day, :stream_shares_created) %>
+			</div>
+		</div>
+	</div>
+	<div class="col s12 m12 l6">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					New stream comments
+				</div>
+				<%= area_chart @reports.pluck(:day, :stream_comments) %>
+			</div>
+		</div>
+	</div>
+
+	<div class="col s12 m12 l6">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					New collections
+				</div>
+				<%= area_chart @reports.pluck(:day, :collections_created) %>
+			</div>
+		</div>
+	</div>
+	<div class="col s12 m12 l6">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					New collection submissions
+				</div>
+				<%= area_chart @reports.pluck(:day, :collections_submissions_created) %>
+			</div>
+		</div>
+	</div>
+
+	<div class="col s12 m12 l6">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					New discussion threads
+				</div>
+				<%= area_chart @reports.pluck(:day, :thredded_threads_created) %>
+			</div>
+		</div>
+	</div>
+	<div class="col s12 m12 l6">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					New discussion replies
+				</div>
+				<%= area_chart @reports.pluck(:day, :thredded_replies_created) %>
+			</div>
+		</div>
+	</div>
+
+	<div class="col s12 m12 l6">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					New private discussions
+				</div>
+				<%= area_chart @reports.pluck(:day, :thredded_private_messages_created) %>
+			</div>
+		</div>
+	</div>
+	<div class="col s12 m12 l6">
+		<div class="card">
+			<div class="card-content">
+				<div class="card-title">
+					New private replies
+				</div>
+				<%= area_chart @reports.pluck(:day, :thredded_private_replies_created) %>
+			</div>
+		</div>
+	</div>
 </div>
