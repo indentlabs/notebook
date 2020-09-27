@@ -57,7 +57,7 @@ class AdminController < ApplicationController
   end
 
   def hate
-    @posts = Thredded::PrivatePost.last(params.fetch(:limit, 500))
+    @posts = Thredded::PrivatePost.last(params.fetch(:limit, 500)).includes(:postable)
     @list  = params[:matchlist]
   end
 
