@@ -81,6 +81,7 @@ gem 'flipper-redis'
 # Forum
 gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
 gem 'rails-ujs'
+gem 'language_filter'
 
 # Workers
 gem 'sidekiq'
@@ -155,5 +156,4 @@ group :worker do
   gem 'engtagger'
   gem 'ibm_watson'
   gem 'textstat'
-  gem 'language_filter'
 end
