@@ -3,6 +3,7 @@ class PageCollectionsController < ApplicationController
 
   before_action :set_sidenav_expansion
   before_action :set_page_collection, only: [:show, :edit, :update, :destroy, :follow, :unfollow, :report]
+  before_action :set_navbar_color
 
   # GET /page_collections
   def index
@@ -160,6 +161,10 @@ class PageCollectionsController < ApplicationController
 
   def set_sidenav_expansion
     @sidenav_expansion = 'community'
+  end
+  
+  def set_navbar_color
+    @navbar_color = PageCollection.hex_color
   end
 
   def sort_pages
