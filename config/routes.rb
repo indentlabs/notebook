@@ -226,15 +226,15 @@ Rails.application.routes.draw do
 
   authenticate :user, lambda { |u| u.site_administrator? } do
     scope 'admin' do
-      get '/stats', to: 'admin#dashboard', as: :admin_dashboard
-      get '/content_type/:type', to: 'admin#content_type', as: :admin_content_type
-      get '/attributes', to: 'admin#attributes', as: :admin_attributes
-      get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
-      get '/unsubscribe', to: 'admin#unsubscribe', as: :mass_unsubscribe
-      get '/images', to: 'admin#images', as: :image_audit
-      get '/promos', to: 'admin#promos', as: :admin_promos
-      get '/shares/reported', to: 'admin#reported_shares'
-      get '/churn',  to: 'admin#churn'
+      get '/stats',                to: 'admin#dashboard', as: :admin_dashboard
+      get '/content_type/:type',   to: 'admin#content_type', as: :admin_content_type
+      get '/attributes',           to: 'admin#attributes', as: :admin_attributes
+      get '/masquerade/:user_id',  to: 'admin#masquerade', as: :masquerade
+      get '/unsubscribe',          to: 'admin#unsubscribe', as: :mass_unsubscribe
+      get '/images',               to: 'admin#images', as: :image_audit
+      get '/promos',               to: 'admin#promos', as: :admin_promos
+      get '/shares/reported',      to: 'admin#reported_shares'
+      get '/churn',                to: 'admin#churn'
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
