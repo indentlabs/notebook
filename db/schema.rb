@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_29_011900) do
+ActiveRecord::Schema.define(version: 2020_09_27_001314) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -39,6 +39,18 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_api_keys_on_user_id"
+  end
+
+  create_table "api_requests", force: :cascade do |t|
+    t.integer "application_integration_id"
+    t.integer "integration_authorization_id"
+    t.string "result"
+    t.integer "updates_used", default: 0
+    t.string "ip_address"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["application_integration_id"], name: "index_api_requests_on_application_integration_id"
+    t.index ["integration_authorization_id"], name: "index_api_requests_on_integration_authorization_id"
   end
 
   create_table "application_integrations", force: :cascade do |t|
@@ -1040,6 +1052,19 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
     t.integer "interrogative_count"
     t.integer "proper_noun_count"
     t.datetime "queued_at"
+    t.float "linsear_write_grade"
+    t.float "dale_chall_grade"
+    t.integer "unique_complex_words_count"
+    t.integer "unique_simple_words_count"
+    t.boolean "hate_content_flag", default: false
+    t.string "hate_trigger_words"
+    t.boolean "profanity_content_flag", default: false
+    t.string "profanity_trigger_words"
+    t.boolean "sex_content_flag", default: false
+    t.string "sex_trigger_words"
+    t.boolean "violence_content_flag", default: false
+    t.string "violence_trigger_words"
+    t.boolean "adult_content_flag", default: false
     t.index ["document_id"], name: "index_document_analyses_on_document_id"
   end
 
@@ -1081,6 +1106,19 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
     t.index ["entity_type", "entity_id"], name: "index_document_entities_on_entity_type_and_entity_id"
   end
 
+  create_table "document_revisions", force: :cascade do |t|
+    t.integer "document_id", null: false
+    t.string "title"
+    t.string "body"
+    t.string "synopsis"
+    t.integer "universe_id"
+    t.string "notes_text"
+    t.datetime "deleted_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["document_id"], name: "index_document_revisions_on_document_id"
+  end
+
   create_table "documents", force: :cascade do |t|
     t.integer "user_id"
     t.text "body"
@@ -1096,6 +1134,61 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
     t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
+  end
+
+  create_table "end_of_day_analytics_reports", force: :cascade do |t|
+    t.date "day"
+    t.integer "user_signups"
+    t.integer "new_monthly_subscriptions"
+    t.integer "ended_monthly_subscriptions"
+    t.integer "new_trimonthly_subscriptions"
+    t.integer "ended_trimonthly_subscriptions"
+    t.integer "new_annual_subscriptions"
+    t.integer "ended_annual_subscriptions"
+    t.integer "paid_paypal_invoices"
+    t.integer "buildings_created"
+    t.integer "characters_created"
+    t.integer "conditions_created"
+    t.integer "continents_created"
+    t.integer "countries_created"
+    t.integer "creatures_created"
+    t.integer "deities_created"
+    t.integer "floras_created"
+    t.integer "foods_created"
+    t.integer "governments_created"
+    t.integer "groups_created"
+    t.integer "items_created"
+    t.integer "jobs_created"
+    t.integer "landmarks_created"
+    t.integer "languages_created"
+    t.integer "locations_created"
+    t.integer "lores_created"
+    t.integer "magics_created"
+    t.integer "planets_created"
+    t.integer "races_created"
+    t.integer "religions_created"
+    t.integer "scenes_created"
+    t.integer "schools_created"
+    t.integer "sports_created"
+    t.integer "technologies_created"
+    t.integer "towns_created"
+    t.integer "traditions_created"
+    t.integer "universes_created"
+    t.integer "vehicles_created"
+    t.integer "documents_created"
+    t.integer "documents_edited"
+    t.integer "timelines_created"
+    t.integer "stream_shares_created"
+    t.integer "stream_comments"
+    t.integer "collections_created"
+    t.integer "collection_submissions_created"
+    t.integer "thredded_threads_created"
+    t.integer "thredded_replies_created"
+    t.integer "thredded_private_messages_created"
+    t.integer "thredded_private_replies_created"
+    t.integer "document_analyses_created"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "famous_figureships", force: :cascade do |t|
@@ -1446,6 +1539,10 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
     t.string "ip_address"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "origin"
+    t.string "content_type"
+    t.string "user_agent"
+    t.string "user_token"
     t.index ["application_integration_id"], name: "index_integration_authorizations_on_application_integration_id"
     t.index ["user_id"], name: "index_integration_authorizations_on_user_id"
   end
@@ -3435,6 +3532,8 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "api_keys", "users"
+  add_foreign_key "api_requests", "application_integrations"
+  add_foreign_key "api_requests", "integration_authorizations"
   add_foreign_key "application_integrations", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
@@ -3567,6 +3666,7 @@ ActiveRecord::Schema.define(version: 2020_08_29_011900) do
   add_foreign_key "document_categories", "document_analyses"
   add_foreign_key "document_concepts", "document_analyses"
   add_foreign_key "document_entities", "document_analyses"
+  add_foreign_key "document_revisions", "documents"
   add_foreign_key "documents", "universes"
   add_foreign_key "documents", "users"
   add_foreign_key "floras", "universes"
