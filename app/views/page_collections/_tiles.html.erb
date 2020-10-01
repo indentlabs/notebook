@@ -1,0 +1,45 @@
+<div class="row">
+  <% pages.each do |page| %>
+    <div class="col s12 m4 l3">
+      <% content = page.content %>
+      <% next unless (current_user || User.new).can_read?(content) %>
+      <div class="hoverable card">
+        <div class="card-image waves-effect waves-block waves-light">
+          <%= image_tag content.random_public_image, class: 'activator' %>
+        </div>
+        <div class="card-content">
+          <span class="card-title activator grey-text text-darken-4">
+            <%= link_to content.name, content %>
+            <i class="material-icons right">more_vert</i>
+          </span>
+          <p>
+            Submitted by 
+            <%= link_to content.user, class: "#{User.color}-text" do %>
+              <%= content.user.display_name %>
+            <% end %>
+          </p>
+        </div>
+        <div class="card-reveal">
+          <span class="card-title grey-text text-darken-4">
+            <%= link_to content.name, content %>
+            <i class="material-icons right">close</i>
+          </span>
+          <% if page.explanation? %>
+            <blockquote>
+              <%= simple_format page.explanation %>
+            </blockquote>
+          <% end %>
+          <ul>
+            <li><%= link_to 'View more submissions from this user', page_collection_submissions_by_user_path(page_collection_id: @page_collection.id, user_id: page.user_id) %></li>
+            <% if user_signed_in? && current_user == @page_collection.user %>
+              <li>&nbsp;</li>
+              <li class="divider"></li>
+              <li>&nbsp;</li>
+              <li><%= link_to 'Remove from collection', page_collection_submission_path(page), method: :delete, class: 'red-text', data: { confirm: "Are you sure you want to remove this page from this collection?" } %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

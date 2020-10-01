@@ -85,6 +85,7 @@
           </div>
 
           <% if @page_collection.contributors.any? %>
+            <br />
             <div class="grey-text uppercase">Contributors</div>
             <% @page_collection.contributors.each do |user| %>
               <div>
@@ -110,26 +111,7 @@
     <% if !!@show_contributor_highlight %>
       <%= render partial: 'page_collections/contributor_highlight_bar', locals: { contributor: @highlighted_contributor } %>
     <% end %>
-    <%= render partial: 'page_collections/stream', locals: { pages: @pages } %>
+    <%= render partial: 'page_collections/tiles', locals: { pages: @pages } %>
   <% end %>
 
 <% end %>
-
-<div class="row">
-  <div class="col s12 m9 l8">
-    <% if @pages.empty? %>
-      <div class="card-panel">
-        This collection doesn't have any approved public pages yet. Please check back later!
-      </div>
-    <% else %>
-      <%= render partial: 'page_collections/sort_bar' %>
-      <% if !!@show_contributor_highlight %>
-        <%= render partial: 'page_collections/contributor_highlight_bar', locals: { contributor: @highlighted_contributor } %>
-      <% end %>
-      <%= render partial: 'page_collections/stream', locals: { pages: @pages } %>
-    <% end %>
-  </div>
-  <div class="col s12 m3 l4">
-    <%= render partial: 'page_collections/sidebar' %>
-  </div>
-</div>
