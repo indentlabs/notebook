@@ -30,7 +30,24 @@
             </blockquote>
           <% end %>
           <ul>
-            <li><%= link_to 'View more submissions from this user', page_collection_submissions_by_user_path(page_collection_id: @page_collection.id, user_id: page.user_id) %></li>
+            <li>
+              <%= link_to content, class: "#{content.class.color}-text" do %>
+                <i class="material-icons right">arrow_right</i>
+                View <%= content.name %>'s notebook page
+              <% end %>
+            </li>
+            <li class="clearfix">
+              <%= link_to page_collection_submissions_by_user_path(page_collection_id: @page_collection.id, user_id: page.user_id), class: "#{PageCollection.color}-text" do %>
+                <i class="material-icons right">arrow_right</i>
+                View more submissions from this user
+              <% end %>
+            </li>
+            <li class="clearfix">
+              <%= link_to page_collection_submissions_by_user_path(page_collection_id: @page_collection.id, user_id: page.user_id), class: "#{User.color}-text" do %>
+                <i class="material-icons right">arrow_right</i>
+                View <%= page.user.display_name %>'s profile
+              <% end %>
+            </li>
             <% if user_signed_in? && current_user == @page_collection.user %>
               <li>&nbsp;</li>
               <li class="divider"></li>
