@@ -43,6 +43,12 @@ class DataController < ApplicationController
     @collaborating_universes = Universe.where(id: collaborating_ids)
   end
 
+  def referrals
+    @referrals      = current_user.referrals.includes(:referree)
+    @referral_count = @referrals.count
+    @share_link     = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}"
+  end
+
   private
 
   def set_sidenav_expansion
