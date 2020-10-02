@@ -173,6 +173,8 @@ class PageCollectionsController < ApplicationController
       @pages = @pages.reorder('cached_content_name ASC')
     when 'chronological'
       @pages = @pages.reorder('accepted_at ASC')
+    when 'shuffle'
+      @pages = @pages.shuffle
     when 'recent'
       @pages = @pages.reorder('accepted_at DESC')
     when nil
