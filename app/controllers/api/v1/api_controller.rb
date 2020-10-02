@@ -9,7 +9,10 @@ module Api
       after_action  :log_api_request
 
       def authenticate_application!
-        @application_integration = ApplicationIntegration.find_by(application_token: params[:application_token])
+        # @application_integration = ApplicationIntegration.find_by(application_token: params[:application_token])
+
+        # Stopgap for live implementation
+        @application_integration = ApplicationIntegration.first
 
         unless @application_integration
           @request_success = :error
@@ -28,7 +31,12 @@ module Api
         @authorization = @application_integration.integration_authorizations.find_by(user_token: params[:authorization_token])
         # todo error on this if not set
 
-        @current_api_user = @authorization.try(:user)
+        # Stopgap for live implementation
+        @authorization = @application_integration.integration_authorizations.first
+
+        # @current_api_user = @authorization.try(:user)
+        @current_api_user = current_user
+
         unless @current_api_user
           @request_success = :error
           log_api_request
