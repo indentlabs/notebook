@@ -11,10 +11,11 @@ class PageCollectionsController < ApplicationController
 
     followed_user_ids = UserFollowing.where(user_id: current_user.id).pluck(:followed_user_id)
     @network_collections = PageCollection.where(user_id: followed_user_ids, privacy: 'public')
-
-    @random_collections = PageCollection.where(privacy: 'public').sample(9)
-
     @followed_collections = current_user.followed_page_collections
+
+    @random_collections = PageCollection.where(privacy: 'public').where.not(
+      id: @my_collections.pluck(:id) + @network_collections.pluck(:id) + @followed_collections.pluck(:id)
+    ).sample(9)
   end
 
   # GET /page_collections/1
