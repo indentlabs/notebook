@@ -8,7 +8,6 @@ class Town < ApplicationRecord
 
   include BelongsToUniverse
 
-  include HasAttributes
   include IsContentPage
   include Serendipitous::Concern
 

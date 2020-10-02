@@ -6,6 +6,7 @@ class AdminController < ApplicationController
   before_action :require_admin_access
 
   def dashboard
+    @reports = EndOfDayAnalyticsReport.order('day DESC').limit(90)
   end
 
   def content_type

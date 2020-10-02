@@ -136,7 +136,7 @@ class QuickActionsSidebar extends React.Component {
   }
 
   setDrawerVisible(open) {
-    console.log("drawer update: " + open);
+    // console.log("drawer update: " + open);
     this.setState({ open: open });
   };
 

@@ -9,6 +9,9 @@ class Document < ApplicationRecord
   has_many :document_concepts,   through: :document_analysis
   has_many :document_categories, through: :document_analysis
 
+  has_many :document_revisions, dependent: :destroy
+  after_update :save_document_revision!
+
   include HasParseableText
   include HasPartsOfSpeech
   include HasImageUploads
@@ -50,6 +53,10 @@ class Document < ApplicationRecord
 
     # TODO: Should we also be deleting all existing analyses here since they're
     #       now out of date? Or should we wait until the analysis is complete?
+  end
+
+  def save_document_revision!
+    SaveDocumentRevisionJob.perform_later(self.id)
   end
 
   def reading_estimate

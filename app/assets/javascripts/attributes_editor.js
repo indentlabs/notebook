@@ -47,23 +47,23 @@ $(document).ready(function () {
       dataType: "json",
       url: "/api/v1/fields/suggest/" + content_type + "/" + category_label,
       success: function (data) {
-        console.log("new fields");
-        console.log(data);
+        // console.log("new fields");
+        // console.log(data);
 
         var existing_fields = result_container.closest('.js-category-container').find('.js-field-label').map(function(){
           return $.trim($(this).text());
         }).get();
 
-        console.log("existing fields");
-        console.log(existing_fields);
+        // console.log("existing fields");
+        // console.log(existing_fields);
 
         var new_fields = data.filter(f => !existing_fields.includes(f));
         var any_suggestions = new_fields.length > 0;
         if (any_suggestions) {
           result_container.html('');
           $.each(new_fields, function(i, value) {
-            console.log("New suggestion: ");
-            console.log(value);
+            // console.log("New suggestion: ");
+            // console.log(value);
             result_container.append(
               $('<a />')
                 .attr('href', '#')

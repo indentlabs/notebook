@@ -111,8 +111,8 @@ $(document).ready(function () {
       var template = $('.timeline-event-template > .timeline-event-container');
       var cloned_template = template.clone(true).removeClass('timeline-event-template');
       var timeline_id = cloned_template.find('.timeline-event-container').first().data('timeline-id');
-      console.log('new event id = ' + new_event_id);
-      console.log('timeline_id = ' + timeline_id);
+      // console.log('new event id = ' + new_event_id);
+      // console.log('timeline_id = ' + timeline_id);
 
       // Update IDs to the newly-created event
       cloned_template.data('event-id', new_event_id);
@@ -127,7 +127,7 @@ $(document).ready(function () {
       $('#js-create-timeline-event').removeAttr('disabled');
 
     }).fail(function () {
-      alert('fail');
+      alert('Error 292');
 
       loading_indicator.hide();
       $('#js-create-timeline-event').removeAttr('disabled');
@@ -136,4 +136,8 @@ $(document).ready(function () {
     // return false so we don't jump to the top of the page
     return false;
   });
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 });

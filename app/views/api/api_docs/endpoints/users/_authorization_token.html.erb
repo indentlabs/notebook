@@ -1,0 +1,56 @@
+<h2>
+  <i class="material-icons <%= User.color %>-text left"><%= User.icon %></i>
+  Fetch a user's authorization token
+</h2>
+<div class="row">
+  <div class="col s12 m6 l6">
+    <h3>Endpoint</h3>
+    <p class="code">
+GET /api/v1/<%= User.name.downcase.pluralize %>/<span class="green-text">&lt;id&gt;</span>/authorization
+    </p>
+    <h3>Example call</h3>
+    <ul class="collection">
+      <li class="collection-item">
+        <span class="title">
+          <strong>application_token</strong>
+          <span class="blue-text">string</span>
+          <span class="red-text">required</span>
+        </span>
+        <p>
+          The token for your application.
+        </p>
+      </li>
+      <li class="collection-item">
+        <span class="title">
+          <strong class="green-text">id</strong>
+          <span class="blue-text">integer</span>
+          <span class="red-text">required</span>
+        </span>
+        <p>
+          The ID of the <%= User.name.downcase %> you're fetching.  
+        </p>
+      </li>
+    </ul>
+    <div class="card-panel blue lighten-5">
+      <p>
+        Each user's authorization token is already passed to your app through your
+        <%= link_to 'callback URL', '#' %> when that user first authorizes your app and should be stored (and associated with your user) at that time. 
+        However, this endpoint is useful if you need to retrieve a particular user's authorization token later.
+      </p>
+      <p>
+        This endpoint will only return an authorization token if the user you're requesting has already authorized your app.
+      </p>
+    </div>
+  </div>
+  <div class="col s12 m6 l6">
+    <h3>Example response</h3>
+    <p class="code">
+{
+  "id": 1,
+  "token": "a1ed29894c458d0093f74ededa59debc953712d9b412c224"
+}
+    </p>
+  </div>
+</div>
+
+

@@ -1,14 +1,28 @@
-<span class="document-name-bar white-text">
+<div class="document-name-bar">
   <% if defined?(f) %>
-    <span class="hide-on-small-only">Editing</span>
     <div class="input-field inline">
       <%=
         f.text_field :title,
           placeholder: 'Untitled document',
           value: document.try(:name) || 'Untitled document',
-          class: 'white-text',
-          style: 'font-size: 150%; border-bottom: 1px solid white;'
+          class: 'teal-text',
+          style: 'font-size: 150%; border-bottom: 1px solid teal;'
       %>
+      <%= f.label :title, 'Editing' %>
     </div>
+    <div class="right">
+      by <%= link_to document.user.display_name, document.user, class: "#{User.color}-text" %>
+    </div>
+    <div class="clearfix"></div>
+  <% else %>
+
+    <h5 class="document-title">
+      <%= document.try(:name) || 'Untitled document' %>
+    </h5>
+    <div class="right">
+      by <%= link_to document.user.display_name, document.user, class: "#{User.color}-text" %>
+    </div>
+    <div class="clearfix"></div>
+
   <% end %>
-</span>
+</div>

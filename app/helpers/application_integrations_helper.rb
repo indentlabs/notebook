@@ -1,0 +1,2 @@
+module ApplicationIntegrationsHelper
+end

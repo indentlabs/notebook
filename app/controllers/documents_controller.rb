@@ -4,7 +4,7 @@ class DocumentsController < ApplicationController
   # todo Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
   skip_before_action :verify_authenticity_token, only: [:link_entity]
 
-  before_action :set_document, only: [:show, :analysis, :queue_analysis, :edit, :destroy]
+  before_action :set_document, only: [:show, :analysis, :plaintext, :queue_analysis, :edit, :destroy]
   before_action :set_sidenav_expansion
   before_action :set_navbar_color
   before_action :set_navbar_actions, except: [:edit]
@@ -12,7 +12,7 @@ class DocumentsController < ApplicationController
 
   before_action :cache_linkable_content_for_each_content_type, only: [:edit]
 
-  layout 'editor', only: [:edit]
+  layout 'editor',    only: [:edit]
 
   def index
     @documents = current_user.documents.order('updated_at desc')
@@ -27,24 +27,8 @@ class DocumentsController < ApplicationController
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     end
 
-    preload_linked_entities
-
-    if @document.user == current_user
-      @navbar_actions.unshift({
-        label: 'Edit document',
-        href: edit_document_path(@document),
-        class: 'right '
-      })
-      @navbar_actions.unshift({
-        label: 'Analyze document',
-        href: analysis_document_path(@document),
-        class: 'right'
-      })
-    end
-    @navbar_actions.unshift({
-      label: (@document.name || 'Untitled document'),
-      href: document_path(@document)
-    })
+    # Put the focus on the document by removing Notebook.ai actions
+    @navbar_actions = []
   end
 
   def analysis
@@ -77,7 +61,9 @@ class DocumentsController < ApplicationController
   # todo this function is an embarassment
   def link_entity
     # Preconditions lol
-    raise "Invalid entity type #{linked_entity_params[:entity_type]}" unless Rails.application.config.content_types[:all].map(&:name).include?(linked_entity_params[:entity_type])
+    unless (Rails.application.config.content_types[:all].map(&:name) + [Timeline.name, Document.name]).include?(linked_entity_params[:entity_type])
+      raise "Invalid entity type #{linked_entity_params[:entity_type]}"
+    end
 
     # Take this out of the params upfront in case we need to modify the value (after creating one, for example)
     document_analysis_id = linked_entity_params[:document_analysis_id].to_i
@@ -137,9 +123,11 @@ class DocumentsController < ApplicationController
   end
 
   def edit
-    preload_linked_entities
-
     redirect_to(root_path, notice: "You don't have permission to edit that!") unless @document.updatable_by?(current_user)
+
+    @linked_entities = @document.document_entities
+      .where.not(entity_id: nil)
+      .group_by(&:entity_type)
   end
 
   # Todo does anything actually use this endpoint?
@@ -172,6 +160,14 @@ class DocumentsController < ApplicationController
     end
   end
 
+  def plaintext
+    unless @document.present? && (current_user || User.new).can_read?(@document)
+      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+    end
+
+    render layout: 'plaintext'
+  end
+
   def toggle_favorite
     document = Document.with_deleted.find_or_initialize_by(id: params[:id])
 
@@ -200,6 +196,22 @@ class DocumentsController < ApplicationController
     entity.destroy
 
     redirect_back(fallback_location: analysis_document_path(document), notice: "Entity removed from analysis.")
+  end
+
+  def unlink_entity
+    document = Document.find_by(id: params[:id])
+    return unless document.present?
+
+    entity   = document.document_entities.find_by(
+      entity_type: params[:page_type],
+      entity_id:   params[:page_id]
+    )
+    return unless entity.present?
+
+    return unless user_signed_in? && document.user == current_user
+    entity.destroy
+
+    redirect_back(fallback_location: document, notice: "Page unlinked.")
   end
 
   def destroy_analysis
@@ -251,29 +263,6 @@ class DocumentsController < ApplicationController
 
   def linked_entity_params
     params.permit(:entity_id, :entity_type, :document_entity_id, :document_id, :document_analysis_id)
-  end
-
-  def preload_linked_entities
-    # Simpler form: (8/6/19 left intact for temporary reference during release -- can delete after release)
-    # @linked_entities = @document.document_entities
-    #   .where.not(entity_id: nil)
-    #   .includes(:entity)
-    #   .order('entity_type asc')
-
-    # More complicated includes-stuff form:
-    @linked_entities = []
-    return unless user_signed_in? && current_user.on_premium_plan?
-    
-    Rails.application.config.content_types[:all].each do |content_type|
-      @linked_entities += @document.document_entities
-        .where(entity_type: content_type.name)
-        .where.not(entity_id: nil)
-        .order('text ASC')
-        .includes(:entity, entity: [:user])
-        .includes(entity: Rails.application.config.inverse_content_relations.fetch(content_type.name, []).map do |relation, data|
-          data[:inverse_class] == content_type.name ? data[:with] : nil
-        end.compact)
-    end
   end
 
   def set_document
