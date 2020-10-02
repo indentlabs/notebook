@@ -3,30 +3,14 @@
     <div class="nav-wrapper">
       <ul>
         <li class="left">
-          <a class="sidenav-trigger show-on-large left" href="#" data-target="sidenav-left">
+          <a class="sidenav-trigger show-on-large left tooltipped" href="#" data-target="sidenav-left" data-tooltip="Notebook.ai navigation">
             <i class="material-icons">menu</i>
           </a>
         </li>
         <li class="left">
-          <%=
-            link_to documents_path, class: 'tooltipped', data: {
-              position: 'bottom',
-              tooltip: 'Back to your documents'
-            } do
-          %>
-            <i class="material-icons white-text">file_copy</i>
-          <% end %>
-        </li>
-        <li class="left">
-          <%=
-            link_to new_document_path, class: 'tooltipped', data: {
-              position: 'bottom',
-              tooltip: 'New document'
-            },
-            target: '_blank' do
-          %>
-            <i class="material-icons white-text left">note_add</i>
-          <% end %>
+          <a class="sidenav-trigger show-on-large left tooltipped" href="#" data-target="document-sidenav-left" data-tooltip="Your documents">
+            <i class="material-icons">file_copy</i>
+          </a>
         </li>
 
         <ul id="about-this-document-dropdown" class="dropdown-content">
@@ -62,7 +46,13 @@
           <li>
             <%= link_to @document, target: '_blank' do %>
               <i class="material-icons left <%= Document.color %>-text"><%= Document.icon %></i>
-              View formatted document
+              Read-only view
+            <% end %>
+          </li>
+          <li>
+            <%= link_to plaintext_document_path(@document), target: '_blank' do %>
+              <i class="material-icons green-text left">title</i>
+              Plaintext view
             <% end %>
           </li>
           <li>
@@ -74,18 +64,25 @@
           <li>
             <%= link_to '#', class: 'modal-trigger', data: { target: 'document-notes-modal' } do %>
               <i class="material-icons left <%= Document.color %>-text">edit</i>
-              Open document notes
+              Document notes
             <% end %>
           </li>
           <li>
             <%=
               link_to '#', class: 'share' do
             %>
-              <i class="material-icons purple-text left">share</i>
+              <i class="material-icons blue-text left">share</i>
               Share this document
             <% end %>
           </li>
+          <li>
+            <%= link_to document_document_revisions_path(@document) do %>
+              <i class="material-icons green-text left">content_copy</i>
+              Revision log
+            <% end %>
+          </li>
           <% if current_user.can_delete?(@document) %>
+            <li class="divider"></li>
             <li>
               <%= link_to @document,
                 method: :delete,
@@ -109,12 +106,18 @@
           %>
             <i class="material-icons white-text left"><%= Document.icon %></i>
             <span class="hide-on-med-and-down">About</span>
-            <i class="material-icons right">arrow_drop_down</i>
           <% end %>
         </li>
         <li class="right">
-          <%= link_to analysis_document_path(@document), class: "tooltipped", data: { tooltip: 'Analyze this document', position: 'bottom' } do %>
-            <i class="material-icons left">bar_chart</i>
+          <a class="sidenav-trigger show-on-large left tooltipped" href="#" data-target="document-entities-right" data-tooltip="Entities in this document">
+            <i class="material-icons white-text left">book</i>
+            <span class="hide-on-med-and-down">Entities</span>
+          </a>
+        </li>
+        <li class="right">
+          <%= link_to analysis_document_path(@document), class: "tooltipped orange btn", data: { tooltip: 'Analyze this document', position: 'bottom' } do %>
+            <i class="material-icons hide-on-large-only">bar_chart</i>
+            <i class="material-icons left hide-on-med-and-down">bar_chart</i>
             <span class="hide-on-med-and-down">Analyze</span>
           <% end %>
         </li>
@@ -149,7 +152,7 @@
           </p>
         </div>
         <% if @linked_entities.any? %>
-          <% linked_entity_universes = @linked_entities.map { |de| de.entity.try(:universe) }.uniq.compact %>
+          <% linked_entity_universes = @linked_entities.values.flatten.map { |de| de.entity.try(:universe) }.uniq.compact %>
           <% if linked_entity_universes.any? %>
             <div class="col s12 m12 l4">
               <p class="grey-text"><%= pluralize linked_entity_universes.count, 'suggested universe' %></p>
@@ -198,7 +201,7 @@
     universe_picker_form.find('.js-autosave-trigger').click(function () {
       var selected_universe_name = $(this).text().trim();
 
-      console.log('name is now ' + selected_universe_name);
+      // console.log('name is now ' + selected_universe_name);
 
       $('.js-content-universe-name').text(selected_universe_name);
       $('#universe-picker-modal').find('form').submit();

@@ -1,0 +1,93 @@
+<h2>
+  <i class="material-icons <%= content_type.color %>-text left"><%= content_type.icon %></i>
+  Create a new <%= content_type.name.downcase %>
+</h2>
+<div class="row">
+  <div class="col s12 m6 l6">
+    <h3>Endpoint</h3>
+    <p class="code">
+POST /api/v1/<%= content_type.name.downcase.pluralize %>
+    </p>
+    <h3>Example call</h3>
+    <ul class="collection">
+      <li class="collection-item">
+        <span class="title">
+          <strong>application_token</strong>
+          <span class="blue-text">string</span>
+          <span class="red-text">required</span>
+        </span>
+        <p>
+          The token for your application.
+        </p>
+      </li>
+      <li class="collection-item">
+        <span class="title">
+          <strong>authorization_token</strong>
+          <span class="blue-text">string</span>
+          <span class="red-text">required</span>
+        </span>
+        <p>
+          The authorization token for your user.
+        </p>
+      </li>
+      <li class="collection-item">
+        <span class="title">
+          <strong>fields</strong>
+          <span class="blue-text">hash</span>
+          <span class="red-text">required</span>
+        </span>
+        <p>
+          This hash should pass field IDs as keys with strings to set that field's initial value to. For example,
+          <div class="code">
+{
+"123": "Value for field with ID 123",
+"124": "Value for another field"
+}
+          </div>
+        </p>
+      </li>
+    </ul>
+    <% if Rails.application.config.content_types[:premium].include?(content_type) %>
+      <div class="card-panel blue lighten-5">
+        Note: Because this is a <strong>Premium</strong> page, either you (the application)
+        or your authenticated user must have an active Premium subscription to create
+        a new <%= content_type.name.downcase %> page.
+      </div>
+    <% end %>
+  </div>
+  <div class="col s12 m6 l6">
+    <h3>Example response</h3>
+    <p class="code">
+{
+  "id": 12345,
+  "name": "Some <%= content_type.name %>",
+<% unless content_type.name == Universe.name %>
+  "universe_id": 2,
+<% end %>
+  "meta": {
+    "created_at": "2020-02-01 08:24:20 UTC",
+    "updated_at": "2020-02-09 06:57:12 UTC"
+  },
+  "categories": {
+    "Overview": {
+      "fields": [
+        {
+          "id": 123,
+          "label": "Description",
+          "value": "Some Description"
+        },
+        {
+          "id": 124,
+          "label": "Another Field",
+          "value": "Some other value"
+        },
+        ...
+      ],
+    },
+    ...
+  },
+  "references": [...]
+}
+    </p>
+  </div>
+</div>

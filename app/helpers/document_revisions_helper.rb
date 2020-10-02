@@ -1,0 +1,2 @@
+module DocumentRevisionsHelper
+end

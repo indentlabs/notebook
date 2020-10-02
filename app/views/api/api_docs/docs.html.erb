@@ -1,0 +1,41 @@
+<div class="row">
+  <div class="col s12 m10 offset-m1 l8 offset-l2">
+    <%= link_to api_path do %>
+      <%= image_tag 'logos/both-original.png', style: 'width: 100%' %>
+    <% end %>
+  </div>
+
+  <div class="col s12">
+    <div class="grey-text uppercase center">SUPPORTED NOTEBOOK ENDPOINTS</div>
+    <ul class="collapsible">
+      <li>
+        <div class="collapsible-header">
+            <i class="material-icons <%= User.color %>-text"><%= User.icon %></i>
+            Interacting with users
+          </div>
+          <div class="collapsible-body">
+            <%= render partial: 'api/api_docs/endpoints/users/profile' %>
+            <%= render partial: 'api/api_docs/endpoints/users/active_page_types' %>
+            <%= render partial: 'api/api_docs/endpoints/users/authorization_token' %>
+          </div>
+      </li>
+
+      <% Rails.application.config.content_types[:all].each do |content_type| %>
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons <%= content_type.color %>-text"><%= content_type.icon %></i>
+            Interacting with <%= content_type.name.downcase.pluralize %>
+          </div>
+          <div class="collapsible-body">
+            <%= render partial: 'api/api_docs/endpoints/content/fetch_all_content',            locals: { content_type: content_type } %>
+            <%= render partial: 'api/api_docs/endpoints/content/fetch_a_specific_content',     locals: { content_type: content_type } %>
+            <%= render partial: 'api/api_docs/endpoints/content/modify_a_specific_content',    locals: { content_type: content_type } %>
+            <%= render partial: 'api/api_docs/endpoints/content/create_a_new_content',         locals: { content_type: content_type } %>
+            <%= render partial: 'api/api_docs/endpoints/content/reference_a_specific_content', locals: { content_type: content_type } %>
+            <%= render partial: 'api/api_docs/endpoints/content/delete_a_specific_content',    locals: { content_type: content_type } %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
