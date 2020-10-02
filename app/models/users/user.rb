@@ -75,6 +75,7 @@ class User < ApplicationRecord
     @published_in_page_collections ||= PageCollection.where(id: ids)
   end
   has_many :page_collection_followings,    dependent: :destroy
+  has_many :followed_page_collections,     through: :page_collection_followings, source: :page_collection
   has_many :page_collection_reports,       dependent: :destroy
 
   has_many :votes,                         dependent: :destroy

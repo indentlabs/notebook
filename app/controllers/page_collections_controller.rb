@@ -13,6 +13,8 @@ class PageCollectionsController < ApplicationController
     @network_collections = PageCollection.where(user_id: followed_user_ids, privacy: 'public')
 
     @random_collections = PageCollection.where(privacy: 'public').sample(9)
+
+    @followed_collections = current_user.followed_page_collections
   end
 
   # GET /page_collections/1
