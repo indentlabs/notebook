@@ -16,8 +16,8 @@ class ApiContentSerializer
   attr_accessor :data
 
   def initialize(content, include_blank_fields: false)
-    self.categories       = content.class.attribute_categories(content.user).where(hidden: false).eager_load(attribute_fields: :attribute_values)
-    self.fields           = AttributeField.where(attribute_category_id: self.categories.map(&:id), hidden: false)
+    self.categories       = content.class.attribute_categories(content.user).where(hidden: [false, nil]).eager_load(attribute_fields: :attribute_values)
+    self.fields           = AttributeField.where(attribute_category_id: self.categories.map(&:id), hidden: [false, nil])
     self.attribute_values = Attribute.where(attribute_field_id: self.fields.map(&:id), entity_type: content.page_type, entity_id: content.id).order('created_at desc')
     self.universe         = (content.class.name == Universe.name) ? nil : content.universe
 
