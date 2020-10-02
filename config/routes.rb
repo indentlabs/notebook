@@ -64,6 +64,7 @@ Rails.application.routes.draw do
 
   resources :documents do
     get  '/analysis',         to: 'documents#analysis',                on: :member
+    get  '/plaintext',        to: 'documents#plaintext',               on: :member
     get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
     post '/link_entity',      to: 'documents#link_entity',             on: :collection
     resources :document_revisions, path: 'revisions', on: :member

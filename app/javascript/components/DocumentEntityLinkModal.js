@@ -3,7 +3,8 @@
   <%=
     react_component("DocumentEntityLinkModal", {
       form_path:    link_entity_documents_path,
-      content_list: @current_user_content
+      content_list: @current_user_content,
+      document_id:  @document.id
     })
   %>
 */
@@ -63,8 +64,7 @@ class DocumentEntityLinkModal extends React.Component {
           </p>
           
           <form action={this.props.form_path} acceptCharset="UTF-8" method="post">
-            <input name="utf8" type="hidden" value="✓" />
-            <input value="8" type="hidden" name="document_id" />
+            <input value={this.props.document_id} type="hidden" name="document_id" />
             <input value="-1" type="hidden" name="document_analysis_id" />
             <input value="-1" type="hidden" name="document_entity_id" />
             <input type="hidden" name="entity_type" />

@@ -4,7 +4,7 @@ class DocumentsController < ApplicationController
   # todo Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
   skip_before_action :verify_authenticity_token, only: [:link_entity]
 
-  before_action :set_document, only: [:show, :analysis, :queue_analysis, :edit, :destroy]
+  before_action :set_document, only: [:show, :analysis, :plaintext, :queue_analysis, :edit, :destroy]
   before_action :set_sidenav_expansion
   before_action :set_navbar_color
   before_action :set_navbar_actions, except: [:edit]
@@ -12,7 +12,7 @@ class DocumentsController < ApplicationController
 
   before_action :cache_linkable_content_for_each_content_type, only: [:edit]
 
-  layout 'editor', only: [:edit]
+  layout 'editor',    only: [:edit]
 
   def index
     @documents = current_user.documents.order('updated_at desc')
@@ -61,7 +61,9 @@ class DocumentsController < ApplicationController
   # todo this function is an embarassment
   def link_entity
     # Preconditions lol
-    raise "Invalid entity type #{linked_entity_params[:entity_type]}" unless Rails.application.config.content_types[:all].map(&:name).include?(linked_entity_params[:entity_type])
+    unless (Rails.application.config.content_types[:all].map(&:name) + [Timeline.name, Document.name]).include?(linked_entity_params[:entity_type])
+      raise "Invalid entity type #{linked_entity_params[:entity_type]}"
+    end
 
     # Take this out of the params upfront in case we need to modify the value (after creating one, for example)
     document_analysis_id = linked_entity_params[:document_analysis_id].to_i
@@ -156,6 +158,14 @@ class DocumentsController < ApplicationController
     else
       head 501, content_type: "text/html"
     end
+  end
+
+  def plaintext
+    unless @document.present? && (current_user || User.new).can_read?(@document)
+      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+    end
+
+    render layout: 'plaintext'
   end
 
   def toggle_favorite

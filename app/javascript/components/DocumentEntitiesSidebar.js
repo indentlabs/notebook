@@ -117,7 +117,7 @@ class DocumentEntitiesSidebar extends React.Component {
             </a>
           </li>
         </ul>
-        <DocumentEntityLinkModal form_path={this.props.link_form_path} content_list={this.props.user_content} />
+        <DocumentEntityLinkModal form_path={this.props.link_form_path} content_list={this.props.user_content} document_id={this.props.document_id} />
         <PageLookupSidebar ref="PageLookupSidebar" document_id={this.props.document_id} />
       </React.Fragment>
     );
