@@ -1,25 +1,39 @@
 <% set_meta_tags title: @document.title, description: truncate(@document.body) %>
 
+<%= content_for :full_width_page_header do %>
+  <%= render partial: 'documents/components/autosave_bar', locals: { document: @document } %>
 
-  <%= content_for :full_width_page_header do %>
-    <%= render partial: 'documents/components/autosave_bar', locals: { document: @document } %>
-    <%= render partial: 'documents/components/smart_sidebar', locals: { document: @document } %>
-    <div id="editor" class="editable js-can-mention-pages" data-save-url="<%= document_url(@document) %>"><%= @document.body.try(:html_safe) %></div>
-  <% end %>
-
-<%= form_for @document do |f| %>
-  <%= content_for :navbar_left_content do %>
-    <%= render partial: 'documents/components/document_name_bar', locals: { document: @document, f: f } %>
-  <% end %>
-
-  <div class="grey-text autosave-bar">
-    <i class="material-icons js-autosave-icon grey-text">save</i>
-    <span class="js-autosave-status">
-      This document will automatically save as you make changes.
-      Highlight any text to bring up formatting options.
-    </span>
+  <div class="container" style="max-width: 50em;">
+    <%= form_for @document do |f| %>
+      <%= render partial: 'documents/components/document_name_bar', locals: { document: @document, f: f } %>
+    <% end %>
   </div>
+
+  <div id="editor" class="editable js-can-mention-pages" data-save-url="<%= document_url(@document) %>"><%= @document.body.try(:html_safe) %></div>
 <% end %>
 
 <div style="clear: both"></div>
 <%= render partial: 'javascripts/content_linking' %>
+
+<div id="document-notes-modal" class="modal modal-fixed-footer">
+  <%= form_for(@document, remote: true, html: { id: 'document-notes-form' }) do |f| %>
+    <div class="modal-content">
+      <h4>
+        <i class="material-icons medium <%= Document.color %>-text left">
+          <%= Document.icon %>
+        </i>
+        Document notes
+      </h4>
+      <p class="grey-text">This field will automatically expand as you write.</p>
+      <%= f.text_area :notes_text, class: 'materialize-textarea', placeholder: "Write as little or as much as you'd like!", style: 'min-height: 400px; border: 1px solid #ccc; padding: 10px;' %>
+      <p class="grey-text">
+        <strong>To save your notes, please click "Save Changes" below.</strong>
+        Closing this dialog will preserve your unsaved changes until you refresh the page, but to keep your notes you must save them!
+      </p>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Ignore changes</a>
+      <%= link_to 'Save changes', "#", onclick: '$("form#document-notes-form").submit()', class: 'modal-close waves-effect waves-green btn-flat lighten-3 ' + Document.color %>
+    </div>
+  <% end %>
+</div>
