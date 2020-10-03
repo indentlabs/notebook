@@ -57,6 +57,11 @@ class AdminController < ApplicationController
   def churn
   end
 
+  def hate
+    @posts = Thredded::PrivatePost.last(params.fetch(:limit, 500)).includes(:postable)
+    @list  = params[:matchlist]
+  end
+
   def perform_unsubscribe
     emails = params[:emails].split(/[\r|\n]+/)
     @users = User.where(email: emails)

@@ -28,7 +28,7 @@ module Api
       end
 
       def authenticate_api_user!
-        @authorization = @application_integration.integration_authorizations.find_by(user_token: params[:authorization_token])
+        # @authorization = @application_integration.integration_authorizations.find_by(user_token: params[:authorization_token])
         # todo error on this if not set
 
         # Stopgap for live implementation

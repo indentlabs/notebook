@@ -65,9 +65,14 @@ Rails.application.routes.draw do
   get '/@:username/following', to: 'users#following'
 
   resources :documents do
-    get  '/analysis',         to: 'documents#analysis',                on: :member
+    # Document Analysis routes
+    get '/analysis/',            to: 'document_analyses#show',        on: :member      
+    get '/analysis/readability', to: 'document_analyses#readability', on: :member
+    get '/analysis/style',       to: 'document_analyses#style',       on: :member
+    get '/analysis/sentiment',   to: 'document_analyses#sentiment',   on: :member
     get  '/plaintext',        to: 'documents#plaintext',               on: :member
     get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
+
     post '/link_entity',      to: 'documents#link_entity',             on: :collection
     resources :document_revisions, path: 'revisions', on: :member
 
@@ -80,7 +85,6 @@ Rails.application.routes.draw do
     get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
     # new route:
     get  '/unlink/:page_type/:page_id', to: 'documents#unlink_entity', on: :member
-
   end
 
   scope '/my' do
@@ -241,6 +245,7 @@ Rails.application.routes.draw do
       get '/promos',               to: 'admin#promos', as: :admin_promos
       get '/shares/reported',      to: 'admin#reported_shares'
       get '/churn',                to: 'admin#churn'
+      get '/hatewatch/:matchlist', to: 'admin#hate'
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'

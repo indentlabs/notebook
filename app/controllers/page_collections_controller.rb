@@ -85,7 +85,7 @@ class PageCollectionsController < ApplicationController
     end
 
     @page_collection.destroy
-    redirect_to page_collections_url, notice: 'Page collection was successfully destroyed.'
+    redirect_to page_collections_url, notice: 'Collection was successfully destroyed.'
   end
 
   def explore
