@@ -18,6 +18,112 @@ span.sentence {
 }
 </style>
 
+<div class="row">
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content spaced-paragraphs">
+        <div class="card-title">Most-used words</div>
+
+        <p>
+          There are a lot of pros and cons to reusing words. For more complex words, reuse is a great way to ensure your reader
+          picks up on definition and tone with each context. On the other hand, reusing simpler or more repetitive words can
+          also have a negative impact on some readers.
+        </p>
+        <p>
+          The following tables show your most-used words in various categories. Each table excludes the most common 175 words
+          (a, an, and, as, but, <em>etc.</em>) in the English language, known as "stop words".
+        </p>
+      </div>
+      <div class="card-tabs">
+        <ul class="tabs tabs-fixed-width">
+          <li class="tab"><a href="#mu-all-words">All words</a></li>
+          <li class="tab"><a href="#mu-nouns">Nouns</a></li>
+          <li class="tab"><a href="#mu-verbs">Verbs</a></li>
+          <li class="tab"><a href="#mu-adjectives">Adjectives</a></li>
+          <li class="tab"><a href="#mu-adverbs">Adverbs</a></li>
+        </ul>
+      </div>
+      <div class="card-content grey lighten-4">
+        <div id="mu-all-words">
+          <table>
+            <tr>
+              <th>Word</th>
+              <th>Times used</th>
+            </tr>
+            <% @analysis.most_used_words.each do |word, count| %>
+              <tr>
+                <td><span class="badge white black-text"><%= word %></span></td>
+                <td><%= count %></td>
+              </tr>
+            <% end %>
+          </table>
+        </div>
+        <div id="mu-nouns">
+          <table>
+            <tr>
+              <th>Word</th>
+              <th>Times used</th>
+            </tr>
+            <% @analysis.most_used_nouns.each do |word, count| %>
+              <tr>
+                <td><span class="badge white black-text"><%= word %></span></td>
+                <td><%= count %></td>
+              </tr>
+            <% end %>
+          </table>
+        </div>
+        <div id="mu-verbs">
+          <table>
+            <tr>
+              <th>Word</th>
+              <th>Times used</th>
+            </tr>
+            <% @analysis.most_used_verbs.each do |word, count| %>
+              <tr>
+                <td><span class="badge white black-text"><%= word %></span></td>
+                <td><%= count %></td>
+              </tr>
+            <% end %>
+          </table>
+        </div>
+        <div id="mu-adjectives">
+          <table>
+            <tr>
+              <th>Word</th>
+              <th>Times used</th>
+            </tr>
+            <% @analysis.most_used_adjectives.each do |word, count| %>
+              <tr>
+                <td><span class="badge white black-text"><%= word %></span></td>
+                <td><%= count %></td>
+              </tr>
+            <% end %>
+          </table>
+        </div>
+        <div id="mu-adverbs">
+          <table>
+            <tr>
+              <th>Word</th>
+              <th>Times used</th>
+            </tr>
+            <% @analysis.most_used_adverbs.each do |word, count| %>
+              <tr>
+                <td><span class="badge white black-text"><%= word %></span></td>
+                <td><%= count %></td>
+              </tr>
+            <% end %>
+          </table>
+        </div>
+      </div>
+      <div class="card-content">
+        Please note that many words can be used in many different forms and contexts (and often are within the same document!), so
+        some words in each category may or may not always be used as that particular part of speech. Instead, words are included
+        in each part-of-speech category if they <em>can</em> be used in that form.
+      </div>
+    </div>
+  </div>
+</div>
+
 <% if @analysis.sentence_count > 1 %>
 <div class="row">
   <div class="col s12">
@@ -439,5 +545,6 @@ span.sentence {
       %>
     </div>
   </div>
+
 
 </div>
