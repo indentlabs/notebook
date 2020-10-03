@@ -85,8 +85,18 @@ module HasPartsOfSpeech
       @pronouns ||= words.select { |word| I18n.t('pronouns').include? word }.uniq
     end
 
-    def stop_words
-      words.select { |word| I18n.t('stop-words').include? word }.uniq
+    def stop_words(with_duplicates: false)
+      stop_words = words.select { |word| I18n.t('stop-words').include?(word) }
+      stop_words.uniq! unless with_duplicates
+
+      stop_words
+    end
+
+    def non_stop_words(with_duplicates: false)
+      non_stop_words = words.reject { |word| I18n.t('stop-words').include?(word) }
+      non_stop_words.uniq! unless with_duplicates
+
+      non_stop_words
     end
   end
 end

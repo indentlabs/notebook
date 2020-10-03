@@ -1,0 +1,37 @@
+<% 1.times do %><br /><% end %>
+
+<div class="row">
+  <div class="col s10 offset-s1 m6 offset-m3 l2 offset-l5 center">
+    <%= image_tag 'logos/book-small.png', width: '100%' %>
+    <div class="blue-text uppercase">Notebook.ai</div>
+    <i class="material-icons blue-text">add</i>
+  </div>
+  <div class="col s12 m10 offset-m l6 offset-l3">
+    <div class="hoverable card" style="border-bottom: 5px solid #2196F3">
+      <div class="card-content">
+        <div class="card-title">
+          <i class="material-icons left <%= ApplicationIntegration.color %>-text"><%= ApplicationIntegration.icon %></i>
+          <%= @application_integration.name %>
+        </div>
+        <p>
+          <div class="grey-text uppercase">description</div>
+          <%= simple_format @application_integration.description %>
+        </p>
+        <br />
+        <p class="grey-text text-darken-1">
+          Authorizing this application will give it full access to manage your Notebook.ai pages, including your private pages. Please only authorize this application
+          if you trust the developer and are here on purpose.
+        </p>
+        <br />
+        <p class="grey-text text-darken-1">
+          You can manage your authorized Notebook.ai integrations at any time in your <strong><%= link_to 'Data Vault', '#' %></strong>.
+        </p>
+        <br />
+        <%= form_for [:api, IntegrationAuthorization.new({ user: current_user, application_integration: @application_integration })] do |f| %>
+          <%= f.hidden_field :application_integration_id, value: @application_integration.id %>
+          <%= f.submit "Authorize #{@application_integration.name}", class: "#{ApplicationIntegration.color} btn white-text", style: 'width: 100%' %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

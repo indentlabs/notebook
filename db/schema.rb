@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_01_195046) do
+ActiveRecord::Schema.define(version: 2020_10_03_052208) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1065,6 +1065,11 @@ ActiveRecord::Schema.define(version: 2020_10_01_195046) do
     t.boolean "violence_content_flag", default: false
     t.string "violence_trigger_words"
     t.boolean "adult_content_flag", default: false
+    t.json "most_used_words"
+    t.json "most_used_adjectives"
+    t.json "most_used_nouns"
+    t.json "most_used_verbs"
+    t.json "most_used_adverbs"
     t.index ["document_id"], name: "index_document_analyses_on_document_id"
   end
 

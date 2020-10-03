@@ -30,9 +30,18 @@ module Documents
         analysis.words_used_once_count = analysis.word_count - analysis.words_used_repeatedly_count
 
         # Complexity counters
-        analysis.complex_words_count = document.complex_words.count
-        analysis.simple_words_count  = document.simple_words.count
+        analysis.complex_words_count = document.words.select { |word| document.complex_words.include?(word) }.count
+        analysis.simple_words_count  = document.words.select { |word| document.simple_words.include?(word) }.count
+        analysis.unique_complex_words_count = document.complex_words.count
+        analysis.unique_simple_words_count  = document.simple_words.count
         analysis.words_per_sentence  = document.sentences.map { |sentence| sentence.split(' ').count }
+
+        # Frequency tables
+        analysis.most_used_words      = document.non_stop_words(with_duplicates: true).group_by(&:itself).transform_values!(&:size).sort_by(&:second).last(10).reverse
+        analysis.most_used_adjectives = document.adjectives.reject { |word, count| I18n.t('stop-words').include?(word) }.sort_by(&:second).last(10).reverse
+        analysis.most_used_nouns      = document.nouns.reject { |word, count| I18n.t('stop-words').include?(word) }.sort_by(&:second).last(10).reverse
+        analysis.most_used_verbs      = document.verbs.reject { |word, count| I18n.t('stop-words').include?(word) }.sort_by(&:second).last(10).reverse
+        analysis.most_used_adverbs    = document.adverbs.reject { |word, count| I18n.t('stop-words').include?(word) }.sort_by(&:second).last(10).reverse
 
         # Ensure we save or else throw an exception
         analysis.save!

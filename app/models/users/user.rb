@@ -108,6 +108,8 @@ class User < ApplicationRecord
       message: "can't be larger than 500KB"
     }
 
+  has_many :application_integrations
+
   def my_universe_ids
     @cached_universe_ids ||= universes.pluck(:id)
   end

@@ -65,16 +65,26 @@ Rails.application.routes.draw do
   get '/@:username/following', to: 'users#following'
 
   resources :documents do
-    get  '/analysis',         to: 'documents#analysis',                on: :member
+    # Document Analysis routes
+    get '/analysis/',            to: 'document_analyses#show',        on: :member      
+    get '/analysis/readability', to: 'document_analyses#readability', on: :member
+    get '/analysis/style',       to: 'document_analyses#style',       on: :member
+    get '/analysis/sentiment',   to: 'document_analyses#sentiment',   on: :member
+    get  '/plaintext',        to: 'documents#plaintext',               on: :member
     get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
+
     post '/link_entity',      to: 'documents#link_entity',             on: :collection
+    resources :document_revisions, path: 'revisions', on: :member
 
     post :toggle_favorite, on: :member
 
     # todo these routes don't belong here and make for awfully weird urls (/documents/:analysis_id/destroy, etc)
     get  '/destroy_analysis', to: 'documents#destroy_analysis',        on: :member
-    get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
 
+    # deprecated route:
+    get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
+    # new route:
+    get  '/unlink/:page_type/:page_id', to: 'documents#unlink_entity', on: :member
   end
 
   scope '/my' do
@@ -226,15 +236,16 @@ Rails.application.routes.draw do
 
   authenticate :user, lambda { |u| u.site_administrator? } do
     scope 'admin' do
-      get '/stats', to: 'admin#dashboard', as: :admin_dashboard
-      get '/content_type/:type', to: 'admin#content_type', as: :admin_content_type
-      get '/attributes', to: 'admin#attributes', as: :admin_attributes
-      get '/masquerade/:user_id', to: 'admin#masquerade', as: :masquerade
-      get '/unsubscribe', to: 'admin#unsubscribe', as: :mass_unsubscribe
-      get '/images', to: 'admin#images', as: :image_audit
-      get '/promos', to: 'admin#promos', as: :admin_promos
-      get '/shares/reported', to: 'admin#reported_shares'
-      get '/churn',  to: 'admin#churn'
+      get '/stats',                to: 'admin#dashboard', as: :admin_dashboard
+      get '/content_type/:type',   to: 'admin#content_type', as: :admin_content_type
+      get '/attributes',           to: 'admin#attributes', as: :admin_attributes
+      get '/masquerade/:user_id',  to: 'admin#masquerade', as: :masquerade
+      get '/unsubscribe',          to: 'admin#unsubscribe', as: :mass_unsubscribe
+      get '/images',               to: 'admin#images', as: :image_audit
+      get '/promos',               to: 'admin#promos', as: :admin_promos
+      get '/shares/reported',      to: 'admin#reported_shares'
+      get '/churn',                to: 'admin#churn'
+      get '/hatewatch/:matchlist', to: 'admin#hate'
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
@@ -251,6 +262,26 @@ Rails.application.routes.draw do
 
   # API Endpoints
   namespace :api do
+    resources :application_integrations, path: :applications, as: :applications do
+      get '/authorize',    action: :authorize,    on: :member
+    end
+
+    scope '/authorizations' do
+      post '/create', to: 'integration_authorizations#create', as: :integration_authorizations
+    end
+      
+    get '/',             to: 'api_docs#index'
+    get '/docs',         to: 'api_docs#docs'
+    # get '/applications', to: 'api_docs#applications'
+    get '/approvals',    to: 'api_docs#approvals'
+    get '/integrations', to: 'api_docs#integrations'
+    get '/pricing',      to: 'api_docs#pricing'
+    
+    scope 'docs' do
+      get '/',           to: 'api_docs#index'
+      get '/references', to: 'api_docs#references'
+    end
+
     namespace :v1 do
       scope '/categories' do
         get '/suggest/:entity_type',              to: 'attribute_categories#suggest'
@@ -260,6 +291,16 @@ Rails.application.routes.draw do
       end
       scope '/answers' do
         get '/suggest/:entity_type/:field_label', to: 'attributes#suggest'
+      end
+
+      # Content index path
+      Rails.application.config.content_types[:all].each do |content_type|
+        get "#{content_type.name.downcase.pluralize}", to: "api##{content_type.name.downcase.pluralize}"
+      end
+
+      # Content show paths
+      Rails.application.config.content_types[:all].each do |content_type|
+        get "#{content_type.name.downcase}/:id", to: "api##{content_type.name.downcase}"
       end
     end
   end
