@@ -13,6 +13,7 @@ class DocumentAnalysesController < ApplicationController
   # end
 
   def show
+    @navbar_actions = [] unless @analysis.present?
   end
 
   def readability
