@@ -64,6 +64,11 @@ namespace :data_migrations do
     end
   end
 
+  desc "Add developer billing plans"
+  task create_developer_billing_plans: :environment do
+    # TODO
+  end
+
   desc "Add bandwidth bonuses to billing plans"
   task billing_plan_bandwidths: :environment do
     puts "Updating bandwidths for all billing plans"

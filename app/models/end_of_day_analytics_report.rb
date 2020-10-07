@@ -1,0 +1,2 @@
+class EndOfDayAnalyticsReport < ApplicationRecord
+end

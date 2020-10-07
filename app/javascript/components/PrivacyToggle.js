@@ -16,7 +16,6 @@ import PropTypes from "prop-types"
 
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
@@ -37,13 +36,13 @@ class PrivacyToggle extends React.Component {
       privacy: initial_privacy
     };
 
-    console.log('Privacy: ' + this.state.privacy);
+    // console.log('Privacy: ' + this.state.privacy);
     axios.defaults.headers.common['X-CSRF-TOKEN'] = this.props.csrf_token;
   }
 
   async autosave() {
     var new_privacy_setting = (this.state.privacy == 'public' ? 'private' : 'public');
-    console.log('changing privacy to --> ' + new_privacy_setting);
+    // console.log('changing privacy to --> ' + new_privacy_setting);
 
     await axios.patch(
       this.props.submit_path,

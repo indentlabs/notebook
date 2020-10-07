@@ -6,6 +6,7 @@ class AdminController < ApplicationController
   before_action :require_admin_access
 
   def dashboard
+    @reports = EndOfDayAnalyticsReport.order('day DESC').limit(90)
   end
 
   def content_type
@@ -54,6 +55,11 @@ class AdminController < ApplicationController
   end
   
   def churn
+  end
+
+  def hate
+    @posts = Thredded::PrivatePost.last(params.fetch(:limit, 500)).includes(:postable)
+    @list  = params[:matchlist]
   end
 
   def perform_unsubscribe

@@ -38,7 +38,7 @@ module IsContentPage
       else
         # For all other content pages, we have to fetch document IDs off DocumentEntities that
         # match those content pages
-        document_ids = DocumentAnalysis.where(
+        document_ids = ::DocumentAnalysis.where(
           id: document_entities.pluck(:document_analysis_id)
         ).pluck(:document_id)
         Document.where(id: document_ids)
