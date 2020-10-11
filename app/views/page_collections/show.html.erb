@@ -55,20 +55,20 @@
     </div>
     <div class="col s12 m12 l5">
       <%# render partial: 'page_collections/quick_add' %>
-      <a class="waves-effect waves-light btn btn-large modal-trigger blue" href="#share-page-modal" style="width: 100%">
+      <a class="waves-effect hoverable waves-light btn btn-large modal-trigger blue" href="#share-page-modal" style="width: 100%; margin-top: 0.5em;">
         <i class="material-icons <%= PageCollection.color %>-text text-darken-2 left"><%= PageCollection.icon %></i>
-        <span class="left"><%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page</span>
+        <div class="left">
+          <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page
+          <span class="hide-on-small-only">
+            to this Collection
+          </span>
+        </div>
       </a>
       <br /><br />
 
       <div class="grey-text uppercase">In this collection</div>
 
       <div class="collection">
-        <%= link_to @page_collection, class: "collection-item #{PageCollection.color}-text" do %>
-          <i class="material-icons left"><%= PageCollection.icon %></i>
-          All Pages
-          <span class="badge brown-text"><%= @page_collection.accepted_submissions.count %></span>
-        <% end %>
         <% @page_collection.page_types.each do |pt| %>
           <% klass = pt.constantize %>
           <%= link_to(send(pt.downcase.pluralize + '_page_collection_path', @page_collection), class: "collection-item #{klass.color} white-text") do %>
@@ -76,6 +76,11 @@
             <%= pt.pluralize %>
             <span class="badge white-text"><%= @page_collection.accepted_submissions.where(content_type: pt).count %></span>
           <% end %>
+        <% end %>
+        <%= link_to @page_collection, class: "collection-item #{PageCollection.color}-text" do %>
+          <i class="material-icons left"><%= PageCollection.icon %></i>
+          All Pages
+          <span class="badge brown-text"><%= @page_collection.accepted_submissions.count %></span>
         <% end %>
       </div>
 
@@ -124,13 +129,27 @@
 <%= form_for PageCollectionSubmission.new do |f| %>
   <div id="share-page-modal" class="modal modal-fixed-footer">
     <div class="modal-content">
-      <h4><%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page</h4>
+      <h4>
+        <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page
+        <span class="hide-on-small-only">
+          to this Collection
+        </span>
+      </h4>
       <br />
       <% if @submittable_content.values.flatten.any? %>
           <div class="row">
             <div class="col s12 m12 l12">
               <%= f.hidden_field :page_collection_id, value: @page_collection.id %>
-              <div class="input-field">
+              <div class="center">
+                <% @submittable_content.keys.each do |submittable_class_name| %>
+                  <% submittable_class = submittable_class_name.constantize %>
+                  <i class="material-icons bordered-text <%= submittable_class.color %>-text <%= @submittable_content.keys.length > 6 ? 'small' : 'medium' %> tooltipped" 
+                     data-tooltip="This Collection allows <%= submittable_class_name.downcase.pluralize %>."><%= submittable_class.icon %></i> &nbsp;
+                <% end %>
+              </div>
+              <br />
+
+              <div class="input-field clearfix">
                 <%= f.select :content do %>
                   <% @submittable_content.each do |content_type, content_list| %>
                     <optgroup label="<%= content_type.pluralize %>">
@@ -170,6 +189,8 @@
     </div>
     <div class="modal-footer">
       <%= f.submit (@page_collection.user == current_user ? 'Add' : 'Submit') + ' page', class: "btn #{PageCollection.color} white-text" %>
+
+      <a href="#!" class="modal-close waves-effect waves-green btn-flat left">Nevermind</a>
     </div>
   </div>
 <% end %>
