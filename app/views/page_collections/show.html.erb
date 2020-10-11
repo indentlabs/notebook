@@ -54,51 +54,52 @@
       </div>
     </div>
     <div class="col s12 m12 l5">
-      <div class="card">
-        <div class="card-content">
-          <%= render partial: 'page_collections/quick_add' %>
+      <%# render partial: 'page_collections/quick_add' %>
+      <a class="waves-effect waves-light btn btn-large modal-trigger blue" href="#share-page-modal" style="width: 100%">
+        <i class="material-icons <%= PageCollection.color %>-text text-darken-2 left"><%= PageCollection.icon %></i>
+        <span class="left"><%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page</span>
+      </a>
+      <br /><br />
 
-          <div class="card-title">In this collection</div>
+      <div class="grey-text uppercase">In this collection</div>
 
-          <div class="collection">
-            <%= link_to @page_collection, class: "collection-item #{PageCollection.color}-text" do %>
-              <i class="material-icons left"><%= PageCollection.icon %></i>
-              All Pages
-              <span class="badge brown-text"><%= @page_collection.accepted_submissions.count %></span>
-            <% end %>
-            <% @page_collection.page_types.each do |pt| %>
-              <% klass = pt.constantize %>
-              <%= link_to(send(pt.downcase.pluralize + '_page_collection_path', @page_collection), class: "collection-item #{klass.color} white-text") do %>
-                <i class="material-icons left"><%= klass.icon %></i>
-                <%= pt.pluralize %>
-                <span class="badge white-text"><%= @page_collection.accepted_submissions.where(content_type: pt).count %></span>
-              <% end %>
-            <% end %>
-          </div>
-
-          <div class="grey-text uppercase">Curator</div>
-          <div>
-            <%= link_to @page_collection.user, class: "#{User.color}-text" do %>
-              <%= image_tag @page_collection.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
-              <%= @page_collection.user.display_name %>
-            <% end %>
-          </div>
-
-          <% if @page_collection.contributors.any? %>
-            <br />
-            <div class="grey-text uppercase">Contributors</div>
-            <% @page_collection.contributors.each do |user| %>
-              <div>
-                <%= link_to user, class: "#{User.color}-text" do %>
-                  <%= image_tag user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
-                  <%= user.display_name %>
-                <% end %>
-              </div>
-            <% end %>
-            <br />
+      <div class="collection">
+        <%= link_to @page_collection, class: "collection-item #{PageCollection.color}-text" do %>
+          <i class="material-icons left"><%= PageCollection.icon %></i>
+          All Pages
+          <span class="badge brown-text"><%= @page_collection.accepted_submissions.count %></span>
+        <% end %>
+        <% @page_collection.page_types.each do |pt| %>
+          <% klass = pt.constantize %>
+          <%= link_to(send(pt.downcase.pluralize + '_page_collection_path', @page_collection), class: "collection-item #{klass.color} white-text") do %>
+            <i class="material-icons left"><%= klass.icon %></i>
+            <%= pt.pluralize %>
+            <span class="badge white-text"><%= @page_collection.accepted_submissions.where(content_type: pt).count %></span>
           <% end %>
-        </div>
+        <% end %>
       </div>
+
+      <div class="grey-text uppercase">Curator</div>
+      <div>
+        <%= link_to @page_collection.user, class: "#{User.color}-text" do %>
+          <%= image_tag @page_collection.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+          <%= @page_collection.user.display_name %>
+        <% end %>
+      </div>
+
+      <% if @page_collection.contributors.any? %>
+        <br />
+        <div class="grey-text uppercase">Contributors</div>
+        <% @page_collection.contributors.each do |user| %>
+          <div>
+            <%= link_to user, class: "#{User.color}-text" do %>
+              <%= image_tag user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+              <%= user.display_name %>
+            <% end %>
+          </div>
+        <% end %>
+        <br />
+      <% end %>
     </div>
   </div>
 
@@ -118,4 +119,57 @@
     <%= render partial: 'page_collections/tiles', locals: { pages: @pages } %>
   <% end %>
 
+<% end %>
+
+<%= form_for PageCollectionSubmission.new do |f| %>
+  <div id="share-page-modal" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h4><%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page</h4>
+      <br />
+      <% if @submittable_content.values.flatten.any? %>
+          <div class="row">
+            <div class="col s12 m12 l12">
+              <%= f.hidden_field :page_collection_id, value: @page_collection.id %>
+              <div class="input-field">
+                <%= f.select :content do %>
+                  <% @submittable_content.each do |content_type, content_list| %>
+                    <optgroup label="<%= content_type.pluralize %>">
+                      <% content_list.each do |content| %>
+                        <option value="<%= content_type %>-<%= content.id %>"><%= content.name %></option>
+                      <% end %>
+                    </optgroup>
+                  <% end %>
+                <% end %>
+                <label>Select a page to <%= @page_collection.user == current_user ? 'add' : 'submit' %></label>
+                <div class="helper-text">
+                  Submitting a page will automatically change its privacy to "public".
+                </div>
+              </div>
+            </div>
+            <div class="col s12 m12 l12">
+              <div class="input-field">
+                <%= f.text_area :explanation, class: 'materialize-textarea' %>
+                <%= f.label :explanation, 'Add a message' %>
+                <div class="helper-text">
+                  <% if @page_collection.user == current_user %>
+                    This message will be visible to everyone.
+                  <% else %>
+                    If this submission is accepted, this message will be visible to everyone.
+                  <% end %>
+                  It can be as long or as short as you'd like!
+                </div>
+              </div>
+            </div>
+          </div>
+
+      <% else %>
+        <p>
+          You don't have any pages to submit to this collection.
+        </p>
+      <% end %>
+    </div>
+    <div class="modal-footer">
+      <%= f.submit (@page_collection.user == current_user ? 'Add' : 'Submit') + ' page', class: "btn #{PageCollection.color} white-text" %>
+    </div>
+  </div>
 <% end %>
