@@ -6,28 +6,30 @@ class StreamController < ApplicationController
   before_action :cache_linkable_content_for_each_content_type, only: [:index]
 
   def index
-    followed_users = current_user.followed_users.pluck(:id)
-    blocked_users  = current_user.blocked_users.pluck(:id)
+    followed_users   = current_user.followed_users.pluck(:id)
+    blocked_users    = current_user.blocked_users.pluck(:id)
     blocked_by_users = current_user.blocked_by_users.pluck(:id)
 
     @feed = ContentPageShare.where(user_id: followed_users + [current_user.id] - blocked_users - blocked_by_users)
       .order('created_at DESC')
-      .includes([:content_page, :user, :share_comments])
-      .limit(50)
+      .includes([:content_page, :secondary_content_page])
+      .includes({ share_comments: [:user], user: [:avatar_attachment] })
+      .limit(25)
   end
 
   def community
   end
 
   def global
-    blocked_users  = current_user.blocked_users.pluck(:id)
+    blocked_users    = current_user.blocked_users.pluck(:id)
     blocked_by_users = current_user.blocked_by_users.pluck(:id)
 
     @feed = ContentPageShare.all
       .where.not(user_id: blocked_users + blocked_by_users)
       .order('created_at DESC')
-      .includes([:content_page, :user, :share_comments])
-      .limit(50)
+      .includes([:content_page, :secondary_content_page])
+      .includes({ share_comments: [:user], user: [:avatar_attachment] })
+      .limit(25)
   end
 
   def set_stream_navbar_color
