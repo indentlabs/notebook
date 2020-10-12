@@ -29,7 +29,7 @@ class PageCollectionsController < ApplicationController
       return redirect_to page_collections_path, notice: "That Collection is not public."
     end
 
-    @pages = @page_collection.accepted_submissions
+    @pages = @page_collection.accepted_submissions.includes({content: [:universe, :user], user: []})
     sort_pages
   end
 
