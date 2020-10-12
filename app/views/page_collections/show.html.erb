@@ -20,6 +20,9 @@
                     Follow for updates
                   <% end %>
                 <% end %>
+              <% else %>
+                <%= link_to 'Edit collection', edit_page_collection_path(@page_collection), class: 'btn btn-flat right' %>
+
               <% end %>
             <% else %>
               <%= link_to '#', class: "btn #{PageCollection.color} lighten-2 right disabled" do %>
@@ -193,7 +196,10 @@
                 <% end %>
                 <label>Select a page to <%= @page_collection.user == current_user ? 'add' : 'submit' %></label>
                 <div class="helper-text">
-                  Submitting a page will automatically change its privacy to "public".
+                  Submitting a page will automatically change its privacy to "public" if this collection is public.
+                  <% if @page_collection.privacy == 'public' %>
+                    (It is!)
+                  <% end %>
                 </div>
               </div>
             </div>
