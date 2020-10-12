@@ -66,7 +66,11 @@ class AdminController < ApplicationController
     @posts = Thredded::PrivatePost
       .where('content ILIKE ?', "%http%")
       .order('id DESC')
-      .limit(params.fetch(:limit, 500)).includes(:postable)
+      .limit(params.fetch(:limit, 500))
+      .includes(:postable)
+
+
+    # @posts = Thredded::PrivatePost.where('content ILIKE ?', "%http%").order('id DESC').limit(5).includes(:postable)
   end
 
   def perform_unsubscribe
