@@ -1,20 +1,32 @@
 <table>
   <tr>
     <th>Thread</th>
-    <th>Full text</th>
+    <th>Links</th>
     <th>Images</th>
+    <th>Full text</th>
   </tr>
   <tr>
 
   <% @posts.each do |post| %>
+    <% links = post.content.scan(/([htp]+?s?:?\/\/[^\s\)"']*)/i) %>
+    <% next unless links.any? %>
     <tr>
         <td><%= post.postable.title %> (<%= post.postable.slug %>)</td>
-        <td><%= post.content %></td>
         <td>
-          <% post.content.gsub("\n", ' ').scan(/[htp]+?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))/i).each do |image_url_match| %>
-            <%= image_tag ':' + image_url_match %>
+          <ul>
+            <% links.each do |url| %>
+              <%= link_to url.first, url.first %>
+            <% end %>
+          </ul>
+        </td>
+        <td>
+          <% links.each do |url| %>
+            <%= link_to url.first do %>
+              <%= image_tag url.first, class: 'left', style: "height: 100px; width: 100px" %>
+            <% end %>
           <% end %>
         </td>
+        <td><%= post.content %></td>
     </tr>
   <% end %>
 </table>
