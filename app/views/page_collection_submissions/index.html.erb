@@ -2,7 +2,11 @@
   <div class="col s12">
     <div class="card">
       <div class="card-content">
-        <div class="card-title">Pending submissions</div>
+        <div class="card-title">
+          You have <%= pluralize @page_collection_submissions.count, 'pending submission' %>
+          to
+          <%= link_to @page_collection.name, @page_collection, class: "#{PageCollection.color}-text" %>.
+        </div>
         <p>
           Submitters will be notified if you accept their content.
         </p>
@@ -30,18 +34,18 @@
             </blockquote>
             <div>
               Submitted by
-              <%= link_to content.user, class: "#{User.color}-text" do %>
+              <%= link_to content.user, class: "#{User.color}-text text-lighten-3" do %>
                 <%= content.user.display_name %>
               <% end %>
               <%= time_ago_in_words page_collection_submission.submitted_at %> ago
             </div>
           </div>
           <div class="card-action">
-            <%= link_to approve_page_collection_submission_path(page_collection_submission), class: 'green-text' do %>
+            <%= link_to approve_page_collection_submission_path(page_collection_submission), class: 'btn green white-text' do %>
               <i class="material-icons left">check</i>
               Approve
             <% end %>
-            <%= link_to pass_page_collection_submission_path(page_collection_submission), class: 'red-text right' do %>
+            <%= link_to pass_page_collection_submission_path(page_collection_submission), class: 'btn red white-text right' do %>
               <i class="material-icons left">close</i>
               Pass
             <% end %>

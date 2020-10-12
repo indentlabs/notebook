@@ -1,0 +1,25 @@
+<h1 class="center" style="font-size: 2em">
+  <i class="material-icons <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
+  <%= title %>
+</h1>
+<% collection_list.each do |collection| %>
+  <div class="col s12 m6 l4">
+    <%= link_to collection do %>
+      <div class="hoverable card <%= PageCollection.color %>" style="height: 250px">
+        <div class="card-image">
+          <%= image_tag collection.random_public_image, style: 'max-height: 250px;' %>
+          <span class="card-title bordered-text">
+            <%= collection.title %>
+            <br />
+            <small>
+              <% collection.page_types.each do |icon| %>
+                <% klass = icon.constantize %>
+                <i class="material-icons left tooltipped tiny <%= klass.color %>-text" data-tooltip="<%= icon.pluralize %>"><%= klass.icon %></i>
+              <% end %>
+            </small>
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

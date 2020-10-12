@@ -1,3 +1,4 @@
+
 class PageCollection < ApplicationRecord
   acts_as_paranoid
   
@@ -64,6 +65,10 @@ class PageCollection < ApplicationRecord
 
   def self.color
     'brown'
+  end
+
+  def self.hex_color
+    '#795548'
   end
 
   def self.icon
