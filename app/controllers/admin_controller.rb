@@ -62,6 +62,13 @@ class AdminController < ApplicationController
     @list  = params[:matchlist]
   end
 
+  def spam
+    @posts = Thredded::PrivatePost
+      .where('content ILIKE ?', "%http%")
+      .order('id DESC')
+      .limit(params.fetch(:limit, 500)).includes(:postable)
+  end
+
   def perform_unsubscribe
     emails = params[:emails].split(/[\r|\n]+/)
     @users = User.where(email: emails)

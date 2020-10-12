@@ -1,0 +1,21 @@
+<table>
+  <tr>
+    <th>Thread</th>
+    <th>Full text</th>
+    <th>Images</th>
+  </tr>
+  <tr>
+
+  <% @posts.each do |post| %>
+    <tr>
+        <% next unless triggers.any? %>
+        <td><%= post.postable.title %> (<%= post.postable.slug %>)</td>
+        <td><%= post.content %></td>
+        <td>
+          <% post.content.gsub("\n", ' ').scan(/[htp]+?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))/i).each do |image_url_match| %>
+            <%= image_tag match %>
+          <% end %>
+        </td>
+    </tr>
+  <% end %>
+</table>
