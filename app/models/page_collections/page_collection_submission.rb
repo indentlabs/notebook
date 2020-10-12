@@ -5,6 +5,10 @@ class PageCollectionSubmission < ApplicationRecord
   belongs_to :page_collection
   belongs_to :user
 
+  after_create :mark_related_content_public
+  after_create :handle_auto_accept
+  after_create :create_submission_notification
+
   after_create :cache_content_name
 
   scope :accepted, -> { where.not(accepted_at: nil).uniq(&:page_collection_id) }
@@ -39,17 +43,35 @@ class PageCollectionSubmission < ApplicationRecord
     page_collection.user.content_page_share_followings.create({content_page_share: share})
   end
 
-  after_create do
+  def mark_related_content_public
+    if page_collection.try(:privacy) == 'public'
+      content.update(privacy: 'public')
+    end
+  end
+
+  def handle_auto_accept
     # If the submission was created by the collection owner, we want to automatically approve it.
     # If the collection has opted to automatically accept submissions, we also want to approve it.
     if user == page_collection.user || page_collection.auto_accept?
       update(accepted_at: DateTime.current)
 
-      # TODO Create a "user added a page to their collection" event
+      # Create a "user added a page to their collection" event if the page and the collection are public
+      if page_collection.try(:privacy) == 'public'
+        share = ContentPageShare.create(
+          user_id:                     self.user_id,
+          content_page_type:           PageCollection.name,
+          content_page_id:             page_collection_id,
+          secondary_content_page_type: content.class.name,
+          secondary_content_page_id:   content.id,
+          shared_at:                   self.created_at,
+          privacy:                     'public',
+          message:                     self.explanation
+        )
+      end
     end
   end
 
-  after_create do
+  def create_submission_notification
     # If the submission needs reviewed, create a notification for the collection owner
     if user != page_collection.user && !page_collection.auto_accept?
       page_collection.user.notifications.create(

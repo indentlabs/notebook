@@ -163,8 +163,15 @@ module AllowUsersToDeleteOwnTopics
   end
 end
 
+module AllowAdminModeration
+  def read?
+    super || @user.thredded_admin?
+  end
+end
+
 Rails.application.config.to_prepare do
   Thredded::TopicPolicy.prepend AllowUsersToDeleteOwnTopics
+  Thredded::PrivateTopicPolicy.prepend AllowAdminModeration
 end
 
 Rails.application.config.to_prepare do
