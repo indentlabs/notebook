@@ -1,5 +1,5 @@
 <% if user_signed_in? && (@page_collection.allow_submissions? || @page_collection.user == current_user) %>
-  <ul class="collapsible">
+  <ul class="hoverable collapsible">
     <li>
       <div class="collapsible-header blue white-text">
         <i class="material-icons <%= PageCollection.color %>-text text-darken-2"><%= PageCollection.icon %></i>
@@ -21,7 +21,10 @@
               <% end %>
               <label>Select a page to <%= @page_collection.user == current_user ? 'add' : 'submit' %></label>
               <div class="helper-text">
-                Submitting a page will automatically change its privacy to "public".
+                Submitting a page will automatically change its privacy to "public" if this collection is public.
+                <% if @page_collection.privacy == 'public' %>
+                  (It is!)
+                <% end %>
               </div>
             </div>
 

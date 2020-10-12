@@ -1,0 +1,18 @@
+<table>
+  <tr>
+    <th>Thread</th>
+    <th>Trigger words</th>
+    <th>Full text</th>
+  </tr>
+  <tr>
+
+  <% @posts.each do |post| %>
+    <tr>
+        <% triggers = Documents::Analysis::ContentService.adult_content?(@list, post.content) %>
+        <% next unless triggers.any? %>
+        <td><%= post.postable.title %> (<%= post.postable.slug %>)</td>
+        <td><%= triggers.inspect %></td>
+        <td><%= post.content %></td>
+    </tr>
+  <% end %>
+</table>

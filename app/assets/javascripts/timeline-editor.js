@@ -111,8 +111,8 @@ $(document).ready(function () {
       var template = $('.timeline-event-template > .timeline-event-container');
       var cloned_template = template.clone(true).removeClass('timeline-event-template');
       var timeline_id = cloned_template.find('.timeline-event-container').first().data('timeline-id');
-      console.log('new event id = ' + new_event_id);
-      console.log('timeline_id = ' + timeline_id);
+      // console.log('new event id = ' + new_event_id);
+      // console.log('timeline_id = ' + timeline_id);
 
       // Update IDs to the newly-created event
       cloned_template.data('event-id', new_event_id);
@@ -127,7 +127,7 @@ $(document).ready(function () {
       $('#js-create-timeline-event').removeAttr('disabled');
 
     }).fail(function () {
-      alert('fail');
+      alert('Error 292');
 
       loading_indicator.hide();
       $('#js-create-timeline-event').removeAttr('disabled');
@@ -135,44 +135,5 @@ $(document).ready(function () {
 
     // return false so we don't jump to the top of the page
     return false;
-  });
-
-  $('.js-link-entity').click(function () {
-    // Store the linking event ID for reference
-    var event_id = $(this).closest('.timeline-event-container').data('event-id');
-    $('#linking-event-id').val(event_id);
-
-    // Open the modal
-    $('#entity-link-modal').modal('open');
-    return false;
-  });
-
-  $('.js-link-entity-selection').click(function () {
-    var entity      = $(this);
-    var entity_type = entity.data('type');
-    var entity_id   = entity.data('id');
-
-    var event_id = $('#linking-event-id').val();
-    
-    $.post(
-      "/plan/timeline_events/" + event_id + "/link",
-      {
-        "entity_type": entity_type,
-        "entity_id":   entity_id
-      }
-    ).done(function () {
-      // todo update the UI somehow
-      M.toast({
-        html: 'Your ' + entity_type + ' was added successfully and will be visible the next time you reload this page.'
-      });
-
-      $('.modal').close();
-
-      return false;
-    }).fail(function() {
-      alert("Something went wrong and your change didn't save. Please try again.");
-    });
-
-    // todo close the modal
   });
 });

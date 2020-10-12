@@ -81,6 +81,7 @@ gem 'flipper-redis'
 # Forum
 gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
 gem 'rails-ujs'
+gem 'language_filter'
 
 # Workers
 gem 'sidekiq'
@@ -130,7 +131,7 @@ group :test do
   gem 'webmock'
   gem 'rubocop', require: false
   gem 'ruby-prof', '1.4.1'
-  gem 'shoulda-matchers', '~> 4.3'
+  gem 'shoulda-matchers', '~> 4.4'
   gem 'rails-controller-testing'
 end
 
@@ -154,4 +155,5 @@ group :worker do
 
   gem 'engtagger'
   gem 'ibm_watson'
+  gem 'textstat'
 end
