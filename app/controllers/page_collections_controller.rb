@@ -2,8 +2,10 @@ class PageCollectionsController < ApplicationController
   before_action :authenticate_user!, except: [:show]
 
   before_action :set_sidenav_expansion
-  before_action :set_page_collection, only: [:show, :edit, :update, :destroy, :follow, :unfollow, :report]
   before_action :set_navbar_color
+
+  before_action :set_page_collection, only: [:show, :edit, :by_user, :update, :destroy, :follow, :unfollow, :report]
+  before_action :set_submittable_content, only: [:show, :by_user]
 
   # GET /page_collections
   def index
@@ -26,12 +28,6 @@ class PageCollectionsController < ApplicationController
 
     @pages = @page_collection.accepted_submissions
     sort_pages
-
-    @submittable_content = if user_signed_in?
-      @current_user_content.slice(*@page_collection.page_types)
-    else
-      []
-    end
   end
 
   # GET /page_collections/new
@@ -99,7 +95,10 @@ class PageCollectionsController < ApplicationController
   Rails.application.config.content_types[:all].each do |content_type|
     define_method(content_type.name.downcase.pluralize.to_sym) do
       set_page_collection
+      set_submittable_content
 
+      @show_page_type_highlight = true
+      @page_type = content_type
       @pages = @page_collection.accepted_submissions.where(content_type: content_type.name)
       sort_pages
 
@@ -132,12 +131,6 @@ class PageCollectionsController < ApplicationController
     @pages = @page_collection.accepted_submissions.where(user_id: params[:user_id])
     sort_pages
 
-    @submittable_content = if user_signed_in?
-      @current_user_content.slice(*@page_collection.page_types)
-    else
-      []
-    end
-
     @show_contributor_highlight = true
     @highlighted_contributor = User.find_by(id: params[:user_id].to_i)
     render :show
@@ -147,7 +140,16 @@ class PageCollectionsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_page_collection
-    @page_collection = PageCollection.find(params[:id])
+    @page_collection   = PageCollection.find_by(id: params[:id])
+    @page_collection ||= PageCollection.find_by(id: params[:page_collection_id])
+  end
+
+  def set_submittable_content
+    @submittable_content ||= if user_signed_in?
+      @current_user_content.slice(*@page_collection.page_types)
+    else
+      {}
+    end
   end
 
   # Only allow a trusted parameter "white list" through.

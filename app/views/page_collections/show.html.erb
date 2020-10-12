@@ -54,8 +54,24 @@
       </div>
     </div>
     <div class="col s12 m12 l5">
+
+      <% if user_signed_in? && @page_collection.user_id == current_user.id %>
+        <% if @page_collection.pending_submissions.count > 0 %>
+          <%=
+            link_to page_collection_pending_submissions_path(page_collection_id: @page_collection.id),
+                    class: "#{PageCollection.color} white-text btn btn-large",
+                    style: "width: 100%" do
+          %>
+            <i class="material-icons left">notifications_active</i>
+            <div class="left">
+              <%= pluralize(@page_collection.pending_submissions.count, 'pending submission') %>
+            </div>
+          <% end %>
+        <% end %>
+      <% end %>
+
       <%# render partial: 'page_collections/quick_add' %>
-      <a class="waves-effect hoverable waves-light btn btn-large modal-trigger blue" href="#share-page-modal" style="width: 100%; margin-top: 0.5em;">
+      <a class="waves-effect hoverable waves-light btn btn-large modal-trigger <%= 'disabled' unless user_signed_in? %> blue" href="#share-page-modal" style="width: 100%; margin-top: 0.5em;">
         <i class="material-icons <%= PageCollection.color %>-text text-darken-2 left"><%= PageCollection.icon %></i>
         <div class="left">
           <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page
@@ -121,6 +137,9 @@
     <% if !!@show_contributor_highlight %>
       <%= render partial: 'page_collections/contributor_highlight_bar', locals: { contributor: @highlighted_contributor } %>
     <% end %>
+    <% if !!@show_page_type_highlight %>
+      <%= render partial: 'page_collections/page_type_highlight_bar', locals: { page_type: @page_type } %>
+    <% end %>
     <%= render partial: 'page_collections/tiles', locals: { pages: @pages } %>
   <% end %>
 
@@ -129,7 +148,7 @@
 <%= form_for PageCollectionSubmission.new do |f| %>
   <div id="share-page-modal" class="modal modal-fixed-footer">
     <div class="modal-content">
-      <h4>
+      <h4 class="center">
         <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page
         <span class="hide-on-small-only">
           to this Collection
