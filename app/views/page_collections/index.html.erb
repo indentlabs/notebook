@@ -4,6 +4,12 @@
 
 <%= render partial: 'notice_dismissal/messages/15' %>
 
+<% if @collections_with_pending.any? %>
+  <div class="row">
+    <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @collections_with_pending, title: "Your collections with pending submissions" } %>
+  </div>
+<% end %>
+
 <% if @my_collections.any? || current_user.on_premium_plan? %>
   <div class="row">
     <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @my_collections, title: "Your collections" } %>

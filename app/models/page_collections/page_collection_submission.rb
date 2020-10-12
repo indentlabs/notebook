@@ -45,7 +45,19 @@ class PageCollectionSubmission < ApplicationRecord
     if user == page_collection.user || page_collection.auto_accept?
       update(accepted_at: DateTime.current)
 
-      # TODO Create a "user added a page to their collection" event
+      # Create a "user added a page to their collection" event if the page and the collection are public
+      if content.try(:privacy) == 'public' && page_collection.try(:privacy) == 'public'
+        share = ContentPageShare.create(
+          user_id:                     self.user_id,
+          content_page_type:           PageCollection.name,
+          content_page_id:             page_collection_id,
+          secondary_content_page_type: content.class.name,
+          secondary_content_page_id:   content.id,
+          shared_at:                   self.created_at,
+          privacy:                     'public',
+          message:                     self.explanation
+        )
+      end
     end
   end
 

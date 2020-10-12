@@ -8,7 +8,11 @@
         <%= image_tag share.user.image_url(size=20), class: 'left circle avatar' %>
         <%= share.user.display_name %>
       <% end %>
-      got accepted into the
+      <% if share.user == content.user %>
+        added a <%= share.secondary_content_page.class.name.downcase %> to their
+      <% else %>
+        got accepted into the
+      <% end %>
       <%= link_to content.title, content, class: "#{content.class.color}-text text-darken-1" %>
       Collection!
       <span class="right">
@@ -22,13 +26,28 @@
   <div class="main-container hoverable card row clearfix">
     <div class="col s12 m6 l6">
       <div class="card-image">
-        <%= link_to [share.user, share] do %>
-          <%= image_tag content.random_public_image %>
+        <% if share.user == content.user %>
+          <%= link_to [share.user, share] do %>
+            <%= image_tag secondary_content.random_public_image %>
+          <% end %>
+        <% else %>
+          <%= link_to [share.user, share] do %>
+            <%= image_tag content.random_public_image %>
+          <% end %>
         <% end %>
         <span class="card-title">
-          <%= link_to content do %>
-            <i class="material-icons tiny <%= content.class.color %>-text"><%= content.class.icon %></i>
-            <span class="white-text bordered-text"><%= content.title %></i>
+          <% if share.user_id == content.user_id %>
+            <%# if this is a share for adding content you own to your own collection, show the content instead of the collection %>
+            <%= link_to secondary_content do %>
+              <i class="material-icons tiny <%= secondary_content.class.color %>-text"><%= secondary_content.class.icon %></i>
+              <span class="white-text bordered-text"><%= secondary_content.name %></i>
+            <% end %>
+
+          <% else %>
+            <%= link_to content do %>
+              <i class="material-icons tiny <%= content.class.color %>-text"><%= content.class.icon %></i>
+              <span class="white-text bordered-text"><%= content.title %></i>
+            <% end %>
           <% end %>
         </span>
       </div>
@@ -42,11 +61,26 @@
             <%= share.user.display_name %>
           <% end %>
           <span class="helper-text">
-            submitted
-            <%= link_to share.secondary_content_page.name, share.secondary_content_page, class: "#{share.secondary_content_page.class.color}-text" %>
-            to
-            <%= link_to content.title, content, class: "#{content.class.color}-text text-lighten-2" %>
-            and got <span class="orange-text">accepted</span>!
+            <% if secondary_content.user_id == share.user_id %>
+              added
+              <%= link_to secondary_content.name, secondary_content, class: "#{secondary_content.class.color}-text" %>
+              to their Collection!
+
+              <br /><br />
+              <%= link_to content, class: "btn #{PageCollection.color} hoverable left white-text clearfix", style: 'width: 100%' do %>
+                <i class="material-icons left"><%= PageCollection.icon %></i>
+                <span class="left"><%= content.name %></span>
+                <i class="material-icons right">arrow_right</i>
+              <% end %>
+              <div class="clearfix"></div>
+
+            <% else %>
+              submitted
+              <%= link_to secondary_content.name, secondary_content, class: "#{secondary_content.class.color}-text" %>
+              to
+              <%= link_to content.title, content, class: "#{content.class.color}-text text-lighten-2" %>
+              and got <span class="orange-text">accepted</span>!
+            <% end %>
           </span>
         </div>
         <% if share.message.present? %>
