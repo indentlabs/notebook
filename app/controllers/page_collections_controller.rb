@@ -51,14 +51,16 @@ class PageCollectionsController < ApplicationController
 
     if @page_collection.save
       # Add a stream event for every user following this user if the collection is public
-      ContentPageShare.create(
-        user_id:                     current_user.id,
-        content_page_type:           PageCollection.name,
-        content_page_id:             @page_collection.reload.id,
-        shared_at:                   @page_collection.created_at,
-        privacy:                     'public',
-        message:                     "I created a new Collection!"
-      )
+      if @page_collection.privacy == 'public'
+        ContentPageShare.create(
+          user_id:                     current_user.id,
+          content_page_type:           PageCollection.name,
+          content_page_id:             @page_collection.reload.id,
+          shared_at:                   @page_collection.created_at,
+          privacy:                     'public',
+          message:                     "I created a new Collection!"
+        )
+      end
 
       redirect_to @page_collection, notice: 'Your collection was successfully created.'
     else
