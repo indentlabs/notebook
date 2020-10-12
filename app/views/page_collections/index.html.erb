@@ -1,33 +1,20 @@
+<%= content_for :full_width_page_header do %>
+  <%= render partial: 'content/components/parallax_header', locals: { content_type: 'PageCollection', content_class: PageCollection, image_only: true } %>
+<% end %>
+
 <%= render partial: 'notice_dismissal/messages/15' %>
 
-<% if @my_collections.any? || current_user.on_premium_plan? %>
+<% if @collections_with_pending.any? %>
   <div class="row">
-    <h1 class="center" style="font-size: 2em">
-      <i class="material-icons <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
-      Your collections
-    </h1>
-    <% @my_collections.each do |collection| %>
-      <div class="col s12 m6 l4">
-        <%= link_to collection do %>
-          <div class="hoverable card <%= PageCollection.color %>" style="height: 250px">
-            <div class="card-image">
-              <%= image_tag collection.random_public_image, style: 'max-height: 250px;' %>
-              <span class="card-title bordered-text">
-                <%= collection.title %>
-                <br />
-                <small>
-                  <% collection.page_types.each do |icon| %>
-                    <% klass = icon.constantize %>
-                    <i class="material-icons left tooltipped tiny <%= klass.color %>-text" data-tooltip="<%= icon.pluralize %>"><%= klass.icon %></i>
-                  <% end %>
-                </small>
-              </span>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-    <% if current_user.on_premium_plan? %>
+    <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @collections_with_pending, title: "Your collections with pending submissions" } %>
+  </div>
+<% end %>
+
+<% if @my_collections.any? || current_user.on_premium_plan? || Date.current < 'October 21, 2020'.to_date %>
+  <div class="row">
+    <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @my_collections, title: "Your collections" } %>
+
+    <% if current_user.on_premium_plan? || Date.current < 'October 21, 2020'.to_date %>
       <div class="col s12 m6 l4">
         <%= link_to new_page_collection_path do %>
           <div class="card-panel <%= PageCollection.color %> white-text hoverable center" style="height: 246px;">
@@ -42,62 +29,20 @@
   </div>
 <% end %>
 
+<% if @followed_collections.any? %>
+  <div class="row">
+    <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @followed_collections, title: "Collections you follow" } %>
+  </div>
+<% end %>
+
 <% if @network_collections.any? %>
   <div class="row">
-    <h1 class="center" style="font-size: 2em">
-      <i class="material-icons <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
-      Collections from your network
-    </h1>
-    <% @network_collections.each do |collection| %>
-      <div class="col s12 m6 l4">
-        <%= link_to collection do %>
-          <div class="hoverable card <%= PageCollection.color %>" style="height: 250px">
-            <div class="card-image">
-              <%= image_tag collection.random_public_image, style: 'max-height: 250px;' %>
-              <span class="card-title bordered-text">
-                <%= collection.title %>
-                <br />
-                <small>
-                  <% collection.page_types.each do |icon| %>
-                    <% klass = icon.constantize %>
-                    <i class="material-icons left tooltipped tiny <%= klass.color %>-text" data-tooltip="<%= icon.pluralize %>"><%= klass.icon %></i>
-                  <% end %>            
-                </small>
-              </span>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
+    <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @network_collections, title: "Collections from your network" } %>
   </div>
 <% end %>
 
 <% if @random_collections.any? %>
   <div class="row">
-    <h1 class="center" style="font-size: 2em">
-      <i class="material-icons <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
-      Discover more collections
-    </h1>
-    <% @random_collections.each do |collection| %>
-      <div class="col s12 m6 l4">
-        <%= link_to collection do %>
-          <div class="hoverable card <%= PageCollection.color %>" style="height: 250px">
-            <div class="card-image">
-              <%= image_tag collection.random_public_image, style: 'max-height: 250px;' %>
-              <span class="card-title bordered-text">
-                <%= collection.title %>
-                <br />
-                <small>
-                  <% collection.page_types.each do |icon| %>
-                    <% klass = icon.constantize %>
-                    <i class="material-icons left tooltipped tiny <%= klass.color %>-text" data-tooltip="<%= icon.pluralize %>"><%= klass.icon %></i>
-                  <% end %>           
-                </small>
-              </span>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
+    <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @random_collections, title: "Discover more collections" } %>
   </div>
 <% end %>

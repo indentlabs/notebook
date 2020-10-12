@@ -58,8 +58,19 @@ class AdminController < ApplicationController
   end
 
   def hate
-    @posts = Thredded::PrivatePost.last(params.fetch(:limit, 500)).includes(:postable)
+    @posts = Thredded::PrivatePost.order('id DESC').limit(params.fetch(:limit, 500)).includes(:postable)
     @list  = params[:matchlist]
+  end
+
+  def spam
+    @posts = Thredded::PrivatePost
+      .where('content ILIKE ?', "%http%")
+      .order('id DESC')
+      .limit(params.fetch(:limit, 500))
+      .includes(:postable)
+
+
+    # @posts = Thredded::PrivatePost.where('content ILIKE ?', "%http%").order('id DESC').limit(5).includes(:postable)
   end
 
   def perform_unsubscribe

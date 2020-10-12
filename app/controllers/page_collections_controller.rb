@@ -2,16 +2,25 @@ class PageCollectionsController < ApplicationController
   before_action :authenticate_user!, except: [:show]
 
   before_action :set_sidenav_expansion
-  before_action :set_page_collection, only: [:show, :edit, :update, :destroy, :follow, :unfollow, :report]
+  before_action :set_navbar_color
+
+  before_action :set_page_collection, only: [:show, :edit, :by_user, :update, :destroy, :follow, :unfollow, :report]
+  before_action :set_submittable_content, only: [:show, :by_user]
 
   # GET /page_collections
   def index
     @my_collections = current_user.page_collections
 
+    pending_submissions = PageCollectionSubmission.where(accepted_at: nil, page_collection_id: @my_collections.pluck(:id))
+    @collections_with_pending = PageCollection.where(id: pending_submissions.pluck(:page_collection_id))
+
     followed_user_ids = UserFollowing.where(user_id: current_user.id).pluck(:followed_user_id)
     @network_collections = PageCollection.where(user_id: followed_user_ids, privacy: 'public')
+    @followed_collections = current_user.followed_page_collections
 
-    @random_collections = PageCollection.where(privacy: 'public').sample(9)
+    @random_collections = PageCollection.where(privacy: 'public').where.not(
+      id: @my_collections.pluck(:id) + @network_collections.pluck(:id) + @followed_collections.pluck(:id)
+    ).sample(9)
   end
 
   # GET /page_collections/1
@@ -20,14 +29,8 @@ class PageCollectionsController < ApplicationController
       return redirect_to page_collections_path, notice: "That Collection is not public."
     end
 
-    @pages = @page_collection.accepted_submissions
+    @pages = @page_collection.accepted_submissions.includes({content: [:universe, :user], user: []})
     sort_pages
-
-    @submittable_content = if user_signed_in?
-      @current_user_content.slice(*@page_collection.page_types)
-    else
-      []
-    end
   end
 
   # GET /page_collections/new
@@ -48,14 +51,16 @@ class PageCollectionsController < ApplicationController
 
     if @page_collection.save
       # Add a stream event for every user following this user if the collection is public
-      ContentPageShare.create(
-        user_id:                     current_user.id,
-        content_page_type:           PageCollection.name,
-        content_page_id:             @page_collection.reload.id,
-        shared_at:                   @page_collection.created_at,
-        privacy:                     'public',
-        message:                     "I created a new Collection!"
-      )
+      if @page_collection.privacy == 'public'
+        ContentPageShare.create(
+          user_id:                     current_user.id,
+          content_page_type:           PageCollection.name,
+          content_page_id:             @page_collection.reload.id,
+          shared_at:                   @page_collection.created_at,
+          privacy:                     'public',
+          message:                     "I created a new Collection!"
+        )
+      end
 
       redirect_to @page_collection, notice: 'Your collection was successfully created.'
     else
@@ -95,8 +100,11 @@ class PageCollectionsController < ApplicationController
   Rails.application.config.content_types[:all].each do |content_type|
     define_method(content_type.name.downcase.pluralize.to_sym) do
       set_page_collection
+      set_submittable_content
 
-      @pages = @page_collection.accepted_submissions.where(content_type: content_type.name)
+      @show_page_type_highlight = true
+      @page_type = content_type
+      @pages = @page_collection.accepted_submissions.where(content_type: content_type.name).includes({content: [:universe, :user], user: []})
       sort_pages
 
       render :show
@@ -125,14 +133,8 @@ class PageCollectionsController < ApplicationController
       return redirect_to page_collections_path, notice: "That Collection is not public."
     end
 
-    @pages = @page_collection.accepted_submissions.where(user_id: params[:user_id])
+    @pages = @page_collection.accepted_submissions.where(user_id: params[:user_id]).includes({content: [:universe, :user], user: []})
     sort_pages
-
-    @submittable_content = if user_signed_in?
-      @current_user_content.slice(*@page_collection.page_types)
-    else
-      []
-    end
 
     @show_contributor_highlight = true
     @highlighted_contributor = User.find_by(id: params[:user_id].to_i)
@@ -143,7 +145,16 @@ class PageCollectionsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_page_collection
-    @page_collection = PageCollection.find(params[:id])
+    @page_collection   = PageCollection.find_by(id: params[:id])
+    @page_collection ||= PageCollection.find_by(id: params[:page_collection_id])
+  end
+
+  def set_submittable_content
+    @submittable_content ||= if user_signed_in?
+      @current_user_content.slice(*@page_collection.page_types)
+    else
+      {}
+    end
   end
 
   # Only allow a trusted parameter "white list" through.
@@ -161,6 +172,10 @@ class PageCollectionsController < ApplicationController
   def set_sidenav_expansion
     @sidenav_expansion = 'community'
   end
+  
+  def set_navbar_color
+    @navbar_color = PageCollection.hex_color
+  end
 
   def sort_pages
     case params.permit(:sort).fetch('sort', nil)
@@ -168,6 +183,8 @@ class PageCollectionsController < ApplicationController
       @pages = @pages.reorder('cached_content_name ASC')
     when 'chronological'
       @pages = @pages.reorder('accepted_at ASC')
+    when 'shuffle'
+      @pages = @pages.shuffle
     when 'recent'
       @pages = @pages.reorder('accepted_at DESC')
     when nil
