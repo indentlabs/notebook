@@ -19,12 +19,12 @@ class PageCollection < ApplicationRecord
     },
     dimension: { 
       width: { max: 2000 },
-      height: { max: 1000 }, 
-      message: 'must be smaller than 2000x1000 pixels'
+      height: { max: 2000 }, 
+      message: 'must be smaller than 2000x2000 pixels'
     },
     size: { 
-      less_than: 500.kilobytes, 
-      message: "can't be larger than 500KB"
+      less_than: 1024.kilobytes, 
+      message: "can't be larger than 1MB"
     }
   
   validates :title, presence: true
