@@ -10,11 +10,11 @@
   </div>
 <% end %>
 
-<% if @my_collections.any? || current_user.on_premium_plan? %>
+<% if @my_collections.any? || current_user.on_premium_plan? || Date.current < 'October 21, 2020'.to_date %>
   <div class="row">
     <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @my_collections, title: "Your collections" } %>
 
-    <% if current_user.on_premium_plan? %>
+    <% if current_user.on_premium_plan? || Date.current < 'October 21, 2020'.to_date %>
       <div class="col s12 m6 l4">
         <%= link_to new_page_collection_path do %>
           <div class="card-panel <%= PageCollection.color %> white-text hoverable center" style="height: 246px;">

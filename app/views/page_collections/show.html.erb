@@ -115,7 +115,7 @@
         <br />
         <div class="grey-text uppercase">Contributors</div>
         <% @page_collection.contributors.each do |user| %>
-          <div>
+          <div class="col s12 m6 l3">
             <%= link_to user, class: "#{User.color}-text" do %>
               <%= image_tag user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
               <%= user.display_name %>
@@ -124,6 +124,38 @@
         <% end %>
         <br />
       <% end %>
+
+      <!--
+      <div class="col s12 m6 l6">
+        <br />
+        <div class="grey-text uppercase">
+          Share collection to...
+        </div>
+        <ul>
+          <li>
+            <%= link_to [
+              'http://twitter.com/share?',
+              'url=' + URI::escape(page_collection_url(@page_collection)),
+              '&text=' + URI::escape("I'm building a collection of fictional " + @page_collection.page_types.map(&:pluralize).map(&:downcase).to_sentence + " on Notebook.ai. Check it out!")
+            ].join, class: 'blue-text', target: '_blank' do %>
+              <i class="material-icons tiny left" style="margin-top: 4px;">share</i>
+              Twitter
+            <% end %>
+          </li>
+          <li>
+            <%= 
+              link_to "https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=#{URI::escape(page_collection_url(@page_collection))}&display=popup&ref=plugin&src=share_button", 
+                class: 'blue-text',
+                onclick: "return !window.open(this.href, 'Facebook', 'width=640,height=580')" do
+            %>
+              <i class="material-icons tiny left" style="margin-top: 4px">share</i>
+              Facebook
+            <% end %>
+          </li>
+
+        </ul>
+      </div>
+      -->
     </div>
   </div>
 
