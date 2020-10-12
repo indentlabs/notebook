@@ -102,7 +102,7 @@ class PageCollectionsController < ApplicationController
 
       @show_page_type_highlight = true
       @page_type = content_type
-      @pages = @page_collection.accepted_submissions.where(content_type: content_type.name)
+      @pages = @page_collection.accepted_submissions.where(content_type: content_type.name).includes({content: [:universe, :user], user: []})
       sort_pages
 
       render :show
@@ -131,7 +131,7 @@ class PageCollectionsController < ApplicationController
       return redirect_to page_collections_path, notice: "That Collection is not public."
     end
 
-    @pages = @page_collection.accepted_submissions.where(user_id: params[:user_id])
+    @pages = @page_collection.accepted_submissions.where(user_id: params[:user_id]).includes({content: [:universe, :user], user: []})
     sort_pages
 
     @show_contributor_highlight = true
