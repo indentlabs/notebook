@@ -3,7 +3,7 @@ ruby "~> 2.6"
 
 # Server
 gem 'rails'
-gem 'puma', '~> 4.3'
+gem 'puma', '~> 5.0'
 gem 'puma-heroku'
 # gem 'bootsnap', require: false
 gem 'sprockets', '~> 3.7.2'
