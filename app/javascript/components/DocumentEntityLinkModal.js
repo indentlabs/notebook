@@ -79,7 +79,7 @@ class DocumentEntityLinkModal extends React.Component {
                     <ul className="collection">
                       {content_list.map((content, j) => {
                         return(
-                          <React.Fragment>
+                          <React.Fragment key={j}>
                             <a href="#" className={this.classColor(content_type) + "-text js-link-entity-selection"} data-id={content.id} data-type={content_type} key={j}>
                               <li className="collection-item hoverable">
                                 <i className="material-icons left">{ this.classIcon(content_type) }</i>
