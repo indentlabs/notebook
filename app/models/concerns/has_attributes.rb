@@ -158,7 +158,7 @@ module HasAttributes
 
     def update_custom_attributes
       (self.custom_attribute_values || []).each do |attribute|
-        field = AttributeField.includes(:attribute_category).find_by(
+        field = AttributeField.includes(:attribute_category).find_by(  # THIS GETS CALLED A TON
           name: attribute[:name],
           user: self.user,
           attribute_categories: { entity_type: self.class.name.downcase }
@@ -167,7 +167,7 @@ module HasAttributes
         #next if field.nil?
         raise "unknown field for attribute: #{attribute.inspect}" if field.nil?
 
-        d = field.attribute_values.find_or_initialize_by(
+        d = field.attribute_values.find_or_initialize_by(  # THIS ALSO GETS CALLED A TON
           attribute_field_id: field.id,
           entity_type: self.class.name,
           entity_id: self.id,

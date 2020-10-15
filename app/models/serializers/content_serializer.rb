@@ -48,7 +48,7 @@ class ContentSerializer
       name: content.try(:name),
       description: content.try(:description),
       universe: self.universe.nil? ? nil : {
-        id: self.universe.id,
+        id:   self.universe.id,
         name: self.universe.try(:name)
       },
       categories: self.categories.map { |category|
