@@ -5,6 +5,9 @@ class LabController < ApplicationController
 
   end
 
+  def dice
+  end
+
   def babel
     EasyTranslate.api_key = ENV['GOOGLE_TRANSLATE_API_KEY']
 

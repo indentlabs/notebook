@@ -168,7 +168,7 @@ Rails.application.routes.draw do
   end
 
   # Lab apps
-  scope '/app' do
+  scope '/lab' do
     # Navigator
     get 'navigator', to: 'navigator#index'
 
@@ -178,6 +178,8 @@ Rails.application.routes.draw do
 
     # Pinboard
     get 'pinboard',  to: 'lab#pinboard'
+
+    get 'dice', to: 'lab#dice'
   end
 
   # Sessions
