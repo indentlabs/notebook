@@ -3,7 +3,7 @@
 # it's in no way optimized for production.
 
 # The image to build from.
-FROM ruby:2.6.3
+FROM ruby:2.6.6
 
 # Properties/labels for the image.
 LABEL maintainer="Notebook.ai Contributors"
