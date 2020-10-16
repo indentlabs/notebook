@@ -28,5 +28,6 @@ $(document).ready(function(){
     });
 
     // console.log('dark mode is now ' + !dark_mode_enabled);
+    return false;
   });
 });

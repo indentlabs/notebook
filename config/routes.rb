@@ -162,9 +162,9 @@ Rails.application.routes.draw do
 
   # Landing pages
   scope '/for' do
-    get '/writers',     to: 'main#for_writers', as: :writers_landing
+    get '/writers',     to: 'main#for_writers',     as: :writers_landing
     get '/roleplayers', to: 'main#for_roleplayers', as: :roleplayers_landing
-    get '/designers',   to: 'main#for_designers', as: :designers_landing
+    get '/designers',   to: 'main#for_designers',   as: :designers_landing
   end
 
   # Lab apps
@@ -256,7 +256,9 @@ Rails.application.routes.draw do
 
   # Fancy shmancy informative pages
   scope '/worldbuilding' do
-    
+    Rails.application.config.content_types[:all].each do |content_type|
+      get content_type.name.downcase.pluralize, to: "information##{content_type.name.downcase.pluralize}", as: "#{content_type.name.downcase}_worldbuilding_info"
+    end
   end
 
   scope '/scene/:scene_id' do
