@@ -303,7 +303,7 @@
       <br />
       <br />
       Our users have created
-      <h1 style="margin: 0"><%= number_with_delimiter @content_type.last.id %></h1>
+      <h1 class="<%= @content_type.color %>-text" style="margin: 0"><%= number_with_delimiter @content_type.last.id %></h1>
       <%= pluralized_class_name.downcase %> on Notebook.ai!
     </div>
   </div>
@@ -312,14 +312,17 @@
       <br />
       <br />
       of which,
-      <h1 style="margin: 0"><%= number_with_delimiter @content_type.where('created_at > ?', Date.current.beginning_of_day - 7.days).count %></h1>
-      were created in the last 30 days!
+      <h1 class="<%= @content_type.color %>-text" style="margin: 0"><%= number_with_delimiter @content_type.where('created_at > ?', Date.current.beginning_of_day - 7.days).count %></h1>
+      were created in the past 30 days!
     </div>
   </div>
   <div class="col s12 m12 l4">
     <div class="card">
       <div class="card-content">
-        <div class="card-title">We're here to stay. :)</div>
+        <div class="card-title">
+          <i class="material-icons left red-text">favorite</i>
+          We're here to stay. :)
+        </div>
         Notebook.ai has been around since 2016 and we're still growing. We're dedicated to making the best writing tool for authors
         out there &mdash; and we'll be around (and improving) for a very long time to do so.
       </div>
@@ -373,7 +376,7 @@
               </li>
               <li class="clearfix" style="padding-bottom: 1em">
                 <i class="material-icons <%= @content_type.color %>-text left"><%= @content_type.icon %></i>
-                See in a single place all the timelines, documents, and timelines your <%= singular_class_name.downcase %> is linked to.
+                See in a single place all the timelines, documents, and collections your <%= singular_class_name.downcase %> is linked to.
               </li>
             </ul>
           </div>
