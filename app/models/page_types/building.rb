@@ -14,6 +14,14 @@ class Building < ActiveRecord::Base
   include Authority::Abilities
   self.authorizer_name = "ExtendedContentAuthorizer"
 
+  relates :towns,            with: :building_towns
+  relates :countries,        with: :building_countries
+  relates :landmarks,        with: :building_landmarks
+  relates :locations,        with: :building_locations
+
+  relates :nearby_buildings, with: :building_nearby_buildings
+  relates :district_schools, with: :building_schools
+
   def self.color
     'blue-grey'
   end

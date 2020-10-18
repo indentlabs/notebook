@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_03_052208) do
+ActiveRecord::Schema.define(version: 2020_10_18_002924) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -202,6 +202,54 @@ ActiveRecord::Schema.define(version: 2020_10_03_052208) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "building_countries", force: :cascade do |t|
+    t.integer "building_id"
+    t.integer "country_id"
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "building_landmarks", force: :cascade do |t|
+    t.integer "building_id"
+    t.integer "landmark_id"
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "building_locations", force: :cascade do |t|
+    t.integer "building_id"
+    t.integer "location_id"
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "building_nearby_buildings", force: :cascade do |t|
+    t.integer "building_id"
+    t.integer "nearby_building_id"
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "building_schools", force: :cascade do |t|
+    t.integer "building_id"
+    t.integer "district_school_id"
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "building_towns", force: :cascade do |t|
+    t.integer "building_id"
+    t.integer "town_id"
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "buildings", force: :cascade do |t|
