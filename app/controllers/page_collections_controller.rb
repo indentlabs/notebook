@@ -15,8 +15,10 @@ class PageCollectionsController < ApplicationController
     @collections_with_pending = PageCollection.where(id: pending_submissions.pluck(:page_collection_id))
 
     followed_user_ids = UserFollowing.where(user_id: current_user.id).pluck(:followed_user_id)
-    @network_collections = PageCollection.where(user_id: followed_user_ids, privacy: 'public')
     @followed_collections = current_user.followed_page_collections
+    @network_collections = PageCollection.where(user_id: followed_user_ids, privacy: 'public').where.not(
+      id: @followed_collections.pluck(:id)
+    )
 
     @random_collections = PageCollection.where(privacy: 'public').where.not(
       id: @my_collections.pluck(:id) + @network_collections.pluck(:id) + @followed_collections.pluck(:id)
