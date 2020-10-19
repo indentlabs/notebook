@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_18_002924) do
+ActiveRecord::Schema.define(version: 2020_10_19_080418) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -140,6 +140,7 @@ ActiveRecord::Schema.define(version: 2020_10_18_002924) do
     t.index ["attribute_category_id", "old_column_source", "user_id", "field_type"], name: "attribute_fields_aci_ocs_ui_ft"
     t.index ["deleted_at", "attribute_category_id"], name: "deleted_at__attribute_category_id"
     t.index ["deleted_at", "name"], name: "index_attribute_fields_on_deleted_at_and_name"
+    t.index ["deleted_at", "position"], name: "index_attribute_fields_on_deleted_at_and_position"
     t.index ["deleted_at", "user_id", "attribute_category_id", "label", "hidden"], name: "attribute_fields_da_ui_aci_l_h"
     t.index ["user_id", "attribute_category_id", "field_type", "deleted_at"], name: "special_field_type_index"
     t.index ["user_id", "attribute_category_id", "label", "hidden", "deleted_at"], name: "field_lookup_by_label_index"
