@@ -9,6 +9,22 @@
   Help center
 </h4>
 
+<h5>About our worldbuilding pages</h5>
+<div class="row">
+  <% Rails.application.config.content_types[:all].each do |content_type| %>
+    <div class="col s12 m4 l3">
+      <%= link_to send("#{content_type.name.downcase}_worldbuilding_info_path") do %>
+        <div class="hoverable card-panel <%= content_type.color %> white-text">
+          <i class="material-icons left"><%= content_type.icon %></i>
+          <%= content_type.name.pluralize %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<h5>Feedback and surveys</h5>
+
 <div class="row">
   <div class="col s12">
     <p>
@@ -25,41 +41,33 @@
 </div>
 
 <div class="row">
-  <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new', class: 'waves-effect col s12' do %>
+  <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSe0jnqJlcPJDqwogGere5j8-8F1nSGGYkzbsI-XkOeMnGwLrA/viewform', target: '_new', class: 'waves-effect col s12 m6' do %>
     <div class="hoverable card-panel">
       <i class="material-icons right">exit_to_app</i>
       Report a problem
     </div>
   <% end %>
-  <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new', class: 'waves-effect col s12' do %>
+  <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScOhSMdDqWqJu9HGPQdmd0R9s90_AcSo0g6_Nc1qNjQIbSaXA/viewform', target: '_new', class: 'waves-effect col s12 m6' do %>
     <div class="hoverable card-panel">
       <i class="material-icons right">exit_to_app</i>
       Request a feature
     </div>
   <% end %>
-  <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new', class: 'waves-effect col s12' do %>
+  <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScZWEVMgm8hBWIIVj1LPzo0GqflmWUrLQlc4TAYqsaS087oAA/viewform', target: '_new', class: 'waves-effect col s12 m6' do %>
     <div class="hoverable card-panel">
       <i class="material-icons right">exit_to_app</i>
       Leave feedback
     </div>
   <% end %>
-</div>
 
-<h5>More surveys</h5>
-<p>
-  The following surveys are also available for you to fill out if you'd like. Thank you for helping!
-</p>
-
-<div class="row">
-
-  <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSctM_QaTIYTaj4WS546L--9WBbEIxAA9LKhWINb5CzguLR-JQ/viewform?usp=sf_link', target: '_new', class: 'waves-effect col s12' do %>
+  <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSctM_QaTIYTaj4WS546L--9WBbEIxAA9LKhWINb5CzguLR-JQ/viewform?usp=sf_link', target: '_new', class: 'waves-effect col s12 m6' do %>
     <div class="hoverable card-panel">
       <i class="material-icons right">exit_to_app</i>
       Mobile usage survey
     </div>
   <% end %>
 
-  <%= link_to 'https://docs.google.com/forms/d/1PFOaa97Cu3vrceUvcuFT6nyITaMwR-4wQSarUdVoPSg/viewform', target: '_new', class: 'waves-effect col s12' do %>
+  <%= link_to 'https://docs.google.com/forms/d/1PFOaa97Cu3vrceUvcuFT6nyITaMwR-4wQSarUdVoPSg/viewform', target: '_new', class: 'waves-effect col s12 m6' do %>
     <div class="hoverable card-panel">
       <i class="material-icons right">exit_to_app</i>
       Request another page type
@@ -67,21 +75,21 @@
   <% end %>
 
   <% if user_signed_in? && current_user.on_premium_plan? %>
-    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScjWJfW2p9LoGfKe9uEn4xWvve-AhX3QtY7hqm7BCyyK0HdRA/viewform?usp=sf_link', target: '_new', class: 'waves-effect col s12' do %>
+    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScjWJfW2p9LoGfKe9uEn4xWvve-AhX3QtY7hqm7BCyyK0HdRA/viewform?usp=sf_link', target: '_new', class: 'waves-effect col s12 m6' do %>
       <div class="hoverable card-panel">
         <i class="material-icons right">exit_to_app</i>
         Document Analysis Feedback
       </div>
     <% end %>
 
-    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSfHHcOpU-CD9EFILPVMd4ZtgWIFkxmzLMW1mdvanJqqLKgMAA/viewform?usp=sf_link', target: '_new', class: 'waves-effect col s12' do %>
+    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLSfHHcOpU-CD9EFILPVMd4ZtgWIFkxmzLMW1mdvanJqqLKgMAA/viewform?usp=sf_link', target: '_new', class: 'waves-effect col s12 m6' do %>
       <div class="hoverable card-panel">
         <i class="material-icons right">exit_to_app</i>
         Timeline Editor Beta Feedback
       </div>
     <% end %>
 
-    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScCPsoJxLxOC_nY3nMrtENja33lnMXNDrZLtWOxS2BYCNlpCQ/viewform?usp=sf_link', target: '_new', class: 'waves-effect col s12' do %>
+    <%= link_to 'https://docs.google.com/forms/d/e/1FAIpQLScCPsoJxLxOC_nY3nMrtENja33lnMXNDrZLtWOxS2BYCNlpCQ/viewform?usp=sf_link', target: '_new', class: 'waves-effect col s12 m6' do %>
       <div class="hoverable card-panel">
         <i class="material-icons right">exit_to_app</i>
         Collections feedback
