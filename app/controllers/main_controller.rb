@@ -13,7 +13,6 @@ class MainController < ApplicationController
   end
 
   def index
-    @page_title = "Worldbuilding and writing"
     redirect_to(:dashboard) if user_signed_in?
   end
 
@@ -24,6 +23,8 @@ class MainController < ApplicationController
   end
 
   def dashboard
+    @page_title = "My notebook"
+
     set_random_content # for questions
     @attribute_field_to_question = SerendipitousService.question_for(@content)
   end
