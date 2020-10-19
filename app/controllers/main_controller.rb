@@ -13,6 +13,7 @@ class MainController < ApplicationController
   end
 
   def index
+    @page_title = "Worldbuilding and writing"
     redirect_to(:dashboard) if user_signed_in?
   end
 
