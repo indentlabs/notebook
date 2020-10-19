@@ -6,6 +6,8 @@ class StreamController < ApplicationController
   before_action :cache_linkable_content_for_each_content_type, only: [:index]
 
   def index
+    @page_title = "What's happening"
+
     followed_users   = current_user.followed_users.pluck(:id)
     blocked_users    = current_user.blocked_users.pluck(:id)
     blocked_by_users = current_user.blocked_by_users.pluck(:id)
@@ -21,6 +23,8 @@ class StreamController < ApplicationController
   end
 
   def global
+    @page_title = "What's happening around the world"
+
     blocked_users    = current_user.blocked_users.pluck(:id)
     blocked_by_users = current_user.blocked_by_users.pluck(:id)
 

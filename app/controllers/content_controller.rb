@@ -18,6 +18,8 @@ class ContentController < ApplicationController
     @content_type_class = content_type_from_controller(self.class)
     pluralized_content_name = @content_type_class.name.downcase.pluralize
 
+    @page_title = "My #{pluralized_content_name}"
+
     # Create the default fields for this user if they don't have any already
     @content_type_class.attribute_categories(current_user)
 

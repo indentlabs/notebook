@@ -15,6 +15,7 @@ class DocumentsController < ApplicationController
   layout 'editor',    only: [:edit]
 
   def index
+    @page_title = "My documents"
     @documents = current_user.documents.order('updated_at desc')
 
     if @universe_scope.present?

@@ -4,6 +4,7 @@ class DataController < ApplicationController
   before_action :set_sidenav_expansion
 
   def index
+    @page_title = "My data vault"
   end
 
   def archive

@@ -4,6 +4,7 @@ class HelpController < ApplicationController
   before_action :set_sidenav_expansion
 
   def index
+    @page_title = "Help center"
   end
   
   def set_sidenav_expansion

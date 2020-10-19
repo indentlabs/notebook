@@ -8,6 +8,7 @@ class TimelinesController < ApplicationController
   # GET /timelines
   def index
     @timelines = current_user.timelines
+    @page_title = "My timelines"
 
     if @universe_scope
       @timelines = @timelines.where(universe: @universe_scope)
@@ -15,6 +16,8 @@ class TimelinesController < ApplicationController
   end
 
   def show
+    @page_title = @timeline.name
+
     unless @timeline.privacy == 'public' || (user_signed_in? && current_user == @timeline.user)
       return redirect_back(fallback_location: root_path, notice: "You don't have permission to view that timeline!")
     end
@@ -28,11 +31,15 @@ class TimelinesController < ApplicationController
 
   # GET /timelines/1/edit
   def edit
+    @page_title = "Editing " + @timeline.name
+
     raise "No Access"   unless user_signed_in? && current_user == @timeline.user
   end
 
   # POST /timelines
   def create
+    @page_title = "Create a timeline"
+
     # TODO this endpoint is probably just API-only, right?
     @timeline = Timeline.new(timeline_params)
 

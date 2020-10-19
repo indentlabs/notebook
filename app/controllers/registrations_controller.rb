@@ -14,14 +14,20 @@ class RegistrationsController < Devise::RegistrationsController
 
   def edit
     @sidenav_expansion = 'my account'
+
+    @page_title = "My settings"
   end
 
   def preferences
     @sidenav_expansion = 'my account'
+
+    @page_title = "My preferences"
   end
 
   def more_actions
     @sidenav_expansion = 'my account'
+
+    @page_title = "More settings"
   end
 
   private

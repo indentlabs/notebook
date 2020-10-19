@@ -9,6 +9,8 @@ class PageCollectionsController < ApplicationController
 
   # GET /page_collections
   def index
+    @page_title = "Collections"
+
     @my_collections = current_user.page_collections
 
     pending_submissions = PageCollectionSubmission.where(accepted_at: nil, page_collection_id: @my_collections.pluck(:id))
@@ -30,6 +32,8 @@ class PageCollectionsController < ApplicationController
     unless (@page_collection.privacy == 'public' || (user_signed_in? && @page_collection.user == current_user))
       return redirect_to page_collections_path, notice: "That Collection is not public."
     end
+
+    @page_title = "#{@page_collection.name} - a Collection"
 
     @pages = @page_collection.accepted_submissions.includes({content: [:universe, :user], user: []})
     sort_pages

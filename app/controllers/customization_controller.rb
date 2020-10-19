@@ -10,6 +10,7 @@ class CustomizationController < ApplicationController
     @premium_content_types = Rails.application.config.content_types[:premium]
     @my_activators = current_user.user_content_type_activators.pluck(:content_type)
     @sidenav_expansion = 'worldbuilding'
+    @page_title = "Customize your notebook pages"
   end
 
   def toggle_content_type

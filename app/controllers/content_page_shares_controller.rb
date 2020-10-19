@@ -12,6 +12,8 @@ class ContentPageSharesController < ApplicationController
 
   # GET /content_page_shares/1
   def show
+    @page_title = "#{@share.user.display_name}'s #{@share.content_page_type} shared"
+
     @sidenav_expansion = 'community'
   end
 

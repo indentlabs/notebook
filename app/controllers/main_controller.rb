@@ -33,6 +33,7 @@ class MainController < ApplicationController
   def prompts
     @sidenav_expansion = 'writing'
     @navbar_color = '#FF9800'
+    @page_title = "Writing prompts"
 
     set_random_content # for question
     @attribute_field_to_question = SerendipitousService.question_for(@content)
@@ -52,12 +53,15 @@ class MainController < ApplicationController
   end
 
   def for_writers
+    @page_title = "Creating fictional worlds and everything within them"
   end
 
   def for_roleplayers
+    @page_title = "Building campaigns and everything within them"
   end
 
   def for_designers
+    @page_title = "Designing games and everything within them"
   end
 
   def feature_voting
