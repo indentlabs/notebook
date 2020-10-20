@@ -12,7 +12,7 @@ class UsersController < ApplicationController
 
     @feed = ContentPageShare.where(user_id: @user.id)
       .order('created_at DESC')
-      .includes([:content_page, :user, :share_comments])
+      .includes([:content_page, :secondary_content_page, :user, :share_comments])
       .limit(100)
 
     @content = @user.public_content.select { |type, list| list.any? }
@@ -21,19 +21,7 @@ class UsersController < ApplicationController
     @accent_color     = @user.favorite_page_type_color
     @accent_icon      = @user.favorite_page_type_icon
     @favorite_content = @user.favorite_page_type? ? @user.send(@user.favorite_page_type.downcase.pluralize).is_public : []
-
-    # todo this is really bad and needs redone/improved
-    # @stream  = @user.content_change_events.order('updated_at desc').limit(100).group_by do |cce|
-    #   next if cce.content.nil?
-    #   if cce.content.is_a?(Attribute)
-    #     next if cce.content.entity.nil?
-    #     cce.content.entity.id
-    #   else
-    #     cce.content.id
-    #   end
-    # end
-
-    @stream = @user.recent_content_list(limit: 20)
+    @stream           = @user.recent_content_list(limit: 20)
     
     Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(@user.id, 'viewed profile', {
       'sharing any content': @user.public_content_count != 0
