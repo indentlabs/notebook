@@ -1,14 +1,12 @@
 class UsersController < ApplicationController
+  before_action :set_user, only: [:show, :followers, :following]
+
   def index
     redirect_to new_session_path(User)
   end
 
   def show
     @sidenav_expansion = 'community'
-
-    @user    = User.find_by(user_params)
-    return redirect_to(root_path, notice: 'That user does not exist.') if @user.nil?
-    return redirect_to(root_path, notice: 'That user does not exist.') if @user.private_profile?
 
     @feed = ContentPageShare.where(user_id: @user.id)
       .order('created_at DESC')
@@ -18,8 +16,6 @@ class UsersController < ApplicationController
     @content = @user.public_content.select { |type, list| list.any? }
     @tabs    = @content.keys
   
-    @accent_color     = @user.favorite_page_type_color
-    @accent_icon      = @user.favorite_page_type_icon
     @favorite_content = @user.favorite_page_type? ? @user.send(@user.favorite_page_type.downcase.pluralize).is_public : []
     @stream           = @user.recent_content_list(limit: 20)
     
@@ -31,9 +27,9 @@ class UsersController < ApplicationController
   Rails.application.config.content_types[:all].each do |content_type|
     content_type_name = content_type.name.downcase.pluralize.to_sym # :characters, :items, etc
     define_method content_type_name do
+      set_user
+      
       @content_type = content_type
-      @user = User.find_by(id: params[:id])
-      return redirect_to(root_path, notice: "This user does not exist") unless @user.present?
       @content_list = @user.send(content_type_name).is_public.order(:name)
 
       render :content_list
@@ -81,21 +77,23 @@ class UsersController < ApplicationController
   end
 
   def followers
-    @user    = User.find_by(user_params)
-    @accent_color     = @user.favorite_page_type_color
-    @accent_icon      = @user.favorite_page_type_icon
   end
 
   def following
-    @user    = User.find_by(user_params)
-    @accent_color     = @user.favorite_page_type_color
-    @accent_icon      = @user.favorite_page_type_icon
   end
 
   private
 
+  def set_user
+    @user    = User.find_by(user_params)
+    return redirect_to(root_path, notice: 'That user does not exist.') if @user.nil?
+    return redirect_to(root_path, notice: 'That user has chosen to hide their profile.') if @user.private_profile?
+
+    @accent_color     = @user.favorite_page_type_color
+    @accent_icon      = @user.favorite_page_type_icon
+  end
+
   def user_params
-    # todo is this used anywhere?
     params.permit(:id, :username)
   end
 end

@@ -93,6 +93,9 @@
           <li>
             <%= link_to 'Notebook.ai', main_app.root_path %>
           </li>
+          <li>
+            <a class="dropdown-trigger" href="#!" data-target="worldbuilding-dropdown">About<i class="material-icons right">arrow_drop_down</i></a>
+          </li>
         <% end %>
       </ul>
     </div>
@@ -116,4 +119,34 @@
       </div>
     <% end %>
   </nav>
+  <ul id="worldbuilding-dropdown" class="dropdown-content">
+    <li>
+      <%= link_to main_app.writers_landing_path, class: 'blue-text' do %>
+        <i class="material-icons left">book</i>
+        Notebook.ai for writers
+      <% end %>
+    </li>
+    <li>
+      <%= link_to main_app.roleplayers_landing_path, class: 'blue-text' do %>
+        <i class="material-icons left">book</i>
+        Notebook.ai for roleplayers
+      <% end %>
+    </li>
+    <li>
+      <%= link_to main_app.designers_landing_path, class: 'blue-text' do %>
+        <i class="material-icons left">book</i>
+        Notebook.ai for designers
+      <% end %>
+    </li>
+    <li class="divider"></li>
+
+    <% Rails.application.config.content_types[:all].each do |content_type| %>
+      <li>
+        <%= link_to main_app.send("#{content_type.name.downcase}_worldbuilding_info_path"), class: content_type.color + '-text' do %>
+          <i class="material-icons left"><%= content_type.icon %></i>
+          <%= content_type.name.pluralize %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
 </div>
