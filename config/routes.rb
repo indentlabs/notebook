@@ -266,6 +266,7 @@ Rails.application.routes.draw do
   end
 
   # API Endpoints
+  get '/platform', to: 'api_docs#index'
   namespace :api do
     resources :application_integrations, path: :applications, as: :applications do
       get '/authorize',    action: :authorize,    on: :member
