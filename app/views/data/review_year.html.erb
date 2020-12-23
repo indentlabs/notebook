@@ -1,0 +1,288 @@
+<h4>
+  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
+        position: 'bottom',
+        enterDelay: '500',
+        tooltip: "Back to your Data Vault"
+      } do %>
+    <i class="material-icons">arrow_back</i>
+  <% end %>
+  Your year in review: <%= @year %>
+</h4>
+
+<% if current_user.created_at.year == @year %>
+  <div class="row">
+    <div class="col s12">
+      <div class="card-panel">
+        <p class="card-panel-title">
+          <i class="left material-icons orange-text">cake</i>
+          You signed up to Notebook.ai on <%= current_user.created_at.strftime("%B %d of this year, a very fine %A") %>!
+        </p>
+        
+        <p>
+          Thank you so much for finding and enjoying the site. It's been a pleasure to build over the years;
+          I hope it's been as helpful for your worldbuilding as it has been for mine!
+        </p>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% if @earliest_page %>
+  <div class="row">
+    <div class="col s12 m5">
+      <div class="card-panel">
+        <div class="card-panel-title">
+          <i class="material-icons left <%= @earliest_page.class.color %>-text">
+            <%= @earliest_page.class.icon %>
+          </i>
+          It all started with <%= @earliest_page.name %>...
+        </div>
+        <p>
+          The first notebook page you created this year was <%= @earliest_page.name %>,
+          which you created on <%= @earliest_page.created_at.strftime("%B %d") %>. What a good omen for
+          things to come!
+        </p>
+      </div>
+    </div>
+    <div class="col s12 m7">
+      <div class="card horizontal">
+        <div class="card-image">
+          <%= image_tag @earliest_page.random_image_including_private %>
+        </div>
+        <div class="card-stacked">
+          <div class="card-content">
+            <div class="card-title">
+              <%= @earliest_page.name %>
+            </div>
+            <p>
+              First created <%= time_ago_in_words @earliest_page.created_at %> ago
+              and last updated <%= time_ago_in_words @earliest_page.updated_at %> ago.
+            </p>
+          </div>
+          <div class="card-action">
+            <%= link_to "View #{@earliest_page.name}", @earliest_page, class: "#{@earliest_page.class.color}-text" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div class="spacer" style="height: 100px;"></div>
+
+<% if @created_content['Universe'].any? %>
+  <div class="row">
+    <div class="col s12">
+      <%= render partial: 'content/components/parallax_header', locals: { content_type: 'Universe', content_class: Universe, image_only: true } %>
+      <div class="card-panel">
+        <p class="card-panel-title">
+          <i class="left material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
+          You started creating <%= pluralize @created_content['Universe'].count, 'different universe' %> in <%= @year %>!
+        </p>
+        
+        That's awesome!
+        <% if @created_content['Universe'].count > 1 %>
+          More than one is more than most! You must be great at multi-tasking!
+        <% end %>
+      </div>
+    </div>
+    <% @created_content['Universe'].each do |universe| %>
+      <div class="col s12 m4 l3">
+          <%= link_to universe do %>
+            <div class="hoverable card-panel <%= Universe.color %> white-text">
+              <i class="material-icons left"><%= Universe.icon %></i>
+              <%= universe.name %>
+            </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @total_created_non_universe_content > 0 %>
+  <div class="row">
+    <div class="col s12">
+      <div class="card-panel">
+        <div class="card-panel-title">
+          <i class="material-icons left blue-text">dashboard</i>
+          In your worlds, you created
+          <%= pluralize @total_created_non_universe_content, 'notebook pages' %>
+          this year!
+        </div>
+        <p>
+          That's a big deal! Fictitious worlds can be extremely hard and complex to create.
+          Filling out worldbuilding pages is just the first step to make the world in your head a reality.
+          The more you create and flesh out, the richer your world becomes!
+        </p>
+
+        <p>In all, you created...</p>
+        <div class="row">
+          <% Rails.application.config.content_types[:all_non_universe].each do |content_type| %>
+            <% next if @created_content[content_type.name].count.zero? %>
+            <div class="col s12 m4 l3">
+              <div class="hoverable card-panel center <%= content_type.color %>">
+                <div class="card-panel-title">
+                  <% icon_count = [@created_content[content_type.name].count, 4].min %>
+                  <% icon_count.times do %>
+                    <i class="material-icons white-text">
+                      <%= content_type.icon %>
+                    </i>
+                  <% end %>
+                </div>
+                <div class="white-text card-panel-title">
+                  <%= pluralize @created_content[content_type.name].count, content_type.name %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="row">
+          <div class="col s12">
+            You also uploaded <%= pluralize @created_content['ImageUpload'].count, 'image' %> to your notebook pages this year!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% if @created_content['Document'].any? %>
+  <div class="spacer" style="height: 100px;"></div>
+  <div class="row">
+    <div class="col s12">
+      <%= render partial: 'content/components/parallax_header', locals: { content_type: 'Document', content_class: Document, image_only: true } %>
+
+      <div class="card-panel">
+        <div class="card-panel-title">
+          <i class="material-icons left <%= Document.color %>-text"><%= Document.icon %></i>
+          You started writing <%= pluralize @created_content['Document'].count, 'document' %> in 2020!
+        </div>
+        <p>
+          Sometimes it can be hard to stare down that blank sheet... but you seem to be entirely unphased!
+        </p>
+      </div>
+
+      <% @created_content['Document'].each do |document| %>
+        <div class="col s12 m4 l3">
+            <%= link_to edit_document_path(document) do %>
+              <div class="hoverable card-panel fixed-card-content <%= Document.color %> white-text">
+                <i class="material-icons left"><%= Document.icon %></i>
+                <%= document.title %>
+              </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<% if @created_content['Thredded::Topic'].any? || @created_content['Thredded::Post'].any? || @created_content['ContentPageShare'].any? %>
+  <div class="spacer" style="height: 100px;"></div>
+  <div class="row">
+    <div class="col s12 m12 l4">
+      <%= render partial: 'content/components/parallax_header', locals: { content_type: 'Discussion', content_class: Document, image_only: true } %>
+
+      <div class="card-panel">
+        <div class="card-panel-title">
+          <i class="material-icons left blue-text">forum</i>
+          You're a social bee!
+        </div>
+        <p>
+          You seem to strike a good balance between working alone and with others.
+        </p>
+      </div>
+    </div>
+    
+    <div class="col s12 m12 l4">
+      <div class="card-panel center" style="border-top: 5px solid #2196F3">
+        This year, you created
+        <%= link_to thredded_path do %>
+          <div class="blue-text" style="font-size: 5em"><%= @created_content['Thredded::Topic'].count %></div>
+        <% end %>
+        <%= 'discussion topic'.pluralize @created_content['Thredded::Topic'].count %> on the forums.
+      </div>
+      
+      <div class="card-panel center" style="border-top: 5px solid <%= ContentPageShare.hex_color %>">
+        You shared your worldbuilding progress
+        <%= link_to stream_path do %>
+          <div class="<%= ContentPageShare.color %>-text" style="font-size: 5em"><%= @created_content['ContentPageShare'].count %></div>
+        <% end %>
+        <%= 'time'.pluralize @created_content['ContentPageShare'].count %> with your followers.
+      </div>
+      
+    </div>
+    <div class="col s12 m12 l4">
+      <div class="card-panel center" style="border-top: 5px solid #2196F3">
+        and you replied to discussions
+        <%= link_to thredded_path do %>
+          <div class="blue-text" style="font-size: 5em"><%= @created_content['Thredded::Post'].count %></div>
+        <% end %>
+        <%= 'time'.pluralize @created_content['Thredded::Post'].count %>!
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% if @created_content['PageCollection'].any? || @publish_rate > 0 %>
+  <div class="spacer" style="height: 100px;"></div>
+  <div class="row">
+    <div class="col s12">
+      <%= render partial: 'content/components/parallax_header', locals: { content_type: 'PageCollection', content_class: PageCollection, image_only: true } %>
+    </div>
+    <% if @created_content['PageCollection'].any? %>
+      <div class="col s12">
+        <div class="card-panel">
+          <p class="card-panel-title">
+            <i class="left material-icons <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
+            You created <%= pluralize @created_content['PageCollection'].count, 'new Collection' %> in <%= @year %>!
+          </p>
+        </div>
+      </div>
+      <div class="col s12">
+        <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @created_content['PageCollection'], title: "Your #{@year} Collections" } %>
+      </div>
+    <% end %>
+
+    <% if @publish_rate > 0 %>
+      <div class="col s12 m12 l4">
+        <div class="spacer" style="height: 100px;"></div>
+
+        <div class="card-panel">
+          <div class="card-panel-title">
+            <i class="material-icons left <%= PageCollection.color %>-text">
+              <%= PageCollection.icon %>
+            </i>
+            You were published in <%= pluralize @published_collections.count, 'Collection' %> this year!
+          </div>
+          <p>
+            You managed a <strong><%= (@publish_rate * 100 + 0.5).to_i %>%</strong> acceptance rate when submitting to a Collection!
+          </p>
+          <p>
+            Congratulations on being awesome!
+          </p>
+        </div>
+      </div>
+      <div class="col s12 m12 l8">
+        <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @published_collections, title: "Collections highlighting #{current_user.display_name}'s work" } %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="spacer" style="height: 100px;"></div>
+<div class="row">
+  <div class="col s12">
+    <div class="card-panel">
+      <div class="card-panel-title">
+        <i class="material-icons left blue-text">date_range</i>
+        <%= @year %> was a productive year for you!
+      </div>
+      <p>
+        Thanks for spending it on Notebook.ai. I can't wait to see what you accomplish in <%= @year + 1 %>! :)
+      </p>
+      <p>
+        &mdash; Andrew
+      </p>
+    </div>
+  </div>
+</div>

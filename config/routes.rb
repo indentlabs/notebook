@@ -134,6 +134,10 @@ Rails.application.routes.draw do
       get '/uploads',       to: 'data#uploads'
       get '/discussions',   to: 'data#discussions'
       get '/collaboration', to: 'data#collaboration'
+      scope 'yearly' do
+        get '/',      to: 'data#yearly_index',   as: :year_in_review
+        get '/:year', to: 'data#review_year',    as: :review_year
+      end
 
       scope 'export' do
         get '/', to: 'export#index', as: :notebook_export

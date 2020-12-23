@@ -28,6 +28,10 @@ class ContentPageShare < ApplicationRecord
     'text-lighten-3 purple'
   end
 
+  def self.hex_color
+    '#CE93D8'
+  end
+
   def self.icon
     'ballot'
   end

@@ -16,6 +16,10 @@ module HasImageUploads
       self.image.uploads.where(privacy: 'private')
     end
 
+    def random_image_including_private(format: :medium)
+      image_uploads.sample.try(:src, format).presence || "card-headers/#{self.class.name.downcase.pluralize}.jpg"
+    end
+
     def random_public_image(format: :medium)
       public_image_uploads.sample.try(:src, format).presence || "card-headers/#{self.class.name.downcase.pluralize}.jpg"
     end
