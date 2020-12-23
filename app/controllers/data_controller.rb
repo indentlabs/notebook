@@ -52,30 +52,30 @@ class DataController < ApplicationController
       .order('created_at ASC')
 
     @created_content['Thredded::Post'] = Thredded::Post
-        .where(user_id: current_user)
-        .where('created_at > ?', comparable_year.beginning_of_year)
-        .where('created_at < ?', comparable_year.end_of_year)
-        .order('created_at ASC')
+      .where(user_id: current_user)
+      .where('created_at > ?', comparable_year.beginning_of_year)
+      .where('created_at < ?', comparable_year.end_of_year)
+      .order('created_at ASC')
 
     @created_content['ContentPageShare'] = current_user.content_page_shares
-        .where('created_at > ?', comparable_year.beginning_of_year)
-        .where('created_at < ?', comparable_year.end_of_year)
-        .order('created_at ASC')
+      .where('created_at > ?', comparable_year.beginning_of_year)
+      .where('created_at < ?', comparable_year.end_of_year)
+      .order('created_at ASC')
 
     @created_content['ImageUpload'] = current_user.image_uploads
-    .where('created_at > ?', comparable_year.beginning_of_year)
-    .where('created_at < ?', comparable_year.end_of_year)
-    .order('created_at ASC')
+      .where('created_at > ?', comparable_year.beginning_of_year)
+      .where('created_at < ?', comparable_year.end_of_year)
+      .order('created_at ASC')
 
     @created_content['PageCollection'] = current_user.page_collections
-    .where('created_at > ?', comparable_year.beginning_of_year)
-    .where('created_at < ?', comparable_year.end_of_year)
-    .order('created_at ASC')
+      .where('created_at > ?', comparable_year.beginning_of_year)
+      .where('created_at < ?', comparable_year.end_of_year)
+      .order('created_at ASC')
 
     @created_content['PageCollectionSubmission'] = current_user.page_collection_submissions
-    .where('created_at > ?', comparable_year.beginning_of_year)
-    .where('created_at < ?', comparable_year.end_of_year)
-    .order('created_at ASC')
+      .where('created_at > ?', comparable_year.beginning_of_year)
+      .where('created_at < ?', comparable_year.end_of_year)
+      .order('created_at ASC')
 
     @published_collections = PageCollection.where(id: @created_content['PageCollectionSubmission'].pluck(:page_collection_id) - @created_content['PageCollection'].pluck(:id))
     @publish_rate = @created_content['PageCollectionSubmission'].select { |s| s.accepted_at.present? && !@created_content['PageCollection'].pluck(:id).include?(s.page_collection_id) }.count.to_f / @created_content['PageCollectionSubmission'].count
