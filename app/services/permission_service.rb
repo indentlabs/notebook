@@ -51,7 +51,8 @@ class PermissionService < Service
 
   def self.user_can_collaborate_in_universe_that_allows_extended_content?(user:)
     user.contributable_universes.any? do |universe|
-      billing_plan_allows_extended_content?(user: universe.user)
+      universe.user.on_premium_plan?
+#      billing_plan_allows_extended_content?(user: universe.user) || user_has_active_promotion_for_this_content_type(user: universe.user, content_type: Universe)
     end
   end
 
@@ -62,7 +63,8 @@ class PermissionService < Service
 
   def self.user_can_collaborate_in_universe_that_allows_collective_content?(user:)
     user.contributable_universes.any? do |universe|
-      billing_plan_allows_collective_content?(user: universe.user)
+      universe.user.on_premium_plan?
+#      billing_plan_allows_collective_content?(user: universe.user) || user_has_active_promotion_for_this_content_type(user: universe.user, content_type: Universe)
     end
   end
 
