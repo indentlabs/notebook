@@ -13,6 +13,20 @@ class TimelinesController < ApplicationController
     if @universe_scope
       @timelines = @timelines.where(universe: @universe_scope)
     end
+
+    @page_tags = PageTag.where(
+      page_type: Timeline.name,
+      page_id:   @timelines.pluck(:id)
+    ).order(:tag)
+    if params.key?(:slug)
+      @filtered_page_tags = @page_tags.where(slug: params[:slug])
+      @timelines = @timelines.select { |timeline| @filtered_page_tags.pluck(:page_id).include?(timeline.id) }
+    end
+
+    # if params.key?(:favorite_only)
+    #   @content.select!(&:favorite?)
+    # end
+
   end
 
   def show
