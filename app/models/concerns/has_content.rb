@@ -48,6 +48,7 @@ module HasContent
         clause
       end.compact.join(' UNION ALL ') + ' ORDER BY page_type, id'
 
+      # TODO: improve this query -- it uses a tooon of memory
       result = ActiveRecord::Base.connection.execute(sql)
       @content_by_page_type ||= result.to_a.each_with_object({}) do |object, hash|
         object.keys.each do |key|
@@ -73,6 +74,7 @@ module HasContent
         "SELECT #{polymorphic_content_fields.join(',')} FROM #{page_type.downcase.pluralize} WHERE #{where_conditions}"
       end.join(' UNION ALL ')
 
+      # TODO: improve this query -- it uses a tooon of memory
       @user_content_list ||= ActiveRecord::Base.connection.execute(sql)
     end
 
