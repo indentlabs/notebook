@@ -32,6 +32,8 @@ class TimelinesController < ApplicationController
   # GET /timelines/1/edit
   def edit
     @page_title = "Editing " + @timeline.name
+    
+    @suggested_page_tags = []
 
     raise "No Access"   unless user_signed_in? && current_user == @timeline.user
   end
@@ -55,6 +57,8 @@ class TimelinesController < ApplicationController
     return unless user_signed_in? && current_user == @timeline.user
 
     if @timeline.update(timeline_params)
+      update_page_tags
+
       render status: 200, json: @timeline.reload
     else
       render status: 501, json: @timeline.errors
@@ -69,6 +73,27 @@ class TimelinesController < ApplicationController
 
   private
 
+  # TODO: move this (and the copy in ContentController) into the has_page_tags concern?
+  def update_page_tags
+    tag_list = page_tag_params.split(PageTag::SUBMISSION_DELIMITER)
+    current_tags = @timeline.page_tags.pluck(:tag)
+
+    tags_to_add    = tag_list - current_tags
+    tags_to_remove = current_tags - tag_list
+
+    tags_to_add.each do |tag|
+      @timeline.page_tags.find_or_create_by(
+        tag:  tag,
+        slug: PageTagService.slug_for(tag),
+        user: @timeline.user
+      )
+    end
+
+    tags_to_remove.each do |tag|
+      @timeline.page_tags.find_by(tag: tag).destroy
+    end
+  end
+
   # Use callbacks to share common setup or constraints between actions.
   def set_timeline
     @timeline = Timeline.find(params[:id])
@@ -76,7 +101,11 @@ class TimelinesController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def timeline_params
-    params.require(:timeline).permit(:name, :subtitle, :description, :notes, :private_notes, :universe_id, :deleted_at, :archived_at, :privacy)
+    params.require(:timeline).except(:page_tags).permit(:name, :subtitle, :description, :notes, :private_notes, :universe_id, :deleted_at, :archived_at, :privacy)
+  end
+
+  def page_tag_params
+    params.require(:timeline).fetch(:page_tags, "")
   end
 
   def set_navbar_color
