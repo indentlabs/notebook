@@ -1,7 +1,5 @@
 <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
 
-  <h4><%= defined?(title_override) ? title_override : 'Log in' %></h4>
-
   <div class="field">
     <%= f.label :email %><br />
     <%= f.email_field :email, autofocus: true %>
@@ -12,14 +10,16 @@
     <%= f.password_field :password, autocomplete: "off" %>
   </div>
 
+  <div class="spacer">&nbsp;</div>
+
   <div class="actions center">
     <div class="col s6">
-    <% if devise_mapping.rememberable? -%>
-      <%= f.label :remember_me do %>
-        <%= f.check_box :remember_me %>
-        <span>Remember me</span>
-      <% end %>
-    <% end -%>
+      <% if devise_mapping.rememberable? -%>
+        <%= f.label :remember_me do %>
+          <%= f.check_box :remember_me %>
+          <span>Remember me</span>
+        <% end %>
+      <% end -%>
     </div>
     <div class="col s6">
       <%= f.submit "Log in", class: 'btn blue' %>
