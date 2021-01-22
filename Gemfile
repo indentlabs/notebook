@@ -3,7 +3,7 @@ ruby "~> 2.6"
 
 # Server
 gem 'rails'
-gem 'puma', '~> 5.0'
+gem 'puma', '~> 5.1'
 gem 'puma-heroku'
 # gem 'bootsnap', require: false
 gem 'sprockets', '~> 3.7.2'
@@ -130,7 +130,7 @@ group :test do
   gem 'rspec-rails'
   gem 'webmock'
   gem 'rubocop', require: false
-  gem 'ruby-prof', '1.4.1'
+  gem 'ruby-prof', '1.4.2'
   gem 'shoulda-matchers', '~> 4.4'
   gem 'rails-controller-testing'
 end
