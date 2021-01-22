@@ -89,7 +89,7 @@ class ContentController < ApplicationController
         })
       end
 
-      if current_user
+      if user_signed_in?
         if @content.updated_at > 30.minutes.ago
           Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed content', {
             'content_type': content_type.name,
@@ -103,6 +103,14 @@ class ContentController < ApplicationController
             'logged_in_user': current_user.present?
           }) if Rails.env.production?
         end
+      end
+
+      if user_signed_in? && current_user.can_create?(content_type)
+        @navbar_actions << {
+          label: "New #{content_type.name.downcase}",
+          href: main_app.new_polymorphic_path(content_type),
+          class: 'right'
+        }
       end
 
       respond_to do |format|
@@ -166,6 +174,14 @@ class ContentController < ApplicationController
 
     unless @content.updatable_by? current_user
       return redirect_to @content, notice: t(:no_do_permission)
+    end
+
+    if user_signed_in? && current_user.can_create?(content_type_class)
+      @navbar_actions << {
+        label: "New #{content_type_class.name.downcase}",
+        href: main_app.new_polymorphic_path(content_type_class),
+        class: 'right'
+      }
     end
 
     respond_to do |format|
@@ -614,12 +630,6 @@ class ContentController < ApplicationController
           href: main_app.polymorphic_path(content_type)
         }
       end
-
-      @navbar_actions << {
-        label: "New #{content_type.name.downcase}",
-        href: main_app.new_polymorphic_path(content_type),
-        class: 'right'
-      }
     end
 
     discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
