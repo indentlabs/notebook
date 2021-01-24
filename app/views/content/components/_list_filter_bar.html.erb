@@ -1,15 +1,18 @@
 <div class="filter-bar">
-  <!-- <div class="btn-group card">
+
+  <!-- 
+  <div class="btn-group card">
     <a href="#" class="btn white black-text"><i class="material-icons">view_module</i></a>
     <a href="#" class="btn white black-text"><i class="material-icons">view_headline</i></a>
     <a href="#" class="btn white black-text"><i class="material-icons">view_stream</i></a>
     <a href="#" class="btn white black-text"><i class="material-icons">grid_on</i></a>
-  </div> -->
+  </div>
+  -->
 
   <% if content_type.new.respond_to?(:universe) %>
     <div class="btn-group card">
       <a
-        class='dropdown-trigger btn white tooltipped <%= Universe.color if @universe_scope.present? %> lighten-5'
+        class='dropdown-trigger btn black-text white tooltipped <%= Universe.color if @universe_scope.present? %> lighten-5'
         href='#'
         data-position="bottom"
         data-delay="500"
@@ -78,14 +81,16 @@
     </div>
   <% end %>
 
-  <a class='btn white <%= 'yellow lighten-3' if params.key?(:favorite_only) %> black-text tooltipped'
-      href="<%= url_for(params.permit(:universe, :favorite_only).merge({favorite_only: params.key?(:favorite_only) ? nil : 1})) %>"
-      data-position="bottom"
-      data-delay="500"
-      data-tooltip="Filter by favorite">
-    <i class="material-icons amber-text">star_outline</i>
-    <% if params.key?(:favorite_only) %>Favorites<% end %>
-  </a>
+  <% if content_type.new.respond_to?(:favorite?) %>
+    <a class='btn white <%= 'yellow lighten-3' if params.key?(:favorite_only) %> black-text tooltipped'
+        href="<%= url_for(params.permit(:universe, :favorite_only).merge({favorite_only: params.key?(:favorite_only) ? nil : 1})) %>"
+        data-position="bottom"
+        data-delay="500"
+        data-tooltip="Filter by favorite">
+      <i class="material-icons amber-text">star_outline</i>
+      <% if params.key?(:favorite_only) %>Favorites<% end %>
+    </a>
+  <% end %>
 
   &nbsp;
 
@@ -120,6 +125,14 @@
   <div class="input-field inline" style="position: relative; top: 5px; min-width: 320px">
     <input id="js-content-name-filter" type="text">
     <label for="js-content-name-filter">Filter <%= content_type.name.downcase.pluralize %> by name...</label>
+  </div>
+
+
+  <div class="btn-group right" style="margin-top: 1.9em;">
+    <%= link_to send("new_#{content_type.name.downcase}_path"), class: "btn right #{content_type.color} white-text" do %>
+      <i class="material-icons left">add</i>
+      New <%= content_type.name %>
+    <% end %>
   </div>
 
 </div>

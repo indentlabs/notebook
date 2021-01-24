@@ -5,18 +5,15 @@
 <% if @timelines.any? %>
 
   <div class="row">
+
     <div class="col s12">
-      <br />
-      <%= link_to new_timeline_path, class: "hoverable btn right #{Timeline.color} white-text" do %>
-        <i class="material-icons left">add</i>
-        Create another timeline
-      <% end %>
+      <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Timeline } %>
     </div>
   </div>
 
-  <% @timelines.each do |timeline| %>
-    <div class="row">
-      <div class="col s12">
+  <div class="js-content-cards-list row">
+    <% @timelines.each do |timeline| %>
+      <div class="col s12 js-content-card-container">
 
         <%= link_to edit_timeline_path(timeline) do %>
           <div class="hoverable card">
@@ -31,7 +28,7 @@
               </a>
               -->
             </div>
-            <div class="card-content black-text">
+            <div class="card-content black-text js-content-name">
               <% if timeline.universe_id? %>
                 <p class="right">
                   <%= link_to timeline.universe, class: "#{Universe.color}-text" do %>
@@ -50,7 +47,21 @@
                 Last edited <%= time_ago_in_words timeline.updated_at %> ago
               </p>
 
+              <div>
+                <% timeline.page_tags.each do |page_tag| %>
+                  <%=
+                    link_to send(
+                      "page_tag_timelines_path",
+                      slug: PageTagService.slug_for(page_tag.tag)
+                    ) do
+                  %>
+                    <span class="new badge <%= params[:slug] == page_tag.slug ? Timeline.color : 'grey' %> right" data-badge-caption="<%= page_tag.tag %>"></span>
+                  <% end %>
+                <% end %>
+              </div>
+
               <div class="clearfix"></div>
+
             </div>
             <div class="card-action">
               <%= link_to timeline_path(timeline), class: 'blue-text left' do %>
@@ -67,8 +78,8 @@
         <% end %>
 
       </div>
-    </div>
-  <% end %>
+    <% end %>
+  </div>
   
   <% if @show_scope_notice %>
     <p class="center help-text">

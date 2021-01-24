@@ -51,6 +51,11 @@ class PageCollection < ApplicationRecord
     # If all else fails, fall back on default header
     "card-headers/#{self.class.name.downcase.pluralize}.jpg"
   end
+
+  def first_public_image
+    random_public_image
+  end
+
   def name
     title
   end

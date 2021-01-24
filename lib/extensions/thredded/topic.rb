@@ -33,6 +33,11 @@ module Extensions
       def random_public_image
         "card-headers/discussions.jpg"
       end
+
+      def first_public_image
+        "card-headers/discussions.jpg"
+      end
+
       def name
         self.title
       end

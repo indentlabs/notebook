@@ -1,6 +1,6 @@
 <%= render partial: 'notice_dismissal/messages/13' %>
 <br />
-<%= form_for @timeline, html: { class: 'autosave-form' }, remote: true do |f| %>
+<%= form_for @timeline, html: { class: 'autosave-form timeline-meta-form' }, remote: true do |f| %>
   <div class="row">
     <div class="col s12 m7 l9">
       <div class="input-field">
@@ -38,8 +38,8 @@
               <%= f.label :description, 'Description' %>
             </div>
             <div class="input-field">
-                <%= f.select :universe_id, current_user.universes.pluck(:name, :id), { include_blank: true }, class: 'materialize-textarea js-trigger-autosave-on-change' %>
-                <%= f.label 'Universe' %>
+              <%= f.select :universe_id, current_user.universes.pluck(:name, :id), { include_blank: true }, class: 'materialize-textarea js-trigger-autosave-on-change' %>
+              <%= f.label 'Universe' %>
             </div>
             <!--
             <div class="input-field">
@@ -47,11 +47,64 @@
               <%= f.label :privacy %>
             </div>
             -->
-            <!--
-            <div>
-              tags
+            
+            <div class="input-field">
+              <div class="input-field">
+                <small><%= f.label :tags %></small>
+                <div class="chips chips-autocomplete chips-initial"></div>
+                <%= f.hidden_field :page_tags, value: @timeline.page_tags.join(PageTag::SUBMISSION_DELIMITER), 
+                                               id: 'hidden_page_tags_value'
+                %>
+
+                <div class="help-text show-when-focused">
+                  <i class="material-icons tiny">label</i>
+                  Type and press enter to create a new tag.
+                </div>
+                <div class="tags-container show-when-focused">
+                  <% @suggested_page_tags.each do |tag| %>
+                    <%=
+                      link_to '#', class: 'js-add-tag' do
+                    %>
+                      <span class="new badge grey left hoverable" data-badge-caption="<%= tag %>"></span>
+                    <% end %>
+                  <% end %>
+                </div>
+                <div class="clearfix"></div>
+              </div>
             </div>
-            -->
+            <%= content_for :javascript do %>
+              function update_hidden_page_tag_value(e) {
+                var chips = M.Chips.getInstance($('.chips')).chipsData.map(function (c) {
+                  return c['tag'];
+                });
+
+                var hidden_input = $('#hidden_page_tags_value').first();
+                hidden_input.val(chips.join('<%= PageTag::SUBMISSION_DELIMITER %>'));
+                $('form.timeline-meta-form').submit();
+              }
+
+              var chips = $('.chips-autocomplete').chips({
+                placeholder: 'Tag this page',
+                secondaryPlaceholder: '+ Tag',
+                autocompleteOptions: {
+                  data: {
+                    <% @timeline.page_tags.pluck(:tag).each do |tag| %>
+                      '<%= tag %>': null,
+                    <% end %>
+                  },
+                  limit: 100,
+                  minLength: 1
+                },
+                data: [
+                  <% @timeline.page_tags.pluck(:tag).each do |tag| %>
+                    {tag: '<%= tag %>'},
+                  <% end %>
+                ],
+                onChipAdd:    update_hidden_page_tag_value,
+                onChipDelete: update_hidden_page_tag_value
+              });
+            <% end %>
+            
             <div class="input-field">
               <%= f.text_area :notes, class: 'materialize-textarea js-trigger-autosave-on-change' %>
               <%= f.label :notes %>

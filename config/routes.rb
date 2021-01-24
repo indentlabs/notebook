@@ -215,7 +215,9 @@ Rails.application.routes.draw do
         get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
       end
     end
-    resources :timelines, only: [:index, :show, :new, :update, :edit, :destroy]
+    resources :timelines, only: [:index, :show, :new, :update, :edit, :destroy] do
+      get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
+    end
     resources :timeline_events do
       scope '/move', as: :move do
         get 'up',     to: 'timeline_events#move_up',        on: :member

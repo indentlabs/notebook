@@ -55,6 +55,7 @@ class Universe < ApplicationRecord
   has_many :contributors, dependent: :destroy
 
   has_many :documents
+  has_many :timelines
 
   scope :in_universe, ->(universe = nil) { where(id: universe.try(:id)) unless universe.nil? }
 

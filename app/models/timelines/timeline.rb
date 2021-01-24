@@ -2,6 +2,7 @@ class Timeline < ApplicationRecord
   acts_as_paranoid
 
   include IsContentPage
+  include HasPageTags
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
