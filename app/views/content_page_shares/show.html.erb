@@ -4,17 +4,23 @@
       <br />
       Shared page
     </div>
-    <div class="hoverable card">
-      <div class="card-image">
-        <%= link_to @share.content_page do %>
-          <%= image_tag @share.content_page.first_public_image %>
-          <span class="card-title bordered-text">
-            <i class="material-icons <%= @share.content_page.class.color %>-text left small"><%= @share.content_page.class.icon %></i>
-            <%= @share.content_page.name %>
-          </span>
-        <% end %>
+    <% if @share.content_page %>
+      <div class="hoverable card">
+        <div class="card-image">
+          <%= link_to @share.content_page do %>
+            <%= image_tag @share.content_page.first_public_image %>
+            <span class="card-title bordered-text">
+              <i class="material-icons <%= @share.content_page.class.color %>-text left small"><%= @share.content_page.class.icon %></i>
+              <%= @share.content_page.name %>
+            </span>
+          <% end %>
+        </div>
       </div>
-    </div>
+    <% else %>
+      <div class="hoverable card">
+        The shared page has been removed.
+      </div>
+    <% end %>
     <div class="grey-text uppercase">
       <br />
       Created by
