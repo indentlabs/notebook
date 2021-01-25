@@ -28,6 +28,10 @@ class UsersController < ApplicationController
     content_type_name = content_type.name.downcase.pluralize.to_sym # :characters, :items, etc
     define_method content_type_name do
       set_user
+
+      # We double up on the same returns from set_user here since we're calling set_user manually instead of a before_action
+      return if @user.nil?
+      return if @user.private_profile?
       
       @content_type = content_type
       @content_list = @user.send(content_type_name).is_public.order(:name)
