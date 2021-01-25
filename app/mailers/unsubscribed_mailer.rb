@@ -1,5 +1,5 @@
 class UnsubscribedMailer < ApplicationMailer
-  default from: "noreply@notebook.ai"
+  default from: "notebook@indentlabs.com"
 
   def unsubscribed(user)
     @user_name  = user.name.presence || 'worldbuilder'
