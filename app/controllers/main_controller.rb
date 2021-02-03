@@ -32,6 +32,9 @@ class MainController < ApplicationController
   def infostack
   end
 
+  def sascon
+  end
+
   def prompts
     @sidenav_expansion = 'writing'
     @navbar_color = '#FF9800'
