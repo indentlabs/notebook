@@ -3,7 +3,7 @@ class AdminController < ApplicationController
   layout 'application', only: [:unsubscribe, :perform_unsubscribe]
 
   before_action :authenticate_user!
-  before_action :require_admin_access
+  before_action :require_admin_access, unless: -> { Rails.env.development? }
 
   def dashboard
     @reports = EndOfDayAnalyticsReport.order('day DESC').limit(90)

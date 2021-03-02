@@ -242,7 +242,7 @@ Rails.application.routes.draw do
   end
   get 'search/', to: 'search#results'
 
-  authenticate :user, lambda { |u| u.site_administrator? } do
+  authenticate :user, lambda { |u| u.site_administrator? || Rails.env.development? } do
     scope 'admin' do
       get '/stats',                to: 'admin#dashboard', as: :admin_dashboard
       get '/content_type/:type',   to: 'admin#content_type', as: :admin_content_type
