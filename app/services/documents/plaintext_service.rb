@@ -12,8 +12,12 @@ module Documents
       Rails.application.config.content_types[:all].each do |content_type|
         tokens = txt.scan(/\[\[#{content_type}-([\d]+)\]\]/).uniq
         tokens.each do |content_id|
+          # Tokens captures are in the form [["id1"], ["id2"], ...] so we dig in to convert to (somewhat safer) 
+          # scalar before putting it into a lookup
+          content_id = content_id.first.to_i
+
           page = content_type.find_by(id: content_id)
-          if page
+          if page.present? 
             txt.gsub!(/\[\[#{content_type}-#{content_id}\]\]/, page.name)
           else
             txt.gsub!(/\[\[#{content_type}-#{content_id}\]\]/, "[Missing #{content_type}]")
