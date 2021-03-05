@@ -45,12 +45,13 @@ module Documents
       # <img alt=''>
       txt.gsub!(/<img.+?alt=\'([^\']*)\'[^>]*\>/i, '\1')
 
-      # links
+      # links - we strip the link out completely
       txt.gsub!(/<a\s.*?href=["'](mailto:)?([^"']*)["'][^>]*>((.|\s)*?)<\/a>/i) do |s|
         if $3.empty?
           ''
         else
-          $3.strip + ' ( ' + $2.strip + ' )'
+          # $3.strip + ' ( ' + $2.strip + ' )'
+          $3.strip + ' '
         end
       end
 
