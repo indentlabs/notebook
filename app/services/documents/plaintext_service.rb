@@ -8,6 +8,19 @@ module Documents
 
       txt = html.dup
 
+      # Do Notebook.ai token replacements in the form of [[PAGE_TYPE-PAGE_ID]] -> Page->Name
+      Rails.application.config.content_types[:all].each do |content_type|
+        tokens = txt.scan(/\[\[#{content_type}-([\d]+)\]\]/).uniq
+        tokens.each do |content_id|
+          page = content_type.find_by(id: content_id)
+          if page
+            txt.gsub!(/\[\[#{content_type}-#{content_id}\]\]/, page.name)
+          else
+            txt.gsub!(/\[\[#{content_type}-#{content_id}\]\]/, "[Missing #{content_type}]")
+          end
+        end
+      end
+
       # strip text ignored html. Useful for removing
       # headers and footers that aren't needed in the
       # text version
