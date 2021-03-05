@@ -3,7 +3,7 @@ import React from "react"
 class Footer extends React.Component {
   render () {
     return (
-      <footer className="grey-text">
+      <footer className="grey-text no-print">
         <div className="container center">
           <div className="row">
             <div className="col s12">
