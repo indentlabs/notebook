@@ -33,6 +33,10 @@ class Timeline < ApplicationRecord
     'timeline'
   end
 
+  def page_type
+    'Timeline'
+  end
+
   def initialize_first_event
     timeline_events.create(title: "Untitled Event", position: 1)
   end

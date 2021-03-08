@@ -35,6 +35,10 @@ class Document < ApplicationRecord
     'description'
   end
 
+  def page_type
+    'Document'
+  end
+
   def name
     title
   end
