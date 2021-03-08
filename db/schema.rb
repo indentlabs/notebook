@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_19_080418) do
+ActiveRecord::Schema.define(version: 2021_03_08_064749) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1187,6 +1187,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.text "notes_text"
     t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
+    t.index ["user_id", "deleted_at"], name: "index_documents_on_user_id_and_deleted_at"
     t.index ["user_id"], name: "index_documents_on_user_id"
   end
 
@@ -2367,7 +2368,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "description"
-    t.boolean "allow_submissions", default: false
+    t.boolean "allow_submissions"
     t.string "slug"
     t.datetime "deleted_at"
     t.index ["user_id"], name: "index_page_collections_on_user_id"
@@ -2832,7 +2833,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
   end
 
   create_table "share_comments", force: :cascade do |t|
-    t.integer "user_id"
+    t.integer "user_id", null: false
     t.integer "content_page_share_id", null: false
     t.string "message"
     t.datetime "deleted_at"
