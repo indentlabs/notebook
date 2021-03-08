@@ -65,6 +65,12 @@ class ApplicationController < ActionController::Base
 
     # Fetch notifications
     @user_notifications = current_user.notifications.order('happened_at DESC').limit(10)
+
+    # Cache recently-edited pages
+    @recently_edited_pages = @current_user_content.values.flatten
+      .sort_by(&:updated_at)
+      .last(50)
+      .reverse
   end
 
   def cache_forums_unread_counts
