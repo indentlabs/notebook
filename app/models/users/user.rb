@@ -277,7 +277,7 @@ class User < ApplicationRecord
       params.delete(:username)
     end
 
-    result = update_attributes(params, *options)
+    result = update(params, *options)
     clean_up_passwords
     result
   end
