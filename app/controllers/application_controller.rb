@@ -16,8 +16,8 @@ class ApplicationController < ActionController::Base
   private
 
   def set_metadata
-    @page_title ||= ''
-    @page_keywords ||= %w[writing author nanowrimo novel character fiction fantasy universe creative dnd roleplay game design]
+    @page_title       ||= ''
+    @page_keywords    ||= %w[writing author nanowrimo novel character fiction fantasy universe creative dnd roleplay game design]
     @page_description ||= 'Notebook.ai is a set of tools for writers, game designers, and roleplayers to create magnificent universes — and everything within them.'
   end
 
@@ -34,7 +34,7 @@ class ApplicationController < ActionController::Base
   end
 
   def set_universe_scope
-    if user_signed_in? && session[:universe_id]
+    if user_signed_in? && session.key?(:universe_id)
       @universe_scope = Universe.find_by(id: session[:universe_id])
       @universe_scope = nil unless current_user.universes.include?(@universe_scope) || current_user.contributable_universes.include?(@universe_scope)
     else
@@ -54,13 +54,13 @@ class ApplicationController < ActionController::Base
 
     # We always want to cache Universes, even if they aren't explicitly turned on.
     @current_user_content = current_user.content(content_types: @activated_content_types + ['Universe'], universe_id: @universe_scope.try(:id))
-    @current_user_content['Document'] = current_user.documents
+    @current_user_content['Document'] = current_user.documents.to_a
 
     # Likewise, we should also always cache Timelines
     if @universe_scope
-      @current_user_content['Timeline'] = current_user.timelines.where(universe_id: @universe_scope.try(:id))
+      @current_user_content['Timeline'] = current_user.timelines.where(universe_id: @universe_scope.try(:id)).to_a
     else
-      @current_user_content['Timeline'] = current_user.timelines
+      @current_user_content['Timeline'] = current_user.timelines.to_a
     end
 
     # Fetch notifications
