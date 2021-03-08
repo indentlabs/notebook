@@ -246,10 +246,19 @@ Rails.application.config.to_prepare do
 end
 
 require 'extensions/thredded/topic'
+require 'extensions/thredded/post'
+
 Rails.application.config.to_prepare do
   begin
     if ActiveRecord::Base.connection.table_exists?(:thredded_topics)
       Thredded::Topic.include(Extensions::Thredded::Topic)
+    end
+  rescue ActiveRecord::NoDatabaseError
+  end
+
+  begin
+    if ActiveRecord::Base.connection.table_exists?(:thredded_posts)
+      Thredded::Post.include(Extensions::Thredded::Post)
     end
   rescue ActiveRecord::NoDatabaseError
   end
