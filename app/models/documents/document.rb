@@ -16,6 +16,8 @@ class Document < ApplicationRecord
   include HasPartsOfSpeech
   include HasImageUploads
 
+  # TODO: include IsContentPage ?
+
   include Authority::Abilities
   self.authorizer_name = 'DocumentAuthorizer'
 
