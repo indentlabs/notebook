@@ -34,7 +34,7 @@ class ApplicationController < ActionController::Base
   end
 
   def set_universe_scope
-    if current_user && session[:universe_id]
+    if user_signed_in? && session[:universe_id]
       @universe_scope = Universe.find_by(id: session[:universe_id])
       @universe_scope = nil unless current_user.universes.include?(@universe_scope) || current_user.contributable_universes.include?(@universe_scope)
     else
