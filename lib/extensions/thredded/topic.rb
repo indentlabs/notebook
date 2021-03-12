@@ -10,6 +10,8 @@ module Extensions
         after_create :create_content_page_share
         has_many     :content_page_shares, as: :content
 
+        acts_as_paranoid
+
         def self.icon
           'forum'
         end
