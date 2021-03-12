@@ -27,7 +27,9 @@ module ApplicationHelper
     content_for(:title) { (parts << 'Notebook').join(' - ') } unless parts.empty?
   end
 
-  def clean_links html
+  def clean_links(html)
+    return '' if html.nil?
+
     html.gsub!(/\<a href=["'](.*?)["']\>(.*?)\<\/a\>/mi, '<a href="\1" rel="nofollow">\2</a>')
     html.html_safe
   end
