@@ -16,6 +16,8 @@ class Document < ApplicationRecord
   include HasPartsOfSpeech
   include HasImageUploads
 
+  # TODO: include IsContentPage ?
+
   include Authority::Abilities
   self.authorizer_name = 'DocumentAuthorizer'
 
@@ -31,6 +33,10 @@ class Document < ApplicationRecord
 
   def self.icon
     'description'
+  end
+
+  def page_type
+    'Document'
   end
 
   def name

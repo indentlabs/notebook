@@ -1,8 +1,28 @@
+<%# TODO: put this in more of a timeline design %>
 <div class="row">
-  <div class="col s12 m6 hoverable card">
-    <%= render partial: 'cards/user/recent_activity', locals: { title: 'Recently-updated pages', content_list: @recent_edits } %>
-  </div>
-  <div class="col s12 m6 hoverable card">
-    <%= render partial: 'cards/user/recent_activity', locals: { title: 'Recently-created pages', content_list: @recent_creates } %>
-  </div>
+  <% @recently_edited_pages.each do |page| %>
+    <% action = page.created_at === page.updated_at ? 'Created' : 'Updated' %>
+    <% klass  = page.is_a?(ContentPage) ? page.page_type.constantize : page.class %>
+    <div class="col s12 m12 l12 content-page-list">
+      <%= link_to send("#{klass.name.downcase}_path", page.id), class: 'black-text' do %>
+        <div class="hoverable card horizontal">
+          <div class="card-image">
+            <%= image_tag page.random_image_including_private %>
+          </div>
+          <div class="card-stacked">
+            <div class="card-content">
+              <div class="card-title">
+                <%= action %>
+                <i class="material-icons left <%= klass.color %>-text"><%= klass.icon %></i>
+                <span class="<%= klass.color %>-text"><%= page.name %></span>
+                <small class="grey-text">
+                  <%= time_ago_in_words page.updated_at %> ago
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
 </div>

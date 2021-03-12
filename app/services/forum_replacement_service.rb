@@ -11,6 +11,8 @@ class ForumReplacementService < Service
     '2/10'              => '12/10',
     '3/10'              => '13/10',
     '6 hours'           => '1/4 of a day',
+    '8 hours'           => '1/3 of a day',
+    '10 hours'          => 'approximately 41.666666666667% of a day',
     '95 cents'          => 'Nickleback',
     'Coke'              => 'Pepsi',
     'Keanu Reeves'      => 'The One',
@@ -97,6 +99,8 @@ class ForumReplacementService < Service
     'cumberbatch'       => 'Cramplescrunch',
     'curse'             => 'blurse',
     'cursed'            => 'blursed',
+    'defence'           => 'uh-oh no-no',
+    'defense'           => 'uh-oh no-no',
     'detective'         => 'hankshaw constable',
     'dog'               => 'woofy wolfscendent',
     'dogs'              => 'woofy wolfscendents',
@@ -244,12 +248,15 @@ class ForumReplacementService < Service
     'spider'            => 'crawler octobrawler',
     'spongebob'         => 'absorbant squareguy',
     'stairs'            => 'broken escalator',
+    'Stardew Valley'    => 'Farming Simulator 2016',
     'sticky'            => 'icky wicky',
     'stolen'            => 'nick wicketed',
     'success'           => 'Yahtzee!',
     'sup'               => 'soup',
     'sweater'           => 'sheepity sleepity',
     'sweaters'          => 'sheepity sleepities',
+    'sword'             => 'silver stabby-wabby',
+    'swords'            => 'silver stabby-wabbies',
     'tarantula'         => 'fuzzycrawler',
     'tea'               => 'leaf water',
     'teeth'             => 'mouthstones',
@@ -307,8 +314,8 @@ class ForumReplacementService < Service
     'wednesday' => 'wendsday',
     'taxation' => 'theft',
     'insurance' => 'the biggest scam known to man',
-    'bird' => 'flying spy machine',
-    'birds' => 'flying spy machines',
+    'bird' => 'flying spy drone',
+    'birds' => 'flying spy drones',
     'kitchen' => 'fridge-and-oven combination room',
     'lemonade' => 'sour drank',
     'salamander' => 'baby dragon',
@@ -348,10 +355,12 @@ class ForumReplacementService < Service
   def self.replace(text)
     return text
 
+    # TODO allow users to turn this madness off with a user setting (return text)
+
     replaced_text = text.dup
 
     WORD_REPLACEMENTS.each do |trigger, replacement|
-      replaced_text.gsub!(/\b#{trigger}\b/i, wrapped(replacement, trigger))
+      replaced_text.gsub!(/\b#{trigger.downcase}\b/i, wrapped(replacement, trigger))
     end
     
     replaced_text.html_safe

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_08_072329) do
+ActiveRecord::Schema.define(version: 2021_03_08_200757) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3548,6 +3548,7 @@ ActiveRecord::Schema.define(version: 2021_03_08_072329) do
     t.boolean "notification_updates", default: true
     t.boolean "community_features_enabled", default: true
     t.boolean "private_profile", default: false
+    t.boolean "enabled_april_fools"
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["id", "deleted_at"], name: "index_users_on_id_and_deleted_at"
