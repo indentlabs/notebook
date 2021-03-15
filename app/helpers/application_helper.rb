@@ -1,5 +1,9 @@
 # Helps generate HTML constructs for object owned by the user
 module ApplicationHelper
+  def content_class_from_name(class_name)
+    Rails.application.config.content_types_by_name[class_name]
+  end
+
   # Will output a link to the item if it exists and is owned by the
   # current logged-in user. Otherwise will just print a text title
   def link_if_present(name, type)

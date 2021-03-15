@@ -59,3 +59,7 @@ Rails.application.config.content_types = {
 }
 
 Rails.application.config.content_types[:all_non_universe] = Rails.application.config.content_types[:all] - [Universe]
+
+Rails.application.config.content_types_by_name = Rails.application.config.content_types[:all].map { |type| [type.name, type] }.to_h
+Rails.application.config.content_types_by_name['Document'] = Document
+Rails.application.config.content_types_by_name['Timeline'] = Timeline
