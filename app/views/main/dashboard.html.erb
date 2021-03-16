@@ -6,7 +6,9 @@
 <div class="row">
 
   <div class="col s12 m12 l8">
-    <div class="grey-text uppercase" style="font-size: 2em">Expand your world</div>
+    <div class="grey-text uppercase" style="font-size: 2em">
+      Expand your world<%= 's' unless @universe_scope.present? %>
+    </div>
     <% if @content %>
       <%= render partial: 'cards/serendipitous/content_question', locals: { 
         content: @content, 
@@ -23,11 +25,16 @@
           <%= link_to send("new_#{type.downcase}_path"), class: "white-text", style: 'width: 100%' do %>
             <div class="hoverable card-panel <%= klass.color %>">
               <div class="valign-wrapper">
-                <i class="material-icons" class="left" style="font-size: 5em;"><%= klass.icon %></i>
+                <i class="material-icons grey-bordered-text" class="left" style="font-size: 5em;"><%= klass.icon %></i>
                 <span style="font-size: 1.1em; margin-left: 1em">
                   New
                   <%= type %><br />
-                  <small>click to create</small>
+                  <small>
+                    You've created <%= pluralize (@current_user_content[type] || []).count, type.downcase %>
+                    <% if @universe_scope %>
+                      in this universe
+                    <% end %>
+                  </small>
                 </span>
               </div>
             </div>
@@ -35,8 +42,7 @@
         </div>
       <% end %>
     </div>
-    
-    
+
   </div>
   <div class="col s12 m12 l4">
     <% if @recently_edited_pages.any? %>
@@ -60,6 +66,7 @@
     <% end %>
   </div>
 
+  <div class="clearfix"></div>
   <%= render partial: 'main/dashboard_header_links' %>
 
   <%
