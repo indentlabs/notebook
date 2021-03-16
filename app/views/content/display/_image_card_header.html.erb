@@ -2,10 +2,7 @@
   <%= render partial: 'content/display/favorite_control', locals: { content: @content } %>
 
   <ul class="slides">
-    <% image_uploads = @content.image_uploads.map { |image| image.src.url(:large) } %>
-    <% image_uploads = ["card-headers/#{@content.class.name.downcase.pluralize}.jpg"] if image_uploads.empty? %>
-
-    <% image_uploads.each do |image_source| %>
+    <% @content.public_image_uploads.each do |image_source| %>
       <li>
         <%= image_tag image_source %>
         <div class="caption bordered-text center">
