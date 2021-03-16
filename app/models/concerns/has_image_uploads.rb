@@ -5,7 +5,7 @@ module HasImageUploads
 
   included do
     has_many :image_uploads, as: :content
-    # todo: dependent: :destroy
+    # todo: dependent: :destroy_async
     # todo: destroy from s3 on destroy
 
     def public_image_uploads
