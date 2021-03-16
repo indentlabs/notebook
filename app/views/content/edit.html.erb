@@ -6,7 +6,7 @@
 
 <div class="row flex">
   <%= form_for @content, multipart: true do |form| %>
-    <div class="col s12 m3" style="position: -webkit-sticky; position: sticky; top: 100px;">
+    <div class="col s12 m3" style="position: -webkit-sticky; position: sticky; top: 110px;">
       <%=
         render partial: 'content/display/sidelinks',
           locals: {
@@ -16,13 +16,22 @@
       %>
     </div>
 
-    <div class="col s12 m9">
+    <div class="col s12 m6">
       <div class="hoverable card">
         <div class="card-image">
           <%= render partial: 'content/display/floating_action_buttons', locals: { editing: true } %>
         </div>
         <%= render partial: 'content/form', locals: { f: form, content: @serialized_content } %>
       </div>
+    </div>
+    <div class="col s12 m3" style="position: -webkit-sticky; position: sticky; top: 110px;">
+      <%=
+        render partial: 'content/display/sideactions',
+          locals: {
+            editing: true,
+            content: @serialized_content
+          }
+      %>
     </div>
   <% end %>
 </div>
