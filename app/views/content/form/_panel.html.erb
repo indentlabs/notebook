@@ -2,185 +2,187 @@
   raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
 %>
 
-<div id="<%= category[:name].gsub("'", '') %>_panel" class="row panel" style="display: none">
-  <% if category[:name] == 'gallery' %>
-    <%= render partial: 'content/form/gallery/panel', locals: { f: f, content: content } %>
-  <% end %>
-
-  <% if category[:name] == 'contributors' %>
-    <%# todo reorganize the files for all these panels? %>
-    <%= render partial: 'content/form/contributors', locals: { f: f, content: content } %>
-  <% end %>
-
-  <div class="<%= raw_model.class.color %>-text section-title">
-    <i class="material-icons left"><%= category[:icon] %></i>
+<div id="<%= category[:name].gsub("'", '') %>_panel" class="panel card" style="display: none">
+  <div class="<%= raw_model.class.color %>-text text-darken-1 section-title white sticky-below-navbar <%= raw_model.class.color %> lighten-5">
+    <i class="material-icons right"><%= category[:icon] %></i>
     <%= category[:label] %>
   </div>
 
-  <% category[:fields].each do |field| %>
-    <% next if !!field[:hidden] %>
+  <div class="card-content">
+    <% if category[:name] == 'gallery' %>
+      <%= render partial: 'content/form/gallery/panel', locals: { f: f, content: content } %>
+    <% end %>
 
-    <div class="col s12 m12 l12">
-      <% if field[:type] == 'link' %>
-        <%# Relation-setting UI %>
-        <% through_class = raw_model.class.reflect_on_association(field[:old_column_source]).options[:through].to_s %>
-        <%=
-          render 'content/form/relation_input',
-            f: f,
-            attribute: field[:old_column_source],
-            label: field[:label],
-            relation: through_class
-        %>
+    <% if category[:name] == 'contributors' %>
+      <%# todo reorganize the files for all these panels? %>
+      <%= render partial: 'content/form/contributors', locals: { f: f, content: content } %>
+    <% end %>
 
-      <% elsif field[:type] == 'tags' %>
+    <% category[:fields].each do |field| %>
+      <% next if !!field[:hidden] %>
 
-        <div class="content-field">
-          <div class="input-field">
-            <small><%= f.label field[:id], field[:label] %></small>
-            <div class="chips chips-autocomplete chips-initial"></div>
-            <%= f.hidden_field :page_tags, value: content.page_tags.join(PageTag::SUBMISSION_DELIMITER), id: 'hidden_page_tags_value' %>
+      <div class="panel-field">
+        <% if field[:type] == 'link' %>
+          <%# Relation-setting UI %>
+          <% through_class = raw_model.class.reflect_on_association(field[:old_column_source]).options[:through].to_s %>
+          <%=
+            render 'content/form/relation_input',
+              f: f,
+              attribute: field[:old_column_source],
+              label: field[:label],
+              relation: through_class
+          %>
 
-            <div class="help-text show-when-focused">
-              <i class="material-icons tiny">label</i>
-              Type and press enter to create a new tag, or click any of the suggested tags below to add it.
-            </div>
-            <div class="tags-container show-when-focused">
-              <% @suggested_page_tags.each do |tag| %>
-                <%=
-                  link_to '#', class: 'js-add-tag' do
-                %>
-                  <span class="new badge grey left hoverable" data-badge-caption="<%= tag %>"></span>
-                <% end %>
-              <% end %>
-            </div>
-            <div class="clearfix"></div>
-          </div>
-        </div>
-        <%= content_for :javascript do %>
-          function update_hidden_page_tag_value(e) {
-            var chips = M.Chips.getInstance($('.chips')).chipsData.map(function (c) {
-              return c['tag'];
-            });
+        <% elsif field[:type] == 'tags' %>
 
-            var hidden_input = $('#hidden_page_tags_value').first();
-            hidden_input.val(chips.join('<%= PageTag::SUBMISSION_DELIMITER %>'));
-          }
-
-          var chips = $('.chips-autocomplete').chips({
-            placeholder: 'Tag this page',
-            secondaryPlaceholder: '+ Tag',
-            autocompleteOptions: {
-              data: {
-                <% @content.page_tags.pluck(:tag).each do |tag| %>
-                  '<%= tag %>': null,
-                <% end %>
-              },
-              limit: 100,
-              minLength: 1
-            },
-            data: [
-              <% @content.page_tags.pluck(:tag).each do |tag| %>
-                {tag: '<%= tag %>'},
-              <% end %>
-            ],
-            onChipAdd: update_hidden_page_tag_value,
-            onChipDelete: update_hidden_page_tag_value
-          });
-        <% end %>
-
-      <% elsif field[:type] == 'universe' %>
-        <div class="content-field">
-          <div class="input-field">
-            <%= f.label field[:id], field[:label] %><br />
-
-            <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) || f.object.universe_id.nil? %>
-              <%# todo not like this %>
-              <%
-                valid_universes = []
-                show_premium_notice = false
-
-                if Rails.application.config.content_types[:free].map(&:name).include?(raw_model.class.name)
-                  valid_universes += current_user.universes
-                  valid_universes += current_user.contributable_universes
-                else
-                  # Premium content
-                  if current_user.on_premium_plan? \
-                    || (raw_model.persisted? && content.user == current_user) \
-                    || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: f.object.class.name)
-
-                    valid_universes += current_user.universes
-
-                    # Allow premium users to add premium content to non-premium universes
-                    valid_universes += current_user.contributable_universes
-                  else
-                    show_premium_notice = true
-                  end
-
-                  current_user.contributable_universes.each do |potential_universe|
-                    if potential_universe.user.on_premium_plan?
-                      valid_universes += [potential_universe]
-                    end
-                  end
-                end
-              %>
-
-              <%= hidden_field_tag "#{raw_model.class.name.downcase}[custom_attribute_values][][name]", field[:id] %>
-              <%=
-                @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
-                select_tag "#{raw_model.class.name.downcase}[custom_attribute_values][][value]",
-                  options_for_select(
-                    @universe_dropdown_options.compact,
-                    content.is_a?(ContentSerializer) ? content.universe.try(:id) : @universe_scope.try(:id)
-                  ),
-                  include_blank: current_user.on_premium_plan? || Rails.application.config.content_types[:free].map(&:name).include?(raw_model.class.name)
-              %>
-              <% if show_premium_notice %>
-                <div class="help-text">
-                  <i class="material-icons" style="font-size: 90%">info</i>
-                  While on a <%= link_to 'Starter plan', subscription_path %>, you can only create premium content in universes you're a contributor to.
-                </div>
-              <% end %>
-            <% else %>
-              <br />
-              <%= link_to(f.object.universe.name, f.object.universe) if f.object.universe %>
-            <% end %>
-          </div>
-        </div>
-
-      <% elsif field[:label].start_with?('Private') %>
-        <%#
-          This field is shown if and only if:
-          * A user is signed in AND
-            * That user is the owner of this universe, if it's a universe, or
-            * That user is the owner of this content's universe, if it's content
-            * That user is the owner of this content, if it's not in a universe
-        %>
-        <% if user_signed_in? && (
-             (raw_model.is_a?(Universe) && content.user == current_user) ||
-             (raw_model.respond_to?(:universe) && raw_model.universe      && raw_model.universe.user == current_user) ||
-             (raw_model.respond_to?(:universe) && raw_model.universe.nil? && content.user == current_user)
-           )
-        %>
           <div class="content-field">
             <div class="input-field">
-              <%= render 'content/form/rich_text_input', f: f, content: content, field: field %>
+              <small><%= f.label field[:id], field[:label] %></small>
+              <div class="chips chips-autocomplete chips-initial"></div>
+              <%= f.hidden_field :page_tags, value: content.page_tags.join(PageTag::SUBMISSION_DELIMITER), id: 'hidden_page_tags_value' %>
+
+              <div class="help-text show-when-focused">
+                <i class="material-icons tiny">label</i>
+                Type and press enter to create a new tag, or click any of the suggested tags below to add it.
+              </div>
+              <div class="tags-container show-when-focused">
+                <% @suggested_page_tags.each do |tag| %>
+                  <%=
+                    link_to '#', class: 'js-add-tag' do
+                  %>
+                    <span class="new badge grey left hoverable" data-badge-caption="<%= tag %>"></span>
+                  <% end %>
+                <% end %>
+              </div>
+              <div class="clearfix"></div>
             </div>
           </div>
+          <%= content_for :javascript do %>
+            function update_hidden_page_tag_value(e) {
+              var chips = M.Chips.getInstance($('.chips')).chipsData.map(function (c) {
+                return c['tag'];
+              });
+
+              var hidden_input = $('#hidden_page_tags_value').first();
+              hidden_input.val(chips.join('<%= PageTag::SUBMISSION_DELIMITER %>'));
+            }
+
+            var chips = $('.chips-autocomplete').chips({
+              placeholder: 'Tag this page',
+              secondaryPlaceholder: '+ Tag',
+              autocompleteOptions: {
+                data: {
+                  <% @content.page_tags.pluck(:tag).each do |tag| %>
+                    '<%= tag %>': null,
+                  <% end %>
+                },
+                limit: 100,
+                minLength: 1
+              },
+              data: [
+                <% @content.page_tags.pluck(:tag).each do |tag| %>
+                  {tag: '<%= tag %>'},
+                <% end %>
+              ],
+              onChipAdd: update_hidden_page_tag_value,
+              onChipDelete: update_hidden_page_tag_value
+            });
+          <% end %>
+
+        <% elsif field[:type] == 'universe' %>
+          <div class="content-field">
+            <div class="input-field">
+              <%= f.label field[:id], field[:label] %><br />
+
+              <% if !f.object.persisted? || (f.object.persisted? && f.object.universe && f.object.universe.user == current_user) || f.object.universe_id.nil? %>
+                <%# todo not like this %>
+                <%
+                  valid_universes = []
+                  show_premium_notice = false
+
+                  if Rails.application.config.content_types[:free].map(&:name).include?(raw_model.class.name)
+                    valid_universes += current_user.universes
+                    valid_universes += current_user.contributable_universes
+                  else
+                    # Premium content
+                    if current_user.on_premium_plan? \
+                      || (raw_model.persisted? && content.user == current_user) \
+                      || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: f.object.class.name)
+
+                      valid_universes += current_user.universes
+
+                      # Allow premium users to add premium content to non-premium universes
+                      valid_universes += current_user.contributable_universes
+                    else
+                      show_premium_notice = true
+                    end
+
+                    current_user.contributable_universes.each do |potential_universe|
+                      if potential_universe.user.on_premium_plan?
+                        valid_universes += [potential_universe]
+                      end
+                    end
+                  end
+                %>
+
+                <%= hidden_field_tag "#{raw_model.class.name.downcase}[custom_attribute_values][][name]", field[:id] %>
+                <%=
+                  @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
+                  select_tag "#{raw_model.class.name.downcase}[custom_attribute_values][][value]",
+                    options_for_select(
+                      @universe_dropdown_options.compact,
+                      content.is_a?(ContentSerializer) ? content.universe.try(:id) : @universe_scope.try(:id)
+                    ),
+                    include_blank: current_user.on_premium_plan? || Rails.application.config.content_types[:free].map(&:name).include?(raw_model.class.name)
+                %>
+                <% if show_premium_notice %>
+                  <div class="help-text">
+                    <i class="material-icons" style="font-size: 90%">info</i>
+                    While on a <%= link_to 'Starter plan', subscription_path %>, you can only create premium content in universes you're a contributor to.
+                  </div>
+                <% end %>
+              <% else %>
+                <br />
+                <%= link_to(f.object.universe.name, f.object.universe) if f.object.universe %>
+              <% end %>
+            </div>
+          </div>
+
+        <% elsif field[:label].start_with?('Private') %>
+          <%#
+            This field is shown if and only if:
+            * A user is signed in AND
+              * That user is the owner of this universe, if it's a universe, or
+              * That user is the owner of this content's universe, if it's content
+              * That user is the owner of this content, if it's not in a universe
+          %>
+          <% if user_signed_in? && (
+              (raw_model.is_a?(Universe) && content.user == current_user) ||
+              (raw_model.respond_to?(:universe) && raw_model.universe      && raw_model.universe.user == current_user) ||
+              (raw_model.respond_to?(:universe) && raw_model.universe.nil? && content.user == current_user)
+            )
+          %>
+            <div class="content-field">
+              <div class="input-field">
+                <%= render 'content/form/rich_text_input', f: f, content: content, field: field %>
+              </div>
+            </div>
+          <% end %>
+        
+        <% elsif field[:type] == 'name' && @entity.present? %>
+          <%= render 'content/form/rich_text_input', f: f, content: content, field: field, value: @entity.try(:text) %>
+          <%= f.hidden_field :document_entity_id, value: @entity.id %>
+
+        <% else %>
+          <%= render 'content/form/rich_text_input', 
+                    f: f, 
+                    content: content, 
+                    field: field, 
+                    autocomplete: AutocompleteService.for_field_label(content_model: raw_model.class, label: field[:label]) 
+          %>
         <% end %>
-      
-      <% elsif field[:type] == 'name' && @entity.present? %>
-        <%= render 'content/form/rich_text_input', f: f, content: content, field: field, value: @entity.try(:text) %>
-        <%= f.hidden_field :document_entity_id, value: @entity.id %>
 
-      <% else %>
-        <%= render 'content/form/rich_text_input', 
-                   f: f, 
-                   content: content, 
-                   field: field, 
-                   autocomplete: AutocompleteService.for_field_label(content_model: raw_model.class, label: field[:label]) 
-        %>
-      <% end %>
-
-    </div>
-  <% end %>
+      </div>
+    <% end %>
+  </div>
 </div>
