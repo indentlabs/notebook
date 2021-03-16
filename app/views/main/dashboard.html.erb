@@ -6,14 +6,15 @@
 <div class="row">
 
   <div class="col s12 m12 l8">
-    <div class="grey-text uppercase" style="font-size: 2em">
+    <div class="grey-text uppercase" style="font-size: 1.6em">
       Expand your world<%= 's' unless @universe_scope.present? %>
     </div>
     <% if @content %>
       <%= render partial: 'cards/serendipitous/content_question', locals: { 
         content: @content, 
         field: @attribute_field_to_question,
-        expand_by_default: true 
+        expand_by_default: true,
+        include_quick_reference: true
       } %>
     <% end %>
 
@@ -30,7 +31,10 @@
                   New
                   <%= type %><br />
                   <small>
-                    You've created <%= pluralize (@current_user_content[type] || []).count, type.downcase %>
+                    <% unless @universe_scope %>
+                      You've created
+                    <% end %>
+                    <%= pluralize (@current_user_content[type] || []).count, type.downcase %>
                     <% if @universe_scope %>
                       in this universe
                     <% end %>
@@ -46,7 +50,9 @@
   </div>
   <div class="col s12 m12 l4">
     <% if @recently_edited_pages.any? %>
-      <div class="grey-text uppercase">Pick up where you left off</div>
+      <div class="grey-text uppercase">
+        Pick up where you left off
+      </div>
       <ul>
         <% @recently_edited_pages.first(5).each do |page| %>
           <% klass = content_class_from_name(page.page_type) %>
