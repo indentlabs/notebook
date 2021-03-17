@@ -1,7 +1,7 @@
-<%# Usage: render 'content/form/relation_input', f: f, attribute: attribute, relation: through_class %>
-<div class="content-field">
-  <div class="hoverable" style="padding: 8px; margin-bottom: 1rem;">
+<div class="content-field link">
+  <div class="hoverable">
     <div>
+      <i class="material-icons left grey-text">link</i>
       <%= f.label attribute, I18n.translate(
         "attributes.#{f.object.class.name.downcase}.#{attribute}",
         scope: :activerecord,
@@ -9,7 +9,7 @@
       ) %>
     </div>
 
-    <div id="<%= relation %>">
+    <div id="<%= relation %>" class="clearfix">
       <%= f.fields_for relation do |builder| %>
         <%= render 'content/form/groupship_fields', f: builder, attribute: attribute.singularize, parent: f.object %>
       <% end %>
