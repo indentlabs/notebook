@@ -1,0 +1,45 @@
+<%
+  creating = defined?(creating) && creating
+  editing  = defined?(editing)  && editing
+%>
+
+<%
+  raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
+%>
+
+<ul class="collection content-tabs">
+  <li class="active center grey-text uppercase">
+    More
+  </li>
+
+  <li class="collection-item">
+    <%= link_to ForumsLinkbuilderService.worldbuilding_url(raw_model.class) do %>
+      <i class="material-icons left">forum</i>
+      Discuss <%= raw_model.class.name.downcase.pluralize %>
+    <% end %>
+  </li>
+
+  <li class="collection-item">
+    <%= link_to main_app.new_polymorphic_path(raw_model.class) do %>
+      <i class="material-icons left">add</i>
+      Create a <%= raw_model.class.name.downcase %>
+    <% end %>
+  </li>
+
+  <% if user_signed_in? && current_user.id == raw_model.user_id && false %>
+    <li class="collection-item">
+      <%= link_to main_app.polymorphic_path(raw_model.class) do %>
+        <i class="material-icons left"><%= raw_model.class.icon %></i>
+        Your <%= raw_model.class.name.downcase.pluralize %>
+        <span class="badge hide-on-med-and-down"><%= @current_user_content[raw_model.class.name].count %></span>
+      <% end %>
+    </li>
+  <% else %>
+    <li class="collection-item">
+      <%= link_to send("#{raw_model.class.name.downcase.pluralize}_user_path", { id: raw_model.user_id }) do %>
+        <i class="material-icons left"><%= raw_model.class.icon %></i>
+        <%= raw_model.class.name.pluralize %> by <%= editing ? current_user.display_name : @user.display_name %>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

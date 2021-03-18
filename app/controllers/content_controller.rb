@@ -105,14 +105,6 @@ class ContentController < ApplicationController
         end
       end
 
-      if user_signed_in? && current_user.can_create?(content_type)
-        @navbar_actions << {
-          label: "New #{content_type.name.downcase}",
-          href: main_app.new_polymorphic_path(content_type),
-          class: 'right'
-        }
-      end
-
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
         format.json { render json: @serialized_content.data }
@@ -174,14 +166,6 @@ class ContentController < ApplicationController
 
     unless @content.updatable_by? current_user
       return redirect_to @content, notice: t(:no_do_permission)
-    end
-
-    if user_signed_in? && current_user.can_create?(content_type_class)
-      @navbar_actions << {
-        label: "New #{content_type_class.name.downcase}",
-        href: main_app.new_polymorphic_path(content_type_class),
-        class: 'right'
-      }
     end
 
     respond_to do |format|
@@ -622,23 +606,6 @@ class ContentController < ApplicationController
     @navbar_actions = []
 
     return if [AttributeCategory, AttributeField].include?(content_type)
-
-    if user_signed_in?
-      if @current_user_content
-        @navbar_actions << {
-          label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
-          href: main_app.polymorphic_path(content_type)
-        }
-      end
-    end
-
-    discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
-    if discussions_link.present?
-      @navbar_actions << {
-        label: 'Discussions',
-        href: discussions_link
-      }
-    end
   end
 
   def set_sidenav_expansion
