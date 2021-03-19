@@ -59,6 +59,7 @@ class ContentSerializer
           hidden: !!category.hidden,
           fields: self.fields.select { |field| field.attribute_category_id == category.id }.map { |field|
             {
+              internal_id: field.id,
               id:     field.name,
               label:  field.label,
               type:   field.field_type,
@@ -72,6 +73,7 @@ class ContentSerializer
               a[:position] <=> b[:position]
 
             else
+              # TODO why do we still have this?
               a_value = case a[:type]
                 when 'name'     then 0
                 when 'universe' then 1

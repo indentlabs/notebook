@@ -20,57 +20,61 @@
     <% category[:fields].each do |field| %>
       <% next if !!field[:hidden] %>
 
-      <div class="panel-field autosave-field">
-        <% if field[:type] == 'link' %>
-          <%=
-            render partial: 'content/form/field_types/legacy_link', locals: {
-              f: f,
-              attribute: field[:old_column_source],
-              label:     field[:label],
-              relation:  raw_model.class.reflect_on_association(field[:old_column_source]).options[:through].to_s
-            }
-          %>
+      <%= form_for attribute_field_path(field[:internal_id]), method: :PUT do |f| %>
+        <div class="panel-field autosave-field">
+          <% if field[:type] == 'link' %>
+            <%=
+              render partial: 'content/form/field_types/legacy_link', locals: {
+                f:         f,
+                attribute: field[:old_column_source],
+                field:     field,
+                page:      @content,
+                label:     field[:label],
+                relation:  raw_model.class.reflect_on_association(field[:old_column_source]).options[:through].to_s
+              }
+            %>
 
-        <% elsif field[:type] == 'tags' %>
-          <%= 
-            render partial: 'content/form/field_types/tags', locals: {
-              f:     f,
-              page:  @content,
-              field: field
-            }
-          %>
+          <% elsif field[:type] == 'tags' %>
+            <%= 
+              render partial: 'content/form/field_types/tags', locals: {
+                f:     f,
+                page:  @content,
+                field: field
+              }
+            %>
 
-        <% elsif field[:type] == 'universe' %>
-          <%=
-            render partial: 'content/form/field_types/universe', locals: {
-              f:         f,
-              field:     field,
-              page:      @content,
-              raw_model: raw_model
-            }
-          %>
+          <% elsif field[:type] == 'universe' %>
+            <%=
+              render partial: 'content/form/field_types/universe', locals: {
+                f:         f,
+                field:     field,
+                page:      @content,
+                raw_model: raw_model
+              }
+            %>
 
-        <% elsif field[:type] == 'name' %>
-          <%=
-            render partial: 'content/form/field_types/name', locals: {
-              f:       f,
-              content: @content,
-              field:   field
-            }
-          %>
+          <% elsif field[:type] == 'name' %>
+            <%=
+              render partial: 'content/form/field_types/name', locals: {
+                f:     f,
+                page:  @content,
+                field: field
+              }
+            %>
 
-        <% else %>
-          <%=
-            render partial: 'content/form/field_types/text', locals: {
-              f:         f,
-              content:   @content,
-              raw_model: raw_model,
-              field:     field,
-            }
-          %>
-        <% end %>
+          <% else %>
+            <%=
+              render partial: 'content/form/field_types/text', locals: {
+                f:         f,
+                content:   @content,
+                raw_model: raw_model,
+                field:     field,
+              }
+            %>
+          <% end %>
 
-      </div>
+        </div>
+      <% end %>
     <% end %>
   </div>
 </div>

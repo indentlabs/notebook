@@ -1,9 +1,10 @@
+<%= raise field.inspect %>
 <div class="content-field link">
   <div class="hoverable">
     <div>
       <i class="material-icons left grey-text">link</i>
       <%= f.label attribute, I18n.translate(
-        "attributes.#{f.object.class.name.downcase}.#{attribute}",
+        "attributes.#{page.class.name.downcase}.#{attribute}",
         scope: :activerecord,
         default: label.humanize.capitalize
       ) %>
@@ -11,17 +12,22 @@
 
     <div id="<%= relation %>" class="clearfix">
       <%= f.fields_for relation do |builder| %>
-        <%= render 'content/form/groupship_fields', f: builder, attribute: attribute.singularize, parent: f.object %>
+        <%= 
+          render 'content/form/groupship_fields', 
+            f: builder, 
+            attribute: attribute.singularize, 
+            parent: page
+        %>
       <% end %>
       <div class="links">
-        <% model_class = f.object.send(attribute).build.class %>
+        <% model_class = page.send(attribute).build.class %>
         <% color = model_class.color %>
         <%= link_to_add_association "link #{model_class.name.downcase}", f, relation,
             class: "btn #{color}",
             partial: 'content/form/groupship_fields',
             render_options: { locals: {
-                attribute: attribute.singularize,
-                parent: f.object
+              attribute: attribute.singularize,
+              parent: page
             }} %>
       </div>
     </div>

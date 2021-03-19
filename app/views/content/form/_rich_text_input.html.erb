@@ -1,9 +1,9 @@
 <%
-  content_name = f.object.class.content_name
+  content_name = content.class.name
 
   field_id = "#{content_name}_#{field[:id]}"
-  value ||= if f.object.respond_to?(field[:id].to_sym)
-    value = f.object.send(field[:id].to_sym)
+  value ||= if content.respond_to?(field[:id].to_sym)
+    value = content.send(field[:id].to_sym)
   else
     value = field[:value]
   end
@@ -18,7 +18,7 @@
 <%
   placeholder = I18n.translate "attributes.#{content_name}.#{field[:label].downcase.gsub(/\s/, '_')}",
     scope: :serendipitous_questions,
-    name: f.object.send('name') || "this #{content_name}",
+    name: content.send('name') || "this #{content_name}",
     default: 'Write as little or as much as you want!'
 %>
 
