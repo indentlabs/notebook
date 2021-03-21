@@ -1,0 +1,44 @@
+<%
+  # Fall back on legacy link klass if we don't have any linkable types set on this link field
+  linkable_types = field.dig(:options, :linkable_types) || [page.send(attribute).klass]
+%>
+
+<div class="content-field link">
+  <div>
+    <i class="material-icons left grey-text">link</i>
+    <%= f.label attribute, I18n.translate(
+      "attributes.#{page.class.name.downcase}.#{attribute}",
+      scope: :activerecord,
+      default: label.humanize.capitalize
+    ) %>
+  </div>
+
+  <div class="input-field">
+    <select multiple>
+      <% linkable_types.each do |page_type| %>
+        <optgroup label="<%= page_type.name.pluralize %>">
+          <% @current_user_content.fetch(page_type.name, []).each do |page| %>
+            <option value="<%= page.id %>" 
+              data-icon="<%= asset_path page.random_image_including_private(format: :thumb) %>"
+              <%= 'selected' if field[:value].include?(page) %>
+            >
+              <%= page.name %>
+            </option>
+          <% end %>
+        </optgroup>
+      <% end %>
+    </select>
+    <div>
+      <small>
+        <i class="material-icons left">link</i>
+        <% linkable_types.each do |page_type| %>
+          <i class="material-icons <%= page_type.color %>-text tooltipped" data-tooltip="Link <%= page_type.name.pluralize.downcase %>">
+            <%= page_type.icon %>
+          </i>
+        <% end %>
+      </small>
+    </div>
+  </div>
+
+  (<%= relation %>)
+</div>

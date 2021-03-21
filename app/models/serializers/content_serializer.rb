@@ -66,7 +66,8 @@ class ContentSerializer
               hidden: !!field.hidden,
               position: field.position,
               old_column_source: field.old_column_source,
-              value: value_for(field, content)
+              value: value_for(field, content),
+              options: field.field_options
             }
           }.sort do |a, b|
             if a[:position] && b[:position]
@@ -111,6 +112,7 @@ class ContentSerializer
   def value_for(attribute_field, content)
     case attribute_field.field_type
     when 'link'
+      # TODO: use attribute_values but fall back on sending old_column if blank / not migrated
       self.raw_model.send(attribute_field.old_column_source)
 
     when 'tags'

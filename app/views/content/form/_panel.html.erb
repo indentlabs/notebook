@@ -10,11 +10,15 @@
 
   <div class="card-content">
     <% if category[:name] == 'gallery' %>
-      <%= render partial: 'content/form/gallery/panel', locals: { f: f, content: content } %>
+      <%= form_for raw_model do |f| %>
+        <%= render partial: 'content/form/gallery/panel', locals: { f: f, content: content } %>
+      <% end %>
     <% end %>
 
     <% if category[:name] == 'contributors' %>
-      <%= render partial: 'content/form/contributors', locals: { f: f, content: content } %>
+      <%= form_for raw_model do |f| %>
+        <%= render partial: 'content/form/contributors', locals: { f: f, content: content } %>
+      <% end %>
     <% end %>
 
     <% category[:fields].each do |field| %>
@@ -24,7 +28,7 @@
         <div class="panel-field autosave-field">
           <% if field[:type] == 'link' %>
             <%=
-              render partial: 'content/form/field_types/legacy_link', locals: {
+              render partial: 'content/form/field_types/migration_link', locals: {
                 f:         f,
                 attribute: field[:old_column_source],
                 field:     field,

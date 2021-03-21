@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_08_200757) do
+ActiveRecord::Schema.define(version: 2021_03_20_230154) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -120,38 +120,8 @@ ActiveRecord::Schema.define(version: 2021_03_08_200757) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "attribute_fields", force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "attribute_category_id", null: false
-    t.string "name", null: false
-    t.string "label", null: false
-    t.string "field_type", null: false
-    t.text "description"
-    t.string "privacy", default: "public", null: false
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.boolean "hidden", default: false
-    t.datetime "deleted_at"
-    t.string "old_column_source"
-    t.integer "position"
-    t.index ["attribute_category_id", "deleted_at"], name: "index_attribute_fields_on_attribute_category_id_and_deleted_at"
-    t.index ["attribute_category_id", "label", "old_column_source", "field_type"], name: "attribute_fields_aci_label_ocs_ft"
-    t.index ["attribute_category_id", "label", "old_column_source", "user_id", "field_type"], name: "attribute_fields_aci_label_ocs_ui_ft"
-    t.index ["attribute_category_id", "old_column_source", "user_id", "field_type"], name: "attribute_fields_aci_ocs_ui_ft"
-    t.index ["deleted_at", "attribute_category_id"], name: "deleted_at__attribute_category_id"
-    t.index ["deleted_at", "name"], name: "index_attribute_fields_on_deleted_at_and_name"
-    t.index ["deleted_at", "position"], name: "index_attribute_fields_on_deleted_at_and_position"
-    t.index ["deleted_at", "user_id", "attribute_category_id", "label", "hidden"], name: "attribute_fields_da_ui_aci_l_h"
-    t.index ["user_id", "attribute_category_id", "field_type", "deleted_at"], name: "special_field_type_index"
-    t.index ["user_id", "attribute_category_id", "label", "hidden", "deleted_at"], name: "field_lookup_by_label_index"
-    t.index ["user_id", "attribute_category_id", "label", "old_column_source", "field_type", "deleted_at"], name: "temporary_migration_lookup_with_deleted_index"
-    t.index ["user_id", "attribute_category_id", "label", "old_column_source", "field_type"], name: "temporary_migration_lookup_index"
-    t.index ["user_id", "attribute_category_id"], name: "index_attribute_fields_on_user_id_and_attribute_category_id"
-    t.index ["user_id", "field_type"], name: "index_attribute_fields_on_user_id_and_field_type"
-    t.index ["user_id", "name"], name: "index_attribute_fields_on_user_id_and_name"
-    t.index ["user_id", "old_column_source"], name: "index_attribute_fields_on_user_id_and_old_column_source"
-    t.index ["user_id"], name: "index_attribute_fields_on_user_id"
-  end
+# Could not dump table "attribute_fields" because of following StandardError
+#   Unknown type 'type' for column 'migrated_from_legacy'
 
   create_table "attributes", force: :cascade do |t|
     t.integer "user_id"
