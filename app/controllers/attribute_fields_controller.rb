@@ -1,4 +1,7 @@
 class AttributeFieldsController < ContentController
+  before_action :authenticate_user!
+  before_action :set_attribute_field, only: [:update]
+
   def create
     initialize_object.save!
     
@@ -18,46 +21,22 @@ class AttributeFieldsController < ContentController
   end
 
   def update
-    content_type = AttributeField
-    # todo rework from here
-
-    content_type = content_type_from_controller(self.class)
-    @content = content_type.with_deleted.find(params[:id])
-
-    unless @content.updatable_by?(current_user)
+    unless @attribute_field.updatable_by?(current_user)
       flash[:notice] = "You don't have permission to edit that!"
-      return redirect_back fallback_location: @content
+      return redirect_back fallback_location: root_path
     end
 
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'updated content', {
-      'content_type': content_type.name
-    }) if Rails.env.production?
-
-    if params.key?('image_uploads')
-      upload_files(params['image_uploads'], content_type.name, @content.id)
-    end
-
-    if @content.is_a?(Universe) && params.key?('contributors') && @content.user == current_user
-      params[:contributors][:email].reject(&:blank?).each do |email|
-        ContributorService.invite_contributor_to_universe(universe: @content, email: email.downcase)
-      end
-    end
-
-    update_page_tags if @content.respond_to?(:page_tags) 
-
-    if @content.user == current_user
-      # todo this needs some extra validation probably to ensure each attribute is one associated with this page
-      update_success = @content.reload.update(content_params)
+    if @attribute_field.update(attribute_field_params.merge({ migrated_from_legacy: true }))
+      successful_response(
+        @attribute_field, 
+        t(:update_success, model_name: @attribute_field.label)
+      )
     else
-      # Exclude fields only the real owner can edit
-      #todo move field list somewhere when it grows
-      update_success = @content.update(content_params.except(:universe_id))
-    end
-
-    if update_success 
-      successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
-    else
-      failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.to_json)
+      failed_response(
+        'edit', 
+        :unprocessable_entity, 
+        "Unable to save page. Error code: " + @attribute_field.errors.to_json
+      )
     end
   end
 
@@ -82,10 +61,6 @@ class AttributeFieldsController < ContentController
       @content.attribute_category_id = category.id
     end
 
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created attribute field', {
-      'content_type': params[:entity_type]
-    }) if Rails.env.production?
-
     @content
   end
 
@@ -104,13 +79,17 @@ class AttributeFieldsController < ContentController
 
   def successful_response(url, notice)
     respond_to do |format|
-      format.html { redirect_to attribute_customization_path(content_type: @content.attribute_category.entity_type), notice: notice }
-      format.json { render json: @content || {}, status: :success, notice: notice }
+      format.html { redirect_to attribute_customization_path(content_type: @attribute_field.attribute_category.entity_type), notice: notice }
+      format.json { render json: @attribute_field || {}, status: :success, notice: notice }
     end
   end
 
   def content_params
     params.require(:attribute_field).permit(content_param_list)
+  end
+
+  def attribute_field_params
+    params.require(:attribute_field).permit(:id, field_options: {})
   end
 
   def content_param_list
@@ -124,5 +103,11 @@ class AttributeFieldsController < ContentController
       :hidden,
       :field_options
     ]
+  end
+
+  private
+
+  def set_attribute_field
+    @attribute_field = current_user.attribute_fields.find_by(params.permit(:id))
   end
 end
