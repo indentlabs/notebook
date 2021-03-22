@@ -7,12 +7,17 @@
   <div class="col s12">
     <p>
       Customize which pages this field can link to with the dropdown below.
+      This won't remove any existing links you've made between your pages.
     </p>
   </div>
   <div class="input-field col s12">
-    <%= form_for field do |f| %>
+    <%= form_for field, remote: true do |f| %>
       <label>Linkable page types</label>
-      <select multiple name="attribute_field[field_options][linkable_types][]" prompt="Please select at least one page type for this field to link to">
+      <select multiple 
+        name="attribute_field[field_options][linkable_types][]" 
+        prompt="Please select at least one page type for this field to link to"
+        class="autosave-closest-form-on-change"
+      >
         <%= 
           options_for_select(
             Rails.application.config.content_types[:all].map { |klass| [klass.name.pluralize, klass.name] }, 
@@ -22,7 +27,7 @@
           )
         %>
       </select>
-      <%= f.submit 'Save link changes' %>
+      <small class="grey-text">Changes will automatically save.</small><br />
     <% end %>
   </div>
 </div>
