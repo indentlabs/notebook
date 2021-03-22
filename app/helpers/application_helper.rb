@@ -1,6 +1,9 @@
 # Helps generate HTML constructs for object owned by the user
 module ApplicationHelper
   def content_class_from_name(class_name)
+    # If we pass in a class (e.g. Character instead of "Character") by mistake, just return it
+    return class_name if class_name.is_a?(Class)
+
     Rails.application.config.content_types_by_name[class_name]
   end
 

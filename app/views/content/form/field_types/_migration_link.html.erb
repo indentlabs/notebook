@@ -1,6 +1,11 @@
 <%
   # Fall back on legacy link klass if we don't have any linkable types set on this link field
-  linkable_types = field.dig(:options, :linkable_types) || [page.send(attribute).klass]
+  linkable_types = field.fetch(:migrated_link, false) \
+    ? field.dig(:options, 'linkable_types') # New-style link
+    : [page.send(attribute).klass]          # Old-style link
+
+  # Constantize upfront so we can #icon, #color, etc
+  linkable_types.map! { |class_name| content_class_from_name(class_name) }
 %>
 
 <div class="content-field link">

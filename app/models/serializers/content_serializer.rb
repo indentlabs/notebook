@@ -59,15 +59,16 @@ class ContentSerializer
           hidden: !!category.hidden,
           fields: self.fields.select { |field| field.attribute_category_id == category.id }.map { |field|
             {
-              internal_id: field.id,
-              id:     field.name,
-              label:  field.label,
-              type:   field.field_type,
-              hidden: !!field.hidden,
-              position: field.position,
-              old_column_source: field.old_column_source,
-              value: value_for(field, content),
-              options: field.field_options
+              internal_id:       field.id,
+              id:                field.name,
+              label:             field.label,
+              type:              field.field_type,
+              hidden:            !!field.hidden,
+              position:          field.position,
+              value:             value_for(field, content),
+              options:           field.field_options,
+              migrated_link:     field.migrated_from_legacy,    
+              old_column_source: field.old_column_source
             }
           }.sort do |a, b|
             if a[:position] && b[:position]
