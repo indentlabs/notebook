@@ -1,4 +1,3 @@
-# Controller for the Attribute model
 class AttributeFieldsController < ContentController
   def create
     initialize_object.save!
@@ -16,6 +15,50 @@ class AttributeFieldsController < ContentController
     # If the related category is now empty, delete it as well
     related_category = @content.attribute_category
     related_category.destroy if related_category.attribute_fields.empty?
+  end
+
+  def update
+    content_type = AttributeField
+    # todo rework from here
+
+    content_type = content_type_from_controller(self.class)
+    @content = content_type.with_deleted.find(params[:id])
+
+    unless @content.updatable_by?(current_user)
+      flash[:notice] = "You don't have permission to edit that!"
+      return redirect_back fallback_location: @content
+    end
+
+    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'updated content', {
+      'content_type': content_type.name
+    }) if Rails.env.production?
+
+    if params.key?('image_uploads')
+      upload_files(params['image_uploads'], content_type.name, @content.id)
+    end
+
+    if @content.is_a?(Universe) && params.key?('contributors') && @content.user == current_user
+      params[:contributors][:email].reject(&:blank?).each do |email|
+        ContributorService.invite_contributor_to_universe(universe: @content, email: email.downcase)
+      end
+    end
+
+    update_page_tags if @content.respond_to?(:page_tags) 
+
+    if @content.user == current_user
+      # todo this needs some extra validation probably to ensure each attribute is one associated with this page
+      update_success = @content.reload.update(content_params)
+    else
+      # Exclude fields only the real owner can edit
+      #todo move field list somewhere when it grows
+      update_success = @content.update(content_params.except(:universe_id))
+    end
+
+    if update_success 
+      successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
+    else
+      failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.to_json)
+    end
   end
 
   private
@@ -78,7 +121,8 @@ class AttributeFieldsController < ContentController
       :label, :description,
       :entity_type, 
       :attribute_category_id,
-      :hidden
+      :hidden,
+      :field_options
     ]
   end
 end

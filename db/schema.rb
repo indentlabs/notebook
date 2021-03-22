@@ -121,7 +121,7 @@ ActiveRecord::Schema.define(version: 2021_03_20_230154) do
   end
 
 # Could not dump table "attribute_fields" because of following StandardError
-#   Unknown type 'type' for column 'migrated_from_legacy'
+#   Unknown type '' for column 'field_options'
 
   create_table "attributes", force: :cascade do |t|
     t.integer "user_id"

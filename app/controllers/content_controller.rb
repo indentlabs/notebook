@@ -256,7 +256,7 @@ class ContentController < ApplicationController
     end
 
     cache_params = {}
-    cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField, Attribute].include?(@content.class)
+    cache_params[:name]     = @content.name_field_value unless [AttributeCategory, Attribute].include?(@content.class)
     cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
     @content.update(cache_params) if cache_params.any? && update_success
 
