@@ -403,6 +403,8 @@ class ContentController < ApplicationController
       .attribute_categories(current_user, show_hidden: true)
       .shown_on_template_editor
       .order(:position)
+
+    @dummy_model = @content_type_class.new
   end
 
   def api_sort

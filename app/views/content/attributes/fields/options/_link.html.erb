@@ -16,7 +16,9 @@
         <%= 
           options_for_select(
             Rails.application.config.content_types[:all].map { |klass| [klass.name.pluralize, klass.name] }, 
-            (field.field_options || {}).fetch('linkable_types', [])
+            field.migrated_from_legacy? \
+              ? (field.field_options || {}).fetch('linkable_types', []) # New-style links
+              : (@dummy_model.send(field.old_column_source).klass)      # Old-style links
           )
         %>
       </select>
