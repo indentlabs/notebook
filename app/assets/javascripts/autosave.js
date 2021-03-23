@@ -2,8 +2,9 @@ $(document).ready(function() {
   $('.autosave-closest-form-on-change').change(function () {
     console.log('autosaving');
     var content_form = $(this).closest('form');
-    // content_form.submit();
-    window.form_to_autosave = content_form;
+
+    M.toast({ html: 'Saving changes...' });
+    content_form.submit();
 
     // show toast: Autosaving... / Saved.
   });
