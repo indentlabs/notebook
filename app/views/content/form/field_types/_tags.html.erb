@@ -5,7 +5,10 @@
       <%= f.label field[:id], field[:label] %>
     </small>
     <div class="chips chips-autocomplete chips-initial"></div>
-    <%= f.hidden_field :page_tags, value: page.page_tags.join(PageTag::SUBMISSION_DELIMITER), id: 'hidden_page_tags_value' %>
+    <%= 
+      hidden_field_tag 'field[value]', page.page_tags.join(PageTag::SUBMISSION_DELIMITER), 
+        id: 'hidden_page_tags_value'
+    %>
 
     <div class="help-text show-when-focused">
       <i class="material-icons tiny">label</i>
@@ -31,6 +34,9 @@
 
     var hidden_input = $('#hidden_page_tags_value').first();
     hidden_input.val(chips.join('<%= PageTag::SUBMISSION_DELIMITER %>'));
+
+    // Trigger autosave manually
+    hidden_input.closest('form').submit();
   }
 
   var chips = $('.chips-autocomplete').chips({

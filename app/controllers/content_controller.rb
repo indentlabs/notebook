@@ -453,16 +453,33 @@ class ContentController < ApplicationController
     attribute_value.save!
   end
 
+  def tags_field_update
+    return unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
+
+    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+    attribute_value.value = field_params.fetch('value', '')
+    attribute_value.save!
+
+    # Create the actual page_tag models too
+    @content = entity_params.fetch('entity_type').constantize.find_by(
+      id:   entity_params.fetch('entity_id'), 
+      user: current_user
+    )
+    update_page_tags
+  end
+
   private
 
   def update_page_tags
-    tag_list = page_tag_params.fetch(:page_tags, "").split(PageTag::SUBMISSION_DELIMITER)
+    tag_list = field_params.fetch('value', '').split(PageTag::SUBMISSION_DELIMITER)
     current_tags = @content.page_tags.pluck(:tag)
 
     tags_to_add    = tag_list - current_tags
     tags_to_remove = current_tags - tag_list
 
     tags_to_add.each do |tag|
+      # TODO: create changelog event for AddedTag
       @content.page_tags.find_or_create_by(
         tag:  tag,
         slug: PageTagService.slug_for(tag),
@@ -471,6 +488,7 @@ class ContentController < ApplicationController
     end
 
     tags_to_remove.each do |tag|
+      # TODO: create changelog event for RemovedTag
       @content.page_tags.find_by(tag: tag).destroy
     end
   end

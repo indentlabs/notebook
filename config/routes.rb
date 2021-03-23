@@ -245,6 +245,7 @@ Rails.application.routes.draw do
   scope :internal do
     patch '/link_field_update/:field_id', to: 'content#link_field_update', as: :link_field_update
     patch '/text_field_update/:field_id', to: 'content#text_field_update', as: :text_field_update
+    patch '/tags_field_update/:field_id', to: 'content#tags_field_update', as: :tags_field_update
   end
 
   get 'search/', to: 'search#results'
