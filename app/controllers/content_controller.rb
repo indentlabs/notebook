@@ -438,10 +438,18 @@ class ContentController < ApplicationController
   end
 
   # Content update for link-type fields
-  def change_page_links
+  def link_field_update
     @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
     attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
     attribute_value.value = params.require(:attribute_field).fetch('linked_pages', [])
+    attribute_value.save!
+  end
+
+  # Content update for text-related fields (text_area, name)
+  def text_field_update
+    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+    attribute_value.value = field_params.fetch('value', '')
     attribute_value.save!
   end
 
@@ -526,6 +534,10 @@ class ContentController < ApplicationController
 
   def entity_params
     params.require(:entity).permit(:entity_id, :entity_type)
+  end
+
+  def field_params
+    params.require(:field).permit(:name, :value)
   end
 
   def content_deletion_redirect_url

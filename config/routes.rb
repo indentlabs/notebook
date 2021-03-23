@@ -243,7 +243,8 @@ Rails.application.routes.draw do
 
   # For non-API API endpoints
   scope :internal do
-    patch '/change_page_links/:field_id', to: 'content#change_page_links', as: :link_field_update
+    patch '/link_field_update/:field_id', to: 'content#link_field_update', as: :link_field_update
+    patch '/text_field_update/:field_id', to: 'content#text_field_update', as: :text_field_update
   end
 
   get 'search/', to: 'search#results'

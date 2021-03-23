@@ -7,6 +7,9 @@
   else
     value = field[:value]
   end
+
+  should_autocomplete = defined?(autocomplete) && !!autocomplete
+  should_autosave     = defined?(autosave)     && !!autosave
 %>
 
 <% unless defined?(show_label) && !show_label %>
@@ -22,11 +25,13 @@
     default: 'Write as little or as much as you want!'
 %>
 
-<%= hidden_field_tag "#{content_name}[custom_attribute_values][][name]", field[:id] %>
+<%= hidden_field_tag "field[name]", field[:id] %>
 <%=
-  text_area_tag "#{content_name}[custom_attribute_values][][value]",
+  text_area_tag "field[value]",
                 value,
-                class: "js-can-mention-pages materialize-textarea #{defined?(autocomplete) && autocomplete ? ('autocomplete ' + 'js-autocomplete-' + field[:id].to_s) : ''}",
+                class: "js-can-mention-pages materialize-textarea" \
+                  + "#{' autocomplete js-autocomplete-' + field[:id].to_s if should_autocomplete}" \
+                  + "#{' autosave-closest-form-on-change' if should_autosave}",
                 placeholder: placeholder
 %>
 

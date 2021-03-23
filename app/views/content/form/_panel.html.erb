@@ -25,6 +25,9 @@
       <% next if !!field[:hidden] %>
 
       <%= form_for @content, url: FieldTypeService.form_path(field), remote: true do |f| %>
+        <%= hidden_field_tag "entity[entity_id]",   raw_model.id %>
+        <%= hidden_field_tag "entity[entity_type]", raw_model.class.name %>
+
         <div class="panel-field">
           <% if field[:type] == 'link' %>
             <%=
