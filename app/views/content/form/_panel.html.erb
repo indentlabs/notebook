@@ -24,10 +24,11 @@
     <% category[:fields].each do |field| %>
       <% next if !!field[:hidden] %>
 
-      <%= form_for attribute_field_path(field[:internal_id]), method: :PUT do |f| %>
-        <div class="panel-field autosave-field">
+      <%= form_for @content, url: FieldTypeService.form_path(field) do |f| %>
+        <div class="panel-field">
           <% if field[:type] == 'link' %>
             <%=
+              # migration phases: 1) /legacy_link, 2) /migration_link, 3) /link
               render partial: 'content/form/field_types/migration_link', locals: {
                 f:         f,
                 attribute: field[:old_column_source],

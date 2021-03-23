@@ -240,6 +240,12 @@ Rails.application.routes.draw do
     # Attributes
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
   end
+
+  # For non-API API endpoints
+  scope :internal do
+    patch '/change_page_links/:field_id', to: 'content#change_page_links', as: :link_field_update
+  end
+
   get 'search/', to: 'search#results'
 
   authenticate :user, lambda { |u| u.site_administrator? || Rails.env.development? } do

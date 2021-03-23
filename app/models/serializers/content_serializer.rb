@@ -113,8 +113,18 @@ class ContentSerializer
   def value_for(attribute_field, content)
     case attribute_field.field_type
     when 'link'
-      # TODO: use attribute_values but fall back on sending old_column if blank / not migrated
-      self.raw_model.send(attribute_field.old_column_source)
+      page_links = attribute_field.attribute_values.find_by(entity_type: content.class.name, entity_id: content.id)
+      if page_links.nil?
+        # Fall back on old relation value
+        self.raw_model.send(attribute_field.old_column_source)
+      else
+        # Use new link system
+        begin
+          JSON.parse(page_links.value)
+        rescue
+          "Error loading Attribute ID #{page_links.id}"
+        end
+      end
 
     when 'tags'
       self.raw_model.page_tags

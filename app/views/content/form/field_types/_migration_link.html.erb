@@ -19,13 +19,20 @@
   </div>
 
   <div class="input-field">
-    <select multiple>
+    <select name="attribute_field[linked_pages][]" multiple class="autosave-closest-form-on-change">
       <% linkable_types.each do |page_type| %>
         <optgroup label="<%= page_type.name.pluralize %>">
+          <%#
+            We don't use this since you can't set data-icon on each option, but the below loop should do the same
+            options_for_select(
+              @current_user_content.fetch(page_type.name, []).map { |klass| [klass.name.pluralize, klass.name] }, 
+              field[:value]
+            )
+          %>
           <% @current_user_content.fetch(page_type.name, []).each do |page| %>
-            <option value="<%= page.id %>" 
+            <option value="<%= page_type %>-<%= page.id %>" 
               data-icon="<%= asset_path page.random_image_including_private(format: :thumb) %>"
-              <%= 'selected' if field[:value].include?(page) %>
+              <%= 'selected' if field[:value].include?("#{page.page_type}-#{page.id}") %>
             >
               <%= page.name %>
             </option>
@@ -44,6 +51,9 @@
       </small>
     </div>
   </div>
+
+  <%= hidden_field_tag "entity[entity_id]",   page.id %>
+  <%= hidden_field_tag "entity[entity_type]", page.class.name %>
 
   (<%= relation %>)
 </div>
