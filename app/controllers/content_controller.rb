@@ -222,6 +222,8 @@ class ContentController < ApplicationController
   end
 
   def update
+    # TODO: most things are stripped out now that we're using per-field updates, so we should
+    # audit what's left of this function and what needs to stay
     content_type = content_type_from_controller(self.class)
     @content = content_type.with_deleted.find(params[:id])
 
