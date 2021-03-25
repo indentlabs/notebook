@@ -471,6 +471,21 @@ class ContentController < ApplicationController
     update_page_tags
   end
 
+  def universe_field_update
+    return unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
+
+    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+    attribute_value.value = field_params.fetch('value', '').to_i
+    attribute_value.save!
+
+    @content = entity_params.fetch('entity_type').constantize.find_by(
+      id:   entity_params.fetch('entity_id'), 
+      user: current_user
+    )
+    @content.update!(universe_id: attribute_value.value)
+  end
+
   private
 
   def update_page_tags

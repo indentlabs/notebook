@@ -36,15 +36,16 @@
         end
       %>
 
-      <%= hidden_field_tag "#{raw_model.class.name.downcase}[custom_attribute_values][][name]", field[:id] %>
+      <%= hidden_field_tag "field[name]", field[:id] %>
       <%=
         @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
-        select_tag "#{raw_model.class.name.downcase}[custom_attribute_values][][value]",
+        select_tag "field[value]",
           options_for_select(
             @universe_dropdown_options.compact,
-            page.is_a?(ContentSerializer) ? page.universe.try(:id) : @universe_scope.try(:id)
+            page.try(:universe_id) || @universe_scope.try(:id)
           ),
-          include_blank: current_user.on_premium_plan? || Rails.application.config.content_types[:free].map(&:name).include?(raw_model.class.name)
+          include_blank: current_user.on_premium_plan? || Rails.application.config.content_types[:free].map(&:name).include?(raw_model.class.name),
+          class: 'autosave-closest-form-on-change'
       %>
       <% if show_premium_notice %>
         <div class="help-text">
