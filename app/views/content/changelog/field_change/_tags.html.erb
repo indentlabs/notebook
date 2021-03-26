@@ -1,14 +1,41 @@
 <div class="row card">
+
   <div class="col s12 m6 l6 red lighten-4">
-    <%= simple_format ContentFormatterService.show(
-      text:         old_value,
-      viewing_user: current_user
-    ) %>
+    <div class="tags-container">
+      <% old_value.split(PageTag::SUBMISSION_DELIMITER).each do |tag| %>
+        <% if user_signed_in? && @content.user == current_user %>
+          <%=
+            link_to send(
+              "page_tag_#{@content.class.name.downcase.pluralize}_path",
+              slug: PageTagService.slug_for(tag)
+            ) do
+          %>
+            <span class="new badge <%= @content.class.color %> left" data-badge-caption="<%= tag %>"></span>
+          <% end %>
+        <% else %>
+          <span class="new badge <%= @content.class.color %> left" data-badge-caption="<%= tag %>"></span>
+        <% end %>
+      <% end %>
+    </div>
   </div>
+
   <div class="col s12 m6 l6 green lighten-4">
-    <%= simple_format ContentFormatterService.show(
-      text:         new_value,
-      viewing_user: current_user
-    ) %>
+    <div class="tags-container">
+      <% new_value.split(PageTag::SUBMISSION_DELIMITER).each do |tag| %>
+        <% if user_signed_in? && @content.user == current_user %>
+          <%=
+            link_to send(
+              "page_tag_#{@content.class.name.downcase.pluralize}_path",
+              slug: PageTagService.slug_for(tag)
+            ) do
+          %>
+            <span class="new badge <%= @content.class.color %> left" data-badge-caption="<%= tag %>"></span>
+          <% end %>
+        <% else %>
+          <span class="new badge <%= @content.class.color %> left" data-badge-caption="<%= tag %>"></span>
+        <% end %>
+      <% end %>
+    </div>
   </div>
+
 </div>
