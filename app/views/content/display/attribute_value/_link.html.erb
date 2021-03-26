@@ -2,7 +2,22 @@
   <% 
     klass, id = link_code.split('-')
   %>
-  <div class="chip js-load-page-name" data-klass="<%= klass %>" data-id="<%= id %>">
+
+  <%#
+    In most cases, a user will be seeing their own content most of the time.
+    This allows us to primarily rely on @current_user_content but fall back
+    on js-load-page-name to fetch & load in post-page-load if the content isn't ours.
+  %>
+  <%
+    content = @current_user_content.fetch(klass, []).detect do |page|
+      page.page_type === klass && page.id === id.to_i
+    end
+  %>
+
+  <div class="chip <%= 'js-load-page-name' if content.nil? %>" 
+       data-klass="<%= klass %>" 
+       data-id="<%= id %>"
+  >
     <%= link_to send("#{klass.downcase}_path", id) do %>
       <span class="<%= content_class_from_name(klass).color %>-text">
         <i class="material-icons left">
@@ -10,7 +25,7 @@
         </i>
       </span>
       <span class="name-container">
-        <em>Loading <%= klass %></em>
+        <%= content.try(:name) || "<em>Loading #{klass}</em>".html_safe %>
       </span>
     <% end %>
   </div>

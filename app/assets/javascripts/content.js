@@ -109,12 +109,8 @@ $(document).ready(function () {
     ).done(function (response) {
       tag.find('.name-container').text(response);
     }).fail(function() {
-      console.log("OMG couldn't load that page: " + [tag.data('klass'), tag.data('id')]);
-      // set "unknown page"
+      tag.find('.name-conainer').text("Unknown " + tag.data('klass'));
     });
-
-    console.log('loading page name');
-    console.log(tag.data('klass') + '-' + tag.data('id'));
   });
 
 });
