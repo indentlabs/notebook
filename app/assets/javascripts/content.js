@@ -100,5 +100,22 @@ $(document).ready(function () {
     });
   });
 
+  $('.js-load-page-name').each(function() {
+    // Replace this element's content with the name of the page
+    var tag = $(this);
+
+    $.get(
+      '/api/internal/' + tag.data('klass') + '/' + tag.data('id') + '/name'
+    ).done(function (response) {
+      tag.find('.name-container').text(response);
+    }).fail(function() {
+      console.log("OMG couldn't load that page: " + [tag.data('klass'), tag.data('id')]);
+      // set "unknown page"
+    });
+
+    console.log('loading page name');
+    console.log(tag.data('klass') + '-' + tag.data('id'));
+  });
+
 });
 

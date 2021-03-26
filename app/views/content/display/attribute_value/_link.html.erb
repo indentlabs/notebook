@@ -1,13 +1,27 @@
-<% value.each do |li| %>
-  <div class="chip">
-    <%= link_to li do %>
-      <span class="<%= li.class.color %>-text">
+
+
+<% value.each do |link_code| %>
+  <% 
+    klass, id = link_code.split('-')
+  %>
+  <div class="chip js-load-page-name" data-klass="<%= klass %>" data-id="<%= id %>">
+    <%= link_to content_class_from_name(klass) do %>
+      <span class="<%= content_class_from_name(klass).color %>-text">
         <i class="material-icons left">
-          <%= li.class.icon %>
+          <%= content_class_from_name(klass).icon %>
         </i>
       </span>
-      <%= li.name_field_value %>
+      <span class="name-container">
+        <%= id %>
+      </span>
     <% end %>
   </div>
 <% end %>
 <br/><br/>
+
+<%#
+  simple_format ContentFormatterService.show(
+    text:         value.map { |link_code| "[[#{link_code}]]"}.join("\n"),
+    viewing_user: current_user
+  )
+%>

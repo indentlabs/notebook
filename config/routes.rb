@@ -303,6 +303,11 @@ Rails.application.routes.draw do
       get '/references', to: 'api_docs#references'
     end
 
+    # API requests we don't want to officially make public -- free to break!
+    namespace :internal do
+      get '/:page_type/:page_id/name',            to: 'api#name_lookup'
+    end
+
     namespace :v1 do
       scope '/categories' do
         get '/suggest/:entity_type',              to: 'attribute_categories#suggest'

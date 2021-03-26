@@ -83,13 +83,6 @@ class ContentController < ApplicationController
 
     if (current_user || User.new).can_read?(@content)
       if user_signed_in?
-        @navbar_actions.insert(1, {
-          label: @content.name,
-          href: main_app.polymorphic_path(@content)
-        })
-      end
-
-      if user_signed_in?
         if @content.updated_at > 30.minutes.ago
           Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed content', {
             'content_type': content_type.name,
