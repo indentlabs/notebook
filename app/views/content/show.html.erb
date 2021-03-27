@@ -10,8 +10,8 @@
 
   <!--
   <div class="row" style="margin-top: -1px; margin-bottom: 30px;">
-    <div class="col s12 purple">
-      <ul class="tabs tabs-fixed-width purple">
+    <div class="col s12 <%= content.class.color %>">
+      <ul class="tabs tabs-fixed-width <%= content.class.color %>">
         <li class="tab"><a href="#test1" class="white-text active"><%= @content.class.name %> details</a></li>
         <li class="tab"><a href="#test2" class="white-text">References</a></li>
         <li class="tab"><a href="#test4" class="white-text">Comments</a></li>
@@ -22,65 +22,61 @@
         
 <% end %>
 
-<div class="row">
-  <div class="col s9 m9">
-    <div class="hoverable card">
+<div class="row flex">
+  <div class="col s12 m3">
+    <div class="sticky-below-navbar">
+      <%=
+        render partial: 'content/display/sidelinks',
+          locals: {
+            editing: false,
+            content: @serialized_content
+          }
+      %>
+      <%=
+        render partial: 'content/display/sideactions',
+          locals: {
+            editing: false,
+            content: @serialized_content
+          }
+      %>
+    </div>
+  </div>
+
+  <div class="col s12 m9">
+    <div class="card">
       <div class="card-image">
         <%= render partial: 'content/display/floating_action_buttons', locals: { editing: false } %>
       </div>
+    </div>
+    <% @serialized_content.data[:categories].each do |serialized_category| %>
+      <%=
+        # Some categories get special views. This switch checks for those and falls back on
+        # the regular view if it's not a special case.
+        case serialized_category[:name]
+          when 'gallery'
+            render partial: 'content/form/images/gallery',  locals: { content: content } if @content.image_uploads.any?
 
-      <div class="card-content">
-        <% @serialized_content.data[:categories].each do |serialized_category| %>
-          <% next if ['gallery', 'contributors'].include? serialized_category[:name] %>
-          <%=
+          when 'contributors'
+            render partial: 'content/display/contributors', locals: { content: content } if @content.is_a?(Universe)
+
+          else
             render partial: 'content/display/category_panel',
               locals: {
                 content: @serialized_content,
                 category: serialized_category
               }
-          %>
-        <% end %>
-
-        <%= render partial: 'content/form/images/gallery',  locals: { content: content } if @content.image_uploads.any? %>
-        <div id="contributors_panel" class="row panel">
-          <%= render partial: 'content/display/contributors', locals: { content: content } if @content.is_a?(Universe) %>
-        </div>
-        <%= render partial: 'content/panels/in_this_universe', locals: { content: content } if @content.is_a?(Universe) %>
-        <%= render partial: 'content/panels/documents', locals: { content: content } if @serialized_content.documents.any? %>
-        <%= render partial: 'content/panels/shares', locals: { content: content } if @content.content_page_shares.any? %>
-        <%= render partial: 'content/panels/timelines', locals: { content: content } if @content.timelines.any? %>
-        <%= render partial: 'content/panels/collections', locals: { content: content } if @content.page_collection_submissions.accepted.any? %>
-        <%= render partial: 'content/panels/associations', locals: { content: content } %>
-      </div>
-
-      <%= render partial: 'content/display/visitor_cta', locals: { content: @serialized_content } %>
-    </div>
-
-    <% if false %>
-      <div class="row">
-        <% if @content.is_a?(Universe) %>
-          <%= render partial: 'content/contexts/universe', locals: { content: @content } %>
-        <% else %>
-          <%= render partial: "content/contexts/dynamic", locals: { content: @content } %>
-        <% end %>
-      </div>
+        end
+      %>
     <% end %>
 
-  </div>
-  <div class="col s3 m3">
-    <%= render partial: 'content/display/sidelinks', locals: { content: @serialized_content } %>
-
-    <% if false && user_signed_in? && current_user.can_create?(@serialized_content.raw_model.class) %>
-      <%= link_to new_polymorphic_path(@serialized_content.raw_model.class) do %>
-        <div class="<%= @serialized_content.class_color %> card">
-          <div class="card-content white-text">
-            <i class="right material-icons">arrow_forward</i>
-            Create another <%= @serialized_content.class_name.downcase %>
-          </div>
-        </div>
-      <% end %>
-    <% end %>
+    <%# For most pages, we also want to render a bunch of other panels in case they're needed %>
+    <%= render partial: 'content/panels/in_this_universe', locals: { content: content } if @content.is_a?(Universe) %>
+    <%= render partial: 'content/panels/documents',        locals: { content: content } if @serialized_content.documents.any? %>
+    <%= render partial: 'content/panels/shares',           locals: { content: content } if @content.content_page_shares.any? %>
+    <%= render partial: 'content/panels/timelines',        locals: { content: content } if @content.timelines.any? %>
+    <%= render partial: 'content/panels/collections',      locals: { content: content } if @content.page_collection_submissions.accepted.any? %>
+    <%= render partial: 'content/panels/associations',     locals: { content: content } %>
   </div>
 </div>
 
-<%= render partial: 'content/share', locals: { shared_content: @content} %>
+<%= render partial: 'content/display/visitor_cta', locals: { content: @serialized_content } %>
