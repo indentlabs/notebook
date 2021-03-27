@@ -8,10 +8,12 @@
         <div class="caption bordered-text center">
           <h3>
             <% if @content.persisted? %>
-              <%= simple_format ContentFormatterService.show(
-                text: @content.name_field_value,
-                viewing_user: current_user
-              ) %>
+              <%= link_to @content do %>
+                <%= simple_format ContentFormatterService.show(
+                  text: @content.name_field_value,
+                  viewing_user: current_user
+                ) %>
+              <% end %>
               <small>
                 <%= simple_format ContentFormatterService.show(
                   text: @content.description,

@@ -1,16 +1,15 @@
 <% content_to_show = Rails.application.config.content_types[:all_non_universe] + [Timeline] %>
 
-<div class="row">
-  <% content_to_show.each do |content_type| %>
-    <% next if @content.send(content_type.name.downcase.pluralize).empty? %>
-    <% list = @content.send(content_type.name.downcase.pluralize) %>
-    <% @sidelinks_in_this_universe_count += list.count %>
+<% content_to_show.each do |content_type| %>
+  <%
+    list = @content.send(content_type.name.downcase.pluralize)
+    next if list.empty?
 
-    <div class="col s12 m12 l12">
-      <%= render partial: 'content/cards/in_universe_content_list', locals: {
-        content_type: content_type.name.downcase.to_sym,
-        content_list: list
-      } %>
-    </div>
-  <% end %>
-</div>
+    @sidelinks_in_this_universe_count += list.count
+  %>
+
+  <%= render partial: 'content/cards/in_universe_content_list', locals: {
+    content_type: content_type.name.downcase.to_sym,
+    content_list: list
+  } %>
+<% end %>

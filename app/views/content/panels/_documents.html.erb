@@ -8,15 +8,17 @@
       <%= render partial: 'notice_dismissal/messages/10' %>
 
       <% if visible_documents.any? %>
-        <%= content.name %> appears in the following documents:
+        <div class="grey-text uppercase center">
+          <%= content.name %> appears in the following documents
+        </div>
 
-        <ul>
-          <% visible_documents.each do |document| %>
-            <li>
+        <% visible_documents.each do |document| %>
+          <%= link_to document do %>
+            <div class="card-panel hoverable <%= Document.color %> lighten-5">
               <%= render partial: 'documents/reference_card', locals: { document: document } %>
-            </li>
+            </div
           <% end %>
-        </ul>
+        <% end %>
       <% end %>
     </div>
   </div>
