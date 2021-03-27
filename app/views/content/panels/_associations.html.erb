@@ -9,27 +9,28 @@
   @sidelinks_association_count = 0
 %>
 
-<div id="associations_panel" class="row panel">
-  <div class="row">
-    <div class="col s12 m10 offset-m1">
-      <%= render partial: 'notice_dismissal/messages/07' %>
+<div id="associations_panel" class="panel">
+  <%= render partial: 'notice_dismissal/messages/07' %>
+  <div class="clearfix"></div>
 
-      <% relations.each do |name, params| %>
-        <%
-          results = params[:related_class].where("#{params[:through_relation].downcase}_id": content.id)
-            .map    { |content| content.send(params[:inverse_class].downcase) }
-            .select { |content| content && content.readable_by?(current_user || User.new) }
-        %>
-        <% next unless results.any? %>
-        <% @sidelinks_association_count += results.count %>
-        <div class="uppercase grey-text">
-          <%= params[:relation_text].to_s.titleize.downcase %> of
-        </div>
-        <%=
-          render partial: "content/display/attribute_value/link", 
-                  locals: { value: results, content: content }
-        %>
-      <% end %>
-    </div>
+  <div class="card-panel">
+    <% relations.each do |name, params| %>
+      <%
+        results = params[:related_class].where("#{params[:through_relation].downcase}_id": content.id)
+          .map    { |content| content.send(params[:inverse_class].downcase) }
+          .select { |content| content && content.readable_by?(current_user || User.new) }
+      %>
+      <% next unless results.any? %>
+      <% @sidelinks_association_count += results.count %>
+
+      <div class="uppercase grey-text">
+        <%= params[:relation_text].to_s.titleize.downcase %> of
+      </div>
+      <%=
+        link_codes = results.map { |page| "#{page.page_type}-#{page.id}" }
+        render partial: "content/display/attribute_value/link", 
+                locals: { value: link_codes, content: content }
+      %>
+    <% end %>
   </div>
 </div>

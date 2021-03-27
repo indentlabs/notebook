@@ -116,7 +116,10 @@ class ContentSerializer
       page_links = attribute_field.attribute_values.find_by(entity_type: content.class.name, entity_id: content.id)
       if page_links.nil?
         # Fall back on old relation value
-        self.raw_model.send(attribute_field.old_column_source)
+        # We're technically doing a double lookup here (by converting response
+        # to link code, then looking up again later) but since this is just stopgap
+        # code to standardize links in views this should be fine for now.
+        self.raw_model.send(attribute_field.old_column_source).map { |page| "#{page.page_type}-#{page.id}" }
       else
         # Use new link system
         begin
