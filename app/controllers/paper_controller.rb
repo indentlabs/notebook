@@ -10,11 +10,33 @@ class PaperController < ApplicationController
     ] + paper_params.keys.map { |page_type, page_count| [page_type, 20] }\
     + ["Notebook.ai", 1]  # Page talking about Notebook.ai <3
 
-    # pdf_html = ActionController::Base.new.render_to_string(template: 'paper/index', layout: 'pdf')
-    # pdf = WickedPdf.new.pdf_from_string(pdf_html)
+    # Build a gigantic HTML model of all the page contents
+    concatenated_pdf_html = ''
+    pages_to_include.first(1).each do |page_template, page_count|
+      page_html = ActionController::Base.new.render_to_string(template: "paper/templates/#{page_template.downcase}", layout: nil)
+      page_count.times do |i|
+        concatenated_pdf_html += page_html
+
+        # Add a manual pagebreak
+        concatenated_pdf_html += "<div class='alwaysbreak'></div>"
+      end
+    end
+
+    # Wrap the page contents in the global pdf layout
+    formatted_pdf = ActionController::Base.new.render_to_string(template: "layouts/pdf", layout: nil)
+    formatted_pdf.gsub!('<!--PDF_CONTENT-->', concatenated_pdf_html)
+
+    # Render the PDF
+    pdf = WickedPdf.new.pdf_from_string(formatted_pdf)
+
     # pdf = WickedPdf.new.pdf_from_html_file('/your/absolute/path/here')
-    pdf = WickedPdf.new.pdf_from_string('<h1>Hello There!</h1>')
-    send_data(pdf, filename: 'file.pdf')
+    # pdf = WickedPdf.new.pdf_from_string('<h1>Hello There!</h1>')
+    send_data(
+      pdf,
+      filename:    'Notebook.pdf',
+      type:        "application/pdf",
+      disposition: "inline"
+    )
   end
 
   private
