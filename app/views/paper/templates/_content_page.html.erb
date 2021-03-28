@@ -1,0 +1,54 @@
+<div class="underlined"></div>
+<div class="uppercase grey-text"><%= content_name.titleize %> name</div>
+<br /><br />
+
+<%
+  YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, defaults|
+    next if %i(contributors gallery changelog).include?(category_name)
+%>
+  <% seen_fields = [] %>
+  <% defaults[:attributes].each.with_index do |field, index| %>
+    <div class="nobreak">
+      <%#
+        We inject the category titles in the first field's nobreak (instead of before the loop)
+        to make sure we never have a situation where a category title ends the page and then
+        the first field is on the next page. Instead, we want to make sure the category title
+        gets clumped with AT LEAST one field on the same page, and this is the best way to do it.
+      %>
+      <% if index === 0 %>
+        <div class="category-name center"><%= category_name.to_s.titleize %></div>
+      <% end %>
+
+      <%
+        # Exclude fields that don't make sense
+        next if [
+          "name", "tags", "private notes", "linked races", "universe"
+        ].include?(field[:label].downcase)
+
+        # Make sure we don't have any duplicate fields
+        next if seen_fields.include?(field[:label].downcase)
+        seen_fields.push field[:label].downcase
+      %>
+
+      <% prompt = I18n.translate "attributes.#{content_name}.#{field[:label].downcase.gsub(/\s/, '_')}",
+                    scope:   :serendipitous_questions,
+                    name:    "this #{content_name}",
+                    default: ''
+      %>
+      
+      <div class="field-name">
+        <%= field[:label] %>
+        <% unless prompt.empty? %>
+          <span class="grey-text">- <%= prompt %></span>
+        <% end %>
+      </div>
+      <% 4.times do %><div class="underlined"></div><% end %>
+      <% if field[:label] == 'Notes' %>
+        <% 4.times do %><div class="underlined"></div><% end %>
+      <% end %>
+    </div>
+    <br />
+    <% end %>
+<%
+  end
+%>

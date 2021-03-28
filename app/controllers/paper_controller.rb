@@ -7,12 +7,13 @@ class PaperController < ApplicationController
       ["Cover",       1], # Notebook Paper cover page
       ["Owner",       1], # "If lost, contact X page"
       [Universe.name, 1], # single Universe page
-    ] + paper_params.keys.map { |page_type, page_count| [page_type, 20] }\
-    + ["Notebook.ai", 1]  # Page talking about Notebook.ai <3
+  ] + paper_params.keys.map { |page_type, page_count| [page_type, 1] }
+    
+    pages_to_include += [["Notebook.ai", 1]]  # Page talking about Notebook.ai <3
 
     # Build a gigantic HTML model of all the page contents
     concatenated_pdf_html = ''
-    pages_to_include.first(1).each do |page_template, page_count|
+    pages_to_include.each do |page_template, page_count|
       page_html = ActionController::Base.new.render_to_string(template: "paper/templates/#{page_template.downcase}", layout: nil)
       page_count.times do |i|
         concatenated_pdf_html += page_html
@@ -29,14 +30,13 @@ class PaperController < ApplicationController
     # Render the PDF
     pdf = WickedPdf.new.pdf_from_string(formatted_pdf)
 
-    # pdf = WickedPdf.new.pdf_from_html_file('/your/absolute/path/here')
-    # pdf = WickedPdf.new.pdf_from_string('<h1>Hello There!</h1>')
     send_data(
       pdf,
       filename:    'Notebook.pdf',
       type:        "application/pdf",
       disposition: "inline"
     )
+    # render html: formatted_pdf.html_safe
   end
 
   private
