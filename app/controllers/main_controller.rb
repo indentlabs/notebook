@@ -29,6 +29,9 @@ class MainController < ApplicationController
     @attribute_field_to_question = SerendipitousService.question_for(@content)
   end
 
+  def paper
+  end
+
   def infostack
   end
 

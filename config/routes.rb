@@ -382,5 +382,6 @@ Rails.application.routes.draw do
   # Promos and other temporary pages
   get '/redeem/infostack', to: 'main#infostack'
   get '/redeem/sascon',    to: 'main#sascon'
+  get '/paper',            to: 'main#paper'
 end
 # rubocop:enable LineLength
