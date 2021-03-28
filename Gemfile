@@ -73,7 +73,6 @@ gem 'barnes'
 # Apps
 #gem 'easy_translate'
 #gem 'levenshtein-ffi'
-gem 'wicked_pdf'
 
 # Feature rollout
 gem 'flipper'
