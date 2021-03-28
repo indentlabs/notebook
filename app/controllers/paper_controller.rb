@@ -7,9 +7,9 @@ class PaperController < ApplicationController
       ["Cover",       1], # Notebook Paper cover page
       ["Owner",       1], # "If lost, contact X page"
       [Universe.name, 1], # single Universe page
-  ] + paper_params.keys.map { |page_type, page_count| [page_type, 1] }
-    
-    pages_to_include += [["Notebook.ai", 1]]  # Page talking about Notebook.ai <3
+    ] + paper_params.keys.map { |page_type, page_count| [page_type, 3] }
+
+    pages_to_include.push ["Notebook.ai", 1]  # Page talking about Notebook.ai <3
 
     # Build a gigantic HTML model of all the page contents
     concatenated_pdf_html = ''
