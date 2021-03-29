@@ -383,7 +383,13 @@ Rails.application.routes.draw do
   get '/redeem/infostack', to: 'main#infostack'
   get '/redeem/sascon',    to: 'main#sascon'
 
-  get '/paper',            to: 'paper#index'
-  post '/paper',           to: 'paper#generate', as: :generate_paper
+  scope :paper do
+    get  '/',           to: 'paper#index'
+    post '/',           to: 'paper#generate',   as: :generate_paper
+
+    # TODO: We probably actually just want to render these once and serve them as
+    #       static PDFs, instead of creating a new PDF on every request. :)
+    get '/:page_type',  to: 'paper#individual', as: :generate_individual_paper
+  end
 end
 # rubocop:enable LineLength
