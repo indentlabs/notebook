@@ -47,6 +47,9 @@ class PaperController < ApplicationController
     formatted_pdf = ActionController::Base.new.render_to_string(template: "layouts/pdf", layout: nil)
     formatted_pdf.gsub!('<!--PDF_CONTENT-->', concatenated_pdf_html)
 
+    # Debugging:
+    # render html: formatted_pdf.html_safe
+
     # Create the PDF and return it
     WickedPdf.new.pdf_from_string(formatted_pdf)
   end
@@ -58,9 +61,6 @@ class PaperController < ApplicationController
       type:        "application/pdf", # Uncommenting these lets us render the PDF in-browser instead of downloading
       disposition: "inline"           # ""
     )
-
-    # Debugging:
-    # render html: formatted_pdf.html_safe
   end
 
   def paper_params
