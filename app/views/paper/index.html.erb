@@ -104,7 +104,7 @@
                     <%= f.check_box content_type.name %>
                     <span class="black-text">
                       <i class="material-icons left <%= content_type.color %>-text"><%= content_type.icon %></i>
-                      Include <%= content_type.name %> pages
+                      Include 3 <%= content_type.name %> pages
                     </span>
                   <% end %>
                 </div>
@@ -115,8 +115,39 @@
           <div class="center">
             <%= f.submit 'Generate Notebook Paper', class: 'btn btn-large blue white-text hoverable'%>
           </div>
+
+          <br />
+          <p class="grey-text center">
+            Please note that while you <em>can</em> select every page, the resulting generated document will
+            be extremely large (almost 500 pages) and up to 1MB in size. It's recommended to choose only the
+            pages you plan to start with, then download more pages as needed from below.
+          </p>
         <% end %>
       </div>
     </div>
   </div>
+
+  <div style="font-size: 1.3rem; text-align: justify; margin-top: 50px;" class="col s12 m10 offset-m1">
+    <h3 style="font-size: 1.3em">Fill your Notebook Paper with more pages</h3>
+    <p>
+      You can always come back here for more of your favorite worldbuilding pages. Each of the
+      buttons below will generate more Notebook Paper for a singular character, location, <em>et cetera</em>.
+      Simply print it out as many times as you want and add it to your Notebook Paper to keep
+      growing your world at your pace!
+    </p>
+  </div>
+
+  <% Rails.application.config.content_types[:all].each do |content_type| %>
+    <div class="col s12 m4 l3">
+      <div class="hoverable card">
+        <div class="card-image">
+          <%= image_tag asset_path("card-headers/#{content_type.name.downcase.pluralize}.jpg"), height: 185 %>
+        </div>
+        <div style="position: relative; top: -2em; left: 0.4em; height: 0"">
+          <i class="material-icons left <%= content_type.color %>-text"><%= content_type.icon %></i>
+          <span class="white-text bordered-text"><%= content_type.name %></span>
+        </div>
+      </div>
+    </div>
+  <% end %>
 </div>

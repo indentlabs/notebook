@@ -33,8 +33,8 @@ class PaperController < ApplicationController
     send_data(
       pdf,
       filename:    'Notebook.pdf',
-      type:        "application/pdf",
-      disposition: "inline"
+      # type:        "application/pdf",
+      # disposition: "inline"
     )
     # render html: formatted_pdf.html_safe
   end
