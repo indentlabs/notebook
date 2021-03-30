@@ -162,6 +162,7 @@ end
 # PDF handling
 group :production do
   gem 'wkhtmltopdf-heroku'
+  gem 'wkhtmltopdf-binary'
 end
 group :development do
   gem 'wkhtmltopdf-binary-edge'
