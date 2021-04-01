@@ -158,6 +158,7 @@ class ForumReplacementService < Service
     'hate'              => 'absolutely love',
     'heart'             => '<em>corazón</em>',
     'hearts'            => '<em>corazones</em>',
+    'hell'              => 'heck',
     'hello'             => 'howdy, partner',
     'hey all'           => 'greetings, earthlings',
     'hip'               => 'hep',
@@ -378,6 +379,6 @@ class ForumReplacementService < Service
   end
 
   def self.wrapped(text, tooltip)
-    "<span class='blue lighten-5 tooltipped' style='padding: 4px' data-tooltip='#{tooltip}'>#{text}</span>"
+    "<span class='blue lighten-5 tooltipped black-text' style='padding: 4px' data-tooltip='#{tooltip}'>#{text}</span>"
   end
 end
