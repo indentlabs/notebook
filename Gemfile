@@ -73,7 +73,6 @@ gem 'barnes'
 # Apps
 #gem 'easy_translate'
 #gem 'levenshtein-ffi'
-gem 'wicked_pdf'
 
 # Feature rollout
 gem 'flipper'
@@ -157,12 +156,4 @@ group :worker do
   gem 'engtagger'
   gem 'ibm_watson'
   gem 'textstat'
-end
-
-# PDF handling
-group :production do
-  gem 'wkhtmltopdf-heroku'
-end
-group :development do
-  gem 'wkhtmltopdf-binary-edge'
 end
