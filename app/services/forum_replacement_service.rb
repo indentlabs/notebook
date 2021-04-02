@@ -373,9 +373,7 @@ class ForumReplacementService < Service
   }
 
   def self.replace(text)
-    # return text # It's april fool's!
-
-    # TODO allow users to turn this madness off with a user setting (return text)
+    return text
 
     replaced_text = text.dup
 
