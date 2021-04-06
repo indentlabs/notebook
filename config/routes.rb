@@ -155,6 +155,8 @@ Rails.application.routes.draw do
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
 
+  get '/paper', to: redirect('https://www.notebook-paper.com')
+
   # Main pages
   root to: 'main#index'
 
