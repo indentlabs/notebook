@@ -375,6 +375,8 @@ class ForumReplacementService < Service
   def self.replace(text)
     return text
 
+    # TODO: page tag replacements?
+
     replaced_text = text.dup
 
     WORD_REPLACEMENTS.each do |trigger, replacement|
