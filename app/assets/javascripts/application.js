@@ -10,11 +10,14 @@
 // WARNING: THE FIRST BLANK LINE MARKS THE END OF WHAT'S TO BE PROCESSED, ANY BLANK LINE SHOULD
 // GO AFTER THE REQUIRES BELOW.
 //
-//= require autocomplete-rails
+//= require_tree ./preload
 //= require cocoon
 //= require medium-editor
 //= require Chart.bundle
 //= require chartkick
+//= require autocomplete-rails
 //= require tribute
 //= require d3
 //= require_tree .
+
+
