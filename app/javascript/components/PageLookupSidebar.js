@@ -172,6 +172,7 @@ class PageLookupSidebar extends React.Component {
               {field.value.map((tag) => {
                 return(
                   <Chip
+                    id={'tag-' + tag.tag}
                     variant="outlined"
                     size="small"
                     label={tag.tag}
