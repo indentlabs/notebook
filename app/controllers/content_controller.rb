@@ -442,7 +442,21 @@ class ContentController < ApplicationController
     attribute_value.save!
   end
 
-  # Content update for text-related fields (text_area, name)
+  # Content update for name fields
+  def name_field_update
+    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+    attribute_value.value = field_params.fetch('value', '')
+    attribute_value.save!
+
+    # We also need to update the cached `name` field on the content page itself
+    entity_type = entity_params.fetch(:entity_type)
+    raise "Invalid entity type: #{entity_params.fetch(:entity_type)}" unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
+    entity = entity_type.constantize.find_by(id: entity_params.fetch(:entity_id).to_i)
+    entity.update(name: field_params.fetch('value', ''))
+  end
+
+  # Content update for text_area fields
   def text_field_update
     @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
     attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))

@@ -4,7 +4,7 @@ class FieldTypeService < Service
     when 'text_area'
       Rails.application.routes.url_helpers.text_field_update_path(field[:internal_id])
     when 'name'
-      Rails.application.routes.url_helpers.text_field_update_path(field[:internal_id])
+      Rails.application.routes.url_helpers.name_field_update_path(field[:internal_id])
     when 'universe'
       Rails.application.routes.url_helpers.universe_field_update_path(field[:internal_id])
     when 'tags'

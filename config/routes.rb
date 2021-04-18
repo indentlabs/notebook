@@ -246,6 +246,7 @@ Rails.application.routes.draw do
   # For non-API API endpoints
   scope :internal do
     patch '/link_field_update/:field_id',     to: 'content#link_field_update',     as: :link_field_update
+    patch '/name_field_update/:field_id',     to: 'content#name_field_update',     as: :name_field_update
     patch '/text_field_update/:field_id',     to: 'content#text_field_update',     as: :text_field_update
     patch '/tags_field_update/:field_id',     to: 'content#tags_field_update',     as: :tags_field_update
     patch '/universe_field_update/:field_id', to: 'content#universe_field_update', as: :universe_field_update
