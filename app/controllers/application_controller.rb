@@ -64,7 +64,7 @@ class ApplicationController < ActionController::Base
     end
 
     # Fetch notifications
-    @user_notifications = current_user.notifications.order('happened_at DESC').limit(10)
+    @user_notifications = current_user.notifications.order('happened_at DESC').limit(8)
 
     # Cache recently-edited pages
     @recently_edited_pages = @current_user_content.values.flatten
