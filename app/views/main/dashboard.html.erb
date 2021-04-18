@@ -5,7 +5,8 @@
 <%= content_for :full_width_page_content do %>
   <div class="row">  
     <%= render partial: 'main/dashboard_header_links' %>
-
+  </div>
+  <div class="row">
     <div class="col s12 m5 l3">
       <div class="grey-text uppercase center">Create something new</div>
       <% @activated_content_types.sample(3).each do |type| %>
@@ -19,9 +20,7 @@
                   New
                   <%= type %><br />
                   <small>
-                    <% unless @universe_scope %>
-                      You've created
-                    <% end %>
+                    You've created
                     <%= pluralize (@current_user_content[type] || []).count, type.downcase %>
                     <% if @universe_scope %>
                       in this universe
@@ -56,6 +55,7 @@
       <%= link_to prompts_path do %>
         <div class="hoverable card-panel orange white-text" style="margin: 0">
           <i class="material-icons left">lightbulb_outline</i>
+          <i class="material-icons right">arrow_right</i>
           View more prompts
         </div>
       <% end %>
