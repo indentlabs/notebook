@@ -108,37 +108,39 @@ class ContentController < ApplicationController
   end
 
   def new
-    @content = content_type_from_controller(self.class).new(user: current_user)
+    @content = content_type_from_controller(self.class)
+      .new(user: current_user)
+      .tap { |content| content.name = "New #{content.class.name}" }
+
     current_users_categories_and_fields = @content.class.attribute_categories(current_user)
     if current_users_categories_and_fields.empty?
       content_type_from_controller(self.class).create_default_attribute_categories(current_user)
       current_users_categories_and_fields = @content.class.attribute_categories(current_user)
     end
-    @serialized_categories_and_fields = CategoriesAndFieldsSerializer.new(
-      current_users_categories_and_fields
-    )
-    @suggested_page_tags = (
-      current_user.page_tags.where(page_type: @content.class.name).pluck(:tag) +
-        PageTagService.suggested_tags_for(@content.class.name)
-    ).uniq
 
-    # todo this is a good spot to audit to disable and see if create permissions are ok also
-    unless (current_user || User.new).can_create?(@content.class) \
+    if user_signed_in? && current_user.can_create?(@content.class) \
       || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: @content.class.name)
 
-      return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
-    end
+      if params.key?(:document_entity)
+        entity = DocumentEntity.find_by(id: params.fetch(:document_entity).to_i)
+        if entity.document_owner == current_user
+          # Link the new page to the document entity
+          @content.name = entity.text # cached name value
+          @content.document_entity_id = entity.id
+          
+          # Since we're creating a new page here, we need to make sure we save it before requesting
+          # a name field, since they're keyed off content IDs (and we don't have an ID before saving).
+          @content.save!
 
-    if params[:document_entity]
-      @entity = DocumentEntity.find_by(id: params[:document_entity].to_i)
-      if @entity.document_owner != current_user
-        @entity = nil
+          # Update the actual AttributeField's value for this page's name also
+          @content.set_name_field_value(entity.text)
+        end
       end
-    end
 
-    respond_to do |format|
-      format.html { render 'content/new', locals: { content: @content } }
-      format.json { render json: @content }
+      @content.save!
+      return redirect_to edit_polymorphic_path(@content)
+    else
+      return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
     end
   end
 
