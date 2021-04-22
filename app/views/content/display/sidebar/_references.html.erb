@@ -11,8 +11,8 @@
 
 <%
   show_in_this_universe_tab = !creating && !editing && raw_model.is_a?(Universe)
-  show_associations_tab     = true#!creating && !editing #&& @sidelinks_association_count > 0
-  show_gallery_tab          = true#creating || editing || raw_model.image_uploads.any?
+  show_associations_tab     = !creating && !editing #&& @sidelinks_association_count > 0
+  show_gallery_tab          = creating || editing || raw_model.image_uploads.any?
   show_documents_tab        = !creating && !editing && related_documents.any?
   show_shares_tab           = !creating && !editing && raw_model.content_page_shares.any?
   show_collections_tab      = !creating && !editing && raw_model.page_collection_submissions.accepted.any?
