@@ -440,6 +440,8 @@ class ContentController < ApplicationController
     attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
     attribute_value.value = params.require(:attribute_field).fetch('linked_pages', [])
     attribute_value.save!
+
+    # TODO: Queue background worker for PageReference models
   end
 
   # Content update for name fields
