@@ -442,6 +442,7 @@ class ContentController < ApplicationController
     attribute_value.save!
 
     # TODO: Queue background worker for PageReference models
+    # PageReference referencing_page:references{polymorphic}, referenced_page:references{polymorphic} attribute_field:references:optional cached_relation_title:string
   end
 
   # Content update for name fields

@@ -1,3 +1,15 @@
+# TODO: We should probably migrate towards using string names instead of actual class references (like we
+# do below) so we can make sure they're always available (e.g. metaprogramming on class definitions).
+# Otherwise, we're loading these classes into memory before this initializer (and/or other initializers)
+# have run. See HasPageReferences for an example of why we needed content_type_names instead of content_types.
+Rails.application.config.content_type_names = {
+  all: %w(
+    Universe Character Location Item Building Condition Continent Country Creature Deity Flora
+    Food Government Group Job Landmark Language Lore Magic Planet Race Religion Scene
+    School Sport Technology Town Tradition Vehicle
+  )
+}
+
 Rails.application.config.content_types = {
   # The complete list of all content types, dictates ordering in sidebar
   all: [

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_20_230154) do
+ActiveRecord::Schema.define(version: 2021_04_25_200153) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -2376,6 +2376,20 @@ ActiveRecord::Schema.define(version: 2021_03_20_230154) do
     t.index ["user_id"], name: "index_page_collections_on_user_id"
   end
 
+  create_table "page_references", force: :cascade do |t|
+    t.string "referencing_page_type", null: false
+    t.integer "referencing_page_id", null: false
+    t.string "referenced_page_type", null: false
+    t.integer "referenced_page_id", null: false
+    t.integer "attribute_field_id"
+    t.string "cached_relation_title"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["attribute_field_id"], name: "index_page_references_on_attribute_field_id"
+    t.index ["referenced_page_type", "referenced_page_id"], name: "page_reference_referenced_page"
+    t.index ["referencing_page_type", "referencing_page_id"], name: "page_reference_referencing_page"
+  end
+
   create_table "page_settings_overrides", force: :cascade do |t|
     t.string "page_type"
     t.string "name_override"
@@ -3880,6 +3894,7 @@ ActiveRecord::Schema.define(version: 2021_03_20_230154) do
   add_foreign_key "page_collection_reports", "users"
   add_foreign_key "page_collection_submissions", "users"
   add_foreign_key "page_collections", "users"
+  add_foreign_key "page_references", "attribute_fields"
   add_foreign_key "page_tags", "users"
   add_foreign_key "paypal_invoices", "page_unlock_promo_codes"
   add_foreign_key "paypal_invoices", "users"
