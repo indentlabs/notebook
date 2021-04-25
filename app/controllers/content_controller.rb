@@ -441,8 +441,33 @@ class ContentController < ApplicationController
     attribute_value.value = params.require(:attribute_field).fetch('linked_pages', [])
     attribute_value.save!
 
-    # TODO: Queue background worker for PageReference models
-    # PageReference referencing_page:references{polymorphic}, referenced_page:references{polymorphic} attribute_field:references:optional cached_relation_title:string
+    # Make sure we create references on the linked pages
+    # PageReferenceUpdateJob.perform_later(attribute_value.id)
+
+    referencing_page_type = entity_params.fetch(:entity_type)
+    referencing_page_id   = entity_params.fetch(:entity_id)
+    referenced_page_codes = JSON.parse(attribute_value.value)
+    
+    return unless valid_content_types.map(&:name).include?(referencing_page_type)
+    referencing_page = referencing_page_type.constantize.find(referencing_page_id)
+
+    valid_reference_ids = []
+    referenced_page_codes.each do |page_code|
+      page_type, page_id = page_code.split('-')
+
+      reference = referencing_page.outgoing_page_references.find_or_initialize_by(
+        referenced_page_type:  page_type,
+        referenced_page_id:    page_id,
+        attribute_field_id:    @attribute_field.id
+      )
+      reference.cached_relation_title = @attribute_field.label
+      reference.save!
+
+      current_reference_ids << reference.reload.id
+    end
+
+    # Delete all other references still attached to this field, but not present in this request
+    referencing_page.outgoing_page_references.where.not(id: valid_reference_ids).destroy_all
   end
 
   # Content update for name fields
@@ -517,7 +542,7 @@ class ContentController < ApplicationController
     end
 
     tags_to_remove.each do |tag|
-      # TODO: create changelog event for RemovedTag
+      # TODO: create changelog event for RemovedTag or use destroy_all
       @content.page_tags.find_by(tag: tag).destroy
     end
   end
