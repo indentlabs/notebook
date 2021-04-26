@@ -46,7 +46,7 @@ namespace :data_migrations do
             user_id:               referencing_page.user_id,
             field_type:            'link',
             old_column_source:     relation_params[:through_relation].pluralize
-          ) 
+          )
 
           if attribute_field.count > 1
             puts "Ambiguous field"
@@ -55,6 +55,10 @@ namespace :data_migrations do
           end
 
           attribute_field = attribute_field.first
+          if attribute_field.nil?
+            # Field has been deleted....?
+            next
+          end
 
           # Debug
           puts "    Referencing page: #{referencing_page_type}-#{referencing_page.id}"
