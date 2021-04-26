@@ -16,9 +16,9 @@ module HasPageReferences
     end
     def referencing_pages
       # Build list of all types of referencing pages
-      pages = {}
+      pages = []
       Rails.application.config.content_type_names[:all].each do |page_type|
-        pages[page_type] = send("referencing_#{page_type.downcase}_pages")
+        pages[page_type] << send("referencing_#{page_type.downcase}_pages").to_a
       end
       pages
     end
@@ -35,9 +35,9 @@ module HasPageReferences
     end
     def referenced_pages
       # Build list of all types of referenced pages
-      pages = {}
+      pages = []
       Rails.application.config.content_type_names[:all].each do |page_type|
-        pages[page_type] = send("referenced_#{page_type.downcase}_pages")
+        pages[page_type] << send("referenced_#{page_type.downcase}_pages").to_a
       end
       pages
     end

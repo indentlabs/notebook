@@ -463,7 +463,7 @@ class ContentController < ApplicationController
       reference.cached_relation_title = @attribute_field.label
       reference.save!
 
-      current_reference_ids << reference.reload.id
+      valid_reference_ids << reference.reload.id
     end
 
     # Delete all other references still attached to this field, but not present in this request

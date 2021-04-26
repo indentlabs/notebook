@@ -5,8 +5,6 @@
 <%
   relations   = Rails.application.config.content_relations[content.class.name]
   relations ||= []
-
-  @sidelinks_association_count = 0
 %>
 
 <div id="associations_panel" class="panel">
@@ -14,6 +12,24 @@
   <div class="clearfix"></div>
 
   <div class="card-panel">
+    <% content.incoming_page_references.group_by(&:attribute_field_id).each do |field_id, reference_list| %>
+      <div class="uppercase grey-text" style="padding-bottom: 0.5em">
+        <%= reference_list.first.referencing_page_type %>
+        <i class="material-icons" style="position: relative; top: 7px">chevron_right</i>
+        <%= reference_list.first.cached_relation_title %>
+        <i class="material-icons" style="position: relative; top: 7px; margin: 0 0.3em">link</i>
+        <span class="<%= content.class.color %>-text">
+          <%= content.name %>
+        </span>
+      </div>
+      <%=
+        link_codes = reference_list.map { |ref| "#{ref.referencing_page_type}-#{ref.referencing_page_id}" }
+        render partial: "content/display/attribute_value/link", 
+                locals: { value: link_codes, content: content }
+      %>
+    <% end %>
+
+    <%# TODO: remove these after writing link migration script %>
     <% relations.each do |name, params| %>
       <%
         results = params[:related_class].where("#{params[:through_relation].downcase}_id": content.id)
@@ -21,7 +37,6 @@
           .select { |content| content && content.readable_by?(current_user || User.new) }
       %>
       <% next unless results.any? %>
-      <% @sidelinks_association_count += results.count %>
 
       <div class="uppercase grey-text">
         <%= params[:relation_text].to_s.titleize.downcase %> of
