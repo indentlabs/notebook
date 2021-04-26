@@ -1,4 +1,71 @@
 namespace :data_migrations do
+  desc "Create PageReferences for all the old content linkers"
+  task create_content_linker_page_references: :environment do
+    start_time = DateTime.current
+    puts "Starting the long migration!"
+
+    Rails.application.config.content_relations.each do |page_type, relation_list|
+      time_elapsed = DateTime.current - start_time
+      puts "Starting #{page_type} link migrations (T+#{time_elapsed.to_i})"
+
+      relation_list.each do |relation_name, relation_params|
+        link_class = relation_params[:related_class] # Fathership
+
+        referencing_page_type = relation_params[:inverse_class]
+        puts relation_params[:through_relation]
+        puts relation_params.inspect
+        puts link_class.reflect_on_association(relation_params[:through_relation]).inspect
+
+        referenced_page_type = nil
+        if relation_params[:through_relation] == :deity && referencing_page_type == "Religion"
+          referenced_page_type = link_class.reflect_on_association(:deity_character).class_name
+        else
+          referenced_page_type = link_class.reflect_on_association(relation_params[:through_relation]).class_name
+        end
+
+        puts "  Creating references for #{link_class.count} #{relation_name} links"
+        link_class.find_each do |link|
+          referencing_page = link.send(referencing_page_type.downcase)
+          referenced_page  = link.send(relation_params[:through_relation])
+          
+          if (referencing_page.nil? || referenced_page.nil?)
+            # Don't do anything here -- one of the pages has since been deleted
+            puts "    Skipping a deleted-page reference"
+            next
+          end
+
+          categories_for_this_page_type_and_user = AttributeCategory.where(
+            entity_type: referencing_page_type.downcase,
+            user_id:     referencing_page.user_id
+          ).pluck(:id)
+
+          # We also need to find the associated AttributeField (OMG) to make sure we
+          # tie the new references to that field.
+          attribute_field = AttributeField.where(
+            attribute_category_id: categories_for_this_page_type_and_user,
+            user_id:               referencing_page.user_id,
+            field_type:            'link',
+            old_column_source:     relation_params[:through_relation].pluralize
+          ) 
+
+          if attribute_field.count > 1
+            puts "Ambiguous field"
+            require 'pry'
+            binding.pry
+          end
+
+          attribute_field = attribute_field.first
+
+          # Debug
+          puts "    Referencing page: #{referencing_page_type}-#{referencing_page.id}"
+          puts "    Referenced page:  #{referenced_page_type}-#{referenced_page.id}"
+          puts "    Attribute field:  #{attribute_field.label} (#{attribute_field.id})"
+        end
+      end
+    end
+
+  end
+
   desc "Create activators for all used content types for all users"
   task create_content_type_activators: :environment do
     default_content_types = [
