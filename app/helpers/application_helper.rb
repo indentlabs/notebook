@@ -40,4 +40,8 @@ module ApplicationHelper
     html.gsub!(/\<a href=["'](.*?)["']\>(.*?)\<\/a\>/mi, '<a href="\1" rel="nofollow">\2</a>')
     html.html_safe
   end
+
+  def show_notice?(id: nil)
+    user_signed_in? && current_user.notice_dismissals.where(notice_id: id).none?
+  end
 end
