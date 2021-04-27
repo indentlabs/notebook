@@ -4,6 +4,8 @@ namespace :data_migrations do
     start_time = DateTime.current
     puts "Starting the long migration!"
 
+    ambiguous_fields = []
+
     Rails.application.config.content_relations.each do |page_type, relation_list|
       time_elapsed = DateTime.current - start_time
       puts "Starting #{page_type} link migrations (T+#{time_elapsed.to_i})"
@@ -49,9 +51,10 @@ namespace :data_migrations do
           )
 
           if attribute_field.count > 1
-            puts "Ambiguous field"
-            require 'pry'
-            binding.pry
+            puts "Ambiguous fields"
+            puts attribute_field.pluck(:id)
+
+            raise "ambiguous fields"
           end
 
           attribute_field = attribute_field.first
