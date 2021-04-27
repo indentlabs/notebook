@@ -4,6 +4,10 @@ namespace :data_migrations do
     start_time = DateTime.current
     puts "Starting the long migration!"
 
+    # Turn off SQL logging
+    old_logger = ActiveRecord::Base.logger
+    ActiveRecord::Base.logger = nil
+
     Rails.application.config.content_relations.each do |page_type, relation_list|
       time_elapsed = DateTime.current - start_time
       puts "Starting #{page_type} link migrations (T+#{time_elapsed.to_i})"
@@ -68,6 +72,11 @@ namespace :data_migrations do
       end
     end
 
+    # Turn SQL logging back on
+    ActiveRecord::Base.logger = old_logger
+    
+    puts "Done!"
+    puts "Total time elapsed: T+#{(DateTime.current - start_time).to_i}"
   end
 
   desc "Create activators for all used content types for all users"
