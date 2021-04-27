@@ -16,9 +16,9 @@ namespace :data_migrations do
         link_class = relation_params[:related_class] # Fathership
 
         referencing_page_type = relation_params[:inverse_class]
-        puts relation_params[:through_relation]
-        puts relation_params.inspect
-        puts link_class.reflect_on_association(relation_params[:through_relation]).inspect
+        # puts relation_params[:through_relation]
+        # puts relation_params.inspect
+        # puts link_class.reflect_on_association(relation_params[:through_relation]).inspect
 
         referenced_page_type = nil
         if relation_params[:through_relation] == :deity && referencing_page_type == "Religion"
@@ -34,7 +34,7 @@ namespace :data_migrations do
           
           if (referencing_page.nil? || referenced_page.nil?)
             # Don't do anything here -- one of the pages has since been deleted
-            puts "    Skipping a deleted-page reference"
+            # puts "    Skipping a deleted-page reference"
             next
           end
 
@@ -65,9 +65,9 @@ namespace :data_migrations do
           end
 
           # Debug
-          puts "    Referencing page: #{referencing_page_type}-#{referencing_page.id}"
-          puts "    Referenced page:  #{referenced_page_type}-#{referenced_page.id}"
-          puts "    Attribute field:  #{attribute_field.label} (#{attribute_field.id})"
+          # puts "    Referencing page: #{referencing_page_type}-#{referencing_page.id}"
+          # puts "    Referenced page:  #{referenced_page_type}-#{referenced_page.id}"
+          # puts "    Attribute field:  #{attribute_field.label} (#{attribute_field.id})"
         end
       end
     end
