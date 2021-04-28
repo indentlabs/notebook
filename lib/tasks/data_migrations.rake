@@ -1,7 +1,7 @@
 namespace :data_migrations do
   desc "Create PageReferences for all the old content linkers"
   task create_content_linker_page_references: :environment do
-    require 'pry'
+    # require 'pry'
 
     start_time = DateTime.current
     puts "Starting the long migration!"
@@ -70,8 +70,8 @@ namespace :data_migrations do
           puts "    Referencing page: #{referencing_page_type}-#{referencing_page.id}"
           puts "    Referenced page:  #{referenced_page_type}-#{referenced_page.id}"
           puts "    Attribute field:  #{attribute_field.label} (#{attribute_field.id})"
-          puts "OK?"
-          binding.pry
+          # puts "OK?"
+          # binding.pry
 
           # Create the PageReference!
           reference = referencing_page.outgoing_page_references.find_or_initialize_by(
