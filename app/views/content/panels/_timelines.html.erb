@@ -6,52 +6,48 @@
   end
 %>
 
-<div id="timelines_panel" class="row panel">
-  <div class="row">
-    <div class="col s12 m10 offset-m1">
-      <%= render partial: 'notice_dismissal/messages/14' %>
+<div id="timelines_panel" class="panel">
+  <%= render partial: 'notice_dismissal/messages/14' %>
 
-      <% if visible_timelines.any? %>
-        <div class="center grey-text uppercase"><%= content.name %> appears in the following timelines</div>
+  <% if visible_timelines.any? %>
+    <div class="center grey-text uppercase"><%= content.name %> appears in the following timelines</div>
 
-        <ul>
-          <% visible_timelines.each do |timeline| %>
-            <li>
-              <%= link_to edit_timeline_path(timeline) do %>
-                <div class="hoverable card">
-                  <div class="card-image"  style="height: 140px;">
-                    <%= image_tag timeline.first_public_image(format: :medium), style: 'height: 140px' %>
-                    <span class="card-title">
-                      <%= timeline.name.presence || 'Untitled Timeline' %>
-                    </span>
-                  </div>
-                  <div class="card-content black-text">
-                    <% if timeline.universe_id? %>
-                      <p class="right">
-                        <%= link_to timeline.universe, class: "#{Universe.color}-text" do %>
-                          <i class="material-icons left"><%= Universe.icon %></i>
-                          <%= timeline.universe.name %>
-                        <% end %>
-                      </p>
+    <ul>
+      <% visible_timelines.each do |timeline| %>
+        <li>
+          <%= link_to edit_timeline_path(timeline) do %>
+            <div class="hoverable card">
+              <div class="card-image"  style="height: 140px;">
+                <%= image_tag timeline.first_public_image(format: :medium), style: 'height: 140px' %>
+                <span class="card-title">
+                  <%= timeline.name.presence || 'Untitled Timeline' %>
+                </span>
+              </div>
+              <div class="card-content black-text">
+                <% if timeline.universe_id? %>
+                  <p class="right">
+                    <%= link_to timeline.universe, class: "#{Universe.color}-text" do %>
+                      <i class="material-icons left"><%= Universe.icon %></i>
+                      <%= timeline.universe.name %>
                     <% end %>
-                    <p>
-                      <strong><%= timeline.subtitle %></strong>
-                    </p>
-                    <p>
-                      <%= timeline.description %>
-                    </p>
-                    <p class="grey-text">
-                      Last edited <%= time_ago_in_words timeline.updated_at %> ago
-                    </p>
+                  </p>
+                <% end %>
+                <p>
+                  <strong><%= timeline.subtitle %></strong>
+                </p>
+                <p>
+                  <%= timeline.description %>
+                </p>
+                <p class="grey-text">
+                  Last edited <%= time_ago_in_words timeline.updated_at %> ago
+                </p>
 
-                    <div class="clearfix"></div>
-                  </div>
-                </div>
-              <% end %>
-            </li>
+                <div class="clearfix"></div>
+              </div>
+            </div>
           <% end %>
-        </ul>
+        </li>
       <% end %>
-    </div>
-  </div>
+    </ul>
+  <% end %>
 </div>
