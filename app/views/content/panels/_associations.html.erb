@@ -29,9 +29,21 @@
       %>
     <% end %>
 
-    <%# TODO: remove these after writing link migration script %>
+    <% if user_signed_in? %>
+      <div class="card-panel yellow lighten-5">
+        Notice: The newest Notebook.ai release is adding the ability to create your own link
+        fields, which includes a rather large migration of all existing link fields into a new linking system. 
+        Links that haven't been migrated yet can be seen below this message; links on the new system appear above.
+        <br /><br />
+        Thank you for your patience during this large rewrite! This notice will automatically disappear after the
+        migration has completed for everyone.
+        <br /><br />
+        &mdash; Andrew
+      </div>
+    <% end %>
+
+    <%# TODO: remove these after finishing link migration script %>
     <% relations.each do |name, params| %>
-      <% next %>
       <%
         results = params[:related_class].where("#{params[:through_relation].downcase}_id": content.id)
           .map    { |content| content.send(params[:inverse_class].downcase) }
