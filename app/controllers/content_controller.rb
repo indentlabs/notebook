@@ -458,7 +458,8 @@ class ContentController < ApplicationController
       reference = referencing_page.outgoing_page_references.find_or_initialize_by(
         referenced_page_type:  page_type,
         referenced_page_id:    page_id,
-        attribute_field_id:    @attribute_field.id
+        attribute_field_id:    @attribute_field.id,
+        reference_type:        'linked'
       )
       reference.cached_relation_title = @attribute_field.label
       reference.save!
@@ -506,7 +507,8 @@ class ContentController < ApplicationController
           reference = @entity.outgoing_page_references.find_or_initialize_by(
             referenced_page_type:  token[:content_type],
             referenced_page_id:    token[:content_id],
-            attribute_field_id:    @attribute_field.id
+            attribute_field_id:    @attribute_field.id,
+            reference_type:        'mentioned'
           )
           reference.cached_relation_title = @attribute_field.label
           reference.save!

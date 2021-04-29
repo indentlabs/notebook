@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_04_25_200153) do
+ActiveRecord::Schema.define(version: 2021_04_29_194615) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -2385,6 +2385,7 @@ ActiveRecord::Schema.define(version: 2021_04_25_200153) do
     t.string "cached_relation_title"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "reference_type"
     t.index ["attribute_field_id"], name: "index_page_references_on_attribute_field_id"
     t.index ["referenced_page_type", "referenced_page_id"], name: "page_reference_referenced_page"
     t.index ["referencing_page_type", "referencing_page_id"], name: "page_reference_referencing_page"

@@ -82,7 +82,8 @@ namespace :data_migrations do
           reference = referencing_page.outgoing_page_references.find_or_initialize_by(
             referenced_page_type:  referenced_page_type,
             referenced_page_id:    referenced_page.id,
-            attribute_field_id:    attribute_field.id
+            attribute_field_id:    attribute_field.id,
+            reference_type:        'linked'
           )
           reference.cached_relation_title = attribute_field.label
           if reference.save!
