@@ -438,20 +438,20 @@ class ContentController < ApplicationController
   def link_field_update
     @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
     attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
-    attribute_value.value = params.require(:attribute_field).fetch('linked_pages', [])
+
+    if params.key?(:attribute_field)
+      attribute_value.value = params.require(:attribute_field).fetch('linked_pages', [])
+    else
+      attribute_value.value = []
+    end
     attribute_value.save!
 
-    # Make sure we create references on the linked pages
-    # PageReferenceUpdateJob.perform_later(attribute_value.id)
-
-    referencing_page_type = entity_params.fetch(:entity_type)
-    referencing_page_id   = entity_params.fetch(:entity_id)
-    referenced_page_codes = JSON.parse(attribute_value.value)
-    
-    return unless valid_content_types.map(&:name).include?(referencing_page_type)
-    referencing_page = referencing_page_type.constantize.find(referencing_page_id)
+    # Make sure we create references from the entity to the linked pages
+    set_entity
+    referencing_page = @entity
 
     valid_reference_ids = []
+    referenced_page_codes = JSON.parse(attribute_value.value)
     referenced_page_codes.each do |page_code|
       page_type, page_id = page_code.split('-')
 
@@ -467,7 +467,10 @@ class ContentController < ApplicationController
     end
 
     # Delete all other references still attached to this field, but not present in this request
-    referencing_page.outgoing_page_references.where.not(id: valid_reference_ids).destroy_all
+    referencing_page.outgoing_page_references
+      .where(attribute_field_id: @attribute_field.id)
+      .where.not(id: valid_reference_ids)
+      .destroy_all
   end
 
   # Content update for name fields
@@ -486,10 +489,38 @@ class ContentController < ApplicationController
 
   # Content update for text_area fields
   def text_field_update
-    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
-    attribute_value.value = field_params.fetch('value', '')
-    attribute_value.save!
+    text = field_params.fetch('value', '')
+    if text.present?
+      @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
+      attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+      attribute_value.value = text
+      attribute_value.save!
+
+      # Create PageReferences for mentioned pages
+      tokens = ContentFormatterService.tokens_to_replace(text)
+      if tokens.any?
+        set_entity
+
+        valid_reference_ids = []
+        tokens.each do |token|
+          reference = @entity.outgoing_page_references.find_or_initialize_by(
+            referenced_page_type:  token[:content_type],
+            referenced_page_id:    token[:content_id],
+            attribute_field_id:    @attribute_field.id
+          )
+          reference.cached_relation_title = @attribute_field.label
+          reference.save!
+
+          valid_reference_ids << reference.reload.id
+        end
+
+        # Delete all other references still attached to this field, but not present in this request
+        referencing_page.outgoing_page_references
+          .where(attribute_field_id: @attribute_field.id)
+          .where.not(id: valid_reference_ids)
+          .destroy_all
+      end
+    end
   end
 
   def tags_field_update
@@ -661,6 +692,14 @@ class ContentController < ApplicationController
   def set_navbar_color
     content_type = @content_type_class || content_type_from_controller(self.class)
     @navbar_color = content_type.try(:hex_color) || '#2196F3'
+  end
+
+  def set_entity
+    entity_page_type = entity_params.fetch(:entity_type)
+    entity_page_id   = entity_params.fetch(:entity_id)
+    
+    return unless valid_content_types.map(&:name).include?(entity_page_type)
+    @entity = entity_page_type.constantize.find(entity_page_id)    
   end
 
   # For index, new, edit

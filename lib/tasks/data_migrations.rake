@@ -1,4 +1,9 @@
 namespace :data_migrations do
+  desc "Create PageReferences for all text fields"
+  task create_text_field_page_references: :environment do
+
+  end
+
   desc "Create PageReferences for all the old content linkers"
   task create_content_linker_page_references: :environment do
     # require 'pry'
