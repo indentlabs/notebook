@@ -1,7 +1,26 @@
 namespace :data_migrations do
   desc "Create PageReferences for all text fields"
   task create_text_field_page_references: :environment do
+    Attribute.where.not(value: [nil, ""]).find_each do |attribute|
+      tokens = ContentFormatterService.tokens_to_replace(attribute.value)
 
+      if tokens.any?
+        field  = attribute.attribute_field
+        entity = attribute.entity
+        next unless field.present? && entity.present?
+
+        tokens.each do |token|
+          reference = entity.outgoing_page_references.find_or_initialize_by(
+            referenced_page_type:  token[:content_type],
+            referenced_page_id:    token[:content_id],
+            attribute_field_id:    field.id,
+            reference_type:        'mentioned'
+          )
+          reference.cached_relation_title = field.label
+          reference.save!
+        end
+      end
+    end
   end
 
   desc "Create PageReferences for all the old content linkers"
