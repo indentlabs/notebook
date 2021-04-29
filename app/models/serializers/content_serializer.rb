@@ -119,7 +119,12 @@ class ContentSerializer
         # We're technically doing a double lookup here (by converting response
         # to link code, then looking up again later) but since this is just stopgap
         # code to standardize links in views this should be fine for now.
-        self.raw_model.send(attribute_field.old_column_source).map { |page| "#{page.page_type}-#{page.id}" }
+        if attribute_field.old_column_source.present?
+          self.raw_model.send(attribute_field.old_column_source).map { |page| "#{page.page_type}-#{page.id}" }
+        else
+          []
+        end
+
       else
         # Use new link system
         begin

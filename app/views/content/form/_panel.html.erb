@@ -34,11 +34,11 @@
               # migration phases: 1) /legacy_link, 2) /migration_link, 3) /link
               render partial: 'content/form/field_types/migration_link', locals: {
                 f:         f,
-                attribute: field[:old_column_source],
+                attribute: field[:old_column_source] || field[:label],
                 field:     field,
                 page:      @content,
                 label:     field[:label],
-                relation:  raw_model.class.reflect_on_association(field[:old_column_source]).options[:through].to_s
+                relation:  field.fetch(:old_column_source, false) ? raw_model.class.reflect_on_association(field[:old_column_source]).options[:through].to_s : nil
               }
             %>
 

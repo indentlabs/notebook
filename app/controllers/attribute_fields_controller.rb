@@ -44,8 +44,8 @@ class AttributeFieldsController < ContentController
 
   def initialize_object
     @content = AttributeField.find_or_initialize_by(content_params).tap do |field|
-      field.user_id    = current_user.id
-      field.field_type = 'text_area'
+      field.user_id = current_user.id
+      field.migrated_from_legacy = true
     end
 
     if @content.attribute_category_id.nil?
