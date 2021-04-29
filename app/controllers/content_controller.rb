@@ -241,7 +241,7 @@ class ContentController < ApplicationController
       end
     end
 
-    update_page_tags if @content.respond_to?(:page_tags) 
+    # update_page_tags if @content.respond_to?(:page_tags)
 
     if @content.user == current_user
       # todo this needs some extra validation probably to ensure each attribute is one associated with this page
@@ -258,7 +258,7 @@ class ContentController < ApplicationController
     cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
     @content.update(cache_params) if cache_params.any? && update_success
 
-    if update_success 
+    if update_success
       successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
       failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.to_json)
