@@ -4,9 +4,13 @@
   raw_model = content.is_a?(Universe) ? content : content.raw_model
 %>
 
-<div id="contributors_panel" class="row panel">
+<div id="contributors_panel" class="panel">
   <% if raw_model.contributors.any? %>
-    <ul class="collection">
+    <ul class="collection with-header">
+      <li class="collection-header purple white-text">
+        <i class="material-icons left">group_add</i>
+        Contributors
+      </li>
       <% raw_model.contributors.each do |contributor| %>
         <%# Don't expose email addresses to anyone other than the content owner who entered them in the first place %>
         <% next if contributor.user.nil? && (content.user != current_user)%>
