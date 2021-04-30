@@ -1,7 +1,7 @@
 <%
-  content_type_name  = content_type.to_s.titleize                # "Character"
-  content_type_class = content_type_name.constantize             # Character
-  content_type_pluralized = content_type_name.downcase.pluralize # characters
+  content_type_name  = content_type.to_s.titleize                 # "Character"
+  content_type_class = content_class_from_name(content_type_name) # Character
+  content_type_pluralized = content_type_name.downcase.pluralize  # characters
 
   category_ids_for_this_content_type = AttributeCategory.where(entity_type: content_type_name.downcase, user_id: current_user).pluck(:id)
   name_field = AttributeField.find_by(field_type: 'name', attribute_category_id: category_ids_for_this_content_type)
