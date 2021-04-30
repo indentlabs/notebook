@@ -534,10 +534,8 @@ class ContentController < ApplicationController
     attribute_value.save!
 
     # Create the actual page_tag models too
-    @content = entity_params.fetch('entity_type').constantize.find_by(
-      id:   entity_params.fetch('entity_id'), 
-      user: current_user
-    )
+    set_entity
+    @content = @entity
     update_page_tags
   end
 
@@ -701,7 +699,10 @@ class ContentController < ApplicationController
     entity_page_id   = entity_params.fetch(:entity_id)
     
     return unless valid_content_types.map(&:name).include?(entity_page_type)
-    @entity = entity_page_type.constantize.find(entity_page_id)    
+    @entity = entity_page_type.constantize.find_by(
+      id:   entity_page_id,
+      user: current_user
+    )    
   end
 
   # For index, new, edit
