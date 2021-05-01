@@ -34,6 +34,31 @@
       </div>
     <% end %>
 
+    <% if @universe_scope.present? %>
+      <%# in-universe stuff %>
+    <% else %>
+      <%
+        accessible_universes = ((@current_user_content['Universe'] || []) + current_user.contributable_universes)
+        if accessible_universes.count > 1
+      %>
+        <div class="grey-text uppercase center">
+          Focus on one universe
+        </div>
+
+        <%= render partial: 'notice_dismissal/messages/16' %>
+
+        <% accessible_universes.sort_by(&:name).each do |universe| %>
+          <div class="col s12 m6 l4">
+            <%= link_to "?universe=#{universe.id}" do %>
+              <div class="hoverable card-panel purple white-text">
+                <i class="material-icons left">vpn_lock</i>
+                <%= universe.name %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
   </div>
 
   <div class="col s12 m5 l4">
@@ -57,6 +82,9 @@
           <% end %>
         <% end %>
       </ul>
+      <div class="center">
+        view more
+      </div>
     <% end %>
 
     <div class="grey-text uppercase center">Create something new</div>
