@@ -54,13 +54,15 @@ class ApplicationController < ActionController::Base
 
     # We always want to cache Universes, even if they aren't explicitly turned on.
     @current_user_content = current_user.content(content_types: @activated_content_types + ['Universe'], universe_id: @universe_scope.try(:id))
-    @current_user_content['Document'] = current_user.documents.order('updated_at DESC').to_a
 
-    # Likewise, we should also always cache Timelines
+
+    # Likewise, we should also always cache Timelines & Documents
     if @universe_scope
       @current_user_content['Timeline'] = current_user.timelines.where(universe_id: @universe_scope.try(:id)).to_a
+      @current_user_content['Document'] = current_user.documents.where(universe_id: @universe_scope.try(:id)).order('updated_at DESC').to_a
     else
       @current_user_content['Timeline'] = current_user.timelines.to_a
+      @current_user_content['Document'] = current_user.documents.order('updated_at DESC').to_a
     end
 
     # Fetch notifications
