@@ -39,7 +39,10 @@
 
     <% if @universe_scope.present? %>
       <% if @current_user_content.except('Universe').values.flatten.any? %>
-        <div class="grey-text uppercase center">in this universe</div>
+        <div class="grey-text uppercase center">
+          <%= pluralize @current_user_content.except('Universe').values.flatten.count, 'page' %>
+          in this universe
+        </div>
         <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
           <div class="col s12 m12 l6">
             <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id) do %>
