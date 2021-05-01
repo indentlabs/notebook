@@ -12,18 +12,31 @@
             <% end %>
           <% end %>
           <div class="activator" style="height: 265px; background: url('<%= content_image %>'); background-size: cover;"></div>
-        </div>
-        <div class="card-content fixed-card-content" style="overflow: hidden">
+
           <span class="card-title js-content-name activator">
-            <%= ContentFormatterService.show(text: content.name.presence || 'Untitled', viewing_user: current_user) %>
-          </span>
-          <p>
-            <% if content.is_a?(Document) %>
-              <%= content.reading_estimate %>
-            <% else %>
-              <%= sanitize ContentFormatterService.show(text: truncate(content.description, length: 140), viewing_user: current_user) %>
+            <div class="bordered-text">
+              <%= ContentFormatterService.show(text: content.name.presence || 'Untitled', viewing_user: current_user) %>
+            </div>
+
+            <% if content.respond_to?(:page_tags) %>
+              <p class="tags-container">
+                <% content.page_tags.each do |tag| %>
+                  <% if user_signed_in? && content.user == current_user %>
+                    <%=
+                      link_to send(
+                        "page_tag_#{content.class.name.downcase.pluralize}_path",
+                        slug: PageTagService.slug_for(tag.tag)
+                      ) do
+                    %>
+                      <span class="new badge <%= params[:slug] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                    <% end %>
+                  <% else %>
+                    <span class="new badge <%= params[:slug] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                  <% end %>
+                <% end %>
+              </p>
             <% end %>
-          </p>
+          </span>
         </div>
         <div class="card-action">
           <%= link_to edit_polymorphic_path(content), class: 'green-text right', target: content.is_a?(Document) ? '_new' : '_self' do %>
@@ -41,10 +54,16 @@
             <i class="material-icons right">close</i>
           </span>
           <% if content.is_a?(Document) || (content.description.try(:length) || 0 > 140) %>
+            <% if content.is_a?(Document) %>
+              <p>
+                <%= content.reading_estimate %>
+              </p>
+            <% end %>
             <p>
               <%= sanitize ContentFormatterService.show(text: truncate(content.description, length: 420, escape: false), viewing_user: current_user) %>
             </p>
           <% end %>
+
           <% if content.respond_to?(:page_tags) %>
             <p class="tags-container">
               <% content.page_tags.each do |tag| %>
@@ -77,7 +96,7 @@
   <% if current_user.can_create?(content_type) %>
     <div class="col s12 m6 l4">
       <%= link_to new_polymorphic_path(content_type), class: 'white-text' do %>
-        <div class="hoverable card <%= content_type.color %> lighten-1" style="height: 440px;">
+        <div class="hoverable card <%= content_type.color %> lighten-1" style="height: 320px;">
           <div class="card-content fixed-card-content centered-card-content">
             <p>
               <i class="material-icons large">add</i>
@@ -92,7 +111,7 @@
     </div>
   <% else %>
     <div class="col s12 m6 l4">
-      <div class="card <%= content_type.color %> lighten-3" style="height: 440px;">
+      <div class="card <%= content_type.color %> lighten-3" style="height: 320px;">
         <div class="card-content fixed-card-content">
           <p class="center grey-text text-lighten-1" style="margin-top: 50px; margin-bottom: 20px;">
             <i class="material-icons large"><%= content_type.icon %></i>
@@ -112,7 +131,7 @@
   <% if local_assigns.fetch(:show_template_editor_form, false) %>
     <div class="col s12 m6 l4">
       <%= link_to attribute_customization_path(content_type: content_type.name.downcase), class: 'white-text' do %>
-        <div class="hoverable card <%= content_type.color %> lighten-2" style="height: 440px;">
+        <div class="hoverable card <%= content_type.color %> lighten-2" style="height: 320px;">
           <div class="card-content fixed-card-content centered-card-content">
             <p>
               <i class="material-icons large"><%= content_type.icon %></i>

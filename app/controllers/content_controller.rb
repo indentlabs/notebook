@@ -110,7 +110,10 @@ class ContentController < ApplicationController
   def new
     @content = content_type_from_controller(self.class)
       .new(user: current_user)
-      .tap { |content| content.name = "New #{content.class.name}" }
+      .tap { |content| 
+        content.name        = "New #{content.class.name}"
+        content.universe_id = @universe_scope.try(:id)
+      }
 
     current_users_categories_and_fields = @content.class.attribute_categories(current_user)
     if current_users_categories_and_fields.empty?

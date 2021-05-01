@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_04_29_194615) do
+ActiveRecord::Schema.define(version: 2021_05_01_220752) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3340,6 +3340,7 @@ ActiveRecord::Schema.define(version: 2021_04_29_194615) do
     t.string "subtitle"
     t.string "notes"
     t.string "private_notes"
+    t.boolean "favorite"
     t.index ["universe_id"], name: "index_timelines_on_universe_id"
     t.index ["user_id"], name: "index_timelines_on_user_id"
   end
