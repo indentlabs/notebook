@@ -10,9 +10,26 @@
     <tr>
         <% triggers = Documents::Analysis::ContentService.adult_content?(@list, post.content) %>
         <% next unless triggers.any? %>
-        <td><%= post.postable.title %> (<%= post.postable.slug %>)</td>
-        <td><%= triggers.inspect %></td>
-        <td><%= post.content %></td>
+        <td>
+          <%= post.postable.title %><br />
+          (<%= link_to post.postable.slug, '/forum/private-topics/' + post.postable.slug %>)<br />
+          <%= post.postable.created_at.strftime("%m/%d/%Y") %> (<%= time_ago_in_words post.postable.created_at %> ago)
+        </td>
+        <td>
+          <% triggers.each do |trigger| %>
+            <span class="badge red white-text"><%= trigger %></span>
+          <% end %>
+        </td>
+        <td>
+          <%
+            content = post.content
+            triggers.each do |trigger|
+              content.gsub!(trigger, "<span class='badge red white-text'>#{trigger}</span>")
+            end
+          %>
+
+          <%= content.html_safe %>
+        </td>
     </tr>
   <% end %>
 </table>
