@@ -112,7 +112,7 @@ class ContentController < ApplicationController
       .new(user: current_user)
       .tap { |content| 
         content.name        = "New #{content.class.name}"
-        content.universe_id = @universe_scope.try(:id)
+        content.universe_id = @universe_scope.try(:id) if content.respond_to?(:universe_id)
       }
 
     current_users_categories_and_fields = @content.class.attribute_categories(current_user)
