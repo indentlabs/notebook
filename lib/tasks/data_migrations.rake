@@ -61,6 +61,7 @@ namespace :data_migrations do
           if (referencing_page.nil? || referenced_page.nil? || referencing_page.user.nil? || referenced_page.user.nil?)
             # Don't do anything here -- one of the pages has since been deleted
             # puts "    Skipping a deleted-page reference"
+            link.destroy
             next
           end
 
