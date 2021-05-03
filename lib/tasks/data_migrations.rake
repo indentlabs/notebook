@@ -94,8 +94,6 @@ namespace :data_migrations do
           # puts "    Referencing page: #{referencing_page_type}-#{referencing_page.id}"
           # puts "    Referenced page:  #{referenced_page_type}-#{referenced_page.id}"
           # puts "    Attribute field:  #{attribute_field.label} (#{attribute_field.id})"
-          puts "OK?"
-          binding.pry
 
           # Create a simulated Attribute with the existing link's value(s)
           attribute = Attribute.find_or_initialize_by(
@@ -109,7 +107,7 @@ namespace :data_migrations do
           else
             json_value = JSON.parse(attribute.value)
             json_value << '["' + referenced_page_type + '-' + referenced_page.id.to_s + '"]'
-            attribute.value = json_value.to_s
+            attribute.value = json_value
           end
           attribute.save!
 
@@ -123,7 +121,7 @@ namespace :data_migrations do
           reference.cached_relation_title = attribute_field.label
           if reference.save!
             # ...delete the old link model?
-            # link.destroy
+            link.destroy
           end
         end
       end
