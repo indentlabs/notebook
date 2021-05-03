@@ -58,7 +58,7 @@ namespace :data_migrations do
           referencing_page = link.send(referencing_page_type.downcase)
           referenced_page  = link.send(relation_params[:through_relation])
           
-          if (referencing_page.nil? || referenced_page.nil?)
+          if (referencing_page.nil? || referenced_page.nil? || referencing_page.user.nil? || referenced_page.user.nil?)
             # Don't do anything here -- one of the pages has since been deleted
             # puts "    Skipping a deleted-page reference"
             next
