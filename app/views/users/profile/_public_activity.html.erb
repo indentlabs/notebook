@@ -9,10 +9,10 @@
           <% next unless change_event.present? && change_event.content.present? %>
           <%
             if change_event.content_type == 'Attribute'
-              content_type_class = change_event.content.entity_type.constantize
+              content_type_class = content_class_from_name(change_event.content.entity_type)
               content            = content_type_class.find_by(id: change_event.content.entity_id)
             else
-              content_type_class = change_event.content_type.constantize
+              content_type_class = content_class_from_name(change_event.content_type)
               content            = content_type_class.find_by(id: change_event.content_id)
             end
           %>

@@ -27,12 +27,20 @@ class Document < ApplicationRecord
     'teal'
   end
 
+  def color
+    Document.color
+  end
+
   def self.hex_color
     '#009688'
   end
 
   def self.icon
     'description'
+  end
+
+  def icon
+    Document.icon
   end
 
   def page_type

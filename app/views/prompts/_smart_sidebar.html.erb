@@ -49,16 +49,11 @@
                 <% if serialized_field[:type] == "text_area" %>
                   <li><%= serialized_field[:value] %></li>
                 <% elsif serialized_field[:type] == "link" %>
-                  <% serialized_field[:value].each do |related_page| %>
-                    <li>
-                      <%= link_to related_page do %>
-                        <i class="material-icons <%= related_page.class.color %>-text left">
-                          <%= related_page.class.icon %>
-                        </i>
-                        <%= related_page.name %>
-                      <% end %>
-                    </li>
-                  <% end %>
+                  <%=
+                    #TODO: We should swap all the other field displays here with the new partials also
+                    render partial: "content/display/attribute_value/link", 
+                      locals: { value: serialized_field[:value], content: content }
+                  %>
                 <% elsif serialized_field[:type] == "name" %>
                   <li><%= serialized_field[:value] %></li>
 

@@ -41,92 +41,95 @@
 </script>
 
 <div class="card" style="padding: 20px 10px;">
-  <form action="<%# Same URL, same GET params %>" method="POST" id="payment-form">
-    <%= hidden_field_tag 'authenticity_token', form_authenticity_token %>
-    <div class="row">
-      <div class="col s12">
-        <label>
-          <span>Card Number</span>
-          <input type="text" size="20" data-stripe="number">
-        </label>
+  <div class="card-content">
+    <form action="<%# Same URL, same GET params %>" method="POST" id="payment-form">
+      <%= hidden_field_tag 'authenticity_token', form_authenticity_token %>
+      <div class="row">
+        <div class="col s12">
+          <label>
+            <span>Card Number</span>
+            <input type="text" size="20" data-stripe="number">
+          </label>
+        </div>
       </div>
-    </div>
 
-    <div class="row">
-      <div class="col s4">
-        <label>
-          <span>Expiration month (MM)</span>
-          <input type="text" size="2" data-stripe="exp_month">
-        </label>
+      <div class="row">
+        <div class="col s4">
+          <label>
+            <span>Expiration month (MM)</span>
+            <input type="text" size="2" data-stripe="exp_month">
+          </label>
+        </div>
+        <div class="col s4">
+          <label>
+            <span>Expiration year (YY)</span>
+            <input type="text" size="2" data-stripe="exp_year">
+          </label>
+        </div>
+        <div class="col s4">
+          <label>
+            <span>CVC<%#<span>(?)</span>%></span>
+            <input type="text" size="4" data-stripe="cvc">
+          </label>
+        </div>
       </div>
-      <div class="col s4">
-        <label>
-          <span>Expiration year (YY)</span>
-          <input type="text" size="2" data-stripe="exp_year">
-        </label>
+
+      <div class="row">
+        <div class="col s12">
+          <label>
+            <span>Billing Postal Code</span>
+            <input type="text" size="6" data-stripe="address_zip">
+          </label>
+        </div>
       </div>
-      <div class="col s4">
-        <label>
-          <span>CVC<%#<span>(?)</span>%></span>
-          <input type="text" size="4" data-stripe="cvc">
-        </label>
-      </div>
-    </div>
 
-    <div class="row">
-      <div class="col s12">
-        <label>
-          <span>Billing Postal Code</span>
-          <input type="text" size="6" data-stripe="address_zip">
-        </label>
-      </div>
-    </div>
+      <div class="payment-errors red white-text center" style="margin-bottom: 10px;"></div>
 
-    <div class="payment-errors red white-text center" style="margin-bottom: 10px;"></div>
+      <div class="center">
+        <% if @selected_plan.nil? %>
+          <input type="submit" class="btn btn-primary blue" value="Save payment info">
 
-    <div class="center">
-      <% if @selected_plan.nil? %>
-        <input type="submit" class="btn btn-primary blue" value="Save payment info">
+        <% else %>
+          <%
+            active_plan_on_stripe = @stripe_customer.subscriptions.data.select { |sub| sub.plan.id == @selected_plan.stripe_plan_id }.first
+          %>
+          <% if active_plan_on_stripe %>
+            <p class="center">
+              Since you've already paid for a <strong><%= @selected_plan.name %></strong> plan
+              until <%= Time.at(active_plan_on_stripe.current_period_end).strftime('%B %d') %>, you will not be charged again
+              for this plan until it renews on that date.
+            </p>
+          <% elsif @selected_plan.stripe_plan_id == 'premium' %>
+            <p class="center">
+              You will be charged <%= number_to_currency(@selected_plan.monthly_cents / 100) %> USD immediately, renewing
+              monthly.
+            </p>
+            <p class="center">
+              Of course, you can cancel at any time.
+            </p>
+          <% elsif @selected_plan.stripe_plan_id == 'premium-trio' %>
+            <p class="center">
+              You will be charged $25.00 USD immediately, renewing every three months.
+            </p>
+            <p class="center">
+              Of course, you can cancel at any time.
+            </p>
+          <% elsif @selected_plan.stripe_plan_id == 'premium-annual' %>
+            <p class="center">
+              You will be charged <%= number_to_currency(@selected_plan.monthly_cents * 12 / 100) %> USD immediately, renewing
+              annually.
+            </p>
+            <p class="center">
+              Of course, you can cancel at any time.
+            </p>
+          <% end %>
+          <br />
 
-      <% else %>
-        <input type="submit" class="btn btn-primary blue" value="Submit payment">
-
-        <%
-          active_plan_on_stripe = @stripe_customer.subscriptions.data.select { |sub| sub.plan.id == @selected_plan.stripe_plan_id }.first
-        %>
-        <% if active_plan_on_stripe %>
-          <p class="center">
-            Since you've already paid for a <strong><%= @selected_plan.name %></strong> plan
-            until <%= Time.at(active_plan_on_stripe.current_period_end).strftime('%B %d') %>, you will not be charged again
-            for this plan until it renews on that date.
-          </p>
-        <% elsif @selected_plan.stripe_plan_id == 'premium' %>
-          <p class="center">
-            You will be charged <%= number_to_currency(@selected_plan.monthly_cents / 100) %> USD immediately, renewing
-            monthly.
-          </p>
-          <p class="center">
-            Of course, you can cancel at any time.
-          </p>
-        <% elsif @selected_plan.stripe_plan_id == 'premium-trio' %>
-          <p class="center">
-            You will be charged $25.00 USD immediately, renewing every three months.
-          </p>
-          <p class="center">
-            Of course, you can cancel at any time.
-          </p>
-        <% elsif @selected_plan.stripe_plan_id == 'premium-annual' %>
-          <p class="center">
-            You will be charged <%= number_to_currency(@selected_plan.monthly_cents * 12 / 100) %> USD immediately, renewing
-            annually.
-          </p>
-          <p class="center">
-            Of course, you can cancel at any time.
-          </p>
+          <input type="submit" class="btn btn-primary blue" value="Submit payment">
         <% end %>
-      <% end %>
-    </div>
-  </form>
+      </div>
+    </form>
+  </div>
 </div>
 
 <div class="center help-text">

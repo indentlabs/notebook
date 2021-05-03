@@ -22,7 +22,7 @@ class AttributeField < ApplicationRecord
   before_validation :ensure_name
 
   UNDELETEABLE_FIELD_TYPES = %w(name universe tags)
-  SETTABLE_FIELD_TYPES = %w(text_area page_link)
+  SETTABLE_FIELD_TYPES     = %w(text_area page_link)
 
   # todo replace old_column_source etc
   #json :acceptable_page_link_classes

@@ -2,7 +2,7 @@
   var tribute = new Tribute({
     values: [
       <% @linkables_cache.each do |class_name, collection| %>
-        <% linkable_class = class_name.constantize %>
+        <% linkable_class = content_class_from_name(class_name) %>
         <% collection.each do |page_name, page_id| %>
           {
             key:   "<%= page_name.gsub('"', "\"").gsub("\n", " ").gsub("\r", " ").strip %>",

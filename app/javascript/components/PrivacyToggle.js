@@ -116,7 +116,7 @@ PrivacyToggle.propTypes = {
     id:             PropTypes.number.isRequired,
     name:           PropTypes.string.isRequired,
     page_type:      PropTypes.string.isRequired,
-    privacy:        PropTypes.string.isRequired
+    privacy:        PropTypes.string
   }).isRequired,
   content_icon:  PropTypes.string.isRequired,
   content_color: PropTypes.string.isRequired,

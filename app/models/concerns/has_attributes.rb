@@ -243,6 +243,17 @@ module HasAttributes
       field_value
     end
 
+    def set_name_field_value(field_value)
+      field = name_field
+      value = field.attribute_values.find_or_create_by(
+        user_id:     self.user_id,
+        entity_type: self.class.name,
+        entity_id:   self.id,
+      )
+
+      value.update(value: field_value)
+    end
+
     def universe_field_value
       universe_field_cache = universe_field
       return nil unless self.respond_to?(:universe_id)

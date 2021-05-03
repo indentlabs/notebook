@@ -89,7 +89,7 @@
 
       <div class="collection">
         <% @page_collection.page_types.each do |pt| %>
-          <% klass = pt.constantize %>
+          <% klass = content_class_from_name(pt) %>
           <%= link_to(send(pt.downcase.pluralize + '_page_collection_path', @page_collection), class: "collection-item #{klass.color} white-text") do %>
             <i class="material-icons left"><%= klass.icon %></i>
             <%= pt.pluralize %>
@@ -209,7 +209,7 @@
               <%= f.hidden_field :page_collection_id, value: @page_collection.id %>
               <div class="center">
                 <% @submittable_content.keys.each do |submittable_class_name| %>
-                  <% submittable_class = submittable_class_name.constantize %>
+                  <% submittable_class = content_class_from_name(submittable_class_name) %>
                   <i class="material-icons bordered-text <%= submittable_class.color %>-text <%= @submittable_content.keys.length > 6 ? 'small' : 'medium' %> tooltipped" 
                      data-tooltip="This Collection allows <%= submittable_class_name.downcase.pluralize %>."><%= submittable_class.icon %></i> &nbsp;
                 <% end %>

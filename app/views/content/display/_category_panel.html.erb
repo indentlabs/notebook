@@ -1,12 +1,20 @@
-<div id="<%= category[:name].gsub("'", '') %>_panel" class="row panel">
-  <div class="row">
-    <% category[:fields].select { |field| !field[:hidden] }.each do |serialized_field| %>
+<div id="<%= category[:name].gsub("'", '') %>_panel" class="card panel">
+  <div class="<%= @content.class.color %>-text text-darken-1 section-title sticky-below-navbar <%= @content.class.color %> lighten-5">
+    <i class="material-icons right"><%= category[:icon] %></i>
+    <%= category[:label] %>
+  </div>
+
+  <div class="card-content">
+    <% category[:fields].reject { |field| field[:hidden] }.each do |serialized_field| %>
+
+      <%# Don't show private fields unless we're signed in AND the owner of the content %>
       <% if serialized_field[:label].start_with?("Private") %>
-        <% next unless user_signed_in? && (
-          (content.raw_model.is_a?(Universe) && content.user == current_user) ||
-          (content.raw_model.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
-          (content.raw_model.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
-        )
+        <%
+          next unless user_signed_in? && (
+            (content.raw_model.is_a?(Universe) && content.user == current_user) ||
+            (content.raw_model.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
+            (content.raw_model.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
+          )
         %>
       <% end %>
 
@@ -21,14 +29,6 @@
           when 'link'
             serialized_field[:value]
 
-            # Leaving this old code in just in case there's an issue with links after release; good to delete after a successful deploy + time
-            # if serialized_field[:old_column_source].present? && content.raw_model.respond_to?(serialized_field[:old_column_source].to_sym)
-            #   serialized_field[:value]
-            # else
-            #   # todo uhhhh is this just a safety guard or are there actual cases of bad data triggering here?
-            #   nil
-            # end
-
           when 'tags'
             content.page_tags
 
@@ -36,26 +36,31 @@
             raise "unknown field type = " + serialized_field[:type].inspect
         end
       %>
-      <% next if value.blank? %>
+      <% 
+        # Don't show fields with a blank value
+        next if value.blank?
+      %>
 
-      <div class="col s12 m10 offset-m1 field-value">
-        <div class="grey-text uppercase">
+      <div class="col s12 field-value">
+        <div class="grey-text">
           <%
             prompt = I18n.translate "attributes.#{content.class_name.downcase}.#{serialized_field[:label].downcase.gsub(/\s/, '_')}",
               scope: :serendipitous_questions,
               name: content.name || "this #{content.class_name}",
               default: ''
           %>
-          <span class="<%= prompt.present? ? 'tooltipped' : nil %>" data-tooltip="<%= prompt %>" data-position="right">
-            <%= serialized_field[:label] %>
+          <span>
+            <strong class="uppercase"><%= serialized_field[:label] %></strong>
+            <%= "- #{prompt}" unless prompt.blank? %>
           </span>
         </div>
 
-        <%= 
+        <%=
           render partial: "content/display/attribute_value/#{serialized_field[:type]}", 
                   locals: { value: value, content: content }
         %>
       </div>
     <% end %>
+    <div class="clearfix"></div>
   </div>
 </div>

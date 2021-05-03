@@ -5,31 +5,61 @@
 <%
   relations   = Rails.application.config.content_relations[content.class.name]
   relations ||= []
-
-  @sidelinks_association_count = 0
 %>
 
-<div id="associations_panel" class="row panel">
-  <div class="row">
-    <div class="col s12 m10 offset-m1">
-      <%= render partial: 'notice_dismissal/messages/07' %>
+<div id="associations_panel" class="panel">
+  <%= render partial: 'notice_dismissal/messages/07' %>
+  <div class="clearfix"></div>
 
-      <% relations.each do |name, params| %>
-        <%
-          results = params[:related_class].where("#{params[:through_relation].downcase}_id": content.id)
-            .map    { |content| content.send(params[:inverse_class].downcase) }
-            .select { |content| content && content.readable_by?(current_user || User.new) }
-        %>
-        <% next unless results.any? %>
-        <% @sidelinks_association_count += results.count %>
-        <div class="uppercase grey-text">
-          <%= params[:relation_text].to_s.titleize.downcase %> of
-        </div>
-        <%=
-          render partial: "content/display/attribute_value/link", 
-                  locals: { value: results, content: content }
-        %>
-      <% end %>
-    </div>
+  <div class="card-panel">
+    <% content.incoming_page_references.group_by(&:attribute_field_id).each do |field_id, reference_list| %>
+      <div class="uppercase grey-text" style="padding-bottom: 0.5em">
+        <%= reference_list.first.referencing_page_type %>
+        <i class="material-icons" style="position: relative; top: 7px">chevron_right</i>
+        <%= reference_list.first.cached_relation_title %>
+        <i class="material-icons" style="position: relative; top: 7px; margin: 0 0.3em">link</i>
+        <%= reference_list.first.reference_type %>
+        <span class="<%= content.class.color %>-text">
+          <%= content.name %>
+        </span>
+      </div>
+      <%=
+        link_codes = reference_list.map { |ref| "#{ref.referencing_page_type}-#{ref.referencing_page_id}" }
+        render partial: "content/display/attribute_value/link", 
+                locals: { value: link_codes, content: content }
+      %>
+    <% end %>
+
+    <% if user_signed_in? %>
+      <div class="card-panel yellow lighten-5">
+        Notice: The newest Notebook.ai release is adding the ability to create your own link
+        fields, which includes a rather large migration of all existing link fields into a new linking system. 
+        Links that haven't been migrated yet can be seen below this message; links on the new system appear above.
+        <br /><br />
+        Thank you for your patience during this large rewrite! This notice will automatically disappear after the
+        migration has completed for everyone.
+        <br /><br />
+        &mdash; Andrew
+      </div>
+    <% end %>
+
+    <%# TODO: remove these after finishing link migration script %>
+    <% relations.each do |name, params| %>
+      <%
+        results = params[:related_class].where("#{params[:through_relation].downcase}_id": content.id)
+          .map    { |content| content.send(params[:inverse_class].downcase) }
+          .select { |content| content && content.readable_by?(current_user || User.new) }
+      %>
+      <% next unless results.any? %>
+
+      <div class="uppercase grey-text">
+        <%= params[:relation_text].to_s.titleize.downcase %> of
+      </div>
+      <%=
+        link_codes = results.map { |page| "#{page.page_type}-#{page.id}" }
+        render partial: "content/display/attribute_value/link", 
+                locals: { value: link_codes, content: content }
+      %>
+    <% end %>
   </div>
 </div>

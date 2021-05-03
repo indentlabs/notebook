@@ -21,7 +21,7 @@
 <div class="row">
   <%# todo aren't document entities precached somewhere on this page? %>
   <% analysis.document_entities.includes(:entity, entity: [:image_uploads]).order('entity_type asc, relevance desc').each do |entity| %>
-    <% entity_class = entity.entity_type.constantize %>
+    <% entity_class = content_class_from_name(entity.entity_type) %>
     <div class="col s12 m6">
       <div class="card">
         <div class="card-image waves-effect waves-block waves-light" style="max-height: 600px;">
@@ -143,7 +143,7 @@
       <%= f.hidden_field :document_entity_id,   value: nil %>
 
       <% @current_user_content.each do |content_type, content_list| %>
-        <% content_type_class = content_type.constantize %>
+        <% content_type_class = content_class_from_name(content_type) %>
         <% next if content_type == 'Document' %>
         <h5><%= content_type.pluralize %></h5>
         <ul class="collection">

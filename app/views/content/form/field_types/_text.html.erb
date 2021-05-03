@@ -1,0 +1,65 @@
+<%
+  autocomplete_options = AutocompleteService.for_field_label(content_model: raw_model.class, label: field[:label])
+%>
+
+<div class="content-field text">
+  <div class="input-field">
+    <div>
+      <i class="material-icons grey-text left">text_fields</i>
+      <%= f.label field[:id], field[:label] %>
+
+      <div class="right show-when-focused">
+        <% if autocomplete_options.any? %>
+          <i class="material-icons tiny grey-text lighten-2 tooltipped"
+              data-tooltip="This field may suggest some ideas for you when you start typing."
+              data-position="left"
+          >
+            offline_bolt
+          </i>
+        <% end %>
+      </div>
+    </div>
+    <%=
+      render partial: 'content/form/rich_text_input', locals: {
+        f:            f, 
+        content:      content,
+        field:        field,
+        show_label:   false,
+        autocomplete: autocomplete_options,
+        autosave:     true
+      }
+    %>
+
+    <p class="grey-text show-when-focused">
+      Tip: Press @ to add a link to your other pages.
+    </p>
+
+    <!--
+    <div class="show-when-focused">
+      <div class="btn-group field-actions card" data-field-id="<%= field[:id] %>">
+        <a href="#" class="btn btn-small white black-text tooltipped" data-tooltip="Link a notebook page">
+          <i class="material-icons">link</i>
+        </a>
+        <a href="#" class="btn btn-small white black-text tooltipped" data-tooltip="Suggest an answer for me">
+          <i class="material-icons">casino</i>
+        </a>
+        <a href="#" class="btn btn-small white black-text tooltipped" data-tooltip="Ask my followers for an answer">
+          <i class="material-icons">help</i>
+        </a>
+        <a href="#" class="btn btn-small white black-text tooltipped" data-tooltip="Add a private note to this field">
+          <i class="material-icons">note_alt</i>
+        </a>
+        <a href="#" class="btn btn-small white black-text tooltipped" data-tooltip="Manage field visibility">
+          <i class="material-icons">remove_red_eye</i>
+        </a>
+        <a href="#" class="btn btn-small white black-text tooltipped" data-tooltip="View changelog for this field">
+          <i class="material-icons">history</i>
+        </a>
+        <a href="#" class="btn btn-small white black-text tooltipped" data-tooltip="Compare to your other pages">
+          <i class="material-icons">compare</i>
+        </a>
+      </div>
+    </div>
+    -->
+  </div>
+</div>

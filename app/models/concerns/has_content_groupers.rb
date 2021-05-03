@@ -1,5 +1,6 @@
 require 'active_support/concern'
 
+# DEPRECATED :)
 module HasContentGroupers
   extend ActiveSupport::Concern
 

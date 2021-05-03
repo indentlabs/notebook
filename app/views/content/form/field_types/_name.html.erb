@@ -1,0 +1,21 @@
+<div class="content-field name">
+  <div class="input-field">
+    <div>
+      <i class="material-icons grey-text left">fingerprint</i>
+      <%= f.label field[:id], field[:label] %>
+    </div>
+    <%=
+      render partial: 'content/form/rich_text_input', locals: {
+        f:          f,
+        content:    page, 
+        field:      field, 
+        value:      @entity.present? ? @entity.try(:text) : nil, # we don't use @entity anymore
+        show_label: false,
+        autosave:   true
+      }
+    %>
+    <% if @entity.present? %>
+      <%= f.hidden_field :document_entity_id, value: @entity.id %>
+    <% end %>
+  </div>
+</div>

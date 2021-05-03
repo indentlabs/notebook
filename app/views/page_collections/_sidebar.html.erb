@@ -52,7 +52,7 @@
     <span class="badge brown-text"><%= @page_collection.accepted_submissions.count %></span>
   <% end %>
   <% @page_collection.page_types.each do |pt| %>
-    <% klass = pt.constantize %>
+    <% klass = content_class_from_name(pt) %>
     <%= link_to(send(pt.downcase.pluralize + '_page_collection_path', @page_collection), class: "collection-item #{klass.color} white-text") do %>
       <i class="material-icons left"><%= klass.icon %></i>
       <%= pt.pluralize %>

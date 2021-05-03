@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_08_200757) do
+ActiveRecord::Schema.define(version: 2021_05_01_220752) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -134,6 +134,8 @@ ActiveRecord::Schema.define(version: 2021_03_08_200757) do
     t.datetime "deleted_at"
     t.string "old_column_source"
     t.integer "position"
+    t.json "field_options"
+    t.boolean "migrated_from_legacy", default: false
     t.index ["attribute_category_id", "deleted_at"], name: "index_attribute_fields_on_attribute_category_id_and_deleted_at"
     t.index ["attribute_category_id", "label", "old_column_source", "field_type"], name: "attribute_fields_aci_label_ocs_ft"
     t.index ["attribute_category_id", "label", "old_column_source", "user_id", "field_type"], name: "attribute_fields_aci_label_ocs_ui_ft"
@@ -2374,6 +2376,21 @@ ActiveRecord::Schema.define(version: 2021_03_08_200757) do
     t.index ["user_id"], name: "index_page_collections_on_user_id"
   end
 
+  create_table "page_references", force: :cascade do |t|
+    t.string "referencing_page_type", null: false
+    t.integer "referencing_page_id", null: false
+    t.string "referenced_page_type", null: false
+    t.integer "referenced_page_id", null: false
+    t.integer "attribute_field_id"
+    t.string "cached_relation_title"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "reference_type"
+    t.index ["attribute_field_id"], name: "index_page_references_on_attribute_field_id"
+    t.index ["referenced_page_type", "referenced_page_id"], name: "page_reference_referenced_page"
+    t.index ["referencing_page_type", "referencing_page_id"], name: "page_reference_referencing_page"
+  end
+
   create_table "page_settings_overrides", force: :cascade do |t|
     t.string "page_type"
     t.string "name_override"
@@ -3323,6 +3340,7 @@ ActiveRecord::Schema.define(version: 2021_03_08_200757) do
     t.string "subtitle"
     t.string "notes"
     t.string "private_notes"
+    t.boolean "favorite"
     t.index ["universe_id"], name: "index_timelines_on_universe_id"
     t.index ["user_id"], name: "index_timelines_on_user_id"
   end
@@ -3878,6 +3896,7 @@ ActiveRecord::Schema.define(version: 2021_03_08_200757) do
   add_foreign_key "page_collection_reports", "users"
   add_foreign_key "page_collection_submissions", "users"
   add_foreign_key "page_collections", "users"
+  add_foreign_key "page_references", "attribute_fields"
   add_foreign_key "page_tags", "users"
   add_foreign_key "paypal_invoices", "page_unlock_promo_codes"
   add_foreign_key "paypal_invoices", "users"

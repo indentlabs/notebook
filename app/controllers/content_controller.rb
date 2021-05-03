@@ -83,13 +83,6 @@ class ContentController < ApplicationController
 
     if (current_user || User.new).can_read?(@content)
       if user_signed_in?
-        @navbar_actions.insert(1, {
-          label: @content.name,
-          href: main_app.polymorphic_path(@content)
-        })
-      end
-
-      if user_signed_in?
         if @content.updated_at > 30.minutes.ago
           Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed content', {
             'content_type': content_type.name,
@@ -105,14 +98,6 @@ class ContentController < ApplicationController
         end
       end
 
-      if user_signed_in? && current_user.can_create?(content_type)
-        @navbar_actions << {
-          label: "New #{content_type.name.downcase}",
-          href: main_app.new_polymorphic_path(content_type),
-          class: 'right'
-        }
-      end
-
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
         format.json { render json: @serialized_content.data }
@@ -123,37 +108,42 @@ class ContentController < ApplicationController
   end
 
   def new
-    @content = content_type_from_controller(self.class).new(user: current_user)
+    @content = content_type_from_controller(self.class)
+      .new(user: current_user)
+      .tap { |content| 
+        content.name        = "New #{content.class.name}"
+        content.universe_id = @universe_scope.try(:id) if content.respond_to?(:universe_id)
+      }
+
     current_users_categories_and_fields = @content.class.attribute_categories(current_user)
     if current_users_categories_and_fields.empty?
       content_type_from_controller(self.class).create_default_attribute_categories(current_user)
       current_users_categories_and_fields = @content.class.attribute_categories(current_user)
     end
-    @serialized_categories_and_fields = CategoriesAndFieldsSerializer.new(
-      current_users_categories_and_fields
-    )
-    @suggested_page_tags = (
-      current_user.page_tags.where(page_type: @content.class.name).pluck(:tag) +
-        PageTagService.suggested_tags_for(@content.class.name)
-    ).uniq
 
-    # todo this is a good spot to audit to disable and see if create permissions are ok also
-    unless (current_user || User.new).can_create?(@content.class) \
+    if user_signed_in? && current_user.can_create?(@content.class) \
       || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: @content.class.name)
 
-      return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
-    end
+      if params.key?(:document_entity)
+        entity = DocumentEntity.find_by(id: params.fetch(:document_entity).to_i)
+        if entity.document_owner == current_user
+          # Link the new page to the document entity
+          @content.name = entity.text # cached name value
+          @content.document_entity_id = entity.id
+          
+          # Since we're creating a new page here, we need to make sure we save it before requesting
+          # a name field, since they're keyed off content IDs (and we don't have an ID before saving).
+          @content.save!
 
-    if params[:document_entity]
-      @entity = DocumentEntity.find_by(id: params[:document_entity].to_i)
-      if @entity.document_owner != current_user
-        @entity = nil
+          # Update the actual AttributeField's value for this page's name also
+          @content.set_name_field_value(entity.text)
+        end
       end
-    end
 
-    respond_to do |format|
-      format.html { render 'content/new', locals: { content: @content } }
-      format.json { render json: @content }
+      @content.save!
+      return redirect_to edit_polymorphic_path(@content)
+    else
+      return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
     end
   end
 
@@ -174,14 +164,6 @@ class ContentController < ApplicationController
 
     unless @content.updatable_by? current_user
       return redirect_to @content, notice: t(:no_do_permission)
-    end
-
-    if user_signed_in? && current_user.can_create?(content_type_class)
-      @navbar_actions << {
-        label: "New #{content_type_class.name.downcase}",
-        href: main_app.new_polymorphic_path(content_type_class),
-        class: 'right'
-      }
     end
 
     respond_to do |format|
@@ -238,6 +220,8 @@ class ContentController < ApplicationController
   end
 
   def update
+    # TODO: most things are stripped out now that we're using per-field updates, so we should
+    # audit what's left of this function and what needs to stay
     content_type = content_type_from_controller(self.class)
     @content = content_type.with_deleted.find(params[:id])
 
@@ -260,7 +244,7 @@ class ContentController < ApplicationController
       end
     end
 
-    update_page_tags if @content.respond_to?(:page_tags) 
+    # update_page_tags if @content.respond_to?(:page_tags)
 
     if @content.user == current_user
       # todo this needs some extra validation probably to ensure each attribute is one associated with this page
@@ -272,11 +256,12 @@ class ContentController < ApplicationController
     end
 
     cache_params = {}
-    cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField, Attribute].include?(@content.class)
+    # TODO strip relevant logic out to AttributeCategory#update and Attribute#update so we don't need this weird branch
+    cache_params[:name]     = @content.name_field_value unless [AttributeCategory, Attribute].include?(@content.class)
     cache_params[:universe] = @content.universe_field_value if self.respond_to?(:universe_id)
     @content.update(cache_params) if cache_params.any? && update_success
 
-    if update_success 
+    if update_success
       successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
       failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.to_json)
@@ -418,6 +403,8 @@ class ContentController < ApplicationController
       .attribute_categories(current_user, show_hidden: true)
       .shown_on_template_editor
       .order(:position)
+
+    @dummy_model = @content_type_class.new
   end
 
   def api_sort
@@ -450,16 +437,137 @@ class ContentController < ApplicationController
     end
   end
 
+  # Content update for link-type fields
+  def link_field_update
+    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+
+    if params.key?(:attribute_field)
+      attribute_value.value = params.require(:attribute_field).fetch('linked_pages', [])
+    else
+      attribute_value.value = []
+    end
+    attribute_value.save!
+
+    # Make sure we create references from the entity to the linked pages
+    set_entity
+    referencing_page = @entity
+
+    valid_reference_ids = []
+    referenced_page_codes = JSON.parse(attribute_value.value)
+    referenced_page_codes.each do |page_code|
+      page_type, page_id = page_code.split('-')
+
+      reference = referencing_page.outgoing_page_references.find_or_initialize_by(
+        referenced_page_type:  page_type,
+        referenced_page_id:    page_id,
+        attribute_field_id:    @attribute_field.id,
+        reference_type:        'linked'
+      )
+      reference.cached_relation_title = @attribute_field.label
+      reference.save!
+
+      valid_reference_ids << reference.reload.id
+    end
+
+    # Delete all other references still attached to this field, but not present in this request
+    referencing_page.outgoing_page_references
+      .where(attribute_field_id: @attribute_field.id)
+      .where.not(id: valid_reference_ids)
+      .destroy_all
+  end
+
+  # Content update for name fields
+  def name_field_update
+    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+    attribute_value.value = field_params.fetch('value', '')
+    attribute_value.save!
+
+    # We also need to update the cached `name` field on the content page itself
+    entity_type = entity_params.fetch(:entity_type)
+    raise "Invalid entity type: #{entity_params.fetch(:entity_type)}" unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
+    entity = entity_type.constantize.find_by(id: entity_params.fetch(:entity_id).to_i)
+    entity.update(name: field_params.fetch('value', ''))
+  end
+
+  # Content update for text_area fields
+  def text_field_update
+    text = field_params.fetch('value', '')
+    if text.present?
+      @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
+      attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+      attribute_value.value = text
+      attribute_value.save!
+
+      # Create PageReferences for mentioned pages
+      tokens = ContentFormatterService.tokens_to_replace(text)
+      if tokens.any?
+        set_entity
+
+        valid_reference_ids = []
+        tokens.each do |token|
+          reference = @entity.outgoing_page_references.find_or_initialize_by(
+            referenced_page_type:  token[:content_type],
+            referenced_page_id:    token[:content_id],
+            attribute_field_id:    @attribute_field.id,
+            reference_type:        'mentioned'
+          )
+          reference.cached_relation_title = @attribute_field.label
+          reference.save!
+
+          valid_reference_ids << reference.reload.id
+        end
+
+        # Delete all other references still attached to this field, but not present in this request
+        referencing_page.outgoing_page_references
+          .where(attribute_field_id: @attribute_field.id)
+          .where.not(id: valid_reference_ids)
+          .destroy_all
+      end
+    end
+  end
+
+  def tags_field_update
+    return unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
+
+    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+    attribute_value.value = field_params.fetch('value', '')
+    attribute_value.save!
+
+    # Create the actual page_tag models too
+    set_entity
+    @content = @entity
+    update_page_tags
+  end
+
+  def universe_field_update
+    return unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
+
+    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+    attribute_value.value = field_params.fetch('value', '').to_i
+    attribute_value.save!
+
+    @content = entity_params.fetch('entity_type').constantize.find_by(
+      id:   entity_params.fetch('entity_id'), 
+      user: current_user
+    )
+    @content.update!(universe_id: attribute_value.value)
+  end
+
   private
 
   def update_page_tags
-    tag_list = page_tag_params.fetch(:page_tags, "").split(PageTag::SUBMISSION_DELIMITER)
+    tag_list = field_params.fetch('value', '').split(PageTag::SUBMISSION_DELIMITER)
     current_tags = @content.page_tags.pluck(:tag)
 
     tags_to_add    = tag_list - current_tags
     tags_to_remove = current_tags - tag_list
 
     tags_to_add.each do |tag|
+      # TODO: create changelog event for AddedTag
       @content.page_tags.find_or_create_by(
         tag:  tag,
         slug: PageTagService.slug_for(tag),
@@ -468,6 +576,7 @@ class ContentController < ApplicationController
     end
 
     tags_to_remove.each do |tag|
+      # TODO: create changelog event for RemovedTag or use destroy_all
       @content.page_tags.find_by(tag: tag).destroy
     end
   end
@@ -529,6 +638,14 @@ class ContentController < ApplicationController
     params.require(content_class).permit(:page_tags)
   end
 
+  def entity_params
+    params.require(:entity).permit(:entity_id, :entity_type)
+  end
+
+  def field_params
+    params.require(:field).permit(:name, :value)
+  end
+
   def content_deletion_redirect_url
     send("#{@content.class.name.underscore.pluralize}_path")
   end
@@ -580,6 +697,17 @@ class ContentController < ApplicationController
     @navbar_color = content_type.try(:hex_color) || '#2196F3'
   end
 
+  def set_entity
+    entity_page_type = entity_params.fetch(:entity_type)
+    entity_page_id   = entity_params.fetch(:entity_id)
+    
+    return unless valid_content_types.map(&:name).include?(entity_page_type)
+    @entity = entity_page_type.constantize.find_by(
+      id:   entity_page_id,
+      user: current_user
+    )    
+  end
+
   # For index, new, edit
   # def set_general_navbar_actions
   #   content_type = @content_type_class || content_type_from_controller(self.class)
@@ -622,23 +750,6 @@ class ContentController < ApplicationController
     @navbar_actions = []
 
     return if [AttributeCategory, AttributeField].include?(content_type)
-
-    if user_signed_in?
-      if @current_user_content
-        @navbar_actions << {
-          label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
-          href: main_app.polymorphic_path(content_type)
-        }
-      end
-    end
-
-    discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
-    if discussions_link.present?
-      @navbar_actions << {
-        label: 'Discussions',
-        href: discussions_link
-      }
-    end
   end
 
   def set_sidenav_expansion
