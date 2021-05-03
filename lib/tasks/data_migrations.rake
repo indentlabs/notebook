@@ -25,7 +25,7 @@ namespace :data_migrations do
 
   desc "Create PageReferences for all the old content linkers"
   task create_content_linker_page_references: :environment do
-    require 'pry'
+    # require 'pry'
 
     start_time = DateTime.current
     puts "Starting the long migration!"
