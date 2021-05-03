@@ -105,10 +105,8 @@ namespace :data_migrations do
             entity_id:          referencing_page.id
           )
           if attribute.value.nil?
-            attribute.value = '["' + referenced_page_type + '-' + referenced_page.id.to_s + '"]'
+            attribute.value = JSON.parse('["' + referenced_page_type + '-' + referenced_page.id.to_s + '"]')
           else
-            require 'pry'
-            binding.pry
             json_value = JSON.parse(attribute.value)
             json_value << '["' + referenced_page_type + '-' + referenced_page.id.to_s + '"]'
             attribute.value = json_value.to_s
