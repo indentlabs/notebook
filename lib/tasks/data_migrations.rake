@@ -106,7 +106,7 @@ namespace :data_migrations do
             attribute.value = JSON.parse('["' + referenced_page_type + '-' + referenced_page.id.to_s + '"]')
           else
             json_value = JSON.parse(attribute.value)
-            json_value << '["' + referenced_page_type + '-' + referenced_page.id.to_s + '"]'
+            json_value << "#{referenced_page_type}-#{referenced_page.id.to_s}"
             attribute.value = json_value
           end
           attribute.save!
@@ -121,7 +121,7 @@ namespace :data_migrations do
           reference.cached_relation_title = attribute_field.label
           if reference.save!
             # ...delete the old link model?
-            link.destroy
+            # link.destroy
           end
         end
       end
