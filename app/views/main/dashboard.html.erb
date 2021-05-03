@@ -8,90 +8,146 @@
   </div>
 <% end %>
 <div class="row">
-  <div class="col s12 m7 l8">
-    <div class="grey-text uppercase center">
-      Expand
-      <% if @universe_scope.present? %>
-        <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.color}-text" %>
-      <% else %>
-        your worlds
-      <% end %>
-    </div>
-    <% if @content %>
-      <%= render partial: 'cards/serendipitous/content_question', locals: { 
-        content: @content, 
-        field: @attribute_field_to_question,
-        expand_by_default: true,
-        include_quick_reference: false
-      } %>
-    <% end %>
+  <% if @current_user_content.values.flatten.count.zero? %>
+    <div class="col s12 m7 l8">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-title">Welcome to Notebook.ai!</div>
+          <p>
+            Notebook.ai is designed to feel like a specialized notebook for of all your worldbuilding ideas.
+          </p>
+          <br />
+          <p>
+            Start your worldbuilding journey by creating a universe with the button below (or jump straight to the good stuff!).
+            All of the worldbuildings pages you create can be assigned to a universe, which contains your world.
+            Once you've created a few worlds, they make it easy to focus on just the world you want to work on!
+          </p> 
+        </div>
+      </div>
 
-    <%= link_to prompts_path do %>
-      <div class="hoverable card-panel orange white-text" style="margin: 0; margin-bottom: 2em">
-        <i class="material-icons left">lightbulb_outline</i>
-        <i class="material-icons right">arrow_right</i>
-        View more prompts
+      <%= link_to new_universe_path do %>
+        <div class="hoverable card-panel <%= Universe.color %> white-text">
+          <i class="material-icons left"><%= Universe.icon %></i>
+          <i class="material-icons right">add</i>
+          Create a Universe
+        </div>
+      <% end %>
+
+      <% (@activated_content_types - ['Universe']).each do |type| %>
+        <%= link_to send("new_#{type.downcase}_path") do %>
+          <div class="hoverable card-panel <%= content_class_from_name(type).color %> white-text">
+            <i class="material-icons left"><%= content_class_from_name(type).icon %></i>
+            <i class="material-icons right">add</i>
+            Create a <%= type %>
+          </div>
+        <% end %>
+      <% end %>
+
+      <div class="card-panel">
+        <p>
+          The free tier of Notebook.ai was intentionally designed to be enough for most beginner worldbuilders. Your noun trifecta
+          (people, places, and things) can be created with Character, Location, and Item pages.
+        </p>
+        <p>
+          For more advanced worlds, the site is supported by an optional Premium subscription that unlocks
+          <%= pluralize Rails.application.config.content_types[:premium].count, 'other page type' %> for you to use!
+        </p>
+      </div>
+
+      <%= link_to customization_content_types_path do %>
+        <div class="card-panel hoverable blue white-text">
+          <i class="material-icons left">add</i>
+          Browse all page types
+        </div>
+      <% end %>
+        
+    </div>
+  <% else %>
+    <div class="col s12 m7 l8">
+      <div class="grey-text uppercase center">
+        Expand
         <% if @universe_scope.present? %>
-          in this universe
+          <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.color}-text" %>
+        <% else %>
+          your worlds
         <% end %>
       </div>
-    <% end %>
+      <% if @content %>
+        <%= render partial: 'cards/serendipitous/content_question', locals: { 
+          content: @content, 
+          field: @attribute_field_to_question,
+          expand_by_default: true,
+          include_quick_reference: false
+        } %>
+      <% end %>
 
-    <% if @universe_scope.present? || @current_user_content.fetch('Universe', []).count == 1 %>
-      <% if @current_user_content.except('Universe').values.flatten.any? %>
-        <div class="grey-text uppercase center">
-          <%= pluralize @current_user_content.except('Universe').values.flatten.count, 'page' %>
-          in
-          <span class="<%= Universe.color %>-text">
-            <%= @universe_scope.try(:name) || @current_user_content.fetch('Universe').first.name %>
-          </span>
+      <%= link_to prompts_path do %>
+        <div class="hoverable card-panel orange white-text" style="margin: 0; margin-bottom: 2em">
+          <i class="material-icons left">lightbulb_outline</i>
+          <i class="material-icons right">arrow_right</i>
+          View more prompts
+          <% if @universe_scope.present? %>
+            in this universe
+          <% end %>
         </div>
-        <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
-          <div class="col s12 m12 l6">
-            <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id) do %>
-              <div class="hoverable card" style="margin-bottom: 2px">
-                <div class="card-image">
-                  <%= image_tag content_page.random_image_including_private, style: 'height: 245px' %>
-                    <div class="card-title bordered-text">
-                      <i class="material-icons left <%= content_page.color %>-text" style="position: relative; top: 4px">
-                        <%= content_page.icon %>
-                      </i>
-                      <%= content_page.name %>
-                    </div>
-                </div>
-              </div>
-            <% end %>
+      <% end %>
+
+      <% if @universe_scope.present? || @current_user_content.fetch('Universe', []).count == 1 %>
+        <% if @current_user_content.except('Universe').values.flatten.any? %>
+          <div class="grey-text uppercase center">
+            <%= pluralize @current_user_content.except('Universe').values.flatten.count, 'page' %>
+            in
+            <span class="<%= Universe.color %>-text">
+              <%= @universe_scope.try(:name) || @current_user_content.fetch('Universe').first.name %>
+            </span>
           </div>
+          <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
+            <div class="col s12 m12 l6">
+              <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id) do %>
+                <div class="hoverable card" style="margin-bottom: 2px">
+                  <div class="card-image">
+                    <%= image_tag content_page.random_image_including_private, style: 'height: 245px' %>
+                      <div class="card-title bordered-text">
+                        <i class="material-icons left <%= content_page.color %>-text" style="position: relative; top: 4px">
+                          <%= content_page.icon %>
+                        </i>
+                        <%= content_page.name %>
+                      </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      <% else %>
+        <%
+          accessible_universes = ((@current_user_content['Universe'] || []) + current_user.contributable_universes)
+          if accessible_universes.count > 1
+        %>
+          <div class="grey-text uppercase center">
+            Focus on one universe at a time
+          </div>
+
+          <%= render partial: 'notice_dismissal/messages/16' %>
+
+          <% accessible_universes.sort_by { |u| u.name.downcase }.each do |universe| %>
+            <div class="col s12 m6 l4">
+              <%= link_to "?universe=#{universe.id}" do %>
+                <div class="hoverable card" style="margin-bottom: 2px">
+                  <div class="card-image">
+                    <%= image_tag universe.random_image_including_private, style: 'height: 162px' %>
+                      <div class="card-title">
+                        <%= universe.name %>
+                      </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
         <% end %>
       <% end %>
-    <% else %>
-      <%
-        accessible_universes = ((@current_user_content['Universe'] || []) + current_user.contributable_universes)
-        if accessible_universes.count > 1
-      %>
-        <div class="grey-text uppercase center">
-          Focus on one universe at a time
-        </div>
-
-        <%= render partial: 'notice_dismissal/messages/16' %>
-
-        <% accessible_universes.sort_by { |u| u.name.downcase }.each do |universe| %>
-          <div class="col s12 m6 l4">
-            <%= link_to "?universe=#{universe.id}" do %>
-              <div class="hoverable card" style="margin-bottom: 2px">
-                <div class="card-image">
-                  <%= image_tag universe.random_image_including_private, style: 'height: 162px' %>
-                    <div class="card-title">
-                      <%= universe.name %>
-                    </div>
-                </div>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-      <% end %>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
 
   <div class="col s12 m5 l4">
     <% if @recently_edited_pages.any? %>

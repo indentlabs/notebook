@@ -19,10 +19,10 @@
 <% end %>
 
 <%
-  placeholder = I18n.translate "attributes.#{content_name}.#{field[:label].downcase.gsub(/\s/, '_')}",
+  placeholder = I18n.translate "attributes.#{content_name.downcase}.#{field[:label].downcase.gsub(/\s/, '_')}",
     scope: :serendipitous_questions,
-    name: content.send('name') || "this #{content_name}",
-    default: 'Write as little or as much as you want!'
+    name: content.send('name') != "New #{content_name}" ? content.send('name') : "this #{content_name.downcase}",
+    default: 'Write as little or as much as you want'
 %>
 
 <%= hidden_field_tag "field[name]", field[:id] %>
