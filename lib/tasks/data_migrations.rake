@@ -91,9 +91,11 @@ namespace :data_migrations do
           end
 
           # Debug
-          # puts "    Referencing page: #{referencing_page_type}-#{referencing_page.id}"
-          # puts "    Referenced page:  #{referenced_page_type}-#{referenced_page.id}"
-          # puts "    Attribute field:  #{attribute_field.label} (#{attribute_field.id})"
+          puts "    Referencing page: #{referencing_page_type}-#{referencing_page.id}"
+          puts "    Referenced page:  #{referenced_page_type}-#{referenced_page.id}"
+          puts "    Attribute field:  #{attribute_field.label} (#{attribute_field.id})"
+          puts "OK?"
+          pause = gets
 
           # Create a simulated Attribute with the existing link's value(s)
           attribute = Attribute.find_or_initialize_by(
