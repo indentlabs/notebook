@@ -29,7 +29,7 @@
               field[:value]
             )
           %>
-          <% @current_user_content.fetch(page_type.name, []).each do |page| %>
+          <% @current_user_content.fetch(page_type.name, []).sort_by { |p| p.name.downcase }.each do |page| %>
             <option value="<%= page_type %>-<%= page.id %>" 
               data-icon="<%= asset_path page.random_image_including_private(format: :thumb) %>"
               <%= 'selected' if field[:value].include?("#{page.page_type}-#{page.id}") %>
