@@ -27,6 +27,7 @@ class AttributeFieldsController < ContentController
     end
 
     if @attribute_field.update(attribute_field_params.merge({ migrated_from_legacy: true }))
+      @content = @attribute_field
       successful_response(
         @attribute_field, 
         t(:update_success, model_name: @attribute_field.label)
@@ -89,7 +90,7 @@ class AttributeFieldsController < ContentController
   end
 
   def attribute_field_params
-    params.require(:attribute_field).permit(:id, field_options: {})
+    params.require(:attribute_field).permit(:id, :label, field_options: {})
   end
 
   def content_param_list
