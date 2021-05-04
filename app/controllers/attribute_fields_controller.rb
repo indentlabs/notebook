@@ -102,7 +102,7 @@ class AttributeFieldsController < ContentController
       :entity_type, 
       :attribute_category_id,
       :hidden,
-      :field_options
+      field_options: {}
     ]
   end
 

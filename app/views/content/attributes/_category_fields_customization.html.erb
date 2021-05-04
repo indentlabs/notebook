@@ -65,6 +65,19 @@
             <%= f.label :label, 'Field label' %>
           </div>
           <div class="input-field col s12">
+            <select multiple 
+              name="attribute_field[field_options][linkable_types][]" 
+              prompt="Please select at least one page type for this field to link to"
+            >
+              <%= 
+                options_for_select(
+                  Rails.application.config.content_types[:all].map { |klass| [klass.name.pluralize, klass.name] }
+                )
+              %>
+            </select>
+            <label>Linkable page types</label>
+          </div>
+          <div class="input-field col s12">
             <%= f.submit 'Add new link field', class: "btn #{@content_type_class.color}" %>
           </div>
         </div>
