@@ -520,7 +520,7 @@ class ContentController < ApplicationController
         end
 
         # Delete all other references still attached to this field, but not present in this request
-        referencing_page.outgoing_page_references
+        @entity.outgoing_page_references
           .where(attribute_field_id: @attribute_field.id)
           .where.not(id: valid_reference_ids)
           .destroy_all
