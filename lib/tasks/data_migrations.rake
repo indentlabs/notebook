@@ -88,6 +88,7 @@ namespace :data_migrations do
           attribute_field = attribute_field.first
           if attribute_field.nil?
             # Field has been deleted....?
+            link.destroy
             next
           end
 
