@@ -44,8 +44,9 @@ class AttributeFieldsController < ContentController
   private
 
   def initialize_object
-    @content = AttributeField.find_or_initialize_by(content_params).tap do |field|
+    @content = AttributeField.find_or_initialize_by(content_params.except(:field_options)).tap do |field|
       field.user_id = current_user.id
+      field.field_options = content_params.fetch(:field_options, {})
       field.migrated_from_legacy = true
     end
 
