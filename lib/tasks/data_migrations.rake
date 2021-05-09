@@ -55,8 +55,17 @@ namespace :data_migrations do
 
         puts "  Creating references for #{link_class.count} #{relation_name} links"
         link_class.find_each do |link|
-          referencing_page = link.send(referencing_page_type.downcase)
-          referenced_page  = link.send(relation_params[:through_relation])
+          referencing_page = nil
+          referenced_page  = nil
+
+          if link.name == Deityship.name
+            referencing_page = link.send(referencing_page_type.downcase)
+            referenced_page  = link.send(:deity_character)
+
+          else
+            referencing_page = link.send(referencing_page_type.downcase)
+            referenced_page  = link.send(relation_params[:through_relation])
+          end
           
           if (referencing_page.nil? || referenced_page.nil? || referencing_page.user.nil? || referenced_page.user.nil?)
             # Don't do anything here -- one of the pages has since been deleted
