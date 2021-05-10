@@ -94,6 +94,7 @@ class ApplicationController < ActionController::Base
 
   def cache_linkable_content_for_each_content_type
     linkable_classes = Rails.application.config.content_types[:all].map(&:name) & current_user.user_content_type_activators.pluck(:content_type)
+    linkable_classes += %w(Document Timeline)
 
     @linkables_cache = {}
     linkable_classes.each do |class_name|

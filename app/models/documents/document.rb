@@ -2,7 +2,6 @@ class Document < ApplicationRecord
   acts_as_paranoid
 
   belongs_to :user,     optional: true
-  belongs_to :universe, optional: true
 
   has_many :document_analysis,   dependent: :destroy
   has_many :document_entities,   through: :document_analysis
@@ -15,6 +14,7 @@ class Document < ApplicationRecord
   include HasParseableText
   include HasPartsOfSpeech
   include HasImageUploads
+  include BelongsToUniverse
 
   # TODO: include IsContentPage ?
 

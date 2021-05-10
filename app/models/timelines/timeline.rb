@@ -3,17 +3,17 @@ class Timeline < ApplicationRecord
 
   include IsContentPage
   include HasPageTags
+
+  include HasImageUploads
+  include BelongsToUniverse
+
   include Authority::Abilities
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   validates :user_id, presence: true
-
-  belongs_to :universe, optional: true
   belongs_to :user
 
   has_many :timeline_events, -> { order(position: :asc) }, dependent: :destroy
-
-  include HasImageUploads
 
   after_create :initialize_first_event
 

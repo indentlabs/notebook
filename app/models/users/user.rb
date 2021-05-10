@@ -143,11 +143,27 @@ class User < ApplicationRecord
     define_method "linkable_#{pluralized_content_type}" do
       # We append [0] to the ID list here in case both sets are empty, since IN () is invalid syntax but IN(0) is [and has the same result]
       content_type.where("""
-        universe_id IN (#{(my_universe_ids + contributable_universe_ids + [0]).uniq.join(',')})
+        universe_id IN (#{(my_universe_ids + contributable_universe_ids + []).uniq.join(',')})
           OR
         (universe_id IS NULL AND user_id = #{self.id.to_i})
       """)
     end
+  end
+
+  def linkable_documents
+    Document.where("""
+      universe_id IN (#{(my_universe_ids + contributable_universe_ids + []).uniq.join(',')})
+        OR
+      (universe_id IS NULL AND user_id = #{self.id.to_i})
+    """)
+  end
+
+  def linkable_timelines
+    Timeline.where("""
+      universe_id IN (#{(my_universe_ids + contributable_universe_ids + []).uniq.join(',')})
+        OR
+      (universe_id IS NULL AND user_id = #{self.id.to_i})
+    """)
   end
 
   has_many :documents, dependent: :destroy

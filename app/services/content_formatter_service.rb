@@ -16,7 +16,7 @@ class ContentFormatterService < Service
   # Only allow linking to content type classes
   # todo: we shouldn't have to map name here, but apparently rails is having a little difficulty
   # https://s3.amazonaws.com/raw.paste.esk.io/Llb%2F64DJHK?versionId=19Lb_TtukDbo1J_IoCpkr.d.pwpW_vmH
-  VALID_LINK_CLASSES = Rails.application.config.content_types[:all].map(&:name)
+  VALID_LINK_CLASSES = Rails.application.config.content_types[:all].map(&:name) + %w(Timeline Document)
   def self.show(text:, viewing_user: User.new)
     # We want to evaluate markdown first, because the markdown engine also happens
     # to strip out HTML tags. So: markdown, _then_ insert content links.
