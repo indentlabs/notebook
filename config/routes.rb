@@ -326,11 +326,13 @@ Rails.application.routes.draw do
       Rails.application.config.content_types[:all].each do |content_type|
         get "#{content_type.name.downcase.pluralize}", to: "api##{content_type.name.downcase.pluralize}"
       end
+      get :timelines, to: "api#timelines"
 
       # Content show paths
       Rails.application.config.content_types[:all].each do |content_type|
         get "#{content_type.name.downcase}/:id", to: "api##{content_type.name.downcase}"
       end
+      get "timeline/:id", to: "api#timeline"
     end
   end
 
