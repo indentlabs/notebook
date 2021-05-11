@@ -7,7 +7,8 @@ class DocumentAuthorizer < ApplicationAuthorizer
     [
       resource.user_id == user.id,
       resource.privacy == 'public',
-      resource.universe.present? && resource.universe.privacy == 'public'
+      resource.universe.present? && resource.universe.privacy == 'public',
+      resource.universe.present? && resource.universe.contributors.pluck(:user_id).include?(user.id)
     ].any?
   end
 

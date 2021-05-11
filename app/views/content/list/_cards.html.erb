@@ -39,13 +39,17 @@
           </span>
         </div>
         <div class="card-action">
-          <%= link_to edit_polymorphic_path(content), class: 'green-text right', target: content.is_a?(Document) ? '_new' : '_self' do %>
-            <i class="material-icons left"><%= content_type.icon %></i>
-            Edit
+          <% if current_user.can_update?(content) %>
+            <%= link_to edit_polymorphic_path(content), class: 'green-text right', target: content.is_a?(Document) ? '_new' : '_self' do %>
+              <i class="material-icons left"><%= content_type.icon %></i>
+              Edit
+            <% end %>
           <% end %>
-          <%= link_to polymorphic_path(content), class: 'blue-text text-lighten-1' do %>
-            <i class="material-icons left"><%= content_type.icon %></i>
-            View
+          <% if current_user.can_read?(content) %>
+            <%= link_to polymorphic_path(content), class: 'blue-text text-lighten-1' do %>
+              <i class="material-icons left"><%= content_type.icon %></i>
+              View
+            <% end %>
           <% end %>
         </div>
         <div class="card-reveal">
