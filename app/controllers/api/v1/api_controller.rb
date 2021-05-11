@@ -101,19 +101,35 @@ module Api
       end
 
       def timeline
-        page = Timeline.find_by(id: params[:id].to_i)
+        timeline = Timeline.find_by(id: params[:id].to_i)
+        events   = timeline.timeline_events
+
         render json: {
-          name: page.name,
-          description: page.description,
-          universe:    page.universe.nil? ? nil : {
-            id:   page.universe.id,
-            name: page.universe.try(:name)
+          name: timeline.name,
+          description: timeline.description,
+          universe:    timeline.universe.nil? ? nil : {
+            id:   timeline.universe.id,
+            name: timeline.universe.try(:name)
           },
           meta: {
-            created_at: page.created_at,
-            updated_at: page.updated_at
+            created_at: timeline.created_at,
+            updated_at: timeline.updated_at
           },
-          categories: []
+          categories: [
+            id:    1,
+            label: 'Events',
+            icon:  Timeline.icon,
+            fields: events.map { |event|
+              {
+                id:    event.id,
+                label: event.title,
+                icon:  Timeline.icon,
+                type:  TimelineEvent.name,
+                description: event.description,
+                time_label:  event.time_label
+              }
+            }
+          ]
         }
       end
     end
