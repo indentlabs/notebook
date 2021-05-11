@@ -29,7 +29,7 @@
           </a>
         </li>
         <li class="divider" tabindex="-1"></li>
-        <% @current_user_content.fetch('Universe', []).each do |universe| %>
+        <% current_user.linkable_universes.each do |universe| %>
           <%= next unless universe.becomes(Universe).send(content_type.name.downcase.pluralize).any? rescue false %>
           <li>
             <a href="?universe=<%= universe.id %>" data-universe-id="<%= universe.id %>" class="<%= Universe.color %>-text">
