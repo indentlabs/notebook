@@ -5,5 +5,24 @@
 %>
 
 <div id="contributors_panel" class="panel">
+  <% if raw_model.contributors.any? %>
+    <ul class="collection with-header">
+      <li class="collection-header purple white-text">
+        <i class="material-icons left"><%= User.icon %></i>
+        Owner
+      </li>
+      <li class="collection-item avatar">
+        <i class="material-icons circle white-text <%= User.color %>"><%= User.icon %></i>
+        <span class="title">
+          <%= link_to(content.user.name, content.user) %>
+        </span>
+        <p class="grey-text">
+          Created universe <%= time_ago_in_words content.created_at %> ago
+        </p>
+        <span class="secondary-content"><i class="material-icons grey-text"><%= User.icon %></i></span>
+      </li>
+    </ul>
+  <% end %>
+
   <%= render partial: 'content/display/contributors_user_list', locals: { content: content, raw_model: raw_model } %>
 </div>
