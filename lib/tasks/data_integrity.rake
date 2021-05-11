@@ -2,7 +2,7 @@ namespace :data_integrity do
   desc "Make sure there are no globally-linkable content pages"
   task remove_invalid_universe_content_pages: :environment do
     Rails.application.config.content_types[:all_non_universe].each do |type|
-      puts type.where(universe_id: 0).update(universe_id: nil)
+      type.where(universe_id: 0).update(universe_id: nil)
     end
   end
 
