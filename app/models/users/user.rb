@@ -172,7 +172,7 @@ class User < ApplicationRecord
   after_create :initialize_referral_code
   after_create :initialize_secure_code
   after_create :initialize_content_type_activators
-  after_create :follow_andrew
+  after_create :follow_andrew # <3
 
   # TODO we should do this, but we need to figure out how to make it fast first
   # after_create :initialize_categories_and_fields
