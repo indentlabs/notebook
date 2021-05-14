@@ -111,7 +111,7 @@ class ContentFormatterService < Service
     [
       Rails.env.production? ? 'https://' : 'http://',
       Rails.env.production? ? 'www.notebook.ai' : 'localhost:3000', # Rails.application.routes.default_url_options[:host]?
-      '/plan/',
+      content_model.class.name != Document.name ? '/plan/' : '/',
       content_model.class.name.downcase.pluralize,
       '/',
       content_model.id
