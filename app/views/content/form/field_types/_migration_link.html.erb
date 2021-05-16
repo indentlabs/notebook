@@ -29,12 +29,12 @@
               field[:value]
             )
           %>
-          <% @current_user_content.fetch(page_type.name, []).sort_by { |p| p.name.downcase }.each do |page| %>
-            <option value="<%= page_type %>-<%= page.id %>" 
+          <% @linkables_cache.fetch(page_type.name, []).sort_by { |name, id| name.downcase }.each do |name, id| %>
+            <option value="<%= page_type %>-<%= id %>" 
               data-icon="<%= asset_path page.random_image_including_private(format: :thumb) %>"
-              <%= 'selected' if field[:value].include?("#{page.page_type}-#{page.id}") %>
+              <%= 'selected' if field[:value].include?("#{page_type}-#{id}") %>
             >
-              <%= page.name %>
+              <%= name %>
             </option>
           <% end %>
         </optgroup>

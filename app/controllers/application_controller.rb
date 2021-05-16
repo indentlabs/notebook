@@ -110,7 +110,7 @@ class ApplicationController < ActionController::Base
       end
 
       @linkables_cache[class_name] = @linkables_cache[class_name]
-        .sort_by(&:name)
+        .sort_by { |p| p.name.downcase }
         .map { |c| [c.name, c.id] }
         .compact
     end
