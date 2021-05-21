@@ -1,1 +1,0 @@
-World(FactoryBot::Syntax::Methods)
