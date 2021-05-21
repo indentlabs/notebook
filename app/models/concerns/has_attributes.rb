@@ -274,7 +274,10 @@ module HasAttributes
       field_cache = overview_field(label)
       return nil if field_cache.nil?
 
-      field_cache.attribute_values.detect { |v| v.entity_id == self.id }&.value.presence || (self.respond_to?(label.downcase) ? self.read_attribute(label.downcase) : nil)
+      field_cache
+        .attribute_values
+        .order('created_at desc')
+        .detect { |v| v.entity_id == self.id }&.value.presence || (self.respond_to?(label.downcase) ? self.read_attribute(label.downcase) : nil)
     end
 
     def self.field_type_for(category, field)

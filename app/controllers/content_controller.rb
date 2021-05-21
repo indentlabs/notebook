@@ -495,8 +495,9 @@ class ContentController < ApplicationController
   def text_field_update
     text = field_params.fetch('value', '')
     if text.present?
-      @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
-      attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+      @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
+      attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
+      attribute_value.user_id ||= current_user.id
       attribute_value.value = text
       attribute_value.save!
 
