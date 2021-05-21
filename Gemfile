@@ -121,6 +121,7 @@ end
 
 group :development do
   gem 'web-console'
+  gem 'listen'
   gem 'bullet'
   gem 'rack-mini-profiler'
   gem 'memory_profiler'
