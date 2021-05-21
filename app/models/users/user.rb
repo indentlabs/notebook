@@ -146,7 +146,7 @@ class User < ApplicationRecord
         universe_id IN (#{(my_universe_ids + contributable_universe_ids + [-1]).uniq.join(',')})
           OR
         (universe_id IS NULL AND user_id = #{self.id.to_i})
-      """)
+      """).where(archived_at: nil)
     end
   end
 
@@ -155,7 +155,7 @@ class User < ApplicationRecord
       universe_id IN (#{(my_universe_ids + contributable_universe_ids + [-1]).uniq.join(',')})
         OR
       (universe_id IS NULL AND user_id = #{self.id.to_i})
-    """)
+    """).where(archived_at: nil)
   end
 
   def linkable_timelines
@@ -163,7 +163,7 @@ class User < ApplicationRecord
       universe_id IN (#{(my_universe_ids + contributable_universe_ids + [-1]).uniq.join(',')})
         OR
       (universe_id IS NULL AND user_id = #{self.id.to_i})
-    """)
+    """).where(archived_at: nil)
   end
 
   has_many :documents, dependent: :destroy
