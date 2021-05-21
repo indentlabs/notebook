@@ -116,16 +116,7 @@ group :test do
   gem 'codeclimate-test-reporter', require: false
   gem 'database_cleaner'
   gem 'selenium-webdriver'
-  gem 'simplecov', require: false
-  gem 'tzinfo-data' # addresses a bug when working on Windows
   gem 'rails-perftest'
-  gem 'rspec-prof'
-  gem 'rspec-rails'
-  gem 'webmock'
-  gem 'rubocop', require: false
-  gem 'ruby-prof', '1.4.3'
-  gem 'shoulda-matchers', '~> 4.5'
-  gem 'rails-controller-testing'
 end
 
 group :development do
