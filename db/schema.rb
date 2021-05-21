@@ -1583,7 +1583,7 @@ ActiveRecord::Schema.define(version: 2021_05_01_220752) do
     t.datetime "updated_at", null: false
     t.string "src_file_name"
     t.string "src_content_type"
-    t.bigint "src_file_size"
+    t.integer "src_file_size"
     t.datetime "src_updated_at"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
