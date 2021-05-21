@@ -113,7 +113,6 @@ group :test, :production do
 end
 
 group :test do
-  gem 'better_errors'
   gem 'capybara'
   gem 'codeclimate-test-reporter', require: false
   gem 'database_cleaner'
