@@ -439,8 +439,9 @@ class ContentController < ApplicationController
 
   # Content update for link-type fields
   def link_field_update
-    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+    @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
+    attribute_value.user_id ||= current_user.id
 
     if params.key?(:attribute_field)
       attribute_value.value = params.require(:attribute_field).fetch('linked_pages', [])
@@ -482,6 +483,7 @@ class ContentController < ApplicationController
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
     attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
     attribute_value.value = field_params.fetch('value', '')
+    attribute_value.user_id ||= current_user.id
     attribute_value.save!
 
     # We also need to update the cached `name` field on the content page itself
@@ -534,6 +536,7 @@ class ContentController < ApplicationController
 
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
     attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
+    attribute_value.user_id ||= current_user.id
     attribute_value.value = field_params.fetch('value', '')
     attribute_value.save!
 
@@ -548,6 +551,7 @@ class ContentController < ApplicationController
 
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
     attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
+    attribute_value.user_id ||= current_user.id
     attribute_value.value = field_params.fetch('value', '').to_i
     attribute_value.save!
 
@@ -703,10 +707,7 @@ class ContentController < ApplicationController
     entity_page_id   = entity_params.fetch(:entity_id)
     
     return unless valid_content_types.map(&:name).include?(entity_page_type)
-    @entity = entity_page_type.constantize.find_by(
-      id:   entity_page_id,
-      user: current_user
-    )    
+    @entity = entity_page_type.constantize.find_by(id: entity_page_id)    
   end
 
   # For index, new, edit
