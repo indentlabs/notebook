@@ -115,9 +115,6 @@ end
 group :test do
   gem 'codeclimate-test-reporter', require: false
   gem 'database_cleaner'
-  gem 'guard'
-  gem 'guard-minitest'
-  gem 'guard-rubocop'
   gem 'selenium-webdriver'
   gem 'simplecov', require: false
   gem 'tzinfo-data' # addresses a bug when working on Windows
