@@ -115,7 +115,6 @@ end
 group :test do
   gem 'codeclimate-test-reporter', require: false
   gem 'database_cleaner'
-  gem 'factory_bot_rails'
   gem 'guard'
   gem 'guard-minitest'
   gem 'guard-rubocop'
