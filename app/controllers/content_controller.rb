@@ -479,8 +479,8 @@ class ContentController < ApplicationController
 
   # Content update for name fields
   def name_field_update
-    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+    @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
     attribute_value.value = field_params.fetch('value', '')
     attribute_value.save!
 
@@ -532,8 +532,8 @@ class ContentController < ApplicationController
   def tags_field_update
     return unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
 
-    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+    @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
     attribute_value.value = field_params.fetch('value', '')
     attribute_value.save!
 
@@ -546,8 +546,8 @@ class ContentController < ApplicationController
   def universe_field_update
     return unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
 
-    @attribute_field = current_user.attribute_fields.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(entity_params.merge({ user: current_user }))
+    @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
     attribute_value.value = field_params.fetch('value', '').to_i
     attribute_value.save!
 
