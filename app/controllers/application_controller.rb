@@ -96,6 +96,7 @@ class ApplicationController < ActionController::Base
     linkable_classes += %w(Document Timeline)
 
     @linkables_cache = {}
+    @linkables_raw   = {}
     linkable_classes.each do |class_name|
       # class_name = "Character"
 
@@ -108,6 +109,10 @@ class ApplicationController < ActionController::Base
           .in_universe(@content.universe)
           .reject { |content| content.class.name == class_name && content.id == @content.id }
       end
+
+      @linkables_raw[class_name] = @linkables_cache[class_name]
+        .sort_by { |p| p.name.downcase }
+        .compact
 
       @linkables_cache[class_name] = @linkables_cache[class_name]
         .sort_by { |p| p.name.downcase }
