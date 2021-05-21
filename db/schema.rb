@@ -1583,7 +1583,7 @@ ActiveRecord::Schema.define(version: 2021_05_01_220752) do
     t.datetime "updated_at", null: false
     t.string "src_file_name"
     t.string "src_content_type"
-    t.integer "src_file_size"
+    t.bigint "src_file_size"
     t.datetime "src_updated_at"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
@@ -2370,7 +2370,7 @@ ActiveRecord::Schema.define(version: 2021_05_01_220752) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "description"
-    t.boolean "allow_submissions"
+    t.boolean "allow_submissions", default: false
     t.string "slug"
     t.datetime "deleted_at"
     t.index ["user_id"], name: "index_page_collections_on_user_id"
@@ -2850,7 +2850,7 @@ ActiveRecord::Schema.define(version: 2021_05_01_220752) do
   end
 
   create_table "share_comments", force: :cascade do |t|
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.integer "content_page_share_id", null: false
     t.string "message"
     t.datetime "deleted_at"
