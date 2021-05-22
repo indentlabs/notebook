@@ -6,6 +6,9 @@ class MainControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  
+  test "should get privacy page" do
+    get privacy_policy_url
+    assert_response :success
+  end
 
 end
