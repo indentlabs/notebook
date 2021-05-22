@@ -401,4 +401,3 @@ Rails.application.routes.draw do
   get '/redeem/infostack', to: 'main#infostack'
   get '/redeem/sascon',    to: 'main#sascon'
 end
-# rubocop:enable LineLength

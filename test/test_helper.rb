@@ -1,4 +1,6 @@
-ENV['RAILS_ENV'] ||= 'test'
+ENV['RAILS_ENV']    ||= 'test'
+ENV['RAILS_GROUPS'] ||= 'test'
+
 require_relative "../config/environment"
 require "rails/test_help"
 
@@ -14,14 +16,12 @@ end
 
 class SmokeTest
   def self.urls(list_of_urls)
-    puts "Smoke testing URLs:"
+    # puts "Smoke testing URLs:"
     list_of_urls.each do |url_name|
-      url = Rails.application.routes.url_helpers.send(url_name)
+      url = Rails.application.routes.url_helpers.send(url_name) rescue "INVALID URL: #{url_name}"
 
-      puts url
-      require 'pry'
-      binding.pry
-      test("should get #{url_name}") do
+      # puts "#{url_name}: #{url}"
+      ActionDispatch::IntegrationTest.test "should get #{url_name}" do
         get(url)
         assert_response(:success)
       end
