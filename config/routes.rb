@@ -162,7 +162,6 @@ Rails.application.routes.draw do
 
   # Info pages
   scope '/about' do
-    #get '/notebook', to: 'main#about_notebook', as: :about_notebook
     get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
   end
 
