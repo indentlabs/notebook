@@ -11,3 +11,20 @@ class ActiveSupport::TestCase
 
   # Add more helper methods to be used by all tests here...
 end
+
+class SmokeTest
+  def self.urls(list_of_urls)
+    puts "Smoke testing URLs:"
+    list_of_urls.each do |url_name|
+      url = Rails.application.routes.url_helpers.send(url_name)
+
+      puts url
+      require 'pry'
+      binding.pry
+      test("should get #{url_name}") do
+        get(url)
+        assert_response(:success)
+      end
+    end
+  end
+end

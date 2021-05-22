@@ -11,4 +11,10 @@ class MainControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  SmokeTest.urls([
+    :root_url,
+    :privacy_policy_url,
+    :dice
+  ])
+
 end
