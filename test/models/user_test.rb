@@ -3,7 +3,7 @@ require 'test_helper'
 class UserTest < ActiveSupport::TestCase
   def setup
     @free_user = User.new
-    @free_user.selected_billing_plan_id = 1
+    @free_user.selected_billing_plan_id = BillingPlan::FREE_IDS.first
 
     @premium_user = User.new
     @premium_user.selected_billing_plan_id = BillingPlan::PREMIUM_IDS.first

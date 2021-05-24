@@ -20,16 +20,15 @@ We also keep ideas in there, and you are welcome to jump into the conversation.
 ## Adding and updating features
 
 Please [create a pull request][pr] to implement features you'd like to see.
-[Travis-ci][travis] is building every pull request,
+GitHub Actions builds every pull request,
 so we'll have prompt feedback on the progress of the feature implementation.
 We require a few things in order to merge a pull request:
 
  - You must merge `master`'s latest commit
  - There must be no merge conflicts
  - Your new feature must be covered by tests
- - The Travis build must pass
+ - The test build must pass
 
-[travis]: https://travis-ci.org/indentlabs/notebook
 [pr]: https://github.com/indentlabs/notebook/compare/
 [create an issue report]: https://github.com/indentlabs/notebook/issues/new
 [issue tracker]: https://github.com/indentlabs/notebook/issues
