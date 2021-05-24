@@ -116,7 +116,6 @@ group :test do
   gem 'codeclimate-test-reporter', require: false
   gem 'database_cleaner'
   gem 'selenium-webdriver'
-  gem 'rails-perftest'
 end
 
 group :development do

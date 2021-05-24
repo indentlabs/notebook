@@ -1,6 +1,10 @@
 require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
+  def setup
+    raise "test"
+  end
+
   test "User can create billing plan -specific pages" do
     free_user = User.new
     free_user.selected_billing_plan_id = 1
