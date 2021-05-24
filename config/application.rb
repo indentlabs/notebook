@@ -32,5 +32,8 @@ module Notebook
     # the framework and any gems in your application.
 
     config.active_job.queue_adapter = :sidekiq
+
+    # Use SQL structure format instead of schema
+    config.active_record.schema_format = :sql
   end
 end
