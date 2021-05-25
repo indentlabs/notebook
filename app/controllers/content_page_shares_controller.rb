@@ -33,7 +33,7 @@ class ContentPageSharesController < ApplicationController
     if @share.save
       @share.content_page.update(privacy: 'public')
 
-      redirect_to [@share.user, @share], notice: 'Content page share was successfully created.'
+      redirect_back fallback_location: [@share.user, @share], notice: "You've shared your #{@share.content_page_type} and will be notified of any comments."
     else
       raise @share.errors.inspect
     end

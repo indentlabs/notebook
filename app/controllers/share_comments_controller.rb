@@ -12,9 +12,8 @@ class ShareCommentsController < ApplicationController
       ContentPageShareNotificationJob.perform_later(@share_comment.id)
 
       redirect_to([@share_comment.content_page_share.user, @share_comment.content_page_share], notice: "Comment posted successfully!");
-      # redirect_back(fallback_location: @share_comment.content_page_share, notice: "Comment posted successfully.")
     else
-      render :new
+      redirect_back(fallback_location: @share_comment.content_page_share, notice: "Error submitting comment.")
     end
   end
 

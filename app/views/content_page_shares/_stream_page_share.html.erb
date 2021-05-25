@@ -57,8 +57,16 @@
           </blockquote>
         <% end %>
 
-        <%= render partial: 'share_comments/form', locals: { share: share } %>
-        <br /><br />
+        <% if user_signed_in? %>
+          <%= render partial: 'share_comments/form', locals: { share: share } %>
+        <% else %>
+          <div class='center'>
+            <%= link_to new_user_registration_path do %>
+              To leave a comment, sign up for a free Notebook.ai account.
+            <% end %>
+          </div>
+        <% end %>
+        <br />
         
         <div class="uppercase grey-text center"><%= pluralize share.share_comments.count, 'comment' %></div>
         <div class="row">
@@ -67,7 +75,7 @@
           <% end %>
         </div>
 
-        <% if share.share_comments.count > 10 %>
+        <% if share.share_comments.count > 10 && user_signed_in? %>
           <%= render partial: 'share_comments/form', locals: { share: share } %>
         <% end %>
       </div>
