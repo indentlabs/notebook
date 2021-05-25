@@ -1,29 +1,40 @@
-<div id="collections_panel" class="row panel">
-  <div class="row">
-    <div class="col s12 m10 offset-m1">
-      <%= render partial: 'notice_dismissal/messages/09' %>
+<div id="collections_panel" class="panel">
+  <%= render partial: 'notice_dismissal/messages/09' %>
 
-      <% content.page_collection_submissions.accepted.each do |submission| %>
-        <% collection = submission.page_collection %>
-        <%= link_to collection do %>
-          <div class="hoverable card">
-            <div class="card-image">
-              <%= image_tag collection.first_public_image, style: 'max-height: 300px;' %>
-              <span class="card-title">
-                <%= collection.title %>
-                <br />
-                <small>
-                  <% if collection.subtitle? %>
-                    <%= collection.subtitle %>
-                  <% else %>
-                    <%= @content.name %> is included in this collection
-                  <% end %>              
-                </small>
-              </span>
-            </div>
-          </div>
-        <% end %>
-      <% end %>
-    </div>
+  <div class="grey-text uppercase center">
+    <%= content.name %> is included in the following collections
   </div>
+
+  <% content.page_collection_submissions.accepted.each do |submission| %>
+    <% collection = submission.page_collection %>
+    <%= link_to collection do %>
+      <div class="hoverable card">
+        <div class="card-image">
+          <%= image_tag collection.first_public_image, style: 'max-height: 300px;' %>
+          <span class="card-title">
+            <%= collection.title %>
+            <small>
+              by
+              <span class="<%= User.color %>-text text-lighten-5">
+                <%= collection.user.display_name %>
+              </span>
+            </small>
+            <br />
+            <small>
+              <% if collection.subtitle? %>
+                <%= collection.subtitle %>
+              <% else %>
+                <small>
+                  <% collection.page_types.each do |icon| %>
+                    <% klass = content_class_from_name(icon) %>
+                    <i class="material-icons left bordered-text <%= klass.color %>-text"><%= klass.icon %></i>
+                  <% end %>
+                </small>
+              <% end %>              
+            </small>
+          </span>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
 </div>

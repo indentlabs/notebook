@@ -18,7 +18,7 @@ class SerendipitousService < Service
   
     fields_for_these_categories = AttributeField.where(
       user:        content.user,
-      field_type:  ["text_area"],
+      field_type:  "text_area",
       hidden:      [nil, false],
       attribute_category_id: categories_for_this_type.pluck(:id)
     )

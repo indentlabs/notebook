@@ -2,6 +2,7 @@ class DataController < ApplicationController
   before_action :authenticate_user!
 
   before_action :set_sidenav_expansion
+  before_action :set_navbar_color
 
   def index
     @page_title = "My data vault"
@@ -129,5 +130,9 @@ class DataController < ApplicationController
 
   def set_sidenav_expansion
     @sidenav_expansion = 'my account'
+  end
+
+  def set_navbar_color
+    @navbar_color = '#795548'
   end
 end

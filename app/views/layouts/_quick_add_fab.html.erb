@@ -1,7 +1,7 @@
 <% if user_signed_in? %>
   <%
     quick_actions = @activated_content_types.map do |content_type_name|
-      content_class = content_type_name.constantize
+      content_class = content_class_from_name(content_type_name)
       {
         name:  "Create new #{content_type_name}",
         icon:  content_class.icon,

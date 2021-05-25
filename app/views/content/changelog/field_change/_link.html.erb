@@ -1,0 +1,20 @@
+<%
+  # Try to parse old/new into JSON so we can properly loop over each link code
+  old_json = JSON.parse(old_value) rescue []
+  new_json = JSON.parse(new_value) rescue []
+%>
+
+<div class="row card">
+  <div class="col s12 m6 l6 red lighten-4">
+    <%= simple_format ContentFormatterService.show(
+      text:         old_json.map { |code| "&bull; [[#{code}]]" }.join("\n"),
+      viewing_user: current_user
+    ) %>
+  </div>
+  <div class="col s12 m6 l6 green lighten-4">
+    <%= simple_format ContentFormatterService.show(
+      text:         new_json.map { |code| "&bull; [[#{code}]]" }.join("\n"),
+      viewing_user: current_user
+    ) %>
+  </div>
+</div>

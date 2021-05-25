@@ -4,11 +4,11 @@ class DocumentsController < ApplicationController
   # todo Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
   skip_before_action :verify_authenticity_token, only: [:link_entity]
 
-  before_action :set_document,          only: [:show, :analysis, :plaintext, :queue_analysis, :edit, :destroy]
+  before_action :set_document,          only:   [:show, :analysis, :plaintext, :queue_analysis, :edit, :destroy]
   before_action :set_sidenav_expansion, except: [:plaintext]
   before_action :set_navbar_color,      except: [:plaintext]
   before_action :set_navbar_actions,    except: [:edit, :plaintext]
-  before_action :set_footer_visibility, only: [:edit]
+  before_action :set_footer_visibility, only:   [:edit]
 
   before_action :cache_linkable_content_for_each_content_type, only: [:edit]
 
@@ -16,11 +16,7 @@ class DocumentsController < ApplicationController
 
   def index
     @page_title = "My documents"
-    @documents = current_user.documents.order('updated_at desc')
-
-    if @universe_scope.present?
-      @documents = @documents.where(universe_id: @universe_scope.id)
-    end
+    @documents = @current_user_content['Document']
   end
 
   def show

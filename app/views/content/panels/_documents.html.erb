@@ -2,22 +2,20 @@
   visible_documents = content.documents.includes(:user).select { |document| (current_user || User.new).can_read?(document) }
 %>
 
-<div id="documents_panel" class="row panel">
-  <div class="row">
-    <div class="col s12 m10 offset-m1">
-      <%= render partial: 'notice_dismissal/messages/10' %>
+<div id="documents_panel" class="panel">
+  <%= render partial: 'notice_dismissal/messages/10' %>
 
-      <% if visible_documents.any? %>
-        <%= content.name %> appears in the following documents:
-
-        <ul>
-          <% visible_documents.each do |document| %>
-            <li>
-              <%= render partial: 'documents/reference_card', locals: { document: document } %>
-            </li>
-          <% end %>
-        </ul>
-      <% end %>
+  <% if visible_documents.any? %>
+    <div class="grey-text uppercase center">
+      <%= content.name %> appears in the following documents
     </div>
-  </div>
+
+    <% visible_documents.each do |document| %>
+      <%= link_to document do %>
+        <div class="card-panel hoverable <%= Document.color %> lighten-5">
+          <%= render partial: 'documents/reference_card', locals: { document: document } %>
+        </div
+      <% end %>
+    <% end %>
+  <% end %>
 </div>

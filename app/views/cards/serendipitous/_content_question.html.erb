@@ -1,9 +1,10 @@
 <%
   # Partial locals: `content` to ask a question about, and `field` for the field being questioned
+  include_quick_reference = defined?(include_quick_reference) && !!include_quick_reference
 %>
 
 <% if defined?(field) && field.present? %>
-  <ul class="hoverable collapsible">
+  <ul class="hoverable collapsible white">
     <li class="<%= 'active' if defined?(expand_by_default) && !!expand_by_default %>">
       <div class="collapsible-header <%= content.class.color %> white-text">
         <i class="material-icons tooltipped" data-tooltip="Answer this randomly-generated question to have it automatically saved to your <%= content.name_field_value %> <%= content.class.name.downcase %> page.">help</i>
@@ -27,12 +28,19 @@
           %>
 
           <%= button_tag(type: 'submit', class: "js-content-question-submit waves-effect waves-light btn blue white-text right") do %>
-            Save answer to <%= content.name_field_value.downcase %>
+            Save answer
+          <% end %>
+
+          <% if include_quick_reference %>
+            <%= link_to content, class: 'entity-trigger sidenav-trigger orange white-text btn tooltipped', data: { target: "quick-reference-#{@content.class.name}-#{@content.id}", tooltip: "View this #{@content.class.name.downcase} without leaving this page" } do %>
+              <i class="material-icons right">vertical_split</i>
+              Quick-reference
+            <% end %>
           <% end %>
           <% if !defined?(show_view_button) || !!show_view_button %>
-            <%= link_to content, class: "btn #{content.class.color} white-text", target: '_new' do %>
+            <%= link_to content, class: "btn #{content.class.color} white-text tooltipped", target: '_new', data: { tooltip: "View this #{@content.class.name.downcase} in a new tab" } do %>
               <i class="material-icons left white-text"><%= content.class.icon %></i>
-              View <%= content.name_field_value %>
+              View
             <% end %>
           <% end %>
           <div style="clear: both;"></div>
@@ -40,6 +48,10 @@
       </div>
     </li>
   </ul>
+
+  <% if include_quick_reference %>
+    <%= render partial: 'prompts/smart_sidebar', locals: { content: content } %>
+  <% end %>
 
 <% elsif defined?(show_empty_prompt) && show_empty_prompt %>
   <div class="row">
@@ -70,3 +82,6 @@
     </div>
   </div>
 <% end %>
+
+
+<div class="clearfix"></div>

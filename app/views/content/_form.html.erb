@@ -1,5 +1,5 @@
-<div style="padding: 35px 20px;">
-  <%= render 'content/form/errors', content: @content %>
+<div>
+  <%# render 'content/form/errors', content: @content %>
 
   <%# Content panels %>
   <%
@@ -12,10 +12,16 @@
     end
   %>
   <% categories.each do |category| %>
-    <%= render 'content/form/panel', category: category, f: f, content: content %>
+    <%=
+      render partial: 'content/form/panel', locals: {
+        category: category, 
+        content:  content
+      }
+    %>
   <% end %>
 </div>
 
-<div class="card-action center grey-text">
-  Tip: You don't need to save before changing categories (on the right). Just remember to save when you're done!
+<div class="center grey-text">
+  <%# todo rotating tips here? %>
+  Tip: Notebook.ai automatically saves your answers.
 </div>

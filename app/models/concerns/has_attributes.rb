@@ -243,6 +243,17 @@ module HasAttributes
       field_value
     end
 
+    def set_name_field_value(field_value)
+      field = name_field
+      value = field.attribute_values.find_or_create_by(
+        user_id:     self.user_id,
+        entity_type: self.class.name,
+        entity_id:   self.id,
+      )
+
+      value.update(value: field_value)
+    end
+
     def universe_field_value
       universe_field_cache = universe_field
       return nil unless self.respond_to?(:universe_id)
@@ -263,7 +274,10 @@ module HasAttributes
       field_cache = overview_field(label)
       return nil if field_cache.nil?
 
-      field_cache.attribute_values.detect { |v| v.entity_id == self.id }&.value.presence || (self.respond_to?(label.downcase) ? self.read_attribute(label.downcase) : nil)
+      field_cache
+        .attribute_values
+        .order('created_at desc')
+        .detect { |v| v.entity_id == self.id }&.value.presence || (self.respond_to?(label.downcase) ? self.read_attribute(label.downcase) : nil)
     end
 
     def self.field_type_for(category, field)

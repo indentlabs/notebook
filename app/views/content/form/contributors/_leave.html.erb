@@ -1,15 +1,17 @@
 <%# Usage: render partial: 'content/form/contributors/leave', locals: { content: content } %>
 
 <% if user_signed_in? && content.contributors.pluck(:user_id).include?(current_user.id) %>
-  <p class="grey-text">
-    You are a contributor to this universe. You may dismiss yourself as a contributor at any time, but will need to be reinvited to begin contributing again.
-    You will lose access to all content in this universe unless it is shared publicly, even if you created or edited it previously.
-  </p>
-  <p class="center">
-    <% my_contributor_object = Contributor.where(user: current_user, universe_id: content.id).first %>
-    <%= link_to 'Leave this universe', remove_contributor_path(my_contributor_object.id),
-      class: 'btn red lighten-3 black-text',
-      method: 'delete',
-      data: { confirm: "Are you sure? You will no longer have contributor access to this universe." } %>
-  </p>
+  <div class="card-panel">
+    <p>
+      You are a contributor to this universe. You may dismiss yourself as a contributor at any time, but will need to be reinvited to begin contributing again.
+      You will lose access to all content in this universe unless it is shared publicly, even if you created or edited it previously.
+    </p>
+    <p class="center">
+      <% my_contributor_object = Contributor.where(user: current_user, universe_id: content.id).first %>
+      <%= link_to 'Leave this universe', remove_contributor_path(my_contributor_object.id),
+        class: 'btn red lighten-3 black-text',
+        method: 'delete',
+        data: { confirm: "Are you sure? You will no longer have contributor access to this universe." } %>
+    </p>
+  </div>
 <% end %>

@@ -54,17 +54,18 @@ class ApplicationController < ActionController::Base
 
     # We always want to cache Universes, even if they aren't explicitly turned on.
     @current_user_content = current_user.content(content_types: @activated_content_types + ['Universe'], universe_id: @universe_scope.try(:id))
-    @current_user_content['Document'] = current_user.documents.order('updated_at DESC').to_a
 
-    # Likewise, we should also always cache Timelines
+    # Likewise, we should also always cache Timelines & Documents
     if @universe_scope
       @current_user_content['Timeline'] = current_user.timelines.where(universe_id: @universe_scope.try(:id)).to_a
+      @current_user_content['Document'] = current_user.linkable_documents.where(universe_id: @universe_scope.try(:id)).order('updated_at DESC').to_a
     else
       @current_user_content['Timeline'] = current_user.timelines.to_a
+      @current_user_content['Document'] = current_user.linkable_documents.order('updated_at DESC').to_a
     end
 
     # Fetch notifications
-    @user_notifications = current_user.notifications.order('happened_at DESC').limit(10)
+    @user_notifications = current_user.notifications.order('happened_at DESC').limit(100)
 
     # Cache recently-edited pages
     @recently_edited_pages = @current_user_content.values.flatten
@@ -92,8 +93,10 @@ class ApplicationController < ActionController::Base
 
   def cache_linkable_content_for_each_content_type
     linkable_classes = Rails.application.config.content_types[:all].map(&:name) & current_user.user_content_type_activators.pluck(:content_type)
+    linkable_classes += %w(Document Timeline)
 
     @linkables_cache = {}
+    @linkables_raw   = {}
     linkable_classes.each do |class_name|
       # class_name = "Character"
 
@@ -107,8 +110,12 @@ class ApplicationController < ActionController::Base
           .reject { |content| content.class.name == class_name && content.id == @content.id }
       end
 
+      @linkables_raw[class_name] = @linkables_cache[class_name]
+        .sort_by { |p| p.name.downcase }
+        .compact
+
       @linkables_cache[class_name] = @linkables_cache[class_name]
-        .sort_by(&:name)
+        .sort_by { |p| p.name.downcase }
         .map { |c| [c.name, c.id] }
         .compact
     end

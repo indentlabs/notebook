@@ -242,6 +242,16 @@ Rails.application.routes.draw do
     # Attributes
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
   end
+
+  # For non-API API endpoints
+  scope :internal do
+    patch '/link_field_update/:field_id',     to: 'content#link_field_update',     as: :link_field_update
+    patch '/name_field_update/:field_id',     to: 'content#name_field_update',     as: :name_field_update
+    patch '/text_field_update/:field_id',     to: 'content#text_field_update',     as: :text_field_update
+    patch '/tags_field_update/:field_id',     to: 'content#tags_field_update',     as: :tags_field_update
+    patch '/universe_field_update/:field_id', to: 'content#universe_field_update', as: :universe_field_update
+  end
+
   get 'search/', to: 'search#results'
 
   authenticate :user, lambda { |u| u.site_administrator? || Rails.env.development? } do
@@ -296,6 +306,11 @@ Rails.application.routes.draw do
       get '/references', to: 'api_docs#references'
     end
 
+    # API requests we don't want to officially make public -- free to break!
+    namespace :internal do
+      get '/:page_type/:page_id/name',            to: 'api#name_lookup'
+    end
+
     namespace :v1 do
       scope '/categories' do
         get '/suggest/:entity_type',              to: 'attribute_categories#suggest'
@@ -311,11 +326,13 @@ Rails.application.routes.draw do
       Rails.application.config.content_types[:all].each do |content_type|
         get "#{content_type.name.downcase.pluralize}", to: "api##{content_type.name.downcase.pluralize}"
       end
+      get :timelines, to: "api#timelines"
 
       # Content show paths
       Rails.application.config.content_types[:all].each do |content_type|
         get "#{content_type.name.downcase}/:id", to: "api##{content_type.name.downcase}"
       end
+      get "timeline/:id", to: "api#timeline"
     end
   end
 

@@ -2,7 +2,7 @@
 <div class="row">
   <% @recently_edited_pages.each do |page| %>
     <% action = page.created_at === page.updated_at ? 'Created' : 'Updated' %>
-    <% klass  = page.is_a?(ContentPage) ? page.page_type.constantize : page.class %>
+    <% klass  = page.is_a?(ContentPage) ? content_class_from_name(page.page_type) : page.class %>
     <div class="col s12 m12 l12 content-page-list">
       <%= link_to send("#{klass.name.downcase}_path", page.id), class: 'black-text' do %>
         <div class="hoverable card horizontal">

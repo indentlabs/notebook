@@ -1,4 +1,152 @@
 namespace :data_migrations do
+  desc "Create PageReferences for all text fields"
+  task create_text_field_page_references: :environment do
+    Attribute.where.not(value: [nil, ""]).find_each do |attribute|
+      tokens = ContentFormatterService.tokens_to_replace(attribute.value)
+
+      if tokens.any?
+        field  = attribute.attribute_field
+        entity = attribute.entity
+        next unless field.present? && entity.present?
+
+        tokens.each do |token|
+          reference = entity.outgoing_page_references.find_or_initialize_by(
+            referenced_page_type:  token[:content_type],
+            referenced_page_id:    token[:content_id],
+            attribute_field_id:    field.id,
+            reference_type:        'mentioned'
+          )
+          reference.cached_relation_title = field.label
+          reference.save!
+        end
+      end
+    end
+  end
+
+  desc "Create PageReferences for all the old content linkers"
+  task create_content_linker_page_references: :environment do
+    # require 'pry'
+
+    start_time = DateTime.current
+    puts "Starting the long migration!"
+
+    # Turn off SQL logging
+    old_logger = ActiveRecord::Base.logger
+    ActiveRecord::Base.logger = nil
+
+    Rails.application.config.content_relations.each do |page_type, relation_list|
+      time_elapsed = DateTime.current - start_time
+      puts "Starting #{page_type} link migrations (T+#{time_elapsed.to_i})"
+
+      relation_list.each do |relation_name, relation_params|
+        link_class = relation_params[:related_class] # Fathership
+
+        referencing_page_type = relation_params[:inverse_class]
+        # puts relation_params[:through_relation]
+        # puts relation_params.inspect
+        # puts link_class.reflect_on_association(relation_params[:through_relation]).inspect
+
+        referenced_page_type = nil
+        if relation_params[:through_relation] == :deity && referencing_page_type == "Religion"
+          referenced_page_type = link_class.reflect_on_association(:deity_character).class_name
+        else
+          referenced_page_type = link_class.reflect_on_association(relation_params[:through_relation]).class_name
+        end
+
+        puts "  Creating references for #{link_class.count} #{relation_name} links"
+        link_class.find_each do |link|
+          referencing_page = nil
+          referenced_page  = nil
+
+          if link.name == Deityship.name
+            referencing_page = link.send(referencing_page_type.downcase)
+            referenced_page  = link.send(:deity_character)
+
+          else
+            referencing_page = link.send(referencing_page_type.downcase)
+            referenced_page  = link.send(relation_params[:through_relation])
+          end
+          
+          if (referencing_page.nil? || referenced_page.nil? || referencing_page.user.nil? || referenced_page.user.nil?)
+            # Don't do anything here -- one of the pages has since been deleted
+            # puts "    Skipping a deleted-page reference"
+            link.destroy
+            next
+          end
+
+          categories_for_this_page_type_and_user = AttributeCategory.where(
+            entity_type: referencing_page_type.downcase,
+            user_id:     referencing_page.user_id
+          ).pluck(:id)
+
+          # We also need to find the associated AttributeField (OMG) to make sure we
+          # tie the new references to that field.
+          attribute_field = AttributeField.where(
+            attribute_category_id: categories_for_this_page_type_and_user,
+            user_id:               referencing_page.user_id,
+            field_type:            'link',
+            old_column_source:     relation_params[:through_relation].pluralize
+          )
+
+          if attribute_field.count > 1
+            # puts "Ambiguous fields"
+            # puts attribute_field.pluck(:id)
+            # raise "ambiguous fields"
+          end
+
+          attribute_field = attribute_field.first
+          if attribute_field.nil?
+            # Field has been deleted....?
+            link.destroy
+            next
+          end
+
+          # Debug
+          # puts "    Referencing page: #{referencing_page_type}-#{referencing_page.id}"
+          # puts "    Referenced page:  #{referenced_page_type}-#{referenced_page.id}"
+          # puts "    Attribute field:  #{attribute_field.label} (#{attribute_field.id})"
+          # puts "OK?"
+          # binding.pry
+
+          # Create a simulated Attribute with the existing link's value(s)
+          attribute = Attribute.find_or_initialize_by(
+            user:               referencing_page.user,
+            attribute_field_id: attribute_field.id,
+            entity_type:        referencing_page_type,
+            entity_id:          referencing_page.id
+          )
+          if attribute.value.nil?
+            attribute.value = JSON.parse('["' + referenced_page_type + '-' + referenced_page.id.to_s + '"]')
+          else
+            json_value = JSON.parse(attribute.value)
+            json_value << "#{referenced_page_type}-#{referenced_page.id.to_s}" unless json_value.include?("#{referenced_page_type}-#{referenced_page.id.to_s}")
+            attribute.value = json_value
+          end
+          attribute.save!
+
+          # Create the PageReference
+          reference = referencing_page.outgoing_page_references.find_or_initialize_by(
+            referenced_page_type:  referenced_page_type,
+            referenced_page_id:    referenced_page.id,
+            attribute_field_id:    attribute_field.id,
+            reference_type:        'linked'
+          )
+          reference.cached_relation_title = attribute_field.label
+          if reference.save!
+            # ...delete the old link model?
+            link.destroy
+          end
+        end
+      end
+    end
+
+    # Turn SQL logging back on
+    ActiveRecord::Base.logger = old_logger
+    
+    puts "Done!"
+    puts "Total time elapsed: T+#{(DateTime.current - start_time).to_i}"
+  end
+
   desc "Create activators for all used content types for all users"
   task create_content_type_activators: :environment do
     default_content_types = [

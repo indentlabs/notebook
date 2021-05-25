@@ -7,54 +7,57 @@
 %>
 
 <%# Primary FAB %>
-<% if personal_content %>
-  <% if creating || editing %>
-    <button class="btn-floating btn-large halfway-fab waves-effect waves-light <%= @content.class.color %> mp-fab-save hoverable" type="submit" name="action" style="z-index: 1">
-      <i class="material-icons">save</i>
-    </button>
-  <% else %>
-    <%= link_to edit_polymorphic_path(@content),
-      class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color} hoverable",
-      style: 'z-index: 1;' do %>
-      <i class="material-icons">edit</i>
+<div class="floating-action-buttons" style="position: relative; top: -28px">
+  <% if personal_content %>
+    <% if creating || editing %>
+      <button class="btn-floating btn-large halfway-fab waves-effect waves-light <%= @content.class.color %> mp-fab-save hoverable" type="submit" name="action" style="z-index: 1">
+        <i class="material-icons">save</i>
+      </button>
+    <% else %>
+      <%= link_to edit_polymorphic_path(@content),
+        class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color} hoverable",
+        style: 'z-index: 1;' do %>
+        <i class="material-icons">edit</i>
+      <% end %>
+    <% end %>
+  <% elsif @content.persisted? %>
+    <%= link_to '#',
+      class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color} share tooltipped hoverable",
+      style: 'z-index: 1;',
+      data: {
+        position: 'bottom',
+        enterDelay: '500',
+        tooltip: "Share this #{@content.class.name.downcase}"
+      } do %>
+      <i class="material-icons">share</i>
     <% end %>
   <% end %>
-<% elsif @content.persisted? %>
+
   <%= link_to '#',
-    class: "btn-floating btn-large halfway-fab waves-effect waves-light #{@content.class.color} share tooltipped hoverable",
-    style: 'z-index: 1;',
-    data: {
-      position: 'bottom',
-      enterDelay: '500',
-      tooltip: "Share this #{@content.class.name.downcase}"
-    } do %>
-    <i class="material-icons">share</i>
+    class: "btn-floating btn-small halfway-fab waves-effect waves-light white expand tooltipped hoverable",
+    style: 'z-index: 1; margin-right: 64px;',
+    data: { position: 'bottom', enterDelay: '500', tooltip: 'Expand all tabs vertically'} do %>
+    <i class="material-icons black-text">format_line_spacing</i>
   <% end %>
-<% end %>
 
-<%= link_to attribute_customization_path(content_type: @content.class.name.downcase),
-  class: "btn-floating btn-small halfway-fab waves-effect waves-light white lighten-3 tooltipped hoverable",
-  style: 'z-index: 1; margin-right: 64px;',
-  data: {
-    position: 'bottom',
-    enterDelay: '500',
-    tooltip: "Configure the categories and fields #{@content.class.name.downcase.pluralize} use",
-    confirm: editing ? "This will take you to a new page. Please make sure any changes are saved before proceeding." : nil
-  } do %>
+  <% if personal_content %>
+    <%= link_to attribute_customization_path(content_type: @content.class.name.downcase),
+      class: "btn-floating btn-small halfway-fab waves-effect waves-light white lighten-3 tooltipped hoverable",
+      style: 'z-index: 1; margin-right: 105px;',
+      data: {
+        position: 'bottom',
+        enterDelay: '500',
+        tooltip: "Configure the categories and fields #{@content.class.name.downcase.pluralize} use",
+        confirm: editing ? "This will take you to a new page. Please make sure any changes are saved before proceeding." : nil
+      } do %>
 
-  <i class="material-icons black-text">tune</i>
-<% end %>
+      <i class="material-icons black-text">tune</i>
+    <% end %>
+  <% end %>
 
-<%= link_to '#',
-  class: "btn-floating btn-small halfway-fab waves-effect waves-light white expand tooltipped hoverable",
-  style: 'z-index: 1; margin-right: 105px;',
-  data: { position: 'bottom', enterDelay: '500', tooltip: 'Expand all tabs vertically'} do %>
-  <i class="material-icons black-text">format_line_spacing</i>
-<% end %>
-
-<% if personal_content && @content.persisted? %>
-  <a class="btn-floating btn-small halfway-fab waves-effect waves-light white share tooltipped" style="z-index: 1; margin-right: 146px;" data-tooltip="Share this <%= @content.class.name.downcase %>">
-    <i class="material-icons black-text">share</i>
-  </a>
-<% end %>
-
+  <% if personal_content && @content.persisted? %>
+    <a class="btn-floating btn-small halfway-fab waves-effect waves-light white share tooltipped" style="z-index: 1; margin-right: 146px;" data-tooltip="Share this <%= @content.class.name.downcase %>">
+      <i class="material-icons black-text">share</i>
+    </a>
+  <% end %>
+</div>
