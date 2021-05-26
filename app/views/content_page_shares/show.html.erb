@@ -124,7 +124,10 @@
             %>
           </blockquote>
         <% end %>
-        
+      </div>
+    </div>
+    <div class="card <%= user_signed_in? && @share.user == current_user ? 'purple' : 'blue' %> lighten-3 black-text hoverable">
+      <div class="card-content">
         <% if user_signed_in? %>
           <%= render partial: 'share_comments/form', locals: { share: @share } %>
         <% else %>
@@ -134,25 +137,28 @@
             <% end %>
           </div>
         <% end %>
-        <br />
-
-        <div class="uppercase grey-text center">
-          <%= pluralize @share.share_comments.count, 'comment' %>
-        </div>
-        <div class="row">
-          <% @share.share_comments.each do |comment| %>
-            <%= 
-              render partial: 'share_comments/show', 
-                    locals: { comment: comment, share: @share }
-            %>
-          <% end %>
-        </div>
-
-        <% if @share.share_comments.count > 10 && user_signed_in? %>
-          <%= render partial: 'share_comments/form', locals: { share: @share } %>
-        <% end %>
-        <br /><br />
+        <div class="clearfix"></div>
       </div>
     </div>
+
+    <div class="uppercase grey-text center">
+      <%= pluralize @share.share_comments.count, 'comment' %>
+    </div>
+    <% @share.share_comments.each do |comment| %>
+      <%= 
+        render partial: 'share_comments/show', 
+              locals: { comment: comment, share: @share }
+      %>
+    <% end %>
+
+    <% if @share.share_comments.count > 10 && user_signed_in? %>
+      <div class="clearfix"></div>
+      <div class="card <%= user_signed_in? && @share.user == current_user ? 'purple' : 'blue' %> lighten-3 black-text hoverable">
+        <div class="card-content">  
+          <%= render partial: 'share_comments/form', locals: { share: @share } %>
+        </div>
+      </div>
+    <% end %>
+    <br /><br />
   </div>
 </div>
