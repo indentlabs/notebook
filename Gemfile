@@ -113,30 +113,14 @@ group :test, :production do
 end
 
 group :test do
-  gem 'better_errors'
-  gem 'capybara'
   gem 'codeclimate-test-reporter', require: false
-  gem 'cucumber-rails', require: false
   gem 'database_cleaner'
-  gem 'factory_bot_rails'
-  gem 'guard'
-  gem 'guard-minitest'
-  gem 'guard-rubocop'
   gem 'selenium-webdriver'
-  gem 'simplecov', require: false
-  gem 'tzinfo-data' # addresses a bug when working on Windows
-  gem 'rails-perftest'
-  gem 'rspec-prof'
-  gem 'rspec-rails'
-  gem 'webmock'
-  gem 'rubocop', require: false
-  gem 'ruby-prof', '1.4.3'
-  gem 'shoulda-matchers', '~> 4.5'
-  gem 'rails-controller-testing'
 end
 
 group :development do
   gem 'web-console'
+  gem 'listen'
   gem 'bullet'
   gem 'rack-mini-profiler'
   gem 'memory_profiler'
