@@ -239,6 +239,9 @@
     color:#303030 !important;
     background:none;
   }
+  .strikethrough {
+    text-decoration: line-through;
+  }
 </style>
 
 <div class="container">
@@ -588,7 +591,7 @@
   function RegisterEvents(){
     document.getElementById("crossword").onfocus = function (){ 
       return false; }
-    document.getElementById("btnCreate").addEventListener('click',Create,false);
+    document.getElementById("btnCreate").addEventListener('click', Create, false);
   }
   RegisterEvents();
 
@@ -603,6 +606,12 @@
       s+=c[i].a+ "='"+ArrayToString(c[i].v," ")+"' ";    
     }
     return (s+">"+h+"</"+e+">");
+  }
+
+  function toggle_strike_through(self) {
+    console.log('toggling');
+    console.log(this);
+    console.log(self);
   }
 
   function ArrayToString(a,s){
@@ -636,4 +645,12 @@
   //---------------------------------//
 
   Create();
+</script>
+
+<script>
+  $(document).ready(function () {
+    $('.line').click(function () {
+      $(this).find('.clue').toggleClass('strikethrough');
+    });
+  })
 </script>
