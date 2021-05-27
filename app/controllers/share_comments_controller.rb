@@ -1,9 +1,10 @@
 class ShareCommentsController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_share_comment, only: [:update, :destroy]
 
   # POST /share_comments
   def create
-    @share_comment = ShareComment.new(share_comment_params.merge({user: current_user}))
+    @share_comment = ShareComment.new(share_comment_params.merge({ user: current_user }))
 
     if @share_comment.save
       # Subscribe the commenter to additional comments on this share
