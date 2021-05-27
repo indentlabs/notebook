@@ -33,8 +33,8 @@ class AdminController < ApplicationController
 
   def images
     @images = ImageUpload.offset(params[:page].to_i * 500).limit(500)
-              .includes(:content)
-              #.where.not(audited: true)
+              .includes(:content) #.where.not(audited: true)
+              .order('id DESC')
   end
 
   def masquerade

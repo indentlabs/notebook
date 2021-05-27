@@ -25,11 +25,11 @@
     </li>
   <% end %>
   <li>
-    <div class="collapsible-header"><i class="material-icons">add</i>Add another field to this section</div>
+    <div class="collapsible-header"><i class="material-icons">add</i>Add a text field to this section</div>
     <div class="collapsible-body">
       <%= form_for(category.attribute_fields.build, method: :post) do |f| %>
-        <%# todo the following line shouldn't be necessary %>
         <%= f.hidden_field :attribute_category_id, value: category.id %>
+        <%= f.hidden_field :field_type, value: 'text_area' %>
 
         <div class="row">
           <div class="input-field col s12">
@@ -37,16 +37,49 @@
             <%= f.label :label, 'Field label' %>
           </div>
           <div class="input-field col s12">
-            <%= f.submit 'Add new field', class: "btn #{@content_type_class.color}" %>
+            <%= f.submit 'Add new text field', class: "btn #{@content_type_class.color}" %>
           </div>
         </div>
         <div class="row">
           <div class="grey-text text-darken-1">
-            <strong>New:</strong> Notebook.ai can now suggest additional fields for this category.
+            Notebook.ai can suggest additional text fields for this category.
           </div>
           <p class="suggest-fields-container">
           </p>
           <%= f.button "Request suggestions", class: 'small btn white black-text js-show-field-suggestions' %>
+        </div>
+      <% end %>
+    </div>
+  </li>
+  <li>
+    <div class="collapsible-header"><i class="material-icons">add</i>Add a link field to this section</div>
+    <div class="collapsible-body">
+      <%= form_for(category.attribute_fields.build, method: :post) do |f| %>
+        <%# todo the following line shouldn't be necessary %>
+        <%= f.hidden_field :attribute_category_id, value: category.id %>
+        <%= f.hidden_field :field_type, value: 'link' %>
+
+        <div class="row">
+          <div class="input-field col s12">
+            <%= f.text_area :label, class: 'materialize-textarea js-field-input' %>
+            <%= f.label :label, 'Field label' %>
+          </div>
+          <div class="input-field col s12">
+            <select multiple 
+              name="attribute_field[field_options][linkable_types][]" 
+              prompt="Please select at least one page type for this field to link to"
+            >
+              <%= 
+                options_for_select(
+                  Rails.application.config.content_types[:all].map { |klass| [klass.name.pluralize, klass.name] }
+                )
+              %>
+            </select>
+            <label>Linkable page types</label>
+          </div>
+          <div class="input-field col s12">
+            <%= f.submit 'Add new link field', class: "btn #{@content_type_class.color}" %>
+          </div>
         </div>
       <% end %>
     </div>

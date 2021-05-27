@@ -4,33 +4,25 @@
   raw_model = content.is_a?(Universe) ? content : content.raw_model
 %>
 
-<% if raw_model.contributors.any? %>
-  <ul class="collection">
-    <% raw_model.contributors.each do |contributor| %>
-      <%# Don't expose email addresses to anyone other than the content owner who entered them in the first place %>
-      <% next if contributor.user.nil? && (content.user != current_user)%>
-
+<div id="contributors_panel" class="panel">
+  <% if raw_model.contributors.any? %>
+    <ul class="collection with-header">
+      <li class="collection-header purple white-text">
+        <i class="material-icons left"><%= User.icon %></i>
+        Owner
+      </li>
       <li class="collection-item avatar">
         <i class="material-icons circle white-text <%= User.color %>"><%= User.icon %></i>
         <span class="title">
-          <%= contributor.user ? link_to(contributor.user.name, contributor.user) : "#{contributor.email} (invited)" %>
+          <%= link_to(content.user.name, content.user) %>
         </span>
         <p class="grey-text">
-          Invited <%= time_ago_in_words contributor.created_at %> ago
+          Created universe <%= time_ago_in_words content.created_at %> ago
         </p>
-        <% if user_signed_in? && content.user == current_user %>
-          <p>
-            <%= link_to 'Remove this contributor', remove_contributor_path(contributor.id),
-              class: 'js-remove-contributor',
-              method: 'delete',
-              remote: true,
-              data: { confirm: "Are you sure? They will no longer have contributor access to this universe." } %>
-          </p>
-        <% end %>
-        <span class="secondary-content"><i class="material-icons grey-text">group</i></span>
+        <span class="secondary-content"><i class="material-icons grey-text"><%= User.icon %></i></span>
       </li>
-    <% end %>
-  </ul>
+    </ul>
+  <% end %>
 
-  <%= render partial: 'content/form/contributors/leave', locals: { content: raw_model } %>
-<% end %>
+  <%= render partial: 'content/display/contributors_user_list', locals: { content: content, raw_model: raw_model } %>
+</div>

@@ -1,0 +1,56 @@
+<%
+  # Fall back on legacy link klass if we don't have any linkable types set on this link field
+  linkable_types = field.fetch(:migrated_link, false) \
+    ? field.dig(:options, 'linkable_types') || [] # New-style link
+    : [page.send(attribute).klass]                # Old-style link
+
+  # Constantize upfront so we can #icon, #color, etc
+  linkable_types.map! { |class_name| content_class_from_name(class_name) }
+%>
+
+<div class="content-field link">
+  <div>
+    <i class="material-icons left grey-text">link</i>
+    <%= f.label attribute, I18n.translate(
+      "attributes.#{page.class.name.downcase}.#{attribute}",
+      scope: :activerecord,
+      default: label.humanize.capitalize
+    ) %>
+  </div>
+
+  <div class="input-field">
+    <select name="attribute_field[linked_pages][]" multiple class="autosave-closest-form-on-change">
+      <% linkable_types.each do |page_type| %>
+        <optgroup label="<%= page_type.name.pluralize %>">
+          <%#
+            We don't use this since you can't set data-icon on each option, but the below loop should do the same
+            options_for_select(
+              @current_user_content.fetch(page_type.name, []).map { |klass| [klass.name.pluralize, klass.name] }, 
+              field[:value]
+            )
+          %>
+          <% @linkables_raw.fetch(page_type.name, []).each do |linkable| %>
+            <option value="<%= page_type %>-<%= linkable.id %>"
+              data-icon="<%= asset_path linkable.random_image_including_private(format: :thumb) %>"
+              <%= 'selected' if field[:value].include?("#{page_type}-#{linkable.id}") %>
+            >
+              <%= linkable.name %>
+            </option>
+          <% end %>
+        </optgroup>
+      <% end %>
+    </select>
+    <div>
+      <small>
+        <i class="material-icons left">link</i>
+        <% linkable_types.each do |page_type| %>
+          <i class="material-icons <%= page_type.color %>-text tooltipped" data-tooltip="Link <%= page_type.name.pluralize.downcase %>">
+            <%= page_type.icon %>
+          </i>
+        <% end %>
+      </small>
+    </div>
+  </div>
+
+  <%# relation %>
+</div>

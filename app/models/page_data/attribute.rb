@@ -3,7 +3,7 @@ class Attribute < ApplicationRecord
 
   belongs_to :user
   belongs_to :attribute_field
-  belongs_to :entity, polymorphic: true
+  belongs_to :entity, polymorphic: true, touch: true
 
   include HasChangelog
 

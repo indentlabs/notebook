@@ -6,7 +6,7 @@
   </li>
   <li class="no-padding">
     <% @recently_edited_pages.each do |content| %>
-      <% content_class = content.is_a?(ContentPage) ? content.page_type.constantize : content.class %>
+      <% content_class = content.is_a?(ContentPage) ? content_class_from_name(content.page_type) : content.class %>
       <li>
         <%= link_to main_app.polymorphic_path(content_class), class: "#{content_class.color}-text tooltipped",
           data: {

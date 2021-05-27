@@ -4,6 +4,14 @@
 
 <%= render partial: 'notice_dismissal/messages/15' %>
 
+<% unless current_user.can_create?(PageCollection) %>
+  <div class="card-panel">
+    Although anyone can submit their notebook pages to any public collection, creating <em>new</em> Collections is currently limited to Premium subscribers.
+    A more widespread release for users without a Premium subscription is coming soon.
+    <%= link_to 'Upgrade to create your own Collection', subscription_path %>.
+  </div>
+<% end %>
+
 <% if @collections_with_pending.any? %>
   <div class="row">
     <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @collections_with_pending, title: "Your collections with pending submissions" } %>

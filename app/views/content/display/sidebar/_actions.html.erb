@@ -12,11 +12,27 @@
     Actions
   </li>
 
+  <li class="collection-item">
+    <%= link_to '#', class: "expand" do %>
+      <i class="material-icons left">format_line_spacing</i>
+      Expand all categories
+    <% end %>
+  </li>
+
+  <% if editing %>
+    <li class="collection-item fake-tab">
+      <%= link_to raw_model do %>
+        <i class="material-icons left"><%= raw_model.class.icon %></i>
+        View this <%= content.class_name.downcase %>
+      <% end %>
+    </li>
+  <% end %>
+
   <% if raw_model.persisted? %>
     <li class="collection-item fake-tab">
       <%= link_to '#', class: 'share' do %>
         <i class="material-icons left">share</i>
-        Share this page
+        Share this <%= content.class_name.downcase %>
       <% end %>
     </li>
   <% end %>

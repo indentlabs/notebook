@@ -1,55 +1,46 @@
 <%
-  content_name = f.object.class.content_name
+  content_name = content.class.name
 
   field_id = "#{content_name}_#{field[:id]}"
-  value ||= if f.object.respond_to?(field[:id].to_sym)
-    value = f.object.send(field[:id].to_sym)
+  value ||= if content.respond_to?(field[:id].to_sym)
+    value = content.send(field[:id].to_sym)
   else
     value = field[:value]
   end
+
+  should_autocomplete = defined?(autocomplete) && !!autocomplete
+  should_autosave     = defined?(autosave)     && !!autosave
 %>
-<div class="content-field">
-  <div class="input-field">
-    <% unless defined?(show_label) && !show_label %>
-      <%= f.label field do %>
-        <%= field[:label].present? ? field[:label] : ' ' %>
-        <% if defined?(autocomplete) && autocomplete && autocomplete.any? %>
-          <i class="material-icons grey-text lighten-2 tooltipped"
-             style="font-size: 100%"
-             data-tooltip="This field may suggest some ideas for you when you start typing."
-             data-position="right"
-          >
-            offline_bolt
-          </i>
-        <% end %>
-      <% end %>
-    <% end %>
 
-    <%
-      placeholder = I18n.translate "attributes.#{content_name}.#{field[:label].downcase.gsub(/\s/, '_')}",
-        scope: :serendipitous_questions,
-        name: f.object.send('name') || "this #{content_name}",
-        default: 'Write as little or as much as you want!'
-    %>
+<% unless defined?(show_label) && !show_label %>
+  <%= f.label field do %>
+    <%= field[:label].present? ? field[:label] : ' ' %>
+  <% end %>
+<% end %>
 
-    <%= hidden_field_tag "#{content_name}[custom_attribute_values][][name]", field[:id] %>
-    <%=
-      text_area_tag "#{content_name}[custom_attribute_values][][value]",
-                    value,
-                    class: "js-can-mention-pages materialize-textarea #{defined?(autocomplete) && autocomplete ? ('autocomplete ' + 'js-autocomplete-' + field[:id].to_s) : ''}",
-                    placeholder: placeholder
-    %>
+<%
+  placeholder = I18n.translate "attributes.#{content_name.downcase}.#{field[:label].downcase.gsub(/\s/, '_')}",
+    scope: :serendipitous_questions,
+    name: content.send('name') != "New #{content_name}" ? content.send('name') : "this #{content_name.downcase}",
+    default: 'Write as little or as much as you want'
+%>
 
-    <p class="help-text show-when-focused">
-      Tip: You can press @ to insert a link to your other pages. 
-    </p>
-    <% if field[:label].start_with?('Private') %>
-      <div class="help-text show-when-focused">
-        Private notes are <em>always</em> visible to only you, even if content is made public and shared.
-      </div>
-    <% end %>
+<%= hidden_field_tag "field[name]", field[:id] %>
+<%=
+  text_area_tag "field[value]",
+                value,
+                class: "js-can-mention-pages materialize-textarea" \
+                  + "#{' autocomplete js-autocomplete-' + field[:id].to_s if should_autocomplete}" \
+                  + "#{' autosave-closest-form-on-change' if should_autosave}",
+                placeholder: placeholder
+%>
+
+<%# todo switch to field[:options].fetch('privacy') %>
+<% if field[:label].start_with?('Private') %>
+  <div class="help-text show-when-focused">
+    Private notes are <em>always</em> visible to only you, even if content is made public and shared.
   </div>
-</div>
+<% end %>
 
 <% if defined?(autocomplete) && autocomplete && autocomplete.any? %>
   <%= content_for :javascript do %>

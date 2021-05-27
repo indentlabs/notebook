@@ -66,7 +66,6 @@ class DocumentEntitiesSidebar extends React.Component {
   }
 
   render () {
-    // console.log(this.state.linked_entities);
     return (
       <React.Fragment>
         <ul id="document-entities-right" className="sidenav">
@@ -78,6 +77,18 @@ class DocumentEntitiesSidebar extends React.Component {
               In this document...
             </a>
           </li>
+
+          {Object.keys(this.state.linked_entities).length === 0 && (
+            <li>
+              <div className="card-panel teal lighten-5 black-text" style={{lineHeight: '1.5em'}}>
+                You can link your notebook pages directly to this document.
+                <br /><br />
+                When you do, you'll be able to quickly reference them from this menu without needing to navigate away from your document.
+                You'll also be able to see a list of all the documents a page is linked to when viewing that page.
+              </div>
+            </li>
+          )}
+
           <li className="no-padding">
             <ul className="collapsible collapsible-accordion">
               {Object.keys(this.state.linked_entities).map((entity_type, i) => {
