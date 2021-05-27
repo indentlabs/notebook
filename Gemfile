@@ -3,7 +3,7 @@ ruby "~> 2.7"
 
 # Server
 gem 'rails'
-gem 'puma', '~> 5.2'
+gem 'puma', '~> 5.3'
 gem 'puma-heroku'
 # gem 'bootsnap', require: false
 gem 'sprockets', '~> 3.7.2'
@@ -91,7 +91,7 @@ gem 'redis'
 gem 'csv'
 
 # Admin
-gem 'rails_admin', '~> 2.0'
+gem 'rails_admin', '~> 2.1'
 
 # Tech debt & hacks
 gem 'binding_of_caller' # see has_changelog.rb

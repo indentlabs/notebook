@@ -185,6 +185,7 @@ Rails.application.routes.draw do
     get 'pinboard',  to: 'lab#pinboard'
 
     get 'dice', to: 'lab#dice'
+    get 'crossword', to: 'lab#crossword'
   end
 
   # Sessions
