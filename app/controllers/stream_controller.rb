@@ -17,6 +17,13 @@ class StreamController < ApplicationController
       .includes([:content_page, :secondary_content_page])
       .includes({ share_comments: [:user], user: [:avatar_attachment] })
       .limit(25)
+    
+    @users_to_follow = User.where(
+      # Users who have shared at least 1 page to their stream
+      id: ContentPageShare.where(content_page_type: Rails.application.config.content_type_names[:all])
+            .where.not(id: current_user.try(:id))
+            .pluck(:user_id)
+    ).order('selected_billing_plan_id DESC').limit(1_000).sample(6)
   end
 
   def community
