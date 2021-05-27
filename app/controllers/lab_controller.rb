@@ -1,5 +1,6 @@
 class LabController < ApplicationController
   layout 'app', only: [:pinboard]
+  layout 'nostyle', only: [:crossword]
 
   def pinboard
 
@@ -28,5 +29,9 @@ class LabController < ApplicationController
       @translations.sort_by! { |translation| Levenshtein.distance(params[:query].downcase, translation.second.downcase) }
       @translations.reverse!
     end
+  end
+
+  def crossword
+
   end
 end
