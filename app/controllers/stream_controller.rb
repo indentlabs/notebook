@@ -23,7 +23,7 @@ class StreamController < ApplicationController
       id: ContentPageShare.where(content_page_type: Rails.application.config.content_type_names[:all])
             .where.not(id: current_user.try(:id))
             .pluck(:user_id)
-    ).order('selected_billing_plan_id DESC').limit(1_000).sample(6)
+    ).order('selected_billing_plan_id DESC').limit(250).sample(12)
   end
 
   def community
