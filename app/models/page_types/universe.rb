@@ -53,6 +53,7 @@ class Universe < ApplicationRecord
   has_many :lores
 
   has_many :contributors, dependent: :destroy
+  has_many :contributing_users, through: :contributors, source: :user
 
   has_many :documents
   has_many :timelines
