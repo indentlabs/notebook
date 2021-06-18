@@ -33,6 +33,6 @@ class ContentPageShare < ApplicationRecord
   end
 
   def self.icon
-    'ballot'
+    'stream'
   end
 end
