@@ -73,9 +73,13 @@ class Document < ApplicationRecord
     SaveDocumentRevisionJob.perform_later(self.id)
   end
 
+  def word_count
+    # TODO this should probably be cached !!
+    (self.body || "").split(/\s+/).count
+  end
+
   def reading_estimate
-    words = (self.body || "").split(/\s+/).count
-    minutes = 1 + (words / 200).to_i
+    minutes = 1 + (word_count / 200).to_i
 
     "~#{minutes} minute read"
   end
