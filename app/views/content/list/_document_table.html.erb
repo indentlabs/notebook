@@ -37,28 +37,33 @@
           <strong style="font-size: 1.2em"><%= document.title %></strong>
         </div>
         <div style="padding-left: 2.6em">
-
-          <% if current_user.can_update?(document) %>
-            <%= link_to edit_polymorphic_path(document), class: 'green white-text btn-flat', target: document.is_a?(Document) ? '_new' : '_self' do %>
-              <i class="material-icons left"><%= content_type.icon %></i>
-              Edit
-            <% end %>
-          <% end %>
           <% if current_user.can_read?(document) %>
             <%= link_to polymorphic_path(document), class: 'blue white-text text-lighten-1 btn-flat' do %>
               <i class="material-icons left"><%= content_type.icon %></i>
               View
             <% end %>
           <% end %>
-          <%= link_to '#', class: 'btn-flat orange white-text' do %>
+          <% if current_user.can_update?(document) %>
+            <%= link_to edit_polymorphic_path(document), class: 'green white-text btn-flat', target: document.is_a?(Document) ? '_new' : '_self' do %>
+              <i class="material-icons left"><%= content_type.icon %></i>
+              Edit
+            <% end %>
+          <% end %>
+          <%= link_to analysis_document_path(document), class: 'btn-flat orange white-text' do %>
             <i class="material-icons left">bar_chart</i>
             Analyze
           <% end %>
         </div>
       </td>
       <td>
-        <%= document.reading_estimate %>
-        <%# pluralize 0, 'word' %>
+        <div>
+          <i class="material-icons tiny" style="position: relative; top: 3px;">text_snippet</i>
+          <%= pluralize document.word_count, 'word' %>
+        </div>
+        <div>
+          <i class="material-icons tiny" style="position: relative; top: 3px;">timer</i>
+          <%= document.reading_estimate %>
+        </div>
       </td>
       <td>
         <span class="tooltipped" data-tooltip="Last edited at <%= document.updated_at.strftime("%m/%d/%Y %H:%M UTC") %>">
