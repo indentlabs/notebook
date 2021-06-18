@@ -16,7 +16,7 @@ class DocumentsController < ApplicationController
 
   def index
     @page_title = "My documents"
-    @documents = @current_user_content.fetch('Document', [])
+    @documents = current_user.linkable_documents.order('favorite DESC, title ASC')
     @recent_documents = current_user.linkable_documents.order('updated_at DESC')
   end
 

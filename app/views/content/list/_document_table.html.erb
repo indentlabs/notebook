@@ -1,0 +1,71 @@
+<%# Usage: render partial: 'content/list/document_table', locals: { content_list: @content, content_type: @content_type_class } %>
+
+<table class="highlight z-depth-1">
+  <thead>
+    <tr>
+        <th>Title</th>
+        <th>Length</th>
+        <th>Last edited</th>
+    </tr>
+  </thead>
+  <% content_list.each do |document| %>
+    <tr class="white">
+      <td>
+        <div>
+          <i class="material-icons left <%= Document.color %>-text"><%= Document.icon %></i>
+
+          <%
+            if document.favorite?
+              icon = 'star'
+              action = 'Unfavorite'
+            else
+              icon = 'star_border'
+              action = 'Favorite'
+            end
+          %>
+
+          <% if document.persisted? && user_signed_in? && document.user == current_user %>
+            <i class="material-icons right orange-text favorite-button tooltipped" 
+              data-tooltip="<%= action %> this page"
+              data-content-id="<%= document.id %>"
+              data-content-class="<%= document.class.name.downcase.pluralize %>">
+              <%= icon %>
+            </i>
+          <% end %>
+
+
+          <strong style="font-size: 1.2em"><%= document.title %></strong>
+        </div>
+        <div style="padding-left: 2.6em">
+
+          <% if current_user.can_update?(document) %>
+            <%= link_to edit_polymorphic_path(document), class: 'green white-text btn-flat', target: document.is_a?(Document) ? '_new' : '_self' do %>
+              <i class="material-icons left"><%= content_type.icon %></i>
+              Edit
+            <% end %>
+          <% end %>
+          <% if current_user.can_read?(document) %>
+            <%= link_to polymorphic_path(document), class: 'blue white-text text-lighten-1 btn-flat' do %>
+              <i class="material-icons left"><%= content_type.icon %></i>
+              View
+            <% end %>
+          <% end %>
+          <%= link_to '#', class: 'btn-flat orange white-text' do %>
+            <i class="material-icons left">bar_chart</i>
+            Analyze
+          <% end %>
+        </div>
+      </td>
+      <td>
+        <%= document.reading_estimate %>
+        <%# pluralize 0, 'word' %>
+      </td>
+      <td>
+        <span class="tooltipped" data-tooltip="Last edited at <%= document.updated_at.strftime("%m/%d/%Y %H:%M UTC") %>">
+          <%= document.updated_at == document.created_at ? 'created' : 'updated' %>
+          <%= time_ago_in_words document.updated_at %> ago
+        </span>
+      </td>
+    </tr>
+  <% end %>
+</table>

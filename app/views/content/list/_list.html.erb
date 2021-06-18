@@ -54,25 +54,27 @@
         <% end %>
       </span>
       <p class="tags-container">
-        <% content.page_tags.each do |tag| %>
-          <% if user_signed_in? && content.user == current_user %>
-            <%=
-              link_to send(
-                "page_tag_#{content.class.name.downcase.pluralize}_path",
-                slug: PageTagService.slug_for(tag.tag)
-              ) do
-            %>
+        <% if content.respond_to?(:page_tags) %>
+          <% content.page_tags.each do |tag| %>
+            <% if user_signed_in? && content.user == current_user %>
+              <%=
+                link_to send(
+                  "page_tag_#{content.class.name.downcase.pluralize}_path",
+                  slug: PageTagService.slug_for(tag.tag)
+                ) do
+              %>
+                <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+              <% end %>
+            <% else %>
               <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
             <% end %>
-          <% else %>
-            <span class="new badge <%= params[:slug] == tag.slug ? @content_type_class.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
           <% end %>
         <% end %>
       </p>
       <p class='grey-text' style="clear: both">
         <% if user_signed_in? %>
           <span class="timestamp tooltipped" data-position="bottom" data-delay="500" data-tooltip="<%= content.updated_at.strftime("%m/%d/%Y %H:%M") %>" style="font-size: 80%">
-            <i class="material-icons">mode_edit</i>
+            <i class="material-icons tiny left">mode_edit</i>
 
             <%
               if content.updated_at == content.created_at
