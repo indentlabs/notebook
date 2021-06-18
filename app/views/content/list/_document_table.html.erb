@@ -3,16 +3,19 @@
 <table class="highlight z-depth-1 js-content-cards-list">
   <thead>
     <tr>
-        <th>Title</th>
-        <th>Length</th>
-        <th>Last edited</th>
+      <th></th>
+      <th>Title</th>
+      <th>Length</th>
+      <th>Last edited</th>
     </tr>
   </thead>
   <% content_list.each do |document| %>
-    <tr class="white js-content-card-container">
+    <tr class="white js-content-card-container hoverable">
+      <td class="center">
+          <i class="material-icons medium <%= Document.color %>-text"><%= Document.icon %></i>
+      </td>
       <td>
         <div>
-          <i class="material-icons left <%= Document.color %>-text"><%= Document.icon %></i>
 
           <%
             if document.favorite?
@@ -34,11 +37,17 @@
           <% end %>
 
 
-          <strong style="font-size: 1.2em" class="js-content-name">
-            <%= document.title %>
-          </strong>
+          <div>
+            <strong style="font-size: 1.2em" class="js-content-name">
+              <%= document.title %>
+            </strong>
+          </div>
+          <div>
+            by <%= link_to document.user.display_name, document.user, class: "#{User.color}-text" %>
+          </div>
+          <br />
         </div>
-        <div style="padding-left: 2.6em">
+        <div>
           <% if current_user.can_read?(document) %>
             <%= link_to polymorphic_path(document), class: 'blue white-text text-lighten-1 btn-flat' do %>
               <i class="material-icons left"><%= content_type.icon %></i>
