@@ -16,8 +16,12 @@ class DocumentsController < ApplicationController
 
   def index
     @page_title = "My documents"
-    @documents = current_user.linkable_documents.order('favorite DESC, title ASC')
-    @recent_documents = current_user.linkable_documents.order('updated_at DESC')
+    @documents = current_user.linkable_documents.order('favorite DESC, title ASC, updated_at DESC').to_a
+    @recent_documents = current_user.linkable_documents.order('updated_at DESC').limit(4).to_a
+
+    if params.key?(:favorite_only)
+      @documents.select!(&:favorite?)
+    end
   end
 
   def show
