@@ -1,6 +1,6 @@
 <%# Usage: render partial: 'content/list/document_table', locals: { content_list: @content, content_type: @content_type_class } %>
 
-<table class="highlight z-depth-1">
+<table class="highlight z-depth-1 js-content-cards-list">
   <thead>
     <tr>
         <th>Title</th>
@@ -9,7 +9,7 @@
     </tr>
   </thead>
   <% content_list.each do |document| %>
-    <tr class="white">
+    <tr class="white js-content-card-container">
       <td>
         <div>
           <i class="material-icons left <%= Document.color %>-text"><%= Document.icon %></i>
@@ -34,7 +34,9 @@
           <% end %>
 
 
-          <strong style="font-size: 1.2em"><%= document.title %></strong>
+          <strong style="font-size: 1.2em" class="js-content-name">
+            <%= document.title %>
+          </strong>
         </div>
         <div style="padding-left: 2.6em">
           <% if current_user.can_read?(document) %>
