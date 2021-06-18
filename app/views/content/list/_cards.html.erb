@@ -97,39 +97,41 @@
     </div>
   <% end %>
 
-  <% if current_user.can_create?(content_type) %>
-    <div class="col s12 m6 l4">
-      <%= link_to new_polymorphic_path(content_type), class: 'white-text' do %>
-        <div class="hoverable card <%= content_type.color %> lighten-1" style="height: 320px;">
-          <div class="card-content fixed-card-content centered-card-content">
-            <p>
-              <i class="material-icons large">add</i>
+  <% if local_assigns.fetch(:show_new_button, true) %>
+    <% if current_user.can_create?(content_type) %>
+      <div class="col s12 m6 l4">
+        <%= link_to new_polymorphic_path(content_type), class: 'white-text' do %>
+          <div class="hoverable card <%= content_type.color %> lighten-1" style="height: 320px;">
+            <div class="card-content fixed-card-content centered-card-content">
+              <p>
+                <i class="material-icons large">add</i>
+              </p>
+              <strong class="card-title">
+                New<br />
+                <%= content_type.name %>
+              </strong>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="col s12 m6 l4">
+        <div class="card <%= content_type.color %> lighten-3" style="height: 320px;">
+          <div class="card-content fixed-card-content">
+            <p class="center grey-text text-lighten-1" style="margin-top: 50px; margin-bottom: 20px;">
+              <i class="material-icons large"><%= content_type.icon %></i>
             </p>
-            <strong class="card-title">
-              New<br />
-              <%= content_type.name %>
-            </strong>
+            <p>
+              An active
+              <%= link_to 'Notebook.ai Premium', subscription_path, class: 'blue-text text-darken-2' %> subscription
+              is required to create additional
+              <%= content_type.name.downcase %> pages, but pages you've already created will always
+              be available here.
+            </p>
           </div>
         </div>
-      <% end %>
-    </div>
-  <% else %>
-    <div class="col s12 m6 l4">
-      <div class="card <%= content_type.color %> lighten-3" style="height: 320px;">
-        <div class="card-content fixed-card-content">
-          <p class="center grey-text text-lighten-1" style="margin-top: 50px; margin-bottom: 20px;">
-            <i class="material-icons large"><%= content_type.icon %></i>
-          </p>
-          <p>
-            An active
-            <%= link_to 'Notebook.ai Premium', subscription_path, class: 'blue-text text-darken-2' %> subscription
-            is required to create additional
-            <%= content_type.name.downcase %> pages, but pages you've already created will always
-            be available here.
-          </p>
-        </div>
       </div>
-    </div>
+    <% end %>
   <% end %>
 
   <% if local_assigns.fetch(:show_template_editor_form, false) %>

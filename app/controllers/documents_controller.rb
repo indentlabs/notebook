@@ -16,7 +16,8 @@ class DocumentsController < ApplicationController
 
   def index
     @page_title = "My documents"
-    @documents = @current_user_content['Document']
+    @documents = @current_user_content.fetch('Document', [])
+    @recent_documents = current_user.linkable_documents.order('updated_at DESC')
   end
 
   def show
@@ -234,18 +235,18 @@ class DocumentsController < ApplicationController
     @navbar_actions = []
     return unless user_signed_in?
 
-    if @current_user_content && @current_user_content['Document'].present?
-      @navbar_actions << {
-        label: "Your #{@current_user_content['Document'].count} Document#{'s' unless @navbar_actions == 1}",
-        href: documents_path
-      }
-    end
+    # if @current_user_content && @current_user_content['Document'].present?
+    #   @navbar_actions << {
+    #     label: "Your #{@current_user_content['Document'].count} Document#{'s' unless @navbar_actions == 1}",
+    #     href: documents_path
+    #   }
+    # end
 
-    @navbar_actions << {
-      label: "New Document",
-      href: new_document_path,
-      target: '_blank'
-    }
+    # @navbar_actions << {
+    #   label: "New Document",
+    #   href: new_document_path,
+    #   target: '_blank'
+    # }
   end
 
   def set_footer_visibility

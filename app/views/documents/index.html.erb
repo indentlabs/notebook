@@ -11,9 +11,21 @@
 <% end %>
 
 <% if @documents.any? %>
-  <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } %>
-  <%= render partial: 'notice_dismissal/messages/02' %>
-  <%= render partial: 'content/list/cards', locals: { content_list: @documents, content_type: Document } %>
+  <%= content_for :full_width_page_content do %>
+    <div class="container-fluid">
+      <div class="row">
+        <h5>Recently-edited documents</h5>
+        <%= render partial: 'content/list/cards', locals: { content_list: @documents.first(3), content_type: Document, show_new_button: false } %>
+      </div>
+      <!-- recent documents -->
+      <div class="row">
+        <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } %>
+        <h5>All documents</h5>
+        <%= render partial: 'notice_dismissal/messages/02' %>
+        <%= render partial: 'content/list/cards', locals: { content_list: @documents, content_type: Document } %>
+      </div>
+    </div>
+  <% end %>
 <% end %>
 
 <% if @documents.empty? %>
