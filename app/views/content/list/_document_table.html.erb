@@ -10,60 +10,34 @@
     </tr>
   </thead>
   <% content_list.each do |document| %>
-    <tr class="white js-content-card-container hoverable">
+    <tr class="white js-content-card-container hoverable modal-trigger" data-target="document-info-<%= document.id %>" style="cursor: pointer">
       <td class="center">
           <i class="material-icons medium <%= Document.color %>-text"><%= Document.icon %></i>
       </td>
       <td>
         <div>
-
-          <%
-            if document.favorite?
-              icon = 'star'
-              action = 'Unfavorite'
-            else
-              icon = 'star_border'
-              action = 'Favorite'
-            end
-          %>
-
-          <% if document.persisted? && user_signed_in? && document.user == current_user %>
-            <i class="material-icons right orange-text favorite-button tooltipped" 
-              data-tooltip="<%= action %> this page"
-              data-content-id="<%= document.id %>"
-              data-content-class="<%= document.class.name.downcase.pluralize %>">
-              <%= icon %>
-            </i>
-          <% end %>
-
-
           <div>
             <strong style="font-size: 1.2em" class="js-content-name">
               <%= document.title %>
             </strong>
           </div>
           <div>
-            by <%= link_to document.user.display_name, document.user, class: "#{User.color}-text" %>
+            <%= link_to document.user, class: "#{User.color}-text" do %>
+              <i class="material-icons left"><%= User.icon %></i>
+              by <%= document.user.display_name %>
+            <% end %>
           </div>
-          <br />
+          <% if document.universe %>
+            <div class="clearfix">
+              <%= link_to document.universe, class: "#{Universe.color}-text" do %>
+                <i class="material-icons left"><%= Universe.icon %></i>
+                in <%= document.universe.try(:name) || 'Unknown universe' %>
+              <% end %>
+            </div>
+          <% end %>
         </div>
         <div>
-          <% if current_user.can_read?(document) %>
-            <%= link_to polymorphic_path(document), class: 'blue white-text text-lighten-1 btn-flat' do %>
-              <i class="material-icons left"><%= content_type.icon %></i>
-              View
-            <% end %>
-          <% end %>
-          <% if current_user.can_update?(document) %>
-            <%= link_to edit_polymorphic_path(document), class: 'green white-text btn-flat', target: document.is_a?(Document) ? '_new' : '_self' do %>
-              <i class="material-icons left"><%= content_type.icon %></i>
-              Edit
-            <% end %>
-          <% end %>
-          <%= link_to analysis_document_path(document), class: 'btn-flat orange white-text' do %>
-            <i class="material-icons left">bar_chart</i>
-            Analyze
-          <% end %>
+
         </div>
       </td>
       <td>
@@ -85,3 +59,88 @@
     </tr>
   <% end %>
 </table>
+
+<%# Build info modals %>
+<% content_list.each do |document| %>
+  <div id="document-info-<%= document.id %>" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h4 class="<%= Document.color %>-text">
+        <i class="material-icons left large"><%= Document.icon %></i>
+        <%= document.title %>
+
+        <%
+          if document.favorite?
+            icon = 'star'
+            action = 'Unfavorite'
+          else
+            icon = 'star_border'
+            action = 'Favorite'
+          end
+        %>
+
+        <% if user_signed_in? && document.user == current_user %>
+          <i class="material-icons right orange-text favorite-button tooltipped" 
+            data-tooltip="<%= action %> this page"
+            data-content-id="<%= document.id %>"
+            data-content-class="<%= document.class.name.downcase.pluralize %>">
+            <%= icon %>
+          </i>
+        <% end %>
+      </h4>
+      <div class="left">
+        <div>
+          <%= link_to document.user, class: "#{User.color}-text" do %>
+            <i class="material-icons left"><%= User.icon %></i>
+            by <%= document.user.display_name %>
+          <% end %>
+        </div>
+        <% if document.universe %>
+          <div class="clearfix">
+            <%= link_to document.universe, class: "#{Universe.color}-text" do %>
+              <i class="material-icons left"><%= Universe.icon %></i>
+              in <%= document.universe.try(:name) || 'Unknown universe' %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+      <div class="clearfix row">
+        <div class="col s12 m12 l8">
+          <%= form_for document do |f| %>
+            <h5>Document synopsis</h5>
+            <div class="input-field">
+              <%= f.text_area :synopsis, class: 'materialize-textarea teal lighten-5', placeholder: 'What happens in this document?' %>
+              <span class="helper-text">Changes will automatically save.</span>
+            </div>
+            <h5>Document notes</h5>
+            <div class="input-field">
+              <%= f.text_area :notes_text, class: 'materialize-textarea teal lighten-5', placeholder: "Write as little or as much as you'd like!" %>
+              <span class="helper-text">Changes will automatically save.</span>
+            </div>
+          <% end %>
+        </div>
+        <div class="col s12 m12 l4">
+          rhs
+        </div>
+      </div>
+      <p>A bunch of full-width text</p>
+    </div>
+    <div class="modal-footer">
+      <% if current_user.can_read?(document) %>
+        <%= link_to polymorphic_path(document), class: 'blue white-text text-lighten-1 btn' do %>
+          <i class="material-icons left"><%= content_type.icon %></i>
+          View
+        <% end %>
+      <% end %>
+      <% if current_user.can_update?(document) %>
+        <%= link_to edit_polymorphic_path(document), class: 'green white-text btn', target: document.is_a?(Document) ? '_new' : '_self' do %>
+          <i class="material-icons left"><%= content_type.icon %></i>
+          Edit
+        <% end %>
+      <% end %>
+      <%= link_to analysis_document_path(document), class: 'btn orange white-text' do %>
+        <i class="material-icons left">bar_chart</i>
+        Analyze
+      <% end %>
+    </div>
+  </div>
+<% end %>
