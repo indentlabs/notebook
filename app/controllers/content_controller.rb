@@ -58,6 +58,7 @@ class ContentController < ApplicationController
     end
 
     @page_tags = @page_tags.uniq(&:tag)
+
     @content = @content.sort_by {|x| [x.favorite? ? 0 : 1, x.name] }
 
     @questioned_content = @content.sample

@@ -14,15 +14,17 @@
       <i class="material-icons tiny">label</i>
       Type and press enter to create a new tag, or click any of the suggested tags below to add it.
     </div>
-    <div class="tags-container show-when-focused">
-      <% @suggested_page_tags.each do |tag| %>
-        <%=
-          link_to '#', class: 'js-add-tag' do
-        %>
-          <span class="new badge grey left hoverable" data-badge-caption="<%= tag %>"></span>
+    <% if @suggested_page_tags %>
+      <div class="tags-container show-when-focused">
+        <% @suggested_page_tags.each do |tag| %>
+          <%=
+            link_to '#', class: 'js-add-tag' do
+          %>
+            <span class="new badge grey left hoverable" data-badge-caption="<%= tag %>"></span>
+          <% end %>
         <% end %>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
     <div class="clearfix"></div>
   </div>
 </div>
@@ -40,7 +42,7 @@
   }
 
   var chips = $('.chips-autocomplete').chips({
-    placeholder: 'Tag this page',
+    placeholder: 'Add tags',
     secondaryPlaceholder: '+ Tag',
     autocompleteOptions: {
       data: {

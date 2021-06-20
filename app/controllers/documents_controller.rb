@@ -17,11 +17,24 @@ class DocumentsController < ApplicationController
   def index
     @page_title = "My documents"
     @documents = current_user.linkable_documents.order('favorite DESC, title ASC, updated_at DESC').to_a
-    @recent_documents = current_user.linkable_documents.order('updated_at DESC').limit(4).to_a
+    @recent_documents = current_user.linkable_documents.order('updated_at DESC').limit(6).to_a
 
     if params.key?(:favorite_only)
       @documents.select!(&:favorite?)
     end
+
+    @page_tags = PageTag.where(
+      page_type: Document.name,
+      page_id:   @documents.pluck(:id)
+    ).order(:tag)
+
+    if params.key?(:slug)
+      @filtered_page_tags = @page_tags.where(slug: params[:slug])
+      @documents.select! { |document| @filtered_page_tags.pluck(:page_id).include?(document.id) }
+    end
+
+    @page_tags = @page_tags.uniq(&:tag)
+    @suggested_page_tags = @page_tags + ['Idea', 'Draft', 'In Progress', 'Done']
   end
 
   def show
@@ -140,7 +153,7 @@ class DocumentsController < ApplicationController
 
   def update
     document = Document.with_deleted.find_or_initialize_by(id: params[:id])
-    d_params = document_params.clone
+    d_params = document_params.clone # TODO: why are we duplicating the params here?
 
     unless document.updatable_by?(current_user)
       redirect_to(dashboard_path, notice: "You don't have permission to do that!")
@@ -154,6 +167,8 @@ class DocumentsController < ApplicationController
     if d_params.fetch(:universe_id, nil) == "nil"
       d_params[:universe_id] = nil
     end
+
+    update_page_tags(document)
 
     if document.update(d_params)
       head 200, content_type: "text/html"
@@ -259,8 +274,34 @@ class DocumentsController < ApplicationController
 
   private
 
+  def update_page_tags(document)
+    tag_list = document_tag_params.fetch('value', '').split(PageTag::SUBMISSION_DELIMITER)
+    current_tags = document.page_tags.pluck(:tag)
+
+    tags_to_add    = tag_list - current_tags
+    tags_to_remove = current_tags - tag_list
+
+    tags_to_add.each do |tag|
+      # TODO: create changelog event for AddedTag
+      document.page_tags.find_or_create_by(
+        tag:  tag,
+        slug: PageTagService.slug_for(tag),
+        user: document.user
+      )
+    end
+
+    tags_to_remove.each do |tag|
+      # TODO: create changelog event for RemovedTag or use destroy_all
+      document.page_tags.find_by(tag: tag).destroy
+    end
+  end
+
   def document_params
     params.require(:document).permit(:title, :body, :deleted_at, :privacy, :universe_id, :notes_text, :synopsis)
+  end
+
+  def document_tag_params
+    params.require(:field).permit(:value)
   end
 
   def linked_entity_params

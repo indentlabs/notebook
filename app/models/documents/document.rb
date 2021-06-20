@@ -14,6 +14,7 @@ class Document < ApplicationRecord
   include HasParseableText
   include HasPartsOfSpeech
   include HasImageUploads
+  include HasPageTags
   include BelongsToUniverse
 
   # TODO: include IsContentPage ?

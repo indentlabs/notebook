@@ -70,17 +70,19 @@ Rails.application.routes.draw do
     get '/analysis/readability', to: 'document_analyses#readability', on: :member
     get '/analysis/style',       to: 'document_analyses#style',       on: :member
     get '/analysis/sentiment',   to: 'document_analyses#sentiment',   on: :member
-    get  '/plaintext',        to: 'documents#plaintext',               on: :member
-    get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
+    get  '/plaintext',           to: 'documents#plaintext',               on: :member
+    get  '/queue_analysis',      to: 'documents#queue_analysis',          on: :member
 
-    post '/link_entity',      to: 'documents#link_entity',             on: :collection
     resources :document_revisions, path: 'revisions', on: :member
+
+    get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
 
     post :toggle_favorite, on: :member
 
     # todo these routes don't belong here and make for awfully weird urls (/documents/:analysis_id/destroy, etc)
     get  '/destroy_analysis', to: 'documents#destroy_analysis',        on: :member
 
+    post '/link_entity',         to: 'documents#link_entity',          on: :collection
     # deprecated route:
     get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
     # new route:
