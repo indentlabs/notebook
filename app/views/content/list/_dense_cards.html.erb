@@ -4,14 +4,18 @@
       <div class="hoverable card sticky-action" style="margin-bottom: 2px">
         <div class="card-image waves-effect waves-block waves-light teal">
           <%= render partial: 'content/display/favorite_control', locals: { content: content } %>
-          <% content_image = asset_path("card-headers/#{content_type.name.downcase.pluralize}.jpg") %>
-          <% if content.respond_to?(:image_uploads) %>
-            <% images = content.image_uploads %>
-            <% if images.any? %>
-              <% content_image = images.sample.src(:medium) %>
+          <% if content_type.name == 'Document' %>
+            <div class='activator' style='height: 165px'></div>
+          <% else %>
+            <% content_image = asset_path("card-headers/#{content_type.name.downcase.pluralize}.jpg") %>
+            <% if content.respond_to?(:image_uploads) %>
+              <% images = content.image_uploads %>
+              <% if images.any? %>
+                <% content_image = images.sample.src(:medium) %>
+              <% end %>
             <% end %>
+            <div class="activator" style="height: 165px; background: url('<%= content_image %>'); background-size: cover;"></div>
           <% end %>
-          <div class="activator" style="height: 165px; background: url('<%= content_image %>'); background-size: cover;"></div>
 
           <span class="card-title js-content-name activator">
             <div class="bordered-text">
