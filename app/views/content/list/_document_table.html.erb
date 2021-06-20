@@ -17,6 +17,14 @@
       <td>
         <div>
           <div>
+            <% if user_signed_in? && document.user == current_user %>
+              <i class="material-icons left orange-text"
+                data-content-id="<%= document.id %>"
+                data-content-class="<%= document.class.name.downcase.pluralize %>">
+                <%= document.favorite? ? 'star' : 'star_border' %>
+              </i>
+            <% end %>
+        
             <strong style="font-size: 1.2em" class="js-content-name">
               <%= document.title %>
             </strong>
@@ -119,27 +127,42 @@
           <% end %>
         </div>
         <div class="col s12 m12 l4">
-          <h5>Analysis</h5>
+          <h5>About</h5>
           <ul>
-            <li>word count</li>
-            <li>created</li>
-            <li>last updated</li>
+            <li>
+              <i class="material-icons tiny" style="position: relative; top: 3px;">text_snippet</i>
+              <%= pluralize document.word_count, 'word' %>
+            </li>
+            <li>
+              <i class="material-icons tiny" style="position: relative; top: 3px;">timer</i>
+              <%= document.reading_estimate %>
+            </li>
+            <li>
+              <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
+              created <%= time_ago_in_words document.created_at %> ago
+            </li>
+            <% if document.created_at != document.updated_at %>
+              <li>
+                <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
+                last updated <%= time_ago_in_words document.updated_at %> ago
+              </li>
+            <% end %>
           </ul>
+
           <%= link_to analysis_document_path(document) do %>
-            <div class="card-panel orange white-text hoverable">
+            <div class="card-panel orange white-text hoverable uppercase">
               <i class="material-icons left">bar_chart</i>
-              Full analysis
+              Analyze
             </div>
           <% end %>
 
           <h5>Actions</h5>
           <ul>
-            <li>view revisions</li>
-            <li>share</li>
+            <li><%= link_to 'View Revision log', document_document_revisions_path(document), class: 'btn' %><br /><br /></li>
+            <li><%= link_to 'View plaintext', plaintext_document_path(document), class: 'btn' %></li>
           </ul>
         </div>
       </div>
-      <p>A bunch of full-width text</p>
     </div>
     <div class="modal-footer">
       <% if current_user.can_read?(document) %>
