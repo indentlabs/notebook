@@ -260,7 +260,7 @@ class DocumentsController < ApplicationController
   private
 
   def document_params
-    params.require(:document).permit(:title, :body, :deleted_at, :privacy, :universe_id, :notes_text)
+    params.require(:document).permit(:title, :body, :deleted_at, :privacy, :universe_id, :notes_text, :synopsis)
   end
 
   def linked_entity_params
