@@ -115,17 +115,30 @@
       </div>
       <div class="clearfix row">
         <div class="col s12 m12 l8">
-          <%= form_for document, remote: true do |f| %>
+          <% if current_user.can_update?(document) %>
+            <%= form_for document, remote: true do |f| %>
+              <h5>Document synopsis</h5>
+              <div class="input-field">
+                <%= f.text_area :synopsis, class: 'materialize-textarea teal lighten-5 autosave-closest-form-on-change', placeholder: 'What happens in this document?' %>
+                <span class="helper-text">Changes will automatically save.</span>
+              </div>
+              <h5>Document notes</h5>
+              <div class="input-field">
+                <%= f.text_area :notes_text, class: 'materialize-textarea teal lighten-5 autosave-closest-form-on-change', placeholder: "Write as little or as much as you'd like!" %>
+                <span class="helper-text">Changes will automatically save. These notes will be available while writing.</span>
+              </div>
+            <% end %>
+          <% else %>
             <h5>Document synopsis</h5>
-            <div class="input-field">
-              <%= f.text_area :synopsis, class: 'materialize-textarea teal lighten-5 autosave-closest-form-on-change', placeholder: 'What happens in this document?' %>
-              <span class="helper-text">Changes will automatically save.</span>
-            </div>
+            <%= simple_format ContentFormatterService.show(
+              text:         document.synopsis,
+              viewing_user: current_user
+            ) %>
             <h5>Document notes</h5>
-            <div class="input-field">
-              <%= f.text_area :notes_text, class: 'materialize-textarea teal lighten-5 autosave-closest-form-on-change', placeholder: "Write as little or as much as you'd like!" %>
-              <span class="helper-text">Changes will automatically save. These notes will be available while writing.</span>
-            </div>
+            <%= simple_format ContentFormatterService.show(
+              text:         document.notes_text,
+              viewing_user: current_user
+            ) %>
           <% end %>
         </div>
         <div class="col s12 m12 l4">
