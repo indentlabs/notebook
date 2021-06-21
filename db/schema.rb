@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_06_20_214754) do
+ActiveRecord::Schema.define(version: 2021_06_21_024413) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1331,6 +1331,17 @@ ActiveRecord::Schema.define(version: 2021_06_20_214754) do
     t.index ["universe_id"], name: "index_floras_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_floras_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_floras_on_user_id"
+  end
+
+  create_table "folders", force: :cascade do |t|
+    t.string "title", default: "New Folder"
+    t.string "context", default: "Document"
+    t.integer "parent_folder_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["parent_folder_id"], name: "index_folders_on_parent_folder_id"
+    t.index ["user_id"], name: "index_folders_on_user_id"
   end
 
   create_table "foods", force: :cascade do |t|
@@ -3757,6 +3768,8 @@ ActiveRecord::Schema.define(version: 2021_06_20_214754) do
   add_foreign_key "documents", "users"
   add_foreign_key "floras", "universes"
   add_foreign_key "floras", "users"
+  add_foreign_key "folders", "parent_folders"
+  add_foreign_key "folders", "users"
   add_foreign_key "foods", "universes"
   add_foreign_key "foods", "users"
   add_foreign_key "government_creatures", "creatures"
