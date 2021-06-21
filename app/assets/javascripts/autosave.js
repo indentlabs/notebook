@@ -13,6 +13,10 @@ $(document).ready(function() {
     // know that we can do so without ajax'ing it instead
   });
 
+  $('.submit-closest-form-on-click').on('click', function() {
+    $(this).closest('form').submit();
+  })
+
   // To ensure all fields get unblurred (and therefore autosaved) upon navigation,
   // we use this little ditty:
   window.onbeforeunload = function(e){

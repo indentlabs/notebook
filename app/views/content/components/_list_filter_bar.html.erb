@@ -125,7 +125,6 @@
     <label for="js-content-name-filter">Filter <%= content_type.name.downcase.pluralize %> by name...</label>
   </div>
 
-
   <div class="btn-group right" style="margin-top: 1.9em;">
     <%= link_to send("new_#{content_type.name.downcase}_path"), class: "btn right #{content_type.color} white-text" do %>
       <i class="material-icons left">add</i>
@@ -133,5 +132,40 @@
     <% end %>
   </div>
 
+  <% if content_type.name == Document.name %>
+    <%# Folders are scoped to documents for release %>
+
+    <div class="btn-group right" style="margin-top: 1.9em; margin-right: 0.2em">
+      <%= link_to '#new-folder-modal', class: "btn right #{content_type.color} lighten-1 white-text modal-trigger" do %>
+        <i class="material-icons left">create_new_folder</i>
+        New folder
+      <% end %>
+    </div>
+  <% end %>
+
 </div>
 <div class="clearfix"></div>
+
+<% if content_type.name == Document.name %>
+  <div id="new-folder-modal" class="modal">
+    <%= form_for Folder.new do |f| %>
+      <div class="modal-content">
+        <h4>
+          <i class="material-icons left medium <%= content_type.color %>-text lighten-1">create_new_folder</i>
+          Create new folder
+        </h4>
+        <div class="input-field">
+          <p>Name your new folder and then press CREATE to create it</p>
+          <%= f.text_field :title, placeholder: 'Folder name' %>
+        </div>
+
+        <%= f.hidden_field :context, value: content_type.name %>
+        <%= f.hidden_field :parent_folder_id, value: nil %>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+        <%= f.button 'Create', class: "waves-effect waves-green btn #{Document.color} white-text" %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

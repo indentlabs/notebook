@@ -88,6 +88,7 @@ Rails.application.routes.draw do
     # new route:
     get  '/unlink/:page_type/:page_id', to: 'documents#unlink_entity', on: :member
   end
+  resources :folders, only: [:create, :update, :destroy]
 
   scope '/my' do
     get '/content',         to: 'main#dashboard', as: :dashboard
