@@ -53,6 +53,8 @@ class PageTagService < Service
       ["Favorite"]
     when Vehicle.name
       ["Automobile", "Train", "Plane", "Spaceship"]
+    when Document.name
+      ['Idea', 'Draft', 'In Progress', 'Done']
     else
       []
     end

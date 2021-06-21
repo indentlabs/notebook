@@ -34,7 +34,7 @@ class DocumentsController < ApplicationController
     end
 
     @page_tags = @page_tags.uniq(&:tag)
-    @suggested_page_tags = @page_tags.pluck(:tag) + ['Idea', 'Draft', 'In Progress', 'Done']
+    @suggested_page_tags = (@page_tags.pluck(:tag) + PageTagService.suggested_tags_for('Document')).uniq
   end
 
   def show
