@@ -5,4 +5,7 @@ class PageTag < ApplicationRecord
   # Delimiter to be used wherever we want to allow submitting multiple tags in a single string
   SUBMISSION_DELIMITER = ',,,|||,,,'
 
+  def to_s
+    self.tag
+  end
 end
