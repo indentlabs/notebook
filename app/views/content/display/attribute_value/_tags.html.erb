@@ -1,16 +1,16 @@
 <div class="tags-container">
   <% value.each do |tag| %>
-    <% if user_signed_in? && @content.user == current_user %>
+    <% if user_signed_in? && content.user == current_user %>
       <%=
         link_to send(
           "page_tag_#{content.raw_model.class.name.downcase.pluralize}_path",
           slug: PageTagService.slug_for(tag)
         ) do
       %>
-        <span class="new badge <%= @content.class.color %> left" data-badge-caption="<%= tag %>"></span>
+        <span class="new badge <%= content.class.color %> left" data-badge-caption="<%= tag %>"></span>
       <% end %>
     <% else %>
-      <span class="new badge <%= @content.class.color %> left" data-badge-caption="<%= tag %>"></span>
+      <span class="new badge <%= content.class.color %> left" data-badge-caption="<%= tag %>"></span>
     <% end %>
   <% end %>
 </div>

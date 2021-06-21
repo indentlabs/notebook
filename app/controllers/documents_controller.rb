@@ -168,7 +168,7 @@ class DocumentsController < ApplicationController
       d_params[:universe_id] = nil
     end
 
-    update_page_tags(document)
+    update_page_tags(document) if document_tag_params
 
     if document.update(d_params)
       head 200, content_type: "text/html"
@@ -302,6 +302,8 @@ class DocumentsController < ApplicationController
 
   def document_tag_params
     params.require(:field).permit(:value)
+  rescue ActionController::ParameterMissing
+    nil
   end
 
   def linked_entity_params
