@@ -1336,7 +1336,7 @@ ActiveRecord::Schema.define(version: 2021_06_21_024413) do
   create_table "folders", force: :cascade do |t|
     t.string "title", default: "New Folder"
     t.string "context", default: "Document"
-    t.integer "parent_folder_id", null: false
+    t.integer "parent_folder_id"
     t.integer "user_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
@@ -3768,7 +3768,7 @@ ActiveRecord::Schema.define(version: 2021_06_21_024413) do
   add_foreign_key "documents", "users"
   add_foreign_key "floras", "universes"
   add_foreign_key "floras", "users"
-  add_foreign_key "folders", "parent_folders"
+  add_foreign_key "folders", "folders", column: "parent_folder_id"
   add_foreign_key "folders", "users"
   add_foreign_key "foods", "universes"
   add_foreign_key "foods", "users"

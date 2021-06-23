@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class FolderControllerTest < ActionDispatch::IntegrationTest
+class FoldersControllerTest < ActionDispatch::IntegrationTest
   test "should get create" do
     get folder_create_url
     assert_response :success

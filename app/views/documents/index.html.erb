@@ -19,8 +19,25 @@
       </div>
       <br />
 
+      <%# TODO: stick this in a partial, move over new folder modal + new folder button? %>
+      <% if @folders.any? %>
+        <div class="row">
+          <h5>Folders</h5>
+          <% @folders.each do |folder| %>
+            <div class="col s12 m3 l2">
+              <%= link_to '#' do %>
+                <div class="hoverable card-panel <%= Folder.color %> white-text">
+                  <i class="material-icons left"><%= Folder.icon %></i>
+                  <%= folder.title %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
       <div class="row">
-        <h5>All documents</h5>
+        <h5>Documents</h5>
         <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } %>
         <%= render partial: 'content/list/document_table', locals: { content_list: @documents, content_type: Document } %>
         <%# render partial: 'notice_dismissal/messages/02' %>

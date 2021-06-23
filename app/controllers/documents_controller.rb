@@ -18,6 +18,7 @@ class DocumentsController < ApplicationController
     @page_title = "My documents"
     @documents = current_user.linkable_documents.order('favorite DESC, title ASC, updated_at DESC').to_a
     @recent_documents = current_user.linkable_documents.order('updated_at DESC').limit(6).to_a
+    @folders = current_user.folders.where(context: 'Document', parent_folder_id: nil)
 
     if params.key?(:favorite_only)
       @documents.select!(&:favorite?)
