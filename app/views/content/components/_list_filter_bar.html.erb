@@ -128,7 +128,14 @@
   </div>
 
   <div class="btn-group right" style="margin-top: 1.9em;">
-    <%= link_to send("new_#{content_type.name.downcase}_path"), class: "btn right #{content_type.color} white-text" do %>
+    <%
+      creation_path = if @folder
+        send("new_#{content_type.name.downcase}_path", { folder: @folder.try(:id) })
+      else
+        send("new_#{content_type.name.downcase}_path")
+      end
+    %>
+    <%= link_to creation_path, class: "btn right #{content_type.color} white-text" do %>
       <i class="material-icons left">add</i>
       New <%= content_type.name %>
     <% end %>

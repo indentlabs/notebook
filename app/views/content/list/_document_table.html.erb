@@ -130,28 +130,93 @@
       </div>
       <div class="clearfix row">
         <%= form_for document, remote: true do |f| %>
+          <div class="col s12 m12 l4">
+            <!--
+            <%= link_to analysis_document_path(document) do %>
+              <div class="card-panel orange white-text hoverable uppercase">
+                <i class="material-icons left">bar_chart</i>
+                Analyze
+              </div>
+            <% end %>
+            -->
+
+            <h5>Folder</h5>
+            <% if current_user.can_update?(document) %>
+              <%= 
+                f.select :folder_id, current_user.folders.pluck(:title, :id), 
+                  { include_blank: 'No folder' }, 
+                  { class: ' autosave-closest-form-on-change' }
+              %>
+              <style>
+                .dropdown-content {
+                  max-height: 350px;
+                }
+              </style>
+            <% else %>
+              <% if document.folder_id %>
+                <%= link_to document.folder.title, document.folder, class: "#{Folder.color}-text" %>
+              <% else %>
+                Not in a folder
+              <% end %>
+            <% end %>
+
+            <h5>About</h5>
+            <ul>
+              <li>
+                <i class="material-icons tiny" style="position: relative; top: 3px;">text_snippet</i>
+                <%= pluralize document.word_count, 'word' %>
+              </li>
+              <li>
+                <i class="material-icons tiny" style="position: relative; top: 3px;">timer</i>
+                <%= document.reading_estimate %>
+              </li>
+              <li>
+                <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
+                created <%= time_ago_in_words document.created_at %> ago
+              </li>
+              <% if document.created_at != document.updated_at %>
+                <li>
+                  <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
+                  last updated <%= time_ago_in_words document.updated_at %> ago
+                </li>
+              <% end %>
+            </ul>
+
+            <!--
+            <h5>Actions</h5>
+            <ul>
+              <li><%= link_to 'View Revision log', document_document_revisions_path(document) %><br /><br /></li>
+              <li><%= link_to 'View plaintext', plaintext_document_path(document) %></li>
+            </ul>
+            -->
+          </div>
+
           <div class="col s12 m12 l8" style="padding-right: 1em">
             <% if current_user.can_update?(document) %>
+              <div class="content-field">
                 <h5>Document synopsis</h5>
                 <div class="input-field">
-                  <%= f.text_area :synopsis, class: 'materialize-textarea teal lighten-5 autosave-closest-form-on-change', placeholder: 'What happens in this document?' %>
+                  <%= f.text_area :synopsis, class: 'materialize-textarea autosave-closest-form-on-change', placeholder: 'What happens in this document?' %>
                   <span class="helper-text">Changes will automatically save.</span>
                 </div>
+              </div>
 
+              <div class="content-field">
                 <h5>Document notes</h5>
                 <div class="input-field">
-                  <%= f.text_area :notes_text, class: 'materialize-textarea teal lighten-5 autosave-closest-form-on-change', placeholder: "Write as little or as much as you'd like!" %>
+                  <%= f.text_area :notes_text, class: 'materialize-textarea autosave-closest-form-on-change', placeholder: "Write as little or as much as you'd like!" %>
                   <span class="helper-text">Changes will automatically save. These notes will be available while writing.</span>
                 </div>
+              </div>
 
-                <h5>Document tags</h5>
-                <%=
-                  render partial: 'content/form/field_types/tags', locals: {
-                    f:     f,
-                    page:  document,
-                    field: AttributeField.new
-                  }
-                %>
+              <h5>Document tags</h5>
+              <%=
+                render partial: 'content/form/field_types/tags', locals: {
+                  f:     f,
+                  page:  document,
+                  field: AttributeField.new
+                }
+              %>
             <% else %>
               <h5>Document synopsis</h5>
               <% if document.synopsis %>
@@ -183,75 +248,26 @@
 
             <% end %>
           </div>
-          <div class="col s12 m12 l4">
-            <h5>About</h5>
-            <ul>
-              <li>
-                <i class="material-icons tiny" style="position: relative; top: 3px;">text_snippet</i>
-                <%= pluralize document.word_count, 'word' %>
-              </li>
-              <li>
-                <i class="material-icons tiny" style="position: relative; top: 3px;">timer</i>
-                <%= document.reading_estimate %>
-              </li>
-              <li>
-                <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
-                created <%= time_ago_in_words document.created_at %> ago
-              </li>
-              <% if document.created_at != document.updated_at %>
-                <li>
-                  <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
-                  last updated <%= time_ago_in_words document.updated_at %> ago
-                </li>
-              <% end %>
-            </ul>
-
-            <!--
-            <%= link_to analysis_document_path(document) do %>
-              <div class="card-panel orange white-text hoverable uppercase">
-                <i class="material-icons left">bar_chart</i>
-                Analyze
-              </div>
-            <% end %>
-            -->
-
-            <h5>Folder</h5>
-            <% if current_user.can_update?(document) %>
-              <%= 
-                f.select :folder_id, current_user.folders.pluck(:title, :id), 
-                  { include_blank: true }, 
-                  { class: ' autosave-closest-form-on-change' }
-              %>
-            <% else %>
-              <% if document.folder_id %>
-                <%= link_to document.folder.title, document.folder, class: "#{Folder.color}-text" %>
-              <% else %>
-                Not in a folder
-              <% end %>
-            <% end %>
-
-            <!--
-            <h5>Actions</h5>
-            <ul>
-              <li><%= link_to 'View Revision log', document_document_revisions_path(document) %><br /><br /></li>
-              <li><%= link_to 'View plaintext', plaintext_document_path(document) %></li>
-            </ul>
-            -->
-          </div>
         <% end %>
       </div>
     </div>
     <div class="modal-footer">
       <% if current_user.can_read?(document) %>
-        <%= link_to polymorphic_path(document), class: 'blue white-text text-lighten-1 btn' do %>
+        <%= link_to polymorphic_path(document), class: 'blue white-text text-lighten-1 btn hoverable' do %>
           <i class="material-icons left"><%= content_type.icon %></i>
           View
         <% end %>
       <% end %>
       <% if current_user.can_update?(document) %>
-        <%= link_to edit_polymorphic_path(document), class: 'green white-text btn', target: document.is_a?(Document) ? '_new' : '_self' do %>
+        <%= link_to edit_polymorphic_path(document), class: 'green white-text btn hoverable', target: document.is_a?(Document) ? '_new' : '_self' do %>
           <i class="material-icons left"><%= content_type.icon %></i>
           Edit
+        <% end %>
+      <% end %>
+      <% if current_user.can_update?(document) %>
+        <%= link_to analysis_document_path(document), class: 'orange white-text btn left hoverable', target: document.is_a?(Document) ? '_new' : '_self' do %>
+          <i class="material-icons left">bar_chart</i>
+          Analyze
         <% end %>
       <% end %>
     </div>

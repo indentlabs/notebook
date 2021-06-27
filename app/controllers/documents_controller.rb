@@ -134,7 +134,10 @@ class DocumentsController < ApplicationController
   end
 
   def new
-    document = current_user.documents.create({universe: @universe_scope})
+    document = current_user.documents.create({
+      universe:  @universe_scope,
+      folder_id: params.fetch('folder', nil).try(:to_i)
+    })
     redirect_to edit_document_path(document)
   end
 
