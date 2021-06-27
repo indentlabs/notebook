@@ -22,6 +22,10 @@ class FoldersController < ApplicationController
 
     # TODO: add other content types here too
     @content = Document.where(folder: @folder)
+
+    if @universe_scope
+      @content = @content.where(universe: @universe_scope)
+    end
   end
 
   private
