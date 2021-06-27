@@ -1,36 +1,74 @@
-  <%= content_for :full_width_page_content do %>
-    <div class="container-fluid">
-      <div class="row">
-        <h5>
-          <% if @parent_folder %>
-            <%= link_to @parent_folder do %>
-              <i class="material-icons left tooltipped" data-tooltip="Go up a folder">arrow_upward</i>
-            <% end %>
-          <% else %>
-            <%# todo link to base context#index page %>
-            <%= link_to documents_path do %>
-              <i class="material-icons left tooltipped" data-tooltip="Go up a folder">arrow_upward</i>
-            <% end %>
+<%= content_for :full_width_page_content do %>
+  <div class="container-fluid">
+    <div class="row">
+      <h5>
+        <% if @parent_folder %>
+          <%= link_to @parent_folder do %>
+            <i class="material-icons left tooltipped" data-tooltip="Go up a folder">arrow_upward</i>
           <% end %>
+        <% else %>
+          <%# todo link to base context#index page %>
+          <%= link_to documents_path do %>
+            <i class="material-icons left tooltipped" data-tooltip="Go up a folder">arrow_upward</i>
+          <% end %>
+        <% end %>
+        <%= link_to '#edit-folder-modal', class: 'modal-trigger' do %>
           <i class="material-icons large left <%= Folder.color %>-text"><%= Folder.icon %></i>
-          <%= @folder.title %>
+        <% end %>
+        <%= @folder.title %>
 
-          <% if @child_folders.empty? %>
-            <div class="btn-group right" style="margin-top: 1.9em; margin-right: 0.2em">
-              <%= link_to '#new-folder-modal', class: "btn right #{Folder.color} lighten-1 white-text modal-trigger" do %>
-                <i class="material-icons left">create_new_folder</i>
-                New folder
-              <% end %>
-            </div>
-          <% end %>
-        </h5>
+        <% if @child_folders.empty? %>
+          <div class="btn-group right" style="margin-top: 1.9em; margin-right: 0.2em">
+            <%= link_to '#new-folder-modal', class: "btn right #{Folder.color} lighten-1 white-text modal-trigger" do %>
+              <i class="material-icons left">create_new_folder</i>
+              New folder
+            <% end %>
+          </div>
+        <% end %>
+      </h5>
+    </div>
+
+    <%= render partial: 'folders/list', locals: { folders: @child_folders } %>
+
+    <div class="row">
+      <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } if @content.any? %>
+      <%= render partial: 'content/list/document_table', locals: { content_list: @content, content_type: Document } %>
+    </div>
+  </div>
+<% end %>
+
+<%= render partial: 'folders/new_modal', locals: { content_type: Document, parent_folder: @folder } %>
+
+<div id="edit-folder-modal" class="modal modal-fixed-footer">
+  <%= form_for @folder do |f| %>
+    <div class="modal-content">
+      <h5>
+        <i class="material-icons left <%= Folder.color %>-text"><%= Folder.icon %></i>
+        Editing <%= @folder.title %>
+      </h5>
+      <div class="input-field">
+        <%= f.label 'Folder name' %>
+        <%= f.text_field :title, placeholder: 'Folder name' %>
+      </div>
+      <div class="input-field">
+        <%= 
+          f.select :parent_folder_id, current_user.folders.where.not(id: @folder.id).pluck(:title, :id), 
+            { include_blank: 'None' }
+        %>
+        <%= f.label 'Parent folder' %>
+        <style>
+          .dropdown-content {
+            max-height: 350px;
+          }
+        </style>
       </div>
 
-      <%= render partial: 'folders/list', locals: { folders: @child_folders } %>
-
-      <div class="row">
-        <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } if @content.any? %>
-        <%= render partial: 'content/list/document_table', locals: { content_list: @content, content_type: Document } %>
-      </div>
+      <%# f.hidden_field :context, value: content_type.name %>
+      <%# f.hidden_field :parent_folder_id, value: parent_folder.try(:id) %>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+      <%= f.button 'Update this folder', class: "waves-effect waves-green btn #{Folder.color} white-text submit-closest-form-on-click" %>
     </div>
   <% end %>
+</div>

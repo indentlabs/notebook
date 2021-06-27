@@ -9,6 +9,9 @@ class FoldersController < ApplicationController
   end
 
   def update
+    @folder.update(folder_params)
+
+    redirect_back(fallback_location: folder_path(@folder), notice: "Folder #{@folder.title} updated!")
   end
 
   def destroy
