@@ -88,7 +88,7 @@ Rails.application.routes.draw do
     # new route:
     get  '/unlink/:page_type/:page_id', to: 'documents#unlink_entity', on: :member
   end
-  resources :folders, only: [:create, :update, :destroy]
+  resources :folders, only: [:create, :update, :destroy, :show]
 
   scope '/my' do
     get '/content',         to: 'main#dashboard', as: :dashboard
@@ -100,6 +100,7 @@ Rails.application.routes.draw do
 
     # Legacy route: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
+
 
     get '/referrals',          to: 'data#referrals', as: :referrals
 

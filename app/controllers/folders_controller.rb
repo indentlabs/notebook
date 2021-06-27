@@ -13,6 +13,10 @@ class FoldersController < ApplicationController
   def destroy
   end
 
+  def show
+    raise params.inspect
+  end
+
   private
 
   def folder_params
