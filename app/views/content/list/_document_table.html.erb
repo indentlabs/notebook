@@ -129,104 +129,112 @@
         <% end %>
       </div>
       <div class="clearfix row">
-        <div class="col s12 m12 l8" style="padding-right: 1em">
-          <% if current_user.can_update?(document) %>
-            <%= form_for document, remote: true do |f| %>
+        <%= form_for document, remote: true do |f| %>
+          <div class="col s12 m12 l8" style="padding-right: 1em">
+            <% if current_user.can_update?(document) %>
+                <h5>Document synopsis</h5>
+                <div class="input-field">
+                  <%= f.text_area :synopsis, class: 'materialize-textarea teal lighten-5 autosave-closest-form-on-change', placeholder: 'What happens in this document?' %>
+                  <span class="helper-text">Changes will automatically save.</span>
+                </div>
+
+                <h5>Document notes</h5>
+                <div class="input-field">
+                  <%= f.text_area :notes_text, class: 'materialize-textarea teal lighten-5 autosave-closest-form-on-change', placeholder: "Write as little or as much as you'd like!" %>
+                  <span class="helper-text">Changes will automatically save. These notes will be available while writing.</span>
+                </div>
+
+                <h5>Document tags</h5>
+                <%=
+                  render partial: 'content/form/field_types/tags', locals: {
+                    f:     f,
+                    page:  document,
+                    field: AttributeField.new
+                  }
+                %>
+            <% else %>
               <h5>Document synopsis</h5>
-              <div class="input-field">
-                <%= f.text_area :synopsis, class: 'materialize-textarea teal lighten-5 autosave-closest-form-on-change', placeholder: 'What happens in this document?' %>
-                <span class="helper-text">Changes will automatically save.</span>
-              </div>
+              <% if document.synopsis %>
+                <%= simple_format ContentFormatterService.show(
+                  text:         document.synopsis,
+                  viewing_user: current_user
+                ) %>
+              <% else %>
+                <em>None yet</em>
+              <% end %>
 
               <h5>Document notes</h5>
-              <div class="input-field">
-                <%= f.text_area :notes_text, class: 'materialize-textarea teal lighten-5 autosave-closest-form-on-change', placeholder: "Write as little or as much as you'd like!" %>
-                <span class="helper-text">Changes will automatically save. These notes will be available while writing.</span>
-              </div>
+              <% if document.notes_text %>
+                <%= simple_format ContentFormatterService.show(
+                  text:         document.notes_text,
+                  viewing_user: current_user
+                ) %>
+              <% else %>
+                <em>None yet</em>
+              <% end %>
 
-              <h5>Document tags</h5>
-              <%=
-                render partial: 'content/form/field_types/tags', locals: {
-                  f:     f,
-                  page:  document,
-                  field: AttributeField.new
-                }
-              %>
-            <% end %>
-          <% else %>
-            <h5>Document synopsis</h5>
-            <% if document.synopsis %>
-              <%= simple_format ContentFormatterService.show(
-                text:         document.synopsis,
-                viewing_user: current_user
-              ) %>
-            <% else %>
-              <em>None yet</em>
-            <% end %>
+              <% if document.page_tags.any? %>
+                <h5>Document tags</h5>
+                <%=
+                  render partial: "content/display/attribute_value/tags", 
+                          locals: { value: document.page_tags.pluck(:tag), content: document }
+                %>
+              <% end %>
 
-            <h5>Document notes</h5>
-            <% if document.notes_text %>
-              <%= simple_format ContentFormatterService.show(
-                text:         document.notes_text,
-                viewing_user: current_user
-              ) %>
-            <% else %>
-              <em>None yet</em>
             <% end %>
-
-            <% if document.page_tags.any? %>
-              <h5>Document tags</h5>
-              <%=
-                render partial: "content/display/attribute_value/tags", 
-                        locals: { value: document.page_tags.pluck(:tag), content: document }
-              %>
-            <% end %>
-
-          <% end %>
-        </div>
-        <div class="col s12 m12 l4">
-          <h5>About</h5>
-          <ul>
-            <li>
-              <i class="material-icons tiny" style="position: relative; top: 3px;">text_snippet</i>
-              <%= pluralize document.word_count, 'word' %>
-            </li>
-            <li>
-              <i class="material-icons tiny" style="position: relative; top: 3px;">timer</i>
-              <%= document.reading_estimate %>
-            </li>
-            <li>
-              <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
-              created <%= time_ago_in_words document.created_at %> ago
-            </li>
-            <% if document.created_at != document.updated_at %>
+          </div>
+          <div class="col s12 m12 l4">
+            <h5>About</h5>
+            <ul>
+              <li>
+                <i class="material-icons tiny" style="position: relative; top: 3px;">text_snippet</i>
+                <%= pluralize document.word_count, 'word' %>
+              </li>
+              <li>
+                <i class="material-icons tiny" style="position: relative; top: 3px;">timer</i>
+                <%= document.reading_estimate %>
+              </li>
               <li>
                 <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
-                last updated <%= time_ago_in_words document.updated_at %> ago
+                created <%= time_ago_in_words document.created_at %> ago
               </li>
+              <% if document.created_at != document.updated_at %>
+                <li>
+                  <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
+                  last updated <%= time_ago_in_words document.updated_at %> ago
+                </li>
+              <% end %>
+            </ul>
+
+            <!--
+            <%= link_to analysis_document_path(document) do %>
+              <div class="card-panel orange white-text hoverable uppercase">
+                <i class="material-icons left">bar_chart</i>
+                Analyze
+              </div>
             <% end %>
-          </ul>
+            -->
 
-          <!--
-          <%= link_to analysis_document_path(document) do %>
-            <div class="card-panel orange white-text hoverable uppercase">
-              <i class="material-icons left">bar_chart</i>
-              Analyze
-            </div>
-          <% end %>
-          -->
+            <h5>Folder</h5>
+            <% if current_user.can_update?(document) %>
+              <%= 
+                f.select :folder_id, current_user.folders.pluck(:title, :id), 
+                  { include_blank: true }, 
+                  { class: ' autosave-closest-form-on-change' }
+              %>
+            <% else %>
+              No folder
+            <% end %>
 
-          <h5>Folder</h5>
-          No folder
-
-          <!--
-          <h5>Actions</h5>
-          <ul>
-            <li><%= link_to 'View Revision log', document_document_revisions_path(document) %><br /><br /></li>
-            <li><%= link_to 'View plaintext', plaintext_document_path(document) %></li>
-          </ul>
-          -->
-        </div>
+            <!--
+            <h5>Actions</h5>
+            <ul>
+              <li><%= link_to 'View Revision log', document_document_revisions_path(document) %><br /><br /></li>
+              <li><%= link_to 'View plaintext', plaintext_document_path(document) %></li>
+            </ul>
+            -->
+          </div>
+        <% end %>
       </div>
     </div>
     <div class="modal-footer">
