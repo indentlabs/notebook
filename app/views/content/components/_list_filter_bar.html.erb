@@ -139,7 +139,7 @@
 
 <% if content_type.name == Document.name %>
   <div id="new-folder-modal" class="modal">
-    <%= form_for Folder.new do |f| %>
+    <%= form_for Folder.new(title: '') do |f| %>
       <div class="modal-content">
         <h4>
           <i class="material-icons left medium <%= content_type.color %>-text lighten-1">create_new_folder</i>
@@ -151,7 +151,7 @@
         </div>
 
         <%= f.hidden_field :context, value: content_type.name %>
-        <%# f.hidden_field :parent_folder_id, value: nil %>
+        <%= f.hidden_field :parent_folder_id, value: @folder.try(:id) %>
       </div>
       <div class="modal-footer">
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
