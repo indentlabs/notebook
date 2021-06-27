@@ -17,6 +17,8 @@ class Document < ApplicationRecord
   include HasPageTags
   include BelongsToUniverse
 
+  belongs_to :folder, optional: true
+
   # TODO: include IsContentPage ?
 
   include Authority::Abilities

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_06_21_024413) do
+ActiveRecord::Schema.define(version: 2021_06_27_023405) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1189,6 +1189,8 @@ ActiveRecord::Schema.define(version: 2021_06_21_024413) do
     t.integer "universe_id"
     t.boolean "favorite"
     t.text "notes_text"
+    t.integer "folder_id"
+    t.index ["folder_id"], name: "index_documents_on_folder_id"
     t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
     t.index ["user_id", "deleted_at"], name: "index_documents_on_user_id_and_deleted_at"
@@ -3764,6 +3766,7 @@ ActiveRecord::Schema.define(version: 2021_06_21_024413) do
   add_foreign_key "document_concepts", "document_analyses"
   add_foreign_key "document_entities", "document_analyses"
   add_foreign_key "document_revisions", "documents"
+  add_foreign_key "documents", "folders"
   add_foreign_key "documents", "universes"
   add_foreign_key "documents", "users"
   add_foreign_key "floras", "universes"

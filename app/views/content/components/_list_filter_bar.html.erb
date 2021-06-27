@@ -62,19 +62,21 @@
         <% end %>
       </li>
       <li class="divider" tabindex="-1"></li>
-      <% @page_tags.each do |page_tag| %>
-        <li>
-          <%=
-            link_to send(
-              "page_tag_#{content_type.name.downcase.pluralize}_path",
-              slug: PageTagService.slug_for(page_tag.tag)
-            ), class: "#{content_type.color}-text" do
-          %>
-            <i class="material-icons">loyalty</i>
-            <small class="grey-text">tagged</small>
-            <%= page_tag.tag %>
-          <% end %>
-        </li>
+      <% if @page_tags %>
+        <% @page_tags.each do |page_tag| %>
+          <li>
+            <%=
+              link_to send(
+                "page_tag_#{content_type.name.downcase.pluralize}_path",
+                slug: PageTagService.slug_for(page_tag.tag)
+              ), class: "#{content_type.color}-text" do
+            %>
+              <i class="material-icons">loyalty</i>
+              <small class="grey-text">tagged</small>
+              <%= page_tag.tag %>
+            <% end %>
+          </li>
+        <% end %>
       <% end %>
     </ul>
   </div>

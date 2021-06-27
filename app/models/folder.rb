@@ -7,7 +7,7 @@ class Folder < ApplicationRecord
   end
 
   def self.color
-    'teal lighten-1'
+    'lighten-1 teal'
   end
 
   def self.icon

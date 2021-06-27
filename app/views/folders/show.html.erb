@@ -1,0 +1,36 @@
+  <%= content_for :full_width_page_content do %>
+    <div class="container-fluid">
+      <div class="row">
+        <h5>
+          <% if @parent_folder %>
+            <%= link_to @parent_folder do %>
+              <i class="material-icons left tooltipped" data-tooltip="Go up a folder">arrow_upward</i>
+            <% end %>
+          <% else %>
+            <%# todo link to base context#index page %>
+            <%= link_to documents_path do %>
+              <i class="material-icons left tooltipped" data-tooltip="Go up a folder">arrow_upward</i>
+            <% end %>
+          <% end %>
+          <i class="material-icons large left <%= Folder.color %>-text"><%= Folder.icon %></i>
+          <%= @folder.title %>
+
+          <% if @child_folders.empty? %>
+            <div class="btn-group right" style="margin-top: 1.9em; margin-right: 0.2em">
+              <%= link_to '#new-folder-modal', class: "btn right #{Folder.color} lighten-1 white-text modal-trigger" do %>
+                <i class="material-icons left">create_new_folder</i>
+                New folder
+              <% end %>
+            </div>
+          <% end %>
+        </h5>
+      </div>
+
+      <%= render partial: 'folders/list', locals: { folders: @child_folders } %>
+
+      <div class="row">
+        <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } %>
+        <%= render partial: 'content/list/document_table', locals: { content_list: @content, content_type: Document } %>
+      </div>
+    </div>
+  <% end %>
