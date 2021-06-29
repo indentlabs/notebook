@@ -35,13 +35,16 @@ class FoldersController < ApplicationController
       page_id:   @content.pluck(:id)
     ).order(:tag)
 
-    if params.key?(:slug)
-      @filtered_page_tags = @page_tags.where(slug: params[:slug])
-      @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
+    if params.key?(:tag)
+      @filtered_page_tags = @page_tags.where(slug: params[:tag])
+
+      @content = @content.to_a.select { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
+      # TODO: the above could probably be replaced with something like the below, but not sure on nesting syntax
+      # @content = @content.where(page_tags: { slug: @filtered_page_tags.pluck(:slug) })
     end
 
     @page_tags = @page_tags.uniq(&:tag)
-    @suggested_page_tags = (@page_tags.pluck(:tag) + PageTagService.suggested_tags_for(@content.klass.name)).uniq
+    @suggested_page_tags = (@page_tags.pluck(:slug) + PageTagService.suggested_tags_for('Document')).uniq
   end
 
   private

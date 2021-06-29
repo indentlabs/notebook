@@ -29,8 +29,8 @@ class DocumentsController < ApplicationController
       page_id:   @documents.pluck(:id)
     ).order(:tag)
 
-    if params.key?(:slug)
-      @filtered_page_tags = @page_tags.where(slug: params[:slug])
+    if params.key?(:tag)
+      @filtered_page_tags = @page_tags.where(slug: params[:tag])
       @documents.select! { |document| @filtered_page_tags.pluck(:page_id).include?(document.id) }
     end
 
