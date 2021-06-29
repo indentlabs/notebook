@@ -29,6 +29,19 @@ class FoldersController < ApplicationController
     if @universe_scope
       @content = @content.where(universe: @universe_scope)
     end
+
+    @page_tags = PageTag.where(
+      page_type: Document.name,
+      page_id:   @content.pluck(:id)
+    ).order(:tag)
+
+    if params.key?(:slug)
+      @filtered_page_tags = @page_tags.where(slug: params[:slug])
+      @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
+    end
+
+    @page_tags = @page_tags.uniq(&:tag)
+    @suggested_page_tags = (@page_tags.pluck(:tag) + PageTagService.suggested_tags_for(@content.klass.name)).uniq
   end
 
   private
