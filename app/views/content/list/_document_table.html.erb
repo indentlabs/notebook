@@ -47,8 +47,10 @@
               </div>
             <% end %>
             <% if document.respond_to?(:page_tags) %>
+              <% page_tags = document.page_tags %>
+              <% if page_tags.any? %>
                 <p class="tags-container">
-                  <% document.page_tags.each do |tag| %>
+                  <% page_tags.each do |tag| %>
                     <% if user_signed_in? && document.user == current_user %>
                       <%=
                         link_to send(
@@ -64,6 +66,7 @@
                   <% end %>
                 </p>
               <% end %>
+            <% end %>
           </div>
         </td>
         <td>
