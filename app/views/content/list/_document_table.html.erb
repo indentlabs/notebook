@@ -53,10 +53,7 @@
                   <% page_tags.each do |tag| %>
                     <% if user_signed_in? && document.user == current_user %>
                       <%=
-                        link_to send(
-                          "page_tag_documents_path",
-                          slug: PageTagService.slug_for(tag.tag)
-                        ) do
+                        link_to params.permit(:tag).merge({ tag: PageTagService.slug_for(tag.tag) }), class: "#{Document.color}-text" do
                       %>
                         <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
                       <% end %>
@@ -152,7 +149,7 @@
                     { class: ' autosave-closest-form-on-change' }
                 %>
                 <style>
-                  .dropdown-content {
+                  .modal .dropdown-content {
                     max-height: 350px;
                   }
                 </style>
