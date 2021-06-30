@@ -22,16 +22,11 @@
               <p class="tags-container">
                 <% content.page_tags.each do |tag| %>
                   <% if user_signed_in? && content.user == current_user %>
-                    <%=
-                      link_to send(
-                        "page_tag_#{content.class.name.downcase.pluralize}_path",
-                        slug: PageTagService.slug_for(tag.tag)
-                      ) do
-                    %>
-                      <span class="new badge <%= params[:slug] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                    <%= link_to params.permit(:tag).merge({ tag: PageTagService.slug_for(tag.tag) }) do %>
+                      <span class="new badge <%= params[:tag] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
                     <% end %>
                   <% else %>
-                    <span class="new badge <%= params[:slug] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                    <span class="new badge <%= params[:tag] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
                   <% end %>
                 <% end %>
               </p>
@@ -72,16 +67,11 @@
             <p class="tags-container">
               <% content.page_tags.each do |tag| %>
                 <% if user_signed_in? && content.user == current_user %>
-                  <%=
-                    link_to send(
-                      "page_tag_#{content.class.name.downcase.pluralize}_path",
-                      slug: PageTagService.slug_for(tag.tag)
-                    ) do
-                  %>
-                    <span class="new badge <%= params[:slug] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                  <%= link_to params.permit(:tag).merge({ tag: PageTagService.slug_for(tag.tag) }) do %>
+                    <span class="new badge <%= params[:tag] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
                   <% end %>
                 <% else %>
-                  <span class="new badge <%= params[:slug] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                  <span class="new badge <%= params[:tag] == tag.slug ? content_type.color : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
                 <% end %>
               <% end %>
             </p>
