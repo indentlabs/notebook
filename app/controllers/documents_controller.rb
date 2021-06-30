@@ -256,20 +256,6 @@ class DocumentsController < ApplicationController
 
   def set_navbar_actions
     @navbar_actions = []
-    return unless user_signed_in?
-
-    # if @current_user_content && @current_user_content['Document'].present?
-    #   @navbar_actions << {
-    #     label: "Your #{@current_user_content['Document'].count} Document#{'s' unless @navbar_actions == 1}",
-    #     href: documents_path
-    #   }
-    # end
-
-    # @navbar_actions << {
-    #   label: "New Document",
-    #   href: new_document_path,
-    #   target: '_blank'
-    # }
   end
 
   def set_footer_visibility

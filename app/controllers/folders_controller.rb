@@ -1,10 +1,11 @@
 class FoldersController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_folder, only: [:show, :destroy, :update]
+  before_action :set_folder,              only: [:show, :destroy, :update]
+  before_action :verify_folder_ownership, only: [:show, :destroy, :update]
+  before_action :set_sidenav_expansion,   only: [:show]
 
   def create
     folder = Folder.create(folder_params.merge({ user: current_user }))
-
     redirect_back(fallback_location: documents_path, notice: "Folder #{folder.title} created!")
   end
 
@@ -15,6 +16,10 @@ class FoldersController < ApplicationController
   end
 
   def destroy
+    Document.where(folder_id: @folder.id).update_all(folder_id: nil)
+
+    @folder.destroy!
+    redirect_to(documents_path, notice: "Folder #{@folder.title} deleted!")
   end
 
   def show
@@ -51,9 +56,23 @@ class FoldersController < ApplicationController
 
   def set_folder
     @folder = Folder.find_by(user: current_user, id: params.fetch(:id).to_i)
+
+    unless @folder
+      raise "No folder found with ID #{params.fetch(:id).to_i}"
+    end
+  end
+
+  def verify_folder_ownership
+    unless user_signed_in? && current_user == @folder.user
+      raise "Trying to access someone else's folder: #{current_user.id} tried to access #{@folder.user_id}'s folder #{@folder.id}"
+    end
   end
 
   def folder_params
     params.require(:folder).permit(:title, :context, :parent_folder_id)
+  end
+
+  def set_sidenav_expansion
+    @sidenav_expansion = 'writing'
   end
 end
