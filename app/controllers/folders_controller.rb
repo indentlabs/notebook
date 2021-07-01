@@ -35,6 +35,10 @@ class FoldersController < ApplicationController
       @content = @content.where(universe: @universe_scope)
     end
 
+    if params.key?(:favorite_only)
+      @content = @content.where(favorite: true)
+    end
+
     @page_tags = PageTag.where(
       page_type: Document.name,
       page_id:   @content.pluck(:id)
