@@ -6,8 +6,9 @@
   <% value.each do |tag| %>
     <% if user_signed_in? && content.user == current_user %>
       <%=
+        # TODO: deprecate this route and send to content_type#index?tag=tag instead
         link_to send(
-          "page_tag_#{content.raw_model.class.name.downcase.pluralize}_path",
+          "page_tag_#{raw_model.class.name.downcase.pluralize}_path",
           slug: PageTagService.slug_for(tag)
         ) do
       %>

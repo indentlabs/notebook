@@ -1,283 +1,342 @@
 <%# Usage: render partial: 'content/list/document_table', locals: { content_list: @content, content_type: @content_type_class } %>
 
 <% if content_list.any? %>
-  <table class="highlight z-depth-1 js-content-cards-list">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Title</th>
-        <th>Length</th>
-        <th>Last edited</th>
-      </tr>
-    </thead>
-    <% content_list.each do |document| %>
-      <tr class="white js-content-card-container hoverable modal-trigger" data-target="document-info-<%= document.id %>" style="cursor: pointer">
-        <td class="center">
-            <i class="material-icons medium <%= Document.color %>-text"><%= Document.icon %></i>
-        </td>
-        <td>
-          <div>
-            <div>
-              <% if user_signed_in? && document.user == current_user %>
-                <i class="material-icons left orange-text"
-                  data-content-id="<%= document.id %>"
-                  data-content-class="<%= document.class.name.downcase.pluralize %>">
-                  <%= document.favorite? ? 'star' : 'star_border' %>
-                </i>
-              <% else %>
-                <i class="material-icons left orange-text tooltipped" data-tooltip="This document has been shared with you.">folder_shared</i>
-              <% end %>
-          
-              <strong style="font-size: 1.2em" class="js-content-name">
-                <%= document.title %>
-              </strong>
-            </div>
-            <div>
-              <%= link_to document.user, class: "#{User.color}-text" do %>
-                <i class="material-icons left"><%= User.icon %></i>
-                by <%= document.user.display_name %>
-              <% end %>
-            </div>
-            <% if document.universe %>
-              <div class="clearfix">
-                <%= link_to document.universe, class: "#{Universe.color}-text" do %>
-                  <i class="material-icons left"><%= Universe.icon %></i>
-                  in <%= document.universe.try(:name) || 'Unknown universe' %>
+  <div class="row">
+    <div class="col s12 m12 l9">
+      <table class="highlight z-depth-1 js-content-cards-list">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Title</th>
+            <th>Length</th>
+            <th>Last edited</th>
+          </tr>
+        </thead>
+        <% content_list.each do |document| %>
+          <tr class="white js-content-card-container hoverable modal-trigger" data-target="document-info-<%= document.id %>" style="cursor: pointer">
+            <td class="center">
+                <i class="material-icons medium <%= Document.color %>-text"><%= Document.icon %></i>
+            </td>
+            <td>
+              <div>
+                <div>
+                  <% if user_signed_in? && document.user == current_user %>
+                    <i class="material-icons left orange-text"
+                      data-content-id="<%= document.id %>"
+                      data-content-class="<%= document.class.name.downcase.pluralize %>">
+                      <%= document.favorite? ? 'star' : 'star_border' %>
+                    </i>
+                  <% else %>
+                    <i class="material-icons left orange-text tooltipped" data-tooltip="This document has been shared with you.">folder_shared</i>
+                  <% end %>
+              
+                  <strong style="font-size: 1.2em" class="js-content-name">
+                    <%= document.title %>
+                  </strong>
+                </div>
+                <div>
+                  <%= link_to document.user, class: "#{User.color}-text" do %>
+                    <i class="material-icons left"><%= User.icon %></i>
+                    by <%= document.user.display_name %>
+                  <% end %>
+                </div>
+                <% if document.universe %>
+                  <div class="clearfix">
+                    <%= link_to document.universe, class: "#{Universe.color}-text" do %>
+                      <i class="material-icons left"><%= Universe.icon %></i>
+                      in <%= document.universe.try(:name) || 'Unknown universe' %>
+                    <% end %>
+                  </div>
+                <% end %>
+                <% if document.respond_to?(:page_tags) %>
+                  <% page_tags = document.page_tags %>
+                  <% if page_tags.any? %>
+                    <p class="tags-container">
+                      <% page_tags.each do |tag| %>
+                        <% if user_signed_in? && document.user == current_user %>
+                          <%=
+                            link_to params.permit(:tag).merge({ tag: PageTagService.slug_for(tag.tag) }), class: "#{Document.color}-text" do
+                          %>
+                            <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
+                          <% end %>
+                        <% else %>
+                          <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
+                        <% end %>
+                      <% end %>
+                    </p>
+                  <% end %>
                 <% end %>
               </div>
-            <% end %>
-            <% if document.respond_to?(:page_tags) %>
-              <% page_tags = document.page_tags %>
-              <% if page_tags.any? %>
-                <p class="tags-container">
-                  <% page_tags.each do |tag| %>
-                    <% if user_signed_in? && document.user == current_user %>
-                      <%=
-                        link_to params.permit(:tag).merge({ tag: PageTagService.slug_for(tag.tag) }), class: "#{Document.color}-text" do
-                      %>
-                        <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
-                      <% end %>
+            </td>
+            <td>
+              <div>
+                <i class="material-icons tiny" style="position: relative; top: 3px;">text_snippet</i>
+                <%= pluralize document.word_count, 'word' %>
+              </div>
+              <div>
+                <i class="material-icons tiny" style="position: relative; top: 3px;">timer</i>
+                <%= document.reading_estimate %>
+              </div>
+            </td>
+            <td>
+              <span class="tooltipped" data-tooltip="Last edited at <%= document.updated_at.strftime("%m/%d/%Y %H:%M UTC") %>">
+                <%= document.updated_at == document.created_at ? 'created' : 'updated' %>
+                <%= time_ago_in_words document.updated_at %> ago
+              </span>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+
+      <%# Build info modals %>
+      <% content_list.each do |document| %>
+        <div id="document-info-<%= document.id %>" class="modal modal-fixed-footer">
+          <div class="modal-content">
+            <h4 class="<%= Document.color %>-text">
+              <i class="material-icons left large"><%= Document.icon %></i>
+              <%= document.title %>
+
+              <%
+                if document.favorite?
+                  icon = 'star'
+                  action = 'Unfavorite'
+                else
+                  icon = 'star_border'
+                  action = 'Favorite'
+                end
+              %>
+
+              <% if user_signed_in? && document.user == current_user %>
+                <i class="material-icons right orange-text favorite-button tooltipped" 
+                  data-tooltip="<%= action %> this page"
+                  data-content-id="<%= document.id %>"
+                  data-content-class="<%= document.class.name.downcase.pluralize %>">
+                  <%= icon %>
+                </i>
+              <% end %>
+            </h4>
+            <div class="left">
+              <div>
+                <%= link_to document.user, class: "#{User.color}-text" do %>
+                  <i class="material-icons left"><%= User.icon %></i>
+                  by <%= document.user.display_name %>
+                <% end %>
+              </div>
+              <% if document.universe %>
+                <div class="clearfix">
+                  <%= link_to document.universe, class: "#{Universe.color}-text" do %>
+                    <i class="material-icons left"><%= Universe.icon %></i>
+                    in <%= document.universe.try(:name) || 'Unknown universe' %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+            <div class="clearfix row">
+              <%= form_for document, remote: true do |f| %>
+                <div class="col s12 m12 l4">
+                  <!--
+                  <%= link_to analysis_document_path(document) do %>
+                    <div class="card-panel orange white-text hoverable uppercase">
+                      <i class="material-icons left">bar_chart</i>
+                      Analyze
+                    </div>
+                  <% end %>
+                  -->
+
+                  <h5>Folder</h5>
+                  <% if current_user.can_update?(document) %>
+                    <%= 
+                      f.select :folder_id, current_user.folders.pluck(:title, :id), 
+                        { include_blank: 'No folder' }, 
+                        { class: ' autosave-closest-form-on-change' }
+                    %>
+                    <style>
+                      .modal .dropdown-content {
+                        max-height: 350px;
+                      }
+                    </style>
+                  <% else %>
+                    <% if document.folder_id %>
+                      <%= link_to document.folder.title, document.folder, class: "#{Folder.color}-text" %>
                     <% else %>
-                      <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
+                      Not in a folder
                     <% end %>
                   <% end %>
-                </p>
+
+                  <h5>About</h5>
+                  <ul>
+                    <li>
+                      <i class="material-icons tiny" style="position: relative; top: 3px;">text_snippet</i>
+                      <%= pluralize document.word_count, 'word' %>
+                    </li>
+                    <li>
+                      <i class="material-icons tiny" style="position: relative; top: 3px;">timer</i>
+                      <%= document.reading_estimate %>
+                    </li>
+                    <li>
+                      <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
+                      created <%= time_ago_in_words document.created_at %> ago
+                    </li>
+                    <% if document.created_at != document.updated_at %>
+                      <li>
+                        <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
+                        last updated <%= time_ago_in_words document.updated_at %> ago
+                      </li>
+                    <% end %>
+                    <li>
+                      <%= link_to document_document_revisions_path(document) do %>
+                        <i class="material-icons tiny" style="position: relative; top: 3px;">content_copy</i>
+                        View revision log
+                      <% end %>
+                    </li>
+                    <li>
+                      <%= link_to plaintext_document_path(document), target: '_blank' do %>
+                        <i class="material-icons tiny" style="position: relative; top: 3px;">title</i>
+                        View in plaintext
+                      <% end %>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="col s12 m12 l8" style="padding-right: 1em;">
+                  <% if current_user.can_update?(document) %>
+                    <div class="content-field">
+                      <h5>Document synopsis</h5>
+                      <div class="input-field">
+                        <%= f.text_area :synopsis, class: 'materialize-textarea autosave-closest-form-on-change', placeholder: 'What happens in this document?' %>
+                        <span class="helper-text">Changes will automatically save.</span>
+                      </div>
+                    </div>
+
+                    <div class="content-field">
+                      <h5>Document notes</h5>
+                      <div class="input-field">
+                        <%= f.text_area :notes_text, class: 'materialize-textarea autosave-closest-form-on-change', placeholder: "Write as little or as much as you'd like!" %>
+                        <span class="helper-text">Changes will automatically save. These notes will be available while writing.</span>
+                      </div>
+                    </div>
+
+                    <h5>Document tags</h5>
+                    <%=
+                      render partial: 'content/form/field_types/tags', locals: {
+                        f:     f,
+                        page:  document,
+                        field: AttributeField.new
+                      }
+                    %>
+                  <% else %>
+                    <h5>Document synopsis</h5>
+                    <% if document.synopsis %>
+                      <%= simple_format ContentFormatterService.show(
+                        text:         document.synopsis,
+                        viewing_user: current_user
+                      ) %>
+                    <% else %>
+                      <em>None yet</em>
+                    <% end %>
+
+                    <h5>Document notes</h5>
+                    <% if document.notes_text %>
+                      <%= simple_format ContentFormatterService.show(
+                        text:         document.notes_text,
+                        viewing_user: current_user
+                      ) %>
+                    <% else %>
+                      <em>None yet</em>
+                    <% end %>
+
+                    <% if document.page_tags.any? %>
+                      <h5>Document tags</h5>
+                      <%=
+                        render partial: "content/display/attribute_value/tags", 
+                                locals: { value: document.page_tags.pluck(:tag), content: document }
+                      %>
+                    <% end %>
+
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <% if current_user.can_read?(document) %>
+              <%= link_to polymorphic_path(document), class: 'blue white-text text-lighten-1 btn hoverable' do %>
+                <i class="material-icons left"><%= content_type.icon %></i>
+                View
+              <% end %>
+            <% end %>
+            <% if current_user.can_update?(document) %>
+              <%= link_to edit_polymorphic_path(document), class: 'green white-text btn hoverable', target: document.is_a?(Document) ? '_blank' : '_self' do %>
+                <i class="material-icons left"><%= content_type.icon %></i>
+                Edit
+              <% end %>
+            <% end %>
+            <% if current_user.can_update?(document) %>
+              <%= link_to analysis_document_path(document), class: 'orange white-text btn left hoverable', target: document.is_a?(Document) ? '_blank' : '_self' do %>
+                <i class="material-icons left">bar_chart</i>
+                Analyze
               <% end %>
             <% end %>
           </div>
-        </td>
-        <td>
-          <div>
-            <i class="material-icons tiny" style="position: relative; top: 3px;">text_snippet</i>
-            <%= pluralize document.word_count, 'word' %>
-          </div>
-          <div>
-            <i class="material-icons tiny" style="position: relative; top: 3px;">timer</i>
-            <%= document.reading_estimate %>
-          </div>
-        </td>
-        <td>
-          <span class="tooltipped" data-tooltip="Last edited at <%= document.updated_at.strftime("%m/%d/%Y %H:%M UTC") %>">
-            <%= document.updated_at == document.created_at ? 'created' : 'updated' %>
-            <%= time_ago_in_words document.updated_at %> ago
-          </span>
-        </td>
-      </tr>
-    <% end %>
-  </table>
-
-  <%# Build info modals %>
-  <% content_list.each do |document| %>
-    <div id="document-info-<%= document.id %>" class="modal modal-fixed-footer">
-      <div class="modal-content">
-        <h4 class="<%= Document.color %>-text">
-          <i class="material-icons left large"><%= Document.icon %></i>
-          <%= document.title %>
-
-          <%
-            if document.favorite?
-              icon = 'star'
-              action = 'Unfavorite'
-            else
-              icon = 'star_border'
-              action = 'Favorite'
-            end
-          %>
-
-          <% if user_signed_in? && document.user == current_user %>
-            <i class="material-icons right orange-text favorite-button tooltipped" 
-              data-tooltip="<%= action %> this page"
-              data-content-id="<%= document.id %>"
-              data-content-class="<%= document.class.name.downcase.pluralize %>">
-              <%= icon %>
-            </i>
-          <% end %>
-        </h4>
-        <div class="left">
-          <div>
-            <%= link_to document.user, class: "#{User.color}-text" do %>
-              <i class="material-icons left"><%= User.icon %></i>
-              by <%= document.user.display_name %>
-            <% end %>
-          </div>
-          <% if document.universe %>
-            <div class="clearfix">
-              <%= link_to document.universe, class: "#{Universe.color}-text" do %>
-                <i class="material-icons left"><%= Universe.icon %></i>
-                in <%= document.universe.try(:name) || 'Unknown universe' %>
-              <% end %>
-            </div>
-          <% end %>
         </div>
-        <div class="clearfix row">
-          <%= form_for document, remote: true do |f| %>
-            <div class="col s12 m12 l4">
-              <!--
-              <%= link_to analysis_document_path(document) do %>
-                <div class="card-panel orange white-text hoverable uppercase">
-                  <i class="material-icons left">bar_chart</i>
-                  Analyze
-                </div>
-              <% end %>
-              -->
-
-              <h5>Folder</h5>
-              <% if current_user.can_update?(document) %>
-                <%= 
-                  f.select :folder_id, current_user.folders.pluck(:title, :id), 
-                    { include_blank: 'No folder' }, 
-                    { class: ' autosave-closest-form-on-change' }
-                %>
-                <style>
-                  .modal .dropdown-content {
-                    max-height: 350px;
-                  }
-                </style>
-              <% else %>
-                <% if document.folder_id %>
-                  <%= link_to document.folder.title, document.folder, class: "#{Folder.color}-text" %>
-                <% else %>
-                  Not in a folder
-                <% end %>
-              <% end %>
-
-              <h5>About</h5>
-              <ul>
-                <li>
-                  <i class="material-icons tiny" style="position: relative; top: 3px;">text_snippet</i>
-                  <%= pluralize document.word_count, 'word' %>
-                </li>
-                <li>
-                  <i class="material-icons tiny" style="position: relative; top: 3px;">timer</i>
-                  <%= document.reading_estimate %>
-                </li>
-                <li>
-                  <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
-                  created <%= time_ago_in_words document.created_at %> ago
-                </li>
-                <% if document.created_at != document.updated_at %>
-                  <li>
-                    <i class="material-icons tiny" style="position: relative; top: 3px;">history</i>
-                    last updated <%= time_ago_in_words document.updated_at %> ago
-                  </li>
-                <% end %>
-                <li>
-                  <%= link_to document_document_revisions_path(document) do %>
-                    <i class="material-icons tiny" style="position: relative; top: 3px;">content_copy</i>
-                    View revision log
+      <% end %>
+    </div>
+    <div class="col s12 m12 l3">
+      <div class="card" style="margin: 0">
+        <div class="card-content">
+          <div class="card-title">Statistics</div>
+          <ul>
+            <li>
+              <i class="material-icons <%= Document.color %>-text left"><%= Document.icon %></i>
+              <strong><%= number_with_delimiter content_list.count %></strong>
+              <%= 'document'.pluralize(content_list.count) %>
+            </li>
+            <li class="clearfix">
+              <% total_word_count = content_list.sum(&:cached_word_count) %>
+              <i class="material-icons <%= Document.color %>-text left">spellcheck</i>
+              totalling
+              <strong><%= number_with_delimiter total_word_count %></strong>
+              <%= 'word'.pluralize(total_word_count) %>
+            </li>
+            <li class="clearfix">
+              <br />
+              <div class="card-title"><small>Tags</small></div>
+              <div class="tags-container">
+                <% PageTag.where(page_type: 'Document', page_id: content_list).each do |tag| %>
+                  <%= link_to params.permit(:tag).merge({ tag: tag.slug }) do %>
+                    <span class="new badge <%= Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
                   <% end %>
-                </li>
-                <li>
-                  <%= link_to plaintext_document_path(document), target: '_blank' do %>
-                    <i class="material-icons tiny" style="position: relative; top: 3px;">title</i>
-                    View in plaintext
+                <% end %>
+              </div>
+            </li>
+            <li class="clearfix">
+              <br />
+              <div class="card-title"><small>Universes</small></div>
+              <div class="tags-container">
+                <% Universe.where(id: content_list.pluck(:universe_id)).each do |universe| %>
+                  <%= link_to universe do %>
+                    <span class="new badge <%= Universe.color %> left" data-badge-caption="<%= universe.name %>"></span>
                   <% end %>
-                </li>
-              </ul>
-            </div>
-
-            <div class="col s12 m12 l8" style="padding-right: 1em;">
-              <% if current_user.can_update?(document) %>
-                <div class="content-field">
-                  <h5>Document synopsis</h5>
-                  <div class="input-field">
-                    <%= f.text_area :synopsis, class: 'materialize-textarea autosave-closest-form-on-change', placeholder: 'What happens in this document?' %>
-                    <span class="helper-text">Changes will automatically save.</span>
-                  </div>
-                </div>
-
-                <div class="content-field">
-                  <h5>Document notes</h5>
-                  <div class="input-field">
-                    <%= f.text_area :notes_text, class: 'materialize-textarea autosave-closest-form-on-change', placeholder: "Write as little or as much as you'd like!" %>
-                    <span class="helper-text">Changes will automatically save. These notes will be available while writing.</span>
-                  </div>
-                </div>
-
-                <h5>Document tags</h5>
-                <%=
-                  render partial: 'content/form/field_types/tags', locals: {
-                    f:     f,
-                    page:  document,
-                    field: AttributeField.new
-                  }
-                %>
-              <% else %>
-                <h5>Document synopsis</h5>
-                <% if document.synopsis %>
-                  <%= simple_format ContentFormatterService.show(
-                    text:         document.synopsis,
-                    viewing_user: current_user
-                  ) %>
-                <% else %>
-                  <em>None yet</em>
                 <% end %>
-
-                <h5>Document notes</h5>
-                <% if document.notes_text %>
-                  <%= simple_format ContentFormatterService.show(
-                    text:         document.notes_text,
-                    viewing_user: current_user
-                  ) %>
-                <% else %>
-                  <em>None yet</em>
+              </div>
+            </li>
+            <li class="clearfix">
+              <br />
+              <div class="card-title"><small>Authors</small></div>
+              <div class="tags-container">
+                <% User.where(id: content_list.pluck(:user_id)).each do |user| %>
+                  <%= link_to user do %>
+                    <span class="new badge <%= User.color %> left" data-badge-caption="<%= user.display_name %>"></span>
+                  <% end %>
                 <% end %>
-
-                <% if document.page_tags.any? %>
-                  <h5>Document tags</h5>
-                  <%=
-                    render partial: "content/display/attribute_value/tags", 
-                            locals: { value: document.page_tags.pluck(:tag), content: document }
-                  %>
-                <% end %>
-
-              <% end %>
-            </div>
-          <% end %>
+              </div>
+            </li>
+            <!-- tags, universes, authors -->
+          </ul>
         </div>
-      </div>
-      <div class="modal-footer">
-        <% if current_user.can_read?(document) %>
-          <%= link_to polymorphic_path(document), class: 'blue white-text text-lighten-1 btn hoverable' do %>
-            <i class="material-icons left"><%= content_type.icon %></i>
-            View
-          <% end %>
-        <% end %>
-        <% if current_user.can_update?(document) %>
-          <%= link_to edit_polymorphic_path(document), class: 'green white-text btn hoverable', target: document.is_a?(Document) ? '_blank' : '_self' do %>
-            <i class="material-icons left"><%= content_type.icon %></i>
-            Edit
-          <% end %>
-        <% end %>
-        <% if current_user.can_update?(document) %>
-          <%= link_to analysis_document_path(document), class: 'orange white-text btn left hoverable', target: document.is_a?(Document) ? '_blank' : '_self' do %>
-            <i class="material-icons left">bar_chart</i>
-            Analyze
-          <% end %>
-        <% end %>
       </div>
     </div>
-  <% end %>
+  </div>
 <% else %>
 
   <div class="row">

@@ -1,7 +1,7 @@
 namespace :backfill do
   desc "Backfill cached word counts on all documents"
   task document_word_count_caches: :environment do
-    Document.where(cached_word_count: nil).order('id DESC').find_each do |document|
+    Document.where(cached_word_count: nil).where.not(body: [nil, ""]).order('id DESC').find_each do |document|
       document.update(cached_word_count: document.computed_word_count)
     end
   end
