@@ -29,7 +29,37 @@
         <% end %>
       </li>
 
-      <!-- folder and docs in this folder -->
+      <%
+        folder = @document.folder
+        if folder
+      %>
+        <li class="bold waves-effect">
+          <a class="collapsible-header" tabindex="0">
+            In this folder...
+            <i class="material-icons chevron">chevron_right</i>
+          </a>
+          <div class="collapsible-body" style="">
+            <ul>
+              <li>
+                <%= link_to folder, class: 'waves-effect' do %>
+                  <i class="material-icons left <%= Folder.color %>-text"><%= Folder.icon %></i>
+                  View <%= folder.title %>
+                <% end %>
+              </li>
+              <% Document.where(folder_id: folder.id).where.not(id: @document.id).each do |document| %>
+                <li>
+                  <%= link_to edit_document_path(document), class: 'waves-effect tooltipped', data: { tooltip: "Last edited #{time_ago_in_words document.updated_at} ago", position: 'right' } do %>
+                    <i class="material-icons <%= Document.color %>-text">
+                      <%= Document.icon %>
+                    </i>
+                    <%= document.title %>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </li>
+      <% end %>
 
       <li class="bold waves-effect active">
         <a class="collapsible-header" tabindex="0">
