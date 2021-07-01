@@ -28,16 +28,19 @@
           New document
         <% end %>
       </li>
+
+      <!-- folder and docs in this folder -->
+
       <li class="bold waves-effect active">
         <a class="collapsible-header" tabindex="0">
-          Jump to...
+          Recent documents
           <i class="material-icons chevron">chevron_right</i>
         </a>
         <div class="collapsible-body" style="">
           <ul>
             <% @current_user_content['Document'].each do |document| %>
               <li>
-                <%= link_to edit_document_path(document), class: 'waves-effect' do %>
+                <%= link_to edit_document_path(document), class: 'waves-effect tooltipped', data: { tooltip: "Last edited #{time_ago_in_words document.updated_at} ago", position: 'right' } do %>
                   <i class="material-icons <%= Document.color %>-text">
                     <%= Document.icon %>
                   </i>
