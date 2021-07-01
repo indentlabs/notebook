@@ -298,43 +298,57 @@
               <strong><%= number_with_delimiter total_word_count %></strong>
               <%= 'word'.pluralize(total_word_count) %>
             </li>
-            <li class="clearfix">
-              <br />
-              <div class="card-title"><small>Tags</small></div>
-              <div class="tags-container">
-                <% PageTag.where(page_type: 'Document', page_id: content_list).each do |tag| %>
-                  <%= link_to params.permit(:tag).merge({ tag: tag.slug }) do %>
-                    <span class="new badge <%= Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
+            <% tags = PageTag.where(page_type: 'Document', page_id: content_list) %>
+            <% if tags.any? %>
+              <li class="clearfix">
+                <br />
+                <div class="card-title"><small>Tags</small></div>
+                <div class="tags-container">
+                  <% tags.each do |tag| %>
+                    <%= link_to params.permit(:tag).merge({ tag: tag.slug }) do %>
+                      <span class="new badge <%= Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
+                    <% end %>
                   <% end %>
-                <% end %>
-              </div>
-            </li>
-            <li class="clearfix">
-              <br />
-              <div class="card-title"><small>Universes</small></div>
-              <div class="tags-container">
-                <% Universe.where(id: content_list.pluck(:universe_id)).each do |universe| %>
-                  <%= link_to universe do %>
-                    <span class="new badge <%= Universe.color %> left" data-badge-caption="<%= universe.name %>"></span>
+                </div>
+              </li>
+            <% end %>
+            <% universes = Universe.where(id: content_list.pluck(:universe_id)) %>
+            <% if universes.any? %>
+              <li class="clearfix">
+                <br />
+                <div class="card-title"><small>Universes</small></div>
+                <div class="tags-container">
+                  <% universes.each do |universe| %>
+                    <%= link_to universe do %>
+                      <span class="new badge <%= Universe.color %> left" data-badge-caption="<%= universe.name %>"></span>
+                    <% end %>
                   <% end %>
-                <% end %>
-              </div>
-            </li>
-            <li class="clearfix">
-              <br />
-              <div class="card-title"><small>Authors</small></div>
-              <div class="tags-container">
-                <% User.where(id: content_list.pluck(:user_id)).each do |user| %>
-                  <%= link_to user do %>
-                    <span class="new badge <%= User.color %> left" data-badge-caption="<%= user.display_name %>"></span>
+                </div>
+              </li>
+            <% end %>
+            <% authors = User.where(id: content_list.pluck(:user_id)) %>
+            <% if authors.count > 1 %>
+              <li class="clearfix">
+                <br />
+                <div class="card-title"><small>Authors</small></div>
+                <div class="tags-container">
+                  <% User.where(id: content_list.pluck(:user_id)).each do |user| %>
+                    <%= link_to user do %>
+                      <span class="new badge <%= User.color %> left" data-badge-caption="<%= user.display_name %>"></span>
+                    <% end %>
                   <% end %>
-                <% end %>
-              </div>
-            </li>
-            <!-- tags, universes, authors -->
+                </div>
+              </li>
+            <% end %>
           </ul>
         </div>
       </div>
+
+      <%= link_to '' do %>
+        <div class="card-panel hoverable">
+          See more statistics about your writing in your Data Vault
+        </div>
+      <% end %>
     </div>
   </div>
 <% else %>
