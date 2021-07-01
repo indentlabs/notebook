@@ -29,7 +29,9 @@ class FoldersController < ApplicationController
     @child_folders = Folder.where(parent_folder: @folder)
 
     # TODO: add other content types here too
-    @content = Document.where(folder: @folder)
+    @content = Document
+      .where(folder: @folder)
+      .includes([:user, :page_tags, :universe])
 
     if @universe_scope
       @content = @content.where(universe: @universe_scope)
