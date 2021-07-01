@@ -83,21 +83,22 @@ class Document < ApplicationRecord
   def computed_word_count
     return 0 unless self.body && self.body.present?
 
+    # Settings: https://github.com/diasks2/word_count_analyzer
     WordCountAnalyzer::Counter.new(
       ellipsis:          'no_special_treatment',
-      hyperlink:         'no_special_treatment',
-      contraction:       'count_as_multiple',
-      hyphenated_word:   'count_as_multiple',
-      date:              'count_as_one',
-      number:            'ignore',
+      hyperlink:         'count_as_one',
+      contraction:       'count_as_one',
+      hyphenated_word:   'count_as_one',
+      date:              'no_special_treatment',
+      number:            'count',
       numbered_list:     'ignore',
-      xhtml:             'keep',
-      forward_slash:     'count_as_multiple',
-      backslash:         'count_as_multiple',
-      dotted_line:       'count',
-      dashed_line:       'count',
-      underscore:        'count',
-      stray_punctuation: 'count'
+      xhtml:             'remove',
+      forward_slash:     'count_as_multiple_except_dates',
+      backslash:         'count_as_one',
+      dotted_line:       'ignore',
+      dashed_line:       'ignore',
+      underscore:        'ignore',
+      stray_punctuation: 'ignore'
     ).count(self.body)
   end
 
