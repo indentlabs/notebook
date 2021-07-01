@@ -7,6 +7,9 @@ class SaveDocumentRevisionJob < ApplicationJob
     document = Document.find(document_id)
     return unless document.present?
 
+    # Update cached word count for the document regardless of how often this is called
+    document.update(cached_word_count: document.computed_word_count)
+
     # Make sure we're only storing revisions at least every 5 min
     latest_revision = document.document_revisions.order('created_at DESC').limit(1).first
     if latest_revision.present? && latest_revision.created_at > 5.minutes.ago

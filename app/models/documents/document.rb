@@ -77,7 +77,10 @@ class Document < ApplicationRecord
   end
 
   def word_count
-    # TODO this should probably be cached !!
+    self.cached_word_count || self.computed_word_count
+  end
+
+  def computed_word_count
     (self.body || "").split(/\s+/).count
   end
 
