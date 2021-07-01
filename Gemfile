@@ -83,6 +83,9 @@ gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feat
 gem 'rails-ujs'
 gem 'language_filter'
 
+# Smarts
+gem 'word_count_analyzer'
+
 # Workers
 gem 'sidekiq'
 gem 'redis'
@@ -136,7 +139,6 @@ group :worker do
   # Document understanding
   gem 'htmlentities'
   gem 'birch', git: 'https://github.com/billthompson/birch.git', branch: 'birch-ruby22'
-  gem 'word_count_analyzer'
 
   gem 'engtagger'
   gem 'ibm_watson'
