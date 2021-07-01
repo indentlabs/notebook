@@ -22,15 +22,18 @@ class DocumentsController < ApplicationController
       .linkable_documents.order('updated_at DESC')
       .limit(6)
       .to_a
+
     @documents = current_user
       .linkable_documents
       .order('favorite DESC, title ASC, updated_at DESC')
       .includes([:user, :page_tags, :universe])
       .to_a
+
     @folders = current_user
       .folders
       .where(context: 'Document', parent_folder_id: nil)
 
+    # TODO: all of this filtering code is repeated everywhere and would be nice to abstract out somewhere
     if params.key?(:favorite_only)
       @documents.select!(&:favorite?)
     end
