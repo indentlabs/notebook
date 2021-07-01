@@ -181,18 +181,22 @@
                     last updated <%= time_ago_in_words document.updated_at %> ago
                   </li>
                 <% end %>
+                <li>
+                  <%= link_to document_document_revisions_path(document) do %>
+                    <i class="material-icons tiny" style="position: relative; top: 3px;">content_copy</i>
+                    View revision log
+                  <% end %>
+                </li>
+                <li>
+                  <%= link_to plaintext_document_path(document), target: '_blank' do %>
+                    <i class="material-icons tiny" style="position: relative; top: 3px;">title</i>
+                    View in plaintext
+                  <% end %>
+                </li>
               </ul>
-
-              <!--
-              <h5>Actions</h5>
-              <ul>
-                <li><%= link_to 'View Revision log', document_document_revisions_path(document) %><br /><br /></li>
-                <li><%= link_to 'View plaintext', plaintext_document_path(document) %></li>
-              </ul>
-              -->
             </div>
 
-            <div class="col s12 m12 l8" style="padding-right: 1em">
+            <div class="col s12 m12 l8" style="padding-right: 1em;">
               <% if current_user.can_update?(document) %>
                 <div class="content-field">
                   <h5>Document synopsis</h5>
@@ -260,13 +264,13 @@
           <% end %>
         <% end %>
         <% if current_user.can_update?(document) %>
-          <%= link_to edit_polymorphic_path(document), class: 'green white-text btn hoverable', target: document.is_a?(Document) ? '_new' : '_self' do %>
+          <%= link_to edit_polymorphic_path(document), class: 'green white-text btn hoverable', target: document.is_a?(Document) ? '_blank' : '_self' do %>
             <i class="material-icons left"><%= content_type.icon %></i>
             Edit
           <% end %>
         <% end %>
         <% if current_user.can_update?(document) %>
-          <%= link_to analysis_document_path(document), class: 'orange white-text btn left hoverable', target: document.is_a?(Document) ? '_new' : '_self' do %>
+          <%= link_to analysis_document_path(document), class: 'orange white-text btn left hoverable', target: document.is_a?(Document) ? '_blank' : '_self' do %>
             <i class="material-icons left">bar_chart</i>
             Analyze
           <% end %>
