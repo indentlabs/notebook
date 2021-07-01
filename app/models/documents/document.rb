@@ -81,7 +81,7 @@ class Document < ApplicationRecord
   end
 
   def computed_word_count
-    (self.body || "").split(/\s+/).count
+    (self.body || "").scan(/[\w-]+/).size
   end
 
   def reading_estimate
