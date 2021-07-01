@@ -81,7 +81,24 @@ class Document < ApplicationRecord
   end
 
   def computed_word_count
-    (self.body || "").scan(/[\w-]+/).size
+    return 0 unless self.body && self.body.present?
+
+    WordCountAnalyzer::Counter.new(
+      ellipsis:          'no_special_treatment',
+      hyperlink:         'no_special_treatment',
+      contraction:       'count_as_multiple',
+      hyphenated_word:   'count_as_multiple',
+      date:              'count_as_one',
+      number:            'ignore',
+      numbered_list:     'ignore',
+      xhtml:             'keep',
+      forward_slash:     'count_as_multiple',
+      backslash:         'count_as_multiple',
+      dotted_line:       'count',
+      dashed_line:       'count',
+      underscore:        'count',
+      stray_punctuation: 'count'
+    ).count(self.body)
   end
 
   def reading_estimate
