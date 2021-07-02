@@ -145,7 +145,7 @@
         <%=
           pie_chart @documents.where.not(cached_word_count: [0, nil]).order('cached_word_count DESC').limit(10).pluck(:title, :cached_word_count),
             suffix: ' words',
-            legend: 'bottom',
+            legend: 'right',
             donut: 'true',
             download: true
         %>
@@ -160,7 +160,7 @@
         <%=
           pie_chart @documents.where.not(cached_word_count: [0, nil]).pluck(:title, :cached_word_count),
             suffix: ' words',
-            legend: 'bottom',
+            legend: 'left',
             donut: 'true',
             download: true
         %>
@@ -177,6 +177,7 @@
               .group('document_revisions.document_id')
               .pluck('documents.title, count(document_revisions.document_id)'),
             suffix: ' revisions',
+            colors: [Document.color],
             download: true
         %>
       </div>
