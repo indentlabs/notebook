@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_01_002938) do
+ActiveRecord::Schema.define(version: 2021_07_02_054655) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1174,6 +1174,7 @@ ActiveRecord::Schema.define(version: 2021_07_01_002938) do
     t.datetime "deleted_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "cached_word_count"
     t.index ["document_id"], name: "index_document_revisions_on_document_id"
   end
 
