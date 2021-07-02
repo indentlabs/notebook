@@ -30,6 +30,7 @@
         </li>
         <li class="divider" tabindex="-1"></li>
         <% current_user.linkable_universes.each do |universe| %>
+          <%# TODO: the following universe gate is hella smelly %>
           <%= next unless universe.becomes(Universe).send(content_type.name.downcase.pluralize).any? rescue false %>
           <li>
             <a href="?universe=<%= universe.id %>" data-universe-id="<%= universe.id %>" class="<%= Universe.color %>-text">

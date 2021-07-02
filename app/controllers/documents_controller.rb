@@ -20,6 +20,7 @@ class DocumentsController < ApplicationController
     @page_title = "My documents"
     @recent_documents = current_user
       .linkable_documents.order('updated_at DESC')
+      .includes([:user, :page_tags, :universe])
       .limit(6)
       .to_a
 

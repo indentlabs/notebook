@@ -29,11 +29,16 @@ class FoldersController < ApplicationController
     @child_folders = Folder.where(parent_folder: @folder)
       .order('title ASC')
 
+    # TODO: probably want to cache this in @current_user_content if we need it anywhere else
+    @all_folders = current_user.folders
+      .where(context: 'Document')
+      .order('title ASC')
+
     # TODO: add other content types here too
     @content = Document
       .where(folder: @folder)
-      .order('documents.favorite DESC, documents.title ASC, documents.updated_at DESC')
       .includes([:user, :page_tags, :universe])
+      .order('documents.favorite DESC, documents.title ASC, documents.updated_at DESC')
 
     if @universe_scope
       @content = @content.where(universe: @universe_scope)
