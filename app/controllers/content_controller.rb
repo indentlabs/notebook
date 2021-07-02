@@ -496,38 +496,36 @@ class ContentController < ApplicationController
   # Content update for text_area fields
   def text_field_update
     text = field_params.fetch('value', '')
-    if text.present?
-      @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
-      attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
-      attribute_value.user_id ||= current_user.id
-      attribute_value.value = text
-      attribute_value.save!
+    @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
+    attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
+    attribute_value.user_id ||= current_user.id
+    attribute_value.value = text
+    attribute_value.save!
 
-      # Create PageReferences for mentioned pages
-      tokens = ContentFormatterService.tokens_to_replace(text)
-      if tokens.any?
-        set_entity
+    # Create PageReferences for mentioned pages
+    tokens = ContentFormatterService.tokens_to_replace(text)
+    if tokens.any?
+      set_entity
 
-        valid_reference_ids = []
-        tokens.each do |token|
-          reference = @entity.outgoing_page_references.find_or_initialize_by(
-            referenced_page_type:  token[:content_type],
-            referenced_page_id:    token[:content_id],
-            attribute_field_id:    @attribute_field.id,
-            reference_type:        'mentioned'
-          )
-          reference.cached_relation_title = @attribute_field.label
-          reference.save!
+      valid_reference_ids = []
+      tokens.each do |token|
+        reference = @entity.outgoing_page_references.find_or_initialize_by(
+          referenced_page_type:  token[:content_type],
+          referenced_page_id:    token[:content_id],
+          attribute_field_id:    @attribute_field.id,
+          reference_type:        'mentioned'
+        )
+        reference.cached_relation_title = @attribute_field.label
+        reference.save!
 
-          valid_reference_ids << reference.reload.id
-        end
-
-        # Delete all other references still attached to this field, but not present in this request
-        @entity.outgoing_page_references
-          .where(attribute_field_id: @attribute_field.id)
-          .where.not(id: valid_reference_ids)
-          .destroy_all
+        valid_reference_ids << reference.reload.id
       end
+
+      # Delete all other references still attached to this field, but not present in this request
+      @entity.outgoing_page_references
+        .where(attribute_field_id: @attribute_field.id)
+        .where.not(id: valid_reference_ids)
+        .destroy_all
     end
   end
 
