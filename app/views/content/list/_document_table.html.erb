@@ -134,15 +134,6 @@
             <div class="clearfix row">
               <%= form_for document, remote: true do |f| %>
                 <div class="col s12 m12 l4">
-                  <!--
-                  <%= link_to analysis_document_path(document) do %>
-                    <div class="card-panel orange white-text hoverable uppercase">
-                      <i class="material-icons left">bar_chart</i>
-                      Analyze
-                    </div>
-                  <% end %>
-                  -->
-
                   <h5>Folder</h5>
                   <% if current_user.can_update?(document) %>
                     <%= 
@@ -167,7 +158,8 @@
                   <ul>
                     <li>
                       <i class="material-icons tiny" style="position: relative; top: 3px;">text_snippet</i>
-                      <%= pluralize document.word_count, 'word' %>
+                      <%= number_with_delimiter document.word_count %>
+                      <%= 'word'.pluralize(document.word_count) %>
                     </li>
                     <li>
                       <i class="material-icons tiny" style="position: relative; top: 3px;">timer</i>
