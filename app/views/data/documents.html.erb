@@ -109,7 +109,8 @@
           title: "Last 45 days",
           ytitle: "minutes",
           colors: [Document.color],
-          suffix: " minutes"
+          suffix: " minutes",
+          download: true
         %>
         <br />
         <%=
@@ -119,7 +120,8 @@
           title: "All time",
           ytitle: "minutes",
           colors: [Document.color],
-          suffix: " minutes"
+          suffix: " minutes",
+          download: true
         %>
         <br />
         <div class="center">
@@ -142,7 +144,8 @@
           pie_chart @documents.where.not(cached_word_count: [0, nil]).order('cached_word_count DESC').limit(10).pluck(:title, :cached_word_count),
             suffix: ' words',
             legend: 'bottom',
-            donut: 'true'
+            donut: 'true',
+            download: true
         %>
       </div>
     </div>
@@ -156,7 +159,8 @@
           pie_chart @documents.where.not(cached_word_count: [0, nil]).pluck(:title, :cached_word_count),
             suffix: ' words',
             legend: 'bottom',
-            donut: 'true'
+            donut: 'true',
+            download: true
         %>
       </div>
     </div>
@@ -170,7 +174,8 @@
           bar_chart current_user.documents.joins(:document_revisions)
               .group('document_revisions.document_id')
               .pluck('documents.title, count(document_revisions.document_id)'),
-            suffix: ' revisions'
+            suffix: ' revisions',
+            download: true
         %>
       </div>
     </div>
