@@ -292,7 +292,7 @@
               <%= 'document'.pluralize(content_list.count) %>
             </li>
             <li class="clearfix">
-              <% total_word_count = content_list.sum(&:cached_word_count) %>
+              <% total_word_count = content_list.sum { |doc| doc.cached_word_count || 0 } %>
               <i class="material-icons <%= Document.color %>-text left">spellcheck</i>
               totalling
               <strong><%= number_with_delimiter total_word_count %></strong>

@@ -32,6 +32,7 @@ class DocumentsController < ApplicationController
     @folders = current_user
       .folders
       .where(context: 'Document', parent_folder_id: nil)
+      .order('title ASC')
 
     # TODO: all of this filtering code is repeated everywhere and would be nice to abstract out somewhere
     if params.key?(:favorite_only)
