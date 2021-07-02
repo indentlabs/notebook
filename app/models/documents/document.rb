@@ -26,6 +26,8 @@ class Document < ApplicationRecord
 
   attr_accessor :tagged_text
 
+  KEYS_TO_TRIGGER_REVISION_ON_CHANGE = %w(title body synopsis notes_text)
+
   def self.color
     'teal'
   end
@@ -73,7 +75,9 @@ class Document < ApplicationRecord
   end
 
   def save_document_revision!
-    SaveDocumentRevisionJob.perform_later(self.id)
+    if (saved_changes.keys & KEYS_TO_TRIGGER_REVISION_ON_CHANGE).any?
+      SaveDocumentRevisionJob.perform_later(self.id)
+    end
   end
 
   def word_count
@@ -84,6 +88,7 @@ class Document < ApplicationRecord
     return 0 unless self.body && self.body.present?
 
     # Settings: https://github.com/diasks2/word_count_analyzer
+    # TODO: move this into analysis services & call that here
     WordCountAnalyzer::Counter.new(
       ellipsis:          'no_special_treatment',
       hyperlink:         'count_as_one',

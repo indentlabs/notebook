@@ -86,8 +86,13 @@ class DataController < ApplicationController
   def archive
   end
 
+  def documents
+    @documents = current_user.documents.order('title ASC')
+    @revisions = DocumentRevision.where(document_id: @documents.pluck(:id))
+  end
+
   def uploads
-    @used_kb     = current_user.image_uploads.sum(:src_file_size) / 1000
+    @used_kb      = current_user.image_uploads.sum(:src_file_size) / 1000
     @remaining_kb = current_user.upload_bandwidth_kb.abs
 
     if current_user.upload_bandwidth_kb < 0

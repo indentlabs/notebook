@@ -135,6 +135,7 @@ Rails.application.routes.draw do
       get '/usage',         to: 'data#usage'
       get '/recyclebin',    to: 'data#recyclebin'
       get '/archive',       to: 'data#archive'
+      get '/documents',     to: 'data#documents', as: :data_documents
       get '/uploads',       to: 'data#uploads'
       get '/discussions',   to: 'data#discussions'
       get '/collaboration', to: 'data#collaboration'
