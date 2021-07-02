@@ -161,4 +161,18 @@
       </div>
     </div>
   </div>
+
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Revisions per document</div>
+        <%=
+          bar_chart current_user.documents.joins(:document_revisions)
+              .group('document_revisions.document_id')
+              .pluck('documents.title, count(document_revisions.document_id)'),
+            suffix: ' revisions'
+        %>
+      </div>
+    </div>
+  </div>
 </div>
