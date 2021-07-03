@@ -26,7 +26,7 @@ class DocumentsController < ApplicationController
 
     @documents = current_user
       .linkable_documents
-      .order('favorite DESC, title ASC, updated_at DESC')
+      .order('favorite DESC NULLS LAST, title ASC, updated_at DESC')
       .includes([:user, :page_tags, :universe])
       .to_a
 
