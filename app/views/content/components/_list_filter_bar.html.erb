@@ -29,9 +29,12 @@
           </a>
         </li>
         <li class="divider" tabindex="-1"></li>
-        <% current_user.linkable_universes.each do |universe| %>
-          <%# TODO: the following universe gate is hella smelly %>
-          <%= next unless universe.becomes(Universe).send(content_type.name.downcase.pluralize).any? rescue false %>
+        <%
+          linkable_universes_with_this_kind_of_content = current_user.linkable_universes.select do |universe|
+            @current_user_content[content_type.name].any? { |content| content.universe_id == universe.id }
+          end
+        %>
+        <% linkable_universes_with_this_kind_of_content.each do |universe| %>
           <li>
             <a href="?universe=<%= universe.id %>" data-universe-id="<%= universe.id %>" class="<%= Universe.color %>-text">
               <i class="material-icons <%= Universe.color %>-text"><%= Universe.icon %></i>
