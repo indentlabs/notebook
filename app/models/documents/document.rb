@@ -81,7 +81,7 @@ class Document < ApplicationRecord
   end
 
   def word_count
-    self.cached_word_count || self.computed_word_count
+    self.cached_word_count || 0 # self.computed_word_count
   end
 
   def computed_word_count
