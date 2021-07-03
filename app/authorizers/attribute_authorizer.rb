@@ -6,13 +6,13 @@ class AttributeAuthorizer < ApplicationAuthorizer
   end
 
   def readable_by? user
-    [
-      PermissionService.user_owns_content?(user: user, content: resource),
-      PermissionService.user_owns_any_containing_universe?(user: user, content: resource),
-      PermissionService.user_can_contribute_to_containing_universe?(user: user, content: resource),
-      PermissionService.content_is_public?(content: resource),
-      PermissionService.content_is_in_a_public_universe?(content: resource)
-    ].any?
+    return true if PermissionService.user_owns_content?(user: user, content: resource)
+    return true if PermissionService.user_owns_any_containing_universe?(user: user, content: resource)
+    return true if PermissionService.user_can_contribute_to_containing_universe?(user: user, content: resource)
+    return true if PermissionService.content_is_public?(content: resource)
+    return true if PermissionService.content_is_in_a_public_universe?(content: resource)
+    
+    return false
   end
 
   def updatable_by? user
