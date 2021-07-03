@@ -70,12 +70,12 @@
             </td>
             <td>
               <div>
-                <i class="material-icons tiny" style="position: relative; top: 3px;">spellcheck</i>
+                <i class="material-icons tiny <%= Document.color %>-text" style="position: relative; top: 3px;">spellcheck</i>
                 <%= number_with_delimiter document.word_count %>
                 <%= 'word'.pluralize(document.word_count) %>
               </div>
               <div>
-                <i class="material-icons tiny" style="position: relative; top: 3px;">timer</i>
+                <i class="material-icons tiny <%= Document.color %>-text" style="position: relative; top: 3px;">timer</i>
                 <%= document.reading_estimate %>
               </div>
             </td>
@@ -138,7 +138,7 @@
                   <h5>Folder</h5>
                   <% if current_user.can_update?(document) %>
                     <%= 
-                      f.select :folder_id, folders.pluck(:title, :id), 
+                      f.select :folder_id, folders, 
                         { include_blank: 'No folder' }, 
                         { class: ' autosave-closest-form-on-change' }
                     %>
