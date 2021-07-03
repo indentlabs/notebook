@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_02_054655) do
+ActiveRecord::Schema.define(version: 2021_07_03_000309) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1192,6 +1192,8 @@ ActiveRecord::Schema.define(version: 2021_07_02_054655) do
     t.text "notes_text"
     t.integer "folder_id"
     t.integer "cached_word_count"
+    t.index ["deleted_at", "universe_id", "user_id"], name: "index_documents_on_deleted_at_and_universe_id_and_user_id"
+    t.index ["deleted_at", "universe_id"], name: "index_documents_on_deleted_at_and_universe_id"
     t.index ["folder_id"], name: "index_documents_on_folder_id"
     t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
@@ -1345,6 +1347,8 @@ ActiveRecord::Schema.define(version: 2021_07_02_054655) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["parent_folder_id"], name: "index_folders_on_parent_folder_id"
+    t.index ["user_id", "context", "parent_folder_id"], name: "index_folders_on_user_id_and_context_and_parent_folder_id"
+    t.index ["user_id", "context"], name: "index_folders_on_user_id_and_context"
     t.index ["user_id"], name: "index_folders_on_user_id"
   end
 
