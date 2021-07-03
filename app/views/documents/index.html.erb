@@ -27,7 +27,8 @@
           render partial: 'content/list/document_table', locals: {
             content_list: @documents,
             content_type: Document,
-            folders:      @folders.pluck(:title, :id)
+            folders:      @folders.pluck(:title, :id),
+            tags:         PageTag.where(page_type: 'Document', page_id: @documents.pluck(:id))
           }
         %>
         <%# render partial: 'notice_dismissal/messages/02' %>

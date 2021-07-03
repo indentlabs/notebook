@@ -33,7 +33,14 @@
     <div class="row">
       <h5>Documents <span class="grey-text"><%= @content.count %></span></h5>
       <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } if @content.any? %>
-      <%= render partial: 'content/list/document_table', locals: { content_list: @content, content_type: Document, folders: @all_folders.pluck(:title, :id) } %>
+      <%=
+        render partial: 'content/list/document_table', locals: {
+          content_list: @content,
+          content_type: Document,
+          folders:      @all_folders.pluck(:title, :id),
+          tags:         PageTag.where(page_type: 'Document', page_id: @content.pluck(:id))
+        }
+      %>
     </div>
   </div>
 <% end %>

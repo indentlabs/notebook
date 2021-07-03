@@ -1,4 +1,12 @@
-<%# Usage: render partial: 'content/list/document_table', locals: { content_list: @content, content_type: @content_type_class } %>
+<%#
+  Usage:
+    render partial: 'content/list/document_table', locals: {
+      content_list: @documents,
+      content_type: Document,
+      folders:      @folders.pluck(:title, :id),
+      tags:         PageTag.where(page_type: 'Document', page_id: @documents.pluck(:id))
+    }
+%>
 
 <% if content_list.any? %>
   <div class="row">
@@ -291,7 +299,6 @@
               <strong><%= number_with_delimiter total_word_count %></strong>
               <%= 'word'.pluralize(total_word_count) %>
             </li>
-            <% tags = PageTag.where(page_type: 'Document', page_id: content_list) %>
             <% if tags.any? %>
               <li class="clearfix">
                 <br />
