@@ -21,14 +21,11 @@ class DocumentsController < ApplicationController
     @recent_documents = current_user
       .linkable_documents.order('updated_at DESC')
       .includes([:user, :page_tags, :universe])
-      .limit(6)
-      .to_a
 
     @documents = current_user
       .linkable_documents
       .order('favorite DESC, title ASC, updated_at DESC')
       .includes([:user, :page_tags, :universe])
-      .to_a
 
     @folders = current_user
       .folders
@@ -40,9 +37,16 @@ class DocumentsController < ApplicationController
       @documents.select!(&:favorite?)
     end
 
+    if @universe_scope
+      @documents = @documents.where(universe: @universe_scope)
+      @recent_documents = @recent_documents.where(universe: @universe_scope)
+    end
+
+    @recent_documents = @recent_documents.limit(6)
+
     @page_tags = PageTag.where(
       page_type: Document.name,
-      page_id:   @documents.pluck(:id)
+      page_id:   @documents.map(&:id)
     ).order(:tag)
 
     if params.key?(:tag)
