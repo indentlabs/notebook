@@ -58,10 +58,10 @@ class ApplicationController < ActionController::Base
     # Likewise, we should also always cache Timelines & Documents
     if @universe_scope
       @current_user_content['Timeline'] = current_user.timelines.where(universe_id: @universe_scope.try(:id)).to_a
-      @current_user_content['Document'] = current_user.linkable_documents.where(universe_id: @universe_scope.try(:id)).order('updated_at DESC').to_a
+      @current_user_content['Document'] = current_user.linkable_documents.includes([:user]).where(universe_id: @universe_scope.try(:id)).order('updated_at DESC').to_a
     else
       @current_user_content['Timeline'] = current_user.timelines.to_a
-      @current_user_content['Document'] = current_user.linkable_documents.order('updated_at DESC').to_a
+      @current_user_content['Document'] = current_user.linkable_documents.includes([:user]).order('updated_at DESC').to_a
     end
 
     # Fetch notifications
