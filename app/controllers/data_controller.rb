@@ -87,8 +87,17 @@ class DataController < ApplicationController
   end
 
   def documents
-    @documents = current_user.documents.order('title ASC')
+    @documents = current_user
+      .documents
+      .order('title ASC')
+      .includes([:document_analysis])
+    
     @revisions = DocumentRevision.where(document_id: @documents.pluck(:id))
+
+    revision_counts = @revisions.pluck(:document_id)
+    @revisions_per_document_data = @documents.pluck(:title, :id).map do |title, did|
+      [title, revision_counts.count(did)]
+    end.reject { |title, count| count.zero? }.sort_by { |title, count| -count }
   end
 
   def uploads
