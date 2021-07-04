@@ -223,7 +223,7 @@
                           <div class="chips chips-autocomplete chips-initial" id="chips-for-<%= document.id %>"></div>
                           <%= 
                             hidden_field_tag 'field[value]', 
-                              tags.join(PageTag::SUBMISSION_DELIMITER), 
+                              document.page_tags.join(PageTag::SUBMISSION_DELIMITER), 
                               class: 'hidden_page_tags_value'
                           %>
 
@@ -401,9 +401,16 @@
       </div>
 
       <%= link_to data_documents_path do %>
-        <div class="card-panel hoverable brown white-text">
+        <div class="card-panel hoverable brown white-text" style="margin: 0">
           <i class="material-icons left">lock</i>
           See more statistics in your Data Vault
+        </div>
+      <% end %>
+
+      <%= link_to '#new-folder-modal', class: "#{Folder.color} modal-trigger" do %>
+        <div class="card-panel hoverable <%= Folder.color %> white-text">
+          <i class="material-icons left"><%= Folder.icon %></i>
+          Create a document folder
         </div>
       <% end %>
     </div>

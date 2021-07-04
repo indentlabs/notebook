@@ -143,10 +143,9 @@
         <div class="card-title">Words-written distribution per document</div>
         <div class="grey-text">(for your 10 longest documents)</div>
         <%=
-          pie_chart @documents.where.not(cached_word_count: [0, nil]).order('cached_word_count DESC').limit(10).pluck(:title, :cached_word_count),
+          pie_chart current_user.documents.where.not(cached_word_count: [0, nil]).order('cached_word_count DESC').limit(10).pluck(:title, :cached_word_count),
             suffix: ' words',
             legend: 'right',
-            donut: 'true',
             download: true
         %>
       </div>
@@ -156,12 +155,11 @@
     <div class="card">
       <div class="card-content center">
         <div class="card-title">Words-written distribution per document</div>
-        <div class="grey-text">(for all of your documents)</div>
+        <div class="grey-text">(for your 10 most recent documents)</div>
         <%=
-          pie_chart @documents.where.not(cached_word_count: [0, nil]).pluck(:title, :cached_word_count),
+          pie_chart current_user.documents.where.not(cached_word_count: [0, nil]).order('documents.updated_at DESC').limit(10).pluck(:title, :cached_word_count),
             suffix: ' words',
             legend: 'left',
-            donut: 'true',
             download: true
         %>
       </div>
