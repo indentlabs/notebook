@@ -322,5 +322,10 @@ class DocumentsController < ApplicationController
 
   def set_document
     @document = Document.find_by(id: params[:id])
+
+    unless @document
+      redirect_to root_path, notice: "Either that document doesn't exist or you don't have permission to view it!"
+      return
+    end
   end
 end
