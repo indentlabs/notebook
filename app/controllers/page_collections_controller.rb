@@ -153,6 +153,11 @@ class PageCollectionsController < ApplicationController
   def set_page_collection
     @page_collection   = PageCollection.find_by(id: params[:id])
     @page_collection ||= PageCollection.find_by(id: params[:page_collection_id])
+
+    unless @page_collection
+      redirect_to root_path, notice: "Collection not found!"
+      return
+    end
   end
 
   def set_submittable_content
