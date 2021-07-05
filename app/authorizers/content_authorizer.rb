@@ -1,6 +1,6 @@
 class ContentAuthorizer < ApplicationAuthorizer
   def readable_by? user
-    return true if user.site_administrator?
+    return true if user && user.site_administrator?
     return true if ::PermissionService.user_owns_any_containing_universe?(user: user, content: resource)
     return true if ::PermissionService.user_owns_content?(user: user, content: resource)
     return true if ::PermissionService.content_is_public?(content: resource)
