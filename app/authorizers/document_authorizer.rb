@@ -4,13 +4,13 @@ class DocumentAuthorizer < ApplicationAuthorizer
   end
 
   def readable_by?(user)
-    [
-      resource.user_id == user.id,
-      resource.privacy == 'public',
-      resource.universe.present? && resource.universe.privacy == 'public',
-      resource.universe.present? && resource.universe.contributors.pluck(:user_id).include?(user.id),
-      resource.universe.present? && resource.universe.user_id == user.id
-    ].any?
+    return true if resource.user_id == user.id
+    return true if resource.privacy == 'public'
+    return true if resource.universe.present? && resource.universe.privacy == 'public'
+    return true if resource.universe.present? && resource.universe.contributors.pluck(:user_id).include?(user.id)
+    return true if resource.universe.present? && resource.universe.user_id == user.id
+
+    return false
   end
 
   def updatable_by?(user)

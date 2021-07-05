@@ -1,0 +1,24 @@
+<% if folders.any? %>
+  <div class="row">
+    <div class="col s12">
+      <div class="btn-group right" style="margin-top: 1em;">
+        <%= link_to '#new-folder-modal', class: "btn right #{Folder.color} lighten-1 white-text modal-trigger" do %>
+          <i class="material-icons left">create_new_folder</i>
+          New folder
+        <% end %>
+      </div>
+
+      <h5>Folders <span class="grey-text"><%= folders.count %></span></h5>
+    </div>
+    <% folders.each do |folder| %>
+      <div class="col s12 m3 l2">
+        <%= link_to folder do %>
+          <div class="hoverable card-panel <%= Folder.color %> white-text" style="min-height: 93px; margin: 4px 0">
+            <i class="material-icons left"><%= Folder.icon %></i>
+            <%= folder.title %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

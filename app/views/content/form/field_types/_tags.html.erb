@@ -1,46 +1,53 @@
 <div class="content-field tags">
   <div class="input-field">
-    <small>
-      <i class="material-icons left grey-text">label</i>
-      <%= f.label field[:id], field[:label] %>
-    </small>
-    <div class="chips chips-autocomplete chips-initial"></div>
+    <% if field[:label] %>
+      <small>
+        <i class="material-icons left grey-text">label</i>
+        <%= f.label field[:id], field[:label] %>
+      </small>
+    <% end %>
+    <div class="chips chips-autocomplete chips-initial" id="chips-for-<%= page.id %>"></div>
     <%= 
-      hidden_field_tag 'field[value]', page.page_tags.join(PageTag::SUBMISSION_DELIMITER), 
-        id: 'hidden_page_tags_value'
+      hidden_field_tag 'field[value]', 
+        page.page_tags.join(PageTag::SUBMISSION_DELIMITER), 
+        class: 'hidden_page_tags_value'
     %>
 
     <div class="help-text show-when-focused">
       <i class="material-icons tiny">label</i>
       Type and press enter to create a new tag, or click any of the suggested tags below to add it.
     </div>
-    <div class="tags-container show-when-focused">
-      <% @suggested_page_tags.each do |tag| %>
-        <%=
-          link_to '#', class: 'js-add-tag' do
-        %>
-          <span class="new badge grey left hoverable" data-badge-caption="<%= tag %>"></span>
+    <% if @suggested_page_tags %>
+      <div class="tags-container show-when-focused">
+        <% @suggested_page_tags.each do |tag| %>
+          <%=
+            link_to '#', class: 'js-add-tag' do
+          %>
+            <span class="new badge grey left hoverable" data-badge-caption="<%= tag %>"></span>
+          <% end %>
         <% end %>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
     <div class="clearfix"></div>
   </div>
 </div>
 <%= content_for :javascript do %>
   function update_hidden_page_tag_value(e) {
-    var chips = M.Chips.getInstance($('.chips')).chipsData.map(function (c) {
+    var chips = M.Chips.getInstance($(e).parent().find('.chips')).chipsData.map(function (c) {
       return c['tag'];
     });
 
-    var hidden_input = $('#hidden_page_tags_value').first();
+    var hidden_input = $(e).parent().find('.hidden_page_tags_value');
     hidden_input.val(chips.join('<%= PageTag::SUBMISSION_DELIMITER %>'));
 
     // Trigger autosave manually
     hidden_input.closest('form').submit();
+
+    M.toast({ html: "Saving changes..." });
   }
 
-  var chips = $('.chips-autocomplete').chips({
-    placeholder: 'Tag this page',
+  var chips = $('#chips-for-<%= page.id %>').chips({
+    placeholder: 'Add tags',
     secondaryPlaceholder: '+ Tag',
     autocompleteOptions: {
       data: {

@@ -94,12 +94,16 @@
 
       <% if @universe_scope.present? || @current_user_content.fetch('Universe', []).count == 1 %>
         <% if @current_user_content.except('Universe').values.flatten.any? %>
-          <div class="grey-text uppercase center">
+          <div class="grey-text uppercase">
             <%= pluralize @current_user_content.except('Universe').values.flatten.count, 'page' %>
             in
             <span class="<%= Universe.color %>-text">
               <%= @universe_scope.try(:name) || @current_user_content.fetch('Universe').first.name %>
             </span>
+            <%= link_to({ universe: 'all' }, class: 'right grey-text') do %>
+              See all universes instead
+              <i class="material-icons right" style="margin: 0">arrow_right</i>
+            <% end %>
           </div>
           <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
             <div class="col s12 m12 l6">
@@ -142,18 +146,6 @@
                   </div>
                 </div>
               <% end %>
-            </div>
-          <% end %>
-        <% end %>
-      <% end %>
-
-      <% if false && !@current_user_content.values.flatten.count.zero? %>%
-        <% @activated_content_types.each do |type| %>
-          <%= link_to send("new_#{type.downcase}_path") do %>
-            <div class="hoverable card-panel <%= content_class_from_name(type).color %> white-text">
-              <i class="material-icons left"><%= content_class_from_name(type).icon %></i>
-              <i class="material-icons right">add</i>
-              Create a <%= type %>
             </div>
           <% end %>
         <% end %>

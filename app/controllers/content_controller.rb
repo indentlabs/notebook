@@ -48,8 +48,8 @@ class ContentController < ApplicationController
       page_type: @content_type_class.name,
       page_id:   @content.pluck(:id)
     ).order(:tag)
-    if params.key?(:slug)
-      @filtered_page_tags = @page_tags.where(slug: params[:slug])
+    if params.key?(:tag)
+      @filtered_page_tags = @page_tags.where(slug: params[:tag])
       @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
 
@@ -58,6 +58,7 @@ class ContentController < ApplicationController
     end
 
     @page_tags = @page_tags.uniq(&:tag)
+
     @content = @content.sort_by {|x| [x.favorite? ? 0 : 1, x.name] }
 
     @questioned_content = @content.sample
