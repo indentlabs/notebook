@@ -34,7 +34,7 @@ class DocumentsController < ApplicationController
 
     # TODO: all of this filtering code is repeated everywhere and would be nice to abstract out somewhere
     if params.key?(:favorite_only)
-      @documents.select!(&:favorite?)
+      @documents = @documents.where(favorite: true)
     end
 
     if @universe_scope
