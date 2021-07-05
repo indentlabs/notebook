@@ -3,6 +3,7 @@ namespace :backfill do
   task document_word_count_caches: :environment do
     Document.where(cached_word_count: nil).where.not(body: [nil, ""]).order('id DESC').find_each do |document|
       document.update_column(:cached_word_count, document.computed_word_count)
+      puts document.id
     end
     puts "Done!"
   end
