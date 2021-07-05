@@ -21,7 +21,13 @@
             <%= number_with_delimiter User.where(selected_billing_plan_id: 4).count %> total
           </span>
         </div>
-        <%= area_chart @reports.pluck(:day, :new_monthly_subscriptions, :ended_monthly_subscriptions), colors: ['#2196F3'] %>
+        <%= 
+          area_chart [
+            { name: 'Started subscriptions', data: @reports.pluck(:day, :new_monthly_subscriptions) },
+            { name: 'Ended subscriptions',   data: @reports.pluck(:day, :ended_monthly_subscriptions) }
+          ],
+          colors: ['#2196F3']
+        %>
       </div>
     </div>
   </div>
@@ -34,7 +40,11 @@
             <%= number_with_delimiter User.where(selected_billing_plan_id: 5).count %> total
           </span>
         </div>
-        <%= area_chart @reports.pluck(:day, :new_trimonthly_subscriptions, :ended_trimonthly_subscriptions), colors: ['#2196F3'] %>
+        <%= area_chart [
+            { name: 'Started subscriptions', data: @reports.pluck(:day, :new_trimonthly_subscriptions) },
+            { name: 'Ended subscriptions',   data: @reports.pluck(:day, :ended_trimonthly_subscriptions) }
+          ],
+          colors: ['#2196F3'] %>
       </div>
     </div>
   </div>
@@ -47,7 +57,11 @@
             <%= number_with_delimiter User.where(selected_billing_plan_id: 6).count %> total
           </span>
         </div>
-        <%= area_chart @reports.pluck(:day, :new_annual_subscriptions, :ended_annual_subscriptions), colors: ['#2196F3'] %>
+        <%= area_chart [
+            { name: 'Started subscriptions', data: @reports.pluck(:day, :new_annual_subscriptions) },
+            { name: 'Ended subscriptions',   data: @reports.pluck(:day, :ended_annual_subscriptions) }
+          ],
+          colors: ['#2196F3'] %>
       </div>
     </div>
   </div>
@@ -94,7 +108,7 @@
         <div class="card-title">
           New stream comments
         </div>
-        <%= area_chart @reports.pluck(:day, :stream_comments), colors: [ShareComment.hex_color] %>
+        <%= area_chart @reports.pluck(:day, :stream_comments), colors: [ContentPageShare.hex_color] %>
       </div>
     </div>
   </div>
