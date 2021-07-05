@@ -1,5 +1,6 @@
 class ExtendedContentAuthorizer < ContentAuthorizer
   def self.creatable_by?(user)
+    return false unless user.present?
     return false if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(user.email)
 
     return true if PermissionService.billing_plan_allows_extended_content?(user: user)

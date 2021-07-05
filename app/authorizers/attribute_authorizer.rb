@@ -1,5 +1,7 @@
 class AttributeAuthorizer < ApplicationAuthorizer
   def self.creatable_by? user
+    return false unless user.present?
+
     [
       true
     ].any?
