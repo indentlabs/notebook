@@ -1,0 +1,42 @@
+<div id="edit-folder-modal" class="modal modal-fixed-footer">
+  <%= form_for folder do |f| %>
+    <div class="modal-content">
+      <h5>
+        <i class="material-icons left <%= Folder.color %>-text"><%= Folder.icon %></i>
+        Editing <%= folder.title %>
+      </h5>
+      <div class="input-field">
+        <%= f.label 'Folder name' %>
+        <%= f.text_field :title, placeholder: 'Folder name' %>
+      </div>
+      <div class="input-field">
+        <%= 
+          f.select :parent_folder_id, current_user.folders.where.not(id: folder.id).pluck(:title, :id), 
+            { include_blank: 'None' }
+        %>
+        <%= f.label 'Parent folder' %>
+        <style>
+          .modal .dropdown-content {
+            max-height: 350px;
+          }
+        </style>
+      </div>
+
+      <div style="margin-top: 3em">
+        <p class="grey-text uppercase">More actions</p>
+        <%=
+          link_to 'Delete this folder', folder_path(folder), 
+            method: :DELETE,
+            class: 'red-text', 
+            data: {
+              confirm: "Are you sure? This will delete the folder and move all documents within it back to your default 'Documents' page."
+            }
+        %>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+      <%= f.button 'Update this folder', class: "waves-effect waves-green btn #{Folder.color} white-text submit-closest-form-on-click" %>
+    </div>
+  <% end %>
+</div>

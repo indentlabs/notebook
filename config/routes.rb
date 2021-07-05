@@ -70,22 +70,25 @@ Rails.application.routes.draw do
     get '/analysis/readability', to: 'document_analyses#readability', on: :member
     get '/analysis/style',       to: 'document_analyses#style',       on: :member
     get '/analysis/sentiment',   to: 'document_analyses#sentiment',   on: :member
-    get  '/plaintext',        to: 'documents#plaintext',               on: :member
-    get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
+    get  '/plaintext',           to: 'documents#plaintext',               on: :member
+    get  '/queue_analysis',      to: 'documents#queue_analysis',          on: :member
 
-    post '/link_entity',      to: 'documents#link_entity',             on: :collection
     resources :document_revisions, path: 'revisions', on: :member
+
+    get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
 
     post :toggle_favorite, on: :member
 
     # todo these routes don't belong here and make for awfully weird urls (/documents/:analysis_id/destroy, etc)
     get  '/destroy_analysis', to: 'documents#destroy_analysis',        on: :member
 
+    post '/link_entity',         to: 'documents#link_entity',          on: :collection
     # deprecated route:
     get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
     # new route:
     get  '/unlink/:page_type/:page_id', to: 'documents#unlink_entity', on: :member
   end
+  resources :folders, only: [:create, :update, :destroy, :show]
 
   scope '/my' do
     get '/content',         to: 'main#dashboard', as: :dashboard
@@ -97,6 +100,7 @@ Rails.application.routes.draw do
 
     # Legacy route: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
+
 
     get '/referrals',          to: 'data#referrals', as: :referrals
 
@@ -131,6 +135,7 @@ Rails.application.routes.draw do
       get '/usage',         to: 'data#usage'
       get '/recyclebin',    to: 'data#recyclebin'
       get '/archive',       to: 'data#archive'
+      get '/documents',     to: 'data#documents', as: :data_documents
       get '/uploads',       to: 'data#uploads'
       get '/discussions',   to: 'data#discussions'
       get '/collaboration', to: 'data#collaboration'

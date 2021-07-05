@@ -10,13 +10,52 @@ class DocumentsController < ApplicationController
   before_action :set_navbar_actions,    except: [:edit, :plaintext]
   before_action :set_footer_visibility, only:   [:edit]
 
+  # TODO: verify_user_can_read, verify_user_can_edit, etc before_actions instead of inlining them
+
   before_action :cache_linkable_content_for_each_content_type, only: [:edit]
 
   layout 'editor',    only: [:edit]
 
   def index
     @page_title = "My documents"
-    @documents = @current_user_content['Document']
+    @recent_documents = current_user
+      .linkable_documents.order('updated_at DESC')
+      .includes([:user, :page_tags, :universe])
+
+    @documents = current_user
+      .linkable_documents
+      .order('favorite DESC, title ASC, updated_at DESC')
+      .includes([:user, :page_tags, :universe])
+
+    @folders = current_user
+      .folders
+      .where(context: 'Document', parent_folder_id: nil)
+      .order('title ASC')
+
+    # TODO: all of this filtering code is repeated everywhere and would be nice to abstract out somewhere
+    if params.key?(:favorite_only)
+      @documents.select!(&:favorite?)
+    end
+
+    if @universe_scope
+      @documents = @documents.where(universe: @universe_scope)
+      @recent_documents = @recent_documents.where(universe: @universe_scope)
+    end
+
+    @recent_documents = @recent_documents.limit(6)
+
+    @page_tags = PageTag.where(
+      page_type: Document.name,
+      page_id:   @documents.map(&:id)
+    ).order(:tag)
+
+    if params.key?(:tag)
+      @filtered_page_tags = @page_tags.where(slug: params[:tag])
+      @documents.select! { |document| @filtered_page_tags.pluck(:page_id).include?(document.id) }
+    end
+
+    @page_tags = @page_tags.uniq(&:tag)
+    @suggested_page_tags = (@page_tags.pluck(:tag) + PageTagService.suggested_tags_for('Document')).uniq
   end
 
   def show
@@ -115,7 +154,10 @@ class DocumentsController < ApplicationController
   end
 
   def new
-    document = current_user.documents.create({universe: @universe_scope})
+    document = current_user.documents.create({
+      universe:  @universe_scope,
+      folder_id: params.fetch('folder', nil).try(:to_i)
+    })
     redirect_to edit_document_path(document)
   end
 
@@ -135,7 +177,7 @@ class DocumentsController < ApplicationController
 
   def update
     document = Document.with_deleted.find_or_initialize_by(id: params[:id])
-    d_params = document_params.clone
+    d_params = document_params.clone # TODO: why are we duplicating the params here?
 
     unless document.updatable_by?(current_user)
       redirect_to(dashboard_path, notice: "You don't have permission to do that!")
@@ -149,6 +191,8 @@ class DocumentsController < ApplicationController
     if d_params.fetch(:universe_id, nil) == "nil"
       d_params[:universe_id] = nil
     end
+
+    update_page_tags(document) if document_tag_params
 
     if document.update(d_params)
       head 200, content_type: "text/html"
@@ -232,20 +276,6 @@ class DocumentsController < ApplicationController
 
   def set_navbar_actions
     @navbar_actions = []
-    return unless user_signed_in?
-
-    if @current_user_content && @current_user_content['Document'].present?
-      @navbar_actions << {
-        label: "Your #{@current_user_content['Document'].count} Document#{'s' unless @navbar_actions == 1}",
-        href: documents_path
-      }
-    end
-
-    @navbar_actions << {
-      label: "New Document",
-      href: new_document_path,
-      target: '_blank'
-    }
   end
 
   def set_footer_visibility
@@ -254,8 +284,36 @@ class DocumentsController < ApplicationController
 
   private
 
+  def update_page_tags(document)
+    tag_list = document_tag_params.fetch('value', '').split(PageTag::SUBMISSION_DELIMITER)
+    current_tags = document.page_tags.pluck(:tag)
+
+    tags_to_add    = tag_list - current_tags
+    tags_to_remove = current_tags - tag_list
+
+    tags_to_add.each do |tag|
+      # TODO: create changelog event for AddedTag
+      document.page_tags.find_or_create_by(
+        tag:  tag,
+        slug: PageTagService.slug_for(tag),
+        user: document.user
+      )
+    end
+
+    tags_to_remove.each do |tag|
+      # TODO: create changelog event for RemovedTag or use destroy_all
+      document.page_tags.find_by(tag: tag).destroy
+    end
+  end
+
   def document_params
-    params.require(:document).permit(:title, :body, :deleted_at, :privacy, :universe_id, :notes_text)
+    params.require(:document).permit(:title, :body, :deleted_at, :privacy, :universe_id, :folder_id, :notes_text, :synopsis)
+  end
+
+  def document_tag_params
+    params.require(:field).permit(:value)
+  rescue ActionController::ParameterMissing
+    nil
   end
 
   def linked_entity_params

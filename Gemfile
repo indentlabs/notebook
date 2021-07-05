@@ -83,6 +83,9 @@ gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feat
 gem 'rails-ujs'
 gem 'language_filter'
 
+# Smarts
+gem 'word_count_analyzer'
+
 # Workers
 gem 'sidekiq'
 gem 'redis'

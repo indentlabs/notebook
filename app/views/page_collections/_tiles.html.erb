@@ -1,8 +1,8 @@
 <div class="row">
   <% pages.each do |page| %>
+    <% content = page.content %>
+    <% next unless (current_user || User.new).can_read?(content) %>
     <div class="col s12 m4 l3">
-      <% content = page.content %>
-      <% next unless (current_user || User.new).can_read?(content) %>
       <div class="hoverable card" style="min-height: 330px;">
         <div class="card-image waves-effect waves-block waves-light">
           <%= image_tag content.first_public_image, class: 'activator', style: "height: 300px;" %>
