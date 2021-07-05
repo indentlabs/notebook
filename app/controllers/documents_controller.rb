@@ -51,7 +51,8 @@ class DocumentsController < ApplicationController
 
     if params.key?(:tag)
       @filtered_page_tags = @page_tags.where(slug: params[:tag])
-      @documents.select! { |document| @filtered_page_tags.pluck(:page_id).include?(document.id) }
+      @documents = @documents.to_a.select { |document| @filtered_page_tags.pluck(:page_id).include?(document.id) }
+      # @documents = @documents.where(page_tags: { slug: params[:tag] })
     end
 
     @page_tags = @page_tags.uniq(&:tag)
