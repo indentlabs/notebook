@@ -28,9 +28,10 @@ class EndOfDayAnalyticsJob < ApplicationJob
     end
 
     # Documents
-    report.documents_created         = Document.where(created_at: timespan).count
-    report.documents_edited          = Document.where(updated_at: timespan).count
-    report.document_analyses_created = DocumentAnalysis.where(created_at: timespan, progress: 100).count
+    report.documents_created          = Document.where(created_at: timespan).count
+    report.documents_edited           = Document.where(updated_at: timespan).count
+    report.document_analyses_created  = DocumentAnalysis.where(created_at: timespan, progress: 100).count
+    report.document_revisions_created = DocumentRevision.where(created_at: timespan).count
 
     # Timelines
     report.timelines_created = Timeline.where(created_at: timespan).count

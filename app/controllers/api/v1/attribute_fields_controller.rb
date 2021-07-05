@@ -7,7 +7,7 @@ module Api
           category_label: params.fetch(:category,    '')
         ).where.not(suggestion: [nil, ""]).order('weight desc').limit(
           AttributeFieldSuggestion::SUGGESTIONS_RESULT_COUNT
-        ).pluck(:suggestion)
+        ).pluck(:suggestion).uniq
 
         if suggestions.empty?
           CacheMostUsedAttributeFieldsJob.perform_later(
