@@ -2,8 +2,9 @@ namespace :backfill do
   desc "Backfill cached word counts on all documents"
   task document_word_count_caches: :environment do
     Document.where(cached_word_count: nil).where.not(body: [nil, ""]).order('id DESC').find_each do |document|
-      document.update_column(cached_word_count: document.computed_word_count)
+      document.update_column(:cached_word_count, document.computed_word_count)
     end
+    puts "Done!"
   end
 
   desc "Start working through old categories/fields without position set"
