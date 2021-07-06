@@ -34,7 +34,7 @@ class DocumentsController < ApplicationController
 
     # TODO: all of this filtering code is repeated everywhere and would be nice to abstract out somewhere
     if params.key?(:favorite_only)
-      @documents.select!(&:favorite?)
+      @documents = @documents.where(favorite: true)
     end
 
     if @universe_scope
@@ -51,7 +51,8 @@ class DocumentsController < ApplicationController
 
     if params.key?(:tag)
       @filtered_page_tags = @page_tags.where(slug: params[:tag])
-      @documents.select! { |document| @filtered_page_tags.pluck(:page_id).include?(document.id) }
+      @documents = @documents.to_a.select { |document| @filtered_page_tags.pluck(:page_id).include?(document.id) }
+      # @documents = @documents.where(page_tags: { slug: params[:tag] })
     end
 
     @page_tags = @page_tags.uniq(&:tag)
@@ -322,5 +323,10 @@ class DocumentsController < ApplicationController
 
   def set_document
     @document = Document.find_by(id: params[:id])
+
+    unless @document
+      redirect_to root_path, notice: "Either that document doesn't exist or you don't have permission to view it!"
+      return
+    end
   end
 end

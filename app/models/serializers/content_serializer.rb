@@ -130,7 +130,11 @@ class ContentSerializer
         begin
           JSON.parse(page_links.value)
         rescue
-          "Error loading Attribute ID #{page_links.id}"
+          if page_links.value == ""
+            []
+          else
+            "Error loading Attribute ID #{page_links.id}"
+          end
         end
       end
 
