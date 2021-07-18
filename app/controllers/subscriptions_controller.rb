@@ -9,11 +9,6 @@ class SubscriptionsController < ApplicationController
   # General billing page
   def new
     @sidenav_expansion = 'my account'
-    
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed billing page', {
-      'current billing plan': current_user.selected_billing_plan_id,
-      'content count': current_user.content_count
-    }) if Rails.env.production?
 
     # We only support a single billing plan right now, so just grab the first one. If they don't have an active plan,
     # we also treat them as if they have a Starter plan.
@@ -137,11 +132,6 @@ class SubscriptionsController < ApplicationController
   def information
     @selected_plan = BillingPlan.find_by(stripe_plan_id: params['plan'], available: true)
     @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
-
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed payment method page', {
-      'current billing plan': current_user.selected_billing_plan_id,
-      'content count': current_user.content_count
-    }) if Rails.env.production?
   end
 
   # Save a payment method
@@ -205,7 +195,6 @@ class SubscriptionsController < ApplicationController
   end
 
   def stripe_webhook
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'stripe webhook') if Rails.env.production?
     #todo handle webhooks :(
   end
 

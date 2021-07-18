@@ -66,7 +66,6 @@ gem 'chartkick'
 gem 'd3-rails' # used for spider charts
 
 # Analytics
-gem 'mixpanel-ruby'
 gem 'slack-notifier'
 gem 'barnes'
 
