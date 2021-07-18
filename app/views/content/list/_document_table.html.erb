@@ -21,11 +21,11 @@
           </tr>
         </thead>
         <% content_list.each do |document| %>
-          <tr class="js-content-card-container hoverable modal-trigger" data-target="document-info-<%= document.id %>" style="cursor: pointer">
-            <td class="center">
+          <tr class="js-content-card-container hoverable" style="cursor: pointer">
+            <td class="center modal-trigger" data-target="document-info-<%= document.id %>">
                 <i class="material-icons medium <%= Document.color %>-text"><%= Document.icon %></i>
             </td>
-            <td>
+            <td class="modal-trigger" data-target="document-info-<%= document.id %>">
               <div>
                 <div>
                   <% if user_signed_in? && document.user == current_user %>
@@ -45,18 +45,14 @@
                     in <span class="<%= Folder.color %>-text"><%= document.folder.title %></span>
                   <% end %>
                 </div>
-                <div>
-                  <%= link_to document.user, class: "#{User.color}-text" do %>
-                    <i class="material-icons left"><%= User.icon %></i>
-                    by <%= document.user.display_name %>
-                  <% end %>
+                <div class="<%= User.color %>-text">
+                  <i class="material-icons left"><%= User.icon %></i>
+                  by <%= document.user.display_name %>
                 </div>
                 <% if document.universe %>
-                  <div class="clearfix">
-                    <%= link_to document.universe, class: "#{Universe.color}-text" do %>
-                      <i class="material-icons left"><%= Universe.icon %></i>
-                      in <%= document.universe.try(:name) || 'Unknown universe' %>
-                    <% end %>
+                  <div class="clearfix <%= Universe.color %>-text">
+                    <i class="material-icons left"><%= Universe.icon %></i>
+                    in <%= document.universe.try(:name) || 'Unknown universe' %>
                   </div>
                 <% end %>
                 <% if document.respond_to?(:page_tags) %>
@@ -64,15 +60,7 @@
                   <% if page_tags.any? %>
                     <p class="tags-container">
                       <% page_tags.each do |tag| %>
-                        <% if user_signed_in? && document.user == current_user %>
-                          <%=
-                            link_to params.permit(:tag).merge({ tag: PageTagService.slug_for(tag.tag) }), class: "#{Document.color}-text" do
-                          %>
-                            <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
-                          <% end %>
-                        <% else %>
-                          <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
-                        <% end %>
+                        <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
                       <% end %>
                     </p>
                   <% end %>
