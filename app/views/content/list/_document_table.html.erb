@@ -15,15 +15,16 @@
         <thead>
           <tr>
             <th></th>
-            <th>Title</th>
+            <th style="width: 60%">Title</th>
             <th>Length</th>
             <th>Last edited</th>
+            <th></th>
           </tr>
         </thead>
         <% content_list.each do |document| %>
           <tr class="js-content-card-container hoverable" style="cursor: pointer">
             <td class="center modal-trigger" data-target="document-info-<%= document.id %>">
-                <i class="material-icons medium <%= Document.color %>-text"><%= Document.icon %></i>
+              <i class="material-icons medium <%= Document.color %>-text"><%= Document.icon %></i>
             </td>
             <td class="modal-trigger" data-target="document-info-<%= document.id %>">
               <div>
@@ -67,7 +68,7 @@
                 <% end %>
               </div>
             </td>
-            <td>
+            <td class="modal-trigger" data-target="document-info-<%= document.id %>">
               <div>
                 <i class="material-icons tiny <%= Document.color %>-text" style="position: relative; top: 3px;">spellcheck</i>
                 <%= number_with_delimiter document.word_count %>
@@ -78,11 +79,15 @@
                 <%= document.reading_estimate %>
               </div>
             </td>
-            <td>
+            <td class="modal-trigger" data-target="document-info-<%= document.id %>">
               <span class="tooltipped" data-tooltip="Last edited at <%= document.updated_at.strftime("%m/%d/%Y %H:%M UTC") %>">
                 <%= document.updated_at == document.created_at ? 'created' : 'updated' %>
                 <%= time_ago_in_words document.updated_at %> ago
               </span>
+            </td>
+            <td>
+              <div><%= link_to 'View', document_path(document), class: 'btn btn-flat' %></div>
+              <div><%= link_to 'Edit', edit_document_path(document), class: 'btn btn-flat' %></div>
             </td>
           </tr>
         <% end %>
