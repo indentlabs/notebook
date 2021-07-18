@@ -63,7 +63,7 @@ gem 'medium-editor-rails'
 
 # Graphs & Charts
 gem 'chartkick'
-gem 'd3-rails'
+gem 'd3-rails' # used for spider charts
 
 # Analytics
 gem 'mixpanel-ruby'
