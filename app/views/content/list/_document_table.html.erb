@@ -159,6 +159,22 @@
                     <% end %>
                   <% end %>
 
+                  <h5>Universe</h5>
+                  <% if current_user.can_update?(document) %>
+                    <%= 
+                      f.select :universe_id,  @linkables_cache.fetch('Universe', []), 
+                        { include_blank: 'No universe' }, 
+                        { class: ' autosave-closest-form-on-change' }
+                    %>
+                  <% else %>
+                    <% if document.universe_id %>
+                      <%= link_to document.universe.name, document.universe, class: "#{Universe.color}-text" %>
+                    <% else %>
+                      Not in a universe
+                    <% end %>
+                  <% end %>
+
+
                   <h5>About</h5>
                   <ul>
                     <li>
