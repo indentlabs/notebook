@@ -63,7 +63,7 @@ gem 'medium-editor-rails'
 
 # Graphs & Charts
 gem 'chartkick'
-gem 'd3-rails'
+gem 'd3-rails' # used for spider charts
 
 # Analytics
 gem 'mixpanel-ruby'
@@ -73,10 +73,6 @@ gem 'barnes'
 # Apps
 #gem 'easy_translate'
 #gem 'levenshtein-ffi'
-
-# Feature rollout
-gem 'flipper'
-gem 'flipper-redis'
 
 # Forum
 gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
