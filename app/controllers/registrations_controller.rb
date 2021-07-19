@@ -84,7 +84,7 @@ class RegistrationsController < Devise::RegistrationsController
         # Create a notification letting the user know about each collaboration!
         potential_contributor_records.each do |contributorship|
           resource.notifications.create(
-            message_html:     "<div>You have been added as a contributor to the <span class='#{Universe.color}-text'>#{contributorship.universe.name}</span> universe.</div>",
+            message_html:     "<div>You have been added as a contributor to the <span class='#{Universe.text_color}'>#{contributorship.universe.name}</span> universe.</div>",
             icon:             Universe.icon,
             icon_color:       Universe.color,
             happened_at:      DateTime.current,

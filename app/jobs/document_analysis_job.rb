@@ -38,7 +38,7 @@ class DocumentAnalysisJob < ApplicationJob
 
     # Create a notification letting the user know!
     analysis.document.user.notifications.create(
-      message_html:     "<div>An analysis of <span class='#{Document.color}-text'>#{analysis.document.title}</span> is ready to view.</div>",
+      message_html:     "<div>An analysis of <span class='#{Document.text_color}'>#{analysis.document.title}</span> is ready to view.</div>",
       icon:             Document.icon,
       icon_color:       Document.color,
       happened_at:      DateTime.current,

@@ -85,7 +85,7 @@ class ContentFormatterService < Service
     content_tag(:span, class: 'chip') do
       body = ''
       if class_model
-        body += content_tag(:span, class: class_model ? "#{class_model.color}-text" : '') do
+        body += content_tag(:span, class: class_model ? "#{class_model.text_color}" : '') do
           # todo tooltip the class icon
           content_tag(:i, class: 'material-icons left', style: 'position: relative; top: 3px;') do
             class_model.icon
@@ -99,7 +99,7 @@ class ContentFormatterService < Service
 
   def self.inline_template(class_model=nil)
     content_tag(:span, class: 'inline-link') do
-      content_tag(:span, class: class_model ? "#{class_model.color}-text" : '') do
+      content_tag(:span, class: class_model ? "#{class_model.text_color}" : '') do
         yield
       end
     end

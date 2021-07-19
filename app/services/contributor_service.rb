@@ -21,7 +21,7 @@ class ContributorService < Service
 
       # Also, create a notification letting the user know!
       related_user.notifications.create(
-        message_html:     "<div>You have been added as a contributor to the <span class='#{Universe.color}-text'>#{universe.name}</span> universe.</div>",
+        message_html:     "<div>You have been added as a contributor to the <span class='#{Universe.text_color}'>#{universe.name}</span> universe.</div>",
         icon:             Universe.icon,
         icon_color:       Universe.color,
         happened_at:      DateTime.current,
