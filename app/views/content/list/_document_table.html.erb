@@ -24,7 +24,7 @@
         <% content_list.each do |document| %>
           <tr class="js-content-card-container hoverable" style="cursor: pointer">
             <td class="center modal-trigger" data-target="document-info-<%= document.id %>">
-              <i class="material-icons medium <%= Document.color %>-text"><%= Document.icon %></i>
+              <i class="material-icons medium <%= Document.text_color %>"><%= Document.icon %></i>
             </td>
             <td class="modal-trigger" data-target="document-info-<%= document.id %>">
               <div>
@@ -43,15 +43,15 @@
                     <%= document.title %>
                   </strong>
                   <% if document.folder_id %>
-                    in <span class="<%= Folder.color %>-text"><%= document.folder.title %></span>
+                    in <span class="<%= Folder.text_color %>"><%= document.folder.title %></span>
                   <% end %>
                 </div>
-                <div class="<%= User.color %>-text">
+                <div class="<%= User.text_color %>">
                   <i class="material-icons left"><%= User.icon %></i>
                   by <%= document.user.display_name %>
                 </div>
                 <% if document.universe %>
-                  <div class="clearfix <%= Universe.color %>-text">
+                  <div class="clearfix <%= Universe.text_color %>">
                     <i class="material-icons left"><%= Universe.icon %></i>
                     in <%= document.universe.try(:name) || 'Unknown universe' %>
                   </div>
@@ -70,12 +70,12 @@
             </td>
             <td class="modal-trigger" data-target="document-info-<%= document.id %>">
               <div>
-                <i class="material-icons tiny <%= Document.color %>-text" style="position: relative; top: 3px;">spellcheck</i>
+                <i class="material-icons tiny <%= Document.text_color %>" style="position: relative; top: 3px;">spellcheck</i>
                 <%= number_with_delimiter document.word_count %>
                 <%= 'word'.pluralize(document.word_count) %>
               </div>
               <div>
-                <i class="material-icons tiny <%= Document.color %>-text" style="position: relative; top: 3px;">timer</i>
+                <i class="material-icons tiny <%= Document.text_color %>" style="position: relative; top: 3px;">timer</i>
                 <%= document.reading_estimate %>
               </div>
             </td>
@@ -97,7 +97,7 @@
       <% content_list.each do |document| %>
         <div id="document-info-<%= document.id %>" class="modal modal-fixed-footer">
           <div class="modal-content">
-            <h4 class="<%= Document.color %>-text">
+            <h4 class="<%= Document.text_color %>">
               <i class="material-icons left large"><%= Document.icon %></i>
               <%= document.title %>
 
@@ -140,7 +140,7 @@
               <%= form_for document, remote: true do |f| %>
                 <div class="col s12 m12 l4">
                   <h5>
-                    <i class="material-icons left <%= Folder.color %>-text"><%= Folder.icon %></i>
+                    <i class="material-icons left <%= Folder.text_color %>"><%= Folder.icon %></i>
                     Folder
                   </h5>
                   <% if current_user.can_update?(document) %>
@@ -163,7 +163,7 @@
                   <% end %>
 
                   <h5>
-                    <i class="material-icons left <%= Universe.color %>-text"><%= Universe.icon %></i>
+                    <i class="material-icons left <%= Universe.text_color %>"><%= Universe.icon %></i>
                     Universe
                   </h5>
                   <% if current_user.can_update?(document) %>
@@ -181,7 +181,7 @@
                   <% end %>
 
                   <h5>
-                    <i class="material-icons left <%= Document.color %>-text">info</i>
+                    <i class="material-icons left <%= Document.text_color %>">info</i>
                     About
                   </h5>
                   <ul>
@@ -223,7 +223,7 @@
                   <% if current_user.can_update?(document) %>
                     <div class="content-field">
                       <h5>
-                        <i class="material-icons left <%= Document.color %>-text">info</i>
+                        <i class="material-icons left <%= Document.text_color %>">info</i>
                         Document synopsis
                       </h5>
                       <div class="input-field">
@@ -234,7 +234,7 @@
 
                     <div class="content-field">
                       <h5>
-                        <i class="material-icons left <%= Document.color %>-text">info</i>
+                        <i class="material-icons left <%= Document.text_color %>">info</i>
                         Document notes
                       </h5>
                       <div class="input-field">
@@ -244,7 +244,7 @@
                     </div>
 
                     <h5>
-                      <i class="material-icons left <%= Document.color %>-text"><%= PageTag.icon %></i>
+                      <i class="material-icons left <%= Document.text_color %>"><%= PageTag.icon %></i>
                       Document tags
                     </h5>
                     <div class="content-field tags">
@@ -373,13 +373,13 @@
           <div class="card-title">Statistics</div>
           <ul>
             <li>
-              <i class="material-icons <%= Document.color %>-text left"><%= Document.icon %></i>
+              <i class="material-icons <%= Document.text_color %> left"><%= Document.icon %></i>
               <strong><%= number_with_delimiter content_list.count %></strong>
               <%= 'document'.pluralize(content_list.count) %>
             </li>
             <li class="clearfix">
               <% total_word_count = content_list.sum { |doc| doc.cached_word_count || 0 } %>
-              <i class="material-icons <%= Document.color %>-text left">spellcheck</i>
+              <i class="material-icons <%= Document.text_color %> left">spellcheck</i>
               totalling
               <strong><%= number_with_delimiter total_word_count %></strong>
               <%= 'word'.pluralize(total_word_count) %>
@@ -457,7 +457,7 @@
           yet!
         </h4>
         <h1>
-          <i class="material-icons <%= Document.color %>-text" style="font-size: 200%">
+          <i class="material-icons <%= Document.text_color %>" style="font-size: 200%">
             <%= Document.icon %>
           </i>
         </h1>
