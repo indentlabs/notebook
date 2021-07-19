@@ -85,7 +85,7 @@ namespace :data_migrations do
             attribute_category_id: categories_for_this_page_type_and_user,
             user_id:               referencing_page.user_id,
             field_type:            'link',
-            old_column_source:     link.name == Deityship.name ? 'deity_characters' : relation_params[:through_relation].pluralize
+            old_column_source:     link.class.name == Deityship.name ? 'deity_characters' : relation_params[:through_relation].pluralize
           )
 
           if attribute_field.count > 1
