@@ -17,6 +17,10 @@ class Condition < ActiveRecord::Base
     'text-darken-1 lime'
   end
 
+  def self.text_color
+    'text-darken-1 lime-text'
+  end
+
   def self.hex_color
     '#CDDC39'
   end

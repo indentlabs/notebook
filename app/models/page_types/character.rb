@@ -52,6 +52,10 @@ class Character < ApplicationRecord
     'red'
   end
 
+  def self.text_color
+    'red-text'
+  end
+
   def self.hex_color
     '#F44336'
   end

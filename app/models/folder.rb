@@ -10,6 +10,10 @@ class Folder < ApplicationRecord
     'lighten-1 teal'
   end
 
+  def self.text_color
+    'text-lighten-1 teal-text'
+  end
+
   def self.icon
     'folder'
   end

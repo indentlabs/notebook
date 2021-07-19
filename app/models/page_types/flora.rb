@@ -32,6 +32,10 @@ class Flora < ApplicationRecord
     'text-lighten-2 lighten-2 teal'
   end
 
+  def self.text_color
+    'text-lighten-2 teal-text'
+  end
+
   def self.hex_color
     '#4DB6AC'
   end

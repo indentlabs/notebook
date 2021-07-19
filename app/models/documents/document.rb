@@ -32,8 +32,16 @@ class Document < ApplicationRecord
     'teal'
   end
 
+  def self.text_color
+    'teal-text'
+  end
+
   def color
     Document.color
+  end
+
+  def text_color
+    Document.text_color
   end
 
   def self.hex_color

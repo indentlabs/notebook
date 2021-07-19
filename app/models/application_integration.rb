@@ -14,6 +14,10 @@ class ApplicationIntegration < ApplicationRecord
     'orange'
   end
 
+  def self.text_color
+    'orange-text'
+  end
+
   def generate_new_access_token!
     self.update(application_token: SecureRandom.hex(24))
   end

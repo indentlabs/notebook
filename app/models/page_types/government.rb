@@ -27,6 +27,10 @@ class Government < ApplicationRecord
     'darken-2 green'
   end
 
+  def self.text_color
+    'green-text'
+  end
+
   def self.hex_color
     '#388E3C'
   end

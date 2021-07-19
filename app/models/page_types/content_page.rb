@@ -13,4 +13,8 @@ class ContentPage < ApplicationRecord
   def color
     self.page_type.constantize.color
   end
+
+  def text_color
+    self.page_type.constantize.text_color
+  end
 end
