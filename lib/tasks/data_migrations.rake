@@ -115,6 +115,7 @@ namespace :data_migrations do
             entity_type:        referencing_page_type,
             entity_id:          referencing_page.id
           )
+          puts "Migrating attribute ID #{attribute.id}"
           if attribute.value.nil?
             attribute.value = JSON.parse('["' + referenced_page_type + '-' + referenced_page.id.to_s + '"]')
           else
