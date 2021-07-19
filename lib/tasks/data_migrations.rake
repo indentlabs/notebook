@@ -58,7 +58,7 @@ namespace :data_migrations do
           referencing_page = nil
           referenced_page  = nil
 
-          if link.name == Deityship.name
+          if link.class.name == Deityship.name
             referencing_page = link.send(referencing_page_type.downcase)
             referenced_page  = link.send(:deity_character)
 
