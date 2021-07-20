@@ -35,7 +35,7 @@ class Timeline < ApplicationRecord
   end
 
   def text_color
-    Timeline.color
+    Timeline.text_color
   end
 
   def self.hex_color
