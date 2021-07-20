@@ -139,6 +139,7 @@ Rails.application.routes.draw do
       get '/uploads',       to: 'data#uploads'
       get '/discussions',   to: 'data#discussions'
       get '/collaboration', to: 'data#collaboration'
+      get '/green',         to: 'data#green'
       scope 'yearly' do
         get '/',      to: 'data#yearly_index',   as: :year_in_review
         get '/:year', to: 'data#review_year',    as: :review_year
