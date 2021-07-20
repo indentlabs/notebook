@@ -1,7 +1,7 @@
 class GreenService < Service
   AVERAGE_WORDS_PER_PAGE           = 500
   AVERAGE_TIMELINE_EVENTS_PER_PAGE = 3
-  SHEETS_OF_PAPER_PER_TREE         = 10_000 # source: https://ribble-pack.co.uk/blog/much-paper-comes-one-tree
+  SHEETS_OF_PAPER_PER_TREE         = 11_000 # source: https://ribble-pack.co.uk/blog/much-paper-comes-one-tree
 
   def self.physical_pages_equivalent_for(worldbuilding_page_type)
     # TODO: This would be better estimated with [average] word counts from pages (or a real total),
