@@ -34,6 +34,10 @@ class Timeline < ApplicationRecord
     Timeline.color
   end
 
+  def text_color
+    Timeline.color
+  end
+
   def self.hex_color
     '#4CAF50'
   end
