@@ -78,12 +78,12 @@
   <div class="card-reveal">
     <span class="card-title">
       <% if content_list.any? %>
-        <i class="material-icons <%= content_type_class.color %>-text" style="position: relative; top: 3px">
+        <i class="material-icons <%= content_type_class.text_color %>" style="position: relative; top: 3px">
           <%= content_type_class.icon %>
         </i>
       <% end %>
       <% if defined?(@content) && @content.is_a?(Universe) && content_type != :universe && content_type.to_s.downcase != 'universe' %>
-        <%= link_to content_type_pluralized.titleize, send("#{content_type_pluralized}_universe_path", { id: @content.id }), class: "#{content_type_class.color}-text" %>
+        <%= link_to content_type_pluralized.titleize, send("#{content_type_pluralized}_universe_path", { id: @content.id }), class: "#{content_type_class.text_color}" %>
       <% else %>
         <%= content_type_pluralized.titleize %>
       <% end %>
@@ -100,7 +100,7 @@
         <tr>
           <td>
             <%= link_to polymorphic_path(content.page_type.downcase, id: content.id) do %>
-              <i class="material-icons left <%= content_type_class.color %>-text"><%= content_type_class.icon %></i>
+              <i class="material-icons left <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
               <%= list_name_lookup_cache[content.id].presence || content.name.presence || "Untitled #{content.page_type}" %>
             <% end %>
           </td>
@@ -128,7 +128,7 @@
     <% elsif content_list.empty? %>
       <div class="row">
         <div class="col s4">
-          <h1><i class="material-icons <%= content_type_class.color %>-text text-lighten-2" style="font-size: 150%">
+          <h1><i class="material-icons <%= content_type_class.text_color %> text-lighten-2" style="font-size: 150%">
             <%= content_type_class.icon %>
           </i></h1>
         </div>

@@ -8,12 +8,12 @@
     <% @recently_edited_pages.each do |content| %>
       <% content_class = content.is_a?(ContentPage) ? content_class_from_name(content.page_type) : content.class %>
       <li>
-        <%= link_to main_app.polymorphic_path(content_class), class: "#{content_class.color}-text tooltipped",
+        <%= link_to main_app.polymorphic_path(content_class), class: "#{content_class.text_color} tooltipped",
           data: {
             position: 'left',
             tooltip: "#{content_class.name} updated #{time_ago_in_words content.updated_at} ago"
           } do %>
-          <i class="material-icons left <%= content_class.color %>-text"><%= content_class.icon %></i>
+          <i class="material-icons left <%= content_class.text_color %>"><%= content_class.icon %></i>
           <%= truncate(content.name, length: 36) %>
         <% end %>
       </li>

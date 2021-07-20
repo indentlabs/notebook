@@ -36,6 +36,10 @@ class Creature < ApplicationRecord
     'brown'
   end
 
+  def self.text_color
+    'brown-text'
+  end
+
   def self.hex_color
     '#795548'
   end

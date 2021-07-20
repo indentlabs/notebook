@@ -34,6 +34,10 @@ class Planet < ApplicationRecord
     'text-lighten-2 blue'
   end
 
+  def self.text_color
+    'text-lighten-2 blue-text'
+  end
+
   def self.hex_color
     '#64B5F6'
   end

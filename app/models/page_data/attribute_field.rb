@@ -31,6 +31,10 @@ class AttributeField < ApplicationRecord
     'amber'
   end
 
+  def self.text_color
+    'amber-text'
+  end
+
   def self.icon
     'text_fields'
   end

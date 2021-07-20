@@ -13,7 +13,7 @@ class ContentPageShareNotificationJob < ApplicationJob
       next if comment.user == following.user
 
       following.user.notifications.create(
-        message_html:     "<div><span class='#{User.color}-text'>#{comment.user.display_name}</span> commented on #{comment.user == comment.content_page_share.content_page.user ? 'the' : 'your'} shared #{comment.content_page_share.content_page.class.name.downcase} <span class='#{comment.content_page_share.content_page.class.color}-text'>#{comment.content_page_share.content_page.name}</span>.</div>",
+        message_html:     "<div><span class='#{User.text_color}'>#{comment.user.display_name}</span> commented on #{comment.user == comment.content_page_share.content_page.user ? 'the' : 'your'} shared #{comment.content_page_share.content_page.class.name.downcase} <span class='#{comment.content_page_share.content_page.class.text_color}'>#{comment.content_page_share.content_page.name}</span>.</div>",
         icon:             comment.content_page_share.content_page.class.icon,
         icon_color:       comment.content_page_share.content_page.class.color,
         happened_at:      DateTime.current,

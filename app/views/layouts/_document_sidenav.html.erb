@@ -11,7 +11,7 @@
     <ul class="collapsible collapsible-accordion">
       <li>
         <%= link_to main_app.documents_path, class: 'waves-effect' do %>
-          <i class="material-icons <%= Document.color %>-text">
+          <i class="material-icons <%= Document.text_color %>">
             file_copy
           </i>
           View all documents
@@ -22,7 +22,7 @@
       </li>
       <li>
         <%= link_to main_app.new_document_path, class: 'waves-effect' do %>
-          <i class="material-icons <%= Document.color %>-text">
+          <i class="material-icons <%= Document.text_color %>">
             note_add
           </i>
           New document
@@ -42,14 +42,14 @@
             <ul>
               <li>
                 <%= link_to folder, class: 'waves-effect' do %>
-                  <i class="material-icons left <%= Folder.color %>-text"><%= Folder.icon %></i>
+                  <i class="material-icons left <%= Folder.text_color %>"><%= Folder.icon %></i>
                   <%= folder.title %>
                 <% end %>
               </li>
               <% Document.where(folder_id: folder.id).where.not(id: @document.id).order('updated_at DESC').each do |document| %>
                 <li>
                   <%= link_to edit_document_path(document), class: 'waves-effect tooltipped', data: { tooltip: "Last edited #{time_ago_in_words document.updated_at} ago", position: 'right' } do %>
-                    <i class="material-icons <%= Document.color %>-text">
+                    <i class="material-icons <%= Document.text_color %>">
                       <%= Document.icon %>
                     </i>
                     <%= document.title %>
@@ -75,7 +75,7 @@
               <% other_folders.each do |folder| %>
                 <li>
                   <%= link_to folder, class: 'waves-effect' do %>
-                    <i class="material-icons <%= Folder.color %>-text"><%= Folder.icon %></i>
+                    <i class="material-icons <%= Folder.text_color %>"><%= Folder.icon %></i>
                     <%= folder.title %>
                   <% end %>
                 </li>
@@ -95,7 +95,7 @@
             <% @current_user_content['Document'].each do |document| %>
               <li>
                 <%= link_to edit_document_path(document), class: 'waves-effect tooltipped', data: { tooltip: "Last edited #{time_ago_in_words document.updated_at} ago", position: 'right' } do %>
-                  <i class="material-icons <%= Document.color %>-text">
+                  <i class="material-icons <%= Document.text_color %>">
                     <%= Document.icon %>
                   </i>
                   <%= document.title %>

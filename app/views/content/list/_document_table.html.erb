@@ -11,21 +11,22 @@
 <% if content_list.any? %>
   <div class="row">
     <div class="col s12 m12 l9">
-      <table class="z-depth-1 js-content-cards-list">
+      <table class="z-depth-1 js-content-cards-list document-list-table">
         <thead>
           <tr>
             <th></th>
-            <th>Title</th>
+            <th style="width: 60%">Title</th>
             <th>Length</th>
             <th>Last edited</th>
+            <th></th>
           </tr>
         </thead>
         <% content_list.each do |document| %>
-          <tr class="js-content-card-container hoverable modal-trigger" data-target="document-info-<%= document.id %>" style="cursor: pointer">
-            <td class="center">
-                <i class="material-icons medium <%= Document.color %>-text"><%= Document.icon %></i>
+          <tr class="js-content-card-container hoverable" style="cursor: pointer">
+            <td class="center modal-trigger" data-target="document-info-<%= document.id %>">
+              <i class="material-icons medium <%= Document.text_color %>"><%= Document.icon %></i>
             </td>
-            <td>
+            <td class="modal-trigger" data-target="document-info-<%= document.id %>">
               <div>
                 <div>
                   <% if user_signed_in? && document.user == current_user %>
@@ -42,21 +43,17 @@
                     <%= document.title %>
                   </strong>
                   <% if document.folder_id %>
-                    in <span class="<%= Folder.color %>-text"><%= document.folder.title %></span>
+                    in <span class="<%= Folder.text_color %>"><%= document.folder.title %></span>
                   <% end %>
                 </div>
-                <div>
-                  <%= link_to document.user, class: "#{User.color}-text" do %>
-                    <i class="material-icons left"><%= User.icon %></i>
-                    by <%= document.user.display_name %>
-                  <% end %>
+                <div class="<%= User.text_color %>">
+                  <i class="material-icons left"><%= User.icon %></i>
+                  by <%= document.user.display_name %>
                 </div>
                 <% if document.universe %>
-                  <div class="clearfix">
-                    <%= link_to document.universe, class: "#{Universe.color}-text" do %>
-                      <i class="material-icons left"><%= Universe.icon %></i>
-                      in <%= document.universe.try(:name) || 'Unknown universe' %>
-                    <% end %>
+                  <div class="clearfix <%= Universe.text_color %>">
+                    <i class="material-icons left"><%= Universe.icon %></i>
+                    in <%= document.universe.try(:name) || 'Unknown universe' %>
                   </div>
                 <% end %>
                 <% if document.respond_to?(:page_tags) %>
@@ -64,37 +61,33 @@
                   <% if page_tags.any? %>
                     <p class="tags-container">
                       <% page_tags.each do |tag| %>
-                        <% if user_signed_in? && document.user == current_user %>
-                          <%=
-                            link_to params.permit(:tag).merge({ tag: PageTagService.slug_for(tag.tag) }), class: "#{Document.color}-text" do
-                          %>
-                            <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
-                          <% end %>
-                        <% else %>
-                          <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
-                        <% end %>
+                        <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : Document.color %> left" data-badge-caption="<%= tag.tag %>"></span>
                       <% end %>
                     </p>
                   <% end %>
                 <% end %>
               </div>
             </td>
-            <td>
+            <td class="modal-trigger" data-target="document-info-<%= document.id %>">
               <div>
-                <i class="material-icons tiny <%= Document.color %>-text" style="position: relative; top: 3px;">spellcheck</i>
+                <i class="material-icons tiny <%= Document.text_color %>" style="position: relative; top: 3px;">spellcheck</i>
                 <%= number_with_delimiter document.word_count %>
                 <%= 'word'.pluralize(document.word_count) %>
               </div>
               <div>
-                <i class="material-icons tiny <%= Document.color %>-text" style="position: relative; top: 3px;">timer</i>
+                <i class="material-icons tiny <%= Document.text_color %>" style="position: relative; top: 3px;">timer</i>
                 <%= document.reading_estimate %>
               </div>
             </td>
-            <td>
+            <td class="modal-trigger" data-target="document-info-<%= document.id %>">
               <span class="tooltipped" data-tooltip="Last edited at <%= document.updated_at.strftime("%m/%d/%Y %H:%M UTC") %>">
-                <%= document.updated_at == document.created_at ? 'created' : 'updated' %>
+                <%# document.updated_at == document.created_at ? 'created' : 'updated' %>
                 <%= time_ago_in_words document.updated_at %> ago
               </span>
+            </td>
+            <td>
+              <div><%= link_to 'View', document_path(document), class: "btn btn-flat blue-text" %></div>
+              <div><%= link_to 'Edit', edit_document_path(document), class: "btn btn-flat green-text", target: '_new' %></div>
             </td>
           </tr>
         <% end %>
@@ -104,7 +97,7 @@
       <% content_list.each do |document| %>
         <div id="document-info-<%= document.id %>" class="modal modal-fixed-footer">
           <div class="modal-content">
-            <h4 class="<%= Document.color %>-text">
+            <h4 class="<%= Document.text_color %>">
               <i class="material-icons left large"><%= Document.icon %></i>
               <%= document.title %>
 
@@ -129,14 +122,14 @@
             </h4>
             <div class="left">
               <div>
-                <%= link_to document.user, class: "#{User.color}-text" do %>
+                <%= link_to document.user, class: "#{User.text_color}" do %>
                   <i class="material-icons left"><%= User.icon %></i>
                   by <%= document.user.display_name %>
                 <% end %>
               </div>
               <% if document.universe %>
                 <div class="clearfix">
-                  <%= link_to document.universe, class: "#{Universe.color}-text" do %>
+                  <%= link_to document.universe, class: "#{Universe.text_color}" do %>
                     <i class="material-icons left"><%= Universe.icon %></i>
                     in <%= document.universe.try(:name) || 'Unknown universe' %>
                   <% end %>
@@ -146,7 +139,10 @@
             <div class="clearfix row">
               <%= form_for document, remote: true do |f| %>
                 <div class="col s12 m12 l4">
-                  <h5>Folder</h5>
+                  <h5>
+                    <i class="material-icons left <%= Folder.text_color %>"><%= Folder.icon %></i>
+                    Folder
+                  </h5>
                   <% if current_user.can_update?(document) %>
                     <%= 
                       f.select :folder_id, folders, 
@@ -160,13 +156,34 @@
                     </style>
                   <% else %>
                     <% if document.folder_id %>
-                      <%= link_to document.folder.title, document.folder, class: "#{Folder.color}-text" %>
+                      <%= link_to document.folder.title, document.folder, class: "#{Folder.text_color}" %>
                     <% else %>
                       Not in a folder
                     <% end %>
                   <% end %>
 
-                  <h5>About</h5>
+                  <h5>
+                    <i class="material-icons left <%= Universe.text_color %>"><%= Universe.icon %></i>
+                    Universe
+                  </h5>
+                  <% if current_user.can_update?(document) %>
+                    <%= 
+                      f.select :universe_id,  @linkables_cache.fetch('Universe', []), 
+                        { include_blank: 'No universe' }, 
+                        { class: ' autosave-closest-form-on-change' }
+                    %>
+                  <% else %>
+                    <% if document.universe_id %>
+                      <%= link_to document.universe.name, document.universe, class: "#{Universe.text_color}" %>
+                    <% else %>
+                      Not in a universe
+                    <% end %>
+                  <% end %>
+
+                  <h5>
+                    <i class="material-icons left <%= Document.text_color %>">info</i>
+                    About
+                  </h5>
                   <ul>
                     <li>
                       <i class="material-icons tiny" style="position: relative; top: 3px;">text_snippet</i>
@@ -205,7 +222,10 @@
                 <div class="col s12 m12 l8" style="padding-right: 1em;">
                   <% if current_user.can_update?(document) %>
                     <div class="content-field">
-                      <h5>Document synopsis</h5>
+                      <h5>
+                        <i class="material-icons left <%= Document.text_color %>">info</i>
+                        Document synopsis
+                      </h5>
                       <div class="input-field">
                         <%= f.text_area :synopsis, class: 'materialize-textarea autosave-closest-form-on-change', placeholder: 'What happens in this document?' %>
                         <span class="helper-text">Changes will automatically save.</span>
@@ -213,77 +233,83 @@
                     </div>
 
                     <div class="content-field">
-                      <h5>Document notes</h5>
+                      <h5>
+                        <i class="material-icons left <%= Document.text_color %>">info</i>
+                        Document notes
+                      </h5>
                       <div class="input-field">
                         <%= f.text_area :notes_text, class: 'materialize-textarea autosave-closest-form-on-change', placeholder: "Write as little or as much as you'd like!" %>
                         <span class="helper-text">Changes will automatically save. These notes will be available while writing.</span>
                       </div>
                     </div>
 
-                    <h5>Document tags</h5>
-                      <div class="content-field tags">
-                        <div class="input-field">
-                          <div class="chips chips-autocomplete chips-initial" id="chips-for-<%= document.id %>"></div>
-                          <%= 
-                            hidden_field_tag 'field[value]', 
-                              document.page_tags.join(PageTag::SUBMISSION_DELIMITER), 
-                              class: 'hidden_page_tags_value'
-                          %>
+                    <h5>
+                      <i class="material-icons left <%= Document.text_color %>"><%= PageTag.icon %></i>
+                      Document tags
+                    </h5>
+                    <div class="content-field tags">
+                      <div class="input-field">
+                        <div class="chips chips-autocomplete chips-initial" id="chips-for-<%= document.id %>"></div>
+                        <%= 
+                          hidden_field_tag 'field[value]', 
+                            document.page_tags.join(PageTag::SUBMISSION_DELIMITER), 
+                            class: 'hidden_page_tags_value'
+                        %>
 
-                          <div class="help-text show-when-focused">
-                            <i class="material-icons tiny">label</i>
-                            Type and press enter to create a new tag, or click any of the suggested tags below to add it.
-                          </div>
-                          <% if @suggested_page_tags %>
-                            <div class="tags-container show-when-focused">
-                              <% @suggested_page_tags.each do |tag| %>
-                                <%=
-                                  link_to '#', class: 'js-add-tag' do
-                                %>
-                                  <span class="new badge grey left hoverable" data-badge-caption="<%= tag %>"></span>
-                                <% end %>
-                              <% end %>
-                            </div>
-                          <% end %>
-                          <div class="clearfix"></div>
+                        <div class="help-text show-when-focused">
+                          <i class="material-icons tiny"><%= PageTag.icon %></i>
+                          Type and press enter to create a new tag, or click any of the suggested tags below to add it.
                         </div>
-                      </div>
-                      <%= content_for :javascript do %>
-                        function update_hidden_page_tag_value(e) {
-                          var chips = M.Chips.getInstance($(e).parent().find('.chips')).chipsData.map(function (c) {
-                            return c['tag'];
-                          });
-
-                          var hidden_input = $(e).parent().find('.hidden_page_tags_value');
-                          hidden_input.val(chips.join('<%= PageTag::SUBMISSION_DELIMITER %>'));
-
-                          // Trigger autosave manually
-                          hidden_input.closest('form').submit();
-
-                          M.toast({ html: "Saving changes..." });
-                        }
-
-                        var chips = $('#chips-for-<%= document.id %>').chips({
-                          placeholder: 'Add tags',
-                          secondaryPlaceholder: '+ Tag',
-                          autocompleteOptions: {
-                            data: {
-                              <% tags.pluck(:tag).each do |tag| %>
-                                '<%= tag %>': null,
+                        <% if @suggested_page_tags %>
+                          <div class="tags-container show-when-focused">
+                            <% @suggested_page_tags.each do |tag| %>
+                              <%=
+                                link_to '#', class: 'js-add-tag' do
+                              %>
+                                <span class="new badge grey left hoverable" data-badge-caption="<%= tag %>"></span>
                               <% end %>
-                            },
-                            limit: 100,
-                            minLength: 1
-                          },
-                          data: [
-                            <% document.page_tags.pluck(:tag).each do |tag| %>
-                              {tag: '<%= tag %>'},
                             <% end %>
-                          ],
-                          onChipAdd:    update_hidden_page_tag_value,
-                          onChipDelete: update_hidden_page_tag_value
+                          </div>
+                        <% end %>
+                        <div class="clearfix"></div>
+                      </div>
+                    </div>
+                    <%= content_for :javascript do %>
+                      function update_hidden_page_tag_value(e) {
+                        var chips = M.Chips.getInstance($(e).parent().find('.chips')).chipsData.map(function (c) {
+                          return c['tag'];
                         });
-                      <% end %>
+
+                        var hidden_input = $(e).parent().find('.hidden_page_tags_value');
+                        hidden_input.val(chips.join('<%= PageTag::SUBMISSION_DELIMITER %>'));
+
+                        // Trigger autosave manually
+                        hidden_input.closest('form').submit();
+
+                        M.toast({ html: "Saving changes..." });
+                      }
+
+                      var chips = $('#chips-for-<%= document.id %>').chips({
+                        placeholder: 'Add tags',
+                        secondaryPlaceholder: '+ Tag',
+                        autocompleteOptions: {
+                          data: {
+                            <% tags.pluck(:tag).each do |tag| %>
+                              '<%= tag %>': null,
+                            <% end %>
+                          },
+                          limit: 100,
+                          minLength: 1
+                        },
+                        data: [
+                          <% document.page_tags.pluck(:tag).each do |tag| %>
+                            {tag: '<%= tag %>'},
+                          <% end %>
+                        ],
+                        onChipAdd:    update_hidden_page_tag_value,
+                        onChipDelete: update_hidden_page_tag_value
+                      });
+                    <% end %>
                   <% else %>
                     <h5>Document synopsis</h5>
                     <% if document.synopsis %>
@@ -347,13 +373,13 @@
           <div class="card-title">Statistics</div>
           <ul>
             <li>
-              <i class="material-icons <%= Document.color %>-text left"><%= Document.icon %></i>
+              <i class="material-icons <%= Document.text_color %> left"><%= Document.icon %></i>
               <strong><%= number_with_delimiter content_list.count %></strong>
               <%= 'document'.pluralize(content_list.count) %>
             </li>
             <li class="clearfix">
               <% total_word_count = content_list.sum { |doc| doc.cached_word_count || 0 } %>
-              <i class="material-icons <%= Document.color %>-text left">spellcheck</i>
+              <i class="material-icons <%= Document.text_color %> left">spellcheck</i>
               totalling
               <strong><%= number_with_delimiter total_word_count %></strong>
               <%= 'word'.pluralize(total_word_count) %>
@@ -431,7 +457,7 @@
           yet!
         </h4>
         <h1>
-          <i class="material-icons <%= Document.color %>-text" style="font-size: 200%">
+          <i class="material-icons <%= Document.text_color %>" style="font-size: 200%">
             <%= Document.icon %>
           </i>
         </h1>
@@ -445,3 +471,14 @@
   </div>
 
 <% end %>
+
+
+<style type="text/css">
+.document-list-table {
+  background: white;
+}
+
+body.dark .document-list-table {
+  background: #4D4D4F;
+}
+</style>
