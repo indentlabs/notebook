@@ -19,6 +19,10 @@ module Extensions
         def self.color
           'blue'
         end
+
+        def self.text_color
+          'blue-text'
+        end
       end
 
       def create_content_page_share
