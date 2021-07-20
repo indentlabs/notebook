@@ -40,6 +40,9 @@ class FoldersController < ApplicationController
       .includes([:user, :page_tags, :universe])
       .order('documents.favorite DESC, documents.title ASC, documents.updated_at DESC')
 
+    # TODO: can we reuse this content to skip a few queries in this controller action?
+    cache_linkable_content_for_each_content_type
+
     if @universe_scope
       @content = @content.where(universe: @universe_scope)
     end
