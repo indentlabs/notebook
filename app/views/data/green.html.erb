@@ -78,7 +78,7 @@
               <td>
                 <strong>
                   <i class="material-icons left grey-text">copy_all</i>
-                  <%= number_with_delimiter total_pages_equivalent %>
+                  <%= number_with_delimiter total_pages_equivalent.round %>
                   <%= 'page'.pluralize total_pages_equivalent %>
                 </strong>
               </td>
@@ -171,8 +171,9 @@
               <td>
                 <strong>
                   <i class="material-icons left green-text">park</i>
-                  <%= pluralize total_pages_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE.round(5), 'tree' %>
-                  saved
+                  <% trees_saved = total_pages_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE %>
+                  <%= number_with_delimiter trees_saved.round(5) %>
+                  <%= 'tree'.pluralize trees_saved %>
                 </strong>
               </td>
             </tr>
