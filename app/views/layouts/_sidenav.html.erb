@@ -4,7 +4,7 @@
       <i class="material-icons white-text right">
         dashboard
       </i>
-      Notebook.ai
+      <span translate="no">Notebook.ai</span>
     <% end %>
   </li>
   <li class="no-padding">
@@ -20,7 +20,7 @@
             <% ((@current_user_content['Universe'] || []) + current_user.contributable_universes).sort_by(&:name).each do |universe| %>
               <li>
                 <%= link_to "?universe=#{universe.id}", class: 'waves-effect' do %>
-                  <i class="material-icons <%= Universe.color %>-text">
+                  <i class="material-icons <%= Universe.text_color %>">
                     <%= Universe.icon %>
                   </i>
                   <span class="white-text">
@@ -32,7 +32,7 @@
             <li class="divider blue"></li>
               <li class="blue lighten-2">
                 <%= link_to "?universe=all", class: 'waves-effect white-text' do %>
-                  <i class="material-icons <%= Universe.color %>-text">
+                  <i class="material-icons <%= Universe.text_color %>">
                     <%= Universe.icon %>
                   </i>
                    All universes
@@ -58,7 +58,7 @@
                   https://materializecss.com/waves.html#!
                 %>
                 <%= link_to main_app.polymorphic_path(content_type_klass), class: "waves-effect waves-#{content_type_klass.color.split(' ').last}" do %>
-                  <i class="material-icons <%= content_type_klass.color %>-text">
+                  <i class="material-icons <%= content_type_klass.text_color %>">
                     <%= content_type_klass.icon %>
                   </i>
                   <%= content_type.pluralize %>
@@ -99,7 +99,7 @@
           <ul>
             <li>
               <%= link_to main_app.documents_path, class: 'waves-effect' do %>
-                <i class="material-icons <%= Document.color %>-text">
+                <i class="material-icons <%= Document.text_color %>">
                   <%= Document.icon %>
                 </i>
                 Documents
@@ -110,7 +110,7 @@
             </li>
             <li>
               <%= link_to main_app.timelines_path, class: 'waves-effect' do %>
-                <i class="material-icons left <%= Timeline.color %>-text"><%= Timeline.icon %></i>
+                <i class="material-icons left <%= Timeline.text_color %>"><%= Timeline.icon %></i>
                 Timelines
                 <span class="badge">
                   <%= @current_user_content.fetch('Timeline', []).count %>
@@ -136,7 +136,7 @@
             <ul>
               <li>
                 <%= link_to main_app.stream_path, class: 'waves-effect' do %>
-                  <i class="material-icons left <%= ContentPageShare.color %>-text"><%= ContentPageShare.icon %></i>
+                  <i class="material-icons left <%= ContentPageShare.text_color %>"><%= ContentPageShare.icon %></i>
                   Stream
                 <% end %>
               </li>
@@ -150,7 +150,7 @@
               -->
               <li>
                 <%= link_to main_app.page_collections_path, class: 'waves-effect' do %>
-                  <i class="material-icons left <%= PageCollection.color %>-text"><%= PageCollection.icon %></i>
+                  <i class="material-icons left <%= PageCollection.text_color %>"><%= PageCollection.icon %></i>
                   <!--<span class="new badge <%= PageCollection.color %> white-text"></span>-->
                   Collections
                 <% end %>
@@ -171,7 +171,7 @@
               <% unless current_user.private_profile? %>
                 <li>
                   <%= link_to current_user.profile_url, class: 'waves-effect' do %>
-                    <i class="material-icons left <%= User.color %>-text"><%= User.icon %></i>
+                    <i class="material-icons left <%= User.text_color %>"><%= User.icon %></i>
                     Profile
                   <% end %>
                 </li>

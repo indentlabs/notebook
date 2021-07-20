@@ -67,7 +67,7 @@
       <div class="grey-text uppercase center">
         Expand
         <% if @universe_scope.present? %>
-          <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.color}-text" %>
+          <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.text_color}" %>
         <% else %>
           your worlds
         <% end %>
@@ -97,7 +97,7 @@
           <div class="grey-text uppercase">
             <%= pluralize @current_user_content.except('Universe').values.flatten.count, 'page' %>
             in
-            <span class="<%= Universe.color %>-text">
+            <span class="<%= Universe.text_color %>">
               <%= @universe_scope.try(:name) || @current_user_content.fetch('Universe').first.name %>
             </span>
             <%= link_to({ universe: 'all' }, class: 'right grey-text') do %>
@@ -112,7 +112,7 @@
                   <div class="card-image">
                     <%= image_tag content_page.random_image_including_private, style: 'height: 245px' %>
                       <div class="card-title bordered-text">
-                        <i class="material-icons left <%= content_page.color %>-text" style="position: relative; top: 4px">
+                        <i class="material-icons left <%= content_page.text_color %>" style="position: relative; top: 4px">
                           <%= content_page.icon %>
                         </i>
                         <%= content_page.name %>
@@ -163,9 +163,9 @@
           <% next if page.page_type === 'Document' && page.user != current_user %>
 
           <% klass = content_class_from_name(page.page_type) %>
-          <%= link_to main_app.send("edit_#{page.page_type.downcase}_path", page.id), class: "#{klass.color}-text" do %>
+          <%= link_to main_app.send("edit_#{page.page_type.downcase}_path", page.id), class: "#{klass.text_color}" do %>
             <li class="card-panel hoverable" style="margin-bottom: 0.5em; border-left: 5px solid <%= klass.hex_color %>">
-              <i class="material-icons left <%= klass.color %>-text" style="font-size: 3em;"><%= klass.icon %></i>
+              <i class="material-icons left <%= klass.text_color %>" style="font-size: 3em;"><%= klass.icon %></i>
               <%= page.name %>
               <div class="grey-text">
                 last edited

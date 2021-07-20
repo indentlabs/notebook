@@ -24,6 +24,10 @@ class Language < ApplicationRecord
     'blue'
   end
 
+  def self.text_color
+    'blue-text'
+  end
+
   def self.hex_color
     '#2196F3'
   end

@@ -17,6 +17,10 @@ class Tradition < ActiveRecord::Base
     'text-lighten-3 lighten-3 red'
   end
 
+  def self.text_color
+    'text-lighten-3 red-text'
+  end
+
   def self.hex_color
     '#EF9A9A'
   end

@@ -25,6 +25,10 @@ class Magic < ApplicationRecord
     'orange'
   end
 
+  def self.text_color
+    'orange-text'
+  end
+
   def self.hex_color
     '#FF9800'
   end

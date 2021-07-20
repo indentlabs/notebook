@@ -333,6 +333,10 @@ class User < ApplicationRecord
     'green'
   end
 
+  def self.text_color
+    'green-text'
+  end
+
   def favorite_page_type_color
     return User.color unless favorite_page_type? && Rails.application.config.content_types[:all].map(&:name).include?(favorite_page_type)
     
