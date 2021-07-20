@@ -45,7 +45,7 @@ class GreenService < Service
   end
 
   def self.total_document_pages_equivalent
-    (Document.with_deleted.sum(:cached_word_count) / AVERAGE_WORDS_PER_PAGE.to_f).to_i
+    (Document.with_deleted.sum(:cached_word_count) / AVERAGE_WORDS_PER_PAGE.to_f).round
   end
 
   def self.total_timeline_pages_equivalent
