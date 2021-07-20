@@ -11,7 +11,7 @@ class GreenService < Service
 
     case worldbuilding_page_type
     when "Universe"   then 2
-    when "Character"  then 8
+    when "Character"  then 6
     when "Location"   then 4
     when "Item"       then 2
     when "Building"   then 8
@@ -27,7 +27,7 @@ class GreenService < Service
     when "Job"        then 4
     when "Landmark"   then 3
     when "Language"   then 5
-    when "Lore"       then 10
+    when "Lore"       then 8
     when "Magic"      then 4
     when "Planet"     then 6
     when "Race"       then 4
