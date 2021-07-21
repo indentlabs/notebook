@@ -372,18 +372,20 @@ class ForumReplacementService < Service
     # 'why is this happening' => 'I think this is great',
   }
 
-  def self.replace(text)
-    return text
-
-    # TODO: page tag replacements?
-
+  def self.replace(text, user=User.new)
     replaced_text = text.dup
 
-    WORD_REPLACEMENTS.each do |trigger, replacement|
-      replaced_text.gsub!(/\b#{trigger.downcase}\b/i, wrapped(replacement, trigger))
-    end
-    
-    replaced_text.html_safe
+    # WORD_REPLACEMENTS.each do |trigger, replacement|
+    #   replaced_text.gsub!(/\b#{trigger.downcase}\b/i, wrapped(replacement, trigger))
+    # end
+
+    # Page tag replacements
+    replaced_text = ContentFormatterService.substitute_content_links(
+      replaced_text,
+      user
+    )
+
+    return replaced_text.html_safe
   end
 
   def self.wrapped(text, tooltip)

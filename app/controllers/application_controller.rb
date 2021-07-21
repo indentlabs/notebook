@@ -92,15 +92,19 @@ class ApplicationController < ActionController::Base
   end
 
   def cache_linkable_content_for_each_content_type
-    linkable_classes = Rails.application.config.content_types[:all].map(&:name) & current_user.user_content_type_activators.pluck(:content_type)
+    return unless user_signed_in?
+
+    linkable_classes = Rails.application.config.content_type_names[:all] & current_user.user_content_type_activators.pluck(:content_type)
     linkable_classes += %w(Document Timeline)
+
+    # TODO: why can't we just use @current_user_content here?
 
     @linkables_cache = {}
     @linkables_raw   = {}
     linkable_classes.each do |class_name|
       # class_name = "Character"
 
-      @linkables_cache[class_name] = current_user
+      @linkables_cache[class_name] ||= current_user
         .send("linkable_#{class_name.downcase.pluralize}")
         .in_universe(@universe_scope)
 
@@ -110,7 +114,7 @@ class ApplicationController < ActionController::Base
           .reject { |content| content.class.name == class_name && content.id == @content.id }
       end
 
-      @linkables_raw[class_name] = @linkables_cache[class_name]
+      @linkables_raw[class_name] ||= @linkables_cache[class_name]
         .sort_by { |p| p.name.downcase }
         .compact
 

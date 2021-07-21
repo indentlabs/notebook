@@ -243,6 +243,14 @@ Rails.application.config.to_prepare do
     end
 
   end
+
+  Thredded::PostsController.module_eval do
+    before_action :cache_linkable_content_for_each_content_type, only: [:edit, :new]
+  end
+
+  Thredded::TopicsController.module_eval do
+    before_action :cache_linkable_content_for_each_content_type, only: [:index, :show]
+  end
 end
 
 require 'extensions/thredded/topic'
