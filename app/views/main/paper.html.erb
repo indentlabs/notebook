@@ -88,8 +88,17 @@
                 </td>
                 <td>
                   <i class="material-icons left grey-text">copy_all</i>
-                  <%= number_with_delimiter physical_page_equivalent %>
-                  <%= 'page'.pluralize physical_page_equivalent %>
+                  <% if content_type == 'Timeline' %>
+                    <% tooltip = "This estimate is based on the average timeline having approximately #{GreenService::AVERAGE_TIMELINE_EVENTS_PER_PAGE} detailed events per page when printed." %>
+                  <% elsif content_type == 'Document' %>
+                    <% tooltip = "This estimate is based on the total word count across all documents on Notebook.ai." %>
+                  <% else %>
+                    <% tooltip = "This estimate is based on the average #{content_type} being approximately #{GreenService.physical_pages_equivalent_for(content_type)} physical pages long when printed." %>
+                  <% end %>
+                  <span class="tooltipped" data-tooltip="<%= tooltip %>" data-position="bottom">
+                    <%= number_with_delimiter physical_page_equivalent %>
+                    <%= 'page'.pluralize physical_page_equivalent %>
+                  </span>
                 </td>
                 <td>
                   <i class="material-icons left green-text">park</i>
