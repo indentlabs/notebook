@@ -22,11 +22,11 @@
                         class: 'thredded--post--dropdown--actions--item',
                         rel: 'nofollow' %>
           <% end %>
-          <% if user_signed_in? %>
-            <%= link_to '#', class: 'thredded--post--dropdown--actions--item' do %>
+          <% if user_signed_in? && params.key?(:id) %>
+            <%= link_to main_app.documentize_topic_path(params[:id]), class: 'thredded--post--dropdown--actions--item' do %>
               Save to document
             <% end %>
-            <%= link_to '#', class: 'thredded--post--dropdown--actions--item', rel: 'nofollow' do %>
+            <%= link_to main_app.plaintext_topic_path(params[:id]), class: 'thredded--post--dropdown--actions--item', rel: 'nofollow' do %>
               View as plaintext
             <% end %>
           <% end %>

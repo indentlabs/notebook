@@ -1,11 +1,10 @@
 class ForumsProsifyService < Service
   ENDLINE = "\r\n"
 
-  def self.prosify_text(thredded_topic_id, strip_parentheticals=true)
-    topic = Thredded::Topic.find_by(id: thredded_topic_id)
+  def self.prosify_text(thredded_topic, strip_parentheticals=true)
     prose = ""
 
-    topic.posts.find_each do |post|
+    thredded_topic.posts.find_each do |post|
       paragraphs = post.content.split(ENDLINE)
 
       paragraphs.each do |paragraph|
@@ -16,13 +15,27 @@ class ForumsProsifyService < Service
     prose
   end
 
-  def self.prosify_html(thredded_topic_id, strip_parentheticals=true)
-    topic = Thredded::Topic.find_by(id: thredded_topic_id)
+  def self.prosify_irc_log(thredded_topic, strip_parentheticals=true)
     prose = ""
-
     user_display_name_cache = {}
 
-    topic.posts.find_each do |post|
+    thredded_topic.posts.find_each do |post|
+      paragraphs = post.content.split(ENDLINE)
+      user_display_name_cache[post.user_id] = post.user.try(:display_name) || "Anonymous" unless user_display_name_cache.key?(post.user_id)
+
+      paragraphs.each do |paragraph|
+        prose += "<#{user_display_name_cache[post.user_id]}> #{paragraph}#{ENDLINE}" unless strip_parentheticals && post.content.start_with?('(') && post.content.end_with?(')')
+      end
+    end
+
+    prose
+  end
+
+  def self.prosify_html(thredded_topic, strip_parentheticals=true)
+    prose = ""
+    user_display_name_cache = {}
+
+    thredded_topic.posts.find_each do |post|
       user_display_name_cache[post.user_id] = post.user.try(:display_name) || "Anonymous user" unless user_display_name_cache.key?(post.user_id)
 
       tooltip = "authored by #{user_display_name_cache[post.user_id]}"
@@ -32,12 +45,10 @@ class ForumsProsifyService < Service
     prose
   end
 
-  def self.save_to_document(user, thredded_topic_id, strip_parentheticals=true)
-    topic = Thredded::Topic.find_by(id: thredded_topic_id)
-
+  def self.save_to_document(user, thredded_topic, strip_parentheticals=true)
     user.documents.create!(
-      title: "#{topic.title} (forums post)",
-      body:  prosify_html(thredded_topic_id, strip_parentheticals)
+      title: "#{thredded_topic.title} (forums post)",
+      body:  prosify_html(thredded_topic, strip_parentheticals)
     )
   end
 end

@@ -393,8 +393,11 @@ Rails.application.routes.draw do
   # get '/forum', to: 'emergency#temporarily_disabled'
   # get '/forum/:wildcard', to: 'emergency#temporarily_disabled'
   # get '/forum/:wildcard/:another', to: 'emergency#temporarily_disabled'
-  mount Thredded::Engine,    at: '/forum',               as: :thredded
-  get '/topic/:slug',        to: 'thredded_proxy#topic', as: :topic
+  mount Thredded::Engine,    at: '/forum',                           as: :thredded
+  get '/topic/:slug',        to: 'thredded_proxy#topic',             as: :topic
+  get '/plaintext/:slug',    to: 'thredded_proxy#view_as_plaintext', as: :plaintext_topic
+  get '/irc_log/:slug',      to: 'thredded_proxy#view_as_irc_log',   as: :irc_log_topic
+  get '/save/:slug',         to: 'thredded_proxy#save_to_document',  as: :documentize_topic
 
   mount StripeEvent::Engine, at: '/webhooks/stripe'
 
