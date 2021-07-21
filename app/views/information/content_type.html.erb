@@ -216,6 +216,8 @@
 
   <div class="col s12">&nbsp;<!-- spacer --></div>
 
+  <div class='col s12 grey-text uppercase center'><%= singular_class_name %> features</div>
+
   <div class="col s12 m12 l6">
     <div class="card">
       <div class="card-content spaced-paragraphs">
@@ -329,7 +331,14 @@
       <br />
       Our users have created
       <div class="h1-size <%= @content_type.text_color %>" style="margin: 0"><%= number_with_delimiter @content_type.last.try(:id) || 0 %></div>
-      <%= pluralized_class_name.downcase %> on Notebook.ai!
+      <%= pluralized_class_name.downcase %> on Notebook.ai
+      <div>
+        <%= link_to green_paper_path, class: 'green-text' do %>
+          and saved
+          <%= number_with_delimiter GreenService.trees_saved_by(singular_class_name).round(2) %>
+          trees!
+        <% end %>
+      </div>
     </div>
   </div>
   <div class="col s12 m12 l4">

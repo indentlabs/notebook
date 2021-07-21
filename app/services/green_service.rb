@@ -44,6 +44,10 @@ class GreenService < Service
     end
   end
 
+  def self.trees_saved_by(worldbuilding_page_type)
+    (physical_pages_equivalent_for(worldbuilding_page_type) * worldbuilding_page_type.constantize.last.id) / SHEETS_OF_PAPER_PER_TREE.to_f
+  end
+
   def self.total_document_pages_equivalent
     total_pages = 0
 
