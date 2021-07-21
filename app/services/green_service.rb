@@ -45,7 +45,17 @@ class GreenService < Service
   end
 
   def self.total_document_pages_equivalent
-    (Document.with_deleted.where.not(body: ["", nil]).sum(:cached_word_count) / AVERAGE_WORDS_PER_PAGE.to_f).round
+    total_pages = 0
+
+    # Treat all <1-page documents as 1 page per document, since they'd print on separate pages
+    total_pages += Document.with_deleted.where('cached_word_count <= ?', AVERAGE_WORDS_PER_PAGE).count
+
+    # For all >1-page documents, do a quick estimate of word count sum + num docs to also cover EOD page breaks
+    docs = Document.with_deleted.where.not(cached_word_count: nil).where('cached_word_count > ?', AVERAGE_WORDS_PER_PAGE)
+    total_pages += (docs.sum(:cached_word_count) / AVERAGE_WORDS_PER_PAGE.to_f).round
+    total_pages += docs.count
+
+    total_pages
   end
 
   def self.total_timeline_pages_equivalent
