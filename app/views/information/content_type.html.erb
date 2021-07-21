@@ -124,7 +124,9 @@
     </div>
   </div>
 
-  <div class="col s12">
+  <div class="col s12">&nbsp;<!-- spacer --></div>
+
+  <div class="col s12 m12 l5">
     <div class="card">
       <div class="card-content">
         <h2 class="card-title">
@@ -136,83 +138,83 @@
           <span class="<%= @content_type.text_color %>"><%= singular_class_name.downcase %></span>
           template
         </h2>
+        <br />
 
-        <div class="row">
-          <div class="col s12 m12 l5">
-            <div class="spaced-paragraphs">
-              <p>
-                Templates on Notebook.ai are what help our unique worldbuilding system better understand your world.
-              </p>
-              <p>
-                You can fill out as little or as much as you'd like on every new <%= singular_class_name.downcase %>. You'll see
-                progress indicators every time you edit it to show where you can make progress on, and our system will
-                intelligently generate questions for you around the site that will automatically save your answers
-                to the proper place on your <%= singular_class_name.downcase %> page.
-              </p>
-              <p>
-                Templates are also fully customizable across every <%= singular_class_name.downcase %> in your notebook.
-              </p>
-              <p>
-                You can browse the default template for <%= pluralized_class_name.downcase %> here; click any category
-                to see its questions.
-              </p>
-            </div>
-          </div>
-          <div class="col s12 m12 l7">
-            <ul class="collapsible popout">
-              <%
-                YAML.load_file(Rails.root.join('config', 'attributes', "#{singular_class_name.downcase}.yml")).map do |category_name, category_details|
-              %>
-                <% next if category_name == :contributors %>
-                <li>
-                  <div class="collapsible-header <%= @content_type.color %> darken-3 white-text">
-                    <i class="material-icons"><%= category_details[:icon] %></i>
-                    <%= category_details[:label] %>
-                  </div>
-                  <div class="collapsible-body">
-                    <% if category_name == :gallery %>
-                      <p>
-                        This category lets you upload images to this <%= singular_class_name.downcase %>'s notebook page.
-                      </p>
-                      <br />
-                      <p>
-                        It's great if you have sketches or artwork for your <%= singular_class_name.downcase %>,
-                        but also works well for collecting visual inspiration, too!
-                      </p>
-                    <% end %>
-                    <% category_details.fetch(:attributes, []).each do |field| %>
-                      <p>
-                        <strong><%= field[:label] %></strong>
-                      </p>
-                      <p>
-                        <% if field[:field_type] == 'link' || field[:field_type] == 'universe' %>
-                          This field allows you to link your other Notebook.ai pages to this <%= singular_class_name.downcase %>.
-                        <% elsif field[:field_type] == 'tags' %>
-                          This field lets you add clickable tags to your <%= pluralized_class_name.downcase %>.
-                        <% else %>
-                          <%=
-                            I18n.translate "attributes.#{singular_class_name.downcase}.#{field[:label].downcase.gsub(/\s/, '_')}",
-                              scope: :serendipitous_questions,
-                              name: "this #{singular_class_name.downcase}",
-                              default: 'Write as little or as much as you want!'
-                          %>
-                          <br />
-                          <span class="grey-text"><%= field[:description].try(:html_safe) %></span>
-                        <% end %>
-                      </p>
-                      <br />
-                    <% end %>
-                  </div>
-                </li>
-              <%
-                end
-              %>
-            </ul>
-          </div>
+        <div class="spaced-paragraphs">
+          <p>
+            Templates on Notebook.ai are what help our unique worldbuilding system better understand your world.
+          </p>
+          <p>
+            You can fill out as little or as much as you'd like on every new <%= singular_class_name.downcase %>. You'll see
+            progress indicators every time you edit it to show where you can make progress on, and our system will
+            intelligently generate questions for you around the site that will automatically save your answers
+            to the proper place on your <%= singular_class_name.downcase %> page.
+          </p>
+          <p>
+            Templates are also fully customizable across every <%= singular_class_name.downcase %> in your notebook.
+          </p>
+          <p>
+            You can browse the default template for <%= pluralized_class_name.downcase %> here; click any category
+            to see its questions.
+          </p>
         </div>
       </div>
     </div>
   </div>
+
+  <div class="col s12 m12 l7">
+    <ul class="collapsible popout">
+      <%
+        YAML.load_file(Rails.root.join('config', 'attributes', "#{singular_class_name.downcase}.yml")).map do |category_name, category_details|
+      %>
+        <% next if category_name == :contributors %>
+        <li>
+          <div class="collapsible-header <%= @content_type.color %> darken-3 white-text">
+            <i class="material-icons"><%= category_details[:icon] %></i>
+            <%= category_details[:label] %>
+          </div>
+          <div class="collapsible-body">
+            <% if category_name == :gallery %>
+              <p>
+                This category lets you upload images to this <%= singular_class_name.downcase %>'s notebook page.
+              </p>
+              <br />
+              <p>
+                It's great if you have sketches or artwork for your <%= singular_class_name.downcase %>,
+                but also works well for collecting visual inspiration, too!
+              </p>
+            <% end %>
+            <% category_details.fetch(:attributes, []).each do |field| %>
+              <div>
+                <strong><%= field[:label] %></strong>
+              </div>
+              <div>
+                <% if field[:field_type] == 'link' || field[:field_type] == 'universe' %>
+                  This field allows you to link your other Notebook.ai pages to this <%= singular_class_name.downcase %>.
+                <% elsif field[:field_type] == 'tags' %>
+                  This field lets you add clickable tags to your <%= pluralized_class_name.downcase %>.
+                <% else %>
+                  <%=
+                    I18n.translate "attributes.#{singular_class_name.downcase}.#{field[:label].downcase.gsub(/\s/, '_')}",
+                      scope: :serendipitous_questions,
+                      name: "this #{singular_class_name.downcase}",
+                      default: 'Write as little or as much as you want!'
+                  %>
+                  <br />
+                  <span class="grey-text"><%= field[:description].try(:html_safe) %></span>
+                <% end %>
+              </div>
+              <br />
+            <% end %>
+          </div>
+        </li>
+      <%
+        end
+      %>
+    </ul>
+  </div>
+
+  <div class="col s12">&nbsp;<!-- spacer --></div>
 
   <div class="col s12 m12 l6">
     <div class="card">
