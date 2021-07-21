@@ -16,7 +16,7 @@ class ForumsProsifyService < Service
   end
 
   def self.prosify_irc_log(thredded_topic, strip_parentheticals=true)
-    prose = ""
+    prose = "-!- Topic: #{post.title}"
     user_display_name_cache = {}
 
     thredded_topic.posts.find_each do |post|
