@@ -45,10 +45,21 @@ class GreenService < Service
   end
 
   def self.total_document_pages_equivalent
-    (Document.with_deleted.sum(:cached_word_count) / AVERAGE_WORDS_PER_PAGE.to_f).round
+    (Document.with_deleted.where.not(body: ["", nil]).sum(:cached_word_count) / AVERAGE_WORDS_PER_PAGE.to_f).round
   end
 
   def self.total_timeline_pages_equivalent
     (TimelineEvent.last.id / AVERAGE_TIMELINE_EVENTS_PER_PAGE.to_f).to_i
+  end
+
+  def self.total_physical_pages_equivalent(content_type)
+    case content_type.name
+      when 'Timeline'
+        GreenService.total_timeline_pages_equivalent
+      when 'Document'
+        GreenService.total_document_pages_equivalent
+      else
+        GreenService.physical_pages_equivalent_for(content_type.name) * (content_type.last.try(:id) || 0)
+    end
   end
 end
