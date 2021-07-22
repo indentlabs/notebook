@@ -22,7 +22,15 @@
     <% end %>
     <% if policy(@new_post.post).create? %>
       <div class="thredded--post-form--wrapper">
-        <h3 class="thredded--post-form--title"><%= t('thredded.posts.form.title_label') %></h3>
+        <h3 class="thredded--post-form--title">
+          <%= t('thredded.posts.form.title_label') %>
+          <%= link_to 'https://www.markdownguide.org/basic-syntax/', target: '_blank' do %>
+            <span class="hoverable badge new blue white-text" data-badge-caption="formatting help"></span>
+          <% end %>
+          <small class="grey-text">
+            You can now @-mention your Notebook.ai pages by typing @ below.
+          </small>
+        </h3>
         <%= render 'thredded/posts/form',
                    post:        @new_post,
                    button_text: t('thredded.posts.form.create_btn'),
