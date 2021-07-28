@@ -1,6 +1,10 @@
 <% if @linkables_cache %>
   <%= content_for :javascript do %>
     var tribute = new Tribute({
+      <%#
+        TODO: tribute allows us to populate values async, so that might be worth exploring the tradeoffs of
+              https://github.com/zurb/tribute
+      %>
       values: [
         <% @linkables_cache.each do |class_name, collection| %>
           <% linkable_class = content_class_from_name(class_name) %>
