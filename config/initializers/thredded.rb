@@ -178,6 +178,7 @@ Rails.application.config.to_prepare do
   # This works for Onebox 1.x, but we'll probably need to switch over to the new AllowedGenericWhitelistOnebox (or whatever it's named)
   # when we upgrade to Onebox 2.x.
   Onebox::Engine::WhitelistedGenericOnebox.whitelist << "notebook.ai"
+  Onebox::Engine::WhitelistedGenericOnebox.whitelist << "papercut-server.herokuapp.com"
 end
 
 Rails.application.config.to_prepare do
