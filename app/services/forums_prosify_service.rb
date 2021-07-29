@@ -24,7 +24,10 @@ class ForumsProsifyService < Service
       user_display_name_cache[post.user_id] = post.user.try(:display_name) || "Anonymous" unless user_display_name_cache.key?(post.user_id)
 
       paragraphs.each do |paragraph|
-        prose += "<#{user_display_name_cache[post.user_id]}> #{paragraph}#{ENDLINE}" unless strip_parentheticals && post.content.start_with?('(') && post.content.end_with?(')')
+        next if paragraph.empty?
+        next if strip_parentheticals && post.content.start_with?('(') && post.content.end_with?(')')
+
+        prose += "<#{user_display_name_cache[post.user_id]}> #{paragraph}#{ENDLINE}"
       end
     end
 
@@ -46,9 +49,30 @@ class ForumsProsifyService < Service
   end
 
   def self.save_to_document(user, thredded_topic, strip_parentheticals=true)
-    user.documents.create!(
+    document = user.documents.create!(
       title: "#{thredded_topic.title} (forums post)",
       body:  prosify_html(thredded_topic, strip_parentheticals)
     )
+    analysis = document.document_analysis.create!
+
+    # If there are any links to Notebook.ai pages or [[page-id]] tokens in this post, we should automatically link those pages
+    tokens = ContentFormatterService.tokens_to_replace(document.body)
+    tokens.each do |token|
+      analysis.document_entities.find_or_create_by(
+        entity_type: token[:content_type],
+        entity_id:   token[:content_id]
+      )
+    end
+
+    links = ContentFormatterService.links_to_replace(document.body)
+    links.each do |link|
+      analysis.document_entities.find_or_create_by(
+        entity_type: link[:content_type],
+        entity_id:   link[:content_id],
+        text:        link[:matched_string]
+      )
+    end
+
+    document
   end
 end
