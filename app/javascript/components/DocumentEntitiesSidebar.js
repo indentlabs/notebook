@@ -61,9 +61,6 @@ class DocumentEntitiesSidebar extends React.Component {
   }
 
   lookupPage(content_type, content_id) {
-    // TODO: we probably want to save/check lookup cache for instant repopulation
-    // on repeated lookups
-
     // console.log('loading page: ' + content_type + ' ' + content_id);
     this.refs.PageLookupSidebar.loadPage(content_type, content_id);
   }
