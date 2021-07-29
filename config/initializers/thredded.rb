@@ -174,6 +174,8 @@ end
 Rails.application.config.to_prepare do
   Thredded::TopicPolicy.prepend AllowUsersToDeleteOwnTopics
   Thredded::PrivateTopicPolicy.prepend AllowAdminModeration
+
+  Onebox::Engine::WhitelistedGenericOnebox.whitelist << "notebook.ai"
 end
 
 Rails.application.config.to_prepare do
