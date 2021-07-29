@@ -77,6 +77,7 @@ gem 'barnes'
 gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
 gem 'rails-ujs'
 gem 'language_filter'
+# gem 'onebox', git: 'https://github.com/indentlabs/onebox.git'
 
 # Smarts
 gem 'word_count_analyzer'
