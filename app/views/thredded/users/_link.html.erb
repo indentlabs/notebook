@@ -2,9 +2,16 @@
   <% if !user.thredded_anonymous? %>
     <% user_path = user_path(user) %>
     <% if user_path.blank? %>
-      <span class='thredded--username'><%= user.thredded_display_name %></span>
+      <span class='thredded--username'>
+        <%= user.thredded_display_name %>
+      </span>
     <% else %>
-      <a href="<%= user_path %>"><%= user.thredded_display_name %></a>
+      <a href="<%= user_path %>">
+        <%= user.thredded_display_name %>
+        <% if user.favorite_page_type? %>
+          <i class="material-icons tiny <%= content_class_from_name(user.favorite_page_type).try(:text_color) %>" style="position: relative; top: 2px"><%= content_class_from_name(user.favorite_page_type).try(:icon) %></i>
+        <% end %>
+      </a>
       <%= render partial: 'thredded/users/badge', locals: { user: user } %>
     <% end %>
   <% else %>
