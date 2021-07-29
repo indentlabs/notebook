@@ -59,6 +59,7 @@ class ApiContentSerializer
   def value_for(attribute_field, content)
     case attribute_field.field_type
     when 'link'
+      # code smell: why aren't we handling new-style links here?
       self.raw_model.send(attribute_field.old_column_source)
 
     when 'tags'

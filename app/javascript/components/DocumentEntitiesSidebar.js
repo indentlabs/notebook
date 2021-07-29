@@ -61,6 +61,9 @@ class DocumentEntitiesSidebar extends React.Component {
   }
 
   lookupPage(content_type, content_id) {
+    // TODO: we probably want to save/check lookup cache for instant repopulation
+    // on repeated lookups
+
     // console.log('loading page: ' + content_type + ' ' + content_id);
     this.refs.PageLookupSidebar.loadPage(content_type, content_id);
   }
@@ -107,7 +110,9 @@ class DocumentEntitiesSidebar extends React.Component {
                                 <i className={"material-icons left " + this.classColor(entity_type) + "-text"}>
                                   { this.classIcon(entity_type) }
                                 </i>
-                                { entity.text }
+                                <span className='js-load-page-name' data-klass={entity_type} data-id={entity.entity_id}>
+                                  <span className='name-container'>{ entity.text }</span>
+                                </span>
                               </a>
                             </li>
                           );
