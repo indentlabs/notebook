@@ -4,22 +4,21 @@
       Recent updates
     <% end %>
   </li>
-  <% recent_content = current_user.recent_content_list(limit: current_user.on_premium_plan? ? 20 : 10) %>
   <li class="no-padding">
-    <% recent_content.each do |content| %>
-      <% content_class = content.class %>
+    <% @recently_edited_pages.each do |content| %>
+      <% content_class = content.is_a?(ContentPage) ? content_class_from_name(content.page_type) : content.class %>
       <li>
-        <%= link_to main_app.polymorphic_path(content), class: "#{content_class.color}-text tooltipped",
+        <%= link_to main_app.polymorphic_path(content_class), class: "#{content_class.text_color} tooltipped",
           data: {
             position: 'left',
-            tooltip: "Updated #{time_ago_in_words content.updated_at} ago"
+            tooltip: "#{content_class.name} updated #{time_ago_in_words content.updated_at} ago"
           } do %>
-          <i class="material-icons left <%= content_class.color %>-text"><%= content_class.icon %></i>
-          <%= truncate(content.name, length: 24) %>
+          <i class="material-icons left <%= content_class.text_color %>"><%= content_class.icon %></i>
+          <%= truncate(content.name, length: 36) %>
         <% end %>
       </li>
     <% end %>
-    <% if recent_content.length > 0 %>
+    <% if @recently_edited_pages.length > 0 %>
       <li class="divider"></li>
       <li class="grey lighten-3">
         <%= link_to 'More...', main_app.recent_content_path, class: 'blue-text' %>

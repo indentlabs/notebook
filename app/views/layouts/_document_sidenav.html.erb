@@ -10,16 +10,8 @@
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
       <li>
-        <%= link_to main_app.new_document_path, class: 'waves-effect' do %>
-          <i class="material-icons <%= Document.color %>-text">
-            note_add
-          </i>
-          New document
-        <% end %>
-      </li>
-      <li>
         <%= link_to main_app.documents_path, class: 'waves-effect' do %>
-          <i class="material-icons <%= Document.color %>-text">
+          <i class="material-icons <%= Document.text_color %>">
             file_copy
           </i>
           View all documents
@@ -28,17 +20,82 @@
           </span>
         <% end %>
       </li>
+      <li>
+        <%= link_to main_app.new_document_path, class: 'waves-effect' do %>
+          <i class="material-icons <%= Document.text_color %>">
+            note_add
+          </i>
+          New document
+        <% end %>
+      </li>
+
+      <%
+        folder = @document.folder
+        if folder
+      %>
+        <li class="bold waves-effect">
+          <a class="collapsible-header" tabindex="0">
+            In this folder...
+            <i class="material-icons chevron">chevron_right</i>
+          </a>
+          <div class="collapsible-body" style="">
+            <ul>
+              <li>
+                <%= link_to folder, class: 'waves-effect' do %>
+                  <i class="material-icons left <%= Folder.text_color %>"><%= Folder.icon %></i>
+                  <%= folder.title %>
+                <% end %>
+              </li>
+              <% Document.where(folder_id: folder.id).where.not(id: @document.id).order('updated_at DESC').each do |document| %>
+                <li>
+                  <%= link_to edit_document_path(document), class: 'waves-effect tooltipped', data: { tooltip: "Last edited #{time_ago_in_words document.updated_at} ago", position: 'right' } do %>
+                    <i class="material-icons <%= Document.text_color %>">
+                      <%= Document.icon %>
+                    </i>
+                    <%= document.title %>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </li>
+      <% end %>
+
+      <%
+        other_folders = current_user.folders.where(context: 'Document').where.not(id: @document.folder_id).order('title ASC')
+        if other_folders.any?
+      %>
+        <li class="bold waves-effect">
+          <a class="collapsible-header" tabindex="0">
+            Other folders
+            <i class="material-icons chevron">chevron_right</i>
+          </a>
+          <div class="collapsible-body" style="">
+            <ul>
+              <% other_folders.each do |folder| %>
+                <li>
+                  <%= link_to folder, class: 'waves-effect' do %>
+                    <i class="material-icons <%= Folder.text_color %>"><%= Folder.icon %></i>
+                    <%= folder.title %>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </li>
+      <% end %>
+
       <li class="bold waves-effect active">
         <a class="collapsible-header" tabindex="0">
-          Jump to...
+          Recent documents
           <i class="material-icons chevron">chevron_right</i>
         </a>
         <div class="collapsible-body" style="">
           <ul>
-            <% @current_user_content['Document'].order('updated_at DESC').each do |document| %>
+            <% @current_user_content['Document'].each do |document| %>
               <li>
-                <%= link_to edit_document_path(document), class: 'waves-effect' do %>
-                  <i class="material-icons <%= Document.color %>-text">
+                <%= link_to edit_document_path(document), class: 'waves-effect tooltipped', data: { tooltip: "Last edited #{time_ago_in_words document.updated_at} ago", position: 'right' } do %>
+                  <i class="material-icons <%= Document.text_color %>">
                     <%= Document.icon %>
                   </i>
                   <%= document.title %>

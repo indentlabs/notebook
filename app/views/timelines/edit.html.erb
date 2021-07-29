@@ -25,7 +25,7 @@
       <ul class="collapsible">
         <li>
           <div class="collapsible-header">
-            <i class="material-icons <%= Timeline.color %>-text"><%= Timeline.icon %></i>
+            <i class="material-icons <%= Timeline.text_color %>"><%= Timeline.icon %></i>
             About this timeline
           </div>
           <div class="collapsible-body">
@@ -57,7 +57,7 @@
                 %>
 
                 <div class="help-text show-when-focused">
-                  <i class="material-icons tiny">label</i>
+                  <i class="material-icons tiny"><%= PageTag.icon %></i>
                   Type and press enter to create a new tag.
                 </div>
                 <div class="tags-container show-when-focused">
@@ -81,6 +81,8 @@
                 var hidden_input = $('#hidden_page_tags_value').first();
                 hidden_input.val(chips.join('<%= PageTag::SUBMISSION_DELIMITER %>'));
                 $('form.timeline-meta-form').submit();
+
+                M.toast({ html: 'Saving changes...' });
               }
 
               var chips = $('.chips-autocomplete').chips({
@@ -228,9 +230,9 @@
               <ul class="collapsible">
                 <% event.timeline_event_entities.order('entity_type').preload(:entity).group_by(&:entity_type).each do |entity_type, entity_list| %>
                   <li>
-                    <% klass = entity_type.constantize %>
+                    <% klass = content_class_from_name(entity_type) %>
                     <div class="collapsible-header">
-                      <i class="material-icons <%= klass.color %>-text"><%= klass.icon %></i>
+                      <i class="material-icons <%= klass.text_color %>"><%= klass.icon %></i>
                       <%= entity_type.pluralize %>
                       <span class="badge"><%= entity_list.count %></span>
                     </div>
@@ -337,9 +339,9 @@
             <ul class="collapsible">
               <% event.timeline_event_entities.order('entity_type').preload(:entity).group_by(&:entity_type).each do |entity_type, entity_list| %>
                 <li>
-                  <% klass = entity_type.constantize %>
+                  <% klass = content_class_from_name(entity_type) %>
                   <div class="collapsible-header">
-                    <i class="material-icons <%= klass.color %>-text"><%= klass.icon %></i>
+                    <i class="material-icons <%= klass.text_color %>"><%= klass.icon %></i>
                     <%= entity_type.pluralize %>
                     <span class="badge"><%= entity_list.count %></span>
                   </div>
@@ -406,12 +408,12 @@
       <%= f.hidden_field :entity_id,            value: nil %>
 
       <% @current_user_content.each do |content_type, content_list| %>
-        <% content_type_class = content_type.constantize %>
+        <% content_type_class = content_class_from_name(content_type) %>
         <h5><%= content_type.pluralize %></h5>
         <ul class="collection">
           <% content_list.each do |content| %>
             <a href="#" 
-               class="<%= content_type_class.color %>-text js-link-entity-selection modal-close" 
+               class="<%= content_type_class.text_color %> js-link-entity-selection modal-close" 
                data-id="<%= content.id %>"
                data-type="<%= content_type %>">
               <li class="collection-item hoverable">
@@ -435,7 +437,6 @@
 <%= render partial: 'content/share', locals: { shared_content: @timeline } %>
 
 <%= content_for :javascript do %>
-$(document).ready(function () {
   $('.js-link-entity').click(function () {
     // Store the linking event ID for reference
     var event_id = $(this).closest('.timeline-event-container').data('event-id');
@@ -474,5 +475,4 @@ $(document).ready(function () {
 
     // todo close the modal
   });
-});
 <% end %>

@@ -31,6 +31,10 @@ class Technology < ApplicationRecord
     'text-darken-2 red'
   end
 
+  def self.text_color
+    'text-darken-2 red-text'
+  end
+
   def self.hex_color
     '#D32F2F'
   end

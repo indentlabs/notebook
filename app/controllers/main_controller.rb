@@ -53,8 +53,10 @@ class MainController < ApplicationController
     # todo optimize this / use Attributes
     return [] if @activated_content_types.nil?
 
-    @recent_edits = current_user.recent_content_list(limit: 50)
-    @recent_creates = current_user.recent_content_list_by_create(limit: 50)
+    @recently_created_pages = @current_user_content.values.flatten
+      .sort_by(&:created_at)
+      .last(50)
+      .reverse
   end
 
   def for_writers

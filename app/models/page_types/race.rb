@@ -31,6 +31,10 @@ class Race < ApplicationRecord
     'darken-2 light-green'
   end
 
+  def self.text_color
+    'text-darken-2 light-green-text'
+  end
+
   def self.hex_color
     '#689F38'
   end

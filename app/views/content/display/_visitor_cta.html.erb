@@ -1,9 +1,9 @@
 <% if current_user.nil? || current_user.id != content.user.id && (content.respond_to?(:universe) && content.universe && content.universe.user.id != current_user.id) %>
-  <div class="card-action center">
+  <div class="card-panel center <%= content.raw_model.class.color %> lighten-5 black-text">
     <p>
       This <%= content.class_name.downcase %> was created by <%= content.user.name %> on Notebook.ai<% if content.raw_model.is_a?(Universe) && @content.contributors.any? %> with <%= pluralize content.raw_model.contributors.count, 'contributor' %><% end %>.
     </p>
-    <%= link_to "See more from #{content.user.name}", content.user %>
+    <%= link_to "See more from #{content.user.name}", content.user %><br />
     <%= link_to "Create your own universe", root_url %>
   </div>
 <% end %>

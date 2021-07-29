@@ -1,28 +1,26 @@
 <%= content_for :javascript do %>
-  $(document).ready(function() {
-    var tribute = new Tribute({
-      values: [
-        <% @linkables_cache.each do |class_name, collection| %>
-          <% linkable_class = class_name.constantize %>
-          <% collection.each do |page_name, page_id| %>
-            {
-              key:   "<%= page_name.gsub('"', "\"").gsub("\n", " ").gsub("\r", " ").strip %>",
-              value: '[[<%= class_name %>-<%= page_id %>]]',
-              color: '<%= linkable_class.color %>',
-              icon:  '<%= linkable_class.icon %>'
-            },
-          <% end %>
+  var tribute = new Tribute({
+    values: [
+      <% @linkables_cache.each do |class_name, collection| %>
+        <% linkable_class = content_class_from_name(class_name) %>
+        <% collection.each do |page_name, page_id| %>
+          {
+            key:   "<%= page_name.gsub('"', "\"").gsub("\n", " ").gsub("\r", " ").strip %>",
+            value: '[[<%= class_name %>-<%= page_id %>]]',
+            color: '<%= linkable_class.color %>',
+            icon:  '<%= linkable_class.icon %>'
+          },
         <% end %>
-      ],
-      selectTemplate: function (item) {
-        // We're overriding the default here so we don't prepend a @
-        return item.original.value;
-      },
-      menuItemTemplate: function (item) {
-        return '<i class="material-icons right ' + item.original.color + '-text">' + item.original.icon + '</i>' + item.string;
-      },
-      spaceSelectsMatch: false
-    });
-    tribute.attach(document.querySelectorAll('.js-can-mention-pages'));
+      <% end %>
+    ],
+    selectTemplate: function (item) {
+      // We're overriding the default here so we don't prepend a @
+      return item.original.value;
+    },
+    menuItemTemplate: function (item) {
+      return '<i class="material-icons right ' + item.original.color + '-text">' + item.original.icon + '</i>' + item.string;
+    },
+    spaceSelectsMatch: false
   });
+  tribute.attach(document.querySelectorAll('.js-can-mention-pages'));
 <% end %>

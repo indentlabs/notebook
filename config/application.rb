@@ -6,6 +6,8 @@ DEVELOPMENT_RAILS_GROUPS = 'web,worker'
 if ENV['RAILS_GROUPS'].blank?
   ENV['RAILS_GROUPS'] = DEVELOPMENT_RAILS_GROUPS
   warn "RAILS_GROUPS is unset; defaulting to #{DEVELOPMENT_RAILS_GROUPS}"
+elsif ENV['RAILS_GROUPS'] == 'assets'
+  puts "RAILS_GROUPS is set to assets (building assets on heroku)"
 elsif ENV['RAILS_GROUPS'] != DEVELOPMENT_RAILS_GROUPS
   warn "RAILS_GROUPS is set to #{ENV['RAILS_GROUPS']} instead of #{DEVELOPMENT_RAILS_GROUPS}"
 end

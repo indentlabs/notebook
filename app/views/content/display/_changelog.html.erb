@@ -2,28 +2,44 @@
   attribute_change_events = content.raw_model.attribute_change_events
 
   changed_attributes      = Attribute.where(id: attribute_change_events.select { |event| event.content_type == 'Attribute' }.map(&:content_id))
-  changed_fields          = AttributeField.where(id: changed_attributes.pluck(:attribute_field_id))
+  changed_fields          = AttributeField.where(id: changed_attributes.pluck(:attribute_field_id)).includes([:attribute_category])
 %>
 
 
 <div class="row">
   <div class="col s12 m12 l10 offset-l1">
-    <div class="flow-text grey-text">Recent changes for <%= link_to content.name, polymorphic_path(content.raw_model) %></div>
+    <h1 class="flow-text grey-text">
+      Recent changes for <%= link_to content.name, polymorphic_path(content.raw_model) %>
+    </h1>
 
     <% attribute_change_events.reverse.each do |change_event| %>
-      <% next if change_event.user.nil? %>
+      <% 
+        # Some of the really old events (4+ years ago) don't have a user. We can just skip those.
+        next if change_event.user.nil?
+      %>
+
       <% change_event.changed_fields.each do |field_key, change| %>
         <% related_attribute = changed_attributes.detect { |attribute| attribute.id == change_event.content_id } %>
-        <% related_field = changed_fields.detect { |field| field.id == related_attribute.attribute_field_id } %>
-        <% key = related_field.label %>
-        <% next if change.first.blank? && change.second.blank? %>
-        <% next if %w(id created_at updated_at user user_id).include?(field_key) %>
+        <% related_field     = changed_fields.detect { |field| field.id == related_attribute.attribute_field_id } %>
+        <% related_category  = related_field.attribute_category %>
+
+        <% 
+          # Skip field changes if the value didn't actually change
+          next if change.first == change.second
+
+          # Skip field changes if the value only changed from one blank value to another
+          next if change.first.blank? && change.second.blank?
+
+          # Don't show ContentChangeEvents for excluded fields like updated_at, etc
+          next if ContentChangeEvent::FIELD_IDS_TO_EXCLUDE.include?(field_key)
+        %>
+
         <%
-          old_value = change.first.blank?  ? '(blank)' : change.first.to_s
-          new_value = change.second.blank? ? '(blank)' : change.second.to_s
+          old_value = change.first.blank?  ? ContentChangeEvent::BLANK_PLACEHOLDER : change.first.to_s
+          new_value = change.second.blank? ? ContentChangeEvent::BLANK_PLACEHOLDER : change.second.to_s
 
           visible_change = true
-          if key.start_with?('Private') # todo actual privacy flag on attributes
+          if related_field.label.start_with?('Private') # todo actual privacy flag on attributes
             visible_change = user_signed_in? && (
               (content.raw_model.is_a?(Universe) && content.user == current_user) ||
               (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||
@@ -32,47 +48,38 @@
           end
 
           unless visible_change
-            old_value = '(hidden)'
-            new_value = '(hidden)'
+            old_value = ContentChangeEvent::PRIVATE_PLACEHOLDER
+            new_value = ContentChangeEvent::PRIVATE_PLACEHOLDER
           end
 
-          # Just for clarity / ease of mind to users -- we treat blank as private, but that's not obvious to them.
-          if key == 'privacy'
-            old_value = 'private' if old_value == '(blank)'
-            new_value = 'private' if new_value == '(blank)'
+          # Just for clarity / ease of mind to users -- we treat blank on privacy field as "private", but that's not obvious to them.
+          if related_field.label.downcase == 'privacy'
+            old_value = 'private' if old_value == ContentChangeEvent::BLANK_PLACEHOLDER
+            new_value = 'private' if new_value == ContentChangeEvent::BLANK_PLACEHOLDER
           end
         %>
 
-        <div class="card-panel">
-          <div>
-            <%= link_to content.name, content.raw_model, class: "#{content.raw_model.class.color}-text" %>
+        <div class="row">
+          <div class="col s12">
+            <strong>
+              <i class="material-icons tiny" style="position: relative; top: 2px"><%= related_category.icon %></i>
+              <%= related_category.label %>
+            </strong>
             &rsaquo;
-            <strong><%= key.titleize %></strong>
+            <strong><%= related_field.label %></strong>
             <%= change_event.action %>
             by
             <span>
-              <% if user_signed_in? && change_event.user == current_user %>
-                <%= link_to 'You', current_user, class: User.color + '-text' %>
-              <% else %>
-                <%= link_to(change_event.user.name, change_event.user) %>
-              <% end %>
+              <%= link_to(change_event.user.display_name, change_event.user, class: "#{User.text_color}") %>
             </span>
             <div class="grey-text right"><%= time_ago_in_words change_event.created_at %> ago</div>
           </div>
-          <div class="row">
-            <div class="col s12 m6 l6 red lighten-4">
-              <%= simple_format ContentFormatterService.show(
-                text: old_value.truncate(380),
-                viewing_user: current_user
-              ) %>
-            </div>
-            <div class="col s12 m6 l6 green lighten-4">
-              <%= simple_format ContentFormatterService.show(
-                text: new_value.truncate(380),
-                viewing_user: current_user
-              ) %>
-            </div>
-          </div>
+        </div>
+        <div style="margin-bottom: 4em">
+          <%= 
+            render partial: "content/changelog/field_change/#{related_field.field_type}", 
+                  locals: { old_value: old_value, new_value: new_value }
+          %>
         </div>
       <% end %>
     <% end %>

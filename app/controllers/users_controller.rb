@@ -18,10 +18,6 @@ class UsersController < ApplicationController
   
     @favorite_content = @user.favorite_page_type? ? @user.send(@user.favorite_page_type.downcase.pluralize).is_public : []
     @stream           = @user.recent_content_list(limit: 20)
-    
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(@user.id, 'viewed profile', {
-      'sharing any content': @user.public_content_count != 0
-    }) if Rails.env.production?
   end
 
   Rails.application.config.content_types[:all].each do |content_type|

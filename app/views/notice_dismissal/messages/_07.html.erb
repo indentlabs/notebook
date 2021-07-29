@@ -1,13 +1,9 @@
-<% if user_signed_in? && current_user.notice_dismissals.where(notice_id: 7).none? %>
-  <div class="col s12">
-    <div class="hoverable card-panel blue lighten-5">
-      <%= link_to prepay_path, class: 'black-text' do %>
-        <i class="material-icons grey-text left">help</i>
-        These associations are automatically created whenever you add another page to this universe.
-        Only you can see this message.
+<% if show_notice?(id: 7) %>
+  <div class="card-panel blue lighten-5 black-text">
+    <i class="material-icons grey-text left">help</i>
+    These associations are automatically created whenever you mention this page from another page.
+    Only you can see this message.
 
-        <%= link_to 'Dismiss this notice.', notice_dismissal_dismiss_path(notice_id: 7), class: 'blue-text' %>
-      <% end %>
-    </div>
+    <%= link_to 'Dismiss this notice.', notice_dismissal_dismiss_path(notice_id: 7), class: 'blue-text' %>
   </div>
 <% end %>

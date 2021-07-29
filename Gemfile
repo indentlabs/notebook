@@ -3,7 +3,7 @@ ruby "~> 2.7"
 
 # Server
 gem 'rails'
-gem 'puma', '~> 5.2'
+gem 'puma', '~> 5.3'
 gem 'puma-heroku'
 # gem 'bootsnap', require: false
 gem 'sprockets', '~> 3.7.2'
@@ -63,10 +63,9 @@ gem 'medium-editor-rails'
 
 # Graphs & Charts
 gem 'chartkick'
-gem 'd3-rails'
+gem 'd3-rails', '~> 5.9.2' # used for spider charts
 
 # Analytics
-gem 'mixpanel-ruby'
 gem 'slack-notifier'
 gem 'barnes'
 
@@ -74,14 +73,13 @@ gem 'barnes'
 #gem 'easy_translate'
 #gem 'levenshtein-ffi'
 
-# Feature rollout
-gem 'flipper'
-gem 'flipper-redis'
-
 # Forum
 gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
 gem 'rails-ujs'
 gem 'language_filter'
+
+# Smarts
+gem 'word_count_analyzer'
 
 # Workers
 gem 'sidekiq'
@@ -91,7 +89,7 @@ gem 'redis'
 gem 'csv'
 
 # Admin
-gem 'rails_admin', '~> 2.0'
+gem 'rails_admin', '~> 2.1'
 
 # Tech debt & hacks
 gem 'binding_of_caller' # see has_changelog.rb
@@ -102,7 +100,6 @@ group :test, :development do
 end
 
 group :production do
-  gem 'rails_12factor'
   gem 'uglifier', '>= 1.3.0'
   gem 'newrelic_rpm'
 end
@@ -113,30 +110,14 @@ group :test, :production do
 end
 
 group :test do
-  gem 'better_errors'
-  gem 'capybara'
   gem 'codeclimate-test-reporter', require: false
-  gem 'cucumber-rails', require: false
   gem 'database_cleaner'
-  gem 'factory_bot_rails'
-  gem 'guard'
-  gem 'guard-minitest'
-  gem 'guard-rubocop'
   gem 'selenium-webdriver'
-  gem 'simplecov', require: false
-  gem 'tzinfo-data' # addresses a bug when working on Windows
-  gem 'rails-perftest'
-  gem 'rspec-prof'
-  gem 'rspec-rails'
-  gem 'webmock'
-  gem 'rubocop', require: false
-  gem 'ruby-prof', '1.4.2'
-  gem 'shoulda-matchers', '~> 4.5'
-  gem 'rails-controller-testing'
 end
 
 group :development do
   gem 'web-console'
+  gem 'listen'
   gem 'bullet'
   gem 'rack-mini-profiler'
   gem 'memory_profiler'

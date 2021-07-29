@@ -26,6 +26,10 @@ class Building < ActiveRecord::Base
     'blue-grey'
   end
 
+  def self.text_color
+    'blue-grey-text'
+  end
+
   def self.hex_color
     '#607D8B'
   end

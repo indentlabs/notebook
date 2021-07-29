@@ -1,0 +1,182 @@
+<h4>
+  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
+        position: 'bottom',
+        enterDelay: '500',
+        tooltip: "Back to your Data Vault"
+      } do %>
+    <i class="material-icons">arrow_back</i>
+  <% end %>
+  Document statistics
+</h4>
+
+<div class="row">
+  <div class="col s12 m4 l4">
+    <div class="card-panel center <%= Document.color %> white-text">
+      <h1 style="margin: 0">
+        <%= number_with_delimiter @documents.sum { |doc| doc.cached_word_count || 0 } %>
+      </h1>
+      total words written
+    </div>
+  </div>
+  <div class="col s12 m4 l4">
+    <%= link_to documents_path do %>
+      <div class="card-panel center <%= Document.color %> white-text hoverable">
+        <h1 style="margin: 0">
+          <%= number_with_delimiter @documents.count %>
+        </h1>
+        total documents
+      </div>
+    <% end %>
+  </div>
+  <div class="col s12 m4 l4">
+    <div class="card-panel center <%= Document.color %> white-text">
+      <h1 style="margin: 0">
+        <%= number_with_delimiter @revisions.count %>
+      </h1>
+      document versions
+    </div>
+  </div>
+
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">You've written <%= pluralize @documents.count, 'document' %> on Notebook.ai</div>
+
+        <table class="striped">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Word count</th>
+              <th>History</th>
+              <th>Analyzed?</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% @documents.each do |document| %>
+              <tr>
+                <td>
+                  <i class="material-icons left <%= Document.text_color %>"><%= Document.icon %></i>
+                  <%= link_to document.title, document, class: "#{Document.text_color}" %>
+                </td>
+                <td>
+                  <%= number_with_delimiter(document.cached_word_count || 0) %>
+                  <%= 'word'.pluralize(document.cached_word_count || 0) %>
+                </td>
+                <td>
+                  <div>
+                    Created <%= time_ago_in_words document.created_at %> ago
+                    <span class="grey-text">
+                      (<%= document.created_at.strftime("%m/%d/%Y") %>)
+                    </span>
+                  </div>
+                  <div>
+                    Last updated <% time_ago_in_words document.updated_at %> ago
+                    <span class="grey-text">
+                      (<%= document.updated_at.strftime("%m/%d/%Y") %>)
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <% if document.document_analysis.where.not(completed_at: nil).any? %>
+                    <strong>
+                      <%= link_to 'Yes', analysis_document_path(document), class: 'orange-text' %>
+                    </strong>                
+                  <% else %>
+                    <%= link_to 'No', analysis_document_path(document) %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Writing activity over time</div>
+        <p>
+          Notebook.ai automatically creates backups of your documents as often as every five minutes as you're writing.
+          The following charts estimate approximately how much time you spend writing in Notebook.ai each day
+          based on how many of those automatic backups were created.
+        </p>
+        <br />
+        <%=
+          line_chart @revisions.where('created_at > ?', Date.current - 30.days).group_by_day(:created_at).map { |ts, c|
+            [ts.split(' ').first, c * 5]
+          },
+          title: "Last 30 days",
+          ytitle: "minutes",
+          colors: [Document.color],
+          suffix: " minutes",
+          download: true
+        %>
+        <br />
+        <%=
+          line_chart @revisions.group_by_day(:created_at).map { |ts, c|
+            [ts.split(' ').first, c * 5]
+          },
+          title: "All time",
+          ytitle: "minutes",
+          colors: [Document.color],
+          suffix: " minutes",
+          download: true
+        %>
+        <br />
+        <div class="center">
+          You have written something in a Notebook.ai document on
+          <strong>
+            <%= @revisions.group_by_day(:created_at).keys.count %>
+            different days!
+          </strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12 m12 l6">
+    <div class="card">
+      <div class="card-content center">
+        <div class="card-title">Words-written distribution per document</div>
+        <div class="grey-text">(for your 10 longest documents)</div>
+        <%=
+          pie_chart current_user.documents.where.not(cached_word_count: [0, nil]).order('cached_word_count DESC').limit(10).pluck(:title, :cached_word_count),
+            suffix: ' words',
+            legend: 'right',
+            download: true
+        %>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m12 l6">
+    <div class="card">
+      <div class="card-content center">
+        <div class="card-title">Words-written distribution per document</div>
+        <div class="grey-text">(for your 10 most recent documents)</div>
+        <%=
+          pie_chart current_user.documents.where.not(cached_word_count: [0, nil]).order('documents.updated_at DESC').limit(10).pluck(:title, :cached_word_count),
+            suffix: ' words',
+            legend: 'left',
+            download: true
+        %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Revisions per document</div>
+        <%=
+          bar_chart @revisions_per_document_data,
+            suffix: ' revisions',
+            colors: [Document.color],
+            download: true
+        %>
+      </div>
+    </div>
+  </div>
+</div>

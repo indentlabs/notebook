@@ -1,5 +1,7 @@
-# Controller for the Attribute model
 class AttributeFieldsController < ContentController
+  before_action :authenticate_user!
+  before_action :set_attribute_field, only: [:update]
+
   def create
     initialize_object.save!
     
@@ -18,12 +20,34 @@ class AttributeFieldsController < ContentController
     related_category.destroy if related_category.attribute_fields.empty?
   end
 
+  def update
+    unless @attribute_field.updatable_by?(current_user)
+      flash[:notice] = "You don't have permission to edit that!"
+      return redirect_back fallback_location: root_path
+    end
+
+    if @attribute_field.update(attribute_field_params.merge({ migrated_from_legacy: true }))
+      @content = @attribute_field
+      successful_response(
+        @attribute_field, 
+        t(:update_success, model_name: @attribute_field.label)
+      )
+    else
+      failed_response(
+        'edit', 
+        :unprocessable_entity, 
+        "Unable to save page. Error code: " + @attribute_field.errors.to_json
+      )
+    end
+  end
+
   private
 
   def initialize_object
-    @content = AttributeField.find_or_initialize_by(content_params).tap do |field|
-      field.user_id    = current_user.id
-      field.field_type = 'text_area'
+    @content = AttributeField.find_or_initialize_by(content_params.except(:field_options)).tap do |field|
+      field.user_id = current_user.id
+      field.field_options = content_params.fetch(:field_options, {})
+      field.migrated_from_legacy = true
     end
 
     if @content.attribute_category_id.nil?
@@ -38,10 +62,6 @@ class AttributeFieldsController < ContentController
 
       @content.attribute_category_id = category.id
     end
-
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created attribute field', {
-      'content_type': params[:entity_type]
-    }) if Rails.env.production?
 
     @content
   end
@@ -70,6 +90,10 @@ class AttributeFieldsController < ContentController
     params.require(:attribute_field).permit(content_param_list)
   end
 
+  def attribute_field_params
+    params.require(:attribute_field).permit(:id, :label, field_options: {})
+  end
+
   def content_param_list
     [
       :universe_id, :user_id,
@@ -78,7 +102,14 @@ class AttributeFieldsController < ContentController
       :label, :description,
       :entity_type, 
       :attribute_category_id,
-      :hidden
+      :hidden,
+      field_options: {}
     ]
+  end
+
+  private
+
+  def set_attribute_field
+    @attribute_field = current_user.attribute_fields.find_by(params.permit(:id))
   end
 end

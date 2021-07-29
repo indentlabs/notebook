@@ -55,7 +55,7 @@
       <% showed_any_content = true %>
 
       <%
-        content_type = content_type_name.constantize
+        content_type = content_class_from_name(content_type_name)
         category_ids_for_this_content_type = AttributeCategory.where(entity_type: content_type_name.downcase, user_id: current_user).pluck(:id)
         name_field = AttributeField.find_by(field_type: 'name', attribute_category_id: category_ids_for_this_content_type)
 
@@ -111,7 +111,7 @@
                         <%= f.hidden_field :deleted_at, value: nil %>
                         <%=
                           f.submit 'Recover page', 
-                            class: "#{content_type_name.constantize.color} lighten-4 btn black-text tooltipped",
+                            class: "#{content_class_from_name(content_type_name).color} lighten-4 btn black-text tooltipped",
                             data: { tooltip: "Un-delete and add this page back to your notebook." }
                         %>
                       <% end %>

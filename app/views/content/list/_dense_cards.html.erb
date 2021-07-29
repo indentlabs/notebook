@@ -1,0 +1,112 @@
+<div class="js-content-cards-list">
+  <% content_list.each.with_index do |content, i| %>
+    <div class="col s12 m3 l2 js-content-card-container">
+      <div class="hoverable card sticky-action" style="margin-bottom: 2px">
+        <div class="card-image waves-effect waves-block waves-light teal modal-trigger" data-target="document-info-<%= content.id %>">
+          <% if content_type.name == 'Document' %>
+            <div class='activator' style='height: 200px'></div>
+          <% else %>
+            <% content_image = asset_path("card-headers/#{content_type.name.downcase.pluralize}.jpg") %>
+            <% if content.respond_to?(:image_uploads) %>
+              <% images = content.image_uploads %>
+              <% if images.any? %>
+                <% content_image = images.sample.src(:medium) %>
+              <% end %>
+            <% end %>
+            <div class="activator" style="height: 200px; background: url('<%= content_image %>'); background-size: cover;"></div>
+          <% end %>
+
+          <span class="card-title js-content-name activator" style="padding: 0.2em 0.3em">
+            <div class="not-bordered-text">
+              <%= ContentFormatterService.show(text: content.name.presence || 'Untitled', viewing_user: current_user) %>
+            </div>
+
+            <% if content.respond_to?(:page_tags) %>
+              <% page_tags = content.page_tags %>
+              <% if page_tags.any? %>
+                <p class="tags-container">
+                  <% page_tags.each do |tag| %>
+                    <% if user_signed_in? && content.user == current_user %>
+                      <%= link_to params.permit(:tag).merge({ tag: PageTagService.slug_for(tag.tag) }) do %>
+                        <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                      <% end %>
+                    <% else %>
+                      <span class="new badge <%= params[:tag] == tag.slug ? 'orange' : 'grey' %> left" data-badge-caption="<%= tag.tag %>"></span>
+                    <% end %>
+                  <% end %>
+                </p>
+              <% end %>
+            <% end %>
+          </span>
+        </div>
+        <div class="card-action">
+          <% if current_user.can_update?(content) %>
+            <%= link_to edit_polymorphic_path(content), class: 'green-text right', target: content.is_a?(Document) ? '_new' : '_self', style: 'margin-right: 0' do %>
+              Edit
+            <% end %>
+          <% end %>
+          <% if current_user.can_read?(content) %>
+            <%= link_to polymorphic_path(content), class: 'blue-text text-lighten-1' do %>
+              View
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if local_assigns.fetch(:show_new_button, true) %>
+    <% if current_user.can_create?(content_type) %>
+      <div class="col s12 m6 l4">
+        <%= link_to new_polymorphic_path(content_type), class: 'white-text' do %>
+          <div class="hoverable card <%= content_type.color %> lighten-1" style="height: 320px;">
+            <div class="card-content fixed-card-content centered-card-content">
+              <p>
+                <i class="material-icons large">add</i>
+              </p>
+              <strong class="card-title">
+                New<br />
+                <%= content_type.name %>
+              </strong>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="col s12 m6 l4">
+        <div class="card <%= content_type.color %> lighten-3" style="height: 320px;">
+          <div class="card-content fixed-card-content">
+            <p class="center grey-text text-lighten-1" style="margin-top: 50px; margin-bottom: 20px;">
+              <i class="material-icons large"><%= content_type.icon %></i>
+            </p>
+            <p>
+              An active
+              <%= link_to 'Notebook.ai Premium', subscription_path, class: 'blue-text text-darken-2' %> subscription
+              is required to create additional
+              <%= content_type.name.downcase %> pages, but pages you've already created will always
+              be available here.
+            </p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+
+  <% if local_assigns.fetch(:show_template_editor_form, false) %>
+    <div class="col s12 m6 l4">
+      <%= link_to attribute_customization_path(content_type: content_type.name.downcase), class: 'white-text' do %>
+        <div class="hoverable card <%= content_type.color %> lighten-2" style="height: 320px;">
+          <div class="card-content fixed-card-content centered-card-content">
+            <p>
+              <i class="material-icons large"><%= content_type.icon %></i>
+            </p>
+            <strong class="card-title">
+              Customize<br />
+              template
+            </strong>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

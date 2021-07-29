@@ -10,7 +10,7 @@
       @seen_result_pages[seen_key] = true
     %>
 
-    <% entity = attribute.entity_type.constantize.find_by(id: attribute.entity_id) %>
+    <% entity = content_class_from_name(attribute.entity_type).find_by(id: attribute.entity_id) %>
     <% next unless entity %>
     <% next unless entity.user_id == current_user.id %>
 
@@ -18,7 +18,7 @@
       <div class="card hoverable">
         <div class="card-content black-text blue-grey lighten-5" style="height: 180px; overflow: hidden">
           <div class="card-title">
-            <%= link_to entity, class: "#{entity.class.color}-text" do %>
+            <%= link_to entity, class: "#{entity.class.text_color}" do %>
               <i class="material-icons" style="position: relative; top: 3px;"><%= entity.class.icon %></i>
               <%= entity.name %>
             <% end %>

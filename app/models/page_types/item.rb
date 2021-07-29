@@ -34,6 +34,10 @@ class Item < ApplicationRecord
     'text-darken-2 amber'
   end
 
+  def self.text_color
+    'text-darken-2 amber-text'
+  end
+
   def self.hex_color
     '#FFA000'
   end

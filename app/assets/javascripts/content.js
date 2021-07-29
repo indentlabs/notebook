@@ -100,5 +100,18 @@ $(document).ready(function () {
     });
   });
 
+  $('.js-load-page-name').each(function() {
+    // Replace this element's content with the name of the page
+    var tag = $(this);
+
+    $.get(
+      '/api/internal/' + tag.data('klass') + '/' + tag.data('id') + '/name'
+    ).done(function (response) {
+      tag.find('.name-container').text(response);
+    }).fail(function() {
+      tag.find('.name-conainer').text("Unknown " + tag.data('klass'));
+    });
+  });
+
 });
 

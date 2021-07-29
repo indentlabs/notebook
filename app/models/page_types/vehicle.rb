@@ -14,7 +14,11 @@ class Vehicle < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'text-lighten-2 green'
+    'text-lighten-2 lighten-2 green'
+  end
+
+  def self.text_color
+    'text-lighten-2 green-text'
   end
 
   def self.hex_color

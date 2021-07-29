@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_19_080418) do
+ActiveRecord::Schema.define(version: 2021_07_05_005416) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -134,6 +134,8 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.string "old_column_source"
     t.integer "position"
+    t.json "field_options"
+    t.boolean "migrated_from_legacy", default: false
     t.index ["attribute_category_id", "deleted_at"], name: "index_attribute_fields_on_attribute_category_id_and_deleted_at"
     t.index ["attribute_category_id", "label", "old_column_source", "field_type"], name: "attribute_fields_aci_label_ocs_ft"
     t.index ["attribute_category_id", "label", "old_column_source", "user_id", "field_type"], name: "attribute_fields_aci_label_ocs_ui_ft"
@@ -167,6 +169,8 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.index ["attribute_field_id", "deleted_at"], name: "index_attributes_on_attribute_field_id_and_deleted_at"
     t.index ["attribute_field_id", "user_id", "entity_type", "entity_id", "deleted_at"], name: "attributes_afi_ui_et_ei_da"
     t.index ["deleted_at", "attribute_field_id", "entity_type", "entity_id"], name: "deleted_at__attribute_field_id__entity_type_and_id"
+    t.index ["deleted_at", "user_id", "attribute_field_id", "entity_type", "entity_id", "id"], name: "all_the_export_fields_with_sort"
+    t.index ["deleted_at", "user_id", "attribute_field_id", "entity_type", "entity_id"], name: "all_the_export_fields"
     t.index ["entity_type", "entity_id"], name: "index_attributes_on_entity_type_and_entity_id"
     t.index ["user_id", "attribute_field_id"], name: "index_attributes_on_user_id_and_attribute_field_id"
     t.index ["user_id", "deleted_at"], name: "index_attributes_on_user_id_and_deleted_at"
@@ -263,7 +267,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_buildings_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_buildings_on_user_id_and_universe_id_and_deleted_at"
@@ -417,7 +421,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.string "page_type", default: "Character"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_characters_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_characters_on_deleted_at_and_universe_id"
@@ -445,7 +449,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_conditions_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_conditions_on_user_id_and_universe_id_and_deleted_at"
@@ -612,7 +616,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id", "universe_id"], name: "index_continents_on_deleted_at_and_id_and_universe_id"
     t.index ["deleted_at", "id", "user_id"], name: "index_continents_on_deleted_at_and_id_and_user_id"
@@ -656,7 +660,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.integer "user_id"
     t.string "page_type", default: "Country"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_countries_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_countries_on_deleted_at_and_universe_id"
@@ -814,7 +818,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.string "species"
     t.string "page_type", default: "Creature"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_creatures_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_creatures_on_deleted_at_and_universe_id"
@@ -859,7 +863,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "updated_at", null: false
     t.string "page_type", default: "Deity"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_deities_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_deities_on_deleted_at_and_universe_id"
@@ -1170,6 +1174,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "cached_word_count"
     t.index ["document_id"], name: "index_document_revisions_on_document_id"
   end
 
@@ -1183,10 +1188,16 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.text "synopsis"
     t.datetime "deleted_at"
     t.integer "universe_id"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.text "notes_text"
+    t.integer "folder_id"
+    t.integer "cached_word_count"
+    t.index ["deleted_at", "universe_id", "user_id"], name: "index_documents_on_deleted_at_and_universe_id_and_user_id"
+    t.index ["deleted_at", "universe_id"], name: "index_documents_on_deleted_at_and_universe_id"
+    t.index ["folder_id"], name: "index_documents_on_folder_id"
     t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
+    t.index ["user_id", "deleted_at"], name: "index_documents_on_user_id_and_deleted_at"
     t.index ["user_id"], name: "index_documents_on_user_id"
   end
 
@@ -1243,6 +1254,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.integer "document_analyses_created"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "document_revisions_created"
   end
 
   create_table "famous_figureships", force: :cascade do |t|
@@ -1316,7 +1328,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.string "material_uses"
     t.string "page_type", default: "Flora"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_floras_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_floras_on_deleted_at_and_universe_id"
@@ -1326,6 +1338,19 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.index ["universe_id"], name: "index_floras_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_floras_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_floras_on_user_id"
+  end
+
+  create_table "folders", force: :cascade do |t|
+    t.string "title", default: "New Folder"
+    t.string "context", default: "Document"
+    t.integer "parent_folder_id"
+    t.integer "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["parent_folder_id"], name: "index_folders_on_parent_folder_id"
+    t.index ["user_id", "context", "parent_folder_id"], name: "index_folders_on_user_id_and_context_and_parent_folder_id"
+    t.index ["user_id", "context"], name: "index_folders_on_user_id_and_context"
+    t.index ["user_id"], name: "index_folders_on_user_id"
   end
 
   create_table "foods", force: :cascade do |t|
@@ -1338,7 +1363,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_foods_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_foods_on_user_id_and_universe_id_and_deleted_at"
@@ -1457,7 +1482,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "updated_at", null: false
     t.string "page_type", default: "Government"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_governments_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_governments_on_deleted_at_and_universe_id"
@@ -1553,7 +1578,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.string "page_type", default: "Group"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_groups_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_groups_on_deleted_at_and_universe_id"
@@ -1633,7 +1658,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.string "page_type", default: "Item"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_items_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_items_on_deleted_at_and_universe_id"
@@ -1655,7 +1680,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_jobs_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_jobs_on_user_id_and_universe_id_and_deleted_at"
@@ -1730,7 +1755,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.integer "user_id"
     t.string "page_type", default: "Landmark"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_landmarks_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_landmarks_on_deleted_at_and_universe_id"
@@ -1762,7 +1787,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.string "page_type", default: "Language"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_languages_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_languages_on_deleted_at_and_universe_id"
@@ -1876,7 +1901,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.string "page_type", default: "Location"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_locations_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_locations_on_deleted_at_and_universe_id"
@@ -2198,7 +2223,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.datetime "archived_at"
     t.string "privacy"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.string "page_type", default: "Lore"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
@@ -2236,7 +2261,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.string "page_type", default: "Magic"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_magics_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_magics_on_deleted_at_and_universe_id"
@@ -2371,6 +2396,21 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.string "slug"
     t.datetime "deleted_at"
     t.index ["user_id"], name: "index_page_collections_on_user_id"
+  end
+
+  create_table "page_references", force: :cascade do |t|
+    t.string "referencing_page_type", null: false
+    t.integer "referencing_page_id", null: false
+    t.string "referenced_page_type", null: false
+    t.integer "referenced_page_id", null: false
+    t.integer "attribute_field_id"
+    t.string "cached_relation_title"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "reference_type"
+    t.index ["attribute_field_id"], name: "index_page_references_on_attribute_field_id"
+    t.index ["referenced_page_type", "referenced_page_id"], name: "page_reference_referenced_page"
+    t.index ["referencing_page_type", "referencing_page_id"], name: "page_reference_referencing_page"
   end
 
   create_table "page_settings_overrides", force: :cascade do |t|
@@ -2601,7 +2641,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.string "notes"
     t.string "page_type", default: "Planet"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_planets_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_planets_on_deleted_at_and_universe_id"
@@ -2655,7 +2695,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.string "page_type", default: "Race"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_races_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_races_on_deleted_at_and_universe_id"
@@ -2729,7 +2769,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.string "page_type", default: "Religion"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_religions_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_religions_on_deleted_at_and_universe_id"
@@ -2795,7 +2835,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.string "page_type", default: "Scene"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_scenes_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_scenes_on_deleted_at_and_universe_id"
@@ -2817,7 +2857,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_schools_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_schools_on_user_id_and_universe_id_and_deleted_at"
@@ -2866,7 +2906,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_sports_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_sports_on_user_id_and_universe_id_and_deleted_at"
@@ -2930,7 +2970,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "updated_at", null: false
     t.string "page_type", default: "Technology"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_technologies_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_technologies_on_deleted_at_and_universe_id"
@@ -3135,6 +3175,11 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.integer "moderation_state", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at", "messageboard_id"], name: "index_thredded_posts_on_deleted_at_and_messageboard_id"
+    t.index ["deleted_at", "postable_id"], name: "index_thredded_posts_on_deleted_at_and_postable_id"
+    t.index ["deleted_at", "user_id"], name: "index_thredded_posts_on_deleted_at_and_user_id"
+    t.index ["deleted_at"], name: "index_thredded_posts_on_deleted_at"
     t.index ["messageboard_id"], name: "index_thredded_posts_on_messageboard_id"
     t.index ["moderation_state", "updated_at"], name: "index_thredded_posts_for_display"
     t.index ["postable_id"], name: "index_thredded_posts_on_postable_id"
@@ -3196,6 +3241,10 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "last_post_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at", "messageboard_id"], name: "index_thredded_topics_on_deleted_at_and_messageboard_id"
+    t.index ["deleted_at", "user_id"], name: "index_thredded_topics_on_deleted_at_and_user_id"
+    t.index ["deleted_at"], name: "index_thredded_topics_on_deleted_at"
     t.index ["hash_id"], name: "index_thredded_topics_on_hash_id"
     t.index ["last_post_at"], name: "index_thredded_topics_on_last_post_at"
     t.index ["messageboard_id"], name: "index_thredded_topics_on_messageboard_id"
@@ -3313,6 +3362,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.string "subtitle"
     t.string "notes"
     t.string "private_notes"
+    t.boolean "favorite", default: false
     t.index ["universe_id"], name: "index_timelines_on_universe_id"
     t.index ["user_id"], name: "index_timelines_on_user_id"
   end
@@ -3411,7 +3461,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.integer "user_id"
     t.string "page_type", default: "Town"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_towns_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_towns_on_deleted_at_and_universe_id"
@@ -3432,7 +3482,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_traditions_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_traditions_on_user_id_and_universe_id_and_deleted_at"
@@ -3456,7 +3506,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "deleted_at"
     t.string "page_type", default: "Universe"
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["deleted_at", "id"], name: "index_universes_on_deleted_at_and_id"
     t.index ["deleted_at", "user_id"], name: "index_universes_on_deleted_at_and_user_id"
@@ -3538,6 +3588,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.boolean "notification_updates", default: true
     t.boolean "community_features_enabled", default: true
     t.boolean "private_profile", default: false
+    t.boolean "enabled_april_fools"
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["id", "deleted_at"], name: "index_users_on_id_and_deleted_at"
@@ -3554,7 +3605,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
-    t.boolean "favorite"
+    t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
     t.index ["universe_id"], name: "index_vehicles_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_vehicles_on_user_id_and_universe_id_and_deleted_at"
@@ -3722,10 +3773,13 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
   add_foreign_key "document_concepts", "document_analyses"
   add_foreign_key "document_entities", "document_analyses"
   add_foreign_key "document_revisions", "documents"
+  add_foreign_key "documents", "folders"
   add_foreign_key "documents", "universes"
   add_foreign_key "documents", "users"
   add_foreign_key "floras", "universes"
   add_foreign_key "floras", "users"
+  add_foreign_key "folders", "folders", column: "parent_folder_id"
+  add_foreign_key "folders", "users"
   add_foreign_key "foods", "universes"
   add_foreign_key "foods", "users"
   add_foreign_key "government_creatures", "creatures"
@@ -3867,6 +3921,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_080418) do
   add_foreign_key "page_collection_reports", "users"
   add_foreign_key "page_collection_submissions", "users"
   add_foreign_key "page_collections", "users"
+  add_foreign_key "page_references", "attribute_fields"
   add_foreign_key "page_tags", "users"
   add_foreign_key "paypal_invoices", "page_unlock_promo_codes"
   add_foreign_key "paypal_invoices", "users"

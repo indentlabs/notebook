@@ -114,11 +114,11 @@
 
 <div class="row">
   <% @analysis.document_entities.includes(:entity, entity: [:image_uploads]).order('entity_type asc, relevance desc').each do |entity| %>
-    <% entity_class = entity.entity_type.constantize %>
+    <% entity_class = content_class_from_name(entity.entity_type) %>
     <div class="col s12">
       <div class="card">
         <div class="card-content">
-          <div class="card-title <%= entity_class.color %>-text">
+          <div class="card-title <%= entity_class.text_color %>">
             <i class="material-icons left"><%= entity_class.icon %></i>
             <%= entity.text %>
           </div>
@@ -165,7 +165,7 @@
               <i class="material-icons left"><%= linked_entity_class.icon %></i>
               Edit page
             <% end %>
-            <%= link_to "Unlink page", destroy_entity_document_path(entity), class: "#{entity_class.color}-text right" %>
+            <%= link_to "Unlink page", destroy_entity_document_path(entity), class: "#{entity_class.text_color} right" %>
             <div class="clearfix"></div>
           <% else %>
             <%= link_to new_polymorphic_path(entity_class, document_entity: entity.id), class: entity_class.color + '-text' do %>
@@ -257,13 +257,13 @@
       <%= f.hidden_field :document_entity_id,   value: nil %>
 
       <% @current_user_content.each do |content_type, content_list| %>
-        <% content_type_class = content_type.constantize %>
+        <% content_type_class = content_class_from_name(content_type) %>
         <% next if content_type == 'Document' %>
         <h5><%= content_type.pluralize %></h5>
         <ul class="collection">
           <% content_list.each do |content| %>
             <a href="#" 
-               class="<%= content_type_class.color %>-text js-link-entity-selection" 
+               class="<%= content_type_class.text_color %> js-link-entity-selection" 
                data-id="<%= content.id %>"
                data-type="<%= content_type %>">
               <li class="collection-item">

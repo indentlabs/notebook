@@ -1,12 +1,33 @@
-<% value.each do |li| %>
-  <div class="chip">
-    <%= link_to li do %>
-      <span class="<%= li.class.color %>-text">
+<% value.each do |link_code| %>
+  <%
+    klass, id = link_code.split('-')
+  %>
+
+  <%#
+    In most cases, a user will be seeing their own content most of the time.
+    This allows us to primarily rely on @current_user_content but fall back
+    on js-load-page-name to fetch & load in post-page-load if the content isn't ours.
+  %>
+  <%
+    content = @current_user_content.fetch(klass, []).detect do |page|
+      page.page_type === klass && page.id === id.to_i
+    end
+  %>
+
+  <%# TODO: we should extract chips out into a react component, probably %>
+  <div class="chip <%= 'js-load-page-name' if content.nil? %>" 
+       data-klass="<%= klass %>" 
+       data-id="<%= id %>"
+  >
+    <%= link_to send("#{klass.downcase}_path", id) do %>
+      <span class="<%= content_class_from_name(klass).text_color %>">
         <i class="material-icons left">
-          <%= li.class.icon %>
+          <%= content_class_from_name(klass).icon %>
         </i>
       </span>
-      <%= li.name_field_value %>
+      <span class="name-container">
+        <%= content.try(:name) || "<em>Loading #{klass}</em>".html_safe %>
+      </span>
     <% end %>
   </div>
 <% end %>

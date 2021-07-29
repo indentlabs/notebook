@@ -1,0 +1,21 @@
+<div id="new-folder-modal" class="modal">
+  <%= form_for Folder.new(title: '') do |f| %>
+    <div class="modal-content">
+      <h4>
+        <i class="material-icons left medium <%= content_type.text_color %> lighten-1">create_new_folder</i>
+        Create new folder
+      </h4>
+      <div class="input-field">
+        <p>Name your new folder and then press CREATE to create it</p>
+        <%= f.text_field :title, placeholder: 'Folder name' %>
+      </div>
+
+      <%= f.hidden_field :context, value: content_type.name %>
+      <%= f.hidden_field :parent_folder_id, value: parent_folder.try(:id) %>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+      <%= f.button 'Create', class: "waves-effect waves-green btn #{Document.color} white-text" %>
+    </div>
+  <% end %>
+</div>

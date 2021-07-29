@@ -4,43 +4,27 @@ class ExportController < ApplicationController
 
   def index
     @sidenav_expansion = 'my account'
-
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed export page', {
-      'content count': current_user.content_count
-    }) if Rails.env.production?
-  end
-
-  def report_to_mixpanel format, scope
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'exported content', {
-      'export format': format,
-      'scope': scope
-    }) if Rails.env.production?
   end
 
   def csv # params[:model] needed
-    report_to_mixpanel 'csv', @pluralized_model
     send_data to_csv(current_user.send(@pluralized_model)), filename: "#{@pluralized_model}-#{Date.today}.csv"
   end
 
   def outline
-    report_to_mixpanel 'outline', 'notebook'
     send_data content_to_outline, filename: "notebook-#{Date.today}.txt"
   end
 
   def notebook_json
-    report_to_mixpanel 'json', 'notebook'
     json_dump = current_user.content.except('Document').except('Timeline').map { |category, content| {"#{category}": fill_relations(category.constantize, content)} }.to_json
     send_data json_dump, filename: "notebook-#{Date.today}.json"
   end
 
   def notebook_xml
-    report_to_mixpanel 'xml', 'notebook'
     xml_dump = current_user.content.except('Document').except('Timeline').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_xml
     send_data xml_dump, filename: "notebook-#{Date.today}.xml"
   end
   
   def notebook_yml
-    report_to_mixpanel 'yaml', 'notebook'
     yaml_dump = current_user.content.except('Document').except('Timeline').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_yaml
     send_data yaml_dump, filename: "notebook-#{Date.today}.yml"
   end

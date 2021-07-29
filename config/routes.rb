@@ -70,22 +70,25 @@ Rails.application.routes.draw do
     get '/analysis/readability', to: 'document_analyses#readability', on: :member
     get '/analysis/style',       to: 'document_analyses#style',       on: :member
     get '/analysis/sentiment',   to: 'document_analyses#sentiment',   on: :member
-    get  '/plaintext',        to: 'documents#plaintext',               on: :member
-    get  '/queue_analysis',   to: 'documents#queue_analysis',          on: :member
+    get  '/plaintext',           to: 'documents#plaintext',               on: :member
+    get  '/queue_analysis',      to: 'documents#queue_analysis',          on: :member
 
-    post '/link_entity',      to: 'documents#link_entity',             on: :collection
     resources :document_revisions, path: 'revisions', on: :member
+
+    get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
 
     post :toggle_favorite, on: :member
 
     # todo these routes don't belong here and make for awfully weird urls (/documents/:analysis_id/destroy, etc)
     get  '/destroy_analysis', to: 'documents#destroy_analysis',        on: :member
 
+    post '/link_entity',         to: 'documents#link_entity',          on: :collection
     # deprecated route:
     get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
     # new route:
     get  '/unlink/:page_type/:page_id', to: 'documents#unlink_entity', on: :member
   end
+  resources :folders, only: [:create, :update, :destroy, :show]
 
   scope '/my' do
     get '/content',         to: 'main#dashboard', as: :dashboard
@@ -97,6 +100,7 @@ Rails.application.routes.draw do
 
     # Legacy route: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
+
 
     get '/referrals',          to: 'data#referrals', as: :referrals
 
@@ -131,6 +135,7 @@ Rails.application.routes.draw do
       get '/usage',         to: 'data#usage'
       get '/recyclebin',    to: 'data#recyclebin'
       get '/archive',       to: 'data#archive'
+      get '/documents',     to: 'data#documents', as: :data_documents
       get '/uploads',       to: 'data#uploads'
       get '/discussions',   to: 'data#discussions'
       get '/collaboration', to: 'data#collaboration'
@@ -155,12 +160,13 @@ Rails.application.routes.draw do
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
 
+  get '/paper', to: redirect('https://www.notebook-paper.com')
+
   # Main pages
   root to: 'main#index'
 
   # Info pages
   scope '/about' do
-    #get '/notebook', to: 'main#about_notebook', as: :about_notebook
     get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
   end
 
@@ -184,6 +190,7 @@ Rails.application.routes.draw do
     get 'pinboard',  to: 'lab#pinboard'
 
     get 'dice', to: 'lab#dice'
+    get 'crossword', to: 'lab#crossword'
   end
 
   # Sessions
@@ -240,6 +247,16 @@ Rails.application.routes.draw do
     # Attributes
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
   end
+
+  # For non-API API endpoints
+  scope :internal do
+    patch '/link_field_update/:field_id',     to: 'content#link_field_update',     as: :link_field_update
+    patch '/name_field_update/:field_id',     to: 'content#name_field_update',     as: :name_field_update
+    patch '/text_field_update/:field_id',     to: 'content#text_field_update',     as: :text_field_update
+    patch '/tags_field_update/:field_id',     to: 'content#tags_field_update',     as: :tags_field_update
+    patch '/universe_field_update/:field_id', to: 'content#universe_field_update', as: :universe_field_update
+  end
+
   get 'search/', to: 'search#results'
 
   authenticate :user, lambda { |u| u.site_administrator? || Rails.env.development? } do
@@ -294,6 +311,11 @@ Rails.application.routes.draw do
       get '/references', to: 'api_docs#references'
     end
 
+    # API requests we don't want to officially make public -- free to break!
+    namespace :internal do
+      get '/:page_type/:page_id/name',            to: 'api#name_lookup'
+    end
+
     namespace :v1 do
       scope '/categories' do
         get '/suggest/:entity_type',              to: 'attribute_categories#suggest'
@@ -309,11 +331,13 @@ Rails.application.routes.draw do
       Rails.application.config.content_types[:all].each do |content_type|
         get "#{content_type.name.downcase.pluralize}", to: "api##{content_type.name.downcase.pluralize}"
       end
+      get :timelines, to: "api#timelines"
 
       # Content show paths
       Rails.application.config.content_types[:all].each do |content_type|
         get "#{content_type.name.downcase}/:id", to: "api##{content_type.name.downcase}"
       end
+      get "timeline/:id", to: "api#timeline"
     end
   end
 
@@ -383,4 +407,3 @@ Rails.application.routes.draw do
   get '/redeem/infostack', to: 'main#infostack'
   get '/redeem/sascon',    to: 'main#sascon'
 end
-# rubocop:enable LineLength

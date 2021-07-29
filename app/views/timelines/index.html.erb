@@ -29,9 +29,9 @@
               -->
             </div>
             <div class="card-content black-text js-content-name">
-              <% if timeline.universe_id? %>
+              <% if timeline.universe %>
                 <p class="right">
-                  <%= link_to timeline.universe, class: "#{Universe.color}-text" do %>
+                  <%= link_to timeline.universe, class: "#{Universe.text_color}" do %>
                     <i class="material-icons left"><%= Universe.icon %></i>
                     <%= timeline.universe.name %>
                   <% end %>
@@ -49,13 +49,8 @@
 
               <div>
                 <% timeline.page_tags.each do |page_tag| %>
-                  <%=
-                    link_to send(
-                      "page_tag_timelines_path",
-                      slug: PageTagService.slug_for(page_tag.tag)
-                    ) do
-                  %>
-                    <span class="new badge <%= params[:slug] == page_tag.slug ? Timeline.color : 'grey' %> right" data-badge-caption="<%= page_tag.tag %>"></span>
+                  <%= link_to params.permit(:tag).merge({ tag: PageTagService.slug_for(page_tag.tag) }) do %>
+                    <span class="new badge <%= params[:tag] == page_tag.slug ? Timeline.color : 'grey' %> right" data-badge-caption="<%= page_tag.tag %>"></span>
                   <% end %>
                 <% end %>
               </div>
@@ -120,7 +115,7 @@
           yet!
         </h4>
         <h1>
-          <i class="material-icons <%= Timeline.color %>-text" style="font-size: 200%">
+          <i class="material-icons <%= Timeline.text_color %>" style="font-size: 200%">
             <%= Timeline.icon %>
           </i>
         </h1>

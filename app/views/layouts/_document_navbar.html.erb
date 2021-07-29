@@ -45,7 +45,7 @@
           <li class="divider"></li>
           <li>
             <%= link_to @document, target: '_blank' do %>
-              <i class="material-icons left <%= Document.color %>-text"><%= Document.icon %></i>
+              <i class="material-icons left <%= Document.text_color %>"><%= Document.icon %></i>
               Read-only view
             <% end %>
           </li>
@@ -63,7 +63,7 @@
           </li>
           <li>
             <%= link_to '#', class: 'modal-trigger', data: { target: 'document-notes-modal' } do %>
-              <i class="material-icons left <%= Document.color %>-text">edit</i>
+              <i class="material-icons left <%= Document.text_color %>">edit</i>
               Document notes
             <% end %>
           </li>
@@ -158,7 +158,7 @@
               <p class="grey-text"><%= pluralize linked_entity_universes.count, 'suggested universe' %></p>
               <% linked_entity_universes.each do |universe| %>
                 <p>
-                  <label>
+                  <label class="js-autosave-trigger">
                     <%= f.radio_button :universe_id, universe.id, class: 'with-gap', checked: @document.universe_id == universe.try(:id) %>
                     <span><%= universe.name %></span>
                   </label>
@@ -195,16 +195,14 @@
 </div>
 
 <%= content_for :javascript do %>
-  $(document).ready(function () {
-    var universe_picker_form = $('#universe-picker-modal').find('form');
+  var universe_picker_form = $('#universe-picker-modal').find('form');
 
-    universe_picker_form.find('.js-autosave-trigger').click(function () {
-      var selected_universe_name = $(this).text().trim();
+  universe_picker_form.find('.js-autosave-trigger').click(function () {
+    var selected_universe_name = $(this).text().trim();
 
-      // console.log('name is now ' + selected_universe_name);
+    // console.log('name is now ' + selected_universe_name);
 
-      $('.js-content-universe-name').text(selected_universe_name);
-      $('#universe-picker-modal').find('form').submit();
-    });
+    $('.js-content-universe-name').text(selected_universe_name);
+    $('#universe-picker-modal').find('form').submit();
   });
 <% end %>

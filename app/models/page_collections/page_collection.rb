@@ -1,4 +1,3 @@
-
 class PageCollection < ApplicationRecord
   acts_as_paranoid
   
@@ -28,6 +27,9 @@ class PageCollection < ApplicationRecord
     }
   
   validates :title, presence: true
+
+  include Authority::Abilities
+  self.authorizer_name = 'CollectionAuthorizer'
 
   def pending_submissions
     page_collection_submissions.where(accepted_at: nil).order('submitted_at ASC')
@@ -70,6 +72,10 @@ class PageCollection < ApplicationRecord
 
   def self.color
     'brown'
+  end
+
+  def self.text_color
+    'brown-text'
   end
 
   def self.hex_color

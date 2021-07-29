@@ -172,6 +172,7 @@ class PageLookupSidebar extends React.Component {
               {field.value.map((tag) => {
                 return(
                   <Chip
+                    id={'tag-' + tag.tag}
                     variant="outlined"
                     size="small"
                     label={tag.tag}
@@ -186,9 +187,28 @@ class PageLookupSidebar extends React.Component {
           </React.Fragment>
         );
       
+      case "TimelineEvent":
+        return(
+          <React.Fragment key={field.id}>
+            <ListSubheader component="div" style={{lineHeight: '1.5em'}}>
+              <div className='right'>
+                <i className='material-icons right'>
+                  schedule
+                </i>
+                { field.time_label }
+              </div>
+              {field.label}
+            </ListSubheader>
+            <ListItem>
+              <SimpleFormat text={ field.description } />
+            </ListItem>
+            <Divider></Divider>
+          </React.Fragment>
+        )
+      
       default:
         return(
-          <div>error loading {field.label}</div>
+          <div>error loading {field.type}: {field.label}</div>
         );
     }
   }

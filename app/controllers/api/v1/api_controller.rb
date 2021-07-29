@@ -90,7 +90,7 @@ module Api
       # Content page show endpoints
       Rails.application.config.content_types[:all].each do |content_type|
         define_method(content_type.name.downcase) do
-          page = content_type.find_by(id: params[:id])
+          page = content_type.find_by(id: params[:id].to_i)
 
           if page && page.readable_by?(@current_api_user || User.new)
             render json: ApiContentSerializer.new(page, include_blank_fields: params.fetch(:include_blank_fields, false)).data
@@ -98,6 +98,39 @@ module Api
             render json: { error: "Page not found" }
           end
         end
+      end
+
+      def timeline
+        timeline = Timeline.find_by(id: params[:id].to_i)
+        events   = timeline.timeline_events
+
+        render json: {
+          name: timeline.name,
+          description: timeline.description,
+          universe:    timeline.universe.nil? ? nil : {
+            id:   timeline.universe.id,
+            name: timeline.universe.try(:name)
+          },
+          meta: {
+            created_at: timeline.created_at,
+            updated_at: timeline.updated_at
+          },
+          categories: [
+            id:    1,
+            label: 'Events',
+            icon:  Timeline.icon,
+            fields: events.map { |event|
+              {
+                id:    event.id,
+                label: event.title,
+                icon:  Timeline.icon,
+                type:  TimelineEvent.name,
+                description: event.description,
+                time_label:  event.time_label
+              }
+            }
+          ]
+        }
       end
     end
   end

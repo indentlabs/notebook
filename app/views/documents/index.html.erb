@@ -11,10 +11,33 @@
 <% end %>
 
 <% if @documents.any? %>
-  <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } %>
-  <%= render partial: 'notice_dismissal/messages/02' %>
-  <%= render partial: 'content/list/cards', locals: { content_list: @documents, content_type: Document } %>
+  <%= content_for :full_width_page_content do %>
+    <div class="container-fluid">
+      <div class="row">
+        <h5>Recently-edited documents</h5>
+        <%= render partial: 'content/list/dense_cards', locals: { content_list: @recent_documents, content_type: Document, show_new_button: false } %>
+      </div>
+
+      <%= render partial: 'folders/list', locals: { folders: @folders } %>
+
+      <div class="row">
+        <h5>All Documents <span class="grey-text"><%= @documents.count %></span></h5>
+        <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } %>
+        <%=
+          render partial: 'content/list/document_table', locals: {
+            content_list: @documents,
+            content_type: Document,
+            folders:      @folders.pluck(:title, :id),
+            tags:         @page_tags.to_a
+          }
+        %>
+        <%# render partial: 'notice_dismissal/messages/02' %>
+      </div>
+    </div>
+  <% end %>
 <% end %>
+
+<!-- recent analysis -->
 
 <% if @documents.empty? %>
   <div class="row">
@@ -22,7 +45,7 @@
       <div class="hoverable card center" style="margin: 50px 0; padding: 50px 0; border-bottom: 10px solid <%= Document.hex_color %>">
         <h4>You haven't created any documents <% if @universe_scope %>in the <%= link_to @universe_scope.name, @universe_scope, class: Universe.color + "-text" %> universe<% end %> yet!</h4>
         <h1>
-          <i class="material-icons <%= Document.color %>-text" style="font-size: 200%">
+          <i class="material-icons <%= Document.text_color %>" style="font-size: 200%">
             <%= Document.icon %>
           </i>
         </h1>
@@ -35,3 +58,5 @@
     </div>
   </div>
 <% end %>
+
+<%= render partial: 'folders/new_modal', locals: { content_type: Document, parent_folder: @folder } %>

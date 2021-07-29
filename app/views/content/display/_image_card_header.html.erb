@@ -2,19 +2,18 @@
   <%= render partial: 'content/display/favorite_control', locals: { content: @content } %>
 
   <ul class="slides">
-    <% image_uploads = @content.image_uploads.map { |image| image.src.url(:large) } %>
-    <% image_uploads = ["card-headers/#{@content.class.name.downcase.pluralize}.jpg"] if image_uploads.empty? %>
-
-    <% image_uploads.each do |image_source| %>
+    <% @content.public_image_uploads.each do |image_source| %>
       <li>
-        <%= image_tag image_source %>
+        <%= image_tag image_source.is_a?(String) ? image_source : image_source.src(:large) %>
         <div class="caption bordered-text center">
           <h3>
             <% if @content.persisted? %>
-              <%= simple_format ContentFormatterService.show(
-                text: @content.name_field_value,
-                viewing_user: current_user
-              ) %>
+              <%= link_to @content do %>
+                <%= simple_format ContentFormatterService.show(
+                  text: @content.name_field_value,
+                  viewing_user: current_user
+                ) %>
+              <% end %>
               <small>
                 <%= simple_format ContentFormatterService.show(
                   text: @content.description,

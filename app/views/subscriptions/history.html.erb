@@ -26,7 +26,7 @@
             <% else %>
               <p>
                 We have a payment method on file for you through Stripe
-                (<%= @stripe_customer.sources.data[0].brand %> ending in <%= @stripe_customer.sources.data[0].last4 %>),
+                (<%= @stripe_customer.sources.data[0].try(:brand) || 'a card' %> ending in <%= @stripe_customer.sources.data[0].last4 %>),
                 but since we don't store it, you cannot edit it. You can choose to add a new one (replacing the old),
                 or delete the existing one.
               </p>

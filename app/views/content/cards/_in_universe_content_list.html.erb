@@ -1,7 +1,7 @@
 <%
-  content_type_name  = content_type.to_s.titleize                # "Character"
-  content_type_class = content_type_name.constantize             # Character
-  content_type_pluralized = content_type_name.downcase.pluralize # characters
+  content_type_name  = content_type.to_s.titleize                 # "Character"
+  content_type_class = content_class_from_name(content_type_name) # Character
+  content_type_pluralized = content_type_name.downcase.pluralize  # characters
 
   category_ids_for_this_content_type = AttributeCategory.where(entity_type: content_type_name.downcase, user_id: current_user).pluck(:id)
   name_field = AttributeField.find_by(field_type: 'name', attribute_category_id: category_ids_for_this_content_type)
@@ -28,7 +28,7 @@
         asset_path("card-headers/#{content_type_pluralized}.jpg")
       end
     %>
-    <div class="activator mp-iucl-view-list" style="height: 265px; background: url('<%= category_image %>'); background-size: cover;"></div>
+    <div class="activator mp-iucl-view-list" style="height: 300px; background: url('<%= category_image %>'); background-size: cover;"></div>
     <span class="card-title bordered-text" style="font-size: 200%">
       <% if defined?(card_title) && !card_title.blank? %>
         <%= card_title %>
@@ -78,12 +78,12 @@
   <div class="card-reveal">
     <span class="card-title">
       <% if content_list.any? %>
-        <i class="material-icons <%= content_type_class.color %>-text" style="position: relative; top: 3px">
+        <i class="material-icons <%= content_type_class.text_color %>" style="position: relative; top: 3px">
           <%= content_type_class.icon %>
         </i>
       <% end %>
       <% if defined?(@content) && @content.is_a?(Universe) && content_type != :universe && content_type.to_s.downcase != 'universe' %>
-        <%= link_to content_type_pluralized.titleize, send("#{content_type_pluralized}_universe_path", { id: @content.id }), class: "#{content_type_class.color}-text" %>
+        <%= link_to content_type_pluralized.titleize, send("#{content_type_pluralized}_universe_path", { id: @content.id }), class: "#{content_type_class.text_color}" %>
       <% else %>
         <%= content_type_pluralized.titleize %>
       <% end %>
@@ -100,7 +100,7 @@
         <tr>
           <td>
             <%= link_to polymorphic_path(content.page_type.downcase, id: content.id) do %>
-              <i class="material-icons left <%= content_type_class.color %>-text"><%= content_type_class.icon %></i>
+              <i class="material-icons left <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
               <%= list_name_lookup_cache[content.id].presence || content.name.presence || "Untitled #{content.page_type}" %>
             <% end %>
           </td>
@@ -128,7 +128,7 @@
     <% elsif content_list.empty? %>
       <div class="row">
         <div class="col s4">
-          <h1><i class="material-icons <%= content_type_class.color %>-text text-lighten-2" style="font-size: 150%">
+          <h1><i class="material-icons <%= content_type_class.text_color %> text-lighten-2" style="font-size: 150%">
             <%= content_type_class.icon %>
           </i></h1>
         </div>

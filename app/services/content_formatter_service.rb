@@ -16,7 +16,7 @@ class ContentFormatterService < Service
   # Only allow linking to content type classes
   # todo: we shouldn't have to map name here, but apparently rails is having a little difficulty
   # https://s3.amazonaws.com/raw.paste.esk.io/Llb%2F64DJHK?versionId=19Lb_TtukDbo1J_IoCpkr.d.pwpW_vmH
-  VALID_LINK_CLASSES = Rails.application.config.content_types[:all].map(&:name)
+  VALID_LINK_CLASSES = Rails.application.config.content_types[:all].map(&:name) + %w(Timeline Document)
   def self.show(text:, viewing_user: User.new)
     # We want to evaluate markdown first, because the markdown engine also happens
     # to strip out HTML tags. So: markdown, _then_ insert content links.
@@ -85,7 +85,7 @@ class ContentFormatterService < Service
     content_tag(:span, class: 'chip') do
       body = ''
       if class_model
-        body += content_tag(:span, class: class_model ? "#{class_model.color}-text" : '') do
+        body += content_tag(:span, class: class_model ? "#{class_model.text_color}" : '') do
           # todo tooltip the class icon
           content_tag(:i, class: 'material-icons left', style: 'position: relative; top: 3px;') do
             class_model.icon
@@ -99,7 +99,7 @@ class ContentFormatterService < Service
 
   def self.inline_template(class_model=nil)
     content_tag(:span, class: 'inline-link') do
-      content_tag(:span, class: class_model ? "#{class_model.color}-text" : '') do
+      content_tag(:span, class: class_model ? "#{class_model.text_color}" : '') do
         yield
       end
     end
@@ -111,7 +111,7 @@ class ContentFormatterService < Service
     [
       Rails.env.production? ? 'https://' : 'http://',
       Rails.env.production? ? 'www.notebook.ai' : 'localhost:3000', # Rails.application.routes.default_url_options[:host]?
-      '/plan/',
+      content_model.class.name != Document.name ? '/plan/' : '/',
       content_model.class.name.downcase.pluralize,
       '/',
       content_model.id

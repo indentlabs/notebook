@@ -2,21 +2,30 @@
   <%= render partial: 'content/display/image_card_header' %>
 <% end %>
 
-<div class="row">
-  <%= form_for @content, multipart: true do |form| %>
-    <div class="col s12 m9">
-      <div class="hoverable card">
-        <div class="card-image">
-          <%= render partial: 'content/display/floating_action_buttons', locals: { creating: true } %>
-        </div>
-        <%= render partial: 'content/form', locals: { f: form, content: @content } %>
-      </div>
+<div class="row flex">
+  <div class="col s12 m3">
+    <div class="sticky-below-navbar">
+      <%=
+        render partial: 'content/display/sideactions', 
+          locals: { 
+            creating: true, 
+            editing:  false,
+            content: @content
+          } 
+      %>
+      <%=
+        render partial: 'content/display/sidelinks', 
+          locals: { 
+            creating: true, 
+            content: @content
+          } 
+      %>
     </div>
+  </div>
 
-    <div class="col s12 m3">
-      <%= render partial: 'content/display/sidelinks', locals: { creating: true, content: @content } %>
-    </div>
-  <% end %>
+  <div class="col s12 m9">
+    <%= render partial: 'content/form', locals: { content: @content } %>
+  </div>
 </div>
 
 <script type="text/javascript">
@@ -24,7 +33,3 @@
 </script>
 
 <%= render partial: 'javascripts/content_linking' %>
-
-<% if @content.persisted? %>
-  <%= render partial: 'content/share', locals: { shared_content: @content} %>
-<% end %>

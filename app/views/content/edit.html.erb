@@ -4,18 +4,9 @@
   <%= render partial: 'content/display/image_card_header' %>
 <% end %>
 
-<div class="row">
-  <%= form_for @content, multipart: true do |form| %>
-    <div class="col s12 m9">
-      <div class="hoverable card">
-        <div class="card-image">
-          <%= render partial: 'content/display/floating_action_buttons', locals: { editing: true } %>
-        </div>
-        <%= render partial: 'content/form', locals: { f: form, content: @serialized_content } %>
-      </div>
-    </div>
-
-    <div class="col s12 m3">
+<div class="row flex">
+  <div class="col s12 m3">
+    <div class="sticky-below-navbar">
       <%=
         render partial: 'content/display/sidelinks',
           locals: {
@@ -24,9 +15,26 @@
           }
       %>
     </div>
-  <% end %>
+  </div>
+
+  <div class="col s12 m6">
+    <%= render partial: 'content/form', locals: { content: @serialized_content } %>
+  </div>
+
+  <div class="col s12 m3">
+    <div class="sticky-below-navbar">
+      <%=
+        render partial: 'content/display/sideactions',
+          locals: {
+            editing: true,
+            content: @serialized_content
+          }
+      %>
+    </div>
+  </div>
 </div>
 
+<%# todo: surely we can strip this out (to a general slider.js?), no? %>
 <script type="text/javascript">
   $(document).ready(function() {
     $('.slider').slider({

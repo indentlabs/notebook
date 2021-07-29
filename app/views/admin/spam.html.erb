@@ -1,4 +1,4 @@
-<table>
+<table style="max-width: 100%">
   <tr>
     <th>Thread</th>
     <th>Links</th>
@@ -11,8 +11,10 @@
     <% links = post.content.scan(/([htp]+?s?:?\/\/[^\s\)"']*)/i) %>
     <% next unless links.any? %>
     <tr>
-        <td><%= post.postable.title %> (<%= post.postable.slug %>)</td>
-        <td>
+        <td style="max-width: 200px">
+          <%= post.postable.title %> (<%= post.postable.slug %>)
+        </td>
+        <td style="max-width: 200px; overflow-x: scroll">
           <ul>
             <% links.each do |url| %>
               <%= link_to url.first, url.first %>
@@ -22,11 +24,13 @@
         <td>
           <% links.each do |url| %>
             <%= link_to url.first do %>
-              <%= image_tag url.first, class: 'left', style: "height: 100px; width: 100px" %>
+              <%= image_tag url.first, class: 'left', style: "height: 200px; width: 200px" %>
             <% end %>
           <% end %>
         </td>
-        <td><%= post.content %></td>
+        <td style="max-width: 800px; overflow-x: scroll">
+          <%= post.content %>
+        </td>
     </tr>
   <% end %>
 </table>

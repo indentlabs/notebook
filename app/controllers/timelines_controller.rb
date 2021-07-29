@@ -18,8 +18,8 @@ class TimelinesController < ApplicationController
       page_type: Timeline.name,
       page_id:   @timelines.pluck(:id)
     ).order(:tag)
-    if params.key?(:slug)
-      @filtered_page_tags = @page_tags.where(slug: params[:slug])
+    if params.key?(:tag)
+      @filtered_page_tags = @page_tags.where(slug: params[:tag])
       @timelines = @timelines.select { |timeline| @filtered_page_tags.pluck(:page_id).include?(timeline.id) }
     end
 
@@ -39,7 +39,7 @@ class TimelinesController < ApplicationController
 
   # GET /timelines/new
   def new
-    timeline = current_user.timelines.create(name: 'Untitled Timeline').reload
+    timeline = current_user.timelines.create(name: 'Untitled Timeline', universe: @universe_scope).reload
     redirect_to edit_timeline_path(timeline)
   end
 

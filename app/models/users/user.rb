@@ -25,6 +25,7 @@ class User < ApplicationRecord
     length: { maximum: 20 },
   if: Proc.new { |user| user.forums_badge_text_changed? }
 
+  has_many :folders
   has_many :subscriptions, dependent: :destroy
   has_many :billing_plans, through: :subscriptions
   def on_premium_plan?
@@ -143,11 +144,27 @@ class User < ApplicationRecord
     define_method "linkable_#{pluralized_content_type}" do
       # We append [0] to the ID list here in case both sets are empty, since IN () is invalid syntax but IN(0) is [and has the same result]
       content_type.where("""
-        universe_id IN (#{(my_universe_ids + contributable_universe_ids + [0]).uniq.join(',')})
+        universe_id IN (#{(my_universe_ids + contributable_universe_ids + [-1]).uniq.join(',')})
           OR
         (universe_id IS NULL AND user_id = #{self.id.to_i})
-      """)
+      """).where(archived_at: nil)
     end
+  end
+
+  def linkable_documents
+    Document.where("""
+      universe_id IN (#{(my_universe_ids + contributable_universe_ids + [-1]).uniq.join(',')})
+        OR
+      (universe_id IS NULL AND user_id = #{self.id.to_i})
+    """)
+  end
+
+  def linkable_timelines
+    Timeline.where("""
+      universe_id IN (#{(my_universe_ids + contributable_universe_ids + [-1]).uniq.join(',')})
+        OR
+      (universe_id IS NULL AND user_id = #{self.id.to_i})
+    """).where(archived_at: nil)
   end
 
   has_many :documents, dependent: :destroy
@@ -156,7 +173,7 @@ class User < ApplicationRecord
   after_create :initialize_referral_code
   after_create :initialize_secure_code
   after_create :initialize_content_type_activators
-  after_create :follow_andrew
+  after_create :follow_andrew # <3
 
   # TODO we should do this, but we need to figure out how to make it fast first
   # after_create :initialize_categories_and_fields
@@ -314,6 +331,10 @@ class User < ApplicationRecord
 
   def self.color
     'green'
+  end
+
+  def self.text_color
+    'green-text'
   end
 
   def favorite_page_type_color

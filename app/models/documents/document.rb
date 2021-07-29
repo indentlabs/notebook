@@ -2,7 +2,6 @@ class Document < ApplicationRecord
   acts_as_paranoid
 
   belongs_to :user,     optional: true
-  belongs_to :universe, optional: true
 
   has_many :document_analysis,   dependent: :destroy
   has_many :document_entities,   through: :document_analysis
@@ -15,14 +14,34 @@ class Document < ApplicationRecord
   include HasParseableText
   include HasPartsOfSpeech
   include HasImageUploads
+  include HasPageTags
+  include BelongsToUniverse
+
+  belongs_to :folder, optional: true
+
+  # TODO: include IsContentPage ?
 
   include Authority::Abilities
   self.authorizer_name = 'DocumentAuthorizer'
 
   attr_accessor :tagged_text
 
+  KEYS_TO_TRIGGER_REVISION_ON_CHANGE = %w(title body synopsis notes_text)
+
   def self.color
     'teal'
+  end
+
+  def self.text_color
+    'teal-text'
+  end
+
+  def color
+    Document.color
+  end
+
+  def text_color
+    Document.text_color
   end
 
   def self.hex_color
@@ -31,6 +50,14 @@ class Document < ApplicationRecord
 
   def self.icon
     'description'
+  end
+
+  def icon
+    Document.icon
+  end
+
+  def page_type
+    'Document'
   end
 
   def name
@@ -56,12 +83,40 @@ class Document < ApplicationRecord
   end
 
   def save_document_revision!
-    SaveDocumentRevisionJob.perform_later(self.id)
+    if (saved_changes.keys & KEYS_TO_TRIGGER_REVISION_ON_CHANGE).any?
+      SaveDocumentRevisionJob.perform_later(self.id)
+    end
+  end
+
+  def word_count
+    self.cached_word_count || 0 # self.computed_word_count
+  end
+
+  def computed_word_count
+    return 0 unless self.body && self.body.present?
+
+    # Settings: https://github.com/diasks2/word_count_analyzer
+    # TODO: move this into analysis services & call that here
+    WordCountAnalyzer::Counter.new(
+      ellipsis:          'no_special_treatment',
+      hyperlink:         'count_as_one',
+      contraction:       'count_as_one',
+      hyphenated_word:   'count_as_one',
+      date:              'no_special_treatment',
+      number:            'count',
+      numbered_list:     'ignore',
+      xhtml:             'remove',
+      forward_slash:     'count_as_multiple_except_dates',
+      backslash:         'count_as_one',
+      dotted_line:       'ignore',
+      dashed_line:       'ignore',
+      underscore:        'ignore',
+      stray_punctuation: 'ignore'
+    ).count(self.body)
   end
 
   def reading_estimate
-    words = (self.body || "").split(/\s+/).count
-    minutes = 1 + (words / 200).to_i
+    minutes = 1 + (word_count / 200).to_i
 
     "~#{minutes} minute read"
   end

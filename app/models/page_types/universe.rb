@@ -53,6 +53,7 @@ class Universe < ApplicationRecord
   has_many :lores
 
   has_many :contributors, dependent: :destroy
+  has_many :contributing_users, through: :contributors, source: :user
 
   has_many :documents
   has_many :timelines
@@ -75,6 +76,10 @@ class Universe < ApplicationRecord
 
   def self.color
     'purple'
+  end
+
+  def self.text_color
+    'purple-text'
   end
 
   def self.hex_color

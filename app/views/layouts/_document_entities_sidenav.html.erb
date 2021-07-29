@@ -10,7 +10,7 @@
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
       <% @linked_entities.each do |category, content_list| %>
-        <% category_class = category.constantize %>
+        <% category_class = content_class_from_name(category) %>
         <li class="bold waves-effect">
           <a class="collapsible-header" tabindex="0">
             <%= pluralize content_list.count, category %>
@@ -21,7 +21,7 @@
               <% content_list.each do |content_link| %>
                 <li>
                   <%= link_to '#' do %>
-                    <i class="material-icons left <%= category_class.color %>-text">
+                    <i class="material-icons left <%= category_class.text_color %>">
                       <%= category_class.icon %>
                     </i>
                     <%= content_link.text%>

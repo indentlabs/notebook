@@ -1,0 +1,31 @@
+# This workflow will download a prebuilt Ruby version, install dependencies and run tests with Rake
+# For more information see: https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
+
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7.4
+        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Set up Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.15.0
+    - name: Compile JS
+      run: RAILS_ENV=test bundle exec rake assets:precompile
+    - name: Run tests
+      run: RAILS_ENV=test bundle exec rails test

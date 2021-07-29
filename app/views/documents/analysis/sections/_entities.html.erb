@@ -21,7 +21,7 @@
 <div class="row">
   <%# todo aren't document entities precached somewhere on this page? %>
   <% analysis.document_entities.includes(:entity, entity: [:image_uploads]).order('entity_type asc, relevance desc').each do |entity| %>
-    <% entity_class = entity.entity_type.constantize %>
+    <% entity_class = content_class_from_name(entity.entity_type) %>
     <div class="col s12 m6">
       <div class="card">
         <div class="card-image waves-effect waves-block waves-light" style="max-height: 600px;">
@@ -32,7 +32,7 @@
           <% end %>
         </div>
         <div class="card-content">
-          <span class="card-title activator <%= entity_class.color %>-text">
+          <span class="card-title activator <%= entity_class.text_color %>">
             <i class="material-icons left"><%= entity_class.icon %></i>
             <%= entity.linked_name_if_possible %>
             <i class="material-icons right black-text">more_vert</i>
@@ -45,7 +45,7 @@
           </p>
         </div>
         <div class="card-reveal">
-          <span class="card-title <%= entity_class.color %>-text">
+          <span class="card-title <%= entity_class.text_color %>">
             <i class="material-icons left"><%= entity_class.icon %></i>
             <%= entity.linked_name_if_possible %>
             <i class="material-icons right black-text">close</i>
@@ -143,13 +143,13 @@
       <%= f.hidden_field :document_entity_id,   value: nil %>
 
       <% @current_user_content.each do |content_type, content_list| %>
-        <% content_type_class = content_type.constantize %>
+        <% content_type_class = content_class_from_name(content_type) %>
         <% next if content_type == 'Document' %>
         <h5><%= content_type.pluralize %></h5>
         <ul class="collection">
           <% content_list.each do |content| %>
             <a href="#" 
-               class="<%= content_type_class.color %>-text js-link-entity-selection" 
+               class="<%= content_type_class.text_color %> js-link-entity-selection" 
                data-id="<%= content.id %>"
                data-type="<%= content_type %>">
               <li class="collection-item">
