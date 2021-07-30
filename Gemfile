@@ -14,14 +14,14 @@ gem 'aws-sdk-s3'
 gem 'filesize'
 
 # Image processing
-gem 'paperclip'
+gem 'paperclip' # tech debt: i'm preeeeetty sure we're just using ActiveStorage for uploads now and this can probably be removed
 gem 'rmagick'
 gem 'image_processing'
 gem 'active_storage_validations'
 
 # Authentication
 gem 'devise'
-gem 'authority'
+gem 'authority' # tech debt: this repo is now unmaintained; recommends migrating to pundit
 
 # Billing
 gem 'stripe'

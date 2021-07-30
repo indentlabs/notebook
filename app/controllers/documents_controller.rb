@@ -184,6 +184,7 @@ class DocumentsController < ApplicationController
   end
 
   def update
+    # TODO: clean this room up
     document = Document.with_deleted.find_or_initialize_by(id: params[:id])
     d_params = document_params.clone # TODO: why are we duplicating the params here?
 
