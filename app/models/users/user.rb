@@ -119,10 +119,6 @@ class User < ApplicationRecord
     @cached_user_contributable_universes ||= Universe.where(id: contributable_universe_ids)
   end
 
-  def linkable_universes
-    @cached_linkable_universes ||= Universe.where(id: my_universe_ids + contributable_universes)
-  end
-
   def contributable_universe_ids
     # TODO: email confirmation needs to happen for data safety / privacy (only verified emails)
     @contributable_universe_ids ||= Contributor.where('email = ? OR user_id = ?', self.email, self.id).pluck(:universe_id)
