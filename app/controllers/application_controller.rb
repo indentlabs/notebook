@@ -53,9 +53,6 @@ class ApplicationController < ActionController::Base
   end
 
   def cache_activated_content_types
-    @activated_content_types = []
-    return unless user_signed_in?
-    
     @activated_content_types ||= if user_signed_in?
       (
         # Use config to dictate order, but AND to only include what a user has turned on
@@ -67,9 +64,10 @@ class ApplicationController < ActionController::Base
   end
 
   def cache_current_user_content
+    return if @current_user_content
+
     @current_user_content = {}
     return unless user_signed_in?
-    return if @current_user_content
 
     cache_activated_content_types
 
