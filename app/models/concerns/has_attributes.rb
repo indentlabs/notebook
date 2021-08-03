@@ -60,13 +60,19 @@ module HasAttributes
           end
 
           category.save! if user && category.new_record?
+          fields_list = category.attribute_fields.with_deleted.where(user: user)
           category.attribute_fields << details[:attributes].map do |field|
-            af_field = category.attribute_fields.with_deleted.find_or_initialize_by(
-              # label: field[:label],
-              old_column_source: field[:name],
-              user: user,
-              field_type: field[:field_type].presence || "text_area"
-            )
+            af_field = fields_list.detect do |persisted_field|
+              persisted_field.old_column_source == field[:name] &&
+              persisted_field.field_type == field[:field_type].presence || "text_area"
+            end
+            if af_field.nil?
+              af_field = category.attribute_fields.new(
+                old_column_source: field[:name],
+                user: user,
+                field_type: field[:field_type].presence || "text_area"
+              )
+            end
             if af_field.label.nil?
               af_field.label = field[:label]
             end
