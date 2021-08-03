@@ -78,7 +78,7 @@ class ContentController < ApplicationController
 
   def show    
     content_type = content_type_from_controller(self.class)
-    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.map(&:name).include?(content_type.name)
+    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.include?(content_type.name)
 
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
@@ -295,7 +295,7 @@ class ContentController < ApplicationController
 
   def changelog
     content_type = content_type_from_controller(self.class)
-    return redirect_to root_path unless valid_content_types.map(&:name).include?(content_type.name)
+    return redirect_to root_path unless valid_content_types.include?(content_type.name)
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
     @serialized_content = ContentSerializer.new(@content)
@@ -461,7 +461,7 @@ class ContentController < ApplicationController
 
     # We also need to update the cached `name` field on the content page itself
     entity_type = entity_params.fetch(:entity_type)
-    raise "Invalid entity type: #{entity_params.fetch(:entity_type)}" unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
+    raise "Invalid entity type: #{entity_params.fetch(:entity_type)}" unless valid_content_types.include?(entity_params.fetch('entity_type'))
     entity = entity_type.constantize.find_by(id: entity_params.fetch(:entity_id).to_i)
     entity.update(name: field_params.fetch('value', ''))
   end
@@ -503,7 +503,7 @@ class ContentController < ApplicationController
   end
 
   def tags_field_update
-    return unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
+    return unless valid_content_types.include?(entity_params.fetch('entity_type'))
 
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
     attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
@@ -518,7 +518,7 @@ class ContentController < ApplicationController
   end
 
   def universe_field_update
-    return unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
+    return unless valid_content_types.include?(entity_params.fetch('entity_type'))
 
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
     attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
@@ -586,7 +586,7 @@ class ContentController < ApplicationController
   end
 
   def valid_content_types
-    Rails.application.config.content_types[:all]
+    Rails.application.config.content_type_names[:all]
   end
 
   def initialize_object
@@ -662,7 +662,7 @@ class ContentController < ApplicationController
   def set_attributes_content_type
     @content_type = params[:content_type]
     # todo make this a before_action load_content_type
-    unless valid_content_types.map { |c| c.name.downcase }.include?(@content_type)
+    unless valid_content_types.map(&:downcase).include?(@content_type)
       raise "Invalid content type on attributes customization page: #{@content_type}"
     end
     @content_type_class = @content_type.titleize.constantize
@@ -677,7 +677,7 @@ class ContentController < ApplicationController
     entity_page_type = entity_params.fetch(:entity_type)
     entity_page_id   = entity_params.fetch(:entity_id)
     
-    return unless valid_content_types.map(&:name).include?(entity_page_type)
+    return unless valid_content_types.include?(entity_page_type)
     @entity = entity_page_type.constantize.find_by(id: entity_page_id)    
   end
 
