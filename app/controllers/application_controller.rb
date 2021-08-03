@@ -119,6 +119,14 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def cache_contributable_universe_ids
+    @contributable_universe_ids = if user_signed_in?
+      Contributor.where(user: current_user).pluck(:universe_id)
+    else
+      []
+    end
+  end
+
   def cache_linkable_content_for_each_content_type
     linkable_classes = Rails.application.config.content_types[:all].map(&:name) & current_user.user_content_type_activators.pluck(:content_type)
     linkable_classes += %w(Document Timeline)
