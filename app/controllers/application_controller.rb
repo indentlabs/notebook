@@ -155,10 +155,12 @@ class ApplicationController < ActionController::Base
           @linkables_raw[page_type] += page_type.constantize.where(universe_id: @contributable_universe_ids)
         end
       end
-    end
 
-    # Finally, we want to sort our caches once so we don't need to sort them again anywhere else
-    @linkables_raw.sort_by!   { |page|     page.name.downcase }.compact!
-    @linkables_cache = @linkables_raw.map { |page| [page.name, page.id] }
+      # Finally, we want to sort our linkables cache once so we don't have to sort it again
+      @linkables_raw[page_type].sort_by! { |page| page.name.downcase }.compact!
+
+      # Lastly, build our name/id cache as well
+      @linkables_cache[page_type] = @linkables_raw[page_type].map { |page| [page.name, page.id] }
+    end
   end
 end
