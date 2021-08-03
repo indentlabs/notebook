@@ -46,6 +46,8 @@ class ApplicationController < ActionController::Base
   # Cache some super-common stuff we need for every page. For example, content lists for the side nav. This is a catch-all for most pages that render
   # UI, but methods are also free to skip this filter and call the individual cache methods they need instead.
   def cache_most_used_page_information
+    return unless user_signed_in?
+
     cache_activated_content_types
     cache_current_user_content
     cache_notifications
@@ -138,7 +140,7 @@ class ApplicationController < ActionController::Base
 
   def cache_contributable_universe_ids
     @contributable_universe_ids ||= if user_signed_in?
-      Contributor.where(user: current_user).pluck(:universe_id)
+      current_user.contributable_universe_ids
     else
       []
     end
