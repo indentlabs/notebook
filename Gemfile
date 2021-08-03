@@ -46,6 +46,9 @@ gem 'animate-rails'
 gem 'webpacker'
 gem 'react-rails'
 
+# Non-JS frontend
+gem "view_component", require: "view_component/engine"
+
 # Form enhancements
 gem 'redcarpet' #markdown formatting
 gem 'acts_as_list' #sortables
