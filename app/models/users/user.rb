@@ -112,9 +112,7 @@ class User < ApplicationRecord
   has_many :application_integrations
 
   def my_universe_ids
-    cache_current_user_content
-
-    @cached_universe_ids = @current_user_content.fetch('Universe', []).map(&:id)
+    @cached_universe_ids ||= universes.pluck(:id)
   end
 
   def contributable_universes
