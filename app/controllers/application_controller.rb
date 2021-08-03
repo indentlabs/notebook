@@ -71,6 +71,8 @@ class ApplicationController < ActionController::Base
     return unless user_signed_in?
     return if @current_user_content
 
+    cache_activated_content_types
+
     # We always want to cache Universes, even if they aren't explicitly turned on.
     @current_user_content = current_user.content(content_types: @activated_content_types + [Universe.name], universe_id: @universe_scope.try(:id))
 
@@ -92,7 +94,9 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def recently_edited_pages
+  def cache_recently_edited_pages
+    cache_current_user_content
+
     @recently_edited_pages ||= if user_signed_in?
       @current_user_content.values.flatten
         .sort_by(&:updated_at)
@@ -129,32 +133,24 @@ class ApplicationController < ActionController::Base
   end
 
   def cache_linkable_content_for_each_content_type
-    linkable_classes = Rails.application.config.content_types[:all].map(&:name) & current_user.user_content_type_activators.pluck(:content_type)
+    cache_contributable_universe_ids
+    cache_current_user_content
+    
+    linkable_classes = @activated_content_types
     linkable_classes += %w(Document Timeline)
 
-    @linkables_cache = {}
-    @linkables_raw   = {}
-    linkable_classes.each do |class_name|
-      # class_name = "Character"
+    @linkables_cache = {} # Cache is list of [[page_name, page_id], [page_name, page_id], ...]
+    @linkables_raw   = {} # Raw is list of objects [#{page}, #{page}, ...]
 
-      @linkables_cache[class_name] = current_user
-        .send("linkable_#{class_name.downcase.pluralize}")
-        .in_universe(@universe_scope)
-
-      if @content.present? && @content.persisted?
-        @linkables_cache[class_name] = @linkables_cache[class_name]
-          .in_universe(@content.universe)
-          .reject { |content| content.class.name == class_name && content.id == @content.id }
-      end
-
-      @linkables_raw[class_name] = @linkables_cache[class_name]
-        .sort_by { |p| p.name.downcase }
-        .compact
-
-      @linkables_cache[class_name] = @linkables_cache[class_name]
-        .sort_by { |p| p.name.downcase }
-        .map { |c| [c.name, c.id] }
-        .compact
+    @current_user_content.each do |page_type, content_list|
+      # We already have our own list of content by the current user in @current_user_content,
+      # so all we need to grab is pages in contributable universes
+      @linkables_raw[page_type] = @current_user_content[page_type] \
+        + page_type.constantize.where(universe_id: @contributable_universe_ids)
     end
+
+    # Finally, we want to sort our caches once so we don't need to sort them again anywhere else
+    @linkables_raw.sort_by!   { |page|     page.name.downcase }.compact!
+    @linkables_cache = @linkables_raw.map { |page| [page.name, page.id] }
   end
 end
