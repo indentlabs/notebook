@@ -27,7 +27,7 @@ class ApplicationController < ActionController::Base
         session.delete(:universe_id)
       elsif params[:universe].is_a?(String) && params[:universe].to_i.to_s == params[:universe]
         found_universe = Universe.find_by(id: params[:universe])
-        found_universe = nil unless found_universe.user_id == current_user.id || current_user.contributable_universes.include?(found_universe)
+        found_universe = nil unless found_universe.user_id == current_user.id || found_universe.contributors.pluck(:user_id).include?(current_user.id)
         session[:universe_id] = found_universe.id if found_universe
       end
     end
