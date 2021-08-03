@@ -56,7 +56,7 @@ class ApplicationController < ActionController::Base
     @activated_content_types = []
     return unless user_signed_in?
     
-    @activated_content_types = if user_signed_in?
+    @activated_content_types ||= if user_signed_in?
       (
         # Use config to dictate order, but AND to only include what a user has turned on
         Rails.application.config.content_type_names[:all] & current_user.user_content_type_activators.pluck(:content_type)
@@ -69,6 +69,7 @@ class ApplicationController < ActionController::Base
   def cache_current_user_content
     @current_user_content = {}
     return unless user_signed_in?
+    return if @current_user_content
 
     # We always want to cache Universes, even if they aren't explicitly turned on.
     @current_user_content = current_user.content(content_types: @activated_content_types + [Universe.name], universe_id: @universe_scope.try(:id))
@@ -84,7 +85,7 @@ class ApplicationController < ActionController::Base
   end
 
   def cache_notifications
-    @user_notifications = if user_signed_in?
+    @user_notifications ||= if user_signed_in?
       current_user.notifications.order('happened_at DESC').limit(100)
     else
       []
@@ -92,7 +93,7 @@ class ApplicationController < ActionController::Base
   end
 
   def recently_edited_pages
-    @recently_edited_pages = if user_signed_in?
+    @recently_edited_pages ||= if user_signed_in?
       @current_user_content.values.flatten
         .sort_by(&:updated_at)
         .last(50)
@@ -103,13 +104,13 @@ class ApplicationController < ActionController::Base
   end
 
   def cache_forums_unread_counts
-    @unread_threads = if user_signed_in?
+    @unread_threads ||= if user_signed_in?
       Thredded::Topic.unread_followed_by(current_user).count
     else
       0
     end
 
-    @unread_private_messages = if user_signed_in?
+    @unread_private_messages ||= if user_signed_in?
       Thredded::PrivateTopic
         .for_user(current_user)
         .unread(current_user)
@@ -120,7 +121,7 @@ class ApplicationController < ActionController::Base
   end
 
   def cache_contributable_universe_ids
-    @contributable_universe_ids = if user_signed_in?
+    @contributable_universe_ids ||= if user_signed_in?
       Contributor.where(user: current_user).pluck(:universe_id)
     else
       []
