@@ -49,7 +49,8 @@ module HasAttributes
       # Cache the result in case we call this function multiple times this request
       @cached_attribute_categories_for_this_content = begin
         # Always include  the flatfile categories (but create AR versions if they don't exist)
-        categories_list = AttributeCategory.with_deleted.where(user: user)
+        categories_list  = AttributeCategory.with_deleted.where(user: user).to_a
+        full_fields_list = AttributeField.with_deleted.where(user: user, attribute_category_id: categories_list.map(&:id))
         categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
           category = categories_list.detect do |persisted_category|
             persisted_category.entity_type == self.content_name &&
@@ -70,7 +71,9 @@ module HasAttributes
           end
 
           category.save! if user && category.new_record?
-          fields_list = category.attribute_fields.with_deleted.where(user: user)
+          fields_list = full_fields_list.select do |field|
+            field.attribute_category_id == category.id
+          end
           category.attribute_fields << details[:attributes].map do |field|
             af_field = fields_list.detect do |persisted_field|
               persisted_field.old_column_source == field[:name] &&
