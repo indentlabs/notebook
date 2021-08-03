@@ -145,8 +145,16 @@ class ApplicationController < ActionController::Base
     @current_user_content.each do |page_type, content_list|
       # We already have our own list of content by the current user in @current_user_content,
       # so all we need to grab is pages in contributable universes
-      @linkables_raw[page_type] = @current_user_content[page_type] \
-        + page_type.constantize.where(universe_id: @contributable_universe_ids)
+      @linkables_raw[page_type] = @current_user_content[page_type]
+
+      if @contributable_universe_ids.any?
+        if page_type == Universe.name
+          @linkables_raw[page_type] += page_type.constantize.where(id: @contributable_universe_ids)
+
+        else
+          @linkables_raw[page_type] += page_type.constantize.where(universe_id: @contributable_universe_ids)
+        end
+      end
     end
 
     # Finally, we want to sort our caches once so we don't need to sort them again anywhere else
