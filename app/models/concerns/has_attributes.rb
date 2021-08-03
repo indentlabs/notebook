@@ -42,6 +42,8 @@ module HasAttributes
     end
 
     def self.attribute_categories(user, show_hidden: false)
+      # TODO: this is a code smell; we should probably either be whitelisting or fixing whatever is calling
+      #       this with the wrong models
       return [] if ['attribute_category', 'attribute_field'].include?(content_name)
 
       # Cache the result in case we call this function multiple times this request
