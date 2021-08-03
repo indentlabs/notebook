@@ -50,9 +50,6 @@ class MainController < ApplicationController
   end
 
   def recent_content
-    return [] if @activated_content_types.nil?
-
-    cache_recently_created_pages
   end
 
   def for_writers
