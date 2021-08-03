@@ -5,7 +5,6 @@ class ApplicationController < ActionController::Base
   before_action :set_universe_scope
 
   before_action :cache_most_used_page_information
-  before_action :cache_forums_unread_counts
 
   before_action :set_metadata
 
@@ -43,18 +42,36 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Cache some super-common stuff we need for every page. For example, content lists for the side nav.
+  # Cache some super-common stuff we need for every page. For example, content lists for the side nav. This is a catch-all for most pages that render
+  # UI, but methods are also free to skip this filter and call the individual cache methods they need instead.
   def cache_most_used_page_information
+    cache_activated_content_types
+    cache_current_user_content
+    cache_notifications
+    cache_recently_edited_pages
+    cache_forums_unread_counts
+  end
+
+  def cache_activated_content_types
+    @activated_content_types = []
+    return unless user_signed_in?
+    
+    @activated_content_types = if user_signed_in?
+      (
+        # Use config to dictate order, but AND to only include what a user has turned on
+        Rails.application.config.content_type_names[:all] & current_user.user_content_type_activators.pluck(:content_type)
+      )
+    else
+      []
+    end
+  end
+
+  def cache_current_user_content
     @current_user_content = {}
     return unless user_signed_in?
 
-    @activated_content_types = (
-      Rails.application.config.content_types[:all].map(&:name) & # Use config to dictate order, but AND to only include what a user has turned on
-      current_user.user_content_type_activators.pluck(:content_type)
-    )
-
     # We always want to cache Universes, even if they aren't explicitly turned on.
-    @current_user_content = current_user.content(content_types: @activated_content_types + ['Universe'], universe_id: @universe_scope.try(:id))
+    @current_user_content = current_user.content(content_types: @activated_content_types + [Universe.name], universe_id: @universe_scope.try(:id))
 
     # Likewise, we should also always cache Timelines & Documents
     if @universe_scope
@@ -64,15 +81,25 @@ class ApplicationController < ActionController::Base
       @current_user_content['Timeline'] = current_user.timelines.to_a
       @current_user_content['Document'] = current_user.linkable_documents.includes([:user]).order('updated_at DESC').to_a
     end
+  end
 
-    # Fetch notifications
-    @user_notifications = current_user.notifications.order('happened_at DESC').limit(100)
+  def cache_notifications
+    @user_notifications = if user_signed_in?
+      current_user.notifications.order('happened_at DESC').limit(100)
+    else
+      []
+    end
+  end
 
-    # Cache recently-edited pages
-    @recently_edited_pages = @current_user_content.values.flatten
-      .sort_by(&:updated_at)
-      .last(50)
-      .reverse
+  def recently_edited_pages
+    @recently_edited_pages = if user_signed_in?
+      @current_user_content.values.flatten
+        .sort_by(&:updated_at)
+        .last(50)
+        .reverse
+    else
+      []
+    end
   end
 
   def cache_forums_unread_counts
