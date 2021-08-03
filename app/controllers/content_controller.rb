@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ContentController < ApplicationController
   # todo we should probably spin off an Api::ContentController for #api_sort and anything else api-wise we need
 
