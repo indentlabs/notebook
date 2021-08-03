@@ -50,13 +50,9 @@ class MainController < ApplicationController
   end
 
   def recent_content
-    # todo optimize this / use Attributes
     return [] if @activated_content_types.nil?
 
-    @recently_created_pages = @current_user_content.values.flatten
-      .sort_by(&:created_at)
-      .last(50)
-      .reverse
+    cache_recently_created_pages
   end
 
   def for_writers

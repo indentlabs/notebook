@@ -93,13 +93,26 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def cache_recently_edited_pages
+  def cache_recently_created_pages(amount=50)
+    cache_current_user_content
+
+    @recently_created_pages = if user_signed_in?
+      @current_user_content.values.flatten
+        .sort_by(&:created_at)
+        .last(amount)
+        .reverse
+    else
+      []
+    end
+  end
+
+  def cache_recently_edited_pages(amount=50)
     cache_current_user_content
 
     @recently_edited_pages ||= if user_signed_in?
       @current_user_content.values.flatten
         .sort_by(&:updated_at)
-        .last(50)
+        .last(amount)
         .reverse
     else
       []

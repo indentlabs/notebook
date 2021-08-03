@@ -180,6 +180,7 @@ module HasAttributes
       end
     end
 
+    # All of these helpers are spooky and rife for N+1s
     def name_field
       category_ids = AttributeCategory.where(
         user_id: user_id,
