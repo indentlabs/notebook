@@ -35,9 +35,13 @@ class ApplicationController < ActionController::Base
 
   def set_universe_scope
     if user_signed_in? && session.key?(:universe_id)
-      # We generally trust that once a universe is set in the session, we don't need to keep re-verifying on every page load that the user
-      # still has access to that universe.
-      @universe_scope = Universe.find_by(id: session[:universe_id])
+      cache_contributable_universe_ids
+      
+      if @contributable_universe_ids.include?(session[:universe_id])
+        @universe_scope = Universe.find_by(id: session[:universe_id])
+      else
+        @universe_scope = nil
+      end
     else
       @universe_scope = nil
     end
