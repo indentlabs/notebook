@@ -11,6 +11,7 @@ class TemporaryFieldMigrationService < Service
   def self.migrate_fields_for_content(content_model, user, force: false)
     return unless content_model.present? && user.present?
     return unless content_model.user == user
+    return if content_model.is_a?(ContentPage)
     return if !force && content_model.persisted? && content_model.created_at > 'May 1, 2018'.to_datetime
     return if !!content_model.columns_migrated_from_old_style?
 

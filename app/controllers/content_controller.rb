@@ -7,7 +7,7 @@ class ContentController < ApplicationController
     + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }
 
   skip_before_action :cache_most_used_page_information, only: [
-    :name_field_update, :text_field_update, :tags_field_update, :universe_field_update
+    :name_field_update, :text_field_update, :tags_field_update, :universe_field_update, :api_sort
   ]
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]

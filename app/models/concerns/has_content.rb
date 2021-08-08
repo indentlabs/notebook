@@ -27,7 +27,7 @@ module HasContent
     )
       return {} if content_types.empty?
 
-      polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :archived_at, :privacy]
+      polymorphic_content_fields = [:id, :name, :favorite, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :archived_at, :privacy]
       where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL AND archived_at IS NULL'
 
       sql = content_types.uniq.map do |page_type|

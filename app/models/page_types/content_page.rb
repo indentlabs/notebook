@@ -17,4 +17,12 @@ class ContentPage < ApplicationRecord
   def text_color
     self.page_type.constantize.text_color
   end
+
+  def favorite?
+    !!favorite
+  end
+
+  def view_path
+
+  end
 end
