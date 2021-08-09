@@ -16,6 +16,7 @@ module HasContent
     has_many :attribute_categories
     has_many :attribute_values, class_name: 'Attribute', dependent: :destroy
 
+    # Alternative approach to #content for benchmarking in prod
     def content_with_multiple_queries(
       content_types: Rails.application.config.content_type_names[:all],
       page_scoping:  { user_id: self.id },
@@ -52,7 +53,7 @@ module HasContent
       page_scoping:  { user_id: self.id },
       universe_id:   nil
     )
-      return content_with_multiple_queries(content_types: content_types, page_scoping: page_scoping, universe_id: universe_id)
+      # return content_with_multiple_queries(content_types: content_types, page_scoping: page_scoping, universe_id: universe_id)
 
       return {} if content_types.empty?
       # TODO: we should return early if we already have @content_by_page_type!!!
