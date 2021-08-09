@@ -168,21 +168,18 @@ class ApplicationController < ActionController::Base
       if @contributable_universe_ids.any?
         existing_page_ids = @linkables_raw[page_type].map(&:id)
 
-        if page_type == Universe.name
-          universes_to_add = page_type.constantize.where(id: @contributable_universe_ids)
-                                                  .where.not(id: existing_page_ids)
-          universes_to_add.each do |page_data|
-            filtered_page_data = page_data.attributes.slice(*ContentPage.polymorphic_content_fields.map(&:to_s))
-            @linkables_raw[page_type].push ContentPage.new(filtered_page_data)
-          end
-
+        pages_to_add = if page_type == Universe.name
+          page_type.constantize.where(id: @contributable_universe_ids)
+                               .where.not(id: existing_page_ids)
         else
-          pages_to_add = page_type.constantize.where(universe_id: @contributable_universe_ids)
-                                              .where.not(id: existing_page_ids)
-          pages_to_add.each do |page_data|
-            filtered_page_data = page_data.attributes.slice(*ContentPage.polymorphic_content_fields.map(&:to_s))
-            @linkables_raw[page_type].push ContentPage.new(filtered_page_data)
-          end
+          page_type.constantize.where(universe_id: @contributable_universe_ids)
+                               .where.not(id: existing_page_ids)
+        end
+
+        filtered_fields = ContentPage.polymorphic_content_fields.map(&:to_s)
+        pages_to_add.each do |page_data|
+          filtered_page_data = page_data.attributes.slice(*filtered_fields)
+          @linkables_raw[page_type].push ContentPage.new(filtered_page_data)
         end
       end
 
