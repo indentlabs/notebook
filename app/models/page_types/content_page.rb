@@ -1,6 +1,13 @@
 class ContentPage < ApplicationRecord
+  include Rails.application.routes.url_helpers
+
   belongs_to :user
   belongs_to :universe
+
+  attr_accessor :favorite
+
+  include Authority::Abilities
+  self.authorizer_name = 'ContentPageAuthorizer'
 
   def random_image_including_private(format: :small)
     ImageUpload.where(content_type: self.page_type, content_id: self.id).sample.try(:src, format) || "card-headers/#{self.page_type.downcase.pluralize}.jpg"
@@ -23,6 +30,14 @@ class ContentPage < ApplicationRecord
   end
 
   def view_path
+    send("#{self.page_type.downcase}_path", self.id)
+  end
 
+  def edit_path
+    send("edit_#{self.page_type.downcase}_path", self.id)
+  end
+
+  def self.polymorphic_content_fields
+    [:id, :name, :favorite, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :archived_at, :privacy]
   end
 end

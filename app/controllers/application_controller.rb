@@ -177,6 +177,7 @@ class ApplicationController < ActionController::Base
         end
 
         filtered_fields = ContentPage.polymorphic_content_fields.map(&:to_s)
+        filtered_fields.push 'universe_id' unless page_type == Universe.name
         pages_to_add.each do |page_data|
           filtered_page_data = page_data.attributes.slice(*filtered_fields)
           @linkables_raw[page_type].push ContentPage.new(filtered_page_data)

@@ -21,33 +21,45 @@ class ContentController < ApplicationController
   before_action :set_sidenav_expansion, except: [:api_sort]
 
   def index
+    cache_linkable_content_for_each_content_type
+
     @content_type_class = content_type_from_controller(self.class)
     pluralized_content_name = @content_type_class.name.downcase.pluralize
 
     @page_title = "My #{pluralized_content_name}"
 
     # Create the default fields for this user if they don't have any already
+    # TODO: uh, this probably doesn't belong here!
     @content_type_class.attribute_categories(current_user)
 
-    if @universe_scope.present? && @content_type_class != Universe
-      @content = @universe_scope.send(pluralized_content_name)
-        .includes(:page_tags, :image_uploads)
-        .unarchived
+    # Linkables cache is already scoped per-universe, includes contributor pages
+    @content = @linkables_raw.fetch(@content_type_class.name, [])
 
-      @show_scope_notice = true
-    else
-      @content = (
-        current_user.send(pluralized_content_name).unarchived.includes(:page_tags, :image_uploads) +
-        current_user.send("contributable_#{pluralized_content_name}").unarchived.includes(:page_tags, :image_uploads)
-      )
+    @show_scope_notice = @universe_scope.present? && content_type_class != Universe
 
-      if @content_type_class != Universe
-        my_universe_ids = current_user.universes.pluck(:id)
-        @content.concat(@content_type_class.where(universe_id: my_universe_ids).unarchived)
-      end
-    end
+    # if @universe_scope.present? && @content_type_class != Universe
+    #   # Linkables cache is already scoped per-universe
 
-    @content = @content.to_a.flatten.uniq
+    #   @content = @current_user_content.fetch(@content_type_class.name, [])
+    #     .select { |page| page.universe_id == @universe_scope.id }
+
+    #   @content = @universe_scope.send(pluralized_content_name)
+    #     .includes(:page_tags, :image_uploads)
+    #     .unarchived
+
+    #   @show_scope_notice = true
+    # else
+    #   @content = (
+    #     current_user.send(pluralized_content_name).unarchived.includes(:page_tags, :image_uploads) +
+    #     current_user.send("contributable_#{pluralized_content_name}").unarchived.includes(:page_tags, :image_uploads)
+    #   )
+
+    #   if @content_type_class != Universe
+    #     my_universe_ids = current_user.universes.pluck(:id)
+    #     @content.concat(@content_type_class.where(universe_id: my_universe_ids).unarchived)
+    #   end
+    # end
+    # @content = @content.to_a.flatten.uniq
 
     # Filters
     @page_tags = PageTag.where(
