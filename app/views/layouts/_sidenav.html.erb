@@ -17,7 +17,8 @@
         </a>
         <div class="collapsible-body blue lighten-1">
           <ul>
-            <% ((@current_user_content['Universe'] || []) + current_user.contributable_universes).sort_by(&:name).each do |universe| %>
+            <%# TODO: we should use a cache here %>
+            <% (@current_user_content.fetch('Universe', []) + current_user.contributable_universes).sort_by(&:name).each do |universe| %>
               <li>
                 <%= link_to "?universe=#{universe.id}", class: 'waves-effect' do %>
                   <i class="material-icons <%= Universe.text_color %>">
@@ -70,7 +71,7 @@
                         @universe_scope.send(pluralized_name).count
                       else
                         (
-                          @current_user_content[content_type] || [] +
+                          @current_user_content.fetch(content_type, []) +
                           current_user.send("contributable_#{pluralized_name}") +
                           (content_type_klass == Universe ? [] : content_type_klass.where(universe_id: current_user.universes.pluck(:id)))
                         ).uniq.count
