@@ -162,15 +162,27 @@ class ApplicationController < ActionController::Base
 
     @current_user_content.each do |page_type, content_list|
       # We already have our own list of content by the current user in @current_user_content,
-      # so all we need to grab is pages in contributable universes
+      # so all we need to grab is additional pages in contributable universes
       @linkables_raw[page_type] = @current_user_content[page_type]
 
       if @contributable_universe_ids.any?
+        existing_page_ids = @linkables_raw[page_type].map(&:id)
+
         if page_type == Universe.name
-          @linkables_raw[page_type] += page_type.constantize.where(id: @contributable_universe_ids)
+          universes_to_add = page_type.constantize.where(id: @contributable_universe_ids)
+                                                  .where.not(id: existing_page_ids)
+          universes_to_add.each do |page_data|
+            filtered_page_data = page_data.attributes.slice(*ContentPage.polymorphic_content_fields.map(&:to_s))
+            @linkables_raw[page_type].push ContentPage.new(filtered_page_data)
+          end
 
         else
-          @linkables_raw[page_type] += page_type.constantize.where(universe_id: @contributable_universe_ids)
+          pages_to_add = page_type.constantize.where(universe_id: @contributable_universe_ids)
+                                              .where.not(id: existing_page_ids)
+          pages_to_add.each do |page_data|
+            filtered_page_data = page_data.attributes.slice(*ContentPage.polymorphic_content_fields.map(&:to_s))
+            @linkables_raw[page_type].push ContentPage.new(filtered_page_data)
+          end
         end
       end
 
