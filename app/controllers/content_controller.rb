@@ -21,8 +21,6 @@ class ContentController < ApplicationController
   before_action :set_sidenav_expansion, except: [:api_sort]
 
   def index
-    cache_linkable_content_for_each_content_type
-
     @content_type_class = content_type_from_controller(self.class)
     pluralized_content_name = @content_type_class.name.downcase.pluralize
 
