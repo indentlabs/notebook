@@ -31,7 +31,7 @@
         <li class="divider" tabindex="-1"></li>
         <%
           linkable_universes_with_this_kind_of_content = @linkables_raw.fetch('Universe', []).select do |universe|
-            @current_user_content[content_type.name].any? { |content| content.universe_id == universe.id }
+            @current_user_content.fetch(content_type.name, []).any? { |content| content.universe_id == universe.id }
           end
         %>
         <% linkable_universes_with_this_kind_of_content.each do |universe| %>
