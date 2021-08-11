@@ -184,6 +184,11 @@ class ApplicationController < ActionController::Base
         end
       end
 
+      # We can't properly display or @-mention content without a name set, so we explicitly
+      # reject it here. However, this is a bit of a code-smell: why is there content without
+      # a name set?
+      @linkables_raw[page_type].reject!  { |page| page.name.nil? }
+
       # Finally, we want to sort our linkables cache once so we don't have to sort it again
       @linkables_raw[page_type].sort_by! { |page| page.name.downcase }.compact!
 
