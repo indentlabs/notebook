@@ -15,4 +15,13 @@ class FieldTypeService < Service
       raise "Unexpected/unhandled field type: #{field[:type]}"
     end
   end
+
+  def self.form_path_from_attribute_field(field)
+    field_data = {
+      type: field.field_type,
+      internal_id: field.id
+    }
+
+    form_path(field_data)
+  end
 end

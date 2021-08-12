@@ -6,22 +6,25 @@
 <% if defined?(field) && field.present? %>
   <ul class="hoverable collapsible white">
     <li class="<%= 'active' if defined?(expand_by_default) && !!expand_by_default %>">
-      <div class="collapsible-header <%= content.class.color %> white-text">
-        <i class="material-icons tooltipped" data-tooltip="Answer this randomly-generated question to have it automatically saved to your <%= content.name_field_value %> <%= content.class.name.downcase %> page.">help</i>
+      <div class="collapsible-header <%= content.color %> white-text">
+        <i class="material-icons tooltipped" data-tooltip="Answer this randomly-generated question to have it automatically saved to your <%= content.name %> <%= content.page_type.downcase %> page.">help</i>
         <%=
           t(
-            "serendipitous_questions.attributes.#{content.class.name.downcase}.#{field.label.downcase}",
-            name:    content.name_field_value,
-            default: "What is #{content.name_field_value}'s #{field.label.downcase}?"
+            "serendipitous_questions.attributes.#{content.page_type.downcase}.#{field.label.downcase}",
+            name:    content.name,
+            default: "What is #{content.name}'s #{field.label.downcase}?"
           )
         %>
       </div>
       <div class="collapsible-body">
-        <%= form_for content do |f| %>
+        <%= form_for content, url: FieldTypeService.form_path_from_attribute_field(field), method: :patch do |f| %>
           <%= hidden_field(:override, :redirect_path, value: redirect_path) if defined?(redirect_path) %>
 
+          <%= hidden_field_tag "entity[entity_id]",   content.id %>
+          <%= hidden_field_tag "entity[entity_type]", content.page_type %>
+
           <%=
-            render 'content/form/text_input',
+            render 'content/form/text_input_for_content_page',
               f: f,
               content: content,
               field: field
@@ -32,14 +35,14 @@
           <% end %>
 
           <% if include_quick_reference %>
-            <%= link_to content, class: 'entity-trigger sidenav-trigger orange white-text btn tooltipped', data: { target: "quick-reference-#{@content.class.name}-#{@content.id}", tooltip: "View this #{@content.class.name.downcase} without leaving this page" } do %>
+            <%= link_to content.view_path, class: 'entity-trigger sidenav-trigger orange white-text btn tooltipped', data: { target: "quick-reference-#{content.name}-#{content.id}", tooltip: "View this #{content.page_type.downcase} without leaving this page" } do %>
               <i class="material-icons right">vertical_split</i>
               Quick-reference
             <% end %>
           <% end %>
           <% if !defined?(show_view_button) || !!show_view_button %>
-            <%= link_to content, class: "btn #{content.class.color} white-text tooltipped", target: '_new', data: { tooltip: "View this #{@content.class.name.downcase} in a new tab" } do %>
-              <i class="material-icons left white-text"><%= content.class.icon %></i>
+            <%= link_to content.view_path, class: "btn #{content.color} white-text tooltipped", target: '_new', data: { tooltip: "View this #{content.name.downcase} in a new tab" } do %>
+              <i class="material-icons left white-text"><%= content.icon %></i>
               View
             <% end %>
           <% end %>

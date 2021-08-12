@@ -510,6 +510,11 @@ class ContentController < ApplicationController
         .where.not(id: valid_reference_ids)
         .destroy_all
     end
+
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: root_path, notice: "#{@attribute_field.label} updated!") }
+      format.json { render json: attribute_value, status: :success }
+    end
   end
 
   def tags_field_update
