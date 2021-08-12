@@ -80,6 +80,7 @@ class ContentController < ApplicationController
     @questioned_content = @content.sample
     @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
 
+    # Uh, do we ever actually make JSON requests to logged-in user pages?
     respond_to do |format|
       format.html { render 'content/index' }
       format.json { render json: @content }
