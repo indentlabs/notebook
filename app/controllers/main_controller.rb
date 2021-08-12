@@ -25,8 +25,7 @@ class MainController < ApplicationController
   def dashboard
     @page_title = "My notebook"
 
-    set_random_content # for questions
-    @attribute_field_to_question = SerendipitousService.question_for(@content)
+    set_questionable_content # for questions
   end
 
   def infostack
@@ -40,8 +39,7 @@ class MainController < ApplicationController
     @navbar_color = '#FF9800'
     @page_title = "Writing prompts"
 
-    set_random_content # for question
-    @attribute_field_to_question = SerendipitousService.question_for(@content)
+    set_questionable_content # for question
   end
 
   # deprecated path just kept around for bookmarks for a while
@@ -73,7 +71,8 @@ class MainController < ApplicationController
 
   private
 
-  def set_random_content
+  def set_questionable_content
     @content = @current_user_content.except(*%w(Timeline Document)).values.flatten.sample
+    @attribute_field_to_question = SerendipitousService.question_for(@content)
   end
 end
