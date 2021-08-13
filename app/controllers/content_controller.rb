@@ -44,12 +44,11 @@ class ContentController < ApplicationController
       @filtered_page_tags = @page_tags.where(slug: params[:tag])
       @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
+    @page_tags = @page_tags.uniq(&:tag)
 
     if params.key?(:favorite_only)
       @content.select!(&:favorite?)
     end
-
-    @page_tags = @page_tags.uniq(&:tag)
 
     @content = @content.sort_by {|x| [x.favorite? ? 0 : 1, x.name] }
 
@@ -414,6 +413,7 @@ class ContentController < ApplicationController
     set_entity
     referencing_page = @entity
 
+    # TODO: move this into a link mention update job
     valid_reference_ids = []
     referenced_page_codes = JSON.parse(attribute_value.value)
     referenced_page_codes.each do |page_code|
@@ -462,31 +462,7 @@ class ContentController < ApplicationController
     attribute_value.value = text
     attribute_value.save!
 
-    # Create PageReferences for mentioned pages
-    tokens = ContentFormatterService.tokens_to_replace(text)
-    if tokens.any?
-      set_entity
-
-      valid_reference_ids = []
-      tokens.each do |token|
-        reference = @entity.outgoing_page_references.find_or_initialize_by(
-          referenced_page_type:  token[:content_type],
-          referenced_page_id:    token[:content_id],
-          attribute_field_id:    @attribute_field.id,
-          reference_type:        'mentioned'
-        )
-        reference.cached_relation_title = @attribute_field.label
-        reference.save!
-
-        valid_reference_ids << reference.reload.id
-      end
-
-      # Delete all other references still attached to this field, but not present in this request
-      @entity.outgoing_page_references
-        .where(attribute_field_id: @attribute_field.id)
-        .where.not(id: valid_reference_ids)
-        .destroy_all
-    end
+    UpdateTextAttributeReferencesJob.perform_later(attribute_value.id)
 
     respond_to do |format|
       format.html { redirect_back(fallback_location: root_path, notice: "#{@attribute_field.label} updated!") }
