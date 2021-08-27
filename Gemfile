@@ -14,7 +14,7 @@ gem 'aws-sdk-s3'
 gem 'filesize'
 
 # Image processing
-gem 'paperclip'
+gem 'paperclip' # used in ImageUpload until we migrate to ActiveStorage
 gem 'rmagick'
 gem 'image_processing'
 gem 'active_storage_validations'
