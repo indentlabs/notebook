@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_05_005416) do
+ActiveRecord::Schema.define(version: 2021_08_27_071633) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -27,10 +27,17 @@ ActiveRecord::Schema.define(version: 2021_07_05_005416) do
     t.string "filename", null: false
     t.string "content_type"
     t.text "metadata"
-    t.bigint "byte_size", null: false
+    t.integer "byte_size", null: false
     t.string "checksum", null: false
     t.datetime "created_at", null: false
+    t.string "service_name", null: false
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
   create_table "api_keys", force: :cascade do |t|
@@ -3637,6 +3644,7 @@ ActiveRecord::Schema.define(version: 2021_07_05_005416) do
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "api_keys", "users"
   add_foreign_key "api_requests", "application_integrations"
   add_foreign_key "api_requests", "integration_authorizations"
