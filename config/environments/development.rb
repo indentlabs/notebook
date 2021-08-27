@@ -62,11 +62,13 @@ Rails.application.configure do
   # Set test-mode Stripe API key
   Stripe.api_key = "sk_test_v37uWbseyPct6PpsfjTa3y1l"
   config.stripe_publishable_key = 'pk_test_eXI4iyJ2gR9UOGJyJERvDlHF'
+  # Todo: uhh, this pk shouldn't be here
 
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
   config.active_job.default_url_options    = { host: 'localhost', port: 3000 }
 
   # Paperclip config for image uploads
+  # TODO: we don't use paperclip anymore so this can probably go bye-bye
   config.paperclip_defaults = {
     storage: :s3,
     s3_credentials: {

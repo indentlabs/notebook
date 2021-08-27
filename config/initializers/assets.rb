@@ -12,12 +12,3 @@ Rails.application.config.assets.paths << Rails.root.join('node_modules')
 # application.js, application.css, and all non-JS/CSS in the app/assets
 # folder are already added.
 # Rails.application.config.assets.precompile += %w( admin.js admin.css )
-
-# Include Rails helpers in the assets pipeline
-# This might be helpful for including e.g. link_to in js components, but is commented out until needed
-# Rails.application.config.assets.configure do |env|
-#   env.context_class.class_eval do
-#     include ActionView::Helpers
-#     include Rails.application.routes.url_helpers
-#   end
-# end
