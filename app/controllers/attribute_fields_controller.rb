@@ -26,7 +26,7 @@ class AttributeFieldsController < ContentController
       return redirect_back fallback_location: root_path
     end
 
-    if @attribute_field.update(attribute_field_params.merge({ migrated_from_legacy: true }))
+    if @attribute_field.update(content_params.merge({ migrated_from_legacy: true }))
       @content = @attribute_field
       successful_response(
         @attribute_field, 
