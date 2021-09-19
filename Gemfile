@@ -9,7 +9,7 @@ gem 'puma-heroku'
 gem 'sprockets', '~> 3.7.2'
 
 # Storage
-gem 'aws-sdk', '~> 3.0'
+gem 'aws-sdk', '~> 3.1'
 gem 'aws-sdk-s3'
 gem 'filesize'
 
