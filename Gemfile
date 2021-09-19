@@ -63,7 +63,7 @@ gem 'medium-editor-rails'
 
 # Graphs & Charts
 gem 'chartkick'
-gem 'd3-rails', '~> 5.9.2' # used for spider charts
+gem 'd3-rails', '~> 7.0.0' # used for spider charts
 
 # Analytics
 gem 'slack-notifier'
