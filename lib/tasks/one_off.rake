@@ -1,6 +1,8 @@
 namespace :one_off do
   desc "Alert users who've saved at least one tree"
   task trees_notification: :environment do
+    reference_code = 'green-trees'
+
     User.find_each do |user|
       trees = GreenService.total_trees_saved_by(user)
     
@@ -12,8 +14,8 @@ namespace :one_off do
           icon_color:   'green',
           happened_at:  DateTime.current,
           passthrough_link: 'https://www.notebook.ai/my/data/green',
-          reference_code: 'green-trees'
-        ) unless user.notifications.where(reference_code: 'green-trees').any?
+          reference_code: reference_code
+        ) unless user.notifications.where(reference_code: reference_code).any?
       end
     end
   end
