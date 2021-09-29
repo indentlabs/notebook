@@ -45,7 +45,7 @@ class GreenService < Service
   end
 
   def self.trees_saved_by(worldbuilding_page_type)
-    (physical_pages_equivalent_for(worldbuilding_page_type) * worldbuilding_page_type.constantize.last.id) / SHEETS_OF_PAPER_PER_TREE.to_f
+    (physical_pages_equivalent_for(worldbuilding_page_type) * (worldbuilding_page_type.constantize.last.try(:id) || 0)) / SHEETS_OF_PAPER_PER_TREE.to_f
   end
 
   def self.total_document_pages_equivalent
@@ -63,7 +63,7 @@ class GreenService < Service
   end
 
   def self.total_timeline_pages_equivalent
-    (TimelineEvent.last.id / AVERAGE_TIMELINE_EVENTS_PER_PAGE.to_f).to_i
+    ((TimelineEvent.last.try(:id) || 0) / AVERAGE_TIMELINE_EVENTS_PER_PAGE.to_f).to_i
   end
 
   def self.total_physical_pages_equivalent(content_type)
@@ -75,5 +75,33 @@ class GreenService < Service
       else
         GreenService.physical_pages_equivalent_for(content_type.name) * (content_type.last.try(:id) || 0)
     end
+  end
+
+  def self.total_pages_saved_by(user)
+    total_pages = 0
+
+    user.content.each do |content_type, content_list|
+      physical_page_equivalent_for_content_type = case content_type
+        when 'Timeline'
+          AVERAGE_TIMELINE_EVENTS_PER_PAGE * TimelineEvent.where(timeline_id: content_list.map(&:id)).count
+
+        when 'Document'
+          [
+            content_list.inject(0) { |sum, doc| sum + (doc.cached_word_count || 0) } / GreenService::AVERAGE_WORDS_PER_PAGE.to_f, 
+            content_list_count
+          ].max
+
+        else
+          physical_pages_equivalent_for(content_type) * content_list.count
+      end
+
+      total_pages += physical_page_equivalent_for_content_type
+    end
+    
+    total_pages
+  end
+
+  def self.total_trees_saved_by(user)
+    total_pages_saved_by(user).to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
   end
 end
