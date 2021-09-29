@@ -125,7 +125,7 @@
         <% end %>
       <% else %>
         <%
-          accessible_universes = ((@current_user_content['Universe'] || []) + current_user.contributable_universes)
+          accessible_universes = @current_user_content.fetch('Universe', []) + current_user.contributable_universes
           if accessible_universes.count > 1
         %>
           <div class="grey-text uppercase center">
@@ -196,7 +196,7 @@
                 <%= type %><br />
                 <small>
                   You've created
-                  <%= pluralize (@current_user_content[type] || []).count, type.downcase %>
+                  <%= pluralize @current_user_content.fetch(type, []).count, type.downcase %>
                   <% if @universe_scope %>
                     in this universe
                   <% end %>
