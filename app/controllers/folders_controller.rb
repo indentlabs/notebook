@@ -34,6 +34,9 @@ class FoldersController < ApplicationController
       .where(context: 'Document')
       .order('title ASC')
 
+    # TODO: can we reuse this content to skip a few queries in this controller action?
+    cache_linkable_content_for_each_content_type
+
     # TODO: add other content types here too
     @content = Document
       .where(folder: @folder)

@@ -37,6 +37,10 @@ class Country < ApplicationRecord
     'lighten-2 text-lighten-2 brown'
   end
 
+  def self.text_color
+    'text-lighten-2 brown-text'
+  end
+
   def self.hex_color
     '#A1887F'
   end

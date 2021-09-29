@@ -32,6 +32,9 @@ class DocumentsController < ApplicationController
       .where(context: 'Document', parent_folder_id: nil)
       .order('title ASC')
 
+    # TODO: can we reuse this content to skip a few queries in this controller action?
+    cache_linkable_content_for_each_content_type
+
     # TODO: all of this filtering code is repeated everywhere and would be nice to abstract out somewhere
     if params.key?(:favorite_only)
       @documents = @documents.where(favorite: true)

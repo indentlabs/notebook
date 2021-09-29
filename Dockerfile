@@ -5,7 +5,7 @@
 # manually is the preferred setup for Notebook.ai instances.
 
 # The image to build from.
-FROM ruby:2.7.3
+FROM ruby:2.7.4
 
 # Properties/labels for the image.
 LABEL maintainer="Notebook.ai Contributors"

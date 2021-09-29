@@ -8,4 +8,8 @@ class PageTag < ApplicationRecord
   def to_s
     self.tag
   end
+
+  def self.icon
+    'label'
+  end
 end

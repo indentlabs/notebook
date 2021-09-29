@@ -30,7 +30,7 @@ class UserFollowingsController < ApplicationController
 
       # Create a notification letting the user know!
       @user_following.followed_user.notifications.create(
-        message_html:     "<div><span class='#{User.color}-text'>#{@user_following.user.display_name}</span> is now following your public updates.</div>",
+        message_html:     "<div><span class='#{User.text_color}'>#{@user_following.user.display_name}</span> is now following your public updates.</div>",
         icon:             User.icon,
         icon_color:       User.color,
         happened_at:      DateTime.current,

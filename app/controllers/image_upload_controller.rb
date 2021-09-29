@@ -26,10 +26,6 @@ class ImageUploadController < ApplicationController
     # And credit that space back to their bandwidth
     current_user.update(upload_bandwidth_kb: current_user.upload_bandwidth_kb + reclaimed_space_kb)
 
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'deleted image', {
-      'image_size_kb': reclaimed_space_kb
-    }) if Rails.env.production?
-
     render json: { success: result }, status: 200
   end
 end

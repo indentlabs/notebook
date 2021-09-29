@@ -3,13 +3,13 @@ ruby "~> 2.7"
 
 # Server
 gem 'rails'
-gem 'puma', '~> 5.3'
+gem 'puma', '~> 5.5'
 gem 'puma-heroku'
 # gem 'bootsnap', require: false
 gem 'sprockets', '~> 3.7.2'
 
 # Storage
-gem 'aws-sdk', '~> 3.0'
+gem 'aws-sdk', '~> 3.1'
 gem 'aws-sdk-s3'
 gem 'filesize'
 
@@ -63,10 +63,9 @@ gem 'medium-editor-rails'
 
 # Graphs & Charts
 gem 'chartkick'
-gem 'd3-rails' # used for spider charts
+gem 'd3-rails', '~> 5.9.2' # used for spider charts
 
 # Analytics
-gem 'mixpanel-ruby'
 gem 'slack-notifier'
 gem 'barnes'
 
@@ -90,7 +89,7 @@ gem 'redis'
 gem 'csv'
 
 # Admin
-gem 'rails_admin', '~> 2.1'
+gem 'rails_admin', '~> 2.2'
 
 # Tech debt & hacks
 gem 'binding_of_caller' # see has_changelog.rb

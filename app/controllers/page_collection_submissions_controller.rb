@@ -64,7 +64,7 @@ class PageCollectionSubmissionsController < ApplicationController
 
     # Create a notification for the submitter to let them know it's been accepted
     @page_collection_submission.user.notifications.create(
-      message_html:     "<div>Your <span class='#{@page_collection_submission.content.class.color}-text'>#{@page_collection_submission.content.name}</span> #{@page_collection_submission.content_type.downcase} submission to <span class='#{PageCollection.color}-text'>#{@page_collection_submission.page_collection.title}</span> was approved!</div>",
+      message_html:     "<div>Your <span class='#{@page_collection_submission.content.class.text_color}'>#{@page_collection_submission.content.name}</span> #{@page_collection_submission.content_type.downcase} submission to <span class='#{PageCollection.text_color}'>#{@page_collection_submission.page_collection.title}</span> was approved!</div>",
       icon:             PageCollection.icon,
       icon_color:       PageCollection.color,
       happened_at:      DateTime.current,

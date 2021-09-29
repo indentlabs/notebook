@@ -33,6 +33,10 @@ class Continent < ActiveRecord::Base
     'lighten-1 text-lighten-1 green'
   end
 
+  def self.text_color
+    'text-lighten-1 green-text'
+  end
+
   def self.hex_color
     '#66BB6A'
   end
