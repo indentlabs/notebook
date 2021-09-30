@@ -111,9 +111,11 @@
             <span class="<%= Universe.text_color %>">
               <%= @universe_scope.try(:name) || @current_user_content.fetch('Universe', []).first.try(:name) || 'your notebook' %>
             </span>
-            <%= link_to({ universe: 'all' }, class: 'right grey-text') do %>
-              See all universes instead
-              <i class="material-icons right" style="margin: 0">arrow_right</i>
+            <% if @current_user_content.fetch('Universe', []).count > 1 %>
+              <%= link_to({ universe: 'all' }, class: 'right grey-text') do %>
+                See all universes instead
+                <i class="material-icons right" style="margin: 0">arrow_right</i>
+              <% end %>
             <% end %>
           </div>
           <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
