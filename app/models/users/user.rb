@@ -68,6 +68,7 @@ class User < ApplicationRecord
   has_many :content_page_shares,           dependent: :destroy
   has_many :content_page_share_followings, dependent: :destroy
   has_many :content_page_share_reports,    dependent: :destroy
+  has_many :share_comments,                dependent: :destroy
 
   has_many :page_collections,              dependent: :destroy
   has_many :page_collection_submissions,   dependent: :destroy

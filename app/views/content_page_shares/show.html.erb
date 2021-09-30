@@ -30,7 +30,7 @@
         <!-- todo vertical card stack user avatar -->
         <div class="card-content">
           <div class="card-title white-text">
-            <i class="material-icons left"><%= User.icon %></i>
+            <%= image_tag @share.user.image_url(size=34), class: 'left circle avatar' %>
             <%= @share.user.display_name %>
           </div>
           <%= render partial: 'thredded/users/badge', locals: { user: @share.user } %>
@@ -102,6 +102,7 @@
     </div>
   </div>
   <div class="col s12 m12 l7">
+    <br /><br />
     <div class="card">
       <div class="card-content">
         <p>
@@ -124,27 +125,41 @@
             %>
           </blockquote>
         <% end %>
-        
-        <%= render partial: 'share_comments/form', locals: { share: @share } %>
-        <br /><br />
-
-        <div class="uppercase grey-text center">
-          <%= pluralize @share.share_comments.count, 'comment' %>
-        </div>
-        <div class="row">
-          <% @share.share_comments.each do |comment| %>
-            <%= 
-              render partial: 'share_comments/show', 
-                    locals: { comment: comment, share: @share }
-            %>
-          <% end %>
-        </div>
-
-        <% if @share.share_comments.count > 10 %>
-          <%= render partial: 'share_comments/form', locals: { share: @share } %>
-        <% end %>
-        <br /><br />
       </div>
     </div>
+    <div class="card <%= user_signed_in? && @share.user == current_user ? 'purple' : 'blue' %> lighten-5 black-text hoverable">
+      <div class="card-content">
+        <% if user_signed_in? %>
+          <%= render partial: 'share_comments/form', locals: { share: @share } %>
+        <% else %>
+          <div class='center'>
+            <%= link_to new_user_registration_path do %>
+              To leave a comment, sign up for a free Notebook.ai account.
+            <% end %>
+          </div>
+        <% end %>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+
+    <div class="uppercase grey-text center">
+      <%= pluralize @share.share_comments.count, 'comment' %>
+    </div>
+    <% @share.share_comments.each do |comment| %>
+      <%= 
+        render partial: 'share_comments/show', 
+              locals: { comment: comment, share: @share }
+      %>
+    <% end %>
+
+    <% if @share.share_comments.count > 10 && user_signed_in? %>
+      <div class="clearfix"></div>
+      <div class="card <%= user_signed_in? && @share.user == current_user ? 'purple' : 'blue' %> lighten-3 black-text hoverable">
+        <div class="card-content">  
+          <%= render partial: 'share_comments/form', locals: { share: @share } %>
+        </div>
+      </div>
+    <% end %>
+    <br /><br />
   </div>
 </div>

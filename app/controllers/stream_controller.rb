@@ -1,5 +1,5 @@
 class StreamController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [:global]
   before_action :set_stream_navbar_actions, only: [:index, :global]
   before_action :set_stream_navbar_color, only: [:index, :global]
   before_action :set_sidenav_expansion
@@ -17,6 +17,13 @@ class StreamController < ApplicationController
       .includes([:content_page, :secondary_content_page])
       .includes({ share_comments: [:user], user: [:avatar_attachment] })
       .limit(25)
+    
+    @users_to_follow = User.where(
+      # Users who have shared at least 1 page to their stream
+      id: ContentPageShare.where(content_page_type: Rails.application.config.content_type_names[:all])
+            .where.not(id: current_user.try(:id))
+            .pluck(:user_id)
+    ).order('selected_billing_plan_id DESC').limit(250).sample(12)
   end
 
   def community
@@ -25,8 +32,13 @@ class StreamController < ApplicationController
   def global
     @page_title = "What's happening around the world"
 
-    blocked_users    = current_user.blocked_users.pluck(:id)
-    blocked_by_users = current_user.blocked_by_users.pluck(:id)
+    if user_signed_in?
+      blocked_users    = current_user.blocked_users.pluck(:id)
+      blocked_by_users = current_user.blocked_by_users.pluck(:id)
+    else
+      blocked_users    = []
+      blocked_by_users = []
+    end
 
     @feed = ContentPageShare.all
       .where.not(user_id: blocked_users + blocked_by_users)
@@ -43,15 +55,15 @@ class StreamController < ApplicationController
   # For showing a specific piece of content
   def set_stream_navbar_actions
     @navbar_actions = [
-      {
+      user_signed_in? ? {
         label: 'You & Your Network',
         href: main_app.stream_path
-      },
+      } : nil,
       {
         label: 'Around the world',
         href: main_app.stream_world_path
       }
-    ]
+    ].compact
   end
 
   def set_sidenav_expansion

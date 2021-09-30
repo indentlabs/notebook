@@ -1,17 +1,12 @@
 <% if comment.from_op?(share) %>
-  <div class="col s12 m10 l9">
-    <div class="purple lighten-4 comment black-text">
+  <div class="col s12 m11 l10">
+    <div class="purple lighten-4 comment black-text card hoverable">
 <% else %>
-  <div class="col s12 m10 offset-m2 l9 offset-l3">
-    <div class="blue lighten-3 comment black-text">
+  <div class="col s12 m11 offset-m1 l10 offset-l2">
+    <div class="blue lighten-4 comment black-text card hoverable">
 <% end %>
 
     <%# Nested indents from above %>
-    <%= clean_links simple_format ContentFormatterService.show(
-      text:         comment.message,
-      viewing_user: current_user
-    ), class: 'black-text' %>
-
     <div class="metadata">
       <%= link_to comment.user, class: "#{User.text_color} text-darken-4" do %>
         <% if comment.user %>
@@ -22,15 +17,17 @@
         <% end %>
       <% end %>
       <span class="timestamp">
-        <%= time_ago_in_words comment.created_at %> ago
+        <span class="tooltipped grey-text text-darken-1" data-tooltip="Posted at <%= comment.created_at %>">
+          <%= time_ago_in_words comment.created_at %> ago
+        </span>
 
         <% if user_signed_in? && (share.user == current_user || comment.user == current_user) %>
-          <a class='dropdown-trigger right' href='#' data-target='dropdown-comment-<%= comment.id %>'>
+          <a class='dropdown-trigger black-text right' href='#' data-target='dropdown-comment-<%= comment.id %>'>
             <i class="material-icons">more_vert</i>
           </a>
           <ul id='dropdown-comment-<%= comment.id %>' class='dropdown-content'>
             <li>
-              <%= link_to comment, method: :delete do %>
+              <%= link_to comment, method: :delete, class: 'red-text', data: { confirm: "Are you sure you want to delete this comment? It cannot be undeleted."} do %>
                 <i class="material-icons left">delete</i>
                 Delete this comment
               <% end %>
@@ -40,6 +37,13 @@
 
       </span>
     </div>
+
+    <%=
+      clean_links simple_format ContentFormatterService.show(
+        text:         comment.message,
+        viewing_user: current_user
+      ), class: 'black-text'
+    %>
 
   </div>
 </div>

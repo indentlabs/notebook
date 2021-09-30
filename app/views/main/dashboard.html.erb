@@ -13,15 +13,26 @@
       <div class="card">
         <div class="card-content">
           <div class="card-title">Welcome to Notebook.ai!</div>
+
+          <div class="hide-on-small-only right">
+            <%= image_tag 'tristan/small.png',
+              class: 'tooltipped tristan',
+              style: 'padding-left: 1em',
+              data: {
+                position: 'left',
+                enterDelay: '500',
+                tooltip: "Hey, I'm Tristan! I'm here to help you around the site!"
+              } %>
+          </div>
           <p>
             Notebook.ai is designed to feel like a specialized notebook for of all your worldbuilding ideas.
           </p>
           <br />
           <p>
-            Start your worldbuilding journey by creating a universe with the button below (or jump straight to the good stuff!).
-            All of the worldbuildings pages you create can be assigned to a universe, which contains your world.
-            Once you've created a few worlds, they make it easy to focus on just the world you want to work on!
+            Start your worldbuilding journey by creating a universe with the button below &mdash; or jump straight to the good stuff!
+            Once you've created a few notebook pages, adding them to a universes makes it easy to focus on just the world you want to work on!
           </p> 
+          <div class="clearfix"></div>
         </div>
       </div>
 
@@ -92,17 +103,19 @@
         </div>
       <% end %>
 
-      <% if @universe_scope.present? || @current_user_content.fetch('Universe', []).count == 1 %>
+      <% if @universe_scope.present? || @current_user_content.fetch('Universe', []).count <= 1 %>
         <% if @current_user_content.except('Universe').values.flatten.any? %>
           <div class="grey-text uppercase">
             <%= pluralize @current_user_content.except('Universe').values.flatten.count, 'page' %>
             in
             <span class="<%= Universe.text_color %>">
-              <%= @universe_scope.try(:name) || @current_user_content.fetch('Universe').first.name %>
+              <%= @universe_scope.try(:name) || @current_user_content.fetch('Universe', []).first.try(:name) || 'your notebook' %>
             </span>
-            <%= link_to({ universe: 'all' }, class: 'right grey-text') do %>
-              See all universes instead
-              <i class="material-icons right" style="margin: 0">arrow_right</i>
+            <% if @current_user_content.fetch('Universe', []).count > 1 %>
+              <%= link_to({ universe: 'all' }, class: 'right grey-text') do %>
+                See all universes instead
+                <i class="material-icons right" style="margin: 0">arrow_right</i>
+              <% end %>
             <% end %>
           </div>
           <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
@@ -158,7 +171,7 @@
       <div class="grey-text uppercase center">
         Pick up where you left off
       </div>
-      <ul style="margin: 0;">
+      <ul style="margin: 0; margin-bottom: 1em">
         <% @recently_edited_pages.first(5).each do |page| %>
           <% next if page.page_type === 'Document' && page.user != current_user %>
 
@@ -207,6 +220,26 @@
         <% end %>
       </div>
     <% end %>
+    <div style=" margin-bottom: 1em"></div>
+
+    <div class="grey-text uppercase center">Get inspired</div>
+    <div>
+      <%= link_to stream_path, class: "white-text", style: 'width: 100%' do %>
+        <div class="hoverable card-panel purple lighten-3" style="margin-bottom: 4px">
+          <div class="valign-wrapper">
+            <i class="material-icons grey-bordered-text" class="left" style="font-size: 3em;">
+              stream
+            </i>
+            <span style="font-size: 1.1em; margin-left: 1em">
+              View your stream<br />
+              <small>
+                What's happening?
+              </small>
+            </span>
+          </div>
+        </div>
+      <% end %>
+    </div>
   </div>
 </div>
 

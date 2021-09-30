@@ -1,9 +1,10 @@
 class ShareCommentsController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_share_comment, only: [:update, :destroy]
 
   # POST /share_comments
   def create
-    @share_comment = ShareComment.new(share_comment_params.merge({user: current_user}))
+    @share_comment = ShareComment.new(share_comment_params.merge({ user: current_user }))
 
     if @share_comment.save
       # Subscribe the commenter to additional comments on this share
@@ -12,9 +13,8 @@ class ShareCommentsController < ApplicationController
       ContentPageShareNotificationJob.perform_later(@share_comment.id)
 
       redirect_to([@share_comment.content_page_share.user, @share_comment.content_page_share], notice: "Comment posted successfully!");
-      # redirect_back(fallback_location: @share_comment.content_page_share, notice: "Comment posted successfully.")
     else
-      render :new
+      redirect_back(fallback_location: @share_comment.content_page_share, notice: "Error submitting comment.")
     end
   end
 

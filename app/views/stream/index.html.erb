@@ -1,3 +1,13 @@
+<%= content_for :full_width_page_header do %>
+  <div class="parallax-header slider" style="height: 1px; position: relative; top: -1px">
+    <ul class="slides">
+      <li>
+        <%= image_tag "card-headers/stream.jpg" %>
+      </li>
+    </ul>
+  </div>
+<% end %>
+
 <br />
 
 <%= render partial: 'notice_dismissal/messages/12' %>
@@ -27,6 +37,28 @@
       </div>
     </div>
   </div>
+<% end %>
+
+<% if @users_to_follow.any? %>
+  <div class='center grey-text uppercase'>Users to follow</div>
+  <% @users_to_follow.each do |user| %>
+    <div class='col s12 m4 l3'>
+      <div class='hoverable card green lighten-5'>
+        <%= link_to user do %>
+          <div class="card-image">
+            <%= image_tag user.image_url(size=200).html_safe, class: 'header-avatar', data: { caption: "#{user.display_name}'s avatar" } %>
+          <span class="black-text right">
+            <%= render partial: 'thredded/users/badge', locals: { user: user } %>
+          </span>
+          </div>
+        <% end %>
+        <div class='card-content fixed-card-content'>
+          <div class='card-title'><%= user.display_name %></div>
+          <%= render partial: 'users/profile/follow_button', locals: { user: user } %>
+        </div>
+      </div>
+    </div>
+  <% end %>
 <% end %>
 
 <%= render partial: 'javascripts/content_linking' %>

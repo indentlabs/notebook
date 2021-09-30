@@ -1,0 +1,23 @@
+<% if user_signed_in? && !user.blocked_by?(current_user || User.new) %>
+  <% if user.followed_by?(current_user) %>
+    <%= form_for(current_user.user_followings.find_by(followed_user_id: user.id), method: :delete) do |f| %>
+      <%= f.hidden_field :followed_user_id, value: user.id %>
+      <%= link_to '#', onclick: "$('.edit_user_following').first().submit()", class: 'collection-item blue-text' do %>
+        Unfollow this user
+        <span class="secondary-content">
+          <i class="material-icons green-text">how_to_reg</i>
+        </span>
+      <% end %>
+    <% end %>
+  <% else %>
+    <%= form_for UserFollowing.new, method: :post do |f| %>
+      <%= f.hidden_field :followed_user_id, value: user.id %>
+      <%= link_to '#', onclick: "$('#new_user_following').first().submit()", class: 'collection-item blue-text' do %>
+        Follow this user
+        <span class="secondary-content">
+          <i class="material-icons green-text"><%= User.icon %></i>
+        </span>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
