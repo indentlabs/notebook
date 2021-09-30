@@ -24,6 +24,10 @@ class AttributeCategory < ApplicationRecord
     'amber'
   end
 
+  def self.text_color
+    'amber-text'
+  end
+
   def icon
     icon_override || self.class.icon
   end
@@ -62,6 +66,7 @@ class AttributeCategory < ApplicationRecord
 
   def backfill_fields_ordering!
     sorted_fields = attribute_fields.select(&:persisted?).sort do |a, b|
+      # TODO: we shouldn't need this code anymore
       a_value = case a.field_type
         when 'name'     then 0
         when 'universe' then 1

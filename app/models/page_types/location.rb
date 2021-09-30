@@ -46,6 +46,10 @@ class Location < ApplicationRecord
     'green'
   end
 
+  def self.text_color
+    'green-text'
+  end
+
   def self.hex_color
     '#4CAF50'
   end

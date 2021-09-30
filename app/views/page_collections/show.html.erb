@@ -75,7 +75,7 @@
 
       <%# render partial: 'page_collections/quick_add' %>
       <a class="waves-effect hoverable waves-light btn btn-large modal-trigger <%= 'disabled' unless user_signed_in? %> blue" href="#share-page-modal" style="width: 100%; margin-top: 0.5em;">
-        <i class="material-icons <%= PageCollection.color %>-text text-darken-2 left"><%= PageCollection.icon %></i>
+        <i class="material-icons <%= PageCollection.text_color %> text-darken-2 left"><%= PageCollection.icon %></i>
         <div class="left">
           <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page
           <span class="hide-on-small-only">
@@ -96,7 +96,7 @@
             <span class="badge white-text"><%= @page_collection.accepted_submissions.where(content_type: pt).count %></span>
           <% end %>
         <% end %>
-        <%= link_to @page_collection, class: "collection-item #{PageCollection.color}-text" do %>
+        <%= link_to @page_collection, class: "collection-item #{PageCollection.text_color}" do %>
           <i class="material-icons left"><%= PageCollection.icon %></i>
           All Pages
           <span class="badge brown-text"><%= @page_collection.accepted_submissions.count %></span>
@@ -105,7 +105,7 @@
 
       <div class="grey-text uppercase">Curator</div>
       <div>
-        <%= link_to @page_collection.user, class: "#{User.color}-text" do %>
+        <%= link_to @page_collection.user, class: "#{User.text_color}" do %>
           <%= image_tag @page_collection.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
           <%= @page_collection.user.display_name %>
         <% end %>
@@ -116,7 +116,7 @@
         <div class="grey-text uppercase">Contributors</div>
         <% @page_collection.contributors.each do |user| %>
           <div class="col s12 m6 l3">
-            <%= link_to user, class: "#{User.color}-text" do %>
+            <%= link_to user, class: "#{User.text_color}" do %>
               <%= image_tag user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
               <%= user.display_name %>
             <% end %>
@@ -210,7 +210,7 @@
               <div class="center">
                 <% @submittable_content.keys.each do |submittable_class_name| %>
                   <% submittable_class = content_class_from_name(submittable_class_name) %>
-                  <i class="material-icons bordered-text <%= submittable_class.color %>-text <%= @submittable_content.keys.length > 6 ? 'small' : 'medium' %> tooltipped" 
+                  <i class="material-icons bordered-text <%= submittable_class.text_color %> <%= @submittable_content.keys.length > 6 ? 'small' : 'medium' %> tooltipped" 
                      data-tooltip="This Collection allows <%= submittable_class_name.downcase.pluralize %>."><%= submittable_class.icon %></i> &nbsp;
                 <% end %>
               </div>

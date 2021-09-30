@@ -58,7 +58,7 @@ namespace :data_migrations do
           referencing_page = nil
           referenced_page  = nil
 
-          if link.name == Deityship.name
+          if link.class.name == Deityship.name
             referencing_page = link.send(referencing_page_type.downcase)
             referenced_page  = link.send(:deity_character)
 
@@ -85,7 +85,7 @@ namespace :data_migrations do
             attribute_category_id: categories_for_this_page_type_and_user,
             user_id:               referencing_page.user_id,
             field_type:            'link',
-            old_column_source:     relation_params[:through_relation].pluralize
+            old_column_source:     link.class.name == Deityship.name ? 'deity_characters' : relation_params[:through_relation].pluralize
           )
 
           if attribute_field.count > 1
@@ -115,6 +115,7 @@ namespace :data_migrations do
             entity_type:        referencing_page_type,
             entity_id:          referencing_page.id
           )
+          puts "Migrating attribute ID #{attribute.id}"
           if attribute.value.nil?
             attribute.value = JSON.parse('["' + referenced_page_type + '-' + referenced_page.id.to_s + '"]')
           else

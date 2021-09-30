@@ -9,7 +9,7 @@ class ContributorsController < ApplicationController
 
       # Create a notification letting the user know!
       user.notifications.create(
-        message_html:     "<div>You have been removed as a contributor from the <span class='#{Universe.color}-text'>#{relevant_universe.name}</span> universe.</div>",
+        message_html:     "<div>You have been removed as a contributor from the <span class='#{Universe.text_color}'>#{relevant_universe.name}</span> universe.</div>",
         icon:             Universe.icon,
         icon_color:       Universe.color,
         happened_at:      DateTime.current,
@@ -18,7 +18,7 @@ class ContributorsController < ApplicationController
 
       # Create a notification letting the universe owner know
       relevant_universe.user.notifications.create(
-        message_html:     "<div><span class='#{User.color}-text'>#{user.display_name}</span> has stopped collaborating on your <span class='#{Universe.color}-text'>#{relevant_universe.name}</span> universe.</div>",
+        message_html:     "<div><span class='#{User.text_color}'>#{user.display_name}</span> has stopped collaborating on your <span class='#{Universe.text_color}'>#{relevant_universe.name}</span> universe.</div>",
         icon:             Universe.icon,
         icon_color:       Universe.color,
         happened_at:      DateTime.current,

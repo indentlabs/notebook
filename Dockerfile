@@ -1,9 +1,11 @@
 # HEADS UP!
 # This Dockerfile is for DEVELOPMENT use only;
-# it's in no way optimized for production.
+# it's in no way optimized for production and is largely maintained by
+# the open source community for convenience. Installing the full stack
+# manually is the preferred setup for Notebook.ai instances.
 
 # The image to build from.
-FROM ruby:2.7.2
+FROM ruby:2.7.4
 
 # Properties/labels for the image.
 LABEL maintainer="Notebook.ai Contributors"

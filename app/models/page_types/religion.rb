@@ -38,6 +38,10 @@ class Religion < ApplicationRecord
     'indigo'
   end
 
+  def self.text_color
+    'indigo-text'
+  end
+
   def self.hex_color
     '#3f51b5'
   end

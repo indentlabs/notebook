@@ -40,6 +40,10 @@ class Group < ApplicationRecord
     'cyan'
   end
 
+  def self.text_color
+    'cyan-text'
+  end
+
   def self.hex_color
     '#00BCD4'
   end

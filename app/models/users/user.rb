@@ -25,6 +25,7 @@ class User < ApplicationRecord
     length: { maximum: 20 },
   if: Proc.new { |user| user.forums_badge_text_changed? }
 
+  has_many :folders
   has_many :subscriptions, dependent: :destroy
   has_many :billing_plans, through: :subscriptions
   def on_premium_plan?
@@ -331,6 +332,10 @@ class User < ApplicationRecord
 
   def self.color
     'green'
+  end
+
+  def self.text_color
+    'green-text'
   end
 
   def favorite_page_type_color

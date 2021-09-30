@@ -48,8 +48,8 @@ class ContentController < ApplicationController
       page_type: @content_type_class.name,
       page_id:   @content.pluck(:id)
     ).order(:tag)
-    if params.key?(:slug)
-      @filtered_page_tags = @page_tags.where(slug: params[:slug])
+    if params.key?(:tag)
+      @filtered_page_tags = @page_tags.where(slug: params[:tag])
       @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
 
@@ -58,6 +58,7 @@ class ContentController < ApplicationController
     end
 
     @page_tags = @page_tags.uniq(&:tag)
+
     @content = @content.sort_by {|x| [x.favorite? ? 0 : 1, x.name] }
 
     @questioned_content = @content.sample
@@ -82,22 +83,6 @@ class ContentController < ApplicationController
     @serialized_content = ContentSerializer.new(@content)
 
     if (current_user || User.new).can_read?(@content)
-      if user_signed_in?
-        if @content.updated_at > 30.minutes.ago
-          Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed content', {
-            'content_type': content_type.name,
-            'content_owner': current_user.present? && current_user.id == @content.user_id,
-            'logged_in_user': current_user.present?
-          }) if Rails.env.production?
-        else
-          Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'viewed recently-modified content', {
-            'content_type': content_type.name,
-            'content_owner': current_user.present? && current_user.id == @content.user_id,
-            'logged_in_user': current_user.present?
-          }) if Rails.env.production?
-        end
-      end
-
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
         format.json { render json: @serialized_content.data }
@@ -190,10 +175,6 @@ class ContentController < ApplicationController
     # Default owner to the current user
     @content.user_id ||= current_user.id
 
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'created content', {
-      'content_type': content_type.name
-    }) if Rails.env.production?
-
     if @content.save
       cache_params = {}
       cache_params[:name]     = @content.name_field_value unless [AttributeCategory, AttributeField].include?(@content.class)
@@ -229,10 +210,6 @@ class ContentController < ApplicationController
       flash[:notice] = "You don't have permission to edit that!"
       return redirect_back fallback_location: @content
     end
-
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'updated content', {
-      'content_type': content_type.name
-    }) if Rails.env.production?
 
     if params.key?('image_uploads')
       upload_files(params['image_uploads'], content_type.name, @content.id)
@@ -351,12 +328,6 @@ class ContentController < ApplicationController
         src: image_data,
         privacy: 'public'
       )
-
-      Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'uploaded image', {
-        'content_type': content_type,
-        'image_size_kb': image_size_kb,
-        'first five images': current_user.image_uploads.count <= 5
-      }) if Rails.env.production?
     end
   end
 
@@ -367,10 +338,6 @@ class ContentController < ApplicationController
     unless current_user.can_delete?(@content)
       return redirect_to :back, notice: "You don't have permission to do that!"
     end
-
-    Mixpanel::Tracker.new(Rails.application.config.mixpanel_token).track(current_user.id, 'deleted content', {
-      'content_type': content_type.name
-    }) if Rails.env.production?
 
     cached_page_name = @content.try(:name)
     @content.destroy

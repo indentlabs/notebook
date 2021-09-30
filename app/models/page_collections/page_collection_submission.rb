@@ -31,7 +31,7 @@ class PageCollectionSubmission < ApplicationRecord
     # Send a notification to all the users following this collection
     page_collection.followers.each do |user|
       user.notifications.create(
-        message_html:     "<div><span class='#{content.class.color}-text'>#{content.name}</span> by <span class='#{User.color}-text'>#{content.user.display_name}</span> was added to the <span class='#{PageCollection.color}-text'>#{page_collection.title}</span> Collection.</div>",
+        message_html:     "<div><span class='#{content.class.text_color}'>#{content.name}</span> by <span class='#{User.text_color}'>#{content.user.display_name}</span> was added to the <span class='#{PageCollection.text_color}'>#{page_collection.title}</span> Collection.</div>",
         icon:             PageCollection.icon,
         icon_color:       PageCollection.color,
         happened_at:      DateTime.current,
@@ -75,7 +75,7 @@ class PageCollectionSubmission < ApplicationRecord
     # If the submission needs reviewed, create a notification for the collection owner
     if user != page_collection.user && !page_collection.auto_accept?
       page_collection.user.notifications.create(
-        message_html:     "<div><span class='#{User.color}-text'>#{user.display_name}</span> submitted the <span class='#{content.class.color}-text'>#{content.name}</span> #{content_type.downcase} to your <span class='#{PageCollection.color}-text'>#{page_collection.title}</span> collection.</div>",
+        message_html:     "<div><span class='#{User.text_color}'>#{user.display_name}</span> submitted the <span class='#{content.class.text_color}'>#{content.name}</span> #{content_type.downcase} to your <span class='#{PageCollection.text_color}'>#{page_collection.title}</span> collection.</div>",
         icon:             PageCollection.icon,
         icon_color:       PageCollection.color,
         happened_at:      DateTime.current,

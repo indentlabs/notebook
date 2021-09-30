@@ -32,7 +32,9 @@ class AdminController < ApplicationController
   end
 
   def images
-    @images = ImageUpload.offset(params[:page].to_i * 500).limit(500)
+    @images = ImageUpload
+              .where({ content_type: params.fetch('content_type', nil) }.reject { |k, v| v.nil? })
+              .offset(params[:page].to_i * 500).limit(500)
               .includes(:content) #.where.not(audited: true)
               .order('id DESC')
   end

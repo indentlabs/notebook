@@ -86,8 +86,22 @@ class DataController < ApplicationController
   def archive
   end
 
+  def documents
+    @documents = current_user
+      .documents
+      .order('title ASC')
+      .includes([:document_analysis])
+    
+    @revisions = DocumentRevision.where(document_id: @documents.pluck(:id))
+
+    revision_counts = @revisions.pluck(:document_id)
+    @revisions_per_document_data = @documents.pluck(:title, :id).map do |title, did|
+      [title, revision_counts.count(did)]
+    end.reject { |title, count| count.zero? }.sort_by { |title, count| -count }
+  end
+
   def uploads
-    @used_kb     = current_user.image_uploads.sum(:src_file_size) / 1000
+    @used_kb      = current_user.image_uploads.sum(:src_file_size) / 1000
     @remaining_kb = current_user.upload_bandwidth_kb.abs
 
     if current_user.upload_bandwidth_kb < 0

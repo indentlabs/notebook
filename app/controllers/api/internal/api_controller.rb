@@ -5,7 +5,7 @@ module Api
       before_action :set_content
 
       def name_lookup
-        render body: @content.name, content_type: 'text/plain'
+        render body: @content.try(:name) || 'Page not found', content_type: 'text/plain'
       end
 
       private
