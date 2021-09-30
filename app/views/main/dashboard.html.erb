@@ -184,8 +184,10 @@
     <% end %>
 
     <div class="grey-text uppercase center">Create something new</div>
+    <% shown_creatures = false %>
     <% @activated_content_types.sample(3).each do |type| %>
       <% klass = content_class_from_name(type) %>
+      <% shown_creatures = true if type == 'Creature' %>
       <div>
         <%= link_to send("new_#{type.downcase}_path"), class: "white-text", style: 'width: 100%' do %>
           <div class="hoverable card-panel <%= klass.color %>" style="margin-bottom: 4px">
