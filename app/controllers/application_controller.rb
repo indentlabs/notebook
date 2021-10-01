@@ -6,6 +6,7 @@ class ApplicationController < ActionController::Base
   before_action :set_universe_scope
 
   before_action :cache_most_used_page_information
+  before_action :cache_forums_unread_counts
 
   before_action :set_metadata
 
@@ -66,7 +67,6 @@ class ApplicationController < ActionController::Base
     cache_current_user_content
     cache_notifications
     cache_recently_edited_pages
-    cache_forums_unread_counts
   end
 
   def cache_activated_content_types
