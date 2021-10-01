@@ -20,7 +20,7 @@ class Creature < ApplicationRecord
   include Serendipitous::Concern
 
   include Authority::Abilities
-  self.authorizer_name = 'ExtendedContentAuthorizer'
+  self.authorizer_name = 'CoreContentAuthorizer'
 
   # Locations
   relates :habitats,    with: :wildlifeships
