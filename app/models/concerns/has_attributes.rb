@@ -42,17 +42,28 @@ module HasAttributes
     end
 
     def self.attribute_categories(user, show_hidden: false)
+      # TODO: this is a code smell; we should probably either be whitelisting or fixing whatever is calling
+      #       this with the wrong models
       return [] if ['attribute_category', 'attribute_field'].include?(content_name)
 
       # Cache the result in case we call this function multiple times this request
       @cached_attribute_categories_for_this_content = begin
         # Always include  the flatfile categories (but create AR versions if they don't exist)
+        categories_list  = AttributeCategory.with_deleted.where(user: user).to_a
+        full_fields_list = AttributeField.with_deleted.where(user: user, attribute_category_id: categories_list.map(&:id))
         categories = YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, details|
-          category = ::AttributeCategory.with_deleted.find_or_initialize_by(
-            entity_type: self.content_name,
-            name: category_name.to_s,
-            user: user
-          )
+          category = categories_list.detect do |persisted_category|
+            persisted_category.entity_type == self.content_name &&
+            persisted_category.name        == category_name.to_s
+          end
+          if category.nil?
+            category = AttributeCategory.new(
+              entity_type: self.content_name,
+              name:        category_name.to_s,
+              user:        user
+            )
+          end
+
           # Default new categories to some sane defaults
           unless category.persisted?
             category.icon  = details[:icon]
@@ -60,13 +71,21 @@ module HasAttributes
           end
 
           category.save! if user && category.new_record?
+          fields_list = full_fields_list.select do |field|
+            field.attribute_category_id == category.id
+          end
           category.attribute_fields << details[:attributes].map do |field|
-            af_field = category.attribute_fields.with_deleted.find_or_initialize_by(
-              # label: field[:label],
-              old_column_source: field[:name],
-              user: user,
-              field_type: field[:field_type].presence || "text_area"
-            )
+            af_field = fields_list.detect do |persisted_field|
+              persisted_field.old_column_source == field[:name] &&
+              persisted_field.field_type        == field[:field_type].presence || "text_area"
+            end
+            if af_field.nil?
+              af_field = category.attribute_fields.new(
+                old_column_source: field[:name],
+                user:              user,
+                field_type:        field[:field_type].presence || "text_area"
+              )
+            end
             if af_field.label.nil?
               af_field.label = field[:label]
             end
@@ -180,6 +199,7 @@ module HasAttributes
       end
     end
 
+    # All of these helpers are spooky and rife for N+1s
     def name_field
       category_ids = AttributeCategory.where(
         user_id: user_id,

@@ -4,6 +4,8 @@ class DocumentsController < ApplicationController
   # todo Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
   skip_before_action :verify_authenticity_token, only: [:link_entity]
 
+  skip_before_action :cache_most_used_page_information, only: [:update]
+
   before_action :set_document,          only:   [:show, :analysis, :plaintext, :queue_analysis, :edit, :destroy]
   before_action :set_sidenav_expansion, except: [:plaintext]
   before_action :set_navbar_color,      except: [:plaintext]
@@ -185,20 +187,20 @@ class DocumentsController < ApplicationController
 
   def update
     document = Document.with_deleted.find_or_initialize_by(id: params[:id])
-    d_params = document_params.clone # TODO: why are we duplicating the params here?
 
     unless document.updatable_by?(current_user)
       redirect_to(dashboard_path, notice: "You don't have permission to do that!")
       return
     end
 
-    # Only queue document mentions for analysis if the document body has changed
-    DocumentMentionJob.perform_later(document.id) if d_params.key?(:body)
-
     # We can't pass actual-nil from HTML (for no universe), so we pass a string instead and convert it back here.
+    d_params = document_params.clone
     if d_params.fetch(:universe_id, nil) == "nil"
       d_params[:universe_id] = nil
     end
+
+    # Only queue document mentions for analysis if the document body has changed
+    DocumentMentionJob.perform_later(document.id) if d_params.key?(:body)
 
     update_page_tags(document) if document_tag_params
 
