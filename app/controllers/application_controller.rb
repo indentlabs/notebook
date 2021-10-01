@@ -35,13 +35,23 @@ class ApplicationController < ActionController::Base
 
   def set_universe_scope
     if user_signed_in? && session.key?(:universe_id)
-      cache_contributable_universe_ids
-      
-      if @contributable_universe_ids.include?(session[:universe_id])
-        @universe_scope = Universe.find_by(id: session[:universe_id])
-      else
-        @universe_scope = nil
+      @universe_scope = Universe.find_by(id: session[:universe_id])
+
+      if @universe_scope && @universe_scope.user_id != current_user.try(:id)
+        # Verify the current user has access to this universe by looking up their
+        # universe contributorship
+        contributorship = Contributor.find_by(
+          user:     current_user,
+          universe: @universe_scope
+        )
+
+        if contributorship.nil?
+          # If the user doesn't have current contributor access to this universe,
+          # then revert back to unscoped universe actions
+          @universe_scope = nil
+        end
       end
+
     else
       @universe_scope = nil
     end
@@ -79,7 +89,10 @@ class ApplicationController < ActionController::Base
     cache_activated_content_types
 
     # We always want to cache Universes, even if they aren't explicitly turned on.
-    @current_user_content = current_user.content(content_types: @activated_content_types + [Universe.name], universe_id: @universe_scope.try(:id))
+    @current_user_content = current_user.content(
+      content_types: @activated_content_types + [Universe.name], 
+      universe_id:   @universe_scope.try(:id)
+    )
 
     # Likewise, we should also always cache Timelines & Documents
     if @universe_scope
@@ -143,6 +156,8 @@ class ApplicationController < ActionController::Base
   end
 
   def cache_contributable_universe_ids
+    cache_current_user_content
+
     @contributable_universe_ids ||= if user_signed_in?
       current_user.contributable_universe_ids + @current_user_content.fetch('Universe', []).map(&:id)
     else
@@ -165,7 +180,7 @@ class ApplicationController < ActionController::Base
       # so all we need to grab is additional pages in contributable universes
       @linkables_raw[page_type] = @current_user_content[page_type]
 
-      if @contributable_universe_ids.any?
+      if !@universe_scope && @contributable_universe_ids.any?
         existing_page_ids = @linkables_raw[page_type].map(&:id)
 
         pages_to_add = if page_type == Universe.name

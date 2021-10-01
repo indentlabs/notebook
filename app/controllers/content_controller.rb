@@ -33,7 +33,7 @@ class ContentController < ApplicationController
     # Linkables cache is already scoped per-universe, includes contributor pages
     @content = @linkables_raw.fetch(@content_type_class.name, [])
 
-    @show_scope_notice = @universe_scope.present? && content_type_class != Universe
+    @show_scope_notice = @universe_scope.present? && @content_type_class != Universe
 
     # Filters
     @page_tags = PageTag.where(
