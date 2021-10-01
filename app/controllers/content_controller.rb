@@ -118,6 +118,10 @@ class ContentController < ApplicationController
       end
 
       @content.save!
+
+      # If the user doesn't have this content type enabled, go ahead and automatically enable it for them
+      current_user.user_content_type_activators.find_or_create_by(content_type: @content.class.name)
+
       return redirect_to edit_polymorphic_path(@content)
     else
       return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
@@ -185,6 +189,9 @@ class ContentController < ApplicationController
           document_entity.update(entity_id: @content.reload.id)
         end
       end
+
+      # If the user doesn't have this content type enabled, go ahead and automatically enable it for them
+      current_user.user_content_type_activators.find_or_create_by(content_type: content_type.name)
 
       successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
