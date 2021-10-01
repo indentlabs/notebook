@@ -40,8 +40,8 @@ class ContentController < ApplicationController
       page_type: @content_type_class.name,
       page_id:   @content.pluck(:id)
     ).order(:tag)
-    if params.key?(:tag)
-      @filtered_page_tags = @page_tags.where(slug: params[:tag])
+    if params.key?(:slug)
+      @filtered_page_tags = @page_tags.where(slug: params[:slug])
       @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
     @page_tags = @page_tags.uniq(&:tag)
