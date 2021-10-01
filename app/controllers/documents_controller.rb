@@ -12,6 +12,10 @@ class DocumentsController < ApplicationController
   before_action :set_navbar_actions,    except: [:edit, :plaintext]
   before_action :set_footer_visibility, only:   [:edit]
 
+  # Skip UI-heavy calls for API endpoints
+  skip_before_action :cache_most_used_page_information, only: [:update]
+  skip_before_action :cache_forums_unread_counts,       only: [:update]
+
   # TODO: verify_user_can_read, verify_user_can_edit, etc before_actions instead of inlining them
 
   before_action :cache_linkable_content_for_each_content_type, only: [:edit]
