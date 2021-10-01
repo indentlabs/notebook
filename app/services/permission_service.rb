@@ -5,7 +5,7 @@ class PermissionService < Service
   end
 
   def self.user_owns_content?(user:, content:)
-    content.user && user && content.user.try(:id) == user.try(:id)
+    content.user && user && content.try(:user_id) == user.try(:id)
   end
 
   def self.user_owns_any_containing_universe?(user:, content:)
