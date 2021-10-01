@@ -14,7 +14,7 @@
     <div class="col s12">
       <div class="card-panel">
         <p class="card-panel-title">
-          <i class="left material-icons orange-text">cake</i>
+          <i class="left material-icons large orange-text">cake</i>
           You signed up to Notebook.ai on <%= current_user.created_at.strftime("%B %d of this year, a very fine %A") %>!
         </p>
         
@@ -32,7 +32,7 @@
     <div class="col s12 m5">
       <div class="card-panel">
         <div class="card-panel-title">
-          <i class="material-icons left <%= @earliest_page.class.text_color %>">
+          <i class="material-icons left large <%= @earliest_page.class.text_color %>">
             <%= @earliest_page.class.icon %>
           </i>
           It all started with <%= @earliest_page.name %>...
@@ -45,9 +45,11 @@
       </div>
     </div>
     <div class="col s12 m7">
-      <div class="card horizontal">
+      <div class="hoverable card horizontal">
         <div class="card-image">
-          <%= image_tag @earliest_page.random_image_including_private %>
+          <%= link_to @earliest_page do %>
+            <%= image_tag @earliest_page.random_image_including_private %>
+          <% end %>
         </div>
         <div class="card-stacked">
           <div class="card-content">
@@ -75,8 +77,8 @@
     <div class="col s12">
       <%= render partial: 'content/components/parallax_header', locals: { content_type: 'Universe', content_class: Universe, image_only: true } %>
       <div class="card-panel">
+        <i class="left material-icons large <%= Universe.text_color %>"><%= Universe.icon %></i>
         <p class="card-panel-title">
-          <i class="left material-icons <%= Universe.text_color %>"><%= Universe.icon %></i>
           You started creating <%= pluralize @created_content['Universe'].count, 'new universe' %> in <%= @year %>!
         </p>
         
@@ -103,8 +105,8 @@
   <div class="row">
     <div class="col s12">
       <div class="card-panel">
+        <i class="material-icons left large blue-text">dashboard</i>
         <div class="card-panel-title">
-          <i class="material-icons left blue-text">dashboard</i>
           In your worlds, you created
           <%= pluralize @total_created_non_universe_content, 'notebook pages' %>
           this year!
@@ -138,7 +140,10 @@
         </div>
         <div class="row">
           <div class="col s12">
-            You also uploaded <%= pluralize @created_content['ImageUpload'].count, 'image' %> to your notebook pages this year!
+            <p class="right">
+              <i class="material-icons left">upload</i>
+              You also uploaded <%= pluralize @created_content['ImageUpload'].count, 'image' %> to your notebook pages this year!
+            </p>
           </div>
         </div>
       </div>
@@ -153,8 +158,8 @@
       <%= render partial: 'content/components/parallax_header', locals: { content_type: 'Document', content_class: Document, image_only: true } %>
 
       <div class="card-panel">
+        <i class="material-icons left large <%= Document.text_color %>"><%= Document.icon %></i>
         <div class="card-panel-title">
-          <i class="material-icons left <%= Document.text_color %>"><%= Document.icon %></i>
           You started writing <%= pluralize @created_content['Document'].count, 'document' %> in <%= @year %>!
         </div>
         <p>
@@ -164,11 +169,11 @@
 
       <% @created_content['Document'].each do |document| %>
         <div class="col s12 m4 l3">
-            <%= link_to edit_document_path(document) do %>
-              <div class="hoverable card-panel fixed-card-content <%= Document.color %> white-text">
-                <i class="material-icons left"><%= Document.icon %></i>
-                <%= document.title %>
-              </div>
+          <%= link_to document_path(document) do %>
+            <div class="hoverable card-panel fixed-card-content <%= Document.color %> white-text">
+              <i class="material-icons left"><%= Document.icon %></i>
+              <%= document.title %>
+            </div>
           <% end %>
         </div>
       <% end %>
@@ -273,14 +278,14 @@
 <div class="row">
   <div class="col s12">
     <div class="card-panel">
+      <i class="material-icons left large blue-text">date_range</i>
       <div class="card-panel-title">
-        <i class="material-icons left blue-text">date_range</i>
         <%= @year %> was a productive year for you!
       </div>
       <p>
         Thanks for spending it on Notebook.ai. I can't wait to see what you accomplish in <%= @year + 1 %>! :)
       </p>
-      <p>
+      <p style="text-align: right">
         &mdash; Andrew
       </p>
     </div>
