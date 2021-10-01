@@ -17,12 +17,12 @@ module HasImageUploads
     end
 
     def random_image_including_private(format: :medium)
-      @cache ||= {}
+      @random_image_including_private_cache ||= {}
       key = self.class.name + self.id.to_s
-      return @cache[key] if @cache.key?(key)
+      return @random_image_including_private_cache[key] if @random_image_including_private_cache.key?(key)
 
       result = image_uploads.sample.try(:src, format).presence || "card-headers/#{self.class.name.downcase.pluralize}.jpg"
-      @cache[key] = result
+      @random_image_including_private_cache[key] = result
 
       result
     end
