@@ -139,6 +139,7 @@ Rails.application.routes.draw do
       get '/uploads',       to: 'data#uploads'
       get '/discussions',   to: 'data#discussions'
       get '/collaboration', to: 'data#collaboration'
+      get '/green',         to: 'data#green'
       scope 'yearly' do
         get '/',      to: 'data#yearly_index',   as: :year_in_review
         get '/:year', to: 'data#review_year',    as: :review_year
@@ -167,6 +168,7 @@ Rails.application.routes.draw do
 
   # Info pages
   scope '/about' do
+    get '/paper',   to: 'main#paper',       as: :green_paper
     get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
   end
 
@@ -281,6 +283,8 @@ Rails.application.routes.draw do
   scope '/worldbuilding' do
     Rails.application.config.content_types[:all].each do |content_type|
       get content_type.name.downcase.pluralize, to: "information##{content_type.name.downcase.pluralize}", as: "#{content_type.name.downcase}_worldbuilding_info"
+      # TODO: documents info page
+      # TODO: timelines info page
     end
   end
 

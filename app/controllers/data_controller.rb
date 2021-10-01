@@ -140,6 +140,9 @@ class DataController < ApplicationController
     @share_link     = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}"
   end
 
+  def green
+  end
+
   private
 
   def set_sidenav_expansion

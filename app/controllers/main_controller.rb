@@ -35,6 +35,31 @@ class MainController < ApplicationController
   def sascon
   end
 
+  def paper
+    @navbar_color = '#4CAF50'
+
+    @total_notebook_pages   = 0
+    @total_pages_equivalent = 0
+    @total_trees_saved      = 0
+
+    @per_page_savings = {}
+
+    (Rails.application.config.content_types[:all] + [Timeline, Document]).each do |content_type|
+      physical_page_equivalent = GreenService.total_physical_pages_equivalent(content_type)
+      tree_equivalent          = physical_page_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
+
+      @per_page_savings[content_type.name] = {
+        digital: content_type.last.try(:id) || 0,
+        pages:   physical_page_equivalent,
+        trees:   tree_equivalent
+      }
+
+      @total_notebook_pages   += @per_page_savings.dig(content_type.name, :digital)
+      @total_pages_equivalent += @per_page_savings.dig(content_type.name, :pages)
+      @total_trees_saved      += @per_page_savings.dig(content_type.name, :trees)
+    end
+  end
+
   def prompts
     @sidenav_expansion = 'writing'
     @navbar_color = '#FF9800'
