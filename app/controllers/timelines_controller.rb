@@ -7,6 +7,8 @@ class TimelinesController < ApplicationController
 
   # GET /timelines
   def index
+    cache_linkable_content_for_each_content_type
+
     @timelines = current_user.timelines
     @page_title = "My timelines"
 

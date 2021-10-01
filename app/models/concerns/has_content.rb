@@ -16,18 +16,49 @@ module HasContent
     has_many :attribute_categories
     has_many :attribute_values, class_name: 'Attribute', dependent: :destroy
 
+    # Alternative approach to #content for benchmarking in prod
+    def content_with_multiple_queries(
+      content_types: Rails.application.config.content_type_names[:all],
+      page_scoping:  { user_id: self.id },
+      universe_id:   nil
+    )
+      @content_by_page_type = {}
+      content_types.each do |content_type|
+        type_specific_fields = ContentPage.polymorphic_content_fields
+        type_specific_fields.push 'universe_id' unless content_type == 'Universe'
+
+        pages_of_this_type = content_type.constantize
+                                         .where(page_scoping)
+                                         .select(type_specific_fields)
+
+        if content_type != 'Universe' && universe_id.present?
+          pages_of_this_type = pages_of_this_type.where(universe_id: universe_id)
+        end
+
+        @content_by_page_type[content_type] = []
+        pages_of_this_type.each do |page_data|
+          @content_by_page_type[content_type].push ContentPage.new(page_data.attributes)
+        end
+      end
+
+      @content_by_page_type
+    end
+
     # {
     #   characters: [...],
     #   locations:  [...]
     # }
     def content(
-      content_types: Rails.application.config.content_types[:all].map(&:name),
+      content_types: Rails.application.config.content_type_names[:all],
       page_scoping:  { user_id: self.id },
       universe_id:   nil
     )
-      return {} if content_types.empty?
+      # return content_with_multiple_queries(content_types: content_types, page_scoping: page_scoping, universe_id: universe_id)
 
-      polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :archived_at, :privacy]
+      return {} if content_types.empty?
+      # TODO: we should return early if we already have @content_by_page_type!!!
+
+      polymorphic_content_fields = ContentPage.polymorphic_content_fields
       where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL AND archived_at IS NULL'
 
       sql = content_types.uniq.map do |page_type|
@@ -67,7 +98,7 @@ module HasContent
     )
 
       # todo we can't select for universe_id here which kind of sucks, so we need to research 1) the repercussions, 2) what to do instead
-      polymorphic_content_fields = [:id, :name, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :archived_at, :privacy]
+      polymorphic_content_fields = ContentPage.polymorphic_content_fields
       where_conditions = page_scoping.map { |key, value| "#{key} = #{value}" }.join(' AND ') + ' AND deleted_at IS NULL AND archived_at IS NULL'
 
       sql = content_types.uniq.map do |page_type|
