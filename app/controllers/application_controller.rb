@@ -196,7 +196,7 @@ class ApplicationController < ActionController::Base
 
         # If we're scoped to a universe, also scope contributor content pulled to that
         # universe. If we're not, leave it as all contributor content.
-        if @universe_scope
+        if @universe_scope && pages_to_add.klass.respond_to?(:universe)
           pages_to_add = pages_to_add.where(universe: @universe_scope)
         end
 
