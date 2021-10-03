@@ -180,15 +180,24 @@ class ApplicationController < ActionController::Base
       # so all we need to grab is additional pages in contributable universes
       @linkables_raw[page_type] = @current_user_content[page_type]
 
-      if !@universe_scope && @contributable_universe_ids.any?
+      # Add contributor content
+      if @contributable_universe_ids.any?
         existing_page_ids = @linkables_raw[page_type].map(&:id)
 
         pages_to_add = if page_type == Universe.name
           page_type.constantize.where(id: @contributable_universe_ids)
                                .where.not(id: existing_page_ids)
+                               .where.not(user_id: current_user.id)
         else
           page_type.constantize.where(universe_id: @contributable_universe_ids)
                                .where.not(id: existing_page_ids)
+                               .where.not(user_id: current_user.id)
+        end
+
+        # If we're scoped to a universe, also scope contributor content pulled to that
+        # universe. If we're not, leave it as all contributor content.
+        if @universe_scope
+          pages_to_add = pages_to_add.where(universe: @universe_scope)
         end
 
         filtered_fields = ContentPage.polymorphic_content_fields.map(&:to_s)
