@@ -51,7 +51,7 @@ class PageCollection < ApplicationRecord
     end
 
     # If all else fails, fall back on default header
-    "card-headers/#{self.class.name.downcase.pluralize}.jpg"
+    "card-headers/#{self.class.name.downcase.pluralize}.webp"
   end
 
   def first_public_image

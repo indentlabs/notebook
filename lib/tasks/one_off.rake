@@ -23,7 +23,7 @@ namespace :one_off do
       page_types: ['Universe'],
       color: Universe.color,
       user_id: OWNER_USER_ID,
-      cover_image: "card-headers/universes.jpg",
+      cover_image: "card-headers/universes.webp",
       description: "The Multiverse is for all of our universes. It's a single, public index — a starting point, if you will — for the wonderful worlds of Notebook.ai.\n\nWhether it's sci-fi or modern, fantasy or fairy tale, modern or horror, original content or alternate universes — your universe is welcome in the Multiverse. Just make sure it's all filled out and has all kinds of pages to continue getting lost in from the universe's page!"
     )
 
@@ -56,7 +56,7 @@ namespace :one_off do
       page_types: ['Creature', 'Flora'],
       color: Creature.color,
       user_id: OWNER_USER_ID,
-      cover_image: "card-headers/creatures.jpg",
+      cover_image: "card-headers/creatures.webp",
       description: "The Bestiary is a collection of life.\n\nSubmit your creatures from all your universes, big or small, and then submit your plant life too!"
     )
 
@@ -67,7 +67,7 @@ namespace :one_off do
       page_types: ['Location', 'Planet', 'Continent', 'Country', 'Town', 'Landmark'],
       color: Location.color,
       user_id: OWNER_USER_ID,
-      cover_image: "card-headers/locations.jpg",
+      cover_image: "card-headers/locations.webp",
       description: "The Atlas is a public collection for the locations in our worlds.\n\nYou can submit locations, planets, continents, countries, towns, and landmarks! Let's fill the atlas up with a rich shared world populated with locations around the multiverse."
     )
 
@@ -78,7 +78,7 @@ namespace :one_off do
       page_types: ['Religion', 'Deity'],
       color: Religion.color,
       user_id: OWNER_USER_ID,
-      cover_image: "card-headers/religions.jpg",
+      cover_image: "card-headers/religions.webp",
       description: "We can build a collective pantheon of gods and goddesses by submitting our deity and religion pages to this collection. Feel free to have your characters take up any the religions shared here!"
     )
 
@@ -100,7 +100,7 @@ namespace :one_off do
       page_types: ['Tradition'],
       color: Tradition.color,
       user_id: OWNER_USER_ID,
-      cover_image: "card-headers/traditions.jpg",
+      cover_image: "card-headers/traditions.webp",
       description: "We're building a giant calendar of all kinds of traditions, events, routines, and important dates. Submit your traditions and let's see if we can fill up a whole year!"
     )
 
