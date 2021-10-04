@@ -4,14 +4,7 @@
       <div class="hoverable card sticky-action" style="margin-bottom: 2px">
         <div class="card-image waves-effect waves-block waves-light">
           <%= render partial: 'content/display/favorite_control', locals: { content: content } %>
-          <% content_image = asset_path("card-headers/#{content_type.name.downcase.pluralize}.webp") %>
-          <% if content.respond_to?(:image_uploads) %>
-            <% images = content.image_uploads %>
-            <% if images.any? %>
-              <% content_image = images.sample.src(:medium) %>
-            <% end %>
-          <% end %>
-          <div class="activator" style="height: 265px; background: url('<%= content_image %>'); background-size: cover;"></div>
+          <div class="activator" style="height: 265px; background: url('<%= content.random_image_including_private(format: :medium) %>'); background-size: cover;"></div>
 
           <span class="card-title js-content-name activator">
             <div class="bordered-text">
@@ -35,13 +28,13 @@
         </div>
         <div class="card-action">
           <% if current_user.can_update?(content) %>
-            <%= link_to edit_polymorphic_path(content), class: 'green-text right', target: content.is_a?(Document) ? '_new' : '_self' do %>
+            <%= link_to content.edit_path, class: 'green-text right', target: content.is_a?(Document) ? '_new' : '_self' do %>
               <i class="material-icons left"><%= content_type.icon %></i>
               Edit
             <% end %>
           <% end %>
           <% if current_user.can_read?(content) %>
-            <%= link_to polymorphic_path(content), class: 'blue-text text-lighten-1' do %>
+            <%= link_to content.view_path, class: 'blue-text text-lighten-1' do %>
               <i class="material-icons left"><%= content_type.icon %></i>
               View
             <% end %>

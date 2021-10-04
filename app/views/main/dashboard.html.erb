@@ -72,14 +72,16 @@
           your worlds
         <% end %>
       </div>
-      <% if @content %>
-        <%= render partial: 'cards/serendipitous/content_question', locals: { 
-          content: @content, 
-          field: @attribute_field_to_question,
-          expand_by_default: true,
-          include_quick_reference: false
-        } %>
-      <% end %>
+      <%=
+        if @content
+          render partial: 'cards/serendipitous/content_question', locals: { 
+            content: @content, 
+            field: @attribute_field_to_question,
+            expand_by_default: true,
+            include_quick_reference: false
+          }
+        end
+      %>
 
       <%= link_to prompts_path do %>
         <div class="hoverable card-panel orange white-text" style="margin: 0; margin-bottom: 2em">
@@ -184,8 +186,10 @@
     <% end %>
 
     <div class="grey-text uppercase center">Create something new</div>
+    <% shown_creatures = false %>
     <% @activated_content_types.sample(3).each do |type| %>
       <% klass = content_class_from_name(type) %>
+      <% shown_creatures = true if type == 'Creature' %>
       <div>
         <%= link_to send("new_#{type.downcase}_path"), class: "white-text", style: 'width: 100%' do %>
           <div class="hoverable card-panel <%= klass.color %>" style="margin-bottom: 4px">
@@ -207,6 +211,24 @@
         <% end %>
       </div>
     <% end %>
+
+    <br />
+    <div>
+      <%= link_to new_creature_path, class: "white-text", style: 'width: 100%' do %>
+        <div class="hoverable card-panel <%= Creature.color %>" style="margin-bottom: 4px">
+          <div class="valign-wrapper">
+            <i class="material-icons grey-bordered-text" class="left" style="font-size: 3em;"><%= Creature.icon %></i>
+            <span style="font-size: 1.1em; margin-left: 1em">
+              New Creature<br />
+              <small>
+                Free for all users in October
+              </small>
+            </span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
   </div>
 </div>
 

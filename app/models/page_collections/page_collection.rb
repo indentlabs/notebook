@@ -51,7 +51,7 @@ class PageCollection < ApplicationRecord
     end
 
     # If all else fails, fall back on default header
-    "card-headers/#{self.class.name.downcase.pluralize}.webp"
+    ActionController::Base.helpers.asset_path("card-headers/#{self.class.name.downcase.pluralize}.webp")
   end
 
   def first_public_image

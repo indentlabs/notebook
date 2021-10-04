@@ -4,7 +4,7 @@ class SerendipitousService < Service
 
     categories_for_this_type = AttributeCategory.where(
       user:        content.user,
-      entity_type: content.class.name.downcase,
+      entity_type: content.page_type.downcase,
       hidden:      [nil, false]
     )
 
@@ -25,7 +25,7 @@ class SerendipitousService < Service
     #raise fields_for_these_categories.pluck(:label).inspect
   
     attribute_fields_with_values = Attribute.where(
-      entity_type: content.class.name,
+      entity_type: content.page_type,
       entity_id:   content.id,
       attribute_field_id: fields_for_these_categories.pluck(:id)
     ).where.not(
