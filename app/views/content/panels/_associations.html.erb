@@ -29,37 +29,5 @@
                 locals: { value: link_codes, content: content }
       %>
     <% end %>
-
-    <% if user_signed_in? %>
-      <div class="card-panel yellow lighten-5 black-text">
-        Notice: The newest Notebook.ai release is adding the ability to create your own link
-        fields, which includes a rather large migration of all existing link fields into a new linking system. 
-        Links that haven't been migrated yet can be seen below this message; links on the new system appear above.
-        <br /><br />
-        Thank you for your patience during this large rewrite! This notice will automatically disappear after the
-        migration has completed for everyone.
-        <br /><br />
-        &mdash; Andrew
-      </div>
-    <% end %>
-
-    <%# TODO: remove these after finishing link migration script %>
-    <% relations.each do |name, params| %>
-      <%
-        results = params[:related_class].where("#{params[:through_relation].downcase}_id": content.id)
-          .map    { |content| content.send(params[:inverse_class].downcase) }
-          .select { |content| content && content.readable_by?(current_user || User.new) }
-      %>
-      <% next unless results.any? %>
-
-      <div class="uppercase grey-text">
-        <%= params[:relation_text].to_s.titleize.downcase %> of
-      </div>
-      <%=
-        link_codes = results.map { |page| "#{page.page_type}-#{page.id}" }
-        render partial: "content/display/attribute_value/link", 
-                locals: { value: link_codes, content: content }
-      %>
-    <% end %>
   </div>
 </div>
