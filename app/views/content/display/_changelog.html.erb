@@ -5,7 +5,6 @@
   changed_fields          = AttributeField.where(id: changed_attributes.pluck(:attribute_field_id)).includes([:attribute_category])
 %>
 
-
 <div class="row">
   <div class="col s12 m12 l10 offset-l1">
     <h1 class="flow-text grey-text">
@@ -72,7 +71,11 @@
             <span>
               <%= link_to(change_event.user.display_name, change_event.user, class: "#{User.text_color}") %>
             </span>
-            <div class="grey-text right"><%= time_ago_in_words change_event.created_at %> ago</div>
+            <div class="grey-text right">
+              <%= time_ago_in_words change_event.created_at %> ago
+              &middot;
+              <%= change_event.created_at.strftime('%B %d, %H:%M %Z') %>
+            </div>
           </div>
         </div>
         <div style="margin-bottom: 4em">
