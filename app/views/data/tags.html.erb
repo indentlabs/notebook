@@ -6,7 +6,7 @@
 <ul class="collapsible">
   <% Rails.application.config.content_types[:all].each do |content_type| %>
     <%
-      grouped_tags = PageTag.where(page_type: content_type.name, user_id: current_user).group_by(&:tag)
+      grouped_tags = PageTag.where(page_type: content_type.name, user_id: current_user).order('tag ASC').group_by(&:tag)
 
       next if grouped_tags.values.length == 0
 
