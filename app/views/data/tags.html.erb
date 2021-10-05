@@ -1,3 +1,7 @@
+<%
+  showed_any_tags = false
+%>
+
 <h2 class="grey-text" style="font-size: 2rem">Your Notebook.ai tags</h2>
 <ul class="collapsible">
   <% Rails.application.config.content_types[:all].each do |content_type| %>
@@ -5,6 +9,8 @@
       grouped_tags = PageTag.where(page_type: content_type.name, user_id: current_user).group_by(&:tag)
 
       next if grouped_tags.values.length == 0
+
+      showed_any_tags = true
     %>
 
     <li>
@@ -39,7 +45,7 @@
                     slug: PageTagService.slug_for(tag)
                   ), data: {
                     confirm: "Are you sure? This will delete this tag and remove it from all pages."
-                  }
+                  }, class: 'red-text'
                 %>
               </div>
             </div>
@@ -65,3 +71,9 @@
     </li>
   <% end %>
 </ul>
+
+<% if !showed_any_tags %>
+  <div class="card-panel">
+    When you create tags for your pages, they'll appear here. Come back later when you've added some!
+  </div>
+<% end %>
