@@ -11,13 +11,13 @@ class PageTagsController < ApplicationController
       user_id:   current_user.id
     ).destroy_all
 
-    return redirect_back fallback_location: root_path, notice: 'Tag deleted successfully.'
+    return redirect_back fallback_location: root_path, notice: 'Tag(s) deleted successfully.'
   end
 
   # Destroy a specific tag by ID
   def destroy
     PageTag.find_by(id: params[:id], user_id: current_user.id).destroy!
 
-    return redirect_back fallback_location: root_path, notice: 'Tag deleted successfully.'
+    return redirect_back fallback_location: root_path, notice: 'Tag(s) deleted successfully.'
   end
 end
