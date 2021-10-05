@@ -105,7 +105,7 @@ $(document).ready(function () {
     var tag = $(this);
 
     // Instantiate a cache for all page lookup queries (if not already created)
-    window.load_page_name_cache ||= {};
+    window.load_page_name_cache = window.load_page_name_cache || {};
     var page_name_key = tag.data('klass') + '/' + tag.data('id');
 
     if (page_name_key in window.load_page_name_cache) {
