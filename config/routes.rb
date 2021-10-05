@@ -98,7 +98,7 @@ Rails.application.routes.draw do
 
     get '/scratchpad',      to: 'main#notes', as: :notes
 
-    get 'tag/remove'
+    get 'tag/remove',       to: 'page_tags#remove'
 
     # Legacy route: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
