@@ -1,4 +1,15 @@
 namespace :one_off do
+  desc "Clean up orphaned page tags"
+  task clean_orphaned_page_tags: :environment do
+    PageTag.find_each do |page_tag|
+      referenced_page = page_tag.page
+
+      if page.nil?
+        page_tag.destroy
+      end
+    end
+  end
+
   desc "Alert users who've saved at least one tree"
   task trees_notification: :environment do
     reference_code = 'green-trees'
