@@ -104,13 +104,35 @@ $(document).ready(function () {
     // Replace this element's content with the name of the page
     var tag = $(this);
 
-    $.get(
-      '/api/internal/' + tag.data('klass') + '/' + tag.data('id') + '/name'
-    ).done(function (response) {
-      tag.find('.name-container').text(response);
-    }).fail(function() {
-      tag.find('.name-conainer').text("Unknown " + tag.data('klass'));
-    });
+    // Instantiate a cache for all page lookup queries (if not already created)
+    window.load_page_name_cache ||= {};
+    var page_name_key = tag.data('klass') + '/' + tag.data('id');
+
+    if (page_name_key in window.load_page_name_cache) {
+      // If we've already made a request for this klass+id, we can just insta-load the
+      // cached result instead of requesting it again.
+      tag.find('.name-container').text(window.load_page_name_cache[page_name_key]);
+
+    } else {
+      // If we haven't made a request for this klass+id, look it up and cache it
+      $.get(
+        '/api/internal/' + page_name_key + '/name'
+      ).done(function (response) {
+        tag.find('.name-container').text(response);
+        window.load_page_name_cache[page_name_key] = response;
+
+        // Go ahead and pre-fill all tags on the page for this klass+id, too
+        $('.js-load-page-name[data-klass=' + tag.data('klass') + '][data-id=' + tag.data('id') + ']')
+          .find('.name-container')
+          .text(response);
+
+      }).fail(function() {
+        tag.find('.name-container').text("Unknown " + tag.data('klass'));
+      });
+    }
+
+
+    
   });
 
 });
