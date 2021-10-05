@@ -29,8 +29,18 @@
                   </span>
                 <% end %>
               </div>
-              <div class="grey-text">
+              <div class="grey-text" style="padding-top: 1em">
                 Used by <%= pluralize page_list.length, 'page' %>
+              </div>
+              <div>
+                <%=
+                  link_to 'Delete this tag', tag_remove_path(
+                    page_type: content_type.name,
+                    slug: PageTagService.slug_for(tag)
+                  ), data: {
+                    confirm: "Are you sure? This will delete this tag and remove it from all pages."
+                  }
+                %>
               </div>
             </div>
             <div class="col s12 m6 l8">
