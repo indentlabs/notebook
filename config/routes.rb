@@ -133,6 +133,7 @@ Rails.application.routes.draw do
     scope '/data' do
       get '/',              to: 'data#index',     as: :data_vault
       get '/usage',         to: 'data#usage'
+      get '/tags',          to: 'data#tags'
       get '/recyclebin',    to: 'data#recyclebin'
       get '/archive',       to: 'data#archive'
       get '/documents',     to: 'data#documents', as: :data_documents

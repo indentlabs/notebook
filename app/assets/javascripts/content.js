@@ -104,6 +104,8 @@ $(document).ready(function () {
     // Replace this element's content with the name of the page
     var tag = $(this);
 
+    // TODO: we should be caching this to reduce duplicate requests on the same page
+
     $.get(
       '/api/internal/' + tag.data('klass') + '/' + tag.data('id') + '/name'
     ).done(function (response) {

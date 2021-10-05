@@ -1,0 +1,121 @@
+<% Rails.application.config.content_types[:all].each do |content_type| %>
+  <%
+    grouped_tags = PageTag.where(page_type: content_type.name, user_id: current_user).group_by(&:tag)
+
+    next if grouped_tags.values.length == 0
+  %>
+
+  <h2 class="grey-text" style="font-size: 2rem"><%= content_type.name %> tags</h2>
+  <% grouped_tags.each do |tag, page_list| %>
+    <div class="row">
+      <div class="col s12">
+        <div class="card">
+          <div class="card-content">
+              <div class="row">
+                <div class="col s12 m6 l4">
+                  <%=
+                    link_to send(
+                      "#{content_type.name.downcase.pluralize}_path",
+                      slug: PageTagService.slug_for(tag)
+                    ) do
+                  %>
+                    <span class="new badge <%= content_type.color %> left" data-badge-caption="<%= tag %>" style="margin: 0.2em; font-size: 1em"></span>
+                  <% end %>
+                </div>
+                <div class="col s12 m6 l8">
+                  <% page_list.each do |page_tag| %>
+                    <div class="chip js-load-page-name" data-klass="<%= page_tag.page_type %>" data-id="<%= page_tag.page_id %>">
+                      <%= link_to send("#{page_tag.page_type.downcase}_path", page_tag.page_id) do %>
+                        <span class="<%= content_type.text_color %>">
+                          <i class="material-icons left">
+                            <%= content_type.icon %>
+                          </i>
+                        </span>
+                        <span class="name-container">
+                          <%= "<em>Loading #{content_type.name} name...</em>".html_safe %>
+                        </span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+<% end %>
+
+
+<% @tags.group_by(&:page_type).each do |page_type, tags| %>
+  <div class="row">
+    <div class="col s12">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-title"><%= page_type %> tags</div>
+
+          <% tags.each do |tag| %>
+            <div class="row">
+              <div class="col s12 m6 l4">
+                <%=
+                  link_to send(
+                    "#{tag.page_type.downcase.pluralize}_path",
+                    slug: tag.slug
+                  ) do
+                %>
+                  <span class="new badge <%= content_class_from_name(tag.page_type).color %> left" data-badge-caption="<%= tag.tag %>" style="margin: 0.2em; font-size: 1em"></span>
+                <% end %>
+
+              </div>
+              <div class="col s12 m6 l8">
+                
+              </div>
+            </div>
+          <% end %>
+
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+
+<div class="row">
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">Tags</div>
+        <div class="row clearfix">
+          <% @tags.group_by(&:page_type).each do |page_type, tags| %>
+            <div class="col s12 m6 l4">
+              <div class="card-title grey-text">
+                <%= page_type %> Tags
+              </div>
+            </div>
+
+            <div class="col s12 m6 l8">
+              <% tags.each do |tag| %>
+                <div class="row">
+                  <div class="col s12 m6 l4">
+                    <%=
+                      link_to send(
+                        "#{tag.page_type.downcase.pluralize}_path",
+                        slug: tag.slug
+                      ) do
+                    %>
+                      <span class="new badge <%= content_class_from_name(tag.page_type).color %> left" data-badge-caption="<%= tag.tag %>" style="margin: 0.2em"></span>
+                    <% end %>
+                  </div>
+                  <div class="col s12 m6 l8">
+                    
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
