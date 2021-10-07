@@ -19,6 +19,10 @@ class Attribute < ApplicationRecord
     end
   end
 
+  after_commit do
+    CacheAttributeWordCountJob.perform_later(self.id) if saved_changes.key?('value')
+  end
+
   after_save do
     entity.touch
   end
