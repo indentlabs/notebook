@@ -4,7 +4,7 @@ namespace :one_off do
     PageTag.find_each do |page_tag|
       referenced_page = page_tag.page
 
-      if page.nil?
+      if referenced_page.nil?
         page_tag.destroy
       end
     end
