@@ -159,7 +159,7 @@ class ApplicationController < ActionController::Base
     cache_current_user_content
 
     @contributable_universe_ids ||= if user_signed_in?
-      current_user.contributable_universe_ids + @current_user_content.fetch('Universe', []).map(&:id)
+      current_user.contributable_universe_ids
     else
       []
     end

@@ -98,6 +98,9 @@ Rails.application.routes.draw do
 
     get '/scratchpad',      to: 'main#notes', as: :notes
 
+    get 'tag/remove',       to: 'page_tags#remove'
+    delete 'tag/:id/destroy', to: 'page_tags#destroy', as: :destroy_specific_tag
+
     # Legacy route: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
 
@@ -133,6 +136,7 @@ Rails.application.routes.draw do
     scope '/data' do
       get '/',              to: 'data#index',     as: :data_vault
       get '/usage',         to: 'data#usage'
+      get '/tags',          to: 'data#tags'
       get '/recyclebin',    to: 'data#recyclebin'
       get '/archive',       to: 'data#archive'
       get '/documents',     to: 'data#documents', as: :data_documents
