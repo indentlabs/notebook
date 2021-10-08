@@ -1,7 +1,7 @@
 namespace :backfill do
   desc "Backfill cached word counts on all attributes"
   task attribute_word_count_caches: :environment do
-    Attribute.where(cached_word_count: nil).find_each do |attribute|
+    Attribute.where(word_count_cache: nil).where.not(value: ["", " ", ".", nil]).find_each do |attribute|
       word_count = WordCountAnalyzer::Counter.new(
         ellipsis:          'no_special_treatment',
         hyperlink:         'count_as_one',
