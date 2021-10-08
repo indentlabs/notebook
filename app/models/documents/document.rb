@@ -26,6 +26,12 @@ class Document < ApplicationRecord
 
   attr_accessor :tagged_text
 
+  # Duplicated from is_content_page since we don't include that here yet
+  has_many :word_count_updates, as: :entity, dependent: :destroy
+  def latest_word_count_cache
+    word_count_updates.order('for_date DESC').limit(1).first.try(:word_count) ||  0
+  end
+
   KEYS_TO_TRIGGER_REVISION_ON_CHANGE = %w(title body synopsis notes_text)
 
   def self.color
