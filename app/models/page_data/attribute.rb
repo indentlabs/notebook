@@ -19,6 +19,16 @@ class Attribute < ApplicationRecord
     end
   end
 
+  after_commit do
+    if saved_changes.key?('value')
+      # Cache the updated word count on this attribute
+      CacheAttributeWordCountJob.perform_later(self.id)
+
+      # Cache the updated word count on the page this attribute belongs to
+      CacheSumAttributeWordCountJob.perform_later(self.entity_type, self.entity_id)
+    end
+  end
+
   after_save do
     entity.touch
   end
