@@ -4,8 +4,8 @@ class SaveDocumentRevisionJob < ApplicationJob
   def perform(*args)
     document_id = args.shift
 
-    document = Document.find(document_id)
-    return unless document.present?
+    document = Document.find_by(id: document_id)
+    return unless document
 
     # Update cached word count for the document regardless of how often this is called
     new_word_count = document.computed_word_count
