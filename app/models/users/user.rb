@@ -122,6 +122,9 @@ class User < ApplicationRecord
   def contributable_universe_ids
     # TODO: email confirmation needs to happen for data safety / privacy (only verified emails)
     @contributable_universe_ids ||= Contributor.where('email = ? OR user_id = ?', self.email, self.id).pluck(:universe_id)
+    @contributable_universe_ids +=  Contributor.where(universe_id: my_universe_ids).pluck(:universe_id)
+
+    @contributable_universe_ids.uniq
   end
 
   # TODO: rename this to #{content_type}_shared_with_me
