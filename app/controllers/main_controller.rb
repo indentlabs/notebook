@@ -25,8 +25,7 @@ class MainController < ApplicationController
   def dashboard
     @page_title = "My notebook"
 
-    set_random_content # for questions
-    @attribute_field_to_question = SerendipitousService.question_for(@content)
+    set_questionable_content # for questions
   end
 
   def infostack
@@ -35,13 +34,37 @@ class MainController < ApplicationController
   def sascon
   end
 
+  def paper
+    @navbar_color = '#4CAF50'
+
+    @total_notebook_pages   = 0
+    @total_pages_equivalent = 0
+    @total_trees_saved      = 0
+
+    @per_page_savings = {}
+
+    (Rails.application.config.content_types[:all] + [Timeline, Document]).each do |content_type|
+      physical_page_equivalent = GreenService.total_physical_pages_equivalent(content_type)
+      tree_equivalent          = physical_page_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
+
+      @per_page_savings[content_type.name] = {
+        digital: content_type.last.try(:id) || 0,
+        pages:   physical_page_equivalent,
+        trees:   tree_equivalent
+      }
+
+      @total_notebook_pages   += @per_page_savings.dig(content_type.name, :digital)
+      @total_pages_equivalent += @per_page_savings.dig(content_type.name, :pages)
+      @total_trees_saved      += @per_page_savings.dig(content_type.name, :trees)
+    end
+  end
+
   def prompts
     @sidenav_expansion = 'writing'
     @navbar_color = '#FF9800'
     @page_title = "Writing prompts"
 
-    set_random_content # for question
-    @attribute_field_to_question = SerendipitousService.question_for(@content)
+    set_questionable_content # for question
   end
 
   # deprecated path just kept around for bookmarks for a while
@@ -50,13 +73,6 @@ class MainController < ApplicationController
   end
 
   def recent_content
-    # todo optimize this / use Attributes
-    return [] if @activated_content_types.nil?
-
-    @recently_created_pages = @current_user_content.values.flatten
-      .sort_by(&:created_at)
-      .last(50)
-      .reverse
   end
 
   def for_writers
@@ -80,27 +96,8 @@ class MainController < ApplicationController
 
   private
 
-  def set_random_content
-    @activated_content_types.shuffle.each do |content_type|
-      if content_type == Universe.name
-        if @universe_scope.present?
-          @content = content_type.constantize.where(user: current_user, id: @universe_scope.id).includes(:user)
-        else
-          @content = content_type.constantize.where(user: current_user).includes(:user)
-        end
-      else
-        if @universe_scope.present?
-          # when we want to enable prompts for contributing universes we can remove the user:
-          # selector here, but we will need to verify the user has permission to see the universe
-          # when we do that, or else prompts could open leak
-          @content = content_type.constantize.where(user: current_user, universe: @universe_scope).includes(:user, :universe)
-        else
-          @content = content_type.constantize.where(user: current_user).includes(:user, :universe)
-        end
-      end
-
-      @content = @content.sample
-      return if @content.present?
-    end
+  def set_questionable_content
+    @content = @current_user_content.except(*%w(Timeline Document)).values.flatten.sample
+    @attribute_field_to_question = SerendipitousService.question_for(@content)
   end
 end

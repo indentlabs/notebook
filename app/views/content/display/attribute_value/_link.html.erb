@@ -9,8 +9,12 @@
     on js-load-page-name to fetch & load in post-page-load if the content isn't ours.
   %>
   <%
-    content = @current_user_content.fetch(klass, []).detect do |page|
-      page.page_type === klass && page.id === id.to_i
+    content = if user_signed_in?
+      @current_user_content.fetch(klass, []).detect do |page|
+        page.page_type === klass && page.id === id.to_i
+      end
+    else
+      nil
     end
   %>
 

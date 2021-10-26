@@ -1,4 +1,35 @@
 namespace :one_off do
+  desc "Clean up orphaned page tags"
+  task clean_orphaned_page_tags: :environment do
+    PageTag.find_each do |page_tag|
+      referenced_page = page_tag.page
+
+      if referenced_page.nil?
+        page_tag.destroy
+      end
+    end
+  end
+
+  desc "Alert users who've saved at least one tree"
+  task trees_notification: :environment do
+    reference_code = 'green-trees'
+
+    User.find_each do |user|
+      trees = GreenService.total_trees_saved_by(user)
+    
+      if trees >= 1
+        user.notifications.create!(
+          message_html: "<div>You've saved #{trees.round} tree#{'s' if trees.round > 1} by going digital!</div><div class='blue-text text-darken-3'>That's AWESOME! Click here to see how.</div>",
+          icon:         'park',
+          icon_color:   'green',
+          happened_at:  DateTime.current,
+          passthrough_link: 'https://www.notebook.ai/my/data/green',
+          reference_code: reference_code
+        ) unless user.notifications.where(reference_code: reference_code).any?
+      end
+    end
+  end
+  
   desc "Create a notification for all users telling them about the new notifications"
   task notifications_announcement: :environment do
     User.all.find_each do |user|

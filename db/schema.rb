@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_29_092030) do
+ActiveRecord::Schema.define(version: 2021_10_07_234707) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -172,6 +172,7 @@ ActiveRecord::Schema.define(version: 2021_07_29_092030) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.datetime "deleted_at"
+    t.integer "word_count_cache"
     t.index ["attribute_field_id", "deleted_at", "entity_id", "entity_type"], name: "attributes_afi_deleted_at_entity_id_entity_type"
     t.index ["attribute_field_id", "deleted_at"], name: "index_attributes_on_attribute_field_id_and_deleted_at"
     t.index ["attribute_field_id", "user_id", "entity_type", "entity_id", "deleted_at"], name: "attributes_afi_ui_et_ei_da"
@@ -3643,6 +3644,18 @@ ActiveRecord::Schema.define(version: 2021_07_29_092030) do
     t.integer "habitat_id"
   end
 
+  create_table "word_count_updates", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "entity_type", null: false
+    t.integer "entity_id", null: false
+    t.integer "word_count"
+    t.date "for_date"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["entity_type", "entity_id"], name: "index_word_count_updates_on_entity_type_and_entity_id"
+    t.index ["user_id"], name: "index_word_count_updates_on_user_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "api_keys", "users"
@@ -4055,4 +4068,5 @@ ActiveRecord::Schema.define(version: 2021_07_29_092030) do
   add_foreign_key "vehicles", "users"
   add_foreign_key "votes", "users"
   add_foreign_key "votes", "votables"
+  add_foreign_key "word_count_updates", "users"
 end

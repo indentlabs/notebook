@@ -115,6 +115,10 @@ class DataController < ApplicationController
     @content = current_user.content
   end
 
+  def tags
+    @tags = current_user.page_tags
+  end
+
   def discussions
     @topics         = Thredded::Topic.where(user_id: current_user.id)
     @posts          = Thredded::Post.where(user_id: current_user.id)
@@ -138,6 +142,9 @@ class DataController < ApplicationController
     @referrals      = current_user.referrals.includes(:referree)
     @referral_count = @referrals.count
     @share_link     = "https://www.notebook.ai/?referral=#{current_user.referral_code.code}"
+  end
+
+  def green
   end
 
   private

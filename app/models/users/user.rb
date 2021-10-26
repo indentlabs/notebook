@@ -119,13 +119,12 @@ class User < ApplicationRecord
     @cached_user_contributable_universes ||= Universe.where(id: contributable_universe_ids)
   end
 
-  def linkable_universes
-    @cached_linkable_universes ||= Universe.where(id: my_universe_ids + contributable_universes)
-  end
-
   def contributable_universe_ids
     # TODO: email confirmation needs to happen for data safety / privacy (only verified emails)
     @contributable_universe_ids ||= Contributor.where('email = ? OR user_id = ?', self.email, self.id).pluck(:universe_id)
+    @contributable_universe_ids +=  Contributor.where(universe_id: my_universe_ids).pluck(:universe_id)
+
+    @contributable_universe_ids.uniq
   end
 
   # TODO: rename this to #{content_type}_shared_with_me
@@ -156,7 +155,7 @@ class User < ApplicationRecord
       universe_id IN (#{(my_universe_ids + contributable_universe_ids + [-1]).uniq.join(',')})
         OR
       (universe_id IS NULL AND user_id = #{self.id.to_i})
-    """)
+    """).includes([:user])
   end
 
   def linkable_timelines
