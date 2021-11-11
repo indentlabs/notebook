@@ -1,7 +1,7 @@
 <div class="js-content-cards-list">
   <% content_list.each.with_index do |content, i| %>
     <%
-      content_image = @random_image_including_private_pool_cache[[content.page_type, content.id]]
+      content_image = @random_image_including_private_pool_cache.fetch([content.page_type, content.id], [])
         .sample
         .try(:src, :medium) || asset_path("card-headers/#{content.page_type.downcase.pluralize}.jpg")
     %>
