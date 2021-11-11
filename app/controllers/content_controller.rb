@@ -152,6 +152,10 @@ class ContentController < ApplicationController
       return redirect_to @content, notice: t(:no_do_permission)
     end
 
+    @random_image_including_private_pool_cache = ImageUpload.where(
+      user_id: current_user.id,
+    ).group_by { |image| [image.content_type, image.content_id] }
+
     respond_to do |format|
       format.html { render 'content/edit', locals: { content: @content } }
       format.json { render json: @content }
