@@ -122,6 +122,7 @@ class ContentSerializer
         # to link code, then looking up again later) but since this is just stopgap
         # code to standardize links in views this should be fine for now.
         if attribute_field.old_column_source.present?
+          # raise "wee"
           self.raw_model.send(attribute_field.old_column_source).map { |page| "#{page.page_type}-#{page.id}" }
         else
           []
