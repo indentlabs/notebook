@@ -94,6 +94,13 @@ class ApplicationController < ActionController::Base
       universe_id:   @universe_scope.try(:id)
     )
 
+    # Due to the way we loop over @current_user_content (page, list) later, we want to make sure that we
+    # at least have an empty list for all activated content types -- otherwise we may skip over the contributor
+    # content injection for a type that a user doesn't have ANY pages for.
+    @activated_content_types.each do |content_type|
+      @current_user_content[content_type] ||= []
+    end
+
     # Likewise, we should also always cache Timelines & Documents
     if @universe_scope
       @current_user_content['Timeline'] = current_user.timelines.where(universe_id: @universe_scope.try(:id)).to_a
