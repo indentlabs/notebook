@@ -68,7 +68,8 @@ class PageCollectionSubmissionsController < ApplicationController
       icon:             PageCollection.icon,
       icon_color:       PageCollection.color,
       happened_at:      DateTime.current,
-      passthrough_link: Rails.application.routes.url_helpers.page_collection_path(@page_collection_submission.page_collection)
+      passthrough_link: Rails.application.routes.url_helpers.page_collection_path(@page_collection_submission.page_collection),
+      reference_code:   'approved-in-collection'
     )
 
     redirect_to(page_collection_pending_submissions_path(@page_collection_submission.page_collection), notice: "Submission approved!")
