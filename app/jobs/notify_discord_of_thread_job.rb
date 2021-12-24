@@ -6,7 +6,7 @@ class NotifyDiscordOfThreadJob < ApplicationJob
   def perform(*args)
     thread_id = args.shift
     thread    = Thredded::Topic.find_by(id: thread_id)
-    return unless thread
+    raise "No thread found for new ID #{thread.id.inspect}" unless thread
 
     webhook_url = ENV.fetch('DISCORD_FORUMS_WEBHOOK', '').freeze
 
