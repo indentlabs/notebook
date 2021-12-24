@@ -27,7 +27,7 @@ module Extensions
       end
 
       def notify_discord
-        NotifyDiscordOfThreadJob.perform_later(self.id)
+        NotifyDiscordOfThreadJob.set(wait: 1.minute).perform_later(self.id)
       end
 
       def create_content_page_share
