@@ -1,4 +1,15 @@
 namespace :one_off do
+  desc "Clean up orphaned page tags"
+  task clean_orphaned_page_tags: :environment do
+    PageTag.find_each do |page_tag|
+      referenced_page = page_tag.page
+
+      if referenced_page.nil?
+        page_tag.destroy
+      end
+    end
+  end
+
   desc "Alert users who've saved at least one tree"
   task trees_notification: :environment do
     reference_code = 'green-trees'
@@ -7,7 +18,6 @@ namespace :one_off do
       trees = GreenService.total_trees_saved_by(user)
     
       if trees >= 1
-        user = User.first
         user.notifications.create!(
           message_html: "<div>You've saved #{trees.round} tree#{'s' if trees.round > 1} by going digital!</div><div class='blue-text text-darken-3'>That's AWESOME! Click here to see how.</div>",
           icon:         'park',

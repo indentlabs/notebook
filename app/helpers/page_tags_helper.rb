@@ -1,0 +1,2 @@
+module PageTagsHelper
+end

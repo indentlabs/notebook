@@ -224,7 +224,8 @@ class SubscriptionsController < ApplicationController
       icon:             'star',
       icon_color:       'text-darken-3 yellow',
       happened_at:      DateTime.current,
-      passthrough_link: Rails.application.routes.url_helpers.customization_content_types_path
+      passthrough_link: Rails.application.routes.url_helpers.customization_content_types_path,
+      reference_code:   'premium-activation'
     )
 
     redirect_back(fallback_location: subscription_path, notice: "Promo code successfully activated!")

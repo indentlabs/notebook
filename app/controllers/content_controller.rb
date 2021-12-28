@@ -40,8 +40,8 @@ class ContentController < ApplicationController
       page_type: @content_type_class.name,
       page_id:   @content.pluck(:id)
     ).order(:tag)
-    if params.key?(:tag)
-      @filtered_page_tags = @page_tags.where(slug: params[:tag])
+    if params.key?(:slug)
+      @filtered_page_tags = @page_tags.where(slug: params[:slug])
       @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
     @page_tags = @page_tags.uniq(&:tag)
@@ -54,6 +54,11 @@ class ContentController < ApplicationController
 
     @questioned_content = @content.sample
     @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
+
+    @random_image_including_private_pool_cache = ImageUpload.where(
+      content_type: @content_type_class.name,
+      content_id:   @content.pluck(:id)
+    ).group_by { |image| [image.content_type, image.content_id] }
 
     # Uh, do we ever actually make JSON requests to logged-in user pages?
     respond_to do |format|
@@ -118,6 +123,10 @@ class ContentController < ApplicationController
       end
 
       @content.save!
+
+      # If the user doesn't have this content type enabled, go ahead and automatically enable it for them
+      current_user.user_content_type_activators.find_or_create_by(content_type: @content.class.name)
+
       return redirect_to edit_polymorphic_path(@content)
     else
       return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
@@ -142,6 +151,10 @@ class ContentController < ApplicationController
     unless @content.updatable_by? current_user
       return redirect_to @content, notice: t(:no_do_permission)
     end
+
+    @random_image_including_private_pool_cache = ImageUpload.where(
+      user_id: current_user.id,
+    ).group_by { |image| [image.content_type, image.content_id] }
 
     respond_to do |format|
       format.html { render 'content/edit', locals: { content: @content } }
@@ -185,6 +198,9 @@ class ContentController < ApplicationController
           document_entity.update(entity_id: @content.reload.id)
         end
       end
+
+      # If the user doesn't have this content type enabled, go ahead and automatically enable it for them
+      current_user.user_content_type_activators.find_or_create_by(content_type: content_type.name)
 
       successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else

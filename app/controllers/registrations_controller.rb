@@ -88,7 +88,8 @@ class RegistrationsController < Devise::RegistrationsController
             icon:             Universe.icon,
             icon_color:       Universe.color,
             happened_at:      DateTime.current,
-            passthrough_link: Rails.application.routes.url_helpers.universe_path(contributorship.universe)
+            passthrough_link: Rails.application.routes.url_helpers.universe_path(contributorship.universe),
+            reference_code:   'contributor-added'
           )
         end
       end

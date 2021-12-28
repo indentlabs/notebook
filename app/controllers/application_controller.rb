@@ -6,6 +6,7 @@ class ApplicationController < ActionController::Base
   before_action :set_universe_scope
 
   before_action :cache_most_used_page_information
+  before_action :cache_forums_unread_counts
 
   before_action :set_metadata
 
@@ -66,7 +67,6 @@ class ApplicationController < ActionController::Base
     cache_current_user_content
     cache_notifications
     cache_recently_edited_pages
-    cache_forums_unread_counts
   end
 
   def cache_activated_content_types
@@ -93,6 +93,13 @@ class ApplicationController < ActionController::Base
       content_types: @activated_content_types + [Universe.name], 
       universe_id:   @universe_scope.try(:id)
     )
+
+    # Due to the way we loop over @current_user_content (page, list) later, we want to make sure that we
+    # at least have an empty list for all activated content types -- otherwise we may skip over the contributor
+    # content injection for a type that a user doesn't have ANY pages for.
+    @activated_content_types.each do |content_type|
+      @current_user_content[content_type] ||= []
+    end
 
     # Likewise, we should also always cache Timelines & Documents
     if @universe_scope
@@ -159,7 +166,7 @@ class ApplicationController < ActionController::Base
     cache_current_user_content
 
     @contributable_universe_ids ||= if user_signed_in?
-      current_user.contributable_universe_ids + @current_user_content.fetch('Universe', []).map(&:id)
+      current_user.contributable_universe_ids
     else
       []
     end
@@ -180,15 +187,24 @@ class ApplicationController < ActionController::Base
       # so all we need to grab is additional pages in contributable universes
       @linkables_raw[page_type] = @current_user_content[page_type]
 
-      if !@universe_scope && @contributable_universe_ids.any?
+      # Add contributor content
+      if @contributable_universe_ids.any?
         existing_page_ids = @linkables_raw[page_type].map(&:id)
 
         pages_to_add = if page_type == Universe.name
           page_type.constantize.where(id: @contributable_universe_ids)
                                .where.not(id: existing_page_ids)
+                               .where.not(user_id: current_user.id)
         else
           page_type.constantize.where(universe_id: @contributable_universe_ids)
                                .where.not(id: existing_page_ids)
+                               .where.not(user_id: current_user.id)
+        end
+
+        # If we're scoped to a universe, also scope contributor content pulled to that
+        # universe. If we're not, leave it as all contributor content.
+        if @universe_scope && pages_to_add.klass.name != 'Universe'
+          pages_to_add = pages_to_add.where(universe: @universe_scope)
         end
 
         filtered_fields = ContentPage.polymorphic_content_fields.map(&:to_s)

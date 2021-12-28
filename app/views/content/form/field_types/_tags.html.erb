@@ -60,7 +60,7 @@
     },
     data: [
       <% page.page_tags.pluck(:tag).each do |tag| %>
-        {tag: '<%= tag %>'},
+        {tag: "<%= tag.gsub('"', '\"').html_safe %>"},
       <% end %>
     ],
     onChipAdd:    update_hidden_page_tag_value,
