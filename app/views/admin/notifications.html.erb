@@ -1,0 +1,28 @@
+<h1>
+  Notification open rates
+</h1>
+
+<div>
+  <%= number_with_delimiter @clicked_notifications.count %> clicked
+  /
+  <%= number_with_delimiter @notifications.count %> total
+  (<%= @clicked_notifications.count / @notifications.count.to_f * 100 %>%)
+</div>
+
+<% @codes.each do |code| %>
+  <div class="card">
+    <div class="card-content">
+      <div class="card-title">Reference code: <%= code.inspect %></div>
+      <%
+        clicked_notifs = Notification.where(reference_code: code).where.not(viewed_at: nil).count
+        total_notifs = Notification.where(reference_code: code).count
+      %>
+
+      <ul class="browser-default">
+        <li><%= number_with_delimiter clicked_notifs %> clicked</li>
+        <li><%= number_with_delimiter total_notifs %> total</li>
+        <li><%= clicked_notifs / total_notifs.to_f * 100 %>% clicked</li>
+      </ul>
+    </div>
+  </div>
+<% end %>

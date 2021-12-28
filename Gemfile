@@ -74,8 +74,11 @@ gem 'barnes'
 
 # Forum
 gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
+# gem 'thredded', git: 'https://github.com/thredded/thredded', branch: 'master'
+# gem 'thredded', git: 'https://github.com/sudara/thredded', branch: 'master'
 gem 'rails-ujs'
 gem 'language_filter'
+gem 'discordrb'
 
 # Smarts
 gem 'word_count_analyzer'

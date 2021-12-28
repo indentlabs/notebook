@@ -1,10 +1,15 @@
 <div class="js-content-cards-list">
   <% content_list.each.with_index do |content, i| %>
+    <%
+      content_image = @random_image_including_private_pool_cache.fetch([content.page_type, content.id], [])
+        .sample
+        .try(:src, :medium) || asset_path("card-headers/#{content.page_type.downcase.pluralize}.jpg")
+    %>
     <div class="col s12 m6 l4 js-content-card-container">
       <div class="hoverable card sticky-action" style="margin-bottom: 2px">
         <div class="card-image waves-effect waves-block waves-light">
           <%= render partial: 'content/display/favorite_control', locals: { content: content } %>
-          <div class="activator" style="height: 265px; background: url('<%= content.random_image_including_private(format: :medium) %>'); background-size: cover;"></div>
+          <div class="activator" style="height: 265px; background: url('<%= content_image %>'); background-size: cover;"></div>
 
           <span class="card-title js-content-name activator">
             <div class="bordered-text">

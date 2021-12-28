@@ -55,6 +55,11 @@ class ContentController < ApplicationController
     @questioned_content = @content.sample
     @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
 
+    @random_image_including_private_pool_cache = ImageUpload.where(
+      content_type: @content_type_class.name,
+      content_id:   @content.pluck(:id)
+    ).group_by { |image| [image.content_type, image.content_id] }
+
     # Uh, do we ever actually make JSON requests to logged-in user pages?
     respond_to do |format|
       format.html { render 'content/index' }
@@ -146,6 +151,10 @@ class ContentController < ApplicationController
     unless @content.updatable_by? current_user
       return redirect_to @content, notice: t(:no_do_permission)
     end
+
+    @random_image_including_private_pool_cache = ImageUpload.where(
+      user_id: current_user.id,
+    ).group_by { |image| [image.content_type, image.content_id] }
 
     respond_to do |format|
       format.html { render 'content/edit', locals: { content: @content } }

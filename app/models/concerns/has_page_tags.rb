@@ -4,6 +4,6 @@ module HasPageTags
   extend ActiveSupport::Concern
 
   included do
-    has_many :page_tags, as: :page
+    has_many :page_tags, as: :page, dependent: :destroy
   end
 end

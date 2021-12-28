@@ -20,7 +20,8 @@ class ContentPageShareNotificationJob < ApplicationJob
         passthrough_link: Rails.application.routes.url_helpers.user_content_page_share_path(
           id:      comment.content_page_share.id,
           user_id: comment.content_page_share.user_id
-        )
+        ),
+        reference_code: 'comment-on-shared-page'
       )
     end
   end

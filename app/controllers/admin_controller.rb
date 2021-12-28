@@ -59,6 +59,13 @@ class AdminController < ApplicationController
   def churn
   end
 
+  def notifications
+    @clicked_notifications = Notification.where.not(viewed_at: nil)
+    @notifications = Notification.all.order(:reference_code)
+
+    @codes = Notification.distinct.order('reference_code').pluck(:reference_code)
+  end
+
   def hate
     @posts = Thredded::PrivatePost.order('id DESC').limit(params.fetch(:limit, 500)).includes(:postable)
     @list  = params[:matchlist]
