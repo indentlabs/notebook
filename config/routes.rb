@@ -278,6 +278,7 @@ Rails.application.routes.draw do
       get '/churn',                to: 'admin#churn'
       get '/hatewatch/:matchlist', to: 'admin#hate'
       get '/spamwatch',            to: 'admin#spam'
+      get '/notifications',        to: 'admin#notifications'
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'

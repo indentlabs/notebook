@@ -18,11 +18,17 @@ class DataController < ApplicationController
 
     @created_content = {}
     @total_created_non_universe_content = 0
+    @words_written = 0
     Rails.application.config.content_types[:all].each do |klass|
       @created_content[klass.name] = klass.where(user_id: current_user.id)
                                           .where('created_at > ?', comparable_year.beginning_of_year)
                                           .where('created_at < ?', comparable_year.end_of_year)
                                           .order('created_at ASC')
+
+      @words_written += WordCountUpdate.where(
+        entity_type: klass.name, 
+        entity_id: @created_content[klass.name].map(&:id)
+      ).sum(:word_count)
 
       if klass.name != 'Universe'
         @total_created_non_universe_content += @created_content[klass.name].count
@@ -33,6 +39,8 @@ class DataController < ApplicationController
                                                .where('created_at > ?', comparable_year.beginning_of_year)
                                                .where('created_at < ?', comparable_year.end_of_year)
                                                .order('created_at ASC')
+
+    @words_written += @created_content['Document'].sum(:cached_word_count)
 
     earliest_page_date = DateTime.current
     @earliest_page = nil
@@ -80,7 +88,6 @@ class DataController < ApplicationController
 
     @published_collections = PageCollection.where(id: @created_content['PageCollectionSubmission'].pluck(:page_collection_id) - @created_content['PageCollection'].pluck(:id))
     @publish_rate = @created_content['PageCollectionSubmission'].select { |s| s.accepted_at.present? && !@created_content['PageCollection'].pluck(:id).include?(s.page_collection_id) }.count.to_f / @created_content['PageCollectionSubmission'].count
-
   end
 
   def archive

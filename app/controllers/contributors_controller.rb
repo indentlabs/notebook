@@ -13,7 +13,8 @@ class ContributorsController < ApplicationController
         icon:             Universe.icon,
         icon_color:       Universe.color,
         happened_at:      DateTime.current,
-        passthrough_link: Rails.application.routes.url_helpers.universe_path(relevant_universe)
+        passthrough_link: Rails.application.routes.url_helpers.universe_path(relevant_universe),
+        reference_code:   'contributor-removed'
       ) if user.present?
 
       # Create a notification letting the universe owner know
@@ -22,7 +23,8 @@ class ContributorsController < ApplicationController
         icon:             Universe.icon,
         icon_color:       Universe.color,
         happened_at:      DateTime.current,
-        passthrough_link: Rails.application.routes.url_helpers.universe_path(relevant_universe)
+        passthrough_link: Rails.application.routes.url_helpers.universe_path(relevant_universe),
+        reference_code:   'contributor-left'
       ) if user.present?
 
       #todo send "you've been removed as a contributor" email

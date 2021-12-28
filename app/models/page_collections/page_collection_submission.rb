@@ -35,7 +35,8 @@ class PageCollectionSubmission < ApplicationRecord
         icon:             PageCollection.icon,
         icon_color:       PageCollection.color,
         happened_at:      DateTime.current,
-        passthrough_link: Rails.application.routes.url_helpers.page_collection_path(page_collection)
+        passthrough_link: Rails.application.routes.url_helpers.page_collection_path(page_collection),
+        reference_code:   'collection-submission-accepted'
       )
     end
 
@@ -79,7 +80,8 @@ class PageCollectionSubmission < ApplicationRecord
         icon:             PageCollection.icon,
         icon_color:       PageCollection.color,
         happened_at:      DateTime.current,
-        passthrough_link: Rails.application.routes.url_helpers.page_collection_pending_submissions_path(page_collection)
+        passthrough_link: Rails.application.routes.url_helpers.page_collection_pending_submissions_path(page_collection),
+        reference_code:   'collection-has-submission'
       )
     end
   end

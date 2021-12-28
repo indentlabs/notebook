@@ -46,7 +46,8 @@ class SubscriptionService < Service
           icon:             'star',
           icon_color:       'text-darken-3 yellow',
           happened_at:      DateTime.current,
-          passthrough_link: Rails.application.routes.url_helpers.customization_content_types_path
+          passthrough_link: Rails.application.routes.url_helpers.customization_content_types_path,
+          reference_code:   'premium-activation'
         ) if user.reload.on_premium_plan?
 
         report_subscription_change_to_slack(user, plan_id)
