@@ -12,7 +12,7 @@ class NotifyDiscordOfThreadJob < ApplicationJob
 
     client = Discordrb::Webhooks::Client.new(url: webhook_url)
     client.execute do |builder|
-      builder.content = "\"#{thread.title}\" started by #{thread.user.display_name} in *#{thread.messageboard.name}*"
+      builder.content = "New thread in **#{thread.messageboard.name}** by #{thread.user.display_name}"
       builder.add_embed do |embed|
         embed.title = thread.title
         embed.description = thread.first_post.content.truncate(140)
