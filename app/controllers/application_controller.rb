@@ -16,6 +16,12 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def require_premium_plan
+    unless user_signed_in? && current_user.on_premium_plan?
+      return redirect_back(fallback_location: root_path, notice: "Doing that requires Premium access.")
+    end
+  end
+
   def set_metadata
     @page_title       ||= ''
     @page_keywords    ||= %w[writing author nanowrimo novel character fiction fantasy universe creative dnd roleplay game design]
