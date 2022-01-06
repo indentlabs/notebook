@@ -42,11 +42,11 @@ module Extensions
       end
 
       def random_public_image
-        "card-headers/discussions.jpg"
+        "card-headers/discussions.webp"
       end
 
       def first_public_image
-        "card-headers/discussions.jpg"
+        "card-headers/discussions.webp"
       end
 
       def name

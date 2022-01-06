@@ -36,7 +36,7 @@ module HasImageUploads
     end
 
     def header_asset_for(class_name)
-      ActionController::Base.helpers.asset_path("card-headers/#{class_name.downcase.pluralize}.jpg")
+      ActionController::Base.helpers.asset_path("card-headers/#{class_name.downcase.pluralize}.webp")
     end
   end
 end
