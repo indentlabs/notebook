@@ -8,6 +8,7 @@ module Extensions
       
       included do
         after_create :create_content_page_share
+        after_create :notify_discord
         has_many     :content_page_shares, as: :content
 
         acts_as_paranoid
@@ -23,6 +24,10 @@ module Extensions
         def self.text_color
           'blue-text'
         end
+      end
+
+      def notify_discord
+        NotifyDiscordOfThreadJob.set(wait: 1.minute).perform_later(self.id)
       end
 
       def create_content_page_share

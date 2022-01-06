@@ -98,6 +98,11 @@ Rails.application.routes.draw do
 
     get '/scratchpad',      to: 'main#notes', as: :notes
 
+    get 'tag/remove',         to: 'page_tags#remove'
+    # post 'tag/:slug/update',  to: 'page_tags#update',  as: :update_tag
+    post '/tag/:tag/rename', to: 'page_tags#rename', as: :rename_tag
+    delete 'tag/:id/destroy', to: 'page_tags#destroy', as: :destroy_specific_tag
+
     # Legacy route: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
 
@@ -133,6 +138,7 @@ Rails.application.routes.draw do
     scope '/data' do
       get '/',              to: 'data#index',     as: :data_vault
       get '/usage',         to: 'data#usage'
+      get '/tags',          to: 'data#tags'
       get '/recyclebin',    to: 'data#recyclebin'
       get '/archive',       to: 'data#archive'
       get '/documents',     to: 'data#documents', as: :data_documents
@@ -274,6 +280,7 @@ Rails.application.routes.draw do
       get '/churn',                to: 'admin#churn'
       get '/hatewatch/:matchlist', to: 'admin#hate'
       get '/spamwatch',            to: 'admin#spam'
+      get '/notifications',        to: 'admin#notifications'
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'

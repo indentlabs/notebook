@@ -16,6 +16,12 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def require_premium_plan
+    unless user_signed_in? && current_user.on_premium_plan?
+      return redirect_back(fallback_location: root_path, notice: "Doing that requires Premium access.")
+    end
+  end
+
   def set_metadata
     @page_title       ||= ''
     @page_keywords    ||= %w[writing author nanowrimo novel character fiction fantasy universe creative dnd roleplay game design]
@@ -94,6 +100,13 @@ class ApplicationController < ActionController::Base
       universe_id:   @universe_scope.try(:id)
     )
 
+    # Due to the way we loop over @current_user_content (page, list) later, we want to make sure that we
+    # at least have an empty list for all activated content types -- otherwise we may skip over the contributor
+    # content injection for a type that a user doesn't have ANY pages for.
+    @activated_content_types.each do |content_type|
+      @current_user_content[content_type] ||= []
+    end
+
     # Likewise, we should also always cache Timelines & Documents
     if @universe_scope
       @current_user_content['Timeline'] = current_user.timelines.where(universe_id: @universe_scope.try(:id)).to_a
@@ -159,7 +172,7 @@ class ApplicationController < ActionController::Base
     cache_current_user_content
 
     @contributable_universe_ids ||= if user_signed_in?
-      current_user.contributable_universe_ids + @current_user_content.fetch('Universe', []).map(&:id)
+      current_user.contributable_universe_ids
     else
       []
     end
@@ -196,7 +209,7 @@ class ApplicationController < ActionController::Base
 
         # If we're scoped to a universe, also scope contributor content pulled to that
         # universe. If we're not, leave it as all contributor content.
-        if @universe_scope && pages_to_add.klass.respond_to?(:universe)
+        if @universe_scope && pages_to_add.klass.name != 'Universe'
           pages_to_add = pages_to_add.where(universe: @universe_scope)
         end
 

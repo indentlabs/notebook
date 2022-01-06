@@ -113,13 +113,16 @@ class ContentSerializer
   def value_for(attribute_field, content)
     case attribute_field.field_type
     when 'link'
-      page_links = attribute_field.attribute_values.find_by(entity_type: content.class.name, entity_id: content.id)
+      page_links = self.attribute_values.detect do |value|
+        value.entity_type == content.class.name && value.entity_id == content.id && value.attribute_field_id == attribute_field.id
+      end
       if page_links.nil?
         # Fall back on old relation value
         # We're technically doing a double lookup here (by converting response
         # to link code, then looking up again later) but since this is just stopgap
         # code to standardize links in views this should be fine for now.
         if attribute_field.old_column_source.present?
+          # raise "wee"
           self.raw_model.send(attribute_field.old_column_source).map { |page| "#{page.page_type}-#{page.id}" }
         else
           []
