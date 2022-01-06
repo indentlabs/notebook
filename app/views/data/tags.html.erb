@@ -35,21 +35,35 @@
                   </span>
                 <% end %>
               </div>
-              <div class="grey-text" style="padding-top: 1em">
-                Used by <%= pluralize page_list.length, 'page' %>
-              </div>
+              <br />
               <div>
+                <%= form_for tag, url: rename_tag_path(tag: tag) do |f| %>
+                  <div class="row">
+                    <div class="input-field col s12 m12 l12">
+                      <%= f.text_field :label, class: '', value: tag %>
+                      <%= f.label :label, 'Rename tag' %>
+                    </div>
+                    <div class="col s12 m12 l12">
+                      <%= f.submit 'Mass-rename', class: 'btn white blue-text', onclick: "javascript: M.toast({ html: 'Saving changes...' });" %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+              <div style="text-align: right">
                 <%=
                   link_to 'Delete this tag', tag_remove_path(
                     page_type: content_type.name,
                     slug: PageTagService.slug_for(tag)
                   ), data: {
                     confirm: "Are you sure? This will delete this tag and remove it from all pages."
-                  }, class: 'red-text'
+                  }, class: 'red-text btn red white-text'
                 %>
               </div>
             </div>
             <div class="col s12 m6 l8">
+              <div class="grey-text" style="padding-top: 1em">
+                Used by <%= pluralize page_list.length, 'page' %>
+              </div>
               <% page_list.each do |page_tag| %>
                 <div class="chip js-load-page-name" data-klass="<%= page_tag.page_type %>" data-id="<%= page_tag.page_id %>">
                   <%= link_to send("#{page_tag.page_type.downcase}_path", page_tag.page_id) do %>

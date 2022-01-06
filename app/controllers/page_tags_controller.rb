@@ -1,4 +1,19 @@
 class PageTagsController < ApplicationController
+  def update
+    raise "placeholder"
+  end
+
+  def rename
+    old_tag_name = params[:tag].to_s
+    new_tag_name = params.dig(old_tag_name, :label)
+
+    if new_tag_name.blank?
+      new_tag_name = 'Untitled Tag'
+    end
+
+    current_user.page_tags.where(tag: old_tag_name).update_all(tag: new_tag_name)
+  end
+
   # Remove a tag and all of its links to a page
   def remove
     # Params
