@@ -98,7 +98,9 @@ Rails.application.routes.draw do
 
     get '/scratchpad',      to: 'main#notes', as: :notes
 
-    get 'tag/remove',       to: 'page_tags#remove'
+    get 'tag/remove',         to: 'page_tags#remove'
+    # post 'tag/:slug/update',  to: 'page_tags#update',  as: :update_tag
+    post '/tag/:tag/rename', to: 'page_tags#rename', as: :rename_tag
     delete 'tag/:id/destroy', to: 'page_tags#destroy', as: :destroy_specific_tag
 
     # Legacy route: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
