@@ -14,6 +14,10 @@ class MainController < ApplicationController
 
   def index
     redirect_to(:dashboard) if user_signed_in?
+
+    @resource ||= User.new
+    @resource_name = :user
+    @devise_mapping ||= Devise.mappings[:user]
   end
 
   def about_notebook
