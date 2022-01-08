@@ -187,11 +187,10 @@
           </div>
           <div class="flex-grow">
             <h2 class="text-gray-900 title-font font-medium mb-2">
-              Unlimited document storage
+              <%= t('marketing.landing_page.benefits.speed.title') %>
             </h2>
             <p class="text-gray-500">
-              Write quickly with reference sheets at the ready. You can view details about
-              your world without leaving the editor!
+              <%= t('marketing.landing_page.benefits.speed.text') %>
             </p>
           </div>
         </div>
@@ -226,6 +225,52 @@
           </div>
         </div>
       </div>
+      <div class="p-2 lg:w-1/3 md:w-full">
+        <div class="bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg">
+          <div class="text-center">
+            <i class="material-icons w-12 h-12 mr-4 text-5xl">search</i>
+          </div>
+          <div class="flex-grow">
+            <h2 class="text-gray-900 title-font font-medium mb-2">
+              <%= t('marketing.landing_page.benefits.search.title') %>
+            </h2>
+            <p class="text-gray-500">
+              <%= t('marketing.landing_page.benefits.search.text') %>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="p-2 lg:w-1/3 md:w-full">
+        <div class="bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg">
+          <div class="text-center">
+            <i class="material-icons w-12 h-12 mr-4 text-5xl">bubble_chart</i>
+          </div>
+          <div class="flex-grow">
+            <h2 class="text-gray-900 title-font font-medium mb-2">
+              <%= t('marketing.landing_page.benefits.creativity.title') %>
+            </h2>
+            <p class="text-gray-500">
+              <%= t('marketing.landing_page.benefits.creativity.text') %>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="p-2 lg:w-1/3 md:w-full">
+        <div class="bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg">
+          <div class="text-center">
+            <i class="material-icons w-12 h-12 mr-4 text-5xl">settings_ethernet</i>
+          </div>
+          <div class="flex-grow">
+            <h2 class="text-gray-900 title-font font-medium mb-2">
+              <%= t('marketing.landing_page.benefits.growth.title') %>
+            </h2>
+            <p class="text-gray-500">
+              <%= t('marketing.landing_page.benefits.growth.text') %>
+            </p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -236,19 +281,42 @@
       <h1 class="title-font font-medium text-3xl text-gray-900">
         It takes a just few seconds to sign up and start materializing the wonderful worlds in your head.
       </h1>
-      <p class="leading-relaxed mt-4">
-        Once you've signed up, you can immediately start creating universes and filling them with characters,
+      <p class="leading-relaxed my-4">
+        Once you've signed up, you can immediately start creating universes and filling them with your characters,
         locations, and items. The worlds you create are private, owned by you, and always available on any
         device, any time you need them.
       </p>
-      <p class="mt-16">
-        trusted by
+      <p class="mb-8">
+        Our
+        <span class="text-indigo-700">
+          <%= number_with_delimiter User.last.try(:id) || 0 %> <%= 'worldbuilders'.pluralize(User.last.try(:id) || 0) %>
+        </span>
+        have created
+        <span class="text-red-700">
+          <%= number_with_delimiter Character.last.try(:id) || 0 %> <%= 'character'.pluralize(Character.last.try(:id) || 0) %>,
+        </span>
+        <span class="text-green-700">
+          <%= number_with_delimiter Location.last.try(:id) || 0 %> <%= 'location'.pluralize(Location.last.try(:id) || 0) %>,
+        </span>
+        and
+        <span class="text-yellow-600">
+          <%= number_with_delimiter Item.last.try(:id) || 0 %> <%= 'item'.pluralize(Item.last.try(:id) || 0) %>
+        </span>
+        in
+        <span class="text-purple-600">
+          <%= number_with_delimiter Universe.last.try(:id) || 0 %> <%= 'fictional universe'.pluralize(Universe.last.try(:id) || 0) %>
+        </span>
+        since 2016.
       </p>
+      <div>
+        <a href="https://www.producthunt.com/posts/notebook-ai?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-notebook-ai" target="_blank">
+          <img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=77889&theme=light&period=daily" alt="Notebook.ai - A smart notebook that grows and collaborates with you | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" />
+        </a>
+      </div>
     </div>
     <div class="lg:w-2/6 md:w-1/2 bg-white border-blue-500 border shadow-lg rounded-lg p-8 flex flex-col md:ml-auto w-full mt-10 md:mt-0">
-      <h2 class="text-gray-900 text-lg font-medium title-font mb-5">Sign up for Notebook.ai</h2>
+      <h2 class="text-gray-900 text-lg font-medium title-font mb-5 tracking-wide">Sign up for Notebook.ai</h2>
       <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-
         <div class="relative mb-4">
           <%= f.label 'Your name', class: 'leading-7 text-sm text-gray-600' %>
           <%= f.text_field :name, class: 'w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out' %>
@@ -306,276 +374,424 @@
           end
         %>
 
-
         <%= f.submit "Sign up", class: 'w-full text-white bg-blue-500 border-0 py-2 px-8 focus:outline-none hover:bg-blue-600 rounded text-lg cursor-pointer' %>
       <% end %>
     </div>
   </div>
 </section>
 
+<section class="text-green-900 min-h-screen">
+  <div class="min-h-screen bg-right-bottom bg-cover flex shadow-lg p-8 py-32" style="background-image: url(<%= image_path 'https://images.unsplash.com/photo-1594312915251-48db9280c8f1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80' %>);">
 
-
-
-
-<div>
-  <div class="container">
-    <div class="section perks-section">
-
-
-      <div class="row">
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size orange-text"><i class="material-icons">public</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.locations.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.locations.text') %>
-            </p>
-          </div>
+    <section class="text-gray-600 body-font">
+      <div class="flex flex-wrap w-full mb-20 bg-white px-6 py-12 rounded-lg">
+        <div class="lg:w-1/2 w-full mb-6 lg:mb-0">
+          <h1 class="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900">
+            Take your world to the
+            <span class="text-blue-600">next level</span>
+            <br class="hidden sm:block" />
+            with powerful Premium features
+          </h1>
         </div>
-
+        <p class="lg:w-1/2 w-full leading-relaxed text-gray-500">
+          All of these features are available with a Premium subscription with customizable payment plans.
+          Upgrade or downgrade your account whenever inspiration strikes.
+        </p>
       </div>
+    </section>
+
+    <section class="text-gray-600 body-font w-full">
+      <div class="px-5 py-24 mx-auto">
+        <div class="flex flex-wrap -m-4">
+          <div class="p-2 lg:w-1/4 md:w-full">
+            <div class="bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg py-6">
+              <div class="text-center mr-4">
+                <i class="material-icons text-yellow-500 text-6xl">public</i>
+              </div>
+              <div class="flex-grow">
+                <h2 class="text-gray-900 title-font font-medium my-2 text-2xl">
+                  <%= t('marketing.landing_page.benefits.locations.title') %>
+                </h2>
+                <p class="text-gray-500 my-2">
+                  <%= t('marketing.landing_page.benefits.locations.text') %>
+                </p>
+                <p class="text-gray-500 my-2 text-blue-500">
+                  See the full list below.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-2 lg:w-1/4 md:w-full">
+            <div class="bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg py-6">
+              <div class="text-center mr-4">
+                <i class="material-icons text-yellow-500 text-6xl"><%= Timeline.icon %></i>
+              </div>
+              <div class="flex-grow">
+                <h2 class="text-gray-900 title-font font-medium my-2 text-2xl">
+                  Build timelines
+                </h2>
+                <p class="text-gray-500 my-2">
+                  Link events together with the characters, locations, and anything else that's relevant &mdash; then see your world's stories
+                  at a glance.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-2 lg:w-1/4 md:w-full">
+            <div class="bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg py-6">
+              <div class="text-center mr-4">
+                <i class="material-icons text-yellow-500 text-6xl"><%= Document.icon %></i>
+              </div>
+              <div class="flex-grow">
+                <h2 class="text-gray-900 title-font font-medium my-2 text-2xl">
+                  Document analysis
+                </h2>
+                <p class="text-gray-500 my-2">
+                  Our state-of-the-art artificial intelligence can analyze your documents for feedback on style, structure,
+                  readability, flow, and more.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-2 lg:w-1/4 md:w-full">
+            <div class="bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg py-6">
+              <div class="text-center mr-4">
+                <i class="material-icons text-yellow-500 text-6xl"><%= PageCollection.icon %></i>
+              </div>
+              <div class="flex-grow">
+                <h2 class="text-gray-900 title-font font-medium my-2 text-2xl">
+                  Start collections
+                </h2>
+                <p class="text-gray-500 my-2">
+                  Collections are a new way to organize your worldbuilding &mdash; or open them up for content submissions from
+                  other users!
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    
+
+  </div>
+</section>
+
+<section class="text-gray-600 body-font">
+  <div class="container px-5 pb-24 pt-8 mx-auto">
+    <div class="flex flex-wrap -m-4">
+
+      <% (Rails.application.config.content_types[:premium]).each do |content_type| %>
+        <div class="lg:w-1/4 md:w-1/2 p-4 w-full">
+          <%= link_to send("#{content_type.name.downcase}_worldbuilding_info_path") do %>
+            <div class="block relative h-48 rounded overflow-hidden hover:shadow-lg">
+              <%= image_tag "card-headers/#{content_type.name.downcase.pluralize}.webp", class: 'h-full w-full rounded w-full object-cover object-center' %>
+            </div>
+            <div class="text-gray-900 title-font text-lg font-medium text-center <%= content_type.text_color %>">
+              <%= content_type.name.pluralize %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="lg:w-1/4 md:w-1/2 p-4 w-full">
+        <div class="block relative h-48 rounded overflow-hidden border border-blue-500 bg-blue-700 text-white p-6">
+          <div class="font-bold mb-2">Want even more page types?</div>
+          Of course, we recognize these pages aren't one-size-fits-all for every world. Every template is fully customizable and
+          new pages are added as users request them.
+        </div>
+      </div>
+
+
     </div>
   </div>
+</section>
 
-  <div class="container">
-    <div class="section perks-section">
-      <h2 class="h5-size">Write smarter with integrated novel-writing software</h2>
-      <div class="row">
-        <div class="col s12 m12 l12">
-          Cross-reference notebook pages and documents you write to build a rich network of connections that makes your world feel
-          like a wiki that manages itself.
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size teal-text"><i class="material-icons">bubble_chart</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.creativity.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.creativity.text') %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size teal-text"><i class="material-icons">assignment_turned_in</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.continuity.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.continuity.text') %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size teal-text"><i class="material-icons">search</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.search.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.search.text') %>
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size teal-text"><i class="material-icons">schedule</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.speed.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.speed.text') %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size teal-text"><i class="material-icons">bar_chart</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.quality.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.quality.text') %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size teal-text"><i class="material-icons">settings_ethernet</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.growth.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.growth.text') %>
-            </p>
-          </div>
-        </div>
-      </div>
+<section class="text-gray-600 body-font overflow-hidden">
+  <div class="container px-5 py-24 mx-auto">
+    <div class="flex flex-col text-center w-full mb-20">
+      <h1 class="sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">Pricing</h1>
+      <p class="lg:w-2/3 mx-auto leading-relaxed text-base text-gray-500">
+        Accounts can be freely upgraded or downgraded at any time with no hidden fees or penalties.
+      </p>
     </div>
-  </div>
-
-  <div class="container">
-    <div class="section">
-      <div class="row">
-        <div class="col s12">
-          <h2 class="h5-size">Go the extra mile with premium notebook pages</h2>
-          <p>
-            Notebook.ai's free tier was intentionally designed to be enough for most worlds, but if you want to support the site and
-            take your worldbuilding to a new level, a premium subscription is available that unlocks
-            <%= Rails.application.config.content_types[:premium].count %> additional page templates to use. Each template is customizable and
-            comes with its own set of writing prompts.
+    <div class="flex flex-wrap -m-4">
+      <div class="p-4 xl:w-1/4 md:w-1/2 w-full">
+        <div class="h-full p-6 rounded-lg border-2 border-gray-300 bg-white flex flex-col relative overflow-hidden">
+          <h2 class="text-sm tracking-widest title-font mb-1 font-medium">STARTER</h2>
+          <h1 class="text-5xl text-gray-900 pb-4 mb-4 border-b border-gray-200 leading-none">Free forever</h1>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create up to <span class="font-bold">&nbsp;5&nbsp;</span> universes
           </p>
+
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Upload <span class="font-bold">&nbsp;50MB&nbsp;</span> of images 
+          </p>
+          <p class="flex items-center text-gray-600 mb-6">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create <span class="font-bold">&nbsp;3 core&nbsp;</span> worldbuilding pages
+            <div>
+              <% (Rails.application.config.content_types[:free]).each do |content_class| %>
+                <% next if content_class.name == "Universe" %>
+                <i class="material-icons <%= content_class.text_color %> tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                  <%= content_class.icon %>
+                </i>
+              <% end %>
+            </div>
+          </p>
+          <%= link_to new_user_registration_path, class: 'mt-auto' do %>
+            <button class="flex items-center mt-auto text-white bg-gray-400 border-0 py-2 px-4 w-full focus:outline-none hover:bg-gray-500 rounded">
+              Sign up
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-auto" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          <% end %>
         </div>
       </div>
 
-      <div class="row">
-        <% (Rails.application.config.content_types[:premium]).each do |content_type| %>
-          <div class="col l3 m6 s12">
-            <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: content_type } %>
-          </div>
-        <% end %>
+      <div class="p-4 xl:w-1/4 md:w-1/2 w-full">
+        <div class="h-full p-6 rounded-lg border-2 border-gray-300 bg-white flex flex-col relative overflow-hidden">
+          <h2 class="text-sm tracking-widest title-font mb-1 font-medium">PREMIUM</h2>
+          <h1 class="text-5xl text-gray-900 leading-none flex items-center pb-4 mb-4 border-b border-gray-200">
+            <span>$9</span>
+            <span class="text-lg ml-1 font-normal text-gray-500">per month</span>
+          </h1>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create <span class="font-bold">&nbsp;unlimited&nbsp;</span> universes
+          </p>
 
-        <div class="col l3 m6 s12">
-          <div class="card hoverable" style="min-height: 330px;">
-            <div class="card-image">
-              <%= image_tag "card-headers/timelines.webp", height: 300, width: 300, style: 'object-fit: cover' %>
-              <h3 class="card-title bordered-text">Create timelines</h3>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Upload <span class="font-bold">&nbsp;10GB&nbsp;</span> of images 
+          </p>
+          <p class="flex items-center text-gray-600 mb-6">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create <span class="font-bold">&nbsp;all <%= Rails.application.config.content_types[:all].count %>&nbsp;</span> worldbuilding pages
+            <div class="mb-2 -mt-3">
+              <% (Rails.application.config.content_types[:all]).each do |content_class| %>
+                <% next if content_class.name == "Universe" %>
+                <i class="material-icons <%= content_class.text_color %> tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                  <%= content_class.icon %>
+                </i>
+              <% end %>
             </div>
-            <div class="card-content fixed-card-content">
-              <p>
-                <%= t("content_descriptions.timeline") %>
-              </p>
-            </div>
-          </div>
+          </p>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create timelines
+          </p>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create collections
+          </p>
+          <p class="flex items-center text-gray-600 mb-8">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Analyze documents
+          </p>
+          <%= link_to new_user_registration_path, class: 'mt-auto' do %>
+            <button class="flex items-center mt-auto text-white bg-gray-400 border-0 py-2 px-4 w-full focus:outline-none hover:bg-gray-500 rounded">
+              Sign up
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-auto" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          <% end %>
         </div>
+      </div>
+      <div class="p-4 xl:w-1/4 md:w-1/2 w-full">
+        <div class="h-full p-6 rounded-lg border-2 border-indigo-500 flex flex-col bg-white relative overflow-hidden">
+          <span class="bg-indigo-500 text-white px-3 py-1 tracking-widest text-xs absolute right-0 top-0 rounded-bl">MOST POPULAR</span>
+          <h2 class="text-sm tracking-widest title-font mb-1 font-medium">PREMIUM</h2>
+          <h1 class="text-5xl text-gray-900 leading-none flex items-center pb-4 mb-4 border-b border-gray-200">
+            <span>$24</span>
+            <span class="text-lg ml-1 font-normal text-gray-500">per 3 months</span>
+          </h1>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create <span class="font-bold">&nbsp;unlimited&nbsp;</span> universes
+          </p>
 
-        <div class="col l3 m6 s12">
-          <div class="card hoverable" style="min-height: 330px;">
-            <div class="card-image">
-              <%= image_tag "card-headers/pagecollections.webp", height: 300, width: 300, style: 'object-fit: cover' %>
-              <h3 class="card-title bordered-text">Create collections</h3>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Upload <span class="font-bold">&nbsp;10GB&nbsp;</span> of images 
+          </p>
+          <p class="flex items-center text-gray-600 mb-6">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create <span class="font-bold">&nbsp;all <%= Rails.application.config.content_types[:all].count %>&nbsp;</span> worldbuilding pages
+            <div class="mb-2 -mt-3">
+              <% (Rails.application.config.content_types[:all]).each do |content_class| %>
+                <% next if content_class.name == "Universe" %>
+                <i class="material-icons <%= content_class.text_color %> tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                  <%= content_class.icon %>
+                </i>
+              <% end %>
             </div>
-            <div class="card-content fixed-card-content">
-              <p>
-                <%= t("content_descriptions.pagecollection") %>
-              </p>
+          </p>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create timelines
+          </p>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create collections
+          </p>
+          <p class="flex items-center text-gray-600 mb-8">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Analyze documents
+          </p>
+          <%= link_to new_user_registration_path, class: 'mt-auto' do %>
+            <button class="flex items-center mt-auto text-white bg-indigo-500 border-0 py-2 px-4 w-full focus:outline-none hover:bg-indigo-600 rounded">
+              Sign up
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-auto" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          <% end %>
+        </div>
+      </div>
+      <div class="p-4 xl:w-1/4 md:w-1/2 w-full">
+        <div class="h-full p-6 rounded-lg border-2 border-gray-300 bg-white flex flex-col relative overflow-hidden">
+          <h2 class="text-sm tracking-widest title-font mb-1 font-medium">PREMIUM</h2>
+          <h1 class="text-5xl text-gray-900 leading-none flex items-center pb-4 mb-4 border-b border-gray-200">
+            <span>$84</span>
+            <span class="text-lg ml-1 font-normal text-gray-500">per year</span>
+          </h1>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create <span class="font-bold">&nbsp;unlimited&nbsp;</span> universes
+          </p>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Upload <span class="font-bold">&nbsp;10GB&nbsp;</span> of images 
+          </p>
+          <p class="flex items-center text-gray-600 mb-6">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create <span class="font-bold">&nbsp;all <%= Rails.application.config.content_types[:all].count %>&nbsp;</span> worldbuilding pages
+            <div class="mb-2 -mt-3">
+              <% (Rails.application.config.content_types[:all]).each do |content_class| %>
+                <% next if content_class.name == "Universe" %>
+                <i class="material-icons <%= content_class.text_color %> tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                  <%= content_class.icon %>
+                </i>
+              <% end %>
             </div>
-          </div>
+          </p>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create timelines
+          </p>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create collections
+          </p>
+          <p class="flex items-center text-gray-600 mb-8">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Analyze documents
+          </p>
+          <%= link_to new_user_registration_path, class: 'mt-auto' do %>
+            <button class="flex items-center mt-auto text-white bg-gray-400 border-0 py-2 px-4 w-full focus:outline-none hover:bg-gray-500 rounded">
+              Sign up
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-auto" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          <% end %>
         </div>
       </div>
     </div>
   </div>
-
-  <div class="hero valign-wrapper">
-    <div class="container center">
-      <h5 class="header light">
-        <strong>"<%= t('marketing.landing_page.quote.text') %>"</strong>
-        <br />
-        <br />
-        &mdash;
-        <%= t('marketing.landing_page.quote.attribution') %>
-      </h5>
-    </div>
-    <%= image_tag 'landing/screenshot.webp', class: 'hero-image'%>
-  </div>
-
-  <div class="container" style="margin-top: 50px; margin-bottom: 75px;">
-    <h2 class="h3-size header center blue-text"><%= t('marketing.landing_page.pricing.title') %></h2>
-    <div class="row center" style="clear: both">
-      <div class="card-panel green white-text" width="200px;">
-        <%= t('marketing.landing_page.pricing.subtitle') %>
-        <%= link_to t('marketing.landing_page.pricing.cta.link'),
-                    new_user_registration_path,
-                    class: 'light-blue-text text-lighten-4' %>
-      </div>
-    </div>
-    <div class="row">
-        <div class="col s12 m6">
-            <div class="card card-avatar center">
-                <div class="center brown-text"><br /><i class="material-icons" style="font-size: 250%">class</i></div>
-                <div class="card-content">
-                    <span class="card-title activator">
-                      <%= t('marketing.landing_page.pricing.starter_plan.title') %>
-                      <br />
-                      <small><em><a class="red-text text-darken-1">
-                        <%= t('marketing.landing_page.pricing.free') %>
-                      </a></em></small>
-                    </span>
-                    <ul class="plan-features">
-                      <% Rails.application.config.content_types[:free].each do |content_type| %>
-                        <li>
-                          <i class="material-icons <%= content_type.text_color %>">
-                            <%= content_type.icon %>
-                          </i>
-                          <%= t("marketing.landing_page.pricing.starter_plan.#{content_type.name.downcase.pluralize}_html") %>
-                        </li>
-                      <% end %>
-                      <li>
-                        <i class="material-icons black-text">cloud_upload</i>
-                        <%= t('marketing.landing_page.pricing.starter_plan.upload_html') %>
-                      </li>
-                    </ul>
-                    <div class="row center">
-                      <%= link_to t('marketing.landing_page.pricing.cta.button'),
-                                  new_user_registration_path,
-                                  class: 'btn-large waves-effect waves-light white black-text' %>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col s12 m6">
-            <div class="card card-avatar">
-                <div class="center brown-text">
-                  <br />
-                  <i class="material-icons" style="font-size: 250%">book</i>
-                </div>
-                <div class="card-content center">
-                  <span class="card-title">
-                    <%= t('marketing.landing_page.pricing.premium_plan.title') %>
-                    <br />
-                    <small><em class="red-text text-darken-1">
-                      <%= t('marketing.landing_page.pricing.premium_plan.price') %> or cheaper
-                    </em></small>
-                  </span>
-                  <div class="row plan-features">
-                    <div>Create <strong>unlimited</strong>...</div>
-                    <% Rails.application.config.content_types[:all].each_with_index do |content_type, i| %>
-                      <%= link_to send("#{content_type.name.downcase}_worldbuilding_info_path"), class: 'content-type-container' do %>
-                        <i class="material-icons <%= content_type.text_color %> medium">
-                          <%= content_type.icon %>
-                        </i>
-                        <div class="black-text">
-                          <%= content_type.name.pluralize %>
-                        </div>
-                      <% end %>
-                    <% end %>
-                    <span class="content-type-container">
-                      <i class="material-icons <%= Timeline.text_color %> medium">
-                        <%= Timeline.icon %>
-                      </i><br />
-                      <%= Timeline.name.pluralize %>
-                    </span>
-                    <span class="content-type-container">
-                      <i class="material-icons <%= PageCollection.text_color %> medium">
-                        <%= PageCollection.icon %>
-                      </i><br />
-                      Collections
-                    </span>
-                    <div>
-                      and...
-                    </div>
-                    <div>
-                      <i class="material-icons black-text">cloud_upload</i>
-                      <%= t('marketing.landing_page.pricing.premium_plan.upload_html') %>
-                    </div>
-                  </div>
-                  <div class="row center">
-                    <%= link_to t('marketing.landing_page.pricing.cta.button'),
-                                new_user_registration_path,
-                                class: 'btn-large waves-effect waves-light blue lighten-1' %>
-                  </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-  </div>
+</section>
