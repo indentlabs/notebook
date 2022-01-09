@@ -1,9 +1,9 @@
 <section class="text-green-900" style="height: 60vh;">
-  <div class="h-full bg-right-bottom bg-cover flex shadow-lg" style="background-image: url(<%= image_path 'https://images.unsplash.com/photo-1518562180175-34a163b1a9a6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80' %>);">
+  <div class="h-full bg-right-bottom bg-cover flex shadow-lg" style="background-image: url(<%= image_path 'https://images.unsplash.com/photo-1455390582262-044cdead277a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1373&q=80' %>);">
     <div class="container mx-auto p-4 flex items-center z-10">
       <div class="text-center w-full">
         <div class="text-black py-4 px-5 my-5">
-          <div class="mb-3 text-4xl md:text-6xl" style="text-shadow: white 0px 0px 10px;">
+          <div class="mb-3 text-4xl md:text-6xl" style="text-shadow: white 0px 0px 18px;">
             The <span class="text-blue-500">smart</span> notebook<br class="hidden sm:block" />
             for <span class="text-blue-500">smart</span> writers
           </div>
@@ -91,28 +91,17 @@
               </span>
             </div>
           </div>
-          <a class="<%= Universe.text_color %> inline-flex items-center mt-4">
+          <%= link_to universe_worldbuilding_info_path, class: "#{Universe.text_color} inline-flex items-center mt-4" do %>
             Learn more about universes
             <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-2" viewBox="0 0 24 24">
               <path d="M5 12h14M12 5l7 7-7 7"></path>
             </svg>
-          </a>
+          <% end %>
         </div>
       </div>
     </div>
   </div>
 </section>
-
-
-
-
-
-
-
-
-
-
-
 
 <section class="text-gray-600 body-font">
   <div class="container px-5 py-24 mx-auto">
@@ -136,13 +125,13 @@
               <%= t("content_descriptions.character") %>
             </p>
             <div class="flex items-center flex-wrap ">
-              <a class="<%= Character.text_color %> inline-flex items-center md:mb-2 lg:mb-0">
+              <%= link_to character_worldbuilding_info_path, class: "#{Character.text_color} inline-flex items-center md:mb-2 lg:mb-0" do %>
                 Learn more about characters
                 <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M5 12h14"></path>
                   <path d="M12 5l7 7-7 7"></path>
                 </svg>
-              </a>
+              <% end %>
             </div>
           </div>
         </div>
@@ -157,13 +146,13 @@
               <%= t("content_descriptions.location") %>
             </p>
             <div class="flex items-center flex-wrap ">
-              <a class="<%= Location.text_color %> inline-flex items-center md:mb-2 lg:mb-0">
+              <%= link_to location_worldbuilding_info_path, class: "#{Location.text_color} inline-flex items-center md:mb-2 lg:mb-0" do %>
                 Learn more about locations
                 <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M5 12h14"></path>
                   <path d="M12 5l7 7-7 7"></path>
                 </svg>
-              </a>
+              <% end %>
             </div>
           </div>
         </div>
@@ -178,13 +167,13 @@
               <%= t("content_descriptions.item") %>
             </p>
             <div class="flex items-center flex-wrap ">
-              <a class="<%= Item.text_color %> inline-flex items-center md:mb-2 lg:mb-0">
+              <%= link_to item_worldbuilding_info_path, class: "#{Item.text_color} inline-flex items-center md:mb-2 lg:mb-0" do %>
                 Learn more about items
                 <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M5 12h14"></path>
                   <path d="M12 5l7 7-7 7"></path>
                 </svg>
-              </a>
+              <% end %>
             </div>
           </div>
         </div>
@@ -213,8 +202,8 @@
           <span class="title-font font-medium">
             <i class="material-icons float-left mr-4 mt-6 mb-4">check</i>
             If you <span class="text-blue-500">customize</span> a page's template, the fields you change are automatically synced across all of your
-            pages of that type. For example, adding a field for a character's favorite band will instantly create that field for <em>all</em> of your
-            characters!
+            pages of that type. For example, adding a field for an item's damage type will instantly create that field for <em>all</em> of your
+            items!
           </span>
         </div>
         <div class="bg-blue-100 my-2 rounded flex p-4 items-center">
@@ -242,7 +231,7 @@
       <ul class="flex flex-wrap list-none mb-4">
         <% Rails.application.config.content_types[:premium].each do |content_type| %>
           <li class="lg:w-1/3 mb-1 w-1/2">
-            <%= link_to '#', class: "#{content_type.text_color} font-bold" do %>
+            <%= link_to send("#{content_type.name.downcase}_worldbuilding_info_path"), class: "#{content_type.text_color} font-bold" do %>
               <%= content_type.name.pluralize %>
             <% end %>
           </li>
@@ -254,7 +243,6 @@
     </div>
   </div>
 </section>
-
 
 <section class="text-gray-600 body-font">
   <div class="container px-5 py-24 mx-auto">
@@ -269,7 +257,6 @@
         Notebook.ai makes a <em>fantastic</em> reference for your favorite word processor, but you can also write in ours!
       </span>
     </div>
-
 
     <div class="flex flex-wrap sm:-m-4 -mx-4 -mb-10 -mt-4 md:space-y-0 space-y-6">
       <div class="p-4 md:w-1/3 flex flex-col items-center">
@@ -355,8 +342,6 @@
     Empower your entire writing process with a new kind of tool.
   </div>
 </div>
-
-
 
 <section class="text-gray-700">
   <div class="container px-5 py-24 mx-auto">
