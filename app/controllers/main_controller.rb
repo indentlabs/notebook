@@ -1,7 +1,7 @@
 # Controller for top-level pages of the site that do not have
 # an associated model
 class MainController < ApplicationController
-  layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_designers, :for_friends]
+  layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_friends]
 
   before_action :authenticate_user!, only: [:dashboard, :prompts, :notes, :recent_content]
   before_action :cache_linkable_content_for_each_content_type, only: [:dashboard, :prompts]
@@ -85,10 +85,6 @@ class MainController < ApplicationController
 
   def for_roleplayers
     @page_title = "Building campaigns and everything within them"
-  end
-
-  def for_designers
-    @page_title = "Designing games and everything within them"
   end
 
   def feature_voting
