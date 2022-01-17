@@ -141,3 +141,4 @@ group :worker do
   gem 'ibm_watson'
   gem 'textstat'
 end
+
