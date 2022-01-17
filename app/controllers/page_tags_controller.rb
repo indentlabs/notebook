@@ -11,7 +11,12 @@ class PageTagsController < ApplicationController
       new_tag_name = 'Untitled Tag'
     end
 
-    current_user.page_tags.where(tag: old_tag_name).update_all(tag: new_tag_name)
+    new_slug = PageTagService.slug_for(new_tag_name)
+
+    current_user.page_tags.where(tag: old_tag_name).update_all(
+      tag:  new_tag_name,
+      slug: new_slug
+    )
   end
 
   # Remove a tag and all of its links to a page

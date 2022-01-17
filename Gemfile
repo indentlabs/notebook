@@ -107,8 +107,9 @@ group :production do
 end
 
 group :test, :production do
-  gem 'mini_racer'
   gem 'pg', '~> 1.2'
+
+  gem "mini_racer", "~> 0.6.2"
 end
 
 group :test do
