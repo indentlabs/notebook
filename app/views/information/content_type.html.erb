@@ -11,470 +11,504 @@
                 }
 %>
 
-<section class="text-green-900" style="height: 78vh;">
-  <div class="h-full bg-right-bottom bg-cover flex shadow-lg" style="background-image: url(<%= image_path 'card-headers/universes.webp' %>);">
+<section class="text-green-900" style="height: 20vh;">
+  <div class="h-full bg-right-bottom bg-cover flex shadow-lg -mx-1" style="background-image: url(<%= image_path "card-headers/#{@content_type.name.downcase.pluralize}.webp" %>);">
     <div class="container mx-auto p-4 flex items-center z-10">
       <div class="text-center w-full">
-        <div class="text-black py-4 px-5 my-5">
-          <div class="mb-3 text-4xl md:text-6xl" style="text-shadow: white 0px 0px 10px;">
-            The <span class="text-blue-500">smart</span> notebook<br class="hidden sm:block" />
-            for <span class="text-blue-500">smart</span> worldbuilders
+        <div class="text-white tracking-widest py-4 px-5 my-5">
+          <div class="mb-3 text-4xl md:text-6xl" style="text-shadow: black 0px 0px 10px;">
+            <i class="material-icons text-5xl <%= @content_type.text_color %>"><%= @content_type.icon %></i>
+            <%= @content_type.name.pluralize %>
           </div>
-          <div class="leading-normal text-2xl" style="text-shadow: white 0px 0px 10px;">
-            <%= t('marketing.landing_page.promo_subheader') %>
+          <div class="leading-normal text-2xl" style="text-shadow: black 0px 0px 10px;">
+            <%= t("content_oneliners.#{@content_type.name.downcase}") %>
           </div>
-        </div>
-        <div class="cta clear-left px-5">
-          <%= link_to new_user_registration_path, class: 'no-underline btn block sm:inline-block global-transition text-white bg-blue-500 hover:bg-blue-400' do %>
-            <div class="flex justify-center items-center">
-              <span>Start worldbuilding now</span>
-              <span class="fa fa-xs fa-arrow-right ml-4"></span>
-            </div>
-          <% end %>
-          <!--
-          <span class="text-white ml-4">
-            No card needed.
-          </span>
-          -->
         </div>
       </div>
     </div>
   </div>
 </section>
 
-
-
-
-
-<% 15.times do %><br /><% end %>
-
-
-<%= content_for :full_width_page_header do %>
-  <%= render partial: 'content/components/parallax_header', locals: { content_type: singular_class_name, content_class: @content_type } %>
-<% end %>
-
-<div class="row">
-  <div class="col s12">
-    <div class="card horizontal">
-      <div class="card-image">
-        <%= image_tag "card-headers/#{pluralized_class_name.downcase}.webp", class: 'materialboxed tooltipped', alt: "The default image used for all #{pluralized_class_name.downcase} on Notebook.ai, but you can replace it with your own uploads.", data: { tooltip: "The default image used for all #{pluralized_class_name.downcase} on Notebook.ai, but you can replace it with your own uploads."} %>
-      </div>
-      <div class="card-stacked">
-        <div class="card-content spaced-paragraphs">
-          <h1 class="card-title <%= @content_type.text_color %>">Creating <%= pluralized_class_name %> on Notebook.ai</h1>
-          <p><em>
-            <%= t("content_descriptions.#{singular_class_name.downcase}") %></em>
-          </p>
-          <p>
-            Creating <%= pluralized_class_name.downcase %> on Notebook.ai is easy.
-          </p>
-          <p>
-            To get started, just click <strong><%= pluralized_class_name %></strong> under the "Worldbuilding" header in the site sidebar.
-            You'll be able to see or edit all of your existing <%= singular_class_name.downcase %> pages and create new ones at any time.
-          </p>
-        </div>
-      </div>
+<section class="text-gray-600 body-font">
+  <div class="container mx-auto flex px-5 py-12 md:flex-row flex-col items-center">
+    <div class="lg:max-w-lg lg:w-full md:w-1/2 w-5/6 mb-10 md:mb-0">
+      <%= image_tag "card-headers/#{@content_type.name.downcase.pluralize}.webp", class: 'object-cover object-center rounded-lg tooltipped materialboxed', alt: "The default image used for all #{pluralized_class_name.downcase} on Notebook.ai, but you can replace it with your own uploads.", data: { tooltip: "The default image used for all #{pluralized_class_name.downcase} on Notebook.ai, but you can replace it with your own uploads."} %>
+    </div>
+    <div class="lg:flex-grow md:w-1/2 lg:pl-24 md:pl-16 flex flex-col md:items-start md:text-left items-center text-center">
+      <h1 class="title-font sm:text-4xl text-3xl mb-4 font-medium <%= Universe.text_color %>">
+        Creating <%= pluralized_class_name %> on Notebook.ai
+      </h1>
+      <p class="bg-gray-200 py-4 px-4 my-2">
+        <em>
+          <%= t("content_descriptions.#{singular_class_name.downcase}") %>
+        </em>
+      </p>
+      <p class="my-2">
+        Creating <%= pluralized_class_name.downcase %> on Notebook.ai is easy.
+      </p>
+      <p class="my-2">
+        To get started, just click <strong><%= pluralized_class_name %></strong> under the "Worldbuilding" header in the site sidebar.
+        You'll be able to see or edit all of your existing <%= singular_class_name.downcase %> pages and create new ones at any time.
+        You can also customize your <%= singular_class_name %> template for all of your pages
+        <%= link_to 'here', attribute_customization_path(@content_type.name.downcase), class: @content_type.text_color %>.
+      </p>
     </div>
   </div>
+</section>
 
-  <div class="col s12 m4 l4">
-    <div class="card">
-      <div class="card-content spaced-paragraphs">
-        <div class="center">
-          <i class="material-icons green-text large">searchable</i>
-          <h2 class="card-title">
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-12 mx-auto">
+    <div class="flex flex-wrap sm:-m-4 -mx-4 -mb-10 -mt-4 md:space-y-0 space-y-6">
+      <div class="p-8 pt-12 md:w-1/3 flex flex-col items-center border border-blue-100 bg-white rounded-lg">
+        <div class="w-20 h-20 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 mb-5 flex-shrink-0">
+          <i class="material-icons text-green-600 text-5xl">search</i>
+        </div>
+        <div class="flex-grow">
+          <h2 class="text-gray-900 text-lg title-font font-medium mb-3">
             Search your <%= pluralized_class_name.downcase %>
           </h2>
-        </div>
-        <br />
-        <p>
-          If you've got a lot of <%= pluralized_class_name.downcase %>, you can quickly get around to the right
-          one with Notebook.ai's full-text search. It searches your entire notebook for anything you wrote about
-          that <%= singular_class_name.downcase %>.
-        </p>
-        <p>
-          <% if @content_type == Universe %>
-            You can also filter your universes by tag or whether you've favorited that page.
-          <% else %>
-            You can also filter your <%= pluralized_class_name.downcase %> by tag, whether you've favorited that page,
-            and which universe it's in.
-          <% end %>
-        </p>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m4 l4">
-    <div class="card">
-      <div class="card-content spaced-paragraphs">
-        <div class="center">
-          <i class="material-icons orange-text large">lock</i>
-          <h2 class="card-title">
-            Private by default
-          </h2>
-        </div>
-        <br />
-        <p>
-          Your ideas are valuable. Every <%= singular_class_name.downcase %> you create in Notebook.ai is owned by you, completely private by default, and only accessible to you.
-        </p>
-        <p>
-          But of course, you also have full control over that privacy and can share any <%= singular_class_name.downcase %> page you want, however you want, whenever
-          you want.
-        </p>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m4 l4">
-    <div class="card">
-      <div class="card-content spaced-paragraphs">
-        <div class="center">
-          <i class="material-icons blue-text large">star</i>
-          <h2 class="card-title">
-            <%= (premium_page) ? 'Premium page' : 'Free page' %>
-          </h2>
-        </div>
-        <br />
-        <% if premium_page %>
-          <p>
-            <%= singular_class_name %> notebook pages require an active Premium subscription to create, but users on free plans can
-            view and edit their existing <%= singular_class_name.downcase %> pages at any time.
+          <p class="leading-relaxed text-base my-2">
+            If you've got a lot of <%= pluralized_class_name.downcase %>, you can quickly get around to the right
+            one with Notebook.ai's full-text search. It searches your entire notebook for anything you wrote about
+            that <%= singular_class_name.downcase %>.
           </p>
-          <p>
-            Notebook.ai is your personal worldbuilding notebook; any page you create is yours forever and you'll never lose access to
-            any part of it for any reason &mdash; even if you downgrade to a free account in the future.
-          </p>
-        <% else %>
-          <p>
-            Free users can create
-            <% if singular_class_name == 'Universe' %>
-              up to five
+          <p class="leading-relaxed text-base my-2 bg-blue-50 py-2 px-4 -mx-4 my-4 border border-blue-100">
+            <% if @content_type == Universe %>
+              You can also filter your universes using tags, favorites, and more!
             <% else %>
-              an unlimited number of
+              You can also filter your <%= pluralized_class_name.downcase %> by tag, whether you've favorited that page,
+              and which universe it's in.
             <% end %>
-            <%= pluralized_class_name.downcase %> on Notebook.ai.
           </p>
-          <p>
-            Notebook.ai's free tier was designed to be more than enough for most people, with Premium pages serving as a way
-            for more advanced worldbuilders to flesh out their world in more detail.
-          </p>
-        <% end %>
-        </p>
+        </div>
       </div>
-    </div>
-  </div>
-
-  <div class="col s12">&nbsp;<!-- spacer --></div>
-
-  <div class="col s12 m12 l5">
-    <div class="card">
-      <div class="card-content">
-        <h2 class="card-title">
-          <i class="material-icons <%= @content_type.text_color %> left">
-            <%= @content_type.icon %>
-          </i>
-
-          Get a head start with a rich
-          <span class="<%= @content_type.text_color %>"><%= singular_class_name.downcase %></span>
-          template
-        </h2>
-        <br />
-
-        <div class="spaced-paragraphs">
-          <p>
-            Templates on Notebook.ai are what help our unique worldbuilding system better understand your world.
+      <div class="p-8 pt-12 md:w-1/3 flex flex-col items-center border border-blue-100 bg-white rounded-lg">
+        <div class="w-20 h-20 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 mb-5 flex-shrink-0">
+          <i class="material-icons text-yellow-600 text-5xl">lock</i>
+        </div>
+        <div class="flex-grow">
+          <h2 class="text-gray-900 text-lg title-font font-medium mb-3">Private by default</h2>
+          <p class="leading-relaxed text-base my-2">
+            Your ideas are valuable. Every <%= singular_class_name.downcase %> you create in Notebook.ai is owned by you, completely private by default, and only accessible to you.
           </p>
-          <p>
-            You can fill out as little or as much as you'd like on every new <%= singular_class_name.downcase %>. You'll see
-            progress indicators every time you edit it to show where you can make progress on, and our system will
-            intelligently generate questions for you around the site that will automatically save your answers
-            to the proper place on your <%= singular_class_name.downcase %> page.
+          <p class="leading-relaxed text-base my-2">
+            But of course, you also have full control over that privacy and can share any <%= singular_class_name.downcase %> page you want, however you want, whenever
+            you want.
           </p>
-          <p>
-            Templates are also fully customizable across every <%= singular_class_name.downcase %> in your notebook.
-          </p>
-          <p>
-            You can browse the default template for <%= pluralized_class_name.downcase %> here; click any category
-            to see its questions.
-          </p>
+        </div>
+      </div>
+      <div class="p-8 pt-12 md:w-1/3 flex flex-col items-center border border-blue-100 bg-white rounded-lg">
+        <div class="w-20 h-20 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 mb-5 flex-shrink-0">
+          <i class="material-icons text-blue-400 text-5xl">star</i>
+        </div>
+        <div class="flex-grow">
+          <h2 class="text-gray-900 text-lg title-font font-medium mb-3">
+            <%= (premium_page) ? "#{pluralized_class_name} are a Premium page" : "#{pluralized_class_name} are free to create on Notebook.ai" %>
+          </h2>
+          <% if premium_page %>
+            <p class="leading-relaxed text-base my-2">
+              <%= singular_class_name %> notebook pages require an active Premium subscription to create, but users on free plans can
+              view and edit their existing <%= singular_class_name.downcase %> pages at any time.
+            </p>
+            <p class="leading-relaxed text-base my-2">
+              Notebook.ai is your personal worldbuilding notebook; any page you create is yours forever and you'll never lose access to
+              any part of it for any reason &mdash; even if you downgrade to a free account in the future.
+            </p>
+          <% else %>
+            <p class="leading-relaxed text-base my-2">
+              Free users can create
+              <% if singular_class_name == 'Universe' %>
+                up to five
+              <% else %>
+                an unlimited number of
+              <% end %>
+              <%= pluralized_class_name.downcase %> on Notebook.ai.
+            </p>
+            <p class="leading-relaxed text-base my-2">
+              Notebook.ai's free tier was designed to be more than enough for most creators, with Premium pages serving as a way
+              for more advanced worldbuilders to flesh out their rich worlds in more detail.
+            </p>
+          <% end %>
         </div>
       </div>
     </div>
   </div>
+</section>
 
-  <div class="col s12 m12 l7">
-    <ul class="collapsible popout">
-      <%
-        YAML.load_file(Rails.root.join('config', 'attributes', "#{singular_class_name.downcase}.yml")).map do |category_name, category_details|
-      %>
-        <% next if category_name == :contributors %>
-        <li>
-          <div class="collapsible-header <%= @content_type.color %> darken-3 white-text">
-            <i class="material-icons"><%= category_details[:icon] %></i>
-            <%= category_details[:label] %>
-          </div>
-          <div class="collapsible-body">
-            <% if category_name == :gallery %>
-              <p>
-                This category lets you upload images to this <%= singular_class_name.downcase %>'s notebook page.
-              </p>
-              <br />
-              <p>
-                It's great if you have sketches or artwork for your <%= singular_class_name.downcase %>,
-                but also works well for collecting visual inspiration, too!
-              </p>
-            <% end %>
-            <% category_details.fetch(:attributes, []).each do |field| %>
-              <div>
-                <strong><%= field[:label] %></strong>
+<section class="text-gray-600 body-font">
+  <div class="container flex flex-wrap px-5 py-12 mx-auto items-center">
+    <div class="md:w-2/5 md:pr-12 md:py-8 md:border-r md:border-b-0 mb-10 md:mb-0 pb-10 border-b border-gray-200">
+      <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">
+        <i class="material-icons <%= @content_type.text_color %> text-6xl float-left mr-4">
+          <%= @content_type.icon %>
+        </i>
+
+        Get a head start with a detailed, customizable
+        <span class="<%= @content_type.text_color %>"><%= singular_class_name.downcase %></span>
+        template
+      </h1>
+      <p class="leading-relaxed text-base my-2">
+        You can fill out as little or as much as you'd like on every new <%= singular_class_name.downcase %>. You'll see
+        progress indicators every time you edit it to show where you can make progress on and our system will
+        intelligently generate questions for you around the site that will automatically save your answers
+        to the proper place on your <%= singular_class_name.downcase %> page.
+      </p>
+      <p class="leading-relaxed text-base my-2">
+        Templates are also fully customizable across every <%= singular_class_name.downcase %> in your notebook.
+      </p>
+      <p class="leading-relaxed text-base my-2">
+        You can browse the default template for <%= pluralized_class_name.downcase %> here; just click a category
+        to see the questions it starts with.
+      </p>
+    </div>
+    <div class="flex flex-col md:w-3/5 md:pl-12">
+
+      <div class="w-full bg-white mx-auto border border-gray-200" x-data="{selected:0}">
+        <ul class="shadow-box">
+          <%
+            i = 0
+            YAML.load_file(Rails.root.join('config', 'attributes', "#{singular_class_name.downcase}.yml")).each do |category_name, category_details|
+              i += 1
+          %>
+            <li class="relative border-b border-gray-200">
+              <button type="button" class="w-full px-8 py-4 text-left <%= @content_type.color %> text-white" @click="selected !== <%= i %> ? selected = <%= i %> : selected = null">
+                <div class="flex items-center justify-between">
+                  <span><%= category_details[:label] %></span>
+                  <i class="material-icons"><%= category_details[:icon] %></i>
+                </div>
+              </button>
+              <div class="relative overflow-hidden transition-all max-h-0 duration-700" style="" x-ref="container<%= i %>" x-bind:style="selected == <%= i %> ? 'max-height: ' + $refs.container<%= i %>.scrollHeight + 'px' : ''">
+                <div class="p-6">
+                  <% if category_name == :gallery %>
+                    <p class="my-2">
+                      This category lets you upload images to this <%= singular_class_name.downcase %>'s notebook page.
+                    </p>
+                    <p class="my-2">
+                      It's great if you have sketches or artwork for your <%= singular_class_name.downcase %>,
+                      but also works well for collecting visual inspiration, too!
+                    </p>
+                  <% elsif category_name == :contributors %>
+                    <p class="my-2">
+                      Universes allow you to invite others to help contribute on your fictional worlds.
+                    </p>
+                  <% else %>
+                    <% category_details.fetch(:attributes, []).each do |field| %>
+                      <div>
+                        <strong><%= field[:label] %></strong>
+                      </div>
+                      <div>
+                        <% if field[:field_type] == 'link' || field[:field_type] == 'universe' %>
+                          This field allows you to link your other Notebook.ai pages to this <%= singular_class_name.downcase %>.
+                        <% elsif field[:field_type] == 'tags' %>
+                          This field lets you add clickable tags to organize your <%= pluralized_class_name.downcase %>.
+                        <% else %>
+                          <%=
+                            I18n.translate "attributes.#{singular_class_name.downcase}.#{field[:label].downcase.gsub(/\s/, '_')}",
+                              scope: :serendipitous_questions,
+                              name: "this #{singular_class_name.downcase}",
+                              default: 'Write as little or as much as you want!'
+                          %>
+                          <span class="text-gray-400"><%= field[:description].try(:html_safe) %></span>
+                        <% end %>
+                      </div>
+                      <br />
+                    <% end %>
+
+                  <% end %>
+                </div>
               </div>
-              <div>
-                <% if field[:field_type] == 'link' || field[:field_type] == 'universe' %>
-                  This field allows you to link your other Notebook.ai pages to this <%= singular_class_name.downcase %>.
-                <% elsif field[:field_type] == 'tags' %>
-                  This field lets you add clickable tags to your <%= pluralized_class_name.downcase %>.
-                <% else %>
-                  <%=
-                    I18n.translate "attributes.#{singular_class_name.downcase}.#{field[:label].downcase.gsub(/\s/, '_')}",
-                      scope: :serendipitous_questions,
-                      name: "this #{singular_class_name.downcase}",
-                      default: 'Write as little or as much as you want!'
-                  %>
-                  <br />
-                  <span class="grey-text"><%= field[:description].try(:html_safe) %></span>
-                <% end %>
-              </div>
-              <br />
-            <% end %>
-          </div>
-        </li>
-      <%
-        end
-      %>
-    </ul>
-  </div>
-
-  <div class="col s12">&nbsp;<!-- spacer --></div>
-
-  <div class='col s12 grey-text uppercase center'><%= singular_class_name %> features</div>
-
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content spaced-paragraphs">
-        <h2 class="card-title">
-          <i class="material-icons left red-text">photo_library</i>
-          Upload images to your <%= singular_class_name.downcase %>
-        </h2>
-        <br />
-        <p>
-          <%= pluralized_class_name %> and other worldbuilding pages all come with a dedicated area to upload and showcase your own uploaded images.
-        </p>
-        <p>
-          All users start out with 50MB of image storage space available for their notebook (usually around 250-500 images), but
-          Premium users receive an extra 10GB (10,000MB) of storage space for plenty of wiggle room when decking your <%= pluralized_class_name.downcase %>
-          out with all kinds of images.
-        </p>
-        <p>
-          The images you upload replace any default images the site uses, which makes your notebook truly feel <em>yours</em> when you see all of your 
-          fancy <%= pluralized_class_name.downcase %>!
-        </p>
+            </li>
+          <% end %>
+        </ul>
       </div>
+
     </div>
   </div>
+</section>
 
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content spaced-paragraphs">
-        <h2 class="card-title">
-          <i class="material-icons left <%= Universe.text_color %>">vpn_lock</i>
-          Focus on <%= pluralized_class_name.downcase %> from a single universe
-        </h2>
-        <br />
-        <p>
-          Building entire fictional worlds is hard, and it gets even harder when you've got ideas spanning multiple universes or worlds.
-        </p>
-        <p>
-          Focusing on a single universe at a time is a good example of how Notebook.ai tries to stay out of your way as a worldbuilding tool,
-          while also presenting your ideas front-and-center for you to work on without distractions. 
-        </p>
-        <p>
-          After you've created a couple universes, you can select any one at any time to filter your entire notebook to just <%= pluralized_class_name.downcase %>
-          and other pages that exist within <em>that</em> universe, letting you focus on just what's important right then.
-        </p>
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-12 mx-auto">
+    <div class="flex flex-wrap w-full mb-20">
+      <div class="lg:w-1/2 w-full mb-6 lg:mb-0">
+        <h1 class="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900">
+          More <%= singular_class_name %> features
+        </h1>
+        <div class="h-1 w-20 <%= @content_type.color %> rounded"></div>
       </div>
-    </div>
-  </div>
-
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content spaced-paragraphs">
-        <h2 class="card-title">
-          <i class="material-icons left green-text">group_add</i>
-          Invite others to collaborate
-        </h2>
-        <br />
-        <p>
-          Notebook.ai lets you add an unlimited number of collaborators to your universes. Each one has full access to work alongside you
-          on your <%= pluralized_class_name.downcase %> and other pages within that universe.
-        </p>
-        <p>
-          If you have a Premium subscription active, your collaborators can also share all of your Premium perks while working in your universe, too!
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <div class="col s12 m12 l6">
-    <div class="card grey darken-4 white-text">
-      <div class="card-content spaced-paragraphs">
-        <h2 class="card-title">
-          <i class="material-icons left white-text">brightness_4</i>
-          Work in light or dark mode
-        </h2>
-        <br />
-        <p>
-          Protect your eyes at night by choosing between light and dark themes at the click of a button, available across the entire website.
-        </p>
-      </div>
-      <div class="card-action">
-        <a href="#" class="dark-toggle">Toggle dark mode</a>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col s12 m12 l12">
-    <div class="card horizontal">
-      <div class="card-image">
-        <%= image_tag "screenshots/prompts.webp", class: 'materialboxed tooltipped', alt: "An example of a writing prompt generated for user's fictional race", data: { tooltip: "An example of a writing prompt generated for a fictional race" } %>
-      </div>
-      <div class="card-content spaced-paragraphs">
-        <h2 class="card-title">
-          <i class="material-icons left <%= @content_type.text_color %>"><%= @content_type.icon %></i>
-          Build your <%= singular_class_name.downcase %> piece by piece with personalized writing prompts
-        </h2>
-        <br />
-        <p>
-          Once you've started creating a <%= singular_class_name.downcase %> or two, you'll start noticing our worldbuilding tool asking you
-          personalized questions about those <%= pluralized_class_name.downcase %> around the site.
-        </p>
-        <p>
-          Whenever you write an answer to any of these prompts, they'll automatically be saved to the relevant
-          field on your <%= singular_class_name.downcase %> notebook page and you won't be asked the same question again.
-        </p>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col s12 m12 l4">
-    <div class="center">
-      <br />
-      <br />
-      Our users have created
-      <div class="h1-size <%= @content_type.text_color %>" style="margin: 0"><%= number_with_delimiter @content_type.last.try(:id) || 0 %></div>
-      <%= pluralized_class_name.downcase %> on Notebook.ai
-      <div>
-        <%= link_to green_paper_path, class: 'green-text' do %>
-          and saved
-          <%= number_with_delimiter GreenService.trees_saved_by(singular_class_name).round(2) %>
-          trees!
+      <p class="lg:w-1/2 w-full leading-relaxed text-gray-500">
+        <% if premium_page %>
+          <%= pluralized_class_name %> require an active Premium subscription to create.
+        <% else %>
+          <%= pluralized_class_name %> are available to create for free.
         <% end %>
-      </div>
+        Once you've created a page, it's yours forever!
+        The following features are always enabled for all <%= singular_class_name %> pages to help you
+        build the wonderful world in your head.
+      </p>
     </div>
-  </div>
-  <div class="col s12 m12 l4">
-    <div class="center">
-      <br />
-      <br />
-      of which,
-      <div class="h1-size <%= @content_type.text_color %>" style="margin: 0"><%= number_with_delimiter @content_type.where('created_at > ?', Date.current.beginning_of_day - 30.days).count %></div>
-      were created in the past 30 days!
-    </div>
-  </div>
-  <div class="col s12 m12 l4">
-    <div class="card">
-      <div class="card-content">
-        <h2 class="card-title">
-          <i class="material-icons left red-text">favorite</i>
-          We're here to stay. :)
-        </h2>
-        Notebook.ai has been around since 2016 and we're still growing. We're dedicated to making the best writing tool for authors
-        out there &mdash; so we'll be around (and improving) for a very long time.
-      </div>
-    </div>
-  </div>
-
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content spaced-paragraphs">
-        <h2 class="card-title">
-          <i class="material-icons <%= Document.text_color %> left"><%= Document.icon %></i>
-          Smoothly transition from worldbuilding to storytelling
-        </h2>
-        <br />
-        <div class="row">
-          <div class="col s12 m12 l6">
-            <div class="spaced-paragraphs">
-              <p>
-                Every account on Notebook.ai comes with unlimited document storage and an integrated word processor for you to bring your fictional worlds to life.
-                <!-- todo link to document info page -->
-              </p>
-              <p>
-                Other integrated tools allow you to build upon the foundation you lay from a world of <%= pluralized_class_name.downcase %>
-                and other notebook pages. Each one offers new ways to enrich your world and write better stories within them.
-              </p>
+    <div class="flex flex-wrap -m-4">
+      <div class="xl:w-1/2 md:w-full p-4">
+        <div class="bg-white p-6 rounded-lg border border-blue-100">
+          <h3 class="tracking-widest text-indigo-500 text-xs font-medium title-font mb-4">AVAILABLE ON ALL PAGES</h3>
+          <h2 class="text-lg text-gray-900 font-medium title-font mb-4">
+            <i class="material-icons left red-text">photo_library</i>
+            Upload images to your <%= singular_class_name.downcase %>
+          </h2>
+          <p class="leading-relaxed text-base my-2">
+            <%= pluralized_class_name %> and other worldbuilding pages all come with a dedicated area to upload and showcase your own uploaded images.
+          </p>
+          <p class="leading-relaxed text-base my-2">
+            The images you upload replace any default images the site uses, which makes your notebook truly feel <em>yours</em> when you see all of your 
+            fancy <%= pluralized_class_name.downcase %> around the site!
+          </p>
+          <div class="flex flex-wrap -mb-4 text-center">
+            <div class="p-4 sm:w-1/2 w-full">
+              <h2 class="title-font font-medium sm:text-4xl text-3xl text-gray-900">50MB</h2>
+              <p class="leading-relaxed">free for all users</p>
+            </div>
+            <div class="p-4 sm:w-1/2 w-full">
+              <h2 class="title-font font-medium sm:text-4xl text-3xl text-gray-900">+10GB</h2>
+              <p class="leading-relaxed">for Premium subscribers</p>
             </div>
           </div>
-          <div class="col s12 m12 l6">
-            <ul>
-              <li class="clearfix" style="padding-bottom: 1em">
+        </div>
+      </div>
+      <div class="xl:w-1/2 md:w-full p-4">
+        <div class="bg-white p-6 rounded-lg border border-blue-100">
+          <h3 class="tracking-widest text-indigo-500 text-xs font-medium title-font mb-4">AVAILABLE ON ALL PAGES</h3>
+          <h2 class="text-lg text-gray-900 font-medium title-font mb-4">
+            <i class="material-icons left <%= Universe.text_color %>">vpn_lock</i>
+            Focus on <%= singular_class_name == 'Universe' ? 'pages' : pluralized_class_name.downcase %> from a single universe
+          </h2>
+          <p class="leading-relaxed text-base my-2">
+            Building entire fictional worlds is hard! And it gets even harder when you've got ideas that span multiple universes or worlds.
+          </p>
+          <p class="leading-relaxed text-base my-2">
+            To help you focus on what's relevant, Notebook.ai lets you <strong>focus</strong> on a single universe at a time. This hides
+            your notebook pages from all other universes and lets you work on your world without distractions.
+          </p>
+          <p class="leading-relaxed text-base my-2">
+            To focus on a single universe, simply select it from the top-left dropdown of any page.
+          </p>
+        </div>
+      </div>
+      <div class="xl:w-1/2 md:w-full p-4">
+        <div class="bg-white p-6 rounded-lg border border-blue-100">
+          <h3 class="tracking-widest text-indigo-500 text-xs font-medium title-font mb-4">AVAILABLE ON ALL PAGES</h3>
+          <h2 class="text-lg text-gray-900 font-medium title-font mb-4">
+            <i class="material-icons left green-text">group_add</i>
+            Invite others to collaborate
+          </h2>
+          <p class="leading-relaxed text-base my-2">
+            Notebook.ai lets you add an unlimited number of collaborators to your universes for free. Each one has full access to work alongside you
+            on your <%= pluralized_class_name.downcase %> and other pages within that universe.
+          </p>
+          <p class="leading-relaxed text-base my-2">
+            If you have a Premium subscription active, your collaborators can also share all of your Premium perks while working in your universe, too!
+          </p>
+        </div>
+      </div>
+      <div class="xl:w-1/2 md:w-full p-4">
+        <div class="bg-black text-white p-6 rounded-lg border border-blue-100">
+          <h3 class="tracking-widest text-indigo-100 text-xs font-medium title-font mb-4">AVAILABLE ON ALL PAGES</h3>
+          <h2 class="text-lg text-gray-100 font-medium title-font mb-4">
+            <i class="material-icons left white-text">brightness_4</i>
+            Work in light or dark mode
+          </h2>
+          <p class="leading-relaxed text-base my-2">
+            Protect your eyes at night by choosing between light and dark themes at the click of a button, available across the entire website.
+          </p>
+          <div class="mt-8 mb-2">
+            <a href="#" class="dark-toggle bg-gray-800 hover:bg-gray-500 border border-gray-300 py-2 px-4">Toggle dark mode</a>
+          </div>
+        </div>
+      </div>
+      <div class="md:w-full p-4">
+        <%= image_tag "screenshots/prompts.webp", class: 'materialboxed tooltipped float-right', alt: "An example of a writing prompt generated for user's fictional race", data: { tooltip: "An example of a writing prompt generated for a fictional race" } %>
+        <div class="bg-white p-6 rounded-lg border border-blue-100">
+          <h3 class="tracking-widest text-indigo-500 text-xs font-medium title-font mb-4">AVAILABLE ON ALL PAGES</h3>
+          <h2 class="text-lg text-gray-900 font-medium title-font mb-4">
+            <i class="material-icons left <%= @content_type.text_color %>"><%= @content_type.icon %></i>
+            Craft your perfect <%= singular_class_name.downcase %> piece by piece with personalized, smart writing prompts
+          </h2>
+
+          <p class="leading-relaxed text-base my-2">
+            Once you've started creating a <%= singular_class_name.downcase %> or two, you'll start noticing our worldbuilding tool asking you
+            personalized questions about those <%= pluralized_class_name.downcase %> around the site.
+          </p>
+          <p class="leading-relaxed text-base my-2">
+            Whenever you write an answer to any of these prompts, they'll automatically be saved to the relevant
+            field on your <%= singular_class_name.downcase %> notebook page and you won't be asked the same question again.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-12 mx-auto flex flex-wrap">
+    <div class="flex flex-wrap -mx-4 mt-auto mb-auto lg:w-1/2 sm:w-2/3 content-start sm:pr-10">
+      <div class="w-full sm:p-4 px-4 mb-6">
+        <h1 class="title-font font-medium text-xl mb-2 text-gray-900">        
+          <i class="material-icons left red-text">favorite</i>
+          We're here to stay.
+        </h1>
+        <div class="leading-relaxed">
+          Notebook.ai has been around since 2016 and we're still growing. We're dedicated to making the best writing tool for authors
+          out there &mdash; so we'll be around (and improving) for a very long time. Your <%= pluralized_class_name.downcase %> are safe with us!
+        </div>
+      </div>
+      <div class="p-4 sm:w-full lg:w-1/3 w-full">
+        <h2 class="title-font font-medium text-3xl <%= @content_type.text_color %>">
+          <%= number_with_delimiter @content_type.last.try(:id) || 0 %>
+        </h2>
+        <p class="leading-relaxed">total <%= pluralized_class_name %> created</p>
+      </div>
+      <div class="p-4 sm:w-full lg:w-1/3 w-full">
+        <h2 class="title-font font-medium text-3xl <%= @content_type.text_color %>">
+          <%= number_with_delimiter @content_type.where('created_at > ?', Date.current.beginning_of_day - 31.days).count %>
+        </h2>
+        <p class="leading-relaxed"><%= pluralized_class_name %> recently created</p>
+      </div>
+      <%= link_to green_paper_path, class: 'p-4 sm:w-full lg:w-1/3 w-full text-green-600 hover:text-green-500' do %>
+        <h2 class="title-font font-medium text-3xl">
+          <%= number_with_delimiter GreenService.trees_saved_by(singular_class_name).round(2) %>
+        </h2>
+        <p class="leading-relaxed">trees saved!</p>
+      <% end %>
+    </div>
+    <div class="lg:w-1/2 sm:w-1/3 w-full rounded-lg overflow-hidden mt-6 sm:mt-0">
+      <%= image_tag "card-headers/#{@content_type.name.downcase.pluralize}.webp", class: 'object-cover object-center w-full h-64 rounded-lg' %>
+    </div>
+  </div>
+</section>
+
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-24 mx-auto">
+    <div class="lg:w-4/5 flex flex-col sm:flex-row sm:items-center items-start mx-auto">
+      <h1 class="flex-grow sm:pr-16 text-2xl font-medium title-font text-gray-900">
+        It takes just seconds to sign up and<br class="hidden sm:block" />
+        start creating
+        <span class="<%= @content_type.text_color %>">
+          your first <%= singular_class_name.downcase %>
+        </span>
+        on Notebook.ai.
+      </h1>
+      <%= link_to new_user_registration_path do %>
+        <button class="flex-shrink-0 text-white <%= @content_type.color %> border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 hover:shadow-lg rounded text-lg mt-10 sm:mt-0">
+          Get Started
+        </button>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-24 mx-auto flex flex-col">
+    <div class="lg:w-4/6 mx-auto">
+      <div class="rounded-lg h-64 overflow-hidden">
+        <%= image_tag "card-headers/documents.webp", class: 'object-cover object-center w-full h-full rounded-lg' %>
+      </div>
+      <div class="flex flex-col sm:flex-row mt-10">
+        <div class="sm:w-1/3 text-center sm:pr-8 sm:py-8">
+          <div class="w-20 h-20 rounded-full inline-flex items-center justify-center bg-gray-200 text-gray-400">
+            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-10 h-10" viewBox="0 0 24 24">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <div class="flex flex-col items-center text-center justify-center">
+            <h2 class="font-medium title-font mt-4 text-gray-900 text-lg">Your Name Here</h2>
+            <div class="w-12 h-1 bg-indigo-500 rounded mt-2 mb-4"></div>
+            <p class="text-base">
+              <em>Bestselling author?</em>
+            </p>
+          </div>
+        </div>
+        <div class="sm:w-2/3 sm:pl-8 sm:py-8 sm:border-l border-gray-200 sm:border-t-0 border-t mt-4 pt-4 sm:mt-0 text-center sm:text-left">
+          <h1 class="title-font font-medium text-xl mb-2 text-gray-900">        
+            <i class="material-icons left <%= @content_type.text_color %>"><%= @content_type.icon %></i>
+            Write smarter with your world at your fingertips.
+          </h1>
+          <p class="leading-relaxed text-lg mb-4">
+            When you're ready to start writing, Notebook.ai makes it easy to take the world you've built and keep it at your fingertips, ready to reference
+            any time you need it.
+          </p>
+          <p class="leading-relaxed text-lg mb-4">
+            Every account on Notebook.ai also includes unlimited document storage using our integrated editor that's full of smart features. You can
+            link your <%= pluralized_class_name.downcase %> and other worldbuilding pages to individual documents to see them directly inside the editor
+            &mdash; making it easy to reference small details without losing momentum.
+          </p>
+          <p class="leading-relaxed text-lg mb-4">
+            If you prefer to use another word processor, our page search makes it easy to look up any information you need about your world, letting you
+            focus on the big picture story instead of fretting over the small details.
+          </p>
+          <!--
+          <a class="text-indigo-500 inline-flex items-center">
+            Learn More
+            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-2" viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7"></path>
+            </svg>
+          </a>
+          -->
+
+          <h1 class="title-font font-medium text-xl mb-2 text-gray-900 mt-32">        
+            <i class="material-icons left <%= Document.text_color %>"><%= Document.icon %></i>
+            Take your story to the next level with more integrated tools
+          </h1>
+          <p class="leading-relaxed text-lg mb-4">
+            Our other integrated tools allow you to build upon the foundation you lay from a world of <%= pluralized_class_name.downcase %>
+            and other notebook pages. Each feature offers new ways to enrich your world and write better stories within them.
+          </p>
+          <ul>
+              <li class="mb-4">
                 <i class="material-icons <%= Timeline.text_color %> left"><%= Timeline.icon %></i>
                 Start working on a timeline and add your <%= pluralized_class_name.downcase %> to the individual scenes that are relevant to them.
               </li>
-              <li class="clearfix" style="padding-bottom: 1em">
+              <li class="mb-4">
                 <i class="material-icons <%= Document.text_color %> left"><%= Document.icon %></i>
                 Create unlimited documents and link your <%= pluralized_class_name.downcase %> to them.
               </li>
-              <li class="clearfix" style="padding-bottom: 1em">
-                <i class="material-icons <%= Document.text_color %> left"><%= Document.icon %></i>
-                Quickly pull up and reference any aspect of your linked <%= pluralized_class_name.downcase %> from the Notebook.ai editor without
-                ever leaving your document.
-              </li>
-              <li class="clearfix" style="padding-bottom: 1em">
+              <li class="mb-4">
                 <i class="material-icons <%= PageCollection.text_color %> left"><%= PageCollection.icon %></i>
                 Group your notebook pages together in new ways by adding them to Collections.
               </li>
-              <li class="clearfix" style="padding-bottom: 1em">
+              <li class="mb-4">
                 <i class="material-icons left text-lighten-3 purple-text">ballot</i>
-                Share your <%= pluralized_class_name.downcase %> to your followers or the world to get comments and feedback.
+                Share your <%= pluralized_class_name.downcase %> to your followers or to the world to get comments and feedback.
               </li>
-              <li class="clearfix" style="padding-bottom: 1em">
+              <li class="mb-4">
                 <i class="material-icons <%= @content_type.text_color %> left"><%= @content_type.icon %></i>
-                See in a single place all the timelines, documents, and collections your <%= singular_class_name.downcase %> is linked to.
+                See in a single place all the timelines, documents, collections, and other pages your <%= singular_class_name.downcase %> is linked to.
               </li>
             </ul>
-          </div>
         </div>
       </div>
     </div>
   </div>
+</section>
 
-  <div class="col s12">&nbsp;<!-- spacer --></div>
-
-  <div class="col s12 center spaced-paragraphs">
-    <p>
-      <%= pluralized_class_name %> are just one of the <%= Rails.application.config.content_types[:all].count %> types of worldbuilding pages available
-      on Notebook.ai.
-      <br />
-      <% Rails.application.config.content_types[:all].each do |content_type| %>
-        <%= link_to send("#{content_type.name.downcase}_worldbuilding_info_path"), class: "tooltipped", data: { tooltip: content_type.name.pluralize } do %>
-          <i class="material-icons <%= content_type.text_color %>"><%= content_type.icon %></i>
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-12 mx-auto">
+    <div class="lg:w-2/3 mx-auto text-center">
+      <h1 class="text-2xl font-medium title-font">
+        <%= pluralized_class_name %> are just one of the <%= Rails.application.config.content_types[:all].count %> types of worldbuilding 
+        pages available on Notebook.ai.
+      </h1>
+      <div class="my-2">
+        <% Rails.application.config.content_types[:all].each do |content_type| %>
+          <%= link_to send("#{content_type.name.downcase}_worldbuilding_info_path"), class: "tooltipped", data: { tooltip: content_type.name.pluralize } do %>
+            <i class="material-icons <%= content_type.text_color %> text-5xl m-2"><%= content_type.icon %></i>
+          <% end %>
         <% end %>
-      <% end %>
-    </p>
-    <p>
-      <%= link_to "Start worldbuilding now", new_user_registration_path, class: "btn #{@content_type.color} white-text btn-large hoverable" %>
-    </p>
-    <p class="grey-text">
-      Create your first <%= singular_class_name.downcase %> today!
-    </p>
+      </div>
+      <div class="mt-12 mb-4">
+        <%= link_to "Start worldbuilding now", new_user_registration_path, class: "#{@content_type.color} text-white p-4 hover:shadow-lg rounded-lg" %>
+      </div>
+      <p class="text-gray-500">
+        Create your first <%= singular_class_name.downcase %> today!
+      </p>
+    </div>
   </div>
-
-</div>
+</section>
