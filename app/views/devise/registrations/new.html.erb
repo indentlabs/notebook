@@ -1,97 +1,84 @@
-<div class="row">
-  <div class="col s12 m6 offset-m3">
-    <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-      <% if resource.errors.any? %>
-        <div class="card red lighten-3">
-          <div class="card-content">
-            <div class="card-title">Please fix the following errors:</div>
-            <ul class="browser-default">
-              <%= devise_error_messages! %>
-            </ul>
+<div class="flex items-center pt-8 pb-32 bg-gray-50">
+  <div class="flex-1 h-full max-w-7xl mx-auto bg-white rounded-lg shadow-xl">
+    <div class="flex flex-col md:flex-row">
+      <div class="h-32 md:h-auto md:w-1/2">
+        <%= image_tag "card-headers/languages.webp", class: 'object-cover w-full h-full' %>
+      </div>
+      <div class="flex items-center justify-center p-6 sm:p-12 md:w-1/2">
+        <div class="w-full">
+          <div class="flex justify-center mb-4">
+            <%= image_tag 'logos/both-small.webp', class: 'object-cover w-full h-full' %>
           </div>
-        </div>
-      <% end %>
-
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title">
+          <h1 class="mb-4 text-2xl font-bold text-center text-gray-700">
             Sign up for Notebook.ai
-          </div>
-          <div style="padding: 0 2em; padding-top: 1em">
-            <%= image_tag 'logos/both-small.webp', class: 'hide-on-small-only', style: 'width: 100%' %>
-            <%= image_tag 'logos/book-small.webp', class: 'hide-on-med-and-up', style: 'width: 100%' %>
-          </div>
+          </h1>
 
-          <div class="field">
-            <%= f.label 'Your name' %><br />
-            <%= f.text_field :name, autofocus: true %>
-          </div>
+          <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+            <% if resource.errors.any? %>
+              <div class="bg-red-200 p-4">
+                <strong>Please fix the following errors:</strong>
+                <ul class="my-2">
+                  <%= devise_error_messages! %>
+                </ul>
+              </div>
+            <% end %>
+            <div class="mt-8">
+              <%= f.label 'Name', class: 'block text-sm' %>
+              <%= f.text_field :name, autofocus: true, class: 'w-full px-4 py-2 text-sm border rounded-md focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-600' %>
+            </div>
+            <div>
+              <%= f.label 'Email', class: 'block text-sm' %>
+              <%= f.email_field :email, class: 'w-full px-4 py-2 text-sm border rounded-md focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-600' %>
+            </div>
+            <div>
+              <%= f.label "Password #{'(' + @minimum_password_length.to_s + ' characters minimum)' if @minimum_password_length.present?}", class: 'block text-sm' %>
+              <%= f.password_field :password, class: 'w-full px-4 py-2 text-sm border rounded-md focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-600', autocomplete: 'off' %>
+            </div>
+            <div>
+              <%= f.label 'Password confirmation', class: 'block text-sm' %>
+              <%= f.password_field :password_confirmation, class: 'w-full px-4 py-2 text-sm border rounded-md focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-600' %>
+            </div>
+            <div class="my-2">
+              <%= f.label 'Email updates', class: 'block text-sm' do %>
+                <%= f.check_box :email_updates, checked: false %>
+                <span>
+                  We're always working to improve Notebook.ai. Please check this box if you'd like to receive occasional updates about
+                  what's new.
+                </span>
+              <% end %>
+            </div>
 
-          <div class="field">
-            <%= f.label :email %> <em>(This is the email you will log in with)</em><br />
-            <%= f.email_field :email %>
-          </div>
-
-          <div class="field">
-            <%= f.label :password %>
-            <% if @minimum_password_length %>
-            <em>(<%= @minimum_password_length %> characters minimum)</em>
-            <% end %><br />
-            <%= f.password_field :password, autocomplete: "off" %>
-          </div>
-
-          <div class="field">
-            <%= f.label :password_confirmation %><br />
-            <%= f.password_field :password_confirmation, autocomplete: "off" %>
-          </div>
-
-          <!--
-          <div class="field">
-            <%= f.label :promo_code %><br />
-            <%= f.text_field :promo_code, value: 'LAUNCHPARTY', disabled: "disabled" %>
-          </div>
-          -->
-
-          <%
-            if params.key?('referral') ||  session.key?('referral')
-              referral_code = params['referral'] || session['referral']
-              referrer = ReferralCode.where(code: referral_code).first
-              if referrer.present?
-          %>
-              <div class="row">
-                <div class="col s12 m6">
-                  <div class="field">
-                    <%= f.label :referral_code %><br />
-                    <%= f.text_field :referral_code, value: referral_code, readonly: true %>
+            <%
+              if params.key?('referral') ||  session.key?('referral')
+                referral_code = params['referral'] || session['referral']
+                referrer = ReferralCode.where(code: referral_code).first
+                if referrer.present?
+            %>
+                <div class="row">
+                  <div class="col s12 m6">
+                    <div class="field">
+                      <%= f.label :referral_code %><br />
+                      <%= f.text_field :referral_code, value: referral_code, readonly: true %>
+                    </div>
+                  </div>
+                  <div class="col s12 m6">
+                    <%= f.label 'The following user will receive credit for referring you' %><br />
+                    <%= f.text_field :referral_user, value: referrer.user.name.split('@').first, disabled: "disabled" %>
                   </div>
                 </div>
-                <div class="col s12 m6">
-                  <%= f.label 'The following user will receive credit for referring you' %><br />
-                  <%= f.text_field :referral_user, value: referrer.user.name.split('@').first, disabled: "disabled" %>
-                </div>
-              </div>
-          <%
+            <%
+                end
               end
-            end
-          %>
+            %>
 
-          <div class="field">
-            <%= f.label :email_updates do %>
-              <%= f.check_box :email_updates %>
-              <span>We're always working to improve Notebook.ai. Please leave this box checked if you'd like to receive occasional updates about
-                what's new.</span>
-            <% end %>
-          </div>
+            <%= f.submit "Sign up", class: 'block w-full px-4 py-4 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue' %>
+          <% end %>
 
-          <div class="actions center" style="margin-top: 20px;">
-            <%= f.submit "Sign up", class: 'btn btn-large blue' %>
-            <p class="center">
-              <br />
-              <%= render "devise/shared/links" %>
-            </p>
+          <div class="mt-4 text-center text-sm">
+            <%= render "devise/shared/links" %>
           </div>
         </div>
       </div>
-    <% end %>
+    </div>
   </div>
 </div>
