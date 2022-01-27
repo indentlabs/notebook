@@ -301,6 +301,7 @@ class ContentController < ApplicationController
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
     @serialized_content = ContentSerializer.new(@content)
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") unless @content.updatable_by?(current_user || User.new)
 
     if user_signed_in?
       @navbar_actions << {
