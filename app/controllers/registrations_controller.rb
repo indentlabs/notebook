@@ -9,6 +9,7 @@ class RegistrationsController < Devise::RegistrationsController
 
   def new
     super
+    
     if params[:referral]
       session[:referral] = params[:referral]
     end
