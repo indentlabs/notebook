@@ -1,10 +1,11 @@
 # Controller for top-level pages of the site that do not have
 # an associated model
 class MainController < ApplicationController
-  layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_friends]
+  layout 'tailwind/landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_friends]
 
   before_action :authenticate_user!, only: [:dashboard, :prompts, :notes, :recent_content]
   before_action :cache_linkable_content_for_each_content_type, only: [:dashboard, :prompts]
+  before_action :set_page_meta_tags
 
   before_action do
     if !user_signed_in? && params[:referral]
@@ -99,5 +100,12 @@ class MainController < ApplicationController
   def set_questionable_content
     @content = @current_user_content.except(*%w(Timeline Document)).values.flatten.sample
     @attribute_field_to_question = SerendipitousService.question_for(@content)
+  end
+
+  def set_page_meta_tags
+    set_meta_tags(
+      site: "The smart notebook for worldbuilders - Notebook.ai",
+      page: ''
+    )
   end
 end
