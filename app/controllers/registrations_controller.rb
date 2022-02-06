@@ -5,6 +5,8 @@ class RegistrationsController < Devise::RegistrationsController
   before_action :set_navbar_actions, only: [:edit, :preferences, :more_actions]
   before_action :set_navbar_color, only: [:edit, :preferences, :more_actions]
 
+  layout 'tailwind/landing', only: [:new]
+
   def new
     super
     if params[:referral]
