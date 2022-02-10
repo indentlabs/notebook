@@ -28,11 +28,11 @@ class Race < ApplicationRecord
   end
 
   def self.color
-    'darken-2 light-green'
+    'darken-2 light-green bg-indigo-500'
   end
 
   def self.text_color
-    'text-darken-2 light-green-text'
+    'text-darken-2 light-green-text text-indigo-500'
   end
 
   def self.hex_color

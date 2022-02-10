@@ -49,11 +49,11 @@ class Character < ApplicationRecord
   end
 
   def self.color
-    'red'
+    'red red-500'
   end
 
   def self.text_color
-    'red-text'
+    'red-text text-red-500'
   end
 
   def self.hex_color

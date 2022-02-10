@@ -21,11 +21,11 @@ class Language < ApplicationRecord
   end
 
   def self.color
-    'blue'
+    'blue bg-cyan-700'
   end
 
   def self.text_color
-    'blue-text'
+    'blue-text text-cyan-700'
   end
 
   def self.hex_color

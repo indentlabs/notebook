@@ -33,11 +33,11 @@ class Creature < ApplicationRecord
   end
 
   def self.color
-    'brown'
+    'brown bg-amber-900'
   end
 
   def self.text_color
-    'brown-text'
+    'brown-text text-amber text-amber-900'
   end
 
   def self.hex_color

@@ -44,11 +44,11 @@ class Lore < ActiveRecord::Base
   relates :related_lores, with: :lore_related_lores
 
   def self.color
-    'text-lighten-2 lighten-1 orange'
+    'text-lighten-2 lighten-1 orange bg-teal-600'
   end
 
   def self.text_color
-    'text-lighten-2 orange-text'
+    'text-lighten-2 orange-text text-teal-600'
   end
 
   def self.hex_color

@@ -31,11 +31,11 @@ class Item < ApplicationRecord
   end
 
   def self.color
-    'text-darken-2 amber'
+    'text-darken-2 amber bg-amber-500'
   end
 
   def self.text_color
-    'text-darken-2 amber-text'
+    'text-darken-2 amber-text text-amber-500'
   end
 
   def self.hex_color

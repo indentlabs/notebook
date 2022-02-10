@@ -75,11 +75,11 @@ class Universe < ApplicationRecord
   end
 
   def self.color
-    'purple'
+    'purple bg-purple-800'
   end
 
   def self.text_color
-    'purple-text'
+    'purple-text text-purple-800'
   end
 
   def self.hex_color
