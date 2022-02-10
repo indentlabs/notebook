@@ -1,4 +1,5 @@
 class InformationController < ApplicationController
+  layout 'tailwind'
   
   Rails.application.config.content_types[:all].each do |content_type|
     define_method(content_type.name.downcase.pluralize) do

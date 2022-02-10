@@ -19,24 +19,22 @@
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'has-fixed-sidenav' if user_signed_in? %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
 >
-  <%= render 'layouts/sidenav' if user_signed_in? %>
-  <%= render 'layouts/recent_edits_sidenav' if user_signed_in? %>
-  <%= render 'layouts/navbar' %>
+  <%# render 'layouts/sidenav' if user_signed_in? %>
+  <%# render 'layouts/recent_edits_sidenav' if user_signed_in? %>
+  <%= render 'layouts/tailwind/navbar' %>
 
   <main>
-    <%= yield :full_width_page_header %>
-    <%= yield :full_width_page_content %>
+    <%# yield :full_width_page_header %>
+    <%# yield :full_width_page_content %>
+
     <%= render 'cards/ui/alert' %>
     <%= render 'cards/ui/notice' %>
-    <div class="row">
-      <div class="col s12">
-        <%= yield %>
-      </div>
-    </div>
+
+    <%= yield %>
   </main>
 
   <%= react_component("Footer")      unless defined?(@show_footer) && !@show_footer %>
-  <%= render 'layouts/quick_add_fab' unless defined?(@show_footer) && !@show_footer %>
+  <%# render 'layouts/quick_add_fab' unless defined?(@show_footer) && !@show_footer %>
 
   <script type="text/javascript">
     <% if user_signed_in? %>
@@ -48,7 +46,7 @@
     });
   </script>
 
-  <%= render partial: 'content/keyboard_controls_help_modal' %>
+  <%# render partial: 'content/keyboard_controls_help_modal' %>
   <%= render 'layouts/ganalytics' %>
 </body>
 </html>
