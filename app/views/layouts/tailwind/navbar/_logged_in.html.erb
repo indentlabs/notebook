@@ -1,58 +1,30 @@
-<div class="bg-blue-400 text-white w-full flex justify-between sticky top-0 z-50">
+<div class="bg-notebook-blue text-white w-full flex justify-between sticky top-0 z-50">
   <div class="relative block p-4 lg:p-6 text-xl font-bold">
     <%= link_to 'Notebook.ai', root_path, class: 'hover:text-blue-100' %>
   </div>
 
   <ul class="flex">
     <li class="border-transparent border-b-2 hover:border-white text-sm">
-      <a href="#" class="relative block py-6 px-2 lg:p-6 text-sm lg:text-base font-bold">Sign in</a>
-    </li>
-    <li class="border-transparent border-b-2 hover:border-white text-sm">
-      <a href="#" class="relative block py-6 px-2 lg:p-6 text-sm lg:text-base font-bold">Sign up</a>
+      <a href="#" class="relative block py-6 px-2 lg:p-6 text-sm lg:text-base font-bold">Home</a>
     </li>
   
     <!-- Toggle dropdown by click -->
-    <li class="toggleable hover:bg-blue-800 hover:text-white">
+    <li class="toggleable border-transparent border-b-2 hover:border-white text-sm">
       <input type="checkbox" value="selected" id="toggle-one" class="toggle-input">
-      <label for="toggle-one" class="block cursor-pointer py-6 px-4 lg:p-6 text-sm lg:text-base font-bold">Click</label>
-      <div role="toggle" class="p-6 mega-menu mb-16 sm:mb-0 shadow-xl bg-blue-800">
-        <div class="container mx-auto w-full flex flex-wrap justify-between mx-2">
-          <ul class="px-4 w-full sm:w-1/2 lg:w-1/4 border-gray-600 border-b sm:border-r lg:border-b-0 pb-6 pt-6 lg:pt-3">
-            <h3 class="font-bold text-xl text-white text-bold mb-2">Heading 1</h3>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-          </ul>
-          <ul class="px-4 w-full sm:w-1/2 lg:w-1/4 border-gray-600 border-b sm:border-r-0 lg:border-r lg:border-b-0 pb-6 pt-6 lg:pt-3">
-            <h3 class="font-bold text-xl text-white text-bold mb-2">Heading 2</h3>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-          </ul>
+      <label for="toggle-one" class="block cursor-pointer py-6 px-4 lg:p-6 text-sm lg:text-base font-bold">Worldbuilding</label>
+      <div role="toggle" class="p-6 mega-menu mb-16 sm:mb-0 shadow-xl bg-blue-100 text-black border-b border-notebook-blue">
+        <div class="w-full flex flex-wrap justify-between mx-2">
+          <div class="px-4 w-full sm:w-full lg:w-1/2 border-gray-600 border-b sm:border-r lg:border-b-0 pb-6 pt-3 lg:pt-2">
+            <h3 class="font-bold text-xl text-black text-bold mb-2">Your notebook pages</h3>
+            <% @current_user_content.keys.sort.each do |key| %>
+              <%= link_to polymorphic_path(key.pluralize.downcase) do %>
+                <span class="bg-white rounded-lg inline-block <%= content_class_from_name(key).color %> text-white pb-4 pt-1 px-4 m-2 my-1 hover:shadow-lg">
+                  <i class="material-icons mr-2 relative top-2"><%= content_class_from_name(key).icon %></i>
+                  <span><%= key.pluralize %></span>
+                </span>
+              <% end %>
+            <% end %>
+          </div>
           <ul class="px-4 w-full sm:w-1/2 lg:w-1/4 border-gray-600 border-b sm:border-b-0 sm:border-r md:border-b-0 pb-6 pt-6 lg:pt-3">
             <h3 class="font-bold text-xl text-white text-bold">Heading 3</h3>
             <li>
@@ -74,7 +46,7 @@
           <ul class="px-4 w-full sm:w-1/2 lg:w-1/4 border-gray-600 pb-6 pt-6 lg:pt-3">
             <h3 class="font-bold text-xl text-white text-bold mb-2">Heading 4</h3>
             <li class="pt-3">
-              <img src="https://placehold.it/205x172">
+              <img src="http://placehold.it/250x250">
               </li>
             </ul>
           </div>

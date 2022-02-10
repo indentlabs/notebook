@@ -22,11 +22,11 @@ class Timeline < ApplicationRecord
   end
 
   def self.color
-    'green'
+    'green bg-green-500'
   end
 
   def self.text_color
-    'green-text'
+    'green-text text-green-500'
   end
 
   # Needed because we sometimes munge Timelines in with ContentPages :(
