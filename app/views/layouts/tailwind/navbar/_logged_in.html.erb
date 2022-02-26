@@ -15,18 +15,28 @@
       <div role="toggle" class="p-6 mega-menu mb-16 sm:mb-0 shadow-xl bg-blue-100 text-black border-b border-notebook-blue">
         <div class="w-full flex flex-wrap justify-between mx-2">
           <div class="px-4 w-full sm:w-full lg:w-1/2 border-gray-600 border-b sm:border-r lg:border-b-0 pb-6 pt-3 lg:pt-2">
-            <h3 class="font-bold text-xl text-black text-bold mb-2">Your notebook pages</h3>
+            <div class="flex flex-row">
+              <h3 class="flex-grow font-bold text-xl text-black text-bold mb-2">
+                Pages for <span class="<%= Universe.text_color %>">this universe</span>
+              </h3>
+              <div class="text-notebook-blue">
+                <%= link_to 'customize active pages', main_app.customization_content_types_path %>
+              </div>
+            </div>
             <% @current_user_content.keys.sort.each do |key| %>
               <%= link_to polymorphic_path(key.pluralize.downcase) do %>
-                <span class="bg-white rounded-lg inline-block <%= content_class_from_name(key).color %> text-white pb-4 pt-1 px-4 m-2 my-1 hover:shadow-lg">
+                <span class="bg-white rounded-lg inline-block <%= content_class_from_name(key).color %> text-white pb-4 pt-1 px-4 m-1 hover:shadow-lg">
                   <i class="material-icons mr-2 relative top-2"><%= content_class_from_name(key).icon %></i>
                   <span><%= key.pluralize %></span>
+                  <span class="bg-black rounded-full px-2 py-1 ml-2 bg-white text-gray-700 text-xs">
+                    <%= number_with_delimiter @current_user_content.fetch(key, []).length %>
+                  </span>
                 </span>
               <% end %>
             <% end %>
           </div>
           <ul class="px-4 w-full sm:w-1/2 lg:w-1/4 border-gray-600 border-b sm:border-b-0 sm:border-r md:border-b-0 pb-6 pt-6 lg:pt-3">
-            <h3 class="font-bold text-xl text-white text-bold">Heading 3</h3>
+            <h3 class="font-bold text-xl text-bold">Recently-edited pages</h3>
             <li>
               <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
             </li>
@@ -44,7 +54,7 @@
             </li>
           </ul>
           <ul class="px-4 w-full sm:w-1/2 lg:w-1/4 border-gray-600 pb-6 pt-6 lg:pt-3">
-            <h3 class="font-bold text-xl text-white text-bold mb-2">Heading 4</h3>
+            <h3 class="font-bold text-xl text-bold mb-2">What's next?</h3>
             <li class="pt-3">
               <img src="http://placehold.it/250x250">
               </li>
