@@ -124,7 +124,17 @@ namespace :data_integrity do
     ActiveRecord::Base.logger = nil
 
     User.find_each do |user|
-      max_bandwidth  = BillingPlan::PREMIUM_IDS.include?(user.selected_billing_plan_id) ? premium_total : base_bandwidth
+      max_bandwidth = case user.selected_billing_plan_id
+        when 1
+          base_bandwidth
+        when 2 # free-for-lifers
+          250_000
+        when 4, 5, 6 # premium
+          premium_total
+        else
+          raise "User with funky billing plan id: U=#{user.id} BP=#{user.selected_billing_plan_id}"
+      end
+
       referral_bonus = user.referrals.count * referral_bonus
       used_bandwidth = user.image_uploads.sum(:src_file_size)
 
