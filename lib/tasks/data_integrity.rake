@@ -111,5 +111,23 @@ namespace :data_integrity do
     end
 
   end
+
+  desc "Ensure all users have the correct upload bandwidth amounts"
+  task correct_bandwidths: :environment do
+    base_bandwidth = User.new.upload_bandwidth_kb           #     50_000
+    premium_bonus  = BillingPlan.find(4).bonus_bandwidth_kb #  9_950_000
+    premium_total  = base_bandwidth + premium_bonus         # 10_000_000
+
+    User.find_each do |user|
+      max_bandwidth  = BillingPlan::PREMIUM_IDS.include?(user.selected_billing_plan_id) ? premium_total : base_bandwidth
+      used_bandwidth = user.image_uploads.sum(:src_file_size)
+
+      remaining_bandwidth = max_bandwidth - used_bandwidth
+      if user.upload_bandwidth_kb != remaining_bandwidth
+        puts "Correcting user #{user.id} bandwidth: #{user.upload_bandwidth_kb} --> #{remaining_bandwidth}"
+        # user.update(upload_bandwidth_kb: remaining_bandwidth)
+      end
+    end
+  end
 end
 
