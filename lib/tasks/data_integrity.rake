@@ -130,7 +130,7 @@ namespace :data_integrity do
 
       remaining_bandwidth = max_bandwidth + referral_bonus - used_bandwidth
       if user.upload_bandwidth_kb != remaining_bandwidth
-        puts "Correcting user #{user.id} bandwidth: #{user.upload_bandwidth_kb} --> #{remaining_bandwidth}"
+        puts "Correcting user #{user.id} bandwidth: #{user.upload_bandwidth_kb} --> #{remaining_bandwidth} (#{used_bandwidth} used)"
         # user.update(upload_bandwidth_kb: remaining_bandwidth)
       end
     end
