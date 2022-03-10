@@ -30,10 +30,7 @@ class PayPalPrepayProcessingJob < ApplicationJob
 
         # Add the extra Premium space
         SubscriptionService.add_any_referral_bonuses(invoice.user, 'premium')
-
-        # Rather than queueing up a job to run N months from now to reset space,
-        # we'll probably go with a worker that ensures everyone's space is correct
-        # every day. Worker TBD.
+        PremiumDowngradeJob.set(wait: (invoice.months).months).perform_later(invoice.user_id)
       end
 
     else
