@@ -27,6 +27,13 @@ class PayPalPrepayProcessingJob < ApplicationJob
       unless invoice.status == 'COMPLETED'
         invoice.update(status: 'COMPLETED')
         invoice.generate_promo_code!
+
+        # Add the extra Premium space
+        SubscriptionService.add_any_referral_bonuses(invoice.user, 'premium')
+
+        # Rather than queueing up a job to run N months from now to reset space,
+        # we'll probably go with a worker that ensures everyone's space is correct
+        # every day. Worker TBD.
       end
 
     else
