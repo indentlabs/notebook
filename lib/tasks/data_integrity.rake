@@ -117,17 +117,26 @@ namespace :data_integrity do
     base_bandwidth = User.new.upload_bandwidth_kb           #     50_000
     premium_bonus  = BillingPlan.find(4).bonus_bandwidth_kb #  9_950_000
     premium_total  = base_bandwidth + premium_bonus         # 10_000_000
+    referral_bonus = 100_000 # per referral
+
+    puts "Disabling SQL logging"
+    old_logger = ActiveRecord::Base.logger
+    ActiveRecord::Base.logger = nil
 
     User.find_each do |user|
       max_bandwidth  = BillingPlan::PREMIUM_IDS.include?(user.selected_billing_plan_id) ? premium_total : base_bandwidth
+      referral_bonus = user.referrals.count * referral_bonus
       used_bandwidth = user.image_uploads.sum(:src_file_size)
 
-      remaining_bandwidth = max_bandwidth - used_bandwidth
+      remaining_bandwidth = max_bandwidth + referral_bonus - used_bandwidth
       if user.upload_bandwidth_kb != remaining_bandwidth
         puts "Correcting user #{user.id} bandwidth: #{user.upload_bandwidth_kb} --> #{remaining_bandwidth}"
         # user.update(upload_bandwidth_kb: remaining_bandwidth)
       end
     end
+
+    puts "Re-enabling SQL logging"
+    ActiveRecord::Base.logger = old_logger
   end
 end
 
