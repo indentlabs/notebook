@@ -125,7 +125,7 @@ namespace :data_integrity do
 
     User.find_each do |user|
       max_bandwidth = case user.selected_billing_plan_id
-        when 1
+        when nil, 1
           base_bandwidth
         when 2 # free-for-lifers
           250_000
