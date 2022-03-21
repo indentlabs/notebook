@@ -16,8 +16,7 @@ class Language < ApplicationRecord
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def description
-    num_speakers = Lingualism.where(spoken_language_id: id).count
-    "Language spoken by #{ActionController::Base.helpers.pluralize num_speakers, 'character'}"
+    overview_field_value('Description')
   end
 
   def self.color

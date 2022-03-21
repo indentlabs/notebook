@@ -243,7 +243,7 @@ class ForumReplacementService < Service
     'prison'            => 'hoosegow locker',
     'raccoon'           => 'trash burgler',
     'radio'             => 'magic musicbox',
-    'rain'              => 'cloudy waterdrops',
+    'rain'              => 'cloudy juice',
     'recursion'         => 'recursion',
     'replaced'          => 'improved',
     'reverse'           => 'esrever',
