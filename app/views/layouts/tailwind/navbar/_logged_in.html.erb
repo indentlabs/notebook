@@ -17,7 +17,8 @@
           <div class="px-4 w-full sm:w-full lg:w-1/2 border-gray-600 border-b sm:border-r lg:border-b-0 pb-6 pt-3 lg:pt-2">
             <div class="flex flex-row">
               <h3 class="flex-grow font-bold text-xl text-black text-bold mb-2">
-                Pages for <span class="<%= Universe.text_color %>">this universe</span>
+                Pages for <span class="<%= Universe.text_color %>">The Great Universe</span>
+                <%= link_to 'change universe', main_app.customization_content_types_path, class: "text-xs #{Universe.text_color} ml-4" %>
               </h3>
               <div class="text-notebook-blue">
                 <%= link_to 'customize active pages', main_app.customization_content_types_path %>
@@ -37,31 +38,34 @@
           </div>
           <ul class="px-4 w-full sm:w-1/2 lg:w-1/4 border-gray-600 border-b sm:border-b-0 sm:border-r md:border-b-0 pb-6 pt-6 lg:pt-3">
             <h3 class="font-bold text-xl text-bold">Recently-edited pages</h3>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
-            <li>
-              <a href="#" class="block p-3 hover:bg-blue-600 text-gray-300 hover:text-white">Category One Sublink</a>
-            </li>
+            <div class="overflow-y-scroll max-h-72">
+              <% @recently_edited_pages.each do |content| %>
+                <% content_class = content_class_from_name(content.page_type) %>
+                <li>
+                  <%= link_to main_app.send("#{content.page_type.downcase}_path", content.id), class: "block px-3 pb-2 hover:bg-notebook-blue #{content.text_color} hover:text-white" do %>
+                    <i class="material-icons mr-2 relative top-2"><%= content_class.icon %></i>
+                    <%= content.name %>
+                    <span class="text-gray-400 text-xs ml-1"><%= time_ago_in_words content.updated_at %> ago</span>
+                  <% end %>
+                </li>
+              <% end %>
+            </div>
           </ul>
           <ul class="px-4 w-full sm:w-1/2 lg:w-1/4 border-gray-600 pb-6 pt-6 lg:pt-3">
-            <h3 class="font-bold text-xl text-bold mb-2">What's next?</h3>
-            <li class="pt-3">
-              <img src="http://placehold.it/250x250">
-              </li>
-            </ul>
-          </div>
+            <h3 class="font-bold text-xl text-bold mb-2">Expand your world</h3>
+            <li class="pt-3 font-bold mb-2">
+              What is <span class="<%= Character.text_color %>">Brock Lentil</span>'s hair color?
+            </li>
+            <li class="mb-1">
+              <textarea class="w-full rounded-lg h-24 p-4" placeholder="Write as little or as much as you'd like!"></textarea>
+            </li>
+            <li class="text-right">
+              <button class="bg-notebook-blue text-white rounded-lg px-2 py-1">Save answer</button>
+            </li>
+          </ul>
         </div>
-      </li>
+      </div>
+    </li>
     
         <!-- ## Toggleable Link Template ##
     
@@ -73,7 +77,7 @@
     
         <!--Hoverable Link-->
         <li class="hoverable hover:bg-blue-800 hover:text-white">
-          <a href="#" class="relative block py-6 px-4 lg:p-6 text-sm lg:text-base font-bold hover:bg-blue-800 hover:text-white">Hover</a>
+          <a href="#" class="relative block py-6 px-4 lg:p-6 text-sm lg:text-base font-bold hover:bg-blue-800 hover:text-white">Writing</a>
           <div class="p-6 mega-menu mb-16 sm:mb-0 shadow-xl bg-blue-800">
             <div class="container mx-auto w-full flex flex-wrap justify-between mx-2">
               <div class="w-full text-white mb-8">
