@@ -14,7 +14,7 @@
   </div>
 
   <div>
-    <div x-data="{ notificationsDropdownOpen: false }" class="inline-block">
+    <div x-data="{ notificationsDropdownOpen: true }" class="inline-block">
       <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="relative top-2 z-10 block mx-2 border border-notebook-blue hover:border-white rounded-full">
         <svg class="h-6 w-6 text-white animate-pulse" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
@@ -23,34 +23,55 @@
 
       <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
 
-      <div x-show="notificationsDropdownOpen" class="absolute right-0 bg-white rounded-md shadow-lg overflow-hidden z-20" style="width:20rem;">
-        <div class="py-2">
-          <a href="#" class="flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2">
-            <img class="h-8 w-8 rounded-full object-cover mx-1" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80" alt="avatar">
-            <p class="text-gray-600 text-sm mx-2">
-              <span class="font-bold" href="#">Sara Salah</span> replied on the <span class="font-bold text-blue-500" href="#">Upload Image</span> artical . 2m
-            </p>
-          </a>
-          <a href="#" class="flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2">
-            <img class="h-8 w-8 rounded-full object-cover mx-1" src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80" alt="avatar">
-            <p class="text-gray-600 text-sm mx-2">
-              <span class="font-bold" href="#">Slick Net</span> start following you . 45m
-            </p>
-          </a>
-          <a href="#" class="flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2">
-            <img class="h-8 w-8 rounded-full object-cover mx-1" src="https://images.unsplash.com/photo-1450297350677-623de575f31c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80" alt="avatar">
-            <p class="text-gray-600 text-sm mx-2">
-              <span class="font-bold" href="#">Jane Doe</span> Like Your reply on <span class="font-bold text-blue-500" href="#">Test with TDD</span> artical . 1h
-            </p>
-          </a>
-          <a href="#" class="flex items-center px-4 py-3 hover:bg-gray-100 -mx-2">
-            <img class="h-8 w-8 rounded-full object-cover mx-1" src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=398&q=80" alt="avatar">
-            <p class="text-gray-600 text-sm mx-2">
-              <span class="font-bold" href="#">Abigail Bennett</span> start following you . 3h
-            </p>
-          </a>
+      <div x-show="notificationsDropdownOpen" class="absolute right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-2/5">
+
+        <ul id='notifications-dropdown' class='dropdown-content hidden'>
+          <% @user_notifications.each do |notification| %>
+            <li class="<%= 'unread-notification' unless notification.viewed_at? %>">
+              <%= link_to main_app.notification_path(notification), class: 'notification-link' do %>
+                <i class="material-icons <%= notification.icon_color %>-text"><%= notification.icon %></i>
+                <%= notification.message_html.html_safe %>
+                <div>
+                  <small class="grey-text"><%= time_ago_in_words notification.happened_at %> ago</small>
+                </div>
+              <% end %>
+            </li>
+            <li class="divider"></li>
+          <% end %>
+          <li class="divider"></li>
+          <li class="blue lighten-1">
+            <%= link_to main_app.notifications_path, class: 'white-text' do %>
+              <i class="material-icons left">notifications</i>
+              View all notifications
+            <% end %>
+          </li>
+          <li class="blue lighten-2">
+            <%= link_to main_app.mark_all_read_path, class: 'white-text' do %>
+              <i class="material-icons left">notifications_none</i>
+              Mark all as read
+            <% end %>
+          </li>
+        </ul>
+
+        <div class="pt-2">
+          <% @user_notifications.limit(8).each do |notification| %>
+            <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2' do %>
+              <i class="material-icons bg-<%= notification.icon_color %>-500 text-white rounded-full p-1 h-8 w-8 mx-1"><%= notification.icon %></i>                
+              <div class="text-black text-sm mx-2 flex-grow">
+                <%= notification.message_html.html_safe %>
+              </div>
+              <div class="text-gray-400 text-xs">
+                <%= time_ago_in_words notification.happened_at %> ago
+              </div>
+            <% end %>
+          <% end %>
         </div>
-        <a href="#" class="block bg-gray-800 text-white text-center font-bold py-2">See all notifications</a>
+        <%= link_to main_app.mark_all_read_path, class: 'block bg-blue-100 hover:bg-blue-50 text-black text-center py-2' do %>
+          Mark all notifications read
+        <% end %>
+        <%= link_to main_app.notifications_path, class: 'block bg-notebook-blue hover:bg-blue-500 text-white text-center font-bold py-2' do %>
+          See all notifications
+        <% end %>
       </div>
     </div>
 
