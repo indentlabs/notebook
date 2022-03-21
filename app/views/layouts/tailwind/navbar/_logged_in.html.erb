@@ -14,7 +14,7 @@
   </div>
 
   <div>
-    <div x-data="{ notificationsDropdownOpen: true }" class="inline-block">
+    <div x-data="{ notificationsDropdownOpen: false }" class="inline-block">
       <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="relative top-2 z-10 block mx-2 border border-notebook-blue hover:border-white rounded-full">
         <svg class="h-6 w-6 text-white animate-pulse" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
@@ -24,7 +24,6 @@
       <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
 
       <div x-show="notificationsDropdownOpen" class="absolute right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-2/5">
-
         <ul id='notifications-dropdown' class='dropdown-content hidden'>
           <% @user_notifications.each do |notification| %>
             <li class="<%= 'unread-notification' unless notification.viewed_at? %>">
