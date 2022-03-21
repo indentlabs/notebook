@@ -19,27 +19,118 @@
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
 >
-  <%= render 'layouts/tailwind/navbar' %>
-  <%= render 'cards/ui/alert' %>
-  <%= render 'cards/ui/notice' %>
+  <%# render 'layouts/tailwind/navbar' %>
+  <%# render 'cards/ui/alert' %>
+  <%# render 'cards/ui/notice' %>
 
-  <% if user_signed_in? %>
-    <div class="flex flex-row">
-      <div class="bg-red-500 w-1/5">
-        <%= render 'layouts/tailwind/sidenav' %>
-      </div>
-      <main class="bg-blue-500 flex-grow">
-        main content
-      </main>
-    </div>
+  <section class="bg-gray-50 flex flex-col" x-data="{ sideBar: false }">
+    <nav class="fixed top-0 left-0 z-20 h-screen pb-10 overflow-x-hidden overflow-y-auto transition origin-left transform bg-white border-r w-60 md:translate-x-0" :class="{ '-translate-x-full' : !sideBar, 'translate-x-0' : sideBar }" @click.away="sideBar = false">
 
-        
+      <%= link_to root_path, class: 'flex items-center px-4 py-3 border-b border-gray-300' do %>
+        <%= image_tag 'logos/book-small.webp', class: 'h-8 mr-3' %>
+        <span class="text-2xl font-bold text-notebook-blue">
+          Notebook.ai
+        </span>
+      <% end %>
+
+      <nav class="text-sm font-medium text-gray-600" aria-label="Main Navigation">
+        <a class="flex items-center px-4 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" href="#">
+          <svg class="shrink-0 w-5 h-5 mr-2 text-gray-400 transition group-hover:text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+          </svg>
+          <span>Home</span> 
+        </a>
+        <a class="flex items-center px-4 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" href="#">
+          <svg class="shrink-0 w-5 h-5 mr-2 text-gray-400 transition group-hover:text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M5 3a1 1 0 000 2c5.523 0 10 4.477 10 10a1 1 0 102 0C17 8.373 11.627 3 5 3z" />
+            <path d="M4 9a1 1 0 011-1 7 7 0 017 7 1 1 0 11-2 0 5 5 0 00-5-5 1 1 0 01-1-1zM3 15a2 2 0 114 0 2 2 0 01-4 0z" />
+          </svg>
+          <span>Articles</span> 
+        </a>
+        <a class="flex items-center px-4 py-3 text-gray-900 transition bg-gray-100 cursor-pointer group hover:bg-gray-100 hover:text-gray-900" href="#">
+          <svg class="shrink-0 w-5 h-5 mr-2 text-gray-600 transition group-hover:text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+          </svg>
+          <span>Collections</span> 
+        </a>
+        <a class="flex items-center px-4 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" href="#">
+          <svg class="shrink-0 w-5 h-5 mr-2 text-gray-400 transition group-hover:text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          <span>Checklists</span> 
+        </a>
+        <div x-data="collapse()">
+          <div class="flex items-center justify-between px-4 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" x-spread="trigger">
+            <div class="flex items-center">
+              <svg class="shrink-0 w-5 h-5 mr-2 text-gray-400 transition group-hover:text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+              <span>Integrations</span> 
+            </div>
+            <svg :class="{ 'rotate-90': open }" class="shrink-0 w-4 h-4 ml-2 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="mb-4" x-spread="collapse" x-cloak> <a class="flex items-center py-2 pl-12 pr-4 transition cursor-pointer hover:bg-gray-100 hover:text-gray-900" href="#">Shopify</a> <a class="flex items-center py-2 pl-12 pr-4 transition cursor-pointer hover:bg-gray-100 hover:text-gray-900" href="#">Slack</a> <a class="flex items-center py-2 pl-12 pr-4 transition cursor-pointer hover:bg-gray-100 hover:text-gray-900" href="#">Zapier</a> </div>
+        </div>
+        <a class="flex items-center px-4 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" href="#">
+          <svg class="shrink-0 w-5 h-5 mr-2 text-gray-400 transition group-hover:text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clip-rule="evenodd" />
+            <path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z" />
+          </svg>
+          <span>Changelog</span> 
+        </a>
+        <a class="flex items-center px-4 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" href="#">
+          <svg class="shrink-0 w-5 h-5 mr-2 text-gray-400 transition group-hover:text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+          </svg>
+          <span>Settings</span> 
+        </a>
+      </nav>
+    </nav>
+
+    <div class="ml-0 transition md:ml-60">
+      <header class="flex sticky top-0 z-50 w-full px-2 bg-notebook-blue border-b border-blue-400 h-14">
+        <button class="block btn btn-light md:hidden" @click.stop="sideBar = true">
+          <span class="sr-only">Menu</span> 
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+          </svg>
+        </button>
+
+        <%= form_tag main_app.search_path, method: :get, class: 'bg-blue-300' do %>
+          <input class="w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-10 px-4 pr-8 text-sm rounded focus:outline-none"
+            type="search" name="q" placeholder="Search your notebook">
+          <button type="submit" class="relative right-8 top-0.5 mt-4 mr-4">
+            <svg class="text-gray-600 hover:text-notebook-blue h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px"
+              viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve"
+              width="512px" height="512px">
+              <path
+                d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
+            </svg>
+          </button>
+        <% end %>
+
+        <div class="bg-red-100 flex-grow text-right">
+          notifs
+        </div>
+      </header>
+      <div class="pt-14">
         <%= yield %>
-  <% else %>
-    <main>
-      <%= yield %>
-    </main>
-  <% end %>
+      </div>
+    </div>
+    <!-- Sidebar Backdrop --> 
+    <div class="fixed inset-0 z-10 w-screen h-screen bg-black bg-opacity-25 md:hidden" x-show.transition="sideBar" x-cloak></div>
+  </section>
+
+
+
+
+
+
+
 
 
   <%= react_component("Footer")      unless defined?(@show_footer) && !@show_footer %>
