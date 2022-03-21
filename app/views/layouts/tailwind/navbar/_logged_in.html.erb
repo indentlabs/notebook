@@ -18,19 +18,18 @@
   <div>
     <div x-data="{ notificationsDropdownOpen: false }" class="inline-block">
       <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="relative top-2 z-10 block mx-2 border border-notebook-blue hover:border-white rounded-full">
-        <svg class="h-6 w-6 text-white animate-pulse" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <svg class="h-6 w-6 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'text-white' : 'text-blue-300' %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
         </svg>
       </button>
-
       <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
 
       <div x-show="notificationsDropdownOpen" class="absolute right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-2/5">
         <div class="pt-2">
-          <% @user_notifications.limit(8).each do |notification| %>
+          <% @user_notifications.each do |notification| %>
             <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2' do %>
               <i class="material-icons bg-<%= notification.icon_color %>-500 text-white rounded-full p-1 h-8 w-8 mx-1"><%= notification.icon %></i>                
-              <div class="text-black text-sm mx-2 flex-grow">
+              <div class="text-black text-sm mx-2 flex-grow <%= 'font-bold' unless notification.viewed_at? %>">
                 <%= notification.message_html.html_safe %>
               </div>
               <div class="text-gray-400 text-xs">
