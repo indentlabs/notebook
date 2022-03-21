@@ -9,18 +9,60 @@
     </span>
   <% end %>
 
-  <div class="text-notebook-blue">
-    <input class="border-2 border-gray-300 bg-white h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none"
-      type="search" name="search" placeholder="Search your notebook">
-    <button type="submit" class="absolute right-0 top-0 mt-4 mr-4">
-      <svg class="text-gray-600 hover:text-notebook-blue h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px"
-        viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve"
-        width="512px" height="512px">
-        <path
-          d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
-      </svg>
-    </button>
+  <div>
+    <div x-data="{ notificationsDropdownOpen: false }" class="inline-block">
+      <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="relative top-2 z-10 block mx-2 border border-notebook-blue hover:border-white rounded-full">
+        <svg class="h-6 w-6 text-white animate-pulse" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+        </svg>
+      </button>
+
+      <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+
+      <div x-show="notificationsDropdownOpen" class="absolute right-0 bg-white rounded-md shadow-lg overflow-hidden z-20" style="width:20rem;">
+        <div class="py-2">
+          <a href="#" class="flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2">
+            <img class="h-8 w-8 rounded-full object-cover mx-1" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80" alt="avatar">
+            <p class="text-gray-600 text-sm mx-2">
+              <span class="font-bold" href="#">Sara Salah</span> replied on the <span class="font-bold text-blue-500" href="#">Upload Image</span> artical . 2m
+            </p>
+          </a>
+          <a href="#" class="flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2">
+            <img class="h-8 w-8 rounded-full object-cover mx-1" src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80" alt="avatar">
+            <p class="text-gray-600 text-sm mx-2">
+              <span class="font-bold" href="#">Slick Net</span> start following you . 45m
+            </p>
+          </a>
+          <a href="#" class="flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2">
+            <img class="h-8 w-8 rounded-full object-cover mx-1" src="https://images.unsplash.com/photo-1450297350677-623de575f31c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80" alt="avatar">
+            <p class="text-gray-600 text-sm mx-2">
+              <span class="font-bold" href="#">Jane Doe</span> Like Your reply on <span class="font-bold text-blue-500" href="#">Test with TDD</span> artical . 1h
+            </p>
+          </a>
+          <a href="#" class="flex items-center px-4 py-3 hover:bg-gray-100 -mx-2">
+            <img class="h-8 w-8 rounded-full object-cover mx-1" src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=398&q=80" alt="avatar">
+            <p class="text-gray-600 text-sm mx-2">
+              <span class="font-bold" href="#">Abigail Bennett</span> start following you . 3h
+            </p>
+          </a>
+        </div>
+        <a href="#" class="block bg-gray-800 text-white text-center font-bold py-2">See all notifications</a>
+      </div>
+    </div>
+
+    <div class="text-notebook-blue inline-block pr-1">
+      <input class="border-2 border-gray-300 focus:border-notebook-blue bg-white h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none"
+        type="search" name="search" placeholder="Search your notebook">
+      <button type="submit" class="absolute right-0 top-0 mt-4 mr-4">
+        <svg class="text-gray-600 hover:text-notebook-blue h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px"
+          viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve"
+          width="512px" height="512px">
+          <path
+            d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
+        </svg>
+      </button>
+    </div>
   </div>
 
   <!-- nav stuff -->
