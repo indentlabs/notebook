@@ -19,16 +19,28 @@
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
 >
-  <%# render 'layouts/sidenav' if user_signed_in? %>
-  <%# render 'layouts/recent_edits_sidenav' if user_signed_in? %>
   <%= render 'layouts/tailwind/navbar' %>
+  <%= render 'cards/ui/alert' %>
+  <%= render 'cards/ui/notice' %>
 
-  <main>
-    <%= render 'cards/ui/alert' %>
-    <%= render 'cards/ui/notice' %>
+  <% if user_signed_in? %>
+    <div class="flex flex-row">
+      <div class="bg-red-500 w-1/5">
+        <%= render 'layouts/tailwind/sidenav' %>
+      </div>
+      <main class="bg-blue-500 flex-grow">
+        main content
+      </main>
+    </div>
 
-    <%= yield %>
-  </main>
+        
+        <%= yield %>
+  <% else %>
+    <main>
+      <%= yield %>
+    </main>
+  <% end %>
+
 
   <%= react_component("Footer")      unless defined?(@show_footer) && !@show_footer %>
   <%# render 'layouts/quick_add_fab' unless defined?(@show_footer) && !@show_footer %>
