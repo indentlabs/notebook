@@ -75,7 +75,7 @@ class PageCollection < ApplicationRecord
   end
 
   def self.text_color
-    'brown-text'
+    'text-brown-800 brown-text'
   end
 
   def self.hex_color

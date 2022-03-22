@@ -24,4 +24,12 @@ class DocumentAnalysis < ApplicationRecord
   def has_sentiment_scores?
     [joy_score, sadness_score, fear_score, disgust_score, anger_score].compact.any?
   end
+
+  def self.icon
+    'bar_chart'
+  end
+
+  def self.text_color
+    'text-orange-500'
+  end
 end
