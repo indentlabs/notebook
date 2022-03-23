@@ -12,264 +12,269 @@
   <%= javascript_include_tag 'application' %>
   <%= javascript_pack_tag 'application' %>
   <%= render 'layouts/seo' %>
-  <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
-
+  <script defer type="text/javascript" src="https://js.stripe.com/v2/"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
+      x-data="{ showSidebar: true }"
 >
   <%# render 'layouts/tailwind/navbar' %>
   <%# render 'cards/ui/alert' %>
   <%# render 'cards/ui/notice' %>
 
-  <section class="bg-gray-50 flex flex-col" x-data="{ sideBar: false }">
-    <nav class="fixed top-0 flex flex-col left-0 z-20 h-screen overflow-x-hidden transition origin-left transform bg-white border-r w-60 md:translate-x-0" :class="{ '-translate-x-full' : !sideBar, 'translate-x-0' : sideBar }" @click.away="sideBar = false">
-      <%= link_to root_path, class: 'flex items-center px-4 py-3 border-b border-gray-300 shadow' do %>
-        <%= image_tag 'logos/book-small.webp', class: 'h-8 mr-3' %>
-        <span class="text-2xl font-bold text-notebook-blue tracking-wide">
-          Notebook.ai
-        </span>
-      <% end %>
+  <!-- navbar -->
+  <header class="flex sticky top-0 z-50 w-full bg-notebook-blue border-b border-blue-400 h-14 shadow">
+    <%= link_to root_path, class: 'flex items-center mr-2 px-6 py-4 border-b border-gray-300 shadow hover:shadow-lg transition bg-white rounded-br-lg' do %>
+      <%= image_tag 'logos/book-small.webp', class: 'h-8 mr-3' %>
+      <span class="text-2xl font-bold text-notebook-blue tracking-wide">
+        Notebook.ai
+      </span>
+    <% end %>
 
-      <nav class="text-sm font-medium text-gray-600 overflow-y-auto flex-grow" aria-label="Main Navigation">
-        <%= link_to '#', class: 'flex items-center px-2 py-3 transition cursor-pointer group hover:bg-gray-100' do %>
-          <i class="material-icons text-gray-400 shrink-0 w-6 h-6 mr-2 text-notebook-blue">dashboard</i>
-          <span class="group-hover:text-gray-900">Table of Contents</span> 
-        <% end %>
-
-        <div x-data="{ expandedWorldbuildingSidebar: false }">
-          <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedWorldbuildingSidebar = !expandedWorldbuildingSidebar" >
-            <div class="flex items-center">
-              <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 mr-2">book</i>
-              <span>Worldbuilding</span> 
-            </div>
-            <svg :class="{ 'rotate-90': expandedWorldbuildingSidebar }" class="shrink-0 w-4 h-4 ml-2 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div x-show="expandedWorldbuildingSidebar" x-cloak class="mb-2 pl-1">
-            <% @activated_content_types.each do |content_type| %>
-              <% content_type_klass = content_class_from_name(content_type) %>
-              <%= link_to main_app.polymorphic_path(content_type_klass), class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
-                <i class="material-icons <%= content_type_klass.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= content_type_klass.icon %></i>
-                <span class="flex-grow text-sm"><%= content_type.pluralize %></span>
-                <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
-                  <%= number_with_delimiter @current_user_content.fetch(content_type, []).count %>
-                </span>
-              <% end %>
-            <% end %>
-          </div>
-        </div>
-
-        <div x-data="{ expandedWritingSidebar: false }">
-          <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedWritingSidebar = !expandedWritingSidebar" >
-            <div class="flex items-center">
-              <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 mr-2">book</i>
-              <span>Writing</span> 
-            </div>
-            <svg :class="{ 'rotate-90': expandedWritingSidebar }" class="shrink-0 w-4 h-4 ml-2 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div x-show="expandedWritingSidebar" x-cloak class="pl-1 mb-2">
-            <%= link_to main_app.prompts_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
-              <i class="material-icons text-orange-400 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">lightbulb</i>
-              <span class="flex-grow text-sm">Prompts</span>
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
-                0
-              </span>
-            <% end %>
-
-            <%= link_to main_app.timelines_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
-              <i class="material-icons <%= Timeline.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= Timeline.icon %></i>
-              <span class="flex-grow text-sm">Timelines</span>
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
-                0
-              </span>
-            <% end %>
-
-            <%= link_to main_app.documents_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
-              <i class="material-icons <%= Document.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= Document.icon %></i>
-              <span class="flex-grow text-sm">Documents</span>
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
-                0
-              </span>
-            <% end %>
-
-            <%= link_to '#new-analysis-onboarding', class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
-              <i class="material-icons <%= DocumentAnalysis.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= DocumentAnalysis.icon %></i>
-              <span class="flex-grow text-sm">Analysis</span>
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
-                0
-              </span>
-            <% end %>
-          </div>
-        </div>
-
-        <div x-data="{ expandedWritingSidebar: false }">
-          <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedWritingSidebar = !expandedWritingSidebar" >
-            <div class="flex items-center">
-              <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 mr-2">book</i>
-              <span>Community</span> 
-            </div>
-            <svg :class="{ 'rotate-90': expandedWritingSidebar }" class="shrink-0 w-4 h-4 ml-2 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div x-show="expandedWritingSidebar" x-cloak class="pl-1 mb-2">
-            <%= link_to main_app.stream_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
-              <i class="material-icons text-purple-400 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">ballot</i>
-              <span class="flex-grow text-sm">Activity</span>
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
-                0
-              </span>
-            <% end %>
-
-            <%= link_to main_app.page_collections_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
-              <i class="material-icons <%= PageCollection.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= PageCollection.icon %></i>
-              <span class="flex-grow text-sm">Collections</span>
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
-                0
-              </span>
-            <% end %>
-
-            <%= link_to main_app.thredded_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
-              <i class="material-icons text-blue-500 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">forum</i>
-              <span class="flex-grow text-sm">Discussions</span>
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
-                0
-              </span>
-            <% end %>
-          </div>
-        </div>
-      </nav>
-    </nav>
-
-    <!-- navbar -->
-    <div class="ml-0 transition md:ml-60">
-      <header class="flex sticky top-0 z-50 w-full px-2 bg-notebook-blue border-b border-blue-400 h-14 shadow">
-        <button class="block btn btn-light md:hidden" @click.stop="sideBar = true">
-          <span class="sr-only">Menu</span> 
-          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-          </svg>
-        </button>
-
-        <!-- left-hand side of navbar -->
-        <div class="flex-grow pt-4 pl-1">
-          <% if @universe_scope %>
-            <%= link_to @universe_scope.name, @universe_scope, class: "px-3 py-2 #{Universe.text_color} bg-purple-100 hover:bg-purple-200 rounded" %>
-          <% else %>
-            <%= link_to 'Choose a universe', '#', class: "px-3 py-2 text-lg #{Universe.text_color} bg-purple-100 hover:bg-purple-200 rounded" %>
-          <% end %>
-        </div>
-
-        <!-- right-hand side of navbar -->
-        <div>
-          <div x-data="{ notificationsDropdownOpen: false }" class="inline-block mt-2.5 mr-2">
-            <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
-              <svg class="h-6 w-6 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'text-white' : 'text-blue-300' %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-              </svg>
-            </button>
-            <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
-
-            <div x-show="notificationsDropdownOpen" class="absolute right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-2/5">
-              <div class="pt-2">
-                <% @user_notifications.each do |notification| %>
-                  <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2' do %>
-                    <i class="material-icons bg-<%= notification.icon_color %>-500 text-white rounded-full p-1 h-8 w-8 mx-1"><%= notification.icon %></i>                
-                    <div class="text-black text-sm mx-2 flex-grow <%= 'font-bold' unless notification.viewed_at? %>">
-                      <%= notification.message_html.html_safe %>
-                    </div>
-                    <div class="text-gray-400 text-xs">
-                      <%= time_ago_in_words notification.happened_at %> ago
-                    </div>
-                  <% end %>
-                <% end %>
-              </div>
-              <%= link_to main_app.mark_all_read_path, class: 'block bg-blue-100 hover:bg-blue-50 text-black text-center py-2' do %>
-                Mark all notifications read
-              <% end %>
-              <%= link_to main_app.notifications_path, class: 'block bg-notebook-blue hover:bg-blue-500 text-white text-center font-bold py-2' do %>
-                See all notifications
-              <% end %>
-            </div>
-          </div>
-
-          <%= form_tag main_app.search_path, method: :get, class: 'inline-block relative -top-2' do %>
-            <input class="w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-10 px-3 text-sm rounded focus:outline-none"
-              type="search" name="q" placeholder="Search your notebook">
-            <!--
-            <button type="submit" class="relative right-8 top-0.5 mt-4 mr-4">
-              <svg class="text-gray-600 hover:text-notebook-blue h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px"
-                viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve"
-                width="512px" height="512px">
-                <path
-                  d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
-              </svg>
-            </button>
-            -->
-          <% end %>
-
-          <div x-data="{ accountDropdownOpen: false }" class="inline-block mt-2.5">
-            <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
-              <%= image_tag current_user.image_url(size=26), class: 'rounded-full' %>
-            </button>
-            <div x-show="accountDropdownOpen" @click="accountDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
-
-            <div x-show="accountDropdownOpen" class="absolute right-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-64">
-              <div class="flex my-2 pt-4 pb-6 px-4 border-b border-gray-300 shadow">
-                <%= image_tag current_user.image_url(size=32), class: 'rounded-full mr-2 p-1 border-2 border-notebook-blue' %>
-                <div>
-                  <div class="text-xs text-gray-500">You're signed in as</div>
-                  <div class="text-sm <%= User.text_color %> font-bold">@andrew</div>
-                </div>
-              </div>
-
-              <%= link_to current_user.profile_url, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
-                <i class="material-icons <%= User.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= User.icon %></i>
-                <span class="flex-grow text-sm">Profile</span>
-              <% end %>
-              <%= link_to main_app.subscription_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
-                <i class="material-icons text-notebook-blue shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">credit_card</i>
-                <span class="flex-grow text-sm">Billing</span>
-                <span class="bg-notebook-blue text-white rounded px-1 text-xs group-hover:bg-notebook-blue">
-                  PREMIUM
-                </span>
-              <% end %>
-              <%= link_to main_app.edit_user_registration_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
-                <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">settings</i>
-                <span class="flex-grow text-sm">Settings</span>
-              <% end %>
-              <%= link_to main_app.data_vault_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
-                <i class="material-icons text-brown-600 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">lock</i>
-                <span class="flex-grow text-sm">Data Vault</span>
-              <% end %>
-              <%= link_to main_app.help_center_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
-                <i class="material-icons text-pink-400 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">help</i>
-                <span class="flex-grow text-sm">Help Center</span>
-              <% end %>
-              <%= link_to main_app.destroy_user_session_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
-                <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">power_settings_new</i>
-                <span class="flex-grow text-sm">Sign Out</span>
-              <% end %>
-            </div>
-          </div>
-        </div>
-      </header>
-      <div>
-        <%= yield %>
+    <div x-cloak x-show="!showSidebar">
+      <span class="sr-only">Menu</span> 
+      <div @click.stop="showSidebar = true" class="mt-2 mr-1 p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+        <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+        </svg>
       </div>
     </div>
-    <!-- Sidebar Backdrop --> 
-    <!--
-    <div class="fixed inset-0 z-10 w-screen h-screen bg-black bg-opacity-25 md:hidden" x-show.transition="sideBar" x-cloak></div>
-    -->
-  </section>
 
+    <!-- left-hand side of navbar -->
+    <div class="flex-grow pt-4 pl-1">
+      <% if @universe_scope %>
+        <%= link_to @universe_scope.name, @universe_scope, class: "px-3 py-2 #{Universe.text_color} bg-purple-100 hover:bg-purple-200 rounded" %>
+      <% else %>
+        <%= link_to 'Choose a universe', '#', class: "px-3 py-2 text-lg #{Universe.text_color} bg-purple-100 hover:bg-purple-200 rounded" %>
+      <% end %>
+    </div>
+
+    <!-- right-hand side of navbar -->
+    <div class="pr-2">
+      <div x-data="{ notificationsDropdownOpen: false }" class="inline-block mt-2.5 mr-2">
+        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+          <svg class="h-6 w-6 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'text-white' : 'text-blue-300' %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+          </svg>
+        </button>
+        <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+
+        <div x-show="notificationsDropdownOpen" class="absolute right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-2/5">
+          <div class="pt-2">
+            <% @user_notifications.each do |notification| %>
+              <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2' do %>
+                <i class="material-icons bg-<%= notification.icon_color %>-500 text-white rounded-full p-1 h-8 w-8 mx-1"><%= notification.icon %></i>                
+                <div class="text-black text-sm mx-2 flex-grow <%= 'font-bold' unless notification.viewed_at? %>">
+                  <%= notification.message_html.html_safe %>
+                </div>
+                <div class="text-gray-400 text-xs">
+                  <%= time_ago_in_words notification.happened_at %> ago
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+          <%= link_to main_app.mark_all_read_path, class: 'block bg-blue-100 hover:bg-blue-50 text-black text-center py-2' do %>
+            Mark all notifications read
+          <% end %>
+          <%= link_to main_app.notifications_path, class: 'block bg-notebook-blue hover:bg-blue-500 text-white text-center font-bold py-2' do %>
+            See all notifications
+          <% end %>
+        </div>
+      </div>
+
+      <%= form_tag main_app.search_path, method: :get, class: 'inline-block relative -top-2' do %>
+        <input class="w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-10 px-3 text-sm rounded focus:outline-none"
+          type="search" name="q" placeholder="Search your notebook">
+        <!--
+        <button type="submit" class="relative right-8 top-0.5 mt-4 mr-4">
+          <svg class="text-gray-600 hover:text-notebook-blue h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px"
+            viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve"
+            width="512px" height="512px">
+            <path
+              d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
+          </svg>
+        </button>
+        -->
+      <% end %>
+
+      <div x-data="{ accountDropdownOpen: false }" class="inline-block mt-2.5">
+        <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+          <%= image_tag current_user.image_url(size=26), class: 'rounded-full' %>
+        </button>
+        <div x-show="accountDropdownOpen" @click="accountDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+
+        <div x-show="accountDropdownOpen" class="absolute right-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-64">
+          <div class="flex my-2 pt-4 pb-6 px-4 border-b border-gray-300 shadow">
+            <%= image_tag current_user.image_url(size=32), class: 'rounded-full mr-2 p-1 border-2 border-notebook-blue' %>
+            <div>
+              <div class="text-xs text-gray-500">You're signed in as</div>
+              <div class="text-sm <%= User.text_color %> font-bold">@andrew</div>
+            </div>
+          </div>
+
+          <%= link_to current_user.profile_url, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons <%= User.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= User.icon %></i>
+            <span class="flex-grow text-sm">Profile</span>
+          <% end %>
+          <%= link_to main_app.subscription_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons text-notebook-blue shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">credit_card</i>
+            <span class="flex-grow text-sm">Billing</span>
+            <span class="bg-notebook-blue text-white rounded px-1 text-xs group-hover:bg-notebook-blue">
+              PREMIUM
+            </span>
+          <% end %>
+          <%= link_to main_app.edit_user_registration_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
+            <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">settings</i>
+            <span class="flex-grow text-sm">Settings</span>
+          <% end %>
+          <%= link_to main_app.data_vault_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons text-brown-600 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">lock</i>
+            <span class="flex-grow text-sm">Data Vault</span>
+          <% end %>
+          <%= link_to main_app.help_center_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
+            <i class="material-icons text-pink-400 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">help</i>
+            <span class="flex-grow text-sm">Help Center</span>
+          <% end %>
+          <%= link_to main_app.destroy_user_session_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">power_settings_new</i>
+            <span class="flex-grow text-sm">Sign Out</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- sidebar -->
+  <nav x-show="showSidebar" class="fixed top-0 pt-16 flex flex-col left-0 z-20 h-screen overflow-x-hidden transition origin-left transform bg-white border-r w-60 md:translate-x-0" :class="{ '-translate-x-full' : !showSidebar, 'translate-x-0' : showSidebar }" <%# @click.away="showSidebar = false" %>>
+    <nav class="text-sm font-medium text-gray-600 overflow-y-auto flex-grow border-b border-gray-300 shadow" aria-label="Main Navigation">
+      <%= link_to '#', class: 'flex items-center px-2 py-3 transition cursor-pointer group hover:bg-gray-100' do %>
+        <i class="material-icons text-gray-400 shrink-0 w-6 h-6 mr-2 text-notebook-blue">dashboard</i>
+        <span class="group-hover:text-gray-900">Table of Contents</span> 
+      <% end %>
+
+      <div x-data="{ expandedWorldbuildingSidebar: false }">
+        <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedWorldbuildingSidebar = !expandedWorldbuildingSidebar" >
+          <div class="flex items-center">
+            <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 mr-2">book</i>
+            <span>Worldbuilding</span> 
+          </div>
+          <svg :class="{ 'rotate-90': expandedWorldbuildingSidebar }" class="shrink-0 w-4 h-4 ml-2 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div x-show="expandedWorldbuildingSidebar" x-cloak class="mb-2 pl-1">
+          <% @activated_content_types.each do |content_type| %>
+            <% content_type_klass = content_class_from_name(content_type) %>
+            <%= link_to main_app.polymorphic_path(content_type_klass), class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+              <i class="material-icons <%= content_type_klass.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= content_type_klass.icon %></i>
+              <span class="flex-grow text-sm"><%= content_type.pluralize %></span>
+              <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+                <%= number_with_delimiter @current_user_content.fetch(content_type, []).count %>
+              </span>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <div x-data="{ expandedWritingSidebar: false }">
+        <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedWritingSidebar = !expandedWritingSidebar" >
+          <div class="flex items-center">
+            <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 mr-2">book</i>
+            <span>Writing</span> 
+          </div>
+          <svg :class="{ 'rotate-90': expandedWritingSidebar }" class="shrink-0 w-4 h-4 ml-2 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div x-show="expandedWritingSidebar" x-cloak class="pl-1 mb-2">
+          <%= link_to main_app.prompts_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons text-orange-400 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">lightbulb</i>
+            <span class="flex-grow text-sm">Prompts</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+
+          <%= link_to main_app.timelines_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons <%= Timeline.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= Timeline.icon %></i>
+            <span class="flex-grow text-sm">Timelines</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+
+          <%= link_to main_app.documents_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons <%= Document.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= Document.icon %></i>
+            <span class="flex-grow text-sm">Documents</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+
+          <%= link_to '#new-analysis-onboarding', class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons <%= DocumentAnalysis.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= DocumentAnalysis.icon %></i>
+            <span class="flex-grow text-sm">Analysis</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+        </div>
+      </div>
+
+      <div x-data="{ expandedWritingSidebar: false }">
+        <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedWritingSidebar = !expandedWritingSidebar" >
+          <div class="flex items-center">
+            <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 mr-2">book</i>
+            <span>Community</span> 
+          </div>
+          <svg :class="{ 'rotate-90': expandedWritingSidebar }" class="shrink-0 w-4 h-4 ml-2 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div x-show="expandedWritingSidebar" x-cloak class="pl-1 mb-2">
+          <%= link_to main_app.stream_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons text-purple-400 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">ballot</i>
+            <span class="flex-grow text-sm">Activity</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+
+          <%= link_to main_app.page_collections_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons <%= PageCollection.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= PageCollection.icon %></i>
+            <span class="flex-grow text-sm">Collections</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+
+          <%= link_to main_app.thredded_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons text-blue-500 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">forum</i>
+            <span class="flex-grow text-sm">Discussions</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+
+    <div @click="showSidebar = false" class="flex items-center px-4 py-1 cursor-pointer group hover:bg-notebook-blue hover:text-white">
+      <i class="material-icons text-blue-500 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">arrow_left</i>
+      <span class="flex-grow text-sm">Hide Sidebar</span>
+    </div>
+  </nav>
+
+  <!-- sidebar backdrop on mobile --> 
+  <div class="fixed inset-0 z-10 w-screen h-screen bg-black bg-opacity-25 md:hidden" x-show.transition="showSidebar" x-cloak></div>
+
+  <!-- main content -->
+  <main :class="{ 'ml-60': showSidebar }">
+    <%= yield %>
+  </main>
+    
   <%= react_component("Footer")      unless defined?(@show_footer) && !@show_footer %>
   <%# render 'layouts/quick_add_fab' unless defined?(@show_footer) && !@show_footer %>
 
