@@ -333,7 +333,7 @@ class User < ApplicationRecord
   end
 
   def self.text_color
-    'green-text'
+    'green-text text-green-600'
   end
 
   def favorite_page_type_color
