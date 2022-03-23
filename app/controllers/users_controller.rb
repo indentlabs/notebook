@@ -1,4 +1,6 @@
 class UsersController < ApplicationController
+  layout 'tailwind'
+
   before_action :set_user, only: [:show, :followers, :following]
 
   def index

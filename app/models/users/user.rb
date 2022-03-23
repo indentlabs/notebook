@@ -329,7 +329,7 @@ class User < ApplicationRecord
   end
 
   def self.color
-    'green'
+    'green bg-green-600'
   end
 
   def self.text_color
