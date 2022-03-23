@@ -20,13 +20,20 @@
   <div class="flex flex-col mb-6 lg:justify-between lg:flex-row md:mb-8">
     <div class="flex flex-grow">
       <%= image_tag @user.image_url, class: 'block rounded-full mr-4 h-20 w-20 border-2 border-notebook-blue p-1' %>
-      <h2 class="mb-5 font-sans font-bold tracking-tight text-gray-900 sm:text-4xl sm:leading-none md:mb-6 group">
-        <div class="mb-1 <%= User.text_color %> text-4xl">
-          <%= @user.name %>
+      <h2 class="mb-5 font-sans font-bold tracking-tight text-gray-900 sm:leading-none md:mb-6 group">
+        <div class="mb-3">
+          <span class="<%= User.text_color %> text-4xl">
+            <%= @user.name %>
+          </span>
+          <span class="text-gray-500 text-xl">
+            @<%= @user.username %>
+            <%= render partial: 'thredded/users/badge', locals: { user: @user } %>
+          </span>
         </div>
-        <div class="mb-1 sm:mb-4 text-gray-500 text-xl">
-          @<%= @user.username %>
-          <%= render partial: 'thredded/users/badge', locals: { user: @user } %>
+        <div class="mb-1 sm:mb-4 text-sm">
+          <%= link_to 'Follow', '#', class: "text-white #{User.color} py-2 px-4 rounded hover:shadow hover:bg-green-500 transition mr-1" %>
+          <%= link_to 'Send Message', '#', class: "text-white bg-blue-500 py-2 px-4 rounded hover:shadow hover:bg-blue-400 transition mr-1" %>
+          <%= link_to 'Block', '#', class: "text-white bg-red-400 py-2 px-4 rounded hover:shadow hover:bg-red-300 transition" %>
         </div>
       </h2>
     </div>
@@ -34,6 +41,9 @@
       <p class="text-gray-700 lg:text-sm lg:max-w-md">
         <%= @user.bio %>
       </p>
+      <%= link_to '#', class: "#{User.text_color} text-right block text-xs hover:text-green-400 transition" do %>
+        Read more
+      <% end %>
     </div>
   </div>
 
@@ -85,7 +95,7 @@
         <a href="/" aria-label="View Item">
           <div class="relative overflow-hidden transition duration-200 transform rounded shadow-lg hover:-translate-y-2 hover:shadow-2xl">
             <img class="object-cover w-full h-56 md:h-64 xl:h-80" src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=2&amp;h=750&amp;w=1260" alt="" />
-            <div class="absolute inset-x-0 bottom-0 px-6 py-4 <%= page_type_klass.color %> bg-opacity-80">
+            <div class="absolute inset-x-0 bottom-0 p-4 <%= page_type_klass.color %> bg-opacity-80">
               <p class="text-sm font-medium tracking-wide text-white">
                 <i class="material-icons float-left text-xl relative bottom-1 mr-2"><%= page_type_klass.icon %></i>
                 <%= page_type.to_s.humanize %>
@@ -103,7 +113,7 @@
   <div class="px-4 py-4 mb-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
     <div class="flex flex-col w-full mb-6 lg:justify-between lg:flex-row md:mb-8">
       <div class="flex items-center lg:max-w-xl">
-        <i class="material-icons text-notebook-blue text-5xl relative bottom-1 mr-3">book</i>
+        <i class="material-icons <%= Document.text_color %> text-5xl relative bottom-1 mr-3"><%= Document.icon %></i>
         <h2 class="font-sans text-2xl font-bold leading-none tracking-tight text-gray-900 sm:text-3xl">
           <span class="inline-block mb-2">Read stories</span>
         </h2>
@@ -112,6 +122,37 @@
         Only your public documents are visible in this section.<br />
         All documents are private by default.
       </div>
+    </div>
+  </div>
+
+  <div class="px-4 py-4 mb-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
+    <div class="flex flex-col w-full mb-6 lg:justify-between lg:flex-row md:mb-8">
+      <div class="flex items-center lg:max-w-xl">
+        <i class="material-icons <%= PageCollection.text_color %> text-5xl relative bottom-1 mr-3"><%= PageCollection.icon %></i>
+        <h2 class="font-sans text-2xl font-bold leading-none tracking-tight text-gray-900 sm:text-3xl">
+          <span class="inline-block mb-2">Published in</span>
+        </h2>
+      </div>
+      <div class="text-black py-2 px-4 bg-blue-100 border border-notebook-blue rounded">
+        This section automatically updates whenever<br />
+        one of your pages is accepted into a public Collection.
+      </div>
+    </div>
+    <div class="grid gap-6 row-gap-5 mb-8 lg:grid-cols-4 sm:row-gap-6 sm:grid-cols-2">
+      <% @content.keys.each do |page_type| %>
+        <% page_type_klass = User.new.send(page_type).klass %>
+        <a href="/" aria-label="View Item">
+          <div class="relative overflow-hidden transition duration-200 transform rounded shadow-lg hover:-translate-y-2 hover:shadow-2xl">
+            <img class="object-cover w-full h-56 md:h-64 xl:h-80" src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=2&amp;h=750&amp;w=1260" alt="" />
+            <div class="absolute inset-x-0 bottom-0 p-4 <%= PageCollection.color %> bg-opacity-80">
+              <p class="text-sm font-medium tracking-wide text-white">
+                <i class="material-icons float-left text-xl relative bottom-1 mr-2"><%= PageCollection.icon %></i>
+                <%= page_type.to_s.humanize %>
+              </p>
+            </div>
+          </div>
+        </a>
+      <% end %>
     </div>
 
   </div>

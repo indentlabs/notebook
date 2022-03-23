@@ -71,7 +71,7 @@ class PageCollection < ApplicationRecord
   serialize :page_types, Array
 
   def self.color
-    'brown'
+    'brown bg-brown-800'
   end
 
   def self.text_color
