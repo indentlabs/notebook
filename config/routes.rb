@@ -1,5 +1,6 @@
 # rubocop:disable LineLength
 Rails.application.routes.draw do
+  get 'styleguide/tailwind'
   default_url_options :host => "notebook.ai"
 
   scope :stream, path: '/stream', as: :stream do
