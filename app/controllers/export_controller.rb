@@ -2,6 +2,9 @@ class ExportController < ApplicationController
   before_action :authenticate_user!
   before_action :whitelist_pluralized_model, only: [:csv]
 
+  skip_before_action :cache_most_used_page_information, only: [:outline]
+  skip_before_action :cache_forums_unread_counts,       only: [:outline]
+
   def index
     @sidenav_expansion = 'my account'
   end
@@ -11,7 +14,9 @@ class ExportController < ApplicationController
   end
 
   def outline
-    send_data content_to_outline, filename: "notebook-#{Date.today}.txt"
+    # old_outline_export = content_to_outline
+    new_outline_export = ExportService.text_outline_export(current_user.universes.pluck(:id))
+    send_data new_outline_export, filename: "notebook-#{Date.today}.txt"
   end
 
   def notebook_json
