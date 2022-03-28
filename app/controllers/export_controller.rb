@@ -14,9 +14,13 @@ class ExportController < ApplicationController
   end
 
   def outline
-    # old_outline_export = content_to_outline
-    new_outline_export = ExportService.text_outline_export(current_user.universes.pluck(:id))
-    send_data new_outline_export, filename: "notebook-#{Date.today}.txt"
+    export = ExportService.text_outline_export(current_user.universes.pluck(:id))
+    send_data export, filename: "notebook-#{Date.today}.txt"
+  end
+
+  def markdown
+    export = ExportService.text_markdown_export(current_user.universes.pluck(:id))
+    send_data export, filename: "notebook-#{Date.today}.md"
   end
 
   def notebook_json

@@ -155,6 +155,7 @@ Rails.application.routes.draw do
         get '/', to: 'export#index', as: :notebook_export
     
         get '/outline',       to: 'export#outline',       as: :notebook_outline
+        get '/markdown',      to: 'export#markdown',      as: :notebook_markdown
         get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
         get '/notebook.xml',  to: 'export#notebook_xml',  as: :notebook_xml
         get '/notebook.yml',  to: 'export#notebook_yml',  as: :notebook_yml
