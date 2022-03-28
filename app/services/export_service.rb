@@ -28,7 +28,9 @@ class ExportService < Service
           values_for_this_page = values.select { |v| v.entity_type == page_type.name && v.entity_id == page.id }
 
           categories_for_this_page_type.each do |category|
-            export_text << "  #{category.label}\n"
+            # Delay printing our category header until we've found a value to print, so we don't print
+            # empty headers and blank sections.
+            printed_category_header = false
 
             fields_for_this_category = fields_for_this_page_type.select { |f| f.attribute_category_id == category.id }
             values_for_these_fields  = values_for_this_page.select { |v| fields_for_this_category.map(&:id).include? v.attribute_field_id }
@@ -39,6 +41,12 @@ class ExportService < Service
                   value.entity_type      == page_type.name &&
                   value.entity_id        == page.id
               end
+
+                # If we have a field to print but haven't printed the header yet, print it
+                if value_for_this_field.try(:value).try(:present?) && !printed_category_header
+                  export_text << "  #{category.label}\n"
+                  printed_category_header = true
+                end
 
               case field.field_type
               when 'text_area', 'textarea'
@@ -58,7 +66,9 @@ class ExportService < Service
 
                   export_text << "    #{field.label}: #{formatted_names.to_sentence}\n"
                 else
-                  export_text << "    #{field.label}:\n"
+                  if INCLUDE_EMPTY_FIELD_LABELS
+                    export_text << "    #{field.label}:\n"
+                  end
                 end
               end
 
@@ -71,8 +81,6 @@ class ExportService < Service
         export_text << "\n" # spacer between sections
       end
     end
-
-    export_text << "\n\nGenerated from Notebook.ai in #{(DateTime.current - @start_time).to_f}sec"
 
     return export_text.string
   end
@@ -161,13 +169,11 @@ class ExportService < Service
       end
     end
 
-    export_text << "\n\nGenerated from Notebook.ai in #{(DateTime.current - @start_time).to_f}sec"
-
     return export_text.string
   end
 
   def self.csv_export(universe_ids, separator=',')
-
+    # todo: figure out zip
   end
 
   def self.json_export(universe_ids)
