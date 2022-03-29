@@ -2,6 +2,9 @@ class ExportController < ApplicationController
   before_action :authenticate_user!
   before_action :whitelist_pluralized_model, only: [:csv]
 
+  skip_before_action :cache_most_used_page_information, only: [:outline, :notebook_json]
+  skip_before_action :cache_forums_unread_counts,       only: [:outline, :notebook_json]
+
   def index
     @sidenav_expansion = 'my account'
   end
@@ -11,11 +14,17 @@ class ExportController < ApplicationController
   end
 
   def outline
-    send_data content_to_outline, filename: "notebook-#{Date.today}.txt"
+    export = ExportService.text_outline_export(current_user.universes.pluck(:id))
+    send_data export, filename: "notebook-#{Date.today}.txt"
+  end
+
+  def markdown
+    export = ExportService.text_markdown_export(current_user.universes.pluck(:id))
+    send_data export, filename: "notebook-#{Date.today}.md"
   end
 
   def notebook_json
-    json_dump = current_user.content.except('Document').except('Timeline').map { |category, content| {"#{category}": fill_relations(category.constantize, content)} }.to_json
+    json_dump = ExportService.json_export(current_user.universes.pluck(:id))
     send_data json_dump, filename: "notebook-#{Date.today}.json"
   end
 

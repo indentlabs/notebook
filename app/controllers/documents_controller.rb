@@ -4,8 +4,6 @@ class DocumentsController < ApplicationController
   # todo Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
   skip_before_action :verify_authenticity_token, only: [:link_entity]
 
-  skip_before_action :cache_most_used_page_information, only: [:update]
-
   before_action :set_document,          only:   [:show, :analysis, :plaintext, :queue_analysis, :edit, :destroy]
   before_action :set_sidenav_expansion, except: [:plaintext]
   before_action :set_navbar_color,      except: [:plaintext]

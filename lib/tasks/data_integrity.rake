@@ -112,6 +112,23 @@ namespace :data_integrity do
 
   end
 
+  desc "Remove orphan page references"
+  task remove_orphan_page_references: :environment do
+    PageReference.find_each do |reference|
+      if reference.referencing_page.nil?
+        puts "Deleting reference #{reference.id}"
+        reference.destroy
+        next
+      end
+
+      if reference.referenced_page.nil?
+        puts "Deleting reference #{reference.id}"
+        reference.destroy
+        next
+      end
+    end
+  end
+
   desc "Ensure all users have the correct upload bandwidth amounts"
   task correct_bandwidths: :environment do
     base_bandwidth = User.new.upload_bandwidth_kb           #     50_000
