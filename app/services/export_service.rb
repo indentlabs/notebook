@@ -177,7 +177,86 @@ class ExportService < Service
   end
 
   def self.json_export(universe_ids)
+    page_types = Rails.application.config.content_types[:all]
+    temporary_user_id_reference = Universe.find_by(id: universe_ids).user_id
 
+    export_object = {}
+
+    categories = fetch_categories(user_id:  temporary_user_id_reference)
+    fields     = fetch_fields(category_ids: categories.map(&:id))
+    values     = fetch_values(field_ids:    fields.map(&:id))
+
+    page_types.each do |page_type|
+      # Get all pages in the given universe(s)
+      pages = (page_type.name == 'Universe') ? page_type.where(id: universe_ids)
+                                             : page_type.where(universe_id: universe_ids)
+      if pages.any?
+        export_object[page_type.name] = []
+
+        categories_for_this_page_type = categories.select { |c| c.entity_type == page_type.name.downcase }
+        fields_for_this_page_type     = fields.select { |f| categories_for_this_page_type.map(&:id).include? f.attribute_category_id }
+
+        page_object = {}
+
+        pages.each do |page|
+          page_object['name'] = page.name
+          page_object['id']   = page.id
+
+          values_for_this_page = values.select { |v| v.entity_type == page_type.name && v.entity_id == page.id }
+
+          categories_for_this_page_type.each do |category|
+            page_object[category.label] ||= {}
+
+            fields_for_this_category = fields_for_this_page_type.select { |f| f.attribute_category_id == category.id }
+            values_for_these_fields  = values_for_this_page.select { |v| fields_for_this_category.map(&:id).include? v.attribute_field_id }
+
+            fields_for_this_category.each do |field|
+              value_for_this_field = values_for_these_fields.detect do |value|
+                value.attribute_field_id == field.id       &&
+                  value.entity_type      == page_type.name &&
+                  value.entity_id        == page.id
+              end
+
+              case field.field_type
+              when 'text_area', 'textarea'
+                # For answers to text fields, we can just output their value directly
+                if value_for_this_field.try(:value).present? || INCLUDE_EMPTY_FIELD_LABELS
+                  page_object[category.label][field.label] = value_for_this_field.try :value
+                end
+
+              when 'link'
+                # For link fields, we have link codes ([[Character-1]]) and need to translate
+                # them into the linked page's name in order for them to actually be useful
+                if value_for_this_field.present?
+                  json_list = JSON.parse(value_for_this_field.value)
+                  formatted_name_objects = json_list.map do |link_code|
+                    link_type, link_id = link_code.split('-')
+                    page_ref = query_link_code_with_cache(link_type, link_id)
+
+                    name_object = {
+                      name: page_ref.name,
+                      id:   page_ref.id,
+                    }
+                  end
+
+                  page_object[category.label][field.label] = formatted_name_objects
+                else
+                  if INCLUDE_EMPTY_FIELD_LABELS
+                    page_object[category.label][field.label] = nil
+                  end
+                end
+              end
+
+            end
+          end
+        end
+
+        # Append the JSON page object we just built to the list of pages of that kind
+        export_object[page_type.name].push page_object
+      end
+    end
+
+    return export_object.to_json
   end
 
   def self.xml_export(universe_ids)
