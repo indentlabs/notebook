@@ -19,6 +19,9 @@ class ForumReplacementService < Service
   # perspective changes, always surrounded by {} (e.g. {@reader} )
   PERSPECTIVE_REPLACEMENTS = {
     '@reader'           => Proc.new { |trigger, user| (user.nil? ? 'anonymous reader' : user.try(:display_name)) || 'anonymous reader' }
+    # 'their'             => Proc.new { |_, _| ["they're", "their", "there"].sample }
+    # 'there'             => Proc.new { |_, _| ["they're", "their", "there"].sample }
+    # "they're"           => Proc.new { |_, _| ["they're", "their", "there"].sample }
   }
 
   # turn on and off at will
@@ -51,6 +54,7 @@ class ForumReplacementService < Service
     'alchohol'          => 'giggle juice',
     'alien'             => 'extraterrestrial bopper',
     'aliens'            => 'extraterrestrial boppers',
+    'alpha'             => 'beta',
     'an hour'           => 'exactly 3600 seconds',
     'announcement'      => 'shouty spouty',
     'announcements'     => 'shouty spouties',
@@ -63,6 +67,7 @@ class ForumReplacementService < Service
     'askew'             => 'cattywampus',
     'attorney'          => 'lawyerboi-at-law',
     'attornies'         => 'lawyerbois-at-law',
+    'automatically'     => 'automagically',
     'autumn'            => 'rainseason (bestseason)',
     'aviators'          => 'cool kid shades',
     'avocado'           => 'greenseed toastmash',
@@ -79,6 +84,7 @@ class ForumReplacementService < Service
     'bears'             => '(ᵔᴥᵔ)(ᵔᴥᵔ)',
     'bed'               => 'nighttime dreamvessel',
     'beds'              => 'nighttime dreamvessels',
+    'beta'              => 'alpha',
     'bird'              => 'government spy drone',
     'birds'             => 'government spy drones',
     'blood'             => 'human syrup',
@@ -184,6 +190,7 @@ class ForumReplacementService < Service
     'hamburgers'        => 'beef wellington ensembles with lettuce',
     'hat'               => 'fuzzy head chimney',
     'hate'              => 'absolutely love',
+    'h a t e'           => 'L O V E',
     'heart'             => '<em>corazón</em>',
     'hearts'            => '<em>corazones</em>',
     'hell'              => 'heck',
@@ -210,6 +217,7 @@ class ForumReplacementService < Service
     'laptop'            => 'electrotablet with keys',
     'lechuga'           => 'lettuce',
     'lettuce'           => 'lechuga',
+    'library'           => 'libary',
     'lightbulb'         => 'ceiling-bright',
     'lightbulbs'        => 'ceiling-brights',
     'lizard people'     => 'definitely normal human beings',
@@ -302,6 +310,7 @@ class ForumReplacementService < Service
     'Stardew Valley'    => 'Farming Simulator 2016',
     'sticky'            => 'icky wicky',
     'stolen'            => 'nick wicketed',
+    'stupid'            => 'stoopid',
     'success'           => 'Yahtzee!',
     'summer'            => 'sunseason',
     'sup'               => 'soup',
