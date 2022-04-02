@@ -140,7 +140,7 @@ namespace :data_integrity do
 
       if user.upload_bandwidth_kb != correct_bandwidth
         puts "Correcting user #{user.id} bandwidth: #{user.upload_bandwidth_kb} --> #{remaining_bandwidth} (#{used_bandwidth} used)"
-        user.update(upload_bandwidth_kb: correct_bandwidth)
+        # user.update(upload_bandwidth_kb: correct_bandwidth)
       end
     end
 
