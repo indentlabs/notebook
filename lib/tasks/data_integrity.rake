@@ -135,10 +135,16 @@ namespace :data_integrity do
     old_logger = ActiveRecord::Base.logger
     ActiveRecord::Base.logger = nil
 
+    # For the sake of minimizing db updates while blazing through all users,
+    # we ignore a small amount (1kb) of difference between saved bandwidth
+    # and calculated bandwidth. Users should never be more than 1kb off though.
+    byte_lenience = 1000
+
     User.find_each do |user|
       correct_bandwidth = SubscriptionService.recalculate_bandwidth_for(user)
 
-      if user.upload_bandwidth_kb != correct_bandwidth
+      difference = (user.upload_bandwidth_kb - correct_bandwidth).abs
+      if difference >  byte_lenience
         puts "Correcting user #{user.id} bandwidth: #{user.upload_bandwidth_kb} --> #{correct_bandwidth}"
         # user.update(upload_bandwidth_kb: correct_bandwidth)
       end
