@@ -11,9 +11,9 @@ class ForumReplacementService < Service
     
   }
 
-  # spam replacements
   SPAM_WORD_REPLACEMENTS = {
-    'cash app'          => 'pls ban me andrew'
+    'cash app'          => 'pls ban me andrew',
+    'cashapp'           => 'hey mr andrew come over here'
   }
 
   # perspective changes, always surrounded by {} (e.g. {@reader} )
@@ -368,29 +368,32 @@ class ForumReplacementService < Service
     'writing'           => 'scribble scrabbling',
     'writer'            => 'scribble scrabbler',
     'writers'           => 'scribble scrabblers',
+    'word'              => 'wod',
+    'words'             => 'wods',
+    'wordsmith'         => 'wodsmith',
     'yuge'              => '<span style="font-size: 40px">yuge</span>',
     'zalgo'             => 'H̶̛̼̼̪̝̞͓̞͕͇̯͚͎͚̘̳͕̱̤̠̗͔͇̙̣̰͓̖̰̯̀̓̐̑̇͊͂̀͋̒̐̓͒̒͊͊̕͜͝ͅE̴̡̧̨̨̲̥̯͎̭̻̩̞̘̞̪̞̗̭͖̻͙͕͎̮͕̺͕̲̘̻̣͚̳̥͍̙͈͚͍͉̗͙̱͖͚̾̂̇͛̉͋͊̾͛̆̀́͑͛̅̋͊̕͘͜͜͜͝ͅͅͅͅ ̸̡̡̨̡̨̛̞͎̹̩̬̗̗̞̬̰̮̙̪̖͈̣̹͔̺̫̰̓̔̉̋̈̈́͐́̿̈̀͊̿̈̉̅̃̊̽͗̈̿̈́̓̈́̎͌̄̀̆̌̎͗̋͒̋̿̋̊̈́͆̋̾̈̏̈́̋̿̕̕̚͝͝͠͠ͅͅͅC̵̛̘̳͙̪̭͖̲̞̯̰̜͇̈̾̈́͋̌̉̽̽͑̎͌̾̈́͌̑͊̊̔̀͆̌̀̇̓͊̀̂̇̿̃͑́̈́̆͂̈́̾̓́̂̂̓̂̍̍͛͆͌͌̽̎̍̀̒̆̀͗͋͘͘͘͝͠͝͝͠͝͝Ǫ̸͕̻̞̝̜͚̗̮̼͎̤͔̤̱͔̫͂̄̉̋̈͊͐͂̇̀̌̎́͑̐̀̈́͋̓̾̅͒̒̄͑̒̆̑̾͜͝͝͝͝M̷̧̧̡̨̛̛̩̭̞͍̼̝̗͕̖͇̣̣̩͆̿̑͒́̉̅̓̌̆̈́͐͒̾̐̂̿̓̚͘̚͜E̵̡̨̢̧̢̢̡̢̨̛̠̱̻̺̦͚̹͓̬͔̪̟̼̥̯̠̘͚̫̯͍̺͔̫̟͇̱̦̟̪͚͉̣̳͓͍̬̙̲͔̘͙͔̤̰̜͍̠̩͉͐̂̊̏̐̿̊̋͑̿̇̊̈́͗̎̋́́̉̓̂̐͑̇̐̐͋́̒̈́͛͑͒̂͒̂̔̀̄̈́̓͂͆̈́͒̌͆̓͗̋͐̔̑͐̕͘ͅͅͅŞ̴̧̧̡̢̧̡̢͕̝͚̝̖͚̣̞̫̻̯͔̳̗̝̰̗̰̰̥̭͕̜̜̫͍̪̳̘̣̺̠͉̗̟͕̹͇̬̘̘̪͆͗̎̕',
   }
 
   OVERLOAD_WORDS_REPLACEMENTS = {
-    'bad'               => 'bodge',
-    'knee'              => 'leg hinge',
-    'knees'             => 'leg hinges',
-    'depression'        => 'megasadness',
-    'ice cream'         => 'eyes cream',
-    'life'              => 'like a box of chocolates',
-    'strawberry'        => 'plastic tubefruit',
-    'gremlin'           => 'extremely smart alien being that is here to help',
-    'gremlins'          => 'extremely smart alien beings that are here to help',
-    'soul' => 'inner ghost',
-    'dance' => 'woopwoop',
-    'curling iron' => 'medieval torture device',
-    'gay' => 'rainbow',
-    'insurance' => 'the biggest scam known to man',
-    'lemonade' => 'sour drank',
-    'salamander' => 'baby dragon',
-    'scrolling' => 'vertically surfing through a screen',
-    'subtext' => 'subtweeting but IRL',
+    'bad'                   => 'bodge',
+    'knee'                  => 'leg hinge',
+    'knees'                 => 'leg hinges',
+    'depression'            => 'megasadness',
+    'ice cream'             => 'eyes cream',
+    'life'                  => 'like a box of chocolates',
+    'strawberry'            => 'plastic tubefruit',
+    'gremlin'               => 'extremely smart alien being that is here to help',
+    'gremlins'              => 'extremely smart alien beings that are here to help',
+    'soul'                  => 'inner ghost',
+    'dance'                 => 'woopwoop',
+    'curling iron'          => 'medieval torture device',
+    'gay'                   => 'rainbow',
+    'insurance'             => 'the biggest scam known to man',
+    'lemonade'              => 'sour drank',
+    'salamander'            => 'baby dragon',
+    'scrolling'             => 'vertically surfing through a screen',
+    'subtext'               => 'subtweeting but IRL',
     'how'                   => 'how now brown cow',
     'midnight'              => 'dayover',
     'kill'                  => 'deathsnuggle',
@@ -410,7 +413,7 @@ class ForumReplacementService < Service
   }
 
   def self.replace_for(text, user)
-    gremlins_phase = 2
+    gremlins_phase = 3
 
     replaced_text = text.dup
 
