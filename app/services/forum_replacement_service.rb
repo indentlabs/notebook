@@ -388,7 +388,6 @@ class ForumReplacementService < Service
     'soul'                  => 'inner ghost',
     'dance'                 => 'woopwoop',
     'curling iron'          => 'medieval torture device',
-    'gay'                   => 'rainbow',
     'insurance'             => 'the biggest scam known to man',
     'lemonade'              => 'sour drank',
     'salamander'            => 'baby dragon',

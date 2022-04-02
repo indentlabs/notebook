@@ -139,7 +139,7 @@ namespace :data_integrity do
       correct_bandwidth = SubscriptionService.recalculate_bandwidth_for(user)
 
       if user.upload_bandwidth_kb != correct_bandwidth
-        puts "Correcting user #{user.id} bandwidth: #{user.upload_bandwidth_kb} --> #{remaining_bandwidth} (#{used_bandwidth} used)"
+        puts "Correcting user #{user.id} bandwidth: #{user.upload_bandwidth_kb} --> #{correct_bandwidth}"
         # user.update(upload_bandwidth_kb: correct_bandwidth)
       end
     end
