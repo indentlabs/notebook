@@ -131,34 +131,16 @@ namespace :data_integrity do
 
   desc "Ensure all users have the correct upload bandwidth amounts"
   task correct_bandwidths: :environment do
-    base_bandwidth = User.new.upload_bandwidth_kb           #     50_000
-    premium_bonus  = BillingPlan.find(4).bonus_bandwidth_kb #  9_950_000
-    premium_total  = base_bandwidth + premium_bonus         # 10_000_000
-    referral_bonus = 100_000 # per referral
-
     puts "Disabling SQL logging"
     old_logger = ActiveRecord::Base.logger
     ActiveRecord::Base.logger = nil
 
     User.find_each do |user|
-      max_bandwidth = case user.selected_billing_plan_id
-        when nil, 1
-          base_bandwidth
-        when 2 # free-for-lifers
-          250_000
-        when 4, 5, 6 # premium
-          premium_total
-        else
-          raise "User with funky billing plan id: U=#{user.id} BP=#{user.selected_billing_plan_id}"
-      end
+      correct_bandwidth = SubscriptionService.recalculate_bandwidth_for(user)
 
-      referral_bonus = user.referrals.count * referral_bonus
-      used_bandwidth = user.image_uploads.sum(:src_file_size)
-
-      remaining_bandwidth = max_bandwidth + referral_bonus - used_bandwidth
-      if user.upload_bandwidth_kb != remaining_bandwidth
+      if user.upload_bandwidth_kb != correct_bandwidth
         puts "Correcting user #{user.id} bandwidth: #{user.upload_bandwidth_kb} --> #{remaining_bandwidth} (#{used_bandwidth} used)"
-        user.update(upload_bandwidth_kb: remaining_bandwidth)
+        user.update(upload_bandwidth_kb: correct_bandwidth)
       end
     end
 
