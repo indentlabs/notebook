@@ -140,15 +140,23 @@ namespace :data_integrity do
     # and calculated bandwidth. Users should never be more than 1kb off though.
     byte_lenience = 1000
 
+    real_byte_difference_this_run = 0
+    effective_byte_difference_this_run = 0
+
     User.find_each do |user|
       correct_bandwidth = SubscriptionService.recalculate_bandwidth_for(user)
 
-      difference = (user.upload_bandwidth_kb - correct_bandwidth).abs
-      if difference >  byte_lenience
+      difference = user.upload_bandwidth_kb - correct_bandwidth
+      real_byte_difference_this_run += difference
+      if difference.abs >  byte_lenience
         puts "Correcting user #{user.id} bandwidth: #{user.upload_bandwidth_kb} --> #{correct_bandwidth}"
+        effective_byte_difference_this_run += difference
         # user.update(upload_bandwidth_kb: correct_bandwidth)
       end
     end
+
+    puts "Real byte difference: #{real_byte_difference_this_run}"
+    puts "Effective byte difference: #{effective_byte_difference_this_run}"
 
     puts "Re-enabling SQL logging"
     ActiveRecord::Base.logger = old_logger
