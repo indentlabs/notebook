@@ -1,102 +1,56 @@
-<% if current_user.content_count > 0 && @content %>
-  <br />
-  <div class="grey-text" style="font-size: 20px;">
-    <strong>Writing prompts</strong>
-    from your world
-  </div>
-  <div class="row">
-    <div class="col s12 m12 l8">
-      <%= render partial: 'cards/serendipitous/content_question', locals: {
-        content: @content,
-        field: @attribute_field_to_question,
-        redirect_path: prompts_path,
-        show_empty_prompt: true,
-        expand_by_default: true,
-        show_view_button: false,
-        include_quick_reference: false
-      } %>
-      
-      <p class="grey-text text-lighten-1 center">
-        Don't forget! You can press @ when typing to link to any of your other pages.
-      </p>
-      <div class="suggest-answers-container"></div>
-    </div>
-
-    <% if @attribute_field_to_question.present? %>
-      <div class="col m12 l4">
-        <%= link_to @content.view_path, class: 'entity-trigger sidenav-trigger', data: { target: "quick-reference-#{@content.page_type}-#{@content.id}"} do %>
-          <div class="hoverable card <%= @content.color %>">
-            <div class="card-content white-text">
-              <i class="material-icons right">vertical_split</i>
-              Quick-reference <%= @content.name %>
-            </div>
-          </div>
-        <% end %>
-        <!--
-        <%= link_to '#', 
-              class: 'js-show-answer-suggestions', 
-              data: {
-                content_type: @content.class.name, 
-                category_id: @attribute_field_to_question.attribute_category_id, 
-                field_label: @attribute_field_to_question.label
-              } do %>
-          <div class="hoverable card purple lighten-2">
-            <div class="card-content white-text">
-              <i class="material-icons right">adjust</i>
-              View answer suggestions
-            </div>
-          </div>
-        <% end %>
-        -->
-        <%= link_to prompts_path do %>
-          <div class="hoverable card orange">
-            <div class="card-content white-text">
-              <i class="material-icons right">arrow_forward</i>
-              Skip this prompt
-            </div>
-          </div>
-        <% end %>
-
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-24 mx-auto flex flex-wrap items-center">
+    <div class="lg:w-2/5 md:w-1/2 md:pr-16 lg:pr-0 pr-0">
+      <div class="text-xs text-gray-500 ml-8 mb-2 uppercase">
+        prompt from your world
       </div>
-    <% end %>
-  </div>
-
-  <%= render partial: 'javascripts/content_linking' %>
-  <%= render partial: 'prompts/smart_sidebar', locals: { content: @content } %>
-
-<% else %>
-  <%= image_tag 'tristan/small.webp',
-    class: 'tooltipped tristan right',
-    data: {
-      position: 'left',
-      enterDelay: '500',
-      tooltip: "Hey, I'm Tristan! Once you've created some pages in your digital notebook, I'll come up with some writing prompts for you!"
-    }
-  %>
-  <h5>Worldbuilding prompts</h5>
-  <p>
-    <% if current_user.content_count.zero? %>
-      Once you've created some ideas in Notebook.ai, you can visit this page for writing prompts set in your world.
-      They'll star your characters, in your locations, using your items, seeing your creatures, practicing your religions, and so on &mdash; so check back frequently for the latest prompts just for you!
-    <% else %>
-      It looks like
-      <% if @universe_scope.present? %>
-        <%= link_to @universe_scope.name, @universe_scope %>
-      <% else %>
-        your world
-      <% end %>
-      is pretty fleshed out already, and you've answered all the questions I've come up with so far.
-      Check back later and I might have a writing prompt for you, but I bet I can come up with some sooner if you
-      <% new_content = (current_user.createable_content_types - [Universe]).sample %>
-      <%= link_to new_polymorphic_path(new_content) do %>
-        create
-        <% if current_user.send(new_content.name.downcase.pluralize).any? %>
-          another
-        <% else %>
-          <%= %w(a e i o u).include?(new_content.name.downcase[0]) ? 'an' : 'a' %>
+      <h1 class="title-font font-medium leading-normal text-4xl text-white bg-notebook-blue px-8 py-6 rounded">
+        <%=
+          t(
+            "serendipitous_questions.attributes.#{@content.page_type.downcase}.#{@attribute_field_to_question.label.downcase}",
+            name:    @content.name,
+            default: "What is #{@content.name}'s #{@attribute_field_to_question.label.downcase}?"
+          )
+        %>
+      </h1>
+      <p class="leading-relaxed mt-4">
+        <%= @content.description %>
+      </p>
+    </div>
+    <div class="lg:w-3/6 md:w-1/2 bg-gray-100 rounded-lg p-8 flex flex-col md:ml-auto w-full mt-10 md:mt-0">
+      <div class="text-xs text-gray-500 uppercase ml-8">expanding</div>
+      <h2 class="text-gray-900 text-xl font-medium title-font mb-5">
+        <%= link_to @content.view_path do %>
+          <i class="material-icons float-left <%= @content.text_color %> mr-2"><%= @content.icon %></i>
+          <%= @content.name %>
         <% end %>
-        <%= new_content.name.downcase %>!
+      </h2>
+
+      <%= form_for @content, url: FieldTypeService.form_path_from_attribute_field(@attribute_field_to_question), method: :patch do |f| %>
+        <%= hidden_field(:override, :redirect_path, value: prompts_path) %>
+
+        <%= hidden_field_tag "entity[entity_id]",   @content.id %>
+        <%= hidden_field_tag "entity[entity_type]", @content.page_type %>
+
+
+        <div class="relative">
+          <%= hidden_field_tag "field[name]", @attribute_field_to_question[:id] %>
+          <label for="field[value]" class="leading-7 text-sm text-gray-600"><%= @attribute_field_to_question.label %></label>
+          <%=
+            text_area_tag "field[value]",
+                          @attribute_field_to_question[:value],
+                          class: "js-can-mention-pages w-full h-96 bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out",
+                          placeholder: "Write as little or as much as you'd like!"
+          %>
+        </div>
+        <p class="text-xs text-gray-500 mb-4">
+          Don't forget: you can mention any of your other pages by typing @ in the text box.
+        </p>
+
+        <%= button_tag(type: 'submit', class: "text-white bg-notebook-blue border-0 py-2 px-8 focus:outline-none hover:bg-blue-500 rounded text-lg") do %>
+          Save answer
+        <% end %>
       <% end %>
-    <% end %>
-  </p>
-<% end %>
+    </div>
+  </div>
+</section>
