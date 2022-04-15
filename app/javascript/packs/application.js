@@ -16,6 +16,7 @@
 // const imagePath = (name) => images(name, true)
 
 import "../application.css";
+import 'controllers'
 
 // Support component names relative to this directory:
 var componentRequireContext = require.context("components", true);
