@@ -6,8 +6,9 @@ module HasPageReferences
   included do
     # Pages that reference this one
     has_many :incoming_page_references, 
-              as:          :referenced_page, 
-              class_name:  PageReference.name
+              as:          :referenced_page,
+              class_name:  PageReference.name,
+              dependent:   :destroy
     Rails.application.config.content_type_names[:all].each do |page_type|
       has_many "referencing_#{page_type.downcase}_pages".to_sym,
         through:     :incoming_page_references,
@@ -26,7 +27,8 @@ module HasPageReferences
     # Pages referenced by this one
     has_many :outgoing_page_references,
               as:         :referencing_page,
-              class_name: PageReference.name
+              class_name: PageReference.name,
+              dependent:  :destroy
     Rails.application.config.content_type_names[:all].each do |page_type|
       has_many "referenced_#{page_type.downcase}_pages".to_sym,
         through:     :outgoing_page_references,

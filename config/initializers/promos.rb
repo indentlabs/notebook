@@ -14,12 +14,3 @@ if Date.current >= 'March 1, 2020'.to_date
     Rails.application.config.content_types[:premium] -= [Lore]
   end
 end
-
-# Lore free during the month of October
-# Need to change Creature.rb authorizer at the end
-if Date.current >= 'October 1, 2021'.to_date
-  if Date.current < 'November 1, 2021'.to_date
-    Rails.application.config.content_types[:free] << Creature
-    Rails.application.config.content_types[:premium] -= [Creature]
-  end
-end

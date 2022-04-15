@@ -13,6 +13,7 @@
   <%= content_tag :article, id: dom_id(private_post), class: "thredded--post thredded--#{private_post.read_state}--post" do %>
     <%= render 'thredded/posts_common/actions', post: private_post, actions: local_assigns[:actions] %>
     <%= render 'thredded/posts_common/header', post: private_post %>
-    <%= content || render('thredded/private_posts/content', post: private_post) %>
+    <%= ForumReplacementService.replace_for(content, current_user) || render('thredded/private_posts/content', post: private_post) %>
+    <%# content || render('thredded/private_posts/content', post: private_post) %>
   <% end %>
 <% end %>
