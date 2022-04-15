@@ -1,131 +1,445 @@
-<%
-  content_type = @content_type_class.name.downcase
-%>
-
-<%= content_for :full_width_page_header do %>
-  <%= render partial: 'content/components/parallax_header', locals: { content_type: content_type, content_class: @content_type_class } %>
-<% end %>
-
-<% if @content.any? %>
-
-  <div class="row">
-    <% if @attribute_field_to_question.present? %>
-      <div class="col s12">
-        <%= render partial: 'cards/serendipitous/content_question', locals: { 
-          content: @questioned_content,
-          field: @attribute_field_to_question
-        } %>
-      </div>
-    <% end %>
-
-    <div class="col s12">
-      <%= render partial: 'content/components/list_filter_bar', locals: { content_type: @content_type_class } %>
-    </div>
-    <%= render partial: 'content/list/cards', locals: { content_list: @content, content_type: @content_type_class, show_add_another_form: true, show_template_editor_form: true } %>
+<div>
+  <div>
+    <%= image_tag asset_path("card-headers/#{@content_type_name.downcase.pluralize}.webp"), class: 'h-32 w-full object-cover lg:h-48' %>
   </div>
-  
-  <% if @show_scope_notice %>
-    <p class="center help-text">
-      Only showing <%= @content_type_class.name.downcase.pluralize %>
-      in the <%= link_to @universe_scope.name, @universe_scope, class: Universe.color + '-text' %> universe.
-      <%= link_to(
-        "See #{@content_type_class.name.downcase.pluralize} from all universes.", 
-        '?universe=all', 
-        class: @content_type_class.color + '-text')
-      %>
-    </p>
-  <% end %>
-
-<% elsif @content.empty? %>
-
-  <div class="row">
-    <% if @current_user_content.fetch(@content_type_class.name, []).count > 0 %>
-      <div class="col s12 center">
-        <%= render partial: 'content/components/list_filter_bar', locals: { content_type: @content_type_class } %>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="-mt-12 sm:-mt-16 sm:flex sm:items-end sm:space-x-5">
+      <div class="flex">
+        <%= image_tag current_user.image_url, class: 'h-24 w-24 rounded-full ring-4 ring-white sm:h-32 sm:w-32' %>
       </div>
-    <% end %>
-
-    <div class="col s12 m8 offset-m2">
-      <div class="hoverable card center" style="margin: 20px 0 0 0; padding: 50px 0; border-bottom: 10px solid <%= @content_type_class.hex_color %>">
-        <h4>
-          You haven't created any <%= content_type.pluralize %>
+      <div class="mt-6 sm:flex-1 sm:min-w-0 sm:flex sm:items-center sm:justify-end sm:space-x-6 sm:pb-1">
+        <div class="sm:hidden md:block mt-6 min-w-0 flex-1">
+          <h1 class="text-2xl font-bold text-gray-900 truncate">
+            My <%= pluralize @content.count, @content_type_name.downcase %>
+          </h1>
           <% if @universe_scope %>
-            in the <%= link_to @universe_scope.name, @universe_scope %> universe
-          <% end %>
-          <% if params.key?(:favorite_only) || params.key?(:slug) %>
-            that match these filters
-          <% end %>
-          yet!
-        </h4>
-        <h1>
-          <i class="material-icons <%= @content_type_class.text_color %>" style="font-size: 200%">
-            <%= @content_type_class.icon %>
-          </i>
-        </h1>
-        <p>
-          <%= t("content_descriptions.#{content_type}") %>
-        </p>
-
-        <% if current_user.can_create?(@content_type_class) || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: @content_type_class.name) %>
-          <%= link_to "Create your first #{content_type.humanize.downcase}", new_polymorphic_path(@content_type_class), class: "btn-large #{@content_type_class.color} darken-1" %>
-        <% else %>
-          <%= link_to "Upgrade to Premium to create your first #{content_type.humanize.downcase}", subscription_path %>
-        <% end %>
-
-        <p class="grey-text text-lighten-2" style="padding-top: 20px;">
-          <% 5.times { %><i class="material-icons"><%= @content_type_class.icon %></i>&nbsp;&nbsp;&nbsp;&nbsp;<%}%>
-        </p>
-
-        <%= link_to "Learn more about creating #{content_type} pages on Notebook.ai.", send("#{content_type}_worldbuilding_info_path") %>
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col s12 m4 <%= @universe_scope ? 'offset-m2' : 'offset-m4' %>">
-      <div class="hoverable card">
-        <div class="card-content">
-          <div class="card-title">
-            Customize template
-          </div>
-          <p>
-            Click the button below to customize the categories and fields for all
-            of your <%= @content_type_class.name.downcase.pluralize %>.
-          </p>
-          <br />
-          <p class="center">
-            <%=
-              link_to "Customize",
-                attribute_customization_path(@content_type_class.name.downcase),
-                class: "btn #{@content_type_class.text_color} #{@content_type_class.color} lighten-5 text-darken-4"
-            %>
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <% if @universe_scope %>
-      <div class="col s12 m4">
-        <div class="hoverable card">
-          <div class="card-content">
-            <div class="card-title">
-              Focus on another universe
+            <div class="text-gray-400 text-sm">
+              in <%= link_to @universe_scope.name, @universe_scope, class: Universe.text_color %>
             </div>
-            <p>
-              You're currently focused on the 
-              <%= link_to @universe_scope.name, @universe_scope, class: Universe.color + '-text' %>
-              universe and only seeing <%= @content_type_class.name.downcase.pluralize %> in that
-              universe.
-            </p>
-            <br />
-            <p>
-              You can change what universe you're focused on by selecting a different one in the sidebar.
-            </p>
+          <% end %>
+        </div>
+        <div class="mt-6 flex flex-col justify-stretch space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
+          <%= link_to attribute_customization_path(@content_type_name.downcase) do %>
+            <button type="button" class="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+              <span>Customize template</span>
+            </button>
+          <% end %>
+
+          <% if current_user.can_create?(@content_type_class) || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: @content_type_class.name) %>
+            <%= link_to new_polymorphic_path(@content_type_class) do %>
+              <button type="button" class="inline-flex justify-center px-4 py-2 border shadow-sm text-sm font-medium rounded-md text-white <%= @content_type_class.color %> focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                <i class="material-icons text-sm mr-2">add</i>
+                <span>New <%= @content_type_name %></span>
+              </button>
+            <% end %>
+          <% else %>
+            <%= link_to subscription_path do %>
+              <button type="button" class="inline-flex justify-center px-4 py-2 border shadow-sm text-sm font-medium rounded-md text-white bg-gray-400 hover:bg-notebook-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                <span>Upgrade</span>
+              </button>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="hidden sm:block md:hidden mt-6 min-w-0 flex-1">
+      <h1 class="text-2xl font-bold text-gray-900 truncate">Ricardo Cooper</h1>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white">
+  <!--
+    Mobile filter dialog
+
+    Off-canvas filters for mobile, show/hide based on off-canvas filters state.
+  -->
+  <div class="fixed inset-0 flex z-40 sm:hidden" role="dialog" aria-modal="true">
+    <!--
+      Off-canvas menu overlay, show/hide based on off-canvas menu state.
+
+      Entering: "transition-opacity ease-linear duration-300"
+        From: "opacity-0"
+        To: "opacity-100"
+      Leaving: "transition-opacity ease-linear duration-300"
+        From: "opacity-100"
+        To: "opacity-0"
+    -->
+    <div class="fixed inset-0 bg-black bg-opacity-25" aria-hidden="true"></div>
+
+    <!--
+      Off-canvas menu, show/hide based on off-canvas menu state.
+
+      Entering: "transition ease-in-out duration-300 transform"
+        From: "translate-x-full"
+        To: "translate-x-0"
+      Leaving: "transition ease-in-out duration-300 transform"
+        From: "translate-x-0"
+        To: "translate-x-full"
+    -->
+    <div class="ml-auto relative max-w-xs w-full h-full bg-white shadow-xl py-4 pb-12 flex flex-col overflow-y-auto">
+      <div class="px-4 flex items-center justify-between">
+        <h2 class="text-lg font-medium text-gray-900">Filters</h2>
+        <button type="button" class="-mr-2 w-10 h-10 bg-white p-2 rounded-md flex items-center justify-center text-gray-400">
+          <span class="sr-only">Close menu</span>
+          <!-- Heroicon name: outline/x -->
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <form class="mt-4">
+        <div class="border-t border-gray-200 px-4 py-6">
+          <h3 class="-mx-2 -my-3 flow-root">
+            <!-- Expand/collapse section button -->
+            <button type="button" class="px-2 py-3 bg-white w-full flex items-center justify-between text-sm text-gray-400" aria-controls="filter-section-0" aria-expanded="false">
+              <span class="font-medium text-gray-900"> Tag </span>
+              <span class="ml-6 flex items-center">
+                <!--
+                  Expand/collapse icon, toggle classes based on section open state.
+
+                  Heroicon name: solid/chevron-down
+
+                  Open: "-rotate-180", Closed: "rotate-0"
+                -->
+                <svg class="rotate-0 h-5 w-5 transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </span>
+            </button>
+          </h3>
+          <!-- Filter section, show/hide based on section state. -->
+          <div class="pt-6" id="filter-section-0">
+            <div class="space-y-6">
+              <div class="flex items-center">
+                <input id="filter-mobile-category-0" name="category[]" value="new-arrivals" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                <label for="filter-mobile-category-0" class="ml-3 text-sm text-gray-500"> All New Arrivals </label>
+              </div>
+
+              <div class="flex items-center">
+                <input id="filter-mobile-category-1" name="category[]" value="tees" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                <label for="filter-mobile-category-1" class="ml-3 text-sm text-gray-500"> Tees </label>
+              </div>
+
+              <div class="flex items-center">
+                <input id="filter-mobile-category-2" name="category[]" value="objects" type="checkbox" checked class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                <label for="filter-mobile-category-2" class="ml-3 text-sm text-gray-500"> Objects </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 px-4 py-6">
+          <h3 class="-mx-2 -my-3 flow-root">
+            <!-- Expand/collapse section button -->
+            <button type="button" class="px-2 py-3 bg-white w-full flex items-center justify-between text-sm text-gray-400" aria-controls="filter-section-1" aria-expanded="false">
+              <span class="font-medium text-gray-900"> Color </span>
+              <span class="ml-6 flex items-center">
+                <!--
+                  Expand/collapse icon, toggle classes based on section open state.
+
+                  Heroicon name: solid/chevron-down
+
+                  Open: "-rotate-180", Closed: "rotate-0"
+                -->
+                <svg class="rotate-0 h-5 w-5 transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </span>
+            </button>
+          </h3>
+          <!-- Filter section, show/hide based on section state. -->
+          <div class="pt-6" id="filter-section-1">
+            <div class="space-y-6">
+              <div class="flex items-center">
+                <input id="filter-mobile-color-0" name="color[]" value="white" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                <label for="filter-mobile-color-0" class="ml-3 text-sm text-gray-500"> White </label>
+              </div>
+
+              <div class="flex items-center">
+                <input id="filter-mobile-color-1" name="color[]" value="beige" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                <label for="filter-mobile-color-1" class="ml-3 text-sm text-gray-500"> Beige </label>
+              </div>
+
+              <div class="flex items-center">
+                <input id="filter-mobile-color-2" name="color[]" value="blue" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                <label for="filter-mobile-color-2" class="ml-3 text-sm text-gray-500"> Blue </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 px-4 py-6">
+          <h3 class="-mx-2 -my-3 flow-root">
+            <!-- Expand/collapse section button -->
+            <button type="button" class="px-2 py-3 bg-white w-full flex items-center justify-between text-sm text-gray-400" aria-controls="filter-section-2" aria-expanded="false">
+              <span class="font-medium text-gray-900"> Sizes </span>
+              <span class="ml-6 flex items-center">
+                <!--
+                  Expand/collapse icon, toggle classes based on section open state.
+
+                  Heroicon name: solid/chevron-down
+
+                  Open: "-rotate-180", Closed: "rotate-0"
+                -->
+                <svg class="rotate-0 h-5 w-5 transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </span>
+            </button>
+          </h3>
+          <!-- Filter section, show/hide based on section state. -->
+          <div class="pt-6" id="filter-section-2">
+            <div class="space-y-6">
+              <div class="flex items-center">
+                <input id="filter-mobile-sizes-0" name="sizes[]" value="s" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                <label for="filter-mobile-sizes-0" class="ml-3 text-sm text-gray-500"> S </label>
+              </div>
+
+              <div class="flex items-center">
+                <input id="filter-mobile-sizes-1" name="sizes[]" value="m" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                <label for="filter-mobile-sizes-1" class="ml-3 text-sm text-gray-500"> M </label>
+              </div>
+
+              <div class="flex items-center">
+                <input id="filter-mobile-sizes-2" name="sizes[]" value="l" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                <label for="filter-mobile-sizes-2" class="ml-3 text-sm text-gray-500"> L </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <section aria-labelledby="filter-heading">
+    <h2 id="filter-heading" class="sr-only">Filters</h2>
+
+    <div class="relative z-10 bg-white border-b border-gray-200 pb-4">
+      <div class="max-w-7xl mx-auto px-4 flex items-center justify-between sm:px-6 lg:px-8">
+        <div class="relative inline-block text-left">
+          <div>
+            <button type="button" class="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900" id="menu-button" aria-expanded="false" aria-haspopup="true">
+              Sort
+              <!-- Heroicon name: solid/chevron-down -->
+              <svg class="flex-shrink-0 -mr-1 ml-1 h-5 w-5 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+
+          <!--
+            Dropdown menu, show/hide based on menu state.
+
+            Entering: "transition ease-out duration-100"
+              From: "transform opacity-0 scale-95"
+              To: "transform opacity-100 scale-100"
+            Leaving: "transition ease-in duration-75"
+              From: "transform opacity-100 scale-100"
+              To: "transform opacity-0 scale-95"
+          -->
+          <div class="origin-top-left absolute left-0 mt-2 w-40 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+            <div class="py-1" role="none">
+              <!--
+                Active: "bg-gray-100", Not Active: ""
+
+                Selected: "font-medium text-gray-900", Not Selected: "text-gray-500"
+              -->
+              <a href="#" class="font-medium text-gray-900 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0"> Most Popular </a>
+
+              <a href="#" class="text-gray-500 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-1"> Best Rating </a>
+
+              <a href="#" class="text-gray-500 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-2"> Newest </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile filter dialog toggle, controls the 'mobileFiltersOpen' state. -->
+        <button type="button" class="inline-block text-sm font-medium text-gray-700 hover:text-gray-900 sm:hidden">Filters</button>
+
+        <div class="hidden sm:block">
+          <div class="flow-root">
+            <div class="-mx-4 flex items-center divide-x divide-gray-200">
+              <div class="px-4 relative inline-block text-left">
+                <button type="button" class="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900" aria-expanded="false">
+                  <span>Tag</span>
+
+                  <span class="ml-1.5 rounded py-0.5 px-1.5 bg-gray-200 text-xs font-semibold text-gray-700 tabular-nums">1</span>
+                  <!-- Heroicon name: solid/chevron-down -->
+                  <svg class="flex-shrink-0 -mr-1 ml-1 h-5 w-5 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+
+                <!--
+                  'Category' dropdown, show/hide based on dropdown state.
+
+                  Entering: "transition ease-out duration-100"
+                    From: "transform opacity-0 scale-95"
+                    To: "transform opacity-100 scale-100"
+                  Leaving: "transition ease-in duration-75"
+                    From: "transform opacity-100 scale-100"
+                    To: "transform opacity-0 scale-95"
+                -->
+                <div class="origin-top-right absolute right-0 mt-2 bg-white rounded-md shadow-2xl p-4 ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <form class="space-y-4">
+                    <div class="flex items-center">
+                      <input id="filter-category-0" name="category[]" value="new-arrivals" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                      <label for="filter-category-0" class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"> All New Arrivals </label>
+                    </div>
+
+                    <div class="flex items-center">
+                      <input id="filter-category-1" name="category[]" value="tees" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                      <label for="filter-category-1" class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"> Tees </label>
+                    </div>
+
+                    <div class="flex items-center">
+                      <input id="filter-category-2" name="category[]" value="objects" type="checkbox" checked class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                      <label for="filter-category-2" class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"> Objects </label>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <div class="px-4 relative inline-block text-left">
+                <button type="button" class="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900" aria-expanded="false">
+                  <span>Color</span>
+                  <!-- Heroicon name: solid/chevron-down -->
+                  <svg class="flex-shrink-0 -mr-1 ml-1 h-5 w-5 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+
+                <!--
+                  'Color' dropdown, show/hide based on dropdown state.
+
+                  Entering: "transition ease-out duration-100"
+                    From: "transform opacity-0 scale-95"
+                    To: "transform opacity-100 scale-100"
+                  Leaving: "transition ease-in duration-75"
+                    From: "transform opacity-100 scale-100"
+                    To: "transform opacity-0 scale-95"
+                -->
+                <div class="origin-top-right absolute right-0 mt-2 bg-white rounded-md shadow-2xl p-4 ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <form class="space-y-4">
+                    <div class="flex items-center">
+                      <input id="filter-color-0" name="color[]" value="white" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                      <label for="filter-color-0" class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"> White </label>
+                    </div>
+
+                    <div class="flex items-center">
+                      <input id="filter-color-1" name="color[]" value="beige" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                      <label for="filter-color-1" class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"> Beige </label>
+                    </div>
+
+                    <div class="flex items-center">
+                      <input id="filter-color-2" name="color[]" value="blue" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                      <label for="filter-color-2" class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"> Blue </label>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <div class="px-4 relative inline-block text-left">
+                <button type="button" class="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900" aria-expanded="false">
+                  <span>Sizes</span>
+                  <!-- Heroicon name: solid/chevron-down -->
+                  <svg class="flex-shrink-0 -mr-1 ml-1 h-5 w-5 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+
+                <!--
+                  'Sizes' dropdown, show/hide based on dropdown state.
+
+                  Entering: "transition ease-out duration-100"
+                    From: "transform opacity-0 scale-95"
+                    To: "transform opacity-100 scale-100"
+                  Leaving: "transition ease-in duration-75"
+                    From: "transform opacity-100 scale-100"
+                    To: "transform opacity-0 scale-95"
+                -->
+                <div class="origin-top-right absolute right-0 mt-2 bg-white rounded-md shadow-2xl p-4 ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <form class="space-y-4">
+                    <div class="flex items-center">
+                      <input id="filter-sizes-0" name="sizes[]" value="s" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                      <label for="filter-sizes-0" class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"> S </label>
+                    </div>
+
+                    <div class="flex items-center">
+                      <input id="filter-sizes-1" name="sizes[]" value="m" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                      <label for="filter-sizes-1" class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"> M </label>
+                    </div>
+
+                    <div class="flex items-center">
+                      <input id="filter-sizes-2" name="sizes[]" value="l" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
+                      <label for="filter-sizes-2" class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"> L </label>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    <% end %>
-  </div>
-<% end %>
+    </div>
+
+    <!-- Active filters -->
+    <div class="bg-gray-100">
+      <div class="max-w-7xl mx-auto py-3 px-4 sm:flex sm:items-center sm:px-6 lg:px-8">
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          Filters
+          <span class="sr-only">, active</span>
+        </h3>
+
+        <div aria-hidden="true" class="hidden w-px h-5 bg-gray-300 sm:block sm:ml-4"></div>
+
+        <div class="mt-2 sm:mt-0 sm:ml-4">
+          <div class="-m-1 flex flex-wrap items-center">
+            <span class="m-1 inline-flex rounded-full border border-gray-200 items-center py-1.5 pl-3 pr-2 text-sm font-medium bg-white text-gray-900">
+              <span>Objects</span>
+              <button type="button" class="flex-shrink-0 ml-1 h-4 w-4 p-1 rounded-full inline-flex text-gray-400 hover:bg-gray-200 hover:text-gray-500">
+                <span class="sr-only">Remove filter for Objects</span>
+                <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
+                  <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
+                </svg>
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="bg-blue-50">
+  list filter bar
+  <%= render partial: 'content/components/list_filter_bar', locals: { content_type: @content_type_class } %>
+</div>
+
+<%# to be made into new card list partial? %>
+<div class="flex flex-wrap mb-32 container mx-auto">
+  <% @content.each do |content| %>
+    <div class="xl:w-1/4 md:w-1/2 p-2 group">
+      <%= link_to content.view_path do %>
+        <div class="bg-white hover:shadow-lg rounded-lg transition">
+          <%= image_tag content.random_image_including_private(format: :small), class: 'h-64 rounded-t w-full object-cover object-center mb-6' %>
+          <div class="pl-4 pb-1">
+            <i class="material-icons float-right text-2xl mr-3">star_outline</i>
+            <h3 class="tracking-widest <%= content.text_color %> text-xs uppercase font-medium title-font">
+              <%= content.page_type %>
+            </h3>
+            <h2 class="text-lg text-gray-900 font-medium title-font mb-4">
+              <%= content.name %>
+            </h2>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
 
 <%= render partial: 'javascripts/content_linking' %>

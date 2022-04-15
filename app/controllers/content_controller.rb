@@ -3,6 +3,8 @@
 # TODO: we should probably spin off an Api::ContentController for #api_sort and anything else 
 #       api-wise we need
 class ContentController < ApplicationController
+  layout 'tailwind', only: [:index]
+
   before_action :authenticate_user!, except: [:show, :changelog, :api_sort] \
     + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }
 
@@ -22,6 +24,7 @@ class ContentController < ApplicationController
 
   def index
     @content_type_class = content_type_from_controller(self.class)
+    @content_type_name  = @content_type_class.name
     pluralized_content_name = @content_type_class.name.downcase.pluralize
 
     @page_title = "My #{pluralized_content_name}"
