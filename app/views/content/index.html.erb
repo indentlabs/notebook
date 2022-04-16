@@ -7,7 +7,9 @@
     <div class="-mt-12 sm:-mt-16 sm:flex sm:items-end sm:space-x-5">
       <div class="flex">
         <% if @universe_scope %>
-          <%= image_tag @universe_scope.random_image_including_private, class: 'h-24 w-24 rounded-full ring-4 ring-purple-800 sm:h-32 sm:w-32' %>
+          <%= link_to @universe_scope do %>
+            <%= image_tag @universe_scope.random_image_including_private, class: 'h-24 w-24 rounded-full ring-4 ring-purple-800 sm:h-32 sm:w-32' %>
+          <% end %>
         <% else %>
           <%= image_tag current_user.image_url, class: 'h-24 w-24 rounded-full ring-4 ring-green-800 sm:h-32 sm:w-32' %>
         <% end %>
@@ -15,7 +17,7 @@
       <div class="mt-6 sm:flex-1 sm:min-w-0 sm:flex sm:items-center sm:justify-end sm:space-x-6 sm:pb-1">
         <div class="sm:hidden md:block mt-6 min-w-0 flex-1">
           <h1 class="text-2xl font-bold text-gray-900 truncate">
-            My <%= pluralize @content.count, @content_type_name.downcase %>
+            Showing <%= pluralize @content.count, @content_type_name.downcase %>
           </h1>
           <% if @universe_scope %>
             <div class="text-gray-400 text-sm">

@@ -92,10 +92,13 @@ Rails.application.routes.draw do
   resources :folders, only: [:create, :update, :destroy, :show]
 
   scope '/my' do
-    get '/content',         to: 'main#dashboard', as: :dashboard
+    get '/dashboard',       to: 'main#dashboard', as: :dashboard
+    get '/content',         to: 'main#table_of_contents', as: :table_of_contents
     get '/content/recent',  to: 'main#recent_content', as: :recent_content
     get '/content/deleted', to: 'content#deleted', as: :recently_deleted_content
     get '/prompts',         to: 'main#prompts', as: :prompts
+
+    get '/multiverse',      to: 'universes#hub', as: :multiverse
 
     get '/scratchpad',      to: 'main#notes', as: :notes
 

@@ -42,12 +42,20 @@
     </div>
 
     <!-- left-hand side of navbar -->
-    <div class="flex-grow pt-3.5 pl-1">
+    <div class="flex-grow pt-2.5 pl-1">
       <% if @universe_scope %>
-        <%= link_to @universe_scope, class: "px-3 py-2 #{Universe.text_color} bg-purple-50 hover:bg-purple-200 rounded" do %>
-          <i class="material-icons text-sm mr-1"><%= Universe.icon %></i>
-          <%= @universe_scope.name %>
-        <% end %>
+        <div class="inline-flex rounded-md shadow-sm" role="group">
+          <%= link_to multiverse_path do %>
+            <button type="button" class="px-2 h-9 text-white <%= Universe.color %> rounded-l-lg border border-purple-800 hover:bg-purple-500 focus:z-10 focus:ring-2 focus:ring-purple-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white">
+              <i class="material-icons text-2xl"><%= Universe.icon %></i>
+            </button>
+          <% end %>
+          <%= link_to @universe_scope do %>
+            <button type="button" class="py-2 h-9 px-4 text-sm font-medium <%= Universe.text_color %> bg-white rounded-r-md border border-gray-200 hover:bg-gray-100 hover:text-purple-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white">
+              <%= @universe_scope.name %>
+            </button>
+          <% end %>
+        </div>
       <% else %>
         <%= link_to 'Choose a universe', '#', class: "px-3 py-2 text-lg #{Universe.text_color} bg-purple-50 hover:bg-purple-200 rounded" %>
       <% end %>

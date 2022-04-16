@@ -36,6 +36,9 @@ class MainController < ApplicationController
     set_questionable_content # for questions
   end
 
+  def table_of_contents
+  end
+
   def infostack
   end
 

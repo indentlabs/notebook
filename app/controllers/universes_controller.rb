@@ -1,4 +1,9 @@
 class UniversesController < ContentController
+  layout 'tailwind', only: [:hub]
+
+  def hub
+
+  end
 
   # TODO: pull list of content types out from some centralized list somewhere
   (Rails.application.config.content_types[:all_non_universe] + [Timeline]).each do |content_type|
