@@ -267,7 +267,7 @@
                   <form class="space-y-4">
                     <% @page_tags.each do |page_tag| %>
                       <div class="flex items-center">
-                        <input id="filter-tag-<%= page_tag.id %>" name="tag[]" value="<%= page_tag.slug %>" type="checkbox" class="h-4 w-4 border-gray-300 rounded <%= @content_type_class.text_color %> focus:ring-notebook-blue">
+                        <input id="filter-tag-<%= page_tag.id %>" name="slug[]" value="<%= page_tag.slug %>" type="checkbox" class="h-4 w-4 border-gray-300 rounded <%= @content_type_class.text_color %> focus:ring-notebook-blue">
                         <label for="filter-tag-<%= page_tag.id %>" class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"><%= page_tag.tag %></label>
                       </div>
                     <% end %>
@@ -296,7 +296,7 @@
       <div class="bg-gray-100">
         <div class="max-w-7xl mx-auto py-3 px-4 sm:flex sm:items-center sm:px-6 lg:px-8">
           <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-            Showing only <%= @content_type_name.pluralize %> with tags
+            Showing only <%= @content_type_name.pluralize %> with <%= 'tag'.pluralize(@filtered_page_tags.count) %> 
             <span class="sr-only">, active</span>
           </h3>
 
@@ -304,15 +304,19 @@
 
           <div class="mt-2 sm:mt-0 sm:ml-4">
             <div class="-m-1 flex flex-wrap items-center">
-              <span class="m-1 inline-flex rounded-full border border-gray-200 items-center py-1.5 pl-3 pr-2 text-sm font-medium bg-white text-gray-900">
-                <span>Objects</span>
-                <button type="button" class="flex-shrink-0 ml-1 h-4 w-4 p-1 rounded-full inline-flex text-gray-400 hover:bg-gray-200 hover:text-gray-500">
-                  <span class="sr-only">Remove filter for Objects</span>
-                  <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
-                    <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
-                  </svg>
-                </button>
-              </span>
+              <% @filtered_page_tags.each do |page_tag| %>
+                <span class="m-1 inline-flex rounded-full border border-gray-200 items-center py-1.5 pl-3 pr-2 text-sm font-medium bg-white text-gray-900">
+                  <span><%= page_tag.tag %></span>
+                  <button type="button" class="flex-shrink-0 ml-1 h-4 w-4 p-1 rounded-full inline-flex text-gray-400 hover:bg-gray-200 hover:text-gray-500">
+                    <%= link_to(polymorphic_path(@content_type_class, { slug: params.fetch(:slug, []) - [page_tag.slug] })) do %>
+                      <span class="sr-only">Remove filter for <%= page_tag.tag %></span>
+                      <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
+                        <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
+                      </svg>
+                    <% end %>
+                  </button>
+                </span>
+              <% end %>
             </div>
           </div>
         </div>
