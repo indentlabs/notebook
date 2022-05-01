@@ -8,7 +8,7 @@
       <div class="flex">
         <% if @universe_scope %>
           <%= link_to @universe_scope do %>
-            <%= image_tag @universe_scope.random_image_including_private, class: 'h-24 w-24 rounded-full ring-4 ring-purple-800 sm:h-32 sm:w-32' %>
+            <%= image_tag @universe_scope.random_image_including_private(format: :hero), class: 'h-24 w-24 rounded-full ring-4 ring-purple-800 sm:h-32 sm:w-32' %>
           <% end %>
         <% else %>
           <%= image_tag current_user.image_url, class: 'h-24 w-24 rounded-full ring-4 ring-green-800 sm:h-32 sm:w-32' %>
@@ -257,7 +257,7 @@
           <div class="flow-root">
             <div class="-mx-4 flex items-center divide-x divide-gray-200">
               <div data-controller="dropdown" class="px-4 relative inline-block text-left">
-                <button data-action="dropdown#toggle click@window->dropdown#hide" type="button" class="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900" aria-expanded="false">
+                <button data-action="dropdown#toggle click@window->dropdown#hide" type="button" class="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900 active:bg-white" aria-expanded="false">
                   <span>Tagged</span>
                   <span class="ml-1.5 rounded py-0.5 px-1.5 bg-gray-100 text-xs font-semibold text-gray-700 tabular-nums">
                     <%= @filtered_page_tags.try(:count) || 0 %>
@@ -276,7 +276,9 @@
 
                     <% if @page_tags.any? %>
                       <div class="flex text-right">
-                        <button data-action="dropdown#toggle" class="bg-notebook-blue hover:bg-blue-500 text-white rounded w-full px-2 py-1">Submit</button>
+                        <button data-action="dropdown#toggle" class="bg-notebook-blue hover:bg-blue-500 text-white rounded w-full px-2 py-1">
+                          Filter
+                        </button>
                       </div>
                     <% else %>
                       <div class="bg-blue-50 p-4">
