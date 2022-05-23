@@ -2,11 +2,11 @@
 
   User.find_each do |user|
     user.notifications.create(
-      message_html:     "<div class='text-darken-4 black-text'>New in Notebook.ai:</div>Document tags, folders, and more!",
-      icon:             Document.icon,
-      icon_color:       Document.color,
+      message_html:     "<div class='text-darken-4 black-text'>2021 is winding to a close...</div>Click here to see your year in review!",
+      icon:             'event_available',
+      icon_color:       'blue',
       happened_at:      DateTime.current,
-      passthrough_link: "https://medium.com/indent-labs/write-and-organize-your-stories-in-notebook-ai-1d7821af6f07",
-      reference_code:   "documents-folders-and-tags"
+      passthrough_link: "https://www.notebook.ai/my/data/yearly/2021",
+      reference_code:   "2021-year-in-review"
     )
   end

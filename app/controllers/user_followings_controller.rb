@@ -34,7 +34,8 @@ class UserFollowingsController < ApplicationController
         icon:             User.icon,
         icon_color:       User.color,
         happened_at:      DateTime.current,
-        passthrough_link: Rails.application.routes.url_helpers.user_path(@user_following.user)
+        passthrough_link: Rails.application.routes.url_helpers.user_path(@user_following.user),
+        reference_code:   'followed-by-user'
       )
 
       redirect_to @user_following.followed_user, notice: "You're now following #{@user_following.followed_user.name.presence || 'this user'}"

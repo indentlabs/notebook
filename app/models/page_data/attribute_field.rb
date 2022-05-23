@@ -7,6 +7,8 @@ class AttributeField < ApplicationRecord
   belongs_to :attribute_category
   has_many :attribute_values, class_name: 'Attribute', dependent: :destroy
 
+  has_many :page_references, dependent: :destroy
+
   validates_presence_of :user_id
 
   acts_as_list scope: [:user_id, :attribute_category_id]

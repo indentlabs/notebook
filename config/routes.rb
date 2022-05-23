@@ -98,6 +98,11 @@ Rails.application.routes.draw do
 
     get '/scratchpad',      to: 'main#notes', as: :notes
 
+    get 'tag/remove',         to: 'page_tags#remove'
+    # post 'tag/:slug/update',  to: 'page_tags#update',  as: :update_tag
+    post '/tag/:tag/rename', to: 'page_tags#rename', as: :rename_tag
+    delete 'tag/:id/destroy', to: 'page_tags#destroy', as: :destroy_specific_tag
+
     # Legacy route: left intact so /my/documents/X URLs continue to work for everyone's bookmarks
     resources :documents
 
@@ -133,12 +138,14 @@ Rails.application.routes.draw do
     scope '/data' do
       get '/',              to: 'data#index',     as: :data_vault
       get '/usage',         to: 'data#usage'
+      get '/tags',          to: 'data#tags'
       get '/recyclebin',    to: 'data#recyclebin'
       get '/archive',       to: 'data#archive'
       get '/documents',     to: 'data#documents', as: :data_documents
       get '/uploads',       to: 'data#uploads'
       get '/discussions',   to: 'data#discussions'
       get '/collaboration', to: 'data#collaboration'
+      get '/green',         to: 'data#green'
       scope 'yearly' do
         get '/',      to: 'data#yearly_index',   as: :year_in_review
         get '/:year', to: 'data#review_year',    as: :review_year
@@ -148,6 +155,7 @@ Rails.application.routes.draw do
         get '/', to: 'export#index', as: :notebook_export
     
         get '/outline',       to: 'export#outline',       as: :notebook_outline
+        get '/markdown',      to: 'export#markdown',      as: :notebook_markdown
         get '/notebook.json', to: 'export#notebook_json', as: :notebook_json
         get '/notebook.xml',  to: 'export#notebook_xml',  as: :notebook_xml
         get '/notebook.yml',  to: 'export#notebook_yml',  as: :notebook_yml
@@ -167,6 +175,7 @@ Rails.application.routes.draw do
 
   # Info pages
   scope '/about' do
+    get '/paper',   to: 'main#paper',       as: :green_paper
     get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
   end
 
@@ -272,6 +281,7 @@ Rails.application.routes.draw do
       get '/churn',                to: 'admin#churn'
       get '/hatewatch/:matchlist', to: 'admin#hate'
       get '/spamwatch',            to: 'admin#spam'
+      get '/notifications',        to: 'admin#notifications'
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
@@ -281,6 +291,8 @@ Rails.application.routes.draw do
   scope '/worldbuilding' do
     Rails.application.config.content_types[:all].each do |content_type|
       get content_type.name.downcase.pluralize, to: "information##{content_type.name.downcase.pluralize}", as: "#{content_type.name.downcase}_worldbuilding_info"
+      # TODO: documents info page
+      # TODO: timelines info page
     end
   end
 

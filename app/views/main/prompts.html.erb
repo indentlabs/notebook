@@ -12,7 +12,8 @@
         redirect_path: prompts_path,
         show_empty_prompt: true,
         expand_by_default: true,
-        show_view_button: false
+        show_view_button: false,
+        include_quick_reference: false
       } %>
       
       <p class="grey-text text-lighten-1 center">
@@ -23,8 +24,8 @@
 
     <% if @attribute_field_to_question.present? %>
       <div class="col m12 l4">
-        <%= link_to @content, class: 'entity-trigger sidenav-trigger', data: { target: "quick-reference-#{@content.class.name}-#{@content.id}"} do %>
-          <div class="hoverable card <%= @content.class.color %>">
+        <%= link_to @content.view_path, class: 'entity-trigger sidenav-trigger', data: { target: "quick-reference-#{@content.page_type}-#{@content.id}"} do %>
+          <div class="hoverable card <%= @content.color %>">
             <div class="card-content white-text">
               <i class="material-icons right">vertical_split</i>
               Quick-reference <%= @content.name %>
@@ -64,7 +65,7 @@
   <%= render partial: 'prompts/smart_sidebar', locals: { content: @content } %>
 
 <% else %>
-  <%= image_tag 'tristan/small.png',
+  <%= image_tag 'tristan/small.webp',
     class: 'tooltipped tristan right',
     data: {
       position: 'left',

@@ -2,14 +2,14 @@ source 'https://rubygems.org'
 ruby "~> 2.7"
 
 # Server
-gem 'rails', '6.0.3.4'
-gem 'puma', '~> 5.3'
+gem 'rails'
+gem 'puma', '~> 5.6'
 gem 'puma-heroku'
 # gem 'bootsnap', require: false
 gem 'sprockets', '~> 3.7.2'
 
 # Storage
-gem 'aws-sdk', '~> 3.0'
+gem 'aws-sdk', '~> 3.1'
 gem 'aws-sdk-s3'
 gem 'filesize'
 
@@ -42,7 +42,6 @@ gem 'paranoia'
 # Javascript
 gem 'coffee-rails'
 gem 'rails-jquery-autocomplete'
-gem 'animate-rails'
 gem 'webpacker'
 gem 'react-rails'
 
@@ -75,9 +74,12 @@ gem 'barnes'
 
 # Forum
 gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
+# gem 'thredded', git: 'https://github.com/thredded/thredded', branch: 'master'
+# gem 'thredded', git: 'https://github.com/sudara/thredded', branch: 'master'
 gem 'rails-ujs'
 gem 'language_filter'
 # gem 'onebox', git: 'https://github.com/indentlabs/onebox.git'
+gem 'discordrb'
 
 # Smarts
 gem 'word_count_analyzer'
@@ -90,7 +92,7 @@ gem 'redis'
 gem 'csv'
 
 # Admin
-gem 'rails_admin', '~> 2.1'
+gem 'rails_admin', '~> 2.2'
 
 # Tech debt & hacks
 gem 'binding_of_caller' # see has_changelog.rb
@@ -106,8 +108,9 @@ group :production do
 end
 
 group :test, :production do
-  gem 'mini_racer'
-  gem 'pg', '~> 1.2'
+  gem 'pg', '~> 1.3'
+
+  gem "mini_racer", "~> 0.6.2"
 end
 
 group :test do

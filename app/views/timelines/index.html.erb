@@ -59,13 +59,17 @@
 
             </div>
             <div class="card-action">
-              <%= link_to timeline_path(timeline), class: 'blue-text left' do %>
-                <i class="material-icons left"><%= Timeline.icon %></i>
-                View
+              <% if timeline.readable_by?(current_user) %>
+                <%= link_to timeline_path(timeline), class: 'blue-text left' do %>
+                  <i class="material-icons left"><%= Timeline.icon %></i>
+                  View
+                <% end %>
               <% end %>
-              <%= link_to edit_timeline_path(timeline), class: 'green-text right' do %>
-                <i class="material-icons left">edit</i>
-                Edit
+              <% if timeline.updatable_by?(current_user) %>
+                <%= link_to edit_timeline_path(timeline), class: 'green-text right' do %>
+                  <i class="material-icons left">edit</i>
+                  Edit
+                <% end %>
               <% end %>
               <div class="clearfix"></div>
             </div>

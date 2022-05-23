@@ -1,0 +1,96 @@
+<%
+  showed_any_tags = false
+%>
+
+<h2 class="grey-text" style="font-size: 2rem">Your Notebook.ai tags</h2>
+<ul class="collapsible">
+  <% Rails.application.config.content_types[:all].each do |content_type| %>
+    <%
+      grouped_tags = PageTag.where(page_type: content_type.name, user_id: current_user).order('tag ASC').group_by(&:tag)
+
+      next if grouped_tags.values.length == 0
+
+      showed_any_tags = true
+    %>
+
+    <li>
+      <div class="collapsible-header">
+        <i class="material-icons <%= content_type.text_color %>"><%= content_type.icon %></i>
+        <%= content_type.name %> tags
+        <span class="badge"><%= grouped_tags.values.length %></span>
+      </div>
+      <div class="collapsible-body">
+        <% grouped_tags.each do |tag, page_list| %>
+          <div class="row" style="border-bottom: 1px solid #ccc; padding-bottom: 2em; margin-bottom: 2em">
+            <div class="col s12 m6 l4">
+              <div>
+                <%=
+                  link_to send(
+                    "#{content_type.name.downcase.pluralize}_path",
+                    slug: PageTagService.slug_for(tag)
+                  ) do
+                %>
+                  <span class="<%= content_type.color %> white-text" style="padding: 0.3em 0.4em; font-size: 1em">
+                    <%= tag %>
+                  </span>
+                <% end %>
+              </div>
+              <br />
+              <div>
+                <%= form_for tag, url: rename_tag_path(tag: tag) do |f| %>
+                  <div class="row">
+                    <div class="input-field col s12 m12 l12">
+                      <%= f.text_field :label, class: '', value: tag %>
+                      <%= f.label :label, 'Rename tag' %>
+                    </div>
+                    <div class="col s12 m12 l12">
+                      <%= f.submit 'Mass-rename', class: 'btn white blue-text', onclick: "javascript: M.toast({ html: 'Saving changes...' });" %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+              <div style="text-align: right">
+                <%=
+                  link_to 'Delete this tag', tag_remove_path(
+                    page_type: content_type.name,
+                    slug: PageTagService.slug_for(tag)
+                  ), data: {
+                    confirm: "Are you sure? This will delete this tag and remove it from all pages."
+                  }, class: 'red-text btn red white-text'
+                %>
+              </div>
+            </div>
+            <div class="col s12 m6 l8">
+              <div class="grey-text" style="padding-top: 1em">
+                Used by <%= pluralize page_list.length, 'page' %>
+              </div>
+              <% page_list.each do |page_tag| %>
+                <div class="chip js-load-page-name" data-klass="<%= page_tag.page_type %>" data-id="<%= page_tag.page_id %>">
+                  <%= link_to send("#{page_tag.page_type.downcase}_path", page_tag.page_id) do %>
+                    <span class="<%= content_type.text_color %>">
+                      <i class="material-icons left">
+                        <%= content_type.icon %>
+                      </i>
+                    </span>
+                    <span class="name-container">
+                      <em>Loading <%= content_type.name %> name...</em>
+                    </span>
+                  <% end %>
+                  <%= link_to destroy_specific_tag_path(page_tag), method: :delete, class: 'tooltipped', data: { tooltip: 'Remove this tag from this page' }, remote: true do %>
+                    <i class="close material-icons">close</i>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </li>
+  <% end %>
+</ul>
+
+<% if !showed_any_tags %>
+  <div class="card-panel">
+    When you create tags for your pages, they'll appear here. Come back later when you've added some!
+  </div>
+<% end %>

@@ -5,13 +5,28 @@ class TimelinesController < ApplicationController
   before_action :set_navbar_color
   before_action :set_sidenav_expansion
 
+  before_action :require_premium_plan, only: [:new, :create]
+  before_action :require_timeline_read_permission, only: [:show]
+  before_action :require_timeline_edit_permission, only: [:edit, :update]
+
   # GET /timelines
   def index
+    cache_linkable_content_for_each_content_type
+
+    # TODO: We SHOULD be just doing the below, but since it returns ContentPage stand-ins instead
+    # of actual Timeline models, it's a bit wonky to get all the Timeline-specific logic in place
+    # without reworking most of the views. For now, we're just grabbing timelines and contributable
+    # timelines manually.
+    # @timelines = @linkables_raw.fetch('Timeline', [])
     @timelines = current_user.timelines
+
     @page_title = "My timelines"
 
     if @universe_scope
-      @timelines = @timelines.where(universe: @universe_scope)
+      @timelines = Timeline.where(universe: @universe_scope)
+    else
+      # Add in all timelines from shared universes also
+      @timelines += Timeline.where(universe_id: current_user.contributable_universe_ids)
     end
 
     @page_tags = PageTag.where(
@@ -24,17 +39,12 @@ class TimelinesController < ApplicationController
     end
 
     # if params.key?(:favorite_only)
-    #   @content.select!(&:favorite?)
+    #   @timelines.select!(&:favorite?)
     # end
-
   end
 
   def show
     @page_title = @timeline.name
-
-    unless @timeline.privacy == 'public' || (user_signed_in? && current_user == @timeline.user)
-      return redirect_back(fallback_location: root_path, notice: "You don't have permission to view that timeline!")
-    end
   end
 
   # GET /timelines/new
@@ -45,11 +55,8 @@ class TimelinesController < ApplicationController
 
   # GET /timelines/1/edit
   def edit
-    @page_title = "Editing " + @timeline.name
-    
+    @page_title = "Editing #{@timeline.name}"
     @suggested_page_tags = []
-
-    raise "No Access"   unless user_signed_in? && current_user == @timeline.user
   end
 
   # POST /timelines
@@ -68,8 +75,6 @@ class TimelinesController < ApplicationController
 
   # PATCH/PUT /timelines/1
   def update
-    return unless user_signed_in? && current_user == @timeline.user
-
     if @timeline.update(timeline_params)
       update_page_tags
 
@@ -86,6 +91,14 @@ class TimelinesController < ApplicationController
   end
 
   private
+
+  def require_timeline_read_permission
+    return user_signed_in? && @timeline.readable_by?(current_user)
+  end
+
+  def require_timeline_edit_permission
+    return user_signed_in? && @timeline.updatable_by?(current_user)
+  end
 
   # TODO: move this (and the copy in ContentController) into the has_page_tags concern?
   def update_page_tags

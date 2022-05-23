@@ -1,8 +1,14 @@
-class ContentController < ApplicationController
-  # todo we should probably spin off an Api::ContentController for #api_sort and anything else api-wise we need
+# frozen_string_literal: true
 
+# TODO: we should probably spin off an Api::ContentController for #api_sort and anything else 
+#       api-wise we need
+class ContentController < ApplicationController
   before_action :authenticate_user!, except: [:show, :changelog, :api_sort] \
     + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }
+
+  skip_before_action :cache_most_used_page_information, only: [
+    :name_field_update, :text_field_update, :tags_field_update, :universe_field_update, :api_sort
+  ]
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
@@ -21,49 +27,40 @@ class ContentController < ApplicationController
     @page_title = "My #{pluralized_content_name}"
 
     # Create the default fields for this user if they don't have any already
+    # TODO: uh, this probably doesn't belong here!
     @content_type_class.attribute_categories(current_user)
 
-    if @universe_scope.present? && @content_type_class != Universe
-      @content = @universe_scope.send(pluralized_content_name)
-        .includes(:page_tags, :image_uploads)
-        .unarchived
+    # Linkables cache is already scoped per-universe, includes contributor pages
+    @content = @linkables_raw.fetch(@content_type_class.name, [])
 
-      @show_scope_notice = true
-    else
-      @content = (
-        current_user.send(pluralized_content_name).unarchived.includes(:page_tags, :image_uploads) +
-        current_user.send("contributable_#{pluralized_content_name}").unarchived.includes(:page_tags, :image_uploads)
-      )
-
-      if @content_type_class != Universe
-        my_universe_ids = current_user.universes.pluck(:id)
-        @content.concat(@content_type_class.where(universe_id: my_universe_ids).unarchived)
-      end
-    end
-
-    @content = @content.to_a.flatten.uniq
+    @show_scope_notice = @universe_scope.present? && @content_type_class != Universe
 
     # Filters
     @page_tags = PageTag.where(
       page_type: @content_type_class.name,
       page_id:   @content.pluck(:id)
     ).order(:tag)
-    if params.key?(:tag)
-      @filtered_page_tags = @page_tags.where(slug: params[:tag])
+    if params.key?(:slug)
+      @filtered_page_tags = @page_tags.where(slug: params[:slug])
       @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
+    @page_tags = @page_tags.uniq(&:tag)
 
     if params.key?(:favorite_only)
       @content.select!(&:favorite?)
     end
-
-    @page_tags = @page_tags.uniq(&:tag)
 
     @content = @content.sort_by {|x| [x.favorite? ? 0 : 1, x.name] }
 
     @questioned_content = @content.sample
     @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
 
+    @random_image_including_private_pool_cache = ImageUpload.where(
+      content_type: @content_type_class.name,
+      content_id:   @content.pluck(:id)
+    ).group_by { |image| [image.content_type, image.content_id] }
+
+    # Uh, do we ever actually make JSON requests to logged-in user pages?
     respond_to do |format|
       format.html { render 'content/index' }
       format.json { render json: @content }
@@ -72,7 +69,7 @@ class ContentController < ApplicationController
 
   def show    
     content_type = content_type_from_controller(self.class)
-    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.map(&:name).include?(content_type.name)
+    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.include?(content_type.name)
 
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
@@ -126,6 +123,10 @@ class ContentController < ApplicationController
       end
 
       @content.save!
+
+      # If the user doesn't have this content type enabled, go ahead and automatically enable it for them
+      current_user.user_content_type_activators.find_or_create_by(content_type: @content.class.name)
+
       return redirect_to edit_polymorphic_path(@content)
     else
       return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
@@ -150,6 +151,10 @@ class ContentController < ApplicationController
     unless @content.updatable_by? current_user
       return redirect_to @content, notice: t(:no_do_permission)
     end
+
+    @random_image_including_private_pool_cache = ImageUpload.where(
+      user_id: current_user.id,
+    ).group_by { |image| [image.content_type, image.content_id] }
 
     respond_to do |format|
       format.html { render 'content/edit', locals: { content: @content } }
@@ -193,6 +198,9 @@ class ContentController < ApplicationController
           document_entity.update(entity_id: @content.reload.id)
         end
       end
+
+      # If the user doesn't have this content type enabled, go ahead and automatically enable it for them
+      current_user.user_content_type_activators.find_or_create_by(content_type: content_type.name)
 
       successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
@@ -289,10 +297,11 @@ class ContentController < ApplicationController
 
   def changelog
     content_type = content_type_from_controller(self.class)
-    return redirect_to root_path unless valid_content_types.map(&:name).include?(content_type.name)
+    return redirect_to root_path unless valid_content_types.include?(content_type.name)
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
     @serialized_content = ContentSerializer.new(@content)
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") unless @content.updatable_by?(current_user || User.new)
 
     if user_signed_in?
       @navbar_actions << {
@@ -421,6 +430,7 @@ class ContentController < ApplicationController
     set_entity
     referencing_page = @entity
 
+    # TODO: move this into a link mention update job
     valid_reference_ids = []
     referenced_page_codes = JSON.parse(attribute_value.value)
     referenced_page_codes.each do |page_code|
@@ -455,7 +465,7 @@ class ContentController < ApplicationController
 
     # We also need to update the cached `name` field on the content page itself
     entity_type = entity_params.fetch(:entity_type)
-    raise "Invalid entity type: #{entity_params.fetch(:entity_type)}" unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
+    raise "Invalid entity type: #{entity_params.fetch(:entity_type)}" unless valid_content_types.include?(entity_params.fetch('entity_type'))
     entity = entity_type.constantize.find_by(id: entity_params.fetch(:entity_id).to_i)
     entity.update(name: field_params.fetch('value', ''))
   end
@@ -469,35 +479,16 @@ class ContentController < ApplicationController
     attribute_value.value = text
     attribute_value.save!
 
-    # Create PageReferences for mentioned pages
-    tokens = ContentFormatterService.tokens_to_replace(text)
-    if tokens.any?
-      set_entity
+    UpdateTextAttributeReferencesJob.perform_later(attribute_value.id)
 
-      valid_reference_ids = []
-      tokens.each do |token|
-        reference = @entity.outgoing_page_references.find_or_initialize_by(
-          referenced_page_type:  token[:content_type],
-          referenced_page_id:    token[:content_id],
-          attribute_field_id:    @attribute_field.id,
-          reference_type:        'mentioned'
-        )
-        reference.cached_relation_title = @attribute_field.label
-        reference.save!
-
-        valid_reference_ids << reference.reload.id
-      end
-
-      # Delete all other references still attached to this field, but not present in this request
-      @entity.outgoing_page_references
-        .where(attribute_field_id: @attribute_field.id)
-        .where.not(id: valid_reference_ids)
-        .destroy_all
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: root_path, notice: "#{@attribute_field.label} updated!") }
+      format.json { render json: attribute_value, status: :success }
     end
   end
 
   def tags_field_update
-    return unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
+    return unless valid_content_types.include?(entity_params.fetch('entity_type'))
 
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
     attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
@@ -512,7 +503,7 @@ class ContentController < ApplicationController
   end
 
   def universe_field_update
-    return unless valid_content_types.map(&:name).include?(entity_params.fetch('entity_type'))
+    return unless valid_content_types.include?(entity_params.fetch('entity_type'))
 
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
     attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
@@ -580,7 +571,7 @@ class ContentController < ApplicationController
   end
 
   def valid_content_types
-    Rails.application.config.content_types[:all]
+    Rails.application.config.content_type_names[:all]
   end
 
   def initialize_object
@@ -656,7 +647,7 @@ class ContentController < ApplicationController
   def set_attributes_content_type
     @content_type = params[:content_type]
     # todo make this a before_action load_content_type
-    unless valid_content_types.map { |c| c.name.downcase }.include?(@content_type)
+    unless valid_content_types.map(&:downcase).include?(@content_type)
       raise "Invalid content type on attributes customization page: #{@content_type}"
     end
     @content_type_class = @content_type.titleize.constantize
@@ -671,7 +662,7 @@ class ContentController < ApplicationController
     entity_page_type = entity_params.fetch(:entity_type)
     entity_page_id   = entity_params.fetch(:entity_id)
     
-    return unless valid_content_types.map(&:name).include?(entity_page_type)
+    return unless valid_content_types.include?(entity_page_type)
     @entity = entity_page_type.constantize.find_by(id: entity_page_id)    
   end
 

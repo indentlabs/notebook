@@ -25,7 +25,8 @@ class ContributorService < Service
         icon:             Universe.icon,
         icon_color:       Universe.color,
         happened_at:      DateTime.current,
-        passthrough_link: Rails.application.routes.url_helpers.universe_path(universe)
+        passthrough_link: Rails.application.routes.url_helpers.universe_path(universe),
+        reference_code:   'invitation-to-contribute'
       ) if related_user.present?
     end
   end

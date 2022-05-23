@@ -19,7 +19,7 @@
   <%= content_tag :article, id: dom_id(post), class: "thredded--post thredded--#{post.read_state}--post #{muted_post ? muted_post_classes : 'card'}" do %>
     <%= render 'thredded/posts_common/actions', post: post, actions: local_assigns[:actions] %>
     <%= render 'thredded/posts_common/header', post: post %>
-    <%= ForumReplacementService.replace(content, current_user) || render('thredded/posts/content', post: post) %>
+    <%= ForumReplacementService.replace_for(content, current_user) || render('thredded/posts/content', post: post) %>
     <% if post.pending_moderation? && !Thredded.content_visible_while_pending_moderation %>
       <p class="thredded--alert thredded--alert-warning"><%= t 'thredded.posts.pending_moderation_notice' %></p>
     <% elsif post.blocked? && post.can_moderate? %>

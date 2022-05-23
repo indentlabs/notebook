@@ -2,15 +2,15 @@
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
 #
-# This file is the source Rails uses to define your schema when running `rails
-# db:schema:load`. When creating a new database, `rails db:schema:load` tends to
+# This file is the source Rails uses to define your schema when running `bin/rails
+# db:schema:load`. When creating a new database, `bin/rails db:schema:load` tends to
 # be faster and is potentially less error prone than running all of your
 # migrations from scratch. Old migrations may fail to apply correctly if those
 # migrations use external dependencies or application code.
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_05_005416) do
+ActiveRecord::Schema.define(version: 2021_10_27_065954) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -27,10 +27,17 @@ ActiveRecord::Schema.define(version: 2021_07_05_005416) do
     t.string "filename", null: false
     t.string "content_type"
     t.text "metadata"
-    t.bigint "byte_size", null: false
+    t.integer "byte_size", null: false
     t.string "checksum", null: false
     t.datetime "created_at", null: false
+    t.string "service_name", null: false
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
   create_table "api_keys", force: :cascade do |t|
@@ -165,6 +172,7 @@ ActiveRecord::Schema.define(version: 2021_07_05_005416) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.datetime "deleted_at"
+    t.integer "word_count_cache"
     t.index ["attribute_field_id", "deleted_at", "entity_id", "entity_type"], name: "attributes_afi_deleted_at_entity_id_entity_type"
     t.index ["attribute_field_id", "deleted_at"], name: "index_attributes_on_attribute_field_id_and_deleted_at"
     t.index ["attribute_field_id", "user_id", "entity_type", "entity_id", "deleted_at"], name: "attributes_afi_ui_et_ei_da"
@@ -3636,7 +3644,20 @@ ActiveRecord::Schema.define(version: 2021_07_05_005416) do
     t.integer "habitat_id"
   end
 
+  create_table "word_count_updates", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "entity_type", null: false
+    t.integer "entity_id", null: false
+    t.integer "word_count"
+    t.date "for_date"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["entity_type", "entity_id"], name: "index_word_count_updates_on_entity_type_and_entity_id"
+    t.index ["user_id"], name: "index_word_count_updates_on_user_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "api_keys", "users"
   add_foreign_key "api_requests", "application_integrations"
   add_foreign_key "api_requests", "integration_authorizations"
@@ -4047,4 +4068,5 @@ ActiveRecord::Schema.define(version: 2021_07_05_005416) do
   add_foreign_key "vehicles", "users"
   add_foreign_key "votes", "users"
   add_foreign_key "votes", "votables"
+  add_foreign_key "word_count_updates", "users"
 end

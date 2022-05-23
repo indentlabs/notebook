@@ -46,7 +46,8 @@ class SubscriptionService < Service
           icon:             'star',
           icon_color:       'text-darken-3 yellow',
           happened_at:      DateTime.current,
-          passthrough_link: Rails.application.routes.url_helpers.customization_content_types_path
+          passthrough_link: Rails.application.routes.url_helpers.customization_content_types_path,
+          reference_code:   'premium-activation'
         ) if user.reload.on_premium_plan?
 
         report_subscription_change_to_slack(user, plan_id)
@@ -126,4 +127,30 @@ class SubscriptionService < Service
       ].join("\n")
     )
   end
+
+  def self.recalculate_bandwidth_for(user)
+    base_bandwidth = User.new.upload_bandwidth_kb           #     50_000
+    premium_bonus  = BillingPlan.find(4).bonus_bandwidth_kb #  9_950_000
+    premium_total  = base_bandwidth + premium_bonus         # 10_000_000
+    referral_bonus = 100_000 # per referral
+
+    max_bandwidth = case user.selected_billing_plan_id
+      when nil, 1
+        base_bandwidth
+      when 2 # free-for-lifers
+        250_000
+      when 4, 5, 6 # premium
+        premium_total
+      else
+        raise "User with funky billing plan id: U=#{user.id} BP=#{user.selected_billing_plan_id}"
+    end
+
+    referral_bonus = user.referrals.count * referral_bonus
+    used_bandwidth = user.image_uploads.sum(:src_file_size) / 1000
+
+    remaining_bandwidth = max_bandwidth + referral_bonus - used_bandwidth
+
+    return remaining_bandwidth
+  end
+
 end

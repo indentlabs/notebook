@@ -1,16 +1,25 @@
-<%# todo extract "sidebar" and call it with @content, then also do the same in documents/components/smart_sidebar %>
-<% serialized_entity = ContentSerializer.new(content) %>
+<%#
+  This sidebar partial uses instantiated ContentPage models instead of the persisted content models (Character, Location, etc)
 
-<ul id="quick-reference-<%= content.class.name %>-<%= content.id %>" class="sidenav quick-reference-sidenav">
+  TODO: merge this with documents/components/smart_sidebar
+%>
+
+<%# todo extract "sidebar" and call it with @content, then also do the same in documents/components/smart_sidebar %>
+<%
+  raw_model = content.page_type.constantize.find_by(id: content.id, user: current_user)
+  serialized_entity = ContentSerializer.new(raw_model)
+%>
+
+<ul id="quick-reference-<%= content.page_type %>-<%= content.id %>" class="sidenav quick-reference-sidenav">
   <li>
     <div class="user-view">
       <div class="background">
-        <%= image_tag "card-headers/#{content.class.name.downcase.pluralize}.jpg", width: '100%' %>
+        <%= image_tag "card-headers/#{content.page_type.downcase.pluralize}.webp", width: '100%' %>
       </div>
       <a href="#name">
         <h1 class="white-text name bordered-text">
-          <i class="material-icons <%= content.class.text_color %> left">
-            <%= content.class.icon %>
+          <i class="material-icons <%= content.text_color %> left">
+            <%= content.icon %>
           </i>
           <%= content.name %>
         </h1>
@@ -83,15 +92,15 @@
   <li><a href="#" class="subheader">Actions</a></li>
 
   <li>
-    <%= link_to polymorphic_path(content), class: "blue-text", target: '_new' do %>
-      <i class="material-icons left <%= content.class.text_color %>"><%= content.class.icon %></i>
+    <%= link_to content.view_path, class: "blue-text", target: '_new' do %>
+      <i class="material-icons left <%= content.text_color %>"><%= content.icon %></i>
       <i class="material-icons right grey-text">exit_to_app</i>
       View <%= content.name %>
     <% end %>
   </li>
   <li>
-    <%= link_to edit_polymorphic_path(content), class: "green-text" do %>
-      <i class="material-icons left <%= content.class.text_color %>"><%= content.class.icon %></i>
+    <%= link_to content.edit_path, class: "green-text" do %>
+      <i class="material-icons left <%= content.text_color %>"><%= content.icon %></i>
       <i class="material-icons right grey-text">exit_to_app</i>
       Edit <%= content.name %>
     <% end %>

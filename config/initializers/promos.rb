@@ -6,7 +6,7 @@ Rails.application.config.promos[:promo_bogo] = {}
 Rails.application.config.promos[:promo_bogo][:start_date] = 'March 21, 2020'.to_date
 Rails.application.config.promos[:promo_bogo][:end_date] = Rails.application.config.promos[:promo_bogo][:start_date] + 2.weeks
 
-# Lore free during the month of April
+# Lore free during the month of April, 2020
 # Need to change Lore.rb authorizer at the end lol
 if Date.current >= 'March 1, 2020'.to_date
   if Date.current < 'April 1, 2020'.to_date

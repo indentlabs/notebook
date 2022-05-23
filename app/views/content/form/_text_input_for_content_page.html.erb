@@ -1,0 +1,62 @@
+<%
+  content_name = content.page_type.downcase
+
+  field_id = "#{content_name}_#{field.name}"
+  value = field.attribute_values.find_by(
+    user:        content.user,
+    entity_type: content.page_type,
+    entity_id:   content.id
+  ).try(:value)
+
+  should_autocomplete = defined?(autocomplete) && !!autocomplete
+  should_autosave     = defined?(autosave)     && !!autosave
+%>
+
+<div class="input-field content-field">
+  <% unless defined?(show_label) && !show_label %>
+    <%= f.label field.id do %>
+      <%= field.label.present? ? field.label : ' ' %>
+      <% if defined?(autocomplete) && autocomplete %>
+        <i class="material-icons grey-text lighten-2 tooltipped" style="font-size: 100%" data-tooltip="This field may suggest some ideas for you when you start typing." data-position="right">
+          offline_bolt
+        </i>
+      <% end %>
+    <% end %>
+  <% end %>
+  <%
+    placeholder = I18n.translate "attributes.#{content_name}.#{field.label.downcase.gsub(/\s/, '_')}",
+      scope: :serendipitous_questions,
+      name: content.name || "this #{content_name}",
+      default: 'Write as little or as much as you want!'
+  %>
+
+  <%= hidden_field_tag "field[name]", field[:id] %>
+  <%=
+    text_area_tag "field[value]",
+                  value,
+                  class: "js-can-mention-pages materialize-textarea" \
+                    + "#{' autocomplete js-autocomplete-' + field[:id].to_s if should_autocomplete}" \
+                    + "#{' autosave-closest-form-on-change' if should_autosave}",
+                  placeholder: placeholder
+  %>
+</div>
+
+<% if defined?(autocomplete) && autocomplete %>
+  <%= content_for :javascript do %>
+    $(function() {
+      // This setTimeout is an unfortunate hack to ensure this runs after initializing materialize
+      setTimeout(function() {
+        console.log("Initializing autocomplete for #<%= "#{content_name}_#{field.label}" %>");
+
+        $('.js-autocomplete-<%= field.id.to_s %>').autocomplete({
+          limit: 5,
+          data: {
+            <% autocomplete.each do |autocomplete_option| %>
+              "<%= autocomplete_option %>": null,
+            <% end %>
+          }
+        });
+      }, 1000);
+    });
+  <% end %>
+<% end %>

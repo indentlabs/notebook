@@ -111,5 +111,47 @@ namespace :data_integrity do
     end
 
   end
+
+  desc "Remove orphan page references"
+  task remove_orphan_page_references: :environment do
+    PageReference.find_each do |reference|
+      if reference.referencing_page.nil?
+        puts "Deleting reference #{reference.id}"
+        reference.destroy
+        next
+      end
+
+      if reference.referenced_page.nil?
+        puts "Deleting reference #{reference.id}"
+        reference.destroy
+        next
+      end
+    end
+  end
+
+  desc "Ensure all users have the correct upload bandwidth amounts"
+  task correct_bandwidths: :environment do
+    puts "Disabling SQL logging"
+    old_logger = ActiveRecord::Base.logger
+    ActiveRecord::Base.logger = nil
+
+    # For the sake of minimizing db updates while blazing through all users,
+    # we ignore a small amount (1kb) of difference between saved bandwidth
+    # and calculated bandwidth. Users should never be more than 1kb off though.
+    byte_lenience = 1000
+
+    User.find_each do |user|
+      correct_bandwidth = SubscriptionService.recalculate_bandwidth_for(user)
+
+      difference = user.upload_bandwidth_kb - correct_bandwidth
+      if difference.abs >  byte_lenience
+        # puts "Correcting user #{user.id} bandwidth: #{user.upload_bandwidth_kb} --> #{correct_bandwidth}"
+        user.update(upload_bandwidth_kb: correct_bandwidth)
+      end
+    end
+
+    puts "Re-enabling SQL logging"
+    ActiveRecord::Base.logger = old_logger
+  end
 end
 

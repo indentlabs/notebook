@@ -2,8 +2,40 @@ class ForumReplacementService < Service
   # Cool replacements we could eventually do not for pranking
   # [roll N] = random number between 1 and N
   # [roll N, M] = random number between N and M
+  # [@reader] = username of the reader
 
-  WORD_REPLACEMENTS = {
+  # NOTE: could do this shader style on word replacements if we want a ui :) [ReplacementList(color, replacements, &active?)]
+
+  # blackout replacements
+  FORBIDDEN_WORD_REPLACEMENTS = {
+    
+  }
+
+  SPAM_WORD_REPLACEMENTS = {
+    'cash app'          => 'pls ban me andrew',
+    'cashapp'           => 'hey mr andrew come over here'
+  }
+
+  # perspective changes, always surrounded by {} (e.g. {@reader} )
+  PERSPECTIVE_REPLACEMENTS = {
+    '@reader'           => Proc.new { |trigger, user| (user.nil? ? 'anonymous reader' : user.try(:display_name)) || 'anonymous reader' }
+    # 'their'             => Proc.new { |_, _| ["they're", "their", "there"].sample }
+    # 'there'             => Proc.new { |_, _| ["they're", "their", "there"].sample }
+    # "they're"           => Proc.new { |_, _| ["they're", "their", "there"].sample }
+  }
+
+  # turn on and off at will
+  CASUAL_CHAOS_WORD_REPLACEMENTS = {
+    'andrew'            => 'andrew (Our Supreme Lord and Overseer)',
+    'amy'               => 'amy (the most wonderful woman in the world)',
+  }
+
+  REFERENCE_REPLACEMENTS = {
+    # [[Character-4]]
+  }
+
+  # gremlin replacements
+  GREMLINS_WORD_REPLACEMENTS = {
     '<3'                => "<span class='red-text'>&heart;</span>",
     '$5'                => '[̲̅$̲̅(̲̅5̲̅)̲̅$̲̅]',
     '0/10'              => '10/10',
@@ -22,9 +54,8 @@ class ForumReplacementService < Service
     'alchohol'          => 'giggle juice',
     'alien'             => 'extraterrestrial bopper',
     'aliens'            => 'extraterrestrial boppers',
-    'amy'               => 'the most wonderful woman in the world',
+    'alpha'             => 'beta',
     'an hour'           => 'exactly 3600 seconds',
-    'andrew'            => 'andrew (Our Supreme Lord and Overseer)',
     'announcement'      => 'shouty spouty',
     'announcements'     => 'shouty spouties',
     "April Fool's Day"  => 'the best holiday of the year',
@@ -36,13 +67,13 @@ class ForumReplacementService < Service
     'askew'             => 'cattywampus',
     'attorney'          => 'lawyerboi-at-law',
     'attornies'         => 'lawyerbois-at-law',
+    'automatically'     => 'automagically',
     'autumn'            => 'rainseason (bestseason)',
     'aviators'          => 'cool kid shades',
     'avocado'           => 'greenseed toastmash',
     'aware'             => 'cognizant',
     'awesome'           => "bee's knees",
     'B&B'               => 'Bungeons & Bragons',
-    'bad'               => 'bodge',
     'ball'              => 'blimpy bounce bounce',
     'balls'             => 'blimpy bounce bounces',
     'balloon'           => 'elastic breath trap',
@@ -53,6 +84,7 @@ class ForumReplacementService < Service
     'bears'             => '(ᵔᴥᵔ)(ᵔᴥᵔ)',
     'bed'               => 'nighttime dreamvessel',
     'beds'              => 'nighttime dreamvessels',
+    'beta'              => 'alpha',
     'bird'              => 'government spy drone',
     'birds'             => 'government spy drones',
     'blood'             => 'human syrup',
@@ -152,14 +184,13 @@ class ForumReplacementService < Service
     'grass'             => 'groundfuzzy',
     'gravy'             => 'meat water',
     'greenhouse'        => 'clearhouse',
-    'gremlin'           => 'extremely smart alien being that is here to help',
-    'gremlins'          => 'extremely smart alien beings that are here to help',
     'gun'               => 'rooty tooty point-n-shooty',
     'guns'              => 'rooty tooty point-n-shooties',
     'hamburger'         => 'beef wellington ensemble with lettuce',
     'hamburgers'        => 'beef wellington ensembles with lettuce',
     'hat'               => 'fuzzy head chimney',
     'hate'              => 'absolutely love',
+    'h a t e'           => 'L O V E',
     'heart'             => '<em>corazón</em>',
     'hearts'            => '<em>corazones</em>',
     'hell'              => 'heck',
@@ -179,8 +210,6 @@ class ForumReplacementService < Service
     'keyboards'         => 'hoighty toighty tippy typers',
     'kidnap'            => 'surprise adoption',
     'kitchen'           => 'fridge-and-oven combination room',
-    'knee'              => 'leg hinge',
-    'knees'             => 'leg hinges',
     'knife'             => 'stabby stick',
     'knives'            => 'stabby sticks',
     'la croix'          => 'water that has been in the vicinity of a fruit at one point in the past few years',
@@ -188,7 +217,7 @@ class ForumReplacementService < Service
     'laptop'            => 'electrotablet with keys',
     'lechuga'           => 'lettuce',
     'lettuce'           => 'lechuga',
-    'life'              => 'like a box of chocolates',
+    'library'           => 'libary',
     'lightbulb'         => 'ceiling-bright',
     'lightbulbs'        => 'ceiling-brights',
     'lizard people'     => 'definitely normal human beings',
@@ -243,7 +272,7 @@ class ForumReplacementService < Service
     'prison'            => 'hoosegow locker',
     'raccoon'           => 'trash burgler',
     'radio'             => 'magic musicbox',
-    'rain'              => 'cloudy waterdrops',
+    'rain'              => 'cloudy juice',
     'recursion'         => 'recursion',
     'replaced'          => 'improved',
     'reverse'           => 'esrever',
@@ -281,6 +310,7 @@ class ForumReplacementService < Service
     'Stardew Valley'    => 'Farming Simulator 2016',
     'sticky'            => 'icky wicky',
     'stolen'            => 'nick wicketed',
+    'stupid'            => 'stoopid',
     'success'           => 'Yahtzee!',
     'summer'            => 'sunseason',
     'sup'               => 'soup',
@@ -338,46 +368,52 @@ class ForumReplacementService < Service
     'writing'           => 'scribble scrabbling',
     'writer'            => 'scribble scrabbler',
     'writers'           => 'scribble scrabblers',
+    'word'              => 'wod',
+    'words'             => 'wods',
+    'wordsmith'         => 'wodsmith',
     'yuge'              => '<span style="font-size: 40px">yuge</span>',
     'zalgo'             => 'H̶̛̼̼̪̝̞͓̞͕͇̯͚͎͚̘̳͕̱̤̠̗͔͇̙̣̰͓̖̰̯̀̓̐̑̇͊͂̀͋̒̐̓͒̒͊͊̕͜͝ͅE̴̡̧̨̨̲̥̯͎̭̻̩̞̘̞̪̞̗̭͖̻͙͕͎̮͕̺͕̲̘̻̣͚̳̥͍̙͈͚͍͉̗͙̱͖͚̾̂̇͛̉͋͊̾͛̆̀́͑͛̅̋͊̕͘͜͜͜͝ͅͅͅͅ ̸̡̡̨̡̨̛̞͎̹̩̬̗̗̞̬̰̮̙̪̖͈̣̹͔̺̫̰̓̔̉̋̈̈́͐́̿̈̀͊̿̈̉̅̃̊̽͗̈̿̈́̓̈́̎͌̄̀̆̌̎͗̋͒̋̿̋̊̈́͆̋̾̈̏̈́̋̿̕̕̚͝͝͠͠ͅͅͅC̵̛̘̳͙̪̭͖̲̞̯̰̜͇̈̾̈́͋̌̉̽̽͑̎͌̾̈́͌̑͊̊̔̀͆̌̀̇̓͊̀̂̇̿̃͑́̈́̆͂̈́̾̓́̂̂̓̂̍̍͛͆͌͌̽̎̍̀̒̆̀͗͋͘͘͘͝͠͝͝͠͝͝Ǫ̸͕̻̞̝̜͚̗̮̼͎̤͔̤̱͔̫͂̄̉̋̈͊͐͂̇̀̌̎́͑̐̀̈́͋̓̾̅͒̒̄͑̒̆̑̾͜͝͝͝͝M̷̧̧̡̨̛̛̩̭̞͍̼̝̗͕̖͇̣̣̩͆̿̑͒́̉̅̓̌̆̈́͐͒̾̐̂̿̓̚͘̚͜E̵̡̨̢̧̢̢̡̢̨̛̠̱̻̺̦͚̹͓̬͔̪̟̼̥̯̠̘͚̫̯͍̺͔̫̟͇̱̦̟̪͚͉̣̳͓͍̬̙̲͔̘͙͔̤̰̜͍̠̩͉͐̂̊̏̐̿̊̋͑̿̇̊̈́͗̎̋́́̉̓̂̐͑̇̐̐͋́̒̈́͛͑͒̂͒̂̔̀̄̈́̓͂͆̈́͒̌͆̓͗̋͐̔̑͐̕͘ͅͅͅŞ̴̧̧̡̢̧̡̢͕̝͚̝̖͚̣̞̫̻̯͔̳̗̝̰̗̰̰̥̭͕̜̜̫͍̪̳̘̣̺̠͉̗̟͕̹͇̬̘̘̪͆͗̎̕',
-
-    ## Crazy mode
-    # 'depression' => 'megasadness',
-    # 'ice cream' => 'eyes cream',
-    # 'strawberry' => 'plastic tubefruit',
-    # 'soul' => 'inner ghost',
-    # 'dance' => 'woopwoop',
-    # 'curling iron' => 'medieval torture device',
-    # 'gay' => 'rainbow',
-    # 'insurance' => 'the biggest scam known to man',
-    # 'lemonade' => 'sour drank',
-    # 'salamander' => 'baby dragon',
-    # 'scrolling' => 'vertically surfing through a screen',
-    # 'subtext' => 'subtweeting but IRL',
-    # 'how' => 'how now brown cow',
-    # 'midnight' => 'dayover',
-    # 'kill' => 'deathsnuggle',
-    # 'babe' => 'bae',
-    # 'video' => 'series of images played in rapid succession to give the illusion of movement on a static screen',
-    # 'online' => 'on the interwebs',
-    # 'internet' => 'series of electrotubes',
-    # 'highlighted' => 'becoming better',
-    # 'backfired' => 'went incredibly well',
-    # 'football' => 'soccer',
-    # 'baseball' => 'thrown soccer',
-    # 'basketball' => 'dribbling soccer',
-    # 'volleyball' => 'beach soccer',
-    # 'rule' => 'law you must obey',
-    # 'rules' => 'laws you must obey',
-    # 'why is this happening' => 'I think this is great',
   }
 
-  def self.replace(text, user=User.new)
-    replaced_text = text.dup
+  OVERLOAD_WORDS_REPLACEMENTS = {
+    'bad'                   => 'bodge',
+    'knee'                  => 'leg hinge',
+    'knees'                 => 'leg hinges',
+    'depression'            => 'megasadness',
+    'ice cream'             => 'eyes cream',
+    'life'                  => 'like a box of chocolates',
+    'strawberry'            => 'plastic tubefruit',
+    'gremlin'               => 'extremely smart alien being that is here to help',
+    'gremlins'              => 'extremely smart alien beings that are here to help',
+    'soul'                  => 'inner ghost',
+    'dance'                 => 'woopwoop',
+    'curling iron'          => 'medieval torture device',
+    'insurance'             => 'the biggest scam known to man',
+    'lemonade'              => 'sour drank',
+    'salamander'            => 'baby dragon',
+    'scrolling'             => 'vertically surfing through a screen',
+    'subtext'               => 'subtweeting but IRL',
+    'how'                   => 'how now brown cow',
+    'midnight'              => 'dayover',
+    'kill'                  => 'deathsnuggle',
+    'babe'                  => 'bae',
+    'video'                 => 'series of images played in rapid succession to give the illusion of movement on a static screen',
+    'online'                => 'on the interwebs',
+    'internet'              => 'series of electrotubes',
+    'highlighted'           => 'becoming better',
+    'backfired'             => 'went incredibly well',
+    'football'              => 'soccer',
+    'baseball'              => 'throwing soccer',
+    'basketball'            => 'dribbling soccer',
+    'volleyball'            => 'beach air soccer',
+    'rule'                  => 'law you must obey',
+    'rules'                 => 'laws you must obey',
+    'why is this happening' => 'I think this is great'
+  }
 
-    # WORD_REPLACEMENTS.each do |trigger, replacement|
-    #   replaced_text.gsub!(/\b#{trigger.downcase}\b/i, wrapped(replacement, trigger))
-    # end
+  def self.replace_for(text, user)
+    gremlins_phase = 0
+    replaced_text = text.dup
 
     # Page tag replacements
     replaced_text = ContentFormatterService.substitute_content_links(
@@ -385,10 +421,42 @@ class ForumReplacementService < Service
       user
     )
 
-    return replaced_text.html_safe
+    SPAM_WORD_REPLACEMENTS.each do |trigger, replacement|
+      replaced_text.gsub!(/\b#{trigger.downcase}\b/i, wrapped(replacement, trigger, 'red'))
+    end
+
+    PERSPECTIVE_REPLACEMENTS.each do |trigger, replacement|
+      replaced_text.gsub!(/{#{trigger.downcase}}/i, wrapped(replacement.call(trigger, user), trigger, 'blue'))
+    end
+
+    if false # not implemented: [[Character-123]] or https://www.notebook.ai/plan/characters/553 etc
+      REFERENCE_REPLACEMENTS.each do |trigger, replacement|
+        replaced_text.gsub!(/\b#{trigger.downcase}\b/i, wrapped(replacement, trigger, 'notebook-blue'))
+      end
+    end
+
+    if gremlins_phase >= 1
+      CASUAL_CHAOS_WORD_REPLACEMENTS.each do |trigger, replacement|
+        replaced_text.gsub!(/\b#{trigger.downcase}\b/i, wrapped(replacement, trigger, 'green'))
+      end
+    end
+
+    if gremlins_phase >= 2
+      GREMLINS_WORD_REPLACEMENTS.each do |trigger, replacement|
+        replaced_text.gsub!(/\b#{trigger.downcase}\b/i, wrapped(replacement, trigger, 'green'))
+      end
+    end
+
+    if gremlins_phase >= 3
+      OVERLOAD_WORDS_REPLACEMENTS.each do |trigger, replacement|
+        replaced_text.gsub!(/\b#{trigger.downcase}\b/i, wrapped(replacement, trigger, 'green'))
+      end
+    end
+
+    replaced_text.html_safe
   end
 
-  def self.wrapped(text, tooltip)
-    "<span class='blue lighten-5 tooltipped black-text' style='padding: 4px' data-tooltip='#{tooltip}'>#{text}</span>"
+  def self.wrapped(text, tooltip, color='blue')
+    "<span class='#{color} lighten-5 tooltipped black-text' style='padding: 4px' data-tooltip='#{tooltip}'>#{text}</span>"
   end
 end
