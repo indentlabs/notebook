@@ -110,8 +110,8 @@ $(document).ready(function () {
       var template = $('.timeline-event-template > .timeline-event-container');
       var cloned_template = template.clone(true).removeClass('timeline-event-template');
       var timeline_id = cloned_template.find('.timeline-event-container').first().data('timeline-id');
-      console.log('new event id = ' + new_event_id);
-      console.log('timeline_id = ' + timeline_id);
+      // console.log('new event id = ' + new_event_id);
+      // console.log('timeline_id = ' + timeline_id);
 
       // Update IDs to the newly-created event
       cloned_template.data('event-id', new_event_id);
@@ -129,8 +129,6 @@ $(document).ready(function () {
       var notes_field = cloned_template.find('.ref-notes');
       notes_field.find('textarea').attr('id', 'timeline-event-notes-' + new_event_id);
       notes_field.find('label').attr('for', 'timeline-event-notes-' + new_event_id);
-
-      
 
       //cloned_template.find('input[name="timeline_event[timeline_id]"]').val(timeline_id);
       cloned_template.find('.js-delete-timeline-event').attr('href', '/plan/timeline_events/' + new_event_id);
