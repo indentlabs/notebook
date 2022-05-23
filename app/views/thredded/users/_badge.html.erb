@@ -1,6 +1,10 @@
 <%
   badge_style  = 'padding: 3px 5px; font-size: 70%; font-weight: normal;'
   badge_text   = user.forums_badge_text
+
+  if user.favorite_page_type?
+    badge_text = "<i class='material-icons tiny #{content_class_from_name(user.favorite_page_type).try(:text_color)}' style='position: relative; top: 2px'>#{content_class_from_name(user.favorite_page_type).try(:icon)}</i> ".html_safe + badge_text
+  end
 %>
 
 <% if user.respond_to?(:selected_billing_plan_id) %>
