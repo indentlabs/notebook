@@ -33,7 +33,6 @@ $(document).ready(function () {
   $('.js-move-event-up').click(function () {
     var event_container = $(this).closest('.timeline-event-container');
     var event_id = event_container.data('event-id');
-    debugger;
 
     $.get(
       "/plan/move/timeline_events/" + event_id + "/up"
@@ -111,12 +110,28 @@ $(document).ready(function () {
       var template = $('.timeline-event-template > .timeline-event-container');
       var cloned_template = template.clone(true).removeClass('timeline-event-template');
       var timeline_id = cloned_template.find('.timeline-event-container').first().data('timeline-id');
-      // console.log('new event id = ' + new_event_id);
-      // console.log('timeline_id = ' + timeline_id);
+      console.log('new event id = ' + new_event_id);
+      console.log('timeline_id = ' + timeline_id);
 
       // Update IDs to the newly-created event
       cloned_template.data('event-id', new_event_id);
       cloned_template.attr('data-event-id', new_event_id);
+
+      // Update labels to jump to this event's fields
+      var title_field = cloned_template.find('.ref-title');
+      title_field.find('input').attr('id', 'timeline-event-title-' + new_event_id);
+      title_field.find('label').attr('for', 'timeline-event-title-' + new_event_id);
+
+      var desc_field = cloned_template.find('.ref-description');
+      desc_field.find('textarea').attr('id', 'timeline-event-description-' + new_event_id);
+      desc_field.find('label').attr('for', 'timeline-event-description-' + new_event_id);
+
+      var notes_field = cloned_template.find('.ref-notes');
+      notes_field.find('textarea').attr('id', 'timeline-event-notes-' + new_event_id);
+      notes_field.find('label').attr('for', 'timeline-event-notes-' + new_event_id);
+
+      
+
       //cloned_template.find('input[name="timeline_event[timeline_id]"]').val(timeline_id);
       cloned_template.find('.js-delete-timeline-event').attr('href', '/plan/timeline_events/' + new_event_id);
       cloned_template.find('.autosave-form').attr('action', '/plan/timeline_events/' + new_event_id);
