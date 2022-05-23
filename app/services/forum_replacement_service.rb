@@ -19,9 +19,6 @@ class ForumReplacementService < Service
   # perspective changes, always surrounded by {} (e.g. {@reader} )
   PERSPECTIVE_REPLACEMENTS = {
     '@reader'           => Proc.new { |trigger, user| (user.nil? ? 'anonymous reader' : user.try(:display_name)) || 'anonymous reader' }
-    # 'their'             => Proc.new { |_, _| ["they're", "their", "there"].sample }
-    # 'there'             => Proc.new { |_, _| ["they're", "their", "there"].sample }
-    # "they're"           => Proc.new { |_, _| ["they're", "their", "there"].sample }
   }
 
   # turn on and off at will
@@ -430,8 +427,12 @@ class ForumReplacementService < Service
     end
 
     if false # not implemented: [[Character-123]] or https://www.notebook.ai/plan/characters/553 etc
-      REFERENCE_REPLACEMENTS.each do |trigger, replacement|
-        replaced_text.gsub!(/\b#{trigger.downcase}\b/i, wrapped(replacement, trigger, 'notebook-blue'))
+      replaced_text.gsub!(ContentFormatterService::LINK_REGEX).each do |match, id|
+        link_token = {
+          content_type: $1.singularize,
+          content_id:   $2.to_i
+        }
+        return ContentFormatterService.replacement_for_token(link_token, User.new)
       end
     end
 

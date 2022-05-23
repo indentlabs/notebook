@@ -14,7 +14,7 @@ class ContentFormatterService < Service
   TOKEN_REGEX = /\[\[([^\-]+)\-([^\]]+)\]\]/
   
   # For finding links to Notebook.ai pages in the form notebook.ai/plan/characters/12345
-  LINK_REGEX = /notebook\.ai\/plan\/([\w]+)\/([\d]+)/
+  LINK_REGEX = /https?:\/\/(?:www\.)?(?:(?:\w)+\.)?notebook\.ai\/plan\/([\w]+)\/([\d]+)/
 
   # Only allow linking to content type classes
   # todo: we shouldn't have to map name here, but apparently rails is having a little difficulty
@@ -52,6 +52,7 @@ class ContentFormatterService < Service
     end
   end
 
+  # Build links for linking documents to the pages they reference
   def self.links_to_replace(text)
     text.scan(LINK_REGEX).map do |klass, id|
       # Sanitize klass (which is plural/lower to singular/title)
