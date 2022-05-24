@@ -428,14 +428,17 @@ class ForumReplacementService < Service
 
     if true # not implemented: [[Character-123]] or https://www.notebook.ai/plan/characters/553 etc
       replaced_text.gsub!(/>https?:\/\/(?:www\.)?(?:(?:\w)+\.)?notebook\.ai\/plan\/([\w]+)\/([\d]+)</).each do |match|
-        klass = $1.singularize
+        klass = $1.singularize.titleize
 
         linkable_whitelist = Rails.application.config.content_type_names[:all]
-        if linkable_whitelist.include? klass.titleize
-          #"><span class='chip js-load-page-name' data-klass='#{klass.titleize}' data-id='#{$2.to_i}'><span class='name-container'></span></span><"
-          chip = ContentFormatterService.name_autoloaded_chip_template(klass.titleize.constantize, $2.to_i)
-
-          ">#{chip}<"
+        if linkable_whitelist.include? klass
+          token = {
+            content_type:   klass,
+            content_id:     $2.to_i,
+            matched_string: "Invalid #{klass}"
+          }
+          replacement = ContentFormatterService.replacement_for_token(token, User.new)
+          ">#{replacement}<"
         else
           match
         end
