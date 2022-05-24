@@ -426,17 +426,19 @@ class ForumReplacementService < Service
       replaced_text.gsub!(/{#{trigger.downcase}}/i, wrapped(replacement.call(trigger, user), trigger, 'blue'))
     end
 
-    # Replace URLs to Notebook.ai content pages with clickable chips
     if true # not implemented: [[Character-123]] or https://www.notebook.ai/plan/characters/553 etc
-      replaced_text.gsub!(/[^\s]*notebook\.ai\/plan\/([\w]+)\/([\d]+)/).each do |match|
-        link_token = {
-          content_type: $1.singularize,
-          content_id:   $2.to_i
-        }
+      replaced_text.gsub!(/>https?:\/\/(?:www\.)?(?:(?:\w)+\.)?notebook\.ai\/plan\/([\w]+)\/([\d]+)</).each do |match|
+        klass = $1.singularize
 
-        # THIS IS WHERE WE ARE WORKING
-        #ContentFormatterService.replacement_for_token(link_token, User.new).html_safe
-        "why is this a link -- maybe try something other than gsub damn"
+        linkable_whitelist = Rails.application.config.content_type_names[:all]
+        if linkable_whitelist.include? klass.titleize
+          #"><span class='chip js-load-page-name' data-klass='#{klass.titleize}' data-id='#{$2.to_i}'><span class='name-container'></span></span><"
+          chip = ContentFormatterService.name_autoloaded_chip_template(klass.titleize.constantize, $2.to_i)
+
+          ">#{chip}<"
+        else
+          match
+        end
       end
     end
 

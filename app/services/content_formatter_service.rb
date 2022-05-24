@@ -116,6 +116,28 @@ class ContentFormatterService < Service
     end
   end
 
+  def self.name_autoloaded_chip_template(klass_model, id)
+    content_tag(:span, class: 'chip') do
+      body = ''
+      if klass_model
+        body += content_tag(:span, 
+          class: "js-load-page-name #{klass_model.text_color}",
+          data: { klass: klass_model.name, id: id }
+        ) do
+          [
+            content_tag(:i, class: 'material-icons left', style: 'position: relative; top: 3px;') do
+              klass_model.icon
+            end,
+            content_tag(:span, class: 'name-container') do
+              "<em>Loading #{klass_model.name.downcase} ##{id}...</em>".html_safe
+            end
+          ].join.html_safe
+        end
+      end
+      body.html_safe
+    end
+  end
+
   def self.inline_template(class_model=nil)
     content_tag(:span, class: 'inline-link') do
       content_tag(:span, class: class_model ? "#{class_model.text_color}" : '') do

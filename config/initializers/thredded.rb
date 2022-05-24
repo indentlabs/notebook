@@ -175,8 +175,8 @@ Rails.application.config.to_prepare do
   Thredded::TopicPolicy.prepend AllowUsersToDeleteOwnTopics
   Thredded::PrivateTopicPolicy.prepend AllowAdminModeration
 
-  Onebox::Engine::AllowlistedGenericOnebox.allowed_domains << "notebook.ai"
-  Onebox::Engine::AllowlistedGenericOnebox.allowed_domains << "papercut-server.herokuapp.com"
+  # Onebox::Engine::AllowlistedGenericOnebox.allowed_domains << "notebook.ai"
+  # Onebox::Engine::AllowlistedGenericOnebox.allowed_domains << "papercut-server.herokuapp.com"
 end
 
 Rails.application.config.to_prepare do

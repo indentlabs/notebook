@@ -100,6 +100,7 @@ $(document).ready(function () {
     });
   });
 
+
   $('.js-load-page-name').each(function() {
     // Replace this element's content with the name of the page
     var tag = $(this);
@@ -130,9 +131,6 @@ $(document).ready(function () {
         tag.find('.name-container').text("Unknown " + tag.data('klass'));
       });
     }
-
-
-    
   });
 
 });
