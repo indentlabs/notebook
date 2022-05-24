@@ -426,13 +426,17 @@ class ForumReplacementService < Service
       replaced_text.gsub!(/{#{trigger.downcase}}/i, wrapped(replacement.call(trigger, user), trigger, 'blue'))
     end
 
-    if false # not implemented: [[Character-123]] or https://www.notebook.ai/plan/characters/553 etc
-      replaced_text.gsub!(ContentFormatterService::LINK_REGEX).each do |match, id|
+    # Replace URLs to Notebook.ai content pages with clickable chips
+    if true # not implemented: [[Character-123]] or https://www.notebook.ai/plan/characters/553 etc
+      replaced_text.gsub!(/[^\s]*notebook\.ai\/plan\/([\w]+)\/([\d]+)/).each do |match|
         link_token = {
           content_type: $1.singularize,
           content_id:   $2.to_i
         }
-        return ContentFormatterService.replacement_for_token(link_token, User.new)
+
+        # THIS IS WHERE WE ARE WORKING
+        #ContentFormatterService.replacement_for_token(link_token, User.new).html_safe
+        "why is this a link -- maybe try something other than gsub damn"
       end
     end
 
