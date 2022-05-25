@@ -59,7 +59,30 @@ class ApiContentSerializer
   def value_for(attribute_field, content)
     case attribute_field.field_type
     when 'link'
-      self.raw_model.send(attribute_field.old_column_source)
+      page_links = attribute_field.attribute_values.find_by(entity_type: content.class.name, entity_id: content.id)
+      if page_links.nil?
+        # Fall back on old relation value
+        # We're technically doing a double lookup here (by converting response
+        # to link code, then looking up again later) but since this is just stopgap
+        # code to standardize links in views this should be fine for now.
+        if attribute_field.old_column_source.present?
+          self.raw_model.send(attribute_field.old_column_source).map { |page| "#{page.page_type}-#{page.id}" }
+        else
+          []
+        end
+
+      else
+        # Use new link system
+        begin
+          JSON.parse(page_links.value)
+        rescue
+          if page_links.value == ""
+            []
+          else
+            "Error loading Attribute ID #{page_links.id}"
+          end
+        end
+      end
 
     when 'tags'
       self.page_tags

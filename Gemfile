@@ -78,6 +78,7 @@ gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feat
 # gem 'thredded', git: 'https://github.com/sudara/thredded', branch: 'master'
 gem 'rails-ujs'
 gem 'language_filter'
+gem 'onebox', git: 'https://github.com/indentlabs/onebox.git', branch: 'notebook-engine'
 gem 'discordrb'
 
 # Smarts

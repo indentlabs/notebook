@@ -19,6 +19,7 @@ Notebook.init = function() {
   });
   $('.slider').slider({ height: 200, indicators: false });
   $('.dropdown-trigger').dropdown({ coverTrigger: false });
+  $('.dropdown-trigger-on-hover').dropdown({ coverTrigger: false, hover: true });
   $('.tooltipped').tooltip({ enterDelay: 50 });
   $('.with-character-counter').characterCounter();
   $('.materialboxed').materialbox();

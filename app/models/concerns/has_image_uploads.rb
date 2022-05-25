@@ -36,7 +36,10 @@ module HasImageUploads
     end
 
     def header_asset_for(class_name)
-      ActionController::Base.helpers.asset_path("card-headers/#{class_name.downcase.pluralize}.webp")
+      # Since we use this as a fallback image on SEO content (for example, Twitter cards for shared notebook pages),
+      # we need to include the full protocol + domain + path to ensure they will display the image. A relative path
+      # will not work.
+      "https://www.notebook.ai" + ActionController::Base.helpers.asset_url("card-headers/#{class_name.downcase.pluralize}.webp")
     end
   end
 end

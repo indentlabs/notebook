@@ -34,6 +34,8 @@ class PageLookupSidebar extends React.Component {
       show_data: false,
       category_open: {}
     };
+
+    window.page_lookup_cache = {};
   }
 
   classIcon(class_name) {
@@ -51,32 +53,45 @@ class PageLookupSidebar extends React.Component {
       category_open: {}
     });
 
-    // make api request
-    await axios.get(
-      "/api/v1/" + page_type.toLowerCase() + "/" + page_id
-        + '?application_token=4756de490e82956dc6329e6650aaec664e27ccd27e153e2f'
-        + '&authorization_token=167bb93139303904cf67f6480a29e71c9f1eaf7a28e902e1',
-      { 
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept':       'application/json'
-        }
-      }
-    ).then(response => {
-      // load response into list
+    if ((page_type + '-' + page_id) in window.page_lookup_cache) {
       this.setState({ 
-        page_data: response.data,
-        show_data: !response.data.hasOwnProperty('error'),
+        page_data: window.page_lookup_cache[page_type + '-' + page_id],
+        show_data: true,
         page_type: page_type,
         page_id:   page_id
       });
 
-    }).catch(err => {
-      console.log(err);
-      this.setDrawerVisible(false);
+    } else {
+      // make new api request
+      await axios.get(
+        "/api/v1/" + page_type.toLowerCase() + "/" + page_id
+          + '?application_token=4756de490e82956dc6329e6650aaec664e27ccd27e153e2f'
+          + '&authorization_token=167bb93139303904cf67f6480a29e71c9f1eaf7a28e902e1',
+        { 
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept':       'application/json'
+          }
+        }
+      ).then(response => {
+        // cache response
+        window.page_lookup_cache[page_type + '-' + page_id] = response.data;
 
-      return null;
-    });
+        // load response into list
+        this.setState({ 
+          page_data: response.data,
+          show_data: !response.data.hasOwnProperty('error'),
+          page_type: page_type,
+          page_id:   page_id
+        });
+
+      }).catch(err => {
+        console.log(err);
+        this.setDrawerVisible(false);
+
+        return null;
+      });
+    }
   };
 
   content_page_view_path(content_type, content_id) {

@@ -19,9 +19,6 @@ class ForumReplacementService < Service
   # perspective changes, always surrounded by {} (e.g. {@reader} )
   PERSPECTIVE_REPLACEMENTS = {
     '@reader'           => Proc.new { |trigger, user| (user.nil? ? 'anonymous reader' : user.try(:display_name)) || 'anonymous reader' }
-    # 'their'             => Proc.new { |_, _| ["they're", "their", "there"].sample }
-    # 'there'             => Proc.new { |_, _| ["they're", "their", "there"].sample }
-    # "they're"           => Proc.new { |_, _| ["they're", "their", "there"].sample }
   }
 
   # turn on and off at will
@@ -413,8 +410,13 @@ class ForumReplacementService < Service
 
   def self.replace_for(text, user)
     gremlins_phase = 0
-
     replaced_text = text.dup
+
+    # Page tag replacements
+    replaced_text = ContentFormatterService.substitute_content_links(
+      replaced_text,
+      user
+    )
 
     SPAM_WORD_REPLACEMENTS.each do |trigger, replacement|
       replaced_text.gsub!(/\b#{trigger.downcase}\b/i, wrapped(replacement, trigger, 'red'))
@@ -424,9 +426,22 @@ class ForumReplacementService < Service
       replaced_text.gsub!(/{#{trigger.downcase}}/i, wrapped(replacement.call(trigger, user), trigger, 'blue'))
     end
 
-    if false # not implemented: [[Character-123]] or https://www.notebook.ai/plan/characters/553 etc
-      REFERENCE_REPLACEMENTS.each do |trigger, replacement|
-        replaced_text.gsub!(/\b#{trigger.downcase}\b/i, wrapped(replacement, trigger, 'notebook-blue'))
+    if true # not implemented: [[Character-123]] or https://www.notebook.ai/plan/characters/553 etc
+      replaced_text.gsub!(/>https?:\/\/(?:www\.)?(?:(?:\w)+\.)?notebook\.ai\/plan\/([\w]+)\/([\d]+)</).each do |match|
+        klass = $1.singularize.titleize
+
+        linkable_whitelist = Rails.application.config.content_type_names[:all]
+        if linkable_whitelist.include? klass
+          token = {
+            content_type:   klass,
+            content_id:     $2.to_i,
+            matched_string: "Invalid #{klass}"
+          }
+          replacement = ContentFormatterService.replacement_for_token(token, User.new)
+          ">#{replacement}<"
+        else
+          match
+        end
       end
     end
 
