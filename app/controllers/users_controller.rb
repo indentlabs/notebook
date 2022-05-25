@@ -28,6 +28,10 @@ class UsersController < ApplicationController
       # We double up on the same returns from set_user here since we're calling set_user manually instead of a before_action
       return if @user.nil?
       return if @user.private_profile?
+
+      @random_image_including_private_pool_cache = ImageUpload.where(
+        user_id: @user.id,
+      ).group_by { |image| [image.content_type, image.content_id] }
       
       @content_type = content_type
       @content_list = @user.send(content_type_name).is_public.order(:name)
