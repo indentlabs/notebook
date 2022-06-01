@@ -1,0 +1,68 @@
+<header class="thredded--topic-header">
+  <%= view_hooks.topic_page.title.render self, topic: topic do %>
+    <h1 class="thredded--topic-header--title">
+      <i class="material-icons left blue-text">forum</i>
+      <%= topic.title %>
+      <div>
+        <small>
+          <cite class="thredded--topic-header--started-by">
+            <%= t 'thredded.topics.started_by_html',
+                  time_ago: time_ago(topic.created_at),
+                  user:     user_link(topic.user) %>
+          </cite>
+        </small>
+      </div>
+
+      <div class="thredded--post--dropdown">
+        <i class="material-icons thredded--post--dropdown--toggle">tune</i>
+
+        <div class="thredded--post--dropdown--actions">
+          <% if topic.can_update? %>
+            <%= link_to t('thredded.topics.edit'), topic.edit_path,
+                        class: 'thredded--post--dropdown--actions--item',
+                        rel: 'nofollow' %>
+          <% end %>
+          <% if user_signed_in? && params.key?(:id) %>
+            <%= link_to main_app.documentize_topic_path(params[:id]), class: 'thredded--post--dropdown--actions--item' do %>
+              Export to document
+            <% end %>
+            <%= link_to main_app.plaintext_topic_path(params[:id]), class: 'thredded--post--dropdown--actions--item', rel: 'nofollow' do %>
+              View as plaintext
+            <% end %>
+            <%= link_to main_app.irc_log_topic_path(params[:id]), class: 'thredded--post--dropdown--actions--item', rel: 'nofollow' do %>
+              View as chat log
+            <% end %>
+          <% end %>
+          <% if topic.can_destroy? %>
+            <div class="thredded--topic-delete--wrapper">
+              <%= button_to t('thredded.topics.delete_topic'), topic.destroy_path, method: :delete,
+                            form_class: 'thredded--topic-delete-form',
+                            class: 'thredded--button thredded--post--dropdown--actions--item',
+                            'data-confirm' => t('thredded.topics.delete_confirm') %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+            
+    </h1>
+  <% end %>
+  <% if thredded_current_user %>
+    <% if topic.followed? %>
+      <div class="thredded--topic-header--follow-info">
+        <span class="thredded--topic-header--follow-info--reason">
+          <%= topic_follow_reason_text topic.follow_reason %>
+        </span>
+        <%= button_to topic.unfollow_path, form: {class: 'thredded--topic-header--follow-info--unfollow'} do %>
+          <%= t('thredded.topics.unfollow') %>
+          <%= inline_svg_tag 'thredded/follow.svg', class: 'thredded--topic-header--follow-icon' %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="thredded--topic-header--follow-info">
+        <%= button_to t('thredded.topics.follow'), topic.follow_path,
+                      form: {class: 'thredded--topic-header--follow-info--follow'} %>
+      </div>
+    <% end %>
+  <% end %>
+  <%= render partial: 'thredded/topics/followers', locals: {topic: topic} %>
+</header>

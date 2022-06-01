@@ -142,7 +142,7 @@ class ContentSerializer
       end
 
     when 'tags'
-      self.raw_model.page_tags
+      self.page_tags
 
     else # text_area, name, universe, etc
       #codesmell here: we shouldn't ever have multiple attribute values but for some reason we do sometimes (in collaboration?)

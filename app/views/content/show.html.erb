@@ -1,8 +1,12 @@
 <%
+  page_description = "#{@content.name}, #{@content.description} — a fictional #{@content.class.name.downcase} on Notebook.ai"
+  page_description ||= "#{@content.name} is a fictional #{@content.class.name.downcase} on Notebook.ai"
+
   set_meta_tags title:       @content.name,
-                description: "#{%w(a e i o u).include?(content.class.name.downcase[0]) ? "An" : "A"} #{@content.class.name.downcase} on Notebook.ai",
+                description: page_description,
                 image_src:   @content.first_public_image,
-                og:          { type: 'website' }
+                og:          { type: 'website' },
+                twitter:     { card: 'photo', image: @content.first_public_image }
 %>
 
 <%= content_for :full_width_page_header do %>

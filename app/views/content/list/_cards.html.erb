@@ -33,13 +33,13 @@
         </div>
         <div class="card-action">
           <% if current_user.can_update?(content) %>
-            <%= link_to content.edit_path, class: 'green-text right', target: content.is_a?(Document) ? '_new' : '_self' do %>
+            <%= link_to content.is_a?(ContentPage) ? content.edit_path : edit_polymorphic_path(content), class: 'green-text right', target: content.is_a?(Document) ? '_new' : '_self' do %>
               <i class="material-icons left"><%= content_type.icon %></i>
               Edit
             <% end %>
           <% end %>
           <% if current_user.can_read?(content) %>
-            <%= link_to content.view_path, class: 'blue-text text-lighten-1' do %>
+            <%= link_to content.is_a?(ContentPage) ? content.view_path : content, class: 'blue-text text-lighten-1' do %>
               <i class="material-icons left"><%= content_type.icon %></i>
               View
             <% end %>

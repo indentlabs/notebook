@@ -18,7 +18,8 @@ class ImageUpload < ApplicationRecord
         SecureRandom.uuid,
         File.extname(filename).downcase
       ].join
-    }
+    },
+    s3_protocol: 'https'
   # has_one_attached :upload
 
   validates_attachment_content_type :src, content_type: /\Aimage\/.*\Z/

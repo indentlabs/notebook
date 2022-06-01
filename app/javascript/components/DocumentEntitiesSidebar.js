@@ -107,7 +107,9 @@ class DocumentEntitiesSidebar extends React.Component {
                                 <i className={"material-icons left " + this.classColor(entity_type) + "-text"}>
                                   { this.classIcon(entity_type) }
                                 </i>
-                                { entity.text }
+                                <span className='js-load-page-name' data-klass={entity_type} data-id={entity.entity_id}>
+                                  <span className='name-container'>{ entity.text }</span>
+                                </span>
                               </a>
                             </li>
                           );

@@ -12,11 +12,15 @@ class ContentFormatterService < Service
   # todo page slugs could be cool for this? I dunno. We probably don't want to use a
   # field like name that can change ([[bob]]) or have an ambiguous link.
   TOKEN_REGEX = /\[\[([^\-]+)\-([^\]]+)\]\]/
+  
+  # For finding links to Notebook.ai pages in the form notebook.ai/plan/characters/12345
+  LINK_REGEX = /https?:\/\/(?:www\.)?(?:(?:\w)+\.)?notebook\.ai\/plan\/([\w]+)\/([\d]+)/
 
   # Only allow linking to content type classes
   # todo: we shouldn't have to map name here, but apparently rails is having a little difficulty
   # https://s3.amazonaws.com/raw.paste.esk.io/Llb%2F64DJHK?versionId=19Lb_TtukDbo1J_IoCpkr.d.pwpW_vmH
-  VALID_LINK_CLASSES = Rails.application.config.content_types[:all].map(&:name) + %w(Timeline Document)
+  VALID_LINK_CLASSES = Rails.application.config.content_type_names[:all] + %w(Timeline Document)
+
   def self.show(text:, viewing_user: User.new)
     # We want to evaluate markdown first, because the markdown engine also happens
     # to strip out HTML tags. So: markdown, _then_ insert content links.
@@ -44,6 +48,21 @@ class ContentFormatterService < Service
         content_type:   klass,
         content_id:     id,
         matched_string: "[[#{klass}-#{id}]]"
+      }
+    end
+  end
+
+  # Build links for linking documents to the pages they reference
+  def self.links_to_replace(text)
+    text.scan(LINK_REGEX).map do |klass, id|
+      # Sanitize klass (which is plural/lower to singular/title)
+      sanitized_klass = klass.singularize.titleize
+      next unless VALID_LINK_CLASSES.include?(sanitized_klass)
+
+      {
+        content_type:   sanitized_klass,
+        content_id:     id,
+        matched_string: "https://www.notebook.ai/plan/#{klass}/#{id}"
       }
     end
   end
@@ -93,6 +112,28 @@ class ContentFormatterService < Service
         end
       end
       body += yield
+      body.html_safe
+    end
+  end
+
+  def self.name_autoloaded_chip_template(klass_model, id)
+    content_tag(:span, class: 'chip') do
+      body = ''
+      if klass_model
+        body += content_tag(:span, 
+          class: "js-load-page-name #{klass_model.text_color}",
+          data: { klass: klass_model.name, id: id }
+        ) do
+          [
+            content_tag(:i, class: 'material-icons left', style: 'position: relative; top: 3px;') do
+              klass_model.icon
+            end,
+            content_tag(:span, class: 'name-container') do
+              "<em>Loading #{klass_model.name.downcase} ##{id}...</em>".html_safe
+            end
+          ].join.html_safe
+        end
+      end
       body.html_safe
     end
   end
