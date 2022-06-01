@@ -1,7 +1,7 @@
 <div class="min-h-full">
   <div class="flex flex-col flex-1">
     <main class="flex-1 pb-8">
-      <div class="bg-white shadow">
+      <div class="bg-white shadow-md">
         <div class="px-4 sm:px-6 lg:max-w-6xl lg:mx-auto lg:px-8">
           <div class="py-6 md:flex md:items-center md:justify-between lg:border-t lg:border-gray-200">
             <div class="flex-1 min-w-0">
@@ -13,7 +13,7 @@
                   <div class="flex items-center">
                     <img class="h-16 w-16 rounded-full sm:hidden" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.6&w=256&h=256&q=80" alt="">
                     <h1 class="ml-3 text-2xl font-bold leading-7 text-gray-900 sm:leading-9 sm:truncate">
-                      Good morning, <%= current_user.display_name %>!
+                      Welcome back, <%= link_to current_user.display_name, current_user, class: User.text_color %>!
                     </h1>
                   </div>
                   <dl class="mt-6 flex flex-col sm:ml-3 sm:mt-1 sm:flex-row sm:flex-wrap">
@@ -38,8 +38,10 @@
               </div>
             </div>
             <div class="mt-6 flex space-x-3 md:mt-0 md:ml-4">
+              <!--
               <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500">Data Vault</button>
-              <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500">Discussions</button>
+              -->
+              <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Discussions</button>
             </div>
           </div>
         </div>
@@ -51,354 +53,209 @@
           <h2 class="text-lg leading-6 font-medium text-gray-900">Overview</h2>
           -->
           <div class="mt-2 mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            <!-- Card -->
+            <!-- Goals -->
 
-            <% 3.times do %>
-
-              <div class="bg-white overflow-hidden shadow rounded-lg">
-                <div class="p-5">
-                  <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                      <!-- Heroicon name: outline/scale -->
-                      <svg class="h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                      </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                      <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">Total words written / this month</dt>
-                        <dd>
-                          <div
-                            class="text-lg font-medium text-gray-900"
-                            data-controller="animated-number"
-                            data-animated-number-lazy-value=""
-                            data-animated-number-start-value="0"
-                            data-animated-number-end-value="53359"
-                            data-animated-number-duration-value="500"
-                          ></div>
-                        </dd>
-                      </dl>
-                    </div>
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="p-5">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <i class="material-icons h-6 w-6 text-gray-400">date_range</i>
                   </div>
-                </div>
-                <div class="bg-gray-50 px-5 py-3">
-                  <div class="text-sm">
-                    <a href="#" class="font-medium text-cyan-700 hover:text-cyan-900"> View streak? </a>
+                  <div class="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt class="text-sm font-medium text-gray-500 truncate">Weekly average</dt>
+                      <dd class="pb-1">
+                        <span
+                          class="text-lg font-medium text-gray-900"
+                          data-controller="animated-number"
+                          data-animated-number-lazy-value=""
+                          data-animated-number-start-value="0"
+                          data-animated-number-end-value="2583"
+                          data-animated-number-duration-value="500"
+                        ></span> words per day
+                      </dd>
+                    </dl>
                   </div>
                 </div>
               </div>
+              <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                  <a href="#" class="font-medium text-notebook-blue hover:text-blue-700">
+                    Some call-to-action
+                  </a>
+                </div>
+              </div>
+            </div>
 
-            <% end %>
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="p-5">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <i class="material-icons h-6 w-6 text-gray-400">calendar_month</i>
+                  </div>
+                  <div class="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt class="text-sm font-medium text-gray-500 truncate">Words written this month</dt>
+                      <dd class="pb-1">
+                        <div
+                          class="text-lg font-medium text-gray-900"
+                          data-controller="animated-number"
+                          data-animated-number-lazy-value=""
+                          data-animated-number-start-value="0"
+                          data-animated-number-end-value="33359"
+                          data-animated-number-duration-value="500"
+                        ></div>
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                  <a href="#" class="font-medium text-notebook-blue hover:text-blue-700">
+                    View daily breakdown
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="p-5">
+                <div class="flex items-center">
+                  <div class="w-0 flex-1">
+                    <dl>
+                      <dt class="text-sm font-medium text-gray-500 truncate">Your active writing streak</dt>
+                      <dd>
+                        <% 7.times.with_index do |i| %>
+                          <span class="relative inline-block mt-2 mr-2">
+                            <span class="text-gray-600 bg-gray-200 rounded-lg p-2 text-xs"><%= 25 + i %></span>
+                            <span class="absolute top-0 right-0 inline-flex items-center justify-center px-1 py-1 text-xs font-bold leading-none transform translate-x-1/2 translate-y-1/4 rounded-full">
+                              <i class="material-icons text-xl text-notebook-blue">check_circle</i>
+                            </span>
+                          </span>
+                        <% end %>
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                  <a href="#" class="font-medium text-notebook-blue hover:text-blue-700">
+                    You're on a 34-day streak!
+                  </a>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
+        <!-- Serendipitous prompt -->
+        <div class="bg-white shadow-md">
+          <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 lg:flex lg:justify-between space-x-0 md:space-x-16">
+            <div class="w-full">
+              <h2 class="text-sm font-extrabold text-gray-900 sm:tracking-tight mb-1">
+                Expand
+                <% if @universe_scope.present? %>
+                  <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.text_color}" %>,
+                <% else %>
+                  your worlds,
+                <% end %>
+                one question at a time <!-- | little by little -->
+              </h2>
+              <%=
+                if @content && @attribute_field_to_question
+                  render partial: 'cards/serendipitous/tailwind_content_question', locals: { 
+                    content: @content, 
+                    field: @attribute_field_to_question,
+                    expand_by_default: true,
+                    include_quick_reference: false
+                  }
+                end
+              %>
+            </div>
+            <div class="mt-10 w-full max-w-xs">
+              <%= link_to '#', class: "#{@content.color} text-white block rounded-lg p-2 mb-1" do %>
+                <i class="material-icons float-left ml-1 mr-3 text-4xl"><%= @content.icon %></i>
+                <div class="text-xs ml-8">Quick-reference</div>
+                <%= @content.name %>
+              <% end %>
 
-<div class="bg-white">
-  <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 lg:flex lg:justify-between">
-    <div class="max-w-xl">
-      <h2 class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">Page prompt</h2>
-      <p class="mt-5 text-xl text-gray-500">Start building for free, then add a site plan to go live. Account plans unlock additional features.</p>
-    </div>
-    <div class="mt-10 w-full max-w-xs">
-      <label for="currency" class="block text-base font-medium text-gray-500">Currency</label>
-      <div class="mt-1.5 relative">
-        <select id="currency" name="currency" class="appearance-none block w-full bg-none bg-white border border-gray-300 rounded-md pl-3 pr-10 py-2 text-base text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-          <option>Argentina (ARS)</option>
-          <option>Australia (AUD)</option>
-          <option selected>United States (USD)</option>
-          <option>Canada (CAD)</option>
-          <option>France (EUR)</option>
-          <option>Japan (JPY)</option>
-          <option>Nigeria (NGN)</option>
-          <option>Switzerland (CHF)</option>
-          <option>United Kingdom (GBP)</option>
-        </select>
-        <div class="pointer-events-none absolute inset-y-0 right-0 px-2 flex items-center">
-          <!-- Heroicon name: solid/chevron-down -->
-          <svg class="h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-          </svg>
+              <%= link_to prompts_path, class: "bg-orange-500 text-white block rounded-lg p-2" do %>
+                <i class="material-icons float-left ml-1 mr-3 -mt-1 text-2xl">lightbulb</i>
+                See more prompts
+                <% if @universe_scope.present? %>
+                  in this universe
+                <% end %>
+                <i class="material-icons float-right">arrow_right</i>
+              <% end %>
+
+              <p class="text-xs text-gray-500 mt-8">
+                <i class="material-icons text-xs mr-1"><%= @content.icon %></i>
+                Your answer will be automatically saved to your
+                <span class="<%= @content.text_color %>"><%= @content.name %></span>
+                <%= @content.page_type.downcase %> page.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-
-
-        <h2 class="max-w-6xl mx-auto mt-8 px-4 text-lg leading-6 font-medium text-gray-900 sm:px-6 lg:px-8">Pick up where you left off</h2>
-
+        <h2 class="max-w-6xl mx-auto mt-8 px-4 text-lg leading-6 font-medium text-gray-900 sm:px-6 lg:px-8">
+          Pick up where you left off
+        </h2>
         <div class="max-w-6xl mx-auto pt-2">
           <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <% 6.times do %>
-              <li class="col-span-1 bg-white rounded-lg shadow divide-y divide-gray-200">
-                <div class="w-full flex items-center justify-between p-6 space-x-6">
-                  <div class="flex-1 truncate">
-                    <div class="flex items-center space-x-3">
-                      <h3 class="text-gray-900 text-sm font-medium truncate">Jane Cooper</h3>
-                      <span class="flex-shrink-0 inline-block px-2 py-0.5 text-green-800 text-xs font-medium bg-green-100 rounded-full">Admin</span>
+            <% @recently_edited_pages.first(9).each do |page| %>
+              <% next if page.is_a?(Document) || page.is_a?(Timeline) %>
+
+              <%= link_to page.edit_path do %>
+                <li class="col-span-1 bg-white rounded-lg shadow divide-y divide-gray-200 hover:shadow-lg">
+                  <div class="w-full flex items-center">
+                    <div class="p-2">
+                      <%= image_tag page.random_image_including_private, class: 'w-32 h-32 bg-notebook-blue rounded-lg flex-shrink-0' %>
                     </div>
-                    <p class="mt-1 text-gray-500 text-sm truncate">Regional Paradigm Technician</p>
-                  </div>
-                  <img class="w-10 h-10 bg-gray-300 rounded-full flex-shrink-0" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60" alt="">
-                </div>
-                <div>
-                  <div class="-mt-px flex divide-x divide-gray-200">
-                    <div class="w-0 flex-1 flex">
-                      <a href="mailto:janecooper@example.com" class="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-gray-500">
-                        <!-- Heroicon name: solid/mail -->
-                        <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                        </svg>
-                        <span class="ml-3">View</span>
-                      </a>
-                    </div>
-                    <div class="-ml-px w-0 flex-1 flex">
-                      <a href="tel:+1-202-555-0170" class="relative w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-br-lg hover:text-gray-500">
-                        <!-- Heroicon name: solid/phone -->
-                        <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                        </svg>
-                        <span class="ml-3">Edit</span>
-                      </a>
+                    <div class="flex-1 truncate p-4">
+                      <div class="flex items-center space-x-3 mb-2">
+                        <h3 class="text-gray-900 text-sm font-medium truncate <%= page.text_color %>">
+                          <%= page.name %>
+                        </h3>
+                      </div>
+                      <p class="text-gray-500 text-sm truncate">
+                        word count
+                      </p>
+                      <p class="text-gray-500 text-sm truncate">
+                        last edited <%= time_ago_in_words page.updated_at %> ago
+                      </p>
                     </div>
                   </div>
-                </div>
-              </li>
+                </li>
+              <% end %>
             <% end %>
           </ul>
+        </div>
 
-
+        <h2 class="max-w-6xl mx-auto mt-8 px-4 text-lg leading-6 font-medium text-gray-900 sm:px-6 lg:px-8">Or create a new...</h2>
+        <div class="pt-2 mx-4">
+          <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-4 lg:grid-cols-10">
+            <% (@activated_content_types + ["Timeline", "Document"]).each do |content_type| %>
+              <% klass = content_class_from_name(content_type) %>
+              <%= link_to send("new_#{content_type.downcase}_path") do %>
+                <li class="col-span-1 <%= klass.color %> text-white py-6 rounded-lg shadow hover:shadow-lg">
+                  <div class="w-full text-center">
+                    <i class="material-icons text-6xl"><%= klass.icon %></i>
+                    <div>
+                      <%= content_type %>
+                    </div>
+                  </div>
+                </li>
+              <% end %>
+            <% end %>
+          </ul>
         </div>
 
       </div>
     </main>
-  </div>
-</div>
-
-
-also: focus on a universe / link to metaverse
-updates from collaborators (maybe in sidebar)
-create new Page
-customize activated pages
-
-
-
-<%= content_for :full_width_page_header do %>
-  <%= render partial: 'content/components/parallax_universe_header' %>
-<% end %>
-
-<%= content_for :full_width_page_content do %>
-  <div class="row">  
-    <%= render partial: 'main/dashboard_header_links' %>
-  </div>
-<% end %>
-<div class="row">
-  <% if @current_user_content.values.flatten.count.zero? %>
-    <div class="col s12 m7 l8">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title">Welcome to Notebook.ai!</div>
-          <p>
-            Notebook.ai is designed to feel like a specialized notebook for of all your worldbuilding ideas.
-          </p>
-          <br />
-          <p>
-            Start your worldbuilding journey by creating a universe with the button below (or jump straight to the good stuff!).
-            All of the worldbuildings pages you create can be assigned to a universe, which contains your world.
-            Once you've created a few worlds, they make it easy to focus on just the world you want to work on!
-          </p> 
-        </div>
-      </div>
-
-      <%= link_to new_universe_path do %>
-        <div class="hoverable card-panel <%= Universe.color %> white-text">
-          <i class="material-icons left"><%= Universe.icon %></i>
-          <i class="material-icons right">add</i>
-          Create a Universe
-        </div>
-      <% end %>
-
-      <% (@activated_content_types - ['Universe']).each do |type| %>
-        <%= link_to send("new_#{type.downcase}_path") do %>
-          <div class="hoverable card-panel <%= content_class_from_name(type).color %> white-text">
-            <i class="material-icons left"><%= content_class_from_name(type).icon %></i>
-            <i class="material-icons right">add</i>
-            Create a <%= type %>
-          </div>
-        <% end %>
-      <% end %>
-
-      <div class="card-panel">
-        <p>
-          The free tier of Notebook.ai was intentionally designed to be enough for most beginner worldbuilders. Your noun trifecta
-          (people, places, and things) can be created with Character, Location, and Item pages.
-        </p>
-        <p>
-          For more advanced worlds, the site is supported by an optional Premium subscription that unlocks
-          <%= pluralize Rails.application.config.content_types[:premium].count, 'other page type' %> for you to use!
-        </p>
-      </div>
-
-      <%= link_to customization_content_types_path do %>
-        <div class="card-panel hoverable blue white-text">
-          <i class="material-icons left">add</i>
-          Browse all page types
-        </div>
-      <% end %>
-        
-    </div>
-  <% else %>
-    <div class="col s12 m7 l8">
-      <div class="grey-text uppercase center">
-        Expand
-        <% if @universe_scope.present? %>
-          <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.text_color}" %>
-        <% else %>
-          your worlds
-        <% end %>
-      </div>
-      <%=
-        if @content
-          render partial: 'cards/serendipitous/content_question', locals: { 
-            content: @content, 
-            field: @attribute_field_to_question,
-            expand_by_default: true,
-            include_quick_reference: false
-          }
-        end
-      %>
-
-      <%= link_to prompts_path do %>
-        <div class="hoverable card-panel orange white-text" style="margin: 0; margin-bottom: 2em">
-          <i class="material-icons left">lightbulb_outline</i>
-          <i class="material-icons right">arrow_right</i>
-          View more prompts
-          <% if @universe_scope.present? %>
-            in this universe
-          <% end %>
-        </div>
-      <% end %>
-
-      <% if @universe_scope.present? || @current_user_content.fetch('Universe', []).count == 1 %>
-        <% if @current_user_content.except('Universe').values.flatten.any? %>
-          <div class="grey-text uppercase">
-            <%= pluralize @current_user_content.except('Universe').values.flatten.count, 'page' %>
-            in
-            <span class="<%= Universe.text_color %>">
-              <%= @universe_scope.try(:name) || @current_user_content.fetch('Universe').first.name %>
-            </span>
-            <%= link_to({ universe: 'all' }, class: 'right grey-text') do %>
-              See all universes instead
-              <i class="material-icons right" style="margin: 0">arrow_right</i>
-            <% end %>
-          </div>
-          <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
-            <div class="col s12 m12 l6">
-              <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id) do %>
-                <div class="hoverable card" style="margin-bottom: 2px">
-                  <div class="card-image">
-                    <%= image_tag content_page.random_image_including_private, style: 'height: 245px' %>
-                      <div class="card-title bordered-text">
-                        <i class="material-icons left <%= content_page.text_color %>" style="position: relative; top: 4px">
-                          <%= content_page.icon %>
-                        </i>
-                        <%= content_page.name %>
-                      </div>
-                  </div>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
-        <% end %>
-      <% else %>
-        <%
-          accessible_universes = @current_user_content.fetch('Universe', []) + current_user.contributable_universes
-          if accessible_universes.count > 1
-        %>
-          <div class="grey-text uppercase center">
-            Focus on one universe at a time
-          </div>
-
-          <%= render partial: 'notice_dismissal/messages/16' %>
-
-          <% accessible_universes.sort_by { |u| u.name.downcase }.each do |universe| %>
-            <div class="col s12 m6 l4">
-              <%= link_to "?universe=#{universe.id}" do %>
-                <div class="hoverable card" style="margin-bottom: 2px">
-                  <div class="card-image">
-                    <%= image_tag universe.random_image_including_private, style: 'height: 162px' %>
-                      <div class="card-title">
-                        <%= universe.name %>
-                      </div>
-                  </div>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
-        <% end %>
-      <% end %>
-    </div>
-  <% end %>
-
-  <div class="col s12 m5 l4">
-    <% if @recently_edited_pages.any? %>
-      <div class="grey-text uppercase center">
-        Pick up where you left off
-      </div>
-      <ul style="margin: 0;">
-        <% @recently_edited_pages.first(5).each do |page| %>
-          <% next if page.page_type === 'Document' && page.user != current_user %>
-
-          <% klass = content_class_from_name(page.page_type) %>
-          <%= link_to main_app.send("edit_#{page.page_type.downcase}_path", page.id), class: "#{klass.text_color}" do %>
-            <li class="card-panel hoverable" style="margin-bottom: 0.5em; border-left: 5px solid <%= klass.hex_color %>">
-              <i class="material-icons left <%= klass.text_color %>" style="font-size: 3em;"><%= klass.icon %></i>
-              <%= page.name %>
-              <div class="grey-text">
-                last edited
-                <%= time_ago_in_words page.updated_at %>
-                ago
-              </div>
-            </li>
-          <% end %>
-        <% end %>
-      </ul>
-      <% if @recently_edited_pages.count > 5 %>
-        <div style="margin-bottom: 2em;">
-          <%= link_to 'view more', '#', class: 'sidenav-trigger right', data: { target: 'recent-edits-sidenav' } %>
-        </div>
-      <% end %>
-    <% end %>
-
-    <div class="grey-text uppercase center">Create something new</div>
-    <% shown_creatures = false %>
-    <% @activated_content_types.sample(3).each do |type| %>
-      <% klass = content_class_from_name(type) %>
-      <% shown_creatures = true if type == 'Creature' %>
-      <div>
-        <%= link_to send("new_#{type.downcase}_path"), class: "white-text", style: 'width: 100%' do %>
-          <div class="hoverable card-panel <%= klass.color %>" style="margin-bottom: 4px">
-            <div class="valign-wrapper">
-              <i class="material-icons grey-bordered-text" class="left" style="font-size: 3em;"><%= klass.icon %></i>
-              <span style="font-size: 1.1em; margin-left: 1em">
-                New
-                <%= type %><br />
-                <small>
-                  You've created
-                  <%= pluralize @current_user_content.fetch(type, []).count, type.downcase %>
-                  <% if @universe_scope %>
-                    in this universe
-                  <% end %>
-                </small>
-              </span>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-
   </div>
 </div>
 
