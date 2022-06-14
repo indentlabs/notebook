@@ -31,20 +31,22 @@
             <% end %>
           </span>
         </div>
-        <div class="card-action">
-          <% if current_user.can_update?(content) %>
-            <%= link_to content.is_a?(ContentPage) ? content.edit_path : edit_polymorphic_path(content), class: 'green-text right', target: content.is_a?(Document) ? '_new' : '_self' do %>
-              <i class="material-icons left"><%= content_type.icon %></i>
-              Edit
+        <% if user_signed_in? %>
+          <div class="card-action">
+            <% if current_user.can_update?(content) %>
+              <%= link_to content.is_a?(ContentPage) ? content.edit_path : edit_polymorphic_path(content), class: 'green-text right', target: content.is_a?(Document) ? '_new' : '_self' do %>
+                <i class="material-icons left"><%= content_type.icon %></i>
+                Edit
+              <% end %>
             <% end %>
-          <% end %>
-          <% if current_user.can_read?(content) %>
-            <%= link_to content.is_a?(ContentPage) ? content.view_path : content, class: 'blue-text text-lighten-1' do %>
-              <i class="material-icons left"><%= content_type.icon %></i>
-              View
+            <% if current_user.can_read?(content) %>
+              <%= link_to content.is_a?(ContentPage) ? content.view_path : content, class: 'blue-text text-lighten-1' do %>
+                <i class="material-icons left"><%= content_type.icon %></i>
+                View
+              <% end %>
             <% end %>
-          <% end %>
-        </div>
+          </div>
+        <% end %>
         <div class="card-reveal">
           <span class="card-title">
             <%= content.name.presence || 'Document preview' %>
