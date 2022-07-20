@@ -1,5 +1,5 @@
 class UniversesController < ContentController
-  layout 'tailwind', only: [:hub]
+  layout 'tailwind', only: [:hub, :show]
 
   def hub
 
