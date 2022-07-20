@@ -8,7 +8,7 @@ class ContentSerializer
   attr_accessor :documents
 
   attr_accessor :raw_model
-  attr_accessor :class_name, :class_color, :class_icon
+  attr_accessor :class_name, :class_color, :class_text_color, :class_icon
 
   attr_accessor :data
   # name: 'blah,
@@ -39,6 +39,7 @@ class ContentSerializer
 
     self.class_name       = content.class.name
     self.class_color      = content.class.color
+    self.class_text_color = content.class.text_color
     self.class_icon       = content.class.icon
 
     self.page_tags        = content.page_tags.pluck(:tag) || []

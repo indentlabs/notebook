@@ -37,6 +37,7 @@ class MainController < ApplicationController
   end
 
   def table_of_contents
+    @serialized_content = ContentSerializer.new(@universe_scope)
   end
 
   def infostack
