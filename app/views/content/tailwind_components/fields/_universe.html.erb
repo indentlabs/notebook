@@ -1,0 +1,26 @@
+<%  klass, id = "Universe", field[:value] %>
+
+<%
+  content = if user_signed_in?
+    @current_user_content.fetch(klass, []).detect do |page|
+      page.page_type === klass && page.id === id.to_i
+    end
+  else
+    nil
+  end
+%>
+
+<span
+  data-klass="<%= klass %>"
+  data-id="<%= id %>"
+  class="<%= 'js-load-page-name' if content.nil? %> inline-flex items-center px-2.5 py-0.5 rounded-md font-medium bg-gray-100 hover:bg-gray-50 text-gray-800"
+>
+  <%= link_to send("#{klass.downcase}_path", id) do %>
+    <span class="<%= content_class_from_name(klass).text_color %>">
+      <i class="material-icons float-left mr-2">
+        <%= content_class_from_name(klass).icon %>
+      </i>
+    </span>
+    <%= content.try(:name) || "<em>Loading #{klass}</em>".html_safe %>
+  <% end %>
+</span>

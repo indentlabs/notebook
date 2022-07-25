@@ -15,23 +15,27 @@
 
         <div class="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
           <% category[:fields].each do |field| %>
-            <% next if field[:value].empty? %>
             <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 pt-4">
               <div class="pl-8">
                 <label for="<%= field[:name] %>" class="block text-sm font-medium text-gray-700">
                   <%= field[:label] %>
                 </label>
-                <div class="text-red-700 text-xs">(type: <%= field[:type] %>)</div>
               </div>
               <div class="mt-1 sm:mt-0 sm:col-span-2">
-                <%= field[:value] %>
-
-                <!-- field actions -->
-                <ul class="text-sm mt-2 space-x-8 text-notebook-blue hidden">
-                  <li class="inline-block"><%= link_to 'Edit', '#' %></li>
-                  <li class="inline-block"><%= link_to 'Revise', '#' %></li>
-                  <li class="inline-block"><%= link_to 'Change field type', '#' %></li>
-                </ul>
+                <%=
+                  case field[:type]
+                  when 'name'
+                    render partial: 'content/tailwind_components/fields/name', locals: { field: field }
+                  when 'text_area', 'textarea'
+                    render partial: 'content/tailwind_components/fields/text', locals: { field: field }
+                  when 'link'
+                    render partial: 'content/tailwind_components/fields/link', locals: { field: field }
+                  when 'universe'
+                    render partial: 'content/tailwind_components/fields/universe', locals: { field: field }
+                  when 'tags'
+                    render partial: 'content/tailwind_components/fields/tags', locals: { field: field }
+                  end
+                %>
               </div>
             </div>
           <% end %>
