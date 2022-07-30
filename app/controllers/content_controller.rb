@@ -3,7 +3,7 @@
 # TODO: we should probably spin off an Api::ContentController for #api_sort and anything else 
 #       api-wise we need
 class ContentController < ApplicationController
-  layout 'tailwind', only: [:index, :show]
+  layout 'tailwind', only: [:index, :show, :gallery]
 
   before_action :authenticate_user!, except: [:show, :changelog, :api_sort] \
     + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }
@@ -91,6 +91,19 @@ class ContentController < ApplicationController
     else
       return redirect_to root_path, notice: "You don't have permission to view that content."
     end
+  end
+
+  def gallery
+    content_type = content_type_from_controller(self.class)
+    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.include?(content_type.name)
+
+    @content = content_type.find_by(id: params[:id])
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+
+    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+
+    @serialized_content = ContentSerializer.new(@content)
   end
 
   def new

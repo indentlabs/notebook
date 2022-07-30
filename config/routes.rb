@@ -228,6 +228,7 @@ Rails.application.routes.draw do
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       # resources :characters do
       resources content_type.name.downcase.pluralize.to_sym do
+        get  :gallery,         on: :member
         get  :changelog,       on: :member
         get  :toggle_archive,  on: :member
         post :toggle_favorite, on: :member
