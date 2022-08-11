@@ -22,7 +22,7 @@ class Footer extends React.Component {
               </div>
             </div>
 
-            Notebook.ai © 2016-2021 <a href='http://www.indentlabs.com' className='grey-text'>
+            Notebook.ai © 2016-2022 <a href='http://www.indentlabs.com' className='grey-text'>
               Indent Labs, LLC
             </a>
           </div>
