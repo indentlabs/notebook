@@ -17,13 +17,15 @@
         else
           # Premium content
           if current_user.on_premium_plan? \
-            || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: page.class.name)
+            || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: page.class.name) \
+            || page.user == current_user
 
             valid_universes += current_user.universes
 
             # Allow premium users to add premium content to non-premium universes
             valid_universes += current_user.contributable_universes
           else
+
             show_premium_notice = true
           end
 
