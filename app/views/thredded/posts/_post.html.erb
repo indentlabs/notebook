@@ -3,18 +3,19 @@
   blocked_post  = user_signed_in? && post.user.present? && post.user.blocked_by?(current_user)
 %>
 
-<%
-  # Mute the post if it's one line that starts with ( and ends with )
-  muted_post = post.present? && post.to_model.content.split("\n").reject(&:empty?).all? { |paragraph| paragraph.strip.start_with?('(') && paragraph.strip.end_with?(')') }
-  muted_post_classes = 'muted-thredded-post'
-%>
-
 <% if blocked_post %>
   <div class='grey-text text-lighten-2'>
     <em class="tooltipped" data-tooltip="This message is hidden because you've blocked the user it's from.">1 message hidden.</em>
   </div>
 
 <% else %>
+
+  <%
+    # Mute the post if it's one line that starts with ( and ends with )
+    muted_post = post.present? && post.to_model.content.split("\n").reject(&:empty?).all? { |paragraph| paragraph.strip.start_with?('(') && paragraph.strip.end_with?(')') }
+    muted_post_classes = 'muted-thredded-post'
+  %>
+
   <%= render 'thredded/posts_common/before_first_unread_post', post: post if post.first_unread_in_page? %>
   <%= content_tag :article, id: dom_id(post), class: "thredded--post thredded--#{post.read_state}--post #{muted_post ? muted_post_classes : 'card'}" do %>
     <%= render 'thredded/posts_common/actions', post: post, actions: local_assigns[:actions] %>
