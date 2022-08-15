@@ -229,6 +229,7 @@
               </div>
               <ul class="collapsible">
                 <% event.timeline_event_entities.order('entity_type').preload(:entity).group_by(&:entity_type).each do |entity_type, entity_list| %>
+                  <% entity_list.reject! { |te_entity| te_entity.entity.nil? } %>
                   <li>
                     <% klass = content_class_from_name(entity_type) %>
                     <div class="collapsible-header">
