@@ -28,4 +28,6 @@ class ThreddedProxyController < ApplicationController
     document = ForumsProsifyService.save_to_document(current_user, topic)
     redirect_to document, notice: "Thread saved to document!"
   end
+
+  
 end
