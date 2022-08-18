@@ -508,7 +508,10 @@ class ContentController < ApplicationController
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
     attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
     attribute_value.user_id ||= current_user.id
-    attribute_value.value = field_params.fetch('value', '').to_i
+
+    new_universe_id = field_params.fetch('value', nil).to_i
+    new_universe_id = nil if new_universe_id == 0
+    attribute_value.value = new_universe_id
     attribute_value.save!
 
     @content = entity_params.fetch('entity_type').constantize.find_by(
