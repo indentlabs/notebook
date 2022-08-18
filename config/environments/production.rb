@@ -91,6 +91,10 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
+  # Whitelist HashWithIndifferentAccess/TimeWithZone for changelog serialization
+  # config.active_record.yaml_column_permitted_classes = [HashWithIndifferentAccess, ActiveSupport::TimeWithZone, Time]
+  config.active_record.use_yaml_unsafe_load = true
+
   # Devise default url options
   config.action_mailer.default_url_options = { host: 'www.notebook.ai' }
   config.active_job.default_url_options    = { host: 'www.notebook.ai' }
