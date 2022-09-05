@@ -59,6 +59,10 @@ Rails.application.configure do
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
+  # Whitelist HashWithIndifferentAccess/TimeWithZone for changelog serialization
+  # config.active_record.yaml_column_permitted_classes = [HashWithIndifferentAccess, ActiveSupport::TimeWithZone, Time]
+  config.active_record.use_yaml_unsafe_load = true
+
   # Set test-mode Stripe API key
   Stripe.api_key = "sk_test_v37uWbseyPct6PpsfjTa3y1l"
   config.stripe_publishable_key = 'pk_test_eXI4iyJ2gR9UOGJyJERvDlHF'
