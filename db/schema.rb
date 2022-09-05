@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_27_065954) do
+ActiveRecord::Schema.define(version: 2022_08_17_213907) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3184,10 +3184,13 @@ ActiveRecord::Schema.define(version: 2021_10_27_065954) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "deleted_at"
+    t.index ["created_at", "postable_id"], name: "index_thredded_posts_on_created_at_and_postable_id"
+    t.index ["created_at"], name: "index_thredded_posts_on_created_at"
     t.index ["deleted_at", "messageboard_id"], name: "index_thredded_posts_on_deleted_at_and_messageboard_id"
     t.index ["deleted_at", "postable_id"], name: "index_thredded_posts_on_deleted_at_and_postable_id"
     t.index ["deleted_at", "user_id"], name: "index_thredded_posts_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_thredded_posts_on_deleted_at"
+    t.index ["id", "deleted_at"], name: "index_thredded_posts_on_id_and_deleted_at"
     t.index ["messageboard_id"], name: "index_thredded_posts_on_messageboard_id"
     t.index ["moderation_state", "updated_at"], name: "index_thredded_posts_for_display"
     t.index ["postable_id"], name: "index_thredded_posts_on_postable_id"

@@ -44,7 +44,7 @@ module Documents
           #   }
           # ]
           analysis.document_entities = []
-          watson.dig('entities').each do |entity|
+          watson.fetch('entities', []).each do |entity|
             analysis.document_entities.build(
               entity_type:     entity_type_map_to_notebook_entity_type.fetch(entity.dig('type'), entity.dig('type')),
               text:            entity.dig('text'),
@@ -67,7 +67,7 @@ module Documents
           #     "dbpedia_resource": "http://dbpedia.org/resource/Jeph_Loeb"
           #   },
           analysis.document_concepts = []
-          watson.dig('concepts').each do |concept|
+          watson.fetch('concepts', []).each do |concept|
             analysis.document_concepts.build(
               text:           concept.dig('text'),
               relevance:      concept.dig('relevance'),
@@ -83,7 +83,7 @@ module Documents
           #   }
           # ]
           analysis.document_categories = []
-          watson.dig('categories').each do |category|
+          watson.fetch('categories', []).each do |category|
             analysis.document_categories.build(
               label: category.dig('label'),
               score: category.dig('score')

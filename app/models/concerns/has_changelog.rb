@@ -40,6 +40,7 @@ module HasChangelog
     before_update do
       if self.is_a?(Attribute)
         # todo how to get current_user?
+
         ContentChangeEvent.create(
           user:           find_current_user,
           changed_fields: changes,
