@@ -120,10 +120,14 @@
 
         <div x-show="accountDropdownOpen" class="absolute right-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-64">
           <div class="flex my-2 pt-4 pb-6 px-4 border-b border-gray-300 shadow">
-            <%= image_tag current_user.image_url(size=32), class: 'rounded-full mr-2 p-1 border-2 border-notebook-blue' %>
+            <%= link_to current_user do %>
+              <%= image_tag current_user.image_url(size=32), class: 'rounded-full mr-2 p-1 border-2 border-notebook-blue' %>
+            <% end %>
             <div>
               <div class="text-xs text-gray-500">You're signed in as</div>
-              <div class="text-sm <%= User.text_color %> font-bold">@andrew</div>
+              <div class="text-sm <%= User.text_color %> font-bold">
+                <%= link_to current_user.display_name, current_user %>
+              </div>
             </div>
           </div>
 
