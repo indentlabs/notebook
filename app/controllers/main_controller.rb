@@ -37,7 +37,12 @@ class MainController < ApplicationController
   end
 
   def table_of_contents
-    @serialized_content = ContentSerializer.new(@universe_scope)
+    content_list = @universe_scope.content_list.sort_by { |page| page['name'] }
+
+    @starred_pages = content_list.select { |page| page['favorite'] == 1 }
+    @other_pages   = content_list.select { |page| page['favorite'] == 0 }
+
+
   end
 
   def infostack

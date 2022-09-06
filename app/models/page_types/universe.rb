@@ -9,6 +9,7 @@ class Universe < ApplicationRecord
   acts_as_paranoid
 
   include IsContentPage
+  include HasContent
 
   include Serendipitous::Concern
 
