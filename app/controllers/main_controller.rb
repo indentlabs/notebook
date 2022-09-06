@@ -42,7 +42,8 @@ class MainController < ApplicationController
     @starred_pages = content_list.select { |page| page['favorite'] == 1 }
     @other_pages   = content_list.select { |page| page['favorite'] == 0 }
 
-
+    @page_type_counts = Hash.new(0)
+    content_list.each { |page| @page_type_counts[page['page_type']] += 1 }
   end
 
   def infostack
