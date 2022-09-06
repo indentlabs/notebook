@@ -1,4 +1,6 @@
 class TimelinesController < ApplicationController
+  layout 'tailwind', only: [:index]
+
   before_action :authenticate_user!, except: [:show]
   before_action :set_timeline, only: [:show, :edit, :update, :destroy]
 
@@ -27,8 +29,10 @@ class TimelinesController < ApplicationController
     else
       # Add in all timelines from shared universes also
       @timelines += Timeline.where(universe_id: current_user.contributable_universe_ids)
+                            .where.not(id: @timelines.pluck(:id))
     end
 
+    @filtered_page_tags = []
     @page_tags = PageTag.where(
       page_type: Timeline.name,
       page_id:   @timelines.pluck(:id)
