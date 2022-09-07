@@ -57,6 +57,7 @@ class DocumentsController < ApplicationController
       page_id:   @documents.map(&:id)
     ).order(:tag)
 
+    @filtered_page_tags = []
     if params.key?(:tag)
       @filtered_page_tags = @page_tags.where(slug: params[:tag])
       @documents = @documents.to_a.select { |document| @filtered_page_tags.pluck(:page_id).include?(document.id) }

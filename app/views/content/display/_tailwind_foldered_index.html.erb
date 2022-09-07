@@ -1,29 +1,21 @@
-<%= render partial: 'content/display/tailwind_foldered_index', locals: {
-  header_image:        "card-headers/#{@content_type_name.downcase.pluralize}.webp",
-  content:             @content,
-  mixed_content_types: false,
-  folders:             @folders,
-  content_type_class:  @content_type_class,
-  content_type_name:   @content_type_name,
-  filtered_page_tags:  @filtered_page_tags,
-  page_tags:           @page_tags
-} %>
+<%
+  if mixed_content_types
+    content_counts_per_type = { content_type_name: content.count }
+  else
+    content_counts_per_type = Hash.new(0)
+    content.each { |page| content_counts_per_type[page.is_a?(ContentPage) ? page['page_type'] : page.class.name] += 1 }
+  end
 
-
-
-
-
-
-
-
-
-
-
+  if @folders.any?
+    content_counts_per_type[Folder.name] = @folders.count
+  end
+%>
 
 
 <div class="h-full flex">
   <!-- Static  for desktop -->
   <div class="flex flex-col min-w-0 flex-1 overflow-hidden">
+    <!-- mobile second header -->
     <div class="lg:hidden">
       <div class="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-1.5">
         <div>
@@ -40,15 +32,15 @@
         </div>
       </div>
     </div>
-    <div class="flex-1 relative z-0 flex overflow-hidden">
-      <main class="flex-1 relative z-0 overflow-y-auto focus:outline-none xl:order-last">
+    <div class="flex-1 relative z-0 flex bg-gray-50 overflow-hidden">
+      <main class="flex-1 relative z-0 bg-gray-200 overflow-y-auto focus:outline-none xl:order-last">
 
 
 
         <!-- content area -->
         <div class="bg-white pb-2">
           <div>
-            <%= image_tag asset_path("card-headers/#{@content_type_name.downcase.pluralize}.webp"), class: 'h-32 w-full object-cover lg:h-48' %>
+            <%= image_tag asset_path(header_image), class: 'h-32 w-full object-cover lg:h-48' %>
           </div>
 
           <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,7 +57,7 @@
               <div class="mt-6 sm:flex-1 sm:min-w-0 sm:flex sm:items-center sm:justify-end sm:space-x-6 sm:pb-1">
                 <div class="sm:hidden md:block mt-6 min-w-0 flex-1">
                   <h1 class="text-2xl font-bold text-gray-900 truncate">
-                    Showing <%= pluralize @content.count, @content_type_name.downcase %>
+                    Showing <%= pluralize content.count, content_type_name.downcase %>
                   </h1>
                   <% if @universe_scope %>
                     <div class="text-gray-400 text-sm">
@@ -74,17 +66,17 @@
                   <% end %>
                 </div>
                 <div class="mt-6 flex flex-col justify-stretch space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
-                  <%= link_to attribute_customization_path(@content_type_name.downcase) do %>
+                  <%= link_to attribute_customization_path(content_type_name.downcase) do %>
                     <button type="button" class="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
                       <span>Customize template</span>
                     </button>
                   <% end %>
 
-                  <% if current_user.can_create?(@content_type_class) || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: @content_type_class.name) %>
-                    <%= link_to new_polymorphic_path(@content_type_class) do %>
-                      <button type="button" class="inline-flex justify-center px-4 py-2 border shadow-sm text-sm font-medium rounded-md text-white <%= @content_type_class.color %> focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                  <% if current_user.can_create?(content_type_class) || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type_class.name) %>
+                    <%= link_to new_polymorphic_path(content_type_class) do %>
+                      <button type="button" class="inline-flex justify-center px-4 py-2 border shadow-sm text-sm font-medium rounded-md text-white <%= content_type_class.color %> focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
                         <i class="material-icons text-sm mr-2">add</i>
-                        <span>New <%= @content_type_name %></span>
+                        <span>New <%= content_type_name %></span>
                       </button>
                     <% end %>
                   <% else %>
@@ -308,21 +300,21 @@
                         <button data-action="dropdown#toggle click@window->dropdown#hide" type="button" class="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900 active:bg-white" aria-expanded="false">
                           <span>Tagged</span>
                           <span class="ml-1.5 rounded py-0.5 px-1.5 bg-gray-100 text-xs font-semibold text-gray-700 tabular-nums">
-                            <%= @filtered_page_tags.try(:count) || 0 %>
+                            <%= filtered_page_tags.try(:count) || 0 %>
                           </span>
                           <%= chevron_down %>
                         </button>
 
                         <div data-dropdown-target="menu" class="w-64 origin-top-right absolute right-0 mt-2 bg-white rounded-md shadow-2xl p-4 ring-1 ring-black ring-opacity-5 focus:outline-none">
                           <form class="space-y-4">
-                            <% @page_tags.each do |page_tag| %>
+                            <% page_tags.each do |page_tag| %>
                               <div class="flex items-center">
-                                <input id="filter-tag-<%= page_tag.id %>" name="slug[]" <%= 'checked' if @filtered_page_tags.map(&:slug).include?(page_tag.slug) %> value="<%= page_tag.slug %>" type="checkbox" class="h-4 w-4 border-gray-300 rounded <%= @content_type_class.text_color %> focus:ring-notebook-blue">
+                                <input id="filter-tag-<%= page_tag.id %>" name="slug[]" <%= 'checked' if filtered_page_tags.map(&:slug).include?(page_tag.slug) %> value="<%= page_tag.slug %>" type="checkbox" class="h-4 w-4 border-gray-300 rounded <%= @content_type_class.text_color %> focus:ring-notebook-blue">
                                 <label for="filter-tag-<%= page_tag.id %>" class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"><%= page_tag.tag %></label>
                               </div>
                             <% end %>
 
-                            <% if @page_tags.any? %>
+                            <% if page_tags.any? %>
                               <div class="flex text-right">
                                 <button data-action="dropdown#toggle" class="bg-notebook-blue hover:bg-blue-500 text-white rounded w-full px-2 py-1">
                                   Filter
@@ -330,7 +322,7 @@
                               </div>
                             <% else %>
                               <div class="bg-blue-50 p-4">
-                                Add tags to your <%= @content_type_name %> pages to be able to filter them here. 
+                                Add tags to your <%= content_type_name %> pages to be able to filter them here. 
                               </div>
                             <% end %>
                           </form>
@@ -344,11 +336,11 @@
             </div>
 
             <!-- Active filters -->
-            <% if @filtered_page_tags.any? %>
+            <% if filtered_page_tags.any? %>
               <div class="bg-gray-100">
                 <div class="max-w-7xl mx-auto py-3 px-4 sm:flex sm:items-center sm:px-6 lg:px-8">
                   <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Showing only <%= @content_type_name.pluralize %> with <%= 'tag'.pluralize(@filtered_page_tags.count) %> 
+                    Showing only <%= content_type_name.pluralize %> with <%= 'tag'.pluralize(filtered_page_tags.count) %> 
                     <span class="sr-only">, active</span>
                   </h3>
 
@@ -356,10 +348,10 @@
 
                   <div class="mt-2 sm:mt-0 sm:ml-4">
                     <div class="-m-1 flex flex-wrap items-center">
-                      <% @filtered_page_tags.each do |page_tag| %>
+                      <% filtered_page_tags.each do |page_tag| %>
                         <span class="m-1 inline-flex rounded-full border border-gray-200 items-center py-1.5 pl-3 pr-2 text-sm font-medium bg-white text-gray-900">
                           <span><%= page_tag.tag %></span>
-                          <%= link_to(polymorphic_path(@content_type_class, { slug: params.fetch(:slug, []) - [page_tag.slug] })) do %>
+                          <%= link_to(polymorphic_path(content_type_class, { slug: params.fetch(:slug, []) - [page_tag.slug] })) do %>
                             <button type="button" class="flex-shrink-0 ml-1 h-4 w-4 p-1 rounded-full inline-flex text-gray-400 hover:bg-gray-200 hover:text-gray-500">
                               <span class="sr-only">Remove filter for <%= page_tag.tag %></span>
                               <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
@@ -377,14 +369,14 @@
           </section>
         </div>
 
-        <%# render partial: 'content/components/list_filter_bar', locals: { content_type: @content_type_class } %>
+        <%# render partial: 'content/components/list_filter_bar', locals: { content_type: content_type_class } %>
 
         <%# to be made into new card list partial? %>
-        <% if @content.any? %>
-          <div class="flex flex-wrap mb-32 container mx-auto">
-            <% @content.each do |content| %>
+        <% if content.any? %>
+          <div class="flex flex-wrap mb-32 px-2 container mx-auto">
+            <% content.each do |content| %>
               <div class="xl:w-1/4 md:w-1/2 p-2 group">
-                <%= link_to content.view_path do %>
+                <%= link_to content.is_a?(ContentPage) ? content.view_path : content do %>
                   <div class="bg-white hover:shadow-lg rounded-lg transition">
                     <%= image_tag content.random_image_including_private(format: :small), class: 'h-64 rounded-t w-full object-cover object-center mb-6' %>
                     <div class="pl-4 pb-1">
@@ -403,23 +395,23 @@
           </div>
         <% end %>
 
-        <% if @content.empty? %>
+        <% if content.empty? %>
           <div class="container mx-auto flex">
             <div class="w-1/2 text-center p-6">
               <button type="button" class="relative container mx-auto block w-full border-2 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <i class="material-icons text-6xl <%= @content_type_class.text_color %>">list</i>
+                <i class="material-icons text-6xl <%= content_type_class.text_color %>">list</i>
                 <div class="mt-2 block text-sm font-medium text-gray-900 mb-1">
-                  Customize your <%= @content_type_name.downcase %> page template
+                  Customize your <%= content_type_name.downcase %> page template
                 </div>
                 <span class="rounded bg-notebook-blue text-white px-2 py-1 text-xs">
-                  recommended before creating your first <%= @content_type_name.downcase %>
+                  recommended before creating your first <%= content_type_name.downcase %>
                 </span>
               </button>
             </div>
             <div class="w-1/2 text-center p-6">
               <button type="button" class="relative container mx-auto block w-full border-2 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <i class="material-icons text-6xl <%= @content_type_class.text_color %>"><%= @content_type_class.icon %></i>
-                <span class="mt-2 block text-sm font-medium text-gray-900">Create your first <%= @content_type_name.downcase %></span>
+                <i class="material-icons text-6xl <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
+                <span class="mt-2 block text-sm font-medium text-gray-900">Create your first <%= content_type_name.downcase %></span>
               </button>
             </div>
           </div>
@@ -430,24 +422,27 @@
 
 
       </main>
-      <aside class="hidden xl:order-first xl:flex xl:flex-col flex-shrink-0 w-96 border-r border-gray-200">
-        <div class="px-6 pt-6 pb-4">
+
+      <!-- second sidebar -->
+      <aside class="hidden xl:order-first xl:flex xl:flex-col flex-shrink-0 w-88 border-r border-gray-200">
+        <div class="px-6 pt-4 pb-4 bg-white">
           <h2 class="text-lg font-medium text-gray-900">
-            Your documents || Folder name
+            <i class="material-icons float-left <%= content_type_class.text_color %> text-xl mr-2"><%= content_type_class.icon %></i>
+            Your <%= content_type_name.pluralize %>
           </h2>
 
           <!--
           <p class="mt-4 text-xs tracking-wider font-bold text-gray-500">
-            Includes <%= pluralize @content.count, 'item' %>
+            Includes <%= pluralize content.count, 'item' %>
           </p>
           <ul class="mt-1 text-gray-600">
             <li class="">
               <i class="material-icons float-left mr-2 <%= Folder.text_color %>"><%= Folder.icon %></i>
-              <span class="text-sm"><%= pluralize @content.count, 'folder' %></span>
+              <span class="text-sm"><%= pluralize content.count, 'folder' %></span>
             </li>
             <li class="">
               <i class="material-icons float-left mr-2 <%= Document.text_color %>"><%= Document.icon %></i>
-              <span class="text-sm"><%= pluralize @content.count, 'document' %></span>
+              <span class="text-sm"><%= pluralize content.count, 'document' %></span>
             </li>
           </ul>
           -->
@@ -475,6 +470,7 @@
           </form>
           -->
 
+          <!--
           <form class="mt-6 flex space-x-2" action="#">
             <button type="submit" class="inline-flex justify-center px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
               <i class="material-icons float-left mr-2 text-sm <%= Folder.text_color %>"><%= Folder.icon %></i>
@@ -482,28 +478,27 @@
             </button>
             <button type="submit" class="inline-flex justify-center px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
               <i class="material-icons float-left mr-2 text-sm <%= Document.text_color %>"><%= Document.icon %></i>
-              New Document
+              New <%= content_type_name %>
             </button>
           </form>
+          -->
         </div>
         <!-- Directory list -->
         <nav class="flex-1 min-h-0 overflow-y-auto" aria-label="Directory">
           <div class="relative">
-            <div class="z-10 sticky top-0 border-t border-b border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500">
+            <div class="z-10 sticky top-0 border-t border-b border-gray-200 bg-gray-100 px-6 py-1 text-sm font-medium text-gray-500">
               <h3>
                 <i class="material-icons float-left text-sm mr-1 <%= Folder.text_color %>"><%= Folder.icon %></i>
                 Folders
-                <% if true && 'folder#show partial' %>in this folder<% end %>
                 <span class="float-right bg-gray-100 rounded px-1 text-xs mt-0.5">
-                  <%= @folders.count %>
+                  <%= folders.count %>
                 </span>
               </h3>
             </div>
             <ul role="list" class="relative z-0 divide-y divide-gray-200">
-              <% @folders.each do |folder| %>
+              <% folders.each do |folder| %>
                 <li>
-                  <%= link_to folder do %>
-                  <div class="relative px-6 py-2 flex items-center space-x-3 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-inset focus-within:ring-teal-500">
+                  <div class="relative px-6 py-2 flex items-center space-x-3 hover:bg-white focus-within:ring-2 focus-within:ring-inset focus-within:ring-teal-500">
                     <div class="flex-shrink-0">
                       <i class="material-icons pt-4 text-4xl <%= Folder.text_color %>"><%= Folder.icon %></i>
                     </div>
@@ -511,38 +506,49 @@
                       <%= link_to folder, class: 'focus:outline-none' do %>
                         <!-- Extend touch target to entire panel -->
                         <span class="absolute inset-0" aria-hidden="true"></span>
-                        <p class="text-sm font-medium text-gray-900"><%= folder.title %></p>
+                        <p class="text-sm font-medium text-gray-900 w-48"><%= folder.title %></p>
                       <% end %>
                     </div>
                   </div>
-                  <% end %>
                 </li>
               <% end %>
+              <li>
+                <div class="relative px-6 flex items-center space-x-3 hover:bg-white focus-within:ring-2 focus-within:ring-inset focus-within:ring-teal-500">
+                  <div class="flex-shrink-0">
+                    <i class="material-icons pt-4 text-4xl <%= Folder.text_color %>">add</i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <%= link_to '', class: 'focus:outline-none' do %>
+                      <!-- Extend touch target to entire panel -->
+                      <span class="absolute inset-0" aria-hidden="true"></span>
+                      <p class="text-sm font-medium text-gray-900">Add a folder</p>
+                    <% end %>
+                  </div>
+                </div>
+              </li>
             </ul>
           </div>
 
           <div class="relative">
-            <div class="z-10 sticky top-0 border-t border-b border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500">
+            <div class="z-10 sticky top-0 border-t border-b border-gray-200 bg-gray-100 px-6 py-1 text-sm font-medium text-gray-500">
               <h3>
                 <i class="material-icons float-left text-sm mr-1 <%= DocumentAnalysis.text_color %>"><%= DocumentAnalysis.icon %></i>
                 Stats
               </h3>
             </div>
             <div class="px-6 leading-relaxed pt-4">
-              <div class="inline-block mr-4">
-                <i class="material-icons float-left mr-0.5 <%= Document.text_color %>"><%= Document.icon %></i>
-                <span class="text-sm">
-                  <span class="font-bold text-gray-700"><%= @content.count %></span>
-                  <%= 'document'.pluralize @content.count %>
-                </span>
-              </div>
-              <div class="inline-block mr-4">
-                <i class="material-icons float-left mr-0.5 <%= Folder.text_color %>"><%= Folder.icon %></i>
-                <span class="text-sm">
-                  <span class="font-bold text-gray-700"><%= @folders.count %></span>
-                  <%= 'folder'.pluralize @folders.count %>
-                </span>
-              </div>
+              <% content_counts_per_type.each do |content_type, count| %>
+                <div class="inline-block mr-4">
+                  <i class="material-icons float-left mr-0.5 <%= content_class_from_name(content_type).text_color %>"><%= content_class_from_name(content_type).icon %></i>
+                  <span class="text-sm">
+                    <span class="font-bold text-gray-700"><%= count %></span>
+                    <%= content_type.pluralize count %>
+                  </span>
+                </div>
+              <% end %>
+
+              <br />
+
               <div class="inline-block mr-4">
                 <i class="material-icons float-left mr-0.5 <%= DocumentAnalysis.text_color %>">spellcheck</i>
                 <% total_word_count = 0 %>
@@ -554,7 +560,7 @@
               in
               <div class="inline-block mr-4">
                 <i class="material-icons float-left mr-0.5 <%= Universe.text_color %>"><%= Universe.icon %></i>
-                <% total_universe_count = @content.select { |doc| doc.universe_id? }.count %>
+                <% total_universe_count = content.select { |doc| doc.universe_id? }.count %>
                 <span class="text-sm">
                   <strong class="font-bold text-gray-700"><%= number_with_delimiter total_universe_count %></strong>
                   <%= 'universe'.pluralize(total_universe_count) %>
@@ -582,14 +588,14 @@
 <div class="mx-8 my-8">
   <h2 class="text-gray-500 text-sm font-medium uppercase tracking-wide">
     Folders
-    <span class="text-gray-400 ml-2"><%= @folders.count %></span>
+    <span class="text-gray-400 ml-2"><%= folders.count %></span>
 
     <%= link_to '#', class: "float-right text-xs #{Folder.color} hover:bg-teal-500 text-white rounded-lg px-2 py-1" do %>
       Create folder
     <% end %>
   </h2>
   <ul role="list" class="mt-3 grid grid-cols-1 gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
-    <% @folders.each do |folder| %>
+    <% folders.each do |folder| %>
       <%= link_to folder, class: 'group' do %>
         <li class="col-span-1 flex shadow-sm rounded-md">
           <div class="flex-shrink-0 flex items-center justify-center w-16 <%= Folder.color %> group-hover:bg-teal-500 text-white text-sm font-medium rounded-l-md">
@@ -619,7 +625,7 @@
 <div class="mx-8 my-8">
   <h2 class="text-gray-500 text-sm font-medium uppercase tracking-wide">
     Documents
-    <span class="text-gray-400 ml-2"><%= @folders.count %></span>
+    <span class="text-gray-400 ml-2"><%= folders.count %></span>
 
     <%= link_to '#', class: "float-right text-xs #{Document.color} hover:bg-teal-600 text-white rounded-lg px-2 py-1" do %>
       Create document

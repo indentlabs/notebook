@@ -4,6 +4,9 @@ module ApplicationHelper
     # If we pass in a class (e.g. Character instead of "Character") by mistake, just return it
     return class_name if class_name.is_a?(Class)
 
+    # Extra whitelisting for some other classes we don't necessarily want in the content_types array
+    return Folder if class_name == Folder.name
+
     Rails.application.config.content_types_by_name[class_name]
   end
 
