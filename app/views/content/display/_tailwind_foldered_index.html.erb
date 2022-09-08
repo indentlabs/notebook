@@ -373,26 +373,7 @@
 
         <%# to be made into new card list partial? %>
         <% if content.any? %>
-          <div class="flex flex-wrap mb-32 px-2 container mx-auto">
-            <% content.each do |content| %>
-              <div class="xl:w-1/4 md:w-1/2 p-2 group">
-                <%= link_to content.is_a?(ContentPage) ? content.view_path : content do %>
-                  <div class="bg-white hover:shadow-lg rounded-lg transition">
-                    <%= image_tag content.random_image_including_private(format: :small), class: 'h-64 rounded-t w-full object-cover object-center mb-6' %>
-                    <div class="pl-4 pb-1">
-                      <i class="material-icons float-right text-2xl mr-3">star_outline</i>
-                      <h3 class="tracking-widest <%= content.text_color %> text-xs uppercase font-medium title-font">
-                        <%= content.page_type %>
-                      </h3>
-                      <h2 class="text-lg text-gray-900 font-medium title-font mb-4">
-                        <%= content.name %>
-                      </h2>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
+          <%= render partial: content_display_partial, locals: { content: content } %>
         <% end %>
 
         <% if content.empty? %>
@@ -424,7 +405,7 @@
       </main>
 
       <!-- second sidebar -->
-      <aside class="hidden xl:order-first xl:flex xl:flex-col flex-shrink-0 w-88 border-r border-gray-200">
+      <aside class="hidden xl:order-first xl:flex xl:flex-col flex-shrink-0 w-88 border-r border-gray-200 min-h-screen">
         <div class="px-6 pt-4 pb-4 bg-white">
           <h2 class="text-lg font-medium text-gray-900">
             <i class="material-icons float-left <%= content_type_class.text_color %> text-xl mr-2"><%= content_type_class.icon %></i>
@@ -529,7 +510,7 @@
             </ul>
           </div>
 
-          <div class="relative">
+          <div class="relative pb-8">
             <div class="z-10 sticky top-0 border-t border-b border-gray-200 bg-gray-100 px-6 py-1 text-sm font-medium text-gray-500">
               <h3>
                 <i class="material-icons float-left text-sm mr-1 <%= DocumentAnalysis.text_color %>"><%= DocumentAnalysis.icon %></i>
@@ -538,7 +519,7 @@
             </div>
             <div class="px-6 leading-relaxed pt-4">
               <% content_counts_per_type.each do |content_type, count| %>
-                <div class="inline-block mr-4">
+                <div class="inline-block mr-4 mb-2">
                   <i class="material-icons float-left mr-0.5 <%= content_class_from_name(content_type).text_color %>"><%= content_class_from_name(content_type).icon %></i>
                   <span class="text-sm">
                     <span class="font-bold text-gray-700"><%= count %></span>
@@ -557,14 +538,17 @@
                   <%= 'total word'.pluralize(total_word_count) %>
                 </span>
               </div>
-              in
-              <div class="inline-block mr-4">
-                <i class="material-icons float-left mr-0.5 <%= Universe.text_color %>"><%= Universe.icon %></i>
-                <% total_universe_count = content.select { |doc| doc.universe_id? }.count %>
-                <span class="text-sm">
-                  <strong class="font-bold text-gray-700"><%= number_with_delimiter total_universe_count %></strong>
-                  <%= 'universe'.pluralize(total_universe_count) %>
-                </span>
+
+              <div class="whitespace-nowrap inline-block">
+                in
+                <div class="inline-block mr-4">
+                  <i class="material-icons float-left mr-0.5 <%= Universe.text_color %>"><%= Universe.icon %></i>
+                  <% total_universe_count = content.select { |doc| doc.universe_id? }.count %>
+                  <span class="text-sm">
+                    <strong class="font-bold text-gray-700"><%= number_with_delimiter total_universe_count %></strong>
+                    <%= 'universe'.pluralize(total_universe_count) %>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
