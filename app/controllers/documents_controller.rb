@@ -1,5 +1,5 @@
 class DocumentsController < ApplicationController
-  layout 'tailwind', only: [:index]
+  layout 'tailwind', only: [:index, :show]
   # layout 'editor',    only: [:edit]
 
   before_action :authenticate_user!, except: [:show, :analysis]
