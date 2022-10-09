@@ -2,17 +2,8 @@
   <div class="bg-notebook-blue rounded-t-lg">
     <%= image_tag @content.random_image_including_private(format: :original), class: 'w-full object-cover object-center max-h-48 rounded-t-md' %>
   </div>
-  <div class="p-4 lg:flex lg:justify-between space-x-0 md:space-x-16">
+  <div class="p-4 lg:flex lg:flex-col lg:justify-between ">
     <div>
-      <h2 class="text-sm font-extrabold text-gray-500 sm:tracking-tight">
-        Expand
-        <% if @universe_scope.present? %>
-          <%= link_to @universe_scope.name, @universe_scope, class: Universe.text_color %>,
-        <% else %>
-          your worlds,
-        <% end %>
-        one question at a time
-      </h2>
       <%=
         if @content && @attribute_field_to_question
           render partial: 'cards/serendipitous/tailwind_content_question', locals: { 
@@ -26,26 +17,9 @@
       <p class="text-xs text-gray-500 text-center">
         <i class="material-icons text-xs mr-1"><%= @content.icon %></i>
         Your answer will be automatically saved to your
-        <span class="<%= @content.text_color %>"><%= @content.name %></span>
+        <%= link_to @content.name, @content.view_path, class: "#{@content.text_color}", target: '_blank' %>
         <%= @content.page_type.downcase %> page.
       </p>
-
-    </div>
-    <div class="mt-10 w-full max-w-xs">
-      <%= link_to '#', class: "#{@content.color} text-white block rounded-lg p-2 mb-1" do %>
-        <i class="material-icons float-left ml-1 mr-3 text-4xl"><%= @content.icon %></i>
-        <div class="text-xs ml-8">Quick-reference</div>
-        <%= @content.name %>
-      <% end %>
-
-      <%= link_to prompts_path, class: "bg-orange-500 text-white block rounded-lg p-2" do %>
-        <i class="material-icons float-left ml-1 mr-3 -mt-1 text-2xl">lightbulb</i>
-        See more prompts
-        <% if @universe_scope.present? %>
-          in this universe
-        <% end %>
-        <i class="material-icons float-right">arrow_right</i>
-      <% end %>
     </div>
   </div>
 </div>

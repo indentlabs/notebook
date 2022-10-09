@@ -47,200 +47,31 @@
         </div>
       </div>
 
+      <%# render partial: 'main/components/activity_bar', locals: { } %>
 
-      <div class="max-w-7xl mx-auto grid grid-cols-4 my-4 md:px-0 px-4 space-x-4">
-        <div class="col-span-3">
+      <div class="max-w-7xl mx-auto grid grid-cols-8 my-4 md:px-0 px-4 space-x-4">
+        <div class="col-span-5">
+          <h2 class="text-sm leading-6 font-medium text-gray-500 mb-2 text-center">
+            Expand
+            <% if @universe_scope.present? %>
+              <%= link_to @universe_scope.name, @universe_scope, class: Universe.text_color %>
+            <% else %>
+              your worlds
+            <% end %>
+          </h2>
           <%= render partial: 'main/components/serendipitous_question', locals: { } %>
+
+          <h2 class="text-sm leading-6 font-medium text-gray-500 mb-2 text-center mt-4">
+            Add another page
+          </h2>
+          <%= render partial: 'main/components/create_new_page_list', locals: { } %>
         </div>
-        <div class="col-span-1 bg-blue-300">
-          rhs
+        <div class="col-span-3">
+          <h2 class="text-sm leading-6 font-medium text-gray-500 mb-2 text-center">
+            Your recent edits
+          </h2>
+          <%= render partial: 'main/components/recently_edited_pages', locals: { } %>
         </div>
-      </div>
-
-
-      <div class="max-w-6xl mx-auto my-4">
-        <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <% @recently_edited_pages.first(9).each do |page| %>
-            <% next if page.is_a?(Document) || page.is_a?(Timeline) %>
-
-            <%= link_to page.edit_path do %>
-              <li class="col-span-1 bg-white rounded-lg shadow divide-y divide-gray-200 hover:shadow-lg">
-                <div class="w-full flex items-center">
-                  <div class="p-2">
-                    <%= image_tag page.random_image_including_private, class: 'w-32 h-32 bg-notebook-blue rounded-lg flex-shrink-0' %>
-                  </div>
-                  <div class="flex-1 truncate p-4">
-                    <div class="flex items-center space-x-3 mb-2">
-                      <h3 class="text-gray-900 text-sm font-medium truncate <%= page.text_color %>">
-                        <%= page.name %>
-                      </h3>
-                    </div>
-                    <p class="text-gray-500 text-sm truncate">
-                      word count
-                    </p>
-                    <p class="text-gray-500 text-sm truncate">
-                      last edited <%= time_ago_in_words page.updated_at %> ago
-                    </p>
-                  </div>
-                </div>
-              </li>
-            <% end %>
-          <% end %>
-        </ul>
-      </div>
-
-
-
-      <div class="max-w-6xl mx-auto mt-4">
-        <h2 class="text-lg leading-6 font-medium text-gray-900">Your writing activity</h2>
-        <div class="mt-2 mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-              <div class="flex items-center">
-                <div class="flex-shrink-0">
-                  <i class="material-icons h-6 w-6 text-gray-400">date_range</i>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate">Weekly average</dt>
-                    <dd class="pb-1">
-                      <span
-                        class="text-lg font-medium text-gray-900"
-                        data-controller="animated-number"
-                        data-animated-number-lazy-value=""
-                        data-animated-number-start-value="0"
-                        data-animated-number-end-value="2583"
-                        data-animated-number-duration-value="500"
-                      ></span> words per day
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div class="bg-gray-50 px-5 py-3">
-              <div class="text-sm">
-                <a href="#" class="font-medium text-notebook-blue hover:text-blue-700">
-                  Some call-to-action
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-              <div class="flex items-center">
-                <div class="flex-shrink-0">
-                  <i class="material-icons h-6 w-6 text-gray-400">calendar_month</i>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate">Words written this month</dt>
-                    <dd class="pb-1">
-                      <div
-                        class="text-lg font-medium text-gray-900"
-                        data-controller="animated-number"
-                        data-animated-number-lazy-value=""
-                        data-animated-number-start-value="0"
-                        data-animated-number-end-value="33359"
-                        data-animated-number-duration-value="500"
-                      ></div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div class="bg-gray-50 px-5 py-3">
-              <div class="text-sm">
-                <a href="#" class="font-medium text-notebook-blue hover:text-blue-700">
-                  View daily breakdown
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-              <div class="flex items-center">
-                <div class="w-0 flex-1">
-                  <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate">Your active writing streak</dt>
-                    <dd>
-                      <% 7.times.with_index do |i| %>
-                        <%= link_to '#day-breakdown', class: 'group relative inline-block mt-2 mr-2' do %>
-                          <span class="text-gray-600 bg-gray-200 group-hover:bg-gray-100 rounded-lg p-2 text-xs"><%= 25 + i %></span>
-                          <span class="absolute top-0 right-0 inline-flex items-center justify-center px-1 py-1 text-xs font-bold leading-none transform translate-x-1/2 translate-y-1/4 rounded-full">
-                            <i class="material-icons text-xl text-notebook-blue">check_circle</i>
-                          </span>
-                        <% end %>
-                      <% end %>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div class="bg-gray-50 px-5 py-3">
-              <div class="text-sm">
-                <a href="#" class="font-medium text-notebook-blue hover:text-blue-700">
-                  You're on a 34-day streak!
-                </a>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <h2 class="max-w-6xl mx-auto mt-8 px-4 text-lg leading-6 font-medium text-gray-900 sm:px-6 lg:px-8">
-        Pick up where you left off
-      </h2>
-      <div class="max-w-6xl mx-auto pt-2">
-        <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <% @recently_edited_pages.first(9).each do |page| %>
-            <% next if page.is_a?(Document) || page.is_a?(Timeline) %>
-
-            <%= link_to page.edit_path do %>
-              <li class="col-span-1 bg-white rounded-lg shadow divide-y divide-gray-200 hover:shadow-lg">
-                <div class="w-full flex items-center">
-                  <div class="p-2">
-                    <%= image_tag page.random_image_including_private, class: 'w-32 h-32 bg-notebook-blue rounded-lg flex-shrink-0' %>
-                  </div>
-                  <div class="flex-1 truncate p-4">
-                    <div class="flex items-center space-x-3 mb-2">
-                      <h3 class="text-gray-900 text-sm font-medium truncate <%= page.text_color %>">
-                        <%= page.name %>
-                      </h3>
-                    </div>
-                    <p class="text-gray-500 text-sm truncate">
-                      word count
-                    </p>
-                    <p class="text-gray-500 text-sm truncate">
-                      last edited <%= time_ago_in_words page.updated_at %> ago
-                    </p>
-                  </div>
-                </div>
-              </li>
-            <% end %>
-          <% end %>
-        </ul>
-      </div>
-
-      <h2 class="max-w-6xl mx-auto mt-8 px-4 text-lg leading-6 font-medium text-gray-900 sm:px-6 lg:px-8">Or create a new...</h2>
-      <div class="pt-2 mx-4">
-        <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-4 lg:grid-cols-10">
-          <% (@activated_content_types + ["Timeline", "Document"]).each do |content_type| %>
-            <% klass = content_class_from_name(content_type) %>
-            <%= link_to send("new_#{content_type.downcase}_path") do %>
-              <li class="col-span-1 <%= klass.color %> text-white py-6 rounded-lg shadow hover:shadow-lg">
-                <div class="w-full text-center">
-                  <i class="material-icons text-6xl"><%= klass.icon %></i>
-                  <div>
-                    <%= content_type %>
-                  </div>
-                </div>
-              </li>
-            <% end %>
-          <% end %>
-        </ul>
       </div>
 
     </main>
