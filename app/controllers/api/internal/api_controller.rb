@@ -11,7 +11,9 @@ module Api
       private
 
       def sanitize_content_type
-        unless Rails.application.config.content_types[:all].map(&:name).include?(params[:page_type])
+        valid_types = Rails.application.config.content_types[:all] + [Timeline, Document]
+
+        unless valid_types.map(&:name).include?(params[:page_type])
           raise "Invalid page type: #{params[:page_type]}"
         end
 
