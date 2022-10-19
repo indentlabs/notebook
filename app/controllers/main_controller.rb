@@ -37,7 +37,10 @@ class MainController < ApplicationController
   end
 
   def table_of_contents
-    content_list = @universe_scope.content_list.sort_by { |page| page['name'] }
+    @toc_scope = @universe_scope || current_user
+    @toc_user  = @universe_scope.try(:user) || current_user
+
+    content_list = @toc_scope.content_list.sort_by { |page| page['name'] }
 
     @starred_pages = content_list.select { |page| page['favorite'] == 1 }
     @other_pages   = content_list.select { |page| page['favorite'] == 0 }
