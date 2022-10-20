@@ -9,7 +9,7 @@ class Universe < ApplicationRecord
   acts_as_paranoid
 
   include IsContentPage
-  # include HasContent
+  # include HasContent # can't do this because we generate cycles since HasContent relies on Universe already being initialized
 
   include Serendipitous::Concern
 
@@ -93,5 +93,17 @@ class Universe < ApplicationRecord
 
   def self.content_name
     'universe'
+  end
+  
+  def content
+    # This is a worse version of the HasContent #content, but... dunno how to include
+    # that functionality in this class without duplicating it in two places and hard-coding
+    # the other content type names. TODO come back and fix this
+    content = {}
+    Rails.application.config.content_types[:all_non_universe].each do |content_type|
+      content[content_type.name] = send(content_type.name.downcase.pluralize)
+    end
+
+    content
   end
 end

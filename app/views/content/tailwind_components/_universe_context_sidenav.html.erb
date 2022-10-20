@@ -1,4 +1,4 @@
-<div class="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200 bg-white">
+<div class="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200 pl-6">
   <div class="pl-4 pr-6 py-6 sm:pl-6 lg:pl-8 xl:pl-0">
     <div class="flex items-center justify-between">
       <div class="flex-1 space-y-2">
@@ -6,15 +6,15 @@
           <!-- Profile -->
           <div class="flex items-center space-x-3">
             <div class="flex-shrink-0 w-full mb-2">
-              <%= link_to @universe_scope do %>
-                <%= image_tag @universe_scope.random_image_including_private, class: 'rounded-lg' %>
+              <%= link_to content.raw_model do %>
+                <%= image_tag content.raw_model.random_image_including_private, class: 'rounded-lg' %>
               <% end %>
             </div>
             <div class="space-y-1">
-              <div class="text-sm font-medium text-gray-900"><%= link_to @universe_scope.name, @universe_scope %></div>
-              <%= link_to @universe_scope.user, class: 'group flex items-center text-xs' do %>
+              <div class="text-sm font-medium text-gray-900"><%= link_to content.name, content.raw_model %></div>
+              <%= link_to content.user, class: 'group flex items-center text-xs' do %>
                 <i class="material-icons <%= User.text_color %>"><%= User.icon %></i>
-                <span class="text-gray-500 group-hover:text-gray-900 font-medium"><%= @universe_scope.user.display_name %></span>
+                <span class="text-gray-500 group-hover:text-gray-900 font-medium"><%= content.user.display_name %></span>
               <% end %>
             </div>
           </div>
@@ -22,22 +22,14 @@
           <div class="pb-2 space-y-1">
             <h2 class="text-sm font-semibold">In this universe</h2>
 
-            <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-              <i class="material-icons <%= Character.text_color %> mr-1"><%= Character.icon %></i>
-              <span class="flex-grow text-left">Characters</span>
-              <span class="bg-gray-100 p-1 text-xs rounded-lg">42</span>
-            </button>
-            <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-              <i class="material-icons <%= Location.text_color %> mr-1"><%= Location.icon %></i>
-              <span class="flex-grow text-left">Locations</span>
-              <span class="bg-gray-100 p-1 text-xs rounded-lg">8</span>
-            </button>
-            <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-              <i class="material-icons <%= Item.text_color %> mr-1"><%= Item.icon %></i>
-              <span class="flex-grow text-left">Items</span>
-              <span class="bg-gray-100 p-1 text-xs rounded-lg">17</span>
-            </button>
-
+            <% content.raw_model.content.each do |content_type, content_list| %>
+              <% next if content_list.count.zero? %>
+              <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
+                <i class="material-icons <%= content_class_from_name(content_type).text_color %> mr-1"><%= content_class_from_name(content_type).icon %></i>
+                <span class="flex-grow text-left"><%= content_type.pluralize %></span>
+                <span class="bg-gray-100 p-1 text-xs rounded-lg"><%= content_list.count %></span>
+              </button>
+            <% end %>
           </div>
         </div>
         <!-- Meta info -->
