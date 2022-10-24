@@ -31,7 +31,8 @@ gem 'paypal-checkout-sdk'
 
 # Design
 gem 'material_icons'
-gem 'font-awesome-rails'
+# gem 'font-awesome-rails'
+gem "font-awesome-sass", "~> 6.2.0"
 gem 'sass-rails'
 
 # Quality of Life

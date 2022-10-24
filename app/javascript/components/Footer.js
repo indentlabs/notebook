@@ -19,6 +19,10 @@ class Footer extends React.Component {
                 <a href="https://github.com/indentlabs/notebook" target="_blank">
                   <i className="fa fa-github black-text"></i> GitHub
                 </a>
+                &nbsp;&middot;&nbsp; 
+                <a href="https://github.com/indentlabs/notebook" target="_blank">
+                  <i className="fa fa-brands fa-discord blue-text"></i> Discord
+                </a>
               </div>
             </div>
 
