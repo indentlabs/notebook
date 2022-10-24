@@ -1,7 +1,7 @@
 class SubscriptionsController < ApplicationController
   protect_from_forgery except: :stripe_webhook
 
-  before_action :authenticate_user!, except: [:redeem]
+  before_action :authenticate_user!, except: [:redeem, :faq]
 
   before_action :set_navbar_actions,    except: [:redeem, :prepay_paid]
   before_action :set_sidenav_expansion, except: [:redeem, :prepay_paid]
@@ -231,6 +231,9 @@ class SubscriptionsController < ApplicationController
     redirect_back(fallback_location: subscription_path, notice: "Promo code successfully activated!")
   end
 
+  def faq
+  end
+
   private
 
   def move_user_to_plan_requested(plan_id)
@@ -264,12 +267,18 @@ class SubscriptionsController < ApplicationController
   end
 
   def set_navbar_actions
-    @navbar_actions = [{
-      label: "Your plan",
-      href: main_app.subscription_path
-    }, {
-      label: "Billing history",
-      href: main_app.billing_history_path
-    }]
+    if user_signed_in? 
+      @navbar_actions = [{
+        label: "Your plan",
+        href: main_app.subscription_path
+      }, {
+        label: "Billing history",
+        href: main_app.billing_history_path
+      },
+      {
+        label: 'Billing FAQ',
+        href: main_app.billing_faq_path
+      }]
+    end
   end
 end
