@@ -179,8 +179,9 @@ Rails.application.routes.draw do
 
   # Info pages
   scope '/about' do
-    get '/paper',   to: 'main#paper',       as: :green_paper
-    get '/privacy', to: 'main#privacyinfo', as: :privacy_policy
+    get '/paper',       to: 'main#paper',       as: :green_paper
+    get '/privacy',     to: 'main#privacyinfo', as: :privacy_policy
+    get '/billing/faq', to: 'subscriptions#faq'
   end
 
   # Landing pages
