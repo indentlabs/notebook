@@ -1,4 +1,6 @@
 class CustomizationController < ApplicationController
+  layout 'tailwind'
+
   # todo require login for all actions :O
 
   before_action :verify_content_type_can_be_toggled, only: [:toggle_content_type]
