@@ -6,7 +6,7 @@ gem 'rails'
 gem 'puma', '~> 5.6'
 gem 'puma-heroku'
 # gem 'bootsnap', require: false
-gem 'sprockets', '~> 3.7.2'
+gem 'sprockets', '~> 4.1.1'
 
 # Storage
 gem 'aws-sdk', '~> 3.1'
