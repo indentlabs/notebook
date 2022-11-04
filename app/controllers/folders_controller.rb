@@ -20,7 +20,7 @@ class FoldersController < ApplicationController
     Document.where(folder_id: @folder.id).update_all(folder_id: nil)
 
     # Relocate all child folders in this folder to the root "folder"
-    Folder.where(parent_folder_id: @folder.id).update_all(folder_id: nil)
+    Folder.where(parent_folder_id: @folder.id).update_all(parent_folder_id: nil)
 
     @folder.destroy!
     redirect_to(documents_path, notice: "Folder #{@folder.title} deleted!")
