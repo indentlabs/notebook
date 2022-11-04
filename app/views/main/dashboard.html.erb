@@ -186,10 +186,8 @@
     <% end %>
 
     <div class="grey-text uppercase center">Create something new</div>
-    <% shown_creatures = false %>
     <% @activated_content_types.sample(3).each do |type| %>
       <% klass = content_class_from_name(type) %>
-      <% shown_creatures = true if type == 'Creature' %>
       <div>
         <%= link_to send("new_#{type.downcase}_path"), class: "white-text", style: 'width: 100%' do %>
           <div class="hoverable card-panel <%= klass.color %>" style="margin-bottom: 4px">
@@ -211,6 +209,32 @@
         <% end %>
       </div>
     <% end %>
+
+    <div class="grey-text uppercase center" style="margin-top: 2em">Join discussions</div>
+    <% @most_recent_threads.each do |topic| %>
+      <div>
+        <%= link_to topic, class: "white-text", style: 'width: 100%' do %>
+          <div class="hoverable card-panel blue" style="margin-bottom: 4px">
+            <div class="valign-wrapper">
+              <i class="material-icons grey-bordered-text" class="left" style="font-size: 3em;">forum</i>
+              <span style="font-size: 1em; margin-left: 1em">
+                <%= topic.title %>
+                <small>
+                  <%= pluralize topic.posts.count, 'post' %>
+                </small>
+                <br />
+                <small>
+                  in <strong><%= topic.messageboard.name %></strong>
+                </small>
+              </span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+    <div style="margin-bottom: 2em;">
+      <%= link_to 'see all', thredded_path, class: 'right' %>
+    </div>
 
   </div>
 </div>
