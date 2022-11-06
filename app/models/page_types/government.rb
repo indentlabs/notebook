@@ -10,7 +10,7 @@ class Government < ApplicationRecord
   include Serendipitous::Concern
 
   include Authority::Abilities
-  self.authorizer_name = 'ExtendedContentAuthorizer'
+  self.authorizer_name = Date.current <= 'November 17, 2022'.to_date ? 'CoreContentAuthorizer' : 'ExtendedContentAuthorizer'
 
   relates :leaders,           with: :government_leaders
   relates :groups,            with: :government_groups
