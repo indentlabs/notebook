@@ -6,7 +6,7 @@ class AdminController < ApplicationController
   before_action :require_admin_access, unless: -> { Rails.env.development? }
 
   def dashboard
-    @reports = EndOfDayAnalyticsReport.order('day DESC').limit(90)
+    @reports = EndOfDayAnalyticsReport.order('day DESC')
   end
 
   def content_type

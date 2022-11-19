@@ -5,10 +5,10 @@
         <div class="card-title">
           90-day signups
           <span class="right grey-text">
-            <%= number_with_delimiter User.last.id %> total
+            <%= number_with_delimiter User.last.id %> total users
           </span>
         </div>
-        <%= area_chart @reports.pluck(:day, :user_signups), colors: ['#2196F3'] %>
+        <%= area_chart @reports.limit(90).pluck(:day, :user_signups), colors: ['#2196F3'] %>
       </div>
     </div>
   </div>
@@ -16,18 +16,23 @@
     <div class="card">
       <div class="card-content">
         <div class="card-title">
-          Monthly subscriptions
+          90-day monthly subscriptions
           <span class="right grey-text">
-            <%= number_with_delimiter User.where(selected_billing_plan_id: 4).count %> total
+            <%= number_with_delimiter User.where(selected_billing_plan_id: 4).count %> current total
           </span>
         </div>
         <%= 
           area_chart [
-            { name: 'Started subscriptions', data: @reports.pluck(:day, :new_monthly_subscriptions) },
-            { name: 'Ended subscriptions',   data: @reports.pluck(:day, :ended_monthly_subscriptions) }
+            { name: 'Started subscriptions', data: @reports.limit(90).pluck(:day, :new_monthly_subscriptions) },
+            { name: 'Ended subscriptions',   data: @reports.limit(90).pluck(:day, :ended_monthly_subscriptions) }
           ],
           colors: ['#2196F3']
         %>
+        <div>
+          90-day net:
+          <%= sprintf "%+d", @reports.limit(90).sum(:new_monthly_subscriptions) - @reports.limit(90).sum(:ended_monthly_subscriptions) %>
+          subscriptions
+        </div>
       </div>
     </div>
   </div>
@@ -35,16 +40,23 @@
     <div class="card">
       <div class="card-content">
         <div class="card-title">
-          Trimonthly subscriptons
+          90-day trimonthly subscriptons
           <span class="right grey-text">
-            <%= number_with_delimiter User.where(selected_billing_plan_id: 5).count %> total
+            <%= number_with_delimiter User.where(selected_billing_plan_id: 5).count %> current total
           </span>
         </div>
-        <%= area_chart [
-            { name: 'Started subscriptions', data: @reports.pluck(:day, :new_trimonthly_subscriptions) },
-            { name: 'Ended subscriptions',   data: @reports.pluck(:day, :ended_trimonthly_subscriptions) }
+        <%=
+          area_chart [
+            { name: 'Started subscriptions', data: @reports.limit(90).pluck(:day, :new_trimonthly_subscriptions) },
+            { name: 'Ended subscriptions',   data: @reports.limit(90).pluck(:day, :ended_trimonthly_subscriptions) }
           ],
-          colors: ['#2196F3'] %>
+          colors: ['#2196F3']
+        %>
+        <div>
+          90-day net:
+          <%= sprintf "%+d", @reports.limit(90).sum(:new_trimonthly_subscriptions) - @reports.limit(90).sum(:ended_trimonthly_subscriptions) %>
+          subscriptions
+        </div>
       </div>
     </div>
   </div>
@@ -52,16 +64,23 @@
     <div class="card">
       <div class="card-content">
         <div class="card-title">
-          Annual subscriptions
+          90-day annual subscriptions
           <span class="right grey-text">
-            <%= number_with_delimiter User.where(selected_billing_plan_id: 6).count %> total
+            <%= number_with_delimiter User.where(selected_billing_plan_id: 6).count %> current total
           </span>
         </div>
-        <%= area_chart [
-            { name: 'Started subscriptions', data: @reports.pluck(:day, :new_annual_subscriptions) },
-            { name: 'Ended subscriptions',   data: @reports.pluck(:day, :ended_annual_subscriptions) }
+        <%=
+          area_chart [
+            { name: 'Started subscriptions', data: @reports.limit(90).pluck(:day, :new_annual_subscriptions) },
+            { name: 'Ended subscriptions',   data: @reports.limit(90).pluck(:day, :ended_annual_subscriptions) }
           ],
-          colors: ['#2196F3'] %>
+          colors: ['#2196F3']
+        %>
+        <div>
+          90-day net:
+          <%= sprintf "%+d", @reports.limit(90).sum(:new_annual_subscriptions) - @reports.limit(90).sum(:ended_annual_subscriptions) %>
+          subscriptions
+        </div>
       </div>
     </div>
   </div>
@@ -71,10 +90,24 @@
       <div class="card">
         <div class="card-content">
           <div class="card-title">
-            New <%= content_type.name.pluralize %>
+            New <%= content_type.name.pluralize %> each day
             <span class="right grey-text"><%= number_with_delimiter content_type.last.id %> total</span>
           </div>
-          <%= area_chart @reports.pluck(:day, "#{content_type.name.downcase.pluralize}_created"), colors: [content_type.hex_color] %>
+          <%=
+            area_chart @reports.order("#{content_type.name.downcase.pluralize}_created DESC")
+                               .pluck(:day, "#{content_type.name.downcase.pluralize}_created")
+                               .group_by { |date, total| date.year }
+                               .map { |year, data|
+                                  totals_per_month = Hash.new(0)
+                                  data.each { |date, count| totals_per_month[date.strftime("%b")] += count }
+
+                                  {
+                                    name: year, 
+                                    data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
+                                  }
+                               },
+              colors: [content_type.hex_color]
+          %>
         </div>
       </div>
     </div>
