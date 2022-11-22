@@ -54,6 +54,17 @@ class PageCollection < ApplicationRecord
     ActionController::Base.helpers.asset_path("card-headers/#{self.class.name.downcase.pluralize}.webp")
   end
 
+  def random_image_including_private(format)
+    return cover_image if cover_image.present?
+
+    if header_image.attachment.present?
+      return header_image
+    end
+
+    # If all else fails, fall back on default header
+    ActionController::Base.helpers.asset_path("card-headers/#{self.class.name.downcase.pluralize}.webp")
+  end
+
   def first_public_image
     random_public_image
   end
@@ -74,6 +85,10 @@ class PageCollection < ApplicationRecord
     'brown bg-brown-800'
   end
 
+  def text_color
+    PageCollection.text_color
+  end
+
   def self.text_color
     'text-brown-800 brown-text'
   end
@@ -84,5 +99,9 @@ class PageCollection < ApplicationRecord
 
   def self.icon
     'layers'
+  end
+
+  def page_type
+    'Collection'
   end
 end
