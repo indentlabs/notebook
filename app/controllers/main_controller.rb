@@ -33,6 +33,17 @@ class MainController < ApplicationController
   def dashboard
     @page_title = "My notebook"
 
+    messageboard_ids_to_exclude = [38, 26, 31, 32, 30, 33, 27]
+    most_recent_posts = Thredded::Post.where.not(messageboard_id: messageboard_ids_to_exclude)
+                                      .where(moderation_state: "approved")
+                                      .order('id DESC')
+                                      .limit(300)
+                                      .shuffle
+                                      .first(3)
+    @most_recent_threads = Thredded::Topic.where(id: most_recent_posts.pluck(:postable_id))
+                                          .where(moderation_state: "approved")
+                                          .includes(:posts, :messageboard)
+    
     set_questionable_content # for questions
   end
 
