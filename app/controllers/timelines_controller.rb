@@ -45,6 +45,14 @@ class TimelinesController < ApplicationController
     # if params.key?(:favorite_only)
     #   @timelines.select!(&:favorite?)
     # end
+
+
+    # New style, using content#index view (we can wipe unused stuff from above once this is finalized)
+    @content_type_class = Timeline
+    @content_type_name = @content_type_class.name
+    @content = @timelines
+    @folders = []
+    render 'content/index'
   end
 
   def show
