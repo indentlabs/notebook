@@ -1,3 +1,266 @@
+<div class="w-full lg:h-80 h-52 pb-10 bg-cover flex justify-center items-center relative" data-src="" uk-img="" style="background-image: url(&quot;<%= url_for @page_collection.random_image_including_private(nil) %>&quot;);">
+  <div class="text-center max-w-xl mx-auto z-10 relative">
+    <div class="mb-3 text-white <%= PageCollection.color %> py-2 px-4 opacity-90">
+      <div class="lg:text-4xl text-2xl text font-semibold">
+        <%= @page_collection.title %>
+      </div>
+      <div class="tracking-wide">
+        <%= @page_collection.subtitle %>
+      </div>
+    </div>
+    <div class="text-white text-lg font-medium text-opacity-90">
+      <% @page_collection.page_types.each do |submittable_class_name| %>
+        <% submittable_class = content_class_from_name(submittable_class_name) %>
+        <%# todo click on any to filter posts to just this type, hover effect %>
+        <%# todo tooltips %>
+        <i class="material-icons bordered-text <%= submittable_class.text_color %> <%= @page_collection.page_types.length > 6 ? 'text-3xl' : 'text-4xl' %>">
+          <%= submittable_class.icon %>
+        </i>
+      <% end %>
+    </div>
+  </div>
+  <div class="absolute w-full h-full inset-0 bg-gray-600 bg-opacity-20"></div>
+</div>
+<div class="-mt-16 flex flex-row space-x-4 mx-auto max-w-7xl">
+  <div class="flex-1">
+    <div class="bg-white p-10 relative rounded-md shadow">
+      <div class="md:space-y-6 space-y-5 text-gray-500 md:text-base">
+        <div class="font-semibold text-lg text-gray-700 text-center">About this Collection</div>
+        <div class="md:leading-8">
+          <%= simple_format @page_collection.description %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex-1">
+    <div class="bg-white p-8 mt-1 relative rounded-md shadow">
+      <div class="md:space-y-6 space-y-5 text-gray-500 md:text-base">
+        <div class="overflow-hidden">
+          <dl class="-mx-8 -mt-8 flex flex-wrap">
+            <div class="flex flex-col px-8 pt-8">
+              <dd class="order-1 text-2xl font-extrabold text-indigo-600 sm:text-3xl">
+                <a href="#" class="flex-shrink-0 group block">
+                  <div class="flex items-center">
+                    <div>
+                      <img class="inline-block h-14 w-14 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Not Tim Cook</p>
+                      <p class="text-xs font-medium text-gray-500 group-hover:text-gray-700">Curator</p>
+                    </div>
+                  </div>
+                </a>
+              </dd>
+            </div>
+
+            <div class="flex flex-col px-8 pt-8">
+              <dd class="order-1 text-2xl font-extrabold text-indigo-600 sm:text-3xl">
+                <a href="#" class="flex-shrink-0 group block">
+                  <div class="flex items-center">
+                    <div class="ml-3">
+                      <div class="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                      
+                        <div class="flex -space-x-1 relative z-0 overflow-hidden">
+                          <img class="relative z-30 inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                          <img class="relative z-20 inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                          <img class="relative z-10 inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80" alt="">
+                          <img class="relative z-0 inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                          +5
+                        </div>
+
+                      </div>
+                      <p class="text-xs font-medium text-gray-500 group-hover:text-gray-700">9 contributors</p>
+                    </div>
+                  </div>
+                </a>
+              </dd>
+            </div>
+
+            <div class="flex flex-col px-8 pt-8">
+              <dt class="order-2 text-xs font-medium text-gray-500 -mt-1">Posts</dt>
+              <dd class="order-1 text-2xl font-extrabold <%= PageCollection.text_color %> sm:text-3xl">1,234</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="flex mt-8 space-x-8">
+        <p class="text-sm text-gray-700 flex-1">
+          Follow this Collection to get a site notification each time something new is published!
+        </p>
+        <div>
+          <%= link_to 'Follow', '#', class: "text-white #{PageCollection.color} py-2 px-4 rounded hover:shadow hover:bg-brown-500 transition" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="flow-root max-w-4xl mx-auto">
+  <h2 class="text-gray-400 font-bold text-sm my-4">Published content</h2>
+  <ul role="list" class="-mb-8">
+    <li>
+      <div class="relative pb-8">
+        <span class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+        <div class="relative flex items-start space-x-3">
+          <div class="relative">
+            <img class="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center ring-8 ring-white" src="https://images.unsplash.com/photo-1520785643438-5bf77931f493?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80" alt="">
+
+            <span class="absolute -bottom-2 -right-1.5 bg-white rounded-tl px-0.5">
+              <i class="material-icons <%= Creature.text_color %> text-base"><%= Creature.icon %></i>
+            </span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div>
+              <div class="text-sm text-gray-500">
+                <a href="#" class="font-medium text-gray-900">Andrew Brown</a>
+                <span class="mt-0.5">published a <strong>Creature</strong> from</span>
+                <a href="#" class="font-medium text-gray-900">Cool Test Guy</a>
+                <span class="px-1">&middot;</span>
+                <span class="">6h ago</span>
+              </div>
+              <p class="mb-4">
+              	<span class="text-3xl <%= PageCollection.text_color %>">&ldquo;</span>
+                Oh, you know, just testing submitting stuff and whatnot. Disregard this.
+              </p>
+            </div>
+            <div class="mt-2 text-sm text-gray-700">
+              <%= link_to '#', class: '' do %>
+                <div class="grid grid-cols-3 bg-white rounded hover:shadow-lg">
+                  <div class="col-span-1">
+                    <%= image_tag Character.last.random_image_including_private, class: 'w-full h-full rounded-l' %>
+                  </div>
+                  <div class="col-span-2 pl-4 pt-4 border-l-4 border-brown-500">
+                    <h3 class="text-lg mb-4 font-bold">
+                      <i class="material-icons <%= Creature.text_color %> float-left mr-2"><%= Creature.icon %></i>
+                      Spooky Ghost Boi
+                    </h3>
+                    The spookiest in all the lands
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <div class="relative pb-8">
+        <span class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+        <div class="relative flex items-start space-x-3">
+          <div>
+            <div class="relative px-1">
+              <div class="relative">
+                <img class="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center ring-8 ring-white" src="https://images.unsplash.com/photo-1520785643438-5bf77931f493?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80" alt="">
+
+                <span class="absolute -bottom-2 -right-1.5 bg-white rounded-tl px-0.5">
+                  <i class="material-icons <%= User.text_color %> text-base"><%= User.icon %></i>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="min-w-0 flex-1 py-1.5">
+            <div class="text-sm text-gray-500">
+              <a href="#" class="font-medium text-gray-900">Dr. Evil</a>
+              followed
+              <a href="#" class="font-medium text-gray-900">Bob "Bob" Bobson</a>
+              <span class="px-1">&middot;</span>
+              <span class="text-sm text-gray-500">2d ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <div class="relative pb-8">
+        <span class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+        <div class="relative flex items-start space-x-3">
+          <div>
+            <div class="relative px-1">
+              <div class="relative">
+                <img class="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center ring-8 ring-white" src="https://images.unsplash.com/photo-1520785643438-5bf77931f493?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80" alt="">
+
+                <span class="absolute -bottom-2 -right-1.5 bg-white rounded-tl px-0.5">
+                  <i class="material-icons text-blue-500 text-base">forum</i>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="min-w-0 flex-1 py-0">
+            <div class="text-sm leading-8 text-gray-500">
+              <span class="mr-0.5">
+                <a href="#" class="font-medium text-gray-900">Dr. Evil</a>
+                started a forum discussion
+              </span>
+              <span class="px-1">&middot;</span>
+              <span class="text-sm text-gray-500">2d ago</span>
+              <div class="ml-1">
+                <a href="#" class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-1 text-sm bg-blue-500 hover:bg-blue-400 hover:shadow-lg">
+                  <i class="material-icons float-left text-white">forum</i>
+                  <span class="ml-3.5 font-medium text-white">What is the name of that guy who did the thing?</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <div class="relative pb-8">
+        <div class="relative flex items-start space-x-3">
+          <div class="relative">
+            <img class="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center ring-8 ring-white" src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80" alt="">
+
+            <span class="absolute -bottom-2 -right-1.5 bg-white rounded-tl px-0.5">
+              <i class="material-icons <%= Document.text_color %> text-base"><%= Document.icon %></i>
+            </span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="text-sm">
+              <a href="#" class="font-medium text-gray-900">Jason Meyers</a>
+              <span class="text-gray-500">shared a <strong>Document</strong></span>
+              <span class="px-1">&middot;</span>
+              <span class="text-sm text-gray-500">5d ago</span>
+            </div>
+            <div class="mt-2 text-sm text-gray-700">
+              <%= link_to '#', class: '' do %>
+                <div class="grid grid-cols-3 bg-white rounded hover:shadow-lg">
+                  <div class="col-span-1">
+                    <%= image_tag Character.last.random_image_including_private, class: 'w-full h-full rounded-l' %>
+                  </div>
+                  <div class="col-span-2 pl-4 pt-4 border-l-4 border-teal-500">
+                    <h3 class="text-lg mb-4 font-bold">
+                      <i class="material-icons <%= Document.text_color %> float-left mr-2"><%= Document.icon %></i>
+                      Document name
+                    </h3>
+                    Details or description here
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
 <%= content_for :full_width_page_header do %>
   <%= render partial: 'content/components/collection_header', locals: { collection: @page_collection } %>
 
@@ -208,11 +471,7 @@
             <div class="col s12 m12 l12">
               <%= f.hidden_field :page_collection_id, value: @page_collection.id %>
               <div class="center">
-                <% @submittable_content.keys.each do |submittable_class_name| %>
-                  <% submittable_class = content_class_from_name(submittable_class_name) %>
-                  <i class="material-icons bordered-text <%= submittable_class.text_color %> <%= @submittable_content.keys.length > 6 ? 'small' : 'medium' %> tooltipped" 
-                     data-tooltip="This Collection allows <%= submittable_class_name.downcase.pluralize %>."><%= submittable_class.icon %></i> &nbsp;
-                <% end %>
+                
               </div>
               <br />
 

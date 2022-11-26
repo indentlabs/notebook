@@ -7,7 +7,7 @@ class PageCollectionsController < ApplicationController
   before_action :set_page_collection, only: [:show, :edit, :by_user, :update, :destroy, :follow, :unfollow, :report]
   before_action :set_submittable_content, only: [:show, :by_user]
 
-  layout 'tailwind', only: [:index]
+  layout 'tailwind', only: [:index, :show]
 
   # GET /page_collections
   def index
