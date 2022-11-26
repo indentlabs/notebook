@@ -1,203 +1,210 @@
 <%= content_for :full_width_page_header do %>
   <%= render partial: 'content/components/collection_header', locals: { collection: @page_collection } %>
+<% end %>
 
-  <div class="row">
-    <div class="col s12 m12 l7">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title">
-            <% if user_signed_in? %>
-              <% if current_user != @page_collection.user %>
-                <% if @page_collection.followed_by?(current_user) %>
-                  <%= link_to unfollow_page_collection_path(@page_collection), class: "btn #{PageCollection.color} lighten-2 right" do %>
-                    <i class="material-icons left"><%= PageCollection.icon %></i>
-                    Unfollow
-                  <% end %>
-
-                <% else %>
-                  <%= link_to follow_page_collection_path(@page_collection), class: "btn #{PageCollection.color} right" do %>
-                    <i class="material-icons left"><%= PageCollection.icon %></i>
-                    Follow for updates
-                  <% end %>
+<div class="row">
+  <div class="col s12 m12 l7">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">
+          <% if user_signed_in? %>
+            <% if current_user != @page_collection.user %>
+              <% if @page_collection.followed_by?(current_user) %>
+                <%= link_to unfollow_page_collection_path(@page_collection), class: "btn #{PageCollection.color} lighten-2 right" do %>
+                  <i class="material-icons left"><%= PageCollection.icon %></i>
+                  Unfollow
                 <% end %>
-              <% else %>
-                <%= link_to 'Edit collection', edit_page_collection_path(@page_collection), class: 'btn btn-flat right' %>
 
+              <% else %>
+                <%= link_to follow_page_collection_path(@page_collection), class: "btn #{PageCollection.color} right" do %>
+                  <i class="material-icons left"><%= PageCollection.icon %></i>
+                  Follow for updates
+                <% end %>
               <% end %>
             <% else %>
-              <%= link_to '#', class: "btn #{PageCollection.color} lighten-2 right disabled" do %>
-                <i class="material-icons left"><%= PageCollection.icon %></i>
-                Follow
-              <% end %>
-            <% end %>
-
-            About this collection
-          </div>
-          <br />
-          <% if user_signed_in? && @page_collection.user == current_user %>
-            <%= form_for @page_collection do |f| %>
-              <div class="input-field">
-                <%= f.text_area :description, class: 'materialize-textarea' %>
-                <%= f.label :description, 'Collection Description' %>
-                <div class="help-text">You can add details for this collection to explain what kinds of pages you'd like it to contain.</div>
-              </div>
-              <%= f.submit 'Save changes', class: 'btn right blue white-text' %>
-              <div class="clearfix"></div>
+              <%= link_to 'Edit collection', edit_page_collection_path(@page_collection), class: 'btn btn-flat right' %>
 
             <% end %>
           <% else %>
-            <% if @page_collection.description? %>
-              <div class="spaced-paragraphs">
-                <%= simple_format @page_collection.description %>
-              </div>
+            <%= link_to '#', class: "btn #{PageCollection.color} lighten-2 right disabled" do %>
+              <i class="material-icons left"><%= PageCollection.icon %></i>
+              Follow
             <% end %>
           <% end %>
 
+          About this collection
         </div>
-      </div>
-    </div>
-    <div class="col s12 m12 l5">
+        <br />
+        <% if user_signed_in? && @page_collection.user == current_user %>
+          <%= form_for @page_collection do |f| %>
+            <div class="input-field">
+              <%= f.text_area :description, class: 'materialize-textarea' %>
+              <%= f.label :description, 'Collection Description' %>
+              <div class="help-text">You can add details for this collection to explain what kinds of pages you'd like it to contain.</div>
+            </div>
+            <%= f.submit 'Save changes', class: 'btn right blue white-text' %>
+            <div class="clearfix"></div>
 
-      <% if user_signed_in? && @page_collection.user_id == current_user.id %>
-        <% if @page_collection.pending_submissions.count > 0 %>
-          <%=
-            link_to page_collection_pending_submissions_path(page_collection_id: @page_collection.id),
-                    class: "#{PageCollection.color} white-text btn btn-large",
-                    style: "width: 100%" do
-          %>
-            <i class="material-icons left">notifications_active</i>
-            <div class="left">
-              <%= pluralize(@page_collection.pending_submissions.count, 'pending submission') %>
+          <% end %>
+        <% else %>
+          <% if @page_collection.description? %>
+            <div class="spaced-paragraphs">
+              <%= simple_format @page_collection.description %>
             </div>
           <% end %>
         <% end %>
-      <% end %>
 
-      <%# render partial: 'page_collections/quick_add' %>
-      <a class="waves-effect hoverable waves-light btn btn-large modal-trigger <%= 'disabled' unless user_signed_in? %> blue" href="#share-page-modal" style="width: 100%; margin-top: 0.5em;">
-        <i class="material-icons <%= PageCollection.text_color %> text-darken-2 left"><%= PageCollection.icon %></i>
-        <div class="left">
-          <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page
-          <span class="hide-on-small-only">
-            to this Collection
-          </span>
-        </div>
-      </a>
-      <br /><br />
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m12 l5">
 
-      <div class="grey-text uppercase">In this collection</div>
-
-      <div class="collection">
-        <% @page_collection.page_types.each do |pt| %>
-          <% klass = content_class_from_name(pt) %>
-          <%= link_to(send(pt.downcase.pluralize + '_page_collection_path', @page_collection), class: "collection-item #{klass.color} white-text") do %>
-            <i class="material-icons left"><%= klass.icon %></i>
-            <%= pt.pluralize %>
-            <span class="badge white-text"><%= @page_collection.accepted_submissions.where(content_type: pt).count %></span>
-          <% end %>
+    <% if user_signed_in? && @page_collection.user_id == current_user.id %>
+      <% if @page_collection.pending_submissions.count > 0 %>
+        <%=
+          link_to page_collection_pending_submissions_path(page_collection_id: @page_collection.id),
+                  class: "#{PageCollection.color} white-text btn btn-large",
+                  style: "width: 100%" do
+        %>
+          <i class="material-icons left">notifications_active</i>
+          <div class="left">
+            <%= pluralize(@page_collection.pending_submissions.count, 'pending submission') %>
+          </div>
         <% end %>
+      <% end %>
+    <% end %>
+
+    <%# render partial: 'page_collections/quick_add' %>
+    <% if user_signed_in? %>
+      <a class="waves-effect hoverable waves-light btn btn-large modal-trigger blue" href="#share-page-modal" style="width: 100%; margin-top: 0.5em;">
+    <% else %>
+      <a class="waves-effect hoverable waves-light btn btn-large modal-trigger blue" href="https://www.notebook.ai/users/sign_in" style="width: 100%; margin-top: 0.5em;">
+    <% end %>
+      <i class="material-icons <%= PageCollection.text_color %> text-darken-2 left"><%= PageCollection.icon %></i>
+      <div class="left">
+        <%= 'Sign in to' unless user_signed_in? %>
+        <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page
+        <span class="hide-on-small-only">
+          to this Collection
+        </span>
+      </div>
+    </a>
+    <br /><br />
+
+    <div class="grey-text uppercase">In this collection</div>
+
+    <div class="collection">
+      <% @page_collection.page_types.each do |pt| %>
+        <% klass = content_class_from_name(pt) %>
+        <%= link_to(send(pt.downcase.pluralize + '_page_collection_path', @page_collection), class: "collection-item #{klass.color} white-text") do %>
+          <i class="material-icons left"><%= klass.icon %></i>
+          <%= pt.pluralize %>
+          <span class="badge white-text"><%= @page_collection.accepted_submissions.where(content_type: pt).count %></span>
+        <% end %>
+      <% end %>
+      <% if @page_collection.page_types.count > 1 %>
         <%= link_to @page_collection, class: "collection-item #{PageCollection.text_color}" do %>
           <i class="material-icons left"><%= PageCollection.icon %></i>
           All Pages
           <span class="badge brown-text"><%= @page_collection.accepted_submissions.count %></span>
         <% end %>
-      </div>
-
-      <div class="grey-text uppercase">Curator</div>
-      <div>
-        <%= link_to @page_collection.user, class: "#{User.text_color}" do %>
-          <%= image_tag @page_collection.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
-          <%= @page_collection.user.display_name %>
-        <% end %>
-      </div>
-
-      <% if @page_collection.contributors.any? %>
-        <br />
-        <div class="grey-text uppercase">Contributors</div>
-        <% @page_collection.contributors.each do |user| %>
-          <div class="col s12 m6 l3">
-            <%= link_to user, class: "#{User.text_color}" do %>
-              <%= image_tag user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
-              <%= user.display_name %>
-            <% end %>
-          </div>
-        <% end %>
-        <br />
       <% end %>
-
-      <!--
-      <div class="col s12 m6 l6">
-        <br />
-        <div class="grey-text uppercase">
-          Share collection to...
-        </div>
-        <ul>
-          <li>
-            <%= link_to [
-              'http://twitter.com/share?',
-              'url=' + URI::escape(page_collection_url(@page_collection)),
-              '&text=' + URI::escape("I'm building a collection of fictional " + @page_collection.page_types.map(&:pluralize).map(&:downcase).to_sentence + " on Notebook.ai. Check it out!")
-            ].join, class: 'blue-text', target: '_blank' do %>
-              <i class="material-icons tiny left" style="margin-top: 4px;">share</i>
-              Twitter
-            <% end %>
-          </li>
-          <li>
-            <%= 
-              link_to "https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=#{URI::escape(page_collection_url(@page_collection))}&display=popup&ref=plugin&src=share_button", 
-                class: 'blue-text',
-                onclick: "return !window.open(this.href, 'Facebook', 'width=640,height=580')" do
-            %>
-              <i class="material-icons tiny left" style="margin-top: 4px">share</i>
-              Facebook
-            <% end %>
-          </li>
-
-        </ul>
-      </div>
-      -->
     </div>
-  </div>
 
-  <% if @pages.empty? %>
-    <div class="row">
-      <div class="col s12 m10 offset-m1 l8 offset-l2">
-        <div class="card-panel">
-          This collection doesn't have any approved public pages yet.
-          <% if user_signed_in? %>
-            <% if current_user == @page_collection.user %>
-              <a class="modal-trigger" href="#share-page-modal">
-                Add your first page.
-              </a>
-            <% else %>
-              <a class="modal-trigger" href="#share-page-modal">
-                Yours could be first!
-              </a>
-            <% end %>
-          <% else %>
-            Sign in to submit your pages!
+    <div class="grey-text uppercase">Curator</div>
+    <div>
+      <%= link_to @page_collection.user, class: "#{User.text_color}" do %>
+        <%= image_tag @page_collection.user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+        <%= @page_collection.user.display_name %>
+      <% end %>
+    </div>
+
+    <% if @page_collection.contributors.any? %>
+      <br />
+      <div class="grey-text uppercase">Contributors</div>
+      <% @page_collection.contributors.each do |user| %>
+        <div class="col s12 m6 l3">
+          <%= link_to user, class: "#{User.text_color}" do %>
+            <%= image_tag user.image_url(size=20), class: 'left circle', style: 'margin-right: 8px;' %>
+            <%= user.display_name %>
           <% end %>
         </div>
+      <% end %>
+      <br />
+    <% end %>
+
+    <!--
+    <div class="col s12 m6 l6">
+      <br />
+      <div class="grey-text uppercase">
+        Share collection to...
+      </div>
+      <ul>
+        <li>
+          <%= link_to [
+            'http://twitter.com/share?',
+            'url=' + URI::escape(page_collection_url(@page_collection)),
+            '&text=' + URI::escape("I'm building a collection of fictional " + @page_collection.page_types.map(&:pluralize).map(&:downcase).to_sentence + " on Notebook.ai. Check it out!")
+          ].join, class: 'blue-text', target: '_blank' do %>
+            <i class="material-icons tiny left" style="margin-top: 4px;">share</i>
+            Twitter
+          <% end %>
+        </li>
+        <li>
+          <%= 
+            link_to "https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=#{URI::escape(page_collection_url(@page_collection))}&display=popup&ref=plugin&src=share_button", 
+              class: 'blue-text',
+              onclick: "return !window.open(this.href, 'Facebook', 'width=640,height=580')" do
+          %>
+            <i class="material-icons tiny left" style="margin-top: 4px">share</i>
+            Facebook
+          <% end %>
+        </li>
+
+      </ul>
+    </div>
+    -->
+  </div>
+</div>
+
+<% if @pages.empty? %>
+  <div class="row">
+    <div class="col s12 m10 offset-m1 l8 offset-l2">
+      <div class="card-panel">
+        This collection doesn't have any published pages yet.
+        <% if user_signed_in? %>
+          <% if current_user == @page_collection.user %>
+            <a class="modal-trigger" href="#share-page-modal">
+              Publish your first page.
+            </a>
+          <% else %>
+            <a class="modal-trigger" href="#share-page-modal">
+              Yours could be first!
+            </a>
+          <% end %>
+        <% else %>
+          Sign in to <%= @page_collection.auto_accept? ? 'add' : 'submit' %> yours!
+        <% end %>
       </div>
     </div>
-  <% else %>
-    <%= render partial: 'page_collections/sort_bar' %>
-    <% if !!@show_contributor_highlight %>
-      <%= render partial: 'page_collections/contributor_highlight_bar', locals: { contributor: @highlighted_contributor } %>
-    <% end %>
-    <% if !!@show_page_type_highlight %>
-      <%= render partial: 'page_collections/page_type_highlight_bar', locals: { page_type: @page_type } %>
-    <% end %>
-    <%= render partial: 'page_collections/tiles', locals: { pages: @pages } %>
+  </div>
+<% else %>
+  <%= render partial: 'page_collections/sort_bar' %>
+  <% if !!@show_contributor_highlight %>
+    <%= render partial: 'page_collections/contributor_highlight_bar', locals: { contributor: @highlighted_contributor } %>
   <% end %>
-
+  <% if !!@show_page_type_highlight %>
+    <%= render partial: 'page_collections/page_type_highlight_bar', locals: { page_type: @page_type } %>
+  <% end %>
+  <%= render partial: 'page_collections/tiles', locals: { pages: @pages } %>
 <% end %>
 
 <%= form_for PageCollectionSubmission.new do |f| %>
   <div id="share-page-modal" class="modal modal-fixed-footer">
     <div class="modal-content">
       <h4 class="center">
-        <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a page
+        <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a
+        <%= @page_collection.page_types.length > 1 ? 'page' : @page_collection.page_types.first %>
         <span class="hide-on-small-only">
           to this Collection
         </span>
