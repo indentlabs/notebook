@@ -7,6 +7,8 @@ class PageCollectionsController < ApplicationController
   before_action :set_page_collection, only: [:show, :edit, :by_user, :update, :destroy, :follow, :unfollow, :report]
   before_action :set_submittable_content, only: [:show, :by_user]
 
+  before_action :require_collection_ownership, only: [:edit, :update, :destroy]
+
   # GET /page_collections
   def index
     @page_title = "Collections"
@@ -148,6 +150,10 @@ class PageCollectionsController < ApplicationController
   end
 
   private
+
+  def require_collection_ownership
+    raise "Forbidden!" unless user_signed_in? && @page_collection.user_id == current_user.id
+  end
 
   # Use callbacks to share common setup or constraints between actions.
   def set_page_collection
