@@ -38,6 +38,8 @@ class PageCollectionsController < ApplicationController
     @page_title = "#{@page_collection.name} - a Collection"
 
     @pages = @page_collection.accepted_submissions.includes({content: [:universe, :user], user: []})
+    @contributors = User.where(id: @pages.to_a.map(&:user_id) - [@page_collection.user_id])
+
     sort_pages
   end
 

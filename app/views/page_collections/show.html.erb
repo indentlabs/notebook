@@ -1,4 +1,4 @@
-<div class="w-full lg:h-80 h-52 pb-10 bg-cover flex justify-center items-center relative" data-src="" uk-img="" style="background-image: url(&quot;<%= url_for @page_collection.random_image_including_private(nil) %>&quot;);">
+<div class="w-full lg:h-80 h-52 pb-10 bg-cover flex justify-center items-center relative" style="background-image: url(&quot;<%= url_for @page_collection.random_image_including_private(nil) %>&quot;);">
   <div class="text-center max-w-xl mx-auto z-10 relative">
     <div class="mb-3 text-white <%= PageCollection.color %> py-2 px-4 opacity-90">
       <div class="lg:text-4xl text-2xl text font-semibold">
@@ -13,9 +13,11 @@
         <% submittable_class = content_class_from_name(submittable_class_name) %>
         <%# todo click on any to filter posts to just this type, hover effect %>
         <%# todo tooltips %>
-        <i class="material-icons bordered-text <%= submittable_class.text_color %> <%= @page_collection.page_types.length > 6 ? 'text-3xl' : 'text-4xl' %>">
-          <%= submittable_class.icon %>
-        </i>
+        <%= link_to send("#{submittable_class_name.downcase.pluralize}_page_collection_path", @page_collection.id) do %>
+          <i class="material-icons bordered-text <%= submittable_class.text_color %> <%= @page_collection.page_types.length > 6 ? 'text-3xl' : 'text-4xl' %>">
+            <%= submittable_class.icon %>
+          </i>
+        <% end %>
       <% end %>
     </div>
   </div>
@@ -43,16 +45,15 @@
       <div class="md:space-y-6 space-y-5 text-gray-500 md:text-base">
         <div class="overflow-hidden">
           <div class="font-semibold text-lg text-gray-700 text-center mb-4">Accepting submissions</div>
-          <div class="md:leading-8 md:space-y-6 space-y-5">
-            This Collection is currently accepting submissions of your
-            <%= @page_collection.page_types.to_sentence %>.
+          <div class="leading-1 md:space-y-6 space-y-5">
+            This Collection is currently accepting submissions of
+            <%= @page_collection.page_types.map(&:pluralize).to_sentence %>.
 
             <% if @page_collection.auto_accept? %>
               Pages submitted at this time will be automatically accepted.
             <% end %>
 
             <%= link_to 'Submit a page', '#', class: "#{PageCollection.color} hover:bg-brown-500 hover:shadow transition text-white text-center block mt-4 py-2 rounded" %>
-
           </div>
         </div>
       </div>
@@ -67,10 +68,10 @@
                 <a href="#" class="flex-shrink-0 group block">
                   <div class="flex items-center">
                     <div>
-                      <img class="inline-block h-14 w-14 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                      <%= image_tag @page_collection.user.image_url(60), class: "inline-block h-14 w-14 rounded-full #{User.color}" %>
                     </div>
                     <div class="ml-3">
-                      <p class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Not Tim Cook</p>
+                      <p class="text-sm font-medium text-gray-700 group-hover:text-gray-900"><%= @page_collection.user.display_name %></p>
                       <p class="text-xs font-medium text-gray-500 group-hover:text-gray-700">Curator</p>
                     </div>
                   </div>
@@ -78,42 +79,50 @@
               </dd>
             </div>
 
-            <div class="flex flex-col px-8 pt-8">
-              <dd class="order-1 text-2xl font-extrabold text-indigo-600 sm:text-3xl">
-                <a href="#" class="flex-shrink-0 group block">
-                  <div class="flex items-center">
-                    <div class="ml-3">
-                      <div class="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                      
-                        <div class="flex -space-x-1 relative z-0 overflow-hidden">
-                          <img class="relative z-30 inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
-                          <img class="relative z-20 inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
-                          <img class="relative z-10 inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80" alt="">
-                          <img class="relative z-0 inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
-                          +5
+            <% if @contributors.any? %>
+              <div class="flex flex-col px-8 pt-8">
+                <dd class="order-1 text-2xl font-extrabold text-indigo-600 sm:text-3xl">
+                  <div class="flex-shrink-0 group block">
+                    <div class="flex items-center">
+                      <div class="ml-3">
+                        <div class="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                        
+                          <div class="flex -space-x-1 relative z-0 overflow-hidden">
+                            <% @contributors.first(4).each.with_index do |user, i| %>
+                              <%= link_to user do %>
+                                <%= image_tag user.image_url(40), class: "#{User.color} z-#{30 - (i * 10)} inline-block h-8 w-8 rounded-full ring-2 ring-white" %>
+                              <% end %>
+                            <% end %>
+                            <% if @contributors.count > 4 %>
+                              +<%= @contributors.count - 4 %>
+                            <% end %>
+                          </div>
                         </div>
-
+                        <p class="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                          <%= pluralize @contributors.count, 'contributor' %>
+                        </p>
                       </div>
-                      <p class="text-xs font-medium text-gray-500 group-hover:text-gray-700">9 contributors</p>
                     </div>
                   </div>
-                </a>
-              </dd>
-            </div>
+                </dd>
+              </div>
+            <% end %>
 
             <div class="flex flex-col px-8 pt-8">
               <dt class="order-2 text-xs font-medium text-gray-500 -mt-1">Posts</dt>
-              <dd class="order-1 text-2xl font-extrabold <%= PageCollection.text_color %> sm:text-3xl">1,234</dd>
+              <dd class="order-1 text-2xl font-extrabold <%= PageCollection.text_color %> sm:text-3xl">
+                <%= number_with_delimiter @pages.count %>
+              </dd>
             </div>
           </dl>
         </div>
       </div>
 
-      <div class="flex mt-8 space-x-8">
+      <div class="flex mt-4 pt-4 space-x-8 border-t-2 border-gray-100">
         <p class="text-sm text-gray-700 flex-1">
           Follow this Collection to get a site notification each time something new is published or when submissions open.
         </p>
-        <div>
+        <div class="pt-1">
           <% if @page_collection.followed_by?(current_user) %>
             <%= link_to 'Unfollow', '#', class: "text-white #{PageCollection.color} py-2 px-8 rounded hover:shadow hover:bg-brown-500 transition" %>
           <% else %>
@@ -128,7 +137,7 @@
 <div class="flow-root max-w-4xl mx-auto">
   <% if @pages.any? %>
     <h2 class="text-gray-400 font-bold text-sm mt-8 mb-4">
-      <span class="float-right">Sort</span>
+      <%= render partial: 'page_collections/sort_bar' %>
       Published content
     </h2>
 
@@ -251,6 +260,8 @@
 
 
 
+
+
 <% if @pages.empty? %>
   <div class="row">
     <div class="col s12 m10 offset-m1 l8 offset-l2">
@@ -273,14 +284,13 @@
     </div>
   </div>
 <% else %>
-  <%= render partial: 'page_collections/sort_bar' %>
   <% if !!@show_contributor_highlight %>
     <%= render partial: 'page_collections/contributor_highlight_bar', locals: { contributor: @highlighted_contributor } %>
   <% end %>
   <% if !!@show_page_type_highlight %>
     <%= render partial: 'page_collections/page_type_highlight_bar', locals: { page_type: @page_type } %>
   <% end %>
-  <%= render partial: 'page_collections/tiles', locals: { pages: @pages } %>
+  <%# render partial: 'page_collections/tiles', locals: { pages: @pages } %>
 <% end %>
 
 <%= form_for PageCollectionSubmission.new do |f| %>
