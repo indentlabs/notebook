@@ -6,10 +6,25 @@
   <%= render 'form', page_collection: @page_collection %>
 </div>
 
-<%= 
-  link_to 'Delete this page collection', 
-    @page_collection, 
-    method: :DELETE, 
-    class: 'btn btn-flat red-text right', 
-    data: { confirm: "Are you sure? This will PERMANENTLY delete this entire collection! It cannot be undone!" }
-%>
+
+<%# todo maybe move this to a Danger Zone tab on the form, if persisted? %>
+<div class="max-w-7xl mx-auto my-16">
+  <div class="md:grid md:grid-cols-3 md:gap-6">
+    <div class="md:col-span-1">
+      <div class="px-4 sm:px-0">
+        <h3 class="text-lg font-medium leading-6 text-gray-900">Administrative actions</h3>
+        <p class="mt-1 text-sm text-gray-600">These actions are only shown to you, the owner.</p>
+      </div>
+    </div>
+    <div class="mt-5 md:mt-0 md:col-span-2">
+      <%= 
+        link_to 'Permanently this page collection',
+          @page_collection,
+          method: :DELETE, 
+          class: 'bg-red-500 px-4 py-2 text-white rounded', 
+          data: { confirm: "Are you sure? This will PERMANENTLY delete this entire collection! It cannot be undone!" }
+      %>
+    </div>
+  </div>
+</div>
+
