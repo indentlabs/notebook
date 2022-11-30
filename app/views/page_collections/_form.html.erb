@@ -9,13 +9,15 @@
 
       <a href="#" class="text-gray-600 hover:text-gray-800 hover:bg-gray-50 group rounded-md px-3 py-2 flex items-center text-sm font-medium">
         <i class="material-icons float-left -ml-1 mr-3">inbox</i>
-        <span class="truncate">Submissions</span>
+        <span class="truncate">Privacy & Submissions</span>
       </a>
 
+      <!--
       <a href="#" class="text-gray-600 hover:text-gray-800 hover:bg-gray-50 group rounded-md px-3 py-2 flex items-center text-sm font-medium">
         <i class="material-icons float-left -ml-1 mr-3">lock</i>
         <span class="truncate">Privacy</span>
       </a>
+      -->
 
       <!--
       <a href="#" class="text-gray-900 hover:text-gray-900 hover:bg-gray-50 group rounded-md px-3 py-2 flex items-center text-sm font-medium">
@@ -30,6 +32,13 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
         <span class="truncate"> Team </span>
+      </a>
+
+      <a href="#" class="text-gray-900 hover:text-gray-900 hover:bg-gray-50 group rounded-md px-3 py-2 flex items-center text-sm font-medium">
+        <svg class="text-gray-400 group-hover:text-gray-500 flex-shrink-0 -ml-1 mr-3 h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
+        </svg>
+        <span class="truncate"> Followers </span>
       </a>
 
       <a href="#" class="text-gray-900 hover:text-gray-900 hover:bg-gray-50 group rounded-md px-3 py-2 flex items-center text-sm font-medium">
@@ -104,42 +113,27 @@
                     <span>Upload a file</span>
                     <input id="file-upload" name="file-upload" type="file" class="sr-only">
                   </label>
-                  <p class="pl-1">or drag and drop to change your header</p>
+                  <p class="pl-1">to change your header</p>
                 </div>
                 <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-        <button type="submit" class="<%= PageCollection.color %> border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-brown-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brown-500">Save</button>
-      </div>
-    </div>
 
-
-    <div class="shadow sm:rounded-md sm:overflow-hidden">
-      <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
-        <div>
-          <h3 class="text-lg leading-6 font-medium text-gray-900">Submissions</h3>
-          <p class="mt-1 text-sm text-gray-500">What kinds of pages do you want in this collection?</p>
-        </div>
-
-        <div class="grid grid-cols-3 gap-6">
           
-          <fieldset class="col-span-1">
-            <legend class="text-base text-gray-900">Allowed pages</legend>
-            <div class="mt-4 border-t border-b border-gray-200 divide-y divide-gray-200">
+          <fieldset class="col-span-3">
+            <legend class="text-base text-gray-900">Allowed page types</legend>
+            <div class="mt-4 border-t border-b border-gray-200 divide-y divide-gray-200 grid grid-cols-3">
               <% Rails.application.config.content_types[:all].each do |content_type| %>
-                <div class="relative flex items-start py-4">
+                <div class="relative flex items-start py-4 col-span-1">
                   <div class="mr-3 flex items-center h-5">
-                    <input id="person-1" name="person-1" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                    <input id="<%= content_type.name %>" name="<%= content_type.name %>" type="checkbox" class="focus:ring-notebook-blue h-5 w-5 border-gray-300 rounded">
                   </div>
                   <div class="min-w-0 flex-1 text-sm">
-                    <i class="material-icons float-right <%= content_type.text_color %>">
-                      <%= content_type.icon %>
-                    </i>
-                    <label for="person-1" class="font-medium text-gray-700 select-none">
+                    <label for="<%= content_type.name %>" class="font-medium text-gray-700 select-none">
+                      <i class="material-icons float-left <%= content_type.text_color %> mr-2 -mt-0.5">
+                        <%= content_type.icon %>
+                      </i>
                       <%= content_type.name.pluralize %>
                     </label>
                   </div>
@@ -147,25 +141,6 @@
               <% end %>
             </div>
           </fieldset>
-
-          <div class="col-span-3">
-            <label for="title" class="block text-sm font-medium text-gray-700">Collection title</label>
-            <input type="text" name="title" id="title" placeholder="My Awesome Collection" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brown-500 focus:border-brown-500 sm:text-sm">
-          </div>
-
-          <div class="col-span-3">
-            <label for="subtitle" class="block text-sm font-medium text-gray-700">Subtitle</label>
-            <input type="text" name="subtitle" id="subtitle" placeholder="Where my awesome stuff is" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brown-500 focus:border-brown-500 sm:text-sm">
-          </div>
-
-          <div class="col-span-3">
-            <label for="about" class="block text-sm font-medium text-gray-700">Description</label>
-            <div class="mt-1">
-              <textarea id="about" name="about" rows="3" class="shadow-sm focus:ring-brown-500 focus:border-brown-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Write as little or as much as you'd like!"></textarea>
-            </div>
-            <p class="mt-2 text-sm text-gray-500">Brief description for your collection. <code>&lt;strong&gt;</code> and <code>&lt;em&gt;</em></code> tags are supported.</p>
-          </div>
-
         </div>
       </div>
       <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
@@ -174,143 +149,87 @@
     </div>
 
 
-
     <div class="shadow sm:rounded-md sm:overflow-hidden">
       <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
         <div>
-          <h3 class="text-lg leading-6 font-medium text-gray-900">Personal Information</h3>
-          <p class="mt-1 text-sm text-gray-500">Use a permanent address where you can recieve mail.</p>
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Privacy & Submissions</h3>
+          <p class="mt-1 text-sm text-gray-500">
+            You can always add pages to your own collections.
+          </p>
         </div>
 
-        <div class="grid grid-cols-6 gap-6">
-          <div class="col-span-6 sm:col-span-3">
-            <label for="first-name" class="block text-sm font-medium text-gray-700">First name</label>
-            <input type="text" name="first-name" id="first-name" autocomplete="given-name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-          </div>
+        <div class="gap-6">
 
-          <div class="col-span-6 sm:col-span-3">
-            <label for="last-name" class="block text-sm font-medium text-gray-700">Last name</label>
-            <input type="text" name="last-name" id="last-name" autocomplete="family-name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-          </div>
+          <fieldset class="my-6">
+            <legend class="text-base font-medium text-gray-900">Visibility</legend>
+            <p class="text-sm text-gray-500">This setting controls who can see this collection.</p>
+            <div class="mt-4 space-y-4">
+              <div class="flex items-center">
+                <input id="public" name="push-notifications" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                <label for="public" class="ml-3">
+                  <span class="inline-block text-sm font-medium text-gray-700">Public</span><span class="text-sm"> - Visible to anyone browsing collections</span>
+                </label>
+              </div>
+              <div class="flex items-center">
+                <input id="by-url" name="push-notifications" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                <label for="by-url" class="ml-3">
+                  <span class="inline-block text-sm font-medium text-gray-700">By URL</span><span class="text-sm"> - Visible to anyone with the URL</span>
+                </label>
+              </div>
+              <div class="flex items-center">
+                <input id="private" name="push-notifications" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                <label for="private" class="ml-3">
+                  <span class="inline-block text-sm font-medium text-gray-700">Private</span><span class="text-sm"> - Visible only to you</span>
+                </label>
+              </div>
+            </div>
+          </fieldset>
 
-          <div class="col-span-6 sm:col-span-4">
-            <label for="email-address" class="block text-sm font-medium text-gray-700">Email address</label>
-            <input type="text" name="email-address" id="email-address" autocomplete="email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-          </div>
+          <fieldset>
+            <legend class="text-base font-medium text-gray-900">Page submissions</legend>
+            <div class="my-4 space-y-4">
+              <div class="flex items-start">
+                <div class="h-5 flex items-center">
+                  <input id="comments" name="comments" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label for="comments" class="font-medium text-gray-700">Allow submissions from other users</label>
+                  <p class="text-gray-500">Submissions are added to a review queue for you to approve or deny.</p>
+                </div>
+              </div>
 
-          <div class="col-span-6 sm:col-span-3">
-            <label for="country" class="block text-sm font-medium text-gray-700">Country</label>
-            <select id="country" name="country" autocomplete="country-name" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-              <option>United States</option>
-              <option>Canada</option>
-              <option>Mexico</option>
-            </select>
-          </div>
+              <div class="ml-6">
+                <label for="about" class="block text-sm font-medium text-gray-700">Submission guidelines</label>
+                <div class="mt-1">
+                  <textarea id="about" name="about" rows="3" class="shadow-sm focus:ring-brown-500 focus:border-brown-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Write as little or as much as you'd like!"></textarea>
+                </div>
+                <p class="mt-2 text-sm text-gray-500">
+                  What kinds of pages are you looking for? This prompt will be shown to users who are about to submit a page.
+                </p>
+              </div>
 
-          <div class="col-span-6">
-            <label for="street-address" class="block text-sm font-medium text-gray-700">Street address</label>
-            <input type="text" name="street-address" id="street-address" autocomplete="street-address" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-          </div>
-
-          <div class="col-span-6 sm:col-span-6 lg:col-span-2">
-            <label for="city" class="block text-sm font-medium text-gray-700">City</label>
-            <input type="text" name="city" id="city" autocomplete="address-level2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-          </div>
-
-          <div class="col-span-6 sm:col-span-3 lg:col-span-2">
-            <label for="region" class="block text-sm font-medium text-gray-700">State / Province</label>
-            <input type="text" name="region" id="region" autocomplete="address-level1" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-          </div>
-
-          <div class="col-span-6 sm:col-span-3 lg:col-span-2">
-            <label for="postal-code" class="block text-sm font-medium text-gray-700">ZIP / Postal code</label>
-            <input type="text" name="postal-code" id="postal-code" autocomplete="postal-code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-          </div>
+              <div>
+                <div class="flex items-start">
+                  <div class="h-5 flex items-center">
+                    <input id="candidates" name="candidates" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                  </div>
+                  <div class="ml-3 text-sm">
+                    <label for="candidates" class="font-medium text-gray-700">Auto-accept all submissions</label>
+                    <p class="text-gray-500">Submissions will skip the review queue and automatically publish.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
         </div>
       </div>
       <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-        <button type="submit" class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Save</button>
+        <button type="submit" class="<%= PageCollection.color %> border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-brown-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brown-500">Save</button>
       </div>
     </div>
 
-    <div class="shadow sm:rounded-md sm:overflow-hidden">
-      <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
-        <div>
-          <h3 class="text-lg leading-6 font-medium text-gray-900">Notifications</h3>
-          <p class="mt-1 text-sm text-gray-500">Provide basic informtion about the job. Be specific with the job title.</p>
-        </div>
-
-        <fieldset>
-          <legend class="text-base font-medium text-gray-900">By Email</legend>
-          <div class="mt-4 space-y-4">
-            <div class="flex items-start">
-              <div class="h-5 flex items-center">
-                <input id="comments" name="comments" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
-              </div>
-              <div class="ml-3 text-sm">
-                <label for="comments" class="font-medium text-gray-700">Comments</label>
-                <p class="text-gray-500">Get notified when someones posts a comment on a posting.</p>
-              </div>
-            </div>
-            <div>
-              <div class="flex items-start">
-                <div class="h-5 flex items-center">
-                  <input id="candidates" name="candidates" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
-                </div>
-                <div class="ml-3 text-sm">
-                  <label for="candidates" class="font-medium text-gray-700">Candidates</label>
-                  <p class="text-gray-500">Get notified when a candidate applies for a job.</p>
-                </div>
-              </div>
-            </div>
-            <div>
-              <div class="flex items-start">
-                <div class="h-5 flex items-center">
-                  <input id="offers" name="offers" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
-                </div>
-                <div class="ml-3 text-sm">
-                  <label for="offers" class="font-medium text-gray-700">Offers</label>
-                  <p class="text-gray-500">Get notified when a candidate accepts or rejects an offer.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </fieldset>
-        <fieldset class="mt-6">
-          <legend class="text-base font-medium text-gray-900">Push Notifications</legend>
-          <p class="text-sm text-gray-500">These are delivered via SMS to your mobile phone.</p>
-          <div class="mt-4 space-y-4">
-            <div class="flex items-center">
-              <input id="push-everything" name="push-notifications" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-              <label for="push-everything" class="ml-3">
-                <span class="block text-sm font-medium text-gray-700">Everything</span>
-              </label>
-            </div>
-            <div class="flex items-center">
-              <input id="push-email" name="push-notifications" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-              <label for="push-email" class="ml-3">
-                <span class="block text-sm font-medium text-gray-700">Same as email</span>
-              </label>
-            </div>
-            <div class="flex items-center">
-              <input id="push-nothing" name="push-notifications" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-              <label for="push-nothing" class="ml-3">
-                <span class="block text-sm font-medium text-gray-700">No push notifications</span>
-              </label>
-            </div>
-          </div>
-        </fieldset>
-      </div>
-      <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-        <button type="submit" class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">Save</button>
-      </div>
-    </div>
   </form>
 </div>
-
-
-
-
 
 
 
