@@ -1,20 +1,30 @@
 <div class="xl:flex-shrink-0 xl:w-80 xl:border-r xl:border-gray-200">
-  <div class="pl-4 pr-6 py-6 sm:pl-6 lg:pl-8 xl:pl-6">
+  <div class="px-4 py-6 sm:pl-6 lg:px-8 xl:px-6">
     <div class="flex items-center justify-between">
       <div class="flex-1 space-y-2">
         <div class="space-y-8 sm:space-y-0 sm:flex sm:justify-between sm:items-center xl:block xl:space-y-8">
-          <!-- Profile -->
-          <div class="flex items-center space-x-3">
+          <div class="flex items-center">
             <div class="flex-shrink-0 w-full mb-2">
-              <%= image_tag content.raw_model.random_image_including_private, class: 'rounded-lg' %>
+              <% image = content.raw_model.random_image_including_private %>
+              <%= link_to image, target: '_blank' do %>
+                <%= image_tag image, class: 'rounded-lg hover:shadow hover:opacity-90' %>
+              <% end %>
             </div>
             <div class="space-y-1">
-              <div class="text-sm font-medium text-gray-900">
+              <div class="text-sm font-medium text-gray-900 mb-4">
                 <i class="material-icons float-left <%= content.class_text_color %> mr-1"><%= content.class_icon %></i>
                 <%= content.name %>
               </div>
+              <% if content.universe %>
+                <%= link_to content.universe, class: 'group flex items-center text-xs' do %>
+                  <i class="material-icons mr-2 <%= Universe.text_color %>"><%= Universe.icon %></i>
+                  in &nbsp;
+                  <span class="text-gray-500 group-hover:text-gray-900 font-medium"><%= content.universe.name %></span>
+                <% end %>
+              <% end %>
               <%= link_to content.user, class: 'group flex items-center text-xs' do %>
-                <i class="material-icons <%= User.text_color %>"><%= User.icon %></i>
+                <i class="material-icons mr-2 <%= User.text_color %>"><%= User.icon %></i>
+                by &nbsp
                 <span class="text-gray-500 group-hover:text-gray-900 font-medium"><%= content.user.display_name %></span>
               <% end %>
             </div>
@@ -43,7 +53,6 @@
               <span class="flex-grow text-left">References</span>
               <span class="bg-gray-100 p-1 text-xs rounded-lg">17</span>
             </button>
-
           </div>
         </div>
         <!-- Meta info -->
