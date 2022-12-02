@@ -37,4 +37,29 @@ namespace :cache do
       end
     end
   end
+
+  desc "Recompute ALL attribute word count caches"
+  task recompute_all_attribute_word_counts: :environment do
+    Attribute.find_each do |attribute|
+      begin
+        CacheAttributeWordCountJob.perform_now(attribute.id)
+
+      rescue ActiveRecord::RecordInvalid => e
+        puts "Something died for attribute ID=#{attribute.id} (#{attribute.entity_type} #{attribute.entity_id}) but we're carrying on."
+        puts e.inspect
+      end
+    end
+  end
+
+  desc "Recompute ALL page word count caches"
+  task recompute_all_page_word_counts: :environment do
+    Rails.application.config.content_types[:all].each do |content_type|
+      puts "Recomputing #{content_type.name} word counts"
+
+      content_type.order('updated_at DESC').find_each do |entity|
+        sum_attribute_word_count = Attribute.where(entity_type: content_type.name, entity_id: entity.id).sum(:word_count_cache)
+        entity.update(cached_word_count: sum_attribute_word_count)
+      end
+    end
+  end
 end
