@@ -58,7 +58,7 @@ namespace :cache do
 
       content_type.order('updated_at DESC').find_each do |entity|
         sum_attribute_word_count = Attribute.where(entity_type: content_type.name, entity_id: entity.id).sum(:word_count_cache)
-        entity.update(cached_word_count: sum_attribute_word_count)
+        entity.update_column(:cached_word_count, sum_attribute_word_count)
       end
     end
   end

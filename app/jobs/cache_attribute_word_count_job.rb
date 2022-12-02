@@ -7,7 +7,7 @@ class CacheAttributeWordCountJob < ApplicationJob
 
     # If we have a blank/null value, ezpz 0 words
     if attribute.nil? || attribute.value.nil? || attribute.value.blank?
-      attribute.update!(word_count_cache: 0)
+      attribute.update_column(:word_count_cache, 0)
       return
     end
 
@@ -29,6 +29,6 @@ class CacheAttributeWordCountJob < ApplicationJob
       stray_punctuation: 'ignore'
     ).count(attribute.value)
 
-    attribute.update!(word_count_cache: word_count)
+    attribute.update_column(:word_count_cache, word_count)
   end
 end
