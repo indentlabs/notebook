@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_08_17_213907) do
+ActiveRecord::Schema.define(version: 2022_12_02_003053) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -277,6 +277,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_buildings_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_buildings_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_buildings_on_user_id"
@@ -431,6 +432,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_characters_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_characters_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_characters_on_deleted_at_and_user_id"
@@ -459,6 +461,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_conditions_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_conditions_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_conditions_on_user_id"
@@ -626,6 +629,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id", "universe_id"], name: "index_continents_on_deleted_at_and_id_and_universe_id"
     t.index ["deleted_at", "id", "user_id"], name: "index_continents_on_deleted_at_and_id_and_user_id"
     t.index ["deleted_at", "id"], name: "index_continents_on_deleted_at_and_id"
@@ -670,6 +674,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_countries_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_countries_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_countries_on_deleted_at_and_user_id"
@@ -828,6 +833,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_creatures_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_creatures_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_creatures_on_deleted_at_and_user_id"
@@ -873,6 +879,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_deities_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_deities_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_deities_on_deleted_at_and_user_id"
@@ -1338,6 +1345,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_floras_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_floras_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_floras_on_deleted_at_and_user_id"
@@ -1373,6 +1381,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_foods_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_foods_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_foods_on_user_id"
@@ -1492,6 +1501,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_governments_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_governments_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_governments_on_deleted_at_and_user_id"
@@ -1588,6 +1598,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_groups_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_groups_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_groups_on_deleted_at_and_user_id"
@@ -1668,6 +1679,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_items_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_items_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_items_on_deleted_at_and_user_id"
@@ -1690,6 +1702,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_jobs_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_jobs_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_jobs_on_user_id"
@@ -1765,6 +1778,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_landmarks_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_landmarks_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_landmarks_on_deleted_at_and_user_id"
@@ -1797,6 +1811,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_languages_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_languages_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_languages_on_deleted_at_and_user_id"
@@ -1911,6 +1926,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_locations_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_locations_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_locations_on_deleted_at_and_user_id"
@@ -2235,6 +2251,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.string "page_type", default: "Lore"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_lores_on_universe_id"
     t.index ["user_id"], name: "index_lores_on_user_id"
   end
@@ -2271,6 +2288,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_magics_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_magics_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_magics_on_deleted_at_and_user_id"
@@ -2651,6 +2669,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_planets_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_planets_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_planets_on_deleted_at_and_user_id"
@@ -2705,6 +2724,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_races_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_races_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_races_on_deleted_at_and_user_id"
@@ -2779,6 +2799,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_religions_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_religions_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_religions_on_deleted_at_and_user_id"
@@ -2845,6 +2866,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_scenes_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_scenes_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_scenes_on_deleted_at_and_user_id"
@@ -2867,6 +2889,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_schools_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_schools_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_schools_on_user_id"
@@ -2916,6 +2939,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_sports_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_sports_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_sports_on_user_id"
@@ -2980,6 +3004,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_technologies_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_technologies_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_technologies_on_deleted_at_and_user_id"
@@ -3474,6 +3499,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_towns_on_deleted_at_and_id"
     t.index ["deleted_at", "universe_id"], name: "index_towns_on_deleted_at_and_universe_id"
     t.index ["deleted_at", "user_id"], name: "index_towns_on_deleted_at_and_user_id"
@@ -3495,6 +3521,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_traditions_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_traditions_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_traditions_on_user_id"
@@ -3519,6 +3546,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["deleted_at", "id"], name: "index_universes_on_deleted_at_and_id"
     t.index ["deleted_at", "user_id"], name: "index_universes_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_universes_on_deleted_at"
@@ -3618,6 +3646,7 @@ ActiveRecord::Schema.define(version: 2022_08_17_213907) do
     t.datetime "archived_at"
     t.boolean "favorite", default: false
     t.boolean "columns_migrated_from_old_style", default: true
+    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_vehicles_on_universe_id"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_vehicles_on_user_id_and_universe_id_and_deleted_at"
     t.index ["user_id"], name: "index_vehicles_on_user_id"

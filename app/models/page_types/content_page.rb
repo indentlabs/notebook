@@ -4,7 +4,7 @@ class ContentPage < ApplicationRecord
   belongs_to :user
   belongs_to :universe
 
-  attr_accessor :favorite
+  attr_accessor :favorite, :cached_word_count
 
   include Authority::Abilities
   self.authorizer_name = 'ContentPageAuthorizer'
@@ -39,6 +39,6 @@ class ContentPage < ApplicationRecord
   end
 
   def self.polymorphic_content_fields
-    [:id, :name, :favorite, :page_type, :user_id, :created_at, :updated_at, :deleted_at, :archived_at, :privacy]
+    [:id, :name, :favorite, :page_type, :user_id, :cached_word_count, :created_at, :updated_at, :deleted_at, :archived_at, :privacy]
   end
 end

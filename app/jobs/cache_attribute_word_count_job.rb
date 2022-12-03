@@ -5,9 +5,13 @@ class CacheAttributeWordCountJob < ApplicationJob
     attribute_id = args.shift
     attribute    = Attribute.find_by(id: attribute_id)
 
-    return if attribute.nil?
-    return if attribute.value.nil? || attribute.value.blank?
+    # If we have a blank/null value, ezpz 0 words
+    if attribute.nil? || attribute.value.nil? || attribute.value.blank?
+      attribute.update_column(:word_count_cache, 0)
+      return
+    end
 
+    # If we actually have some content, use a smart WordCountAnalyzer instead of just splitting on spaces
     word_count = WordCountAnalyzer::Counter.new(
       ellipsis:          'no_special_treatment',
       hyperlink:         'count_as_one',
@@ -25,6 +29,6 @@ class CacheAttributeWordCountJob < ApplicationJob
       stray_punctuation: 'ignore'
     ).count(attribute.value)
 
-    attribute.update!(word_count_cache: word_count)
+    attribute.update_column(:word_count_cache, word_count)
   end
 end

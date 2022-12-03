@@ -2,6 +2,8 @@ class PageCollectionSubmissionsController < ApplicationController
   before_action :set_page_collection, only: [:index]
   before_action :set_page_collection_submission, only: [:show, :edit, :update, :destroy, :approve, :pass]
 
+  before_action :require_collection_ownership, only: [:index, :edit, :update, :destroy, :pass, :approve]
+
   # GET /page_collection_submissions
   def index
     @page_collection_submissions = @page_collection.page_collection_submissions.where(accepted_at: nil)
@@ -82,6 +84,10 @@ class PageCollectionSubmissionsController < ApplicationController
   end
 
   private
+
+  def require_collection_ownership
+    raise "Forbidden!" unless user_signed_in? && @page_collection.user_id == current_user.id
+  end
 
   def set_page_collection
     @page_collection = PageCollection.find(params[:page_collection_id])

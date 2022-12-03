@@ -10,6 +10,8 @@ class ContentSerializer
   attr_accessor :raw_model
   attr_accessor :class_name, :class_color, :class_text_color, :class_icon
 
+  attr_accessor :cached_word_count
+
   attr_accessor :data
   # name: 'blah,
   # categories: [
@@ -44,6 +46,8 @@ class ContentSerializer
 
     self.page_tags        = content.page_tags.pluck(:tag) || []
     self.documents        = content.documents || []
+
+    self.cached_word_count = content.cached_word_count
 
     self.data = {
       name: content.try(:name),
