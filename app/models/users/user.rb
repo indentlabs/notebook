@@ -92,6 +92,8 @@ class User < ApplicationRecord
   has_many :notifications,                 dependent: :destroy
   has_many :notice_dismissals,             dependent: :destroy
 
+  has_many :word_count_updates,            dependent: :destroy
+
   has_many :page_settings_overrides,       dependent: :destroy
   has_one_attached :avatar
   validates :avatar, attached: false,

@@ -12,12 +12,16 @@
               <%= page.name %>
             </h3>
           </div>
-          <p class="text-gray-500 text-sm truncate">
-            word count
-          </p>
-          <p class="text-gray-500 text-sm truncate">
-            last edited <%= time_ago_in_words page.updated_at %> ago
-          </p>
+
+          <ul class="text-gray-500 text-xs truncate flex flex-row space-x-2 divide-x-2">
+            <li>
+              <%= number_with_delimiter page.cached_word_count %>
+              <%= 'word'.pluralize(page.cached_word_count) %>
+            </li>
+            <li class="pl-2">
+              edited <%= time_ago_in_words page.updated_at %> ago
+            </li>
+          </ul>
         </div>
       </li>
     <% end %>
