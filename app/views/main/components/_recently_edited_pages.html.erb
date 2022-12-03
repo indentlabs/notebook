@@ -1,24 +1,27 @@
 <ul role="list" class="space-y-2 flex">
   <% @recently_edited_pages.first(9).each do |page| %>
-    <%# Timelines and Documents use edit_polymorphic_path, while ContentPages uses edit_path %>
-    <%= link_to page.try(:edit_path) || edit_polymorphic_path(page), class: 'w-full' do %>
-      <li class="flex items-center bg-white rounded-md shadow hover:shadow-md">
-        <div class="p-2">
-          <%= image_tag page.random_image_including_private, class: 'w-32 h-32 bg-notebook-blue rounded-md flex-shrink-0' %>
+    <%# Timelines and Documents use edit_polymorphic_path, while ContentPages uses edit_path -- gross %>
+    <%= link_to page.try(:view_path) || edit_polymorphic_path(page), class: 'w-full' do %>
+      <li class="flex items-center bg-white rounded-md shadow hover:shadow-md h-32 divide-x-2">
+        <div class="h-32">
+          <%= image_tag page.random_image_including_private, class: 'w-full h-full bg-notebook-blue rounded-l-md flex-shrink-0' %>
         </div>
-        <div class="flex-1 truncate p-4">
-          <div class="flex items-center space-x-3 mb-2">
+        <div class="flex-1 h-full flex flex-col divide-y">
+          <div class="flex flex-col flex-1 items-start mb-2 p-3">
             <h3 class="text-gray-900 text-sm font-medium truncate <%= page.text_color %>">
               <%= page.name %>
             </h3>
+            <p class="line-clamp-2 text-sm">
+              <%= page.description %>
+            </p>
           </div>
 
-          <ul class="text-gray-500 text-xs truncate flex flex-row space-x-2 divide-x-2">
-            <li>
+          <ul class="text-gray-500 text-xs truncate flex flex-row space-x-2 divide-x">
+            <li class="p-2 pr-0 flex-1 text-right">
               <%= number_with_delimiter page.cached_word_count %>
               <%= 'word'.pluralize(page.cached_word_count) %>
             </li>
-            <li class="pl-2">
+            <li class="p-2">
               edited <%= time_ago_in_words page.updated_at %> ago
             </li>
           </ul>
