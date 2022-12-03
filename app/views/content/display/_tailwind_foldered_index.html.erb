@@ -13,7 +13,7 @@
 
 
 <div class="h-full flex">
-  <!-- Static  for desktop -->
+  <!-- Static for desktop -->
   <div class="flex flex-col min-w-0 flex-1 overflow-hidden">
     <!-- mobile second header -->
     <div class="lg:hidden">
@@ -403,28 +403,29 @@
       </main>
 
       <!-- second sidebar -->
-      <aside class="hidden xl:order-first xl:flex xl:flex-col flex-shrink-0 w-88 border-r border-gray-200 min-h-screen">
+      <aside class="hidden xl:order-first xl:flex xl:flex-col flex-shrink-0 w-96 border-r border-gray-200 min-h-screen">
         <div class="px-6 pt-4 pb-4 bg-white">
           <h2 class="text-lg font-medium text-gray-900">
             <i class="material-icons float-left <%= content_type_class.text_color %> text-xl mr-2"><%= content_type_class.icon %></i>
             Your <%= content_type_name.pluralize %>
           </h2>
 
-          <!--
           <p class="mt-4 text-xs tracking-wider font-bold text-gray-500">
-            Includes <%= pluralize content.count, 'item' %>
+            Showing <%= pluralize content.count, 'pages' %>
           </p>
           <ul class="mt-1 text-gray-600">
-            <li class="">
-              <i class="material-icons float-left mr-2 <%= Folder.text_color %>"><%= Folder.icon %></i>
-              <span class="text-sm"><%= pluralize content.count, 'folder' %></span>
-            </li>
-            <li class="">
-              <i class="material-icons float-left mr-2 <%= Document.text_color %>"><%= Document.icon %></i>
-              <span class="text-sm"><%= pluralize content.count, 'document' %></span>
-            </li>
+            <% content_counts_per_type.each do |content_type, count| %>
+              <li>
+                <i class="material-icons float-left mr-2 <%= content_class_from_name(content_type).text_color %>">
+                  <%= content_class_from_name(content_type).icon %>
+                </i>
+                <span class="text-sm">
+                  <%= number_with_delimiter count %>
+                  <%= content_type.downcase.pluralize count %>
+                </span>
+              </li>
+            <% end %>
           </ul>
-          -->
           
           <!-- todo put filter/search bar here -->
           <!--
@@ -462,7 +463,8 @@
           </form>
           -->
         </div>
-        <!-- Directory list -->
+
+        <!-- Folder & stats -->
         <nav class="flex-1 min-h-0 overflow-y-auto" aria-label="Directory">
           <div class="relative">
             <div class="z-10 sticky top-0 border-t border-b border-gray-200 bg-gray-100 px-6 py-1 text-sm font-medium text-gray-500">
@@ -516,6 +518,7 @@
               </h3>
             </div>
             <div class="px-6 leading-relaxed pt-4">
+              <!--
               <% content_counts_per_type.each do |content_type, count| %>
                 <div class="inline-block mr-4 mb-2">
                   <i class="material-icons float-left mr-1 <%= content_class_from_name(content_type).text_color %>"><%= content_class_from_name(content_type).icon %></i>
@@ -525,12 +528,11 @@
                   </span>
                 </div>
               <% end %>
-
-              <br />
+              -->
 
               <div class="inline-block mr-4">
                 <i class="material-icons float-left mr-1 <%= DocumentAnalysis.text_color %>">spellcheck</i>
-                <% total_word_count = 0 %>
+                <% total_word_count = content.map(&:cached_word_count).sum %>
                 <span class="text-sm">
                   <strong class="font-bold text-gray-700"><%= number_with_delimiter total_word_count %></strong>
                   <%= 'total word'.pluralize(total_word_count) %>
