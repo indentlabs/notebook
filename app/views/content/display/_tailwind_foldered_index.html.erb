@@ -539,17 +539,20 @@
                 </span>
               </div>
 
-              <div class="whitespace-nowrap inline-block">
-                in
-                <div class="inline-block mr-4">
-                  <i class="material-icons float-left mr-0.5 <%= Universe.text_color %>"><%= Universe.icon %></i>
-                  <% total_universe_count = content.select { |doc| doc.universe_id? }.count %>
-                  <span class="text-sm">
-                    <strong class="font-bold text-gray-700"><%= number_with_delimiter total_universe_count %></strong>
-                    <%= 'universe'.pluralize(total_universe_count) %>
-                  </span>
+              <% if false && content.any? { |content_page| content_page.page_type != Universe.name } %>
+                <div class="whitespace-nowrap inline-block">
+                  in
+                  <div class="inline-block mr-4">
+                    <i class="material-icons float-left mr-0.5 <%= Universe.text_color %>"><%= Universe.icon %></i>
+                    <%# todo this is broken because we don't actually set universe on ContentPage imports %>
+                    <% total_universe_count = content.reject { |page| page.universe.nil? }.count %>
+                    <span class="text-sm">
+                      <strong class="font-bold text-gray-700"><%= number_with_delimiter total_universe_count %></strong>
+                      <%= 'universe'.pluralize(total_universe_count) %>
+                    </span>
+                  </div>
                 </div>
-              </div>
+              <% end %>
             </div>
           </div>
         </nav>
