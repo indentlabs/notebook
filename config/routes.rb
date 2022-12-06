@@ -65,6 +65,10 @@ Rails.application.routes.draw do
   get '/@:username/followers', to: 'users#followers'
   get '/@:username/following', to: 'users#following'
 
+  scope '/analysis' do
+    get '/', to: 'document_analyses#index'
+  end
+
   resources :documents do
     # Document Analysis routes
     get '/analysis/',            to: 'document_analyses#show',        on: :member      

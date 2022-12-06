@@ -3,20 +3,18 @@
   blocked_post  = user_signed_in? && post.user.present? && post.user.blocked_by?(current_user)
 %>
 
-<% if blocked_post %>
-  <div class='grey-text text-lighten-2'>
-    <em class="tooltipped" data-tooltip="This message is hidden because you've blocked the user it's from.">1 message hidden.</em>
-  </div>
-
-<% else %>
+<% unless blocked_post %>
   <%
+    common_post_classes  = 'p-4'
+    unmuted_post_classes = 'bg-white rounded shadow' + ' ' + common_post_classes
+    muted_post_classes   = '' + ' ' + common_post_classes
+
     # Mute the post if it's one line that starts with ( and ends with )
     muted_post = post.present? && post.to_model.content.split("\n").reject(&:empty?).all? { |paragraph| paragraph.strip.start_with?('(') && paragraph.strip.end_with?(')') }
-    muted_post_classes = 'muted-thredded-post'
   %>
 
   <%= render 'thredded/posts_common/before_first_unread_post', post: post if post.first_unread_in_page? %>
-  <%= content_tag :article, id: dom_id(post), class: "thredded--post thredded--#{post.read_state}--post #{muted_post ? muted_post_classes : 'card'}" do %>
+  <%= content_tag :article, id: dom_id(post), class: "thredded--post thredded--#{post.read_state}--post #{muted_post ? muted_post_classes : unmuted_post_classes}" do %>
     <%= render 'thredded/posts_common/actions', post: post, actions: local_assigns[:actions] %>
     <%= render 'thredded/posts_common/header', post: post %>
     <%= ForumReplacementService.replace_for(content, current_user) || render('thredded/posts/content', post: post) %>

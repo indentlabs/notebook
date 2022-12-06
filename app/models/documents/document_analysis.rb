@@ -32,4 +32,8 @@ class DocumentAnalysis < ApplicationRecord
   def self.text_color
     'text-orange-500'
   end
+
+  def self.color
+    'bg-orange-500'
+  end
 end

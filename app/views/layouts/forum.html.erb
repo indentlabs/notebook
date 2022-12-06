@@ -1,49 +1,330 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title><%= yield :thredded_page_title %> | Notebook.ai</title>
-  <%= render 'layouts/common_head' %>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <%= csrf_meta_tags %>
 
-  <%= stylesheet_link_tag 'thredded', 'data-turbolinks-track': 'reload' %>
-  <%= csrf_meta_tag %>
-  <%# javascript_include_tag :application %>
-  <%= javascript_include_tag 'thredded',
-                             async: !Rails.application.config.assets.debug,
-                             defer: true %>
-  <%== RailsGravatar.prefetch_dns_tag %>
+  <%= stylesheet_link_tag 'application', media: 'all' %>
+  <!--
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+  -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+  <%= render 'layouts/favicon' %>
+  <%= javascript_include_tag 'application' %>
+  <%= javascript_pack_tag 'application' %>
+  <%= render 'layouts/seo' %>
+
+  <!-- todo mirror this in-repo? -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body data-in-app="true" class="<%= 'has-fixed-sidenav' if user_signed_in? %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>">
-  <%= render 'layouts/sidenav' if user_signed_in? %>
-  <%= render 'layouts/recent_edits_sidenav' if user_signed_in? %>
-  <%= render 'layouts/navbar' %>
+<body data-in-app="true"
+      class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
+      x-data="{ showSidebar: true }"
+>
+  <header class="flex sticky top-0 z-50 w-full bg-notebook-blue border-b border-blue-400 h-14 shadow">
+    <%= link_to root_path, class: 'flex items-center mr-2 px-6 py-4 border-b border-gray-300 shadow hover:shadow-md transition bg-white rounded-br-lg' do %>
+      <%= image_tag 'logos/book-small.webp', class: 'h-8 mr-3' %>
+      <span class="text-2xl font-bold text-notebook-blue tracking-wide">
+        Notebook.ai
+      </span>
+    <% end %>
 
-  <main>
-    <%= yield :full_width_page_header %>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col s12">
-          <%# todo: move these to toasts and/or make dismissable %>
-          <%= render 'cards/ui/alert' %>
-          <%= render 'cards/ui/notice' %>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col s12">
-          <%= yield %>
-        </div>
+    <div x-cloak x-show="!showSidebar">
+      <span class="sr-only">Menu</span> 
+      <div @click.stop="showSidebar = true" class="mt-2 mr-1 p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+        <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+        </svg>
       </div>
     </div>
 
-    <%= render 'layouts/ganalytics' %>
+    <!-- left-hand side of navbar -->
+    <div class="flex-grow pt-2 pl-1">
+      <!-- no universe picker on the forums -->
+    </div>
+
+    <!-- right-hand side of navbar -->
+    <div class="pr-2">
+      <div x-data="{ notificationsDropdownOpen: false }" class="inline-block mt-2.5 mr-2">
+        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+          <svg class="h-6 w-6 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'text-white' : 'text-blue-300' %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+          </svg>
+        </button>
+        <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+
+        <div x-show="notificationsDropdownOpen" class="absolute right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-2/5">
+          <div class="pt-2">
+            <% @user_notifications.each do |notification| %>
+              <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2' do %>
+                <i class="material-icons bg-<%= notification.icon_color %>-500 text-white rounded-full p-1 h-8 w-8 mx-1"><%= notification.icon %></i>                
+                <div class="text-black text-sm mx-2 flex-grow <%= 'font-bold' unless notification.viewed_at? %>">
+                  <%= notification.message_html.html_safe %>
+                </div>
+                <div class="text-gray-400 text-xs">
+                  <%= time_ago_in_words notification.happened_at %> ago
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+          <%= link_to main_app.mark_all_read_path, class: 'block bg-blue-100 hover:bg-blue-50 text-black text-center py-2' do %>
+            Mark all notifications read
+          <% end %>
+          <%= link_to main_app.notifications_path, class: 'block bg-notebook-blue hover:bg-blue-500 text-white text-center font-bold py-2' do %>
+            See all notifications
+          <% end %>
+        </div>
+      </div>
+
+      <%= form_tag main_app.search_path, method: :get, class: 'inline-block relative -top-2' do %>
+        <input class="w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-10 px-3 text-sm rounded focus:outline-none"
+          type="search" name="q" placeholder="Search discussions">
+        <!--
+        <button type="submit" class="relative right-8 top-0.5 mt-4 mr-4">
+          <svg class="text-gray-600 hover:text-notebook-blue h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px"
+            viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve"
+            width="512px" height="512px">
+            <path
+              d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
+          </svg>
+        </button>
+        -->
+      <% end %>
+
+      <div x-data="{ accountDropdownOpen: false }" class="inline-block mt-2.5">
+        <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+          <%= image_tag current_user.image_url(size=26), class: 'rounded-full' %>
+        </button>
+        <div x-show="accountDropdownOpen" @click="accountDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+
+        <div x-show="accountDropdownOpen" class="absolute right-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-64">
+          <div class="flex my-2 pt-4 pb-6 px-4 border-b border-gray-300 shadow">
+            <%= link_to current_user do %>
+              <%= image_tag current_user.image_url(size=32), class: 'rounded-full mr-2 p-1 border-2 border-notebook-blue' %>
+            <% end %>
+            <div>
+              <div class="text-xs text-gray-500">You're signed in as</div>
+              <div class="text-sm <%= User.text_color %> font-bold">
+                <%= link_to current_user.display_name, current_user %>
+              </div>
+            </div>
+          </div>
+
+          <%= link_to current_user.profile_url, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons <%= User.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= User.icon %></i>
+            <span class="flex-grow text-sm">Profile</span>
+          <% end %>
+          <%= link_to main_app.subscription_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons text-notebook-blue shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">credit_card</i>
+            <span class="flex-grow text-sm">Billing</span>
+            <span class="bg-notebook-blue text-white rounded px-1 text-xs group-hover:bg-notebook-blue">
+              PREMIUM
+            </span>
+          <% end %>
+          <%= link_to main_app.edit_user_registration_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
+            <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">settings</i>
+            <span class="flex-grow text-sm">Settings</span>
+          <% end %>
+          <%= link_to main_app.data_vault_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons text-brown-600 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">lock</i>
+            <span class="flex-grow text-sm">Data Vault</span>
+          <% end %>
+          <%= link_to main_app.help_center_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
+            <i class="material-icons text-pink-400 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">help</i>
+            <span class="flex-grow text-sm">Help Center</span>
+          <% end %>
+          <%= link_to main_app.destroy_user_session_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">power_settings_new</i>
+            <span class="flex-grow text-sm">Sign Out</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- sidebar -->
+  <!-- todo put this in shared partial with real design -->
+  <nav x-show="showSidebar" class="fixed top-0 pt-16 flex flex-col left-0 z-20 h-screen overflow-x-hidden transition origin-left transform bg-white border-r w-56 md:translate-x-0" :class="{ '-translate-x-full' : !showSidebar, 'translate-x-0' : showSidebar }" <%# @click.away="showSidebar = false" %>>
+    <nav class="text-sm font-medium text-gray-600 pt-1 overflow-y-auto flex-grow border-b border-gray-300 shadow" aria-label="Main Navigation">
+      <!--
+      <%= link_to main_app.table_of_contents_path, class: 'flex items-center px-2 py-3 transition cursor-pointer group hover:bg-gray-100' do %>
+        <i class="material-icons text-gray-400 shrink-0 w-6 h-6 mr-2 <%= Universe.text_color %>">dashboard</i>
+        <span class="group-hover:text-gray-900">Table of Contents</span>
+      <% end %>
+      -->
+
+      <div x-data="{ expandedWorldbuildingSidebar: false }">
+        <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedWorldbuildingSidebar = !expandedWorldbuildingSidebar" >
+          <div class="flex items-center">
+            <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 mr-2">book</i>
+            <span>Worldbuilding</span> 
+          </div>
+          <svg :class="{ 'rotate-90': expandedWorldbuildingSidebar }" class="shrink-0 w-4 h-4 ml-2 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div x-show="expandedWorldbuildingSidebar" x-cloak class="mb-1 pl-1">
+          <% @activated_content_types.each do |content_type| %>
+            <% content_type_klass = content_class_from_name(content_type) %>
+            <%= link_to main_app.polymorphic_path(content_type_klass), class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+              <i class="material-icons <%= content_type_klass.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= content_type_klass.icon %></i>
+              <span class="flex-grow text-sm"><%= content_type.pluralize %></span>
+              <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+                <%= number_with_delimiter @current_user_content.fetch(content_type, []).count %>
+              </span>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <div x-data="{ expandedWritingSidebar: false }">
+        <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedWritingSidebar = !expandedWritingSidebar" >
+          <div class="flex items-center">
+            <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 mr-2">book</i>
+            <span>Writing</span> 
+          </div>
+          <svg :class="{ 'rotate-90': expandedWritingSidebar }" class="shrink-0 w-4 h-4 ml-2 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div x-show="expandedWritingSidebar" x-cloak class="pl-1 mb-2">
+          <%= link_to main_app.prompts_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons text-orange-400 shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">lightbulb</i>
+            <span class="flex-grow text-sm">Prompts</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+
+          <%= link_to main_app.timelines_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons <%= Timeline.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= Timeline.icon %></i>
+            <span class="flex-grow text-sm">Timelines</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+
+          <%= link_to main_app.documents_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons <%= Document.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= Document.icon %></i>
+            <span class="flex-grow text-sm">Documents</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+
+          <%= link_to '#new-analysis-onboarding', class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons <%= DocumentAnalysis.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= DocumentAnalysis.icon %></i>
+            <span class="flex-grow text-sm">Analysis</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+        </div>
+      </div>
+
+      <div x-data="{ expandedWritingSidebar: false }">
+        <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedWritingSidebar = !expandedWritingSidebar" >
+          <div class="flex items-center">
+            <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 mr-2">book</i>
+            <span>Community</span> 
+          </div>
+          <svg :class="{ 'rotate-90': expandedWritingSidebar }" class="shrink-0 w-4 h-4 ml-2 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div x-show="expandedWritingSidebar" x-cloak class="pl-1 mb-2">
+          <%= link_to main_app.stream_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons text-purple-400 shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">ballot</i>
+            <span class="flex-grow text-sm">Activity</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+
+          <%= link_to main_app.page_collections_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons <%= PageCollection.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= PageCollection.icon %></i>
+            <span class="flex-grow text-sm">Collections</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+
+          <%= link_to main_app.thredded_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <i class="material-icons text-blue-500 shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">forum</i>
+            <span class="flex-grow text-sm">Discussions</span>
+            <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue">
+              0
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+
+    <div @click="showSidebar = false" class="flex items-center px-4 py-1 cursor-pointer group hover:bg-notebook-blue hover:text-white">
+      <i class="material-icons text-blue-500 shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full p-1">arrow_left</i>
+      <span class="flex-grow text-sm">Hide Sidebar</span>
+    </div>
+  </nav>
+
+  <!-- forum navigation breadcrumbs -->
+  <nav class="bg-white border-b border-gray-200 flex" aria-label="Breadcrumb">
+    <ol role="list" class="max-w-screen-xl w-full mx-auto px-4 flex space-x-4 sm:px-6 lg:px-8">
+      <%= render('thredded/redesigned/breadcrumbs') %>
+    </ol>
+  </nav>
+
+  <!-- sidebar backdrop on mobile --> 
+  <div class="fixed inset-0 z-10 w-screen h-screen bg-black bg-opacity-25 md:hidden" x-show.transition="showSidebar" x-cloak></div>
+
+  <main :class="{ 'ml-56': showSidebar }">
+    <%= yield %>
   </main>
 
-  <%= react_component("Footer") unless defined?(@show_footer) && !@show_footer %>
-  <%= render 'layouts/quick_add_fab' unless defined?(@show_footer) && !@show_footer %>
-  <%= render partial: 'content/keyboard_controls_help_modal' %>
+  <footer :class="{ 'ml-56': showSidebar }">
+    <div class="max-w-7xl mx-auto pt-24 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
+      <div class="flex justify-center space-x-6 md:order-2">
+        <%= link_to 'https://www.facebook.com/notebookai/', class: 'text-gray-400 hover:text-gray-500' do %>
+          <span class="sr-only">Facebook</span>
+          <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" />
+          </svg>
+        <% end %>
+
+        <%= link_to 'https://twitter.com/indentlabs', class: 'text-gray-400 hover:text-gray-500' do %>
+          <span class="sr-only">Twitter</span>
+          <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+          </svg>
+        <% end %>
+
+        <%= link_to 'https://github.com/indentlabs/notebook', class: 'text-gray-400 hover:text-gray-500' do %>
+          <span class="sr-only">GitHub</span>
+          <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+          </svg>
+        <% end %>
+      </div>
+      <div class="mt-8 md:mt-0 md:order-1">
+        <p class="text-center text-base text-gray-400">Notebook.ai &copy; 2016-2022 Indent Labs, LLC</p>
+      </div>
+    </div>
+  </footer>
+    
+  <%# react_component("Footer")      unless defined?(@show_footer) && !@show_footer %>
+  <%# render 'layouts/quick_add_fab' unless defined?(@show_footer) && !@show_footer %>
 
   <script type="text/javascript">
-    <%= yield :javascript %>
+    <% if user_signed_in? %>
+      DISABLE_KEYBOARD_SHORTCUTS = <%= !current_user.keyboard_shortcuts_preference %>;
+    <% end %>
+
+    $(document).ready(function() {
+      <%= yield :javascript %>
+    });
   </script>
 
+  <%= render 'layouts/ganalytics' %>
 </body>
 </html>

@@ -1,14 +1,18 @@
 <% if Thredded.show_topic_followers %>
   <div class="thredded--topic-followers">
+    <div class="text-gray-400 font-medium uppercase pt-4">
+      <i class="material-icons float-left text-sm mr-1">people_alt</i>
+      <%= pluralize topic.followers.count, 'follower' %>
+    </div>
+    
     <% if topic.followers.present? %>
-      <%# t('thredded.topics.followed_by') %>
-      <span class="tooltipped" data-tooltip="<%= pluralize topic.followers.count, 'person' %> will be notified of any updates to this thread." data-position="right">
-        <i class="material-icons tiny" style="position: relative; top: 2px;">people_alt</i>
-        <%= pluralize topic.followers.count, 'follower' %>
-      </span>
-      <%# topic.followers.each do |user| %>
-        <%#= user_link(user) %>
-      <%# end %>
+      <ul class="divide-y">
+        <% topic.followers.each do |user| %>
+          <li class="text-xs py-1">
+            <%= link_to user.display_name, user, class: User.text_color %>
+          </li>
+        <% end %>
+      </ul>
     <% else %>
       <%= t('thredded.topics.followed_by_noone')%>
     <% end %>

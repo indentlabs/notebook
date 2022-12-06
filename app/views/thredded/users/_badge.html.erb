@@ -1,10 +1,10 @@
 <%
-  badge_style  = 'padding: 3px 5px; font-size: 70%; font-weight: normal;'
-  badge_text   = user.forums_badge_text
+  badge_classes = 'text-xs'
+  badge_text    = user.forums_badge_text
 
   if user.favorite_page_type?
     favorite_link = link_to main_app.send("#{user.favorite_page_type.downcase.pluralize}_user_path", { id: user.id }) do
-      content_tag(:i, class: "material-icons tiny #{content_class_from_name(user.favorite_page_type).try(:text_color)}", style: 'position: relative; top: 4px') do
+      content_tag(:i, class: "material-icons text-sm mr-1 #{content_class_from_name(user.favorite_page_type).try(:text_color)}") do
         "#{content_class_from_name(user.favorite_page_type).try(:icon)}"
       end
     end
@@ -15,13 +15,21 @@
 
 <% if user.respond_to?(:selected_billing_plan_id) %>
   <% if user.id == 5 %>
-    <span style="<%= badge_style %>; background: #2196F3; color: white"><%= badge_text.presence || 'Admin' %></span>
+    <span class="<%= badge_classes %>" style="background: #2196F3; color: white">
+      <%= badge_text.presence || 'Admin' %>
+    </span>
   <% elsif user.selected_billing_plan_id == 2 %>
-    <span style="<%= badge_style %>; background: #dedeff"><%= badge_text.presence || 'Beta Tester' %></span>
+    <span class="<%= badge_classes %>" style="background: #dedeff">
+      <%= badge_text.presence || 'Beta Tester' %>
+    </span>
   <% elsif user.selected_billing_plan_id == 3 %>
-    <span style="<%= badge_style %>; background: #ffdede"><%= badge_text.presence || 'Early Adopter' %></span>
+    <span class="<%= badge_classes %>" style="background: #ffdede">
+      <%= badge_text.presence || 'Early Adopter' %>
+    </span>
   <% elsif user.on_premium_plan? %>
-    <span style="<%= badge_style %>; background: #ffffaa"><%= badge_text.presence || 'Premium Supporter' %></span>
+    <span class="<%= badge_classes %>" style="background: #ffffaa">
+      <%= badge_text.presence || 'Premium Supporter' %>
+    </span>
   <% else %>
     <%= favorite_link %>
   <% end %>

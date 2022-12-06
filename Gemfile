@@ -73,8 +73,8 @@ gem 'barnes'
 #gem 'levenshtein-ffi'
 
 # Forum
-gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
-# gem 'thredded', path: "../thredded"
+# gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
+gem 'thredded', path: "../thredded"
 
 # gem 'thredded'
 # gem 'thredded', git: 'https://github.com/sudara/thredded', branch: 'master'

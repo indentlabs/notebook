@@ -1,5 +1,15 @@
 <header>
-  <%= image_tag post.avatar_url, class: 'thredded--post--avatar' if post.user %>
+  <div>
+    <%= image_tag post.avatar_url, class: 'thredded--post--avatar mt-8' if post.user %>
+    
+    <%# TODO add moderator badge to avatar instead of next to name %>
+    <% if false && post.user.forum_moderator? %>
+      <i class="material-icons tooltipped float-left text-notebook-blue" data-tooltip="Forum Moderator" style="position: relative; top: 2px">
+        health_and_safety
+      </i>
+    <% end %>
+  </div>
+
   <h2 class="thredded--post--user"><%= user_link post.user %></h2>
   <a href="<%= post.permalink_path %>" rel="nofollow" class="thredded--link thredded--post--created-at right">
     <%= time_ago post.created_at %>
