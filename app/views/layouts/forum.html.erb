@@ -146,8 +146,8 @@
 
   <!-- sidebar -->
   <!-- todo put this in shared partial with real design -->
-  <nav x-show="showSidebar" class="fixed top-0 pt-16 flex flex-col left-0 z-20 h-screen overflow-x-hidden transition origin-left transform bg-white border-r w-56 md:translate-x-0" :class="{ '-translate-x-full' : !showSidebar, 'translate-x-0' : showSidebar }" <%# @click.away="showSidebar = false" %>>
-    <nav class="text-sm font-medium text-gray-600 pt-1 overflow-y-auto flex-grow border-b border-gray-300 shadow" aria-label="Main Navigation">
+  <nav x-show="showSidebar" class="notebook--sidebar fixed top-0 pt-16 flex flex-col left-0 z-20 h-screen overflow-x-hidden transition origin-left transform bg-white border-r w-56 md:translate-x-0" :class="{ '-translate-x-full' : !showSidebar, 'translate-x-0' : showSidebar }" <%# @click.away="showSidebar = false" %>>
+    <nav class="notebook--sidebar text-sm font-medium text-gray-600 pt-1 overflow-y-auto flex-grow border-b border-gray-300 shadow" aria-label="Main Navigation">
       <!--
       <%= link_to main_app.table_of_contents_path, class: 'flex items-center px-2 py-3 transition cursor-pointer group hover:bg-gray-100' do %>
         <i class="material-icons text-gray-400 shrink-0 w-6 h-6 mr-2 <%= Universe.text_color %>">dashboard</i>
@@ -268,11 +268,17 @@
     </div>
   </nav>
 
-  <!-- forum navigation breadcrumbs -->
-  <nav class="bg-white border-b border-gray-200 flex" aria-label="Breadcrumb">
-    <ol role="list" class="max-w-screen-xl w-full mx-auto px-4 flex space-x-4 sm:px-6 lg:px-8">
+  <!-- forum navigation & breadcrumbs -->
+  <nav class="thredded-nav bg-white border-b border-gray-200 flex">
+    <ol role="list" class="max-w-screen-xl w-full mx-auto flex space-x-4 pl-40">
       <%= render('thredded/redesigned/breadcrumbs') %>
     </ol>
+    <ul class="divide-x">
+      <li><!-- Included to always force a left-border on whatever action is left-most --></li>
+      <%= render 'thredded/shared/nav/moderation' %>
+      <%= render 'thredded/shared/nav/notification_preferences' %>
+      <%= render 'thredded/shared/nav/private_topics' if Thredded.private_messaging_enabled %>
+    </ul>
   </nav>
 
   <!-- sidebar backdrop on mobile --> 
