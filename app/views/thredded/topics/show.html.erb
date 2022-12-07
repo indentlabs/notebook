@@ -2,8 +2,8 @@
 <% content_for :thredded_page_title, topic.title %>
 <% content_for :thredded_page_id, 'thredded--topic-show' %>
 
-<div class="flex-1 relative z-0 flex" :class="{ 'ml-56': showSidebar }">
-  <aside class="hidden relative xl:flex xl:flex-col flex-shrink-0 w-96 border-r border-gray-200 overflow-y-auto">
+<div class="flex-1 relative z-0 flex">
+  <aside class="bg-gray-50 hidden relative xl:flex xl:flex-col flex-shrink-0 w-96 border-r border-gray-200 overflow-y-auto">
     <!-- side panel (hidden on small screens; todo: probably just stack it) -->
     <div class="py-6 px-4 sm:px-6 lg:px-8">
       <%= content_tag :section,
@@ -12,48 +12,45 @@
       <% end %>
     </div>
   </aside>
-  <main class="flex-1 relative z-0 focus:outline-none">
+  <main class="flex-1 relative z-0 mt-10 focus:outline-none">
     <!-- main panel-->
-    <div class="py-6 px-4 sm:px-6 lg:px-1">
-      <%= thredded_page do %>
-        <%= content_tag :section,
-                        id: dom_id(topic),
-                        class: ['thredded--main-section', 'thredded--topic', *topic_css_classes(topic)] do %>
-          <%= view_hooks.posts_common.pagination_top.render(self, posts: @posts) do %>
-            <footer class="thredded--pagination-top"><%= paginate @posts %></footer>
-          <% end %>
+    <%= thredded_page do %>
+      <%= content_tag :section,
+                      id: dom_id(topic),
+                      class: ['thredded--main-section', 'thredded--topic', *topic_css_classes(topic)] do %>
+        <%= view_hooks.posts_common.pagination_top.render(self, posts: @posts) do %>
+          <footer class="thredded--pagination-top"><%= paginate @posts %></footer>
+        <% end %>
 
-          <%= render_posts @posts,
-                          partial: 'thredded/posts/post',
-                          content_partial: 'thredded/posts/content',
-                          locals: { actions: { quote: true } } %>
+        <%= render_posts @posts,
+                        partial: 'thredded/posts/post',
+                        content_partial: 'thredded/posts/content',
+                        locals: { actions: { quote: true } } %>
 
-          <%= view_hooks.posts_common.pagination_bottom.render(self, posts: @posts) do %>
-            <footer class="thredded--pagination-bottom"><%= paginate @posts %></footer>
-          <% end %>
-          <% if topic.locked? %>
-            <p class="thredded--topic--locked-notice"><%= t 'thredded.topics.locked.message'%></p>
-          <% end %>
-          <% if policy(@new_post.post).create? %>
-            <div class="thredded--post-form--wrapper">
-              <h3 class="thredded--post-form--title"><%= t('thredded.posts.form.title_label') %></h3>
-              <%= render 'thredded/posts/form',
-                        post:        @new_post,
-                        button_text: t('thredded.posts.form.create_btn'),
-                        button_submitting_text: t('thredded.posts.form.create_btn_submitting') %>
-            </div>
-          <% end %>
-          <% if topic.can_destroy? %>
-            <div class="thredded--topic-delete--wrapper">
-              <%= button_to t('thredded.topics.delete_topic'), topic.destroy_path, method: :delete,
-                            form_class: 'thredded--topic-delete-form',
-                            class: 'thredded--button bg-red-500',
-                            'data-confirm' => t('thredded.topics.delete_confirm') %>
-            </div>
-          <% end %>
+        <%= view_hooks.posts_common.pagination_bottom.render(self, posts: @posts) do %>
+          <footer class="thredded--pagination-bottom"><%= paginate @posts %></footer>
+        <% end %>
+        <% if topic.locked? %>
+          <p class="thredded--topic--locked-notice"><%= t 'thredded.topics.locked.message'%></p>
+        <% end %>
+        <% if policy(@new_post.post).create? %>
+          <div class="thredded--post-form--wrapper">
+            <h3 class="thredded--post-form--title"><%= t('thredded.posts.form.title_label') %></h3>
+            <%= render 'thredded/posts/form',
+                      post:        @new_post,
+                      button_text: t('thredded.posts.form.create_btn'),
+                      button_submitting_text: t('thredded.posts.form.create_btn_submitting') %>
+          </div>
+        <% end %>
+        <% if topic.can_destroy? %>
+          <div class="thredded--topic-delete--wrapper">
+            <%= button_to t('thredded.topics.delete_topic'), topic.destroy_path, method: :delete,
+                          form_class: 'thredded--topic-delete-form',
+                          class: 'thredded--button bg-red-500',
+                          'data-confirm' => t('thredded.topics.delete_confirm') %>
+          </div>
         <% end %>
       <% end %>
-
-    </div>
+    <% end %>
   </main>
 </div>

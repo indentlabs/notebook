@@ -5,7 +5,7 @@
 
 <% unless blocked_post %>
   <%
-    common_post_classes  = 'p-4'
+    common_post_classes  = 'p-4 text-sm'
     unmuted_post_classes = 'bg-white rounded shadow' + ' ' + common_post_classes
     muted_post_classes   = '' + ' ' + common_post_classes
 
@@ -14,16 +14,55 @@
   %>
 
   <%= render 'thredded/posts_common/before_first_unread_post', post: post if post.first_unread_in_page? %>
-  <%= content_tag :article, id: dom_id(post), class: "thredded--post thredded--#{post.read_state}--post #{muted_post ? muted_post_classes : unmuted_post_classes}" do %>
-    <%= render 'thredded/posts_common/actions', post: post, actions: local_assigns[:actions] %>
-    <%= render 'thredded/posts_common/header', post: post %>
-    <%= ForumReplacementService.replace_for(content, current_user) || render('thredded/posts/content', post: post) %>
-    <% if post.pending_moderation? && !Thredded.content_visible_while_pending_moderation %>
-      <p class="thredded--alert thredded--alert-warning"><%= t 'thredded.posts.pending_moderation_notice' %></p>
-    <% elsif post.blocked? && post.can_moderate? %>
-      <p class="thredded--alert thredded--alert-danger">
-        <%= render 'thredded/shared/content_moderation_blocked_state', moderation_record: post.last_moderation_record %>
-      </p>
-    <% end %>
+  <%= content_tag :article, id: dom_id(post), class: "thredded--post thredded--#{post.read_state}--post" do %>
+    <div class="flex space-x-4">
+      <div>
+        <span class="inline-block relative">
+          <%= image_tag post.user.image_url(120), class: 'h-16 w-16 rounded-full border border-gray-200' %>
+          <% if post.user.favorite_page_type? %>
+            <span class="absolute bottom-2 right-2 transform translate-y-1/2 translate-x-1/2 block border-2 border-white rounded-full">
+              <span class="block h-6 w-6 rounded-full text-center <%= content_class_from_name(post.user.favorite_page_type).color %>">
+                <i class="material-icons text-sm text-white"><%= content_class_from_name(post.user.favorite_page_type).icon %></i>
+              </span>
+            </span>
+          <% end %>
+        </span>
+      </div>
+      <div class="bg-white flex-1 border border-gray-200 rounded divide-y">
+        <div class="px-2 py-1 bg-gray-50 rounded-t flex">
+          <div class="flex-1">
+            <h2 class="thredded--post--user text-sm">
+              <%= user_link post.user %>
+            </h2>
+
+            <% if post.user.forum_moderator? %>
+              <i class="material-icons float-left text-notebook-blue mr-1">
+                health_and_safety
+              </i>
+            <% end %>
+          </div>
+          <div class="h-6">
+            <span class="relative -top-0.5">
+              <a href="<%= post.permalink_path %>" rel="nofollow" class="thredded--link thredded--post--created-at text-xs">
+                <%= time_ago post.created_at %>
+              </a>
+            </span>
+            <span class="relative top-0.5">
+              <%= render 'thredded/posts_common/actions', post: post, actions: local_assigns[:actions] %>
+            </span>
+          </div>
+        </div>
+        <div class="p-4">
+          <%= ForumReplacementService.replace_for(content, current_user) || render('thredded/posts/content', post: post) %>
+        </div>
+        <% if post.pending_moderation? && !Thredded.content_visible_while_pending_moderation %>
+          <p class="thredded--alert thredded--alert-warning"><%= t 'thredded.posts.pending_moderation_notice' %></p>
+        <% elsif post.blocked? && post.can_moderate? %>
+          <p class="thredded--alert thredded--alert-danger">
+            <%= render 'thredded/shared/content_moderation_blocked_state', moderation_record: post.last_moderation_record %>
+          </p>
+        <% end %>
+      </div>
+    </div>
   <% end %>
 <% end %>
