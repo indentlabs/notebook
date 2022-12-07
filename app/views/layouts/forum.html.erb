@@ -46,36 +46,38 @@
 
     <!-- right-hand side of navbar -->
     <div class="pr-2">
-      <div x-data="{ notificationsDropdownOpen: false }" class="inline-block mt-2.5 mr-2">
-        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
-          <svg class="h-6 w-6 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'text-white' : 'text-blue-300' %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-          </svg>
-        </button>
-        <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+      <% if user_signed_in? %>
+        <div x-data="{ notificationsDropdownOpen: false }" class="inline-block mt-2.5 mr-2">
+          <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+            <svg class="h-6 w-6 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'text-white' : 'text-blue-300' %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+            </svg>
+          </button>
+          <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
 
-        <div x-show="notificationsDropdownOpen" class="absolute right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-2/5">
-          <div class="pt-2">
-            <% @user_notifications.each do |notification| %>
-              <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2' do %>
-                <i class="material-icons bg-<%= notification.icon_color %>-500 text-white rounded-full p-1 h-8 w-8 mx-1"><%= notification.icon %></i>                
-                <div class="text-black text-sm mx-2 flex-grow <%= 'font-bold' unless notification.viewed_at? %>">
-                  <%= notification.message_html.html_safe %>
-                </div>
-                <div class="text-gray-400 text-xs">
-                  <%= time_ago_in_words notification.happened_at %> ago
-                </div>
+          <div x-show="notificationsDropdownOpen" class="absolute right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-2/5">
+            <div class="pt-2">
+              <% @user_notifications.each do |notification| %>
+                <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2' do %>
+                  <i class="material-icons bg-<%= notification.icon_color %>-500 text-white rounded-full p-1 h-8 w-8 mx-1"><%= notification.icon %></i>                
+                  <div class="text-black text-sm mx-2 flex-grow <%= 'font-bold' unless notification.viewed_at? %>">
+                    <%= notification.message_html.html_safe %>
+                  </div>
+                  <div class="text-gray-400 text-xs">
+                    <%= time_ago_in_words notification.happened_at %> ago
+                  </div>
+                <% end %>
               <% end %>
+            </div>
+            <%= link_to main_app.mark_all_read_path, class: 'block bg-blue-100 hover:bg-blue-50 text-black text-center py-2' do %>
+              Mark all notifications read
+            <% end %>
+            <%= link_to main_app.notifications_path, class: 'block bg-notebook-blue hover:bg-blue-500 text-white text-center font-bold py-2' do %>
+              See all notifications
             <% end %>
           </div>
-          <%= link_to main_app.mark_all_read_path, class: 'block bg-blue-100 hover:bg-blue-50 text-black text-center py-2' do %>
-            Mark all notifications read
-          <% end %>
-          <%= link_to main_app.notifications_path, class: 'block bg-notebook-blue hover:bg-blue-500 text-white text-center font-bold py-2' do %>
-            See all notifications
-          <% end %>
         </div>
-      </div>
+      <% end %>
 
       <%= form_tag main_app.search_path, method: :get, class: 'inline-block relative -top-2' do %>
         <input class="w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-10 px-3 text-sm rounded focus:outline-none"
@@ -93,54 +95,56 @@
         -->
       <% end %>
 
-      <div x-data="{ accountDropdownOpen: false }" class="inline-block mt-2.5">
-        <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
-          <%= image_tag current_user.image_url(size=26), class: 'rounded-full' %>
-        </button>
-        <div x-show="accountDropdownOpen" @click="accountDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+      <% if user_signed_in? %>
+        <div x-data="{ accountDropdownOpen: false }" class="inline-block mt-2.5">
+          <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+            <%= image_tag current_user.image_url(size=26), class: 'rounded-full' %>
+          </button>
+          <div x-show="accountDropdownOpen" @click="accountDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
 
-        <div x-show="accountDropdownOpen" class="absolute right-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-64">
-          <div class="flex my-2 pt-4 pb-6 px-4 border-b border-gray-300 shadow">
-            <%= link_to current_user do %>
-              <%= image_tag current_user.image_url(size=32), class: 'rounded-full mr-2 p-1 border-2 border-notebook-blue' %>
-            <% end %>
-            <div>
-              <div class="text-xs text-gray-500">You're signed in as</div>
-              <div class="text-sm <%= User.text_color %> font-bold">
-                <%= link_to current_user.display_name, current_user %>
+          <div x-show="accountDropdownOpen" class="absolute right-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-64">
+            <div class="flex my-2 pt-4 pb-6 px-4 border-b border-gray-300 shadow">
+              <%= link_to current_user do %>
+                <%= image_tag current_user.image_url(size=32), class: 'rounded-full mr-2 p-1 border-2 border-notebook-blue' %>
+              <% end %>
+              <div>
+                <div class="text-xs text-gray-500">You're signed in as</div>
+                <div class="text-sm <%= User.text_color %> font-bold">
+                  <%= link_to current_user.display_name, current_user %>
+                </div>
               </div>
             </div>
-          </div>
 
-          <%= link_to current_user.profile_url, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
-            <i class="material-icons <%= User.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= User.icon %></i>
-            <span class="flex-grow text-sm">Profile</span>
-          <% end %>
-          <%= link_to main_app.subscription_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
-            <i class="material-icons text-notebook-blue shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">credit_card</i>
-            <span class="flex-grow text-sm">Billing</span>
-            <span class="bg-notebook-blue text-white rounded px-1 text-xs group-hover:bg-notebook-blue">
-              PREMIUM
-            </span>
-          <% end %>
-          <%= link_to main_app.edit_user_registration_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
-            <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">settings</i>
-            <span class="flex-grow text-sm">Settings</span>
-          <% end %>
-          <%= link_to main_app.data_vault_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
-            <i class="material-icons text-brown-600 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">lock</i>
-            <span class="flex-grow text-sm">Data Vault</span>
-          <% end %>
-          <%= link_to main_app.help_center_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
-            <i class="material-icons text-pink-400 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">help</i>
-            <span class="flex-grow text-sm">Help Center</span>
-          <% end %>
-          <%= link_to main_app.destroy_user_session_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
-            <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">power_settings_new</i>
-            <span class="flex-grow text-sm">Sign Out</span>
-          <% end %>
+            <%= link_to current_user.profile_url, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+              <i class="material-icons <%= User.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= User.icon %></i>
+              <span class="flex-grow text-sm">Profile</span>
+            <% end %>
+            <%= link_to main_app.subscription_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+              <i class="material-icons text-notebook-blue shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">credit_card</i>
+              <span class="flex-grow text-sm">Billing</span>
+              <span class="bg-notebook-blue text-white rounded px-1 text-xs group-hover:bg-notebook-blue">
+                PREMIUM
+              </span>
+            <% end %>
+            <%= link_to main_app.edit_user_registration_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
+              <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">settings</i>
+              <span class="flex-grow text-sm">Settings</span>
+            <% end %>
+            <%= link_to main_app.data_vault_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+              <i class="material-icons text-brown-600 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">lock</i>
+              <span class="flex-grow text-sm">Data Vault</span>
+            <% end %>
+            <%= link_to main_app.help_center_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
+              <i class="material-icons text-pink-400 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">help</i>
+              <span class="flex-grow text-sm">Help Center</span>
+            <% end %>
+            <%= link_to main_app.destroy_user_session_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+              <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">power_settings_new</i>
+              <span class="flex-grow text-sm">Sign Out</span>
+            <% end %>
+          </div>
         </div>
-      </div>
+      <% end %>
     </div>
   </header>
 
