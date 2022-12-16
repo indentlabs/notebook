@@ -17,7 +17,8 @@ class FoldersController < ApplicationController
 
   def destroy
     # Relocate all documents in this folder to the root "folder"
-    Document.where(folder_id: @folder.id).update_all(folder_id: nil)
+    # TODO - I think we can handle this at the model association level with dependent: nullify, but I've never used it
+    Document.with_deleted.where(folder_id: @folder.id).update_all(folder_id: nil)
 
     # Relocate all child folders in this folder to the root "folder"
     Folder.where(parent_folder_id: @folder.id).update_all(parent_folder_id: nil)
