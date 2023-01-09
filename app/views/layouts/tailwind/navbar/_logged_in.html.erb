@@ -1,57 +1,81 @@
-<div class="shadow-lg bg-notebook-blue text-white w-full flex justify-between sticky top-0 z-50 py-1 px-1">
+<header class="flex sticky top-0 z-50 w-full bg-notebook-blue border-b border-blue-400 h-14 shadow">
+  <%= link_to root_path, class: 'flex items-center mr-2 px-6 py-4 border-b border-gray-300 shadow hover:shadow-md transition bg-white rounded-br-lg' do %>
+    <%= image_tag 'logos/book-small.webp', class: 'h-8 mr-3' %>
+    <span class="text-2xl font-bold text-notebook-blue tracking-wide">
+      Notebook.ai
+    </span>
+  <% end %>
 
-  <div>
-    <%= link_to root_path, class: 'hover:text-blue-100 mr-3' do %>
-      <%# image_tag 'logos/book-small.webp', class: 'h-8 mt-1 px-1 float-left mr-3 bg-white rounded-lg' %>
-      <i class="material-icons pt-2 ml-4">dashboard</i>
-
-      <span class="pl-1 text-3xl font-bold">
-        Notebook.ai
-      </span>
-    <% end %>
-
-    <% if @universe_scope %>
-      <%= link_to @universe_scope.name, @universe_scope, class: "relative -top-1 px-3 py-1 text-xl #{Universe.text_color} bg-purple-100 hover:bg-purple-200 rounded-lg" %>
-    <% end %>
+  <div x-cloak x-show="!showSidebar">
+    <span class="sr-only">Menu</span> 
+    <div @click.stop="showSidebar = true" class="mt-2 mr-1 p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+      <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+      </svg>
+    </div>
   </div>
 
-  <div>
-    <div x-data="{ notificationsDropdownOpen: false }" class="inline-block">
-      <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="relative top-2 z-10 block mx-2 border border-notebook-blue hover:border-white rounded-full">
-        <svg class="h-6 w-6 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'text-white' : 'text-blue-300' %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-        </svg>
-      </button>
-      <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
-
-      <div x-show="notificationsDropdownOpen" class="absolute right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-2/5">
-        <div class="pt-2">
-          <% @user_notifications.each do |notification| %>
-            <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2' do %>
-              <i class="material-icons bg-<%= notification.icon_color %>-500 text-white rounded-full p-1 h-8 w-8 mx-1"><%= notification.icon %></i>                
-              <div class="text-black text-sm mx-2 flex-grow <%= 'font-bold' unless notification.viewed_at? %>">
-                <%= notification.message_html.html_safe %>
-              </div>
-              <div class="text-gray-400 text-xs">
-                <%= time_ago_in_words notification.happened_at %> ago
-              </div>
-            <% end %>
+  <!-- left-hand side of navbar -->
+  <% if user_signed_in? %>
+    <div class="flex-grow pt-2 pl-1">
+      <% if @universe_scope %>
+        <div class="inline-flex rounded-md shadow-sm mt-0.5" role="group">
+          <%= link_to main_app.multiverse_path do %>
+            <button type="button" class="px-2 h-9 text-white <%= Universe.color %> rounded-l-lg border border-purple-800 hover:bg-purple-500 focus:z-10 focus:ring-2 focus:ring-purple-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white">
+              <i class="material-icons text-2xl"><%= Universe.icon %></i>
+            </button>
+          <% end %>
+          <%= link_to @universe_scope do %>
+            <button type="button" class="py-2 h-9 px-4 text-sm font-medium <%= Universe.text_color %> bg-white rounded-r-md border border-gray-200 hover:bg-gray-100 hover:text-purple-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white">
+              <%= @universe_scope.name %>
+            </button>
           <% end %>
         </div>
-        <%= link_to main_app.mark_all_read_path, class: 'block bg-blue-100 hover:bg-blue-50 text-black text-center py-2' do %>
-          Mark all notifications read
+      <% else %>
+        <%= link_to main_app.multiverse_path, class: "px-3 py-2 inline-block text-base #{Universe.text_color} bg-purple-50 hover:bg-purple-200 rounded" do %>
+          Choose a universe
         <% end %>
-        <%= link_to main_app.notifications_path, class: 'block bg-notebook-blue hover:bg-blue-500 text-white text-center font-bold py-2' do %>
-          See all notifications
-        <% end %>
-      </div>
+      <% end %>
     </div>
 
-    <div class="text-notebook-blue inline-block pr-1">
-      <%= form_tag main_app.search_path, method: :get do %>
-        <input class="border-2 border-gray-300 focus:border-notebook-blue bg-white h-10 px-5 pr-8 rounded-lg text-sm focus:outline-none"
+    <!-- right-hand side of navbar -->
+    <div class="pr-2">
+      <div x-data="{ notificationsDropdownOpen: false }" class="inline-block mt-2.5 mr-2">
+        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+          <svg class="h-6 w-6 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'text-white' : 'text-blue-300' %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+          </svg>
+        </button>
+        <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+
+        <div x-show="notificationsDropdownOpen" class="absolute right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-2/5">
+          <div class="pt-2">
+            <% @user_notifications.each do |notification| %>
+              <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2' do %>
+                <i class="material-icons bg-<%= notification.icon_color %>-500 text-white rounded-full p-1 h-8 w-8 mx-1"><%= notification.icon %></i>                
+                <div class="text-black text-sm mx-2 flex-grow <%= 'font-bold' unless notification.viewed_at? %>">
+                  <%= notification.message_html.html_safe %>
+                </div>
+                <div class="text-gray-400 text-xs">
+                  <%= time_ago_in_words notification.happened_at %> ago
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+          <%= link_to main_app.mark_all_read_path, class: 'block bg-blue-100 hover:bg-blue-50 text-black text-center py-2' do %>
+            Mark all notifications read
+          <% end %>
+          <%= link_to main_app.notifications_path, class: 'block bg-notebook-blue hover:bg-blue-500 text-white text-center font-bold py-2' do %>
+            See all notifications
+          <% end %>
+        </div>
+      </div>
+
+      <%= form_tag main_app.search_path, method: :get, class: 'inline-block relative -top-2' do %>
+        <input class="w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-10 px-3 text-sm rounded focus:outline-none"
           type="search" name="q" placeholder="Search your notebook">
-        <button type="submit" class="absolute right-0 top-0 mt-4 mr-4">
+        <!--
+        <button type="submit" class="relative right-8 top-0.5 mt-4 mr-4">
           <svg class="text-gray-600 hover:text-notebook-blue h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px"
             viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve"
@@ -60,10 +84,57 @@
               d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
           </svg>
         </button>
+        -->
       <% end %>
-    </div>
+
+      <div x-data="{ accountDropdownOpen: false }" class="inline-block mt-2.5">
+        <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+          <%= image_tag current_user.image_url(size=26), class: 'rounded-full' %>
+        </button>
+        <div x-show="accountDropdownOpen" @click="accountDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+
+        <div x-show="accountDropdownOpen" class="absolute right-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-64">
+          <%= link_to current_user.profile_url, class: 'flex border-t pt-4 pb-4 px-4 border-b border-gray-300 shadow group hover:bg-notebook-blue hover:text-white' do %>
+            <%= image_tag current_user.image_url(size=32), class: 'rounded-full mr-2 p-1 border-2 border-notebook-blue group-hover:border-green-500' %>
+            <div>
+              <div class="text-xs text-gray-500 group-hover:text-white">You're signed in as</div>
+              <div class="text-sm <%= User.text_color %> group-hover:text-white font-bold">
+                <%= current_user.display_name %>
+              </div>
+            </div>
+          <% end %>
+
+          <!--
+          <%= link_to current_user.profile_url, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons <%= User.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= User.icon %></i>
+            <span class="flex-grow text-sm">Profile</span>
+          <% end %>
+          -->
+          <%= link_to main_app.subscription_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons text-notebook-blue shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">credit_card</i>
+            <span class="flex-grow text-sm">Billing</span>
+            <span class="bg-notebook-blue text-white rounded px-1 text-xs group-hover:bg-orange-500">
+              PREMIUM
+            </span>
+          <% end %>
+          <%= link_to main_app.edit_user_registration_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
+            <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">settings</i>
+            <span class="flex-grow text-sm">Settings</span>
+          <% end %>
+          <%= link_to main_app.data_vault_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons text-brown-600 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">lock</i>
+            <span class="flex-grow text-sm">Data Vault</span>
+          <% end %>
+          <%= link_to main_app.help_center_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
+            <i class="material-icons text-pink-400 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">help</i>
+            <span class="flex-grow text-sm">Help Center</span>
+          <% end %>
+          <%= link_to main_app.destroy_user_session_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">power_settings_new</i>
+            <span class="flex-grow text-sm">Sign Out</span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
   </div>
-
-  <!-- nav stuff -->
-
-</div>
+</header>
