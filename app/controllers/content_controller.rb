@@ -55,7 +55,10 @@ class ContentController < ApplicationController
     end
 
     @content = @content.sort_by {|x| [x.favorite? ? 0 : 1, x.name] }
-    @folders = []
+    @folders = current_user
+    .folders
+    .where(context: @content_type_name, parent_folder_id: nil)
+    .order('title ASC')
 
     @questioned_content = @content.sample
     @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)

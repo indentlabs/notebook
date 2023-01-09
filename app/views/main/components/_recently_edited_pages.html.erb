@@ -18,8 +18,10 @@
 
           <ul class="text-gray-500 text-xs truncate flex flex-row space-x-2 divide-x">
             <li class="p-2 pr-0 flex-1 text-right">
-              <%= number_with_delimiter page.cached_word_count %>
-              <%= 'word'.pluralize(page.cached_word_count) %>
+              <% if page.cached_word_count.present? %>
+                <%= number_with_delimiter page.cached_word_count %>
+                <%= 'word'.pluralize(page.cached_word_count) %>
+              <% end %>
             </li>
             <li class="p-2">
               edited <%= time_ago_in_words page.updated_at %> ago
