@@ -406,64 +406,66 @@
 
         <!-- second sidebar -->
         <aside class="hidden xl:order-first xl:flex xl:flex-col flex-shrink-0 w-96 border-r border-gray-200 min-h-screen">
-          <div class="px-6 pt-4 pb-4 bg-white">
-            <h2 class="text-lg font-medium text-gray-900">
+          <div class="pb-4 bg-white">
+            <h2 class="text-lg font-medium z-10 sticky top-0 border-t border-b border-gray-200 bg-gray-100 px-6 py-1 text-sm font-medium text-gray-500">
               <i class="material-icons float-left <%= content_type_class.text_color %> text-xl mr-2"><%= content_type_class.icon %></i>
               Your <%= content_type_name.pluralize %>
             </h2>
 
-            <p class="mt-4 text-xs tracking-wider font-bold text-gray-500">
-              Showing <%= pluralize content.count, 'page' %>
-            </p>
-            <ul class="mt-1 text-gray-600">
-              <% content_counts_per_type.each do |content_type, count| %>
-                <li>
-                  <i class="material-icons float-left mr-2 <%= content_class_from_name(content_type).text_color %>">
-                    <%= content_class_from_name(content_type).icon %>
-                  </i>
-                  <span class="text-sm">
-                    <%= number_with_delimiter count %>
-                    <%= content_type.downcase.pluralize count %>
-                  </span>
-                </li>
-              <% end %>
-            </ul>
-            
-            <!-- todo put filter/search bar here -->
-            <!--
-            <form class="mt-6 flex space-x-4" action="#">
-              <div class="flex-1 min-w-0">
-                <label for="search" class="sr-only">Search</label>
-                <div class="relative rounded-md shadow-sm">
-                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                    </svg>
+            <div class="px-6">
+              <p class="mt-4 text-xs tracking-wider font-bold text-gray-500">
+                Showing <%= pluralize content.count, 'page' %>
+              </p>
+              <ul class="mt-1 text-gray-600">
+                <% content_counts_per_type.each do |content_type, count| %>
+                  <li>
+                    <i class="material-icons float-left mr-2 <%= content_class_from_name(content_type).text_color %>">
+                      <%= content_class_from_name(content_type).icon %>
+                    </i>
+                    <span class="text-sm">
+                      <%= number_with_delimiter count %>
+                      <%= content_type.downcase.pluralize count %>
+                    </span>
+                  </li>
+                <% end %>
+              </ul>
+              
+              <!-- todo put filter/search bar here -->
+              <!--
+              <form class="mt-6 flex space-x-4" action="#">
+                <div class="flex-1 min-w-0">
+                  <label for="search" class="sr-only">Search</label>
+                  <div class="relative rounded-md shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <input type="search" name="search" id="search" class="focus:ring-pink-500 focus:border-pink-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="Search">
                   </div>
-                  <input type="search" name="search" id="search" class="focus:ring-pink-500 focus:border-pink-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="Search">
                 </div>
-              </div>
-              <button type="submit" class="inline-flex justify-center px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
-                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
-                </svg>
-                <span class="sr-only">Search</span>
-              </button>
-            </form>
-            -->
+                <button type="submit" class="inline-flex justify-center px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                  <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="sr-only">Search</span>
+                </button>
+              </form>
+              -->
 
-            <!--
-            <form class="mt-6 flex space-x-2" action="#">
-              <button type="submit" class="inline-flex justify-center px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
-                <i class="material-icons float-left mr-2 text-sm <%= Folder.text_color %>"><%= Folder.icon %></i>
-                New Folder
-              </button>
-              <button type="submit" class="inline-flex justify-center px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
-                <i class="material-icons float-left mr-2 text-sm <%= Document.text_color %>"><%= Document.icon %></i>
-                New <%= content_type_name %>
-              </button>
-            </form>
-            -->
+              <!--
+              <form class="mt-6 flex space-x-2" action="#">
+                <button type="submit" class="inline-flex justify-center px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                  <i class="material-icons float-left mr-2 text-sm <%= Folder.text_color %>"><%= Folder.icon %></i>
+                  New Folder
+                </button>
+                <button type="submit" class="inline-flex justify-center px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                  <i class="material-icons float-left mr-2 text-sm <%= Document.text_color %>"><%= Document.icon %></i>
+                  New <%= content_type_name %>
+                </button>
+              </form>
+              -->
+            </div>
           </div>
 
           <!-- Folder & stats -->
