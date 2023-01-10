@@ -63,25 +63,29 @@
                       <div class="text-gray-400 text-sm">
                         in <%= link_to @universe_scope.name, @universe_scope, class: Universe.text_color %>
                       </div>
+                    <% else %>
+                      <div class="text-gray-400 text-sm">
+                        by <%= link_to current_user.display_name, current_user, class: User.text_color %>
+                      </div>
                     <% end %>
                   </div>
                   <div class="mt-6 flex flex-col justify-stretch space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
                     <%= link_to attribute_customization_path(content_type_name.downcase) do %>
-                      <button type="button" class="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                      <button type="button" class="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
                         <span>Customize template</span>
                       </button>
                     <% end %>
 
                     <% if current_user.can_create?(content_type_class) || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type_class.name) %>
                       <%= link_to new_polymorphic_path(content_type_class) do %>
-                        <button type="button" class="inline-flex justify-center px-4 py-2 border shadow-sm text-sm font-medium rounded-md text-white <%= content_type_class.color %> focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                        <button type="button" class="inline-flex justify-center px-4 py-2 border shadow-sm text-sm font-medium rounded-md text-white <%= content_type_class.color %> focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
                           <i class="material-icons text-sm mr-2">add</i>
                           <span>New <%= content_type_name %></span>
                         </button>
                       <% end %>
                     <% else %>
                       <%= link_to subscription_path do %>
-                        <button type="button" class="inline-flex justify-center px-4 py-2 border shadow-sm text-sm font-medium rounded-md text-white bg-gray-400 hover:bg-notebook-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                        <button type="button" class="inline-flex justify-center px-4 py-2 border shadow-sm text-sm font-medium rounded-md text-white bg-gray-400 hover:bg-notebook-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
                           <span>Upgrade</span>
                         </button>
                       <% end %>
@@ -321,7 +325,7 @@
                                   </button>
                                 </div>
                               <% else %>
-                                <div class="bg-blue-50 p-4">
+                                <div class="bg-blue-50 p-4 text-sm">
                                   Add tags to your <%= content_type_name %> pages to be able to filter them here. 
                                 </div>
                               <% end %>
@@ -555,6 +559,15 @@
                     </div>
                   </div>
                 <% end %>
+
+                <!-- timespan: latest updated_at - earliest created_at -->
+                <div class="inline-block mr-4">
+                  <i class="material-icons float-left mr-1 text-notebook-blue">date_range</i>
+                  <span class="text-sm">
+                    <strong class="font-bold text-gray-700"><%= distance_of_time_in_words content.map(&:updated_at).max - content.map(&:created_at).min %></strong>
+                    timespan
+                  </span>
+                </div>
               </div>
             </div>
           </nav>
