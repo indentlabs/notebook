@@ -11,6 +11,7 @@ class ContentSerializer
   attr_accessor :class_name, :class_color, :class_text_color, :class_icon
 
   attr_accessor :cached_word_count
+  attr_accessor :created_at, :updated_at
 
   attr_accessor :data
   # name: 'blah,
@@ -48,6 +49,8 @@ class ContentSerializer
     self.documents        = content.documents || []
 
     self.cached_word_count = content.cached_word_count
+    self.created_at = content.created_at
+    self.updated_at = content.updated_at
 
     self.data = {
       name: content.try(:name),

@@ -12,20 +12,20 @@
             </div>
             <div class="space-y-1">
               <div class="text-sm font-medium text-gray-900 mb-4">
-                <i class="material-icons float-left <%= content.class_text_color %> mr-1"><%= content.class_icon %></i>
-                <%= content.name %>
+                <i class="material-icons float-left <%= content.class_text_color %> mr-2"><%= content.class_icon %></i>
+                <span class="relative top-0.5"><%= content.name %></span>
               </div>
               <% if content.universe %>
                 <%= link_to content.universe, class: 'group flex items-center text-xs' do %>
                   <i class="material-icons mr-2 <%= Universe.text_color %>"><%= Universe.icon %></i>
                   in &nbsp;
-                  <span class="text-gray-500 group-hover:text-gray-900 font-medium"><%= content.universe.name %></span>
+                  <span class="text-gray-500 group-hover:<%= Universe.text_color %> font-medium"><%= content.universe.name %></span>
                 <% end %>
               <% end %>
               <%= link_to content.user, class: 'group flex items-center text-xs' do %>
                 <i class="material-icons mr-2 <%= User.text_color %>"><%= User.icon %></i>
                 by &nbsp
-                <span class="text-gray-500 group-hover:text-gray-900 font-medium"><%= content.user.display_name %></span>
+                <span class="text-gray-500 group-hover:<%= User.text_color %> font-medium"><%= content.user.display_name %></span>
               <% end %>
             </div>
           </div>
@@ -39,9 +39,14 @@
               <span class="bg-gray-100 p-1 text-xs rounded-lg">42</span>
             </button>
             <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-              <i class="material-icons <%= Location.text_color %> mr-1"><%= Document.icon %></i>
+              <i class="material-icons <%= Document.text_color %> mr-1"><%= Document.icon %></i>
               <span class="flex-grow text-left">Documents</span>
               <span class="bg-gray-100 p-1 text-xs rounded-lg">8</span>
+            </button>
+            <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
+              <i class="material-icons <%= Timeline.text_color %> mr-1"><%= Timeline.icon %></i>
+              <span class="flex-grow text-left">Timelines</span>
+              <span class="bg-gray-100 p-1 text-xs rounded-lg">2</span>
             </button>
             <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
               <i class="material-icons <%= Location.text_color %> mr-1"><%= Location.icon %></i>
@@ -55,28 +60,27 @@
             </button>
           </div>
         </div>
+
         <!-- Meta info -->
-        <div class="pt-2 flex flex-col space-y-2 sm:flex-row xl:flex-col xl:space-x-0">
+        <div class="pt-2 flex flex-col space-y-1 sm:flex-row xl:flex-col xl:space-x-0">
           <div class="flex items-center space-x-2">
-            <!-- Heroicon name: solid/collection -->
-            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
-            </svg>
-            <span class="text-sm text-gray-500 font-medium">15,323 words</span>
+            <i class="material-icons <%= DocumentAnalysis.text_color %>">spellcheck</i>
+            <span class="text-xs text-gray-500 font-medium">
+              <%= number_with_delimiter content.cached_word_count %>
+              <%= 'word'.pluralize content.cached_word_count %>
+            </span>
           </div>
           <div class="flex items-center space-x-2">
-            <!-- Heroicon name: solid/collection -->
-            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
-            </svg>
-            <span class="text-sm text-gray-500 font-medium">7 somethings</span>
+            <i class="material-icons text-notebook-blue" translate="no">date_range</i>
+            <span class="text-xs text-gray-500 font-medium">
+              Created <%= time_ago_in_words content.created_at %> ago
+            </span>
           </div>
           <div class="flex items-center space-x-2">
-            <!-- Heroicon name: solid/badge-check -->
-            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            <span class="text-sm text-gray-500 font-medium">Another something</span>
+            <i class="material-icons text-notebook-blue" translate="no">date_range</i>
+            <span class="text-xs text-gray-500 font-medium">
+              Updated <%= time_ago_in_words content.updated_at %> ago
+            </span>
           </div>
         </div>
       </div>
