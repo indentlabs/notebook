@@ -2,7 +2,7 @@ class PageCollectionSubmissionsController < ApplicationController
   before_action :set_page_collection, only: [:index]
   before_action :set_page_collection_submission, only: [:show, :edit, :update, :destroy, :approve, :pass]
 
-  before_action :require_collection_ownership, only: [:index, :edit, :update, :destroy, :pass, :approve]
+  before_action :require_collection_ownership, only: [:index]
 
   # GET /page_collection_submissions
   def index

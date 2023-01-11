@@ -1,4 +1,6 @@
 class ShareCommentsController < ApplicationController
+  before_action :authenticate_user!
+
   before_action :set_share_comment, only: [:update, :destroy]
 
   # POST /share_comments
