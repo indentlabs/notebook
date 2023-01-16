@@ -1,5 +1,16 @@
+<%
+  page_description = "#{@content.name}, #{@content.description} — a fictional #{@content.class.name.downcase} on Notebook.ai"
+  page_description ||= @content.description
+  page_description ||= "#{@content.name} is a fictional #{@content.class.name.downcase} on Notebook.ai"
+
+  set_meta_tags title:       @content.name,
+                description: page_description.truncate(160),
+                image_src:   @content.first_public_image,
+                og:          { type: 'website' },
+                twitter:     { card: 'photo', image: @content.first_public_image }
+%>
 <div
-  x-data="{}"
+  x-data="{ showEditMode: false }"
 >
   <nav class="bg-white h-16 border-b border-gray-200 flex sticky top-14 z-40" aria-label="Breadcrumb">
     <ol role="list" class="flex-1 mx-auto px-4 flex space-x-4 sm:px-6 lg:px-8">
@@ -33,11 +44,12 @@
 
     <div class="flex flex-row pt-3">
       <div class="mr-3">
-        <button type="button" data-action="dropdown#toggle click@window->dropdown#hide" class="w-full bg-notebook-blue border border-notebook-blue rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-200 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" id="page-index-button" aria-expanded="false" aria-haspopup="true">
-          <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-          </svg>
-          Edit mode
+        <button type="button" class="w-full bg-notebook-blue border border-notebook-blue rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-200 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" id="page-index-button" aria-expanded="false" aria-haspopup="true"
+          data-action="dropdown#toggle click@window->dropdown#hide" 
+          @click="showEditMode = !showEditMode"
+        >
+          <i class="material-icons text-2xl mr-3 -mt-1.5" x-text="showEditMode ? 'visibility' : 'edit'"></i>
+          <span x-text="showEditMode ? 'Read Mode' : 'Edit Mode'"></span>
         </button>
       </div>
       <div data-controller="dropdown" class="mr-3">
@@ -220,17 +232,6 @@
 
 
 <div class="mt-128 pt-128">spacer</div>
-
-<%
-  page_description = "#{@content.name}, #{@content.description} — a fictional #{@content.class.name.downcase} on Notebook.ai"
-  page_description ||= "#{@content.name} is a fictional #{@content.class.name.downcase} on Notebook.ai"
-
-  set_meta_tags title:       @content.name,
-                description: page_description,
-                image_src:   @content.first_public_image,
-                og:          { type: 'website' },
-                twitter:     { card: 'photo', image: @content.first_public_image }
-%>
 
 <%= content_for :full_width_page_header do %>
   <%= render partial: 'content/display/image_card_header' %>

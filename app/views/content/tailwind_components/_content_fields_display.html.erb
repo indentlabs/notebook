@@ -1,29 +1,39 @@
-<form class="space-y-8 divide-y divide-gray-200 px-6">
-  <div class="divide-y divide-gray-200">
-
+<div class="space-y-8 divide-y divide-gray-200 px-6">
+  <div class="divide-y divide-gray-200 space-y-20 mb-20">
     <% content.data[:categories].each do |category| %>
-      <div class="mb-20">
+      <div
+        x-show="showEditMode || (<%= category[:fields].map { |field| "#{field[:value].inspect} != ''" }.join(' || ') %>)"
+      >
         <div class="pt-4 flex flex-row space-x-32">
-          <h3 class="text-lg leading-6 font-medium text-gray-900">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 flex-1">
             <i class="material-icons float-left <%= content.class_text_color %> mr-2"><%= category[:icon] %></i>
             <%= category[:label] %>
           </h3>
-          <div class="flex-1 bg-gray-200 rounded-full h-4 relative top-1.5">
-            <div class="<%= content.class_color %> text-xs text-white font-medium text-center p-0.5 leading-none rounded-full line-clamp-1" style="width: <%= category[:percent_complete] %>%">
-              <%= category[:percent_complete] %>% complete
+          <% if category[:percent_complete].present? %>
+            <div class="flex-1 bg-gray-200 rounded-full h-4 relative top-1.5"
+              x-show="showEditMode"
+            >
+              <div class="<%= content.class_color %> text-xs text-white font-medium text-center p-0.5 leading-none rounded-full line-clamp-1" style="width: <%= category[:percent_complete] %>%">
+                <%= category[:percent_complete] %>% complete
+              </div>
             </div>
-          </div>
+          <% end %>
         </div>
 
         <div class="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
           <% category[:fields].each do |field| %>
-            <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 pt-4">
+            <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 pt-4"
+              x-data="{ value: '<%= escape_javascript field[:value] %>' }"
+              x-show="showEditMode || value != ''"
+            >
               <div class="pl-8">
                 <label for="<%= field[:name] %>" class="block text-sm font-medium text-gray-700">
                   <%= field[:label] %>
                 </label>
               </div>
-              <div class="mt-1 sm:mt-0 sm:col-span-2">
+              <div class="mt-1 sm:mt-0 sm:col-span-2"
+                x-show="!showEditMode"
+              >
                 <%=
                   case field[:type]
                   when 'name'
@@ -39,10 +49,38 @@
                   end
                 %>
               </div>
+              <div class="-mt-1 col-span-2 col-start-2"
+                x-show="showEditMode"
+              >
+                <%= form_for content.raw_model, url: FieldTypeService.form_path(field), remote: true, authenticity_token: true do |f| %>
+                  <%= hidden_field_tag "entity[entity_id]",   content.id %>
+                  <%= hidden_field_tag "entity[entity_type]", content.class_name %>
+                  <%=
+                    case field[:type]
+                    when 'name', 'text_area', 'textarea'
+                      render partial: 'content/form/rich_text_input', locals: {
+                        f:            f, 
+                        content:      content,
+                        field:        field,
+                        show_label:   false,
+                        autocomplete: AutocompleteService.for_field_label(content_model: content.class, label: field[:label]),
+                        autosave:     true
+                      }
+                    when 'universe'
+                      render partial: 'content/form/field_types/universe', locals: {
+                        f:         f,
+                        field:     field,
+                        page:      content,
+                        raw_model: content.raw_model
+                      }
+                    end
+                  %>
+                <% end %>
+              </div>
             </div>
           <% end %>
         </div>
       </div>
     <% end %>
   </div>
-</form>
+</div>
