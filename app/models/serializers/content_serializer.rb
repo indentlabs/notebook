@@ -101,8 +101,10 @@ class ContentSerializer
 
     # Do a little number crunching
     self.data[:categories].each do |category|
-      completed_fields = category[:fields].select { |field| field[:value].present? }.count.to_f
-      total_fields = category[:fields].count
+      completable_fields = category[:fields].select { |field| field[:type] != 'universe' && field[:type] != 'tags' }
+
+      completed_fields = completable_fields.select { |field| field[:value].present? }.count.to_f
+      total_fields = completable_fields.count
 
       if total_fields.zero?
         category[:percent_complete] = nil
