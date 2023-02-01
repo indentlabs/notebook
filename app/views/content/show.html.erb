@@ -10,7 +10,7 @@
                 twitter:     { card: 'photo', image: @content.first_public_image }
 %>
 <div
-  x-data="{ showEditMode: false }"
+  x-data="{ showEditMode: <%= params.fetch('editing', false) %> }"
 >
   <nav class="bg-white h-16 border-b border-gray-200 flex sticky top-14 z-40" aria-label="Breadcrumb">
     <ol role="list" class="flex-1 mx-auto px-4 flex space-x-4 sm:px-6 lg:px-8">
@@ -43,29 +43,24 @@
     </ol>
 
     <div class="flex flex-row pt-3">
-      <div class="mr-3"
-        x-show="showEditMode"
-      >
-        <%= link_to @content do %>
+      <% if @content.updatable_by?(current_user) %>
+        <div class="mr-3" x-show="showEditMode">
+          <%= link_to @content do %>
+            <button type="button" class="w-full bg-notebook-blue border border-notebook-blue rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-200 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <i class="material-icons text-2xl mr-3 -mt-1.5">visibility</i>
+              Read Mode
+            </button>
+          <% end %>
+        </div>
+        <div class="mr-3" x-show="!showEditMode">
           <button type="button" class="w-full bg-notebook-blue border border-notebook-blue rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-200 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            id="read-mode-button"
+            @click="showEditMode = true"
           >
-            <i class="material-icons text-2xl mr-3 -mt-1.5">visibility</i>
-            Read Mode
+            <i class="material-icons text-2xl mr-3 -mt-1.5">edit</i>
+            Edit Mode
           </button>
-        <% end %>
-      </div>
-      <div class="mr-3"
-        x-show="!showEditMode"
-      >
-        <button type="button" class="w-full bg-notebook-blue border border-notebook-blue rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-200 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          id="edit-mode-button"
-          @click="showEditMode = true"
-        >
-          <i class="material-icons text-2xl mr-3 -mt-1.5">edit</i>
-          Edit Mode
-        </button>
-      </div>
+        </div>
+      <% end %>
       <div data-controller="dropdown" class="mr-3">
         <button type="button" data-action="dropdown#toggle click@window->dropdown#hide" class="w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue" id="page-index-button" aria-expanded="false" aria-haspopup="true">
           <!-- Heroicon name: solid/sort-descending -->

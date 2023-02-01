@@ -49,7 +49,7 @@
                   end
                 %>
               </div>
-              <div class="-mt-1 -ml-2 col-span-2 col-start-2"
+              <div class="-mt-1 -ml-2 col-span-2 col-start-2 mb-4"
                 x-show="showEditMode"
               >
                 <%= form_for content.raw_model, url: FieldTypeService.form_path(field), remote: true, authenticity_token: true do |f| %>
@@ -68,6 +68,15 @@
                       }
                     when 'universe'
                       render partial: 'content/form/field_types/universe', locals: {
+                        f:         f,
+                        field:     field,
+                        page:      content,
+                        raw_model: content.raw_model
+                      }
+                    when 'tags'
+                      "tags tbd"
+                    when 'link'
+                      render partial: 'content/form/field_types/link', locals: {
                         f:         f,
                         field:     field,
                         page:      content,

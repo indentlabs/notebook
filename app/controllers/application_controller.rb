@@ -179,6 +179,8 @@ class ApplicationController < ActionController::Base
   end
 
   def cache_linkable_content_for_each_content_type
+    return unless user_signed_in?
+
     cache_contributable_universe_ids
     cache_current_user_content
     

@@ -1,62 +1,12 @@
-<div class="content-field universe">
-  <div class="input-field">
-    <div>
-      <i class="material-icons grey-text left"><%= Universe.icon %></i>
-      <%= f.label field[:id], field[:label] %>
-    </div>
-
-    <% if raw_model.new_record? || (raw_model.persisted? && raw_model.universe && raw_model.universe.user == current_user) || raw_model.universe_id.nil? # || raw_model.universe_id.zero? %>
-      <%# todo not like this %>
-      <%
-        valid_universes = []
-        show_premium_notice = false
-
-        if Rails.application.config.content_types[:free].map(&:name).include?(raw_model.class.name)
-          valid_universes += current_user.universes
-          valid_universes += current_user.contributable_universes
-        else
-          # Premium content
-          if current_user.on_premium_plan? \
-            || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: raw_model.class.name) \
-            || page.user == current_user
-
-            valid_universes += current_user.universes
-
-            # Allow premium users to add premium content to non-premium universes
-            valid_universes += current_user.contributable_universes
-          else
-
-            show_premium_notice = true
-          end
-
-          current_user.contributable_universes.each do |potential_universe|
-            if potential_universe.user.on_premium_plan?
-              valid_universes += [potential_universe]
-            end
-          end
-        end
-      %>
-
-      <%= hidden_field_tag "field[name]", field[:id] %>
-      <%=
-        @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
-        select_tag "field[value]",
-          options_for_select(
-            @universe_dropdown_options.compact,
-            raw_model.try(:universe_id) || @universe_scope.try(:id)
-          ),
-          include_blank: current_user.on_premium_plan? || Rails.application.config.content_types[:free].map(&:name).include?(raw_model.class.name),
-          class: 'autosave-closest-form-on-change'
-      %>
-      <% if show_premium_notice %>
-        <div class="help-text">
-          <i class="material-icons" style="font-size: 90%">info</i>
-          While on a <%= link_to 'Starter plan', subscription_path %>, you can only create premium content in universes you're a contributor to.
-        </div>
-      <% end %>
-    <% else %>
-      <br />
-      <%= link_to(raw_model.universe.name, raw_model.universe) if raw_model.universe %>
-    <% end %>
-  </div>
+<div>
+  <%= hidden_field_tag "field[name]", field[:id] %>
+  <%=
+    select_tag "field[value]",
+      options_for_select(
+        @linkables_raw['Universe'].compact.sort_by(&:name).map { |u| [u.name, u.id] },
+        raw_model.try(:universe_id) || @universe_scope.try(:id)
+      ),
+      include_blank: true,
+      class: 'autosave-closest-form-on-change block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-800 focus:border-purple-800 sm:text-sm rounded-md'
+  %>
 </div>

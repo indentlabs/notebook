@@ -14,7 +14,7 @@ class ContentController < ApplicationController
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
-  before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit, :index]
+  before_action :cache_linkable_content_for_each_content_type, only: [:new, :show, :edit, :index]
 
   before_action :set_attributes_content_type, only: [:attributes]
 
