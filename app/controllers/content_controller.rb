@@ -87,6 +87,13 @@ class ContentController < ApplicationController
 
     @serialized_content = ContentSerializer.new(@content)
 
+    if @content.updatable_by?(current_user)
+      @suggested_page_tags = (
+        current_user.page_tags.where(page_type: content_type.name).pluck(:tag) +
+          PageTagService.suggested_tags_for(content_type.name)
+        ).uniq
+    end
+
     if (current_user || User.new).can_read?(@content)
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }

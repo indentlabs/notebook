@@ -1,69 +1,152 @@
-<div class="content-field tags">
-  <div class="input-field">
-    <% if field[:label] %>
-      <small>
-        <i class="material-icons left grey-text"><%= PageTag.icon %></i>
-        <%= f.label field[:id], field[:label] %>
-      </small>
-    <% end %>
-    <div class="chips chips-autocomplete chips-initial" id="chips-for-<%= page.id %>"></div>
-    <%= 
-      hidden_field_tag 'field[value]', 
-        page.page_tags.join(PageTag::SUBMISSION_DELIMITER), 
-        class: 'hidden_page_tags_value'
-    %>
+<%
+  field_uuid = SecureRandom.uuid
+%>
 
-    <div class="help-text show-when-focused">
-      <i class="material-icons tiny"><%= PageTag.icon %></i>
-      Type and press enter to create a new tag, or click any of the suggested tags below to add it.
-    </div>
-    <% if @suggested_page_tags %>
-      <div class="tags-container show-when-focused">
-        <% @suggested_page_tags.each do |tag| %>
-          <%=
-            link_to '#', class: 'js-add-tag' do
-          %>
-            <span class="new badge grey left hoverable" data-badge-caption="<%= tag %>"></span>
-          <% end %>
-        <% end %>
+<div
+  x-data
+  @tags-update="console.log('tags updated', $event.detail.tags)"
+  data-tags='<%= page.page_tags %>'
+  class="max-w-lg"
+>
+  <div
+    x-data="tagSelect()"
+    x-init="init('parentEl')"
+    @click.away="clearSearch()"
+    @keydown.escape="clearSearch()"
+  >
+    <div class="relative" @keydown.enter.prevent="addTag(textInput)">
+      <%= 
+        hidden_field_tag 'field[value]', 
+          page.page_tags.join(PageTag::SUBMISSION_DELIMITER), 
+          class: 'hidden_page_tags_value',
+          id: field_uuid
+      %>
+      <input
+        x-model="textInput"
+        x-ref="textInput"
+        @input="search($event.target.value)"
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        placeholder="Add tags to this page"
+      />
+      <div :class="[open ? 'block' : 'hidden']">
+        <div class="absolute z-40 left-0 mt-0 w-full">
+          <div class="py-1 text-sm bg-white rounded shadow-lg border border-gray-300">
+            <a
+              @click.prevent="addTag(textInput)"
+              class="block py-1 px-5 cursor-pointer hover:bg-notebook-blue hover:text-white"
+            >
+              Add tag "<span class="font-semibold" x-text="textInput"></span>"
+            </a>
+          </div>
+        </div>
       </div>
-    <% end %>
-    <div class="clearfix"></div>
+      <!-- selections -->
+      <template x-for="(tag, index) in tags">
+        <div class="<%= page.class_color %> text-white inline-flex items-center text-sm rounded mt-2 mr-1">
+          <span class="ml-2 mr-1 leading-relaxed truncate max-w-xs" x-text="tag"></span>
+          <button @click.prevent="removeTag(index)" class="w-6 h-6 inline-block align-middle text-gray-600 hover:text-black focus:outline-none">
+            <svg class="w-6 h-6 fill-current mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M15.78 14.36a1 1 0 0 1-1.42 1.42l-2.82-2.83-2.83 2.83a1 1 0 1 1-1.42-1.42l2.83-2.82L7.3 8.7a1 1 0 0 1 1.42-1.42l2.83 2.83 2.82-2.83a1 1 0 0 1 1.42 1.42l-2.83 2.83 2.83 2.82z"/></svg>
+          </button>
+        </div>
+      </template>
+    </div>
+    <div
+      class="bg-blue-100 px-4 py-2 mt-4 rounded-lg"
+      x-data="{ showClickableTags: false }"
+    >
+      <div
+        class="text-gray-700 hover:text-gray-900 text-xs cursor-pointer"
+        @click="showClickableTags = !showClickableTags"
+      >
+        <span x-text="showClickableTags ? 'Hide' : 'Show'"></span>
+        quick tags
+      </div>
+      <div
+        class="leading-loose mt-4"
+        x-show="showClickableTags"
+      >
+        <% @suggested_page_tags.each do |tag| %>
+          <a
+            @click="addTag('<%= tag %>')"
+            class="inline-block bg-white hover:<%= @content.class.color %> hover:text-white rounded-full px-3 py-1 text-sm text-gray-700 cursor-pointer"
+          >
+            <%= tag %>
+          </a>
+        <% end %>
+
+        <div class="mt-4 text-xs">
+          Click any tag to add it to this page. Any tags you've added to your other <%= @content.class.name %> pages will also appear here.
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-<%= content_for :javascript do %>
-  function update_hidden_page_tag_value(e) {
-    var chips = M.Chips.getInstance($(e).parent().find('.chips')).chipsData.map(function (c) {
-      return c['tag'];
-    });
 
-    var hidden_input = $(e).parent().find('.hidden_page_tags_value');
-    hidden_input.val(chips.join('<%= PageTag::SUBMISSION_DELIMITER %>'));
+<script type="text/javascript">
+  function update_hidden_page_tag_value(tags) {
+    const tag_delimiter = '<%= PageTag::SUBMISSION_DELIMITER %>';
+    const hidden_field  = $('#<%= field_uuid %>');
+
+    console.log('updating tags to ');
+    console.log(tags.join(tag_delimiter));
+
+    // Update our selected tags
+    hidden_field.val(tags.join(tag_delimiter));
 
     // Trigger autosave manually
-    hidden_input.closest('form').submit();
-
-    M.toast({ html: "Saving changes..." });
+    hidden_field.closest('form').submit();
   }
 
-  var chips = $('#chips-for-<%= page.id %>').chips({
-    placeholder: 'Add tags',
-    secondaryPlaceholder: '+ Tag',
-    autocompleteOptions: {
-      data: {
-        <% page.page_tags.pluck(:tag).each do |tag| %>
-          '<%= tag %>': null,
-        <% end %>
+  function tagSelect() {
+    return {
+      open: false,
+      textInput: '',
+      tags: [],
+      init() {
+        this.tags = JSON.parse(this.$el.parentNode.getAttribute('data-tags'));
       },
-      limit: 100,
-      minLength: 1
-    },
-    data: [
-      <% page.page_tags.pluck(:tag).each do |tag| %>
-        {tag: "<%= tag.gsub('"', '\"').html_safe %>"},
-      <% end %>
-    ],
-    onChipAdd:    update_hidden_page_tag_value,
-    onChipDelete: update_hidden_page_tag_value
-  });
-<% end %>
+      addTag(tag) {
+        console.log('adding tag: ' + tag);
+        tag = tag.trim()
+        if (tag != "" && !this.hasTag(tag)) {
+          this.tags.push( tag )
+        }
+        this.clearSearch()
+        this.$refs.textInput.focus()
+        this.fireTagsUpdateEvent()
+      },
+      fireTagsUpdateEvent() {
+        update_hidden_page_tag_value(this.tags);
+        this.$el.dispatchEvent(new CustomEvent('tags-update', {
+          detail: { tags: this.tags },
+          bubbles: true,
+        }));
+      },
+      hasTag(tag) {
+        var tag = this.tags.find(e => {
+          return e.toLowerCase() === tag.toLowerCase()
+        })
+        return tag != undefined
+      },
+      removeTag(index) {
+        this.tags.splice(index, 1)
+        this.fireTagsUpdateEvent()
+      },
+      search(q) {
+        if ( q.includes(",") ) {
+          q.split(",").forEach(function(val) {
+            this.addTag(val)
+          }, this)
+        }
+        this.toggleSearch()
+      },
+      clearSearch() {
+        this.textInput = ''
+        this.toggleSearch()
+      },
+      toggleSearch() {
+        this.open = this.textInput != ''
+      }
+    }
+  }
+</script>
