@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 ruby "~> 2.7"
 
-# Server
+# Server core
 gem 'rails'
 gem 'puma', '~> 5.6'
 gem 'puma-heroku'
@@ -14,7 +14,7 @@ gem 'aws-sdk-s3'
 gem 'filesize'
 
 # Image processing
-gem 'paperclip'
+gem 'paperclip' # TODO: we want to migrate off this game to ActiveStorage
 gem 'rmagick'
 gem 'image_processing'
 gem 'active_storage_validations'
@@ -26,7 +26,7 @@ gem 'authority'
 # Billing
 gem 'stripe'
 gem 'stripe_event'
-gem 'paypal_client' # todo do we need this gem after all?
+gem 'paypal_client' # TODO: audit whether this is still used
 gem 'paypal-checkout-sdk'
 
 # Design
@@ -113,11 +113,11 @@ end
 group :test, :production do
   gem 'pg', '~> 1.4'
 
-  gem "mini_racer", "~> 0.6.3"
+  gem "mini_racer", "~> 0.6.3" # TODO: audit whether we can remove this
 end
 
 group :test do
-  gem 'codeclimate-test-reporter', require: false
+  gem 'codeclimate-test-reporter', require: false # TODO: remove this
   gem 'database_cleaner'
   gem 'selenium-webdriver'
 end
