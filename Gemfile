@@ -1,12 +1,16 @@
 source 'https://rubygems.org'
-ruby "~> 2.7"
+ruby "~> 3.2"
 
 # Server core
-gem 'rails'
+gem 'rails', '~> 6.1'
 gem 'puma', '~> 5.6'
-gem 'puma-heroku'
 # gem 'bootsnap', require: false
-gem 'sprockets', '~> 3.7.2'
+gem 'sprockets', '~> 4.2.0'
+gem 'terser'
+
+group :production do
+  gem 'puma-heroku'
+end
 
 # Storage
 gem 'aws-sdk', '~> 3.1'
@@ -95,7 +99,7 @@ gem 'redis'
 gem 'csv'
 
 # Admin
-gem 'rails_admin', '~> 2.2'
+gem 'rails_admin'
 
 # Tech debt & hacks
 gem 'binding_of_caller' # see has_changelog.rb
