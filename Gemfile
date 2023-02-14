@@ -96,7 +96,7 @@ gem 'redis'
 gem 'csv'
 
 # Admin
-# gem 'rails_admin', '~> 2.2'
+gem 'rails_admin'
 
 # Tech debt & hacks
 gem 'binding_of_caller' # see has_changelog.rb
