@@ -285,7 +285,7 @@ Rails.application.routes.draw do
       get '/notifications',        to: 'admin#notifications'
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
-    mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
+    # mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
   end
 
   # Fancy shmancy informative pages
