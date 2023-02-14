@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby "~> 2.7"
+ruby "~> 3.2"
 
 # Server core
 gem 'rails', '~> 6.1'
