@@ -80,8 +80,8 @@
         <li>
           <%= link_to [
             'http://twitter.com/share?',
-            'url=' + URI::escape(user_content_page_share_url(user_id: @share.user.id, id: @share.id)),
-            '&text=' + URI::escape(@share.message)
+            'url=' + CGI.escape(user_content_page_share_url(user_id: @share.user.id, id: @share.id)),
+            '&text=' + CGI.escape(@share.message)
           ].join, class: 'blue-text', target: '_blank' do %>
             <i class="material-icons tiny left" style="margin-top: 4px;">share</i>
             Twitter
@@ -89,7 +89,7 @@
         </li>
         <li>
           <%= 
-            link_to "https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=#{URI::escape(user_content_page_share_url(user_id: @share.user.id, id: @share.id))}&display=popup&ref=plugin&src=share_button", 
+            link_to "https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=#{CGI.escape(user_content_page_share_url(user_id: @share.user.id, id: @share.id))}&display=popup&ref=plugin&src=share_button", 
               class: 'blue-text',
               onclick: "return !window.open(this.href, 'Facebook', 'width=640,height=580')" do
           %>
