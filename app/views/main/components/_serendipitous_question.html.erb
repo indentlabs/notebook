@@ -1,25 +1,27 @@
-<div class="bg-white shadow-md rounded-md mb-8">
-  <div class="bg-notebook-blue rounded-t-lg">
-    <%= image_tag @content.random_image_including_private(format: :original), class: 'w-full object-cover object-center max-h-48 rounded-t-md' %>
-  </div>
-  <div class="p-4 lg:flex lg:flex-col lg:justify-between ">
-    <div>
-      <%=
-        if @content && @attribute_field_to_question
-          render partial: 'cards/serendipitous/tailwind_content_question', locals: { 
-            content: @content, 
-            field: @attribute_field_to_question,
-            expand_by_default: true,
-            include_quick_reference: false
-          }
-        end
-      %>
-      <p class="text-xs text-gray-500 text-center">
-        <i class="material-icons text-xs mr-1"><%= @content.icon %></i>
-        Your answer will be automatically saved to your
-        <%= link_to @content.name, @content.view_path, class: "#{@content.text_color}", target: '_blank' %>
-        <%= @content.page_type.downcase %> page.
-      </p>
+<% if @content %>
+  <div class="bg-white shadow-md rounded-md mb-8">
+    <div class="bg-notebook-blue rounded-t-lg">
+      <%= image_tag @content.random_image_including_private(format: :original), class: 'w-full object-cover object-center max-h-48 rounded-t-md' %>
+    </div>
+    <div class="p-4 lg:flex lg:flex-col lg:justify-between ">
+      <div>
+        <%=
+          if @attribute_field_to_question
+            render partial: 'cards/serendipitous/tailwind_content_question', locals: { 
+              content: @content, 
+              field: @attribute_field_to_question,
+              expand_by_default: true,
+              include_quick_reference: false
+            }
+          end
+        %>
+        <p class="text-xs text-gray-500 text-center">
+          <i class="material-icons text-xs mr-1"><%= @content.icon %></i>
+          Your answer will be automatically saved to your
+          <%= link_to @content.name, @content.view_path, class: "#{@content.text_color}", target: '_blank' %>
+          <%= @content.page_type.downcase %> page.
+        </p>
+      </div>
     </div>
   </div>
-</div>
+<% end %>
