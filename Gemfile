@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 ruby "~> 2.7"
 
 # Server core
-gem 'rails'
+gem 'rails', '~> 6.1'
 gem 'puma', '~> 5.6'
 gem 'puma-heroku'
 # gem 'bootsnap', require: false
