@@ -1,12 +1,30 @@
-<div>
-  <%= hidden_field_tag "field[name]", field[:id] %>
-  <%=
-    select_tag "field[value]",
-      options_for_select(
-        @linkables_raw['Universe'].compact.sort_by(&:name).map { |u| [u.name, u.id] },
-        raw_model.try(:universe_id) || @universe_scope.try(:id)
-      ),
-      include_blank: true,
-      class: 'autosave-closest-form-on-change block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-800 focus:border-purple-800 sm:text-sm rounded-md'
-  %>
-</div>
+<% if @linkables_raw.fetch('Universe', []).any? %>
+  <div>
+    <%= hidden_field_tag "field[name]", field[:id] %>
+    <%=
+      select_tag "field[value]",
+        options_for_select(
+          @linkables_raw['Universe'].compact.sort_by(&:name).map { |u| [u.name, u.id] },
+          raw_model.try(:universe_id) || @universe_scope.try(:id)
+        ),
+        include_blank: true,
+        class: 'autosave-closest-form-on-change block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-800 focus:border-purple-800 sm:text-sm rounded-md'
+    %>
+  </div>
+<% else %>
+  <%= link_to new_universe_path do %>
+    <div class="bg-purple-200 p-4 rounded-lg flex hover:shadow-md">
+      <i class="material-icons text-4xl mr-3"><%= Universe.icon %></i>
+
+      <div class="flex-1">
+        <p>
+          You haven't created any universes yet!
+        </p>
+        <p class="text-xs">
+          Universes allow you to organize your separate worlds and focus on just one universe's pages at a time. Your changes here are automatically saved. Click this box to go
+          create your first universe.
+        </p>
+      </div>
+    </div>
+  <% end %>
+<% end %>
