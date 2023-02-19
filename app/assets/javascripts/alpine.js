@@ -29,19 +29,54 @@ function alpineMultiSelectController() {
       // to make sure our autosave fires on it.
       originalSelect.dispatchEvent(new Event('change'));
     },
+    select(groupIndex, optionIndex, event) { // WE ARE HERE -- click from html
+      if (!this.options[index].selected) {
+        this.options[index].selected = true;
+        this.options[index].element = event.target;
+        this.selected.push(index);
+
+      } else {
+        this.selected.splice(this.selected.lastIndexOf(index), 1);
+        this.options[index].selected = false
+      }
+
+      // Update the original select element's selected options
+      const originalSelect = document.getElementById(this.sourceFieldId);
+      for (let i = 0; i < originalSelect.options.length; i++) {
+        originalSelect.options[i].selected = this.options[i].selected;
+      }
+
+      // Finally, trigger a manual on-change event on the original select
+      // to make sure our autosave fires on it.
+      originalSelect.dispatchEvent(new Event('change'));
+    },
     remove(index, option) {
       this.options[option].selected = false;
       this.selected.splice(index, 1);
     },
     loadOptions(fieldId) {
       this.sourceFieldId = fieldId;
-      const select = document.getElementById(fieldId).options;
+      const select = document.getElementById(fieldId);
+      const optgroups = select.getElementsByTagName('optgroup');
+
+      for (let i = 0; i < optgroups.length; i++) {
+        const groupOptions = optgroups[i].getElementsByTagName('option');
+
+        this.optgroups.push({
+          label: optgroups[i].label,
+          icon: 'help',
+          options: groupOptions
+        });
+
+        console.log('optgroups', this.optgroups);
+      }
 
       for (let i = 0; i < select.length; i++) {
         this.options.push({
           value: select[i].value,
           text: select[i].innerText,
-          selected: !!select[i].selected
+          selected: !!select[i].selected,
+          icon: 'help'
         });
 
         // Default anything already-selected to actively selected
@@ -52,7 +87,7 @@ function alpineMultiSelectController() {
     },
     selectedValues(){
       // Return all this.options where selected=true
-      return this.options.filter(op => op.selected === true).map(el => el.text)
+      return this.options.filter(op => op.selected === true); // .map(el => el.text)
       // return this.selected.map((option)=>{
       //   return this.options[option].value;
       // });
