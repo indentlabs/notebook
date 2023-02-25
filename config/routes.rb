@@ -8,7 +8,7 @@ Rails.application.routes.draw do
       get '/character/:id', to: 'basil#character', as: :basil_character
       get '/character/:id/commission', to: 'basil#commission_character', as: :basil_commission_character
 
-      post '/complete/:jobid', to: 'basil#complete_commission'
+      get '/complete/:jobid', to: 'basil#complete_commission'
     end
   end
 
