@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_12_02_003053) do
+ActiveRecord::Schema.define(version: 2023_02_25_101433) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -184,6 +184,19 @@ ActiveRecord::Schema.define(version: 2022_12_02_003053) do
     t.index ["user_id", "deleted_at"], name: "index_attributes_on_user_id_and_deleted_at"
     t.index ["user_id", "entity_type", "entity_id"], name: "index_attributes_on_user_id_and_entity_type_and_entity_id"
     t.index ["user_id"], name: "index_attributes_on_user_id"
+  end
+
+  create_table "basil_commissions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "entity_type", null: false
+    t.integer "entity_id", null: false
+    t.string "prompt"
+    t.string "job_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "completed_at"
+    t.index ["entity_type", "entity_id"], name: "index_basil_commissions_on_entity"
+    t.index ["user_id"], name: "index_basil_commissions_on_user_id"
   end
 
   create_table "best_friendships", force: :cascade do |t|
@@ -3694,6 +3707,7 @@ ActiveRecord::Schema.define(version: 2022_12_02_003053) do
   add_foreign_key "api_requests", "application_integrations"
   add_foreign_key "api_requests", "integration_authorizations"
   add_foreign_key "application_integrations", "users"
+  add_foreign_key "basil_commissions", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
   add_foreign_key "character_birthtowns", "characters"

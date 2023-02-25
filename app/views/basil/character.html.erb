@@ -1,0 +1,101 @@
+<div class="row">
+  <div class="col s5">
+    <div>
+      <%= image_tag @character.random_image_including_private(format: :medium) %>
+      <h1 style="font-size: 2rem"><%= @character.name %></h1>
+    </div>
+
+    <ul>
+      <% @appearance_fields.each do |field| %>
+        <%
+          value = @attributes.detect { |attr| attr.attribute_field_id == field.id }.try(:value)
+          next if value.nil? || value.blank?
+        %>
+        <li style="margin-bottom: 1em;">
+          <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
+            <%= field.label %>
+          </div>
+          <div>
+            <%= value %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+
+    <div>
+      <%= link_to 'Visit this character page', @character, class: 'grey-text' %>
+    </div>
+    <div>
+      <%= link_to 'Back to my other characters', basil_path, class: 'grey-text' %>
+    </div>
+  </div>
+
+  <div class="col s7">
+    <div class="card-panel" style="margin-top: 2em">
+      <p>
+        Hey there! This is still a work in progress and very much a beta. If you run into any issues,
+        please let me know in the <%= link_to 'Site Support forums', 'https://www.notebook.ai/forum/site-support' %>
+        or <%= link_to 'on Discord', 'https://discord.gg/7WCuGxY3AW' %>.
+      </p>
+      <p>
+        Basil is learning as fast as he can. Some fields may not be incorporated into art as well as others.
+        Right now, Basil is best at generating art for realistic, human characters. Each image may take up to
+        several minutes to complete.
+      </p>
+    </div>
+
+    <% if @can_request_another %>
+      <%= link_to basil_commission_character_path(@character) do %>
+        <div class="hoverable card-panel blue white-text">
+          Click here to request Basil generate 
+          <%= @commissions.any? ? 'another' : 'an' %>
+          image of <%= @character.name %>.
+        </div>
+      <% end %>
+    <% end %>
+
+    <% @commissions.each do |commission| %>
+      <div>
+        <% if commission.complete? %>
+          <%# image_tag commission.image, style: 'width: 100%' %>
+          <%
+            s3 = Aws::S3::Resource.new(region: "us-east-1")
+            obj = s3.bucket("basil-characters").object("job-#{commission.job_id}.png")
+          %>
+          <div class="card horizontal">
+            <div class="card-image">
+              <%= link_to obj.presigned_url(:get) do %>
+                <%= image_tag obj.presigned_url(:get) %>
+              <% end %>
+            </div>
+            <div class="card-stacked">
+              <div class="card-content">
+                <ul>
+                  <li>
+                    Completed <%= time_ago_in_words commission.completed_at %> ago
+                  </li>
+                  <li>
+                    Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %>
+                  </li>
+                  <hr />
+                  <li>
+                    You can click on the image to download it. Congratulations, it's yours now!
+                    Feel free to upload it to your character's page if you want to keep and/or use it.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        <% else %>
+          <div class="card-panel green white-text darken-4">
+            Basil is still working on this commission...
+            <div style="font-size: 0.8em">
+              (Requested <%= time_ago_in_words(commission.created_at) %> ago)
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+

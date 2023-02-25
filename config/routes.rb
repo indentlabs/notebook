@@ -2,6 +2,16 @@
 Rails.application.routes.draw do
   default_url_options :host => "notebook.ai"
 
+  scope :ai, path: '/ai' do
+    scope :basil do
+      get '/', to: 'basil#index', as: :basil
+      get '/character/:id', to: 'basil#character', as: :basil_character
+      get '/character/:id/commission', to: 'basil#commission_character', as: :basil_commission_character
+
+      get '/complete/:jobid', to: 'basil#complete_commission'
+    end
+  end
+
   scope :stream, path: '/stream', as: :stream do
     get '/',         to: 'stream#index'
     get 'world',     to: 'stream#global'
