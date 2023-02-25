@@ -1,15 +1,17 @@
 <div class="row">
   <div class="col s5">
     <div>
-      <%= image_tag @character.random_image_including_private(format: :medium) %>
+      <%= image_tag @character.random_image_including_private(format: :medium), style: 'width: 100%' %>
       <h1 style="font-size: 2rem"><%= @character.name %></h1>
     </div>
 
     <ul>
+      <% shown_any_value = false %>
       <% @appearance_fields.each do |field| %>
         <%
           value = @attributes.detect { |attr| attr.attribute_field_id == field.id }.try(:value)
           next if value.nil? || value.blank?
+          shown_any_value = true
         %>
         <li style="margin-bottom: 1em;">
           <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
@@ -22,29 +24,50 @@
       <% end %>
     </ul>
 
+    <% if !shown_any_value %>
+      <div class="red card-panel lighten-3">
+        Basil works best with guidance! Please fill out some fields in the "Looks" category for this character
+        before requesting an image.
+      </div>
+    <% end %>
+
     <div>
-      <%= link_to 'Visit this character page', @character, class: 'grey-text' %>
+      <%= link_to 'Edit this character page', edit_polymorphic_path(@character), class: 'grey-text text-darken-2' %>
     </div>
     <div>
-      <%= link_to 'Back to my other characters', basil_path, class: 'grey-text' %>
+      <%= link_to 'Back to my other characters', basil_path, class: 'grey-text text-darken-2' %>
     </div>
   </div>
 
   <div class="col s7">
     <div class="card-panel" style="margin-top: 2em">
       <p>
-        Hey there! This is still a work in progress and very much a beta. If you run into any issues,
-        please let me know in the <%= link_to 'Site Support forums', 'https://www.notebook.ai/forum/site-support' %>
-        or <%= link_to 'on Discord', 'https://discord.gg/7WCuGxY3AW' %>.
+        Basil is learning as fast as he can. Here are some tips and guidelines to get the most out of
+        him right now:
+      </p>
+      <ul class="browser-default">
+        <li>Realistic, humanoid characters work best.</li>
+        <li>Basil doesn't take into account any images you've already uploaded, and instead focuses
+        entirely on the text descriptions you've provided.</li>
+        <li>Although all fields are incorporated into the art, some may be incorporated better than
+        others.</li>
+        <li>You can generate more images without changing any descriptions; Basil will paint something
+        new every time until you find something you like.</li>
+        <li>You'll need to refresh the page to see your generated images. Most images take less than a minute,
+        but may take longer depending on Basil's queue.</li>
+      </ul>
+      <p>
+        This is still a work in progress and very much a beta that will change a lot before releasing publicly,
+        but feel free to use it as much as you'd like to provide feedback!
       </p>
       <p>
-        Basil is learning as fast as he can. Some fields may not be incorporated into art as well as others.
-        Right now, Basil is best at generating art for realistic, human characters. Each image may take up to
-        several minutes to complete.
+        If you run into any issues, please let me know <%# in the %>
+        <%# link_to 'Site Support forums', 'https://www.notebook.ai/forum/site-support' %>
+        <%# or %> <%= link_to 'on Discord', 'https://discord.gg/7WCuGxY3AW' %>.
       </p>
     </div>
 
-    <% if @can_request_another %>
+    <% if @can_request_another && shown_any_value %>
       <%= link_to basil_commission_character_path(@character) do %>
         <div class="hoverable card-panel blue white-text">
           Click here to request Basil generate 
