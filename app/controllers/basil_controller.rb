@@ -20,6 +20,12 @@ class BasilController < ApplicationController
       entity_type: 'Character'
     )
 
+    gender_field = @character.overview_field('Gender')
+    @gender_value = Attribute.find_by(attribute_field_id: gender_field.id, entity: @character).try(:value)
+
+    age_field = @character.overview_field('Age')
+    @age_value = Attribute.find_by(attribute_field_id: age_field.id, entity: @character).try(:value)
+
     @commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id).order('id DESC')
     @can_request_another = @commissions.all? { |c| c.complete? }
   end
@@ -41,6 +47,13 @@ class BasilController < ApplicationController
     gender_field = @character.overview_field('Gender')
     gender_value = Attribute.find_by(attribute_field_id: gender_field.id, entity: @character).try(:value)
 
+    age_field = @character.overview_field('Age')
+    @age_value = Attribute.find_by(attribute_field_id: age_field.id, entity: @character).try(:value)
+
+    if @age_value.present? && @age_value.to_i.to_s == @age_value
+      @age_value = "#{@age_value} years old"
+    end
+
     formatted_field_values = appearance_fields.map do |field|
       value = attributes.detect { |a| a.attribute_field_id == field.id }.try(:value)
       next if value.nil? || value.blank? || ['none', 'n/a', 'no', '.', '-', ' '].include?(value.try(:downcase))
@@ -49,6 +62,7 @@ class BasilController < ApplicationController
     end
     prompt = [
       gender_value,
+      age_value,
       formatted_field_values.compact.join(', '),
     ].compact.join(', ')
 
