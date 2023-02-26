@@ -72,7 +72,7 @@ class BasilController < ApplicationController
       value = attributes.detect { |a| a.attribute_field_id == field.id }.try(:value)
       next if value.nil? || value.blank? || ['none', 'n/a', 'no', '.', '-', ' '].include?(value.try(:downcase))
 
-      "#{value.gsub(',', '')} #{field.label}"
+      "#{field.label}: #{value.gsub(',', '')}"
     end
     prompt = [
       gender_value,
