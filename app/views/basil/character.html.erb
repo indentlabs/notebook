@@ -63,17 +63,6 @@
         Basil is learning as fast as he can. Here are some tips and guidelines to get the most out of
         him right now:
       </p>
-      <ul class="browser-default">
-        <li>Realistic, humanoid characters work best.</li>
-        <li>Basil doesn't take into account any images you've already uploaded, and instead focuses
-        entirely on the text descriptions you've provided.</li>
-        <li>Although all fields are incorporated into the art, some may be incorporated better than
-        others.</li>
-        <li>You can generate more images without changing any descriptions; Basil will paint something
-        new every time until you find something you like.</li>
-        <li>You'll need to refresh the page to see your generated images. Most images take less than a minute,
-        but may take longer depending on Basil's queue.</li>
-      </ul>
       <p>
         This is still a work in progress and very much a beta that will change a lot before releasing publicly,
         but feel free to use it as much as you'd like to provide feedback!
@@ -86,13 +75,37 @@
     </div>
 
     <% if @can_request_another && shown_any_value %>
-      <%= link_to basil_commission_character_path(@character) do %>
-        <div class="hoverable card-panel blue white-text">
-          Click here to request Basil generate 
-          <%= @commissions.any? ? 'another' : 'an' %>
-          image of <%= @character.name %>.
+      <div class="center">
+        To request Basil create an image of <%= @character.name %>, choose your desired style.
+      </div>
+      <div class="row">
+        <div class="col s12 m4 l4">
+          <%= link_to basil_commission_character_path(@character, style: 'realistic') do %>
+            <div class="hoverable card-panel blue white-text">
+              <i class="material-icons left">photo</i>
+              Photograph
+            </div>
+          <% end %>
         </div>
-      <% end %>
+        <div class="col s12 m4 l4">
+          <%= link_to basil_commission_character_path(@character, style: 'painting') do %>
+            <div class="hoverable card-panel blue white-text">
+              <i class="material-icons left">palette</i>
+              Painting
+            </div>
+          <% end %>
+        </div>
+        <div class="col s12 m4 l4">
+          <%= link_to basil_commission_character_path(@character, style: 'sketch') do %>
+            <div class="hoverable card-panel blue white-text">
+              <i class="material-icons left">edit</i>
+              Sketch
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      
     <% end %>
 
     <% @commissions.each do |commission| %>

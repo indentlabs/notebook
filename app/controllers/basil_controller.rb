@@ -33,7 +33,11 @@ class BasilController < ApplicationController
   end
 
   def info
-
+    # total commissions
+    # queue size (total commissions - completed commissions)
+    # average time to complete today / this week
+    # commissions per day bar chart
+    # count(average time to complete) bar chart
   end
 
   def review
@@ -84,7 +88,7 @@ class BasilController < ApplicationController
       job_id:      SecureRandom.uuid
     )
 
-    redirect_to basil_character_path(@character, notice: "Basil is working on your commission!")
+    redirect_to basil_character_path(@character)
   end
 
   def complete_commission
