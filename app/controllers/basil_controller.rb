@@ -1,5 +1,5 @@
 class BasilController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [:complete_commission]
 
   def index
     @characters = @current_user_content['Character']
