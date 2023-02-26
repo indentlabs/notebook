@@ -38,13 +38,19 @@ class BasilController < ApplicationController
       entity_type: 'Character'
     )
 
+    gender_field = @character.overview_field('Gender')
+    gender_value = Attribute.find_by(attribute_field_id: gender_field.id, entity: @character).try(:value)
+
     formatted_field_values = appearance_fields.map do |field|
       value = attributes.detect { |a| a.attribute_field_id == field.id }.try(:value)
       next if value.nil? || value.blank? || ['none', 'n/a', 'no', '.', '-', ' '].include?(value.try(:downcase))
 
       "#{value.gsub(',', ' ')} #{field.label}"
     end
-    prompt = "#{formatted_field_values.compact.join(', ')}"
+    prompt = [
+      gender_value,
+      formatted_field_values.compact.join(', '),
+    ].compact.join(', ')
 
     BasilCommission.create!(
       user:        current_user,
