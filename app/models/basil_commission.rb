@@ -19,7 +19,7 @@ class BasilCommission < ApplicationRecord
     message_body = {
       job_id: job_id,
       prompt: prompt,
-      style:  'realistic'
+      style:  style
     }.to_json
 
     sqs_client.send_message(

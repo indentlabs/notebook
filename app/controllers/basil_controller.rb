@@ -85,6 +85,7 @@ class BasilController < ApplicationController
       entity_type: 'Character',
       entity_id:   @character.id,
       prompt:      prompt,
+      style:       params.fetch('style', 'realistic'),
       job_id:      SecureRandom.uuid
     )
 
