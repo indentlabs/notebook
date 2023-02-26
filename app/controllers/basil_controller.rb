@@ -71,6 +71,7 @@ class BasilController < ApplicationController
     formatted_field_values = appearance_fields.map do |field|
       value = attributes.detect { |a| a.attribute_field_id == field.id }.try(:value)
       next if value.nil? || value.blank? || ['none', 'n/a', 'no', '.', '-', ' '].include?(value.try(:downcase))
+      next if field.label.downcase == 'race' && value.downcase == 'human'
 
       "#{field.label}: #{value.gsub(',', '').gsub("\r", "").gsub("\n", " ")}"
     end
