@@ -73,7 +73,7 @@ class BasilController < ApplicationController
       next if value.nil? || value.blank? || ['none', 'n/a', 'no', '.', '-', ' '].include?(value.try(:downcase))
       next if field.label.downcase == 'race' && value.downcase == 'human'
 
-      "#{field.label}: #{value.gsub(',', '').gsub("\r", "").gsub("\n", " ")}"
+      "(#{value.gsub(',', '').gsub("\r", "").gsub("\n", " ")} #{field.label})"
     end
     prompt = [
       gender_value,
