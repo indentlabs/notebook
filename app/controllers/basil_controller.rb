@@ -48,10 +48,10 @@ class BasilController < ApplicationController
     gender_value = Attribute.find_by(attribute_field_id: gender_field.id, entity: @character).try(:value)
 
     age_field = @character.overview_field('Age')
-    @age_value = Attribute.find_by(attribute_field_id: age_field.id, entity: @character).try(:value)
+    age_value = Attribute.find_by(attribute_field_id: age_field.id, entity: @character).try(:value)
 
-    if @age_value.present? && @age_value.to_i.to_s == @age_value
-      @age_value = "#{@age_value} years old"
+    if age_value.present? && age_value.to_i.to_s == age_value
+      age_value = "#{age_value} years old"
     end
 
     formatted_field_values = appearance_fields.map do |field|
