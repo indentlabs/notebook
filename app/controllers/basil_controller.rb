@@ -1,6 +1,8 @@
 class BasilController < ApplicationController
   before_action :authenticate_user!, except: [:complete_commission]
 
+  before_action :require_admin_access, only: [:review], unless: -> { Rails.env.development? }
+
   def index
     @characters = @current_user_content['Character']
   end
@@ -28,6 +30,14 @@ class BasilController < ApplicationController
 
     @commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id).order('id DESC')
     @can_request_another = @commissions.all? { |c| c.complete? }
+  end
+
+  def info
+
+  end
+
+  def review
+    @recent_commissions = BasilCommission.all.includes(:entity, :user).order('id DESC').limit(500)
   end
 
   def commission_character
@@ -58,7 +68,7 @@ class BasilController < ApplicationController
       value = attributes.detect { |a| a.attribute_field_id == field.id }.try(:value)
       next if value.nil? || value.blank? || ['none', 'n/a', 'no', '.', '-', ' '].include?(value.try(:downcase))
 
-      "#{value.gsub(',', ' ')} #{field.label}"
+      "#{value.gsub(',', '')} #{field.label}"
     end
     prompt = [
       gender_value,

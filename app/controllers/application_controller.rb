@@ -22,6 +22,12 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def require_admin_access
+    unless user_signed_in? && current_user.site_administrator
+      return redirect_to root_path, notice: "You don't have permission to view that!"
+    end
+  end
+
   def set_metadata
     @page_title       ||= ''
     @page_keywords    ||= %w[writing author nanowrimo novel character fiction fantasy universe creative dnd roleplay game design]

@@ -9,6 +9,9 @@ Rails.application.routes.draw do
       get '/character/:id/commission', to: 'basil#commission_character', as: :basil_commission_character
 
       get '/complete/:jobid', to: 'basil#complete_commission'
+
+      get '/info', to: 'basil#info'
+      get '/review', to: 'basil#review'
     end
   end
 

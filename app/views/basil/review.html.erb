@@ -1,0 +1,47 @@
+<% @recent_commissions.each do |commission| %>
+  <div>
+    <% if commission.complete? %>
+      <%# image_tag commission.image, style: 'width: 100%' %>
+      <%
+        s3 = Aws::S3::Resource.new(region: "us-east-1")
+        obj = s3.bucket("basil-characters").object("job-#{commission.job_id}.png")
+      %>
+      <div class="card horizontal">
+        <div class="card-image">
+          <%= link_to obj.presigned_url(:get) do %>
+            <%= image_tag obj.presigned_url(:get) %>
+          <% end %>
+        </div>
+        <div class="card-stacked">
+          <div class="card-content">
+            <div>
+              <strong><%= link_to commission.entity.name, commission.entity %></strong>
+              by <%= link_to commission.user.name, commission.user %>
+              <div style="font-size: 0.5em"><%= commission.job_id %></div>
+            </div>
+            <ul>
+              <li>
+                Completed <%= time_ago_in_words commission.completed_at %> ago
+              </li>
+              <li>
+                Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %>
+              </li>
+              <hr />
+              <li>
+                <div>Preprompt:</div>
+                <%= commission.prompt.inspect %>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <div class="card-panel green white-text darken-4">
+        Basil is still working on this commission...
+        <div style="font-size: 0.8em">
+          (Requested <%= time_ago_in_words(commission.created_at) %> ago)
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
