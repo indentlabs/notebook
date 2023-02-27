@@ -64,12 +64,8 @@ class BasilController < ApplicationController
     gender_value = Attribute.find_by(attribute_field_id: gender_field.id, entity: @character).try(:value)
     if gender_value.present?
       gender_importance = params.dig(:field, gender_field.id.to_s)
+      gender_importance = gender_importance.to_f if gender_importance.present?
       
-      # Add 1 because we present weight to the user as -1 to 1, but it's really 0 to 2 for Stable Diffusion.
-      if gender_importance.present?
-        gender_importance = gender_importance.to_f + 1
-      end
-
       if gender_importance == 1
         # If the importance is exactly 1, we can omit the parentheses and save a few tokens, since the
         # default attention importance is 1.
@@ -92,11 +88,7 @@ class BasilController < ApplicationController
       end
 
       age_importance = params.dig(:field, age_field.id.to_s)
-      
-      # Add 1 because we present weight to the user as -1 to 1, but it's really 0 to 2 for Stable Diffusion.
-      if age_importance.present?
-        age_importance = age_importance.to_f + 1
-      end
+      age_importance = age_importance.to_f if age_importance.present?
 
       if age_importance == 1
         prompt_components.push age_value
@@ -118,7 +110,7 @@ class BasilController < ApplicationController
 
       # Get the importance of this field and add 1 to get back to our SD version
       importance = params.dig(:field, field.id.to_s)
-      importance = importance.to_f + 1 if importance.present?
+      importance = importance.to_f if importance.present?
 
       # If the importance is exactly 1, we can omit the parentheses and save a few tokens, since the
       # default attention importance is 1.
