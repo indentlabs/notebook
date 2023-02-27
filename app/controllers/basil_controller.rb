@@ -108,6 +108,12 @@ class BasilController < ApplicationController
       # If the field is something implied like a "Human" answer on "Race", skip it.
       next if field.label.downcase == 'race' && value.downcase == 'human'
 
+      # We also want to do a little sanitizing of our field value.
+      # We'll remove periods, newlines, and carriage returns, since they can mess up the prompt.
+      value = value.gsub('.', ' ').gsub("\r", "").gsub("\n", " ")
+      # We also remove parentheses, since they can mess up the prompt attention groups.
+      value = value.gsub('(', '').gsub(')', '')
+
       # Get the importance of this field and add 1 to get back to our SD version
       importance = params.dig(:field, field.id.to_s)
       importance = importance.to_f if importance.present?
