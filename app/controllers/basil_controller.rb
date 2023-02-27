@@ -23,10 +23,14 @@ class BasilController < ApplicationController
     )
 
     @gender_field = @character.overview_field('Gender')
-    @gender_value = Attribute.find_by(attribute_field_id: @gender_field.id, entity: @character).try(:value)
+    if @gender_field
+      @gender_value = Attribute.find_by(attribute_field_id: @gender_field.id, entity: @character).try(:value)
+    end
 
     @age_field = @character.overview_field('Age')
-    @age_value = Attribute.find_by(attribute_field_id: @age_field.id, entity: @character).try(:value)
+    if @age_field
+      @age_value = Attribute.find_by(attribute_field_id: @age_field.id, entity: @character).try(:value)
+    end
 
     @commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id).order('id DESC')
     @can_request_another = @commissions.all? { |c| c.complete? }
@@ -61,40 +65,44 @@ class BasilController < ApplicationController
 
     # Step 1. Gender
     gender_field = @character.overview_field('Gender')
-    gender_value = Attribute.find_by(attribute_field_id: gender_field.id, entity: @character).try(:value)
-    if gender_value.present?
-      gender_importance = params.dig(:field, gender_field.id.to_s)
-      gender_importance = gender_importance.to_f if gender_importance.present?
-      
-      if gender_importance == 1
-        # If the importance is exactly 1, we can omit the parentheses and save a few tokens, since the
-        # default attention importance is 1.
-        prompt_components.push gender_value
-      elsif gender_importance != 0
-        # We also want to skip adding gender to the prompt at all if the user marked it as completely unimportant (-1 + 1 = 0)
-        prompt_components.push "(#{gender_value}:#{gender_importance})"
+    if gender_field
+      gender_value = Attribute.find_by(attribute_field_id: gender_field.id, entity: @character).try(:value)
+      if gender_value.present?
+        gender_importance = params.dig(:field, gender_field.id.to_s)
+        gender_importance = gender_importance.to_f if gender_importance.present?
+        
+        if gender_importance == 1
+          # If the importance is exactly 1, we can omit the parentheses and save a few tokens, since the
+          # default attention importance is 1.
+          prompt_components.push gender_value
+        elsif gender_importance != 0
+          # We also want to skip adding gender to the prompt at all if the user marked it as completely unimportant (-1 + 1 = 0)
+          prompt_components.push "(#{gender_value}:#{gender_importance})"
+        end
       end
     end
 
     # Step 2. Age
     age_field = @character.overview_field('Age')
-    age_value = Attribute.find_by(attribute_field_id: age_field.id, entity: @character).try(:value)
+    if age_field
+      age_value = Attribute.find_by(attribute_field_id: age_field.id, entity: @character).try(:value)
 
-    if age_value.present?
-      # If the user simply entered a number in for an age field, we want to help SD along by 
-      # giving it some context. Otherwise, we'll just use the value as-is.
-      if age_value.to_i.to_s == age_value
-        age_value = "#{age_value} years old"
-      end
+      if age_value.present?
+        # If the user simply entered a number in for an age field, we want to help SD along by 
+        # giving it some context. Otherwise, we'll just use the value as-is.
+        if age_value.to_i.to_s == age_value
+          age_value = "#{age_value} years old"
+        end
 
-      age_importance = params.dig(:field, age_field.id.to_s)
-      age_importance = age_importance.to_f if age_importance.present?
+        age_importance = params.dig(:field, age_field.id.to_s)
+        age_importance = age_importance.to_f if age_importance.present?
 
-      if age_importance == 1
-        prompt_components.push age_value
-      elsif age_importance != 0
-        # We also want to skip adding gender to the prompt at all if the user marked it as completely unimportant (-1 + 1 = 0)
-        prompt_components.push "(#{age_value}:#{age_importance})"
+        if age_importance == 1
+          prompt_components.push age_value
+        elsif age_importance != 0
+          # We also want to skip adding gender to the prompt at all if the user marked it as completely unimportant (-1 + 1 = 0)
+          prompt_components.push "(#{age_value}:#{age_importance})"
+        end
       end
     end
 
