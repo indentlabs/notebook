@@ -5,9 +5,12 @@ Rails.application.routes.draw do
   scope :ai, path: '/ai' do
     scope :basil do
       get '/', to: 'basil#index', as: :basil
+      
       get '/character/:id', to: 'basil#character', as: :basil_character
-      get '/character/:id/commission', to: 'basil#commission_character', as: :basil_commission_character
+      post '/character/:id', to: 'basil#commission'
+      #get '/character/:id/commission', to: 'basil#commission_character', as: :basil_commission_character
 
+      # TODO this should also be a POST
       get '/complete/:jobid', to: 'basil#complete_commission'
 
       get '/info', to: 'basil#info'

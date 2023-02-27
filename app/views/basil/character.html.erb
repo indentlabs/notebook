@@ -1,180 +1,212 @@
-<div class="row">
-  <div class="col s5">
-    <div>
-      <%= image_tag @character.random_image_including_private(format: :medium), style: 'width: 100%' %>
-      <h1 style="font-size: 2rem"><%= @character.name %></h1>
-    </div>
+<%= form_for BasilCommission.new, url: basil_character_path(@character) do |f| %>
+  <%= f.hidden_field :style, value: 'realistic' %>
+  <%= f.hidden_field :entity_type, value: 'Character' %>
+  <%= f.hidden_field :entity_id, value: @character.id %>
 
-    <ul>
-      <li style="margin-bottom: 1em">
-        <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
-          Gender
-        </div>
-        <div>
-          <%= @gender_value %>
-        </div>
-      </li>
+  <div class="row">
+    <div class="col s5">
+      <div>
+        <%= image_tag @character.random_image_including_private(format: :medium), style: 'width: 100%' %>
+        <h1 style="font-size: 2rem"><%= @character.name %></h1>
+      </div>
 
-      <li style="margin-bottom: 1em">
-        <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
-          Age
-        </div>
-        <div>
-          <%= @age_value %>
-        </div>
-      </li>
-
-      <% shown_any_value = false %>
-      <% @appearance_fields.each do |field| %>
-        <%
-          value = @attributes.detect { |attr| attr.attribute_field_id == field.id }.try(:value)
-          next if value.nil? || value.blank?
-          shown_any_value = true
-        %>
-        <li style="margin-bottom: 1em;">
+      <ul>
+        <li style="margin-bottom: 1em">
           <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
-            <%= field.label %>
+            Gender
+            <%= range_field_tag "field[#{@gender_field.id}]", 0, { min: -1, max: 1, step: 0.25, style: 'width: 50%', class: 'js-importance-slider hide' } %>
           </div>
           <div>
-            <%= value %>
+            <%= @gender_value %>
           </div>
         </li>
-      <% end %>
-    </ul>
 
-    <% if !shown_any_value %>
-      <div class="red card-panel lighten-3">
-        Basil works best with guidance! Please fill out some fields in the "Looks" category for this character
-        before requesting an image.
-      </div>
-    <% end %>
+        <li style="margin-bottom: 1em">
+          <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
+            Age
+            <%= range_field_tag "field[#{@age_field.id}]", 0, { min: -1, max: 1, step: 0.25, style: 'width: 50%', class: 'js-importance-slider hide' } %>
+          </div>
+          <div>
+            <%= @age_value %>
+          </div>
+        </li>
 
-    <div>
-      <%= link_to 'Edit this character page', edit_polymorphic_path(@character), class: 'grey-text text-darken-2' %>
-    </div>
-    <div>
-      <%= link_to 'Back to my other characters', basil_path, class: 'grey-text text-darken-2' %>
-    </div>
-  </div>
-
-  <div class="col s7">
-    <div class="card-panel" style="margin-top: 2em">
-      <p>
-        Basil is learning as fast as he can. Here are some tips and guidelines to get the most out of
-        him right now:
-      </p>
-      <p>
-        This is still a work in progress and very much a beta that will change a lot before releasing publicly,
-        but feel free to use it as much as you'd like to provide feedback!
-      </p>
-      <p>
-        If you run into any issues, please let me know <%# in the %>
-        <%# link_to 'Site Support forums', 'https://www.notebook.ai/forum/site-support' %>
-        <%# or %> <%= link_to 'on Discord', 'https://discord.gg/7WCuGxY3AW' %>.
-      </p>
-    </div>
-
-    <% if @can_request_another && shown_any_value %>
-      <div class="center">
-        To request Basil create an image of <%= @character.name %>, choose your desired style.
-      </div>
-      <div class="row">
-        <div class="col s12 m4 l4">
-          <%= link_to basil_commission_character_path(@character, style: 'realistic') do %>
-            <div class="hoverable card-panel blue white-text">
-              <i class="material-icons left">photo</i>
-              Photograph
-            </div>
-          <% end %>
-        </div>
-        <div class="col s12 m4 l4">
-          <%= link_to basil_commission_character_path(@character, style: 'painting') do %>
-            <div class="hoverable card-panel blue white-text">
-              <i class="material-icons left">palette</i>
-              Painting
-            </div>
-          <% end %>
-        </div>
-        <div class="col s12 m4 l4">
-          <%= link_to basil_commission_character_path(@character, style: 'sketch') do %>
-            <div class="hoverable card-panel blue white-text">
-              <i class="material-icons left">edit</i>
-              Sketch
-            </div>
-          <% end %>
-        </div>
-        <div class="col s12 m4 l4">
-          <%= link_to basil_commission_character_path(@character, style: 'digital') do %>
-            <div class="hoverable card-panel blue white-text">
-              <i class="material-icons left">brush</i>
-              Digital art
-            </div>
-          <% end %>
-        </div>
-        <div class="col s12 m4 l4">
-          <%= link_to basil_commission_character_path(@character, style: 'anime') do %>
-            <div class="hoverable card-panel blue white-text">
-              <i class="material-icons left">face</i>
-              Anime
-            </div>
-          <% end %>
-        </div>
-        <div class="col s12 m4 l4">
-          <%= link_to basil_commission_character_path(@character, style: 'abstract') do %>
-            <div class="hoverable card-panel blue white-text">
-              <i class="material-icons left">supervised_user_circle</i>
-              Abstract
-            </div>
-          <% end %>
-        </div>
-      </div>
-
-      
-    <% end %>
-
-    <% @commissions.each do |commission| %>
-      <div>
-        <% if commission.complete? %>
-          <%# image_tag commission.image, style: 'width: 100%' %>
+        <% shown_any_value = false %>
+        <% @appearance_fields.each do |field| %>
           <%
-            s3 = Aws::S3::Resource.new(region: "us-east-1")
-            obj = s3.bucket("basil-characters").object("job-#{commission.job_id}.png")
+            value = @attributes.detect { |attr| attr.attribute_field_id == field.id }.try(:value)
+            next if value.nil? || value.blank?
+            shown_any_value = true
           %>
-          <div class="card horizontal">
-            <div class="card-image">
-              <%= link_to obj.presigned_url(:get) do %>
-                <%= image_tag obj.presigned_url(:get) %>
-              <% end %>
+          <li style="margin-bottom: 1em;">
+            <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
+              <%= field.label %>
+              <%= range_field_tag "field[#{field.id}]", 0, { min: -1, max: 1, step: 0.25, style: 'width: 50%', class: 'js-importance-slider hide' } %>
             </div>
-            <div class="card-stacked">
-              <div class="card-content">
-                <strong><%= @character.name %></strong>
-                <ul>
-                  <li>
-                    Completed <%= time_ago_in_words commission.completed_at %> ago
-                  </li>
-                  <li>
-                    Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %>
-                  </li>
-                  <hr />
-                  <li>
-                    You can click on the image to download it. Congratulations, it's yours now!
-                    Feel free to upload it to your character's page if you want to keep and/or use it.
-                  </li>
-                </ul>
+            <div>
+              <%= value %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+
+      <% if !shown_any_value %>
+        <div class="red card-panel lighten-3">
+          Basil works best with guidance! Please fill out some fields in the "Looks" category for this character
+          before requesting an image.
+        </div>
+      <% end %>
+
+      <div>
+        <%= link_to 'Customize per-field importance', "javascript:var sliders = document.getElementsByClassName('js-importance-slider'); for(var i = 0; i < sliders.length; i++) sliders.item(i).classList.remove('hide')" %>
+
+        <div class="card-panel js-importance-slider hide" style="margin-right: 1em">
+          <strong>How to customize per-field importance</strong>
+          <br /><br />
+
+          This allows you to tell Basil which fields are more or less important to you. For example, if Basil isn't
+          getting a character's hair color right, you can increase the importance of the "Hair Color" field.
+          <br /><br />
+          You can also tell Basil to ignore a field entirely by dragging the slider all the way to the left.
+        </div>
+      </div>
+      <br /><br />
+      <div>
+        <%= link_to 'Edit this character page', edit_polymorphic_path(@character), class: 'grey-text text-darken-2' %>
+      </div>
+      <div>
+        <%= link_to 'Back to my other characters', basil_path, class: 'grey-text text-darken-2' %>
+      </div>
+    </div>
+
+    <div class="col s7">
+      <div class="card-panel" style="margin-top: 2em">
+        <p>
+          Basil is learning as fast as he can. Here are some tips and guidelines to get the most out of
+          him right now:
+        </p>
+        <p>
+          This is still a work in progress and very much a beta that will change a lot before releasing publicly,
+          but feel free to use it as much as you'd like to provide feedback!
+        </p>
+        <p>
+          If you run into any issues, please let me know <%# in the %>
+          <%# link_to 'Site Support forums', 'https://www.notebook.ai/forum/site-support' %>
+          <%# or %> <%= link_to 'on Discord', 'https://discord.gg/7WCuGxY3AW' %>.
+        </p>
+      </div>
+
+      <% if @can_request_another && shown_any_value %>
+        <div class="center">
+          To request Basil create an image of <%= @character.name %>, choose your desired style.
+        </div>
+        <div class="row">
+          <div class="col s12 m4 l4">
+            <%= link_to 'javascript:commission_basil("realistic")' do %>
+              <div class="hoverable card-panel blue white-text">
+                <i class="material-icons left">photo</i>
+                Photograph
+              </div>
+            <% end %>
+          </div>
+          <div class="col s12 m4 l4">
+            <%= link_to 'javascript:commission_basil("painting")' do %>
+              <div class="hoverable card-panel blue white-text">
+                <i class="material-icons left">palette</i>
+                Painting
+              </div>
+            <% end %>
+          </div>
+          <div class="col s12 m4 l4">
+            <%= link_to 'javascript:commission_basil("sketch")' do %>
+              <div class="hoverable card-panel blue white-text">
+                <i class="material-icons left">edit</i>
+                Sketch
+              </div>
+            <% end %>
+          </div>
+          <div class="col s12 m4 l4">
+            <%= link_to 'javascript:commission_basil("digital")' do %>
+              <div class="hoverable card-panel blue white-text">
+                <i class="material-icons left">brush</i>
+                Digital art
+              </div>
+            <% end %>
+          </div>
+          <div class="col s12 m4 l4">
+            <%= link_to 'javascript:commission_basil("anime")' do %>
+              <div class="hoverable card-panel blue white-text">
+                <i class="material-icons left">face</i>
+                Anime
+              </div>
+            <% end %>
+          </div>
+          <div class="col s12 m4 l4">
+            <%= link_to 'javascript:commission_basil("abstract")' do %>
+              <div class="hoverable card-panel blue white-text">
+                <i class="material-icons left">supervised_user_circle</i>
+                Abstract
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        
+      <% end %>
+
+      <% @commissions.each do |commission| %>
+        <div>
+          <% if commission.complete? %>
+            <%# image_tag commission.image, style: 'width: 100%' %>
+            <%
+              s3 = Aws::S3::Resource.new(region: "us-east-1")
+              obj = s3.bucket("basil-characters").object("job-#{commission.job_id}.png")
+            %>
+            <div class="card horizontal">
+              <div class="card-image">
+                <%= link_to obj.presigned_url(:get) do %>
+                  <%= image_tag obj.presigned_url(:get) %>
+                <% end %>
+              </div>
+              <div class="card-stacked">
+                <div class="card-content">
+                  <strong><%= @character.name %></strong>
+                  <ul>
+                    <li>
+                      Completed <%= time_ago_in_words commission.completed_at %> ago
+                    </li>
+                    <li>
+                      Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %>
+                    </li>
+                    <hr />
+                    <li>
+                      You can click on the image to download it. Congratulations, it's yours now!
+                      Feel free to upload it to your character's page if you want to keep and/or use it.
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
-          </div>
-        <% else %>
-          <div class="card-panel green white-text darken-4">
-            Basil is still working on this commission...
-            <div style="font-size: 0.8em">
-              (Requested <%= time_ago_in_words(commission.created_at) %> ago)
+          <% else %>
+            <div class="card-panel green white-text darken-4">
+              Basil is still working on this commission...
+              <div style="font-size: 0.8em">
+                (Requested <%= time_ago_in_words(commission.created_at) %> ago)
+              </div>
             </div>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
   </div>
-</div>
+<% end %>
 
+<script type="text/javascript">
+function commission_basil(style) {
+  // Set style hidden value to our selected style
+  $('#basil_commission_style').val(style);
+
+  // Submit form to start the commission
+  $('#new_basil_commission').submit();
+}
+</script>
