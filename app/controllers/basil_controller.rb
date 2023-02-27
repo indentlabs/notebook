@@ -139,7 +139,7 @@ class BasilController < ApplicationController
       entity_type: 'Character',
       entity_id:   @character.id,
       prompt:      prompt,
-      style:       params.fetch('style', 'realistic'),
+      style:       params[:basil_commission][:style],
       job_id:      SecureRandom.uuid
     )
 
