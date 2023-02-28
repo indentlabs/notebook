@@ -4,8 +4,6 @@ class BasilCommission < ApplicationRecord
 
   has_one_attached :image, dependent: :destroy
 
-  serialize :final_settings, JSON
-
   after_create :submit_to_job_queue!
   def submit_to_job_queue!
     # TODO clean this up and put it in a config
