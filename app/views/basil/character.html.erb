@@ -11,7 +11,7 @@
       </div>
 
       <ul>
-        <% if @gender_field %>
+        <% if @gender_field && @gender_value %>
           <li style="margin-bottom: 1em">
             <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
               Gender
@@ -23,7 +23,7 @@
           </li>
         <% end %>
 
-        <% if @age_field %>
+        <% if @age_field && @gender_value %>
           <li style="margin-bottom: 1em">
             <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
               Age
@@ -62,7 +62,9 @@
       <% end %>
 
       <div>
-        <%= link_to 'Customize per-field importance', "javascript:var sliders = document.getElementsByClassName('js-importance-slider'); for(var i = 0; i < sliders.length; i++) sliders.item(i).classList.remove('hide')" %>
+        <% if @can_request_another %>
+          <%= link_to 'Customize per-field importance', "javascript:var sliders = document.getElementsByClassName('js-importance-slider'); for(var i = 0; i < sliders.length; i++) sliders.item(i).classList.remove('hide')" %>
+        <% end %>
 
         <div class="card-panel js-importance-slider hide" style="margin-right: 1em">
           <strong>How to customize per-field importance</strong>

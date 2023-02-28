@@ -106,6 +106,12 @@ class BasilController < ApplicationController
       end
     end
 
+    field_importance_multipliers = {
+      'hair color': 1.4,
+      'hair style': 1.2,
+      'skin tone':  1.3
+    }
+
     # Step 3. Do it all again for every other field, too
     formatted_field_values = appearance_fields.map do |field|
       value = attributes.detect { |a| a.attribute_field_id == field.id }.try(:value)
@@ -123,8 +129,9 @@ class BasilController < ApplicationController
       value = value.gsub('(', '').gsub(')', '')
 
       # Get the importance of this field and add 1 to get back to our SD version
-      importance = params.dig(:field, field.id.to_s)
-      importance = importance.to_f if importance.present?
+      importance = params.dig(:field, field.id.to_s) || 1.0
+      importance = importance.to_f * field_importance_multipliers.fetch(field.label.downcase.to_sym, 1.0)
+      importance = importance.round(2)
 
       # If the importance is exactly 1, we can omit the parentheses and save a few tokens, since the
       # default attention importance is 1.
