@@ -107,11 +107,11 @@ class BasilController < ApplicationController
     end
 
     field_importance_multipliers = {
-      'hair':       1.4,
-      'hair color': 1.4,
-      'hair style': 1.2,
-      'skin tone':  1.3,
-      'race':       1.3
+      'hair':       1.2,
+      'hair color': 1.2,
+      'hair style': 1.1,
+      'skin tone':  1.1,
+      'race':       1.1
     }
 
     # Step 3. Do it all again for every other field, too
