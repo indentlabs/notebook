@@ -109,9 +109,10 @@ class BasilController < ApplicationController
     field_importance_multipliers = {
       'hair':       1.15,
       'hair color': 1.15,
-      'hair style': 1.05,
+      'hair style': 1.10,
       'skin tone':  1.05,
-      'race':       1.10
+      'race':       1.10,
+      'eye color':  1.05,
     }
 
     # Step 3. Do it all again for every other field, too
@@ -119,7 +120,7 @@ class BasilController < ApplicationController
       value = attributes.detect { |a| a.attribute_field_id == field.id }.try(:value)
 
       # If there is no value to this field (or looks like it doesn't apply), skip it.
-      next if value.nil? || value.blank? || ['none', 'n/a', 'no', '.', '-', ' '].include?(value.try(:downcase))
+      next if value.nil? || value.blank? || ['none', 'n/a', 'no', '.', '-', ' ', '?', '??', '???'].include?(value.try(:downcase))
 
       # If the field is something implied like a "Human" answer on "Race", skip it.
       next if field.label.downcase == 'race' && value.downcase == 'human'
@@ -134,6 +135,10 @@ class BasilController < ApplicationController
       importance = params.dig(:field, field.id.to_s) || 1.0
       importance = importance.to_f * field_importance_multipliers.fetch(field.label.downcase.to_sym, 1.0)
       importance = importance.round(2)
+
+      # Lastly, we also do a little sanitation on the label
+      label = field.label.downcase
+      label = '' if label == 'identifying marks'
 
       # If the importance is exactly 1, we can omit the parentheses and save a few tokens, since the
       # default attention importance is 1.
