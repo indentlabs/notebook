@@ -108,7 +108,7 @@ class BasilController < ApplicationController
 
     field_importance_multipliers = {
       'hair':       1.15,
-      'hair color': 1.15,
+      'hair color': 1.55,
       'hair style': 1.10,
       'skin tone':  1.05,
       'race':       1.10,
