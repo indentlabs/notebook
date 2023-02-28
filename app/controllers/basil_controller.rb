@@ -45,7 +45,7 @@ class BasilController < ApplicationController
   end
 
   def review
-    @recent_commissions = BasilCommission.all.includes(:entity, :user).order('id DESC').limit(500)
+    @recent_commissions = BasilCommission.all.includes(:entity, :user).order('id DESC').limit(100)
   end
 
   def commission
@@ -107,11 +107,11 @@ class BasilController < ApplicationController
     end
 
     field_importance_multipliers = {
-      'hair':       1.2,
-      'hair color': 1.2,
-      'hair style': 1.1,
-      'skin tone':  1.1,
-      'race':       1.1
+      'hair':       1.15,
+      'hair color': 1.15,
+      'hair style': 1.05,
+      'skin tone':  1.05,
+      'race':       1.10
     }
 
     # Step 3. Do it all again for every other field, too
