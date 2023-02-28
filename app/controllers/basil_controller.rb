@@ -32,7 +32,7 @@ class BasilController < ApplicationController
       @age_value = Attribute.find_by(attribute_field_id: @age_field.id, entity: @character).try(:value)
     end
 
-    @commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id).order('id DESC')
+    @commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id).order('id DESC').limit(20)
     @can_request_another = @commissions.all? { |c| c.complete? }
   end
 
