@@ -121,7 +121,7 @@ class BasilController < ApplicationController
       value = attributes.detect { |a| a.attribute_field_id == field.id }.try(:value)
 
       # If there is no value to this field (or looks like it doesn't apply), skip it.
-      next if value.nil? || value.blank? || ['none', 'n/a', 'no', '.', '-', ' ', '?', '??', '???'].include?(value.try(:downcase))
+      next if value.nil? || value.blank? || ['none', 'n/a', '.', '-', ' ', '?', '??', '???'].include?(value.try(:downcase))
 
       # If the field is something implied like a "Human" answer on "Race", skip it.
       next if field.label.downcase == 'race' && value.downcase == 'human'
