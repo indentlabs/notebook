@@ -113,6 +113,7 @@ class BasilController < ApplicationController
       'skin tone':  1.05,
       'race':       1.10,
       'eye color':  1.05,
+      'gender':     1.15
     }
 
     # Step 3. Do it all again for every other field, too
