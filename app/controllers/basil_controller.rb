@@ -66,7 +66,7 @@ class BasilController < ApplicationController
     # Step 1. Gender
     gender_field = @character.overview_field('Gender')
     if gender_field
-      gender_value = Attribute.find_by(attribute_field_id: gender_field.id, entity: @character).try(:value)
+      gender_value = Attribute.find_by(attribute_field_id: gender_field.id, entity: @character).try(:value).try(:strip)
       if gender_value.present?
         gender_importance = params.dig(:field, gender_field.id.to_s)
         gender_importance = gender_importance.to_f if gender_importance.present?
@@ -85,7 +85,7 @@ class BasilController < ApplicationController
     # Step 2. Age
     age_field = @character.overview_field('Age')
     if age_field
-      age_value = Attribute.find_by(attribute_field_id: age_field.id, entity: @character).try(:value)
+      age_value = Attribute.find_by(attribute_field_id: age_field.id, entity: @character).try(:value).try(:strip)
 
       if age_value.present?
         # If the user simply entered a number in for an age field, we want to help SD along by 
@@ -130,6 +130,7 @@ class BasilController < ApplicationController
       value = value.gsub('.', ' ').gsub("\r", "").gsub("\n", " ")
       # We also remove parentheses, since they can mess up the prompt attention groups.
       value = value.gsub('(', '').gsub(')', '')
+      value = value.strip
 
       # Get the importance of this field and add 1 to get back to our SD version
       importance = params.dig(:field, field.id.to_s) || 1.0
@@ -171,8 +172,8 @@ class BasilController < ApplicationController
   def complete_commission
     commission = BasilCommission.find_by(job_id: params[:jobid])
     commission.update(
-      completed_at: DateTime.current,
-      final_settings: params[:settings]
+      completed_at:   DateTime.current,
+      final_settings: params
     )
 
     # TODO: we should attach the S3 object to the commission.image attachment
