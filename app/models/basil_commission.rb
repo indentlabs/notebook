@@ -4,6 +4,8 @@ class BasilCommission < ApplicationRecord
 
   has_one_attached :image, dependent: :destroy
 
+  has_many :basil_feedbacks, dependent: :destroy
+
   after_create :submit_to_job_queue!
   def submit_to_job_queue!
     # TODO clean this up and put it in a config

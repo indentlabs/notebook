@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_02_28_210338) do
+ActiveRecord::Schema.define(version: 2023_03_02_185532) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -199,6 +199,27 @@ ActiveRecord::Schema.define(version: 2023_02_28_210338) do
     t.json "final_settings"
     t.index ["entity_type", "entity_id"], name: "index_basil_commissions_on_entity"
     t.index ["user_id"], name: "index_basil_commissions_on_user_id"
+  end
+
+  create_table "basil_feedbacks", force: :cascade do |t|
+    t.integer "basil_commission_id", null: false
+    t.integer "user_id", null: false
+    t.integer "score_adjustment"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["basil_commission_id"], name: "index_basil_feedbacks_on_basil_commission_id"
+    t.index ["user_id"], name: "index_basil_feedbacks_on_user_id"
+  end
+
+  create_table "basil_field_guidances", force: :cascade do |t|
+    t.string "entity_type", null: false
+    t.integer "entity_id", null: false
+    t.integer "user_id", null: false
+    t.json "guidance"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["entity_type", "entity_id"], name: "index_basil_field_guidances_on_entity"
+    t.index ["user_id"], name: "index_basil_field_guidances_on_user_id"
   end
 
   create_table "best_friendships", force: :cascade do |t|
@@ -3710,6 +3731,9 @@ ActiveRecord::Schema.define(version: 2023_02_28_210338) do
   add_foreign_key "api_requests", "integration_authorizations"
   add_foreign_key "application_integrations", "users"
   add_foreign_key "basil_commissions", "users"
+  add_foreign_key "basil_feedbacks", "basil_commissions"
+  add_foreign_key "basil_feedbacks", "users"
+  add_foreign_key "basil_field_guidances", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
   add_foreign_key "character_birthtowns", "characters"

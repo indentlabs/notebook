@@ -32,8 +32,12 @@ class BasilController < ApplicationController
       @age_value = Attribute.find_by(attribute_field_id: @age_field.id, entity: @character).try(:value)
     end
 
-    @commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id).order('id DESC').limit(20)
-    @can_request_another = @commissions.all? { |c| c.complete? }
+    @commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id)
+                                  .order('id DESC')
+                                  .limit(20)
+                                  .includes(:basil_feedbacks)
+    @in_progress_commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id, completed_at: nil)
+    @can_request_another = @in_progress_commissions.count <= 3
   end
 
   def info
@@ -199,5 +203,14 @@ class BasilController < ApplicationController
     # raise params.inspect
 
     render json: { success: true }
+  end
+
+  def feedback
+    commission = BasilCommission.find_by(job_id: params[:jobid])
+    score_adjustment = params[:basil_feedback][:score_adjustment].to_i
+    score_adjustment = score_adjustment.clamp(-2, 2)
+
+    feedback = commission.basil_feedbacks.find_or_initialize_by(user: current_user)
+    feedback.update!(score_adjustment: score_adjustment)
   end
 end

@@ -6,9 +6,10 @@ Rails.application.routes.draw do
     scope :basil do
       get '/', to: 'basil#index', as: :basil
       
-      get '/character/:id', to: 'basil#character', as: :basil_character
-      post '/character/:id', to: 'basil#commission'
+      get '/character/:id',    to: 'basil#character', as: :basil_character
+      post '/character/:id',   to: 'basil#commission'
       post '/complete/:jobid', to: 'basil#complete_commission'
+      post '/feedback/:jobid', to: 'basil#feedback', as: :basil_feedback
 
       get '/info', to: 'basil#info'
       get '/review', to: 'basil#review'
