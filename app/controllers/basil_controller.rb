@@ -185,9 +185,11 @@ class BasilController < ApplicationController
 
   def complete_commission
     commission = BasilCommission.find_by(job_id: params[:jobid])
+    return if commission.nil?
+
     commission.update(
       completed_at:   DateTime.current,
-      final_settings: params[:settings]
+      final_settings: JSON.parse(params.fetch(:settings, {}))
     )
 
     # TODO: we should attach the S3 object to the commission.image attachment
