@@ -231,13 +231,14 @@ class BasilController < ApplicationController
 
   def help_rate
     # Commissions without feedback:
-    reviewed_commission_ids = BasilFeedback.where(user: current_user)
+    @reviewed_commission_ids = BasilFeedback.where(user: current_user)
                                            .pluck(:basil_commission_id)
-    @commissions = BasilCommission.where.not(id: reviewed_commission_ids)
+    @commissions = BasilCommission.where.not(id: @reviewed_commission_ids)
                                   .where.not(completed_at: nil)
                                   .where(user: current_user)
                                   .order(created_at: :desc)
                                   .limit(50)
                                   .includes(:entity)
+                                  .shuffle
   end
 end

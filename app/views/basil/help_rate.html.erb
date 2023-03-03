@@ -2,17 +2,34 @@
   <%= link_to 'Back to Basil', basil_path %>
 </div>
 
-<div class="card-panel purple white-text">
-  <strong>You have <%= pluralize @commissions.count, 'generated images' %><%= '+' if @commissions.count == 50 %> without feedback.</strong>
-  Feedback is optional but helps Basil understand what he does well and what he could improve on.
-  You can refresh the page at any time to clear all the ones you've rated.
+<div class="row">
+  <div class="col s12 m4 l3">
+    <div class="center" style="margin-bottom: 2em">
+      <h1 style="margin-bottom: 0"><%= number_with_delimiter @reviewed_commission_ids.count %></h1>
+      <div class="grey-text text-darken-2">Images rated</div>
+    </div>
+  </div>
+
+  <div class="col s12 m8 l9">
+    <div class="card-panel purple white-text">
+      <div>
+        <strong>You have <%= pluralize @commissions.count, 'generated images' %><%= '+' if @commissions.count == 50 %> without feedback.</strong>
+      </div>
+      <p>
+        Feedback is optional but helps Basil understand what he does well and what he could improve on.
+        Below are 50 random images that haven't been rated. You can refresh the page at any time for 50 more.
+      </p>
+    </div>
+  </div>
 </div>
 
 <% if @commissions.empty? %>
   <div class="center" style="margin-top: 5em">
     <h1 class="font-size: 2em">Hurrah, inbox zero!</h1>
     <br />
-    <%= link_to "Request a commission", basil_path, class: "btn purple" %>
+    <p>
+      Your images will appear here when you have any that you haven't rated.
+    </p>
   </div>
 <% end %>
 
