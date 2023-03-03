@@ -80,8 +80,8 @@ class BasilController < ApplicationController
     end
 
     # Feedback all time
-    @feedback_all_time = BasilFeedback.group(:score_adjustment)
-                                      .count
+    @feedback_all_time = BasilFeedback.group(:score_adjustment).count
+    days_since_start = (Date.current - BasilFeedback.minimum(:updated_at).to_date)
     @emoji_counts_all_time = @feedback_all_time.map do |score, count|
       emoji = case score
         when -2 then "Very Bad :'("
@@ -92,7 +92,7 @@ class BasilController < ApplicationController
         when  3 then "Lovely! <3"
       end
 
-      [emoji, count]
+      [emoji, count / days_since_start]
     end
 
     # queue size (total commissions - completed commissions)
