@@ -55,20 +55,28 @@
   <div class="col s12 m8 l7">
     <%=
       column_chart [
-        { name: "Today",               data: @emoji_counts_today, },
-        { name: "Historical average",  data: @emoji_counts_all_time }
+        { name: "Historical average",  data: @emoji_counts_all_time },
+        { name: "Today",               data: @emoji_counts_today, }
       ],
-      colors: ['#C88ED2', '#2196F3'],
+      colors: ['#2196F3', '#C88ED2'],
       title: "Quality: #{number_with_delimiter @feedback_all_time.values.sum} #{'image'.pluralize @feedback_all_time.values.sum} rated"
     %>
   </div>
   <div class="col s12 m4 l5">
     <%=
       pie_chart @emoji_counts_today,
-        colors: ['#EF9A9A', '#FFCC80', '#CCCCCC' '#A5D6A7', '#90CAF9', '#FFCDD2'],
+        colors: ['#EF9A9A', '#FFCC80', '#CCCCCC' '#A5D6A7', '#90CAF9', '#4CAF50'],
         legend: 'right',
         donut: true,
         title: "Today's quality ratings"
     %>
+    <br /><br /><br />
+  </div>
+
+  <div class="col s12 m6">
+    <%= bar_chart @average_score_per_style, title: "Average quality score per style", min: -2, max: 2 %>
+  </div>
+  <div class="col s12 m6">
+    <%= bar_chart @total_score_per_style, title: "Total quality score per style" %>
   </div>
 </div>

@@ -100,6 +100,22 @@ class BasilController < ApplicationController
       [emoji, count / days_since_start]
     end
 
+    active_styles = %w(realistic painting sketch digital anime abstract painting2 horror pixel watercolor)
+    @total_score_per_style = BasilCommission.where(style: active_styles)
+                                              .joins(:basil_feedbacks)
+                                              .group(:style)
+                                              .sum(:score_adjustment)
+                                              .map { |style, average| [style, average.round(1)] }
+                                              .sort_by(&:second)
+                                              .reverse
+    @average_score_per_style = BasilCommission.where(style: active_styles)
+                                              .joins(:basil_feedbacks)
+                                              .group(:style)
+                                              .average(:score_adjustment)
+                                              .map { |style, average| [style, average.round(1)] }
+                                              .sort_by(&:second)
+                                              .reverse
+
     # queue size (total commissions - completed commissions)
     # average time to complete today / this week
     # commissions per day bar chart
