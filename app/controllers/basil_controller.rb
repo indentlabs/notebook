@@ -39,7 +39,7 @@ class BasilController < ApplicationController
                                   .limit(20)
                                   .includes(:basil_feedbacks)
     @in_progress_commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id, completed_at: nil)
-    @can_request_another = @in_progress_commissions.count <= 3
+    @can_request_another = @in_progress_commissions.count < 3
   end
 
   def info
