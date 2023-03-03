@@ -38,7 +38,7 @@
   </div>
   <div class="col s12 m8 l9">
     <%=
-      area_chart @commissions.group_by_day(:created_at),
+      area_chart @commissions.order(:created_at).group_by_day(:created_at).map { |date, count| [date.to_date, count] },
         colors: ['#9C27B0', '#2196F3'],
         title: 'Images created per day'
       %>

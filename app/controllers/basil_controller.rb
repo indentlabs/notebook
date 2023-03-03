@@ -65,6 +65,7 @@ class BasilController < ApplicationController
 
     # Feedback today
     @feedback_today = BasilFeedback.where('updated_at > ?', 24.hours.ago)
+                                   .order(:score_adjustment)
                                    .group(:score_adjustment)
                                    .count
     @emoji_counts_today = @feedback_today.map do |score, count|
@@ -80,7 +81,9 @@ class BasilController < ApplicationController
     end
 
     # Feedback all time
-    @feedback_all_time = BasilFeedback.group(:score_adjustment).count
+    @feedback_all_time = BasilFeedback.order(:score_adjustment)
+                                      .group(:score_adjustment)
+                                      .count
     days_since_start = (Date.current - BasilFeedback.minimum(:updated_at).to_date)
     days_since_start = 1 if days_since_start.zero? # no dividing by 0 lol
 
