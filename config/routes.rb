@@ -13,7 +13,8 @@ Rails.application.routes.draw do
 
       get '/help/rate',        to: 'basil#help_rate', as: :basil_rating_queue
 
-      get '/info', to: 'basil#info'
+      get '/about', to: 'basil#about'
+      get '/stats', to: 'basil#stats'
       get '/review', to: 'basil#review'
     end
   end

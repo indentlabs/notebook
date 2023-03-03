@@ -42,7 +42,11 @@ class BasilController < ApplicationController
     @can_request_another = @in_progress_commissions.count < 3
   end
 
-  def info
+  def about
+  end
+
+  def stats
+    @commissions = BasilCommission.all
     # total commissions
     # queue size (total commissions - completed commissions)
     # average time to complete today / this week
@@ -231,6 +235,7 @@ class BasilController < ApplicationController
                                            .pluck(:basil_commission_id)
     @commissions = BasilCommission.where.not(id: reviewed_commission_ids)
                                   .where.not(completed_at: nil)
+                                  .where(user: current_user)
                                   .order(created_at: :desc)
                                   .limit(50)
                                   .includes(:entity)
