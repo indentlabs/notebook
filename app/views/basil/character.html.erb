@@ -15,9 +15,16 @@ function commission_basil(style) {
     <%= f.hidden_field :entity_type, value: 'Character' %>
     <%= f.hidden_field :entity_id, value: @character.id %>
     <div class="col s12 m4">
-      <div>
+      <div style="margin: 1em 0">
+        <%= link_to basil_path, class: 'grey-text text-darken-2' do %>
+          <i class="material-icons left">chevron_left</i>
+          Back to my character list
+        <% end %>
+      </div>
+      <div class="clearfix">
         <%= image_tag @character.random_image_including_private(format: :medium), style: 'width: 100%' %>
-        <h1 style="font-size: 2rem"><%= @character.name %></h1>
+        <h1 style="font-size: 2rem; margin-bottom: 0"><%= link_to @character.name, @character %></h1>
+        <%= link_to 'Edit this character page', edit_polymorphic_path(@character), class: 'grey-text text-darken-2' %>
       </div>
 
       <ul>
@@ -25,7 +32,7 @@ function commission_basil(style) {
           <li style="margin-bottom: 1em">
             <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
               Gender
-              <%= range_field_tag "field[#{@gender_field.id}]", 1, { min: 0, max: 1.3, step: 0.1, style: 'width: 50%', class: 'js-importance-slider hide' } %>
+              <%= range_field_tag "field[#{@gender_field.id}]", @guidance.fetch(@gender_field.id.to_s, 1), { min: 0, max: 1.3, step: 0.1, style: 'width: 50%', class: 'js-importance-slider hide' } %>
             </div>
             <div>
               <%= @gender_value %>
@@ -37,7 +44,7 @@ function commission_basil(style) {
           <li style="margin-bottom: 1em">
             <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
               Age
-              <%= range_field_tag "field[#{@age_field.id}]", 1, { min: 0, max: 1.3, step: 0.1, style: 'width: 50%', class: 'js-importance-slider hide' } %>
+              <%= range_field_tag "field[#{@age_field.id}]", @guidance.fetch(@age_field.id.to_s, 1), { min: 0, max: 1.3, step: 0.1, style: 'width: 50%', class: 'js-importance-slider hide' } %>
             </div>
             <div>
               <%= @age_value %>
@@ -55,7 +62,7 @@ function commission_basil(style) {
           <li style="margin-bottom: 1em;">
             <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
               <%= field.label %>
-              <%= range_field_tag "field[#{field.id}]", 1, { min: 0, max: 1.3, step: 0.1, style: 'width: 50%', class: 'js-importance-slider hide' } %>
+              <%= range_field_tag "field[#{field.id}]", @guidance.fetch(field.id.to_s, 1), { min: 0, max: 1.3, step: 0.1, style: 'width: 50%', class: 'js-importance-slider hide' } %>
             </div>
             <div>
               <%= value %>
@@ -85,13 +92,6 @@ function commission_basil(style) {
           <br /><br />
           You can also tell Basil to ignore a field entirely by dragging the slider all the way to the left.
         </div>
-      </div>
-      <br /><br />
-      <div>
-        <%= link_to 'Edit this character page', edit_polymorphic_path(@character), class: 'grey-text text-darken-2' %>
-      </div>
-      <div>
-        <%= link_to 'Back to my other characters', basil_path, class: 'grey-text text-darken-2' %>
       </div>
 
       <div class="card-panel" style="margin-top: 2em">
@@ -202,15 +202,17 @@ function commission_basil(style) {
                   </div>
                 </div>
               </div>
+              <!--
               <div class="card-action">
                 <%= link_to "Save to #{@character.name}", '#', class: 'purple-text' %>
                 <%= link_to "Delete", '#', class: 'red-text right' %>
               </div>
+              -->
             </div>
           </div>
         <% else %>
           <div class="card-panel green white-text darken-4">
-            Basil is still working on this commission...
+            Basil is still working on this commission... (style: <%= commission.style %>)
             <div style="font-size: 0.8em">
               (Requested <%= time_ago_in_words(commission.created_at) %> ago)
             </div>

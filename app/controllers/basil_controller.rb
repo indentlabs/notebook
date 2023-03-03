@@ -9,6 +9,7 @@ class BasilController < ApplicationController
 
   def character
     @character = current_user.characters.find(params[:id])
+    @guidance  = BasilFieldGuidance.find_or_initialize_by(entity: @character, user: current_user).try(:guidance)
 
     category_ids = AttributeCategory.where(
       user_id: current_user.id,
@@ -161,6 +162,13 @@ class BasilController < ApplicationController
 
     prompt_components.concat formatted_field_values.compact
     prompt = prompt_components.join(', ')
+
+    # Save our field weights as the latest guidance also
+    guidance = BasilFieldGuidance.find_or_initialize_by(
+      entity: @character,
+      user:   current_user
+    )
+    guidance.update(guidance: params[:field])
 
     BasilCommission.create!(
       user:        current_user,
