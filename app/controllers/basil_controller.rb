@@ -100,7 +100,7 @@ class BasilController < ApplicationController
       [emoji, count / days_since_start]
     end
 
-    active_styles = %w(realistic painting sketch digital anime abstract painting2 horror pixel watercolor)
+    active_styles = %w(realistic painting sketch digital anime abstract painting2 horror watercolor)
     @total_score_per_style = BasilCommission.where(style: active_styles)
                                               .joins(:basil_feedbacks)
                                               .group(:style)
