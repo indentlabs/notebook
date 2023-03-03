@@ -8,8 +8,9 @@ class BasilController < ApplicationController
   end
 
   def character
-    @character = current_user.characters.find(params[:id])
-    @guidance  = BasilFieldGuidance.find_or_initialize_by(entity: @character, user: current_user).try(:guidance)
+    @character  = current_user.characters.find(params[:id])
+    @guidance   = BasilFieldGuidance.find_or_initialize_by(entity: @character, user: current_user).try(:guidance)
+    @guidance ||= {}
 
     category_ids = AttributeCategory.where(
       user_id: current_user.id,
