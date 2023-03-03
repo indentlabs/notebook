@@ -38,7 +38,7 @@
   </div>
   <div class="col s12 m8 l9">
     <%=
-      area_chart @commissions.group_by_day(:created_at),
+      area_chart @commissions.group_by_day(:created_at).map { |date, count| [date.to_date, count] },
         colors: ['#9C27B0', '#2196F3'],
         title: 'Images created per day'
       %>
@@ -65,7 +65,7 @@
   <div class="col s12 m4 l5">
     <%=
       pie_chart @emoji_counts_today,
-        colors: ['#EF9A9A', '#FFCC80', '#A5D6A7', '#90CAF9', '#FFCDD2'],
+        colors: ['#EF9A9A', '#FFCC80', '#DEDEDE' '#A5D6A7', '#90CAF9', '#00FF44'],
         legend: 'right',
         donut: true,
         title: "Today's quality ratings"

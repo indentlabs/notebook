@@ -68,6 +68,7 @@
               <div class="center" style="font-size: 0.9em"><strong>Feedback for Basil</strong></div>
               <div class="row">
                 <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), url: basil_feedback_path(commission.job_id), method: :POST, remote: true do |f| %>
+                  <% f.object.score_adjustment = nil if !f.object.persisted? %>
                   <div class="col s2 red lighten-3">
                     <label>
                       <%= f.radio_button :score_adjustment, '-2', { class: 'autosave-closest-form-on-change' } %>
