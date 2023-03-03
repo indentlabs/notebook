@@ -189,7 +189,7 @@ class BasilController < ApplicationController
 
     commission.update(
       completed_at:   DateTime.current,
-      final_settings: JSON.parse(params.fetch(:settings, {}))
+      final_settings: JSON.parse(params[:settings])
     )
 
     # TODO: we should attach the S3 object to the commission.image attachment
@@ -223,5 +223,16 @@ class BasilController < ApplicationController
 
     feedback = commission.basil_feedbacks.find_or_initialize_by(user: current_user)
     feedback.update!(score_adjustment: score_adjustment)
+  end
+
+  def help_rate
+    # Commissions without feedback:
+    reviewed_commission_ids = BasilFeedback.where(user: current_user)
+                                           .pluck(:basil_commission_id)
+    @commissions = BasilCommission.where.not(id: reviewed_commission_ids)
+                                  .where.not(completed_at: nil)
+                                  .order(created_at: :desc)
+                                  .limit(50)
+                                  .includes(:entity)
   end
 end

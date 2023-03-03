@@ -11,6 +11,8 @@ Rails.application.routes.draw do
       post '/complete/:jobid', to: 'basil#complete_commission'
       post '/feedback/:jobid', to: 'basil#feedback', as: :basil_feedback
 
+      get '/help/rate',        to: 'basil#help_rate', as: :basil_rating_queue
+
       get '/info', to: 'basil#info'
       get '/review', to: 'basil#review'
     end

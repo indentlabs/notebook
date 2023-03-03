@@ -1,0 +1,100 @@
+<div>
+  <%= link_to 'Back to Basil', basil_path %>
+</div>
+
+<div class="card-panel purple white-text">
+  <strong>You have <%= pluralize @commissions.count, 'generated images' %> without feedback.</strong>
+  Feedback is optional but helps Basil understand what he does well and what he could improve on.
+  You can refresh the page at any time to clear all the ones you've rated.
+</div>
+
+<% if @commissions.empty? %>
+  <div class="center" style="margin-top: 5em">
+    <h1 class="font-size: 2em">Hurrah, inbox zero!</h1>
+    <br />
+    <%= link_to "Request a commission", basil_path, class: "btn purple" %>
+  </div>
+<% end %>
+
+<% @commissions.each do |commission| %>
+  <div>
+    <% if commission.complete? %>
+      <%
+        s3 = Aws::S3::Resource.new(region: "us-east-1")
+        obj = s3.bucket("basil-characters").object("job-#{commission.job_id}.png")
+      %>
+      <div class="card horizontal">
+        <div class="card-image">
+          <%= link_to obj.presigned_url(:get) do %>
+            <%= image_tag obj.presigned_url(:get) %>
+          <% end %>
+        </div>
+        <div class="card-stacked">
+          <div class="card-content">
+            <div>
+              <strong><%= commission.entity.name %></strong>
+              <% if commission.style? %>
+                <em>(<%= commission.style.humanize %>)</em>
+              <% end %>
+            </div>
+            <div class="grey-text text-darken-2">
+              <span style="font-size: 0.8em">Completed <%= time_ago_in_words commission.completed_at %> ago</span>
+              &middot;<br />
+              <span style="font-size: 0.8em">Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %></span>
+            </div>
+            <div style="margin-top: 1em">
+              <div class="center" style="font-size: 0.9em"><strong>Feedback for Basil</strong></div>
+              <div class="row">
+                <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), url: basil_feedback_path(commission.job_id), method: :POST, remote: true do |f| %>
+                  <div class="col s2 red lighten-3">
+                    <label>
+                      <%= f.radio_button :score_adjustment, '-2', { class: 'autosave-closest-form-on-change' } %>
+                      <span class="black-text" style="font-size: 3em;">:'(</span>
+                    </label>
+                  </div>
+                  <div class="col s2 orange lighten-3">
+                    <label>
+                      <%= f.radio_button :score_adjustment, '-1', { class: 'autosave-closest-form-on-change' } %>
+                      <span class="black-text" style="font-size: 3em;">:(</span>
+                    </label>
+                  </div>
+                  <div class="col s2 grey lighten-3 black-text lighten-3">
+                    <label>
+                      <%= f.radio_button :score_adjustment, '-1', { class: 'autosave-closest-form-on-change' } %>
+                      <span class="black-text" style="font-size: 3em;">:|</span>
+                    </label>
+                  </div>
+                  <div class="col s2 green lighten-3">
+                    <label>
+                      <%= f.radio_button :score_adjustment, '1', { class: 'autosave-closest-form-on-change' } %>
+                      <span class="black-text" style="font-size: 3em;">:)</span>
+                    </label>
+                  </div>
+                  <div class="col s2 blue lighten-3">
+                    <label>
+                      <%= f.radio_button :score_adjustment, '2', { class: 'autosave-closest-form-on-change' } %>
+                      <span class="black-text" style="font-size: 3em;">:D</span>
+                    </label>
+                  </div>
+                  <div class="col s2 red lighten-4">
+                    <label>
+                      <%= f.radio_button :score_adjustment, '3', { class: 'autosave-closest-form-on-change' } %>
+                      <span class="red-text text-darken-4" style="font-size: 3em;">&hearts;<sub>u</sub>&hearts;</span>
+                    </label>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <div class="card-panel green white-text darken-4">
+        Basil is still working on this commission... (style: <%= commission.style %>)
+        <div style="font-size: 0.8em">
+          (Requested <%= time_ago_in_words(commission.created_at) %> ago)
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
