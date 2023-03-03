@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_03_02_185532) do
+ActiveRecord::Schema.define(version: 2023_03_03_073002) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -197,6 +197,7 @@ ActiveRecord::Schema.define(version: 2023_03_02_185532) do
     t.datetime "completed_at"
     t.string "style"
     t.json "final_settings"
+    t.float "cached_seconds_taken"
     t.index ["entity_type", "entity_id"], name: "index_basil_commissions_on_entity"
     t.index ["user_id"], name: "index_basil_commissions_on_user_id"
   end

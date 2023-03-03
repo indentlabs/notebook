@@ -12,8 +12,82 @@
 </div>
 
 <div class="row">
+
+  <div class="col s12 m3 l2">
+    <h1 class="center orange-text" style="margin-bottom: 0; margin-top: 1.6em"><%= number_with_delimiter @queued.count %></h1>
+    <div class="center grey-text text-darken-3"><strong>requests in queue</strong></div>    
+  </div>
+  <div class="col s12 m3 l2">
+    <h1 class="center orange-text" style="margin-bottom: 0; margin-top: 1.6em; font-size: 2.95em"><%= time_ago_in_words @average_wait_time.seconds.ago %></h1>
+    <div class="center grey-text text-darken-3">
+      <strong>average wait time<br />today</strong>
+    </div>    
+  </div>
+  <div class="col s12 m6 l8">
+    <div class="center grey-text text-darken-3"><strong>All wait times today (in minutes)</strong></div>
+    <%= bar_chart @seconds_over_time, colors: ['#EF6C00'], label: 'Images that took this long', xtitle: 'minutes' %>
+    <br /><br />
+  </div>
+
+  <div class="col s12 m4 l3">
+    <h1 class="center purple-text" style="margin-bottom: 0; margin-top: 1.6em"><%= number_with_delimiter @commissions.count %></h1>
+    <div class="center grey-text text-darken-3"><strong>total images created</strong></div>    
+  </div>
+  <div class="col s12 m8 l9">
+    <div class="center grey-text text-darken-3"><strong>Images created per day</strong></div>
+    <%= area_chart @commissions.group_by_day(:created_at), colors: ['#9C27B0', '#2196F3'] %>
+  </div>
+
   <div class="col s12">
-    <div class="center grey-text text-darken-3">Images created</div>
-    <%= area_chart @commissions.group_by_day(:created_at), colors: ['#2196F3'] %>
+    <div class="card-panel">
+      At his average rate of <%= pluralize @average_commissions_per_day.to_i, 'image' %> per day, Basil is predicted to generate his 1,000,000<sup>th</sup> image on
+      <%= (DateTime.current + @days_til_1_million_commissions.days).strftime "%A, %B %e, %Y" %>.
+    </div>
+    <br />
+  </div>
+
+  <div class="col s12 m8 l7">
+    <br />
+    <div class="center grey-text text-darken-3">
+      <strong>
+        <%= number_with_delimiter @feedback_today.values.sum %>
+        <%= 'image'.pluralize @feedback_today.values.sum %> rated today
+      </strong>
+    </div>
+    <%=
+      column_chart @emoji_counts_today, 
+        colors: ['#EF9A9A', '#FFCC80', '#CCCCCC', '#A5D6A7', '#90CAF9', '#FFCDD2']
+    %>
+  </div>
+  <div class="col s12 m4 l5">
+    <%=
+      pie_chart @emoji_counts_today,
+        colors: ['#EF9A9A', '#FFCC80', '#CCCCCC', '#A5D6A7', '#90CAF9', '#FFCDD2'],
+        legend: 'right',
+        donut: true
+    %>
+  </div>
+
+
+  <div class="col s12 m8 l7">
+    <br />
+    <div class="center grey-text text-darken-3">
+      <strong>
+        <%= number_with_delimiter @feedback_all_time.values.sum %>
+        <%= 'image'.pluralize @feedback_all_time.values.sum %> rated all time
+      </strong>
+    </div>
+    <%=
+      column_chart @emoji_counts_all_time, 
+        colors: ['#EF9A9A', '#FFCC80', '#CCCCCC', '#A5D6A7', '#90CAF9', '#FFCDD2']
+    %>
+  </div>
+  <div class="col s12 m4 l5">
+    <%=
+      pie_chart @emoji_counts_all_time,
+        colors: ['#EF9A9A', '#FFCC80', '#CCCCCC', '#A5D6A7', '#90CAF9', '#FFCDD2'],
+        legend: 'right',
+        donut: true
+    %>
   </div>
 </div>

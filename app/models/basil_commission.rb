@@ -30,6 +30,10 @@ class BasilCommission < ApplicationRecord
     )
   end
 
+  def cache_after_complete!
+    update(cached_seconds_taken: self.completed_at - self.created_at)
+  end
+
   def complete?
     # image.attached?
 

@@ -47,7 +47,54 @@ class BasilController < ApplicationController
 
   def stats
     @commissions = BasilCommission.all
-    # total commissions
+
+    @queued = BasilCommission.where(completed_at: nil)
+    @completed = BasilCommission.where.not(completed_at: nil)
+
+    @average_wait_time = @completed.where('completed_at > ?', 24.hours.ago)
+                                   .average(:cached_seconds_taken)
+    @seconds_over_time = @completed.where('completed_at > ?', 24.hours.ago)
+                                   .group_by { |c| (c.cached_seconds_taken / 60).round }
+                                   .map { |minutes, list| [minutes, list.count] }
+
+    # Projected date, at our current rate, to reach 1,000,000 images
+    commission_counts_per_day   = @commissions.group_by_day(:completed_at).values
+    @average_commissions_per_day = commission_counts_per_day.sum(0.0) / commission_counts_per_day.count
+    commissions_left            = 1_000_000 - @commissions.count
+    @days_til_1_million_commissions = commissions_left / @average_commissions_per_day
+
+    # Feedback today
+    @feedback_today = BasilFeedback.where('updated_at > ?', 24.hours.ago)
+                                   .group(:score_adjustment)
+                                   .count
+    @emoji_counts_today = @feedback_today.map do |score, count|
+      emoji = case score
+        when -2 then "Very Bad :'("
+        when -1 then "Bad :("
+        when  0 then "Meh :|"
+        when  1 then "Good :)"
+        when  2 then "Very Good :D"
+        when  3 then "Lovely! <3"
+      end
+      [emoji, count]
+    end
+
+    # Feedback all time
+    @feedback_all_time = BasilFeedback.group(:score_adjustment)
+                                      .count
+    @emoji_counts_all_time = @feedback_all_time.map do |score, count|
+      emoji = case score
+        when -2 then "Very Bad :'("
+        when -1 then "Bad :("
+        when  0 then "Meh :|"
+        when  1 then "Good :)"
+        when  2 then "Very Good :D"
+        when  3 then "Lovely! <3"
+      end
+
+      [emoji, count]
+    end
+
     # queue size (total commissions - completed commissions)
     # average time to complete today / this week
     # commissions per day bar chart
@@ -191,10 +238,10 @@ class BasilController < ApplicationController
     commission = BasilCommission.find_by(job_id: params[:jobid])
     return if commission.nil?
 
-    commission.update(
-      completed_at:   DateTime.current,
-      final_settings: JSON.parse(params[:settings])
-    )
+    commission.update(completed_at:   DateTime.current,
+                      final_settings: JSON.parse(params[:settings]))
+
+    commission.cache_after_complete!
 
     # TODO: we should attach the S3 object to the commission.image attachment
     # but I dunno how to do that yet. See broken attempts below.
