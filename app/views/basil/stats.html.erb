@@ -28,7 +28,8 @@
       bar_chart @seconds_over_time,
         colors: ['#EF6C00'],
         label: 'Images that took this long',
-        title: 'Wait times today (in minutes)' %>
+        title: 'Wait times today (in minutes)'
+    %>
     <br /><br />
   </div>
 
@@ -36,11 +37,13 @@
     <h1 class="center purple-text" style="margin-bottom: 0; margin-top: 1.6em"><%= number_with_delimiter @commissions.count %></h1>
     <div class="center grey-text text-darken-3"><strong>total images created</strong></div>    
   </div>
-  <div class="col s12 m8 l9">
+  <div class="col s12 m8 l9 grey lighten-3">
     <%=
       area_chart @commissions.group_by_day(:created_at).map { |date, count| [date.to_date, count] },
         colors: ['#9C27B0', '#2196F3'],
-        title: 'Images created per day'
+        title: 'Images created per day',
+        library: { backgroundColor: "#fff" },
+        suffix: ' images'
       %>
   </div>
 
@@ -59,7 +62,8 @@
         { name: "Today",               data: @emoji_counts_today, }
       ],
       colors: ['#2196F3', '#C88ED2'],
-      title: "Quality: #{number_with_delimiter @feedback_all_time.values.sum} #{'image'.pluralize @feedback_all_time.values.sum} rated"
+      title: "Quality: #{number_with_delimiter @feedback_today.values.sum + @feedback_before_today.values.sum} #{'image'.pluralize @feedback_before_today.values.sum} rated",
+      suffix: '%'
     %>
   </div>
   <div class="col s12 m4 l5">
@@ -68,7 +72,8 @@
         colors: ['#B71C1C', '#D95151', '#757575' '#1B5E20', '#236428', '#43A047', '#2196F3'],
         legend: 'right',
         donut: true,
-        title: "Today's quality ratings"
+        title: "Today's quality ratings",
+        suffix: '%'
     %>
     <br /><br /><br />
   </div>

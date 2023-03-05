@@ -1,5 +1,5 @@
 class BasilController < ApplicationController
-  before_action :authenticate_user!, except: [:complete_commission]
+  before_action :authenticate_user!, except: [:complete_commission, :about, :stats]
 
   before_action :require_admin_access, only: [:review], unless: -> { Rails.env.development? }
 
@@ -54,7 +54,7 @@ class BasilController < ApplicationController
     @average_wait_time = @completed.where('completed_at > ?', 24.hours.ago)
                                    .average(:cached_seconds_taken)
     @seconds_over_time = @completed.where('completed_at > ?', 24.hours.ago)
-                                   .group_by { |c| (c.cached_seconds_taken / 60).round }
+                                   .group_by { |c| ((c.cached_seconds_taken || 0) / 60).round }
                                    .map { |minutes, list| [minutes, list.count] }
 
     # Projected date, at our current rate, to reach 1,000,000 images
@@ -68,6 +68,7 @@ class BasilController < ApplicationController
                                    .order(:score_adjustment)
                                    .group(:score_adjustment)
                                    .count
+    total = @feedback_today.values.sum
     @emoji_counts_today = @feedback_today.map do |score, count|
       emoji = case score
         when -2 then "Very Bad :'("
@@ -77,17 +78,19 @@ class BasilController < ApplicationController
         when  2 then "Very Good :D"
         when  3 then "Lovely! <3"
       end
-      [emoji, count]
+      [emoji, (count / total.to_f * 100).round(1)]
     end
 
     # Feedback all time
-    @feedback_all_time = BasilFeedback.order(:score_adjustment)
+    @feedback_before_today = BasilFeedback.where('updated_at < ?', 24.hours.ago)
+                                      .order(:score_adjustment)
                                       .group(:score_adjustment)
                                       .count
     days_since_start = (Date.current - BasilFeedback.minimum(:updated_at).to_date)
     days_since_start = 1 if days_since_start.zero? # no dividing by 0 lol
 
-    @emoji_counts_all_time = @feedback_all_time.map do |score, count|
+    total = @feedback_before_today.values.sum
+    @emoji_counts_all_time = @feedback_before_today.map do |score, count|
       emoji = case score
         when -2 then "Very Bad :'("
         when -1 then "Bad :("
@@ -97,7 +100,7 @@ class BasilController < ApplicationController
         when  3 then "Lovely! <3"
       end
 
-      [emoji, count / days_since_start]
+      [emoji, (count / total.to_f * 100).round(1)]
     end
 
     active_styles = %w(realistic painting sketch digital anime abstract painting2 horror watercolor)
