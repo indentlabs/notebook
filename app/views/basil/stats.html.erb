@@ -15,34 +15,35 @@
 
   <div class="col s12 m3 l2">
     <h1 class="center orange-text" style="margin-bottom: 0; margin-top: 1.6em"><%= number_with_delimiter @queued.count %></h1>
-    <div class="center grey-text text-darken-3"><strong>requests in queue</strong></div>    
+    <div class="center grey-text"><strong>requests in queue</strong></div>    
   </div>
   <div class="col s12 m3 l2">
     <h1 class="center orange-text" style="margin-bottom: 0; margin-top: 1.6em; font-size: 2.95em"><%= time_ago_in_words @average_wait_time.seconds.ago %></h1>
-    <div class="center grey-text text-darken-3">
+    <div class="center grey-text">
       <strong>average wait time<br />today</strong>
     </div>    
   </div>
   <div class="col s12 m6 l8">
-    <%=
-      bar_chart @seconds_over_time,
-        colors: ['#EF6C00'],
-        label: 'Images that took this long',
-        title: 'Wait times today (in minutes)'
-    %>
+    <div class="grey lighten-3">
+      <%=
+        bar_chart @seconds_over_time,
+          colors: ['#EF6C00'],
+          label: 'Images that took this long',
+          title: 'Wait times today (in minutes)'
+      %>
+    </div>
     <br /><br />
   </div>
 
   <div class="col s12 m4 l3">
     <h1 class="center purple-text" style="margin-bottom: 0; margin-top: 1.6em"><%= number_with_delimiter @commissions.count %></h1>
-    <div class="center grey-text text-darken-3"><strong>total images created</strong></div>    
+    <div class="center grey-text"><strong>total images created</strong></div>    
   </div>
   <div class="col s12 m8 l9 grey lighten-3">
     <%=
       area_chart @commissions.group_by_day(:created_at).map { |date, count| [date.to_date, count] },
         colors: ['#9C27B0', '#2196F3'],
         title: 'Images created per day',
-        library: { backgroundColor: "#fff" },
         suffix: ' images'
       %>
   </div>
@@ -55,7 +56,7 @@
     <br /><br /><br />
   </div>
 
-  <div class="col s12 m8 l7">
+  <div class="col s12 m8 l7 grey lighten-3">
     <%=
       column_chart [
         { name: "Historical average",  data: @emoji_counts_all_time },
@@ -67,22 +68,32 @@
     %>
   </div>
   <div class="col s12 m4 l5">
-    <%=
-      pie_chart @emoji_counts_today,
-        colors: ['#B71C1C', '#D95151', '#757575' '#1B5E20', '#236428', '#43A047', '#2196F3'],
-        legend: 'right',
-        donut: true,
-        title: "Today's quality ratings",
-        suffix: '%'
-    %>
+    <div class="grey lighten-3">
+      <%=
+        pie_chart @emoji_counts_today,
+          colors: ['#B71C1C', '#D95151', '#757575' '#1B5E20', '#236428', '#43A047', '#2196F3'],
+          legend: 'right',
+          donut: true,
+          title: "Today's quality ratings",
+          suffix: '%'
+      %>
+    </div>
     <br /><br /><br />
   </div>
 
-  <div class="col s12 m6">
-    <%= bar_chart @average_score_per_style, title: "Average quality score per style", min: -2, max: 2 %>
+  <div class="col s12 m6 grey lighten-3">
+    <%=
+      bar_chart @average_score_per_style,
+        title: "Average quality score per style", 
+        min: -2, 
+        max: 2
+    %>
   </div>
-  <div class="col s12 m6">
-    <%= bar_chart @total_score_per_style, title: "Total quality score per style" %>
+  <div class="col s12 m6 grey lighten-3">
+    <%=
+      bar_chart @total_score_per_style, 
+        title: "Total quality score per style"
+    %>
   </div>
   <div class="col s12">
     <div class="center">
