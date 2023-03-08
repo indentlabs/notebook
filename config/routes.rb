@@ -4,12 +4,6 @@ Rails.application.routes.draw do
 
   scope :ai, path: '/ai' do
     scope :basil do
-      # Standard generation flow for users
-      get  '/',                  to: 'basil#index',      as: :basil
-      get  '/:content_type',     to: 'basil#index',      as: :basil_content_index
-      get  '/:content_type/:id', to: 'basil#content',    as: :basil_content
-      post '/:content_type/:id', to: 'basil#commission', as: :basil_commission
-
       # Meta pages
       get '/help/rate',     to: 'basil#help_rate', as: :basil_rating_queue
       get '/about',         to: 'basil#about'
@@ -18,13 +12,19 @@ Rails.application.routes.draw do
       # Admin pages
       get '/review',        to: 'basil#review'
 
+      # Standard generation flow for users
+      get  '/',                  to: 'basil#index',      as: :basil
+      get  '/:content_type',     to: 'basil#index',      as: :basil_content_index
+      get  '/:content_type/:id', to: 'basil#content',    as: :basil_content
+      post '/:content_type/:id', to: 'basil#commission', as: :basil_commission
+
       # API endpoints
       post '/complete/:jobid', to: 'basil#complete_commission'
       post '/feedback/:jobid', to: 'basil#feedback', as: :basil_feedback
 
       # URLs to migrate over
-      get '/character/:id',    to: 'basil#character', as: :basil_character
-      post '/character/:id',   to: 'basil#commission'
+      # get '/character/:id',    to: 'basil#character', as: :basil_character
+      # post '/character/:id',   to: 'basil#commission'
     end
   end
 
