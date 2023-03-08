@@ -11,7 +11,7 @@ class BasilController < ApplicationController
       return raise "Invalid content type: #{params[:content_type]}"
     end
 
-    @content = @current_user_content[@content_type]
+    @content = @current_user_content[@content_type].sort_by(&:name)
   end
 
   def content
