@@ -141,7 +141,11 @@ class BasilController < ApplicationController
       [emoji, (count / total.to_f * 100).round(1)]
     end
 
-    active_styles = %w(realistic painting sketch digital anime abstract painting2 horror watercolor)
+    active_styles = [
+      BasilService.enabled_styles_for('Character'),
+      BasilService.enabled_styles_for('Location')
+    ].flatten.compact.uniq
+
     @total_score_per_style = BasilCommission.where(style: active_styles)
                                               .joins(:basil_feedbacks)
                                               .group(:style)
