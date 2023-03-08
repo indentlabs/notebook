@@ -10,7 +10,7 @@ class BasilCommission < ApplicationRecord
   def submit_to_job_queue!
     # TODO clean this up and put it in a config
     region     = 'us-east-1'
-    queue_name = 'basil-characters'
+    queue_name = 'basil-commissions'
 
     # TODO clean this up and put it in a service
     sts_client = Aws::STS::Client.new(region: region)

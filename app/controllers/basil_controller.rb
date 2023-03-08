@@ -4,7 +4,55 @@ class BasilController < ApplicationController
   before_action :require_admin_access, only: [:review], unless: -> { Rails.env.development? }
 
   def index
-    @characters = @current_user_content['Character']
+    @enabled_content_types = [Character, Location].map(&:name)
+
+    @content_type = params[:content_type].try(:humanize) || 'Character'
+    if @content_type.nil? || !@enabled_content_types.include?(@content_type)
+      return raise "Invalid content type: #{params[:content_type]}"
+    end
+
+    @content = @current_user_content[@content_type]
+  end
+
+  def content
+    # Fetch the content page from our already-queried cache of current user content
+    @content_type = params[:content_type].humanize
+    @content      = @current_user_content[@content_type].detect do |page|
+      page.id == params[:id].to_i
+    end
+    raise "No content found for #{params[:content_type]} with ID #{params[:id]} for user #{current_user.id}" if @content.nil?
+
+    # Fetch any existing Basil configurations/guidance for this character
+    @guidance   = BasilFieldGuidance.find_or_initialize_by(entity: @content, user: current_user).try(:guidance)
+    @guidance ||= {}
+
+    # Fetch all the related fields for this content type and their values
+    # and format them into an array of [field, value] pairs to pass to the view
+    @relevant_fields = []
+    
+    case @content_type
+    when 'Character'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Gender')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Age')
+      @relevant_fields.push BasilService.include_all_fields_in_category(current_user, @content, ['Looks', 'Appearance'])
+
+    when 'Location'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Name')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Geography', 'Area')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Geography', 'Climate')
+
+    end
+    @relevant_fields.compact!
+
+    # Finally, cache some state we can reference in the view
+    @commissions = BasilCommission.where(entity_type: @content.page_type, entity_id: @content.id)
+                                  .order('id DESC')
+                                  .limit(20)
+                                  .includes(:basil_feedbacks)
+    @in_progress_commissions = @commissions.select { |c| c.completed_at.nil? }
+    @can_request_another     = @in_progress_commissions.count < 3
   end
 
   def character
@@ -23,16 +71,6 @@ class BasilController < ApplicationController
       entity_id: @character.id, 
       entity_type: 'Character'
     )
-
-    @gender_field = @character.overview_field('Gender')
-    if @gender_field
-      @gender_value = Attribute.find_by(attribute_field_id: @gender_field.id, entity: @character).try(:value)
-    end
-
-    @age_field = @character.overview_field('Age')
-    if @age_field
-      @age_value = Attribute.find_by(attribute_field_id: @age_field.id, entity: @character).try(:value)
-    end
 
     @commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id)
                                   .order('id DESC')
@@ -130,63 +168,18 @@ class BasilController < ApplicationController
   end
 
   def commission
-    # TODO: when we support multiple page types, we'll want to grab params[:entity_type] and params[:entity_id]
-    #       and constantize the former, then find the entity from the user's content
-    @character = current_user.characters.find(params[:id])
+    # Fetch the related content
+    @content = @current_user_content[commission_params.fetch(:entity_type)]
+                  .find { |c| c.id == commission_params.fetch(:entity_id).to_i }
+    return raise "Invalid content commission params" if @content.nil?
 
-    # Build the prompt from the character's attributes
-    category_ids = AttributeCategory.where(user: current_user, entity_type: 'character', label: ['Looks', 'Appearance'])
-                                    .pluck(:id)
-    appearance_fields = AttributeField.where(attribute_category_id: category_ids)
-    attributes = Attribute.where(attribute_field_id: appearance_fields.pluck(:id),
-                                 entity_id: @character.id,
-                                 entity_type: 'Character')
-
-    prompt_components = []
-
-    # Step 1. Gender
-    gender_field = @character.overview_field('Gender')
-    if gender_field
-      gender_value = Attribute.find_by(attribute_field_id: gender_field.id, entity: @character).try(:value).try(:strip)
-      if gender_value.present?
-        gender_importance = params.dig(:field, gender_field.id.to_s)
-        gender_importance = gender_importance.to_f if gender_importance.present?
-        
-        if gender_importance == 1
-          # If the importance is exactly 1, we can omit the parentheses and save a few tokens, since the
-          # default attention importance is 1.
-          prompt_components.push gender_value
-        elsif gender_importance != 0
-          # We also want to skip adding gender to the prompt at all if the user marked it as completely unimportant (-1 + 1 = 0)
-          prompt_components.push "(#{gender_value}:#{gender_importance})"
-        end
-      end
-    end
-
-    # Step 2. Age
-    age_field = @character.overview_field('Age')
-    if age_field
-      age_value = Attribute.find_by(attribute_field_id: age_field.id, entity: @character).try(:value).try(:strip)
-
-      if age_value.present?
-        # If the user simply entered a number in for an age field, we want to help SD along by 
-        # giving it some context. Otherwise, we'll just use the value as-is.
-        if age_value.to_i.to_s == age_value
-          age_value = "#{age_value} years old"
-        end
-
-        age_importance = params.dig(:field, age_field.id.to_s)
-        age_importance = age_importance.to_f if age_importance.present?
-
-        if age_importance == 1
-          prompt_components.push age_value
-        elsif age_importance != 0
-          # We also want to skip adding gender to the prompt at all if the user marked it as completely unimportant (-1 + 1 = 0)
-          prompt_components.push "(#{age_value}:#{age_importance})"
-        end
-      end
-    end
-
+    # Before creating the prompt, do a little config to tweak things to work well :)
+    labels_to_omit_label_text = [
+      "Name",
+      "Identifying Marks",
+      "Type",
+      "Description"
+    ].map(&:downcase)
     field_importance_multipliers = {
       'hair':       1.15,
       'hair color': 1.55,
@@ -196,66 +189,69 @@ class BasilController < ApplicationController
       'eye color':  1.05,
       'gender':     1.15
     }
+    label_value_pairs_to_skip_entirely = [
+      ['race', 'human']
+    ]
+    value_suffix_for_numerical_fields = {
+      'age': ' years old'
+    }
 
-    # Step 3. Do it all again for every other field, too
-    formatted_field_values = appearance_fields.map do |field|
-      value = attributes.detect { |a| a.attribute_field_id == field.id }.try(:value)
+    # Prepare our prompt components
+    prompt_components = []
+    commission_params.fetch(:field).each do |field_id, field_data|
+      label      = field_data[:label].strip
+      value      = field_data[:value].gsub(',',  '')
+                                     .gsub("\r", '')
+                                     .gsub('(',  '')
+                                     .gsub(')',  '')
+                                     .gsub("\n", ' ')
+                                     .strip
+      importance = field_data[:importance].to_f
 
-      # If there is no value to this field (or looks like it doesn't apply), skip it.
-      next if value.nil? || value.blank? || ['none', 'n/a', '.', '-', ' ', '?', '??', '???'].include?(value.try(:downcase))
+      # Field skips
+      next if label_value_pairs_to_skip_entirely.include?([label.downcase, value.downcase])
 
-      # If the field is something implied like a "Human" answer on "Race", skip it.
-      next if field.label.downcase == 'race' && value.downcase == 'human'
+      # Do any per-field manipulations
+      importance *= field_importance_multipliers[label.downcase.to_sym]      if field_importance_multipliers.key?(label.downcase.to_sym)
+      value      += value_suffix_for_numerical_fields[label.downcase.to_sym] if value_suffix_for_numerical_fields.key?(label.downcase.to_sym)
+      label       = ''                                                       if labels_to_omit_label_text.include?(label.downcase)
 
-      # We also want to do a little sanitizing of our field value.
-      # We'll remove periods, newlines, and carriage returns, since they can mess up the prompt.
-      value = value.gsub('.', ' ').gsub("\r", "").gsub("\n", " ")
-      # We also remove parentheses, since they can mess up the prompt attention groups.
-      value = value.gsub('(', '').gsub(')', '')
-      value = value.strip
-
-      # Get the importance of this field and add 1 to get back to our SD version
-      importance = params.dig(:field, field.id.to_s) || 1.0
-      importance = importance.to_f * field_importance_multipliers.fetch(field.label.downcase.to_sym, 1.0)
+      # Finally, cut down on any unnecessary precision to save more tokens
       importance = importance.round(2)
 
-      # Lastly, we also do a little sanitation on the label
-      label = field.label.downcase
-      label = '' if label == 'identifying marks'
-
-      # If the importance is exactly 1, we can omit the parentheses and save a few tokens, since the
-      # default attention importance is 1.
-      if importance == 1
-        "#{value.gsub(',', '').gsub("\r", "").gsub("\n", " ")} #{field.label}"
+      component_text = "#{value} #{label}".strip
+      if importance == 1.0
+        # If the importance is exactly 1, we can omit the parentheses and save a few tokens, since the
+        # default attention importance is 1.
+        prompt_components.push "#{component_text}"
       elsif importance != 0
-        # We also want to skip adding gender to the prompt at all if the user marked it as completely unimportant (-1 + 1 = 0)
-        "(#{value.gsub(',', '').gsub("\r", "").gsub("\n", " ")} #{field.label}:#{importance})"
-      else
-        # For 0-importance fields, we'll compact them out of the list in a moment
-        nil
+        # If the importance isn't 1 (default) or 0 (not included), we want to specify it in the prompt.
+        prompt_components.push "(#{component_text}:#{importance})"
       end
     end
 
-    prompt_components.concat formatted_field_values.compact
-    prompt = prompt_components.join(', ')
+    # Build a prompt for Basil from the component parts
+    prompt = prompt_components.join(' ')
 
     # Save our field weights as the latest guidance also
-    guidance = BasilFieldGuidance.find_or_initialize_by(
-      entity: @character,
-      user:   current_user
-    )
-    guidance.update(guidance: params[:field])
+    guidance = BasilFieldGuidance.find_or_initialize_by(entity_type: @content.page_type,
+                                                        entity_id:   @content.id,
+                                                        user:        current_user)
+    guidance_data = commission_params.fetch(:field)
+                                     .transform_values { |data| data[:importance].to_f }
+                                     .to_h
+    guidance.update(guidance: guidance_data)
 
     BasilCommission.create!(
       user:        current_user,
-      entity_type: 'Character',
-      entity_id:   @character.id,
+      entity_type: @content.page_type,
+      entity_id:   @content.id,
       prompt:      prompt,
-      style:       params[:basil_commission][:style],
+      style:       commission_params.fetch(:style, 'realistic'),
       job_id:      SecureRandom.uuid
     )
 
-    redirect_to basil_character_path(@character)
+    redirect_to basil_content_path(@content.page_type, @content.id)
   end
 
   def complete_commission
@@ -311,5 +307,11 @@ class BasilController < ApplicationController
                                   .limit(50)
                                   .includes(:entity)
                                   .shuffle
+  end
+
+  private
+
+  def commission_params
+    params.require(:basil_commission).permit(:style, :entity_type, :entity_id, field: {})
   end
 end

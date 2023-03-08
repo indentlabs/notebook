@@ -1,0 +1,198 @@
+<script type="text/javascript">
+function commission_basil(style) {
+  // Set style hidden value to our selected style
+  $('#basil_commission_style').val(style);
+
+  // Submit form to start the commission
+  $('#new_basil_commission').submit();
+}
+</script>
+
+<div class="row">
+  <%= form_for BasilCommission.new, url: basil_commission_path(@content_type, @content.id) do |f| %>
+    <%= f.hidden_field :style,       value: 'realistic' %>
+    <%= f.hidden_field :entity_type, value: @content.page_type %>
+    <%= f.hidden_field :entity_id,   value: @content.id %>
+    <div class="col s12 m4">
+      <div style="margin: 1em 0">
+        <%= link_to basil_path, class: 'grey-text text-darken-2' do %>
+          <i class="material-icons left">chevron_left</i>
+          Back to my character list
+        <% end %>
+      </div>
+      <div class="clearfix">
+        <%= image_tag @content.random_image_including_private(format: :medium), style: 'width: 100%' %>
+        <h1 style="font-size: 2rem; margin-bottom: 0">
+          <%= link_to @content.name, @content.view_path %>
+        </h1>
+        <%= link_to 'Edit this page', @content.edit_path, class: 'grey-text text-darken-2' %>
+      </div>
+
+      <ul>
+        <% @relevant_fields.each do |field, value| %>
+          <%= f.hidden_field "field[#{field.id}][label]", value: field.label %>
+          <%= f.hidden_field "field[#{field.id}][value]", value: value %>
+          
+          <li style="margin-bottom: 1em">
+            <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
+              <%= field.label %>
+              <%= range_field_tag "basil_commission[field][#{field.id}][importance]", @guidance.fetch(field.id.to_s, 1), { min: 0, max: 1.3, step: 0.1, style: 'width: 50%', class: 'js-importance-slider hide' } %>
+            </div>
+            <div>
+              <%= value %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+
+      <% if @relevant_fields.empty? %>
+        <div class="red card-panel lighten-3">
+          Basil works best with guidance! Please fill out some fields in the "Looks" category for this character
+          before requesting an image.
+        </div>
+      <% end %>
+
+      <div>
+        <% if @can_request_another %>
+          <%= link_to 'Customize per-field importance', "javascript:var sliders = document.getElementsByClassName('js-importance-slider'); for(var i = 0; i < sliders.length; i++) sliders.item(i).classList.remove('hide')" %>
+        <% end %>
+
+        <div class="card-panel js-importance-slider hide" style="margin-right: 1em">
+          <strong>How to customize per-field importance</strong>
+          <br /><br />
+
+          This allows you to tell Basil which fields are more or less important to you. For example, if Basil isn't
+          getting a character's hair color right, you can increase the importance of the "Hair Color" field.
+          <br /><br />
+          You can also tell Basil to ignore a field entirely by dragging the slider all the way to the left.
+        </div>
+      </div>
+
+      <div class="card-panel" style="margin-top: 2em">
+        <p>
+          This is still a work in progress and very much a beta that will change a lot before releasing publicly,
+          but feel free to use it as much as you'd like to provide feedback!
+        </p>
+        <p>
+          If you run into any issues, please let me know <%# in the %>
+          <%# link_to 'Site Support forums', 'https://www.notebook.ai/forum/site-support' %>
+          <%# or %> <%= link_to 'on Discord', 'https://discord.gg/7WCuGxY3AW' %>.
+        </p>
+      </div>
+    </div>
+
+    <div class="col s12 m2" style="margin-top: 1rem">
+      <% if @can_request_another && @relevant_fields.any? %>
+        <div class="grey-text center"><strong>Available styles</strong></div>
+        <% %w(realistic painting sketch digital anime abstract).each do |style| %>
+          <%= link_to "javascript:commission_basil('#{style}')" do %>
+            <div class="hoverable card-panel purple white-text">
+              <%= style.humanize %>
+              <i class="material-icons right">chevron_right</i>
+            </div>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% if @can_request_another && @relevant_fields.any? %>
+        <div class="grey-text center"><strong>Experimental styles</strong></div>
+        <% %w(painting2 horror watercolor).each do |style| %>
+          <%= link_to "javascript:commission_basil('#{style}')" do %>
+            <div class="hoverable card-panel purple white-text">
+              <%= style.humanize %>
+              <i class="material-icons right">chevron_right</i>
+            </div>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% if !@can_request_another %>
+        <div class="card-panel purple white-text">
+          Basil is working on your <%= pluralize @in_progress_commissions.count, 'requested commission' %>.
+          <br /><br />
+          As soon as he completes one, you'll be able to request another.
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="col s12 m6" style="margin-top: 1rem">
+    <% @commissions.each do |commission| %>
+      <div>
+        <% if commission.complete? %>
+          <%# image_tag commission.image, style: 'width: 100%' %>
+          <%
+            s3 = Aws::S3::Resource.new(region: "us-east-1")
+            obj = s3.bucket("basil-commissions").object("job-#{commission.job_id}.png")
+          %>
+          <div class="card horizontal">
+            <div class="card-image">
+              <%= link_to obj.presigned_url(:get) do %>
+                <%= image_tag obj.presigned_url(:get) %>
+              <% end %>
+            </div>
+            <div class="card-stacked">
+              <div class="card-content">
+                <div>
+                  <strong><%= @content.name %></strong>
+                  <% if commission.style? %>
+                    <em>(<%= commission.style.humanize %>)</em>
+                  <% end %>
+                </div>
+                <div class="grey-text text-darken-2">
+                  <span style="font-size: 0.8em">Completed <%= time_ago_in_words commission.completed_at %> ago</span>
+                  &middot;<br />
+                  <span style="font-size: 0.8em">Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %></span>
+                </div>
+                <div style="margin-top: 1em">
+                  <div class="center" style="font-size: 0.9em"><strong>Feedback for Basil</strong></div>
+                  <div class="row">
+                    <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), url: basil_feedback_path(commission.job_id), method: :POST, remote: true do |f| %>
+                      <div class="col s3 red lighten-3">
+                        <label>
+                          <%= f.radio_button :score_adjustment, '-2', { class: 'autosave-closest-form-on-change' } %>
+                          <span class="black-text">:'(</span>
+                        </label>
+                      </div>
+                      <div class="col s3 orange lighten-3">
+                        <label>
+                          <%= f.radio_button :score_adjustment, '-1', { class: 'autosave-closest-form-on-change' } %>
+                          <span class="black-text">:(</span>
+                        </label>
+                      </div>
+                      <div class="col s3 green lighten-3">
+                        <label>
+                          <%= f.radio_button :score_adjustment, '1', { class: 'autosave-closest-form-on-change' } %>
+                          <span class="black-text">:)</span>
+                        </label>
+                      </div>
+                      <div class="col s3 blue lighten-3">
+                        <label>
+                          <%= f.radio_button :score_adjustment, '2', { class: 'autosave-closest-form-on-change' } %>
+                          <span class="black-text">:D</span>
+                        </label>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              <!--
+              <div class="card-action">
+                <%= link_to "Save to #{@content.name}", '#', class: 'purple-text' %>
+                <%= link_to "Delete", '#', class: 'red-text right' %>
+              </div>
+              -->
+            </div>
+          </div>
+        <% else %>
+          <div class="card-panel green white-text darken-4">
+            Basil is still working on this commission... (style: <%= commission.style %>)
+            <div style="font-size: 0.8em">
+              (Requested <%= time_ago_in_words(commission.created_at) %> ago)
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
