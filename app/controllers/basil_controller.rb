@@ -4,7 +4,7 @@ class BasilController < ApplicationController
   before_action :require_admin_access, only: [:review], unless: -> { Rails.env.development? }
 
   def index
-    @enabled_content_types = [Character].map(&:name)
+    @enabled_content_types = [Character, Location].map(&:name)
 
     @content_type = params[:content_type].try(:humanize) || 'Character'
     if @content_type.nil? || !@enabled_content_types.include?(@content_type)
