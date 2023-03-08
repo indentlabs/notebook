@@ -12,15 +12,15 @@ Rails.application.routes.draw do
       # Admin pages
       get '/review',        to: 'basil#review'
 
+      # API endpoints
+      post '/complete/:jobid', to: 'basil#complete_commission'
+      post '/feedback/:jobid', to: 'basil#feedback', as: :basil_feedback
+
       # Standard generation flow for users
       get  '/',                  to: 'basil#index',      as: :basil
       get  '/:content_type',     to: 'basil#index',      as: :basil_content_index
       get  '/:content_type/:id', to: 'basil#content',    as: :basil_content
       post '/:content_type/:id', to: 'basil#commission', as: :basil_commission
-
-      # API endpoints
-      post '/complete/:jobid', to: 'basil#complete_commission'
-      post '/feedback/:jobid', to: 'basil#feedback', as: :basil_feedback
 
       # URLs to migrate over
       # get '/character/:id',    to: 'basil#character', as: :basil_character
