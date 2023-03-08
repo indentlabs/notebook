@@ -10,7 +10,7 @@ class BasilService < Service
     return nil if category.empty?
 
     fields = AttributeField.where(
-      attribute_category_id: category.id,
+      attribute_category_id: category.pluck(:id),
       hidden:                [nil, false]
     )
     return nil if fields.empty?
