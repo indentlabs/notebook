@@ -19,9 +19,10 @@ class BasilCommission < ApplicationRecord
     sqs_client = Aws::SQS::Client.new(region: region)
 
     message_body = {
-      job_id: job_id,
-      prompt: prompt,
-      style:  style
+      job_id:    job_id,
+      prompt:    prompt,
+      style:     style,
+      page_type: entity_type
     }.to_json
 
     sqs_client.send_message(
