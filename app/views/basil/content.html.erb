@@ -84,7 +84,7 @@ function commission_basil(style) {
     <div class="col s12 m2" style="margin-top: 1rem">
       <% if @can_request_another && @relevant_fields.any? %>
         <div class="grey-text center"><strong>Available styles</strong></div>
-        <% %w(realistic painting sketch digital anime abstract).each do |style| %>
+        <% BasilService.enabled_styles_for(@content.page_type).each do |style| %>
           <%= link_to "javascript:commission_basil('#{style}')" do %>
             <div class="hoverable card-panel purple white-text">
               <%= style.humanize %>
@@ -95,13 +95,15 @@ function commission_basil(style) {
       <% end %>
 
       <% if @can_request_another && @relevant_fields.any? %>
-        <div class="grey-text center"><strong>Experimental styles</strong></div>
-        <% %w(painting2 horror watercolor).each do |style| %>
-          <%= link_to "javascript:commission_basil('#{style}')" do %>
-            <div class="hoverable card-panel purple white-text">
-              <%= style.humanize %>
-              <i class="material-icons right">chevron_right</i>
-            </div>
+        <% if BasilService.experimental_styles_for(@content.page_type).any? %>
+          <div class="grey-text center"><strong>Experimental styles</strong></div>
+          <% BasilService.experimental_styles_for(@content.page_type).each do |style| %>
+            <%= link_to "javascript:commission_basil('#{style}')" do %>
+              <div class="hoverable card-panel purple white-text">
+                <%= style.humanize %>
+                <i class="material-icons right">chevron_right</i>
+              </div>
+            <% end %>
           <% end %>
         <% end %>
       <% end %>

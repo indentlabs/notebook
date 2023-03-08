@@ -1,6 +1,26 @@
 class BasilService < Service
   IGNORED_VALUES = ['none', 'n/a', '.', '-', ' ', '?', '??', '???', 'x', nil]
 
+  def self.enabled_styles_for(page_type)
+    case page_type
+    when 'Character'
+      %w(realistic painting sketch digital abstract)
+    when 'Location'
+      %w(realistic painting sketch)
+    else
+      %w(Default)
+    end
+  end
+
+  def self.experimental_styles_for(page_type)
+    case page_type
+    when 'Character'
+      %w(anime painting2 horror watercolor)
+    else
+      []
+    end
+  end
+
   def self.include_all_fields_in_category(user, page, category_label)
     category = AttributeCategory.where(
       user_id:     user.id,
