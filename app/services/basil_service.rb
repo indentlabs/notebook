@@ -18,7 +18,7 @@ class BasilService < Service
     answers = Attribute.where(
       attribute_field_id: fields.pluck(:id),
       entity_id:          page.id,
-      entity_type:        page.class.name,
+      entity_type:        page.page_type,
     ).where.not(value: IGNORED_VALUES)
     return nil if answers.empty?
 

@@ -34,7 +34,7 @@ class BasilController < ApplicationController
     when 'Character'
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Gender')
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Age')
-      @relevant_fields.push BasilService.include_all_fields_in_category(current_user, @content, ['Looks', 'Appearance'])
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Looks', 'Appearance'])
 
     when 'Location'
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Name')
