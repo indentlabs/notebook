@@ -237,7 +237,7 @@ class BasilController < ApplicationController
     end
 
     # Build a prompt for Basil from the component parts
-    prompt = prompt_components.join(' ')
+    prompt = prompt_components.join(', ')
 
     # Save our field weights as the latest guidance also
     guidance = BasilFieldGuidance.find_or_initialize_by(entity_type: @content.page_type,
