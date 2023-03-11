@@ -163,6 +163,12 @@ class BasilController < ApplicationController
                                               .sort_by(&:second)
                                               .reverse
 
+    @average_score_per_page_type = BasilCommission.where.not(completed_at: nil)
+                                                  .joins(:basil_feedbacks)
+                                                  .group(:entity_type)
+                                                  .average(:score_adjustment)
+                                                  .map { |k, v| [k, (v * 100).round(1)] }.to_h
+
     # queue size (total commissions - completed commissions)
     # average time to complete today / this week
     # commissions per day bar chart
