@@ -29,7 +29,13 @@ namespace :data_migrations do
       # blob.update_attribute(:key, key)
       # blob.update_attribute(:service_name, :amazon_basil)
 
-      commission.update!(image: blob.signed_id)
+      begin
+        commission.update!(image: blob.signed_id)
+      rescue ActiveStorage::FileNotFoundError => e
+        puts "job failed: #{obj.key}\n#{e.message}"
+        require 'pry'
+        binding.pry
+      end
     end
 
     puts "Done!"
