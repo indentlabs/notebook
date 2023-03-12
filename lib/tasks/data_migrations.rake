@@ -5,8 +5,14 @@ namespace :data_migrations do
       # Skip if we've already attached an image
       next if commission.image.attached?
 
+      if commission.s3_bucket != 'basil-commissions'
+        puts "Skipping #{commission.job_id} because it's in the old bucket"
+        next
+      end
+
       # Attach the image in S3 to our `image` ActiveStorage relation
       key    = "job-#{commission.job_id}.png"
+      puts "Attaching #{key}"
       s3     = Aws::S3::Resource.new(region: "us-east-1")
       obj    = s3.bucket("basil-commissions").object(key)
       params = { 
