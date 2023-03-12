@@ -15,7 +15,7 @@ namespace :data_migrations do
       puts "Attaching #{key}"
       s3     = Aws::S3::Resource.new(region: "us-east-1")
       obj    = s3.bucket("basil-commissions").object(key)
-      params = { 
+      params = {
         filename:     obj.key, 
         content_type: obj.content_type, # binary/octet-stream but we want image/png
         byte_size:    obj.size, 
@@ -29,13 +29,7 @@ namespace :data_migrations do
       # blob.update_attribute(:key, key)
       # blob.update_attribute(:service_name, :amazon_basil)
 
-      begin
-        commission.update!(image: blob.signed_id)
-      rescue ActiveStorage::FileNotFoundError => e
-        puts "job failed: #{obj.key}\n#{e.message}"
-        require 'pry'
-        binding.pry
-      end
+      commission.update!(image: blob.signed_id)
     end
 
     puts "Done!"
