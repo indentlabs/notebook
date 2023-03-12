@@ -1,4 +1,34 @@
 namespace :data_migrations do
+  desc "Attach S3 images to BasilCommissioms"
+  task attach_s3_images_to_basil_commissions: :environment do
+    BasilCommission.find_each do |commission|
+      # Skip if we've already attached an image
+      next if commission.image.attached?
+
+      # Attach the image in S3 to our `image` ActiveStorage relation
+      key    = "job-#{commission.job_id}.png"
+      s3     = Aws::S3::Resource.new(region: "us-east-1")
+      obj    = s3.bucket("basil-commissions").object(key)
+      params = { 
+        filename:     obj.key, 
+        content_type: obj.content_type, # binary/octet-stream but we want image/png
+        byte_size:    obj.size, 
+        checksum:     obj.etag.gsub('"',"")
+      }
+      blob = ActiveStorage::Blob.create_before_direct_upload!(**params)
+      blob.key = key
+      blob.service_name = :amazon_basil
+      blob.save!
+
+      # blob.update_attribute(:key, key)
+      # blob.update_attribute(:service_name, :amazon_basil)
+
+      commission.update!(image: blob.signed_id)
+    end
+
+    puts "Done!"
+  end
+
   desc "Create PageReferences for all text fields"
   task create_text_field_page_references: :environment do
     Attribute.where.not(value: [nil, ""]).find_each do |attribute|

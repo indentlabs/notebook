@@ -2,7 +2,9 @@ class BasilCommission < ApplicationRecord
   belongs_to :user
   belongs_to :entity, polymorphic: true
 
-  has_one_attached :image, dependent: :destroy
+  has_one_attached :image,
+    service: :amazon_basil,
+    dependent: :destroy
 
   has_many :basil_feedbacks, dependent: :destroy
 
@@ -36,8 +38,6 @@ class BasilCommission < ApplicationRecord
   end
 
   def complete?
-    # image.attached?
-
-    completed_at.present?
+    image.attached?
   end
 end

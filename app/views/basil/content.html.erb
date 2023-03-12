@@ -119,6 +119,12 @@ function commission_basil(style) {
   <% end %>
 
   <div class="col s12 m6" style="margin-top: 1rem">
+    <% if @commissions.any? %>
+      <div class="card-panel">
+        <strong>Like an image and want to keep it?</strong> Just click <strong>Save</strong> and it'll save to your <%= @content.name %> page like a normal upload.
+      </div>
+    <% end %>
+
     <% @commissions.each do |commission| %>
       <div>
         <% if commission.complete? %>
@@ -178,12 +184,10 @@ function commission_basil(style) {
                   </div>
                 </div>
               </div>
-              <!--
               <div class="card-action">
-                <%= link_to "Save to #{@content.name}", '#', class: 'purple-text' %>
-                <%= link_to "Delete", '#', class: 'red-text right' %>
+                <%= link_to "Save", basil_save_path(commission), class: 'purple-text' %>
+                <%= link_to "Delete", basil_delete_path(commission), class: 'red-text right' %>
               </div>
-              -->
             </div>
           </div>
         <% else %>

@@ -273,6 +273,25 @@ class BasilController < ApplicationController
     commission.update(completed_at:   DateTime.current,
                       final_settings: JSON.parse(params[:settings]))
 
+    # Attach the image in S3 to our `image` ActiveStorage relation
+    key    = "job-#{params[:jobid]}.png"
+    s3     = Aws::S3::Resource.new(region: "us-east-1")
+    obj    = s3.bucket("basil-commissions").object(key)
+    params = { 
+      filename:     obj.key, 
+      content_type: obj.content_type, # binary/octet-stream but we want image/png
+      byte_size:    obj.size, 
+      checksum:     obj.etag.gsub('"',"")
+    }
+    blob = ActiveStorage::Blob.create_before_direct_upload!(**params)
+    blob.key = key
+    blob.service_name = :amazon_basil
+    blob.save!
+
+    # blob.update_attribute(:key, key)
+    # blob.update_attribute(:service_name, :amazon_basil)
+
+    commission.update(image: blob.signed_id)
     commission.cache_after_complete!
 
     # TODO: we should attach the S3 object to the commission.image attachment
@@ -319,6 +338,22 @@ class BasilController < ApplicationController
                                   .limit(50)
                                   .includes(:entity)
                                   .shuffle
+  end
+
+  def save
+    @commission = BasilCommission.find_by(
+      id:   params[:id],
+      user: current_user
+    )
+    @entity = @commission.entity
+
+
+
+    raise params.inspect
+  end
+
+  def delete
+    raise params.inspect
   end
 
   private
