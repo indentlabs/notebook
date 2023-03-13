@@ -157,6 +157,8 @@ class ContentController < ApplicationController
     @random_image_including_private_pool_cache = ImageUpload.where(
       user_id: current_user.id,
     ).group_by { |image| [image.content_type, image.content_id] }
+    @basil_images       = BasilCommission.where(entity: @content)
+                                         .where.not(saved_at: nil)
 
     respond_to do |format|
       format.html { render 'content/edit', locals: { content: @content } }

@@ -322,6 +322,7 @@ class BasilController < ApplicationController
       user: current_user
     )
     @commission.update(saved_at: DateTime.current)
+    render json: { success: true }, status: 200
   end
 
   def delete
@@ -330,6 +331,7 @@ class BasilController < ApplicationController
       user: current_user
     )
     @commission.destroy!
+    render json: { success: true }, status: 200
   end
 
   private

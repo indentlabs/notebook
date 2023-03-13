@@ -190,7 +190,7 @@ function commission_basil(style) {
                 <% else %>
                   <%= link_to "Save", '#', class: 'purple-text js-save-commission', data: { endpoint: basil_save_path(commission) } %>
                 <% end %>
-                <%= link_to "Delete", basil_delete_path(commission), class: 'red-text right right-align', style: 'margin-right: 0' %>
+                <%= link_to "Delete", '#', class: 'js-delete-commission red-text right right-align', style: 'margin-right: 0', data: { endpoint: basil_delete_path(commission) } %>
               </div>
             </div>
           </div>
@@ -215,6 +215,20 @@ $(document).ready(function() {
     var save_endpoint = $(this).data('endpoint');
     $.post(save_endpoint, function(data) {
       console.log(data);
+    });
+  });
+
+  $('.js-delete-commission').click(function() {
+    $(this).text('Deleting...');
+    $(this).closest('.card').hide();
+
+    var delete_endpoint = $(this).data('endpoint');
+    $.ajax({
+        url: delete_endpoint,
+        type: 'DELETE',
+        success: function(result) {
+          $(this).closest('.card').hide();
+        }
     });
   });
 });
