@@ -43,6 +43,141 @@ class BasilController < ApplicationController
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Geography', 'Area')
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Geography', 'Climate')
 
+    when 'Item'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Name')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Item Type')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Looks', 'Appearance'])
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Abilities', 'Magical effects')
+
+    when 'Building'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Name')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of building')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Design'])
+
+    when 'Condition'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of condition')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Effects', 'Symptoms')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Effects', 'Visual effects')
+
+    when 'Continent'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Geography', 'Area')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Geography', 'Shape')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Geography', 'Topography')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Geography', 'Bodies of water')
+
+    when 'Country'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Geography', 'Area')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Geography', 'Climate')
+
+    when 'Creature'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of creature')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Looks'])
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Traits', 'Method of attack')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Traits', 'Methods of defense')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Comparisons', 'Similar creatures')
+
+    when 'Deity'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Appearance'])
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Symbolism', 'Elements')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Symbolism', 'Symbols')
+
+    when 'Flora'
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Appearance'])
+
+    when 'Food'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of food')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Recipe', 'Ingredients')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Recipe', 'Color')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Recipe', 'Size')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Eating', 'Serving')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Eating', 'Texture')
+
+    when 'Government'
+      # DISABLE UNTIL WE HAVE A VISION OF WHAT TO GENERATE
+      # but yolo lets see what we get with the below
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Structure'])
+
+    when 'Group'
+      # PROBABLY NEEDS TEXTUAL INVERSION ON MEMBERS
+
+    when 'Job'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of job')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+
+    when 'Landmark'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of landmark')
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Appearance'])
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+
+    when 'Language'
+      # DISABLE UNTIL WE HAVE A VISION OF WHAT TO GENERATE
+
+    when 'Lore'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Content', 'Genre')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Content', 'Tone')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Culture', 'Time period')
+      # TODO textual inversion of any linked pages
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'About', 'Subjects')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+
+    when 'Magic'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Name')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of magic')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Appearance'])
+
+    when 'Planet'
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Geography'])
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Astral', 'Moons')
+
+    when 'Race'
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Looks'])
+
+    when 'Religion'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Beliefs', 'Places of worship')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Beliefs', 'Worship services')
+
+    when 'Scene'
+      # TODO hold off until we can use textual inversion of members + action + location
+
+    when 'School'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of school')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Identity', 'Colors')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+
+    when 'Sport'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Setup', 'Play area')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Setup', 'Equipment')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Setup', 'Number of players')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Setup', 'Scoring')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Culture', 'Uniforms')
+
+    when 'Technology'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Appearance'])
+
+    when 'Town'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Layout'])
+
+    when 'Tradition'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of tradition')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Celebrations', 'Activities')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Celebrations', 'Symbolism')
+
+    when 'Vehicle'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of vehicle')
+      @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Looks'])
+
     end
     @relevant_fields.compact!
 
