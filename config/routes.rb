@@ -15,7 +15,7 @@ Rails.application.routes.draw do
       # API endpoints
       post   '/complete/:jobid', to: 'basil#complete_commission'
       post   '/feedback/:jobid', to: 'basil#feedback', as: :basil_feedback
-      get    '/:id/save',        to: 'basil#save',     as: :basil_save
+      post   '/:id/save',        to: 'basil#save',     as: :basil_save
       delete '/:id/delete',      to: 'basil#delete',   as: :basil_delete
 
       # Standard generation flow for users

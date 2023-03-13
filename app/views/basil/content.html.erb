@@ -121,7 +121,7 @@ function commission_basil(style) {
   <div class="col s12 m6" style="margin-top: 1rem">
     <% if @commissions.any? %>
       <div class="card-panel">
-        <strong>Like an image and want to keep it?</strong> Just click <strong>Save</strong> and it'll save to your <%= @content.name %> page like a normal upload.
+        <strong>Like an image and want to keep it?</strong> Just click <strong>Save</strong> and it'll save to your <%= @content.name %> page next to any normal uploads.
       </div>
     <% end %>
 
@@ -135,8 +135,8 @@ function commission_basil(style) {
           %>
           <div class="card horizontal">
             <div class="card-image">
-              <%= link_to obj.presigned_url(:get) do %>
-                <%= image_tag obj.presigned_url(:get) %>
+              <%= link_to commission.image do %>
+                <%= image_tag commission.image %>
               <% end %>
             </div>
             <div class="card-stacked">
@@ -185,8 +185,12 @@ function commission_basil(style) {
                 </div>
               </div>
               <div class="card-action">
-                <%= link_to "Save", basil_save_path(commission), class: 'purple-text' %>
-                <%= link_to "Delete", basil_delete_path(commission), class: 'red-text right' %>
+                <% if commission.saved_at? %>
+                  <%= link_to 'Saved', commission.entity, class: 'blue-text' %>
+                <% else %>
+                  <%= link_to "Save", '#', class: 'purple-text js-save-commission', data: { endpoint: basil_save_path(commission) } %>
+                <% end %>
+                <%= link_to "Delete", basil_delete_path(commission), class: 'red-text right right-align', style: 'margin-right: 0' %>
               </div>
             </div>
           </div>
@@ -202,3 +206,16 @@ function commission_basil(style) {
     <% end %>
   </div>
 </div>
+
+<% content_for :javascript do %>
+$(document).ready(function() {
+  $('.js-save-commission').click(function() {
+    $(this).text('Saved!');
+
+    var save_endpoint = $(this).data('endpoint');
+    $.post(save_endpoint, function(data) {
+      console.log(data);
+    });
+  });
+});
+<% end %>

@@ -78,6 +78,8 @@ class ContentController < ApplicationController
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
 
     @serialized_content = ContentSerializer.new(@content)
+    @basil_images       = BasilCommission.where(entity: @content)
+                                         .where.not(saved_at: nil)
 
     if (current_user || User.new).can_read?(@content)
       respond_to do |format|

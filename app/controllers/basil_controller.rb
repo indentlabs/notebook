@@ -49,8 +49,8 @@ class BasilController < ApplicationController
     # Finally, cache some state we can reference in the view
     @commissions = BasilCommission.where(entity_type: @content.page_type, entity_id: @content.id)
                                   .order('id DESC')
-                                  .limit(20)
-                                  .includes(:basil_feedbacks)
+                                  .limit(10)
+                                  .includes(:basil_feedbacks, :image_blob)
     @in_progress_commissions = @commissions.select { |c| c.completed_at.nil? }
     @can_request_another     = @in_progress_commissions.count < 3
   end
@@ -288,32 +288,8 @@ class BasilController < ApplicationController
     blob.service_name = :amazon_basil
     blob.save!
 
-    # blob.update_attribute(:key, key)
-    # blob.update_attribute(:service_name, :amazon_basil)
-
     commission.update(image: blob.signed_id)
     commission.cache_after_complete!
-
-    # TODO: we should attach the S3 object to the commission.image attachment
-    # but I dunno how to do that yet. See broken attempts below.
-
-    # s3 = Aws::S3::Resource.new(region: "us-east-1")
-    # obj = s3.bucket("basil-characters").object("job-#{params[:jobid]}.png")
-    # blob_params = {
-    #   filename: File.basename(obj.key), 
-    #   content_type: obj.content_type, 
-    #   byte_size: obj.size, 
-    #   checksum: obj.etag.gsub('"',"")
-    # }
-    # raise "wow"
-    # blob = ActiveStorage::Blob.create_before_direct_upload!(**blob_params)
-
-    # # By default, the blob's key (S3 key, in this case) a secure (random) token
-    # # However, since the file is already on S3, we need to change the 
-    # # key to match our file on S3
-    # blob.update_attribute :key, obj.key
-
-    # raise params.inspect
 
     render json: { success: true }
   end
@@ -345,15 +321,15 @@ class BasilController < ApplicationController
       id:   params[:id],
       user: current_user
     )
-    @entity = @commission.entity
-
-
-
-    raise params.inspect
+    @commission.update(saved_at: DateTime.current)
   end
 
   def delete
-    raise params.inspect
+    @commission = BasilCommission.find_by(
+      id:   params[:id],
+      user: current_user
+    )
+    @commission.destroy!
   end
 
   private
