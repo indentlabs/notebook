@@ -1,5 +1,5 @@
 class BasilService < Service
-  IGNORED_VALUES = ['none', 'n/a', '.', '-', ' ', '?', '??', '???', 'x', nil]
+  IGNORED_VALUES = ['', 'none', 'n/a', '.', '-', ' ', '?', '??', '???', 'x', nil]
 
   def self.enabled_styles_for(page_type)
     case page_type
