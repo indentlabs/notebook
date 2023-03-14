@@ -4,7 +4,15 @@ class BasilController < ApplicationController
   before_action :require_admin_access, only: [:review], unless: -> { Rails.env.development? }
 
   def index
-    @enabled_content_types = [Character, Location].map(&:name)
+    disabled_content_types = [Universe]
+
+    @enabled_content_types = [
+      Character, Location, Item, 
+      # Building, Condition, Continent, Country,
+      # Creature, Deity, Flora, Food, Government, Group, Job, Landmark, Language,
+      # Lore, Magic, Planet, Race, Religion, Scene, School, Sport, Technology,
+      # Town, Tradition, Vehicle
+    ].map(&:name)
 
     @content_type = params[:content_type].try(:humanize) || 'Character'
     if @content_type.nil? || !@enabled_content_types.include?(@content_type)
@@ -30,6 +38,7 @@ class BasilController < ApplicationController
     # and format them into an array of [field, value] pairs to pass to the view
     @relevant_fields = []
     
+    # TODO: either move this to the default field template (metadata for each field) or to a BasilService
     case @content_type
     when 'Character'
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Gender')
@@ -325,16 +334,28 @@ class BasilController < ApplicationController
       "Name",
       "Identifying Marks",
       "Type",
-      "Description"
+      "Description",
+      "Body Type",
+      "Item type",
     ].map(&:downcase)
     field_importance_multipliers = {
-      'hair':       1.15,
-      'hair color': 1.55,
-      'hair style': 1.10,
-      'skin tone':  1.05,
-      'race':       1.10,
-      'eye color':  1.05,
-      'gender':     1.15
+      'hair':        1.15,
+      'hair color':  1.55,
+      'hair style':  1.10,
+      'skin tone':   1.05,
+      'race':        1.10,
+      'eye color':   1.05,
+      'gender':      1.15,
+      'description': 1.00,
+      'item type':   1.55,
+      'type':        1.15,
+      'type of building':  1.25,
+      'type of condition': 1.25,
+      'type of food':      1.15,
+      'type of landmark':  1.25,
+      'type of magic':     1.25,
+      'type of school':    1.25,
+      'type of vehicle':   1.25
     }
     label_value_pairs_to_skip_entirely = [
       ['race', 'human']

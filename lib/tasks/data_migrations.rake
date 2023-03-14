@@ -1,5 +1,5 @@
 namespace :data_migrations do
-  desc "Attach S3 images to BasilCommissioms"
+  desc "Attach S3 images to BasilCommissions"
   task attach_s3_images_to_basil_commissions: :environment do
     BasilCommission.find_each do |commission|
       # Skip if we've already attached an image

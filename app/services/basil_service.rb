@@ -7,6 +7,8 @@ class BasilService < Service
       %w(realistic painting sketch digital abstract)
     when 'Location'
       %w(realistic painting sketch)
+    when 'Item'
+      %w(realistic painting sketch)
     else
       %w(Default)
     end
