@@ -13,6 +13,8 @@ class BasilService < Service
       %w(realistic sketch)
     when 'Food'
       %w(realistic)
+    when 'Planet'
+      %w(realistic)
     else
       %w(Default)
     end

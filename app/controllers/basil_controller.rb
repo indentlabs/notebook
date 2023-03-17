@@ -8,12 +8,12 @@ class BasilController < ApplicationController
 
     @enabled_content_types = [
       Character, Location, Item, Building,
-      Food
+      Food, Planet
 
       # TODO
-      #Condition, Continent, Country,
+      # Condition, Continent, Country,
       # Creature, Deity, Flora, Government, Group, Job, Landmark, Language,
-      # Lore, Magic, Planet, Race, Religion, Scene, School, Sport, Technology,
+      # Lore, Magic, Race, Religion, Scene, School, Sport, Technology,
       # Town, Tradition, Vehicle
     ].map(&:name)
 
@@ -341,6 +341,7 @@ class BasilController < ApplicationController
       "Description",
       "Body Type",
       "Item type",
+      "Type of food"
     ].map(&:downcase)
     field_importance_multipliers = {
       'hair':        1.15,
@@ -355,7 +356,7 @@ class BasilController < ApplicationController
       'type':        1.15,
       'type of building':  1.25,
       'type of condition': 1.25,
-      'type of food':      1.15,
+      'type of food':      1.25,
       'type of landmark':  1.25,
       'type of magic':     1.25,
       'type of school':    1.25,
