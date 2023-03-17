@@ -7,9 +7,12 @@ class BasilController < ApplicationController
     disabled_content_types = [Universe]
 
     @enabled_content_types = [
-      Character, Location, Item, 
-      # Building, Condition, Continent, Country,
-      # Creature, Deity, Flora, Food, Government, Group, Job, Landmark, Language,
+      Character, Location, Item, Building,
+      Food
+
+      # TODO
+      #Condition, Continent, Country,
+      # Creature, Deity, Flora, Government, Group, Job, Landmark, Language,
       # Lore, Magic, Planet, Race, Religion, Scene, School, Sport, Technology,
       # Town, Tradition, Vehicle
     ].map(&:name)
@@ -103,6 +106,7 @@ class BasilController < ApplicationController
     when 'Food'
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of food')
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Recipe', 'Ingredients')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Recipe', 'Cooking method')
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Recipe', 'Color')
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Recipe', 'Size')
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Eating', 'Serving')
