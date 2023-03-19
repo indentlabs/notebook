@@ -472,6 +472,8 @@ class ContentController < ApplicationController
     raise "Invalid entity type: #{entity_params.fetch(:entity_type)}" unless valid_content_types.include?(entity_params.fetch('entity_type'))
     entity = entity_type.constantize.find_by(id: entity_params.fetch(:entity_id).to_i)
     entity.update(name: field_params.fetch('value', ''))
+
+    render json: attribute_value.to_json, status: 200
   end
 
   # Content update for text_area fields
@@ -485,10 +487,11 @@ class ContentController < ApplicationController
 
     UpdateTextAttributeReferencesJob.perform_later(attribute_value.id)
 
-    respond_to do |format|
-      format.html { redirect_back(fallback_location: root_path, notice: "#{@attribute_field.label} updated!") }
-      format.json { render json: attribute_value, status: :success }
-    end
+    # respond_to do |format|
+    #   format.html { redirect_back(fallback_location: root_path, notice: "#{@attribute_field.label} updated!") }
+    #   format.json { render json: attribute_value, status: :success }
+    # end
+    render json: attribute_value.to_json, status: 200
   end
 
   def tags_field_update
@@ -504,6 +507,8 @@ class ContentController < ApplicationController
     set_entity
     @content = @entity
     update_page_tags
+
+    render json: attribute_value.to_json, status: 200
   end
 
   def universe_field_update
@@ -523,6 +528,8 @@ class ContentController < ApplicationController
       user: current_user
     )
     @content.update!(universe_id: attribute_value.value)
+
+    render json: attribute_value.to_json, status: 200
   end
 
   private
