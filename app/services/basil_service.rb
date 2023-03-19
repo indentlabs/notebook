@@ -15,6 +15,8 @@ class BasilService < Service
       %w(realistic)
     when 'Planet'
       %w(realistic)
+    when 'Landmark'
+      %w(realistic)
     else
       %w(Default)
     end
