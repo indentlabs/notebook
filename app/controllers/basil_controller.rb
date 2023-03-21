@@ -9,15 +9,20 @@ class BasilController < ApplicationController
     @enabled_content_types = [
       Character, Location, Item,
       Food, Planet, Landmark,
+      Flora,
 
       # TODO improve these before release, if possible
-      Building,
+      Building, Vehicle,
 
-      # TODO
-      # Condition, Continent, Country,
-      # Creature, Deity, Flora, Government, Group, Job, Landmark, Language,
-      # Lore, Magic, Race, Religion, Scene, School, Sport, Technology,
-      # Town, Tradition, Vehicle
+      # TODO before release
+      # Continent, Country,
+      # Creature, Deity,
+      # Magic, School, Sport, Technology,
+      # Town, Tradition
+
+      # Probably won't do before release
+      # Condition, Government, Group, Job, Language, Lore,
+      # Race, Religion, Scene
     ].map(&:name)
 
     @content_type = params[:content_type].try(:humanize) || 'Character'
