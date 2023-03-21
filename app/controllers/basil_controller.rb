@@ -105,6 +105,7 @@ class BasilController < ApplicationController
 
     when 'Flora'
       @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Appearance'])
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
 
     when 'Food'
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of food')

@@ -18,7 +18,7 @@ class BasilService < Service
     when 'Landmark'
       %w(realistic)
     else
-      %w(Default)
+      %w(realistic)
     end
   end
 
