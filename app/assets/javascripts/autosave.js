@@ -9,7 +9,7 @@ $(document).ready(function() {
       form_data += "&authenticity_token=" + $('meta[name="csrf-token"]').attr('content');
 
       $.ajax({
-        url:  content_form.attr('action'),
+        url:  content_form.attr('action') + '.json',
         type: content_form.attr('method').toUpperCase(),
         data: form_data,
         success: function(response) {
