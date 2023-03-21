@@ -17,6 +17,8 @@ class BasilService < Service
       %w(realistic)
     when 'Landmark'
       %w(realistic)
+    when 'Town'
+      %w(realistic map)
     else
       %w(realistic)
     end
