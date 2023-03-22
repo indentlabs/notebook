@@ -5,9 +5,10 @@ Rails.application.routes.draw do
   scope :ai, path: '/ai' do
     scope :basil do
       # Meta pages
-      get '/help/rate',     to: 'basil#help_rate', as: :basil_rating_queue
-      get '/about',         to: 'basil#about'
-      get '/stats',         to: 'basil#stats', as: :basil_stats
+      get '/help/rate',        to: 'basil#help_rate',  as: :basil_rating_queue
+      get '/stats',            to: 'basil#stats',      as: :basil_stats
+      get '/stats/:page_type', to: 'basil#page_stats', as: :basil_page_stats
+      # get '/about',            to: 'basil#about'
 
       # Admin pages
       get '/review',        to: 'basil#review'

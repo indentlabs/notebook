@@ -11,7 +11,7 @@ class BasilController < ApplicationController
       Food, Planet, Landmark,
       Flora, Town,
 
-      # TODO improve these before release, if possible
+      # TODO improve these before release, if possible; otherwise disable
       Building, Vehicle,
 
       # TODO before release
@@ -330,6 +330,86 @@ class BasilController < ApplicationController
     # average time to complete today / this week
     # commissions per day bar chart
     # count(average time to complete) bar chart
+  end
+
+  def page_stats
+    @page_type = params[:page_type]
+    # TODO verify page_type is valid
+
+    @commissions = BasilCommission.where(entity_type: @page_type)
+
+    # Feedback today
+    @feedback_today = BasilFeedback.where('updated_at > ?', 24.hours.ago)
+                                   .where(basil_commission_id: @commissions.pluck(:id))
+                                   .order(:score_adjustment)
+                                   .group(:score_adjustment)
+                                   .count
+    total = @feedback_today.values.sum
+    @emoji_counts_today = @feedback_today.map do |score, count|
+      emoji = case score
+        when -2 then "Very Bad :'("
+        when -1 then "Bad :("
+        when  0 then "Meh :|"
+        when  1 then "Good :)"
+        when  2 then "Very Good :D"
+        when  3 then "Lovely! <3"
+      end
+      [emoji, (count / total.to_f * 100).round(1)]
+    end
+
+    # Feedback all time
+    @feedback_before_today = BasilFeedback.where('updated_at < ?', 24.hours.ago)
+                                          .where(basil_commission_id: @commissions.pluck(:id))
+                                          .order(:score_adjustment)
+                                          .group(:score_adjustment)
+                                          .count
+    days_since_start = (Date.current - BasilFeedback.minimum(:updated_at).to_date)
+    days_since_start = 1 if days_since_start.zero? # no dividing by 0 lol
+
+    total = @feedback_before_today.values.sum
+    @emoji_counts_all_time = @feedback_before_today.map do |score, count|
+      emoji = case score
+        when -2 then "Very Bad :'("
+        when -1 then "Bad :("
+        when  0 then "Meh :|"
+        when  1 then "Good :)"
+        when  2 then "Very Good :D"
+        when  3 then "Lovely! <3"
+      end
+
+      [emoji, (count / total.to_f * 100).round(1)]
+    end
+
+    active_styles = [
+      BasilService.enabled_styles_for(@page_type),
+      BasilService.experimental_styles_for(@page_type),
+    ].flatten.compact.uniq
+
+    @total_score_per_style = @commissions.where(style: active_styles)
+                                              .joins(:basil_feedbacks)
+                                              .group(:style)
+                                              .sum(:score_adjustment)
+                                              .map { |style, average| [style, average.round(1)] }
+                                              .sort_by(&:second)
+                                              .reverse
+    @average_score_per_style = @commissions.where(style: active_styles)
+                                              .joins(:basil_feedbacks)
+                                              .group(:style)
+                                              .average(:score_adjustment)
+                                              .map { |style, average| [style, average.round(1)] }
+                                              .sort_by(&:second)
+                                              .reverse
+
+    @average_score_per_page_type = @commissions.where.not(completed_at: nil)
+                                                  .joins(:basil_feedbacks)
+                                                  .group(:entity_type)
+                                                  .average(:score_adjustment)
+                                                  .map { |k, v| [k, (v * 100).round(1)] }.to_h
+
+    # # queue size (total commissions - completed commissions)
+    # # average time to complete today / this week
+    # # commissions per day bar chart
+    # # count(average time to complete) bar chart
   end
 
   def review

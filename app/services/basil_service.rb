@@ -27,7 +27,7 @@ class BasilService < Service
   def self.experimental_styles_for(page_type)
     case page_type
     when 'Character'
-      %w(realistic2 painting2 painting3 horror watercolor anime)
+      %w(realistic2 realistic3 painting2 painting3 horror watercolor anime)
     else
       []
     end
