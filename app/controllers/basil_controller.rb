@@ -42,7 +42,11 @@ class BasilController < ApplicationController
     raise "No content found for #{params[:content_type]} with ID #{params[:id]} for user #{current_user.id}" if @content.nil?
 
     # Fetch any existing Basil configurations/guidance for this character
-    @guidance   = BasilFieldGuidance.find_or_initialize_by(entity: @content, user: current_user).try(:guidance)
+    @guidance   = BasilFieldGuidance.find_or_initialize_by(
+      entity_type: @content.page_type,
+      entity_id:   @content.id,
+      user:        current_user
+    ).try(:guidance)
     @guidance ||= {}
 
     # Fetch all the related fields for this content type and their values

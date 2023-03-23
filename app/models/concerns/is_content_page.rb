@@ -18,6 +18,8 @@ module IsContentPage
     has_many :timeline_events,             through: :timeline_event_entities
     has_many :timelines, -> { distinct },  through: :timeline_events
 
+    has_many :basil_commissions,           as: :entity, dependent: :destroy
+
     has_many :word_count_updates, as: :entity, dependent: :destroy
     def latest_word_count_cache
       word_count_updates.order('for_date DESC').limit(1).first.try(:word_count) ||  0
