@@ -60,6 +60,12 @@ class ContentController < ApplicationController
       content_id:   @content.pluck(:id)
     ).group_by { |image| [image.content_type, image.content_id] }
 
+    @saved_basil_commissions = BasilCommission.where(
+      entity_type: @content_type_class.name,
+      entity_id:   @content.pluck(:id)
+    ).where.not(saved_at: nil)
+    .group_by { |commission| [commission.entity_type, commission.entity_id] }
+
     # Uh, do we ever actually make JSON requests to logged-in user pages?
     respond_to do |format|
       format.html { render 'content/index' }

@@ -209,6 +209,7 @@ class BasilController < ApplicationController
 
     # Finally, cache some state we can reference in the view
     @commissions = BasilCommission.where(entity_type: @content.page_type, entity_id: @content.id)
+                                  .where(saved_at: nil)
                                   .order('id DESC')
                                   .limit(10)
                                   .includes(:basil_feedbacks, :image_blob)
