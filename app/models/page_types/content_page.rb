@@ -10,7 +10,9 @@ class ContentPage < ApplicationRecord
   self.authorizer_name = 'ContentPageAuthorizer'
 
   def random_image_including_private(format: :small)
-    ImageUpload.where(content_type: self.page_type, content_id: self.id).sample.try(:src, format) || ActionController::Base.helpers.asset_path("card-headers/#{self.page_type.downcase.pluralize}.webp")
+    ImageUpload.where(content_type: self.page_type, content_id: self.id).sample.try(:src, format) \
+    || BasilCommission.where(entity_type: self.page_type, entity_id: self.id).where.not(saved_at: nil).sample.try(:image) \
+    || ActionController::Base.helpers.asset_path("card-headers/#{self.page_type.downcase.pluralize}.webp")
   end
 
   def icon

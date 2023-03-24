@@ -21,8 +21,16 @@ module HasImageUploads
       key = self.class.name + self.id.to_s
       return @random_image_including_private_cache[key] if @random_image_including_private_cache.key?(key)
 
-      result = image_uploads.sample.try(:src, format).presence || header_asset_for(self.class.name)
+      result = image_uploads.sample.try(:src, format)
       @random_image_including_private_cache[key] = result
+
+      # If we don't have any uploaded images, we look for saved Basil commissions
+      if result.nil?
+        result = basil_commissions.where.not(saved_at: nil).sample.try(:image)
+      end
+
+      # Finally, if we have no image upload, we return the default image for this type
+      result = result.presence || header_asset_for(self.class.name)
 
       result
     end
