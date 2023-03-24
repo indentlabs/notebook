@@ -78,6 +78,7 @@ function commission_basil(style) {
         </div>
       </div>
 
+      <!--
       <div style="margin-top: 2rem">
         <%= link_to new_polymorphic_path(@content.page_type.downcase), class: "hoverable card-panel white-text #{@content.color}", style: 'display: block' do %>
           <i class="material-icons left">add</i>
@@ -86,10 +87,13 @@ function commission_basil(style) {
           </span>
         <% end %>
       </div>
+      -->
     </div>
   <% end %>
 
   <div class="col s12 m8" style="margin-top: 1rem">
+    <%= render partial: 'notice_dismissal/messages/19' if show_notice?(id: 19) %>
+
     <% if @can_request_another && @relevant_fields.any? %>
       <div class="row" style="padding-left: 0.5rem">
         <div class="grey-text center"><strong>Available styles</strong></div>
@@ -217,6 +221,16 @@ function commission_basil(style) {
             </div>
           </div>
         <% end %>
+      </div>
+    <% end %>
+
+    <% if @commissions.count == 10 %>
+      <div class="card-panel">
+        <div class="text-center"><strong>End of the list?</strong></div>
+        <p>
+          Only your 10 most recent generations are displayed here, but you can still find all
+          of your generated images on the <%= link_to 'Basil Feedback', basil_rating_queue_path %> pages.
+        </p>
       </div>
     <% end %>
   </div>

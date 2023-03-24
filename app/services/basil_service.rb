@@ -43,6 +43,7 @@ class BasilService < Service
 
     fields = AttributeField.where(
       attribute_category_id: category.pluck(:id),
+      field_type:            ['name', 'text_area', 'textarea'],
       hidden:                [nil, false]
     )
     return nil if fields.empty?
