@@ -127,7 +127,7 @@
         <% end %>
       <% else %>
         <%
-          accessible_universes = @current_user_content.fetch('Universe', []) + current_user.contributable_universes
+          accessible_universes = (@current_user_content.fetch('Universe', []) + current_user.contributable_universes).uniq(&:id)
           if accessible_universes.count > 1
         %>
           <div class="grey-text uppercase center">
@@ -155,7 +155,7 @@
     </div>
   <% end %>
 
-  <%= render partial: 'notice_dismissal/messages/18' %>
+  <%= render partial: 'notice_dismissal/messages/20' if show_notice?(id: 20) %>
 
   <div class="col s12 m5 l4">
     <% if @recently_edited_pages.any? %>

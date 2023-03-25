@@ -559,16 +559,23 @@ class BasilController < ApplicationController
   end
 
   def help_rate
-    # Commissions without feedback:
+    @reviewed_commission_count = BasilFeedback.where(user: current_user).where.not(score_adjustment: nil).count
+
     @reviewed_commission_ids = BasilFeedback.where(user: current_user)
-                                           .pluck(:basil_commission_id)
-    @commissions = BasilCommission.where.not(id: @reviewed_commission_ids)
+    if params.key?(:rating)
+      @reviewed_commission_ids = @reviewed_commission_ids.where(score_adjustment: params[:rating].to_i)
+    else
+      # Unreviewed commissions
+      @reviewed_commission_ids = @reviewed_commission_ids.where(score_adjustment: nil)
+    end
+
+    @commissions = BasilCommission.where(id: @reviewed_commission_ids.pluck(:basil_commission_id))
                                   .where.not(completed_at: nil)
                                   .where(user: current_user)
                                   .order(created_at: :desc)
                                   .limit(50)
                                   .includes(:entity)
-                                  .shuffle
+                                  .order(completed_at: :desc)
   end
 
   def save
