@@ -26,11 +26,13 @@ class BasilController < ApplicationController
     ].map(&:name)
 
     @content_type = params[:content_type].try(:humanize) || 'Character'
-    if @content_type.nil? || !@enabled_content_types.include?(@content_type)
-      return raise "Invalid content type: #{params[:content_type]}"
-    end
+    if @content_type.present?
+      if !@enabled_content_types.include?(@content_type)
+        return raise "Invalid content type: #{params[:content_type]}"
+      end
 
-    @content = @current_user_content[@content_type].sort_by(&:name)
+      @content = @current_user_content[@content_type].sort_by(&:name)      
+    end
   end
 
   def content

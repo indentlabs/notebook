@@ -54,13 +54,15 @@ function commission_basil(style) {
 
       <% if @relevant_fields.empty? %>
         <div class="red card-panel lighten-3">
-          Basil works best with guidance! Please fill out more fields for this page
+          <strong>Basil works best with guidance!</strong>
+          <br /><br />
+          Please <%= link_to 'fill out more fields', @content.edit_path %> for this page
           before requesting an image.
         </div>
       <% end %>
 
       <div>
-        <% if @can_request_another %>
+        <% if @can_request_another && @relevant_fields.any? %>
           <%= link_to 'Customize per-field importance', "javascript:var sliders = document.getElementsByClassName('js-importance-slider'); for(var i = 0; i < sliders.length; i++) sliders.item(i).classList.remove('hide')" %>
         <% end %>
 
