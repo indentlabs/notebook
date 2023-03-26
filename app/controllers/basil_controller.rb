@@ -12,7 +12,7 @@ class BasilController < ApplicationController
       Flora, Town,
 
       # TODO improve these before release, if possible; otherwise disable
-      Building, Vehicle,
+      Building, Vehicle, Creature,
 
       # TODO before release
       # Continent, Country,
@@ -456,7 +456,8 @@ class BasilController < ApplicationController
       'type of landmark':  1.25,
       'type of magic':     1.25,
       'type of school':    1.25,
-      'type of vehicle':   1.25
+      'type of vehicle':   1.25,
+      'type of creature':  1.25
     }
     label_value_pairs_to_skip_entirely = [
       ['race', 'human']

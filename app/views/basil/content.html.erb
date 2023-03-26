@@ -104,7 +104,7 @@ function commission_basil(style) {
             <%= link_to "javascript:commission_basil('#{style}')" do %>
               <div class="hoverable card-panel purple white-text">
                 <%= style.humanize %>
-                <i class="material-icons right">chevron_right</i>
+                <i class="material-icons right">chevron_down</i>
               </div>
             <% end %>
           </div>
@@ -121,7 +121,7 @@ function commission_basil(style) {
               <%= link_to "javascript:commission_basil('#{style}')" do %>
                 <div class="hoverable card-panel purple white-text">
                   <%= style.humanize %>
-                  <i class="material-icons right">chevron_right</i>
+                  <i class="material-icons right">chevron_down</i>
                 </div>
               <% end %>
             </div>
@@ -149,77 +149,76 @@ function commission_basil(style) {
     <% @commissions.each do |commission| %>
       <div>
         <% if commission.complete? %>
-          <%# image_tag commission.image, style: 'width: 100%' %>
-          <%
-            s3 = Aws::S3::Resource.new(region: "us-east-1")
-            obj = s3.bucket(commission.s3_bucket).object("job-#{commission.job_id}.png")
-          %>
-          <div class="card horizontal">
+          <div class="card">
             <div class="card-image">
               <%= link_to commission.image do %>
                 <%= image_tag commission.image %>
               <% end %>
             </div>
-            <div class="card-stacked">
-              <div class="card-content">
-                <div>
-                  <strong><%= @content.name %></strong>
-                  <% if commission.style? %>
-                    <em>(<%= commission.style.humanize %>)</em>
+            <div class="card-content">
+              <div>
+                <strong><%= @content.name %></strong>
+                <% if commission.style? %>
+                  <em>(<%= commission.style.humanize %>)</em>
+                <% end %>
+              </div>
+              <div class="grey-text text-darken-2">
+                <span style="font-size: 0.8em">Completed <%= time_ago_in_words commission.completed_at %> ago</span>
+                &middot;<br />
+                <span style="font-size: 0.8em">Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %></span>
+              </div>
+              <div style="margin-top: 1em">
+                <div class="center" style="font-size: 0.9em"><strong>Feedback for Basil</strong></div>
+                <div class="row">
+                  <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), url: basil_feedback_path(commission.job_id), method: :POST, remote: true do |f| %>
+                    <div class="col s4 m4 l2 red lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '-2', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text">:'(</span>
+                      </label>
+                    </div>
+                    <div class="col s4 m4 l3 orange lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '-1', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text">:(</span>
+                      </label>
+                    </div>
+                    <div class="col s4 m4 l3 green lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '1', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text">:)</span>
+                      </label>
+                    </div>
+                    <div class="col s4 m4 l2 blue lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '2', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text">:D</span>
+                      </label>
+                    </div>
+                    <div class="col s4 m4 l2 red lighten-4">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '3', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="red-text" style="font-size: 1.4em">&hearts;</span>
+                      </label>
+                    </div>
                   <% end %>
                 </div>
-                <div class="grey-text text-darken-2">
-                  <span style="font-size: 0.8em">Completed <%= time_ago_in_words commission.completed_at %> ago</span>
-                  &middot;<br />
-                  <span style="font-size: 0.8em">Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %></span>
-                </div>
-                <div style="margin-top: 1em">
-                  <div class="center" style="font-size: 0.9em"><strong>Feedback for Basil</strong></div>
-                  <div class="row">
-                    <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), url: basil_feedback_path(commission.job_id), method: :POST, remote: true do |f| %>
-                      <div class="col s3 red lighten-3">
-                        <label>
-                          <%= f.radio_button :score_adjustment, '-2', { class: 'autosave-closest-form-on-change' } %>
-                          <span class="black-text">:'(</span>
-                        </label>
-                      </div>
-                      <div class="col s3 orange lighten-3">
-                        <label>
-                          <%= f.radio_button :score_adjustment, '-1', { class: 'autosave-closest-form-on-change' } %>
-                          <span class="black-text">:(</span>
-                        </label>
-                      </div>
-                      <div class="col s3 green lighten-3">
-                        <label>
-                          <%= f.radio_button :score_adjustment, '1', { class: 'autosave-closest-form-on-change' } %>
-                          <span class="black-text">:)</span>
-                        </label>
-                      </div>
-                      <div class="col s3 blue lighten-3">
-                        <label>
-                          <%= f.radio_button :score_adjustment, '2', { class: 'autosave-closest-form-on-change' } %>
-                          <span class="black-text">:D</span>
-                        </label>
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
               </div>
-              <div class="card-action">
-                <% if commission.saved_at? %>
-                  <%= link_to 'Saved', commission.entity, class: 'blue-text' %>
-                <% else %>
-                  <%= link_to "Save", '#', class: 'js-save-commission purple-text', data: { endpoint: basil_save_path(commission) } %>
-                <% end %>
-                <%= link_to "Delete", '#', class: 'js-delete-commission red-text right right-align', style: 'margin-right: 0', data: { endpoint: basil_delete_path(commission) } %>
-              </div>
+            </div>
+            <div class="card-action">
+              <% if commission.saved_at? %>
+                <%= link_to 'Saved', commission.entity, class: 'blue-text' %>
+              <% else %>
+                <%= link_to "Save to page", '#', class: 'js-save-commission purple-text', data: { endpoint: basil_save_path(commission) } %>
+              <% end %>
+              <%= link_to "Delete", '#', class: 'js-delete-commission red-text right right-align', style: 'margin-right: 0', data: { endpoint: basil_delete_path(commission) } %>
             </div>
           </div>
         <% else %>
           <div class="card-panel green white-text darken-4">
             Basil is still working on this commission... (style: <%= commission.style %>)
             <div style="font-size: 0.8em">
-              (Requested <%= time_ago_in_words(commission.created_at) %> ago)
+              (Requested <%= time_ago_in_words(commission.created_at) %> ago &middot; Refresh this page for updates)
             </div>
           </div>
         <% end %>

@@ -11,14 +11,10 @@ class BasilService < Service
       %w(realistic painting sketch)
     when 'Building'
       %w(realistic sketch)
-    when 'Food'
-      %w(realistic)
-    when 'Planet'
-      %w(realistic)
-    when 'Landmark'
-      %w(realistic)
     when 'Town'
       %w(realistic map)
+    when 'Creature'
+      %w(realistic fantasy)
     else
       %w(realistic)
     end
