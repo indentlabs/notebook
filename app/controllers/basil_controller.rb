@@ -8,11 +8,12 @@ class BasilController < ApplicationController
 
     @enabled_content_types = [
       Character, Location, Item,
-      Food, Planet, Landmark,
-      Flora, Town,
+      Creature, Flora,
+      Food, Planet, 
+      Landmark, Town,
 
       # TODO improve these before release, if possible; otherwise disable
-      Building, Vehicle, Creature,
+      # Building, Vehicle, 
 
       # TODO before release
       # Continent, Country,
