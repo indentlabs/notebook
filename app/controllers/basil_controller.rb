@@ -550,18 +550,26 @@ class BasilController < ApplicationController
     @reviewed_commission_ids = BasilFeedback.where(user: current_user)
     if params.key?(:rating)
       @reviewed_commission_ids = @reviewed_commission_ids.where(score_adjustment: params[:rating].to_i)
+
+      @commissions = BasilCommission.where(id: @reviewed_commission_ids.pluck(:basil_commission_id))
+        .where.not(completed_at: nil)
+        .where(user: current_user)
+        .order(created_at: :desc)
+        .limit(50)
+        .includes(:entity)
+        .order(completed_at: :desc)
     else
       # Unreviewed commissions
       @reviewed_commission_ids = @reviewed_commission_ids.where(score_adjustment: nil)
-    end
 
-    @commissions = BasilCommission.where(id: @reviewed_commission_ids.pluck(:basil_commission_id))
-                                  .where.not(completed_at: nil)
-                                  .where(user: current_user)
-                                  .order(created_at: :desc)
-                                  .limit(50)
-                                  .includes(:entity)
-                                  .order(completed_at: :desc)
+      @commissions = BasilCommission.where.not(id: @reviewed_commission_ids)
+        .where.not(completed_at: nil)
+        .where(user: current_user)
+        .order(created_at: :desc)
+        .limit(50)
+        .includes(:entity)
+        .order(completed_at: :desc)
+    end
   end
 
   def save
