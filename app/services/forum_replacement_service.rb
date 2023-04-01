@@ -25,6 +25,8 @@ class ForumReplacementService < Service
   CASUAL_CHAOS_WORD_REPLACEMENTS = {
     'andrew'            => 'andrew (Our Supreme Lord and Overseer)',
     'amy'               => 'amy (the most wonderful woman in the world)',
+    'gremlin'           => 'friend',
+    'gremlins'          => 'friends',
   }
 
   REFERENCE_REPLACEMENTS = {
@@ -360,7 +362,7 @@ class ForumReplacementService < Service
   }
 
   def self.replace_for(text, user)
-    gremlins_phase = 0
+    gremlins_phase = 1
     replaced_text = text.dup
 
     # Page tag replacements
