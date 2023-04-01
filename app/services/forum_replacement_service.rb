@@ -83,9 +83,10 @@ class ForumReplacementService < Service
     'baseball'          => 'throwing soccer',
     'basketball'        => 'dribbling soccer',
     'bear'              => '(ᵔᴥᵔ)',
+    'b e a r'           => '( ᵔ ᴥ ᵔ )',
     'bears'             => '(ᵔᴥᵔ)(ᵔᴥᵔ)',
-    'beautiful'         => "<em>bonita</e>",
-    'B E A U T I F U L' => "<em>B O N I T A</e>",
+    'beautiful'         => "<em>bonita</em>",
+    'B E A U T I F U L' => "<em>B O N I T A</em>",
     'billion'           => 'giga-gob',
     'billions'          => 'giga-gobs',
     'bird'              => 'government spy drone',
@@ -376,6 +377,7 @@ class ForumReplacementService < Service
     'feo'                   => 'ugly</em>',
     'insurance'             => 'the biggest scam known to man',
     'internet'              => 'series of electrotubes',
+    'irl'                   => 'in meatspace',
     'lemonade'              => 'sour drank',
     'kill'                  => 'deathsnuggle',
     'over here'             => 'hither',
@@ -391,13 +393,16 @@ class ForumReplacementService < Service
     'Notebook.ai'           => 'NotebookAnvil',
     'online'                => 'on the interwebs',
     'highlighted'           => 'becoming better',
+    'horrible prank'        => 'horrible prank <em>',
     'rule'                  => 'law you must obey',
     'rules'                 => 'laws you must obey',
     'vampire'               => '✨vampire✨',
     'vampires'              => '✨vampires✨',
+    'voldemort'             => 'he who shall not be named',
     'video'                 => 'series of images played in rapid succession to give the illusion of movement on a static screen',
     'volleyball'            => 'beach air soccer',
-    'why is this happening' => 'I think this is great'
+    'why is this happening' => 'I think this is great',
+    'yeet'                  => 'defenestrate'
   }
 
   def self.replace_for(text, user)
