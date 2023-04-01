@@ -5,10 +5,12 @@
         .sample
         .try(:src, :medium)
 
-      content_image ||= @saved_basil_commissions.fetch([content.page_type, content.id], [])
-        .sample
-        .try(:image)
-        .try(:url)
+      if @saved_basil_commissions
+        content_image ||= @saved_basil_commissions.fetch([content.page_type, content.id], [])
+          .sample
+          .try(:image)
+          .try(:url)
+      end
 
       content_image ||= asset_path("card-headers/#{content.page_type.downcase.pluralize}.jpg")
     %>

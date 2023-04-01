@@ -36,6 +36,12 @@ class UsersController < ApplicationController
       @content_type = content_type
       @content_list = @user.send(content_type_name).is_public.order(:name)
 
+      @saved_basil_commissions = BasilCommission.where(
+        entity_type: content_type_name,
+        entity_id:   @content_list.pluck(:id)
+      ).where.not(saved_at: nil)
+      .group_by { |commission| [commission.entity_type, commission.entity_id] }
+
       render :content_list
     end
   end
