@@ -25,7 +25,7 @@ module HasImageUploads
       @random_image_including_private_cache[key] = result
 
       # If we don't have any uploaded images, we look for saved Basil commissions
-      if result.nil?
+      if result.nil? && respond_to?(:basil_commissions)
         result = basil_commissions.where.not(saved_at: nil).sample.try(:image)
       end
 
