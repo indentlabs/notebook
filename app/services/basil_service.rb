@@ -1,6 +1,26 @@
 class BasilService < Service
   IGNORED_VALUES = ['', 'none', 'n/a', '.', '-', ' ', '?', '??', '???', 'x', nil]
 
+  ENABLED_PAGE_TYPES = [
+    Character, Location, Item,
+    Creature, Flora,
+    Food, Planet, 
+    Landmark, Town,
+
+    # TODO improve these before release, if possible; otherwise disable
+    # Building, Vehicle, 
+
+    # TODO before release
+    # Continent, Country,
+    # Creature, Deity,
+    # Magic, School, Sport, Technology,
+    # Tradition
+
+    # Probably won't do before release
+    # Condition, Government, Group, Job, Language, Lore,
+    # Race, Religion, Scene
+  ].map(&:name)
+
   def self.enabled_styles_for(page_type)
     case page_type
     when 'Character'

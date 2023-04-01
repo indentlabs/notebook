@@ -6,25 +6,7 @@ class BasilController < ApplicationController
   def index
     disabled_content_types = [Universe]
 
-    @enabled_content_types = [
-      Character, Location, Item,
-      Creature, Flora,
-      Food, Planet, 
-      Landmark, Town,
-
-      # TODO improve these before release, if possible; otherwise disable
-      # Building, Vehicle, 
-
-      # TODO before release
-      # Continent, Country,
-      # Creature, Deity,
-      # Magic, School, Sport, Technology,
-      # Tradition
-
-      # Probably won't do before release
-      # Condition, Government, Group, Job, Language, Lore,
-      # Race, Religion, Scene
-    ].map(&:name)
+    @enabled_content_types = BasilService::ENABLED_PAGE_TYPES
 
     @content_type = params[:content_type].try(:humanize) || 'Character'
     if @content_type.present?
