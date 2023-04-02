@@ -453,7 +453,6 @@ class ForumReplacementService < Service
     'muffin'                => 'cakelet',
     'muffins'               => 'cakelets',
     'nacho'                 => 'cheesy triangle',
-    'Notebook.ai'           => 'NotebookAnvil',
     'online'                => 'on the interwebs',
     'pajamas'               => 'nighty-suit',
     'rule'                  => 'law you must obey',
