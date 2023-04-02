@@ -436,7 +436,7 @@ class ForumReplacementService < Service
     'piano'                 => 'tinkle-tapper',
     'Pokeball'              => 'Prisonball',
     'recruit'               => 'kidnap',
-    'sacred summoning words' => "According to all known laws of aviation, there is no way a bee should be able to fly. Its wings are too small to get its fat little body off the ground. The bee, of course, flies anyway because bees don't care what humans think is impossible.",
+    'sacred summoning wods' => "According to all known laws of aviation, there is no way a bee should be able to fly. Its wings are too small to get its fat little body off the ground. The bee, of course, flies anyway because bees don't care what humans think is impossible.",
     'salamander'            => 'baby dragon',
     'soul'                  => 'inner ghost',
     'subtext'               => '<sub>text</sub>',
