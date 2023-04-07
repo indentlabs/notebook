@@ -472,7 +472,7 @@ class ForumReplacementService < Service
   }
 
   def self.replace_for(text, user)
-    gremlins_phase = 1
+    gremlins_phase = 0
     replaced_text = text.dup
 
     # Page tag replacements
