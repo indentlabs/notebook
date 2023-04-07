@@ -1,0 +1,80 @@
+<div class="row">
+  <div class="col s12 m3">
+    <%= image_tag 'basil/portrait.png', style: 'width: 100%' %>
+  </div>
+  <div class="col s12 m9">
+    <h1 style="font-size: 2em; margin-left: 1rem">Hey, I'm Basil.</h4>
+    <h2 style="font-size: 1.4em; margin-left: 1rem">I can help you visualize your ideas.</h2>
+    <p style="margin-left: 1rem">
+      This is a little About Me page.
+      <%= link_to 'Click here to start generating images of your ideas.', basil_path %>
+    </p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12 m4 l3">
+    <h1 class="center purple-text" style="margin-bottom: 0; margin-top: 1.6em"><%= number_with_delimiter @commissions.count %></h1>
+    <div class="center grey-text"><strong><%= @page_type.downcase %> images created</strong></div>    
+  </div>
+  <div class="col s12 m8 l9 grey lighten-3">
+    <%=
+      area_chart @commissions.group_by_day(:created_at).map { |date, count| [date.to_date, count] },
+        colors: ['#9C27B0', '#2196F3'],
+        title: "#{@page_type} images created per day",
+        suffix: ' images'
+    %>
+  </div>
+
+  <div class="col s12">
+    <br /><br />
+  </div>
+
+  <div class="col s12 m8 l7 grey lighten-3">
+    <%=
+      column_chart [
+        { name: "Historical average",  data: @emoji_counts_all_time },
+        { name: "Today",               data: @emoji_counts_today, }
+      ],
+      colors: ['#2196F3', '#C88ED2'],
+      title: "Quality: #{number_with_delimiter @feedback_today.values.sum + @feedback_before_today.values.sum} #{'image'.pluralize @feedback_before_today.values.sum} rated",
+      suffix: '%'
+    %>
+  </div>
+  <div class="col s12 m4 l5">
+    <div class="grey lighten-3">
+      <%=
+        pie_chart @emoji_counts_today,
+          colors: ['#B71C1C', '#D95151', '#757575' '#1B5E20', '#236428', '#43A047', '#2196F3'],
+          legend: 'right',
+          donut: true,
+          title: "Today's quality ratings",
+          suffix: '%'
+      %>
+    </div>
+    <br /><br /><br />
+  </div>
+
+    <div class="col s12 m6 grey lighten-3">
+    <%=
+      bar_chart @average_score_per_style,
+        title: "Average quality score per style", 
+        min: -2, 
+        max: 2,
+        colors: ['#2196F3']
+    %>
+  </div>
+  <div class="col s12 m6 grey lighten-3">
+    <%=
+      bar_chart @total_score_per_style, 
+        title: "Total quality score per style",
+        colors: ['#2196F3']
+    %>
+  </div>
+  <div class="col s12">
+    <div class="center">
+      <br />
+      <%= link_to 'Click here to help by rating your images.', basil_rating_queue_path %>
+    </div>
+  </div>
+</div>

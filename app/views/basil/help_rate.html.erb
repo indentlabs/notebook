@@ -1,0 +1,210 @@
+<!--
+<div>
+  <%= link_to basil_path do %>
+    <i class="material-icons left">chevron_left</i>
+    Back to Basil
+  <% end %>
+</div>
+-->
+
+<%
+  color_for_rating = {
+    -2 => 'red lighten-3',
+    -1 => 'orange lighten-3',
+     0 => 'grey lighten-3',
+     1 => 'green lighten-3',
+     2 => 'blue lighten-3',
+     3 => 'red lighten-4',
+  }
+%>
+
+<div class="row">
+  <div class="col s12 m4 l3">
+    <div class="center" style="margin-bottom: 2em">
+      <h1 style="margin-bottom: 0"><%= number_with_delimiter @reviewed_commission_count %></h1>
+      <div class="grey-text text-darken-2">Images rated</div>
+    </div>
+  </div>
+
+  <% if params.key?(:rating) %>
+    <div class="col s12 m8 l9">
+      <div class="card-panel <%= color_for_rating[params[:rating].to_i] %>" style="margin-top: 3em">
+        Showing <%= pluralize @commissions.count, 'image' %> you rated
+        "<%= 
+          case params[:rating].to_i
+          when -2 then 'Very Bad'
+          when -1 then 'Bad'
+          when 0 then 'Meh'
+          when 1 then 'Good'
+          when 2 then 'Great'
+          when 3 then 'Loved'
+          end
+        -%>".
+      </div>
+    </div>
+  <% else %>
+    <div class="col s12 m8 l9">
+      <div class="card-panel purple white-text">
+        <div>
+          <strong>
+            You have
+            <%= 'at least' if @commissions.count >= 50 %>
+            <%= pluralize @commissions.count, 'generated images' %>
+            without feedback.
+          </strong>
+        </div>
+        <p>
+          Feedback is optional but helps Basil understand what he does well and what he could improve on.
+          Below are 50 random images of yours that haven't been rated. You can refresh the page at any time for 50 more.
+          <%= link_to 'View global stats.', basil_stats_path, class: 'orange-text' %>
+        </p>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="row">
+  <div class="col s12 m4 l3">
+    <%= link_to basil_rating_queue_path do %>
+      <div class="hoverable card-panel black-text">
+        Unrated images
+      </div>
+    <% end %>
+
+    <div class="grey-text center">
+      <strong>Your ratings</strong>
+    </div>
+
+    <%= link_to basil_rating_queue_path(rating: 3) do %>
+      <div class="hoverable card-panel red lighten-4 black-text">
+        Loved images
+      </div>
+    <% end %>
+    <%= link_to basil_rating_queue_path(rating: 2) do %>
+      <div class="hoverable card-panel blue lighten-3 black-text">
+        Very good images
+      </div>
+    <% end %>
+    <%= link_to basil_rating_queue_path(rating: 1) do %>
+      <div class="hoverable card-panel green lighten-3 black-text">
+        Good images
+      </div>
+    <% end %>
+    <%= link_to basil_rating_queue_path(rating: 0) do %>
+      <div class="hoverable card-panel grey lighten-3 black-text">
+        Meh images
+      </div>
+    <% end %>
+    <%= link_to basil_rating_queue_path(rating: -1) do %>
+      <div class="hoverable card-panel orange lighten-3 black-text">
+        Bad images
+      </div>
+    <% end %>
+    <%= link_to basil_rating_queue_path(rating: -2) do %>
+      <div class="hoverable card-panel red lighten-3 black-text">
+        Very bad images
+      </div>
+    <% end %>
+
+    <div style="margin-top: 1em">
+      <%= link_to basil_path do %>
+        <i class="material-icons left">chevron_left</i>
+        Back to Basil
+      <% end %>
+    </div>
+  </div>
+  <div class="col s12 m8 l9">
+    
+    <% if @commissions.empty? %>
+      <div class="center" style="margin-top: 5em">
+        <h1 class="font-size: 2em">Hurrah, inbox zero!</h1>
+        <br />
+        <p>
+          Your images will appear here when you have any that you haven't rated.
+        </p>
+      </div>
+    <% end %>
+
+    <% @commissions.each do |commission| %>
+      <div style="margin-bottom: 2em">
+        <% if commission.complete? %>
+          <div class="card">
+            <div class="card-image">
+              <%= link_to commission.image do %>
+                <%= image_tag commission.image %>
+              <% end %>
+            </div>
+            <div class="card-content">
+              <div>
+                <strong><%= link_to commission.entity.name, basil_content_path(content_type: commission.entity_type, id: commission.entity_id) %></strong>
+                <% if commission.style? %>
+                  <em>(<%= commission.style.humanize %>)</em>
+                <% end %>
+              </div>
+              <div class="grey-text text-darken-2">
+                <span style="font-size: 0.8em">Completed <%= time_ago_in_words commission.completed_at %> ago</span>
+                &middot;
+                <span style="font-size: 0.8em">Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %></span>
+              </div>
+              <div style="margin-top: 1em">
+                <div class="center" style="font-size: 0.9em"><strong>Feedback for Basil</strong></div>
+                <div class="row">
+                  <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), url: basil_feedback_path(commission.job_id), method: :POST, remote: true do |f| %>
+                    <% f.object.score_adjustment = nil if !f.object.persisted? %>
+                    <div class="col s2 red lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '-2', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text" style="font-size: 3em;">:'(</span>
+                      </label>
+                    </div>
+                    <div class="col s2 orange lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '-1', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text" style="font-size: 3em;">:(</span>
+                      </label>
+                    </div>
+                    <div class="col s2 grey lighten-3 black-text lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '0', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text" style="font-size: 3em;">:|</span>
+                      </label>
+                    </div>
+                    <div class="col s2 green lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '1', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text" style="font-size: 3em;">:)</span>
+                      </label>
+                    </div>
+                    <div class="col s2 blue lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '2', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text" style="font-size: 3em;">:D</span>
+                      </label>
+                    </div>
+                    <div class="col s2 red lighten-4">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '3', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="red-text text-darken-4" style="font-size: 3em;">&hearts;<small>u</small>&hearts;</span>
+                      </label>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% else %>
+          <div class="card-panel green white-text darken-4">
+            Basil is still working on this commission... (style: <%= commission.style %>)
+            <div style="font-size: 0.8em">
+              (Requested <%= time_ago_in_words(commission.created_at) %> ago)
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+  </div>
+</div>
+
+
+

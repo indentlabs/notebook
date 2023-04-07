@@ -12,7 +12,7 @@
 <%
   show_in_this_universe_tab = !creating && !editing && raw_model.is_a?(Universe)
   show_associations_tab     = !creating && !editing
-  show_gallery_tab          = creating || editing || raw_model.image_uploads.any?
+  show_gallery_tab          = creating || editing || raw_model.image_uploads.any? || @basil_images.any?
   show_documents_tab        = !creating && !editing && related_documents.any?
   show_shares_tab           = !creating && !editing && raw_model.content_page_shares.any?
   show_collections_tab      = !creating && !editing && raw_model.page_collection_submissions.accepted.any?
@@ -59,7 +59,9 @@
         <a href="#gallery_panel">
           <i class="material-icons left">photo_library</i>
           Gallery
-          <span class="badge hide-on-med-and-down"><%= raw_model.image_uploads.count %></span>
+          <span class="badge hide-on-med-and-down">
+            <%= raw_model.image_uploads.count + @basil_images.count %>
+          </span>
         </a>
       </li>
     <% end %>

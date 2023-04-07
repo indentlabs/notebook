@@ -4,6 +4,7 @@
 
 module URI
   def URI.escape(url)
-    CGI.escape(url)
+    #CGI.escape(url)
+    url
   end
 end

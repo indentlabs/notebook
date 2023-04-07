@@ -68,6 +68,12 @@ class ContentController < ApplicationController
       content_id:   @content.pluck(:id)
     ).group_by { |image| [image.content_type, image.content_id] }
 
+    @saved_basil_commissions = BasilCommission.where(
+      entity_type: @content_type_class.name,
+      entity_id:   @content.pluck(:id)
+    ).where.not(saved_at: nil)
+    .group_by { |commission| [commission.entity_type, commission.entity_id] }
+
     # Uh, do we ever actually make JSON requests to logged-in user pages?
     respond_to do |format|
       format.html { render 'content/index' }
@@ -86,6 +92,8 @@ class ContentController < ApplicationController
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
 
     @serialized_content = ContentSerializer.new(@content)
+    @basil_images       = BasilCommission.where(entity: @content)
+                                         .where.not(saved_at: nil)
 
     if @content.updatable_by?(current_user)
       @suggested_page_tags = (
@@ -183,6 +191,8 @@ class ContentController < ApplicationController
     @random_image_including_private_pool_cache = ImageUpload.where(
       user_id: current_user.id,
     ).group_by { |image| [image.content_type, image.content_id] }
+    @basil_images       = BasilCommission.where(entity: @content)
+                                         .where.not(saved_at: nil)
 
     respond_to do |format|
       format.html { render 'content/edit', locals: { content: @content } }
@@ -496,6 +506,8 @@ class ContentController < ApplicationController
     raise "Invalid entity type: #{entity_params.fetch(:entity_type)}" unless valid_content_types.include?(entity_params.fetch('entity_type'))
     entity = entity_type.constantize.find_by(id: entity_params.fetch(:entity_id).to_i)
     entity.update(name: field_params.fetch('value', ''))
+
+    render json: attribute_value.to_json, status: 200
   end
 
   # Content update for text_area fields
@@ -508,6 +520,11 @@ class ContentController < ApplicationController
     attribute_value.save!
 
     UpdateTextAttributeReferencesJob.perform_later(attribute_value.id)
+
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: root_path, notice: "#{@attribute_field.label} updated!") }
+      format.json { render json: attribute_value.to_json, status: 200 }
+    end
   end
 
   def tags_field_update
@@ -523,6 +540,8 @@ class ContentController < ApplicationController
     set_entity
     @content = @entity
     update_page_tags
+
+    render json: attribute_value.to_json, status: 200
   end
 
   def universe_field_update
@@ -542,6 +561,8 @@ class ContentController < ApplicationController
       user: current_user
     )
     @content.update!(universe_id: attribute_value.value)
+
+    render json: attribute_value.to_json, status: 200
   end
 
   private

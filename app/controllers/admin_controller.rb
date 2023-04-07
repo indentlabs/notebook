@@ -97,12 +97,4 @@ class AdminController < ApplicationController
   def promos
     @codes = PageUnlockPromoCode.all.includes(:promotions)
   end
-
-  private
-
-  def require_admin_access
-    unless user_signed_in? && current_user.site_administrator
-      redirect_to root_path, notice: "You don't have permission to view that!"
-    end
-  end
 end

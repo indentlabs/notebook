@@ -1,0 +1,273 @@
+<script type="text/javascript">
+function commission_basil(style) {
+  // Set style hidden value to our selected style
+  $('#basil_commission_style').val(style);
+
+  // Submit form to start the commission
+  $('#new_basil_commission').submit();
+}
+</script>
+
+<div class="row">
+  <%= form_for BasilCommission.new, url: basil_commission_path(@content_type, @content.id) do |f| %>
+    <%= f.hidden_field :style,       value: 'realistic' %>
+    <%= f.hidden_field :entity_type, value: @content.page_type %>
+    <%= f.hidden_field :entity_id,   value: @content.id %>
+    <div class="col s12 m4">
+      <div style="margin: 1em 0">
+        <%= link_to basil_path, class: 'grey-text text-darken-2' do %>
+          Basil
+        <% end %>
+        <i class="material-icons grey-text" style="display:inline-flex; vertical-align:top;">chevron_right</i>
+        <%= link_to basil_content_index_path(content_type: @content.page_type), class: 'grey-text text-darken-2' do %>
+          <%= @content.page_type.pluralize %>
+        <% end %>
+      </div>
+      <div class="clearfix">
+        <%= image_tag @content.random_image_including_private(format: :medium), style: 'width: 100%' %>
+        <h1 style="font-size: 2rem; margin-bottom: 0">
+          <%= link_to @content.name, @content.view_path, class: @content.text_color %>
+        </h1>
+        <%= link_to @content.edit_path, class: 'grey-text text-darken-2' do %>
+          Edit this <%= @content.page_type.downcase %>
+        <% end %>
+      </div>
+
+      <ul>
+        <% @relevant_fields.each do |field, value| %>
+          <%= f.hidden_field "field[#{field.id}][label]", value: field.label %>
+          <%= f.hidden_field "field[#{field.id}][value]", value: value %>
+          
+          <li style="margin-bottom: 1em">
+            <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
+              <div style="display: flex">
+                <span style="position: relative; top: 8px; padding-right: 0.5rem"><%= field.label %></span>
+                <%= range_field_tag "basil_commission[field][#{field.id}][importance]", @guidance.fetch(field.id.to_s, 1), { min: 0, max: 1.3, step: 0.1, style: 'width: 100%', class: 'js-importance-slider hide' } %>
+              </div>
+            </div>
+            <div>
+              <%= value %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+
+      <% if @relevant_fields.empty? %>
+        <div class="red card-panel lighten-3">
+          <strong>Basil works best with guidance!</strong>
+          <br /><br />
+          Please <%= link_to 'fill out more fields', @content.edit_path %> for this page
+          before requesting an image.
+        </div>
+      <% end %>
+
+      <div>
+        <% if @can_request_another && @relevant_fields.any? %>
+          <%= link_to 'Customize per-field importance', "javascript:var sliders = document.getElementsByClassName('js-importance-slider'); for(var i = 0; i < sliders.length; i++) sliders.item(i).classList.remove('hide')" %>
+        <% end %>
+
+        <div class="js-importance-slider hide" style="margin-right: 1em">
+          <strong>How to customize per-field importance</strong>
+          <br /><br />
+
+          Customizing importance allows you to tell Basil which fields are more or less important to you. For example, if Basil is
+          focusing too hard on something specific you've said, you can turn down the importance of that field with
+          the slider.
+          <br /><br />
+          You can also tell Basil to ignore your answer to a field entirely by dragging the slider all the way to the left.
+          <br /><br />
+          Your preferences for this page are saved whenever you request an image.
+        </div>
+      </div>
+
+      <!--
+      <div style="margin-top: 2rem">
+        <%= link_to new_polymorphic_path(@content.page_type.downcase), class: "hoverable card-panel white-text #{@content.color}", style: 'display: block' do %>
+          <i class="material-icons left">add</i>
+          <span>
+            Create another <%= @content.page_type.downcase %>
+          </span>
+        <% end %>
+      </div>
+      -->
+    </div>
+  <% end %>
+
+  <div class="col s12 m8" style="margin-top: 1rem">
+    <%= render partial: 'notice_dismissal/messages/19' if show_notice?(id: 19) %>
+
+    <% if @can_request_another && @relevant_fields.any? %>
+      <div class="row" style="padding-left: 0.5rem">
+        <div class="grey-text center"><strong>Available styles</strong></div>
+        <% BasilService.enabled_styles_for(@content.page_type).each do |style| %>
+          <div class="col s12 m6 l4">
+            <%= link_to "javascript:commission_basil('#{style}')" do %>
+              <div class="hoverable card-panel purple white-text">
+                <%= style.humanize %>
+                <i class="material-icons right">chevron_down</i>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  
+    <% if @can_request_another && @relevant_fields.any? %>
+      <% if BasilService.experimental_styles_for(@content.page_type).any? %>
+        <div class="row" style="padding-left: 0.5rem">
+          <div class="grey-text center"><strong>Experimental styles</strong></div>
+          <% BasilService.experimental_styles_for(@content.page_type).each do |style| %>
+            <div class="col s12 m6 l4">
+              <%= link_to "javascript:commission_basil('#{style}')" do %>
+                <div class="hoverable card-panel purple white-text">
+                  <%= style.humanize %>
+                  <i class="material-icons right">chevron_down</i>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <% if !@can_request_another %>
+      <div class="card-panel purple white-text">
+        Basil is working on your <%= pluralize @in_progress_commissions.count, 'requested commission' %>.
+        <br /><br />
+        As soon as he completes one, you'll be able to request another.
+      </div>
+    <% end %>
+
+    <!--
+    <% if @commissions.any? %>
+      <div class="card-panel">
+        <strong>Like an image and want to keep it?</strong> Just click <strong>Save</strong> and it'll save to your <%= @content.name %> page next to any normal uploads.
+      </div>
+    <% end %>
+    -->
+
+    <% @commissions.each do |commission| %>
+      <div>
+        <% if commission.complete? %>
+          <div class="card">
+            <div class="card-image">
+              <%= link_to commission.image do %>
+                <%= image_tag commission.image %>
+              <% end %>
+            </div>
+            <div class="card-content">
+              <div>
+                <strong><%= @content.name %></strong>
+                <% if commission.style? %>
+                  <em>(<%= commission.style.humanize %>)</em>
+                <% end %>
+              </div>
+              <div class="grey-text text-darken-2">
+                <span style="font-size: 0.8em">Completed <%= time_ago_in_words commission.completed_at %> ago</span>
+                &middot;<br />
+                <span style="font-size: 0.8em">Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %></span>
+              </div>
+              <div style="margin-top: 1em">
+                <div class="center" style="font-size: 0.9em"><strong>Feedback for Basil</strong></div>
+                <div class="row">
+                  <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), url: basil_feedback_path(commission.job_id), method: :POST, remote: true do |f| %>
+                    <div class="col s4 m4 l2 red lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '-2', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text">:'(</span>
+                      </label>
+                    </div>
+                    <div class="col s4 m4 l3 orange lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '-1', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text">:(</span>
+                      </label>
+                    </div>
+                    <div class="col s4 m4 l3 green lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '1', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text">:)</span>
+                      </label>
+                    </div>
+                    <div class="col s4 m4 l2 blue lighten-3">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '2', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="black-text">:D</span>
+                      </label>
+                    </div>
+                    <div class="col s4 m4 l2 red lighten-4">
+                      <label>
+                        <%= f.radio_button :score_adjustment, '3', { class: 'autosave-closest-form-on-change' } %>
+                        <span class="red-text" style="font-size: 1.4em">&hearts;</span>
+                      </label>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+            <div class="card-action">
+              <% if commission.saved_at? %>
+                <%= link_to 'Saved', commission.entity, class: 'blue-text' %>
+              <% else %>
+                <%= link_to "Save to page", '#', class: 'js-save-commission purple-text', data: { endpoint: basil_save_path(commission) } %>
+              <% end %>
+              <%= link_to "Delete", '#', class: 'js-delete-commission red-text right right-align', style: 'margin-right: 0', data: { endpoint: basil_delete_path(commission) } %>
+            </div>
+          </div>
+        <% else %>
+          <div class="card-panel green white-text darken-4">
+            Basil is still working on this commission... (style: <%= commission.style %>)
+            <div style="font-size: 0.8em">
+              (Requested <%= time_ago_in_words(commission.created_at) %> ago &middot; Refresh this page for updates)
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% if @commissions.count == 10 %>
+      <div class="card-panel">
+        <div><strong>End of the list?</strong></div>
+        <p>
+          Only your 10 most recent generations are displayed here, but you can still find all
+          of your generated images on the <%= link_to 'Basil Feedback', basil_rating_queue_path %> pages.
+        </p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<% content_for :javascript do %>
+$(document).ready(function() {
+  $('.js-save-commission').click(function(e) {
+    $(this).text('Saved!');
+
+    var save_endpoint = $(this).data('endpoint') + '.json';
+    $.post(save_endpoint, function(data) {
+      console.log(data);
+
+      M.toast({ html: "This image has been added to <%= @content.name.gsub('"', '\"') %>'s page." });
+    });
+
+    e.preventDefault();
+  });
+
+  $('.js-delete-commission').click(function(e) {
+    $(this).text('Deleting...');
+    $(this).closest('.card').hide();
+
+    var delete_endpoint = $(this).data('endpoint') + '.json';
+    $.ajax({
+        url: delete_endpoint,
+        type: 'DELETE',
+        success: function(result) {
+          $(this).closest('.card').hide();
+
+          M.toast({ html: "Image successfully deleted." });
+        }
+    });
+
+    e.preventDefault();
+  });
+});
+<% end %>

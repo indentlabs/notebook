@@ -6,19 +6,29 @@ $(document).ready(function() {
 
     // Submit content_form with ajax
     if (content_form) {
-      // M.toast({ html: 'Saving changes...' });
-      console.log('saving changes');
-      recent_autosave = true;
-      content_form.trigger('submit');
+      M.toast({ html: 'Saving your changes...' });
 
-      setTimeout(() => recent_autosave = true, 1000);
+      recent_autosave = true;
+      setTimeout(() => recent_autosave = false, 1000);
+
+      var form_data = content_form.serialize();
+      form_data += "&authenticity_token=" + $('meta[name="csrf-token"]').attr('content');
+
+      $.ajax({
+        url:  content_form.attr('action') + '.json',
+        type: content_form.attr('method').toUpperCase(),
+        data: form_data,
+        success: function(response) {
+          M.toast({ html: 'Saved successfully!' });
+        },
+        error: function(response) {
+          M.toast({ html: "There was an error saving your changes. Please back up any changes and refresh the page." });
+        }
+      });
     } else {
       console.log('error saving changes');
       // M.toast({ html: "There was an error saving your changes. Please back up any changes and refresh the page." });
     }
-
-    // TODO: it'd be really nice to capture the response of the form submit but I don't
-    // know that we can do so without ajax'ing it instead
   });
 
   $('.submit-closest-form-on-click').on('click', function() {

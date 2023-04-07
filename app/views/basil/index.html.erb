@@ -1,0 +1,80 @@
+<div class="row">
+  <div class="col s12 m4 l3">
+    <%= image_tag 'basil/portrait.png', style: 'width: 100%' %>
+  </div>
+  <div class="col s12 m8 l9">
+    <h1 style="font-size: 2em; margin-left: 1rem">Hey, I'm Basil.</h4>
+    <h2 style="font-size: 1.4em; margin-left: 1rem">I can help you visualize your characters and other pages.</h2>
+    <p style="margin-left: 1rem">
+      To get started, select the page you want to generate images for. Their description
+      will be pulled from any answers you've given to relevant fields on their notebook page.
+    </p>
+    <p style="margin-left: 1rem">
+      You can also
+      <%= link_to 'help Basil get better by leaving feedback on your images', basil_rating_queue_path %>.
+    </p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12 m4 l3">
+    <div class="grey-text text-darken-1 center">Draw my...</div>
+    <% @enabled_content_types.each do |content_type| %>
+      <%= link_to basil_content_index_path(content_type.downcase) do %>
+        <div class="<%= content_class_from_name(content_type).color %> white-text hoverable card-panel">
+          <i class="material-icons left"><%= content_class_from_name(content_type).icon %></i>
+          <%= content_type.pluralize %>
+          <% if @content_type == content_type %>
+            <i class="material-icons right">chevron_right</i>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <p class="grey-text">
+      <strong>What about other pages?</strong><br />
+      A lot of work goes into making sure each page produces accurate, high quality images.
+      More page types will be added soon!
+    </p>
+  </div>
+  <div class="col s12 m8 l9">
+    <% if @universe_scope %>
+      <div class="card-panel <%= Universe.color %> white-text">
+        <i class="material-icons left"><%= Universe.icon %></i>
+        Showing <%= pluralize @content.count, @content_type %> from <%= @universe_scope.name %>.
+        <%= link_to "Show #{@content_type.pluralize.downcase} from all universes instead.", basil_content_index_path(@content_type, universe: "all"), class: 'purple-text text-lighten-4' %>
+      </div>
+    <% end %>
+
+    <div class="row" style="margin-left: 0rem">
+      <% @content.each do |content| %>
+        <%= link_to basil_content_path(@content_type, content.id) do %>
+          <div class="col s12 m4 l3">
+            <div class="hoverable card">
+              <div class="card-image">
+                <%= image_tag content.random_image_including_private(format: :medium), style: 'height: 200px' %>
+                <span class="card-title"><%= content.name %></span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+
+      <% if @content.empty? %>
+        <div class="center">
+          <strong>You haven't created any <%= @content_type %> pages yet.</strong>
+          <br /><br />
+
+          <%= link_to new_polymorphic_path(@content_type.downcase), class: '' do %>
+            <div class="hoverable card-panel <%= @content_type.constantize.color %> white-text" style="width: 33%; margin: 0 auto">
+              <i class="material-icons left">add</i>
+              Create <%= @content_type %>
+            </div>
+          <% end %>
+        <div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+

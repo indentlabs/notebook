@@ -3,7 +3,16 @@
     <%
       content_image = @random_image_including_private_pool_cache.fetch([content.page_type, content.id], [])
         .sample
-        .try(:src, :medium) || asset_path("card-headers/#{content.page_type.downcase.pluralize}.jpg")
+        .try(:src, :medium)
+
+      if @saved_basil_commissions
+        content_image ||= @saved_basil_commissions.fetch([content.page_type, content.id], [])
+          .sample
+          .try(:image)
+          .try(:url)
+      end
+
+      content_image ||= asset_path("card-headers/#{content.page_type.downcase.pluralize}.jpg")
     %>
     <div class="col s12 m6 l4 js-content-card-container">
       <div class="hoverable card sticky-action" style="margin-bottom: 2px">

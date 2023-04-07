@@ -3,6 +3,35 @@ Rails.application.routes.draw do
   get 'styleguide/tailwind'
   default_url_options :host => "notebook.ai"
 
+  scope :ai, path: '/ai' do
+    scope :basil do
+      # Meta pages
+      get '/help/rate',        to: 'basil#help_rate',  as: :basil_rating_queue
+      get '/stats',            to: 'basil#stats',      as: :basil_stats
+      get '/stats/:page_type', to: 'basil#page_stats', as: :basil_page_stats
+      # get '/about',            to: 'basil#about'
+
+      # Admin pages
+      get '/review',        to: 'basil#review'
+
+      # API endpoints
+      post   '/complete/:jobid', to: 'basil#complete_commission'
+      post   '/feedback/:jobid', to: 'basil#feedback', as: :basil_feedback
+      post   '/:id/save',        to: 'basil#save',     as: :basil_save
+      delete '/:id/delete',      to: 'basil#delete',   as: :basil_delete
+
+      # Standard generation flow for users
+      get  '/',                  to: 'basil#index',      as: :basil
+      get  '/:content_type',     to: 'basil#index',      as: :basil_content_index
+      get  '/:content_type/:id', to: 'basil#content',    as: :basil_content
+      post '/:content_type/:id', to: 'basil#commission', as: :basil_commission
+
+      # URLs to migrate over
+      # get '/character/:id',    to: 'basil#character', as: :basil_character
+      # post '/character/:id',   to: 'basil#commission'
+    end
+  end
+
   scope :stream, path: '/stream', as: :stream do
     get '/',         to: 'stream#index'
     get 'world',     to: 'stream#global'
