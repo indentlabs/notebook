@@ -74,18 +74,22 @@
           <svg class="ml-2.5 -mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
           </svg>
-
-          <!-- Dropdown menu, show/hide based on menu state. -->
-          <div data-dropdown-target="menu" class="origin-top-right z-10 absolute right-4 -mt-6 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="page-index-button" tabindex="-1">
-            <div class="py-1" role="none">
-            <% @serialized_content.data[:categories].each do |category| %>
-              <%= link_to "##{category[:label]}", class: "text-gray-700 block px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 border-b border-gray-100", id: category[:id], data: { action: "dropdown#toggle" } do %>
-                <i class="material-icons float-left <%= @serialized_content.class_text_color %> mr-3"><%= category[:icon] %></i>
-                <%= category[:label] %>
-              <% end %>
-            <% end %>
-          </div>
         </button>
+
+        <!-- Dropdown menu, show/hide based on menu state. -->
+        <div data-dropdown-target="menu" class="origin-top-right z-10 absolute right-4 -mt-6 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="page-index-button" tabindex="-1">
+          <div class="py-1" role="none">
+          <% @serialized_content.data[:categories].each do |category| %>
+            <%= link_to "##{category[:label]}", class: "text-gray-700 block px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 border-b border-gray-100", id: category[:id], data: { action: "dropdown#toggle" } do %>
+              <i class="material-icons float-left <%= @serialized_content.class_text_color %> mr-3"><%= category[:icon] %></i>
+              <%= category[:label] %>
+            <% end %>
+          <% end %>
+        </div>
+        <%#
+          DEV NOTE: This dropdown menu makes the following elements wrap; however, nesting it under the <button> also introduces weird interaction bugs.
+                    For example, jumping to a section will work, but then the button needs clicked *twice* before you can open the menu again.
+        %>
       </div>
 
       <!--
