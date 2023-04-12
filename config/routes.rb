@@ -262,11 +262,16 @@ Rails.application.routes.draw do
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       # resources :characters do
       resources content_type.name.downcase.pluralize.to_sym do
+
+        # Browsable pages
         get  :gallery,         on: :member
+        get  :documents,       on: :member
         get  :changelog,       on: :member
+        get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
+
+        # API endpoints
         get  :toggle_archive,  on: :member
         post :toggle_favorite, on: :member
-        get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
       end
     end
     resources :timelines, only: [:index, :show, :new, :update, :edit, :destroy] do

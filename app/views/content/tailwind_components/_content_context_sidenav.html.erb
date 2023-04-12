@@ -6,8 +6,9 @@
           <div class="flex items-center">
             <div class="flex-shrink-0 w-full mb-2">
               <% image = content.raw_model.random_image_including_private %>
+              <%# DEV NOTE TODO - this should probably link to the gallery tab instead if there are any images %>
               <%= link_to image, target: '_blank' do %>
-                <%= image_tag image, class: 'rounded-lg hover:shadow hover:opacity-90' %>
+                <%= image_tag image, class: 'rounded-lg bg-notebook-blue h-64 hover:shadow hover:opacity-90' %>
               <% end %>
             </div>
             <div class="space-y-1">
@@ -33,16 +34,27 @@
           <div class="pb-2 space-y-1">
             <h2 class="text-sm font-semibold pb-2">Go deeper</h2>
 
-            <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-              <i class="material-icons <%= Character.text_color %> mr-1">image</i>
-              <span class="flex-grow text-left">Images</span>
-              <span class="bg-gray-100 p-1 text-xs rounded-lg">42</span>
-            </button>
-            <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-              <i class="material-icons <%= Document.text_color %> mr-1"><%= Document.icon %></i>
-              <span class="flex-grow text-left">Documents</span>
-              <span class="bg-gray-100 p-1 text-xs rounded-lg">8</span>
-            </button>
+            <%= link_to content.raw_model do %>
+              <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
+                <i class="material-icons text-red-500 mr-1"><%= content.class_icon %></i>
+                <span class="flex-grow text-left"><%= content.class_name %> page</span>
+              </button>
+            <% end %>
+            <%= link_to send("gallery_#{content.class_name.downcase}_path") do %>
+              <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
+                <i class="material-icons text-red-500 mr-1">image</i>
+                <span class="flex-grow text-left">Images</span>
+                <span class="bg-gray-100 p-1 text-xs rounded-lg">42</span>
+              </button>
+            <% end %>
+            <%= link_to send("documents_#{content.class_name.downcase}_path") do %>
+              <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
+                <i class="material-icons <%= Document.text_color %> mr-1"><%= Document.icon %></i>
+                <span class="flex-grow text-left">Documents</span>
+                <span class="bg-gray-100 p-1 text-xs rounded-lg">8</span>
+              </button>
+            <% end %>
+            <%# DEV NOTE - maybe combine Documents + Timelines into "Stories" ? %>
             <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
               <i class="material-icons <%= Timeline.text_color %> mr-1"><%= Timeline.icon %></i>
               <span class="flex-grow text-left">Timelines</span>
