@@ -13,6 +13,17 @@
     <div>
       <%= pluralize @unique_users_generating_count.count, 'unique user' %> over 48h
     </div>
+
+    <br /><br />
+    <div><strong>Queue</strong></div>
+    <ol>
+      <% @current_queue_items.each do |commission| %>
+        <li>
+          <%= commission.entity_type %>-<%= commission.entity_id %> (<%= commission.style %>)
+          for U-<%= commission.user_id %>
+        </li>
+      <% end %>
+    </ol>
   </div>
   <div class="col s9">
     <% @recent_commissions.each do |commission| %>

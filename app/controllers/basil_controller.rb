@@ -203,7 +203,7 @@ class BasilController < ApplicationController
     @in_progress_commissions = @commissions.select { |c| c.completed_at.nil? }
     @generated_images_count  = current_user.basil_commissions.with_deleted.count
 
-    @can_request_another     = @in_progress_commissions.count < 3
+    @can_request_another     = @in_progress_commissions.count < BasilService::MAX_JOB_QUEUE_SIZE
   end
 
   def character
@@ -228,7 +228,7 @@ class BasilController < ApplicationController
                                   .limit(20)
                                   .includes(:basil_feedbacks)
     @in_progress_commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id, completed_at: nil)
-    @can_request_another = @in_progress_commissions.count < 3
+    @can_request_another = @in_progress_commissions.count < BasilService::MAX_JOB_QUEUE_SIZE
   end
 
   def about
@@ -411,12 +411,20 @@ class BasilController < ApplicationController
 
     @commissions_per_user_id = BasilCommission.with_deleted.where('created_at > ?', 48.hours.ago).group(:user_id).order('count_all DESC').limit(5).count
     @unique_users_generating_count = BasilCommission.with_deleted.where('created_at > ?', 48.hours.ago).group(:user_id).count
+
+    @current_queue_items = BasilCommission.where(completed_at: nil).order('created_at ASC')
   end
 
   def commission
     @generated_images_count  = current_user.basil_commissions.with_deleted.count
     if @generated_images_count > BasilService::FREE_IMAGE_LIMIT
       redirect_back fallback_location: basil_path, notice: "You've reached your free image limit. Please upgrade to generate more images."
+      return
+    end
+
+    current_queue_size = current_user.basil_commissions.where(completed_at: nil).count
+    if current_queue_size >= BasilService::MAX_JOB_QUEUE_SIZE
+      redirect_back fallback_location: basil_path, notice: "You can only have #{BasilService::MAX_JOB_QUEUE_SIZE} commissions in progress at a time. Please wait for one to complete before requesting another."
       return
     end
 
