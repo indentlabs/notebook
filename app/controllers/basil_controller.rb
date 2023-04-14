@@ -16,6 +16,8 @@ class BasilController < ApplicationController
 
       @content = @current_user_content[@content_type].sort_by(&:name)      
     end
+
+    @generated_images_count = current_user.basil_commissions.with_deleted.count
   end
 
   def content
@@ -199,6 +201,8 @@ class BasilController < ApplicationController
                                   .limit(10)
                                   .includes(:basil_feedbacks, :image_blob)
     @in_progress_commissions = @commissions.select { |c| c.completed_at.nil? }
+    @generated_images_count  = current_user.basil_commissions.with_deleted.count
+
     @can_request_another     = @in_progress_commissions.count < 3
   end
 
@@ -404,9 +408,17 @@ class BasilController < ApplicationController
 
   def review
     @recent_commissions = BasilCommission.all.includes(:entity, :user).order('id DESC').limit(100)
+
+    @commissions_per_user_id = BasilCommission.where('created_at > ?', 48.hours.ago).group(:user_id).order('count_all DESC').limit(5).count
   end
 
   def commission
+    @generated_images_count  = current_user.basil_commissions.with_deleted.count
+    if @generated_images_count > BasilService::FREE_IMAGE_LIMIT
+      redirect_back fallback_location: basil_path, notice: "You've reached your free image limit. Please upgrade to generate more images."
+      return
+    end
+
     # Fetch the related content
     @content = @current_user_content[commission_params.fetch(:entity_type)]
                   .find { |c| c.id == commission_params.fetch(:entity_id).to_i }

@@ -38,6 +38,26 @@
     </p>
   </div>
   <div class="col s12 m8 l9">
+
+    <% if true %>
+      <div class="orange lighten-2 card-panel">
+        <strong>
+          Image generation is a Premium-only feature, but free accounts can still generate up
+          to <%= pluralize BasilService::FREE_IMAGE_LIMIT, 'image' %> for free.
+        </strong>
+        <br /><br />
+        You have generated <%= pluralize @generated_images_count, 'image' %>
+        and have <%= pluralize [0, BasilService::FREE_IMAGE_LIMIT - @generated_images_count].max, 'image' %> remaining:
+        <div class="progress white">
+          <div class="determinate blue" style="width: <%= [@generated_images_count, BasilService::FREE_IMAGE_LIMIT].min %>%"></div>
+        </div>
+
+        <% if @generated_images_count > BasilService::FREE_IMAGE_LIMIT %>
+          <%= link_to 'Click here to manage your billing plan', subscription_path, class: 'blue-text text-darken-4' %>
+        <% end %>
+      </div>
+    <% end %>
+
     <% if @universe_scope %>
       <div class="card-panel <%= Universe.color %> white-text">
         <i class="material-icons left"><%= Universe.icon %></i>

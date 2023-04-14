@@ -1,4 +1,6 @@
 class BasilService < Service
+  FREE_IMAGE_LIMIT = 100
+
   IGNORED_VALUES = ['', 'none', 'n/a', '.', '-', ' ', '?', '??', '???', 'x', nil]
 
   ENABLED_PAGE_TYPES = [

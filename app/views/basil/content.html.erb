@@ -110,9 +110,7 @@ function commission_basil(style) {
           </div>
         <% end %>
       </div>
-    <% end %>
-  
-    <% if @can_request_another && @relevant_fields.any? %>
+
       <% if BasilService.experimental_styles_for(@content.page_type).any? %>
         <div class="row" style="padding-left: 0.5rem">
           <div class="grey-text center"><strong>Experimental styles</strong></div>
@@ -130,7 +128,7 @@ function commission_basil(style) {
       <% end %>
     <% end %>
 
-    <% if !@can_request_another %>
+    <% if !@can_request_another && @in_progress_commissions.any? %>
       <div class="card-panel purple white-text">
         Basil is working on your <%= pluralize @in_progress_commissions.count, 'requested commission' %>.
         <br /><br />
@@ -138,13 +136,24 @@ function commission_basil(style) {
       </div>
     <% end %>
 
-    <!--
-    <% if @commissions.any? %>
-      <div class="card-panel">
-        <strong>Like an image and want to keep it?</strong> Just click <strong>Save</strong> and it'll save to your <%= @content.name %> page next to any normal uploads.
+    <% if !@can_request_another && @generated_images_count >= BasilService::FREE_IMAGE_LIMIT %>
+      <div class="orange lighten-2 card-panel">
+        <strong>
+          Image generation is a Premium-only feature, but free accounts can still generate up
+          to <%= pluralize BasilService::FREE_IMAGE_LIMIT, 'image' %> for free.
+        </strong>
+        <br /><br />
+        You have generated <%= pluralize @generated_images_count, 'image' %>
+        and have <%= pluralize [0, BasilService::FREE_IMAGE_LIMIT - @generated_images_count].max, 'image' %> remaining:
+        <div class="progress white">
+          <div class="determinate blue" style="width: <%= [@generated_images_count, BasilService::FREE_IMAGE_LIMIT].min %>%"></div>
+        </div>
+
+        <% if @generated_images_count > BasilService::FREE_IMAGE_LIMIT %>
+          <%= link_to 'Click here to manage your billing plan', subscription_path, class: 'blue-text text-darken-4' %>
+        <% end %>
       </div>
     <% end %>
-    -->
 
     <% @commissions.each do |commission| %>
       <div>
