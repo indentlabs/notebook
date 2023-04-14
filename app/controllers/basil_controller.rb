@@ -203,7 +203,8 @@ class BasilController < ApplicationController
     @in_progress_commissions = @commissions.select { |c| c.completed_at.nil? }
     @generated_images_count  = current_user.basil_commissions.with_deleted.count
 
-    @can_request_another     = @in_progress_commissions.count < BasilService::MAX_JOB_QUEUE_SIZE
+    @can_request_another     = current_user.on_premium_plan? || @generated_images_count < BasilService::FREE_IMAGE_LIMIT
+    @can_request_another     = @can_request_another && @in_progress_commissions.count < BasilService::MAX_JOB_QUEUE_SIZE
   end
 
   def character
