@@ -410,6 +410,7 @@ class BasilController < ApplicationController
     @recent_commissions = BasilCommission.all.includes(:entity, :user).order('id DESC').limit(100)
 
     @commissions_per_user_id = BasilCommission.where('created_at > ?', 48.hours.ago).group(:user_id).order('count_all DESC').limit(5).count
+    @unique_users_generating_count = BasilCommission.where('created_at > ?', 48.hours.ago).group(:user_id).count
   end
 
   def commission
