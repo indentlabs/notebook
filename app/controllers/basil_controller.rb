@@ -207,31 +207,6 @@ class BasilController < ApplicationController
     @can_request_another     = @can_request_another && @in_progress_commissions.count < BasilService::MAX_JOB_QUEUE_SIZE
   end
 
-  def character
-    @character  = current_user.characters.find(params[:id])
-    @guidance   = BasilFieldGuidance.find_or_initialize_by(entity: @character, user: current_user).try(:guidance)
-    @guidance ||= {}
-
-    category_ids = AttributeCategory.where(
-      user_id: current_user.id,
-      entity_type: 'character',
-      label: ['Looks', 'Appearance']
-    ).pluck(:id)
-    @appearance_fields = AttributeField.where(attribute_category_id: category_ids)
-    @attributes = Attribute.where(
-      attribute_field_id: @appearance_fields.pluck(:id), 
-      entity_id: @character.id, 
-      entity_type: 'Character'
-    )
-
-    @commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id)
-                                  .order('id DESC')
-                                  .limit(20)
-                                  .includes(:basil_feedbacks)
-    @in_progress_commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id, completed_at: nil)
-    @can_request_another = @in_progress_commissions.count < BasilService::MAX_JOB_QUEUE_SIZE
-  end
-
   def about
   end
 
