@@ -128,15 +128,7 @@ function commission_basil(style) {
       <% end %>
     <% end %>
 
-    <% if !@can_request_another && @in_progress_commissions.any? %>
-      <div class="card-panel purple white-text">
-        Basil is working on your <%= pluralize @in_progress_commissions.count, 'requested commission' %>.
-        <br /><br />
-        As soon as he completes one, you'll be able to request another.
-      </div>
-    <% end %>
-
-    <% if !@can_request_another && @generated_images_count >= BasilService::FREE_IMAGE_LIMIT %>
+    <% unless current_user.on_premium_plan? %>
       <div class="orange lighten-2 card-panel">
         <strong>
           Image generation is a Premium-only feature, but free accounts can still generate up
@@ -144,14 +136,22 @@ function commission_basil(style) {
         </strong>
         <br /><br />
         You have generated <%= pluralize @generated_images_count, 'image' %>
-        and have <%= pluralize [0, BasilService::FREE_IMAGE_LIMIT - @generated_images_count].max, 'image' %> remaining:
+        and have <%= pluralize [0, BasilService::FREE_IMAGE_LIMIT - @generated_images_count].max, 'free image' %> remaining:
         <div class="progress white">
           <div class="determinate blue" style="width: <%= [@generated_images_count, BasilService::FREE_IMAGE_LIMIT].min %>%"></div>
         </div>
 
-        <% if @generated_images_count > BasilService::FREE_IMAGE_LIMIT %>
+        <% if @generated_images_count >= BasilService::FREE_IMAGE_LIMIT %>
           <%= link_to 'Click here to manage your billing plan', subscription_path, class: 'blue-text text-darken-4' %>
         <% end %>
+      </div>
+    <% end %>
+
+    <% if !@can_request_another && @in_progress_commissions.any? %>
+      <div class="card-panel purple white-text">
+        Basil is working on your <%= pluralize @in_progress_commissions.count, 'requested commission' %>.
+        <br /><br />
+        As soon as he completes one, you'll be able to request another.
       </div>
     <% end %>
 

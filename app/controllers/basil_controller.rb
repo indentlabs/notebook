@@ -211,10 +211,10 @@ class BasilController < ApplicationController
   end
 
   def stats
-    @commissions = BasilCommission.all
+    @commissions = BasilCommission.all.with_deleted
 
     @queued = BasilCommission.where(completed_at: nil)
-    @completed = BasilCommission.where.not(completed_at: nil)
+    @completed = BasilCommission.where.not(completed_at: nil).with_deleted
 
     @average_wait_time = @completed.where('completed_at > ?', 24.hours.ago)
                                    .average(:cached_seconds_taken)
@@ -275,14 +275,16 @@ class BasilController < ApplicationController
       'painting2', 'painting3', 'anime'
     ].flatten.compact.uniq
 
-    @total_score_per_style = BasilCommission.where(style: active_styles)
-                                              .joins(:basil_feedbacks)
-                                              .group(:style)
-                                              .sum(:score_adjustment)
-                                              .map { |style, average| [style, average.round(1)] }
-                                              .sort_by(&:second)
-                                              .reverse
-    @average_score_per_style = BasilCommission.where(style: active_styles)
+    @total_score_per_style = BasilCommission.with_deleted
+                                            .where(style: active_styles)
+                                            .joins(:basil_feedbacks)
+                                            .group(:style)
+                                            .sum(:score_adjustment)
+                                            .map { |style, average| [style, average.round(1)] }
+                                            .sort_by(&:second)
+                                            .reverse
+    @average_score_per_style = BasilCommission.with_deleted
+                                              .where(style: active_styles)
                                               .joins(:basil_feedbacks)
                                               .group(:style)
                                               .average(:score_adjustment)
@@ -290,7 +292,8 @@ class BasilController < ApplicationController
                                               .sort_by(&:second)
                                               .reverse
 
-    @average_score_per_page_type = BasilCommission.where.not(completed_at: nil)
+    @average_score_per_page_type = BasilCommission.with_deleted
+                                                  .where.not(completed_at: nil)
                                                   .joins(:basil_feedbacks)
                                                   .group(:entity_type)
                                                   .average(:score_adjustment)
@@ -398,16 +401,16 @@ class BasilController < ApplicationController
       return
     end
 
-    current_queue_size = current_user.basil_commissions.where(completed_at: nil).count
-    if current_queue_size >= BasilService::MAX_JOB_QUEUE_SIZE
-      redirect_back fallback_location: basil_path, notice: "You can only have #{BasilService::MAX_JOB_QUEUE_SIZE} commissions in progress at a time. Please wait for one to complete before requesting another."
-      return
-    end
-
     # Fetch the related content
     @content = @current_user_content[commission_params.fetch(:entity_type)]
                   .find { |c| c.id == commission_params.fetch(:entity_id).to_i }
     return raise "Invalid content commission params" if @content.nil?
+
+    current_queue_size = current_user.basil_commissions.where(completed_at: nil).where(entity: @content).count
+    if current_queue_size >= BasilService::MAX_JOB_QUEUE_SIZE
+      redirect_back fallback_location: basil_path, notice: "You can only have #{BasilService::MAX_JOB_QUEUE_SIZE} commissions per page in progress at a time. Please wait for one to complete before requesting another."
+      return
+    end
 
     # Before creating the prompt, do a little config to tweak things to work well :)
     labels_to_omit_label_text = [
