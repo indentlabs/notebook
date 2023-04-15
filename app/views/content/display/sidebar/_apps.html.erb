@@ -1,20 +1,34 @@
 <%
   creating = defined?(creating) && creating
   editing  = defined?(editing)  && editing
-  page_type_enabled = BasilService::ENABLED_PAGE_TYPES.include? content.class_name
+  show_basil_tool   = BasilService::ENABLED_PAGE_TYPES.include? content.class_name
+  show_conversation = content.class_name == 'Character'
+
+  show_tools_menu = show_basil_tool || show_conversation
 %>
 
-<% if page_type_enabled %>
+<% if show_tools_menu %>
   <ul class="collection content-tabs">
     <li class="active center grey-text uppercase">
       Tools
     </li>
 
-    <li class="collection-item">
-      <%= link_to basil_content_path(content_type: content.class_name, id: content.id) do %>
-        <i class="material-icons left">palette</i>
-        Image Generation
-      <% end %>
-    </li>
+    <% if show_basil_tool %>
+      <li class="collection-item">
+        <%= link_to basil_content_path(content_type: content.class_name, id: content.id) do %>
+          <i class="material-icons left">palette</i>
+          Image Generation
+        <% end %>
+      </li>
+    <% end %>
+
+    <% if show_conversation %>
+      <li class="collection-item">
+        <%= link_to talk_path(character_id: content.id) do %>
+          <i class="material-icons left">message</i>
+          Talk to <%= content.name %>
+        <% end %>
+      </li>
+    <% end %>
   </ul>
 <% end %>
