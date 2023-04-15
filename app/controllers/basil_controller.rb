@@ -14,7 +14,7 @@ class BasilController < ApplicationController
         return raise "Invalid content type: #{params[:content_type]}"
       end
 
-      @content = @current_user_content[@content_type].sort_by(&:name)      
+      @content = @current_user_content.fetch(@content_type, []).sort_by(&:name)
     end
 
     @generated_images_count = current_user.basil_commissions.with_deleted.count
