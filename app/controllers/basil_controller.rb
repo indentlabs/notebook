@@ -217,7 +217,7 @@ class BasilController < ApplicationController
     @completed = BasilCommission.where.not(completed_at: nil).with_deleted
 
     @average_wait_time = @completed.where('completed_at > ?', 24.hours.ago)
-                                   .average(:cached_seconds_taken)
+                                   .average(:cached_seconds_taken) || 0
     @seconds_over_time = @completed.where('completed_at > ?', 24.hours.ago)
                                    .group_by { |c| ((c.cached_seconds_taken || 0) / 60).round }
                                    .map { |minutes, list| [minutes, list.count] }
