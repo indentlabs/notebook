@@ -396,7 +396,7 @@ class BasilController < ApplicationController
 
   def commission
     @generated_images_count  = current_user.basil_commissions.with_deleted.count
-    if @generated_images_count > BasilService::FREE_IMAGE_LIMIT
+    if !current_user.on_premium_plan? && @generated_images_count > BasilService::FREE_IMAGE_LIMIT
       redirect_back fallback_location: basil_path, notice: "You've reached your free image limit. Please upgrade to generate more images."
       return
     end
