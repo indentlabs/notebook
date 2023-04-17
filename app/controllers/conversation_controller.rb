@@ -3,14 +3,28 @@ class ConversationController < ApplicationController
   before_action :ensure_character_privacy
 
   def character_landing
-    @first_greeting = "Hello, friend!"
-
-    @personality = personality_for_character
-    @description = description_for_character
+    @first_greeting = default_character_greeting
+    @personality    = personality_for_character
+    @description    = description_for_character
   end
 
   def export
-    raise open_characters_persona_params.inspect
+    add_character_hash = base_open_characters_export.merge({
+      "name":            open_characters_persona_params.fetch('name', 'New character'),
+      "roleInstruction": "You are to act as #{@character.name}, whos personality is detailed below:\n\n#{description_for_character}",
+      "reminderMessage": "#{personality_for_character} Do not break character!",
+    })
+
+    # Add a character image if one has been uploaded to the page
+    avatar = @character.random_image_including_private
+    add_character_hash[:avatar][:url] = avatar if avatar.present?
+
+    # Redirect to OpenCharacters
+
+    base_oc_url = 'https://josephrocca.github.io/OpenCharacters/'
+    oc_params = { addCharacter: add_character_hash }
+
+    redirect_to "#{base_oc_url}##{ERB::Util.url_encode(oc_params)}"
   end
 
   private
@@ -65,10 +79,95 @@ class ConversationController < ApplicationController
   def ensure_character_privacy
     unless (user_signed_in? && @character.user == current_user) || @character.privacy == 'public'
       redirect_to root_path, notice: "That character is private!"
+      return
     end
   end
 
   def open_characters_persona_params
     params.permit(:name, :avatar, :scenario, :char_greeting, :personality, :description, :example_dialogue)
+  end
+
+  def default_scenario
+    ""
+  end
+
+  def default_reminder_message
+    ""
+  end
+
+  def default_custom_code
+    ""
+
+    # TODO maybe include our standard (whisper) formatting on messages?
+  end
+
+  def base_open_characters_export
+    {
+      "name": "New character",
+      # "roleInstruction": default_scenario,
+      # "reminderMessage": default_reminder_message,
+      "modelName": "gpt-3.5-turbo",
+      "fitMessagesInContextMethod": "summarizeOld",
+      "associativeMemoryMethod": "v1",
+      "associativeMemoryEmbeddingModelName": "text-embedding-ada-002",
+      "temperature": 0.7,
+      "customCode": default_custom_code,
+      "initialMessages": default_initial_messages,
+      "avatar": {
+        "url": "",
+        "size": 1,
+        "shape": "square"
+      },
+      "scene": {
+        "background": {
+          "url": ""
+        },
+        "music": {
+          "url": ""
+        }
+      },
+      "userCharacter": {
+        "avatar": {
+          "url": current_user.avatar.url,
+          "size": 1,
+          "shape": "circle"
+        }
+      },
+      "streamingResponse": true
+    }
+  end
+
+  def default_initial_messages
+    [
+      {
+        "author": "system",
+        "content": open_characters_persona_params.fetch('scenario', default_scenario),
+        "hiddenFrom": [] # "ai", "user", "both", "neither"
+      },
+      {
+        "author": "ai",
+        "content": open_characters_persona_params.fetch('char_greeting', default_character_greeting),
+        "hiddenFrom": []
+      }
+    ]
+  end
+
+  def default_export_metadata
+    {
+      "version":  1,
+      "created":  @content.created_at.to_i,
+      "modified": @content.updated_at.to_i,
+      "ncid":     @content.id,
+      "source": "https://www.notebook.ai/plan/characters#{@content.id}",
+      "tool": {
+        "name": "Notebook.ai Persona Export",
+        "version": "1.0.0",
+        "url": "https://www.notebook.ai"
+      }
+    }
+  end
+
+  def default_character_greeting
+    "Hello, friend!"
   end
 end
