@@ -9,10 +9,14 @@ class ConversationController < ApplicationController
   end
 
   def export
+    name        = open_characters_persona_params.fetch('name', 'New character').strip
+    personality = open_characters_persona_params.fetch('personality', '')
+    description = open_characters_persona_params.fetch('description', '')
+
     add_character_hash = base_open_characters_export.merge({
-      "name":            open_characters_persona_params.fetch('name', 'New character'),
-      "roleInstruction": "You are to act as #{@character.name}, whos personality is detailed below:\n\n#{description_for_character}",
-      "reminderMessage": "#{personality_for_character} Do not break character!",
+      "name":            name,
+      "roleInstruction": "You are to act as #{name}, whos personality is detailed below:\n\n#{description}",
+      "reminderMessage": "#{personality}\n\nDo not break character!",
     })
 
     # Add a character image if one has been uploaded to the page
@@ -20,11 +24,10 @@ class ConversationController < ApplicationController
     add_character_hash[:avatar][:url] = avatar if avatar.present?
 
     # Redirect to OpenCharacters
-
     base_oc_url = 'https://josephrocca.github.io/OpenCharacters/'
     oc_params = { addCharacter: add_character_hash }
 
-    redirect_to "#{base_oc_url}##{ERB::Util.url_encode(oc_params)}"
+    redirect_to "#{base_oc_url}##{ERB::Util.url_encode(oc_params.to_json)}"
   end
 
   private
