@@ -20,6 +20,7 @@ Rails.application.routes.draw do
       delete '/:id/delete',      to: 'basil#delete',   as: :basil_delete
 
       # Standard generation flow for users
+      get  '/demo',              to: 'basil#standalone', as: :basil_standalone
       get  '/',                  to: 'basil#index',      as: :basil
       get  '/:content_type',     to: 'basil#index',      as: :basil_content_index
       get  '/:content_type/:id', to: 'basil#content',    as: :basil_content

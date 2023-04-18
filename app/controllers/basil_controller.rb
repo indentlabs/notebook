@@ -1,5 +1,5 @@
 class BasilController < ApplicationController
-  before_action :authenticate_user!, except: [:complete_commission, :about, :stats]
+  before_action :authenticate_user!, except: [:complete_commission, :about, :stats, :standalone]
 
   before_action :require_admin_access, only: [:review], unless: -> { Rails.env.development? }
 
@@ -18,6 +18,9 @@ class BasilController < ApplicationController
     end
 
     @generated_images_count = current_user.basil_commissions.with_deleted.count
+  end
+
+  def standalone
   end
 
   def content
