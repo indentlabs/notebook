@@ -38,7 +38,7 @@
         <% end %>
         -->
 
-        <div x-data="{ expandedWorldbuildingSidebar: false }">
+        <div x-data="{ expandedWorldbuildingSidebar: <%= @sidenav_expansion == 'worldbuilding' %> }">
           <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedWorldbuildingSidebar = !expandedWorldbuildingSidebar" >
             <div class="flex items-center">
               <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 mr-2">book</i>
@@ -58,6 +58,11 @@
                   <%= number_with_delimiter @current_user_content.fetch(content_type, []).count %>
                 </span>
               <% end %>
+            <% end %>
+
+            <%= link_to main_app.customization_content_types_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+              <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">add</i>
+              <span class="flex-grow text-sm">Add more...</span>
             <% end %>
           </div>
         </div>
