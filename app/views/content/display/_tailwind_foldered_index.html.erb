@@ -561,13 +561,17 @@
                 <% end %>
 
                 <!-- timespan: latest updated_at - earliest created_at -->
-                <div class="inline-block mr-4">
-                  <i class="material-icons float-left mr-1 text-notebook-blue">date_range</i>
-                  <span class="text-sm">
-                    <strong class="font-bold text-gray-700"><%= distance_of_time_in_words content.map(&:updated_at).max - content.map(&:created_at).min %></strong>
-                    timespan
-                  </span>
-                </div>
+                <% if content.any? %>
+                  <div class="inline-block mr-4">
+                    <i class="material-icons float-left mr-1 text-notebook-blue">date_range</i>
+                    <span class="text-sm">
+                      <strong class="font-bold text-gray-700">
+                        <%= distance_of_time_in_words content.map(&:updated_at).max - content.map(&:created_at).min %>
+                      </strong>
+                      timespan
+                    </span>
+                  </div>
+                <% end %>
               </div>
             </div>
           </nav>
