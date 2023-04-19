@@ -1,4 +1,7 @@
 class BasilService < Service
+  FREE_IMAGE_LIMIT   = 100
+  MAX_JOB_QUEUE_SIZE = 3
+
   IGNORED_VALUES = ['', 'none', 'n/a', '.', '-', ' ', '?', '??', '???', 'x', nil]
 
   ENABLED_PAGE_TYPES = [

@@ -25,10 +25,6 @@ Rails.application.routes.draw do
       get  '/:content_type',     to: 'basil#index',      as: :basil_content_index
       get  '/:content_type/:id', to: 'basil#content',    as: :basil_content
       post '/:content_type/:id', to: 'basil#commission', as: :basil_commission
-
-      # URLs to migrate over
-      # get '/character/:id',    to: 'basil#character', as: :basil_character
-      # post '/character/:id',   to: 'basil#commission'
     end
   end
 

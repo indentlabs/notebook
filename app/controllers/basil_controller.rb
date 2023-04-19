@@ -14,8 +14,10 @@ class BasilController < ApplicationController
         return raise "Invalid content type: #{params[:content_type]}"
       end
 
-      @content = @current_user_content[@content_type].sort_by(&:name)      
+      @content = @current_user_content.fetch(@content_type, []).sort_by(&:name)
     end
+
+    @generated_images_count = current_user.basil_commissions.with_deleted.count
   end
 
   def content
@@ -199,45 +201,23 @@ class BasilController < ApplicationController
                                   .limit(10)
                                   .includes(:basil_feedbacks, :image_blob)
     @in_progress_commissions = @commissions.select { |c| c.completed_at.nil? }
-    @can_request_another     = @in_progress_commissions.count < 3
-  end
+    @generated_images_count  = current_user.basil_commissions.with_deleted.count
 
-  def character
-    @character  = current_user.characters.find(params[:id])
-    @guidance   = BasilFieldGuidance.find_or_initialize_by(entity: @character, user: current_user).try(:guidance)
-    @guidance ||= {}
-
-    category_ids = AttributeCategory.where(
-      user_id: current_user.id,
-      entity_type: 'character',
-      label: ['Looks', 'Appearance']
-    ).pluck(:id)
-    @appearance_fields = AttributeField.where(attribute_category_id: category_ids)
-    @attributes = Attribute.where(
-      attribute_field_id: @appearance_fields.pluck(:id), 
-      entity_id: @character.id, 
-      entity_type: 'Character'
-    )
-
-    @commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id)
-                                  .order('id DESC')
-                                  .limit(20)
-                                  .includes(:basil_feedbacks)
-    @in_progress_commissions = BasilCommission.where(entity_type: 'Character', entity_id: @character.id, completed_at: nil)
-    @can_request_another = @in_progress_commissions.count < 3
+    @can_request_another     = current_user.on_premium_plan? || @generated_images_count < BasilService::FREE_IMAGE_LIMIT
+    @can_request_another     = @can_request_another && @in_progress_commissions.count < BasilService::MAX_JOB_QUEUE_SIZE
   end
 
   def about
   end
 
   def stats
-    @commissions = BasilCommission.all
+    @commissions = BasilCommission.all.with_deleted
 
     @queued = BasilCommission.where(completed_at: nil)
-    @completed = BasilCommission.where.not(completed_at: nil)
+    @completed = BasilCommission.where.not(completed_at: nil).with_deleted
 
     @average_wait_time = @completed.where('completed_at > ?', 24.hours.ago)
-                                   .average(:cached_seconds_taken)
+                                   .average(:cached_seconds_taken) || 0
     @seconds_over_time = @completed.where('completed_at > ?', 24.hours.ago)
                                    .group_by { |c| ((c.cached_seconds_taken || 0) / 60).round }
                                    .map { |minutes, list| [minutes, list.count] }
@@ -295,14 +275,16 @@ class BasilController < ApplicationController
       'painting2', 'painting3', 'anime'
     ].flatten.compact.uniq
 
-    @total_score_per_style = BasilCommission.where(style: active_styles)
-                                              .joins(:basil_feedbacks)
-                                              .group(:style)
-                                              .sum(:score_adjustment)
-                                              .map { |style, average| [style, average.round(1)] }
-                                              .sort_by(&:second)
-                                              .reverse
-    @average_score_per_style = BasilCommission.where(style: active_styles)
+    @total_score_per_style = BasilCommission.with_deleted
+                                            .where(style: active_styles)
+                                            .joins(:basil_feedbacks)
+                                            .group(:style)
+                                            .sum(:score_adjustment)
+                                            .map { |style, average| [style, average.round(1)] }
+                                            .sort_by(&:second)
+                                            .reverse
+    @average_score_per_style = BasilCommission.with_deleted
+                                              .where(style: active_styles)
                                               .joins(:basil_feedbacks)
                                               .group(:style)
                                               .average(:score_adjustment)
@@ -310,7 +292,8 @@ class BasilController < ApplicationController
                                               .sort_by(&:second)
                                               .reverse
 
-    @average_score_per_page_type = BasilCommission.where.not(completed_at: nil)
+    @average_score_per_page_type = BasilCommission.with_deleted
+                                                  .where.not(completed_at: nil)
                                                   .joins(:basil_feedbacks)
                                                   .group(:entity_type)
                                                   .average(:score_adjustment)
@@ -404,13 +387,30 @@ class BasilController < ApplicationController
 
   def review
     @recent_commissions = BasilCommission.all.includes(:entity, :user).order('id DESC').limit(100)
+
+    @commissions_per_user_id = BasilCommission.with_deleted.where('created_at > ?', 48.hours.ago).group(:user_id).order('count_all DESC').limit(5).count
+    @unique_users_generating_count = BasilCommission.with_deleted.where('created_at > ?', 48.hours.ago).group(:user_id).count
+
+    @current_queue_items = BasilCommission.where(completed_at: nil).order('created_at ASC')
   end
 
   def commission
+    @generated_images_count  = current_user.basil_commissions.with_deleted.count
+    if !current_user.on_premium_plan? && @generated_images_count > BasilService::FREE_IMAGE_LIMIT
+      redirect_back fallback_location: basil_path, notice: "You've reached your free image limit. Please upgrade to generate more images."
+      return
+    end
+
     # Fetch the related content
     @content = @current_user_content[commission_params.fetch(:entity_type)]
                   .find { |c| c.id == commission_params.fetch(:entity_id).to_i }
     return raise "Invalid content commission params" if @content.nil?
+
+    current_queue_size = current_user.basil_commissions.where(completed_at: nil).where(entity: @content).count
+    if current_queue_size >= BasilService::MAX_JOB_QUEUE_SIZE
+      redirect_back fallback_location: basil_path, notice: "You can only have #{BasilService::MAX_JOB_QUEUE_SIZE} commissions per page in progress at a time. Please wait for one to complete before requesting another."
+      return
+    end
 
     # Before creating the prompt, do a little config to tweak things to work well :)
     labels_to_omit_label_text = [
