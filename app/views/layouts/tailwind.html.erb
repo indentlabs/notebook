@@ -67,7 +67,7 @@
           </div>
         </div>
 
-        <div x-data="{ expandedWritingSidebar: false }">
+        <div x-data="{ expandedWritingSidebar: <%= @sidenav_expansion == 'writing' %> }">
           <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedWritingSidebar = !expandedWritingSidebar" >
             <div class="flex items-center">
               <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 mr-2">book</i>
@@ -112,17 +112,17 @@
           </div>
         </div>
 
-        <div x-data="{ expandedWritingSidebar: false }">
-          <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedWritingSidebar = !expandedWritingSidebar" >
+        <div x-data="{ expandedCommunitySidebar: <%= @sidenav_expansion == 'community' %> }">
+          <div class="flex items-center justify-between px-2 py-3 transition cursor-pointer group hover:bg-gray-100 hover:text-gray-900" role="button" @click="expandedCommunitySidebar = !expandedCommunitySidebar" >
             <div class="flex items-center">
               <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 mr-2">book</i>
               <span>Community</span> 
             </div>
-            <svg :class="{ 'rotate-90': expandedWritingSidebar }" class="shrink-0 w-4 h-4 ml-2 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <svg :class="{ 'rotate-90': expandedCommunitySidebar }" class="shrink-0 w-4 h-4 ml-2 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
             </svg>
           </div>
-          <div x-show="expandedWritingSidebar" x-cloak class="pl-1 mb-2">
+          <div x-show="expandedCommunitySidebar" x-cloak class="pl-1 mb-2">
             <%= link_to main_app.stream_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
               <i class="material-icons text-purple-400 shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">ballot</i>
               <span class="flex-grow text-sm">Activity</span>

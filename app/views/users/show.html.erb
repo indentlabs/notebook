@@ -97,24 +97,26 @@
         </div>
       </div>
 
-      <div class="flex flex-col bg-white rounded-2xl shadow-xl">
-        <div class="flex-1 relative pt-16 px-6 pb-8 md:px-8">
-          <div class="absolute top-0 px-4 py-3 inline-block <%= content_class_from_name(@user.favorite_page_type).color %> rounded-xl shadow-lg transform -translate-y-1/2">
-            <i class="material-icons text-white text-3xl"><%= content_class_from_name(@user.favorite_page_type).icon %></i>
+      <% if @user.favorite_page_type? %>
+        <div class="flex flex-col bg-white rounded-2xl shadow-xl">
+          <div class="flex-1 relative pt-16 px-6 pb-8 md:px-8">
+            <div class="absolute top-0 px-4 py-3 inline-block <%= content_class_from_name(@user.favorite_page_type).color %> rounded-xl shadow-lg transform -translate-y-1/2">
+              <i class="material-icons text-white text-3xl"><%= content_class_from_name(@user.favorite_page_type).icon %></i>
+            </div>
+            <!--
+            <h3 class="text-xl font-medium text-gray-900">My favorite pages</h3>
+            -->
+            <p class="mt-4 text-base text-gray-500">
+              (something here)
+            </p>
           </div>
-          <!--
-          <h3 class="text-xl font-medium text-gray-900">My favorite pages</h3>
-          -->
-          <p class="mt-4 text-base text-gray-500">
-            (something here)
-          </p>
+          <div class="p-3 bg-gray-50 rounded-bl-2xl rounded-br-2xl md:px-8">
+            <a href="#" class="text-base font-medium <%= content_class_from_name(@user.favorite_page_type).text_color %> hover:text-notebook-blue">
+              See my <%= @user.favorite_page_type.pluralize.downcase %>
+            </a>
+          </div>
         </div>
-        <div class="p-3 bg-gray-50 rounded-bl-2xl rounded-br-2xl md:px-8">
-          <a href="#" class="text-base font-medium <%= content_class_from_name(@user.favorite_page_type).text_color %> hover:text-notebook-blue">
-            See my <%= @user.favorite_page_type.pluralize.downcase %>
-          </a>
-        </div>
-      </div>
+      <% end %>
     </div>
   </section>
 </div>
@@ -156,8 +158,8 @@
           <span class="inline-block mb-2">Explore my notebook pages</span>
         </h2>
       </div>
-      <div class="text-black py-2 px-4 bg-blue-100 border border-notebook-blue rounded">
-        Only your public pages are visible in this section.<br />
+      <div class="text-black py-3 px-4 bg-blue-100 border border-notebook-blue rounded">
+        Only your public pages are visible in this section.
         All pages are private by default.
       </div>
     </div>
@@ -190,8 +192,8 @@
           <span class="inline-block mb-2">Read stories</span>
         </h2>
       </div>
-      <div class="text-black py-2 px-4 bg-blue-100 border border-notebook-blue rounded">
-        Only your public documents are visible in this section.<br />
+      <div class="text-black py-3 px-4 bg-blue-100 border border-notebook-blue rounded">
+        Only your public documents are visible in this section.
         All documents are private by default.
       </div>
     </div>
@@ -220,9 +222,9 @@
           <span class="inline-block mb-2">Published in</span>
         </h2>
       </div>
-      <div class="text-black py-2 px-4 bg-blue-100 border border-notebook-blue rounded">
-        This section automatically updates whenever<br />
-        one of your pages is accepted into a public Collection.
+      <div class="text-black py-3 px-4 bg-blue-100 border border-notebook-blue rounded">
+        This section automatically updates whenever
+        one of your pages is accepted into someone else's Collection.
       </div>
     </div>
     <div class="grid gap-6 row-gap-5 mb-8 lg:grid-cols-4 sm:row-gap-6 sm:grid-cols-2">
@@ -250,8 +252,8 @@
           <span class="inline-block mb-2">Editor of</span>
         </h2>
       </div>
-      <div class="text-black py-2 px-4 bg-blue-100 border border-notebook-blue rounded">
-        This section automatically updates whenever<br />
+      <div class="text-black py-3 px-4 bg-blue-100 border border-notebook-blue rounded">
+        This section automatically updates whenever
         you create a public Collection.
       </div>
     </div>
