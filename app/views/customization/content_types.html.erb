@@ -24,9 +24,9 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
           </div>
-          <h3 class="text-xl font-medium text-gray-900">Choose your page templates</h3>
+          <h3 class="text-xl font-medium text-gray-900">Choose your page types</h3>
           <p class="mt-4 text-base text-gray-500">
-            Add or remove templates across the site at any time by toggling them here. Disabled templates are hidden, but not deleted.
+            Add or remove page types across the site at any time by toggling them here. Disabled page types are simply hidden, not deleted.
           </p>
         </div>
         <div class="p-6 bg-gray-50 rounded-bl-2xl rounded-br-2xl md:px-8">
@@ -48,11 +48,11 @@
           </div>
           <h3 class="text-xl font-medium text-gray-900">Customize your templates</h3>
           <p class="mt-4 text-base text-gray-500">
-            Each page template comes with a thorough set of categories and questions &mdash; which you can fully customize.
+            Each page type comes with an in-depth template of fully-customizable categories and questions.
           </p>
         </div>
         <div class="p-6 bg-gray-50 rounded-bl-2xl rounded-br-2xl md:px-8">
-          <a href="#" class="text-base font-medium text-indigo-700 hover:text-indigo-600">Learn about templates<span aria-hidden="true"> &rarr;</span></a>
+          <a href="#" class="text-base font-medium text-notebook-blue hover:text-blue-600">Learn about templates</a>
         </div>
       </div>
 
@@ -69,8 +69,9 @@
           </p>
         </div>
         <div class="p-6 bg-gray-50 rounded-bl-2xl rounded-br-2xl md:px-8">
-          <%= link_to 'https://docs.google.com/forms/d/1PFOaa97Cu3vrceUvcuFT6nyITaMwR-4wQSarUdVoPSg/edit', target: '_new', class: 'text-base font-medium text-indigo-700 hover:text-indigo-600' do %>
-            Suggest a new template
+          <%= link_to 'https://docs.google.com/forms/d/1PFOaa97Cu3vrceUvcuFT6nyITaMwR-4wQSarUdVoPSg/edit', target: '_new', class: 'text-base font-medium text-notebook-blue hover:text-blue-600' do %>
+            Suggest a new page type
+            <span aria-hidden="true"> &rarr;</span>
           <% end %>
         </div>
       </div>
@@ -131,7 +132,10 @@
                       <% if user_signed_in? %>
                         You've created <%= pluralize @current_user_content.fetch(content_type.name, []).count, "page" %> with this template.
                       <% else %>
-                        Users have created <%= pluralize content_type.last.try(:id) || 0, "page" %> with this template.
+                        Users have created
+                        <%= number_with_delimiter content_type.last.try(:id) || 0 %>
+                        <%= "page".pluralize content_type.last.try(:id) || 0 %>
+                        with this template.
                       <% end %>
                     </span>
                   </span>
@@ -227,7 +231,10 @@
                 <% if user_signed_in? %>
                   You've created <%= pluralize @current_user_content.fetch('Universe', []).count, "page" %> with this template.
                 <% else %>
-                  Users have created <%= pluralize Universe.last.try(:id) || 0, "page" %> with this template.
+                  Users have created
+                  <%= number_with_delimiter Universe.last.try(:id) || 0 %>
+                  <%= "universe".pluralize Universe.last.try(:id) || 0 %>
+                  with this template.
                 <% end %>
               </span>
             </span>
@@ -259,9 +266,9 @@
                 </noscript>
               </div>
             <% else %>
-              <%= link_to send("#{content_type.name.downcase}_worldbuilding_info_path") do %>
+              <%= link_to send("#{Universe.name.downcase}_worldbuilding_info_path") do %>
                 <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  About <%= content_type.name.pluralize %>
+                  About <%= Universe.name.pluralize %>
                 </button>
               <% end %>
             <% end %>
@@ -345,7 +352,10 @@
                       <% if user_signed_in? %>
                         You've created <%= pluralize @current_user_content.fetch(content_type.name, []).count, "page" %> with this template.
                       <% else %>
-                        Users have created <%= pluralize content_type.last.try(:id) || 0, "page" %> with this template.
+                        Users have created
+                        <%= number_with_delimiter content_type.last.try(:id) || 0 %>
+                        <%= "page".pluralize content_type.last.try(:id) || 0 %>
+                        with this template.
                       <% end %>
                     </span>
                   </span>
