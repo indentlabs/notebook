@@ -1,13 +1,13 @@
 class CustomizationController < ApplicationController
   layout 'tailwind'
 
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [:content_types]
   before_action :verify_content_type_can_be_toggled, only: [:toggle_content_type]
 
   def content_types
     @all_content_types = Rails.application.config.content_types[:all]
     @premium_content_types = Rails.application.config.content_types[:premium]
-    @my_activators = current_user.user_content_type_activators.pluck(:content_type)
+    @my_activators = user_signed_in? ? current_user.user_content_type_activators.pluck(:content_type) : []
 
     @sidenav_expansion = 'worldbuilding'
     @page_title = "Customize your notebook pages"
