@@ -14,8 +14,9 @@ class ConversationController < ApplicationController
     description = open_characters_persona_params.fetch('description', '')
 
     add_character_hash = base_open_characters_export.merge({
+      "uuid":            deterministic_uuid(@character.id),
       "name":            name,
-      "roleInstruction": "You are to act as #{name}, whos personality is detailed below:\n\n#{description}",
+      "roleInstruction": "You are to act as #{name}, whose personality is detailed below:\n\n#{description}",
       "reminderMessage": "#{personality}\n\nDo not break character!",
     })
 
@@ -32,15 +33,22 @@ class ConversationController < ApplicationController
 
   private
 
+  def deterministic_uuid(id)
+    static_prefix = "notebook-"
+    hashed_id = Digest::SHA1.hexdigest(static_prefix + id.to_s)
+    uuid = "#{hashed_id[0..7]}-#{hashed_id[8..11]}-#{hashed_id[12..15]}-#{hashed_id[16..19]}-#{hashed_id[20..31]}"
+    uuid
+  end
+
   def personality_for_character
     name    = @character.name
-    gender  = @character.get_field_value('Overview', 'Gender')
-    role    = @character.get_field_value('Overview', 'Role')
-    age     = @character.get_field_value('Overview', 'Age')
-    aliases = @character.get_field_value('Overview', 'Aliases')
-    hobbies = @character.get_field_value('Nature',   'Hobbies')
+    gender  = @character.get_field_value('Overview', 'Gender').try(:strip)
+    role    = @character.get_field_value('Overview', 'Role').try(:strip)
+    age     = @character.get_field_value('Overview', 'Age').try(:strip)
+    aliases = @character.get_field_value('Overview', 'Aliases').try(:strip)
+    hobbies = @character.get_field_value('Nature',   'Hobbies').try(:strip)
 
-    [
+    final_text = [
       name,
       " is a ",
       gender.downcase,
@@ -50,6 +58,8 @@ class ConversationController < ApplicationController
       aliases.present? ? "(also known as #{aliases})" : nil,
       hobbies.present? ? " into #{hobbies}."          : "."
     ].compact.join
+
+    ContentFormatterService.plaintext_show(text: final_text, viewing_user: current_user)
   end
 
   def description_for_character
@@ -72,7 +82,7 @@ class ConversationController < ApplicationController
     description_parts.concat ["TALENTS", talents, nil] if talents.present?
     description_parts.concat ["HOBBIES", hobbies, nil] if hobbies.present?
 
-    description_parts.join("\n")
+    ContentFormatterService.plaintext_show(text: description_parts.join("\n"), viewing_user: current_user)
   end
 
   def set_character

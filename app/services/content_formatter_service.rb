@@ -21,6 +21,16 @@ class ContentFormatterService < Service
   # https://s3.amazonaws.com/raw.paste.esk.io/Llb%2F64DJHK?versionId=19Lb_TtukDbo1J_IoCpkr.d.pwpW_vmH
   VALID_LINK_CLASSES = Rails.application.config.content_type_names[:all] + %w(Timeline Document)
 
+  def self.plaintext_show(text:, viewing_user: User.new)
+    formatted_text = markdown.render(text || '').html_safe
+
+    tokens_to_replace(text).each do |token|
+      text.gsub!(token[:matched_string], replacement_for_token(token, viewing_user, true))
+    end
+
+    text
+  end
+
   def self.show(text:, viewing_user: User.new)
     # We want to evaluate markdown first, because the markdown engine also happens
     # to strip out HTML tags. So: markdown, _then_ insert content links.
@@ -67,7 +77,7 @@ class ContentFormatterService < Service
     end
   end
 
-  def self.replacement_for_token(token, viewing_user)
+  def self.replacement_for_token(token, viewing_user, plaintext=false)
     return unknown_link_template(token) unless token.key?(:content_type) && token.key?(:content_id)
     begin
       content_class = token[:content_type].titleize.constantize
@@ -81,9 +91,17 @@ class ContentFormatterService < Service
     return unknown_link_template(token) unless content_model.present?
 
     if content_model.readable_by?(viewing_user)
-      link_template(content_model)
+      if plaintext
+        plaintext_replacement_template(content_model)
+      else
+        link_template(content_model)
+      end
     else
-      private_link_template(content_model)
+      if plaintext
+        plaintext_replacement_template(content_model)
+      else
+        private_link_template(content_model)
+      end
     end
   end
 
@@ -93,6 +111,10 @@ class ContentFormatterService < Service
 
   def self.private_link_template(content_model)
     inline_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: 'grey-text content_link disabled') }
+  end
+
+  def self.plaintext_replacement_template(content_model)
+    content_model.name
   end
 
   def self.unknown_link_template(attempted_key)
