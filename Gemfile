@@ -115,7 +115,7 @@ group :production do
 end
 
 group :test, :production do
-  gem 'pg', '~> 1.4'
+  gem 'pg', '~> 1.5'
 
   gem "mini_racer", "~> 0.6.3" # TODO: audit whether we can remove this
 end
