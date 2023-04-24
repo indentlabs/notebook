@@ -60,7 +60,7 @@ class User < ApplicationRecord
   has_many :user_blockings,               dependent: :destroy
   has_many :blocked_users,                through: :user_blockings, source: :blocked_user
   def blocked_by_users
-    User.where(id: UserBlocking.where(blocked_user_id: self.id).pluck(:user_id))    
+    @cached_blocked_by_users ||= User.where(id: UserBlocking.where(blocked_user_id: self.id).pluck(:user_id))
   end
   def blocked_by?(user)
     blocked_by_users.pluck(:id).include?(user.id)
@@ -206,7 +206,7 @@ class User < ApplicationRecord
   end
 
   def image_url(size=80)
-    if avatar.attached? # manually-uploaded avatar
+    @cached_user_image_url ||= if avatar.attached? # manually-uploaded avatar
       Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_limit: [size, size]).processed, only_path: true)
 
     else # otherwise, grab the default from Gravatar for this email address
@@ -243,7 +243,7 @@ class User < ApplicationRecord
   end
 
   def active_promo_codes
-    PageUnlockPromoCode.where(id: active_promotions.pluck(:page_unlock_promo_code_id))
+    @cached_active_promo_codes ||= PageUnlockPromoCode.where(id: active_promotions.pluck(:page_unlock_promo_code_id))
   end
 
   def initialize_stripe_customer
