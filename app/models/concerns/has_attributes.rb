@@ -300,14 +300,14 @@ module HasAttributes
         .detect { |v| v.entity_id == self.id }&.value.presence || (self.respond_to?(label.downcase) ? self.read_attribute(label.downcase) : nil)
     end
 
-    def get_field_value(category, field)
+    def get_field_value(category, field, fallback=nil)
       category = AttributeCategory.find_by(
         label:       category,
         entity_type: self.class.name.downcase,
         user_id:     self.user_id,
         hidden:      [nil, false]
       )
-      return nil if category.nil?
+      return fallback if category.nil?
 
       field = AttributeField.find_by(
         label:                 field,
@@ -315,7 +315,7 @@ module HasAttributes
         user_id:               self.user_id,
         hidden:                [nil, false]
       )
-      return nil if field.nil?
+      return fallback if field.nil?
 
       answer = Attribute.find_by(
         attribute_field_id: field.id,
@@ -323,7 +323,7 @@ module HasAttributes
         entity_id:          self.id,
         user_id:            self.user_id
       )
-      return nil if answer.nil?
+      return fallback if answer.nil?
 
       answer.value
     end

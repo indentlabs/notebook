@@ -16,14 +16,13 @@ class ConversationController < ApplicationController
 
   def export
     name        = open_characters_persona_params.fetch('name', 'New character').strip
-    personality = open_characters_persona_params.fetch('personality', '')
     description = open_characters_persona_params.fetch('description', '')
 
     add_character_hash = base_open_characters_export.merge({
       "uuid":            deterministic_uuid(@character.id),
       "name":            name,
-      "roleInstruction": "You are to act as #{name}, whose personality is detailed below:\n\n#{description}",
-      "reminderMessage": "#{personality}\n\n[AI]: (Thought: I need to remember to be very descriptive, and create an engaging experience for the user)",
+      "roleInstruction": full_role_instruction,
+      "reminderMessage": reminder_message,
     })
 
     # Add a character image if one has been uploaded to the page
@@ -31,7 +30,7 @@ class ConversationController < ApplicationController
     add_character_hash[:avatar][:url] = avatar if avatar.present?
 
     # Provide a default scenario if one wasn't given
-    add_character_hash[:scenario] ||= "You are talking"
+    add_character_hash[:scenario] ||= default_scenario
 
     # Redirect to OpenCharacters
     base_oc_url = 'https://josephrocca.github.io/OpenCharacters/'
@@ -49,26 +48,34 @@ class ConversationController < ApplicationController
     uuid
   end
 
-  def personality_for_character
-    name    = @character.name
-    gender  = @character.get_field_value('Overview', 'Gender').try(:strip)
-    role    = @character.get_field_value('Overview', 'Role').try(:strip)
-    age     = @character.get_field_value('Overview', 'Age').try(:strip)
-    aliases = @character.get_field_value('Overview', 'Aliases').try(:strip)
-    hobbies = @character.get_field_value('Nature',   'Hobbies').try(:strip)
-
+  def full_role_instruction
     final_text = [
-      name,
-      " is a ",
-      gender.downcase,
-      " ",
-      role || "character",
-      age.present?     ? ", #{age},"                  : nil,
-      aliases.present? ? "(also known as #{aliases})" : nil,
-      hobbies.present? ? " into #{hobbies}."          : "."
-    ].compact.join
+      "[SYSTEM]: You are roleplaying as #{@character.name}, #{personality_for_character}",
+      "",
+      "Follow this pattern:",
+      "\"Hello!\" - dialogue",
+      "*He jumps out of the bushes.* - action",
+      "",
+      "#{@character.name}'s personality is below:",
+      "#{open_characters_persona_params.fetch('description', '(not included)')}",
+      "",
+      "#{@character.name} will now respond while staying in character in an extremely descriptive manner at length, avoiding being repetitive, without advancing events by herself, avoiding implying conversations without a reply from the user first, and wait for the user's reply to advance events. Describe what #{@character.name} is feeling, saying, and doing with rich detail, but do not include any parenthetical thoughts and focus primarily on dialogue.",
+    ].join("\n")
+  end
 
-    ContentFormatterService.plaintext_show(text: final_text, viewing_user: current_user)
+  def reminder_message
+    "[SYSTEM]: (Thought: I need to rememeber to be creative, descriptive, and engaging! I should work very hard to avoid being repetitive as well! Unless the user speaks to me OOC, with parentheses around their input, first, I will not say anything OOC or in parentheses. I shouldn't ignore parts of the user's post, even if they move on to a new scene. I should at least write my characters thoughts and feelings towards the prior scene before continuing with the new one. I don't need to feel the need to write a long response if the user's post is short. In that case, I can feel free to write a short response myself - making sure to not take over writing the user's character's dialogue, thoughts, or actions!)"
+  end
+
+  def personality_for_character
+    hobbies = @character.get_field_value('Nature', 'Hobbies')
+
+    personality_parts = [
+      "a #{@character.get_field_value('Overview', 'Gender', fallback='')} #{@character.get_field_value('Overview', 'Role', fallback='character')}, age #{@character.get_field_value('Overview', 'Age', fallback='irrelevant')}."
+    ]
+    personality_parts << "Their hobbies include #{hobbies}." if hobbies.present?
+
+    ContentFormatterService.plaintext_show(text: personality_parts.join(' '), viewing_user: current_user)
   end
 
   def description_for_character
@@ -110,11 +117,7 @@ class ConversationController < ApplicationController
   end
 
   def default_scenario
-    ""
-  end
-
-  def default_reminder_message
-    ""
+    "This character is interacting with the user within their own fictional universe. The character will respond in a way that is consistent with their personality and background."
   end
 
   def default_custom_code
@@ -126,8 +129,6 @@ class ConversationController < ApplicationController
   def base_open_characters_export
     {
       "name": "New character",
-      # "roleInstruction": default_scenario,
-      # "reminderMessage": default_reminder_message,
       "modelName": "gpt-3.5-turbo",
       "fitMessagesInContextMethod": "summarizeOld",
       "associativeMemoryMethod": "v1",
@@ -163,7 +164,7 @@ class ConversationController < ApplicationController
     [
       {
         "author": "system",
-        "content": open_characters_persona_params.fetch('scenario', default_scenario),
+        "content": "Scenario: " + (open_characters_persona_params.fetch('scenario', nil).presence || default_scenario),
         "hiddenFrom": [] # "ai", "user", "both", "neither"
       },
       {
@@ -190,6 +191,6 @@ class ConversationController < ApplicationController
   end
 
   def default_character_greeting
-    "Hello, friend!"
+    "Hello!"
   end
 end
