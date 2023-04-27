@@ -1,6 +1,12 @@
 class ConversationController < ApplicationController
-  before_action :set_character
-  before_action :ensure_character_privacy
+  before_action :authenticate_user!,       only: [:character_index]
+
+  before_action :set_character,            only: [:character_landing, :export]
+  before_action :ensure_character_privacy, only: [:character_landing, :export]
+
+  def character_index
+    @characters = @current_user_content.fetch('Character', [])
+  end
 
   def character_landing
     @first_greeting = default_character_greeting
@@ -17,12 +23,15 @@ class ConversationController < ApplicationController
       "uuid":            deterministic_uuid(@character.id),
       "name":            name,
       "roleInstruction": "You are to act as #{name}, whose personality is detailed below:\n\n#{description}",
-      "reminderMessage": "#{personality}\n\nDo not break character!",
+      "reminderMessage": "#{personality}\n\n[AI]: (Thought: I need to remember to be very descriptive, and create an engaging experience for the user)",
     })
 
     # Add a character image if one has been uploaded to the page
     avatar = @character.random_image_including_private
     add_character_hash[:avatar][:url] = avatar if avatar.present?
+
+    # Provide a default scenario if one wasn't given
+    add_character_hash[:scenario] ||= "You are talking"
 
     # Redirect to OpenCharacters
     base_oc_url = 'https://josephrocca.github.io/OpenCharacters/'

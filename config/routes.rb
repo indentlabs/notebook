@@ -27,8 +27,9 @@ Rails.application.routes.draw do
     end
 
     scope :talk do
+      get '/',                      to: 'conversation#character_index',   as: :conversation
       get '/to/:character_id',      to: 'conversation#character_landing', as: :talk
-      post '/export/:character_id', to: 'conversation#export', as: :export_character
+      post '/export/:character_id', to: 'conversation#export',            as: :export_character
     end
   end
 

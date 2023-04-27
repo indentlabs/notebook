@@ -26,7 +26,7 @@ module HasImageUploads
 
       # If we don't have any uploaded images, we look for saved Basil commissions
       if result.nil? && respond_to?(:basil_commissions)
-        result = basil_commissions.where.not(saved_at: nil).sample.try(:image)
+        result = basil_commissions.where.not(saved_at: nil).includes([:image_attachment]).sample.try(:image)
       end
 
       # Finally, if we have no image upload, we return the default image for this type
