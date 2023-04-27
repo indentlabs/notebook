@@ -1,0 +1,60 @@
+<div class="row">
+  <div class="col s12">
+    <h1 style="font-size: 2rem">
+      <i class="material-icons float-right ">forum</i>
+      Talk to your characters
+    </h1>
+    <p>
+      There are a lot of new sites popping up for talking to AI characters. This page lets you
+      export your Notebook.ai characters to those sites, starting with the open-source project
+      OpenCharacters.
+    </p>
+    <p>
+      Please note that these services aren't a part of Notebook.ai; this is just a way to get your
+      Notebook.ai characters into those sites! To get started, click on any character below.
+    </p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12">
+    <% if @universe_scope %>
+      <div class="card-panel <%= Universe.color %> white-text">
+        <i class="material-icons left"><%= Universe.icon %></i>
+        Showing <%= pluralize @characters.count, 'character' %> from <%= @universe_scope.name %>.
+        <%= link_to "Show characters from all universes instead.", conversation_path(universe: "all"), class: 'purple-text text-lighten-4' %>
+      </div>
+    <% end %>
+
+    <div class="row">
+      <% @characters.each do |content| %>
+        <%= link_to talk_path(content) do %>
+          <div class="col s12 m4 l3">
+            <div class="hoverable card">
+              <div class="card-image">
+                <%= image_tag content.random_image_including_private(format: :medium), style: 'height: 200px' %>
+                <span class="card-title"><%= content.name %></span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+
+      <% if @characters.empty? %>
+        <div class="center">
+          <strong>You haven't created any character pages yet.</strong>
+          <br /><br />
+
+          <%= link_to new_character_path, class: '' do %>
+            <div class="hoverable card-panel <%= Character.color %> white-text" style="width: 33%; margin: 0 auto">
+              <i class="material-icons left">add</i>
+              Create character
+            </div>
+          <% end %>
+        <div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+

@@ -25,6 +25,12 @@ Rails.application.routes.draw do
       get  '/:content_type/:id', to: 'basil#content',    as: :basil_content
       post '/:content_type/:id', to: 'basil#commission', as: :basil_commission
     end
+
+    scope :talk do
+      get '/',                      to: 'conversation#character_index',   as: :conversation
+      get '/to/:character_id',      to: 'conversation#character_landing', as: :talk
+      post '/export/:character_id', to: 'conversation#export',            as: :export_character
+    end
   end
 
   scope :stream, path: '/stream', as: :stream do

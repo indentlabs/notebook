@@ -1,0 +1,94 @@
+<div class="row">
+  <div class="col s12 m4">
+    <%= link_to @character do %>
+      <%= image_tag @character.random_image_including_private, style: "width: 100%" %>
+    <% end %>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="card-title">
+          <strong>Talk to <%= @character.name %></strong>
+        </div>
+        <p>
+          You can now export your Notebook.ai characters to the open-source project OpenCharacters
+          and talk to them in real-time! This is a great way to get to know your characters a little
+          better or to roleplay with them.
+        </p>
+      </div>
+    </div>
+
+    <p style="font-size: 0.9em">
+      The fields will be used to create a conversational AI persona of
+      your character. You can edit these fields before exporting if you want to change how your
+      character talks. If your character is public, you can also share this page with others
+      to let them talk to your character, too!
+    </p>
+    <div>
+      <%= link_to "Back to notebook page", @character %>
+    </div>
+  </div>
+  <div class="col s12 m8">
+    <%= form_tag export_character_path(@character.id), method: :post, target: '_blank' do |f| %>
+
+      <%= hidden_field_tag "name",   @character.name %>
+      <%= hidden_field_tag "avatar", @character.random_image_including_private %>
+      <%# TODO background image/music/etc? %>
+
+      <div class="card-panel">
+        <p class="center">
+          <strong>Persona export for <%= @character.name %></strong>
+          <% if user_signed_in? && @character.user_id == current_user.id %>
+            <br />
+            <em>(editable because you created <%= @character.name %>)</em>
+          <% end %>
+        </p>
+        <br /><br />
+
+        <div class="input-field">
+          <%= text_area_tag 'scenario', nil, disabled: false, style: 'min-height: 100px', placeholder: "Is there a specific scenario/context you want to have this conversation in?", class: 'materialize-textarea' %>
+          <label for="scenario">Optional: Scenario</label>
+        </div>
+
+        <div class="input-field">
+          <%= text_area_tag 'char_greeting', @first_greeting, disabled: false, placeholder: "This will be the first thing your character says to you. It can be a simple greeting, or you can use it to set a specific topic, tone, or speaking style.", class: 'materialize-textarea' %>
+          <label for="char_greeting">First greeting from <%= @character.name %></label>
+        </div>
+
+        <div class="input-field">
+          <%= text_area_tag 'personality', @personality, disabled: false, class: 'materialize-textarea' %>
+          <label for="personality">Brief personality</label>
+        </div>
+
+        <div class="input-field">
+          <%= text_area_tag 'description', @description, disabled: false, class: 'materialize-textarea' %>
+          <label for="description">In-depth personality</label>
+        </div>
+
+        <div class="input-field">
+          <%= text_area_tag 'example_dialogue', nil, disabled: false, style: 'min-height: 100px', placeholder: "If you have any dialogue examples, quotes, or other phrases your character says, you can use this field to include them and adjust their speaking style closer to the examples. Write as little or as much as you'd like!", class: 'materialize-textarea' %>
+          <label for="example_dialogue">Optional: More dialogue examples</label>
+        </div>
+      </div>
+
+      <div class="card-panel">
+        <div class="center">
+          <strong>Note: An OpenAI API key is required by OpenCharacters</strong>
+        </div>
+        
+        <p>
+          OpenCharacters uses this persona data with OpenAI's GPT models
+          in a web app that runs entirely in your browser, rather than being hosted or stored on any server.
+          This means that you will need a valid OpenAI key to use OpenCharacters.
+        </p>
+      </div>
+
+      <br />
+      <div class="center">
+        <%= submit_tag "Chat with #{@character.name}", class: 'hoverable btn blue white-text' %>
+        <span class="grey-text text-darken-1" style="margin-left: 0.5rem">using OpenCharacters</span>
+      </div>
+
+      <% 10.times do %><br /><% end %>
+    <% end %>
+  </div>
+</div>
