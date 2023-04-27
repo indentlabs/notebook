@@ -1,6 +1,8 @@
 <div class="row">
   <div class="col s12 m4">
-    <%= image_tag @character.random_image_including_private, style: "width: 100%" %>
+    <%= link_to @character do %>
+      <%= image_tag @character.random_image_including_private, style: "width: 100%" %>
+    <% end %>
 
     <div class="card">
       <div class="card-content">
@@ -19,14 +21,14 @@
       The fields will be used to create a conversational AI persona of
       your character. You can edit these fields before exporting if you want to change how your
       character talks. If your character is public, you can also share this page with others
-      to let them talk to your character!
+      to let them talk to your character, too!
     </p>
     <div>
       <%= link_to "Back to notebook page", @character %>
     </div>
   </div>
   <div class="col s12 m8">
-    <%= form_tag export_character_path(@character.id), method: :post do |f| %>
+    <%= form_tag export_character_path(@character.id), method: :post, target: '_blank' do |f| %>
 
       <%= hidden_field_tag "name",   @character.name %>
       <%= hidden_field_tag "avatar", @character.random_image_including_private %>
@@ -76,7 +78,7 @@
         <p>
           OpenCharacters uses this persona data with OpenAI's GPT models
           in a web app that runs entirely in your browser, rather than being hosted or stored on any server.
-          This means that you will need a valid OpenAI key to use this feature.
+          This means that you will need a valid OpenAI key to use OpenCharacters.
         </p>
       </div>
 
