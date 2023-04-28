@@ -98,16 +98,16 @@
         -->
       <% end %>
 
-      <div x-data="{ accountDropdownOpen: false }" class="inline-block mt-2.5">
-        <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
-          <%= image_tag current_user.image_url(size=26), class: 'rounded-full' %>
+      <div x-data="{ accountDropdownOpen: false }" class="inline-block">
+        <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 relative top-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+          <%= image_tag current_user.image_url, class: 'rounded-full h-8 w-8' %>
         </button>
         <div x-show="accountDropdownOpen" @click="accountDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
 
         <div x-show="accountDropdownOpen" class="absolute right-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-64">
-          <%= link_to current_user.profile_url, class: 'flex border-t pt-4 pb-4 px-4 border-b border-gray-300 shadow group hover:bg-notebook-blue hover:text-white' do %>
-            <%= image_tag current_user.image_url(size=32), class: 'rounded-full mr-2 p-1 border-2 border-notebook-blue group-hover:border-green-500' %>
-            <div>
+          <%= link_to current_user.profile_url, class: 'flex border-t p-2 border-b border-gray-300 shadow group hover:bg-notebook-blue hover:text-white' do %>
+            <%= image_tag current_user.image_url(size=32), class: 'rounded-full h-16 w-16 mr-2 p-1 border-2 border-notebook-blue group-hover:border-green-500' %>
+            <div class="m-auto ml-1">
               <div class="text-xs text-gray-500 group-hover:text-white">You're signed in as</div>
               <div class="text-sm <%= User.text_color %> group-hover:text-white font-bold">
                 <%= current_user.display_name %>
