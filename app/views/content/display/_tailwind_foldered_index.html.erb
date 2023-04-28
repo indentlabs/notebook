@@ -377,6 +377,7 @@
 
           <!-- replace cards/serendipitous/_content_question with a variant of this -->
           <% if @questioned_content && @attribute_field_to_question %>
+            <% serendipitous_category = @attribute_field_to_question.attribute_category%>
             <div x-data="{ isOpen: false }" id="serendipitous-question" data-accordion="collapse" class="mb-2">
               <h2 id="serendipitous-question-heading-1" class="relative">
                 <button
@@ -387,11 +388,11 @@
                   :aria-expanded="isOpen"
                   aria-controls="serendipitous-question-body-1"
                 >
-                  <i class="material-icons float-left mr-2">help_outline</i>
+                  <i class="material-icons float-left mr-2"><%= serendipitous_category.icon %></i>
                   <span>
                     <%=
                       t(
-                        "serendipitous_questions.attributes.#{@questioned_content.page_type}.#{@attribute_field_to_question.label.downcase}",
+                        "serendipitous_questions.attributes.#{@questioned_content.page_type.downcase}.#{@attribute_field_to_question.label.parameterize.underscore}",
                         name:    @questioned_content.name,
                         default: "What is #{@questioned_content.name}'s #{@attribute_field_to_question.label.downcase}?"
                       )
@@ -411,8 +412,11 @@
 
                       <div class="relative p-4">
                         <%= hidden_field_tag "field[name]", @attribute_field_to_question[:id] %>
-                        <label for="field[value]" class="leading-7 text-sm text-gray-600">
+                        <label for="field[value]" class="leading-7 text-sm text-black">
+                          <span class="text-gray-600">Your answer will be saved to</span>
                           <%= link_to @questioned_content.name, @questioned_content.view_path, class: @questioned_content.text_color %>
+                          &rsaquo;
+                          <%= serendipitous_category.label %>
                           &rsaquo;
                           <%= @attribute_field_to_question.label %>
                         </label>
@@ -422,9 +426,11 @@
                                         class: "w-full h-32 bg-white rounded border border-gray-300 focus:border-notebook-blue focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-1 px-3",
                                         placeholder: "Write as little or as much as you'd like!"
                         %>
+                        <!--
                         <%= button_tag(type: 'submit', class: "js-content-question-submit px-4 py-2 #{@questioned_content.color} text-white rounded") do %>
                           Save answer
                         <% end %>
+                        -->
                       </div>
                     <% end %>
                 </div>
