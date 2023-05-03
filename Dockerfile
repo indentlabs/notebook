@@ -46,7 +46,9 @@ RUN bundle install && \
         echo "Compiling webpack assets..." && \
         rails webpacker:compile ; \
     fi && \
-    rails db:setup
+    rails db:setup && \
+    rake db:migrate && \
+    rm -f tmp/pids/server.pid
 
 # This image should expose the port 3000.
 # This does not actually expose the port, you'll have to expose it yourself by
@@ -55,6 +57,4 @@ RUN bundle install && \
 EXPOSE 3000/tcp
 
 # Finally, start the server!
-RUN rake db:migrate && \
-    rm -f tmp/pids/server.pid && \
-    rails server -b 0.0.0.0
+CMD rails server -b 0.0.0.0
