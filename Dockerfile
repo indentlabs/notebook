@@ -54,7 +54,20 @@ RUN bundle install && \
 # This does not actually expose the port, you'll have to expose it yourself by
 # using `-p 3000:3000/tcp` in Docker's CLI or `- "3000:3000"` in the in docker-compose.yml service's ports[].
 # https://docs.docker.com/engine/reference/builder/#expose
-EXPOSE 3000/tcp
+#EXPOSE 3000/tcp
 
 # Finally, start the server!
-CMD rails server -b 0.0.0.0
+#CMD rails server -b 0.0.0.0
+
+
+
+# This image should expose port 80.
+EXPOSE 80/tcp
+
+# Finally, start the server using Puma!
+CMD bundle exec puma -C config/puma.rb -e ${RAILS_ENV} -b tcp://0.0.0.0:80
+
+
+
+# And run it with
+# docker run --name nb-webserver -p 80:3000 -d notebookai
