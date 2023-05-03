@@ -62,7 +62,7 @@ RUN bundle install && \
 
 
 # This image should expose port 80.
-EXPOSE 80/tcp
+EXPOSE 3000/tcp
 
 # Finally, start the server using Puma!
 CMD bundle exec puma -C config/puma.rb -e ${RAILS_ENV} -b tcp://0.0.0.0:80
