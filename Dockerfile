@@ -56,18 +56,11 @@ RUN bundle install && \
 # https://docs.docker.com/engine/reference/builder/#expose
 #EXPOSE 3000/tcp
 
-# Finally, start the server!
-#CMD rails server -b 0.0.0.0
-
-
-
-# This image should expose port 80.
+# This image should expose port 3000.
 EXPOSE 3000/tcp
 
 # Finally, start the server using Puma!
 CMD bundle exec puma -C config/puma.rb -e ${RAILS_ENV} -b tcp://0.0.0.0:3000
-
-
 
 # And run it with
 # docker run --name nb-webserver -p 80:3000 -d notebookai
