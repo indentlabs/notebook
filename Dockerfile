@@ -53,3 +53,8 @@ RUN bundle install && \
 # using `-p 3000:3000/tcp` in Docker's CLI or `- "3000:3000"` in the in docker-compose.yml service's ports[].
 # https://docs.docker.com/engine/reference/builder/#expose
 EXPOSE 3000/tcp
+
+# Finally, start the server!
+RUN rake db:migrate && \
+    rm -f tmp/pids/server.pid && \
+    rails server -b 0.0.0.0
