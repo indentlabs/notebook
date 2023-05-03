@@ -65,7 +65,7 @@ RUN bundle install && \
 EXPOSE 3000/tcp
 
 # Finally, start the server using Puma!
-CMD bundle exec puma -C config/puma.rb -e ${RAILS_ENV} -b 0.0.0.0
+CMD bundle exec puma -C config/puma.rb -e ${RAILS_ENV} -b tcp://0.0.0.0:3000
 
 
 
