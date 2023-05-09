@@ -1,6 +1,8 @@
 <div class="space-y-8 divide-y divide-gray-200 px-6">
   <div class="divide-y divide-gray-200 space-y-20 mb-20">
     <% content.data[:categories].each do |category| %>
+      <% next if category[:label] == 'Gallery' %>
+
       <div
         x-show="showEditMode || (<%= category[:fields].map { |field| "#{field[:value].inspect} != ''" }.join(' || ').present? %>)"
       >
