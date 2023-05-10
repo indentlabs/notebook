@@ -8,6 +8,11 @@ module HasImageUploads
     # todo: dependent: :destroy_async
     # todo: destroy from s3 on destroy
 
+    def primary_image
+      # self.image_uploads.find_by(primary: true) || self.image_uploads.first
+      self.image_uploads.first
+    end
+
     def public_image_uploads
       self.image_uploads.where(privacy: 'public').presence || [header_asset_for(self.class.name)]
     end

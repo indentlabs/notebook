@@ -36,29 +36,32 @@
           </div>
         </div>
 
-
-        <div class="px-5 py-2 mx-auto pt-6">
-          <div class="flex flex-wrap -m-1 md:-m-2">
-            <%# "highlighted" images %>
-            <% 1.times do %>
+        <!-- PRIMARY image -->
+        <% if @primary_image %>
+          <div class="px-5 py-2 mx-auto pt-6">
+            <div class="flex flex-wrap -m-1 md:-m-2">
               <%# we should probably scale size/dimensions based on actual image data (which we have here) %>
               <div class="flex flex-wrap w-2/3">
                 <div class="w-full p-1 md:p-2">
-                  <img alt="gallery" class="block object-cover object-center w-full h-full rounded"
-                    src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(73).webp">
+                  <%= link_to @primary_image.src.url do %>
+                    <%= image_tag @primary_image.src.url, class: 'block object-cover object-center w-full h-full rounded hover:opacity-90', alt: "Primary image for #{@content.name}" %>
+                  <% end %>
                 </div>
               </div>
               <div class="flex flex-wrap w-1/3 p-12">
                 <div>
-                  <h2 class="font-bold w-full">Image title</h2>
+                  <h2 class="font-bold w-full"><%= @content.name %></h2>
                   <div class="text-sm text-gray-400">
-                    Uploaded by
-                    <span class="<%= User.text_color %>">@andrew</span>
+                    A <%= @content.class.name.downcase %>
+                    by <%= link_to @content.user.name, @content.user, class: User.text_color %>
                   </div>
                 </div>
+                <!--
                 <p class="text-gray-700">
                   Image description that's provided and might be kind of long so it might have to wrap, so we might as well write this long description here to see if it looks good when it does wrap
                 </p>
+                -->
+                <!--
                 <div class="text-sm text-gray-400">
                   3 weeks ago
                   &middot;
@@ -70,51 +73,36 @@
                     42 comments
                   </span>
                 </div>
+                -->
+                <!--
                 <div class="border-b border-gray-200 w-1/3 mx-auto h-1"></div>
+                -->
               </div>
-            <% end %>
+            </div>
           </div>
-        </div>
+        <% end %>
 
+        <!-- All other non-primary images -->
         <div class="px-5 py-2 mx-auto flex flex-wrap -m-1 md:-m-2">
-          <div class="flex flex-wrap w-1/3">
-            <div class="w-full p-1 md:p-2">
-              <img alt="gallery" class="block object-cover object-center w-full h-full rounded-lg"
-                src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(73).webp">
+          <% @other_images.each do |image| %>
+            <div class="flex flex-wrap w-1/3">
+              <div class="w-full p-1 md:p-2">
+                <%= link_to image.src.url do %>
+                  <%= image_tag image.src.url, class: 'block object-cover object-center w-full h-full rounded-lg hover:opacity-90' %>
+                <% end %>
+              </div>
             </div>
-          </div>
-          <div class="flex flex-wrap w-1/3">
-            <div class="w-full p-1 md:p-2">
-              <img alt="gallery" class="block object-cover object-center w-full h-full rounded-lg"
-                src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(74).webp">
+          <% end %>
+          <% @basil_images.each do |commission| %>
+            <div class="flex flex-wrap w-1/3">
+              <div class="w-full p-1 md:p-2">
+                <%= link_to commission.image do %>
+                  <%= image_tag commission.image, class: 'block object-cover object-center w-full h-full rounded-lg hover:opacity-90' %>
+                <% end %>
+              </div>
             </div>
-          </div>
-          <div class="flex flex-wrap w-1/3">
-            <div class="w-full p-1 md:p-2">
-              <img alt="gallery" class="block object-cover object-center w-full h-full rounded-lg"
-                src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(75).webp">
-            </div>
-          </div>
-          <div class="flex flex-wrap w-1/3">
-            <div class="w-full p-1 md:p-2">
-              <img alt="gallery" class="block object-cover object-center w-full h-full rounded-lg"
-                src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(70).webp">
-            </div>
-          </div>
-          <div class="flex flex-wrap w-1/3">
-            <div class="w-full p-1 md:p-2">
-              <img alt="gallery" class="block object-cover object-center w-full h-full rounded-lg"
-                src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(76).webp">
-            </div>
-          </div>
-          <div class="flex flex-wrap w-1/3">
-            <div class="w-full p-1 md:p-2">
-              <img alt="gallery" class="block object-cover object-center w-full h-full rounded-lg"
-                src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(72).webp">
-            </div>
-          </div>
+          <% end %>
         </div>
-
 
       </div>
     </div>

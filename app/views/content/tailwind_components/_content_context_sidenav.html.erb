@@ -1,98 +1,88 @@
 <div class="xl:flex-shrink-0 xl:w-80 xl:border-r xl:border-gray-200">
   <div class="px-4 py-6 sm:pl-6 lg:px-8 xl:px-6">
     <div class="flex items-center justify-between">
-      <div class="flex-1 space-y-2">
-        <div class="space-y-8 sm:space-y-0 sm:flex sm:justify-between sm:items-center xl:block xl:space-y-8">
+      <div class="flex-1">
+        <div class="space-y-8 sm:flex sm:justify-between sm:items-center xl:block">
           <div class="flex items-center">
             <div class="flex-shrink-0 w-full mb-2">
               <% image = content.raw_model.random_image_including_private %>
-              <%# DEV NOTE TODO - this should probably link to the gallery tab instead if there are any images %>
-              <%= link_to image, target: '_blank' do %>
-                <%= image_tag image, class: 'rounded-lg bg-notebook-blue h-64 hover:shadow hover:opacity-90' %>
+              <%= link_to send("gallery_#{content.class_name.downcase}_path") do %>
+                <%= image_tag image, class: 'rounded-lg bg-notebook-blue h-64 object-cover object-center hover:shadow hover:opacity-90' %>
               <% end %>
             </div>
             <div class="space-y-1">
-              <div class="text-sm font-medium text-gray-900 mb-4">
+              <div class="text-sm font-medium text-gray-900 mb-1">
                 <i class="material-icons float-left <%= content.class_text_color %> mr-2"><%= content.class_icon %></i>
                 <span class="relative top-0.5"><%= content.name %></span>
               </div>
-              <% if content.universe %>
-                <%= link_to content.universe, class: 'group flex items-center text-xs' do %>
-                  <i class="material-icons mr-2 <%= Universe.text_color %>"><%= Universe.icon %></i>
-                  in &nbsp;
-                  <span class="text-gray-500 group-hover:<%= Universe.text_color %> font-medium"><%= content.universe.name %></span>
-                <% end %>
-              <% end %>
               <%= link_to content.user, class: 'group flex items-center text-xs' do %>
                 <i class="material-icons mr-2 <%= User.text_color %>"><%= User.icon %></i>
                 by &nbsp
                 <span class="text-gray-500 group-hover:<%= User.text_color %> font-medium"><%= content.user.display_name %></span>
               <% end %>
             </div>
+
+            <div class="space-y-1 mt-2">
+              <%= link_to content.raw_model, class: 'block my-0' do %>
+                <button type="button" class="mt-0 inline-flex items-center px-4 py-2 border border-b-0 border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:ml-3 xl:ml-0 xl:w-full">
+                  <i class="material-icons text-red-500 mr-1"><%= content.class_icon %></i>
+                  <span class="flex-grow text-left">Details</span>
+                </button>
+              <% end %>
+              <%= link_to send("gallery_#{content.class_name.downcase}_path") do %>
+                <button type="button" class="mt-0 inline-flex items-center px-4 py-2 border border-b-0 border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:ml-3 xl:ml-0 xl:w-full">
+                  <i class="material-icons text-red-500 mr-1">image</i>
+                  <span class="flex-grow text-left">Gallery</span>
+                  <!--
+                  <span class="bg-gray-100 p-1 text-xs rounded-lg">42</span>
+                  -->
+                </button>
+              <% end %>
+              <%= link_to send("references_#{content.class_name.downcase}_path") do %>
+                <button type="button" class="mt-0 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:ml-3 xl:ml-0 xl:w-full">
+                  <i class="material-icons <%= Document.text_color %> mr-1"><%= Document.icon %></i>
+                  <span class="flex-grow text-left">References</span>
+                </button>
+              <% end %>
+            </div>
           </div>
 
-          <div class="pb-2 space-y-1">
-            <h2 class="text-sm font-semibold pb-2">Go deeper</h2>
+          <% if content.universe %>
+            <div class="mb-4">
+              <%= link_to content.universe, class: 'flex items-center text-xs mb-1' do %>
+                <i class="material-icons mr-2 <%= Universe.text_color %>"><%= Universe.icon %></i>
+                In the
+                <span class="text-gray-500 mx-1 <%= Universe.text_color %> font-medium"><%= content.universe.name %></span>
+                universe
+              <% end %>
+              <%= image_tag content.universe.random_image_including_private, class: "#{Universe.color} w-full h-24 border border-purple-800 object-center object-cover rounded-md shadow hover:opacity-90" %>
+            </div>
+          <% end %>
 
-            <%= link_to content.raw_model do %>
-              <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-                <i class="material-icons text-red-500 mr-1"><%= content.class_icon %></i>
-                <span class="flex-grow text-left"><%= content.class_name %> page</span>
-              </button>
-            <% end %>
-            <%= link_to send("gallery_#{content.class_name.downcase}_path") do %>
-              <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-                <i class="material-icons text-red-500 mr-1">image</i>
-                <span class="flex-grow text-left">Images</span>
-                <span class="bg-gray-100 p-1 text-xs rounded-lg">42</span>
-              </button>
-            <% end %>
-            <%= link_to send("documents_#{content.class_name.downcase}_path") do %>
-              <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-                <i class="material-icons <%= Document.text_color %> mr-1"><%= Document.icon %></i>
-                <span class="flex-grow text-left">Documents</span>
-                <span class="bg-gray-100 p-1 text-xs rounded-lg">8</span>
-              </button>
-            <% end %>
-            <%# DEV NOTE - maybe combine Documents + Timelines into "Stories" ? %>
-            <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-              <i class="material-icons <%= Timeline.text_color %> mr-1"><%= Timeline.icon %></i>
-              <span class="flex-grow text-left">Timelines</span>
-              <span class="bg-gray-100 p-1 text-xs rounded-lg">2</span>
-            </button>
-            <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-              <i class="material-icons <%= Location.text_color %> mr-1"><%= Location.icon %></i>
-              <span class="flex-grow text-left">Mentions</span>
-              <span class="bg-gray-100 p-1 text-xs rounded-lg">8</span>
-            </button>
-            <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-              <i class="material-icons <%= Item.text_color %> mr-1"><%= Item.icon %></i>
-              <span class="flex-grow text-left">References</span>
-              <span class="bg-gray-100 p-1 text-xs rounded-lg">17</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Meta info -->
-        <div class="pt-2 flex flex-col space-y-1 sm:flex-row xl:flex-col xl:space-x-0">
-          <div class="flex items-center space-x-2">
-            <i class="material-icons <%= DocumentAnalysis.text_color %>">spellcheck</i>
-            <span class="text-xs text-gray-500 font-medium">
-              <%= number_with_delimiter content.cached_word_count %>
-              <%= 'word'.pluralize content.cached_word_count %>
-            </span>
-          </div>
-          <div class="flex items-center space-x-2">
-            <i class="material-icons text-notebook-blue" translate="no">date_range</i>
-            <span class="text-xs text-gray-500 font-medium">
-              Created <%= time_ago_in_words content.created_at %> ago
-            </span>
-          </div>
-          <div class="flex items-center space-x-2">
-            <i class="material-icons text-notebook-blue" translate="no">date_range</i>
-            <span class="text-xs text-gray-500 font-medium">
-              Updated <%= time_ago_in_words content.updated_at %> ago
-            </span>
+          <!-- Meta info -->
+          <div class="flex flex-col space-y-1 sm:flex-row xl:flex-col xl:space-x-0">
+            <h2 class="text-xs font-semibold">
+              Page stats
+            </h2>
+            <div class="flex items-center space-x-2">
+              <i class="material-icons <%= DocumentAnalysis.text_color %>">spellcheck</i>
+              <span class="text-xs text-gray-500 font-medium">
+                <%= number_with_delimiter content.cached_word_count %>
+                <%= 'word'.pluralize content.cached_word_count %>
+              </span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <i class="material-icons text-notebook-blue" translate="no">date_range</i>
+              <span class="text-xs text-gray-500 font-medium">
+                Created <%= time_ago_in_words content.created_at %> ago
+              </span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <i class="material-icons text-notebook-blue" translate="no">date_range</i>
+              <span class="text-xs text-gray-500 font-medium">
+                Last updated <%= time_ago_in_words content.updated_at %> ago
+              </span>
+            </div>
           </div>
         </div>
       </div>

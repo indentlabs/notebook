@@ -267,7 +267,7 @@ Rails.application.routes.draw do
 
         # Browsable pages
         get  :gallery,         on: :member
-        get  :documents,       on: :member
+        get  :references,      on: :member
         get  :changelog,       on: :member
         get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
 

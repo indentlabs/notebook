@@ -123,6 +123,14 @@ class ContentController < ApplicationController
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
 
     @serialized_content = ContentSerializer.new(@content)
+
+    @primary_image = @content.primary_image
+    @other_images  = @content.image_uploads.where.not(id: @primary_image.try(:id))
+    @basil_images  = @content.basil_commissions.where.not(saved_at: nil)
+  end
+
+  def references
+
   end
 
   def new
