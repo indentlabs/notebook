@@ -211,11 +211,27 @@ class BasilController < ApplicationController
   end
 
   def jam
-    @recent_commissions = BasilCommission.order('id DESC').limit(16)
+    @recent_commissions = BasilCommission.order('id DESC').limit(18)
   end
 
   def queue_jam_job
-    raise params.inspect
+    created_prompt = [
+      jam_params[:age],
+      jam_params[:gender],
+      *jam_params[:features]
+    ].join(', ')
+
+    # Create our commission, then redirect back to preview it
+    BasilCommission.create!(
+      user:   current_user,
+      entity: nil,
+      prompt: created_prompt,
+      job_id: SecureRandom.uuid,
+      style:  ["realistic"].sample,
+      final_settings: jam_params
+    )
+
+    redirect_back(fallback_location: basil_jam_path, notice: "#{jam_params[:name]} will be visualized shortly. Find them on this page!")
   end
 
   def commission_info
@@ -620,5 +636,9 @@ class BasilController < ApplicationController
 
   def commission_params
     params.require(:basil_commission).permit(:style, :entity_type, :entity_id, field: {})
+  end
+
+  def jam_params
+    params.require(:commission).permit(:name, :age, :gender, features: [])
   end
 end
