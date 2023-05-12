@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_04_14_183606) do
+ActiveRecord::Schema.define(version: 2023_05_12_222601) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -187,9 +187,9 @@ ActiveRecord::Schema.define(version: 2023_04_14_183606) do
   end
 
   create_table "basil_commissions", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.string "entity_type", null: false
-    t.integer "entity_id", null: false
+    t.integer "user_id"
+    t.string "entity_type"
+    t.integer "entity_id"
     t.string "prompt"
     t.string "job_id"
     t.datetime "created_at", precision: 6, null: false

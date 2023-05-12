@@ -207,12 +207,12 @@
                   <% if commission.complete? %>
                     <%= image_tag commission.image, class: 'commission-image' %>
                   <% else %>
-                    <%= image_tag image_path("placeholders/commission.png"), style: "width: 100%", class: 'commission-image' %>
+                    <%= image_tag image_path("placeholders/commission.png"), class: 'commission-image' %>
                   <% end %>
                 <% end %>
                 <% if commission.final_settings %>
                   <span class="card-title">
-                    <%= commission.final_settings&.fetch('jam_name', '') %>
+                    <%= commission.final_settings&.fetch('name', '') %>
                   </span>
                 <% end %>
               </div>
@@ -265,7 +265,10 @@
 
             <div id="details-<%= commission.job_id %>" class="modal">
               <div class="modal-content">
-                <h4><%= commission.final_settings&.fetch('jam_name', 'Nameless character') %></h4>
+                <h4>
+                  <i class="material-icons <%= Character.text_color %>"><%= Character.icon %></i>
+                  <%= commission.final_settings&.fetch('name', 'Nameless character') %>
+                </h4>
                 <div class="row">
                   <div class="col s12 m4 l3">
                     <% if commission.complete? %>
@@ -283,9 +286,14 @@
                     <% end %>
                   </div>
                   <div class="col s12 m8 l9">
-                    <p>
-                      <%= commission.final_settings&.fetch('jam_prompt', 'prompt text') %>
-                    </p>
+                    <ul style="margin: 0 8px">
+                      <li>
+                        <strong class="grey-text">Prompt:</strong>
+                        <blockquote>
+                          <%= commission.prompt %>
+                        </blockquote>
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </div>
