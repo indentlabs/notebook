@@ -551,10 +551,11 @@ class BasilController < ApplicationController
 
   def complete_commission
     commission = BasilCommission.find_by(job_id: params[:jobid])
-    return if commission.nil?
-
-    commission.update(completed_at:   DateTime.current,
-                      final_settings: JSON.parse(params[:settings]))
+    raise "Tried to complete commission with invalid job ID #{params[:jobid]}" if commission.nil?
+    
+    merged_settings = commission.final_settings || {}
+    commission.update!(completed_at:   DateTime.current,
+                       final_settings: merged_settings.merge(JSON.parse(params.fetch(:settings, "{}"))))
 
     # Attach the image in S3 to our `image` ActiveStorage relation
     key    = "job-#{params[:jobid]}.png"

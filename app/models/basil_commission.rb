@@ -18,8 +18,7 @@ class BasilCommission < ApplicationRecord
 
     # TODO clean this up and put it in a service
     sts_client = Aws::STS::Client.new(region: region)
-    queue_url = 'https://sqs.' + region + '.amazonaws.com/' + 
-      sts_client.get_caller_identity.account + '/' + queue_name
+    queue_url = 'https://sqs.' + region + '.amazonaws.com/' + sts_client.get_caller_identity.account + '/' + queue_name
     sqs_client = Aws::SQS::Client.new(region: region)
 
     message_body = {
