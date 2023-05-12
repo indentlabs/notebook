@@ -1,5 +1,5 @@
 class BasilController < ApplicationController
-  before_action :authenticate_user!, except: [:complete_commission, :about, :stats]
+  before_action :authenticate_user!, except: [:complete_commission, :about, :stats, :jam, :queue_jam_job, :commission_info]
 
   before_action :require_admin_access, only: [:review], unless: -> { Rails.env.development? }
 
@@ -208,6 +208,32 @@ class BasilController < ApplicationController
   end
 
   def about
+  end
+
+  def jam
+    @recent_commissions = BasilCommission.order('id DESC').limit(16)
+  end
+
+  def queue_jam_job
+    raise params.inspect
+  end
+
+  def commission_info
+    @commission = BasilCommission.find_by(job_id: params[:jobid])
+    raise "No BasilCommission with ID #{params[:jobid]}" if @commission.nil?
+
+    render json: {
+      image_url: @commission.image.url,
+      user_id: @commission.user_id,
+      prompt: @commission.prompt,
+      job_id: @commission.job_id,
+      created_at: @commission.created_at,
+      updated_at: @commission.updated_at,
+      completed_at: @commission.completed_at,
+      style: @commission.style,
+      final_settings: @commission.final_settings,
+      cached_seconds_taken: @commission.cached_seconds_taken,
+    }
   end
 
   def stats
