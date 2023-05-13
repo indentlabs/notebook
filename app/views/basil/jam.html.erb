@@ -108,7 +108,7 @@
               <!-- Eye color checkboxes -->
               <div style="margin-bottom: 1em">
                 <strong style="margin-right: 1em">Eye color</strong>
-                <% options = ['Amber', 'Blue', 'Indigo', 'Brown', 'Topaz', 'Grey', 'Green', 'Hazel', 'Amethyst', 'Violet', 'Red', 'Black', 'White'] %>
+                <% options = ['Amber', 'Blue', 'Brown', 'Topaz', 'Grey', 'Green', 'Hazel', 'Amethyst', 'Indigo', 'Violet', 'Red', 'Black', 'White'] %>
                 <% options.each do |option| %>
                   <label>
                     <input type="checkbox" name="commission[features][]" value="<%= option %> eye color" />
@@ -119,10 +119,24 @@
                 <% end %>
               </div>
 
+              <!-- Skin tone checkboxes -->
+              <div style="margin-bottom: 1em">
+                <strong style="margin-right: 1em">Skin tone</strong>
+                <% options = ['Light', 'Medium', 'Dark', 'Pale', 'Fair', 'Tan', 'White', 'Brown', 'Black', 'Olive', 'Albino', 'Chocolate', 'Grey', 'Green', 'Blue', 'Red', 'Orange', 'Silver', 'Gold', 'Yellow', 'Purple'] %>
+                <% options.each do |option| %>
+                  <label>
+                    <input type="checkbox" name="commission[features][]" value="<%= option %> skin tone" />
+                    <span class="chip">
+                      <%= option %>
+                    </span>
+                  </label>
+                <% end %>
+              </div>
+
               <!-- Race checkboxes -->
               <div style="margin-bottom: 1em">
-                <strong style="margin-right: 1em">Race</strong>
-                <% options = AutocompleteService.for_field_label(content_model: Character, label: 'Race') %>
+                <strong style="margin-right: 1em">Alternate Race</strong>
+                <% options = AutocompleteService.for_field_label(content_model: Character, label: 'Race') - ['Human'] %>
                 <% options.each do |option| %>
                   <label>
                     <input type="checkbox" name="commission[features][]" value="<%= option %> race" />
@@ -200,19 +214,18 @@
 
       <div class="row">
         <div class="col s12 cards-container">
-          <% @recent_commissions.each do |commission| %>          
+          <% @recent_commissions.each do |commission| %>
+
             <div class="hoverable card" id='card-<%= commission.job_id %>' data-complete="<%= commission.complete? %>">
               <div class="card-image">
                 <%= link_to "#details-#{commission.job_id}", class: 'modal-trigger waves-effect waves-light' do %>
                   <% if commission.complete? %>
                     <%= image_tag commission.image, class: 'commission-image' %>
                   <% else %>
-                    <%= image_tag image_path("placeholders/commission.png"), class: 'commission-image' %>
+                    <%= image_tag image_path("placeholders/loading2.png"), class: 'commission-image' %>
                   <% end %>
-                <% end %>
-                <% if commission.final_settings %>
                   <span class="card-title">
-                    <%= commission.final_settings&.fetch('name', '') %>
+                    <%= commission.final_settings&.fetch('name', 'Nameless') %>
                   </span>
                 <% end %>
               </div>
@@ -263,14 +276,14 @@
               </script>
             <% end %>
 
-            <div id="details-<%= commission.job_id %>" class="modal">
+            <div id="details-<%= commission.job_id %>" class="modal modal-fixed-footer">
               <div class="modal-content">
                 <h4>
                   <i class="material-icons <%= Character.text_color %>"><%= Character.icon %></i>
                   <%= commission.final_settings&.fetch('name', 'Nameless character') %>
                 </h4>
                 <div class="row">
-                  <div class="col s12 m4 l3">
+                  <div class="col s12 m6">
                     <% if commission.complete? %>
                       <%= link_to commission.image, target: '_blank' do %>
                         <%= image_tag commission.image, class: 'commission-image', style: 'width: 100%' %>
@@ -285,16 +298,13 @@
                       </div>
                     <% end %>
                   </div>
-                  <div class="col s12 m8 l9">
+                  <div class="col s12 m6">
                     <ul style="margin: 0 8px">
                       <li>
                         <strong class="grey-text">Prompt:</strong>
                         <blockquote>
                           <%= commission.prompt %>
                         </blockquote>
-                      </li>
-                      <li>
-                        <small><%= commission.job_id %></small>
                       </li>
                     </ul>
                   </div>
