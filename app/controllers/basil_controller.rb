@@ -211,7 +211,7 @@ class BasilController < ApplicationController
   end
 
   def jam
-    @recent_commissions = BasilCommission.where(entity_id: nil).order('id DESC').limit(18)
+    @recent_commissions = BasilCommission.where(entity_id: nil).order('id DESC').limit(20)
   end
 
   def queue_jam_job
@@ -219,7 +219,7 @@ class BasilController < ApplicationController
       jam_params[:age],
       jam_params[:gender],
       *jam_params[:features]
-    ].join(', ')
+    ].compact.join(', ')
 
     # Create our commission, then redirect back to preview it
     BasilCommission.create!(
@@ -231,7 +231,7 @@ class BasilController < ApplicationController
       final_settings: jam_params
     )
 
-    redirect_back(fallback_location: basil_jam_path, notice: "#{jam_params[:name]} will be visualized shortly. Find them on this page!")
+    redirect_back(fallback_location: basil_jam_path, notice: "#{jam_params.fetch(:name, '').presence || 'Your character'} will be visualized shortly. Find them on this page!")
   end
 
   def commission_info

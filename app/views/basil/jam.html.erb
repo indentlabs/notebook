@@ -52,7 +52,7 @@
               <!-- Build checkboxes -->
               <div style="margin-bottom: 1em">
                 <strong style="margin-right: 1em">Body type</strong>
-                <% options = ['Frail', 'Lean', 'Thin', 'Athletic', 'Hourglass', 'Bodybuilder', 'Rectangular', 'Muscular', 'Big-boned', 'Round', 'Pear-shaped', 'Curvy', 'Overweight', 'Underweight'] %>
+                <% options = ['Frail', 'Lean', 'Thin', 'Athletic', 'Hourglass', 'Rectangular', 'Muscular', 'Big-boned', 'Round', 'Pear-shaped', 'Curvy', 'Overweight', 'Underweight'] %>
                 <% options.each do |option| %>
                   <label>
                     <input type="checkbox" name="commission[features][]" value="<%= option %> body" />
@@ -80,7 +80,7 @@
               <!-- Hair color checkboxes -->
               <div style="margin-bottom: 1em">
                 <strong style="margin-right: 1em">Hair style</strong>
-                <% options = ['Afro', 'Bald', 'Balding', 'Bob cut', 'Bowl cut', 'Bouffant', 'Braided', 'Bun', 'Buzzcut', 'Chignon', 'Combover', 'Cornrows', 'Crewcut', 'Dreadlocks', 'Emo', 'Fauxhawk', 'Feathered', 'Flattop', 'Fringe', 'Liberty Spike', 'Long', 'Short', 'Wavy', 'Straight', 'Curly', 'Mop-top', 'Parted', 'Pigtails', 'Pixie', 'Pompadour', 'Ponytail', 'Rat-tail', 'Rocker', 'Slicked back', 'Spiked'] %>
+                <% options = ['Long', 'Short', 'Wavy', 'Straight', 'Curly', 'Afro', 'Bald', 'Balding', 'Bob cut', 'Bowl cut', 'Bouffant', 'Braided', 'Bun', 'Buzzcut', 'Chignon', 'Combover', 'Cornrows', 'Crewcut', 'Dreadlocks', 'Emo', 'Fauxhawk', 'Feathered', 'Flattop', 'Fringe', 'Liberty Spike', 'Mop-top', 'Parted', 'Pigtails', 'Pixie', 'Pompadour', 'Ponytail', 'Rat-tail', 'Rocker', 'Slicked back', 'Spiked'] %>
                 <% options.each do |option| %>
                   <label>
                     <input type="checkbox" name="commission[features][]" value="<%= option %> hair style" />
@@ -136,7 +136,7 @@
               <!-- Race checkboxes -->
               <div style="margin-bottom: 1em">
                 <strong style="margin-right: 1em">Alternate Race</strong>
-                <% options = AutocompleteService.for_field_label(content_model: Character, label: 'Race') - ['Human'] %>
+                <% options = AutocompleteService.for_field_label(content_model: Character, label: 'Race') - ['Human', 'Dark Elf'] %>
                 <% options.each do |option| %>
                   <label>
                     <input type="checkbox" name="commission[features][]" value="<%= option %> race" />
@@ -183,11 +183,55 @@
               All visualizer images are typically private by default when generated from Notebook.ai, but any images generated from this page
               for the VizJam will be public by default (and visible right below this!). The jam is meant to introduce our creatives to
               the new kinds of tools out there available for visualizing your ideas, and making everything public is a great way to
-              learn what's possible from each other.
+              learn what's possible from each other. If you want to make private images, you can always use
+              <%= link_to "Notebook.ai's standard visualization feature", basil_path %>.
             </p>
             <p>
               Only the most recent 20 generated images are shown below, so make sure you save any images you want to keep! After they fall
               off the list, you won't see them again!
+            </p>
+          </div>
+        </li>
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons">help</i>
+            How is this different from the normal visualization features in Notebook.ai?
+          </div>
+          <div class="collapsible-body">
+            <p>
+              Here are the big differences:
+
+              <table>
+                <th>
+                  <td><strong>VizJam</strong></td>
+                  <td><strong>Notebook.ai</strong></td>
+                </th>
+                <tr>
+                  <td><strong>Price</strong></td>
+                  <td>Free to use</td>
+                  <td>Available with Premium</td>
+                </tr>
+                <tr>
+                  <td><strong>Privacy</strong></td>
+                  <td>Visualizations are public</td>
+                  <td>Visualizations are private</td>
+                </tr>
+                <tr>
+                  <td><strong>Available Styles</strong></td>
+                  <td>Realistic</td>
+                  <td>Realistic & 11 other styles</td>
+                </tr>
+                <tr>
+                  <td><strong>Content</strong></td>
+                  <td>Characters only</td>
+                  <td><%= BasilService::ENABLED_PAGE_TYPES.map(&:pluralize).to_sentence %></td>
+                </tr>
+                <tr>
+                  <td><strong>Control</strong></td>
+                  <td>Limited checkbox options</td>
+                  <td>Unlimited, freeform text</td>
+                </tr>
+              </table>
             </p>
           </div>
         </li>
@@ -224,8 +268,8 @@
                   <% else %>
                     <%= image_tag image_path("placeholders/loading.gif"), class: 'commission-image', style: 'background: #2196F3' %>
                   <% end %>
-                  <span class="card-title">
-                    <%= commission.final_settings&.fetch('name', 'Nameless') %>
+                  <span class="card-title" style="background: black; opacity: 0.75; padding: 4px">
+                    <%= commission.final_settings&.fetch('name', '').presence || 'No name' %>
                   </span>
                 <% end %>
               </div>
@@ -280,7 +324,7 @@
               <div class="modal-content">
                 <h4>
                   <i class="material-icons <%= Character.text_color %>"><%= Character.icon %></i>
-                  <%= commission.final_settings&.fetch('name', 'Nameless character') %>
+                  <%= commission.final_settings&.fetch('name', '').presence || 'Nameless character' %>
                 </h4>
                 <div class="row">
                   <div class="col s12 m6">
@@ -305,6 +349,9 @@
                         <blockquote>
                           <%= commission.prompt %>
                         </blockquote>
+                      </li>
+                      <li>
+                        <small class="grey-text">Generation ID: <%= commission.job_id %></small>
                       </li>
                     </ul>
                   </div>
