@@ -20,7 +20,7 @@
       <% @current_queue_items.each do |commission| %>
         <li>
           <%= commission.entity_type %>-<%= commission.entity_id %> (<%= commission.style %>)
-          for U-<%= commission.user_id %>
+          for U-<%= commission.user_id %> (#<%= commission.id %>)
         </li>
       <% end %>
     </ol>
@@ -29,15 +29,10 @@
     <% @recent_commissions.each do |commission| %>
       <div>
         <% if commission.complete? %>
-          <%# image_tag commission.image, style: 'width: 100%' %>
-          <%
-            s3 = Aws::S3::Resource.new(region: "us-east-1")
-            obj = s3.bucket(commission.s3_bucket).object("job-#{commission.job_id}.png")
-          %>
           <div class="card horizontal">
             <div class="card-image">
-              <%= link_to obj.presigned_url(:get) do %>
-                <%= image_tag obj.presigned_url(:get) %>
+              <%= link_to commission.image do %>
+                <%= image_tag commission.image %>
               <% end %>
             </div>
             <div class="card-stacked">
@@ -45,6 +40,7 @@
                 <div>
                   <%= commission.id %>.
                   <% if commission.entity.present? %>
+                    <i class="material-icons right <%= content_class_from_name(commission.entity_type).text_color %>"><%= content_class_from_name(commission.entity_type).icon %></i>
                     <strong><%= link_to commission.entity.name, commission.entity %></strong>
                   <% end %>
                   <% if commission.style? %>
