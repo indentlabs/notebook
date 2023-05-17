@@ -1,7 +1,7 @@
 class CollaborationMailer < ApplicationMailer
   default from: "collaboration@notebook.ai"
 
-  def contributor_invitation(inviter:, invite_email:, universe:)
+  def contributor_invitation(inviter, invite_email, universe)
     @inviter = inviter
     @universe = universe
 
