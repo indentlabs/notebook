@@ -6,13 +6,13 @@ $(document).ready(function() {
 
     // Submit content_form with ajax
     if (content_form) {
-      M.toast({ html: 'Saving your changes...' });
+      // M.toast({ html: 'Saving your changes...' });
 
       recent_autosave = true;
       setTimeout(() => recent_autosave = false, 1000);
 
       var form_data = content_form.serialize();
-      form_data += "&authenticity_token=" + $('meta[name="csrf-token"]').attr('content');
+      form_data += "&authenticity_token=" + encodeURIComponent($('meta[name="csrf-token"]').attr('content'));
 
       $.ajax({
         url:  content_form.attr('action') + '.json',
