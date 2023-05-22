@@ -58,6 +58,8 @@ function alpineMultiSelectController() {
             value: option.value,
             text: option.textContent.trim(),
             imageUrl: imageUrl,
+            icon: option.getAttribute('data-icon'),
+            icon_color: option.getAttribute('data-icon-color'),
             selected: !!option.selected
           });
 

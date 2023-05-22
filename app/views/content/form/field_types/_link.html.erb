@@ -17,6 +17,8 @@
         <% @linkables_raw.fetch(page_type.name, []).each do |linkable| %>
           <option value="<%= page_type %>-<%= linkable.id %>"
             data-image-url="<%= linkable.primary_image %>"
+            data-icon="<%= page_type.icon %>"
+            data-icon-color="<%= page_type.text_color %>"
             <%= 'selected' if field[:value].include?("#{page_type}-#{linkable.id}") %>
           >
             <%= linkable.name %>
@@ -37,7 +39,7 @@
               <template x-for="(option,index) in selected" :key="index">
                 <div class="flex justify-center items-center m-1 font-medium py-1 px-1 bg-white rounded bg-gray-100 border hover:border-notebook-blue">
                   <div class="text-xs font-normal leading-none max-w-full flex-initial inline-flex items-center" x-model="options[option]">
-                    <span x-text="options[option].icon" class="material-icons text-xl leading-3"></span>
+                    <span x-text="options[option].icon" class="material-icons text-xl leading-3" :class="`${options[option].icon_color}`"></span>
                     <span x-text="options[option].text" class="mr-1 px-1"></span>
                   </div>
                   <div class="flex flex-auto flex-row-reverse">
