@@ -16,28 +16,7 @@ function alpineMultiSelectController() {
 
       } else {
         this.selected.splice(this.selected.lastIndexOf(index), 1);
-        this.options[index].selected = false
-      }
-
-      // Update the original select element's selected options
-      const originalSelect = document.getElementById(this.sourceFieldId);
-      for (let i = 0; i < originalSelect.options.length; i++) {
-        originalSelect.options[i].selected = this.options[i].selected;
-      }
-
-      // Finally, trigger a manual on-change event on the original select
-      // to make sure our autosave fires on it.
-      originalSelect.dispatchEvent(new Event('change'));
-    },
-    select(groupIndex, optionIndex, event) { // WE ARE HERE -- click from html
-      if (!this.options[index].selected) {
-        this.options[index].selected = true;
-        this.options[index].element = event.target;
-        this.selected.push(index);
-
-      } else {
-        this.selected.splice(this.selected.lastIndexOf(index), 1);
-        this.options[index].selected = false
+        this.options[index].selected = false;
       }
 
       // Update the original select element's selected options
@@ -59,6 +38,11 @@ function alpineMultiSelectController() {
       const select = document.getElementById(fieldId);
       const optgroups = select.getElementsByTagName('optgroup');
 
+      // Since we're effectively resetting indices per optgroup, we need to track
+      // a single running index throughout all optgroups to use as an index for
+      // each option for events, etc.
+      let runningOptionIndex = 0;
+
       // For each optgroup (page type)...
       for (let i = 0; i < optgroups.length; i++) {
         const groupOptions = optgroups[i].getElementsByTagName('option');
@@ -70,10 +54,16 @@ function alpineMultiSelectController() {
           const imageUrl = option.getAttribute('data-image-url');
       
           optionsForThisOptGroup.push({
+            index: runningOptionIndex++,
             value: option.value,
             text: option.textContent.trim(),
-            imageUrl: imageUrl
+            imageUrl: imageUrl,
+            selected: !!option.selected
           });
+
+          if (!!option.selected) {
+            this.selected.push(runningOptionIndex - 1);
+          }
         }
 
         // Finally, add it as a valid optgroup with options
@@ -85,19 +75,11 @@ function alpineMultiSelectController() {
             plural: window.ContentTypeData[optgroups[i].label].plural,
             options: optionsForThisOptGroup
           });
-        }
-      }
 
-      for (let i = 0; i < select.length; i++) {
-        this.options.push({
-          value: select[i].value,
-          text: select[i].innerText,
-          selected: !!select[i].selected
-        });
-
-        // Default anything already-selected to actively selected
-        if (!!select[i].selected) {
-          this.selected.push(i);
+          // And also track all the options in a flat array so we can reference them with a single index
+          for (let j = 0; j < optionsForThisOptGroup.length; j++) {
+            this.options.push(optionsForThisOptGroup[j]);
+          }
         }
       }
     },

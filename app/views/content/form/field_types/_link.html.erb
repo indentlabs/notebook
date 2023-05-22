@@ -82,7 +82,7 @@
         <div class="w-full">
           <div x-show.transition.origin.top="isOpen()" class="absolute shadow-lg top-100 bg-white z-40 w-full left-0 rounded-lg" x-on:click.away="close">
             <div class="flex flex-row w-full overflow-y-auto max-h-64">
-              <template x-for="(optgroup,index) in optgroups" :key="index" class="overflow-auto">
+              <template x-for="(optgroup,groupIndex) in optgroups" :key="groupIndex" class="overflow-auto">
                 <div class="w-full">
                   <%# Optgroup styling %>
                   <div class="w-full py-1 rounded-t-lg text-white inline-flex items-center" x-bind:class="optgroup.color">
@@ -90,9 +90,9 @@
                     <span x-text="optgroup.plural" class="text-xs font-medium"></span>
                   </div>
                   <div class="mb-2">
-                    <template x-for="(option,index) in optgroup.options" :key="option" class="overflow-auto">
+                    <template x-for="(option, optionIndex) in optgroup.options" :key="optionIndex" class="overflow-auto">
                       <%# Option styling %>
-                      <div class="cursor-pointer w-full border-gray-100 rounded-t hover:bg-blue-50" @click="select(index,$event)">
+                      <div class="cursor-pointer w-full border-gray-100 rounded-t hover:bg-blue-50" @click="select(option.index,$event)">
                         <div class="flex w-full px-2 pl-2 border-transparent border-l-2 relative">
                           <div class="w-full items-center flex justify-between">
                             <div class="w-4">
@@ -111,23 +111,6 @@
                   </div>
                 </div>
               </template>
-
-              <%#
-              <template x-for="(option,index) in options" :key="option" class="overflow-auto">
-                <div class="cursor-pointer w-full border-gray-100 rounded-t border-b hover:bg-gray-100" @click="select(index,$event)">
-                  <div class="flex w-full items-center p-2 pl-2 border-transparent border-l-2 relative">
-                    <div class="w-full items-center flex justify-between">
-                      <div class="mx-2 leading-6" x-model="option" x-text="option.text"></div>
-                      <div x-show="option.selected">
-                        <svg class="svg-icon" viewBox="0 0 20 20">
-                          <path fill="none" d="M7.197,16.963H7.195c-0.204,0-0.399-0.083-0.544-0.227l-6.039-6.082c-0.3-0.302-0.297-0.788,0.003-1.087 C0.919,9.266,1.404,9.269,1.702,9.57l5.495,5.536L18.221,4.083c0.301-0.301,0.787-0.301,1.087,0c0.301,0.3,0.301,0.787,0,1.087 L7.741,16.738C7.596,16.882,7.401,16.963,7.197,16.963z"></path>
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              %>
             </div>
           </div>
         </div>
