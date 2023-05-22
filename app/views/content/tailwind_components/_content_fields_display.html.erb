@@ -12,7 +12,7 @@
             <i class="material-icons float-left <%= content.class_text_color %> mr-2"><%= category[:icon] %></i>
             <%= category[:label] %>
           </h3>
-          <% if category[:percent_complete].present? && category[:percent_complete] > 10 %>
+          <% if category[:percent_complete].present? && category[:percent_complete] >= 25 %>
             <div class="flex-1 bg-gray-200 rounded-full h-4 relative top-1.5"
               x-show="showEditMode"
             >
@@ -34,7 +34,7 @@
                   <%= field[:label] %>
                 </label>
               </div>
-              <div class="mt-1 sm:mt-0 sm:col-span-3 mb-6"
+              <div class="mt-1 sm:mt-0 col-span-3 mb-6"
                 x-show="!showEditMode"
               >
                 <%=
@@ -52,10 +52,10 @@
                   end
                 %>
               </div>
-              <div class="-mt-1 -ml-2 col-span-2 col-start-2 mb-4"
+              <div class="-mt-1 -ml-2 col-span-3 col-start-2 mb-4"
                 x-show="showEditMode"
               >
-                <%= form_for content.raw_model, url: FieldTypeService.form_path(field), remote: true do |f| %>
+                <%= form_for content.raw_model, url: FieldTypeService.form_path(field), remote: true, authenticity_token: true do |f| %>
                   <%= hidden_field_tag "entity[entity_id]",   content.id %>
                   <%= hidden_field_tag "entity[entity_type]", content.class_name %>
                   <%=

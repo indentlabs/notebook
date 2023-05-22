@@ -549,7 +549,10 @@ class ContentController < ApplicationController
     @content = @entity
     update_page_tags
 
-    render json: attribute_value.to_json, status: 200
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: root_path, notice: "#{@attribute_field.label} updated!") }
+      format.json { render json: attribute_value.to_json, status: 200 }
+    end
   end
 
   def universe_field_update
