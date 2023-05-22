@@ -59,24 +59,40 @@ function alpineMultiSelectController() {
       const select = document.getElementById(fieldId);
       const optgroups = select.getElementsByTagName('optgroup');
 
+      // For each optgroup (page type)...
       for (let i = 0; i < optgroups.length; i++) {
         const groupOptions = optgroups[i].getElementsByTagName('option');
 
-        this.optgroups.push({
-          label: optgroups[i].label,
-          icon: 'help',
-          options: groupOptions
-        });
+        // Prepare the `options` array for this optgroup
+        const optionsForThisOptGroup = [];
+        for (let j = 0; j < groupOptions.length; j++) {
+          const option = groupOptions[j];
+          const imageUrl = option.getAttribute('data-image-url');
+      
+          optionsForThisOptGroup.push({
+            value: option.value,
+            text: option.textContent.trim(),
+            imageUrl: imageUrl
+          });
+        }
 
-        console.log('optgroups', this.optgroups);
+        // Finally, add it as a valid optgroup with options
+        if (optionsForThisOptGroup.length > 0) {
+          this.optgroups.push({
+            label: optgroups[i].label,
+            icon: window.ContentTypeData[optgroups[i].label].icon,
+            color: window.ContentTypeData[optgroups[i].label].color,
+            plural: window.ContentTypeData[optgroups[i].label].plural,
+            options: optionsForThisOptGroup
+          });
+        }
       }
 
       for (let i = 0; i < select.length; i++) {
         this.options.push({
           value: select[i].value,
           text: select[i].innerText,
-          selected: !!select[i].selected,
-          icon: 'help'
+          selected: !!select[i].selected
         });
 
         // Default anything already-selected to actively selected
