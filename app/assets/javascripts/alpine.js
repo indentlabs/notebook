@@ -32,6 +32,15 @@ function alpineMultiSelectController() {
     remove(index, option) {
       this.options[option].selected = false;
       this.selected.splice(index, 1);
+
+      // We also want to manually remove the `selected` attribute from the
+      // original select element's option.
+      const originalSelect = document.getElementById(this.sourceFieldId);
+      originalSelect.options[option].selected = false;
+
+      // After removing the option, we want to emit a change event to trigger
+      // a field autosave.
+      originalSelect.dispatchEvent(new Event('change'));
     },
     loadOptions(fieldId) {
       this.sourceFieldId = fieldId;
