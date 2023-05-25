@@ -10,7 +10,7 @@ module HasImageUploads
 
     def primary_image
       # self.image_uploads.find_by(primary: true) || self.image_uploads.first
-      self.image_uploads.first
+      self.image_uploads.first.presence || [header_asset_for(self.class.name)]
     end
 
     def public_image_uploads

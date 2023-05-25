@@ -3,7 +3,7 @@
 # TODO: we should probably spin off an Api::ContentController for #api_sort and anything else 
 #       api-wise we need
 class ContentController < ApplicationController
-  layout 'tailwind', only: [:index, :show, :gallery]
+  layout 'tailwind', only: [:index, :show, :gallery, :references]
 
   before_action :authenticate_user!, except: [:show, :changelog, :api_sort] \
     + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }
@@ -130,7 +130,25 @@ class ContentController < ApplicationController
   end
 
   def references
+    content_type = content_type_from_controller(self.class)
+    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.include?(content_type.name)
 
+    @content = content_type.find_by(id: params[:id])
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+
+    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+
+    @serialized_content = ContentSerializer.new(@content)
+
+    analysis_ids = DocumentEntity.where(entity: @content).pluck(:document_analysis_id)
+    document_ids = DocumentAnalysis.where(id: analysis_ids).pluck(:document_id)
+    @documents = Document.where(id: document_ids)
+    @references = @content.incoming_page_references.preload(:referencing_page)
+    @mentioning_attributes = Attribute.where(
+      attribute_field_id: @references.pluck(:attribute_field_id),
+      entity_id: @references.pluck(:referencing_page_id)
+    )
   end
 
   def new
