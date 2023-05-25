@@ -1,213 +1,321 @@
 <%# render partial: 'content/tailwind_components/content_image_header', locals: { content: @serialized_content } %>
 
-<div class="relative min-h-full flex flex-col">
-  <!-- 3 column wrapper -->
-  <div class="flex-grow w-full lg:flex min-h-screen">
-    <!-- Left sidebar & main wrapper -->
-    <div class="flex-1 min-w-0 bg-gray-50 xl:flex px-6">
-      <% if @serialized_content.class_name == Universe.name %>
-        <%= render partial: 'content/tailwind_components/universe_context_sidenav', locals: { content: @serialized_content } %>
-      <% else %>
-        <%= render partial: 'content/tailwind_components/content_context_sidenav', locals: { content: @serialized_content } %>
+<div
+  x-data="{ showEditMode: <%= params.fetch('editing', false) %> }"
+>
+  <nav class="bg-white h-16 border-b border-gray-200 flex sticky top-14 z-40" aria-label="Breadcrumb">
+    <ol role="list" class="flex-1 mx-auto px-4 flex space-x-4 sm:px-6 lg:px-8">
+      <li class="flex">
+        <div class="flex items-center">
+          <%= link_to root_path, class: 'text-gray-400 hover:text-gray-500' do %>
+            <i class="material-icons flex-shrink-0 text-2xl relative top-1">dashboard</i>
+            <span class="sr-only">Home</span>
+          <% end %>
+        </div>
+      </li>
+
+      <li class="flex">
+        <div class="flex items-center">
+          <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+          </svg>
+          <%= link_to @serialized_content.class_name.pluralize, send("#{@serialized_content.class_name.downcase.pluralize}_path"), class: 'ml-4 text-sm font-medium text-gray-500 hover:text-gray-700' %>
+        </div>
+      </li>
+
+      <li class="flex">
+        <div class="flex items-center">
+          <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+          </svg>
+          <%= link_to @serialized_content.name, @serialized_content.raw_model, class: 'ml-4 text-sm font-medium text-gray-500 hover:text-gray-700', aria: { current: 'page' } %>
+        </div>
+      </li>
+    </ol>
+
+    <div class="flex flex-row pt-3">
+      <% if @content.updatable_by?(current_user) %>
+        <div class="mr-3" x-show="showEditMode">
+          <button type="button" class="w-full bg-notebook-blue border border-notebook-blue rounded-md shadow-sm px-4 py-2 inline-flex items-center text-sm font-medium text-gray-200 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            @click="showEditMode = false"
+          >
+            <i class="material-icons text-2xl leading-3 mr-3">edit</i>
+            Read Mode
+          </button>
+        </div>
+        <div class="mr-3" x-show="!showEditMode">
+          <button type="button" class="w-full bg-notebook-blue border border-notebook-blue rounded-md shadow-sm px-4 py-2 inline-flex items-center text-sm font-medium text-gray-200 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            @click="showEditMode = true"
+          >
+            <i class="material-icons text-2xl leading-3 mr-3">edit</i>
+            Edit Mode
+          </button>
+        </div>
       <% end %>
 
-      <div class="bg-white lg:min-w-0 lg:flex-1">
-        <div class="pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
-          <div class="flex items-center">
-            <h1 class="flex-1 text-lg font-medium">
-              <span class="<%= @serialized_content.class_text_color %>">
-                <%= @serialized_content.name %>
-              </span>
-              <small class="ml-2 text-gray-500">
-                by
-                <span class="<%= User.text_color %>">
-                  <%= link_to @serialized_content.user.display_name, @serialized_content.user %>
-                </span>
-              </small>
-            </h1>
-            <%= link_to '#edit-gallery', class: 'mr-2 block' do %>
-              <button type="button" data-action="dropdown#toggle click@window->dropdown#hide" class="w-full bg-notebook-blue border border-notebook-blue rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-200 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" id="sort-menu-button" aria-expanded="false" aria-haspopup="true">
-                <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                </svg>
-                Edit mode
-              </button>
-            <% end %>
-          </div>
-        </div>
+      <!--
+      <div data-controller="dropdown" class="mr-3">
+        <button type="button" data-action="dropdown#toggle click@window->dropdown#hide" class="w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue" id="page-index-button" aria-expanded="false" aria-haspopup="true">
+          <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+          </svg>
+          Jump to...
+          <svg class="ml-2.5 -mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
 
-        <!-- PRIMARY image -->
-        <% if @primary_image %>
-          <div class="px-5 py-2 mx-auto pt-6">
-            <div class="flex flex-wrap -m-1 md:-m-2">
-              <%# we should probably scale size/dimensions based on actual image data (which we have here) %>
-              <div class="flex flex-wrap w-2/3">
-                <div class="w-full p-1 md:p-2">
-                  <%= link_to @primary_image.src.url do %>
-                    <%= image_tag @primary_image.src.url, class: 'block object-cover object-center w-full h-full rounded hover:opacity-90', alt: "Primary image for #{@content.name}" %>
-                  <% end %>
-                </div>
-              </div>
-              <div class="flex flex-wrap w-1/3 p-12">
-                <div>
-                  <h2 class="font-bold w-full"><%= @content.name %></h2>
-                  <div class="text-sm text-gray-400">
-                    A <%= @content.class.name.downcase %>
-                    by <%= link_to @content.user.name, @content.user, class: User.text_color %>
-                  </div>
-                </div>
-                <!--
-                <p class="text-gray-700">
-                  Image description that's provided and might be kind of long so it might have to wrap, so we might as well write this long description here to see if it looks good when it does wrap
-                </p>
-                -->
-                <!--
-                <div class="text-sm text-gray-400">
-                  3 weeks ago
-                  &middot;
-                  <span class="text-blue-800">
-                    7 kudos
-                  </span>
-                  &middot;
-                  <span class="text-blue-800">
-                    42 comments
-                  </span>
-                </div>
-                -->
-                <!--
-                <div class="border-b border-gray-200 w-1/3 mx-auto h-1"></div>
-                -->
-              </div>
-            </div>
-          </div>
+        <div data-dropdown-target="menu" class="origin-top-right z-10 absolute right-4 -mt-6 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="page-index-button" tabindex="-1">
+          <div class="py-1" role="none">
+          <% @serialized_content.data[:categories].each do |category| %>
+            <%= link_to "##{category[:label]}", class: "text-gray-700 block px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 border-b border-gray-100", id: category[:id], data: { action: "dropdown#toggle" } do %>
+              <i class="material-icons float-left <%= @serialized_content.class_text_color %> mr-3"><%= category[:icon] %></i>
+              <%= category[:label] %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+      -->
+
+      <!--
+      <% if @content.updatable_by?(current_user) %>
+        <div class="mr-3">
+          <button type="button" class="bg-white border rounded-md shadow-sm px-4 py-2 inline-flex items-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            @click=""
+          >
+            <i class="material-icons text-2xl leading-3 mr-3 text-gray-400">dashboard</i>
+            Tools
+          </button>
+        </div>
+      <% end %>
+      -->
+    </div>
+  </nav>
+
+  <div class="relative min-h-full flex flex-col">
+    <!-- 3 column wrapper -->
+    <div class="flex-grow w-full lg:flex min-h-screen">
+      <!-- Left sidebar & main wrapper -->
+      <div class="flex-1 min-w-0 xl:flex">
+        <% if @serialized_content.class_name == Universe.name %>
+          <%= render partial: 'content/tailwind_components/universe_context_sidenav', locals: { content: @serialized_content } %>
+        <% else %>
+          <%= render partial: 'content/tailwind_components/content_context_sidenav', locals: { content: @serialized_content } %>
         <% end %>
 
-        <!-- All other non-primary images -->
-        <div class="px-5 py-2 mx-auto flex flex-wrap -m-1 md:-m-2">
-          <% @other_images.each do |image| %>
-            <div class="flex flex-wrap w-1/3">
-              <div class="w-full p-1 md:p-2">
-                <%= link_to image.src.url do %>
-                  <%= image_tag image.src.url, class: 'block object-cover object-center w-full h-full rounded-lg hover:opacity-90' %>
-                <% end %>
-              </div>
-            </div>
-          <% end %>
-          <% @basil_images.each do |commission| %>
-            <div class="flex flex-wrap w-1/3">
-              <div class="w-full p-1 md:p-2">
-                <%= link_to commission.image do %>
-                  <%= image_tag commission.image, class: 'block object-cover object-center w-full h-full rounded-lg hover:opacity-90' %>
-                <% end %>
-              </div>
-            </div>
-          <% end %>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Activity feed -->
-    <div class="hidden bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0">
-      <div class="pl-6 lg:w-80 px-6 pt-6">
-
-        <div class="lg:flex lg:items-center lg:justify-between">
-          <div class="flex-1 min-w-0 mb-8">
-            <h2 class="font-bold leading-tight text-gray-900">Page customization</h2>
-            <div class="flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
-              <div class="flex items-center text-sm text-gray-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                  <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                </svg>
-                Only visible to you (maybe its own page?) (maybe slide in/out from Edit mode button?)
-              </div>
-            </div>
+        <div class="bg-white lg:min-w-0 lg:flex-1 border-b border-gray-200 shadow">
+          <div class="pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
+            <%= render partial: 'content/tailwind_components/content_header', locals: { content: @serialized_content } %>
           </div>
-        </div>
 
-
-        <div class="mb-8">
-          <div class="flex items-center mb-4">
-            <!-- Enabled: "bg-indigo-600", Not Enabled: "bg-gray-200" -->
-            <button type="button" class="bg-gray-200 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" role="switch" aria-checked="false" aria-labelledby="annual-billing-label">
-              <!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
-              <span aria-hidden="true" class="translate-x-0 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
-            </button>
-            <span class="ml-3" id="annual-billing-label">
-              <span class="text-sm font-medium text-gray-900">Enable Gallery</span>
-              <span class="text-sm text-gray-500">to others</span>
-            </span>
-          </div>
-          <div class="flex items-center mb-4">
-            <!-- Enabled: "bg-indigo-600", Not Enabled: "bg-gray-200" -->
-            <button type="button" class="bg-gray-200 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" role="switch" aria-checked="false" aria-labelledby="annual-billing-label">
-              <!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
-              <span aria-hidden="true" class="translate-x-0 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
-            </button>
-            <span class="ml-3" id="annual-billing-label">
-              <span class="text-sm font-medium text-gray-900">Enable Comments</span>
-              <span class="text-sm text-gray-500">something</span>
-            </span>
-          </div>
-        </div>
-      
-
-        <!-- Action buttons -->
-        <div class="flex flex-col sm:flex-row xl:flex-col space-y-1">
-          <button type="button" class="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white <%= Universe.color %> hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 xl:w-full">
-          </button>
-            Create page
-            <br />Privacy settings [page controls visible only to you!]
-          <button type="button" class="mt-3 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
-            Share universe
-          </button>
-        </div>
-
-        <div class="pt-6 pb-2">
-          <h2 class="text-sm font-semibold">Recent Activity</h2>
-        </div>
-        <div>
-          <ul role="list" class="divide-y divide-gray-200">
-
-            <% 4.times do %>
-
-              <li class="py-4">
-                <div class="flex space-x-3">
-                  <img class="h-10 w-10 rounded-lg" src="https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=256&h=256&q=80" alt="">
-                  <div class="flex-1 space-y-1">
-                    <div class="flex items-center justify-between">
-                      <h3 class="text-sm font-medium">Sarah Cena</h3>
-                      <p class="text-sm text-gray-500">1h</p>
-                    </div>
-                    <p class="text-sm text-gray-500 group">
-                      Character updated by <%= link_to current_user.display_name, current_user, class: "group-hover:#{User.text_color}" %>.
-                    </p>
+          <!-- PRIMARY image -->
+          <% if @primary_image %>
+            <div class="px-5 py-2 mx-auto pt-6">
+              <div class="flex flex-wrap -m-1 md:-m-2">
+                <%# we should probably scale size/dimensions based on actual image data (which we have here) %>
+                <div class="flex flex-wrap w-2/3">
+                  <div class="w-full p-1 md:p-2">
+                    <%= link_to @primary_image.src.url do %>
+                      <%= image_tag @primary_image.src.url, class: 'block object-cover object-center w-full h-full rounded hover:opacity-90', alt: "Primary image for #{@content.name}" %>
+                    <% end %>
                   </div>
                 </div>
-              </li>
+                <div class="flex flex-wrap w-1/3 p-12">
+                  <div>
+                    <h2 class="font-bold w-full"><%= @content.name %></h2>
+                    <div class="text-sm text-gray-400">
+                      A <%= @content.class.name.downcase %>
+                      by <%= link_to @content.user.name, @content.user, class: User.text_color %>
+                    </div>
+                  </div>
 
+                  <div x-show="showEditMode">
+                    <%=
+                      link_to 'Delete this image', image_deletion_path(@primary_image.id),
+                        class: 'js-remove-image text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg',
+                        method: 'delete',
+                        remote: true,
+                        data: { confirm: "Are you sure? This can't be undone." }
+                    %>
+                  </div>
+                  <!--
+                  <p class="text-gray-700">
+                    Image description that's provided and might be kind of long so it might have to wrap, so we might as well write this long description here to see if it looks good when it does wrap
+                  </p>
+                  -->
+                  <!--
+                  <div class="text-sm text-gray-400">
+                    3 weeks ago
+                    &middot;
+                    <span class="text-blue-800">
+                      7 kudos
+                    </span>
+                    &middot;
+                    <span class="text-blue-800">
+                      42 comments
+                    </span>
+                  </div>
+                  -->
+                  <!--
+                  <div class="border-b border-gray-200 w-1/3 mx-auto h-1"></div>
+                  -->
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- All other non-primary images -->
+          <div class="px-5 py-2 mx-auto flex flex-wrap">
+            <% @other_images.each do |image| %>
+              <div class="flex flex-wrap w-1/3">
+                <div class="w-full p-2">
+                  <%= link_to image.src.url do %>
+                    <%= image_tag image.src.url, class: 'block object-cover object-center w-full h-full border rounded-lg hover:opacity-90' %>
+                  <% end %>
+                  <div x-show="showEditMode" class="relative -top-8 right-1 text-right">
+                    <%=
+                      link_to 'Delete this image', image_deletion_path(image.id),
+                        class: 'js-remove-image text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg',
+                        method: :delete,
+                        remote: true,
+                        data: { confirm: "Are you sure? This can't be undone." }
+                    %>
+                  </div>
+                </div>
+              </div>
             <% end %>
+            <% @basil_images.each do |commission| %>
+              <div class="flex flex-wrap w-1/3">
+                <div class="w-full p-1 md:p-2">
+                  <%= link_to commission.image do %>
+                    <%= image_tag commission.image, class: 'block object-cover object-center w-full h-full rounded-lg hover:opacity-90' %>
+                  <% end %>
+                  <div x-show="showEditMode" class="relative -top-8 right-1 text-right">
+                    <%=
+                      link_to 'Delete this image', basil_delete_path(commission),
+                        class: 'js-remove-image text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg',
+                        method: 'delete',
+                        remote: true,
+                        data: { confirm: "Are you sure? This can't be undone." } 
+                    %>
+                  </div>
 
-            <!-- More items... -->
-          </ul>
-          <!--
-          <div class="py-4 text-sm border-t border-gray-200">
-            <a href="#" class="text-indigo-600 font-semibold hover:text-indigo-900">View all activity <span aria-hidden="true">&rarr;</span></a>
+
+                  
+                </div>
+              </div>
+            <% end %>
           </div>
-          -->
+
+          <div x-show="showEditMode">
+            Upload more images
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right pane -->
+      <div class="bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0">
+        <div class="pl-6 lg:w-80 hidden px-6 pt-6">
+
+          <div class="lg:flex lg:items-center lg:justify-between">
+            <div class="flex-1 min-w-0 mb-8">
+              <h2 class="font-bold leading-tight text-gray-900">Page customization</h2>
+              <div class="flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+                <div class="flex items-center text-sm text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                  </svg>
+                  Only visible to you (maybe its own page?) (maybe slide in/out from Edit mode button?)
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="mb-8">
+            <div class="flex items-center mb-4">
+              <!-- Enabled: "bg-indigo-600", Not Enabled: "bg-gray-200" -->
+              <button type="button" class="bg-gray-200 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" role="switch" aria-checked="false" aria-labelledby="annual-billing-label">
+                <!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
+                <span aria-hidden="true" class="translate-x-0 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+              </button>
+              <span class="ml-3" id="annual-billing-label">
+                <span class="text-sm font-medium text-gray-900">Enable Gallery</span>
+                <span class="text-sm text-gray-500">to others</span>
+              </span>
+            </div>
+            <div class="flex items-center mb-4">
+              <!-- Enabled: "bg-indigo-600", Not Enabled: "bg-gray-200" -->
+              <button type="button" class="bg-gray-200 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" role="switch" aria-checked="false" aria-labelledby="annual-billing-label">
+                <!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
+                <span aria-hidden="true" class="translate-x-0 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+              </button>
+              <span class="ml-3" id="annual-billing-label">
+                <span class="text-sm font-medium text-gray-900">Enable Comments</span>
+                <span class="text-sm text-gray-500">something</span>
+              </span>
+            </div>
+          </div>
+        
+
+          <!-- Action buttons -->
+          <div class="flex flex-col sm:flex-row xl:flex-col space-y-1">
+            <button type="button" class="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white <%= Universe.color %> hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 xl:w-full">
+            </button>
+              Create page
+              <br />Privacy settings [page controls visible only to you!]
+            <button type="button" class="mt-3 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full">
+              Share universe
+            </button>
+          </div>
 
           <div class="pt-6 pb-2">
-            <h2 class="text-sm font-semibold">Contributors to this page</h2>
+            <h2 class="text-sm font-semibold">Recent Activity</h2>
           </div>
+          <div>
+            <ul role="list" class="divide-y divide-gray-200">
 
-          <div class="mt-4 flex-shrink-0 sm:mt-0">
-            <div class="flex overflow-hidden -space-x-1">
-              <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Emily Selman">
+              <% 4.times do %>
 
-              <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Kristin Watson">
+                <li class="py-4">
+                  <div class="flex space-x-3">
+                    <img class="h-10 w-10 rounded-lg" src="https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=256&h=256&q=80" alt="">
+                    <div class="flex-1 space-y-1">
+                      <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-medium">Sarah Cena</h3>
+                        <p class="text-sm text-gray-500">1h</p>
+                      </div>
+                      <p class="text-sm text-gray-500 group">
+                        Character updated by <%= link_to @content.user.display_name, @content.user, class: "group-hover:#{User.text_color}" %>.
+                      </p>
+                    </div>
+                  </div>
+                </li>
 
-              <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Emma Dorsey">
+              <% end %>
+
+              <!-- More items... -->
+            </ul>
+            <!--
+            <div class="py-4 text-sm border-t border-gray-200">
+              <a href="#" class="text-indigo-600 font-semibold hover:text-indigo-900">View all activity <span aria-hidden="true">&rarr;</span></a>
+            </div>
+            -->
+
+            <div class="pt-6 pb-2">
+              <h2 class="text-sm font-semibold">Contributors to this page</h2>
+            </div>
+
+            <div class="mt-4 flex-shrink-0 sm:mt-0">
+              <div class="flex overflow-hidden -space-x-1">
+                <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Emily Selman">
+
+                <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Kristin Watson">
+
+                <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Emma Dorsey">
+              </div>
             </div>
           </div>
         </div>
