@@ -79,11 +79,13 @@
         <!-- Dropdown menu, show/hide based on menu state. -->
         <div data-dropdown-target="menu" class="origin-top-right z-10 absolute right-4 -mt-6 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="page-index-button" tabindex="-1">
           <div class="py-1" role="none">
-          <% @serialized_content.data[:categories].each do |category| %>
-            <%= link_to "##{category[:label]}", class: "text-gray-700 block px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 border-b border-gray-100", id: category[:id], data: { action: "dropdown#toggle" } do %>
-              <i class="material-icons float-left <%= @serialized_content.class_text_color %> mr-3"><%= category[:icon] %></i>
-              <%= category[:label] %>
-            <% end %>
+          <%= link_to "#documents", class: "text-gray-700 block px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 border-b border-gray-100", id: "documents-jump", data: { action: "dropdown#toggle" } do %>
+            <i class="material-icons float-left <%= Document.text_color %> mr-3"><%= Document.icon %></i>
+            Documents
+          <% end %>
+          <%= link_to "#mentions", class: "text-gray-700 block px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 border-b border-gray-100", id: "mentions-jump", data: { action: "dropdown#toggle" } do %>
+            <i class="material-icons float-left text-notebook-blue mr-3">book</i>
+            Mentions
           <% end %>
         </div>
         <%#
@@ -130,9 +132,10 @@
             </div>
 
             <div class="mt-12 space-y-16 sm:mt-16">
-              <section aria-labelledby="4376-heading">
+              <section aria-labelledby="documents">
                 <div class="space-y-1 md:flex md:items-baseline md:space-y-0 md:space-x-4">
-                  <h2 id="4376-heading" class="text-lg font-medium text-gray-900 md:flex-shrink-0">Documents</h2>
+                  <div id="documents" class="anchor-offset relative -top-8"></div>
+                  <h2 class="text-lg font-medium text-gray-900 md:flex-shrink-0">Documents</h2>
                   <div class="space-y-5 md:flex-1 md:min-w-0 sm:flex sm:items-baseline sm:justify-between sm:space-y-0">
                     <p class="text-sm font-medium text-gray-500">Read the stories this character appears in.</p>
                     <div class="flex text-sm font-medium">
@@ -177,9 +180,11 @@
                             Read
                           </button>
                         <% end %>
+                        <!--
                         <button type="button" class="w-full flex items-center justify-center bg-white py-2 px-2.5 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 sm:w-full sm:flex-grow-0">
                           Bookmark
                         </button>
+                        -->
                       </div>
                     </div>
                   <% end %>
@@ -188,9 +193,10 @@
             </div>
 
             <div class="mt-12 space-y-16 sm:mt-16">
-              <section aria-labelledby="4376-heading">
+              <section aria-labelledby="mentions">
                 <div class="space-y-1 md:flex md:items-baseline md:space-y-0 md:space-x-4">
-                  <h2 id="4376-heading" class="text-lg font-medium text-gray-900 md:flex-shrink-0">Mentions</h2>
+                  <div id="mentions" class="anchor-offset relative -top-8"></div>
+                  <h2 class="text-lg font-medium text-gray-900 md:flex-shrink-0">Mentions</h2>
                   <div class="space-y-5 md:flex-1 md:min-w-0 sm:flex sm:items-baseline sm:justify-between sm:space-y-0">
                     <p class="text-sm font-medium text-gray-500">See which other pages mention this <%= @serialized_content.class_name.downcase %>.</p>
                     <div class="flex text-sm font-medium">
