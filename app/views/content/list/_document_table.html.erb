@@ -345,6 +345,12 @@
             </div>
           </div>
           <div class="modal-footer">
+            <% if current_user.can_delete?(document) %>
+              <%= link_to document_path(document), method: :delete, class: 'red white-text btn hoverable' do %>
+                <i class="material-icons left">delete</i>
+                Delete
+              <% end %>
+            <% end %>
             <% if current_user.can_read?(document) %>
               <%= link_to polymorphic_path(document), class: 'blue white-text text-lighten-1 btn hoverable' do %>
                 <i class="material-icons left"><%= content_type.icon %></i>
