@@ -38,6 +38,9 @@ Rails.application.routes.draw do
     end
   end
 
+  # Temporary landing path for jams (nice URL)
+  get '/jam', to: 'basil#jam', as: :jam
+
   scope :stream, path: '/stream', as: :stream do
     get '/',         to: 'stream#index'
     get 'world',     to: 'stream#global'
