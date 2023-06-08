@@ -218,7 +218,6 @@ class BasilController < ApplicationController
   def queue_jam_job
     created_prompt = [
       jam_params[:age],
-      jam_params[:gender],
       *jam_params[:features]
     ].compact.join(', ')
 
@@ -641,6 +640,6 @@ class BasilController < ApplicationController
   end
 
   def jam_params
-    params.require(:commission).permit(:name, :age, :gender, features: [])
+    params.require(:commission).permit(:name, :age, features: [])
   end
 end
