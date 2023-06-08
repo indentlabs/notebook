@@ -212,6 +212,7 @@ class BasilController < ApplicationController
 
   def jam
     @recent_commissions = BasilCommission.where(entity_id: nil).order('id DESC').limit(20)
+    @total_count = BasilCommission.where(entity_id: nil).count
   end
 
   def queue_jam_job
