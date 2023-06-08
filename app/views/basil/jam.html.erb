@@ -83,7 +83,7 @@
               <!-- Hair color checkboxes -->
               <div style="margin-bottom: 1em">
                 <strong style="margin-right: 1em">Hair color</strong>
-                <% options = ['Blonde', 'Black', 'Brown', 'Red', 'White', 'Grey', 'Greying', 'Bald', 'Bleached', 'Blue', 'Green', 'Purple', 'Orange', 'Auburn', 'Rainbow'] %>
+                <% options = ['Blonde', 'Black', 'Brown', 'Red', 'White', 'Grey', 'Greying', 'Bald', 'Bleached', 'Blue', 'Green', 'Purple', 'Pink', 'Orange', 'Auburn', 'Rainbow'] %>
                 <% options.each do |option| %>
                   <label>
                     <input type="checkbox" name="commission[features][]" value="<%= option %> hair color" />
@@ -94,10 +94,10 @@
                 <% end %>
               </div>
 
-              <!-- Hair color checkboxes -->
+              <!-- Hair style checkboxes -->
               <div style="margin-bottom: 1em">
                 <strong style="margin-right: 1em">Hair style</strong>
-                <% options = ['Long', 'Short', 'Wavy', 'Straight', 'Curly', 'Afro', 'Bald', 'Balding', 'Bob cut', 'Bowl cut', 'Bouffant', 'Braided', 'Bun', 'Buzzcut', 'Chignon', 'Combover', 'Cornrows', 'Crewcut', 'Dreadlocks', 'Emo', 'Fauxhawk', 'Feathered', 'Flattop', 'Fringe', 'Liberty Spike', 'Mop-top', 'Parted', 'Pigtails', 'Pixie', 'Pompadour', 'Ponytail', 'Rat-tail', 'Rocker', 'Slicked back', 'Spiked'] %>
+                <% options = ['Long', 'Short', 'Wavy', 'Straight', 'Curly', 'Afro', 'Bald', 'Balding', 'Bangs', 'Bob cut', 'Bowl cut', 'Bouffant', 'Braided', 'Bun', 'Buzzcut', 'Chignon', 'Combover', 'Cornrows', 'Crewcut', 'Dreadlocks', 'Emo', 'Fauxhawk', 'Feathered', 'Flattop', 'Fringe', 'Liberty Spike', 'Mop-top', 'Parted', 'Pigtails', 'Pixie', 'Pompadour', 'Ponytail', 'Rat-tail', 'Rocker', 'Slicked back', 'Spiked'] %>
                 <% options.each do |option| %>
                   <label>
                     <input type="checkbox" name="commission[features][]" value="<%= option %> hair style" />
@@ -153,7 +153,7 @@
               <!-- Race checkboxes -->
               <div style="margin-bottom: 1em">
                 <strong style="margin-right: 1em">Alternate Race</strong>
-                <% options = AutocompleteService.for_field_label(content_model: Character, label: 'Race') - ['Human', 'Dark Elf'] %>
+                <% options = AutocompleteService.for_field_label(content_model: Character, label: 'Race') - ['Human', 'Dark Elf', 'Construct'] %>
                 <% options.each do |option| %>
                   <label>
                     <input type="checkbox" name="commission[features][]" value="<%= option %> race" />
@@ -379,10 +379,43 @@
                   <div class="col s12 m6">
                     <ul style="margin: 0 8px">
                       <li>
-                        <strong class="grey-text">Prompt:</strong>
-                        <blockquote>
-                          <%= commission.prompt %>
-                        </blockquote>
+                        <strong class="grey-text">Traits:</strong>
+                        <div>
+                          <% commission.prompt.split(',').map do |tag| %>
+                            <span class="red white-text" style="padding: 1.5px 10px; white-space: nowrap;"><%= tag.strip %></span>
+                          <% end %>
+                        </div>
+                      </li>
+                      <li style="padding-top: 1em">
+                        <strong class="grey-text">Generated AI Prompt:</strong>
+                        <div class="card-panel blue lighten-5">
+                          The raw AI parameters that were used are listed below. You can use these in other image generation tools.
+                          If they are blank, you may need to refresh the page to see them.
+                        </div>
+                        <div style="font-size: 0.8em">
+                          Sampler: <strong><%= commission.final_settings.fetch('sampler', '') %></strong>
+                        </div>
+                        <div style="font-size: 0.8em">
+                          Steps: <strong><%= commission.final_settings.fetch('steps', '') %></strong>
+                        </div>
+                        <div style="font-size: 0.8em">
+                          CFG scale: <strong><%= commission.final_settings.fetch('cfg_scale', '') %></strong>
+                        </div>
+                        <div style="font-size: 0.8em">
+                          Face restoration: <strong><%= commission.final_settings.fetch('face_restoration_model', '') %></strong>
+                        </div>
+                        <div>
+                          <div style="font-size: 0.8em">Positive prompt:</span>
+                          <blockquote style="margin: 5px 0">
+                            <%= commission.final_settings.fetch('prompt', '').gsub('ANAD2', 'person') %>
+                          </blockquote>
+                        </div>
+                        <div> 
+                          <div style="font-size: 0.8em">Negative prompt:</span>
+                          <blockquote style="margin: 5px 0">
+                            <%= commission.final_settings.fetch('negative_prompt', '') %>
+                          </blockquote>
+                        </div>
                       </li>
                       <li>
                         <small class="grey-text">Generation ID: <%= commission.job_id %></small>

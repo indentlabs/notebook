@@ -211,7 +211,7 @@ class BasilController < ApplicationController
   end
 
   def jam
-    @recent_commissions = BasilCommission.where(entity_id: nil).order('id DESC').limit(20)
+    @recent_commissions = BasilCommission.where(entity_id: nil).order('id DESC').limit(24)
     @total_count = BasilCommission.where(entity_id: nil).count
   end
 
