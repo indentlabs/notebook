@@ -1,473 +1,444 @@
-<!--
 <div class="row">
-  <div class="col s12 m12">
+  <div class="col s12 m12 l6">
     <h1 class="text-center" style="font-size: 2rem">
       <i class="material-icons <%= Character.text_color %>"><%= Character.icon %></i>
-      Welcome to our Character VizJam!
+      The Character VizJam has concluded!
     </h1>
 
-    <div class="center">
-      <%= image_tag 'basil/character-jam.png', style: 'width: 600px;' %>
+    <div class="center" style="padding: 10px">
+      <%= link_to asset_path('basil/character-jam.png') do %>
+        <%= image_tag 'basil/character-jam.png', style: 'width: 100%' %>
+      <% end %>
       <br />
-      Come back to this page on June 8th to start visualizing your characters!
+      Thank you for participating!
+    </div>
+  </div>
+
+  <div class="col s12 m12 l6">
+    <h2 style="font-size: 1.6rem; margin-top: 3rem">Together, we visualized 1,611 characters!</h2>
+    <p>
+      In the spirit of AI transparency, I've compiled some aggregate visualizations of the kinds of characters
+      that were most &mdash; and least &mdash; visualized during this VizJam.
+    </p>
+
+    <ul class="collapsible">
+      <li>
+        <div class="collapsible-header"><i class="material-icons">bar_chart</i> Age</div>
+        <div class="collapsible-body white">
+          <%= column_chart(
+            { "Infant" => 36, "Child" => 33, "Teenager" => 275, "Young Adult" => 467, "Adult" => 751, "Old" => 146, "Very Old" => 24 },
+            colors: ['#2196F3'],
+            max: 760,
+            label: 'Visualizations'
+          )
+          %>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">pie_chart</i> Gender</div>
+        <div class="collapsible-body white">
+          <%= pie_chart(
+            { "Male" => 508, "Female" => 628, "Ambiguous" => 92, "Transgender" => 63, "Non-binary" => 81, "Agender" => 33, "Androgenous" => 146, "Genderqueer" => 28 }, 
+            legend: 'right', 
+            suffix: ' visualizations'
+          )
+          %>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">bar_chart</i> Skin tone</div>
+        <div class="collapsible-body white">
+          <%= bar_chart(
+            {"Light"=>348,
+            "Pale"=>314,
+            "Olive"=>233,
+            "Black"=>227,
+            "Brown"=>188,
+            "White"=>185,
+            "Fair"=>169,
+            "Dark"=>165,
+            "Tan"=>153,
+            "Medium"=>151,
+            "Freckled"=>99,
+            "Blue"=>42,
+            "Grey"=>29,
+            "Silver"=>27,
+            "Chocolate"=>27,
+            "Gold"=>25,
+            "Green"=>24,
+            "Speckled"=>22,
+            "Albino"=>21,
+            "Purple"=>19,
+            "Pink"=>17,
+            "Red"=>15,
+            "Yellow"=>11,
+            "Orange"=>10},
+            colors: ['#2196F3'],
+            label: 'Visualizations',
+            height: '600px',
+            max: 350
+          )
+          %>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">bar_chart</i> Face</div>
+        <div class="collapsible-body white">
+          <%= bar_chart(
+            {"Brown"=>285,
+            "Blue"=>218,
+            "Green"=>161,
+            "Amber"=>96,
+            "Grey"=>90,
+            "Hazel"=>87,
+            "Topaz"=>66,
+            "Black"=>61,
+            "Amethyst"=>50,
+            "Red"=>43,
+            "Violet"=>43,
+            "White"=>28,
+            "Indigo"=>25},
+            colors: ['#2196F3'],
+            title: 'Eye color',
+            height: '500px',
+            label: 'Visualizations'
+            )
+          %>
+          <br />
+          <%= bar_chart({
+            "Stubble"=>168,
+            "Beard"=>125,
+            "Chinstrap"=>114,
+            "Mustache"=>113,
+            "Goatee"=>61,
+            "Patchy"=>40,
+            "Sideburns"=>28,
+            "Mutton chops"=>16,
+            "Soul patch"=>9,
+            "Neckbeard"=>7,
+            "Horseshoe mustache"=>5,
+            "Fu Manchu"=>5,
+            "Handlebar mustache"=>4,
+            "Chin curtain"=>3},
+            title: 'Facial hair (if any)',
+            colors: ['#2196F3'],
+            max: 170,
+            height: '500px',
+            label: 'Visualizations'
+          )
+          %>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">bar_chart</i> Hair</div>
+        <div class="collapsible-body white">
+          <%= bar_chart({
+            "Black"=>375,
+            "Brown"=>359,
+            "Blonde"=>216,
+            "Red"=>93,
+            "Blue"=>88,
+            "White"=>79,
+            "Auburn"=>68,
+            "Orange"=>54,
+            "Pink"=>53,
+            "Purple"=>48,
+            "Greying"=>40,
+            "Bleached"=>39,
+            "Grey"=>32,
+            "Rainbow"=>30,
+            "Green"=>29,
+            "Bald"=>7},
+            colors: ['#2196F3'],
+            title: 'Colors',
+            height: '500px',
+            label: 'Visualizations')
+          %>
+          <br />
+          <%=
+            bar_chart({
+              "Long"=>617,
+              "Medium"=>394,
+              "Wavy"=>288,
+              "Straight"=>242,
+              "Short"=>231,
+              "Curly"=>186,
+              "Ponytail"=>111,
+              "Bangs"=>99,
+              "Braided"=>97,
+              "Parted"=>88,
+              "Fringe"=>70,
+              "Bob cut"=>59,
+              "Emo"=>48,
+              "Slicked back"=>46,
+              "Dreadlocks"=>46,
+              "Pixie"=>41,
+              "Bun"=>40,
+              "Feathered"=>39,
+              "Afro"=>36,
+              "Rocker"=>31,
+              "Spiked"=>29,
+              "Pigtails"=>22,
+              "Mop-top"=>20,
+              "Buzzcut"=>20,
+              "Bald"=>19,
+              "Crewcut"=>18,
+              "Balding"=>13,
+              "Cornrows"=>11,
+              "Flattop"=>10,
+              "Chignon"=>9,
+              "Bowl cut"=>9,
+              "Rat-tail"=>8,
+              "Pompadour"=>7,
+              "Bouffant"=>7,
+              "Combover"=>6},
+              colors: ['#2196F3'],
+              max: 620,
+              height: '900px',
+              title: 'Styles',
+              label: 'Visualizations'
+            )
+          %>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">bar_chart</i> Body</div>
+        <div class="collapsible-body white">
+          <%=
+            bar_chart({
+              "Lean"=>395,
+              "Thin"=>336,
+              "Athletic"=>329,
+              "Curvy"=>188,
+              "Hourglass"=>149,
+              "Muscular"=>144,
+              "Rectangular"=>130,
+              "Petite"=>106,
+              "Round"=>77,
+              "Frail"=>74,
+              "Big-boned"=>73,
+              "Pear-shaped"=>73,
+              "Underweight"=>66,
+              "Overweight"=>60
+            },
+            colors: ['#2196F3'],
+            height: '500px',
+            label: 'Visualizations')
+          %>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header"><i class="material-icons">bar_chart</i> Non-human races</div>
+        <div class="collapsible-body white">
+          <%= bar_chart(
+            {"Angel"=>69,
+            "Fey"=>67,
+            "Fairy"=>59,
+            "Vampire"=>54,
+            "Elf"=>52,
+            "Animal"=>51,
+            "Reptilian"=>48,
+            "Werewolf"=>44,
+            "Elemental"=>33,
+            "Robot"=>29,
+            "Android"=>26,
+            "Bird"=>25,
+            "Insectoid"=>18,
+            "Genie"=>15,
+            "Orc"=>13,
+            "Halfling"=>13,
+            "Dwarf"=>11,
+            "Gnome"=>10,
+            "Arachnoid"=>10},
+            colors: ['#2196F3'],
+            max: 70,
+            height: '500px',
+            label: 'Visualizations'
+          )
+          %>
+        </div>
+      </li>
+    </ul>
+
+    <p style="font-size: 0.8em">
+      If you noticed that any particular age, gender, race, or other trait produced
+      lower-quality images than others, please <%= link_to 'let me know', 'https://discord.gg/bDE8g5YRzp' %>
+      so I can continue to make our AI models work better for <em>all</em> kinds of characters!
+    </p>
+
+    <br />
+
+    <div class="grey lighten-4">
+      <%= area_chart({
+        "2023-06-08"=>208,
+        "2023-06-09"=>515,
+        "2023-06-10"=>255,
+        "2023-06-11"=>128,
+        "2023-06-12"=>167,
+        "2023-06-13"=>338}, title: 'New visualizations per day', colors: ['#E91E63'], max: 550, height: '200px')
+      %>
     </div>
   </div>
 </div>
--->
 
-<%= content_for :full_width_page_header do %>
-  <div class="row">
-    <div class="col s12 m12 l6">
-      <h1 style="font-size: 2rem; padding: 0 1em">
-        <i class="material-icons <%= Character.text_color %>"><%= Character.icon %></i>
-        Welcome to our Character VizJam!
-      </h1>
+<%
+  @content_type = Character
+  singular_class_name   = @content_type.name
+  pluralized_class_name = @content_type.name.pluralize
+  premium_page          = !User.new.can_create?(@content_type)
+%>
 
-      <ul class="collapsible" style="margin: 0 2em">
-        <li class="active">
-          <div class="collapsible-header">
-            <i class="material-icons pink-text">palette</i>
-            <strong>Visualize your character</strong>
-          </div>
-          <div class="collapsible-body">
-            <%= form_for basil_jam_submit_path do |f| %>
-              <div class="input-field">
-                <input placeholder="Nameless character" id="name" name="commission[name]" type="text">
-                <label for="name">Name your character, then select their traits from the options below.</label>
-              </div>
+<div class="row">
+  <div class="col s12">
+    <h1 class="text-center" style="font-size: 2rem">
+      You can still create characters and visualize them on Notebook.ai!
+    </h1>
+  </div>
 
-              <!-- Age radio -->
-              <div style="margin-bottom: 1em">
-                <div x-data="{ selectedTag: '' }">
-                  <strong style="margin-right: 1em">Age</strong>
-                  <% options = ['Infant', 'Child', 'Teenager', 'Young Adult', 'Adult', 'Old', 'Very Old'] %>
-                  <% options.each do |option| %>
-                    <label>
-                      <input type="radio" name="commission[age]" value="<%= option %>" />
-                      <span class="chip">
-                        <%= option %>
-                      </span>
-                    </label>
-                  <% end %>
-                </div>
-              </div>
-
-              <!-- Gender radio -->
-              <div style="margin-bottom: 1em">
-                <strong style="margin-right: 1em">Gender</strong>
-                <% options = ['Male', 'Female', 'Ambiguous', 'Transgender', 'Non-binary', 'Agender', 'Androgenous', 'Genderqueer'] %>
-                <% options.each do |option| %>
-                  <label>
-                    <input type="checkbox" name="commission[features][]" value="<%= option %>" />
-                    <span class="chip">
-                      <%= option %>
-                    </span>
-                  </label>
-                <% end %>
-              </div>
-
-              <!-- Build checkboxes -->
-              <div style="margin-bottom: 1em">
-                <strong style="margin-right: 1em">Body type</strong>
-                <% options = ['Frail', 'Lean', 'Thin', 'Athletic', 'Hourglass', 'Rectangular', 'Muscular', 'Big-boned', 'Petite', 'Round', 'Pear-shaped', 'Curvy', 'Overweight', 'Underweight'] %>
-                <% options.each do |option| %>
-                  <label>
-                    <input type="checkbox" name="commission[features][]" value="<%= option %> body" />
-                    <span class="chip">
-                      <%= option %>
-                    </span>
-                  </label>
-                <% end %>
-              </div>
-
-              <!-- Hair color checkboxes -->
-              <div style="margin-bottom: 1em">
-                <strong style="margin-right: 1em">Hair color</strong>
-                <% options = ['Blonde', 'Black', 'Brown', 'Red', 'White', 'Grey', 'Greying', 'Bald', 'Bleached', 'Blue', 'Green', 'Purple', 'Pink', 'Orange', 'Auburn', 'Rainbow'] %>
-                <% options.each do |option| %>
-                  <label>
-                    <input type="checkbox" name="commission[features][]" value="<%= option %> hair color" />
-                    <span class="chip">
-                      <%= option %>
-                    </span>
-                  </label>
-                <% end %>
-              </div>
-
-              <!-- Hair style checkboxes -->
-              <div style="margin-bottom: 1em">
-                <strong style="margin-right: 1em">Hair style</strong>
-                <% options = ['Long', 'Medium', 'Short', 'Wavy', 'Straight', 'Curly', 'Afro', 'Bald', 'Balding', 'Bangs', 'Bob cut', 'Bowl cut', 'Bouffant', 'Braided', 'Bun', 'Buzzcut', 'Chignon', 'Combover', 'Cornrows', 'Crewcut', 'Dreadlocks', 'Emo', 'Feathered', 'Flattop', 'Fringe', 'Mop-top', 'Parted', 'Pigtails', 'Pixie', 'Pompadour', 'Ponytail', 'Rat-tail', 'Rocker', 'Slicked back', 'Spiked'] %>
-                <% options.each do |option| %>
-                  <label>
-                    <input type="checkbox" name="commission[features][]" value="<%= option %> hair style" />
-                    <span class="chip">
-                      <%= option %>
-                    </span>
-                  </label>
-                <% end %>
-              </div>
-
-              <!-- Eye color checkboxes -->
-              <div style="margin-bottom: 1em">
-                <strong style="margin-right: 1em">Eye color</strong>
-                <% options = ['Amber', 'Blue', 'Brown', 'Topaz', 'Grey', 'Green', 'Hazel', 'Amethyst', 'Indigo', 'Violet', 'Red', 'Black', 'White'] %>
-                <% options.each do |option| %>
-                  <label>
-                    <input type="checkbox" name="commission[features][]" value="<%= option %> eye color" />
-                    <span class="chip">
-                      <%= option %>
-                    </span>
-                  </label>
-                <% end %>
-              </div>
-
-              <!-- Skin tone checkboxes -->
-              <div style="margin-bottom: 1em">
-                <strong style="margin-right: 1em">Skin tone</strong>
-                <% options = ['Light', 'Medium', 'Dark', 'Pale', 'Fair', 'Tan', 'White', 'Brown', 'Black', 'Olive', 'Albino', 'Chocolate', 'Grey', 'Green', 'Blue', 'Red', 'Pink', 'Orange', 'Silver', 'Gold', 'Yellow', 'Purple', 'Freckled', 'Speckled'] %>
-                <% options.each do |option| %>
-                  <label>
-                    <input type="checkbox" name="commission[features][]" value="<%= option %> skin tone" />
-                    <span class="chip">
-                      <%= option %>
-                    </span>
-                  </label>
-                <% end %>
-              </div>
-
-              <!-- Facial hair checkboxes -->
-              <div style="margin-bottom: 1em">
-                <strong style="margin-right: 1em">Facial hair</strong>
-                <% options = ['Stubble', 'Patchy', 'Beard', 'Chin curtain', 'Chinstrap', 'Fu Manchu', 'Goatee', 'Mustache', 'Handlebar mustache', 'Horseshoe mustache', 'Mutton chops', 'Neckbeard', 'Sideburns', 'Soul patch'] %>
-                <% options.each do |option| %>
-                  <label>
-                    <input type="checkbox" name="commission[features][]" value="<%= option %> facial hair" />
-                    <span class="chip">
-                      <%= option %>
-                    </span>
-                  </label>
-                <% end %>
-              </div>
-
-              <!-- Race checkboxes -->
-              <div style="margin-bottom: 1em">
-                <strong style="margin-right: 1em">Alternate Race</strong>
-                <% options = AutocompleteService.for_field_label(content_model: Character, label: 'Race') - ['Human', 'Dark Elf', 'Construct', 'Half-Elf', 'Half-Dwarf', 'Half-Orc', 'Spirit'] %>
-                <% options.each do |option| %>
-                  <label>
-                    <input type="checkbox" name="commission[features][]" value="<%= option %> race" />
-                    <span class="chip">
-                      <%= option %>
-                    </span>
-                  </label>
-                <% end %>
-              </div>
-
-              <div class="center">
-                <br />
-                <%= f.submit 'Visualize this character', class: 'btn white-text pink' %>
-              </div>
-            <% end %>
-          </div>
-        </li>
-        <li>
-          <div class="collapsible-header">
-            <i class="material-icons">help</i>
-            How do I save my images?
-          </div>
-          <div class="collapsible-body">
-            <p>
-              To save any image, simply right click on it (or long-press if you're on mobile) and click "Save as..." to save
-              it to your computer.
-            </p>
-            <p>
-              Feel free to upload your images to their character pages on Notebook.ai if you want to show them off in a gallery
-              alongside any other information you have about your character!
-              <% unless user_signed_in? %>
-                <%= link_to 'You can sign up for a free account here.', new_registration_path(User) %>
-              <% end %>
-            </p>
-          </div>
-        </li>
-        <li>
-          <div class="collapsible-header">
-            <i class="material-icons">help</i>
-            Who can see the images I generate?
-          </div>
-          <div class="collapsible-body">
-            <p>
-              All visualizer images are typically private by default when generated from Notebook.ai, but any images generated from this page
-              for the VizJam will be public by default (and visible from this page!). The jam is meant to introduce our creatives to
-              the new kinds of tools out there available for visualizing your ideas, and making everything public is a great way to
-              learn what's possible from each other. If you want to make private images of your characters, you can always use
-              <%= link_to "Notebook.ai's standard visualization feature", basil_path %>.
-            </p>
-            <p>
-              Only the most recent 20 generated images are shown on this page, so make sure you save any images you want to keep! After they fall
-              off the list, you won't see them again!
-            </p>
-          </div>
-        </li>
-        <li>
-          <div class="collapsible-header">
-            <i class="material-icons">help</i>
-            What if I want an option that isn't available?
-          </div>
-          <div class="collapsible-body">
-            <p>
-              Come <%= link_to 'join us on Discord', 'https://discord.gg/bDE8g5YRzp' %>
-              and request it! I'll be adding more character options throughout the day based on your feedback. :)
-            </p>
-          </div>
-        </li>
-        <li>
-          <div class="collapsible-header">
-            <i class="material-icons">help</i>
-            How is this different from the normal visualization features in Notebook.ai?
-          </div>
-          <div class="collapsible-body">
-            <p>
-              Here are the big differences:
-
-              <table>
-                <th>
-                  <td><strong>VizJam</strong></td>
-                  <td><strong>Notebook.ai's Visualizer</strong></td>
-                </th>
-                <tr>
-                  <td><strong>Price</strong></td>
-                  <td>Free to use</td>
-                  <td>Available with Premium ($7-9/mo)</td>
-                </tr>
-                <tr>
-                  <td><strong>Privacy</strong></td>
-                  <td>Public</td>
-                  <td>Private</td>
-                </tr>
-                <tr>
-                  <td><strong>Available Styles</strong></td>
-                  <td>Realistic</td>
-                  <td>Realistic & 11 other styles</td>
-                </tr>
-                <tr>
-                  <td><strong>Content</strong></td>
-                  <td>Characters only</td>
-                  <td><%= BasilService::ENABLED_PAGE_TYPES.map(&:pluralize).to_sentence %></td>
-                </tr>
-                <tr>
-                  <td><strong>Control</strong></td>
-                  <td>Simple checkbox options</td>
-                  <td>Unlimited, freeform text</td>
-                </tr>
-              </table>
-            </p>
-          </div>
-        </li>
-        <li>
-          <div class="collapsible-header">
-            <i class="material-icons">help</i>
-            How long will the VizJam last?
-          </div>
-          <div class="collapsible-body">
-            <p>
-              This VizJam runs from <strong>June 8rd, 2023</strong> to <strong>June 13th, 2023</strong>. You can follow
-              <%= link_to '@IndentLabs on Twitter', 'https://www.twitter.com/IndentLabs', target: '_blank' %>
-              or
-              <%= link_to '@IndentLabs on Medium', 'https://medium.com/indent-labs', target: '_blank' %>
-              to know when the next VizJam will be!
-            </p>
-          </div>
-        </li>
-      </ul>
-    </div>
-
-    <div class="col s12 m12 l6">
-      <h2 style="font-size: 1.4rem">
-        Recent visualizations <small>(click one to see their traits, refresh for more)</small>
-        <span class="right badge red white-text tooltipped" data-tooltip="<%= @total_count %> characters visualized!">
-          <%= number_with_delimiter @total_count %>
-        </span>
-      </h2>
-
-      <div class="row">
-        <div class="col s12 cards-container">
-          <% @recent_commissions.each do |commission| %>
-
-            <div class="hoverable card" id='card-<%= commission.job_id %>' data-complete="<%= commission.complete? %>">
-              <div class="card-image">
-                <%= link_to "#details-#{commission.job_id}", class: 'modal-trigger waves-effect waves-light' do %>
-                  <% if commission.complete? %>
-                    <%= image_tag commission.image, class: 'commission-image' %>
-                  <% else %>
-                    <%= image_tag image_path("placeholders/loading.gif"), class: 'commission-image', style: 'background: #2196F3' %>
-                  <% end %>
-                  <span class="card-title" style="background: black; opacity: 0.75; padding: 4px">
-                    <%= commission.final_settings&.fetch('name', '').presence || 'No name' %>
-                  </span>
-                <% end %>
-              </div>
-            </div>
-
-            <% if commission.completed_at.nil? %>
-              <script>
-                document.addEventListener('DOMContentLoaded', (event) => {
-                  let jobId = '<%= commission.job_id %>';
-                  let card = document.getElementById(`card-${jobId}`);
-                  let modal = document.getElementById(`details-${jobId}`);
-                  let complete = card.getAttribute('data-complete') === 'true';
-
-                  if (!complete) {
-                    console.log('job id ' + jobId + ' is not complete, queueing polling');
-                    let interval = setInterval(() => {
-                      console.log('polling for', jobId);
-                      fetch('<%= basil_commission_info_path(commission.job_id) %>')
-                        .then(response => {
-                          if(!response.ok) {
-                            throw new Error("HTTP error " + response.status);
-                          }
-                          return response.json();
-                        })
-                        .then(data => {
-                          if (data.completed_at) {
-                            console.log('job id ' + jobId + ' is complete, updating image');
-
-                            complete = true;
-                            card.setAttribute('data-complete', 'true');
-
-                            cardImage = card.querySelector('.commission-image');
-                            cardImage.src = data.image_url;
-
-                            modalImage = modal.querySelector('.commission-image');
-                            modalImage.src = data.image_url;
-                            clearInterval(interval);
-                          } else {
-                            console.log('job id ' + jobId + ' is not complete, continuing polling');
-                          }
-                        })
-                        .catch(error => {
-                          console.log("Fetch error: " + error);
-                        });
-                    }, 5000);
-                  }
-                });
-              </script>
-            <% end %>
-
-            <div id="details-<%= commission.job_id %>" class="modal modal-fixed-footer">
-              <div class="modal-content">
-                <h4>
-                  <i class="material-icons <%= Character.text_color %>"><%= Character.icon %></i>
-                  <%= commission.final_settings&.fetch('name', '').presence || 'Nameless character' %>
-                </h4>
-                <div class="row">
-                  <div class="col s12 m6">
-                    <% if commission.complete? %>
-                      <%= link_to commission.image, target: '_blank' do %>
-                        <%= image_tag commission.image, class: 'commission-image', style: 'width: 100%' %>
-                      <% end %>
-                      <div class="text-center" style="font-size: 0.8em">
-                        Click the image to see it full-size and/or download it.
-                      </div>
-                    <% else %>
-                      <%= image_tag image_path("placeholders/loading.gif"), class: 'commission-image', style: 'width: 100%' %>
-                      <div class="text-center" style="font-size: 0.8em">
-                        This image is still generating...
-                      </div>
-                    <% end %>
-                  </div>
-                  <div class="col s12 m6">
-                    <ul style="margin: 0 8px">
-                      <li>
-                        <strong class="grey-text">Traits:</strong>
-                        <div>
-                          <% commission.prompt.split(',').map do |tag| %>
-                            <span class="red white-text" style="padding: 1.5px 10px; white-space: nowrap;"><%= tag.strip %></span>
-                          <% end %>
-                        </div>
-                        <%# link_to 'Select these traits in my form', '#' %>
-                      </li>
-                      <li style="padding-top: 1em">
-                        <strong class="grey-text">Generated AI Prompt:</strong>
-                        <div class="card-panel blue lighten-5">
-                          The raw AI parameters that were used are listed below. You can use these in other image generation tools.
-                          If they are blank, you may need to refresh the page to see them.
-                        </div>
-                        <div style="font-size: 0.8em">
-                          Sampler: <strong><%= commission.final_settings.fetch('sampler', '') %></strong>
-                        </div>
-                        <div style="font-size: 0.8em">
-                          Steps: <strong><%= commission.final_settings.fetch('steps', '') %></strong>
-                        </div>
-                        <div style="font-size: 0.8em">
-                          CFG scale: <strong><%= commission.final_settings.fetch('cfg_scale', '') %></strong>
-                        </div>
-                        <div style="font-size: 0.8em">
-                          Face restoration: <strong><%= commission.final_settings.fetch('face_restoration_model', '') %></strong>
-                        </div>
-                        <div>
-                          <div style="font-size: 0.8em">Positive prompt:</span>
-                          <blockquote style="margin: 5px 0">
-                            <%= commission.final_settings.fetch('prompt', '').gsub('ANAD2', 'person') %>
-                          </blockquote>
-                        </div>
-                        <div> 
-                          <div style="font-size: 0.8em">Negative prompt:</span>
-                          <blockquote style="margin: 5px 0">
-                            <%= commission.final_settings.fetch('negative_prompt', '') %>
-                          </blockquote>
-                        </div>
-                        <div style="font-size: 0.8em">
-                          Notebook.ai style: <strong><code><%= commission.style %></code></strong>
-                        </div>
-                      </li>
-                      <li>
-                        <small class="grey-text">Generation ID: <%= commission.job_id %></small>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
-              </div>
-            </div>
-          <% end %>
+  <div class="col s12">
+    <div class="card horizontal">
+      <div class="card-image">
+        <%= image_tag "card-headers/#{pluralized_class_name.downcase}.webp", class: 'materialboxed tooltipped', alt: "The default image used for all #{pluralized_class_name.downcase} on Notebook.ai, but you can replace it with your own uploads.", data: { tooltip: "The default image used for all #{pluralized_class_name.downcase} on Notebook.ai, but you can replace it with your own uploads."} %>
+      </div>
+      <div class="card-stacked">
+        <div class="card-content spaced-paragraphs">
+          <h1 class="card-title <%= @content_type.text_color %>">Creating <%= pluralized_class_name %> on Notebook.ai</h1>
+          <p><em>
+            <%= t("content_descriptions.#{singular_class_name.downcase}") %></em>
+          </p>
+          <p>
+            Creating <%= pluralized_class_name.downcase %> on Notebook.ai is easy.
+          </p>
+          <p>
+            To get started, just click <strong><%= pluralized_class_name %></strong> under the "Worldbuilding" header in the site sidebar.
+            You'll be able to see or edit all of your existing <%= singular_class_name.downcase %> pages and create new ones at any time.
+          </p>
         </div>
       </div>
-
     </div>
+  </div>
+
+  <div class="col s12 m12 l5">
+    <div class="card">
+      <div class="card-content">
+        <h2 class="card-title">
+          <i class="material-icons <%= @content_type.text_color %> left">
+            <%= @content_type.icon %>
+          </i>
+
+          Get a head start with a rich
+          <span class="<%= @content_type.text_color %>"><%= singular_class_name.downcase %></span>
+          template
+        </h2>
+        <br />
+
+        <div class="spaced-paragraphs">
+          <p>
+            Templates on Notebook.ai are what help our unique worldbuilding system better understand your world.
+          </p>
+          <p>
+            You can fill out as little or as much as you'd like on every new <%= singular_class_name.downcase %>. You'll see
+            progress indicators every time you edit it to show where you can make progress on, and our system will
+            intelligently generate questions for you around the site that will automatically save your answers
+            to the proper place on your <%= singular_class_name.downcase %> page.
+          </p>
+          <p>
+            Templates are also fully customizable across every <%= singular_class_name.downcase %> in your notebook.
+          </p>
+          <p>
+            You can browse the default template for <%= pluralized_class_name.downcase %> here; click any category
+            to see its questions.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m12 l7">
+    <ul class="collapsible popout">
+      <%
+        YAML.load_file(Rails.root.join('config', 'attributes', "#{singular_class_name.downcase}.yml")).map do |category_name, category_details|
+      %>
+        <% next if category_name == :contributors %>
+        <li>
+          <div class="collapsible-header <%= @content_type.color %> darken-3 white-text">
+            <i class="material-icons"><%= category_details[:icon] %></i>
+            <%= category_details[:label] %>
+          </div>
+          <div class="collapsible-body">
+            <% if category_name == :gallery %>
+              <p>
+                This category lets you upload images to this <%= singular_class_name.downcase %>'s notebook page.
+              </p>
+              <br />
+              <p>
+                It's great if you have sketches or artwork for your <%= singular_class_name.downcase %>,
+                but also works well for collecting visual inspiration, too!
+              </p>
+            <% end %>
+            <% category_details.fetch(:attributes, []).each do |field| %>
+              <div>
+                <strong><%= field[:label] %></strong>
+              </div>
+              <div>
+                <% if field[:field_type] == 'link' || field[:field_type] == 'universe' %>
+                  This field allows you to link your other Notebook.ai pages to this <%= singular_class_name.downcase %>.
+                <% elsif field[:field_type] == 'tags' %>
+                  This field lets you add clickable tags to your <%= pluralized_class_name.downcase %>.
+                <% else %>
+                  <%=
+                    I18n.translate "attributes.#{singular_class_name.downcase}.#{field[:label].downcase.gsub(/\s/, '_')}",
+                      scope: :serendipitous_questions,
+                      name: "this #{singular_class_name.downcase}",
+                      default: 'Write as little or as much as you want!'
+                  %>
+                  <br />
+                  <span class="grey-text"><%= field[:description].try(:html_safe) %></span>
+                <% end %>
+              </div>
+              <br />
+            <% end %>
+          </div>
+        </li>
+      <%
+        end
+      %>
+    </ul>
+  </div>
+  <div class="col s12">
+    <div class="card horizontal">
+      <div class="card-image">
+        <%= image_tag 'basil/portrait.png', style: 'width: 420px' %>
+      </div>
+      <div class="card-stacked">
+        <div class="card-content">
+          <div class="card-title">
+            <i class="pink-text material-icons left">palette</i>
+            Visualize your characters
+          </div>
+          <p>
+            After you've created a character on Notebook.ai, visualizing them is as easy as picking an image style and clicking a button.
+            Everything you've written about what they look like on their notebook page is automatically included.
+          </p>
+          <br />
+          <p>
+            Image visualization is a Premium feature, but you can generate up to 100 images for free to try it out for yourself.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if user_signed_in? %>
+  <div class="text-center">
+    <div>Already logged in? Great!</div>
+    <%= link_to 'Visualize your ideas', basil_path, class: 'btn btn-large hoverable blue white-text' %>
+  </div>
+<% else %>
+  <div class="text-center">
+    <div>Want to keep visualizing your ideas?</div>
+    <%= link_to 'Get started with Notebook.ai', new_registration_path(User), class: 'btn btn-large hoverable blue white-text' %>
   </div>
 <% end %>
 
-
-<script>
-function pollingData() {
-  return {
-    image: 'images/sample-1.jpg',
-    jobId: '123', // Job id should be dynamic
-    pollingInterval: null,
-    init() {
-      this.pollingInterval = setInterval(this.poll.bind(this), 5000); // Poll every 5 seconds
-    },
-    poll() {
-      fetch(`/poll/${this.jobId}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.image) {
-            this.image = data.image;
-            clearInterval(this.pollingInterval); // Stop polling if image is returned
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
-    },
-  }
-}
-</script>
+<% 10.times do %><br /><% end %>

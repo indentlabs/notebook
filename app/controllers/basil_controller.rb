@@ -213,6 +213,9 @@ class BasilController < ApplicationController
   def jam
     @recent_commissions = BasilCommission.where(entity_id: nil).order('id DESC').limit(24)
     @total_count = BasilCommission.where(entity_id: nil).count
+
+    # For generating pie charts
+    @all_commissions = BasilCommission.where(entity_id: nil)
   end
 
   def queue_jam_job
