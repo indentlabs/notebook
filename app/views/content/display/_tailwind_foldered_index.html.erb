@@ -95,9 +95,6 @@
                   </div>
                 </div>
               </div>
-              <div class="hidden sm:block md:hidden mt-6 min-w-0 flex-1">
-                <h1 class="text-2xl font-bold text-gray-900 truncate">Ricardo Cooper</h1>
-              </div>
             </div>
           </div>
 
@@ -448,22 +445,27 @@
 
           <% if content.empty? %>
             <div class="container mx-auto flex">
+              <% if Rails.application.config.content_type_names.include?(content_type_name) %>
               <div class="w-1/2 text-center p-6">
-                <button type="button" class="relative container mx-auto block w-full border-2 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                  <i class="material-icons text-6xl <%= content_type_class.text_color %>">list</i>
-                  <div class="mt-2 block text-sm font-medium text-gray-900 mb-1">
-                    Customize your <%= content_type_name.downcase %> page template
-                  </div>
-                  <span class="rounded bg-notebook-blue text-white px-2 py-1 text-xs">
-                    recommended before creating your first <%= content_type_name.downcase %>
-                  </span>
-                </button>
+                <%= link_to attribute_customization_path(content_type_name.downcase) do %>
+                  <button type="button" class="relative container mx-auto block w-full border-2 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
+                    <i class="material-icons text-6xl <%= content_type_class.text_color %>">list</i>
+                    <div class="mt-2 block text-sm font-medium text-gray-900 mb-1">
+                      Customize your <%= content_type_name.downcase %> page template
+                    </div>
+                    <span class="rounded bg-notebook-blue text-white px-2 py-1 text-xs">
+                      recommended before creating your first <%= content_type_name.downcase %>
+                    </span>
+                  </button>
+                <% end %>
               </div>
               <div class="w-1/2 text-center p-6">
-                <button type="button" class="relative container mx-auto block w-full border-2 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                  <i class="material-icons text-6xl <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
-                  <span class="mt-2 block text-sm font-medium text-gray-900">Create your first <%= content_type_name.downcase %></span>
-                </button>
+                <%= link_to new_polymorphic_path(content_type_class) do %>
+                  <button type="button" class="relative container mx-auto block w-full border-2 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
+                    <i class="material-icons text-6xl <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
+                    <span class="mt-2 block text-sm font-medium text-gray-900">Create your first <%= content_type_name.downcase %></span>
+                  </button>
+                <% end %>
               </div>
             </div>
           <% end %>
