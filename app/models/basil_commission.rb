@@ -1,8 +1,8 @@
 class BasilCommission < ApplicationRecord
   acts_as_paranoid
 
-  belongs_to :user
-  belongs_to :entity, polymorphic: true
+  belongs_to :user, optional: true
+  belongs_to :entity, polymorphic: true, optional: true
 
   has_one_attached :image,
     service: :amazon_basil,
@@ -18,8 +18,7 @@ class BasilCommission < ApplicationRecord
 
     # TODO clean this up and put it in a service
     sts_client = Aws::STS::Client.new(region: region)
-    queue_url = 'https://sqs.' + region + '.amazonaws.com/' + 
-      sts_client.get_caller_identity.account + '/' + queue_name
+    queue_url = 'https://sqs.' + region + '.amazonaws.com/' + sts_client.get_caller_identity.account + '/' + queue_name
     sqs_client = Aws::SQS::Client.new(region: region)
 
     message_body = {

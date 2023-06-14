@@ -1,5 +1,5 @@
 class BasilController < ApplicationController
-  before_action :authenticate_user!, except: [:complete_commission, :about, :stats]
+  before_action :authenticate_user!, except: [:complete_commission, :about, :stats, :jam, :queue_jam_job, :commission_info]
 
   before_action :require_admin_access, only: [:review], unless: -> { Rails.env.development? }
 
@@ -208,6 +208,51 @@ class BasilController < ApplicationController
   end
 
   def about
+  end
+
+  def jam
+    @recent_commissions = BasilCommission.where(entity_id: nil).order('id DESC').limit(24)
+    @total_count = BasilCommission.where(entity_id: nil).count
+
+    # For generating pie charts
+    @all_commissions = BasilCommission.where(entity_id: nil)
+  end
+
+  def queue_jam_job
+    created_prompt = [
+      jam_params[:age],
+      *jam_params[:features]
+    ].compact.join(', ')
+
+    # Create our commission, then redirect back to preview it
+    BasilCommission.create!(
+      user:   current_user,
+      entity: nil,
+      prompt: created_prompt,
+      job_id: SecureRandom.uuid,
+      style:  ["realistic", "realistic2", "realistic3"].sample,
+      final_settings: jam_params
+    )
+
+    redirect_back(fallback_location: basil_jam_path, notice: "#{jam_params.fetch(:name, '').presence || 'Your character'} will be visualized shortly. Find them on this page!")
+  end
+
+  def commission_info
+    @commission = BasilCommission.find_by(job_id: params[:jobid])
+    raise "No BasilCommission with ID #{params[:jobid]}" if @commission.nil?
+
+    render json: {
+      image_url: @commission.image.url,
+      user_id: @commission.user_id,
+      prompt: @commission.prompt,
+      job_id: @commission.job_id,
+      created_at: @commission.created_at,
+      updated_at: @commission.updated_at,
+      completed_at: @commission.completed_at,
+      style: @commission.style,
+      final_settings: @commission.final_settings,
+      cached_seconds_taken: @commission.cached_seconds_taken,
+    }
   end
 
   def stats
@@ -509,10 +554,11 @@ class BasilController < ApplicationController
 
   def complete_commission
     commission = BasilCommission.find_by(job_id: params[:jobid])
-    return if commission.nil?
-
-    commission.update(completed_at:   DateTime.current,
-                      final_settings: JSON.parse(params[:settings]))
+    raise "Tried to complete commission with invalid job ID #{params[:jobid]}" if commission.nil?
+    
+    merged_settings = commission.final_settings || {}
+    commission.update!(completed_at:   DateTime.current,
+                       final_settings: merged_settings.merge(JSON.parse(params.fetch(:settings, "{}"))))
 
     # Attach the image in S3 to our `image` ActiveStorage relation
     key    = "job-#{params[:jobid]}.png"
@@ -554,6 +600,7 @@ class BasilController < ApplicationController
       @commissions = BasilCommission.where(id: @reviewed_commission_ids.pluck(:basil_commission_id))
         .where.not(completed_at: nil)
         .where(user: current_user)
+        .where.not(entity_type: nil, entity_id: nil)
         .order(created_at: :desc)
         .limit(50)
         .includes(:entity)
@@ -565,6 +612,7 @@ class BasilController < ApplicationController
       @commissions = BasilCommission.where.not(id: @reviewed_commission_ids)
         .where.not(completed_at: nil)
         .where(user: current_user)
+        .where.not(entity_type: nil, entity_id: nil)
         .order(created_at: :desc)
         .limit(50)
         .includes(:entity)
@@ -594,5 +642,9 @@ class BasilController < ApplicationController
 
   def commission_params
     params.require(:basil_commission).permit(:style, :entity_type, :entity_id, field: {})
+  end
+
+  def jam_params
+    params.require(:commission).permit(:name, :age, features: [])
   end
 end

@@ -19,6 +19,11 @@ Rails.application.routes.draw do
       post   '/feedback/:jobid', to: 'basil#feedback', as: :basil_feedback
       post   '/:id/save',        to: 'basil#save',     as: :basil_save
       delete '/:id/delete',      to: 'basil#delete',   as: :basil_delete
+      get    '/commission/:jobid', to: 'basil#commission_info', as: :basil_commission_info
+
+      # Landing pages
+      get  '/jam',               to: 'basil#jam',        as: :basil_jam
+      post '/jam',               to: 'basil#queue_jam_job', as: :basil_jam_submit
 
       # Standard generation flow for users
       get  '/',                  to: 'basil#index',      as: :basil
@@ -33,6 +38,9 @@ Rails.application.routes.draw do
       post '/export/:character_id', to: 'conversation#export',            as: :export_character
     end
   end
+
+  # Temporary landing path for jams (nice URL)
+  get '/jam', to: 'basil#jam', as: :jam
 
   scope :stream, path: '/stream', as: :stream do
     get '/',         to: 'stream#index'
