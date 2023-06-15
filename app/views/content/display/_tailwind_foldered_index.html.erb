@@ -72,10 +72,12 @@
                     <% end %>
                   </div>
                   <div class="mt-6 flex flex-col justify-stretch space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
-                    <%= link_to attribute_customization_path(content_type_name.downcase) do %>
-                      <button type="button" class="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
-                        <span>Customize template</span>
-                      </button>
+                    <% if Rails.application.config.content_type_names.include?(content_type_name) %>
+                      <%= link_to attribute_customization_path(content_type_name.downcase) do %>
+                        <button type="button" class="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
+                          <span>Customize template</span>
+                        </button>
+                      <% end %>
                     <% end %>
 
                     <% if current_user.can_create?(content_type_class) || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type_class.name) %>
@@ -446,19 +448,20 @@
           <% if content.empty? %>
             <div class="container mx-auto flex">
               <% if Rails.application.config.content_type_names.include?(content_type_name) %>
-              <div class="w-1/2 text-center p-6">
-                <%= link_to attribute_customization_path(content_type_name.downcase) do %>
-                  <button type="button" class="relative container mx-auto block w-full border-2 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
-                    <i class="material-icons text-6xl <%= content_type_class.text_color %>">list</i>
-                    <div class="mt-2 block text-sm font-medium text-gray-900 mb-1">
-                      Customize your <%= content_type_name.downcase %> page template
-                    </div>
-                    <span class="rounded bg-notebook-blue text-white px-2 py-1 text-xs">
-                      recommended before creating your first <%= content_type_name.downcase %>
-                    </span>
-                  </button>
-                <% end %>
-              </div>
+                <div class="w-1/2 text-center p-6">
+                  <%= link_to attribute_customization_path(content_type_name.downcase) do %>
+                    <button type="button" class="relative container mx-auto block w-full border-2 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
+                      <i class="material-icons text-6xl <%= content_type_class.text_color %>">list</i>
+                      <div class="mt-2 block text-sm font-medium text-gray-900 mb-1">
+                        Customize your <%= content_type_name.downcase %> page template
+                      </div>
+                      <span class="rounded bg-notebook-blue text-white px-2 py-1 text-xs">
+                        recommended before creating your first <%= content_type_name.downcase %>
+                      </span>
+                    </button>
+                  <% end %>
+                </div>
+              <% end %>
               <div class="w-1/2 text-center p-6">
                 <%= link_to new_polymorphic_path(content_type_class) do %>
                   <button type="button" class="relative container mx-auto block w-full border-2 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
