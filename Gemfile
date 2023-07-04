@@ -128,7 +128,7 @@ end
 
 group :development do
   gem 'web-console'
-  gem 'listen'
+  # gem 'listen'
   gem 'bullet'
   gem 'rack-mini-profiler'
   gem 'memory_profiler'
@@ -149,3 +149,4 @@ group :worker do
   gem 'ibm_watson'
   gem 'textstat'
 end
+
