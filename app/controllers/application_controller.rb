@@ -31,7 +31,7 @@ class ApplicationController < ActionController::Base
   def set_metadata
     @page_title       ||= ''
     @page_keywords    ||= %w[writing author nanowrimo novel character fiction fantasy universe creative dnd roleplay game design]
-    @page_description ||= 'Notebook.ai is a set of tools for writers, game designers, and roleplayers to create magnificent universes — and everything within them.'
+    @page_description ||= 'Notebook.ai is a set of tools for writers and roleplayers to create magnificent universes — and everything within them.'
   end
 
   def set_universe_session
