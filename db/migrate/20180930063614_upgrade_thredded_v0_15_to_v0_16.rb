@@ -4,6 +4,23 @@ require 'thredded/base_migration'
 
 class UpgradeThreddedV015ToV016 < Thredded::BaseMigration
   def up
+    # Add the deleted_at column and index if they don't already exist
+    unless column_exists?(:thredded_topics, :deleted_at)
+      add_column :thredded_topics, :deleted_at, :datetime
+      add_index :thredded_topics, :deleted_at
+
+      add_index :thredded_topics, [:deleted_at, :messageboard_id]
+      add_index :thredded_topics, [:deleted_at, :user_id]
+    end
+
+    unless column_exists?(:thredded_posts, :deleted_at)
+      add_column :thredded_posts, :deleted_at, :datetime
+      add_index :thredded_posts, :deleted_at
+      add_index :thredded_posts, [:deleted_at, :messageboard_id]
+      add_index :thredded_posts, [:deleted_at, :postable_id]
+      add_index :thredded_posts, [:deleted_at, :user_id]
+    end
+
     %i[thredded_user_topic_read_states thredded_user_private_topic_read_states].each do |table_name|
       add_column table_name, :unread_posts_count, :integer, default: 0, null: false
       add_column table_name, :read_posts_count, :integer, default: 0, null: false
