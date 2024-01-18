@@ -18,7 +18,7 @@ gem 'aws-sdk-s3'
 gem 'filesize'
 
 # Image processing
-gem 'paperclip' # TODO: we want to migrate off this game to ActiveStorage
+gem 'kt-paperclip' # TODO: we want to migrate off this game to ActiveStorage
 gem 'rmagick'
 gem 'image_processing'
 gem 'active_storage_validations'
