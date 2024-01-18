@@ -215,7 +215,7 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
   create_table "basil_feedbacks", force: :cascade do |t|
     t.integer "basil_commission_id", null: false
     t.integer "user_id", null: false
-    t.integer "score_adjustment"
+    t.integer "score_adjustment", default: 0
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["basil_commission_id"], name: "index_basil_feedbacks_on_basil_commission_id"
@@ -1941,10 +1941,6 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
     t.string "name", null: false
     t.string "type_of"
     t.text "description"
-    t.string "map_file_name"
-    t.string "map_content_type"
-    t.integer "map_file_size"
-    t.datetime "map_updated_at"
     t.string "population"
     t.string "language"
     t.string "currency"
@@ -3255,14 +3251,9 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
     t.integer "moderation_state", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
+    t.index "\"id\", \"deleted_at\"", name: "index_thredded_posts_on_id_and_deleted_at"
     t.index ["created_at", "postable_id"], name: "index_thredded_posts_on_created_at_and_postable_id"
     t.index ["created_at"], name: "index_thredded_posts_on_created_at"
-    t.index ["deleted_at", "messageboard_id"], name: "index_thredded_posts_on_deleted_at_and_messageboard_id"
-    t.index ["deleted_at", "postable_id"], name: "index_thredded_posts_on_deleted_at_and_postable_id"
-    t.index ["deleted_at", "user_id"], name: "index_thredded_posts_on_deleted_at_and_user_id"
-    t.index ["deleted_at"], name: "index_thredded_posts_on_deleted_at"
-    t.index ["id", "deleted_at"], name: "index_thredded_posts_on_id_and_deleted_at"
     t.index ["messageboard_id"], name: "index_thredded_posts_on_messageboard_id"
     t.index ["moderation_state", "updated_at"], name: "index_thredded_posts_for_display"
     t.index ["postable_id"], name: "index_thredded_posts_on_postable_id"
@@ -3325,8 +3316,6 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "deleted_at"
-    t.index ["deleted_at", "messageboard_id"], name: "index_thredded_topics_on_deleted_at_and_messageboard_id"
-    t.index ["deleted_at", "user_id"], name: "index_thredded_topics_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_thredded_topics_on_deleted_at"
     t.index ["hash_id"], name: "index_thredded_topics_on_hash_id"
     t.index ["last_post_at"], name: "index_thredded_topics_on_last_post_at"
