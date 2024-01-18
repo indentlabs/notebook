@@ -9,10 +9,6 @@
 class Location < ApplicationRecord
   acts_as_paranoid
 
-  # todo: clear these -- not used anymore
-  has_attached_file :map, styles: { original: '1920x1080>', thumb: '200x200>' }
-  validates_attachment_content_type :map, content_type: %r{\Aimage\/.*\Z}
-
   validates :name, presence: true
 
   belongs_to :user
