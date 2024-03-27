@@ -71,6 +71,10 @@ class DocumentsController < ApplicationController
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     end
 
+    if @document.user.thredded_user_detail.moderation_state == "blocked"
+      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+    end
+
     # Put the focus on the document by removing Notebook.ai actions
     @navbar_actions = []
   end
