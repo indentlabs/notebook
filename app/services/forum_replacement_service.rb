@@ -456,6 +456,7 @@ class ForumReplacementService < Service
     'flipflops'             => 'slappy sandals',
     'glove'                 => 'hand sock',
     'gloves'                => 'hand socks',
+    'g r e m l i n s'       => 'f r i e n d s',
     'guitar'                => 'strumma-plucka',
     'guitars'               => 'strumma-pluckas',
     'hairbrush'             => 'tangle tamer',
@@ -526,7 +527,7 @@ class ForumReplacementService < Service
   }
 
   def self.replace_for(text, user)
-    gremlins_phase = 2
+    gremlins_phase = 1
     replaced_text = text.dup
 
     # Page tag replacements
