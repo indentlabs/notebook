@@ -215,7 +215,7 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
   create_table "basil_feedbacks", force: :cascade do |t|
     t.integer "basil_commission_id", null: false
     t.integer "user_id", null: false
-    t.integer "score_adjustment"
+    t.integer "score_adjustment", default: 0
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["basil_commission_id"], name: "index_basil_feedbacks_on_basil_commission_id"
@@ -1941,10 +1941,6 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
     t.string "name", null: false
     t.string "type_of"
     t.text "description"
-    t.string "map_file_name"
-    t.string "map_content_type"
-    t.integer "map_file_size"
-    t.datetime "map_updated_at"
     t.string "population"
     t.string "language"
     t.string "currency"
