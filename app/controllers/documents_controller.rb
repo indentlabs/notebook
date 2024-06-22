@@ -181,7 +181,6 @@ class DocumentsController < ApplicationController
       .group_by(&:entity_type)
   end
 
-  # Todo does anything actually use this endpoint?
   def create
     created_document = current_user.documents.create(document_params)
     redirect_to edit_document_path(created_document), notice: "Your document has been saved!"
