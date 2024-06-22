@@ -61,9 +61,6 @@ gem 'meta-tags'
 # gem 'serendipitous', :path => "../serendipitous-gem"
 gem 'serendipitous', git: 'https://github.com/indentlabs/serendipitous-gem.git'
 
-# Editor
-gem 'medium-editor-rails'
-
 # Graphs & Charts
 gem 'chartkick'
 gem 'd3-rails', '~> 5.9.2' # used for spider charts
