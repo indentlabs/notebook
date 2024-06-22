@@ -219,6 +219,17 @@ class SubscriptionsController < ApplicationController
     # If it looks like a valid code and quacks like a valid code, it's probably a valid code
     code.activate!(current_user)
 
+    # Also, give the user the Premium upload bandwidth
+    # TODO we should probably use SubscriptionService#recalculate_bandwidth_for() here so we can reduce
+    #      code reuse
+    premium_bandwidth = 10_000_000 # skipping a lookup to BillingPlan.find(4).bonus_bandwidth_kb
+    bandwidth_remaining = premium_bandwidth - current_user.image_uploads.sum(:src_file_size) / 1000
+
+    # Also add referral bandwidth bonus to total (100MB per referral)
+    bandwidth_remaining += current_user.referrals.count * 100_000
+
+    current_user.update(upload_bandwidth_kb: bandwidth_remaining)
+
     current_user.notifications.create(
       message_html:     "<div class='yellow-text text-darken-4'>You activated a Premium Code!</div><div>Click here to turn on your Premium pages.</div>",
       icon:             'star',

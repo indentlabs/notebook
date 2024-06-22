@@ -223,7 +223,6 @@ Rails.application.routes.draw do
   scope '/for' do
     get '/writers',     to: 'main#for_writers',     as: :writers_landing
     get '/roleplayers', to: 'main#for_roleplayers', as: :roleplayers_landing
-    get '/designers',   to: 'main#for_designers',   as: :designers_landing
   end
 
   # Lab apps

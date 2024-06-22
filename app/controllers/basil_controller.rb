@@ -230,7 +230,7 @@ class BasilController < ApplicationController
       entity: nil,
       prompt: created_prompt,
       job_id: SecureRandom.uuid,
-      style:  ["realistic", "realistic2", "realistic3"].sample,
+      style:  ["realistic", "realistic2", "realistic3", "painting", "painting2", "painting3"].sample,
       final_settings: jam_params
     )
 
