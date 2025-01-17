@@ -98,7 +98,7 @@ class CreateModels < ActiveRecord::Migration[4.2]
       t.text :description
 
       # Map
-      t.attachment :map
+      t.string :map
 
       # Culture
       t.string :population

@@ -83,9 +83,31 @@ class UpgradeThreddedV014ToV015 < Thredded::BaseMigration
 
   private
 
+  #def remove_string_limit(table, column, type: :text, indices: [])
+  #  indices.each { |(_, options)| remove_index table, name: options[:name] }
+  #  change_column table, column, type, **{ limit: nil }
+  #  indices.each { |args| add_index table, *args }
+  #end
+
   def remove_string_limit(table, column, type: :text, indices: [])
-    indices.each { |(_, options)| remove_index table, name: options[:name] }
+    indices.each do |index|
+      if index.is_a?(Hash) && index[:name] # Ensure index is a hash with :name key
+        puts "Removing index: #{index[:name]}"
+        remove_index table, name: index[:name]
+      else
+        puts "Skipping malformed index entry: #{index.inspect}"
+      end
+    end
+
     change_column table, column, type, limit: nil
-    indices.each { |args| add_index table, *args }
+
+    indices.each do |index|
+      if index.is_a?(Hash) && index[:columns] # Ensure index has required keys
+        puts "Re-adding index: #{index[:name]}"
+        add_index table, index[:columns], name: index[:name], unique: index[:unique], length: index[:length]
+      else
+        puts "Skipping malformed index entry: #{index.inspect}"
+      end
+    end
   end
 end

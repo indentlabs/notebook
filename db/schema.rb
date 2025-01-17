@@ -215,7 +215,7 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
   create_table "basil_feedbacks", force: :cascade do |t|
     t.integer "basil_commission_id", null: false
     t.integer "user_id", null: false
-    t.integer "score_adjustment"
+    t.integer "score_adjustment", default: 0
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["basil_commission_id"], name: "index_basil_feedbacks_on_basil_commission_id"
@@ -1669,10 +1669,7 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
     t.integer "content_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "src_file_name"
-    t.string "src_content_type"
-    t.bigint "src_file_size"
-    t.datetime "src_updated_at"
+    t.string "src"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
   end
@@ -1941,10 +1938,6 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
     t.string "name", null: false
     t.string "type_of"
     t.text "description"
-    t.string "map_file_name"
-    t.string "map_content_type"
-    t.integer "map_file_size"
-    t.datetime "map_updated_at"
     t.string "population"
     t.string "language"
     t.string "currency"
@@ -3216,7 +3209,7 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
     t.datetime "updated_at", null: false
     t.boolean "locked", default: false, null: false
     t.index ["messageboard_group_id"], name: "index_thredded_messageboards_on_messageboard_group_id"
-    t.index ["slug"], name: "index_thredded_messageboards_on_slug", unique: true
+    t.index ["slug"], name: "index_thredded_messageboards_on_slug"
   end
 
   create_table "thredded_notifications_for_followed_topics", force: :cascade do |t|
@@ -3291,7 +3284,7 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
     t.datetime "updated_at", null: false
     t.index ["hash_id"], name: "index_thredded_private_topics_on_hash_id"
     t.index ["last_post_at"], name: "index_thredded_private_topics_on_last_post_at"
-    t.index ["slug"], name: "index_thredded_private_topics_on_slug", unique: true
+    t.index ["slug"], name: "index_thredded_private_topics_on_slug"
   end
 
   create_table "thredded_private_users", force: :cascade do |t|
