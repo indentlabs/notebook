@@ -3,7 +3,10 @@ ruby "~> 3.2"
 
 # Server core
 gem 'rails', '~> 6.1'
-gem 'puma', '~> 5.6'
+
+#gem 'puma', '~> 5.6'
+gem 'passenger'
+
 # gem 'bootsnap', require: false
 gem 'sprockets', '~> 4.2.0'
 gem 'terser'
