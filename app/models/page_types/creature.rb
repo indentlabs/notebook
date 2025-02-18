@@ -3,7 +3,7 @@
 # == /'krechurr/
 # _noun_
 #
-# 1. an animal, plant, or other wildlife occuring in a user's story
+# 1. an animal, plant, or other wildlife occurring in a user's story
 #
 #    exists within a Universe.
 class Creature < ApplicationRecord
