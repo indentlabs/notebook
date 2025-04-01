@@ -408,6 +408,56 @@ class ForumReplacementService < Service
     'yoga'              => 'bendy business',
     'yuge'              => '<span style="font-size: 40px">yuge</span>',
     'zalgo'             => 'H̶̛̼̼̪̝̞͓̞͕͇̯͚͎͚̘̳͕̱̤̠̗͔͇̙̣̰͓̖̰̯̀̓̐̑̇͊͂̀͋̒̐̓͒̒͊͊̕͜͝ͅE̴̡̧̨̨̲̥̯͎̭̻̩̞̘̞̪̞̗̭͖̻͙͕͎̮͕̺͕̲̘̻̣͚̳̥͍̙͈͚͍͉̗͙̱͖͚̾̂̇͛̉͋͊̾͛̆̀́͑͛̅̋͊̕͘͜͜͜͝ͅͅͅͅ ̸̡̡̨̡̨̛̞͎̹̩̬̗̗̞̬̰̮̙̪̖͈̣̹͔̺̫̰̓̔̉̋̈̈́͐́̿̈̀͊̿̈̉̅̃̊̽͗̈̿̈́̓̈́̎͌̄̀̆̌̎͗̋͒̋̿̋̊̈́͆̋̾̈̏̈́̋̿̕̕̚͝͝͠͠ͅͅͅC̵̛̘̳͙̪̭͖̲̞̯̰̜͇̈̾̈́͋̌̉̽̽͑̎͌̾̈́͌̑͊̊̔̀͆̌̀̇̓͊̀̂̇̿̃͑́̈́̆͂̈́̾̓́̂̂̓̂̍̍͛͆͌͌̽̎̍̀̒̆̀͗͋͘͘͘͝͠͝͝͠͝͝Ǫ̸͕̻̞̝̜͚̗̮̼͎̤͔̤̱͔̫͂̄̉̋̈͊͐͂̇̀̌̎́͑̐̀̈́͋̓̾̅͒̒̄͑̒̆̑̾͜͝͝͝͝M̷̧̧̡̨̛̛̩̭̞͍̼̝̗͕̖͇̣̣̩͆̿̑͒́̉̅̓̌̆̈́͐͒̾̐̂̿̓̚͘̚͜E̵̡̨̢̧̢̢̡̢̨̛̠̱̻̺̦͚̹͓̬͔̪̟̼̥̯̠̘͚̫̯͍̺͔̫̟͇̱̦̟̪͚͉̣̳͓͍̬̙̲͔̘͙͔̤̰̜͍̠̩͉͐̂̊̏̐̿̊̋͑̿̇̊̈́͗̎̋́́̉̓̂̐͑̇̐̐͋́̒̈́͛͑͒̂͒̂̔̀̄̈́̓͂͆̈́͒̌͆̓͗̋͐̔̑͐̕͘ͅͅͅŞ̴̧̧̡̢̧̡̢͕̝͚̝̖͚̣̞̫̻̯͔̳̗̝̰̗̰̰̥̭͕̜̜̫͍̪̳̘̣̺̠͉̗̟͕̹͇̬̘̘̪͆͗̎̕',
+    'antagonist'        => 'plot troublemaker',
+    'character arc'     => 'protagonist pilgrimage',
+    'dialogue'          => 'character ping-pong',
+    'epilogue'          => 'literary afterparty',
+    'exposition'        => 'backstory breadcrumbs',
+    'first draft'       => 'word vomit masterpiece',
+    'flashback'         => 'temporal boomerang',
+    'literary device'   => 'wordsmith multitool',
+    'narrative'         => 'tale trajectory',
+    'plot hole'         => 'story oopsie',
+    'plot twist'        => 'narrative pretzel',
+    'prologue'          => 'story appetizer',
+    'protagonist'       => 'trouble magnet',
+    'subplot'           => 'story side quest',
+    'afternoon'         => 'post-meridian jaunt',
+    'constellation'     => 'connect-the-stars doodle',
+    'dimension'         => 'reality flavor',
+    'galaxy'            => 'cosmic spiraly-whirly',
+    'gravity'           => 'universal clingy-ness',
+    'infinity'          => 'endless et cetera',
+    'light year'        => 'space marathon',
+    'parallel universe' => 'reality neighbor',
+    'quantum physics'   => 'subatomic tomfoolery',
+    'anti-hero'         => 'morally flexible protagonist',
+    'mentor'            => 'wisdom dispenser',
+    'artificial intelligence' => 'silicon smartypants',
+    'social media'      => 'digital popularity contest',
+    'streaming service' => 'endless content waterfall',
+    'viral'             => 'internet famous adjacent',
+    'Wi-Fi'             => 'invisible knowledge tubes',
+    'footnote'          => 'page whisper',
+    'hypothesis'        => 'educated guess-timate',
+    'peer review'       => 'academic fact-checking party',
+    'autocorrect'       => 'automated word mangler',
+    'backspace'         => 'letter eating key',
+    'font'              => 'letter costume',
+    'grammar checker'   => 'sentence referee',
+    'spell check'       => 'typo detective',
+    'word count'        => 'verbose-o-meter',
+    'epiphany'          => 'brain lightning',
+    'existential crisis' => 'reality maintenance check',
+    'inspiration'       => 'creativity lightning strike',
+    'procrastination'   => 'productive avoidance',
+    'writers block'     => 'creativity traffic jam',
+    'fantasy'           => 'dragons-and-magic soup',
+    'horror'            => 'spooky word collection',
+    'romance'           => 'heart-squeezy tale',
+    'science fiction'   => 'future speculation story',
+    'consciousness'     => 'reality subscription service',
+    'philosophy'        => 'professional pondering',
   }
 
   OVERLOAD_WORDS_REPLACEMENTS = {
@@ -527,7 +577,7 @@ class ForumReplacementService < Service
   }
 
   def self.replace_for(text, user)
-    gremlins_phase = 1
+    gremlins_phase = 2
     replaced_text = text.dup
 
     # Page tag replacements
