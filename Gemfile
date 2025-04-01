@@ -88,6 +88,8 @@ gem 'discordrb'
 # Smarts
 gem 'word_count_analyzer'
 
+gem 'will_paginate', '~> 4.0'
+
 # Workers
 gem 'sidekiq'
 gem 'redis'

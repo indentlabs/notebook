@@ -1938,6 +1938,7 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
     t.string "name", null: false
     t.string "type_of"
     t.text "description"
+    t.string "map"
     t.string "population"
     t.string "language"
     t.string "currency"
