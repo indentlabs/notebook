@@ -113,7 +113,6 @@ end
 
 group :production do
   gem 'uglifier', '>= 1.3.0'
-  gem 'newrelic_rpm'
 end
 
 group :test, :production do
