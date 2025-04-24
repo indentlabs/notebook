@@ -72,6 +72,11 @@ gem 'd3-rails', '~> 5.9.2' # used for spider charts
 gem 'slack-notifier'
 gem 'barnes'
 
+# Profiling / error tracking
+gem "stackprof"
+gem "sentry-ruby"
+gem "sentry-rails"
+
 # Apps
 #gem 'easy_translate'
 #gem 'levenshtein-ffi'
@@ -135,13 +140,6 @@ group :development do
   gem 'memory_profiler'
   gem 'flamegraph'
   gem 'bundler-audit'
-end
-
-group :development, :production do
-  # Profiling / error tracking
-  gem "stackprof"
-  gem "sentry-ruby"
-  gem "sentry-rails"
 end
 
 group :worker do
