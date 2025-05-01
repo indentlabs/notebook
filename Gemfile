@@ -3,7 +3,10 @@ ruby "~> 3.2"
 
 # Server core
 gem 'rails', '~> 6.1'
-gem 'puma', '~> 5.6'
+
+#gem 'puma', '~> 5.6'
+gem 'passenger'
+
 # gem 'bootsnap', require: false
 gem 'sprockets', '~> 4.2.0'
 gem 'terser'
@@ -88,6 +91,8 @@ gem 'discordrb'
 # Smarts
 gem 'word_count_analyzer'
 
+gem 'will_paginate', '~> 4.0'
+
 # Workers
 gem 'sidekiq'
 gem 'redis'
@@ -108,7 +113,6 @@ end
 
 group :production do
   gem 'uglifier', '>= 1.3.0'
-  gem 'newrelic_rpm'
 end
 
 group :test, :production do
@@ -130,8 +134,14 @@ group :development do
   gem 'rack-mini-profiler'
   gem 'memory_profiler'
   gem 'flamegraph'
-  gem 'stackprof'
   gem 'bundler-audit'
+end
+
+group :development, :production do
+  # Profiling / error tracking
+  gem "stackprof"
+  gem "sentry-ruby"
+  gem "sentry-rails"
 end
 
 group :worker do
