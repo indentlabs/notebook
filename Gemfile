@@ -115,6 +115,15 @@ gem 'binding_of_caller' # see has_changelog.rb
 group :test, :development do
   gem 'pry'
   gem 'sqlite3'
+  
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+  gem 'dotenv-rails'
+  gem 'letter_opener_web'
+  gem 'minitest-reporters', '~> 1.1', require: false
+
+  # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
+  gem 'spring'
 end
 
 group :production do
