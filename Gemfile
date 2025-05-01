@@ -82,6 +82,7 @@ gem "sentry-rails"
 #gem 'levenshtein-ffi'
 
 # Forum
+gem "html-pipeline", "~> 2.14"   # keep the pre-3.x API that Thredded expects
 gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
 # gem 'thredded', path: "../thredded"
 
