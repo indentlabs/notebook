@@ -3,28 +3,32 @@ class SaveDocumentRevisionJob < ApplicationJob
 
   def perform(*args)
     document_id = args.shift
-
     document = Document.find_by(id: document_id)
     return unless document
 
-    # Load body once (needed for potential fallback and revision)
-    body_text = document.body || ""
+    # Initialize variables; body is NOT loaded yet
     new_word_count = 0
+    body_loaded = false
+    body_text = nil
 
     begin
       # Try the accurate (but potentially memory-intensive) count first
-      new_word_count = document.computed_word_count # Let it load body internally
+      # This accesses document.body internally
+      new_word_count = document.computed_word_count
     rescue StandardError => e
       # Log the error for visibility
       Rails.logger.warn("SaveDocumentRevisionJob: Failed accurate word count for Document #{document_id}: #{e.message}. Falling back to basic count.")
-      # Fallback to basic count if accurate one fails (e.g., NoMemoryError or other issues)
+
+      # Fallback: Load body ONLY if needed for fallback count
+      body_text = document.body || "" # Load body here
+      body_loaded = true
       new_word_count = body_text.split.size
     end
 
-    # Update cached word count for the document
+    # Update cached word count for the document (always do this)
     document.update(cached_word_count: new_word_count)
 
-    # Save a WordCountUpdate for this document for today
+    # Save a WordCountUpdate for this document for today (always do this)
     update = document.word_count_updates.find_or_initialize_by(
       for_date: DateTime.current,
     )
@@ -32,16 +36,23 @@ class SaveDocumentRevisionJob < ApplicationJob
     update.user_id  ||= document.user_id
     update.save!
 
-    # Make sure we're only storing revisions at least every 5 min
+    # Check if revision is needed BEFORE potentially loading body again
     latest_revision = document.document_revisions.order('created_at DESC').limit(1).first
     if latest_revision.present? && latest_revision.created_at > 5.minutes.ago
+      # Revision not needed, exit early. Body only loaded if fallback count happened.
       return
     end
 
-    # Store the document information as-is
+    # Revision IS needed. Load body if it wasn't already loaded for the fallback count.
+    unless body_loaded
+      body_text = document.body || "" # Load body here
+      # body_loaded = true # State update no longer needed
+    end
+
+    # Store the document information as-is, using the potentially-large body_text
     document.document_revisions.create!(
       title:             document.title,
-      body:              body_text, # Use the body_text we already loaded
+      body:              body_text, # Use the body_text (now definitely loaded if needed)
       synopsis:          document.synopsis,
       universe_id:       document.universe_id,
       notes_text:        document.notes_text,
