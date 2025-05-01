@@ -38,7 +38,7 @@ class SaveDocumentRevisionJob < ApplicationJob
 
     # Check if revision is needed BEFORE potentially loading body again
     latest_revision = document.document_revisions.order('created_at DESC').limit(1).first
-    if latest_revision.present? && latest_revision.created_at > 5.minutes.ago
+    if latest_revision.present? && latest_revision.created_at > 5.minutes.ago # read as "AFTER" the time which was 5 minutes ago, not "LESS THAN" 5 minutes ago
       # Revision not needed, exit early. Body only loaded if fallback count happened.
       return
     end
