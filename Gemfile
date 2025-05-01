@@ -3,7 +3,10 @@ ruby "~> 3.2"
 
 # Server core
 gem 'rails', '~> 6.1'
-gem 'puma', '~> 5.6'
+
+#gem 'puma', '~> 5.6'
+gem 'passenger'
+
 # gem 'bootsnap', require: false
 gem 'sprockets', '~> 4.2.0'
 gem 'terser'
@@ -61,9 +64,6 @@ gem 'meta-tags'
 # gem 'serendipitous', :path => "../serendipitous-gem"
 gem 'serendipitous', git: 'https://github.com/indentlabs/serendipitous-gem.git'
 
-# Editor
-gem 'medium-editor-rails'
-
 # Graphs & Charts
 gem 'chartkick'
 gem 'd3-rails', '~> 5.9.2' # used for spider charts
@@ -72,11 +72,17 @@ gem 'd3-rails', '~> 5.9.2' # used for spider charts
 gem 'slack-notifier'
 gem 'barnes'
 
+# Profiling / error tracking
+gem "stackprof"
+gem "sentry-ruby"
+gem "sentry-rails"
+
 # Apps
 #gem 'easy_translate'
 #gem 'levenshtein-ffi'
 
 # Forum
+gem "html-pipeline", "~> 2.14"   # keep the pre-3.x API that Thredded expects
 gem 'thredded', git: 'https://github.com/indentlabs/thredded.git', branch: 'feature/report-posts'
 # gem 'thredded', path: "../thredded"
 
@@ -90,6 +96,8 @@ gem 'discordrb'
 
 # Smarts
 gem 'word_count_analyzer'
+
+gem 'will_paginate', '~> 4.0'
 
 # Workers
 gem 'sidekiq'
@@ -107,11 +115,19 @@ gem 'binding_of_caller' # see has_changelog.rb
 group :test, :development do
   gem 'pry'
   gem 'sqlite3'
+  
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+  gem 'dotenv-rails'
+  gem 'letter_opener_web'
+  gem 'minitest-reporters', '~> 1.1', require: false
+
+  # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
+  gem 'spring'
 end
 
 group :production do
   gem 'uglifier', '>= 1.3.0'
-  gem 'newrelic_rpm'
 end
 
 group :test, :production do
@@ -133,7 +149,6 @@ group :development do
   gem 'rack-mini-profiler'
   gem 'memory_profiler'
   gem 'flamegraph'
-  gem 'stackprof'
   gem 'bundler-audit'
 end
 

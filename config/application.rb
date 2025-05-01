@@ -32,5 +32,12 @@ module Notebook
     # the framework and any gems in your application.
 
     config.active_job.queue_adapter = :sidekiq
+
+    config.after_initialize do
+      if ENV["MIGRATION_DATABASE_URL"].present?
+        puts "Connecting to migration database"
+        ActiveRecord::Base.establish_connection(ENV["MIGRATION_DATABASE_URL"])
+      end
+    end
   end
 end
