@@ -7,8 +7,21 @@ class SaveDocumentRevisionJob < ApplicationJob
     document = Document.find_by(id: document_id)
     return unless document
 
-    # Update cached word count for the document regardless of how often this is called
-    new_word_count = document.computed_word_count
+    # Load body once (needed for potential fallback and revision)
+    body_text = document.body || ""
+    new_word_count = 0
+
+    begin
+      # Try the accurate (but potentially memory-intensive) count first
+      new_word_count = document.computed_word_count # Let it load body internally
+    rescue StandardError => e
+      # Log the error for visibility
+      Rails.logger.warn("SaveDocumentRevisionJob: Failed accurate word count for Document #{document_id}: #{e.message}. Falling back to basic count.")
+      # Fallback to basic count if accurate one fails (e.g., NoMemoryError or other issues)
+      new_word_count = body_text.split.size
+    end
+
+    # Update cached word count for the document
     document.update(cached_word_count: new_word_count)
 
     # Save a WordCountUpdate for this document for today
@@ -28,7 +41,7 @@ class SaveDocumentRevisionJob < ApplicationJob
     # Store the document information as-is
     document.document_revisions.create!(
       title:             document.title,
-      body:              document.body,
+      body:              body_text, # Use the body_text we already loaded
       synopsis:          document.synopsis,
       universe_id:       document.universe_id,
       notes_text:        document.notes_text,
