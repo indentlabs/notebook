@@ -101,7 +101,7 @@ gem 'will_paginate', '~> 4.0'
 
 # Workers
 gem 'sidekiq'
-gem 'redis'
+gem 'redis', '~> 5.0.6'
 
 # Exports
 gem 'csv'
