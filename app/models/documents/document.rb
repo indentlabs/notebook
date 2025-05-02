@@ -103,7 +103,7 @@ class Document < ApplicationRecord
 
     # Settings: https://github.com/diasks2/word_count_analyzer
     # TODO: move this into analysis services & call that here
-    if self.body.length <= 10_000
+    if false && self.body.length <= 10_000
       WordCountAnalyzer::Counter.new(
         ellipsis:          'no_special_treatment',
         hyperlink:         'count_as_one',
