@@ -159,8 +159,7 @@ group :worker do
   # Document understanding
   gem 'htmlentities'
   gem 'birch', git: 'https://github.com/billthompson/birch.git', branch: 'birch-ruby22'
-
-  gem 'engtagger'
+  gem 'engtagger', github: 'yohasebe/engtagger', ref: 'master' # we might want this in more groups...?
   gem 'ibm_watson'
   gem 'textstat'
 end
