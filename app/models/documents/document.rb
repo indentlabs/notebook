@@ -103,22 +103,27 @@ class Document < ApplicationRecord
 
     # Settings: https://github.com/diasks2/word_count_analyzer
     # TODO: move this into analysis services & call that here
-    WordCountAnalyzer::Counter.new(
-      ellipsis:          'no_special_treatment',
-      hyperlink:         'count_as_one',
-      contraction:       'count_as_one',
-      hyphenated_word:   'count_as_one',
-      date:              'no_special_treatment',
-      number:            'count',
-      numbered_list:     'ignore',
-      xhtml:             'remove',
-      forward_slash:     'count_as_multiple_except_dates',
-      backslash:         'count_as_one',
-      dotted_line:       'ignore',
-      dashed_line:       'ignore',
-      underscore:        'ignore',
-      stray_punctuation: 'ignore'
-    ).count(self.body)
+    if self.body.length <= 10_000
+      WordCountAnalyzer::Counter.new(
+        ellipsis:          'no_special_treatment',
+        hyperlink:         'count_as_one',
+        contraction:       'count_as_one',
+        hyphenated_word:   'count_as_one',
+        date:              'no_special_treatment',
+        number:            'count',
+        numbered_list:     'ignore',
+        xhtml:             'remove',
+        forward_slash:     'count_as_multiple_except_dates',
+        backslash:         'count_as_one',
+        dotted_line:       'ignore',
+        dashed_line:       'ignore',
+        underscore:        'ignore',
+        stray_punctuation: 'ignore'
+      ).count(self.body)
+    else
+      # For really long documents, use a faster approach to estimate word count
+      self.body.scan(/\b\w+\b/).count
+    end
   end
 
   def reading_estimate
