@@ -457,6 +457,9 @@ class BasilController < ApplicationController
       return
     end
 
+    # At this point, the content is valid, and the user is allowed to commission it!
+    # We can now create the prompt, and save the commission.
+  
     # Before creating the prompt, do a little config to tweak things to work well :)
     labels_to_omit_label_text = [
       "Name",
@@ -468,24 +471,24 @@ class BasilController < ApplicationController
       "Type of food"
     ].map(&:downcase)
     field_importance_multipliers = {
-      'hair':        1.15,
-      'hair color':  1.55,
-      'hair style':  1.10,
-      'skin tone':   1.05,
-      'race':        1.10,
-      'eye color':   1.05,
-      'gender':      1.15,
+      'hair':        1.00,
+      'hair color':  1.00,
+      'hair style':  1.00,
+      'skin tone':   1.00,
+      'race':        1.00,
+      'eye color':   1.00,
+      'gender':      1.00,
       'description': 1.00,
-      'item type':   1.55,
-      'type':        1.15,
-      'type of building':  1.25,
-      'type of condition': 1.25,
-      'type of food':      1.25,
-      'type of landmark':  1.25,
-      'type of magic':     1.25,
-      'type of school':    1.25,
-      'type of vehicle':   1.25,
-      'type of creature':  1.25
+      'item type':   1.00,
+      'type':        1.00,
+      'type of building':  1.00,
+      'type of condition': 1.00,
+      'type of food':      1.00,
+      'type of landmark':  1.00,
+      'type of magic':     1.00,
+      'type of school':    1.00,
+      'type of vehicle':   1.00,
+      'type of creature':  1.00
     }
     label_value_pairs_to_skip_entirely = [
       ['race', 'human']
@@ -540,6 +543,7 @@ class BasilController < ApplicationController
                                      .to_h
     guidance.update(guidance: guidance_data)
 
+    # Finally, create the commission!
     BasilCommission.create!(
       user:        current_user,
       entity_type: @content.page_type,
