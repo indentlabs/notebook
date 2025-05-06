@@ -27,26 +27,30 @@ class BasilService < Service
   def self.enabled_styles_for(page_type)
     case page_type
     when 'Character'
-      %w(realistic painting sketch digital abstract watercolor)
+      %w(photograph watercolor pencil_sketch smiling villain horror)
     when 'Location'
-      %w(realistic painting sketch)
+      %w(painting watercolor sketch)
     when 'Item'
       %w(realistic painting sketch)
     when 'Building'
-      %w(realistic sketch)
+      %w(photograph sketch)
     when 'Town'
-      %w(realistic map)
+      %w(photograph map)
     when 'Creature'
-      %w(realistic fantasy)
+      %w(photograph fantasy)
     else
-      %w(realistic)
+      %w(photograph)
     end
   end
 
   def self.experimental_styles_for(page_type)
     case page_type
     when 'Character'
-      %w(realistic2 realistic3 painting2 painting3 horror anime)
+      %w(anime fantasy scifi historical abstract caricature)
+    when 'Location'
+      %w(aerial_photograph anime)
+    when 'Item'
+      %w(schematic anime hand_made)
     else
       []
     end

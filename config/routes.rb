@@ -22,7 +22,7 @@ Rails.application.routes.draw do
 
       # Landing pages
       get  '/jam',               to: 'basil#jam',        as: :basil_jam
-      post '/jam',               to: 'basil#queue_jam_job', as: :basil_jam_submit
+      #post '/jam',               to: 'basil#queue_jam_job', as: :basil_jam_submit
 
       # Standard generation flow for users
       get  '/',                  to: 'basil#index',      as: :basil

@@ -37,10 +37,14 @@ class GenerateBasilImageJob < ApplicationJob
       steps: 20,
       # Add other parameters like negative_prompt, width, height, sampler_index, etc. as needed
       # Example:
-      negative_prompt: "nudity, nsfw, nude, xxx, low quality, blurry, worst quality, diptych, triptych, multiple images, multiple subjects",
+      negative_prompt: "nudity, nsfw, nude, xxx, low quality, blurry, worst quality, diptych, triptych, multiple images, multiple subjects, signed, signature, watermark, watermarked",
       width: 512,
       height: 512,
-      sd_model_checkpoint: "openxl"
+      override_settings: {
+        sd_model_checkpoint: (commission.style == "anime") ? "openxl" : "photorealism.safetensors",
+      },
+      sampler_index: "DPM++ 3M SDE",
+      cfg_scale: 4
     }.to_json
 
     begin

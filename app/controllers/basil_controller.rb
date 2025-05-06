@@ -317,7 +317,7 @@ class BasilController < ApplicationController
       BasilService.enabled_styles_for('Character'),
       BasilService.enabled_styles_for('Location'),
       # Also include anything we specifically want to track for now :)
-      'painting2', 'painting3', 'anime'
+      #'painting2', 'painting3', 'anime'
     ].flatten.compact.uniq
 
     @total_score_per_style = BasilCommission.with_deleted
