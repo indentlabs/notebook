@@ -37,7 +37,7 @@ class GenerateBasilImageJob < ApplicationJob
       steps: 20,
       # Add other parameters like negative_prompt, width, height, sampler_index, etc. as needed
       # Example:
-      negative_prompt: "nudity, nsfw, nude, xxx, low quality, blurry, worst quality, diptych, triptych, multiple images, multiple subjects, signed, signature, watermark, watermarked",
+      negative_prompt: "(naked, nudity, nsfw, nude), (sex, hardcore, porn, pornographic), xxx, low quality, blurry, worst quality, diptych, triptych, multiple images, multiple subjects, signed, signature, watermark, watermarked",
       width: 512,
       height: 512,
       override_settings: {
