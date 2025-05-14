@@ -256,10 +256,11 @@ class BasilController < ApplicationController
   end
 
   def stats
-    @commissions = BasilCommission.all.with_deleted
+    @version = params[:v] || 2
+    @all_commissions = BasilCommission.where(basil_version: @version).with_deleted
 
-    @queued = BasilCommission.where(completed_at: nil)
-    @completed = BasilCommission.where.not(completed_at: nil).with_deleted
+    @queued = BasilCommission.where(completed_at: nil, basil_version: @version)
+    @completed = BasilCommission.where.not(completed_at: nil).where(basil_version: @version).with_deleted
 
     @average_wait_time = @completed.where('completed_at > ?', 24.hours.ago)
                                    .average(:cached_seconds_taken) || 0
@@ -268,10 +269,10 @@ class BasilController < ApplicationController
                                    .map { |minutes, list| [minutes, list.count] }
 
     # Projected date, at our current rate, to reach 1,000,000 images
-    commission_counts_per_day   = @commissions.group_by_day(:completed_at).values
-    @average_commissions_per_day = commission_counts_per_day.sum(0.0) / commission_counts_per_day.count
-    commissions_left            = 1_000_000 - @commissions.count
-    @days_til_1_million_commissions = commissions_left / @average_commissions_per_day
+    commission_counts_per_day   = @all_commissions.group_by_day(:completed_at).values
+    @average_commissions_per_day = commission_counts_per_day.sum(0.0) / (commission_counts_per_day.count + 0.000001)
+    commissions_left            = 1_000_000 - @all_commissions.count
+    @days_til_1_million_commissions = commissions_left / (@average_commissions_per_day + 0.000001)
 
     # Feedback today
     @feedback_today = BasilFeedback.where('updated_at > ?', 24.hours.ago)
