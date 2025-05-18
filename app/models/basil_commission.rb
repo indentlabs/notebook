@@ -34,7 +34,7 @@ class BasilCommission < ApplicationRecord
     # )
 
      # Enqueue the background job to generate the image
-     GenerateBasilImageJob.perform_now(self.id)
+     GenerateBasilImageJob.perform_later(self.id)
   end
 
   def cache_after_complete!

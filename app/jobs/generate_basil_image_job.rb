@@ -6,7 +6,7 @@ require 'tempfile'
 require 'aws-sdk-s3'
 
 class GenerateBasilImageJob < ApplicationJob
-  queue_as :default
+  queue_as :basil
 
   # Define potential errors for rescue
   class ApiError < StandardError; end
@@ -18,13 +18,16 @@ class GenerateBasilImageJob < ApplicationJob
     # Skip if already completed (image attached)
     return if commission.image.attached?
 
+    # Filter out specific words from the prompt that we don't want to include in image generation
+    sanitized_commmission_prompt = commission.prompt.gsub(/(nudity|nsfw|nude|xxx|porn|pornographic|naked|sex|blowjob|undressed|stripped|stripping|stripper)/i, '')
+
     # Details we can use:
     # commission.prompt - the prompt for the image
     # commission.style - the style of the image
     # commission.entity_type - the type of entity the image is for (e.g. Character, Location, etc)
-    prompt_to_send = "(#{commission.style} style), #{commission.entity_type}, #{commission.prompt}"
+    prompt_to_send = "(#{commission.style} style), #{commission.entity_type}, #{sanitized_commmission_prompt}"
 
-    # Make the API request to generate the image
+    # Make the API request to generate the imagex
     endpoint_url = ENV.fetch("BASIL_ENDPOINT")
     api_url = URI.join(endpoint_url, '/sdapi/v1/txt2img')
 

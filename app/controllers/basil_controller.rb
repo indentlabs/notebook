@@ -353,9 +353,10 @@ class BasilController < ApplicationController
 
   def page_stats
     @page_type = params[:page_type]
+    @version = params[:v] || 2
     # TODO verify page_type is valid
 
-    @commissions = BasilCommission.where(entity_type: @page_type)
+    @commissions = BasilCommission.where(entity_type: @page_type).where(basil_version: @version)
 
     # Feedback today
     @feedback_today = BasilFeedback.where('updated_at > ?', 24.hours.ago)
@@ -381,6 +382,7 @@ class BasilController < ApplicationController
                                           .where(basil_commission_id: @commissions.pluck(:id))
                                           .order(:score_adjustment)
                                           .group(:score_adjustment)
+                                          .where(basil_version: @version)
                                           .count
     days_since_start = (Date.current - BasilFeedback.minimum(:updated_at).to_date)
     days_since_start = 1 if days_since_start.zero? # no dividing by 0 lol
