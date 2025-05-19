@@ -100,8 +100,8 @@ gem 'word_count_analyzer'
 gem 'will_paginate', '~> 4.0'
 
 # Workers
-gem 'sidekiq', '~> 5.2.7'
-gem 'redis', '~> 4.8.1'
+gem 'sidekiq', '~> 7.3.9'
+gem 'redis', '~> 5.1.0'
 
 # Exports
 gem 'csv'
