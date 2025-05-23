@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 ruby "~> 3.2"
 
 # Server core
-gem 'rails', '~> 6.1'
+gem 'rails', '~> 8.0'
 
 #gem 'puma', '~> 5.6'
 gem 'passenger'
@@ -100,7 +100,7 @@ gem 'word_count_analyzer'
 gem 'will_paginate', '~> 4.0'
 
 # Workers
-gem 'sidekiq', '~> 7.3.9'
+gem 'sidekiq', '~> 8.0.3'
 gem 'redis', '~> 5.1.0'
 
 # Exports
