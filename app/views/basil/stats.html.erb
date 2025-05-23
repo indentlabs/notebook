@@ -6,7 +6,8 @@
     <h1 style="font-size: 2em; margin-left: 1rem">Hey, I'm Basil.</h4>
     <h2 style="font-size: 1.4em; margin-left: 1rem">I can help you visualize your ideas.</h2>
     <p style="margin-left: 1rem">
-      This is a little About Me page.
+      <strong>The latest Basil version is v2.</strong> This page is currently showing stats for v<%= @version %>. You can see v1's stats by <%= link_to 'clicking here', basil_stats_path(v: 1) %>.
+      <br /><br />
       <%= link_to 'Click here to start generating images of your notebook pages.', basil_path %>
     </p>
   </div>
@@ -37,12 +38,12 @@
   </div>
 
   <div class="col s12 m4 l3">
-    <h1 class="center purple-text" style="margin-bottom: 0; margin-top: 1.6em"><%= number_with_delimiter @commissions.count %></h1>
+    <h1 class="center purple-text" style="margin-bottom: 0; margin-top: 1.6em"><%= number_with_delimiter @all_commissions.count %></h1>
     <div class="center grey-text"><strong>total images created</strong></div>    
   </div>
   <div class="col s12 m8 l9 grey lighten-3">
     <%=
-      area_chart @commissions.where('created_at > ?', 30.days.ago.beginning_of_month).group_by_day(:created_at).map { |date, count| [date.to_date, count] },
+      area_chart @all_commissions.where('created_at > ?', 30.days.ago.beginning_of_month).group_by_day(:created_at).map { |date, count| [date.to_date, count] },
         colors: ['#9C27B0', '#2196F3'],
         title: 'Images created per day',
         suffix: ' images'

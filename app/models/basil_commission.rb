@@ -12,26 +12,29 @@ class BasilCommission < ApplicationRecord
 
   after_create :submit_to_job_queue!
   def submit_to_job_queue!
-    # TODO clean this up and put it in a config
-    region     = 'us-east-1'
-    queue_name = 'basil-commissions'
+    # # TODO clean this up and put it in a config
+    # region     = 'us-east-1'
+    # queue_name = 'basil-commissions'
 
-    # TODO clean this up and put it in a service
-    sts_client = Aws::STS::Client.new(region: region)
-    queue_url = 'https://sqs.' + region + '.amazonaws.com/' + sts_client.get_caller_identity.account + '/' + queue_name
-    sqs_client = Aws::SQS::Client.new(region: region)
+    # # TODO clean this up and put it in a service
+    # sts_client = Aws::STS::Client.new(region: region)
+    # queue_url = 'https://sqs.' + region + '.amazonaws.com/' + sts_client.get_caller_identity.account + '/' + queue_name
+    # sqs_client = Aws::SQS::Client.new(region: region)
 
-    message_body = {
-      job_id:    job_id,
-      prompt:    prompt,
-      style:     style,
-      page_type: entity_type
-    }.to_json
+    # message_body = {
+    #   job_id:    job_id,
+    #   prompt:    prompt,
+    #   style:     style,
+    #   page_type: entity_type
+    # }.to_json
 
-    sqs_client.send_message(
-      queue_url:    queue_url,
-      message_body: message_body
-    )
+    # sqs_client.send_message(
+    #   queue_url:    queue_url,
+    #   message_body: message_body
+    # )
+
+     # Enqueue the background job to generate the image
+     GenerateBasilImageJob.perform_later(self.id)
   end
 
   def cache_after_complete!

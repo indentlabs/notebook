@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_05_12_222601) do
+ActiveRecord::Schema.define(version: 2025_05_06_081045) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -201,6 +201,7 @@ ActiveRecord::Schema.define(version: 2023_05_12_222601) do
     t.string "s3_bucket", default: "basil-commissions"
     t.datetime "saved_at"
     t.datetime "deleted_at"
+    t.integer "basil_version", default: 2
     t.index ["entity_type", "entity_id", "saved_at"], name: "basil_commissions_ees"
     t.index ["entity_type", "entity_id", "style"], name: "basil_commissions_ees2"
     t.index ["entity_type", "entity_id"], name: "basil_commissions_ee"
