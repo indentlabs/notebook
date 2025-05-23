@@ -127,8 +127,8 @@ function commission_basil(style) {
         <% BasilService.enabled_styles_for(@content.page_type).each do |style| %>
           <div class="col s12 m6 l4">
             <%= link_to "javascript:commission_basil('#{style}')",
-                        class: "waves-effect waves-light purple lighten-1 white-text",
-                        style: "display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 120px; text-align: center; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-decoration: none;" do %>
+                        class: "waves-effect waves-light purple lighten-1 white-text hoverable",
+                        style: "display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 120px; text-align: center; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-decoration: none; transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;" do %>
               <i class="material-icons" style="font-size: 2rem; margin-bottom: 0.5rem;">palette</i>
               <span><%= style.humanize %></span>
             <% end %>
@@ -137,8 +137,8 @@ function commission_basil(style) {
         <% BasilService.experimental_styles_for(@content.page_type).each do |style| %>
           <div class="col s12 m6 l4">
             <%= link_to "javascript:commission_basil('#{style}')",
-                        class: "waves-effect waves-light purple lighten-3 white-text",
-                        style: "display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 120px; text-align: center; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-decoration: none;" do %>
+                        class: "waves-effect waves-light purple lighten-3 white-text hoverable",
+                        style: "display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 120px; text-align: center; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-decoration: none; transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;" do %>
               <i class="material-icons" style="font-size: 2rem; margin-bottom: 0.5rem;">science</i>
               <span><%= style.humanize %> (Experimental)</span>
             <% end %>
@@ -226,9 +226,9 @@ function commission_basil(style) {
                 </div>
               </div>
             <% else %>
-              <div class="card-panel blue-grey lighten-1 white-text" style="display: flex; align-items: center; min-height: 100px;">
-                <div class="preloader-wrapper small active" style="margin-right: 1rem;">
-                  <div class="spinner-layer spinner-green-only">
+              <div class="card-panel orange lighten-5 basil-loading-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 1px dashed #a5d6a7; /* Light green for pulsing border */ min-height: 180px; position: relative; overflow: hidden;">
+                <div class="preloader-wrapper medium active">
+                  <div class="spinner-layer spinner-blue-only">
                     <div class="circle-clipper left">
                       <div class="circle"></div>
                     </div><div class="gap-patch">
@@ -238,12 +238,13 @@ function commission_basil(style) {
                     </div>
                   </div>
                 </div>
-                <div>
-                  Basil is still working on this commission... (style: <%= commission.style %>)
-                  <div style="font-size: 0.8em">
-                    (Requested <%= time_ago_in_words(commission.created_at) %> ago &middot; Refresh this page for updates)
-                  </div>
-                </div>
+                <h5 style="color: #424242; font-weight: 600; margin-bottom: 0.5rem;">Working on it!</h5>
+                <p style="font-size: 1rem; color: #616161; margin-bottom: 0.75rem;">
+                  Basil is crafting your image in the <strong><%= commission.style.try(:humanize) || 'selected' %></strong> style.
+                </p>
+                <p style="font-size: 0.9em; color: #757575;">
+                  Requested <%= time_ago_in_words(commission.created_at) %> ago. <br class="hide-on-med-and-up">Please refresh for updates.
+                </p>
               </div>
             <% end %>
           </div>
@@ -296,4 +297,26 @@ $(document).ready(function() {
     e.preventDefault();
   });
 });
+<% end %>
+
+<% content_for :css_includes do %>
+  <style>
+    @keyframes pulse-border {
+      0% {
+        border-color: #a5d6a7; /* Light green */
+        box-shadow: 0 0 0 0 rgba(165, 214, 167, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(165, 214, 167, 0);
+      }
+      100% {
+        border-color: #e8f5e9; /* Lighter green */
+        box-shadow: 0 0 0 0 rgba(165, 214, 167, 0);
+      }
+    }
+
+    .basil-loading-card {
+      animation: pulse-border 2s infinite;
+    }
+  </style>
 <% end %>
