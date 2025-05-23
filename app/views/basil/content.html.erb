@@ -14,82 +14,107 @@ function commission_basil(style) {
     <%= f.hidden_field :entity_type, value: @content.page_type %>
     <%= f.hidden_field :entity_id,   value: @content.id %>
     <div class="col s12 m4">
-      <div style="margin: 1em 0">
-        <%= link_to basil_path, class: 'grey-text text-darken-2' do %>
-          Basil
-        <% end %>
-        <i class="material-icons grey-text" style="display:inline-flex; vertical-align:top;">chevron_right</i>
-        <%= link_to basil_content_index_path(content_type: @content.page_type), class: 'grey-text text-darken-2' do %>
-          <%= @content.page_type.pluralize %>
-        <% end %>
-      </div>
-      <div class="clearfix">
-        <%= image_tag @content.random_image_including_private(format: :medium), style: 'width: 100%' %>
-        <h1 style="font-size: 2rem; margin-bottom: 0">
-          <%= link_to @content.name, @content.view_path, class: @content.text_color %>
-        </h1>
-        <%= link_to @content.edit_path, class: 'grey-text text-darken-2' do %>
-          Edit this <%= @content.page_type.downcase %>
-        <% end %>
-      </div>
+      <div class="card-panel white" style="padding: 1rem;">
+        <div style="margin: 1em 0; margin-bottom: 1rem;">
+          <%= link_to basil_path, class: 'grey-text text-darken-2' do %>
+            Basil
+          <% end %>
+          <i class="material-icons grey-text" style="display:inline-flex; vertical-align:top;">chevron_right</i>
+          <%= link_to basil_content_index_path(content_type: @content.page_type), class: 'grey-text text-darken-2' do %>
+            <%= @content.page_type.pluralize %>
+          <% end %>
+        </div>
+        <div class="clearfix">
+          <%= image_tag @content.random_image_including_private(format: :medium), style: 'width: 100%' %>
+          <h1 style="font-size: 2rem; margin-bottom: 0">
+            <%= link_to @content.name, @content.view_path, class: @content.text_color %>
+          </h1>
+          <%= link_to @content.edit_path, class: 'grey-text text-darken-2', style: 'margin-bottom: 1rem; display: inline-block;' do %>
+            Edit this <%= @content.page_type.downcase %>
+          <% end %>
+        </div>
 
-      <ul>
-        <% @relevant_fields.each do |field, value| %>
-          <%= f.hidden_field "field[#{field.id}][label]", value: field.label %>
-          <%= f.hidden_field "field[#{field.id}][value]", value: value %>
-          
-          <li style="margin-bottom: 1em">
-            <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
-              <div style="display: flex">
-                <span style="position: relative; top: 8px; padding-right: 0.5rem"><%= field.label %></span>
-                <%= range_field_tag "basil_commission[field][#{field.id}][importance]", @guidance.fetch(field.id.to_s, 1), { min: 0, max: 1.3, step: 0.1, style: 'width: 100%', class: 'js-importance-slider hide' } %>
+        <ul>
+          <% @relevant_fields.each do |field, value| %>
+            <%= f.hidden_field "field[#{field.id}][label]", value: field.label %>
+            <%= f.hidden_field "field[#{field.id}][value]", value: value %>
+            
+            <li style="margin-bottom: 1em">
+              <div style="margin-bottom: 1rem; padding: 1rem;">
+                <div class="grey-text text-darken-3" style="font-weight: bold; font-size: 0.8em">
+                  <div style="display: flex; align-items: center;">
+                    <span style="position: relative; top: 0px; padding-right: 0.5rem; flex-grow: 1;"><%= field.label %></span>
+                    <%= range_field_tag "basil_commission[field][#{field.id}][importance]", @guidance.fetch(field.id.to_s, 1), { min: 0, max: 1.3, step: 0.1, style: 'width: 60%;', class: 'js-importance-slider hide' } %>
+                  </div>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                  <%= value %>
+                </div>
               </div>
-            </div>
-            <div>
-              <%= value %>
-            </div>
-          </li>
-        <% end %>
-      </ul>
+            </li>
+          <% end %>
+        </ul>
 
-      <% if @relevant_fields.empty? %>
-        <div class="red card-panel lighten-3">
-          <strong>Basil works best with guidance!</strong>
-          <br /><br />
-          Please <%= link_to 'fill out more fields', @content.edit_path %> for this page
-          before requesting an image.
-        </div>
-      <% end %>
-
-      <div>
-        <% if @can_request_another && @relevant_fields.any? %>
-          <%= link_to 'Customize per-field importance', "javascript:var sliders = document.getElementsByClassName('js-importance-slider'); for(var i = 0; i < sliders.length; i++) sliders.item(i).classList.remove('hide')" %>
+        <% if @relevant_fields.empty? %>
+          <div class="red card-panel lighten-3">
+            <strong>Basil works best with guidance!</strong>
+            <br /><br />
+            Please <%= link_to 'fill out more fields', @content.edit_path %> for this page
+            before requesting an image.
+          </div>
         <% end %>
 
-        <div class="js-importance-slider hide" style="margin-right: 1em">
-          <strong>How to customize per-field importance</strong>
-          <br /><br />
+        <div>
+          <% if @can_request_another && @relevant_fields.any? %>
+            <a href="javascript:var sliders = document.getElementsByClassName('js-importance-slider'); for(var i = 0; i < sliders.length; i++) sliders.item(i).classList.remove('hide'); document.getElementById('importance-explainer').classList.remove('hide');" class="waves-effect waves-light btn-small purple lighten-1" style="margin-bottom: 1rem;">Customize per-field importance</a>
+          <% end %>
 
-          Customizing importance allows you to tell Basil which fields are more or less important to you. For example, if Basil is
-          focusing too hard on something specific you've said, you can turn down the importance of that field with
-          the slider.
-          <br /><br />
-          You can also tell Basil to ignore your answer to a field entirely by dragging the slider all the way to the left.
-          <br /><br />
-          Your preferences for this page are saved whenever you request an image.
+          <div id="importance-explainer" class="js-importance-slider hide card-panel grey lighten-5" style="margin-right: 1em; padding: 1rem;">
+            <strong>How to customize per-field importance</strong>
+            <br /><br />
+
+            Customizing importance allows you to tell Basil which fields are more or less important to you. For example, if Basil is
+            focusing too hard on something specific you've said, you can turn down the importance of that field with
+            the slider.
+            <br /><br />
+            You can also tell Basil to ignore your answer to a field entirely by dragging the slider all the way to the left.
+            <br /><br />
+            Your preferences for this page are saved whenever you request an image.
+          </div>
         </div>
+
+        <!--
+        <div style="margin-top: 2rem">
+          <%= link_to new_polymorphic_path(@content.page_type.downcase), class: "hoverable card-panel white-text #{@content.color}", style: 'display: block' do %>
+            <i class="material-icons left">add</i>
+            <span>
+              Create another <%= @content.page_type.downcase %>
+            </span>
+          <% end %>
+        </div>
+        -->
       </div>
 
-      <!--
-      <div style="margin-top: 2rem">
-        <%= link_to new_polymorphic_path(@content.page_type.downcase), class: "hoverable card-panel white-text #{@content.color}", style: 'display: block' do %>
-          <i class="material-icons left">add</i>
-          <span>
-            Create another <%= @content.page_type.downcase %>
-          </span>
+      <div style="margin-top: 1.5rem; margin-bottom: 1rem;">
+        <% unless current_user.on_premium_plan? %>
+          <div class="orange lighten-2 card-panel">
+            <strong>
+              Image generation is a Premium-only feature, but free accounts can still generate up
+              to <%= pluralize BasilService::FREE_IMAGE_LIMIT, 'image' %> for free.
+            </strong>
+            <br /><br />
+            You have generated <%= pluralize @generated_images_count, 'image' %>
+            and have <%= pluralize [0, BasilService::FREE_IMAGE_LIMIT - @generated_images_count].max, 'free image' %> remaining:
+            <div class="progress white">
+              <div class="determinate blue" style="width: <%= [@generated_images_count, BasilService::FREE_IMAGE_LIMIT].min %>%"></div>
+            </div>
+
+            <% if @generated_images_count >= BasilService::FREE_IMAGE_LIMIT %>
+              <%= link_to 'Click here to manage your billing plan', subscription_path, class: 'blue-text text-darken-4' %>
+            <% end %>
+          </div>
         <% end %>
       </div>
-      -->
     </div>
   <% end %>
 
@@ -98,51 +123,26 @@ function commission_basil(style) {
 
     <% if @can_request_another && @relevant_fields.any? %>
       <div class="row" style="padding-left: 0.5rem">
-        <div class="grey-text center"><strong>Available styles</strong></div>
+        <div class="grey-text center" style="font-size: 1.2rem; margin-bottom: 0.5rem;"><strong>Image Styles</strong></div>
         <% BasilService.enabled_styles_for(@content.page_type).each do |style| %>
-          <div class="col s12 m6 l4">
+          <div class="col s12 m6 l4" style="padding: 0 0.25rem;">
             <%= link_to "javascript:commission_basil('#{style}')" do %>
-              <div class="hoverable card-panel purple white-text">
+              <div class="hoverable card-panel purple lighten-1 white-text" style="margin-bottom: 0.5rem;">
                 <%= style.humanize %>
                 <i class="material-icons right">chevron_down</i>
               </div>
             <% end %>
           </div>
         <% end %>
-      </div>
-
-      <% if BasilService.experimental_styles_for(@content.page_type).any? %>
-        <div class="row" style="padding-left: 0.5rem">
-          <div class="grey-text center"><strong>Experimental styles</strong></div>
-          <% BasilService.experimental_styles_for(@content.page_type).each do |style| %>
-            <div class="col s12 m6 l4">
-              <%= link_to "javascript:commission_basil('#{style}')" do %>
-                <div class="hoverable card-panel purple lighten-2 white-text">
-                  <%= style.humanize %>
-                  <i class="material-icons right">chevron_down</i>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
-        </div>
-      <% end %>
-    <% end %>
-
-    <% unless current_user.on_premium_plan? %>
-      <div class="orange lighten-2 card-panel">
-        <strong>
-          Image generation is a Premium-only feature, but free accounts can still generate up
-          to <%= pluralize BasilService::FREE_IMAGE_LIMIT, 'image' %> for free.
-        </strong>
-        <br /><br />
-        You have generated <%= pluralize @generated_images_count, 'image' %>
-        and have <%= pluralize [0, BasilService::FREE_IMAGE_LIMIT - @generated_images_count].max, 'free image' %> remaining:
-        <div class="progress white">
-          <div class="determinate blue" style="width: <%= [@generated_images_count, BasilService::FREE_IMAGE_LIMIT].min %>%"></div>
-        </div>
-
-        <% if @generated_images_count >= BasilService::FREE_IMAGE_LIMIT %>
-          <%= link_to 'Click here to manage your billing plan', subscription_path, class: 'blue-text text-darken-4' %>
+        <% BasilService.experimental_styles_for(@content.page_type).each do |style| %>
+          <div class="col s12 m6 l4" style="padding: 0 0.25rem;">
+            <%= link_to "javascript:commission_basil('#{style}')" do %>
+              <div class="hoverable card-panel purple lighten-3 white-text" style="margin-bottom: 0.5rem;">
+                <%= style.humanize %> (Experimental)
+                <i class="material-icons right">chevron_down</i>
+              </div>
+            <% end %>
+          </div>
         <% end %>
       </div>
     <% end %>
@@ -155,84 +155,101 @@ function commission_basil(style) {
       </div>
     <% end %>
 
-    <% @commissions.each do |commission| %>
-      <div>
-        <% if commission.complete? %>
-          <div class="card">
-            <div class="card-image">
-              <%= link_to commission.image do %>
-                <%= image_tag commission.image %>
-              <% end %>
-            </div>
-            <div class="card-content">
-              <div>
-                <strong><%= @content.name %></strong>
-                <% if commission.style? %>
-                  <em>(<%= commission.style.humanize %>)</em>
-                <% end %>
-              </div>
-              <div class="grey-text text-darken-2">
-                <span style="font-size: 0.8em">Completed <%= time_ago_in_words commission.completed_at %> ago</span>
-                &middot;<br />
-                <span style="font-size: 0.8em">Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %></span>
-              </div>
-              <div style="margin-top: 1em">
-                <div class="center" style="font-size: 0.9em"><strong>Feedback for Basil</strong></div>
-                <div class="row">
-                  <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), url: basil_feedback_path(commission.job_id), method: :POST, remote: true do |f| %>
-                    <div class="col s4 m4 l2 red lighten-3">
-                      <label>
-                        <%= f.radio_button :score_adjustment, '-2', { class: 'autosave-closest-form-on-change' } %>
-                        <span class="black-text">:'(</span>
-                      </label>
-                    </div>
-                    <div class="col s4 m4 l3 orange lighten-3">
-                      <label>
-                        <%= f.radio_button :score_adjustment, '-1', { class: 'autosave-closest-form-on-change' } %>
-                        <span class="black-text">:(</span>
-                      </label>
-                    </div>
-                    <div class="col s4 m4 l3 green lighten-3">
-                      <label>
-                        <%= f.radio_button :score_adjustment, '1', { class: 'autosave-closest-form-on-change' } %>
-                        <span class="black-text">:)</span>
-                      </label>
-                    </div>
-                    <div class="col s4 m4 l2 blue lighten-3">
-                      <label>
-                        <%= f.radio_button :score_adjustment, '2', { class: 'autosave-closest-form-on-change' } %>
-                        <span class="black-text">:D</span>
-                      </label>
-                    </div>
-                    <div class="col s4 m4 l2 red lighten-4">
-                      <label>
-                        <%= f.radio_button :score_adjustment, '3', { class: 'autosave-closest-form-on-change' } %>
-                        <span class="red-text" style="font-size: 1.4em">&hearts;</span>
-                      </label>
-                    </div>
+    <div class="row">
+      <% @commissions.each do |commission| %>
+        <div class="col s12">
+          <div>
+            <% if commission.complete? %>
+              <div class="card">
+                <div class="card-image">
+                  <%= link_to commission.image do %>
+                    <%= image_tag commission.image %>
                   <% end %>
                 </div>
+                <div class="card-content" style="padding: 18px;">
+                  <div>
+                    <strong><%= @content.name %></strong>
+                    <% if commission.style? %>
+                      <em>(<%= commission.style.humanize %>)</em>
+                    <% end %>
+                  </div>
+                  <div class="grey-text text-darken-2">
+                    <span style="font-size: 0.8em">Completed <%= time_ago_in_words commission.completed_at %> ago</span>
+                    &middot;<br />
+                    <span style="font-size: 0.8em">Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %></span>
+                  </div>
+                  <div style="margin-top: 1em">
+                    <div class="center" style="font-size: 0.9em; margin-bottom: 0.5rem;"><strong>Feedback for Basil</strong></div>
+                    <div class="row" style="margin-bottom: 0;">
+                      <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), url: basil_feedback_path(commission.job_id), method: :POST, remote: true do |f| %>
+                        <div class="col s3 center-align" style="padding: 0 2px;">
+                          <label>
+                            <%= f.radio_button :score_adjustment, '-2', { class: 'autosave-closest-form-on-change' } %>
+                            <span class="black-text"><i class="material-icons red-text text-darken-1">sentiment_very_dissatisfied</i></span>
+                          </label>
+                        </div>
+                        <div class="col s2 center-align" style="padding: 0 2px;">
+                          <label>
+                            <%= f.radio_button :score_adjustment, '-1', { class: 'autosave-closest-form-on-change' } %>
+                            <span class="black-text"><i class="material-icons orange-text">sentiment_dissatisfied</i></span>
+                          </label>
+                        </div>
+                        <div class="col s2 center-align" style="padding: 0 2px;">
+                          <label>
+                            <%= f.radio_button :score_adjustment, '1', { class: 'autosave-closest-form-on-change' } %>
+                            <span class="black-text"><i class="material-icons light-green-text">sentiment_satisfied</i></span>
+                          </label>
+                        </div>
+                        <div class="col s2 center-align" style="padding: 0 2px;">
+                          <label>
+                            <%= f.radio_button :score_adjustment, '2', { class: 'autosave-closest-form-on-change' } %>
+                            <span class="black-text"><i class="material-icons green-text text-darken-1">sentiment_very_satisfied</i></span>
+                          </label>
+                        </div>
+                        <div class="col s3 center-align" style="padding: 0 2px;">
+                          <label>
+                            <%= f.radio_button :score_adjustment, '3', { class: 'autosave-closest-form-on-change' } %>
+                            <span class="red-text text-darken-1"><i class="material-icons">favorite</i></span>
+                          </label>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-action">
+                  <% if commission.saved_at? %>
+                    <%= link_to 'Saved', commission.entity, class: 'blue-text' %>
+                  <% else %>
+                    <%= link_to "Save to page", '#', class: 'js-save-commission purple-text', data: { endpoint: basil_save_path(commission) } %>
+                  <% end %>
+                  <%= link_to "Delete", '#', class: 'js-delete-commission red-text right right-align', style: 'margin-right: 0', data: { endpoint: basil_delete_path(commission) } %>
+                </div>
               </div>
-            </div>
-            <div class="card-action">
-              <% if commission.saved_at? %>
-                <%= link_to 'Saved', commission.entity, class: 'blue-text' %>
-              <% else %>
-                <%= link_to "Save to page", '#', class: 'js-save-commission purple-text', data: { endpoint: basil_save_path(commission) } %>
-              <% end %>
-              <%= link_to "Delete", '#', class: 'js-delete-commission red-text right right-align', style: 'margin-right: 0', data: { endpoint: basil_delete_path(commission) } %>
-            </div>
+            <% else %>
+              <div class="card-panel blue-grey lighten-1 white-text" style="display: flex; align-items: center; min-height: 100px;">
+                <div class="preloader-wrapper small active" style="margin-right: 1rem;">
+                  <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                      <div class="circle"></div>
+                    </div><div class="gap-patch">
+                      <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                      <div class="circle"></div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  Basil is still working on this commission... (style: <%= commission.style %>)
+                  <div style="font-size: 0.8em">
+                    (Requested <%= time_ago_in_words(commission.created_at) %> ago &middot; Refresh this page for updates)
+                  </div>
+                </div>
+              </div>
+            <% end %>
           </div>
-        <% else %>
-          <div class="card-panel green white-text darken-4">
-            Basil is still working on this commission... (style: <%= commission.style %>)
-            <div style="font-size: 0.8em">
-              (Requested <%= time_ago_in_words(commission.created_at) %> ago &middot; Refresh this page for updates)
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
+        </div>
+      <% end %>
+    </div>
 
     <% if @commissions.count == 10 %>
       <div class="card-panel">
