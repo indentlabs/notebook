@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 ruby "~> 3.2"
 
 # Server core
-gem 'rails', '~> 6.1'
+gem 'rails', '~> 8.0'
 
 #gem 'puma', '~> 5.6'
 gem 'passenger'
