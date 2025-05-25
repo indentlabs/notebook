@@ -6,7 +6,15 @@
     <h1 style="font-size: 2em; margin-left: 1rem">Hey, I'm Basil.</h4>
     <h2 style="font-size: 1.4em; margin-left: 1rem">I can help you visualize your ideas.</h2>
     <p style="margin-left: 1rem">
-      <strong>The latest Basil version is v2.</strong> This page is currently showing stats for v<%= @version %>. You can see v1's stats by <%= link_to 'clicking here', basil_stats_path(v: 1) %>.
+      <strong>
+        The latest Basil version is v2.</strong> This page is currently showing stats for v<%= @version %>.
+      
+      <% if @version.to_i != 1 %>
+        You can see v1's stats by <%= link_to 'clicking here', basil_stats_path(v: 1) %>.
+      <% end %>
+      <% if @version.to_i != 2 %>
+        You can see v2's stats by <%= link_to 'clicking here', basil_stats_path(v: 2) %>.
+      <% end %>
       <br /><br />
       <%= link_to 'Click here to start generating images of your notebook pages.', basil_path %>
     </p>
