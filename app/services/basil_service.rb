@@ -11,8 +11,9 @@ class BasilService < Service
     Landmark, Town,
 
     # TODO improve these before release, if possible; otherwise disable
-   # Building,
-   # Vehicle, 
+    Building,
+    Vehicle, 
+    Deity,
 
     # TODO before release
     # Continent, Country,
@@ -41,6 +42,8 @@ class BasilService < Service
       %w(photograph fantasy)
     when 'Vehicle'
       %w(photograph watercolor_painting anime)
+    when 'Deity'
+      %w(photograph watercolor_painting anime)
     else
       %w(photograph)
     end
@@ -58,6 +61,8 @@ class BasilService < Service
       %w(dystopian utopian pencil_sketch)
     when 'Vehicle'
       %w(futuristic vintage schematic)
+    when 'Deity'
+      %w()
     else
       []
     end
