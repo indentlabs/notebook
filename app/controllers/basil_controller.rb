@@ -329,6 +329,7 @@ class BasilController < ApplicationController
 
     @total_score_per_style = BasilCommission.with_deleted
                                             .where(style: active_styles)
+                                            .where(basil_version: @version)
                                             .joins(:basil_feedbacks)
                                             .group(:style)
                                             .sum(:score_adjustment)
@@ -337,6 +338,7 @@ class BasilController < ApplicationController
                                             .reverse
     @average_score_per_style = BasilCommission.with_deleted
                                               .where(style: active_styles)
+                                              .where(basil_version: @version)
                                               .joins(:basil_feedbacks)
                                               .group(:style)
                                               .average(:score_adjustment)
@@ -346,6 +348,7 @@ class BasilController < ApplicationController
 
     @average_score_per_page_type = BasilCommission.with_deleted
                                                   .where.not(completed_at: nil)
+                                                  .where(basil_version: @version)
                                                   .joins(:basil_feedbacks)
                                                   .group(:entity_type)
                                                   .average(:score_adjustment)
