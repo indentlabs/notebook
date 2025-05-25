@@ -275,7 +275,9 @@ class BasilController < ApplicationController
     @days_til_1_million_commissions = commissions_left / (@average_commissions_per_day + 0.000001)
 
     # Feedback today
-    @feedback_today = BasilFeedback.where('updated_at > ?', 24.hours.ago)
+    @feedback_today = BasilFeedback.joins(:basil_commission)
+                                   .where(basil_commissions: { basil_version: @version })
+                                   .where('basil_feedbacks.updated_at > ?', 24.hours.ago)
                                    .order(:score_adjustment)
                                    .group(:score_adjustment)
                                    .count
@@ -293,10 +295,12 @@ class BasilController < ApplicationController
     end
 
     # Feedback all time
-    @feedback_before_today = BasilFeedback.where('updated_at < ?', 24.hours.ago)
-                                      .order(:score_adjustment)
-                                      .group(:score_adjustment)
-                                      .count
+    @feedback_before_today = BasilFeedback.joins(:basil_commission)
+                                          .where(basil_commissions: { basil_version: @version })
+                                          .where('basil_feedbacks.updated_at < ?', 24.hours.ago)
+                                          .order(:score_adjustment)
+                                          .group(:score_adjustment)
+                                          .count
     days_since_start = (Date.current - BasilFeedback.minimum(:updated_at).to_date)
     days_since_start = 1 if days_since_start.zero? # no dividing by 0 lol
 
@@ -359,8 +363,8 @@ class BasilController < ApplicationController
     @commissions = BasilCommission.where(entity_type: @page_type).where(basil_version: @version)
 
     # Feedback today
-    @feedback_today = BasilFeedback.where('updated_at > ?', 24.hours.ago)
-                                   .where(basil_commission_id: @commissions.pluck(:id))
+    @feedback_today = BasilFeedback.where(basil_commission_id: @commissions.pluck(:id))
+                                   .where('basil_feedbacks.updated_at > ?', 24.hours.ago)
                                    .order(:score_adjustment)
                                    .group(:score_adjustment)
                                    .count
@@ -378,11 +382,10 @@ class BasilController < ApplicationController
     end
 
     # Feedback all time
-    @feedback_before_today = BasilFeedback.where('updated_at < ?', 24.hours.ago)
-                                          .where(basil_commission_id: @commissions.pluck(:id))
+    @feedback_before_today = BasilFeedback.where(basil_commission_id: @commissions.pluck(:id))
+                                          .where('basil_feedbacks.updated_at < ?', 24.hours.ago)
                                           .order(:score_adjustment)
                                           .group(:score_adjustment)
-                                          .where(basil_version: @version)
                                           .count
     days_since_start = (Date.current - BasilFeedback.minimum(:updated_at).to_date)
     days_since_start = 1 if days_since_start.zero? # no dividing by 0 lol
