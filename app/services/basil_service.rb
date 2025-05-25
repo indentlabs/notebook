@@ -11,9 +11,9 @@ class BasilService < Service
     Landmark, Town,
 
     # TODO improve these before release, if possible; otherwise disable
-    Building,
-    Vehicle, 
-    Deity,
+    #Building,
+    #Vehicle, 
+    #Deity,
 
     # TODO before release
     # Continent, Country,
