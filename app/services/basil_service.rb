@@ -11,7 +11,8 @@ class BasilService < Service
     Landmark, Town,
 
     # TODO improve these before release, if possible; otherwise disable
-    # Building, Vehicle, 
+    Building,
+    Vehicle, 
 
     # TODO before release
     # Continent, Country,
@@ -22,22 +23,24 @@ class BasilService < Service
     # Probably won't do before release
     # Condition, Government, Group, Job, Language, Lore,
     # Race, Religion, Scene
-  ].map(&:name)
+  ].map(&:name).sort_by(&:downcase)
 
   def self.enabled_styles_for(page_type)
     case page_type
     when 'Character'
-      %w(photograph watercolor pencil_sketch smiling villain horror)
+      %w(photograph watercolor_painting pencil_sketch smiling villain horror)
     when 'Location'
-      %w(painting watercolor sketch)
+      %w(painting watercolor_painting sketch)
     when 'Item'
-      %w(realistic painting sketch)
+      %w(realistic painting pencil_sketch)
     when 'Building'
-      %w(photograph sketch)
+      %w(photograph interior exterior aerial_photograph)
     when 'Town'
       %w(photograph map)
     when 'Creature'
       %w(photograph fantasy)
+    when 'Vehicle'
+      %w(photograph watercolor_painting anime)
     else
       %w(photograph)
     end
@@ -51,6 +54,10 @@ class BasilService < Service
       %w(aerial_photograph anime)
     when 'Item'
       %w(schematic anime hand_made)
+    when 'Building'
+      %w(dystopian utopian pencil_sketch)
+    when 'Vehicle'
+      %w(futuristic vintage schematic)
     else
       []
     end

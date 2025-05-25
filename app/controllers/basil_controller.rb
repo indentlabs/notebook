@@ -188,7 +188,9 @@ class BasilController < ApplicationController
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Celebrations', 'Symbolism')
 
     when 'Vehicle'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Name')
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of vehicle')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
       @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Looks'])
 
     end
