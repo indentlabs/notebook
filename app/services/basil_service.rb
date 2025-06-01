@@ -67,14 +67,16 @@ class BasilService < Service
       %w(schematic anime hand_made)
     when 'Flora'
       %w(bouquet)
+    when 'Deity'
+      %w(celestial_body abstract geometric symbolic)
     when 'Building'
       %w(dystopian utopian pencil_sketch)
     when 'Vehicle'
-      %w(futuristic vintage schematic)
+      %w(futuristic vintage schematic steampunk)
     when 'Deity'
       %w()
     when 'Technology'
-      %w(concept_art early_prototype ancient_technology)
+      %w(concept_art early_prototype ancient_technology steampunk)
     when 'Landmark'
       %w(map_icon)
     when 'Tradition'
