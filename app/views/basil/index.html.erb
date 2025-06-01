@@ -85,18 +85,15 @@
         <% end %>
       <% end %>
 
-      <% if @content.empty? %>
-        <div class="center">
-          <strong>You haven't created any <%= @content_type %> pages yet.</strong>
-          <br /><br />
-
-          <%= link_to new_polymorphic_path(@content_type.downcase), class: '' do %>
-            <div class="hoverable card-panel <%= @content_type.constantize.color %> white-text" style="width: 33%; margin: 0 auto">
-              <i class="material-icons left">add</i>
-              Create <%= @content_type %>
+      <%= link_to new_polymorphic_path(@content_type.downcase) do %>
+        <div class="col s12 m4 l3">
+          <div class="hoverable card">
+            <div class="card-content <%= @content_type.constantize.color %> white-text center-align" style="height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+              <i class="material-icons" style="font-size: 3rem;">add</i>
+              <span>New <%= @content_type %></span>
             </div>
-          <% end %>
-        <div>
+          </div>
+        </div>
       <% end %>
     </div>
   </div>
