@@ -10,16 +10,16 @@ class BasilService < Service
     Food, Planet, 
     Landmark, Town,
 
-    # TODO improve these before release, if possible; otherwise disable
-    #Building,
-    #Vehicle, 
-    #Deity,
+    # In the next release
+    Building,
+    Vehicle, 
+    Deity,
+    Technology,
+    Tradition,
 
     # TODO before release
     # Continent, Country,
-    # Creature, Deity,
-    # Magic, School, Sport, Technology,
-    # Tradition
+    # Magic, School, Sport,
 
     # Probably won't do before release
     # Condition, Government, Group, Job, Language, Lore,
@@ -33,15 +33,23 @@ class BasilService < Service
     when 'Location'
       %w(painting watercolor_painting sketch)
     when 'Item'
-      %w(realistic painting pencil_sketch)
+      %w(photograph watercolor_painting pencil_sketch)
+    when 'Landmark'
+      %w(photograph watercolor_painting)
+    when 'Flora'
+      %w(photograph watercolor_painting)
     when 'Building'
       %w(photograph interior exterior aerial_photograph)
     when 'Town'
-      %w(photograph map)
+      %w(photograph)
     when 'Creature'
       %w(photograph fantasy)
+    when 'Technology'
+      %w(product_photography macro_photography cutaway_render)
     when 'Vehicle'
       %w(photograph watercolor_painting anime)
+    when 'Tradition'
+      %w(action_shot watercolor_painting)
     when 'Deity'
       %w(photograph watercolor_painting anime)
     else
@@ -57,12 +65,22 @@ class BasilService < Service
       %w(aerial_photograph anime)
     when 'Item'
       %w(schematic anime hand_made)
+    when 'Flora'
+      %w(bouquet)
     when 'Building'
       %w(dystopian utopian pencil_sketch)
     when 'Vehicle'
       %w(futuristic vintage schematic)
     when 'Deity'
       %w()
+    when 'Technology'
+      %w(concept_art early_prototype ancient_technology)
+    when 'Landmark'
+      %w(map_icon)
+    when 'Tradition'
+      %w(anime cinematic_shot amateur_photography)
+    when 'Town'
+      %w(map)
     else
       []
     end

@@ -176,6 +176,7 @@ class BasilController < ApplicationController
 
     when 'Technology'
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Production', 'Materials')
       @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Appearance'])
 
     when 'Town'
@@ -184,6 +185,7 @@ class BasilController < ApplicationController
 
     when 'Tradition'
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of tradition')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Celebrations', 'Activities')
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Celebrations', 'Symbolism')
 
@@ -352,7 +354,7 @@ class BasilController < ApplicationController
                                                   .joins(:basil_feedbacks)
                                                   .group(:entity_type)
                                                   .average(:score_adjustment)
-                                                  .map { |k, v| [k, (v * 100).round(1)] }.to_h
+                                                  .map { |k, v| [k, v.round(1)] }.to_h
 
     # queue size (total commissions - completed commissions)
     # average time to complete today / this week
@@ -433,7 +435,7 @@ class BasilController < ApplicationController
                                                   .joins(:basil_feedbacks)
                                                   .group(:entity_type)
                                                   .average(:score_adjustment)
-                                                  .map { |k, v| [k, (v * 100).round(1)] }.to_h
+                                                  .map { |k, v| [k, v.round(1)] }.to_h
 
     # # queue size (total commissions - completed commissions)
     # # average time to complete today / this week
