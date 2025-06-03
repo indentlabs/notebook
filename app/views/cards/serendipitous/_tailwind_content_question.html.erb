@@ -3,6 +3,34 @@
   include_quick_reference = defined?(include_quick_reference) && !!include_quick_reference
 %>
 
+<style>
+  /* Enhanced autosave visual feedback styles */
+  .js-enhanced-autosave.border-yellow-400 {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 0 1px #fbbf24 !important;
+  }
+  .js-enhanced-autosave.border-green-400 {
+    border-color: #34d399 !important;
+    box-shadow: 0 0 0 1px #34d399 !important;
+  }
+  .js-enhanced-autosave.border-red-400 {
+    border-color: #f87171 !important;
+    box-shadow: 0 0 0 1px #f87171 !important;
+  }
+  .js-enhanced-autosave:focus.border-yellow-400 {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2) !important;
+  }
+  .js-enhanced-autosave:focus.border-green-400 {
+    border-color: #34d399 !important;
+    box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2) !important;
+  }
+  .js-enhanced-autosave:focus.border-red-400 {
+    border-color: #f87171 !important;
+    box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2) !important;
+  }
+</style>
+
 <p class="text-4xl text-gray-900">
   <%=
     t(
@@ -14,12 +42,62 @@
 </p>
 
 <div class="mt-4">
-  <label class="text-sm text-gray-500">
-    <span class="<%= @content.text_color %>"><%= link_to @content.name, @content.view_path %></span>
-    <span class="mx-1">&rsaquo;</span>
-    <%= field.label %>
-  </label>
-  <textarea class="w-full rounded-lg focus:border-notebook-blue h-48 border-gray-300" placeholder="Write as little or as much as you'd like!"></textarea>
+  <div class="flex items-center justify-between">
+    <label class="text-sm text-gray-500">
+      <span class="<%= @content.text_color %>"><%= link_to @content.name, @content.view_path %></span>
+      <span class="mx-1">&rsaquo;</span>
+      <%= field.label %>
+    </label>
+    <div class="js-autosave-status text-xs text-gray-400 hidden">
+      <span class="js-status-text"></span>
+    </div>
+  </div>
+
+  <%= form_for content, url: FieldTypeService.form_path_from_attribute_field(field), method: :patch, html: { class: "serendipitous-question-form" } do |f| %>
+    <%= hidden_field(:override, :redirect_path, value: request.fullpath) %>
+    <%= hidden_field_tag "entity[entity_id]",   content.id %>
+    <%= hidden_field_tag "entity[entity_type]", content.page_type %>
+    <%= hidden_field_tag "field[name]", field[:id] %>
+    
+    <%
+      field_value = field.attribute_values.find_by(
+        user:        content.user,
+        entity_type: content.page_type,
+        entity_id:   content.id
+      ).try(:value)
+      
+      placeholder = I18n.translate "attributes.#{content.page_type.downcase}.#{field.label.downcase.gsub(/\s/, '_')}",
+        scope: :serendipitous_questions,
+        name: content.name || "this #{content.page_type.downcase}",
+        default: 'Write as little or as much as you want!'
+    %>
+    
+    <div class="relative mt-1">
+      <%=
+        text_area_tag "field[value]",
+                      field_value,
+                      class: "w-full rounded-lg focus:border-notebook-blue h-48 border-gray-300 js-enhanced-autosave js-can-mention-pages resize-none transition-all duration-200",
+                      placeholder: placeholder
+      %>
+      <div class="js-save-indicator absolute top-3 right-3 hidden z-10">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 shadow-sm">
+          ✓ Saved!
+        </span>
+      </div>
+    </div>
+    
+    <div class="mt-6 flex justify-center">
+      <%= button_tag type: 'submit', class: "group relative inline-flex items-center px-8 py-3 overflow-hidden text-lg font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:ring-blue-300 focus:outline-none transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg" do %>
+        <span class="absolute inset-0 w-full h-full bg-white opacity-10 rounded-xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-left"></span>
+        <span class="relative flex items-center">
+          <svg class="w-5 h-5 mr-2 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Submit & Continue
+        </span>
+      <% end %>
+    </div>
+  <% end %>
 </div>
 
 
