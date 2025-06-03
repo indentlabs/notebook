@@ -99,7 +99,7 @@ class User < ApplicationRecord
   has_one_attached :avatar
   validates :avatar, attached: false,
     content_type: {
-      in: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'],
+      in: ['image/png', 'image/jpeg', 'image/gif'],
       message: 'must be a PNG, JPG, JPEG, or GIF'
     },
     dimension: { 

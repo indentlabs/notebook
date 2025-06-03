@@ -4,7 +4,7 @@ class DocumentRevisionsController < ApplicationController
 
   # GET /document_revisions
   def index
-    @document_revisions = @document.document_revisions.order('created_at DESC')
+    @document_revisions = @document.document_revisions.order('created_at DESC').paginate(page: params[:page], per_page: 10)
   end
 
   # GET /document_revisions/1

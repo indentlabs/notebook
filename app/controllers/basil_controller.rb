@@ -176,6 +176,7 @@ class BasilController < ApplicationController
 
     when 'Technology'
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Production', 'Materials')
       @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Appearance'])
 
     when 'Town'
@@ -184,11 +185,14 @@ class BasilController < ApplicationController
 
     when 'Tradition'
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of tradition')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Celebrations', 'Activities')
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Celebrations', 'Symbolism')
 
     when 'Vehicle'
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Name')
       @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Type of vehicle')
+      @relevant_fields.push BasilService.include_specific_field(current_user, @content, 'Overview', 'Description')
       @relevant_fields.push *BasilService.include_all_fields_in_category(current_user, @content, ['Looks'])
 
     end
@@ -203,7 +207,7 @@ class BasilController < ApplicationController
     @in_progress_commissions = @commissions.select { |c| c.completed_at.nil? }
     @generated_images_count  = current_user.basil_commissions.with_deleted.count
 
-    @can_request_another     = current_user.on_premium_plan? || @generated_images_count < BasilService::FREE_IMAGE_LIMIT
+    @can_request_another     = (true || current_user.on_premium_plan?) || @generated_images_count < BasilService::FREE_IMAGE_LIMIT
     @can_request_another     = @can_request_another && @in_progress_commissions.count < BasilService::MAX_JOB_QUEUE_SIZE
   end
 
@@ -230,7 +234,7 @@ class BasilController < ApplicationController
       entity: nil,
       prompt: created_prompt,
       job_id: SecureRandom.uuid,
-      style:  ["realistic", "realistic2", "realistic3"].sample,
+      style:  ["realistic", "realistic2", "realistic3", "painting", "painting2", "painting3"].sample,
       final_settings: jam_params
     )
 
@@ -256,10 +260,11 @@ class BasilController < ApplicationController
   end
 
   def stats
-    @commissions = BasilCommission.all.with_deleted
+    @version = params[:v] || 2
+    @all_commissions = BasilCommission.where(basil_version: @version).with_deleted
 
-    @queued = BasilCommission.where(completed_at: nil)
-    @completed = BasilCommission.where.not(completed_at: nil).with_deleted
+    @queued = BasilCommission.where(completed_at: nil, basil_version: @version)
+    @completed = BasilCommission.where.not(completed_at: nil).where(basil_version: @version).with_deleted
 
     @average_wait_time = @completed.where('completed_at > ?', 24.hours.ago)
                                    .average(:cached_seconds_taken) || 0
@@ -268,13 +273,15 @@ class BasilController < ApplicationController
                                    .map { |minutes, list| [minutes, list.count] }
 
     # Projected date, at our current rate, to reach 1,000,000 images
-    commission_counts_per_day   = @commissions.group_by_day(:completed_at).values
-    @average_commissions_per_day = commission_counts_per_day.sum(0.0) / commission_counts_per_day.count
-    commissions_left            = 1_000_000 - @commissions.count
-    @days_til_1_million_commissions = commissions_left / @average_commissions_per_day
+    commission_counts_per_day   = @all_commissions.group_by_day(:completed_at).values
+    @average_commissions_per_day = commission_counts_per_day.sum(0.0) / (commission_counts_per_day.count + 0.000001)
+    commissions_left            = 1_000_000 - @all_commissions.count
+    @days_til_1_million_commissions = commissions_left / (@average_commissions_per_day + 0.000001)
 
     # Feedback today
-    @feedback_today = BasilFeedback.where('updated_at > ?', 24.hours.ago)
+    @feedback_today = BasilFeedback.joins(:basil_commission)
+                                   .where(basil_commissions: { basil_version: @version })
+                                   .where('basil_feedbacks.updated_at > ?', 24.hours.ago)
                                    .order(:score_adjustment)
                                    .group(:score_adjustment)
                                    .count
@@ -292,10 +299,12 @@ class BasilController < ApplicationController
     end
 
     # Feedback all time
-    @feedback_before_today = BasilFeedback.where('updated_at < ?', 24.hours.ago)
-                                      .order(:score_adjustment)
-                                      .group(:score_adjustment)
-                                      .count
+    @feedback_before_today = BasilFeedback.joins(:basil_commission)
+                                          .where(basil_commissions: { basil_version: @version })
+                                          .where('basil_feedbacks.updated_at < ?', 24.hours.ago)
+                                          .order(:score_adjustment)
+                                          .group(:score_adjustment)
+                                          .count
     days_since_start = (Date.current - BasilFeedback.minimum(:updated_at).to_date)
     days_since_start = 1 if days_since_start.zero? # no dividing by 0 lol
 
@@ -317,11 +326,12 @@ class BasilController < ApplicationController
       BasilService.enabled_styles_for('Character'),
       BasilService.enabled_styles_for('Location'),
       # Also include anything we specifically want to track for now :)
-      'painting2', 'painting3', 'anime'
+      #'painting2', 'painting3', 'anime'
     ].flatten.compact.uniq
 
     @total_score_per_style = BasilCommission.with_deleted
                                             .where(style: active_styles)
+                                            .where(basil_version: @version)
                                             .joins(:basil_feedbacks)
                                             .group(:style)
                                             .sum(:score_adjustment)
@@ -330,6 +340,7 @@ class BasilController < ApplicationController
                                             .reverse
     @average_score_per_style = BasilCommission.with_deleted
                                               .where(style: active_styles)
+                                              .where(basil_version: @version)
                                               .joins(:basil_feedbacks)
                                               .group(:style)
                                               .average(:score_adjustment)
@@ -339,10 +350,11 @@ class BasilController < ApplicationController
 
     @average_score_per_page_type = BasilCommission.with_deleted
                                                   .where.not(completed_at: nil)
+                                                  .where(basil_version: @version)
                                                   .joins(:basil_feedbacks)
                                                   .group(:entity_type)
                                                   .average(:score_adjustment)
-                                                  .map { |k, v| [k, (v * 100).round(1)] }.to_h
+                                                  .map { |k, v| [k, v.round(1)] }.to_h
 
     # queue size (total commissions - completed commissions)
     # average time to complete today / this week
@@ -352,13 +364,14 @@ class BasilController < ApplicationController
 
   def page_stats
     @page_type = params[:page_type]
+    @version = params[:v] || 2
     # TODO verify page_type is valid
 
-    @commissions = BasilCommission.where(entity_type: @page_type)
+    @commissions = BasilCommission.where(entity_type: @page_type).where(basil_version: @version)
 
     # Feedback today
-    @feedback_today = BasilFeedback.where('updated_at > ?', 24.hours.ago)
-                                   .where(basil_commission_id: @commissions.pluck(:id))
+    @feedback_today = BasilFeedback.where(basil_commission_id: @commissions.pluck(:id))
+                                   .where('basil_feedbacks.updated_at > ?', 24.hours.ago)
                                    .order(:score_adjustment)
                                    .group(:score_adjustment)
                                    .count
@@ -376,8 +389,8 @@ class BasilController < ApplicationController
     end
 
     # Feedback all time
-    @feedback_before_today = BasilFeedback.where('updated_at < ?', 24.hours.ago)
-                                          .where(basil_commission_id: @commissions.pluck(:id))
+    @feedback_before_today = BasilFeedback.where(basil_commission_id: @commissions.pluck(:id))
+                                          .where('basil_feedbacks.updated_at < ?', 24.hours.ago)
                                           .order(:score_adjustment)
                                           .group(:score_adjustment)
                                           .count
@@ -422,7 +435,7 @@ class BasilController < ApplicationController
                                                   .joins(:basil_feedbacks)
                                                   .group(:entity_type)
                                                   .average(:score_adjustment)
-                                                  .map { |k, v| [k, (v * 100).round(1)] }.to_h
+                                                  .map { |k, v| [k, v.round(1)] }.to_h
 
     # # queue size (total commissions - completed commissions)
     # # average time to complete today / this week
@@ -441,7 +454,7 @@ class BasilController < ApplicationController
 
   def commission
     @generated_images_count  = current_user.basil_commissions.with_deleted.count
-    if !current_user.on_premium_plan? && @generated_images_count > BasilService::FREE_IMAGE_LIMIT
+    if false && !current_user.on_premium_plan? && @generated_images_count > BasilService::FREE_IMAGE_LIMIT
       redirect_back fallback_location: basil_path, notice: "You've reached your free image limit. Please upgrade to generate more images."
       return
     end
@@ -457,6 +470,9 @@ class BasilController < ApplicationController
       return
     end
 
+    # At this point, the content is valid, and the user is allowed to commission it!
+    # We can now create the prompt, and save the commission.
+  
     # Before creating the prompt, do a little config to tweak things to work well :)
     labels_to_omit_label_text = [
       "Name",
@@ -468,24 +484,24 @@ class BasilController < ApplicationController
       "Type of food"
     ].map(&:downcase)
     field_importance_multipliers = {
-      'hair':        1.15,
-      'hair color':  1.55,
-      'hair style':  1.10,
-      'skin tone':   1.05,
-      'race':        1.10,
-      'eye color':   1.05,
-      'gender':      1.15,
+      'hair':        1.00,
+      'hair color':  1.00,
+      'hair style':  1.00,
+      'skin tone':   1.00,
+      'race':        1.00,
+      'eye color':   1.00,
+      'gender':      1.00,
       'description': 1.00,
-      'item type':   1.55,
-      'type':        1.15,
-      'type of building':  1.25,
-      'type of condition': 1.25,
-      'type of food':      1.25,
-      'type of landmark':  1.25,
-      'type of magic':     1.25,
-      'type of school':    1.25,
-      'type of vehicle':   1.25,
-      'type of creature':  1.25
+      'item type':   1.00,
+      'type':        1.00,
+      'type of building':  1.00,
+      'type of condition': 1.00,
+      'type of food':      1.00,
+      'type of landmark':  1.00,
+      'type of magic':     1.00,
+      'type of school':    1.00,
+      'type of vehicle':   1.00,
+      'type of creature':  1.00
     }
     label_value_pairs_to_skip_entirely = [
       ['race', 'human']
@@ -540,6 +556,7 @@ class BasilController < ApplicationController
                                      .to_h
     guidance.update(guidance: guidance_data)
 
+    # Finally, create the commission!
     BasilCommission.create!(
       user:        current_user,
       entity_type: @content.page_type,

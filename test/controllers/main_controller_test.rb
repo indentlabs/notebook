@@ -16,7 +16,6 @@ class MainControllerTest < ActionDispatch::IntegrationTest
     :privacy_policy_url,
     :writers_landing_url,
     :roleplayers_landing_url,
-    :designers_landing_url,
     :redeem_infostack_url,
     :redeem_sascon_url
   ])

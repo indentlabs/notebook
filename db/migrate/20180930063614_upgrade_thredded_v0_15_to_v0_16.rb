@@ -4,6 +4,8 @@ require 'thredded/base_migration'
 
 class UpgradeThreddedV015ToV016 < Thredded::BaseMigration
   def up
+    add_column :thredded_topics, :deleted_at, :datetime
+
     %i[thredded_user_topic_read_states thredded_user_private_topic_read_states].each do |table_name|
       add_column table_name, :unread_posts_count, :integer, default: 0, null: false
       add_column table_name, :read_posts_count, :integer, default: 0, null: false
@@ -21,6 +23,8 @@ class UpgradeThreddedV015ToV016 < Thredded::BaseMigration
   end
 
   def down
+    remove_column :thredded_topics, :deleted_at
+
     remove_column :thredded_user_topic_read_states, :messageboard_id
     %i[thredded_user_topic_read_states thredded_user_private_topic_read_states].each do |table|
       remove_column table, :unread_posts_count

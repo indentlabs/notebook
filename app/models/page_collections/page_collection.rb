@@ -13,7 +13,7 @@ class PageCollection < ApplicationRecord
   has_one_attached :header_image, dependent: :destroy
   validates :header_image, attached: false,
     content_type: {
-      in: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'],
+      in: ['image/png', 'image/jpeg', 'image/gif'],
       message: 'must be a PNG, JPG, JPEG, or GIF'
     },
     dimension: { 

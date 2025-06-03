@@ -73,6 +73,10 @@ class DocumentsController < ApplicationController
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     end
 
+    if @document.user.thredded_user_detail.moderation_state == "blocked"
+      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+    end
+
     # Put the focus on the document by removing Notebook.ai actions
     @navbar_actions = []
   end
@@ -179,7 +183,6 @@ class DocumentsController < ApplicationController
       .group_by(&:entity_type)
   end
 
-  # Todo does anything actually use this endpoint?
   def create
     created_document = current_user.documents.create(document_params)
     redirect_to edit_document_path(created_document), notice: "Your document has been saved!"
