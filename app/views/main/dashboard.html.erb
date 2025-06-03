@@ -3,26 +3,26 @@
     <main class="flex-1 pb-8">
       <!-- Modern full-width header -->
       <div class="bg-gradient-to-r from-slate-50 to-white border-b border-gray-200">
-        <div class="w-full px-6 lg:px-8">
-          <div class="py-8">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="w-full px-4 sm:px-6 lg:px-8">
+          <div class="py-4 sm:py-6 lg:py-8">
+            <div class="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
               <!-- User info section -->
-              <div class="flex items-center space-x-4">
-                <%= link_to current_user, class: "group relative" do %>
+              <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-4 sm:space-y-0">
+                <%= link_to current_user, class: "group relative self-center sm:self-auto" do %>
                   <div class="relative">
-                    <%= image_tag current_user.image_url, class: "h-20 w-20 rounded-full #{User.color} ring-4 ring-white shadow-lg group-hover:ring-blue-100 transition-all duration-200" %>
-                    <div class="absolute -bottom-1 -right-1 h-6 w-6 bg-green-400 rounded-full ring-4 ring-white"></div>
+                    <%= image_tag current_user.image_url, class: "h-16 w-16 sm:h-20 sm:w-20 rounded-full #{User.color} ring-4 ring-white shadow-lg group-hover:ring-blue-100 transition-all duration-200" %>
+                    <div class="absolute -bottom-1 -right-1 h-4 w-4 sm:h-6 sm:w-6 bg-green-400 rounded-full ring-4 ring-white"></div>
                   </div>
                 <% end %>
                 
-                <div class="flex flex-col">
-                  <div class="flex items-center space-x-2">
-                    <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
+                <div class="flex flex-col text-center sm:text-left">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-1 sm:space-y-0">
+                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight">
                       Welcome back, <%= link_to current_user.display_name, current_user, class: "#{User.text_color} hover:opacity-80 transition-opacity" %>
                     </h1>
                     <%= render partial: 'thredded/users/badge', locals: { user: current_user } %>
                   </div>
-                  <p class="text-lg text-gray-600 mt-1">
+                  <p class="text-base sm:text-lg text-gray-600 mt-1">
                     Ready to create something amazing today?
                   </p>
                   
@@ -46,16 +46,16 @@
               </div>
               
               <!-- Action buttons -->
-              <div class="mt-6 lg:mt-0 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+              <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
                 <%= link_to new_character_path do %>
-                  <button type="button" class="fancy-button relative overflow-hidden inline-flex items-center justify-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 active:scale-95 active:shadow-sm">
+                  <button type="button" class="fancy-button relative overflow-hidden inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 active:scale-95 active:shadow-sm">
                     <i class="material-icons mr-2 <%= Character.text_color %> transition-transform duration-200"><%= Character.icon %></i>
                     <span class="transition-all duration-200">Create Character</span>
                   </button>
                 <% end %>
                 <% random_enabled_page_type = (current_user.createable_content_types - [Character]).sample %>
                 <%= link_to new_polymorphic_path(random_enabled_page_type) do %>
-                  <button type="button" class="fancy-button relative overflow-hidden inline-flex items-center justify-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white <%= random_enabled_page_type.color %> hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 active:scale-95 active:shadow-sm">
+                  <button type="button" class="fancy-button relative overflow-hidden inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white <%= random_enabled_page_type.color %> hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 active:scale-95 active:shadow-sm">
                     <i class="material-icons mr-2 transition-transform duration-200"><%= random_enabled_page_type.icon %></i>
                     <span class="transition-all duration-200">
                       Create <%= random_enabled_page_type.name %>
@@ -70,40 +70,53 @@
 
       <%# render partial: 'main/components/activity_bar', locals: { } %>
 
-      <div class="max-w-7xl mx-auto grid grid-cols-8 my-4 md:px-0 px-4 space-x-4">
-        <div class="col-span-5">
-          <% if @content %>
-            <h2 class="text-sm leading-6 font-medium text-gray-500 mb-2 text-center">
-              Expand
-              <% if @universe_scope.present? %>
-                <%= link_to @universe_scope.name, @universe_scope, class: Universe.text_color %>
-              <% else %>
-                your worlds
-              <% end %>
-            </h2>
-            <%= render partial: 'main/components/serendipitous_question', locals: { } %>
-          <% end %>
+      <div class="max-w-7xl mx-auto my-4 px-4 sm:px-6 lg:px-8">
+        <!-- Mobile-first: stack vertically, then side-by-side on larger screens -->
+        <div class="grid grid-cols-1 xl:grid-cols-8 gap-4 xl:gap-6">
+          <!-- Main content area - full width on mobile, 5/8 on xl -->
+          <div class="xl:col-span-5 space-y-6">
+            <% if @content %>
+              <div class="text-center">
+                <h2 class="text-sm leading-6 font-medium text-gray-500 mb-2">
+                  Expand
+                  <% if @universe_scope.present? %>
+                    <%= link_to @universe_scope.name, @universe_scope, class: Universe.text_color %>
+                  <% else %>
+                    your worlds
+                  <% end %>
+                </h2>
+                <%= render partial: 'main/components/serendipitous_question', locals: { } %>
+              </div>
+            <% end %>
 
-          <h2 class="text-sm leading-6 font-medium text-gray-500 mb-2 text-center mt-4">
-            Create a new page
-          </h2>
-          <%= render partial: 'main/components/create_new_page_list', locals: { } %>
-        </div>
-        <div class="col-span-3">
+            <div class="text-center">
+              <h2 class="text-sm leading-6 font-medium text-gray-500 mb-2">
+                Create a new page
+              </h2>
+              <%= render partial: 'main/components/create_new_page_list', locals: { } %>
+            </div>
+          </div>
+          
+          <!-- Sidebar content - full width on mobile, 3/8 on xl -->
+          <div class="xl:col-span-3 space-y-6">
+            <% if @most_recent_threads.any? %>
+              <div class="text-center">
+                <h2 class="text-sm leading-6 font-medium text-gray-500 hover:text-gray-800 mb-2">
+                  <%= link_to 'Active discussions', thredded_path %>
+                </h2>
+                <%= render partial: 'main/components/active_discussions', locals: { discussions: @most_recent_threads } %>
+              </div>
+            <% end %>
 
-          <% if @most_recent_threads.any? %>
-            <h2 class="text-sm leading-6 font-medium text-gray-500 hover:text-gray-800 mb-2 text-center">
-              <%= link_to 'Active discussions', thredded_path %>
-            </h2>
-            <%= render partial: 'main/components/active_discussions', locals: { discussions: @most_recent_threads } %>
-          <% end %>
-
-          <% if @recently_edited_pages %>
-            <h2 class="text-sm leading-6 font-medium text-gray-500 hover:text-gray-800 mb-2 text-center">
-              <%= link_to 'Your recent updates', recent_content_path %>
-            </h2>
-            <%= render partial: 'main/components/recently_edited_pages', locals: { } %>
-          <% end %>
+            <% if @recently_edited_pages %>
+              <div class="text-center">
+                <h2 class="text-sm leading-6 font-medium text-gray-500 hover:text-gray-800 mb-2">
+                  <%= link_to 'Your recent updates', recent_content_path %>
+                </h2>
+                <%= render partial: 'main/components/recently_edited_pages', locals: { } %>
+              </div>
+            <% end %>
+          </div>
         </div>
       </div>
     </main>
