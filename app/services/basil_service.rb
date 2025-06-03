@@ -43,7 +43,7 @@ class BasilService < Service
     when 'Town'
       %w(photograph)
     when 'Creature'
-      %w(photograph fantasy)
+      %w(amateur_photograph fantasy)
     when 'Technology'
       %w(product_photography macro_photography cutaway_render)
     when 'Vehicle'
