@@ -1,8 +1,9 @@
 <header class="flex sticky top-0 z-50 w-full bg-notebook-blue border-b border-blue-400 h-14 shadow">
-  <%= link_to root_path, class: 'flex items-center mr-2 px-6 py-4 border-b border-gray-300 shadow hover:shadow-md transition bg-white rounded-br-lg' do %>
-    <%= image_tag 'logos/book-small.webp', class: 'h-8 mr-3' %>
-    <span class="text-2xl font-bold text-notebook-blue tracking-wide">
-      Notebook.ai
+  <%= link_to root_path, class: 'flex items-center mr-2 px-3 sm:px-6 py-4 border-b border-gray-300 shadow hover:shadow-md transition bg-white rounded-br-lg' do %>
+    <%= image_tag 'logos/book-small.webp', class: 'h-6 sm:h-8 mr-2 sm:mr-3' %>
+    <span class="text-lg sm:text-2xl font-bold text-notebook-blue tracking-wide">
+      <span class="hidden sm:inline">Notebook.ai</span>
+      <span class="sm:hidden">Notebook</span>
     </span>
   <% end %>
 
@@ -17,7 +18,7 @@
 
   <!-- left-hand side of navbar -->
   <% if user_signed_in? %>
-    <div class="flex-grow pt-2 pl-1">
+    <div class="flex-grow pt-2 pl-1 hidden lg:block">
       <% if @universe_scope %>
         <div class="inline-flex rounded-md shadow-sm mt-0.5" role="group">
           <%= link_to main_app.multiverse_path do %>
@@ -39,16 +40,16 @@
     </div>
 
     <!-- right-hand side of navbar -->
-    <div class="pr-2">
-      <div x-data="{ notificationsDropdownOpen: false }" class="inline-block mt-2.5 mr-2">
+    <div class="pr-2 flex items-center space-x-1 sm:space-x-2">
+      <div x-data="{ notificationsDropdownOpen: false }" class="inline-block">
         <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
-          <svg class="h-6 w-6 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'text-white' : 'text-blue-300' %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <svg class="h-5 w-5 sm:h-6 sm:w-6 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'text-white' : 'text-blue-300' %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
           </svg>
         </button>
         <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
 
-        <div x-show="notificationsDropdownOpen" class="absolute right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-2/5">
+        <div x-show="notificationsDropdownOpen" class="absolute right-2 sm:right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-80 sm:w-2/5 max-w-md">
           <div class="pt-2">
             <% @user_notifications.each do |notification| %>
               <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2' do %>
@@ -56,15 +57,15 @@
                 <div class="text-black text-sm mx-2 flex-grow <%= 'font-bold' unless notification.viewed_at? %>">
                   <%= notification.message_html.html_safe %>
                 </div>
-                <div class="text-gray-400 text-xs">
+                <div class="text-gray-400 text-xs hidden sm:block">
                   <%= time_ago_in_words notification.happened_at %> ago
                 </div>
               <% end %>
             <% end %>
           </div>
           <% if @user_notifications.empty? %>
-            <div class="relative block my-4 mx-6 border-2 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              <svg class="mx-auto h-12 w-12 text-blue-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <div class="relative block my-4 mx-6 border-2 border-gray-300 border-dashed rounded-lg p-8 sm:p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              <svg class="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-blue-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
               <span class="mt-2 block text-sm font-medium text-gray-900">
@@ -82,8 +83,8 @@
         </div>
       </div>
 
-      <%= form_tag main_app.search_path, method: :get, class: 'inline-block relative -top-2' do %>
-        <input class="w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-10 px-3 text-sm rounded focus:outline-none"
+      <%= form_tag main_app.search_path, method: :get, class: 'hidden md:inline-block relative' do %>
+        <input class="w-48 lg:w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-9 px-3 text-sm rounded focus:outline-none"
           type="search" name="q" value="<%= params[:q] %>" placeholder="Search your notebook">
         <!--
         <button type="submit" class="relative right-8 top-0.5 mt-4 mr-4">
@@ -99,14 +100,14 @@
       <% end %>
 
       <div x-data="{ accountDropdownOpen: false }" class="inline-block">
-        <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 relative top-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
-          <%= image_tag current_user.image_url, class: 'rounded-full h-8 w-8' %>
+        <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
+          <%= image_tag current_user.image_url, class: 'rounded-full h-6 w-6 sm:h-8 sm:w-8' %>
         </button>
         <div x-show="accountDropdownOpen" @click="accountDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
 
         <div x-show="accountDropdownOpen" class="absolute right-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-64">
           <%= link_to current_user.profile_url, class: 'flex border-t p-2 border-b border-gray-300 shadow group hover:bg-notebook-blue hover:text-white' do %>
-            <%= image_tag current_user.image_url(size=32), class: 'rounded-full h-16 w-16 mr-2 p-1 border-2 border-notebook-blue group-hover:border-green-500' %>
+            <%= image_tag current_user.image_url(size=32), class: 'rounded-full h-12 w-12 sm:h-16 sm:w-16 mr-2 p-1 border-2 border-notebook-blue group-hover:border-green-500' %>
             <div class="m-auto ml-1">
               <div class="text-xs text-gray-500 group-hover:text-white">You're signed in as</div>
               <div class="text-sm <%= User.text_color %> group-hover:text-white font-bold">
