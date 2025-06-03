@@ -29,6 +29,21 @@ namespace :one_off do
       end
     end
   end
+
+  desc "Year in Review notification"
+  task year_in_review_notification: :environment do
+    year = DateTime.current.year
+
+    User.find_each do |user|
+      user.notifications.create(
+        message_html: "<div>Your #{year} Year in Review is now available!</div><div class='blue-text text-darken-3'>Look back on your year on Notebook.ai.</div>",
+        icon:         'event',
+        icon_color:   'blue',
+        happened_at:  DateTime.current,
+        passthrough_link: Rails.application.routes.url_helpers.review_year_path(year)
+      )
+    end
+  end
   
   desc "Create a notification for all users telling them about the new notifications"
   task notifications_announcement: :environment do

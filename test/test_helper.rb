@@ -1,6 +1,9 @@
 ENV['RAILS_ENV']    ||= 'test'
 ENV['RAILS_GROUPS'] ||= 'test'
 
+require 'minitest/reporters'
+Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
+
 require_relative "../config/environment"
 require "rails/test_help"
 

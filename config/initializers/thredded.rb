@@ -216,7 +216,7 @@ Rails.application.config.to_prepare do
         @navbar_actions << {
           label: 'Discussions',
           href: discussions_link,
-          class: ForumsLinkbuilderService.is_discussions_page?(request.env['REQUEST_PATH']) ? 'active' : nil
+          class: ForumsLinkbuilderService.is_discussions_page?(request.env['REQUEST_PATH'] || request.fullpath) ? 'active' : nil
         }
       end
 
@@ -238,7 +238,7 @@ Rails.application.config.to_prepare do
     private
 
     def related_content_type
-      current_path = request.env['REQUEST_PATH']
+      current_path = request.env['REQUEST_PATH'] || request.fullpath
       match = ForumsLinkbuilderService.content_to_url_map.detect { |key, base_url| current_path.start_with?(base_url) }
 
       if match

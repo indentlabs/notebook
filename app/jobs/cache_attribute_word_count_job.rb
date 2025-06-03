@@ -5,6 +5,11 @@ class CacheAttributeWordCountJob < ApplicationJob
     attribute_id = args.shift
     attribute    = Attribute.find_by(id: attribute_id)
 
+    # If the attribute has been deleted since this job was enqueued, just bail
+    if attribute.nil?
+      return
+    end
+
     # If we have a blank/null value, ezpz 0 words
     if attribute.nil? || attribute.value.nil? || attribute.value.blank?
       attribute.update_column(:word_count_cache, 0)

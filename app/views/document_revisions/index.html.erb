@@ -10,6 +10,7 @@
         <tr>
             <th>Title</th>
             <th>Backed up</th>
+            <th>Word Count</th>
             <th>Actions</th>
         </tr>
       </thead>
@@ -18,12 +19,14 @@
         <tr>
           <td><%= @document.title %></td>
           <td>Latest version</td>
+          <td><%= @document.cached_word_count %></td>
           <td><%= link_to 'Edit document', edit_document_path(@document), class: 'btn' %></td>
         </tr>
         <% @document_revisions.each do |document_revision| %>
           <tr>
             <td><%= document_revision.title %></td>
             <td><span class="tooltipped" data-tooltip="Backed up at <%= document_revision.created_at %>"><%= time_ago_in_words document_revision.created_at %> ago</span></td>
+            <td><%= document_revision.cached_word_count %></td>
             <td>
               <%= link_to 'View', document_document_revision_path(id: document_revision.id), class: 'btn' %>
               <%= link_to 'Delete', document_document_revision_path(document: @document, id: document_revision.id), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn red lighten-5 red-text' %>
@@ -32,5 +35,6 @@
         <% end %>
       </tbody>
     </table>
+    <%= will_paginate @document_revisions %>
   </div>
 </div>

@@ -114,6 +114,12 @@ class ContentController < ApplicationController
     if user_signed_in? && current_user.can_create?(@content.class) \
       || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: @content.class.name)
 
+      # For users who are creating premium content in a collaborated universe without premium of their own
+      # we want to default that content into one of their collaborated unvierses.
+      if !current_user.on_premium_plan? && Rails.application.config.content_types[:premium].map(&:name).include?(@content.class.name)
+        @content.universe_id = current_user.contributable_universes.first.try(:id)
+      end
+
       if params.key?(:document_entity)
         entity = DocumentEntity.find_by(id: params.fetch(:document_entity).to_i)
         if entity.document_owner == current_user

@@ -1,5 +1,5 @@
 class ContributorService < Service
-  def self.invite_contributor_to_universe universe:, email:
+  def self.invite_contributor_to_universe(universe:, email:)
     # First, look up whether a user already exists for this invite
     related_user = User.find_by(email: email.downcase)
 
@@ -31,19 +31,19 @@ class ContributorService < Service
     end
   end
 
-  def self.send_invite_email_to inviter:, email:, universe:
+  def self.send_invite_email_to(inviter:, email:, universe:)
     CollaborationMailer.contributor_invitation(
-      inviter: inviter,
-      invite_email: email,
-      universe: universe
+      inviter,
+      email,
+      universe
     ).deliver_now! if Rails.env.production?
   end
 
-  def self.send_contributor_notice_to inviter:, email:, universe:
+  def self.send_contributor_notice_to(inviter:, email:, universe:)
     CollaborationMailer.contributor_invitation(
-      inviter: inviter,
-      invite_email: email,
-      universe: universe
+      inviter,
+      email,
+      universe
     ).deliver_now! if Rails.env.production?
   end
 end

@@ -12,7 +12,6 @@
 //
 //= require_tree ./preload
 //= require cocoon
-//= require medium-editor
 //= require Chart.bundle
 //= require chartkick
 //= require autocomplete-rails

@@ -61,8 +61,8 @@ class ExportService < Service
                 if value_for_this_field.present?
                   json_list = JSON.parse(value_for_this_field.value)
                   formatted_names = json_list.map do |link_code|
-                    query_link_code_with_cache(*link_code.split('-')).name
-                  end
+                    query_link_code_with_cache(*link_code.split('-')).try(:name)
+                  end.compact
 
                   export_text << "    #{field.label}: #{formatted_names.to_sentence}\n"
                 else
@@ -310,8 +310,8 @@ class ExportService < Service
     # TODO: we should probably whitelist content_type from valid page types here
 
     # If there's no cache, we unfortunately need to do a query to resolve the link code
-    content = class_from_name(content_type_name).find(content_id)
-    @content_cache[cache_key] = content
+    content = class_from_name(content_type_name).find_by(id: content_id)
+    @content_cache[cache_key] = content if content.present?
 
     return content
   end

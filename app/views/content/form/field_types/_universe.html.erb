@@ -5,7 +5,7 @@
       <%= f.label field[:id], field[:label] %>
     </div>
 
-    <% if page.new_record? || (page.persisted? && page.universe && page.universe.user == current_user) || page.universe_id.nil? # || page.universe_id.zero? %>
+    <% if page.new_record? || (page.persisted? && page.universe && page.universe.user == current_user) || page.universe_id.nil? || current_user.contributable_universes.count >= 1 # || page.universe_id.zero? %>
       <%# todo not like this %>
       <%
         valid_universes = []
@@ -17,15 +17,13 @@
         else
           # Premium content
           if current_user.on_premium_plan? \
-            || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: page.class.name) \
-            || page.user == current_user
+            || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: page.class.name)
 
             valid_universes += current_user.universes
 
             # Allow premium users to add premium content to non-premium universes
             valid_universes += current_user.contributable_universes
           else
-
             show_premium_notice = true
           end
 

@@ -98,6 +98,7 @@ class UsersController < ApplicationController
     @user    = User.find_by(user_params)
     return redirect_to(root_path, notice: 'That user does not exist.') if @user.nil?
     return redirect_to(root_path, notice: 'That user has chosen to hide their profile.') if @user.private_profile?
+    return redirect_to(root_path, notice: 'That user has had their profile hidden.') if @user.thredded_user_detail.moderation_state == 'blocked'
 
     @accent_color     = @user.favorite_page_type_color
     @accent_icon      = @user.favorite_page_type_icon
