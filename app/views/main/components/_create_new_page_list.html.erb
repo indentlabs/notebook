@@ -2,10 +2,10 @@
   <% (@activated_content_types + ["Timeline", "Document"]).each do |content_type| %>
     <% klass = content_class_from_name(content_type) %>
     <%= link_to send("new_#{content_type.downcase}_path") do %>
-      <li class="col-span-1 <%= klass.color %> text-white py-6 rounded-lg shadow hover:shadow-lg hover:opacity-80">
-        <div class="w-full text-center">
-          <i class="material-icons text-6xl"><%= klass.icon %></i>
-          <div>
+      <li class="fancy-button relative overflow-hidden col-span-1 <%= klass.color %> text-white py-6 rounded-lg shadow hover:shadow-lg hover:opacity-90 hover:-translate-y-1 transition-all duration-200 active:scale-95 active:shadow-sm cursor-pointer">
+        <div class="w-full text-center relative z-10">
+          <i class="material-icons text-6xl transition-transform duration-200"><%= klass.icon %></i>
+          <div class="transition-all duration-200">
             <%= content_type %>
           </div>
         </div>
@@ -14,13 +14,136 @@
   <% end %>
 
   <%= link_to customization_content_types_path do %>
-    <li class="col-span-1 bg-notebook-blue text-white py-6 rounded-lg shadow hover:shadow-lg">
-      <div class="w-full text-center">
-        <i class="material-icons text-6xl">add</i>
-        <div>
+    <li class="fancy-button relative overflow-hidden col-span-1 bg-notebook-blue text-white py-6 rounded-lg shadow hover:shadow-lg hover:opacity-90 hover:-translate-y-1 transition-all duration-200 active:scale-95 active:shadow-sm cursor-pointer">
+      <div class="w-full text-center relative z-10">
+        <i class="material-icons text-6xl transition-transform duration-200">add</i>
+        <div class="transition-all duration-200">
           More...
         </div>
       </div>
     </li>
   <% end %>
 </ul>
+
+<style>
+.fancy-button {
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.fancy-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fancy-button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.fancy-button:active i {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.fancy-button:hover i {
+  transform: scale(1.05);
+}
+
+/* Enhanced glow effect on hover */
+.fancy-button:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Pulse animation on focus */
+.fancy-button:focus {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+/* Ripple effect styles */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0);
+  animation: rippleEffect 0.6s linear;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes rippleEffect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const fancyButtons = document.querySelectorAll('.fancy-button');
+  
+  fancyButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      // Create ripple effect
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      ripple.classList.add('ripple');
+      
+      this.appendChild(ripple);
+      
+      // Add click animation classes
+      this.style.transform = 'scale(0.95) translateY(-1px)';
+      
+      setTimeout(() => {
+        this.style.transform = '';
+        ripple.remove();
+      }, 300);
+      
+      // Add a brief glow effect
+      this.style.boxShadow = '0 0 20px rgba(255, 255, 255, 0.3)';
+      setTimeout(() => {
+        this.style.boxShadow = '';
+      }, 200);
+    });
+    
+    // Add floating animation on hover
+    button.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-3px) scale(1.02)';
+    });
+    
+    button.addEventListener('mouseleave', function() {
+      this.style.transform = '';
+    });
+  });
+});
+</script>

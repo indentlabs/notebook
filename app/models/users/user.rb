@@ -184,6 +184,10 @@ class User < ApplicationRecord
     Rails.application.config.content_types[:all].select { |c| can_create? c }
   end
 
+  def words_written_today
+    word_count_updates.where(created_at: Time.current.beginning_of_day..Time.current.end_of_day).sum(:word_count)
+  end
+
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
   # which is undesireable in a case like this, when we want to modify it
