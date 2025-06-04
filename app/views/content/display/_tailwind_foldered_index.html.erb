@@ -11,784 +11,753 @@
   end
 %>
 
-<div 
-  x-data="{ showNewFolderModal: false, sidebarOpen: false }"
->
-  <div class="h-full flex">
-    <!-- Static for desktop -->
-    <div class="flex flex-col min-w-0 flex-1 overflow-hidden">
-      <!-- mobile second header -->
-      <div class="lg:hidden">
-        <div class="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-1.5">
-          <div>
-            <button 
-              @click="sidebarOpen = !sidebarOpen"
-              type="button" 
-              class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue"
-            >
-              <i class="material-icons text-sm mr-1"><%= content_type_class.icon %></i>
-              <span class="hidden sm:inline">Your <%= content_type_name.pluralize %></span>
+<div x-data="{ 
+  showNewFolderModal: false, 
+  sidebarOpen: false,
+  viewMode: 'grid',
+  selectedItems: [],
+  searchQuery: '',
+  showSerendipitousQuestion: <%= @questioned_content ? 'true' : 'false' %>
+}" class="h-screen flex bg-gray-50">
+  
+  <!-- Mobile Header -->
+  <div class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-4 py-3">
+    <div class="flex items-center justify-between">
+      <button 
+        @click="sidebarOpen = !sidebarOpen"
+        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        <i class="material-icons text-lg mr-2"><%= content_type_class.icon %></i>
+        <span><%= content_type_name.pluralize %></span>
+      </button>
+      
+      <div class="flex items-center space-x-2">
+        <% if current_user.can_create?(content_type_class) %>
+          <%= link_to new_polymorphic_path(content_type_class) do %>
+            <button class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-white <%= content_type_class.color %> hover:opacity-90">
+              <i class="material-icons text-lg">add</i>
             </button>
-          </div>
-          <div>
-            <button type="button" class="-mr-3 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-pink-600">
-              <span class="sr-only">Open sidebar</span>
-              <!-- Heroicon name: outline/menu -->
-              <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="flex-1 relative z-0 flex bg-gray-50 overflow-hidden">
-        <main class="flex-1 relative z-0 bg-gray-200 overflow-y-auto focus:outline-none xl:order-last">
-
-          <!-- content area -->
-          <div class="bg-white pb-2">
-            <div>
-              <%= image_tag asset_path(header_image), class: 'h-32 w-full object-cover lg:h-48' %>
-            </div>
-
-            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div class="-mt-12 sm:-mt-16 sm:flex sm:items-end sm:space-x-5">
-                <div class="flex">
-                  <% if @universe_scope %>
-                    <%= link_to @universe_scope do %>
-                      <%= image_tag @universe_scope.random_image_including_private(format: :hero), class: 'h-24 w-24 rounded-full ring-4 ring-purple-800 sm:h-32 sm:w-32' %>
-                    <% end %>
-                  <% else %>
-                    <%= image_tag current_user.image_url, class: 'h-24 w-24 rounded-full ring-4 ring-green-800 sm:h-32 sm:w-32' %>
-                  <% end %>
-                </div>
-                <div class="mt-6 sm:flex-1 sm:min-w-0 sm:flex sm:items-center sm:justify-end sm:space-x-6 sm:pb-1">
-                  <div class="sm:hidden md:block mt-6 min-w-0 flex-1">
-                    <h1 class="text-2xl font-bold text-gray-900 truncate">
-                      Showing <%= pluralize content.count, content_type_name.downcase %>
-                    </h1>
-                    <% if @universe_scope %>
-                      <div class="text-gray-400 text-sm">
-                        in <%= link_to @universe_scope.name, @universe_scope, class: Universe.text_color %>
-                      </div>
-                    <% else %>
-                      <div class="text-gray-400 text-sm">
-                        by <%= link_to current_user.display_name, current_user, class: User.text_color %>
-                      </div>
-                    <% end %>
-                  </div>
-                  <div class="mt-6 flex flex-col justify-stretch space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
-                    <% if Rails.application.config.content_type_names.include?(content_type_name) %>
-                      <%= link_to attribute_customization_path(content_type_name.downcase) do %>
-                        <button type="button" class="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
-                          <span>Customize template</span>
-                        </button>
-                      <% end %>
-                    <% end %>
-
-                    <% if current_user.can_create?(content_type_class) || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type_class.name) %>
-                      <%= link_to new_polymorphic_path(content_type_class) do %>
-                        <button type="button" class="inline-flex justify-center px-4 py-2 border shadow-sm text-sm font-medium rounded-md text-white <%= content_type_class.color %> focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
-                          <i class="material-icons text-sm mr-2">add</i>
-                          <span>New <%= content_type_name %></span>
-                        </button>
-                      <% end %>
-                    <% else %>
-                      <%= link_to subscription_path do %>
-                        <button type="button" class="inline-flex justify-center px-4 py-2 border shadow-sm text-sm font-medium rounded-md text-white bg-gray-400 hover:bg-notebook-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
-                          <span>Upgrade to Premium to create a <%= content_type_name %> page</span>
-                        </button>
-                      <% end %>
-                    <% end %>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!--  new filter bar -->
-          <div class="bg-white mb-4">
-            <!--
-              Mobile filter dialog
-
-              Off-canvas filters for mobile, show/hide based on off-canvas filters state.
-            -->
-            <div class="fixed inset-0 flex z-40 sm:hidden" role="dialog" aria-modal="true">
-              <!--
-                Off-canvas menu overlay, show/hide based on off-canvas menu state.
-
-                Entering: "transition-opacity ease-linear duration-300"
-                  From: "opacity-0"
-                  To: "opacity-100"
-                Leaving: "transition-opacity ease-linear duration-300"
-                  From: "opacity-100"
-                  To: "opacity-0"
-              -->
-              <div class="fixed inset-0 bg-black bg-opacity-25" aria-hidden="true"></div>
-
-              <!--
-                Off-canvas menu, show/hide based on off-canvas menu state.
-
-                Entering: "transition ease-in-out duration-300 transform"
-                  From: "translate-x-full"
-                  To: "translate-x-0"
-                Leaving: "transition ease-in-out duration-300 transform"
-                  From: "translate-x-0"
-                  To: "translate-x-full"
-              -->
-              <div class="ml-auto relative max-w-xs w-full h-full bg-white shadow-xl py-4 pb-12 flex flex-col overflow-y-auto">
-                <div class="px-4 flex items-center justify-between">
-                  <h2 class="text-lg font-medium text-gray-900">Filters</h2>
-                  <button type="button" class="-mr-2 w-10 h-10 bg-white p-2 rounded-md flex items-center justify-center text-gray-400">
-                    <span class="sr-only">Close menu</span>
-                    <!-- Heroicon name: outline/x -->
-                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-
-                <!-- Filters -->
-                <form class="mt-4">
-                  <div class="border-t border-gray-200 px-4 py-6">
-                    <h3 class="-mx-2 -my-3 flow-root">
-                      <!-- Expand/collapse section button -->
-                      <button type="button" class="px-2 py-3 bg-white w-full flex items-center justify-between text-sm text-gray-400" aria-controls="filter-section-0" aria-expanded="false">
-                        <span class="font-medium text-gray-900"> Tag </span>
-                        <span class="ml-6 flex items-center">
-                          <!--
-                            Expand/collapse icon, toggle classes based on section open state.
-
-                            Heroicon name: solid/chevron-down
-
-                            Open: "-rotate-180", Closed: "rotate-0"
-                          -->
-                          <svg class="rotate-0 h-5 w-5 transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                          </svg>
-                        </span>
-                      </button>
-                    </h3>
-                    <!-- Filter section, show/hide based on section state. -->
-                    <div class="pt-6" id="filter-section-0">
-                      <div class="space-y-6">
-                        <div class="flex items-center">
-                          <input id="filter-mobile-category-0" name="category[]" value="new-arrivals" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
-                          <label for="filter-mobile-category-0" class="ml-3 text-sm text-gray-500"> All New Arrivals </label>
-                        </div>
-
-                        <div class="flex items-center">
-                          <input id="filter-mobile-category-1" name="category[]" value="tees" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
-                          <label for="filter-mobile-category-1" class="ml-3 text-sm text-gray-500"> Tees </label>
-                        </div>
-
-                        <div class="flex items-center">
-                          <input id="filter-mobile-category-2" name="category[]" value="objects" type="checkbox" checked class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
-                          <label for="filter-mobile-category-2" class="ml-3 text-sm text-gray-500"> Objects </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="border-t border-gray-200 px-4 py-6">
-                    <h3 class="-mx-2 -my-3 flow-root">
-                      <!-- Expand/collapse section button -->
-                      <button type="button" class="px-2 py-3 bg-white w-full flex items-center justify-between text-sm text-gray-400" aria-controls="filter-section-1" aria-expanded="false">
-                        <span class="font-medium text-gray-900"> Color </span>
-                        <span class="ml-6 flex items-center">
-                          <!--
-                            Expand/collapse icon, toggle classes based on section open state.
-
-                            Heroicon name: solid/chevron-down
-
-                            Open: "-rotate-180", Closed: "rotate-0"
-                          -->
-                          <svg class="rotate-0 h-5 w-5 transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                          </svg>
-                        </span>
-                      </button>
-                    </h3>
-                    <!-- Filter section, show/hide based on section state. -->
-                    <div class="pt-6" id="filter-section-1">
-                      <div class="space-y-6">
-                        <div class="flex items-center">
-                          <input id="filter-mobile-color-0" name="color[]" value="white" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
-                          <label for="filter-mobile-color-0" class="ml-3 text-sm text-gray-500"> White </label>
-                        </div>
-
-                        <div class="flex items-center">
-                          <input id="filter-mobile-color-1" name="color[]" value="beige" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
-                          <label for="filter-mobile-color-1" class="ml-3 text-sm text-gray-500"> Beige </label>
-                        </div>
-
-                        <div class="flex items-center">
-                          <input id="filter-mobile-color-2" name="color[]" value="blue" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
-                          <label for="filter-mobile-color-2" class="ml-3 text-sm text-gray-500"> Blue </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="border-t border-gray-200 px-4 py-6">
-                    <h3 class="-mx-2 -my-3 flow-root">
-                      <!-- Expand/collapse section button -->
-                      <button type="button" class="px-2 py-3 bg-white w-full flex items-center justify-between text-sm text-gray-400" aria-controls="filter-section-2" aria-expanded="false">
-                        <span class="font-medium text-gray-900"> Sizes </span>
-                        <span class="ml-6 flex items-center">
-                          <!--
-                            Expand/collapse icon, toggle classes based on section open state.
-
-                            Heroicon name: solid/chevron-down
-
-                            Open: "-rotate-180", Closed: "rotate-0"
-                          -->
-                          <svg class="rotate-0 h-5 w-5 transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                          </svg>
-                        </span>
-                      </button>
-                    </h3>
-                    <!-- Filter section, show/hide based on section state. -->
-                    <div class="pt-6" id="filter-section-2">
-                      <div class="space-y-6">
-                        <div class="flex items-center">
-                          <input id="filter-mobile-sizes-0" name="sizes[]" value="s" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
-                          <label for="filter-mobile-sizes-0" class="ml-3 text-sm text-gray-500"> S </label>
-                        </div>
-
-                        <div class="flex items-center">
-                          <input id="filter-mobile-sizes-1" name="sizes[]" value="m" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
-                          <label for="filter-mobile-sizes-1" class="ml-3 text-sm text-gray-500"> M </label>
-                        </div>
-
-                        <div class="flex items-center">
-                          <input id="filter-mobile-sizes-2" name="sizes[]" value="l" type="checkbox" class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500">
-                          <label for="filter-mobile-sizes-2" class="ml-3 text-sm text-gray-500"> L </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            <!-- Filters -->
-            <section aria-labelledby="filter-heading">
-              <h2 id="filter-heading" class="sr-only">Filters</h2>
-
-              <div class="relative z-10 bg-white border-b border-gray-200 pb-4">
-                <div class="max-w-7xl mx-auto px-4 flex items-center justify-between sm:px-6 lg:px-8">
-                  <div data-controller="dropdown" class="relative inline-block text-left">
-                    <div>
-                      <button data-action="dropdown#toggle click@window->dropdown#hide" type="button" class="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900" id="menu-button" aria-expanded="false" aria-haspopup="true">
-                        Sort <%= chevron_down %>
-                      </button>
-                    </div>
-
-                    <div data-dropdown-target="menu" class="origin-top-left absolute left-0 mt-2 w-40 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                      <div class="py-1" role="none">
-                        <!--
-                          Active: "bg-gray-100", Not Active: ""
-
-                          Selected: "font-medium text-gray-900", Not Selected: "text-gray-500"
-                        -->
-                        <a href="#" data-action="dropdown#toggle" class="font-medium text-gray-900 block px-4 py-2 text-sm hover:bg-notebook-blue hover:text-white" role="menuitem" tabindex="-1" id="menu-item-0">Favorites First</a>
-                        <a href="#" data-action="dropdown#toggle" class="text-gray-500 block px-4 py-2 text-sm hover:bg-notebook-blue hover:text-white" role="menuitem" tabindex="-1" id="menu-item-1">Alphabetical</a>
-                        <a href="#" data-action="dropdown#toggle" class="text-gray-500 block px-4 py-2 text-sm hover:bg-notebook-blue hover:text-white" role="menuitem" tabindex="-1" id="menu-item-2">Recently-edited</a>
-                        <a href="#" data-action="dropdown#toggle" class="text-gray-500 block px-4 py-2 text-sm hover:bg-notebook-blue hover:text-white" role="menuitem" tabindex="-1" id="menu-item-2">Order created</a>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Mobile filter dialog toggle, controls the 'mobileFiltersOpen' state. -->
-                  <button type="button" class="inline-block text-sm font-medium text-gray-700 hover:text-gray-900 sm:hidden">Filters</button>
-
-                  <div class="hidden sm:block">
-                    <div class="flow-root">
-                      <div class="-mx-4 flex items-center divide-x divide-gray-200">
-                        <div data-controller="dropdown" class="px-4 relative inline-block text-left">
-                          <button data-action="dropdown#toggle click@window->dropdown#hide" type="button" class="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900 active:bg-white" aria-expanded="false">
-                            <span>Tagged</span>
-                            <span class="ml-1.5 rounded py-0.5 px-1.5 bg-gray-100 text-xs font-semibold text-gray-700 tabular-nums">
-                              <%= filtered_page_tags.try(:count) || 0 %>
-                            </span>
-                            <%= chevron_down %>
-                          </button>
-
-                          <div data-dropdown-target="menu" class="w-64 origin-top-right absolute right-0 mt-2 bg-white rounded-md shadow-2xl p-4 ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            <form class="space-y-4">
-                              <% page_tags.each do |page_tag| %>
-                                <div class="flex items-center">
-                                  <input id="filter-tag-<%= page_tag.id %>" name="slug[]" <%= 'checked' if filtered_page_tags.map(&:slug).include?(page_tag.slug) %> value="<%= page_tag.slug %>" type="checkbox" class="h-4 w-4 border-gray-300 rounded <%= content_type_class.text_color %> focus:ring-notebook-blue">
-                                  <label for="filter-tag-<%= page_tag.id %>" class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"><%= page_tag.tag %></label>
-                                </div>
-                              <% end %>
-
-                              <% if page_tags.any? %>
-                                <div class="flex text-right">
-                                  <button data-action="dropdown#toggle" class="bg-notebook-blue hover:bg-blue-500 text-white rounded w-full px-2 py-1">
-                                    Filter
-                                  </button>
-                                </div>
-                              <% else %>
-                                <div class="bg-blue-50 p-4 text-sm">
-                                  Add tags to your <%= content_type_name %> pages to be able to filter them here. 
-                                </div>
-                              <% end %>
-                            </form>
-                          </div>
-                        </div>
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Active filters -->
-              <% if filtered_page_tags.any? %>
-                <div class="bg-gray-100">
-                  <div class="max-w-7xl mx-auto py-3 px-4 sm:flex sm:items-center sm:px-6 lg:px-8">
-                    <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                      Showing only <%= content_type_name.pluralize %> with <%= 'tag'.pluralize(filtered_page_tags.count) %> 
-                      <span class="sr-only">, active</span>
-                    </h3>
-
-                    <div aria-hidden="true" class="hidden w-px h-5 bg-gray-300 sm:block sm:ml-4"></div>
-
-                    <div class="mt-2 sm:mt-0 sm:ml-4">
-                      <div class="-m-1 flex flex-wrap items-center">
-                        <% filtered_page_tags.each do |page_tag| %>
-                          <span class="m-1 inline-flex rounded-full border border-gray-200 items-center py-1.5 pl-3 pr-2 text-sm font-medium bg-white text-gray-900">
-                            <span><%= page_tag.tag %></span>
-                            <%= link_to(polymorphic_path(content_type_class, { slug: params.fetch(:slug, []) - [page_tag.slug] })) do %>
-                              <button type="button" class="flex-shrink-0 ml-1 h-4 w-4 p-1 rounded-full inline-flex text-gray-400 hover:bg-gray-200 hover:text-gray-500">
-                                <span class="sr-only">Remove filter for <%= page_tag.tag %></span>
-                                <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
-                                  <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
-                                </svg>
-                              </button>
-                            <% end %>
-                          </span>
-                        <% end %>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              <% end %>
-            </section>
-          </div>
-
-          <!-- Serendipitous Question Card -->
-          <% if @questioned_content && @attribute_field_to_question %>
-            <% serendipitous_category = @attribute_field_to_question.attribute_category %>
-            
-            <style>
-              /* Enhanced autosave visual feedback styles */
-              .js-enhanced-autosave.border-yellow-400 {
-                border-color: #fbbf24 !important;
-                box-shadow: 0 0 0 1px #fbbf24 !important;
-              }
-              .js-enhanced-autosave.border-green-400 {
-                border-color: #34d399 !important;
-                box-shadow: 0 0 0 1px #34d399 !important;
-              }
-              .js-enhanced-autosave.border-red-400 {
-                border-color: #f87171 !important;
-                box-shadow: 0 0 0 1px #f87171 !important;
-              }
-              .js-enhanced-autosave:focus.border-yellow-400 {
-                border-color: #fbbf24 !important;
-                box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2) !important;
-              }
-              .js-enhanced-autosave:focus.border-green-400 {
-                border-color: #34d399 !important;
-                box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2) !important;
-              }
-              .js-enhanced-autosave:focus.border-red-400 {
-                border-color: #f87171 !important;
-                box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2) !important;
-              }
-              
-              /* Hide the top-right corner toast notifications */
-              .js-autosave-toast {
-                display: none !important;
-              }
-            </style>
-
-            <div x-data="{ isOpen: false }" class="mx-4 mb-4">
-              <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <!-- Question Header -->
-                <button
-                  type="button"
-                  class="w-full px-6 py-4 text-left bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue"
-                  @click="isOpen = !isOpen"
-                  :aria-expanded="isOpen"
-                  aria-controls="serendipitous-question-body"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                      <!-- Question Icon -->
-                      <div class="flex-shrink-0">
-                        <div class="<%= @questioned_content.color %> w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-sm">
-                          <i class="material-icons"><%= serendipitous_category.icon %></i>
-                        </div>
-                      </div>
-                      
-                      <!-- Question Text -->
-                      <div class="flex-1 min-w-0">
-                        <h3 class="text-xl font-medium text-gray-900 mb-1">
-                          <%=
-                            t(
-                              "serendipitous_questions.attributes.#{@questioned_content.page_type.downcase}.#{@attribute_field_to_question.label.parameterize.underscore}",
-                              name:    @questioned_content.name,
-                              default: "What is #{@questioned_content.name}'s #{@attribute_field_to_question.label.downcase}?"
-                            )
-                          %>
-                        </h3>
-                      </div>
-                    </div>
-                    
-                    <!-- Expand/Collapse Icon -->
-                    <div class="flex-shrink-0 ml-4">
-                      <svg 
-                        class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                        :class="{ 'rotate-180': isOpen }"
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor"
-                      >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-                </button>
-
-                <!-- Answer Form -->
-                <div
-                  id="serendipitous-question-body"
-                  class="transition-all duration-300 ease-in-out px-8"
-                  x-show="isOpen"
-                  x-transition:enter="transition ease-out duration-300"
-                  x-transition:enter-start="opacity-0 -translate-y-2"
-                  x-transition:enter-end="opacity-100 translate-y-0"
-                  x-transition:leave="transition ease-in duration-200"
-                  x-transition:leave-start="opacity-100 translate-y-0"
-                  x-transition:leave-end="opacity-0 -translate-y-2"
-                  style="display: none;"
-                >
-                  <%= form_for content, url: FieldTypeService.form_path_from_attribute_field(@attribute_field_to_question), method: :patch, class: "py-6", html: { class: "serendipitous-question-form" } do |f| %>
-                    <%= hidden_field_tag "entity[entity_id]",   @questioned_content.id %>
-                    <%= hidden_field_tag "entity[entity_type]", @questioned_content.page_type %>
-                    <%= hidden_field_tag "field[name]", @attribute_field_to_question[:id] %>
-
-                    <div class="space-y-4 my-6">
-                      <!-- Answer Input -->
-                      <div class="mt-4">
-                        <div class="flex items-center justify-between mb-3">
-                          <label for="field_value" class="block text-sm font-medium text-gray-900">
-                            Your answer will be saved to
-                            <%= link_to @questioned_content.name, @questioned_content.view_path, class: "#{@questioned_content.text_color} hover:underline font-medium" %>
-                            → <%= @attribute_field_to_question.label %>
-                          </label>
-                          <!-- Autosave status indicator -->
-                          <div class="js-autosave-status hidden flex items-center space-x-2">
-                            <div class="flex items-center">
-                              <div class="w-2 h-2 rounded-full bg-current mr-2"></div>
-                              <span class="js-status-text text-sm font-medium"></span>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="relative">
-                          <%=
-                            text_area_tag "field[value]",
-                                          @attribute_field_to_question[:value],
-                                          id: "field_value",
-                                          class: "w-full px-4 py-3 text-base bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-notebook-blue focus:border-notebook-blue transition-all duration-200 resize-none placeholder-gray-500 js-enhanced-autosave js-can-mention-pages",
-                                          rows: 4,
-                                          placeholder: "Write your thoughts here..."
-                          %>
-                        </div>
-                      </div>
-                      
-                      <!-- Actions and Context -->
-                      <div class="flex items-center justify-between">
-                        <button
-                          type="submit"
-                          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white <%= @questioned_content.color %> rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue transition-all duration-150"
-                        >
-                          Save & get another question
-                        </button>
-                      </div>
-                    </div>
-                  <% end %>
-                </div>
-              </div>
-            </div>
           <% end %>
-
-
-          <%# render partial: 'content/components/list_filter_bar', locals: { content_type: content_type_class } %>
-
-          <%# to be made into new card list partial? %>
-          <% if content.any? %>
-            <%= render partial: content_display_partial, locals: { content: content } %>
-          <% end %>
-
-          <% if content.empty? %>
-            <div class="container mx-auto flex">
-              <% if Rails.application.config.content_type_names.include?(content_type_name) %>
-                <div class="w-1/2 text-center p-6">
-                  <%= link_to attribute_customization_path(content_type_name.downcase) do %>
-                    <button type="button" class="relative container mx-auto block w-full border-2 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
-                      <i class="material-icons text-6xl <%= content_type_class.text_color %>">list</i>
-                      <div class="mt-2 block text-sm font-medium text-gray-900 mb-1">
-                        Customize your <%= content_type_name.downcase %> page template
-                      </div>
-                      <span class="rounded bg-notebook-blue text-white px-2 py-1 text-xs">
-                        recommended before creating your first <%= content_type_name.downcase %>
-                      </span>
-                    </button>
-                  <% end %>
-                </div>
-              <% end %>
-              <div class="w-1/2 text-center p-6">
-                <%= link_to new_polymorphic_path(content_type_class) do %>
-                  <button type="button" class="relative container mx-auto block w-full border-2 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
-                    <i class="material-icons text-6xl <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
-                    <span class="mt-2 block text-sm font-medium text-gray-900">Create your first <%= content_type_name.downcase %></span>
-                  </button>
-                <% end %>
-              </div>
-            </div>
-          <% end %>
-        </main>
-
-        <!-- second sidebar -->
-        <!-- Mobile sidebar overlay -->
-        <div 
-          x-show="sidebarOpen" 
-          x-transition:enter="transition-opacity ease-linear duration-300"
-          x-transition:enter-start="opacity-0"
-          x-transition:enter-end="opacity-100"
-          x-transition:leave="transition-opacity ease-linear duration-300"
-          x-transition:leave-start="opacity-100"
-          x-transition:leave-end="opacity-0"
-          class="fixed inset-0 z-40 lg:hidden"
-          style="display: none;"
-        >
-          <div class="fixed inset-0 bg-black bg-opacity-25" @click="sidebarOpen = false"></div>
-          <div 
-            x-show="sidebarOpen"
-            x-transition:enter="transition ease-in-out duration-300 transform"
-            x-transition:enter-start="-translate-x-full"
-            x-transition:enter-end="translate-x-0"
-            x-transition:leave="transition ease-in-out duration-300 transform"
-            x-transition:leave-start="translate-x-0"
-            x-transition:leave-end="-translate-x-full"
-            class="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-xl"
-          >
-            <div class="absolute top-0 right-0 -mr-12 pt-2">
-              <button
-                @click="sidebarOpen = false"
-                type="button"
-                class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-              >
-                <span class="sr-only">Close sidebar</span>
-                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-              <div class="flex-shrink-0 flex items-center px-4 mb-6">
-                <i class="material-icons <%= content_type_class.text_color %> text-2xl mr-3"><%= content_type_class.icon %></i>
-                <h2 class="text-lg font-semibold text-gray-900">Your <%= content_type_name.pluralize %></h2>
-              </div>
-              <!-- Mobile sidebar content -->
-              <div class="px-4 space-y-6">
-                <!-- Stats summary -->
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <h3 class="text-sm font-medium text-gray-900 mb-3">Overview</h3>
-                  <div class="space-y-2">
-                    <div class="flex items-center justify-between text-sm">
-                      <span class="text-gray-600">Total pages</span>
-                      <span class="font-medium text-gray-900"><%= content.count %></span>
-                    </div>
-                    <% total_word_count = content.map(&:cached_word_count).reject(&:nil?).sum %>
-                    <div class="flex items-center justify-between text-sm">
-                      <span class="text-gray-600">Total words</span>
-                      <span class="font-medium text-gray-900"><%= number_with_delimiter total_word_count %></span>
-                    </div>
-                    <div class="flex items-center justify-between text-sm">
-                      <span class="text-gray-600">Folders</span>
-                      <span class="font-medium text-gray-900"><%= folders.count %></span>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Folders -->
-                <div>
-                  <h3 class="text-sm font-medium text-gray-900 mb-3">Folders</h3>
-                  <div class="space-y-2">
-                    <% folders.each do |folder| %>
-                      <%= link_to folder, class: "flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150" do %>
-                        <i class="material-icons <%= Folder.text_color %> mr-3"><%= Folder.icon %></i>
-                        <span class="text-sm font-medium text-gray-900 truncate"><%= folder.title %></span>
-                      <% end %>
-                    <% end %>
-                    <button 
-                      @click="showNewFolderModal=true; sidebarOpen=false"
-                      class="w-full flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150 text-left"
-                    >
-                      <i class="material-icons <%= Folder.text_color %> mr-3">add</i>
-                      <span class="text-sm font-medium text-gray-700">Add a folder</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Desktop sidebar -->
-        <aside class="hidden lg:order-first lg:flex lg:flex-col flex-shrink-0 w-80 border-r border-gray-200 min-h-screen bg-white">
-          <!-- Header -->
-          <div class="flex-shrink-0 border-b border-gray-200">
-            <div class="flex items-center px-6 py-4 bg-gradient-to-r from-gray-50 to-white">
-              <div class="flex items-center">
-                <i class="material-icons <%= content_type_class.text_color %> text-2xl mr-3"><%= content_type_class.icon %></i>
-                <h2 class="text-lg font-semibold text-gray-900">Your <%= content_type_name.pluralize %></h2>
-              </div>
-            </div>
-          </div>
-
-          <!-- Content overview -->
-          <% non_folder_content_types = content_counts_per_type.reject { |type, _| type == 'Folder' } %>
-          <% if non_folder_content_types.count > 1 %>
-            <div class="flex-shrink-0 px-6 py-4 bg-gray-50 border-b border-gray-200">
-              <!-- Content type breakdown -->
-              <div class="space-y-2">
-                <% content_counts_per_type.each do |content_type, count| %>
-                  <% next if content_type == 'Folder' %>
-                  <div class="flex items-center justify-between text-sm">
-                    <div class="flex items-center">
-                      <i class="material-icons text-sm <%= content_class_from_name(content_type).text_color %> mr-2">
-                        <%= content_class_from_name(content_type).icon %>
-                      </i>
-                      <span class="text-gray-700"><%= content_type.downcase.pluralize.humanize %></span>
-                    </div>
-                    <span class="font-medium text-gray-900"><%= number_with_delimiter count %></span>
-                  </div>
-                <% end %>
-              </div>
-            </div>
-          <% end %>
-
-          <!-- Scrollable content -->
-          <div class="flex-1 overflow-y-auto">
-            <!-- Folders section -->
-            <div class="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-3">
-              <div class="flex items-center justify-between">
-                <h3 class="text-sm font-medium text-gray-900 flex items-center">
-                  <i class="material-icons text-sm <%= Folder.text_color %> mr-2"><%= Folder.icon %></i>
-                  Folders
-                </h3>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                  <%= folders.count %>
-                </span>
-              </div>
-            </div>
-            
-            <div class="px-6 py-2 pb-4">
-              <div class="space-y-1">
-                <% folders.each do |folder| %>
-                  <%= link_to folder, class: "group flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-150" do %>
-                    <i class="material-icons <%= Folder.text_color %> mr-3 text-xl group-hover:scale-110 transition-transform duration-150"><%= Folder.icon %></i>
-                    <span class="truncate"><%= folder.title %></span>
-                  <% end %>
-                <% end %>
-                
-                <button 
-                  @click="showNewFolderModal=true"
-                  class="group w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-all duration-150"
-                >
-                  <i class="material-icons <%= Folder.text_color %> mr-3 text-xl group-hover:scale-110 transition-transform duration-150">add</i>
-                  <span>Add a folder</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Stats section -->
-            <div class="border-t border-gray-200 bg-gray-50 px-6 py-4">
-              <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center">
-                <i class="material-icons text-sm <%= DocumentAnalysis.text_color %> mr-2"><%= DocumentAnalysis.icon %></i>
-                Statistics
-              </h3>
-              
-              <div class="space-y-3">
-                <div class="flex items-center text-sm">
-                  <i class="material-icons text-sm <%= DocumentAnalysis.text_color %> mr-2">spellcheck</i>
-                  <div>
-                    <% total_word_count = content.map(&:cached_word_count).reject(&:nil?).sum %>
-                    <div class="font-semibold text-gray-900"><%= number_with_delimiter total_word_count %></div>
-                    <div class="text-xs text-gray-500"><%= 'total word'.pluralize(total_word_count) %></div>
-                  </div>
-                </div>
-
-                <% if content.any? %>
-                  <div class="flex items-center text-sm">
-                    <i class="material-icons text-sm text-notebook-blue mr-2">date_range</i>
-                    <div>
-                      <div class="font-semibold text-gray-900">
-                        <%= distance_of_time_in_words content.map(&:updated_at).max - content.map(&:created_at).min %>
-                      </div>
-                      <div class="text-xs text-gray-500">timespan</div>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            </div>
-          </div>
-        </aside>
+        <% end %>
       </div>
     </div>
   </div>
 
-  <!-- New folder modal -->
-  <div class="fixed z-10 inset-0 overflow-y-auto" role="dialog" aria-modal="true"
-    x-show="showNewFolderModal"
-    @click.away="showNewFolderModal=false"
-    x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-300" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90"
+  <!-- Content Sidebar -->
+  <aside class="hidden lg:flex lg:flex-col lg:w-80 bg-white border-r border-gray-200">
+    <!-- Sidebar Header -->
+    <div class="px-6 py-6 border-b border-gray-200">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 rounded-lg <%= content_type_class.color %> flex items-center justify-center">
+            <i class="material-icons text-white"><%= content_type_class.icon %></i>
+          </div>
+        </div>
+        <div class="ml-4">
+          <h2 class="text-lg font-semibold text-gray-900">Your <%= content_type_name.pluralize %></h2>
+          <p class="text-sm text-gray-500"><%= pluralize content.count, 'item' %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-900"><%= content.count %></div>
+          <div class="text-xs text-gray-500 uppercase tracking-wide">Total</div>
+        </div>
+        <div class="text-center">
+          <% total_words = content.map(&:cached_word_count).reject(&:nil?).sum %>
+          <div class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(total_words / 1000) %>k</div>
+          <div class="text-xs text-gray-500 uppercase tracking-wide">Words</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Folders Section -->
+    <div class="flex-1 overflow-y-auto">
+      <div class="px-6 py-4">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-medium text-gray-900">Folders</h3>
+          <button 
+            @click="showNewFolderModal = true"
+            class="inline-flex items-center p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+          >
+            <i class="material-icons text-lg">add</i>
+          </button>
+        </div>
+        
+        <div class="space-y-1">
+          <% folders.each do |folder| %>
+            <%= link_to folder, class: "group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors" do %>
+              <i class="material-icons text-lg mr-3 text-gray-400 group-hover:text-gray-600"><%= Folder.icon %></i>
+              <span class="truncate"><%= folder.title %></span>
+            <% end %>
+          <% end %>
+          
+          <% if folders.empty? %>
+            <button 
+              @click="showNewFolderModal = true"
+              class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            >
+              <i class="material-icons text-lg mr-3">folder_open</i>
+              <span>Create your first folder</span>
+            </button>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Content Type Breakdown (if mixed) -->
+      <% non_folder_content_types = content_counts_per_type.reject { |type, _| type == 'Folder' } %>
+      <% if non_folder_content_types.count > 1 %>
+        <div class="px-6 py-4 border-t border-gray-200">
+          <h3 class="text-sm font-medium text-gray-900 mb-3">Content Types</h3>
+          <div class="space-y-2">
+            <% content_counts_per_type.each do |content_type, count| %>
+              <% next if content_type == 'Folder' %>
+              <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center">
+                  <i class="material-icons text-sm mr-2 <%= content_class_from_name(content_type).text_color %>">
+                    <%= content_class_from_name(content_type).icon %>
+                  </i>
+                  <span class="text-gray-700"><%= content_type.downcase.pluralize.humanize %></span>
+                </div>
+                <span class="text-gray-900 font-medium"><%= count %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Additional Stats -->
+      <% if content.any? %>
+        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <h3 class="text-sm font-medium text-gray-900 mb-3">Activity</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Total words</span>
+              <span class="text-gray-900">
+                <%= number_with_delimiter(content.map(&:cached_word_count).reject(&:nil?).sum) %>
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Last edited</span>
+              <span class="text-gray-900">
+                <%= distance_of_time_in_words(content.map(&:updated_at).max, Time.current) %> ago
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Created</span>
+              <span class="text-gray-900">
+                <%= distance_of_time_in_words(content.map(&:created_at).min, Time.current) %> ago
+              </span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </aside>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div 
+    x-show="sidebarOpen" 
+    x-transition:enter="transition-opacity ease-linear duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition-opacity ease-linear duration-300"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="fixed inset-0 z-40 lg:hidden"
+    style="display: none;"
   >
+    <div class="fixed inset-0 bg-black bg-opacity-25" @click="sidebarOpen = false"></div>
+    <div 
+      x-show="sidebarOpen"
+      x-transition:enter="transition ease-in-out duration-300 transform"
+      x-transition:enter-start="-translate-x-full"
+      x-transition:enter-end="translate-x-0"
+      x-transition:leave="transition ease-in-out duration-300 transform"
+      x-transition:leave-start="translate-x-0"
+      x-transition:leave-end="-translate-x-full"
+      class="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-xl"
+    >
+      <!-- Mobile sidebar content - simplified version of desktop sidebar -->
+      <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+        <div class="px-4">
+          <div class="flex items-center mb-6">
+            <div class="w-8 h-8 rounded-lg <%= content_type_class.color %> flex items-center justify-center mr-3">
+              <i class="material-icons text-white text-lg"><%= content_type_class.icon %></i>
+            </div>
+            <h2 class="text-lg font-semibold text-gray-900"><%= content_type_name.pluralize %></h2>
+          </div>
+          
+          <!-- Mobile folders list -->
+          <div class="space-y-1">
+            <% folders.each do |folder| %>
+              <%= link_to folder, class: "flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100", onclick: "document.querySelector('[x-data]').__x.$data.sidebarOpen = false" do %>
+                <i class="material-icons text-lg mr-3 text-gray-400"><%= Folder.icon %></i>
+                <span><%= folder.title %></span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <div class="absolute top-0 right-0 -mr-12 pt-2">
+        <button
+          @click="sidebarOpen = false"
+          type="button"
+          class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+        >
+          <span class="sr-only">Close sidebar</span>
+          <i class="material-icons text-white">close</i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col overflow-hidden lg:pt-0 pt-16">
+    <!-- Hero Header -->
+    <div class="bg-white shadow-sm">
+      <div class="relative">
+        <%= image_tag asset_path(header_image), class: 'h-32 w-full object-cover lg:h-48' %>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20"></div>
+      </div>
+      
+      <div class="px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-5">
+            <div class="flex-shrink-0">
+              <% if @universe_scope %>
+                <%= link_to @universe_scope do %>
+                  <%= image_tag @universe_scope.random_image_including_private(format: :hero), class: 'h-16 w-16 rounded-xl ring-4 ring-white shadow-lg lg:h-20 lg:w-20' %>
+                <% end %>
+              <% else %>
+                <%= image_tag current_user.image_url, class: 'h-16 w-16 rounded-xl ring-4 ring-white shadow-lg lg:h-20 lg:w-20' %>
+              <% end %>
+            </div>
+            
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900 lg:text-3xl">
+                <%= content_type_name.pluralize %>
+              </h1>
+              <p class="text-gray-600 mt-1">
+                <% if @universe_scope %>
+                  in <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.text_color} font-medium hover:underline" %>
+                <% else %>
+                  by <%= link_to current_user.display_name, current_user, class: "#{User.text_color} font-medium hover:underline" %>
+                <% end %>
+              </p>
+            </div>
+          </div>
+          
+          <div class="flex items-center space-x-3">
+            <% if Rails.application.config.content_type_names.include?(content_type_name) %>
+              <%= link_to attribute_customization_path(content_type_name.downcase) do %>
+                <button class="hidden lg:inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  <i class="material-icons text-lg mr-2">tune</i>
+                  Customize template
+                </button>
+              <% end %>
+            <% end %>
+
+            <% if current_user.can_create?(content_type_class) %>
+              <%= link_to new_polymorphic_path(content_type_class) do %>
+                <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white <%= content_type_class.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
+                  <i class="material-icons text-lg mr-2">add</i>
+                  <span class="hidden sm:inline">New <%= content_type_name %></span>
+                  <span class="sm:hidden">New</span>
+                </button>
+              <% end %>
+            <% else %>
+              <%= link_to subscription_path do %>
+                <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gray-400 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
+                  <span class="hidden sm:inline">Upgrade to create <%= content_type_name.pluralize %></span>
+                  <span class="sm:hidden">Upgrade</span>
+                </button>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Serendipitous Question - Compact Expandable Header -->
+    <% if @questioned_content && @attribute_field_to_question %>
+      <% serendipitous_category = @attribute_field_to_question.attribute_category %>
+      
+      <style>
+        .js-enhanced-autosave.border-yellow-400 { border-color: #fbbf24 !important; box-shadow: 0 0 0 1px #fbbf24 !important; }
+        .js-enhanced-autosave.border-green-400 { border-color: #34d399 !important; box-shadow: 0 0 0 1px #34d399 !important; }
+        .js-enhanced-autosave.border-red-400 { border-color: #f87171 !important; box-shadow: 0 0 0 1px #f87171 !important; }
+        .js-autosave-toast { display: none !important; }
+      </style>
+
+      <div x-data="{ questionExpanded: false }" class="border-b border-gray-200">
+        <!-- Compact Question Header -->
+        <button 
+          @click="questionExpanded = !questionExpanded"
+          class="w-full px-6 lg:px-8 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-all duration-200 focus:outline-none"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="flex-shrink-0">
+                <div class="w-8 h-8 rounded-lg <%= @questioned_content.color %> flex items-center justify-center shadow-sm">
+                  <i class="material-icons text-white text-sm"><%= serendipitous_category.icon %></i>
+                </div>
+              </div>
+              <div class="text-left">
+                <h3 class="text-sm font-medium text-gray-900">
+                  <%=
+                    t(
+                      "serendipitous_questions.attributes.#{@questioned_content.page_type.downcase}.#{@attribute_field_to_question.label.parameterize.underscore}",
+                      name: @questioned_content.name,
+                      default: "What is #{@questioned_content.name}'s #{@attribute_field_to_question.label.downcase}?"
+                    )
+                  %>
+                </h3>
+                <p class="text-xs text-gray-600">Click to answer this question</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs text-gray-500 hidden sm:inline">Answer question</span>
+              <i class="material-icons text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': questionExpanded }">
+                expand_more
+              </i>
+            </div>
+          </div>
+        </button>
+        
+        <!-- Expanded Question Form -->
+        <div
+          x-show="questionExpanded"
+          x-transition:enter="transition ease-out duration-300"
+          x-transition:enter-start="opacity-0 -translate-y-2"
+          x-transition:enter-end="opacity-100 translate-y-0"
+          x-transition:leave="transition ease-in duration-200"
+          x-transition:leave-start="opacity-100 translate-y-0"
+          x-transition:leave-end="opacity-0 -translate-y-2"
+          class="px-6 lg:px-8 pb-6 bg-white border-t border-gray-100"
+          style="display: none;"
+        >
+          <%= form_for content, url: FieldTypeService.form_path_from_attribute_field(@attribute_field_to_question), method: :patch, class: "space-y-4", html: { class: "serendipitous-question-form" } do |f| %>
+            <%= hidden_field_tag "entity[entity_id]", @questioned_content.id %>
+            <%= hidden_field_tag "entity[entity_type]", @questioned_content.page_type %>
+            <%= hidden_field_tag "field[name]", @attribute_field_to_question[:id] %>
+
+            <div class="mt-4">
+              <div class="flex items-center justify-between mb-2">
+                <label for="field_value" class="block text-sm font-medium text-gray-700">
+                  Your answer will be saved to 
+                  <%= link_to @questioned_content.name, @questioned_content.view_path, class: "#{@questioned_content.text_color} hover:underline font-medium" %>
+                  → <%= @attribute_field_to_question.label %>
+                </label>
+                <div class="flex items-center space-x-2 text-sm">
+                  <span class="js-autosave-indicator text-green-600 opacity-0 transition-opacity duration-200">
+                    <i class="material-icons text-sm mr-1">check_circle</i>
+                    Saved!
+                  </span>
+                </div>
+              </div>
+              <%=
+                text_area_tag "field[value]",
+                              @attribute_field_to_question[:value],
+                              id: "field_value",
+                              class: "w-full px-4 py-3 text-base bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none placeholder-gray-500 js-enhanced-autosave js-can-mention-pages",
+                              rows: 3,
+                              placeholder: "Share your thoughts..."
+              %>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <button
+                type="submit"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white <%= @questioned_content.color %> rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-150"
+              >
+                <i class="material-icons text-sm mr-2">save</i>
+                Save & get another question
+              </button>
+              <button
+                type="button"
+                @click="questionExpanded = false"
+                class="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Collapse
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Filters & Controls -->
+    <div class="bg-white border-b border-gray-200 px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <!-- Sort Dropdown -->
+          <div data-controller="dropdown" class="relative">
+            <button data-action="dropdown#toggle click@window->dropdown#hide" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <i class="material-icons text-lg mr-2">sort</i>
+              Sort
+              <%= chevron_down %>
+            </button>
+            <div data-dropdown-target="menu" class="origin-top-left absolute left-0 mt-2 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+              <div class="py-1">
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Recently edited</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Alphabetical</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Favorites first</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Date created</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tag Filter -->
+          <% if defined?(page_tags) && page_tags.any? %>
+            <div data-controller="dropdown" class="relative">
+              <%= form_with url: "", method: :get, local: true, class: "contents" do |form| %>
+                <button 
+                  data-action="dropdown#toggle click@window->dropdown#hide" 
+                  type="button"
+                  class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 <%= content_type_class.color if defined?(filtered_page_tags) && filtered_page_tags.any? %>"
+                >
+                  <i class="material-icons text-lg mr-2 <%= content_type_class.text_color %>">label</i>
+                  Tags
+                  <% if defined?(filtered_page_tags) && filtered_page_tags.any? %>
+                    <span class="ml-1.5 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                      <%= filtered_page_tags.count %>
+                    </span>
+                  <% end %>
+                  <%= chevron_down %>
+                </button>
+                <div data-dropdown-target="menu" class="origin-top-right absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                  <div class="p-4">
+                    <div class="space-y-3">
+                      <% page_tags.each do |page_tag| %>
+                        <div class="flex items-center">
+                          <input 
+                            id="filter-tag-<%= page_tag.id %>" 
+                            name="slug[]" 
+                            <%= 'checked' if defined?(filtered_page_tags) && filtered_page_tags.map(&:slug).include?(page_tag.slug) %> 
+                            value="<%= page_tag.slug %>" 
+                            type="checkbox" 
+                            class="h-4 w-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500"
+                          >
+                          <label for="filter-tag-<%= page_tag.id %>" class="ml-3 text-sm font-medium text-gray-900">
+                            <%= page_tag.tag %>
+                          </label>
+                        </div>
+                      <% end %>
+                      <div class="pt-2">
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg">
+                          Apply filters
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+          <!-- View Mode Toggle -->
+          <div class="hidden sm:flex border border-gray-300 rounded-lg">
+            <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-l-lg focus:outline-none">
+              <i class="material-icons text-lg">grid_view</i>
+            </button>
+            <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-r-lg focus:outline-none">
+              <i class="material-icons text-lg">view_list</i>
+            </button>
+          </div>
+          
+          <span class="text-sm text-gray-500">
+            <%= pluralize content.count, 'item' %>
+          </span>
+        </div>
+      </div>
+      
+      <!-- Active Filters -->
+      <% if defined?(filtered_page_tags) && filtered_page_tags.any? %>
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <span class="text-sm text-gray-500">Filtered by:</span>
+          <% filtered_page_tags.each do |page_tag| %>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+              <%= page_tag.tag %>
+              <%= link_to(polymorphic_path(content_type_class, { slug: params.fetch(:slug, []) - [page_tag.slug] })) do %>
+                <button class="ml-1 hover:text-blue-600">
+                  <i class="material-icons text-sm">close</i>
+                </button>
+              <% end %>
+            </span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="flex-1 overflow-y-auto bg-gray-50">
+      <% if content.any? %>
+        <!-- Grid View -->
+        <div x-show="viewMode === 'grid'" class="p-6 lg:p-8">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+            <% content.each do |item| %>
+              <div
+                class="group"
+                x-data="{
+                  isFavorite: <%= item.favorite? %>,
+                  isLoading: false,
+                  toggleFavorite(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.isLoading = true;
+                    const contentId = '<%= item.id %>';
+                    const contentClass = '<%= item.class.name.downcase.pluralize %>';
+                    let postUrl = contentClass === 'documents'
+                      ? `/documents/${contentId}/toggle_favorite`
+                      : `/plan/${contentClass}/${contentId}/toggle_favorite`;
+                    fetch(postUrl, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': document.querySelector('meta[name=\\'csrf-token\\']').content
+                      },
+                      body: JSON.stringify({ id: contentId })
+                    })
+                    .then(response => {
+                      if (!response.ok && postUrl.startsWith('/plan/')) {
+                        postUrl = `/${contentClass}/${contentId}/toggle_favorite`;
+                        return fetch(postUrl, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': document.querySelector('meta[name=\\'csrf-token\\']').content
+                          },
+                          body: JSON.stringify({ id: contentId })
+                        });
+                      }
+                      return response;
+                    })
+                    .then(response => {
+                      if (response.ok) {
+                        this.isFavorite = !this.isFavorite;
+                      } else {
+                        console.error('Failed to toggle favorite', response);
+                        alert('Error toggling favorite. Please try again.');
+                      }
+                    })
+                    .catch(error => {
+                      console.error('Error during fetch:', error);
+                      alert('An unexpected error occurred. Please check the console.');
+                    })
+                    .finally(() => {
+                      this.isLoading = false;
+                    });
+                  }
+                }"
+              >
+                <%= link_to (item.is_a?(ContentPage) ? item.view_path : item), class: "block" do %>
+                  <div class="bg-white hover:shadow-xl rounded-lg transition-shadow duration-200 overflow-hidden">
+                    <%
+                      item_image = nil
+                      if item.respond_to?(:random_image_including_private)
+                        item_image = item.random_image_including_private(format: :medium)
+                      end
+                      item_image ||= asset_path("card-headers/#{item.page_type.downcase.pluralize}.jpg")
+                    %>
+                    <%= image_tag item_image, class: 'h-48 w-full object-cover' %>
+                    <div class="p-4">
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1 min-w-0">
+                          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide <%= item.text_color %> truncate">
+                            <%= item.page_type %>
+                          </h3>
+                          <h2 class="mt-1 text-lg font-semibold text-gray-900 line-clamp-2" title="<%= item.name %>">
+                            <%= item.name %>
+                          </h2>
+                        </div>
+                        <% if item.respond_to?(:favorite?) %>
+                          <button
+                            @click="toggleFavorite"
+                            :disabled="isLoading"
+                            class="p-1 -m-1 text-xl rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                            title="Toggle favorite"
+                          >
+                            <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-300 hover:text-gray-400'">
+                              {{ isFavorite ? 'star' : 'star_outline' }}
+                            </i>
+                          </button>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- List View -->
+        <div x-show="viewMode === 'list'" style="display: none;" class="p-6 lg:p-8">
+          <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <% content.each_with_index do |item, index| %>
+              <div
+                class="<%= 'border-t border-gray-200' if index > 0 %> hover:bg-gray-50 transition-colors"
+                x-data="{
+                  isFavorite: <%= item.favorite? %>,
+                  isLoading: false,
+                  toggleFavorite(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.isLoading = true;
+                    const contentId = '<%= item.id %>';
+                    const contentClass = '<%= item.class.name.downcase.pluralize %>';
+                    let postUrl = contentClass === 'documents'
+                      ? `/documents/${contentId}/toggle_favorite`
+                      : `/plan/${contentClass}/${contentId}/toggle_favorite`;
+                    fetch(postUrl, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': document.querySelector('meta[name=\\'csrf-token\\']').content
+                      },
+                      body: JSON.stringify({ id: contentId })
+                    })
+                    .then(response => {
+                      if (!response.ok && postUrl.startsWith('/plan/')) {
+                        postUrl = `/${contentClass}/${contentId}/toggle_favorite`;
+                        return fetch(postUrl, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': document.querySelector('meta[name=\\'csrf-token\\']').content
+                          },
+                          body: JSON.stringify({ id: contentId })
+                        });
+                      }
+                      return response;
+                    })
+                    .then(response => {
+                      if (response.ok) {
+                        this.isFavorite = !this.isFavorite;
+                      } else {
+                        console.error('Failed to toggle favorite', response);
+                        alert('Error toggling favorite. Please try again.');
+                      }
+                    })
+                    .catch(error => {
+                      console.error('Error during fetch:', error);
+                      alert('An unexpected error occurred. Please check the console.');
+                    })
+                    .finally(() => {
+                      this.isLoading = false;
+                    });
+                  }
+                }"
+              >
+                <%= link_to (item.is_a?(ContentPage) ? item.view_path : item), class: "flex items-center p-4 space-x-4" do %>
+                  <div class="flex-shrink-0">
+                    <%
+                      item_image = nil
+                      if item.respond_to?(:random_image_including_private)
+                        item_image = item.random_image_including_private(format: :small)
+                      end
+                      item_image ||= asset_path("card-headers/#{item.page_type.downcase.pluralize}.jpg")
+                    %>
+                    <%= image_tag item_image, class: 'w-16 h-16 rounded-lg object-cover' %>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-lg font-medium text-gray-900 truncate" title="<%= item.name %>"><%= item.name %></h3>
+                    <p class="text-sm text-gray-500 <%= item.text_color %> truncate"><%= item.page_type %></p>
+                  </div>
+                  <div class="flex-shrink-0 flex items-center space-x-3">
+                    <% if item.respond_to?(:favorite?) %>
+                      <button
+                        @click="toggleFavorite"
+                        :disabled="isLoading"
+                        class="p-1 -m-1 text-lg rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                        :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                        title="Toggle favorite"
+                      >
+                        <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-300 hover:text-gray-400'">
+                          {{ isFavorite ? 'star' : 'star_outline' }}
+                        </i>
+                      </button>
+                    <% end %>
+                    <i class="material-icons text-gray-400">chevron_right</i>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <!-- Empty State -->
+        <div class="flex-1 flex items-center justify-center p-12">
+          <div class="text-center max-w-md">
+            <div class="mx-auto h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center mb-6">
+              <i class="material-icons text-4xl text-gray-400"><%= content_type_class.icon %></i>
+            </div>
+            <h3 class="text-xl font-medium text-gray-900 mb-3">No <%= content_type_name.pluralize.downcase %> yet</h3>
+            <p class="text-gray-500 mb-8">Get started by creating your first <%= content_type_name.downcase %>. You can also customize your template to organize information exactly how you want.</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+              <% if Rails.application.config.content_type_names.include?(content_type_name) %>
+                <%= link_to attribute_customization_path(content_type_name.downcase) do %>
+                  <button class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="material-icons text-lg mr-2">tune</i>
+                    Customize template
+                  </button>
+                <% end %>
+              <% end %>
+              <%= link_to new_polymorphic_path(content_type_class) do %>
+                <button class="inline-flex items-center px-6 py-3 text-sm font-medium rounded-lg text-white <%= content_type_class.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
+                  <i class="material-icons text-lg mr-2">add</i>
+                  Create your first <%= content_type_name.downcase %>
+                </button>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </main>
+
+  <!-- New Folder Modal -->
+  <div class="fixed z-50 inset-0 overflow-y-auto" x-show="showNewFolderModal" style="display: none;">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-      <!-- This element is to trick the browser into centering the modal contents. -->
-      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showNewFolderModal = false"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
 
       <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
         <%= form_for Folder.new do |f| %>
           <%= f.hidden_field :context, value: content_type_name %>
           <%= f.hidden_field :parent_folder_id, value: @parent_folder %>
 
-          <div>
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-              <i class="material-icons <%= Folder.text_color %> h-6 w-6"><%= Folder.icon %></i>
+          <div class="sm:flex sm:items-start">
+            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+              <i class="material-icons text-blue-600"><%= Folder.icon %></i>
             </div>
-            <div class="mt-3 text-center sm:mt-5">
-              <h3 class="text-lg leading-6 font-medium text-gray-900">Create a folder</h3>
-
-              <div class="mt-2 text-left">
-                <label for="title" class="block text-sm font-medium text-gray-700">Folder name</label>
-                <%= f.text_field :title, placeholder: "New Folder", value: "", class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Create a folder</h3>
+              <div>
+                <label for="folder_title" class="block text-sm font-medium text-gray-700 mb-2">Folder name</label>
+                <%= f.text_field :title, 
+                    placeholder: "Enter folder name", 
+                    class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500", 
+                    id: "folder_title" %>
               </div>
             </div>
           </div>
-          <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-            <%= f.submit 'Create folder', class: "w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 #{Folder.color} text-base font-medium text-white hover:bg-notebook-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm cursor-pointer" %>
-            <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm"
-              @click="showNewFolderModal=false"
-            >
+          
+          <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+            <%= f.submit 'Create folder', 
+                class: "w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 #{Folder.color} text-base font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm" %>
+            <button type="button" 
+                class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
+                @click="showNewFolderModal = false">
               Cancel
             </button>
           </div>
@@ -796,4 +765,49 @@
       </div>
     </div>
   </div>
+
+  <!-- Enhanced Autosave JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const autosaveFields = document.querySelectorAll('.js-enhanced-autosave');
+      
+      autosaveFields.forEach(field => {
+        const indicator = document.querySelector('.js-autosave-indicator');
+        
+        field.addEventListener('input', function() {
+          // Show saving state
+          field.classList.remove('border-green-400', 'border-red-400');
+          field.classList.add('border-yellow-400');
+          if (indicator) {
+            indicator.classList.remove('opacity-100');
+            indicator.classList.add('opacity-0');
+          }
+        });
+
+        field.addEventListener('autosave:success', function() {
+          // Show saved state
+          field.classList.remove('border-yellow-400', 'border-red-400');
+          field.classList.add('border-green-400');
+          if (indicator) {
+            indicator.classList.remove('opacity-0');
+            indicator.classList.add('opacity-100');
+            setTimeout(() => {
+              indicator.classList.remove('opacity-100');
+              indicator.classList.add('opacity-0');
+            }, 2000);
+          }
+        });
+
+        field.addEventListener('autosave:error', function() {
+          // Show error state
+          field.classList.remove('border-yellow-400', 'border-green-400');
+          field.classList.add('border-red-400');
+          if (indicator) {
+            indicator.classList.remove('opacity-100');
+            indicator.classList.add('opacity-0');
+          }
+        });
+      });
+    });
+  </script>
 </div>
