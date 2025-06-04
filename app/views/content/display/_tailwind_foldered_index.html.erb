@@ -12,7 +12,7 @@
 %>
 
 <div 
-  x-data="{ showNewFolderModal: false }"
+  x-data="{ showNewFolderModal: false, sidebarOpen: false }"
 >
   <div class="h-full flex">
     <!-- Static for desktop -->
@@ -21,9 +21,14 @@
       <div class="lg:hidden">
         <div class="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-1.5">
           <div>
-            <!--
-            <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-pink-500.svg" alt="Workflow">
-            -->
+            <button 
+              @click="sidebarOpen = !sidebarOpen"
+              type="button" 
+              class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue"
+            >
+              <i class="material-icons text-sm mr-1"><%= content_type_class.icon %></i>
+              <span class="hidden sm:inline">Your <%= content_type_name.pluralize %></span>
+            </button>
           </div>
           <div>
             <button type="button" class="-mr-3 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-pink-600">
@@ -472,180 +477,194 @@
               </div>
             </div>
           <% end %>
-
-
-
-
-
         </main>
 
         <!-- second sidebar -->
-        <aside class="hidden xl:order-first xl:flex xl:flex-col flex-shrink-0 w-96 border-r border-gray-200 min-h-screen">
-          <div class="pb-4 bg-white">
-            <h2 class="text-lg font-medium z-10 sticky top-0 border-t border-b border-gray-200 bg-gray-100 px-6 py-1 text-sm font-medium text-gray-500">
-              <i class="material-icons float-left <%= content_type_class.text_color %> text-xl mr-2"><%= content_type_class.icon %></i>
-              Your <%= content_type_name.pluralize %>
-            </h2>
-
-            <div class="px-6">
-              <p class="mt-4 text-xs tracking-wider font-bold text-gray-500">
-                Showing <%= pluralize content.count, 'page' %>
-              </p>
-              <ul class="mt-1 text-gray-600">
-                <% content_counts_per_type.each do |content_type, count| %>
-                  <li>
-                    <i class="material-icons float-left mr-2 <%= content_class_from_name(content_type).text_color %>">
-                      <%= content_class_from_name(content_type).icon %>
-                    </i>
-                    <span class="text-sm">
-                      <%= number_with_delimiter count %>
-                      <%= content_type.downcase.pluralize count %>
-                    </span>
-                  </li>
-                <% end %>
-              </ul>
-              
-              <!-- todo put filter/search bar here -->
-              <!--
-              <form class="mt-6 flex space-x-4" action="#">
-                <div class="flex-1 min-w-0">
-                  <label for="search" class="sr-only">Search</label>
-                  <div class="relative rounded-md shadow-sm">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                      </svg>
+        <!-- Mobile sidebar overlay -->
+        <div 
+          x-show="sidebarOpen" 
+          x-transition:enter="transition-opacity ease-linear duration-300"
+          x-transition:enter-start="opacity-0"
+          x-transition:enter-end="opacity-100"
+          x-transition:leave="transition-opacity ease-linear duration-300"
+          x-transition:leave-start="opacity-100"
+          x-transition:leave-end="opacity-0"
+          class="fixed inset-0 z-40 lg:hidden"
+          style="display: none;"
+        >
+          <div class="fixed inset-0 bg-black bg-opacity-25" @click="sidebarOpen = false"></div>
+          <div 
+            x-show="sidebarOpen"
+            x-transition:enter="transition ease-in-out duration-300 transform"
+            x-transition:enter-start="-translate-x-full"
+            x-transition:enter-end="translate-x-0"
+            x-transition:leave="transition ease-in-out duration-300 transform"
+            x-transition:leave-start="translate-x-0"
+            x-transition:leave-end="-translate-x-full"
+            class="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-xl"
+          >
+            <div class="absolute top-0 right-0 -mr-12 pt-2">
+              <button
+                @click="sidebarOpen = false"
+                type="button"
+                class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+              >
+                <span class="sr-only">Close sidebar</span>
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+              <div class="flex-shrink-0 flex items-center px-4 mb-6">
+                <i class="material-icons <%= content_type_class.text_color %> text-2xl mr-3"><%= content_type_class.icon %></i>
+                <h2 class="text-lg font-semibold text-gray-900">Your <%= content_type_name.pluralize %></h2>
+              </div>
+              <!-- Mobile sidebar content -->
+              <div class="px-4 space-y-6">
+                <!-- Stats summary -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <h3 class="text-sm font-medium text-gray-900 mb-3">Overview</h3>
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between text-sm">
+                      <span class="text-gray-600">Total pages</span>
+                      <span class="font-medium text-gray-900"><%= content.count %></span>
                     </div>
-                    <input type="search" name="search" id="search" class="focus:ring-pink-500 focus:border-pink-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="Search">
+                    <% total_word_count = content.map(&:cached_word_count).reject(&:nil?).sum %>
+                    <div class="flex items-center justify-between text-sm">
+                      <span class="text-gray-600">Total words</span>
+                      <span class="font-medium text-gray-900"><%= number_with_delimiter total_word_count %></span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                      <span class="text-gray-600">Folders</span>
+                      <span class="font-medium text-gray-900"><%= folders.count %></span>
+                    </div>
                   </div>
                 </div>
-                <button type="submit" class="inline-flex justify-center px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
-                  <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
-                  </svg>
-                  <span class="sr-only">Search</span>
-                </button>
-              </form>
-              -->
+                
+                <!-- Folders -->
+                <div>
+                  <h3 class="text-sm font-medium text-gray-900 mb-3">Folders</h3>
+                  <div class="space-y-2">
+                    <% folders.each do |folder| %>
+                      <%= link_to folder, class: "flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150" do %>
+                        <i class="material-icons <%= Folder.text_color %> mr-3"><%= Folder.icon %></i>
+                        <span class="text-sm font-medium text-gray-900 truncate"><%= folder.title %></span>
+                      <% end %>
+                    <% end %>
+                    <button 
+                      @click="showNewFolderModal=true; sidebarOpen=false"
+                      class="w-full flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150 text-left"
+                    >
+                      <i class="material-icons <%= Folder.text_color %> mr-3">add</i>
+                      <span class="text-sm font-medium text-gray-700">Add a folder</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-              <!--
-              <form class="mt-6 flex space-x-2" action="#">
-                <button type="submit" class="inline-flex justify-center px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
-                  <i class="material-icons float-left mr-2 text-sm <%= Folder.text_color %>"><%= Folder.icon %></i>
-                  New Folder
-                </button>
-                <button type="submit" class="inline-flex justify-center px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
-                  <i class="material-icons float-left mr-2 text-sm <%= Document.text_color %>"><%= Document.icon %></i>
-                  New <%= content_type_name %>
-                </button>
-              </form>
-              -->
+        <!-- Desktop sidebar -->
+        <aside class="hidden lg:order-first lg:flex lg:flex-col flex-shrink-0 w-80 border-r border-gray-200 min-h-screen bg-white">
+          <!-- Header -->
+          <div class="flex-shrink-0 border-b border-gray-200">
+            <div class="flex items-center px-6 py-4 bg-gradient-to-r from-gray-50 to-white">
+              <div class="flex items-center">
+                <i class="material-icons <%= content_type_class.text_color %> text-2xl mr-3"><%= content_type_class.icon %></i>
+                <h2 class="text-lg font-semibold text-gray-900">Your <%= content_type_name.pluralize %></h2>
+              </div>
             </div>
           </div>
 
-          <!-- Folder & stats -->
-          <nav class="flex-1 min-h-0 overflow-y-auto" aria-label="Directory">
-            <div class="relative">
-              <div class="z-10 sticky top-0 border-t border-b border-gray-200 bg-gray-100 px-6 py-1 text-sm font-medium text-gray-500">
-                <h3>
-                  <i class="material-icons float-left text-sm mr-1 <%= Folder.text_color %>"><%= Folder.icon %></i>
-                  Folders
-                  <span class="float-right bg-gray-100 rounded px-1 text-xs mt-0.5">
-                    <%= folders.count %>
-                  </span>
-                </h3>
-              </div>
-              <ul role="list" class="relative z-0 divide-y divide-gray-200">
-                <% folders.each do |folder| %>
-                  <li>
-                    <div class="relative px-6 py-2 flex items-center space-x-3 hover:bg-white focus-within:ring-2 focus-within:ring-inset focus-within:ring-teal-500">
-                      <div class="flex-shrink-0">
-                        <i class="material-icons pt-1 text-4xl <%= Folder.text_color %>"><%= Folder.icon %></i>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <%= link_to folder, class: 'focus:outline-none' do %>
-                          <!-- Extend touch target to entire panel -->
-                          <span class="absolute inset-0" aria-hidden="true"></span>
-                          <p class="text-sm font-medium text-gray-900 w-48"><%= folder.title %></p>
-                        <% end %>
-                      </div>
+          <!-- Content overview -->
+          <% non_folder_content_types = content_counts_per_type.reject { |type, _| type == 'Folder' } %>
+          <% if non_folder_content_types.count > 1 %>
+            <div class="flex-shrink-0 px-6 py-4 bg-gray-50 border-b border-gray-200">
+              <!-- Content type breakdown -->
+              <div class="space-y-2">
+                <% content_counts_per_type.each do |content_type, count| %>
+                  <% next if content_type == 'Folder' %>
+                  <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center">
+                      <i class="material-icons text-sm <%= content_class_from_name(content_type).text_color %> mr-2">
+                        <%= content_class_from_name(content_type).icon %>
+                      </i>
+                      <span class="text-gray-700"><%= content_type.downcase.pluralize.humanize %></span>
                     </div>
-                  </li>
-                <% end %>
-                <li>
-                  <div class="relative cursor-pointer select-none px-6 flex items-center space-x-3 hover:bg-white focus-within:ring-2 focus-within:ring-inset focus-within:ring-teal-500"
-                     @click="showNewFolderModal=true"
-                  >
-                    <div class="flex-shrink-0">
-                      <i class="material-icons pt-1 text-4xl <%= Folder.text_color %>">add</i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm font-medium text-gray-900">Add a folder</p>
-                    </div>
+                    <span class="font-medium text-gray-900"><%= number_with_delimiter count %></span>
                   </div>
-                </li>
-              </ul>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Scrollable content -->
+          <div class="flex-1 overflow-y-auto">
+            <!-- Folders section -->
+            <div class="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-3">
+              <div class="flex items-center justify-between">
+                <h3 class="text-sm font-medium text-gray-900 flex items-center">
+                  <i class="material-icons text-sm <%= Folder.text_color %> mr-2"><%= Folder.icon %></i>
+                  Folders
+                </h3>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  <%= folders.count %>
+                </span>
+              </div>
+            </div>
+            
+            <div class="px-6 py-2 pb-4">
+              <div class="space-y-1">
+                <% folders.each do |folder| %>
+                  <%= link_to folder, class: "group flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-150" do %>
+                    <i class="material-icons <%= Folder.text_color %> mr-3 text-xl group-hover:scale-110 transition-transform duration-150"><%= Folder.icon %></i>
+                    <span class="truncate"><%= folder.title %></span>
+                  <% end %>
+                <% end %>
+                
+                <button 
+                  @click="showNewFolderModal=true"
+                  class="group w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-all duration-150"
+                >
+                  <i class="material-icons <%= Folder.text_color %> mr-3 text-xl group-hover:scale-110 transition-transform duration-150">add</i>
+                  <span>Add a folder</span>
+                </button>
+              </div>
             </div>
 
-            <div class="relative pb-8">
-              <div class="z-10 sticky top-0 border-t border-b border-gray-200 bg-gray-100 px-6 py-1 text-sm font-medium text-gray-500">
-                <h3>
-                  <i class="material-icons float-left text-sm mr-1 <%= DocumentAnalysis.text_color %>"><%= DocumentAnalysis.icon %></i>
-                  Stats
-                </h3>
-              </div>
-              <div class="px-6 leading-relaxed pt-4">
-                <!--
-                <% content_counts_per_type.each do |content_type, count| %>
-                  <div class="inline-block mr-4 mb-2">
-                    <i class="material-icons float-left mr-1 <%= content_class_from_name(content_type).text_color %>"><%= content_class_from_name(content_type).icon %></i>
-                    <span class="text-sm">
-                      <span class="font-bold text-gray-700"><%= count %></span>
-                      <%= content_type.pluralize count %>
-                    </span>
+            <!-- Stats section -->
+            <div class="border-t border-gray-200 bg-gray-50 px-6 py-4">
+              <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center">
+                <i class="material-icons text-sm <%= DocumentAnalysis.text_color %> mr-2"><%= DocumentAnalysis.icon %></i>
+                Statistics
+              </h3>
+              
+              <div class="space-y-3">
+                <div class="flex items-center text-sm">
+                  <i class="material-icons text-sm <%= DocumentAnalysis.text_color %> mr-2">spellcheck</i>
+                  <div>
+                    <% total_word_count = content.map(&:cached_word_count).reject(&:nil?).sum %>
+                    <div class="font-semibold text-gray-900"><%= number_with_delimiter total_word_count %></div>
+                    <div class="text-xs text-gray-500"><%= 'total word'.pluralize(total_word_count) %></div>
                   </div>
-                <% end %>
-                -->
-
-                <div class="inline-block mr-4">
-                  <i class="material-icons float-left mr-1 <%= DocumentAnalysis.text_color %>">spellcheck</i>
-                  <% total_word_count = content.map(&:cached_word_count).reject(&:nil?).sum %>
-                  <span class="text-sm">
-                    <strong class="font-bold text-gray-700"><%= number_with_delimiter total_word_count %></strong>
-                    <%= 'total word'.pluralize(total_word_count) %>
-                  </span>
                 </div>
 
-                <% if false && content.any? { |content_page| content_page.page_type != Universe.name } %>
-                  <div class="whitespace-nowrap inline-block">
-                    in
-                    <div class="inline-block mr-4">
-                      <i class="material-icons float-left mr-0.5 <%= Universe.text_color %>"><%= Universe.icon %></i>
-                      <%# todo this is broken because we don't actually set universe on ContentPage imports %>
-                      <% total_universe_count = content.reject { |page| page.universe.nil? }.count %>
-                      <span class="text-sm">
-                        <strong class="font-bold text-gray-700"><%= number_with_delimiter total_universe_count %></strong>
-                        <%= 'universe'.pluralize(total_universe_count) %>
-                      </span>
-                    </div>
-                  </div>
-                <% end %>
-
-                <!-- timespan: latest updated_at - earliest created_at -->
                 <% if content.any? %>
-                  <div class="inline-block mr-4">
-                    <i class="material-icons float-left mr-1 text-notebook-blue">date_range</i>
-                    <span class="text-sm">
-                      <strong class="font-bold text-gray-700">
+                  <div class="flex items-center text-sm">
+                    <i class="material-icons text-sm text-notebook-blue mr-2">date_range</i>
+                    <div>
+                      <div class="font-semibold text-gray-900">
                         <%= distance_of_time_in_words content.map(&:updated_at).max - content.map(&:created_at).min %>
-                      </strong>
-                      timespan
-                    </span>
+                      </div>
+                      <div class="text-xs text-gray-500">timespan</div>
+                    </div>
                   </div>
                 <% end %>
               </div>
             </div>
-          </nav>
+          </div>
         </aside>
       </div>
     </div>
