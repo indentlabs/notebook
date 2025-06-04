@@ -51,16 +51,17 @@
           <div x-show="expandedWorldbuildingSidebar" x-cloak class="mb-1 pl-1">
             <% @activated_content_types.each do |content_type| %>
               <% content_type_klass = content_class_from_name(content_type) %>
-              <%= link_to main_app.polymorphic_path(content_type_klass), class: 'flex items-center px-2 sm:px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+              <% is_current_page = current_page?(main_app.polymorphic_path(content_type_klass)) %>
+              <%= link_to main_app.polymorphic_path(content_type_klass), class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{is_current_page ? 'bg-notebook-blue text-white' : 'hover:text-notebook-blue'} hover:bg-notebook-blue/20 hover:border-r-2 hover:border-notebook-blue" do %>
                 <i class="material-icons <%= content_type_klass.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= content_type_klass.icon %></i>
                 <span class="flex-grow text-sm hidden sm:inline"><%= content_type.pluralize %></span>
-                <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue hidden sm:inline">
+                <span class="text-black rounded px-1 text-xs group-hover:text-notebook-blue group-hover:bg-gray-100 hidden sm:inline">
                   <%= number_with_delimiter @current_user_content.fetch(content_type, []).count %>
                 </span>
               <% end %>
             <% end %>
 
-            <%= link_to main_app.customization_content_types_path, class: 'flex items-center px-2 sm:px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <%= link_to main_app.customization_content_types_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.customization_content_types_path)} hover:bg-notebook-blue/20 hover:text-notebook-blue hover:border-r-2 hover:border-notebook-blue" do %>
               <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">add</i>
               <span class="flex-grow text-sm hidden sm:inline">Add more...</span>
             <% end %>
@@ -78,7 +79,7 @@
             </svg>
           </div>
           <div x-show="expandedWritingSidebar" x-cloak class="pl-1 mb-2">
-            <%= link_to main_app.prompts_path, class: 'flex items-center px-2 sm:px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <%= link_to main_app.prompts_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.prompts_path)} hover:bg-notebook-blue/20 hover:text-notebook-blue hover:border-r-2 hover:border-notebook-blue" do %>
               <i class="material-icons text-orange-400 shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">lightbulb</i>
               <span class="flex-grow text-sm hidden sm:inline">Prompts</span>
               <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue hidden sm:inline">
@@ -86,7 +87,7 @@
               </span>
             <% end %>
 
-            <%= link_to main_app.timelines_path, class: 'flex items-center px-2 sm:px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <%= link_to main_app.timelines_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.timelines_path)} hover:bg-notebook-blue/20 hover:text-notebook-blue hover:border-r-2 hover:border-notebook-blue" do %>
               <i class="material-icons <%= Timeline.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= Timeline.icon %></i>
               <span class="flex-grow text-sm hidden sm:inline">Timelines</span>
               <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue hidden sm:inline">
@@ -94,7 +95,7 @@
               </span>
             <% end %>
 
-            <%= link_to main_app.documents_path, class: 'flex items-center px-2 sm:px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <%= link_to main_app.documents_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.documents_path)} hover:bg-notebook-blue/20 hover:text-notebook-blue hover:border-r-2 hover:border-notebook-blue" do %>
               <i class="material-icons <%= Document.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= Document.icon %></i>
               <span class="flex-grow text-sm hidden sm:inline">Documents</span>
               <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue hidden sm:inline">
@@ -102,7 +103,7 @@
               </span>
             <% end %>
 
-            <%= link_to '#new-analysis-onboarding', class: 'flex items-center px-2 sm:px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <%= link_to '#new-analysis-onboarding', class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?('#new-analysis-onboarding')} hover:bg-notebook-blue/20 hover:text-notebook-blue hover:border-r-2 hover:border-notebook-blue" do %>
               <i class="material-icons <%= DocumentAnalysis.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= DocumentAnalysis.icon %></i>
               <span class="flex-grow text-sm hidden sm:inline">Analysis</span>
               <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue hidden sm:inline">
@@ -123,7 +124,7 @@
             </svg>
           </div>
           <div x-show="expandedCommunitySidebar" x-cloak class="pl-1 mb-2">
-            <%= link_to main_app.stream_path, class: 'flex items-center px-2 sm:px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <%= link_to main_app.stream_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.stream_path)} hover:bg-notebook-blue/20 hover:text-notebook-blue hover:border-r-2 hover:border-notebook-blue" do %>
               <i class="material-icons text-purple-400 shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">ballot</i>
               <span class="flex-grow text-sm hidden sm:inline">Activity</span>
               <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue hidden sm:inline">
@@ -131,7 +132,7 @@
               </span>
             <% end %>
 
-            <%= link_to main_app.page_collections_path, class: 'flex items-center px-2 sm:px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <%= link_to main_app.page_collections_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.page_collections_path)} hover:bg-notebook-blue/20 hover:text-notebook-blue hover:border-r-2 hover:border-notebook-blue" do %>
               <i class="material-icons <%= PageCollection.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= PageCollection.icon %></i>
               <span class="flex-grow text-sm hidden sm:inline">Collections</span>
               <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue hidden sm:inline">
@@ -139,7 +140,7 @@
               </span>
             <% end %>
 
-            <%= link_to main_app.thredded_path, class: 'flex items-center px-2 sm:px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white rounded-l-full' do %>
+            <%= link_to main_app.thredded_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.thredded_path)} hover:bg-notebook-blue/20 hover:text-notebook-blue hover:border-r-2 hover:border-notebook-blue" do %>
               <i class="material-icons text-blue-500 shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">forum</i>
               <span class="flex-grow text-sm hidden sm:inline">Discussions</span>
               <span class="bg-gray-100 rounded px-1 text-xs group-hover:bg-notebook-blue hidden sm:inline">
