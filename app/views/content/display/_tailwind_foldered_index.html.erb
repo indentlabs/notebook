@@ -505,56 +505,27 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
             <% content.each do |item| %>
               <div
-                class="group"
+                class="group relative"
                 x-data="{
                   isFavorite: <%= item.favorite? %>,
                   isLoading: false,
-                  toggleFavorite(event) {
+                  async toggleFavorite(event) {
                     event.preventDefault();
                     event.stopPropagation();
                     this.isLoading = true;
-                    const contentId = '<%= item.id %>';
-                    const contentClass = '<%= item.class.name.downcase.pluralize %>';
-                    let postUrl = contentClass === 'documents'
-                      ? `/documents/${contentId}/toggle_favorite`
-                      : `/plan/${contentClass}/${contentId}/toggle_favorite`;
-                    fetch(postUrl, {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': document.querySelector('meta[name=\\'csrf-token\\']').content
-                      },
-                      body: JSON.stringify({ id: contentId })
-                    })
-                    .then(response => {
-                      if (!response.ok && postUrl.startsWith('/plan/')) {
-                        postUrl = `/${contentClass}/${contentId}/toggle_favorite`;
-                        return fetch(postUrl, {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-Token': document.querySelector('meta[name=\\'csrf-token\\']').content
-                          },
-                          body: JSON.stringify({ id: contentId })
-                        });
-                      }
-                      return response;
-                    })
-                    .then(response => {
-                      if (response.ok) {
+                    try {
+                      const result = await window.toggleItemFavorite('<%= item.id %>', '<%= item.page_type.downcase.pluralize %>');
+                      if (result.success) {
                         this.isFavorite = !this.isFavorite;
                       } else {
-                        console.error('Failed to toggle favorite', response);
                         alert('Error toggling favorite. Please try again.');
                       }
-                    })
-                    .catch(error => {
-                      console.error('Error during fetch:', error);
+                    } catch (error) {
+                      console.error('Error:', error);
                       alert('An unexpected error occurred. Please check the console.');
-                    })
-                    .finally(() => {
+                    } finally {
                       this.isLoading = false;
-                    });
+                    }
                   }
                 }"
               >
@@ -570,7 +541,7 @@
                     <%= image_tag item_image, class: 'h-48 w-full object-cover' %>
                     <div class="p-4">
                       <div class="flex items-start justify-between">
-                        <div class="flex-1 min-w-0">
+                        <div class="flex-1 min-w-0 pr-8">
                           <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide <%= item.text_color %> truncate">
                             <%= item.page_type %>
                           </h3>
@@ -578,22 +549,20 @@
                             <%= item.name %>
                           </h2>
                         </div>
-                        <% if item.respond_to?(:favorite?) %>
-                          <button
-                            @click="toggleFavorite"
-                            :disabled="isLoading"
-                            class="p-1 -m-1 text-xl rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                            :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
-                            title="Toggle favorite"
-                          >
-                            <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-300 hover:text-gray-400'">
-                              {{ isFavorite ? 'star' : 'star_outline' }}
-                            </i>
-                          </button>
-                        <% end %>
                       </div>
                     </div>
                   </div>
+                <% end %>
+                <% if item.respond_to?(:favorite?) %>
+                  <button
+                    @click="toggleFavorite"
+                    :disabled="isLoading"
+                    class="absolute top-4 right-4 p-1 text-xl rounded-full bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all"
+                    :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                    title="Toggle favorite"
+                  >
+                    <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400 hover:text-gray-600'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                  </button>
                 <% end %>
               </div>
             <% end %>
@@ -605,60 +574,31 @@
           <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <% content.each_with_index do |item, index| %>
               <div
-                class="<%= 'border-t border-gray-200' if index > 0 %> hover:bg-gray-50 transition-colors"
+                class="<%= 'border-t border-gray-200' if index > 0 %> hover:bg-gray-50 transition-colors relative"
                 x-data="{
                   isFavorite: <%= item.favorite? %>,
                   isLoading: false,
-                  toggleFavorite(event) {
+                  async toggleFavorite(event) {
                     event.preventDefault();
                     event.stopPropagation();
                     this.isLoading = true;
-                    const contentId = '<%= item.id %>';
-                    const contentClass = '<%= item.class.name.downcase.pluralize %>';
-                    let postUrl = contentClass === 'documents'
-                      ? `/documents/${contentId}/toggle_favorite`
-                      : `/plan/${contentClass}/${contentId}/toggle_favorite`;
-                    fetch(postUrl, {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': document.querySelector('meta[name=\\'csrf-token\\']').content
-                      },
-                      body: JSON.stringify({ id: contentId })
-                    })
-                    .then(response => {
-                      if (!response.ok && postUrl.startsWith('/plan/')) {
-                        postUrl = `/${contentClass}/${contentId}/toggle_favorite`;
-                        return fetch(postUrl, {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-Token': document.querySelector('meta[name=\\'csrf-token\\']').content
-                          },
-                          body: JSON.stringify({ id: contentId })
-                        });
-                      }
-                      return response;
-                    })
-                    .then(response => {
-                      if (response.ok) {
+                    try {
+                      const result = await window.toggleItemFavorite('<%= item.id %>', '<%= item.page_type.downcase.pluralize %>');
+                      if (result.success) {
                         this.isFavorite = !this.isFavorite;
                       } else {
-                        console.error('Failed to toggle favorite', response);
                         alert('Error toggling favorite. Please try again.');
                       }
-                    })
-                    .catch(error => {
-                      console.error('Error during fetch:', error);
+                    } catch (error) {
+                      console.error('Error:', error);
                       alert('An unexpected error occurred. Please check the console.');
-                    })
-                    .finally(() => {
+                    } finally {
                       this.isLoading = false;
-                    });
+                    }
                   }
                 }"
               >
-                <%= link_to (item.is_a?(ContentPage) ? item.view_path : item), class: "flex items-center p-4 space-x-4" do %>
+                <%= link_to (item.is_a?(ContentPage) ? item.view_path : item), class: "flex items-center p-4 space-x-4 pr-16" do %>
                   <div class="flex-shrink-0">
                     <%
                       item_image = nil
@@ -673,22 +613,20 @@
                     <h3 class="text-lg font-medium text-gray-900 truncate" title="<%= item.name %>"><%= item.name %></h3>
                     <p class="text-sm text-gray-500 <%= item.text_color %> truncate"><%= item.page_type %></p>
                   </div>
-                  <div class="flex-shrink-0 flex items-center space-x-3">
-                    <% if item.respond_to?(:favorite?) %>
-                      <button
-                        @click="toggleFavorite"
-                        :disabled="isLoading"
-                        class="p-1 -m-1 text-lg rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                        :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
-                        title="Toggle favorite"
-                      >
-                        <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-300 hover:text-gray-400'">
-                          {{ isFavorite ? 'star' : 'star_outline' }}
-                        </i>
-                      </button>
-                    <% end %>
+                  <div class="flex-shrink-0">
                     <i class="material-icons text-gray-400">chevron_right</i>
                   </div>
+                <% end %>
+                <% if item.respond_to?(:favorite?) %>
+                  <button
+                    @click="toggleFavorite"
+                    :disabled="isLoading"
+                    class="absolute right-12 top-1/2 transform -translate-y-1/2 p-1 text-lg rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                    title="Toggle favorite"
+                  >
+                    <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-300 hover:text-gray-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                  </button>
                 <% end %>
               </div>
             <% end %>
@@ -768,6 +706,42 @@
 
   <!-- Enhanced Autosave JavaScript -->
   <script>
+    // Global function for toggling favorites
+    window.toggleItemFavorite = async function(contentId, contentClass) {
+      const csrfToken = document.querySelector('meta[name=csrf-token]').getAttribute('content');
+      let postUrl = contentClass === 'documents'
+        ? `/documents/${contentId}/toggle_favorite`
+        : `/plan/${contentClass}/${contentId}/toggle_favorite`;
+      
+      try {
+        let response = await fetch(postUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({ id: contentId })
+        });
+        
+        if (!response.ok && postUrl.startsWith('/plan/')) {
+          postUrl = `/${contentClass}/${contentId}/toggle_favorite`;
+          response = await fetch(postUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({ id: contentId })
+          });
+        }
+        
+        return { success: response.ok };
+      } catch (error) {
+        console.error('Fetch error:', error);
+        throw error;
+      }
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
       const autosaveFields = document.querySelectorAll('.js-enhanced-autosave');
       

@@ -35,7 +35,15 @@ class ContentPage < ApplicationRecord
   end
 
   def favorite?
-    !!favorite
+    # Handle different formats that might come from SQL queries
+    case favorite
+    when true, 1, "1", "true"
+      true
+    when false, 0, "0", "false", nil
+      false
+    else
+      !!favorite
+    end
   end
 
   def view_path
