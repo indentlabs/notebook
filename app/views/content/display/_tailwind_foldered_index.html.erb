@@ -14,11 +14,12 @@
 <div x-data="{ 
   showNewFolderModal: false, 
   sidebarOpen: false,
-  showContentSidebar: true,
+  showContentSidebar: <%= @content.any? %>,
   viewMode: 'grid',
   selectedItems: [],
   searchQuery: '',
-  showSerendipitousQuestion: <%= @questioned_content ? 'true' : 'false' %>
+  showSerendipitousQuestion: <%= @questioned_content ? 'true' : 'false' %>,
+  isLoading: false
 }" class="h-screen flex bg-gray-50">
   
   <!-- Mobile Header -->
@@ -406,6 +407,29 @@
     <div class="bg-white border-b border-gray-200 px-6 lg:px-8 py-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
+          <!-- Search Input -->
+          <div class="relative group">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="material-icons text-gray-400 text-lg">search</i>
+            </div>
+            <input 
+              x-model="searchQuery"
+              type="text" 
+              placeholder="Search <%= content_type_name.pluralize.downcase %>..."
+              class="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+            <div x-show="searchQuery.length > 0" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+              <button @click="searchQuery = ''" class="text-gray-400 hover:text-gray-600">
+                <i class="material-icons text-lg">clear</i>
+              </button>
+            </div>
+            
+            <!-- Keyboard shortcut hint -->
+            <div class="absolute top-full left-0 mt-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+              Press <kbd class="px-1 py-0.5 bg-gray-700 rounded">⌘K</kbd> to focus search
+            </div>
+          </div>
+
           <!-- Sort Dropdown -->
           <div data-controller="dropdown" class="relative">
             <button data-action="dropdown#toggle click@window->dropdown#hide" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -484,7 +508,8 @@
           </div>
           
           <span class="text-sm text-gray-500">
-            <%= pluralize content.count, 'item' %>
+            <span x-text="searchQuery === '' ? '<%= pluralize content.count, 'item' %>' : 'Filtered results'"></span>
+            <span x-show="searchQuery !== ''" x-text="`for '${searchQuery}'`" class="text-gray-400"></span>
           </span>
         </div>
       </div>
@@ -510,12 +535,49 @@
     <!-- Content Grid -->
     <div class="flex-1 overflow-y-auto bg-gray-50">
       <% if content.any? %>
+        <!-- Search Empty State -->
+        <div x-show="searchQuery !== ''" x-transition class="hidden" id="search-empty-state">
+          <div class="flex-1 flex items-center justify-center p-12 min-h-96">
+            <div class="text-center max-w-lg">
+              <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-6 shadow-sm">
+                <i class="material-icons text-4xl text-gray-400">search_off</i>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-3">No matching <%= content_type_name.pluralize.downcase %> found</h3>
+              <p class="text-gray-600 mb-8 leading-relaxed" x-text="`We couldn't find any <%= content_type_name.pluralize.downcase %> matching '${searchQuery}'. Try adjusting your search terms or create a new one.`"></p>
+              
+              <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button @click="searchQuery = ''" class="inline-flex items-center px-6 py-3 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors shadow-sm">
+                  <i class="material-icons text-lg mr-2">clear</i>
+                  Clear search
+                </button>
+                
+                <% if current_user.can_create?(content_type_class) %>
+                  <%= link_to new_polymorphic_path(content_type_class) do %>
+                    <button class="inline-flex items-center px-6 py-3 text-sm font-medium rounded-lg text-white <%= content_type_class.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all">
+                      <i class="material-icons text-lg mr-2">add</i>
+                      Create new <%= content_type_name.downcase %>
+                    </button>
+                  <% end %>
+                <% else %>
+                  <%= link_to subscription_path do %>
+                    <button class="inline-flex items-center px-6 py-3 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all">
+                      <i class="material-icons text-lg mr-2">upgrade</i>
+                      Upgrade to create <%= content_type_name.pluralize.downcase %>
+                    </button>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Grid View -->
         <div x-show="viewMode === 'grid'" class="p-6 lg:p-8">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
             <% content.each do |item| %>
               <div
                 class="group relative"
+                x-show="searchQuery === '' || '<%= item.name.downcase %>'.includes(searchQuery.toLowerCase()) || '<%= item.page_type.downcase %>'.includes(searchQuery.toLowerCase())"
                 x-data="{
                   isFavorite: <%= item.favorite? %>,
                   isLoading: false,
@@ -585,6 +647,7 @@
             <% content.each_with_index do |item, index| %>
               <div
                 class="<%= 'border-t border-gray-200' if index > 0 %> hover:bg-gray-50 transition-colors relative"
+                x-show="searchQuery === '' || '<%= item.name.downcase %>'.includes(searchQuery.toLowerCase()) || '<%= item.page_type.downcase %>'.includes(searchQuery.toLowerCase())"
                 x-data="{
                   isFavorite: <%= item.favorite? %>,
                   isLoading: false,
@@ -660,10 +723,29 @@
                   </button>
                 <% end %>
               <% end %>
-              <%= link_to new_polymorphic_path(content_type_class) do %>
-                <button class="inline-flex items-center px-6 py-3 text-sm font-medium rounded-lg text-white <%= content_type_class.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
-                  <i class="material-icons text-lg mr-2">add</i>
-                  Create your first <%= content_type_name.downcase %>
+              <% if current_user.can_create?(content_type_class) %>
+                <%= link_to new_polymorphic_path(content_type_class) do %>
+                  <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white <%= content_type_class.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
+                    <i class="material-icons text-lg mr-2">add</i>
+                    <span class="hidden sm:inline">New <%= content_type_name %></span>
+                    <span class="sm:hidden">New</span>
+                  </button>
+                <% end %>
+              <% else %>
+                <%= link_to subscription_path do %>
+                  <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gray-400 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
+                    <i class="material-icons text-lg mr-2">book</i>
+                    <span class="hidden sm:inline">Upgrade to create a <%= content_type_name %></span>
+                    <span class="sm:hidden">Upgrade</span>
+                  </button>
+                <% end %>
+              <% end %>
+
+              <!-- Customize template button -->
+              <%= link_to attribute_customization_path(content_type_name.downcase) do %>
+                <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gray-400 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
+                  <i class="material-icons text-lg mr-2">tune</i>
+                  Customize template
                 </button>
               <% end %>
             </div>
@@ -792,6 +874,64 @@
           }
         });
       });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        // Only if not typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        // CMD/Ctrl + K to focus search
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          const searchInput = document.querySelector('input[x-model="searchQuery"]');
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+        }
+        
+        // CMD/Ctrl + \ to toggle content sidebar
+        if ((e.metaKey || e.ctrlKey) && e.key === '\\') {
+          e.preventDefault();
+          const toggleButton = document.querySelector('[\\@click="showContentSidebar = !showContentSidebar"]');
+          if (toggleButton) toggleButton.click();
+        }
+        
+        // 1 for grid view, 2 for list view
+        if (e.key === '1') {
+          e.preventDefault();
+          window.Alpine && window.Alpine.evaluate(document.querySelector('[x-data]'), 'viewMode = "grid"');
+        }
+        if (e.key === '2') {
+          e.preventDefault();
+          window.Alpine && window.Alpine.evaluate(document.querySelector('[x-data]'), 'viewMode = "list"');
+        }
+      });
+
+      // Search empty state management
+      function updateSearchEmptyState() {
+        const searchInput = document.querySelector('input[x-model="searchQuery"]');
+        const searchEmptyState = document.getElementById('search-empty-state');
+        
+        if (!searchInput || !searchEmptyState) return;
+        
+        const searchQuery = searchInput.value.trim();
+        const visibleItems = document.querySelectorAll('[x-show*="searchQuery"]:not([style*="display: none"])');
+        
+        if (searchQuery && visibleItems.length === 0) {
+          searchEmptyState.style.display = 'block';
+        } else {
+          searchEmptyState.style.display = 'none';
+        }
+      }
+      
+      // Watch for search input changes
+      const searchInput = document.querySelector('input[x-model="searchQuery"]');
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          setTimeout(updateSearchEmptyState, 100); // Small delay to let Alpine.js update visibility
+        });
+      }
     });
   </script>
 </div>
