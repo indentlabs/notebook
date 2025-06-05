@@ -14,6 +14,7 @@
 <div x-data="{ 
   showNewFolderModal: false, 
   sidebarOpen: false,
+  showContentSidebar: true,
   viewMode: 'grid',
   selectedItems: [],
   searchQuery: '',
@@ -44,7 +45,7 @@
   </div>
 
   <!-- Content Sidebar -->
-  <aside class="hidden lg:flex lg:flex-col lg:w-80 bg-white border-r border-gray-200">
+  <aside x-show="showContentSidebar" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="hidden lg:flex lg:flex-col lg:w-80 bg-white border-r border-gray-200">
     <!-- Sidebar Header -->
     <div class="px-6 py-6 border-b border-gray-200">
       <div class="flex items-center">
@@ -218,7 +219,7 @@
   </div>
 
   <!-- Main Content Area -->
-  <main class="flex-1 flex flex-col overflow-hidden lg:pt-0 pt-16">
+  <main class="flex-1 flex flex-col overflow-hidden lg:pt-0 pt-16" :class="{ 'lg:ml-0': !showContentSidebar }">
     <!-- Hero Header -->
     <div class="bg-white shadow-sm">
       <div class="relative">
@@ -229,6 +230,15 @@
       <div class="px-6 lg:px-8 py-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-5">
+            <!-- Content Sidebar Toggle Button -->
+            <button 
+              @click="showContentSidebar = !showContentSidebar"
+              class="hidden lg:inline-flex items-center p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              title="Toggle content sidebar"
+            >
+              <i class="material-icons text-xl" x-text="showContentSidebar ? 'menu_open' : 'menu'"></i>
+            </button>
+            
             <div class="flex-shrink-0">
               <% if @universe_scope %>
                 <%= link_to @universe_scope do %>
