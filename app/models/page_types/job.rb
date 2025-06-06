@@ -14,11 +14,11 @@ class Job < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'text-lighten-1 brown'
+    'text-lighten-1 brown bg-yellow-700'
   end
 
   def self.text_color
-    'text-lighten-1 brown-text'
+    'text-lighten-1 brown-text text-yellow-700'
   end
 
   def self.hex_color

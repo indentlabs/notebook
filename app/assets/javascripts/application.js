@@ -18,5 +18,3 @@
 //= require tribute
 //= require d3
 //= require_tree .
-
-

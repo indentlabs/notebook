@@ -1,4 +1,7 @@
 class DocumentsController < ApplicationController
+  layout 'tailwind', only: [:index, :show]
+  # layout 'editor',    only: [:edit]
+
   before_action :authenticate_user!, except: [:show, :analysis]
 
   # todo Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
@@ -17,8 +20,6 @@ class DocumentsController < ApplicationController
   # TODO: verify_user_can_read, verify_user_can_edit, etc before_actions instead of inlining them
 
   before_action :cache_linkable_content_for_each_content_type, only: [:edit]
-
-  layout 'editor',    only: [:edit]
 
   def index
     @page_title = "My documents"
@@ -56,6 +57,7 @@ class DocumentsController < ApplicationController
       page_id:   @documents.map(&:id)
     ).order(:tag)
 
+    @filtered_page_tags = []
     if params.key?(:tag)
       @filtered_page_tags = @page_tags.where(slug: params[:tag])
       @documents = @documents.to_a.select { |document| @filtered_page_tags.pluck(:page_id).include?(document.id) }

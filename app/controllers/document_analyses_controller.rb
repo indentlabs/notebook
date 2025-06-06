@@ -1,16 +1,18 @@
 class DocumentAnalysesController < ApplicationController
-  before_action :authenticate_user!
-  before_action :set_document
-  before_action :authorize_user_for_document
-  before_action :set_document_analysis
+  before_action :authenticate_user!,          except: [:index]
+  before_action :set_document,                except: [:index]
+  before_action :authorize_user_for_document, except: [:index]
+  before_action :set_document_analysis,       except: [:index]
 
   before_action :set_navbar_color
   before_action :set_sidenav_expansion
-  before_action :set_navbar_actions
+  # before_action :set_navbar_actions
 
-  # def index
-  #   @document_analyses = DocumentAnalysis.all
-  # end
+  layout 'tailwind', only: [:index]
+
+  def index
+    @document_analyses = DocumentAnalysis.all
+  end
 
   def show
     @navbar_actions = [] unless @analysis.present?

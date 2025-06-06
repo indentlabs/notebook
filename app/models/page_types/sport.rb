@@ -15,11 +15,11 @@ class Sport < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'orange'
+    'orange bg-orange-300'
   end
 
   def self.text_color
-    'orange-text'
+    'orange-text text-orange-300'
   end
 
   def self.hex_color
