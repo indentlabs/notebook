@@ -2,12 +2,11 @@
   <%= link_to root_path, class: 'flex items-center mr-2 px-3 sm:px-6 py-4 border-b border-gray-300 shadow hover:shadow-md transition bg-white rounded-br-lg' do %>
     <%= image_tag 'logos/book-small.webp', class: 'h-6 sm:h-8 mr-2 sm:mr-3' %>
     <span class="text-lg sm:text-2xl font-bold text-notebook-blue tracking-wide">
-      <span class="hidden sm:inline">Notebook.ai</span>
-      <span class="sm:hidden">Notebook</span>
+      <span>Notebook.ai</span>
     </span>
   <% end %>
 
-  <div x-cloak x-show="!showSidebar">
+  <div x-cloak x-show="!showSidebar" class="lg:hidden">
     <span class="sr-only">Menu</span> 
     <div @click.stop="showSidebar = true" class="mt-2 mr-1 p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
       <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -38,9 +37,13 @@
         <% end %>
       <% end %>
     </div>
+  <% else %>
+    <div class="flex-grow"></div>
+  <% end %>
 
-    <!-- right-hand side of navbar -->
-    <div class="pr-2 flex items-center space-x-1 sm:space-x-2">
+  <!-- right-hand side of navbar -->
+  <div class="pr-2 flex items-center justify-end space-x-1 sm:space-x-2 ml-auto">
+    <% if user_signed_in? %>
       <div x-data="{ notificationsDropdownOpen: false }" class="inline-block">
         <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="z-10 block p-1 border-2 border-notebook-blue hover:border-blue-200 rounded-full">
           <svg class="h-5 w-5 sm:h-6 sm:w-6 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'text-white' : 'text-blue-300' %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -84,7 +87,7 @@
       </div>
 
       <%= form_tag main_app.search_path, method: :get, class: 'hidden md:inline-block relative' do %>
-        <input class="w-48 lg:w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-9 px-3 text-sm rounded focus:outline-none"
+        <input class="w-32 lg:w-48 xl:w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-9 px-3 text-sm rounded focus:outline-none"
           type="search" name="q" value="<%= params[:q] %>" placeholder="Search your notebook">
         <!--
         <button type="submit" class="relative right-8 top-0.5 mt-4 mr-4">
