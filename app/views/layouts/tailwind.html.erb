@@ -38,10 +38,10 @@
       </svg>
     </button>
 
-    <nav x-show="showSidebar" class="notebook--sidebar fixed top-0 pt-16 flex flex-col left-0 z-20 h-screen overflow-x-hidden transition-all duration-300 origin-left transform bg-white border-r w-48 sm:w-56 lg:translate-x-0" :class="{ '-translate-x-full' : !showSidebar, 'translate-x-0' : showSidebar }" <%# @click.away="showSidebar = false" %>>
+    <nav x-show="showSidebar" class="notebook--sidebar fixed top-0 pt-16 flex flex-col left-0 z-20 h-screen overflow-hidden transition-all duration-300 origin-left transform bg-white border-r w-56 sm:w-64 lg:w-56" :class="{ '-translate-x-full' : !showSidebar, 'translate-x-0' : showSidebar }" <%# @click.away="showSidebar = false" %>>
       
       <!-- Universe selector - moved here for mobile/tablet -->
-      <div class="lg:hidden p-3 border-b border-gray-200 bg-gray-50">
+      <div class="lg:hidden p-3 border-b border-gray-200 bg-gray-50 shrink-0">
         <% if @universe_scope %>
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <%= link_to main_app.multiverse_path, class: "flex items-center px-3 py-2 hover:bg-gray-50 border-b border-gray-100" do %>
@@ -71,7 +71,7 @@
         <% end %>
       </div>
 
-      <nav class="notebook--sidebar text-sm font-medium text-gray-600 pt-1 overflow-y-auto flex-grow border-b border-gray-300 shadow" aria-label="Main Navigation">
+      <nav class="notebook--sidebar text-sm font-medium text-gray-600 pt-1 overflow-y-auto flex-1 min-h-0 border-b border-gray-300 shadow" aria-label="Main Navigation">
         <!--
         <%= link_to main_app.table_of_contents_path, class: 'flex items-center px-2 py-3 transition cursor-pointer group hover:bg-gray-100' do %>
           <i class="material-icons text-gray-400 shrink-0 w-6 h-6 mr-2 <%= Universe.text_color %>">dashboard</i>
@@ -94,17 +94,17 @@
               <% content_type_klass = content_class_from_name(content_type) %>
               <% is_current_page = current_page?(main_app.polymorphic_path(content_type_klass)) %>
               <%= link_to main_app.polymorphic_path(content_type_klass), class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{is_current_page ? 'bg-notebook-blue text-white' : 'hover:bg-notebook-blue hover:text-white'}" do %>
-                <i class="material-icons <%= content_type_klass.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= content_type_klass.icon %></i>
-                <span class="flex-grow text-sm"><%= content_type.pluralize %></span>
-                <span class="text-black rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 hidden sm:inline">
+                <i class="material-icons <%= content_type_klass.text_color %> shrink-0 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= content_type_klass.icon %></i>
+                <span class="flex-grow text-sm min-w-0 truncate"><%= content_type.pluralize %></span>
+                <span class="text-black rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 shrink-0">
                   <%= number_with_delimiter @current_user_content.fetch(content_type, []).count %>
                 </span>
               <% end %>
             <% end %>
 
             <%= link_to main_app.customization_content_types_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.customization_content_types_path)} hover:bg-notebook-blue hover:text-white" do %>
-              <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">add</i>
-              <span class="flex-grow text-sm">Add more...</span>
+              <i class="material-icons text-notebook-blue shrink-0 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">add</i>
+              <span class="flex-grow text-sm min-w-0 truncate">Add more...</span>
             <% end %>
           </div>
         </div>
@@ -121,36 +121,36 @@
           </div>
           <div x-show="expandedWritingSidebar" x-cloak class="pl-1 mb-2">
             <%= link_to main_app.timelines_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.timelines_path)} hover:bg-notebook-blue hover:text-white" do %>
-              <i class="material-icons <%= Timeline.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= Timeline.icon %></i>
-              <span class="flex-grow text-sm">Timelines</span>
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 hidden sm:inline">
+              <i class="material-icons <%= Timeline.text_color %> shrink-0 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= Timeline.icon %></i>
+              <span class="flex-grow text-sm min-w-0 truncate">Timelines</span>
+              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 shrink-0">
                 <%= @current_user_content.fetch('Timeline', []).count %>
               </span>
             <% end %>
 
             <%= link_to main_app.documents_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.documents_path)} hover:bg-notebook-blue hover:text-white" do %>
-              <i class="material-icons <%= Document.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= Document.icon %></i>
-              <span class="flex-grow text-sm">Documents</span>
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 hidden sm:inline">
+              <i class="material-icons <%= Document.text_color %> shrink-0 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= Document.icon %></i>
+              <span class="flex-grow text-sm min-w-0 truncate">Documents</span>
+              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 shrink-0">
                 <%= @current_user_content.fetch('Document', []).count %>
               </span>
             <% end %>
 
             <%= link_to main_app.prompts_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.prompts_path)} hover:bg-notebook-blue hover:text-white" do %>
-              <i class="material-icons text-orange-400 shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">lightbulb</i>
-              <span class="flex-grow text-sm">Prompts</span>
+              <i class="material-icons text-orange-400 shrink-0 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">lightbulb</i>
+              <span class="flex-grow text-sm min-w-0 truncate">Prompts</span>
               <!--
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 hidden sm:inline">
+              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700">
                 0
               </span>
               -->
             <% end %>
 
             <%= link_to '#new-analysis-onboarding', class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?('#new-analysis-onboarding')} hover:bg-notebook-blue hover:text-white" do %>
-              <i class="material-icons <%= DocumentAnalysis.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= DocumentAnalysis.icon %></i>
-              <span class="flex-grow text-sm">Analysis</span>
+              <i class="material-icons <%= DocumentAnalysis.text_color %> shrink-0 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= DocumentAnalysis.icon %></i>
+              <span class="flex-grow text-sm min-w-0 truncate">Analysis</span>
               <!--
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 hidden sm:inline">
+              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700">
                 0
               </span>
               -->
@@ -169,36 +169,38 @@
             </svg>
           </div>
           <div x-show="expandedCommunitySidebar" x-cloak class="pl-1 mb-2">
-            <%= link_to main_app.stream_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.stream_path)} hover:bg-notebook-blue hover:text-white" do %>
-              <i class="material-icons text-purple-400 shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">ballot</i>
-              <span class="flex-grow text-sm">Activity</span>
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 hidden sm:inline">
-                0
-              </span>
-            <% end %>
-
             <%= link_to main_app.page_collections_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.page_collections_path)} hover:bg-notebook-blue hover:text-white" do %>
-              <i class="material-icons <%= PageCollection.text_color %> shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= PageCollection.icon %></i>
-              <span class="flex-grow text-sm">Collections</span>
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 hidden sm:inline">
-                0
+              <i class="material-icons <%= PageCollection.text_color %> shrink-0 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= PageCollection.icon %></i>
+              <span class="flex-grow text-sm min-w-0 truncate">Collections</span>
+              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 shrink-0">
+                <%= @current_user_content.fetch('PageCollection', []).count %>
               </span>
             <% end %>
 
             <%= link_to main_app.thredded_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.thredded_path)} hover:bg-notebook-blue hover:text-white" do %>
-              <i class="material-icons text-blue-500 shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">forum</i>
-              <span class="flex-grow text-sm">Discussions</span>
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 hidden sm:inline">
+              <i class="material-icons text-blue-500 shrink-0 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">forum</i>
+              <span class="flex-grow text-sm min-w-0 truncate">Discussions</span>
+              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 shrink-0">
                 0
               </span>
+            <% end %>
+
+            <%= link_to main_app.stream_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(main_app.stream_path)} hover:bg-notebook-blue hover:text-white" do %>
+              <i class="material-icons text-purple-400 shrink-0 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full">ballot</i>
+              <span class="flex-grow text-sm min-w-0 truncate">Activity</span>
+              <!--
+              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 shrink-0">
+                0
+              </span>
+              -->
             <% end %>
           </div>
         </div>
       </nav>
 
-      <div @click="showSidebar = false" class="flex items-center px-2 sm:px-4 py-1 cursor-pointer group hover:bg-notebook-blue hover:text-white">
-        <i class="material-icons text-blue-500 shrink-0 w-6 h-6 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full p-1">arrow_left</i>
-        <span class="flex-grow text-sm">Hide Sidebar</span>
+      <div @click="showSidebar = false" class="flex items-center px-2 sm:px-4 py-1 cursor-pointer group hover:bg-notebook-blue hover:text-white shrink-0">
+        <i class="material-icons text-blue-500 shrink-0 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full p-1">arrow_left</i>
+        <span class="flex-grow text-sm min-w-0 truncate">Hide Sidebar</span>
       </div>
     </nav>
 
@@ -208,11 +210,11 @@
   <% end %>
 
   <!-- main content -->
-  <main <% if user_signed_in? %>:class="{ 'ml-48 sm:ml-56': showSidebar }"<% end %> class="transition-all duration-300">
+  <main <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-64 lg:ml-56': showSidebar }"<% end %> class="transition-all duration-300">
     <%= yield %>
   </main>
 
-  <footer <% if user_signed_in? %>:class="{ 'ml-48 sm:ml-56': showSidebar }"<% end %> class="transition-all duration-300">
+  <footer <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-64 lg:ml-56': showSidebar }"<% end %> class="transition-all duration-300">
     <div class="max-w-7xl mx-auto pt-24 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
       <div class="flex justify-center space-x-6 md:order-2">
         <%= link_to 'https://www.facebook.com/notebookai/', class: 'text-gray-400 hover:text-gray-500' do %>
