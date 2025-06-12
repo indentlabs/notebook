@@ -1,63 +1,284 @@
 <div x-data="{
   showNewFolderModal: false,
   showEditFolderModal: false,
+  sidebarOpen: false,
+  showContentSidebar: false,
   viewMode: 'grid',
   searchQuery: ''
-}" class="bg-gray-50 min-h-screen">
-  <!-- Header Section -->
-  <div class="bg-white shadow-sm">
-    <div class="px-6 lg:px-8 py-6">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <!-- Back/Up Navigation -->
-          <% if @parent_folder %>
-            <%= link_to @parent_folder, class: "p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" do %>
-              <i class="material-icons" title="Go up a folder: to <%= @parent_folder.title %>">arrow_upward</i>
-            <% end %>
-          <% else %>
-            <%
-              context_class = @folder.context.constantize rescue Document
-              
-              # Default to documents_path if the context class doesn't have a folder association
-              if context_class.column_names.include?('folder_id')
-                context_path = context_class.name.downcase.pluralize + "_path"
-                context_name = @folder.context.pluralize
-              else
-                context_path = "documents_path"
-                context_name = "Documents"
-              end
-            %>
-            <%= link_to send(context_path), class: "p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" do %>
-              <i class="material-icons" title="Go up a folder: back to <%= context_name %>">arrow_upward</i>
-            <% end %>
-          <% end %>
-          
-          <!-- Folder Icon and Title -->
-          <div class="flex items-center">
-            <button
-              @click="showEditFolderModal = true"
-              class="w-12 h-12 rounded-lg <%= Folder.color %> flex items-center justify-center mr-3"
-            >
-              <i class="material-icons text-white text-xl"><%= Folder.icon %></i>
-            </button>
-            <h1 class="text-2xl font-bold text-gray-900"><%= @folder.title %></h1>
-          </div>
-        </div>
-        
-        <!-- Action Buttons -->
-        <div>
-          <button
-            @click="showNewFolderModal = true"
-            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white <%= Folder.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm"
-          >
-            <i class="material-icons text-lg mr-2">create_new_folder</i>
-            <span class="hidden sm:inline">New subfolder</span>
-            <span class="sm:hidden">New</span>
-          </button>
-        </div>
+}" class="h-screen flex bg-gray-50">
+  
+  <!-- Mobile Header -->
+  <div class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-4 py-3">
+    <div class="flex items-center justify-between">
+      <button
+        @click="sidebarOpen = !sidebarOpen"
+        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        <i class="material-icons text-lg mr-2"><%= Folder.icon %></i>
+        <span>Folder</span>
+      </button>
+      
+      <div class="flex items-center space-x-2">
+        <button
+          @click="showNewFolderModal = true"
+          class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-white <%= Folder.color %> hover:opacity-90"
+        >
+          <i class="material-icons text-lg">add</i>
+        </button>
       </div>
     </div>
   </div>
+
+  <!-- Content Sidebar -->
+  <aside x-show="showContentSidebar" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="hidden lg:flex lg:flex-col lg:w-80 bg-white border-r border-gray-200">
+    <!-- Sidebar Header -->
+    <div class="px-6 py-6 border-b border-gray-200">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 rounded-lg <%= Folder.color %> flex items-center justify-center">
+            <i class="material-icons text-white"><%= Folder.icon %></i>
+          </div>
+        </div>
+        <div class="ml-4">
+          <h2 class="text-lg font-semibold text-gray-900"><%= @folder.title %></h2>
+          <p class="text-sm text-gray-500"><%= pluralize @content.count, 'item' %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-900"><%= @content.count %></div>
+          <div class="text-xs text-gray-500 uppercase tracking-wide">Total</div>
+        </div>
+        <div class="text-center">
+          <% total_words = @content.map(&:cached_word_count).reject(&:nil?).sum %>
+          <div class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(total_words / 1000) %>k</div>
+          <div class="text-xs text-gray-500 uppercase tracking-wide">Words</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Folders Section -->
+    <div class="flex-1 overflow-y-auto">
+      <div class="px-6 py-4">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-medium text-gray-900">Subfolders</h3>
+          <button
+            @click="showNewFolderModal = true"
+            class="inline-flex items-center p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+          >
+            <i class="material-icons text-lg">add</i>
+          </button>
+        </div>
+        
+        <div class="space-y-1">
+          <% @child_folders.each do |folder| %>
+            <%= link_to folder, class: "group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors" do %>
+              <i class="material-icons text-lg mr-3 text-gray-400 group-hover:text-gray-600"><%= Folder.icon %></i>
+              <span class="truncate"><%= folder.title %></span>
+            <% end %>
+          <% end %>
+          
+          <% if @child_folders.empty? %>
+            <button
+              @click="showNewFolderModal = true"
+              class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            >
+              <i class="material-icons text-lg mr-3">folder_open</i>
+              <span>Create your first subfolder</span>
+            </button>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Content Type Breakdown -->
+      <%
+        content_counts_per_type = Hash.new(0)
+        @content.each { |page| content_counts_per_type[page.respond_to?(:page_type) ? page.page_type : page.class.name] += 1 }
+      %>
+      <% if content_counts_per_type.keys.count > 1 %>
+        <div class="px-6 py-4 border-t border-gray-200">
+          <h3 class="text-sm font-medium text-gray-900 mb-3">Content Types</h3>
+          <div class="space-y-2">
+            <% content_counts_per_type.each do |content_type, count| %>
+              <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center">
+                  <i class="material-icons text-sm mr-2 <%= content_class_from_name(content_type).text_color %>">
+                    <%= content_class_from_name(content_type).icon %>
+                  </i>
+                  <span class="text-gray-700"><%= content_type.downcase.pluralize.humanize %></span>
+                </div>
+                <span class="text-gray-900 font-medium"><%= count %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Additional Stats -->
+      <% if @content.any? %>
+        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <h3 class="text-sm font-medium text-gray-900 mb-3">Activity</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Total words</span>
+              <span class="text-gray-900">
+                <%= number_with_delimiter(@content.map(&:cached_word_count).reject(&:nil?).sum) %>
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Last edited</span>
+              <span class="text-gray-900">
+                <%= distance_of_time_in_words(@content.map(&:updated_at).max, Time.current) %> ago
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Created</span>
+              <span class="text-gray-900">
+                <%= distance_of_time_in_words(@content.map(&:created_at).min, Time.current) %> ago
+              </span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </aside>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div
+    x-show="sidebarOpen"
+    x-transition:enter="transition-opacity ease-linear duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition-opacity ease-linear duration-300"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="fixed inset-0 z-40 lg:hidden"
+    style="display: none;"
+  >
+    <div class="fixed inset-0 bg-black bg-opacity-25" @click="sidebarOpen = false"></div>
+    <div
+      x-show="sidebarOpen"
+      x-transition:enter="transition ease-in-out duration-300 transform"
+      x-transition:enter-start="-translate-x-full"
+      x-transition:enter-end="translate-x-0"
+      x-transition:leave="transition ease-in-out duration-300 transform"
+      x-transition:leave-start="translate-x-0"
+      x-transition:leave-end="-translate-x-full"
+      class="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-xl"
+    >
+      <!-- Mobile sidebar content - simplified version of desktop sidebar -->
+      <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+        <div class="px-4">
+          <div class="flex items-center mb-6">
+            <div class="w-8 h-8 rounded-lg <%= Folder.color %> flex items-center justify-center mr-3">
+              <i class="material-icons text-white text-lg"><%= Folder.icon %></i>
+            </div>
+            <h2 class="text-lg font-semibold text-gray-900"><%= @folder.title %></h2>
+          </div>
+          
+          <!-- Mobile folders list -->
+          <div class="space-y-1">
+            <% @child_folders.each do |folder| %>
+              <%= link_to folder, class: "flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100", onclick: "document.querySelector('[x-data]').__x.$data.sidebarOpen = false" do %>
+                <i class="material-icons text-lg mr-3 text-gray-400"><%= Folder.icon %></i>
+                <span><%= folder.title %></span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <div class="absolute top-0 right-0 -mr-12 pt-2">
+        <button
+          @click="sidebarOpen = false"
+          type="button"
+          class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+        >
+          <span class="sr-only">Close sidebar</span>
+          <i class="material-icons text-white">close</i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col overflow-hidden lg:pt-0 pt-16" :class="{ 'lg:ml-0': !showContentSidebar }">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm">
+      <div class="px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <!-- Content Sidebar Toggle Button -->
+            <button
+              @click="showContentSidebar = !showContentSidebar"
+              class="hidden lg:inline-flex items-center p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              title="Toggle content sidebar"
+            >
+              <i class="material-icons text-xl" x-text="showContentSidebar ? 'menu_open' : 'menu'"></i>
+            </button>
+            
+            <!-- Back/Up Navigation -->
+            <% if @parent_folder %>
+              <%= link_to @parent_folder, class: "p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" do %>
+                <i class="material-icons" title="Go up a folder: to <%= @parent_folder.title %>">arrow_upward</i>
+              <% end %>
+            <% else %>
+              <%
+                context_class = @folder.context.constantize rescue Document
+                
+                # Default to documents_path if the context class doesn't have a folder association
+                if context_class.column_names.include?('folder_id')
+                  context_path = context_class.name.downcase.pluralize + "_path"
+                  context_name = @folder.context.pluralize
+                else
+                  context_path = "documents_path"
+                  context_name = "Documents"
+                end
+              %>
+              <%= link_to send(context_path), class: "p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" do %>
+                <i class="material-icons" title="Go up a folder: back to <%= context_name %>">arrow_upward</i>
+              <% end %>
+            <% end %>
+            
+            <!-- Folder Icon and Title -->
+            <div class="flex items-center">
+              <button
+                @click="showEditFolderModal = true"
+                class="w-12 h-12 rounded-lg <%= Folder.color %> flex items-center justify-center mr-3"
+              >
+                <i class="material-icons text-white text-xl"><%= Folder.icon %></i>
+              </button>
+              <div>
+                <h1 class="text-2xl font-bold text-gray-900"><%= @folder.title %></h1>
+                <p class="text-gray-600 mt-1">
+                  <% if @universe_scope %>
+                    in <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.text_color} font-medium hover:underline" %>
+                  <% else %>
+                    by <%= link_to current_user.display_name, current_user, class: "#{User.text_color} font-medium hover:underline" %>
+                  <% end %>
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div>
+            <button
+              @click="showNewFolderModal = true"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white <%= Folder.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm"
+            >
+              <i class="material-icons text-lg mr-2">create_new_folder</i>
+              <span class="hidden sm:inline">New subfolder</span>
+              <span class="sm:hidden">New</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
   <!-- Child Folders Section -->
   <div class="px-6 lg:px-8 py-6">
