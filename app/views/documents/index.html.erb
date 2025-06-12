@@ -1,13 +1,27 @@
-<%= render partial: 'content/display/tailwind_foldered_index', locals: {
-  header_image:        "card-headers/documents.webp",
-  content:             @documents,
-  content_display_partial: "content/display/tailwind_content_list/document_index",
-  mixed_content_types: false,
-  folders:             @folders,
-  content_type_class:  Document,
-  content_type_name:   Document.name,
-  filtered_page_tags:  @filtered_page_tags,
-  page_tags:           @page_tags
-} %>
+<div x-data="{ showNewFolderModal: false }">
+  <%= render partial: 'content/display/tailwind_foldered_index', locals: {
+    header_image:        "card-headers/documents.webp",
+    content:             @documents,
+    content_display_partial: "content/display/tailwind_content_list/document_index",
+    mixed_content_types: false,
+    folders:             @folders,
+    content_type_class:  Document,
+    content_type_name:   Document.name,
+    filtered_page_tags:  @filtered_page_tags,
+    page_tags:           @page_tags
+  } %>
 
-<%= render partial: 'folders/new_modal', locals: { content_type: Document, parent_folder: @folder } %>
+  <div x-show="showNewFolderModal">
+    <%= render partial: 'folders/tailwind_new_modal', locals: { content_type: nil, parent_folder: @folder } %>
+  </div>
+
+  <!-- New Folder Button -->
+  <div class="fixed bottom-8 right-8">
+    <button
+      @click="showNewFolderModal = true"
+      class="inline-flex items-center p-3 rounded-full text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg"
+    >
+      <i class="material-icons">create_new_folder</i>
+    </button>
+  </div>
+</div>

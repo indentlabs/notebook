@@ -1,49 +1,240 @@
-<%= content_for :full_width_page_content do %>
-  <div class="container-fluid">
-    <div class="row">
-      <h5>
-        <% if @parent_folder %>
-          <%= link_to @parent_folder do %>
-            <i class="material-icons left tooltipped" data-tooltip="Go up a folder: to <%= @parent_folder.title %>">arrow_upward</i>
-          <% end %>
-        <% else %>
-          <%# todo link to base `context`#index page %>
-          <%= link_to documents_path do %>
-            <i class="material-icons left tooltipped" data-tooltip="Go up a folder: back to Documents">arrow_upward</i>
-          <% end %>
-        <% end %>
-        <%= link_to '#edit-folder-modal', class: 'modal-trigger tooltipped', data: { tooltip: "Click to edit this folder" } do %>
-          <i class="material-icons large left <%= Folder.text_color %>"><%= Folder.icon %></i>
-        <% end %>
-        <%= @folder.title %>
-
-        <% if @child_folders.empty? %>
-          <div class="btn-group right" style="margin-top: 1.9em; margin-right: 0.2em">
-            <%= link_to '#new-folder-modal', class: "btn right #{Folder.color} lighten-1 white-text modal-trigger" do %>
-              <i class="material-icons left">create_new_folder</i>
-              New folder
+<div x-data="{
+  showNewFolderModal: false,
+  showEditFolderModal: false,
+  viewMode: 'grid',
+  searchQuery: ''
+}" class="bg-gray-50 min-h-screen">
+  <!-- Header Section -->
+  <div class="bg-white shadow-sm">
+    <div class="px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <!-- Back/Up Navigation -->
+          <% if @parent_folder %>
+            <%= link_to @parent_folder, class: "p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" do %>
+              <i class="material-icons" title="Go up a folder: to <%= @parent_folder.title %>">arrow_upward</i>
             <% end %>
+          <% else %>
+            <%
+              context_class = @folder.context.constantize rescue Document
+              
+              # Default to documents_path if the context class doesn't have a folder association
+              if context_class.column_names.include?('folder_id')
+                context_path = context_class.name.downcase.pluralize + "_path"
+                context_name = @folder.context.pluralize
+              else
+                context_path = "documents_path"
+                context_name = "Documents"
+              end
+            %>
+            <%= link_to send(context_path), class: "p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" do %>
+              <i class="material-icons" title="Go up a folder: back to <%= context_name %>">arrow_upward</i>
+            <% end %>
+          <% end %>
+          
+          <!-- Folder Icon and Title -->
+          <div class="flex items-center">
+            <button
+              @click="showEditFolderModal = true"
+              class="w-12 h-12 rounded-lg <%= Folder.color %> flex items-center justify-center mr-3"
+            >
+              <i class="material-icons text-white text-xl"><%= Folder.icon %></i>
+            </button>
+            <h1 class="text-2xl font-bold text-gray-900"><%= @folder.title %></h1>
           </div>
-        <% end %>
-      </h5>
-    </div>
-
-    <%= render partial: 'folders/list', locals: { folders: @child_folders } %>
-
-    <div class="row">
-      <h5>Documents <span class="grey-text"><%= @content.count %></span></h5>
-      <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } if @content.any? %>
-      <%=
-        render partial: 'content/list/document_table', locals: {
-          content_list: @content,
-          content_type: Document,
-          folders:      @all_folders.pluck(:title, :id),
-          tags:         @page_tags.to_a
-        }
-      %>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div>
+          <button
+            @click="showNewFolderModal = true"
+            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white <%= Folder.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm"
+          >
+            <i class="material-icons text-lg mr-2">create_new_folder</i>
+            <span class="hidden sm:inline">New subfolder</span>
+            <span class="sm:hidden">New</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
-<% end %>
 
-<%= render partial: 'folders/new_modal', locals: { content_type: Document, parent_folder: @folder } %>
-<%= render partial: 'folders/edit_modal', locals: { folder: @folder } %>
+  <!-- Child Folders Section -->
+  <div class="px-6 lg:px-8 py-6">
+    <% if @child_folders.any? %>
+      <h2 class="text-lg font-medium text-gray-900 mb-4">Folders</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+        <% @child_folders.each do |folder| %>
+          <%= link_to folder, class: "bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-200 p-4 flex items-center" do %>
+            <div class="w-10 h-10 rounded-lg <%= Folder.color %> flex items-center justify-center mr-3 flex-shrink-0">
+              <i class="material-icons text-white"><%= Folder.icon %></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-base font-medium text-gray-900 truncate"><%= folder.title %></h3>
+              <%
+                begin
+                  context_class = folder.context.constantize
+                  if context_class.column_names.include?('folder_id')
+                    content_count = context_class.where(folder: folder).count
+                    content_type_label = folder.context.downcase
+                  else
+                    content_count = 0
+                    content_type_label = 'item'
+                  end
+                rescue
+                  content_count = 0
+                  content_type_label = 'item'
+                end
+              %>
+              <% if content_count > 0 %>
+                <p class="text-sm text-gray-500"><%= pluralize(content_count, content_type_label) %></p>
+              <% else %>
+                <p class="text-sm text-gray-500">Empty folder</p>
+              <% end %>
+            </div>
+            <i class="material-icons text-gray-400">chevron_right</i>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Content Section -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-medium text-gray-900">Contents <span class="text-gray-500"><%= @content.count %></span></h2>
+        
+        <!-- Search and Filter Controls -->
+        <% if @content.any? %>
+          <div class="flex items-center space-x-4">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="material-icons text-gray-400 text-lg">search</i>
+              </div>
+              <input
+                x-model="searchQuery"
+                type="text"
+                placeholder="Search contents..."
+                class="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+            </div>
+            
+            <!-- View Mode Toggle -->
+            <div class="hidden sm:flex border border-gray-300 rounded-lg">
+              <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-l-lg focus:outline-none">
+                <i class="material-icons text-lg">grid_view</i>
+              </button>
+              <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-r-lg focus:outline-none">
+                <i class="material-icons text-lg">view_list</i>
+              </button>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <% if @content.any? %>
+        <!-- Grid View -->
+        <div x-show="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <% @content.each do |content_item| %>
+            <div
+              class="group relative"
+              x-show="searchQuery === '' || '<%= content_item.name.downcase %>'.includes(searchQuery.toLowerCase()) || '<%= content_item.respond_to?(:page_type) ? content_item.page_type.downcase : content_item.class.name.downcase %>'.includes(searchQuery.toLowerCase())"
+            >
+              <%= link_to (content_item.respond_to?(:view_path) ? content_item.view_path : content_item), class: "block" do %>
+                <div class="bg-white hover:shadow-xl rounded-lg transition-shadow duration-200 overflow-hidden">
+                  <%
+                    content_image = nil
+                    if content_item.respond_to?(:random_image_including_private)
+                      content_image = content_item.random_image_including_private(format: :medium)
+                    end
+                    content_type = if content_item.respond_to?(:page_type) && content_item.page_type.present?
+                                     content_item.page_type
+                                   else
+                                     content_item.class.name
+                                   end
+                    content_image ||= asset_path("card-headers/#{content_type.downcase.pluralize}.jpg")
+                  %>
+                  <%= image_tag content_image, class: 'h-48 w-full object-cover' %>
+                  <div class="p-4">
+                    <div class="flex items-start justify-between">
+                      <div class="flex-1 min-w-0 pr-8">
+                        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide <%= content_item.text_color %> truncate">
+                          <%= content_type %>
+                        </h3>
+                        <h2 class="mt-1 text-lg font-semibold text-gray-900 line-clamp-2" title="<%= content_item.name %>">
+                          <%= content_item.name %>
+                        </h2>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- List View -->
+        <div x-show="viewMode === 'list'" style="display: none;" class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <% @content.each_with_index do |content_item, index| %>
+            <div
+              class="<%= 'border-t border-gray-200' if index > 0 %> hover:bg-gray-50 transition-colors"
+              x-show="searchQuery === '' || '<%= content_item.name.downcase %>'.includes(searchQuery.toLowerCase()) || '<%= content_item.respond_to?(:page_type) ? content_item.page_type.downcase : content_item.class.name.downcase %>'.includes(searchQuery.toLowerCase())"
+            >
+              <%= link_to (content_item.respond_to?(:view_path) ? content_item.view_path : content_item), class: "flex items-center p-4 space-x-4" do %>
+                <div class="flex-shrink-0">
+                  <%
+                    content_image = nil
+                    if content_item.respond_to?(:random_image_including_private)
+                      content_image = content_item.random_image_including_private(format: :small)
+                    end
+                    content_type = if content_item.respond_to?(:page_type) && content_item.page_type.present?
+                                     content_item.page_type
+                                   else
+                                     content_item.class.name
+                                   end
+                    content_image ||= asset_path("card-headers/#{content_type.downcase.pluralize}.jpg")
+                  %>
+                  <%= image_tag content_image, class: 'w-16 h-16 rounded-lg object-cover' %>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-lg font-medium text-gray-900 truncate" title="<%= content_item.name %>"><%= content_item.name %></h3>
+                  <p class="text-sm text-gray-500 <%= content_item.text_color %> truncate"><%= content_type %></p>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="material-icons text-gray-400">chevron_right</i>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <!-- Empty State -->
+        <div class="bg-white rounded-lg border border-gray-200 p-8 text-center">
+          <div class="mx-auto h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+            <i class="material-icons text-2xl text-gray-400">folder_open</i>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">This folder is empty</h3>
+          <p class="text-gray-500 mb-4">Add content to this folder by selecting "Move to folder" when viewing any page.</p>
+          <div class="flex flex-wrap justify-center gap-3">
+            <% Rails.application.config.content_types[:free].each do |content_type| %>
+              <%= link_to new_polymorphic_path(content_type) do %>
+                <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white <%= content_type.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  <i class="material-icons text-sm mr-2"><%= content_type.icon %></i>
+                  New <%= content_type.name %>
+                </button>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- Include modals -->
+  <div x-show="showNewFolderModal">
+    <%= render partial: 'folders/tailwind_new_modal', locals: { content_type: @content_type_class, parent_folder: @folder } %>
+  </div>
+  
+  <div x-show="showEditFolderModal">
+    <%= render partial: 'folders/tailwind_edit_modal', locals: { folder: @folder } %>
+  </div>
+</div>
