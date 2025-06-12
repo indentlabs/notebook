@@ -210,39 +210,18 @@
     <!-- Breadcrumb Navigation -->
     <nav class="bg-white border-b border-gray-200 px-6 lg:px-8 py-3">
       <ol class="flex items-center space-x-2 text-sm">
-        <%
-          breadcrumb_folders = []
-          current_folder = @folder
-          
-          while current_folder&.parent_folder
-            breadcrumb_folders.unshift(current_folder.parent_folder)
-            current_folder = current_folder.parent_folder
-          end
-        %>
-        
-        <li>
-          <%
-            context_class = @folder.context.constantize rescue Document
-            if context_class.column_names.include?('folder_id')
-              context_path = context_class.name.downcase.pluralize + "_path"
-              context_name = @folder.context.pluralize
-            else
-              context_path = "documents_path"
-              context_name = "Documents"
-            end
-          %>
-          <%= link_to send(context_path), class: "text-gray-500 hover:text-gray-700 hover:underline" do %>
-            <%= context_name %>
-          <% end %>
-        </li>
-        
-        <li class="text-gray-400">
-          <i class="material-icons text-sm">chevron_right</i>
-        </li>
-        
-        <% breadcrumb_folders.each do |folder| %>
+        <% if @parent_folder %>
+          <!-- If there's a parent folder, show it in the breadcrumb -->
           <li>
-            <%= link_to folder.title, folder, class: "text-gray-500 hover:text-gray-700 hover:underline truncate max-w-[150px]" %>
+            <%= link_to @parent_folder.title, @parent_folder, class: "text-gray-500 hover:text-gray-700 hover:underline truncate max-w-[200px]" %>
+          </li>
+          <li class="text-gray-400">
+            <i class="material-icons text-sm">chevron_right</i>
+          </li>
+        <% else %>
+          <!-- If no parent folder, just show "Folders" without a link -->
+          <li class="text-gray-500">
+            Folders
           </li>
           <li class="text-gray-400">
             <i class="material-icons text-sm">chevron_right</i>
@@ -349,10 +328,17 @@
                   <i class="material-icons text-sm mr-2 align-text-bottom">content_copy</i>
                   Duplicate folder
                 </a>
-                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                <%=
+                  link_to folder_path(@folder),
+                    method: :delete,
+                    class: "block px-4 py-2 text-sm text-red-600 hover:bg-red-50",
+                    data: {
+                      confirm: "Are you sure? This will delete the folder and move all contents within it back to your default page."
+                    } do
+                %>
                   <i class="material-icons text-sm mr-2 align-text-bottom">delete</i>
                   Delete folder
-                </a>
+                <% end %>
               </div>
             </div>
           </div>
