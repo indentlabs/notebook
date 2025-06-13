@@ -1,27 +1,446 @@
-<div x-data="{ showNewFolderModal: false }">
-  <%= render partial: 'content/display/tailwind_foldered_index', locals: {
-    header_image:        "card-headers/documents.webp",
-    content:             @documents,
-    content_display_partial: "content/display/tailwind_content_list/document_index",
-    mixed_content_types: false,
-    folders:             @folders,
-    content_type_class:  Document,
-    content_type_name:   Document.name,
-    filtered_page_tags:  @filtered_page_tags,
-    page_tags:           @page_tags
-  } %>
-
-  <div x-show="showNewFolderModal">
-    <%= render partial: 'folders/tailwind_new_modal', locals: { content_type: nil, parent_folder: @folder } %>
+<div x-data="{
+  showNewFolderModal: false,
+  showShortcuts: false,
+  fabOpen: false,
+  viewMode: 'grid',
+  searchQuery: '',
+  isSearching: false,
+  showFilters: false,
+  selectedDate: 'all',
+  selectedTags: []
+}">
+  <!-- Header Section -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">Documents</h1>
+        <div class="flex space-x-2">
+          <%= link_to new_document_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+            <i class="material-icons mr-1 text-sm">add</i>
+            New Document
+          <% end %>
+          <div class="relative" x-data="{ open: false }" @click.away="open = false">
+            <button @click="open = !open" type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <i class="material-icons mr-1 text-sm">more_horiz</i>
+              Actions
+            </button>
+            <div x-show="open"
+                 x-transition:enter="transition ease-out duration-100"
+                 x-transition:enter-start="transform opacity-0 scale-95"
+                 x-transition:enter-end="transform opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-75"
+                 x-transition:leave-start="transform opacity-100 scale-100"
+                 x-transition:leave-end="transform opacity-0 scale-95"
+                 class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+                 role="menu"
+                 aria-orientation="vertical"
+                 style="display: none;">
+              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Import Documents</a>
+              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Export All</a>
+              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Bulk Actions</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Quick Stats -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+      <div class="flex items-center">
+        <i class="material-icons text-blue-500 mr-1">description</i>
+        <span><%= Document.where(user_id: current_user.id).count %> documents</span>
+      </div>
+      <div class="flex items-center">
+        <i class="material-icons text-yellow-500 mr-1">folder</i>
+        <span><%= @folders.count %> folders</span>
+      </div>
+      <div class="flex items-center">
+        <i class="material-icons text-purple-500 mr-1">text_fields</i>
+        <span><%= number_with_delimiter(Document.where(user_id: current_user.id).sum(:cached_word_count) || 0) %> words</span>
+      </div>
+      <% recent_doc = Document.where(user_id: current_user.id).order(updated_at: :desc).first %>
+      <% if recent_doc.present? %>
+        <div class="flex items-center">
+          <i class="material-icons text-green-500 mr-1">update</i>
+          <span>Last updated <%= time_ago_in_words(recent_doc.updated_at) %> ago</span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- Recently Edited Documents Section -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-medium text-gray-900">Recently Edited</h2>
+    </div>
+    
+    <% if @recent_documents.any? %>
+      <div class="overflow-x-auto pb-2">
+        <div class="flex space-x-4">
+          <% @recent_documents.each do |document| %>
+            <%= link_to edit_document_path(document), class: "flex-shrink-0 w-64" do %>
+              <div class="bg-white overflow-hidden shadow rounded-md hover:shadow-md transition-shadow duration-300 border border-gray-200 h-full">
+                <div class="p-3">
+                  <h3 class="text-sm font-medium text-gray-900 truncate"><%= document.title %></h3>
+                  <div class="mt-1 flex items-center text-xs text-gray-500">
+                    <span><%= time_ago_in_words(document.updated_at) %> ago</span>
+                    <span class="mx-1">•</span>
+                    <span><%= number_with_delimiter(document.cached_word_count || 0) %> words</span>
+                  </div>
+                </div>
+                <div class="bg-gray-50 px-3 py-1.5 flex items-center justify-between">
+                  <div class="text-xs text-gray-500">
+                    <% if document.folder %>
+                      <span class="flex items-center">
+                        <i class="material-icons text-xs mr-0.5">folder</i>
+                        <span class="truncate max-w-[100px]"><%= document.folder.title %></span>
+                      </span>
+                    <% else %>
+                      <span>No folder</span>
+                    <% end %>
+                  </div>
+                  <span class="text-blue-600 hover:text-blue-800 text-xs font-medium">Edit</span>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="bg-white shadow rounded-md p-4 text-center text-gray-500">
+        No recently edited documents
+      </div>
+    <% end %>
   </div>
 
-  <!-- New Folder Button -->
-  <div class="fixed bottom-8 right-8">
-    <button
-      @click="showNewFolderModal = true"
-      class="inline-flex items-center p-3 rounded-full text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg"
-    >
-      <i class="material-icons">create_new_folder</i>
-    </button>
+  <!-- Folders Section -->
+  <div id="folders" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-medium text-gray-900">Folders</h2>
+      <div>
+        <button
+          type="button"
+          @click="$dispatch('open-modal', { id: 'new-folder-modal' })"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <i class="material-icons mr-1 text-sm">create_new_folder</i>
+          New Folder
+        </button>
+      </div>
+    </div>
+            
+    <% if @folders.any? %>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <% @folders.each do |folder| %>
+          <%= link_to folder_path(folder), class: "block" do %>
+            <div class="bg-white overflow-hidden shadow rounded-md hover:shadow-md transition-shadow duration-300 border border-gray-200">
+              <div class="p-4">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <i class="material-icons text-yellow-500 text-xl">folder</i>
+                  </div>
+                  <div class="ml-3 flex-1">
+                    <h3 class="text-sm font-medium text-gray-900 truncate"><%= folder.title %></h3>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-gray-50 px-4 py-2 flex items-center justify-between">
+                <div class="text-xs text-gray-500">
+                  <%= pluralize(folder.documents.count, 'document') %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="bg-white shadow sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="text-center">
+            <i class="material-icons text-gray-400 text-5xl">folder</i>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No folders</h3>
+            <p class="mt-1 text-sm text-gray-500">Get started by creating a new folder to organize your documents.</p>
+            <div class="mt-6">
+              <button
+                type="button"
+                @click="$dispatch('open-modal', { id: 'new-folder-modal' })"
+                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <i class="material-icons mr-2 text-sm">create_new_folder</i>
+                New Folder
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
   </div>
+  
+  <!-- New Folder Modal -->
+  <div
+    id="new-folder-modal"
+    x-data="{ open: false }"
+    x-show="open"
+    @open-modal.window="if ($event.detail.id === 'new-folder-modal') open = true"
+    @close-modal.window="if ($event.detail.id === 'new-folder-modal') open = false"
+    class="fixed z-10 inset-0 overflow-y-auto"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true"
+    style="display: none;"
+  >
+    <%= render partial: 'folders/tailwind_new_modal', locals: { content_type: Document, parent_folder: nil } %>
+  </div>
+  
+  <!-- Documents Section -->
+  <div id="documents" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center">
+        <h2 class="text-lg font-medium text-gray-900">Your Documents</h2>
+        <div class="ml-4">
+          <div class="flex items-center space-x-2">
+            <button type="button" @click="viewMode = 'grid'" :class="{'text-blue-600': viewMode === 'grid', 'text-gray-400 hover:text-gray-500': viewMode !== 'grid'}" class="p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <i class="material-icons">grid_view</i>
+            </button>
+            <button type="button" @click="viewMode = 'list'" :class="{'text-blue-600': viewMode === 'list', 'text-gray-400 hover:text-gray-500': viewMode !== 'list'}" class="p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <i class="material-icons">view_list</i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="relative" x-data="{ open: false }" @click.away="open = false">
+        <button @click="open = !open" type="button" class="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          <i class="material-icons mr-1 text-sm">sort</i>
+          Sort
+        </button>
+        <div x-show="open"
+             x-transition:enter="transition ease-out duration-100"
+             x-transition:enter-start="transform opacity-0 scale-95"
+             x-transition:enter-end="transform opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-75"
+             x-transition:leave-start="transform opacity-100 scale-100"
+             x-transition:leave-end="transform opacity-0 scale-95"
+             class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+             role="menu"
+             aria-orientation="vertical"
+             style="display: none;">
+          <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Recently Updated</a>
+          <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Alphabetical (A-Z)</a>
+          <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Word Count (High-Low)</a>
+          <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Date Created</a>
+        </div>
+      </div>
+    </div>
+        
+    <% if Document.where(user_id: current_user.id).any? %>
+      <div x-show="viewMode === 'grid'" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <% Document.where(user_id: current_user.id).order(updated_at: :desc).each do |document| %>
+          <div class="bg-white overflow-hidden shadow rounded-md hover:shadow-md transition-shadow duration-300 border border-gray-200">
+            <div class="p-4">
+              <div class="flex items-center justify-between">
+                <h3 class="text-sm font-medium text-gray-900 truncate"><%= document.title %></h3>
+                <div class="ml-2 flex-shrink-0" x-data="{ open: false }" @click.away="open = false">
+                  <button @click="open = !open" class="text-gray-400 hover:text-gray-500">
+                    <i class="material-icons text-sm">more_vert</i>
+                  </button>
+                  <div x-show="open"
+                       x-transition:enter="transition ease-out duration-100"
+                       x-transition:enter-start="transform opacity-0 scale-95"
+                       x-transition:enter-end="transform opacity-100 scale-100"
+                       x-transition:leave="transition ease-in duration-75"
+                       x-transition:leave-start="transform opacity-100 scale-100"
+                       x-transition:leave-end="transform opacity-0 scale-95"
+                       class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+                       role="menu"
+                       aria-orientation="vertical"
+                       style="display: none;">
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edit</a>
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Move to folder</a>
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Duplicate</a>
+                    <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100" role="menuitem">Delete</a>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-2 flex items-center text-xs text-gray-500">
+                <span><%= time_ago_in_words(document.updated_at) %> ago</span>
+                <span class="mx-1">•</span>
+                <span><%= number_with_delimiter(document.cached_word_count || 0) %> words</span>
+              </div>
+              <% if document.notes_text.present? %>
+                <p class="mt-2 text-xs text-gray-500 line-clamp-2">
+                  <%= document.notes_text %>
+                </p>
+              <% end %>
+            </div>
+            <div class="bg-gray-50 px-4 py-2 flex items-center justify-between">
+              <%= link_to edit_document_path(document), class: "text-blue-600 hover:text-blue-800 text-xs font-medium" do %>
+                <i class="material-icons text-xs align-middle">edit</i>
+                Edit
+              <% end %>
+              <%= link_to document_path(document), class: "text-blue-600 hover:text-blue-800 text-xs font-medium" do %>
+                <i class="material-icons text-xs align-middle">open_in_new</i>
+                View
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <div x-show="viewMode === 'list'" class="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200" style="display: none;">
+        <ul class="divide-y divide-gray-200">
+          <% Document.where(user_id: current_user.id).order(updated_at: :desc).each do |document| %>
+            <li>
+              <div class="px-4 py-4 flex items-center sm:px-6">
+                <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
+                  <div class="flex items-center pr-4">
+                    <i class="material-icons <%= Document.text_color %> text-xl"><%= Document.icon %></i>
+                  </div>
+                  <div class="mt-2 min-w-0 flex-1 sm:mt-0 sm:truncate">
+                    <div class="flex text-sm">
+                      <p class="font-medium text-blue-600 truncate"><%= document.title %></p>
+                      <p class="ml-1 flex-shrink-0 font-normal text-gray-500">
+                        <% if document.folder %>
+                          <span class="text-gray-500">
+                            in <i class="material-icons text-xs align-middle">folder</i>
+                            <%= document.folder.title %>
+                          </span>
+                        <% end %>
+                      </p>
+                    </div>
+                    <div class="mt-1 flex text-xs text-gray-500">
+                      <p>Updated <%= time_ago_in_words(document.updated_at) %> ago</p>
+                      <p class="ml-2"><%= number_with_delimiter(document.cached_word_count || 0) %> words</p>
+                    </div>
+                  </div>
+                  <div class="mt-4 flex-shrink-0 sm:mt-0 sm:ml-5">
+                    <div class="flex space-x-4 overflow-hidden">
+                      <%= link_to edit_document_path(document), class: "inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200" do %>
+                        Edit
+                      <% end %>
+                      <%= link_to document_path(document), class: "inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200" do %>
+                        View
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+                <div class="ml-5 flex-shrink-0">
+                  <i class="material-icons text-gray-400">chevron_right</i>
+                </div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% else %>
+      <div class="bg-white shadow sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="text-center">
+            <i class="material-icons text-gray-400 text-5xl">description</i>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No documents</h3>
+            <p class="mt-1 text-sm text-gray-500">Get started by creating a new document.</p>
+            <div class="mt-6">
+              <%= link_to new_document_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <i class="material-icons mr-2 text-sm">add</i>
+                New Document
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Document Templates Section -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-medium text-gray-900">Document Templates</h2>
+      <a href="#" class="text-sm font-medium text-blue-700 hover:text-blue-900">View all templates</a>
+    </div>
+            
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <!-- Template 1: Blank Document -->
+      <div class="bg-white overflow-hidden shadow rounded-md hover:shadow-md transition-shadow duration-300 border border-gray-200">
+        <div class="p-4">
+          <div class="flex items-center justify-center h-16">
+            <i class="material-icons text-gray-400 text-3xl">description</i>
+          </div>
+          <div class="mt-3 text-center">
+            <h3 class="text-sm font-medium text-gray-900">Blank Document</h3>
+            <p class="mt-1 text-xs text-gray-500">Start with a clean slate</p>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-2">
+          <div class="text-xs text-center">
+            <%= link_to new_document_path, class: "font-medium text-blue-600 hover:text-blue-800" do %>
+              Use template
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Template 2: Chapter -->
+      <div class="bg-white overflow-hidden shadow rounded-md hover:shadow-md transition-shadow duration-300 border border-gray-200">
+        <div class="p-4">
+          <div class="flex items-center justify-center h-16">
+            <i class="material-icons text-blue-400 text-3xl">book</i>
+          </div>
+          <div class="mt-3 text-center">
+            <h3 class="text-sm font-medium text-gray-900">Chapter</h3>
+            <p class="mt-1 text-xs text-gray-500">Novel or book chapter template</p>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-2">
+          <div class="text-xs text-center">
+            <%= link_to new_document_path(template: 'chapter'), class: "font-medium text-blue-600 hover:text-blue-800" do %>
+              Use template
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Template 3: Research Notes -->
+      <div class="bg-white overflow-hidden shadow rounded-md hover:shadow-md transition-shadow duration-300 border border-gray-200">
+        <div class="p-4">
+          <div class="flex items-center justify-center h-16">
+            <i class="material-icons text-green-400 text-3xl">science</i>
+          </div>
+          <div class="mt-3 text-center">
+            <h3 class="text-sm font-medium text-gray-900">Research Notes</h3>
+            <p class="mt-1 text-xs text-gray-500">Structured research template</p>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-2">
+          <div class="text-xs text-center">
+            <%= link_to new_document_path(template: 'research'), class: "font-medium text-blue-600 hover:text-blue-800" do %>
+              Use template
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Template 4: Letter -->
+      <div class="bg-white overflow-hidden shadow rounded-md hover:shadow-md transition-shadow duration-300 border border-gray-200">
+        <div class="p-4">
+          <div class="flex items-center justify-center h-16">
+            <i class="material-icons text-purple-400 text-3xl">mail</i>
+          </div>
+          <div class="mt-3 text-center">
+            <h3 class="text-sm font-medium text-gray-900">Letter</h3>
+            <p class="mt-1 text-xs text-gray-500">Formal letter template</p>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-2">
+          <div class="text-xs text-center">
+            <%= link_to new_document_path(template: 'letter'), class: "font-medium text-blue-600 hover:text-blue-800" do %>
+              Use template
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
 </div>

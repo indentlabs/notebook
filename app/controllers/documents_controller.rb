@@ -1,6 +1,5 @@
 class DocumentsController < ApplicationController
-  layout 'tailwind', only: [:index, :show]
-  # layout 'editor',    only: [:edit]
+  layout :determine_layout
 
   before_action :authenticate_user!, except: [:show, :analysis]
 
@@ -219,7 +218,7 @@ class DocumentsController < ApplicationController
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
     end
 
-    render layout: 'plaintext'
+    render
   end
 
   def toggle_favorite
@@ -293,6 +292,19 @@ class DocumentsController < ApplicationController
 
   def set_footer_visibility
     @show_footer = false
+  end
+
+  # Determines which layout to use based on the current action
+  def determine_layout
+    if action_name == 'edit'
+      'editor'
+    elsif ['index', 'show'].include?(action_name)
+      'tailwind'
+    elsif action_name == 'plaintext'
+      'plaintext'
+    else
+      'application' # Default layout for other actions
+    end
   end
 
   private

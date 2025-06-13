@@ -8,40 +8,846 @@
 
 <% set_meta_tags title: "Editing: " + @document.title, description: truncate(@document.body) %>
 
-<%= content_for :full_width_page_header do %>
-  <%= render partial: 'documents/components/autosave_bar', locals: { document: @document } %>
+<div x-data="{ entitiesSidebarOpen: false }" class="min-h-screen bg-gray-50 flex flex-col">
+  <!-- Document editor navbar - sticky beneath site navbar, provides tools and stats -->
+  <header class="bg-white border-b border-gray-200 sticky top-14 z-20 shadow-sm">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-2">
+      <div class="flex flex-row items-center justify-between">
+        <!-- Left side: Document action buttons -->
+        <div class="flex items-center space-x-2">
+          <!-- Entities button - styled like AI analysis FAB -->
+          <button
+            @click="entitiesSidebarOpen = !entitiesSidebarOpen"
+            class="flex items-center px-3 py-1.5 rounded-md bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-colors shadow-sm"
+          >
+            <i class="material-icons text-white mr-1 text-sm">people_alt</i>
+            <span class="font-medium">Entities</span>
+          </button>
+          
+          <!-- Metadata button -->
+          <button
+            @click="$dispatch('open-modal', 'document-notes-modal')"
+            class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
+          >
+            <i class="material-icons mr-1 text-sm">description</i>
+            <span class="font-medium">Metadata</span>
+          </button>
+          
+          <!-- Preview as Reader -->
+          <%= link_to document_path(@document), class: "flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm" do %>
+            <i class="material-icons mr-1 text-sm">visibility</i>
+            <span class="font-medium">Preview as Reader</span>
+          <% end %>
+          
+          <!-- Privacy settings -->
+          <button type="button" class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm">
+            <i class="material-icons mr-1 text-sm">visibility_off</i>
+            <span class="font-medium">Privacy</span>
+          </button>
+          
+          <!-- Overflow menu -->
+          <div class="relative" x-data="{ open: false }">
+            <button
+              @click="open = !open"
+              class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
+            >
+              <i class="material-icons text-sm">more_horiz</i>
+            </button>
+            
+            <div
+              x-show="open"
+              @click.away="open = false"
+              x-transition:enter="transition ease-out duration-100"
+              x-transition:enter-start="transform opacity-0 scale-95"
+              x-transition:enter-end="transform opacity-100 scale-100"
+              x-transition:leave="transition ease-in duration-75"
+              x-transition:leave-start="transform opacity-100 scale-100"
+              x-transition:leave-end="transform opacity-0 scale-95"
+              class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+              x-cloak
+            >
+              <div class="py-1">
+                <!-- Analyze document -->
+                <%= link_to queue_analysis_document_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do %>
+                  <i class="material-icons text-blue-500 mr-3 text-sm">analytics</i>
+                  <span>Analyze this document</span>
+                <% end %>
+                
+                <!-- Revision log -->
+                <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                  <i class="material-icons text-gray-600 mr-3 text-sm">history</i>
+                  <span>Revision log</span>
+                </a>
+                
+                <!-- Plaintext view -->
+                <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                  <i class="material-icons text-gray-600 mr-3 text-sm">text_format</i>
+                  <span>Plaintext view</span>
+                </a>
+                
+                <hr class="my-1 border-gray-100">
+                
+                <!-- Delete Document -->
+                <a href="#" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                  <i class="material-icons text-red-500 mr-3 text-sm">delete</i>
+                  <span>Delete document</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right side: Document stats -->
+        <div class="flex items-center space-x-4 text-sm">
+          <!-- Word count -->
+          <div class="flex items-center bg-white/30 px-3 py-1 rounded-md">
+            <i class="material-icons mr-1 text-sm">text_fields</i>
+            <span><span id="word-count">0</span> words</span>
+          </div>
+          
+          <!-- Privacy status -->
+          <div class="flex items-center bg-white/30 px-3 py-1 rounded-md">
+            <i class="material-icons mr-1 text-sm"><%= @document.privacy == 'private' ? 'lock' : 'public' %></i>
+            <span class="capitalize"><%= @document.privacy || 'private' %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
 
-  <div class="container" style="max-width: 50em;">
+  <!-- Main content area - Three column grid layout -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12">
+    <!-- Left column (empty space/margin) -->
+    <div class="hidden lg:block lg:col-span-2"></div>
+    
+    <!-- Center column (editor) - always centered -->
+    <div class="lg:col-span-8 px-4 sm:px-6 lg:px-8 py-6">
+      <!-- Editor container with max width -->
+      <div class="max-w-3xl mx-auto">
+        <!-- Document title input -->
+        <div class="mb-4">
     <%= form_for @document do |f| %>
-      <%= render partial: 'documents/components/document_name_bar', locals: { document: @document, f: f } %>
+      <div class="flex items-center bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-3 py-2 border-r border-gray-200">
+          <i class="material-icons <%= Document.text_color %>"><%= Document.icon %></i>
+        </div>
+        <%= f.text_field :title,
+          id: "document_title",
+          class: "flex-1 px-4 py-3 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+          placeholder: "Document title"
+        %>
+      </div>
     <% end %>
-  </div>
+        </div>
 
-  <div id="editor" class="editable js-can-mention-pages" data-save-url="<%= document_url(@document) %>"><%= @document.body.try(:html_safe) %></div>
-<% end %>
+        <!-- Editor with integrated toolbar -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 min-h-[500px] overflow-hidden">
 
-<div style="clear: both"></div>
-<%= render partial: 'javascripts/content_linking' %>
-
-<div id="document-notes-modal" class="modal modal-fixed-footer">
-  <%= form_for(@document, remote: true, html: { id: 'document-notes-form' }) do |f| %>
-    <div class="modal-content">
-      <h4>
-        <i class="material-icons medium <%= Document.text_color %> left">
-          <%= Document.icon %>
-        </i>
-        Document notes
-      </h4>
-      <p class="grey-text">This field will automatically expand as you write.</p>
-      <%= f.text_area :notes_text, class: 'materialize-textarea', placeholder: "Write as little or as much as you'd like!", style: 'min-height: 400px; border: 1px solid #ccc; padding: 10px;' %>
-      <p class="grey-text">
-        <strong>To save your notes, please click "Save Changes" below.</strong>
-        Closing this dialog will preserve your unsaved changes until you refresh the page, but to keep your notes you must save them!
-      </p>
-    </div>
-    <div class="modal-footer">
-      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Ignore changes</a>
-      <%= link_to 'Save changes', "#", onclick: '$("form#document-notes-form").submit()', class: 'modal-close waves-effect waves-green btn-flat lighten-3 ' + Document.color %>
-    </div>
-  <% end %>
+<!-- Editor content area -->
+<div id="editor" class="editable js-can-mention-pages prose prose-lg max-w-none p-6 min-h-[500px] focus:outline-none border-0" data-save-url="<%= document_url(@document) %>"><%= @document.body.try(:html_safe) %></div>
 </div>
+      </div>
+    </div>
+    
+    <!-- Right column (sidebar) -->
+    <div class="lg:col-span-2 relative">
+      <!-- Entities sidebar container - positioned in the right column -->
+      <div class="lg:sticky lg:top-14 lg:h-screen">
+        <%= render partial: 'javascripts/content_linking' %>
+        
+        <!-- Document notes modal using Alpine.js -->
+        <div
+          id="document-notes-modal"
+          x-data="{ open: false }"
+          x-show="open"
+          @open-modal.window="if ($event.detail === 'document-notes-modal') open = true"
+          @keydown.escape.window="open = false"
+          class="fixed inset-0 z-50 overflow-y-auto"
+          x-cloak
+        >
+          <!-- Modal backdrop -->
+          <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" x-show="open" @click="open = false"></div>
+          
+          <!-- Modal content -->
+          <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div
+              class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-3xl transform transition-all"
+              x-show="open"
+              x-transition:enter="ease-out duration-300"
+              x-transition:enter-start="opacity-0 translate-y-4"
+              x-transition:enter-end="opacity-100 translate-y-0"
+              x-transition:leave="ease-in duration-200"
+              x-transition:leave-start="opacity-100 translate-y-0"
+              x-transition:leave-end="opacity-0 translate-y-4"
+              @click.away="open = false"
+            >
+              <%= form_for(@document, remote: true, html: { id: 'document-notes-form' }) do |f| %>
+                <!-- Modal header -->
+                <div class="px-6 py-4 border-b border-gray-200">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full <%= Document.color %> flex items-center justify-center mr-3">
+                      <i class="material-icons text-white"><%= Document.icon %></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">Document notes</h3>
+                  </div>
+                </div>
+                
+                <!-- Modal body -->
+                <div class="px-6 py-4">
+                  <p class="text-sm text-gray-500 mb-4">This field will automatically expand as you write.</p>
+                  <%= f.text_area :notes_text,
+                    class: 'w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50',
+                    placeholder: "Write as little or as much as you'd like!",
+                    style: 'min-height: 400px; padding: 10px;'
+                  %>
+                  <p class="text-sm text-gray-500 mt-4">
+                    <strong>To save your notes, please click "Save Changes" below.</strong>
+                    Closing this dialog will preserve your unsaved changes until you refresh the page, but to keep your notes you must save them!
+                  </p>
+                </div>
+                
+                <!-- Modal footer -->
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+                  <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" @click="open = false">
+                    Ignore changes
+                  </button>
+                  <button type="button" onclick='$("form#document-notes-form").submit()' @click="open = false" class="px-4 py-2 text-sm font-medium text-white bg-notebook-blue border border-transparent rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Save changes
+                  </button>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Document entities sidebar using Alpine.js -->
+        <div
+          x-data="{ activeTab: 'all', selectedEntity: null }"
+          x-init="$watch('entitiesSidebarOpen', value => {
+            if (value) {
+              document.body.classList.add('overflow-hidden', 'lg:overflow-auto');
+              // Focus the search input when sidebar is shown
+              setTimeout(() => {
+                document.getElementById('entity-search-input').focus();
+              }, 300);
+            } else {
+              document.body.classList.remove('overflow-hidden', 'lg:overflow-auto');
+            }
+          })"
+          @keydown.escape.window="entitiesSidebarOpen = false"
+        >
+          <!-- Entities sidebar - in right column on large screens -->
+          <div
+            class="bg-white border-l border-gray-200 transition-all duration-300 ease-in-out overflow-hidden h-full sticky top-14 z-50"
+            :class="entitiesSidebarOpen ? 'block' : 'hidden'"
+            style="height: calc(100vh - 112px);"
+            x-cloak
+          >
+            <!-- Sidebar header -->
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center mr-2">
+                  <i class="material-icons text-white text-sm">people_alt</i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">Document Entities</h3>
+              </div>
+              <button @click="entitiesSidebarOpen = false" class="text-gray-500 hover:text-gray-700 lg:hidden">
+                <i class="material-icons">close</i>
+              </button>
+            </div>
+            
+            <!-- Sidebar content -->
+            <div class="flex flex-col h-full overflow-hidden" style="height: calc(100vh - 168px);">
+              <!-- Link new entity section -->
+              <div class="p-4 border-b border-gray-200">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Link a page to this document</h4>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="entity-search-input"
+                    placeholder="Search pages to link..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    autocomplete="off"
+                  >
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="material-icons text-gray-400">search</i>
+                  </div>
+                  <!-- Dropdown for autocomplete results will appear here -->
+                </div>
+              </div>
+              
+              <!-- Filter tabs with Material Icons -->
+              <div class="px-4 py-2 border-b border-gray-200 overflow-x-auto whitespace-nowrap">
+                <div class="flex space-x-2">
+                  <button
+                    @click="activeTab = 'all'"
+                    :class="activeTab === 'all' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
+                    class="p-2 rounded-md text-xs font-medium transition-colors"
+                    title="All pages"
+                  >
+                    <i class="material-icons text-sm">apps</i>
+                  </button>
+                  
+                  <!-- Character filter -->
+                  <button
+                    @click="activeTab = 'Character'"
+                    :class="activeTab === 'Character' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
+                    class="p-2 rounded-md text-xs font-medium transition-colors"
+                    title="Characters"
+                  >
+                    <i class="material-icons text-sm">person</i>
+                  </button>
+                  
+                  <!-- Location filter -->
+                  <button
+                    @click="activeTab = 'Location'"
+                    :class="activeTab === 'Location' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
+                    class="p-2 rounded-md text-xs font-medium transition-colors"
+                    title="Locations"
+                  >
+                    <i class="material-icons text-sm">place</i>
+                  </button>
+                  
+                  <!-- Item filter -->
+                  <button
+                    @click="activeTab = 'Item'"
+                    :class="activeTab === 'Item' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
+                    class="p-2 rounded-md text-xs font-medium transition-colors"
+                    title="Items"
+                  >
+                    <i class="material-icons text-sm">diamond</i>
+                  </button>
+                  
+                  <!-- Document filter -->
+                  <button
+                    @click="activeTab = 'Document'"
+                    :class="activeTab === 'Document' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
+                    class="p-2 rounded-md text-xs font-medium transition-colors"
+                    title="Documents"
+                  >
+                    <i class="material-icons text-sm">description</i>
+                  </button>
+                  
+                  <!-- Universe filter -->
+                  <button
+                    @click="activeTab = 'Universe'"
+                    :class="activeTab === 'Universe' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
+                    class="p-2 rounded-md text-xs font-medium transition-colors"
+                    title="Universes"
+                  >
+                    <i class="material-icons text-sm">public</i>
+                  </button>
+                </div>
+              </div>
+            
+              <!-- Vertical entity list with expandable previews -->
+              <div class="flex-1 overflow-y-auto p-4 h-full" style="flex-grow: 1;">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Linked pages</h4>
+                
+                <!-- Entity list with collapsible previews -->
+                <div class="space-y-2">
+                  <!--
+                  This section should be populated with actual document entities using:
+                  <% @document.document_entities.each do |entity| %>
+                    <!-- Entity type, name, and other details from entity.linkable -->
+                  <% end %>
+                  
+                  See document.rb and document_analysis.rb for the relationship between
+                  documents and their linked entities via document_analysis.
+                -->
+                  
+                  <!-- Example entity with collapsible preview -->
+                  <div x-data="{ expanded: false }" class="border rounded-md overflow-hidden">
+                    <!-- Entity header (always visible) -->
+                    <div
+                      @click="expanded = !expanded; selectedEntity = expanded ? 'character-1' : null"
+                      :class="expanded ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                      class="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                          <div class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center mr-2">
+                            <i class="material-icons text-red-600 text-xs">person</i>
+                          </div>
+                          <div>
+                            <span class="text-sm font-medium">Aragorn</span>
+                            <p class="text-xs text-gray-500">Character</p>
+                          </div>
+                        </div>
+                        <i class="material-icons text-gray-400 text-sm" :class="{ 'transform rotate-180': expanded }">expand_more</i>
+                      </div>
+                    </div>
+                    
+                    <!-- Expandable preview section -->
+                    <div x-show="expanded" x-collapse class="border-t border-gray-200 bg-gray-50 p-3">
+                      <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-medium text-gray-700">Quick reference</h4>
+                        <a href="#" class="text-xs text-blue-600 hover:text-blue-800">View full page</a>
+                      </div>
+                      
+                      <div class="space-y-2">
+                        <div>
+                          <h4 class="text-xs font-medium text-gray-500 uppercase">Role</h4>
+                          <p class="text-sm">Ranger of the North, Heir to the throne of Gondor</p>
+                        </div>
+                        <div>
+                          <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                          <p class="text-sm">A tall, dark-haired man with gray eyes and a stern face that would light up when he smiled.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Example entity 2 -->
+                  <div x-data="{ expanded: false }" class="border rounded-md overflow-hidden">
+                    <div
+                      @click="expanded = !expanded; selectedEntity = expanded ? 'location-1' : null"
+                      :class="expanded ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                      class="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                          <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
+                            <i class="material-icons text-green-600 text-xs">place</i>
+                          </div>
+                          <div>
+                            <span class="text-sm font-medium">Rivendell</span>
+                            <p class="text-xs text-gray-500">Location</p>
+                          </div>
+                        </div>
+                        <i class="material-icons text-gray-400 text-sm" :class="{ 'transform rotate-180': expanded }">expand_more</i>
+                      </div>
+                    </div>
+                    
+                    <div x-show="expanded" x-collapse class="border-t border-gray-200 bg-gray-50 p-3">
+                      <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-medium text-gray-700">Quick reference</h4>
+                        <a href="#" class="text-xs text-blue-600 hover:text-blue-800">View full page</a>
+                      </div>
+                      
+                      <div class="space-y-2">
+                        <div>
+                          <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                          <p class="text-sm">Elven settlement</p>
+                        </div>
+                        <div>
+                          <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                          <p class="text-sm">A hidden valley with elegant elven architecture, surrounded by forests and waterfalls.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Empty state when no entities are linked -->
+                  <template x-if="false">
+                    <div class="flex flex-col items-center justify-center py-8 text-center">
+                      <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                        <i class="material-icons text-gray-400 text-xl">link_off</i>
+                      </div>
+                      <h4 class="text-sm font-medium text-gray-700 mb-1">No linked pages yet</h4>
+                      <p class="text-xs text-gray-500">Search above to link pages to this document</p>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Mobile entities sidebar (overlays content on small screens) -->
+      <div
+        x-show="entitiesSidebarOpen"
+        class="fixed inset-y-0 right-0 z-50 w-80 bg-white border-l border-gray-200 shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden"
+        x-cloak
+      >
+        <!-- Sidebar header -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+          <div class="flex items-center">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center mr-2">
+              <i class="material-icons text-white text-sm">people_alt</i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">Document Entities</h3>
+          </div>
+          <button @click="entitiesSidebarOpen = false" class="text-gray-500 hover:text-gray-700">
+            <i class="material-icons">close</i>
+          </button>
+        </div>
+        
+        <!-- Sidebar content (same as desktop) -->
+        <div class="flex flex-col h-full overflow-hidden">
+          <!-- Link new entity section -->
+          <div class="p-4 border-b border-gray-200">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Link a page to this document</h4>
+            <div class="relative">
+              <input
+                type="text"
+                id="entity-search-input-mobile"
+                placeholder="Search pages to link..."
+                class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                autocomplete="off"
+              >
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                <i class="material-icons text-gray-400">search</i>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Entity list (same as desktop) -->
+          <div class="flex-1 overflow-y-auto p-4">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Linked pages</h4>
+            <div class="space-y-2">
+              <!-- Same entity list as desktop -->
+              <!-- Example entity with collapsible preview -->
+              <div class="border rounded-md overflow-hidden">
+                <div class="p-3 hover:bg-gray-50 transition-colors">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <div class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center mr-2">
+                        <i class="material-icons text-red-600 text-xs">person</i>
+                      </div>
+                      <div>
+                        <span class="text-sm font-medium">Aragorn</span>
+                        <p class="text-xs text-gray-500">Character</p>
+                      </div>
+                    </div>
+                    <i class="material-icons text-gray-400 text-sm">chevron_right</i>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Example entity 2 -->
+              <div class="border rounded-md overflow-hidden">
+                <div class="p-3 hover:bg-gray-50 transition-colors">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
+                        <i class="material-icons text-green-600 text-xs">place</i>
+                      </div>
+                      <div>
+                        <span class="text-sm font-medium">Rivendell</span>
+                        <p class="text-xs text-gray-500">Location</p>
+                      </div>
+                    </div>
+                    <i class="material-icons text-gray-400 text-sm">chevron_right</i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Backdrop for mobile -->
+      <div
+        x-show="entitiesSidebarOpen"
+        @click="entitiesSidebarOpen = false"
+        class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+        x-cloak
+      ></div>
+    </div>
+  </main>
+      
+      <!-- Always-visible save status indicator centered at the bottom -->
+      <div id="save-indicator" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center bg-white rounded-full shadow-md px-3 py-1.5 border border-gray-200 transition-colors duration-300">
+        <i class="material-icons js-autosave-icon text-gray-900 mr-2 text-sm">save</i>
+        <span class="js-autosave-status text-sm text-gray-600">Saved</span>
+      </div>
+      
+      <!-- Floating action buttons with tooltip -->
+      <div class="fixed bottom-8 right-8 flex flex-col space-y-4">
+        <!-- Document analysis button -->
+        <div class="group relative">
+          <%= link_to queue_analysis_document_path(@document), class: "flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-110 focus:outline-none" do %>
+            <i class="material-icons">analytics</i>
+          <% end %>
+          
+          <!-- Enhanced tooltip with CTA - positioned to stay on screen -->
+          <div class="absolute bottom-full mb-3 right-0 w-64 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity">
+            <div class="p-3">
+              <h4 class="font-medium text-gray-900 mb-1">Analyze Your Document</h4>
+              <p class="text-xs text-gray-600">Get AI-powered insights about readability, style, and sentiment.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Initialize Medium Editor with enhanced toolbar -->
+      <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        window.editor = new MediumEditor('#editor', {
+          targetBlank: true,
+          autoLink: false,
+          buttonLabels: 'fontawesome',
+          placeholder: {
+            text: 'Write as little or as much as you want!',
+            hideOnClick: true
+          },
+          toolbar: {
+            buttons: [
+              'bold',
+              'italic',
+              'underline',
+              'strikethrough',
+              {
+                name: 'h1',
+                action: 'append-h2',
+                aria: 'header type 1',
+                tagNames: ['h2'],
+                contentDefault: '<b>H1</b>',
+                classList: ['custom-class-h1'],
+                attrs: {'data-custom-attr': 'attr-value-h1'}
+              },
+              {
+                name: 'h2',
+                action: 'append-h3',
+                aria: 'header type 2',
+                tagNames: ['h3'],
+                contentDefault: '<b>H2</b>',
+                classList: ['custom-class-h2'],
+                attrs: {'data-custom-attr': 'attr-value-h2'}
+              },
+              {
+                name: 'h3',
+                action: 'append-h4',
+                aria: 'header type 3',
+                tagNames: ['h4'],
+                contentDefault: '<b>H3</b>',
+                classList: ['custom-class-h3'],
+                attrs: {'data-custom-attr': 'attr-value-h3'}
+              },
+              'justifyLeft',
+              'justifyCenter',
+              'justifyRight',
+              'justifyFull',
+              'orderedlist',
+              'unorderedlist',
+              'quote',
+              'anchor',
+              'removeFormat'
+            ]
+          },
+          anchorPreview: {
+            hideDelay: 0
+          },
+          paste: {
+            forcePlainText: false
+          }
+        });
+        
+        // Set up CSRF token for AJAX requests
+        $.ajaxSetup({
+          headers: {
+            'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+          }
+        });
+        
+        // Autosave variables
+        let short_timer = null;           // Timer that resets on each change (2 seconds)
+        let long_timer = null;            // Timer that forces save after 30 seconds
+        let last_autosave = null;         // Last AJAX request
+        let first_change_time = null;     // When the first unsaved change was made
+        let has_unsaved_changes = false;  // Whether we have unsaved changes
+        let autosave_hide_timeout = null; // Timeout for hiding success indicator
+        
+        // Function to perform the actual save
+        const performSave = function() {
+          console.log('Performing save');
+          
+          // Update save indicator to saving state
+          $('.js-autosave-status').text('Saving...');
+          $('.js-autosave-icon').addClass('text-gray-400').removeClass('text-gray-900 text-red-500');
+          $('#save-indicator').removeClass('bg-red-500').addClass('bg-white');
+          $('.js-autosave-status').removeClass('text-white').addClass('text-gray-600');
+          
+          // Clear both timers
+          clearTimeout(short_timer);
+          clearTimeout(long_timer);
+          short_timer = null;
+          long_timer = null;
+          
+          // Reset change tracking
+          first_change_time = null;
+          has_unsaved_changes = false;
+          
+          // Do the autosave
+          last_autosave = $.ajax({
+            type: 'PATCH',
+            url: $('#editor').data('save-url'),
+            data: {
+              document: {
+                title: $('#document_title').val(),
+                body: $('#editor').html()
+              }
+            }
+          });
+          
+          last_autosave.fail(function(jqXHR, textStatus) {
+            // Update indicator to error state with red background and white text
+            $('.js-autosave-status').text('Error saving!');
+            $('.js-autosave-icon').addClass('text-white').removeClass('text-gray-400 text-gray-900 text-red-500');
+            $('#save-indicator').removeClass('bg-white bg-green-50').addClass('bg-red-500');
+            $('.js-autosave-status').removeClass('text-gray-600').addClass('text-white');
+            
+            // Mark that we still have unsaved changes
+            has_unsaved_changes = true;
+          });
+          
+          last_autosave.done(function() {
+            // Update indicator to saved state
+            $('.js-autosave-status').text('Saved');
+            $('.js-autosave-icon').addClass('text-gray-900').removeClass('text-gray-400 text-red-500 text-white');
+            $('#save-indicator').removeClass('bg-red-500').addClass('bg-white');
+            $('.js-autosave-status').removeClass('text-white').addClass('text-gray-600');
+            
+            // Make the indicator more visible for a moment
+            $('#save-indicator').addClass('bg-green-50');
+            clearTimeout(autosave_hide_timeout);
+            autosave_hide_timeout = setTimeout(function() {
+              $('#save-indicator').removeClass('bg-green-50');
+            }, 1000);
+          });
+        };
+        
+        // Function to queue an autosave after a change
+        const queueAutosave = function() {
+          // If this is the first unsaved change, record the time
+          if (!has_unsaved_changes) {
+            first_change_time = new Date();
+            has_unsaved_changes = true;
+            
+            // Set long timer for 30 seconds (won't be reset by further changes)
+            if (!long_timer) {
+              long_timer = setTimeout(function() {
+                console.log('Long timer triggered - 30 seconds since first change');
+                performSave();
+              }, 30000); // 30 seconds
+            }
+          }
+          
+          // Update indicator to show pending changes
+          $('.js-autosave-status').text('Editing...');
+          
+          // Clear and reset the short timer (2 seconds)
+          clearTimeout(short_timer);
+          short_timer = setTimeout(function() {
+            console.log('Short timer triggered - 2 seconds since last change');
+            performSave();
+          }, 2000); // 2 seconds
+        };
+        
+        // Function to count words in text
+        const countWords = function(text) {
+          // Remove HTML tags
+          const strippedText = text.replace(/<[^>]*>/g, ' ');
+          // Replace multiple spaces, tabs, newlines with a single space
+          const cleanText = strippedText.replace(/\s+/g, ' ').trim();
+          // Return 0 if empty, otherwise count words
+          return cleanText === '' ? 0 : cleanText.split(' ').length;
+        };
+        
+        // Update word count display
+        const updateWordCount = function() {
+          const content = $('#editor').html();
+          const wordCount = countWords(content);
+          $('#word-count').text(wordCount);
+        };
+        
+        // Initial word count
+        updateWordCount();
+        
+        // Trigger autosave and update word count on content changes
+        editor.subscribe('editableInput', function() {
+          // Queue an autosave
+          queueAutosave();
+          // Update word count
+          updateWordCount();
+        });
+        
+        // Trigger autosave on title changes
+        $('#document_title').on('change', function() {
+          queueAutosave();
+        });
+        
+        $('#document_title').on('keyup', function() {
+          if ($(this).val().length > 0) {
+            queueAutosave();
+          }
+        });
+        
+        // Manual save on click - immediate save, not queued
+        $('.js-autosave-status').on('click', performSave);
+        
+        // Allow entering `tab` into the editor
+        $(document).delegate('#editor', 'keydown', function(e) {
+          const keyCode = e.keyCode || e.which;
+          if (keyCode === 9) {
+            e.preventDefault();
+          }
+        });
+      });
+      </script>
+      
+      <!-- Custom styles for Medium Editor to match Tailwind design -->
+      <style>
+        .medium-editor-toolbar {
+          border-radius: 0.375rem;
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+          border: 1px solid rgba(209, 213, 219, 1);
+          background-color: white;
+        }
+        
+        .medium-editor-toolbar-active {
+          visibility: visible;
+          background-color: white;
+        }
+        
+        .medium-editor-toolbar-actions {
+          background-color: white;
+        }
+        
+        .medium-editor-action {
+          background-color: white;
+          color: rgba(55, 65, 81, 1);
+          transition: background-color 0.2s;
+        }
+        
+        .medium-editor-action:hover {
+          background-color: rgba(243, 244, 246, 1);
+          color: rgba(17, 24, 39, 1);
+        }
+        
+        .medium-editor-button-active {
+          background-color: rgba(239, 246, 255, 1);
+          color: rgba(37, 99, 235, 1);
+        }
+        
+        .medium-editor-placeholder {
+          color: rgba(156, 163, 175, 1);
+        }
+        
+        /* Improve the prose styling for the editor */
+        .prose {
+          max-width: none;
+        }
+        
+        .prose h2 {
+          margin-top: 1.5em;
+          margin-bottom: 0.5em;
+        }
+        
+        .prose h3 {
+          margin-top: 1.5em;
+          margin-bottom: 0.5em;
+        }
+        
+        .prose p {
+          margin-top: 1em;
+          margin-bottom: 1em;
+        }
+        
+        .prose ul, .prose ol {
+          margin-top: 1em;
+          margin-bottom: 1em;
+        }
+      </style>
