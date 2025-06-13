@@ -8,10 +8,14 @@
 
 <% set_meta_tags title: "Editing: " + @document.title, description: truncate(@document.body) %>
 
-<div x-data="{ entitiesSidebarOpen: false }" class="min-h-screen bg-gray-50 flex flex-col">
+<div x-data="{
+  entitiesSidebarOpen: false
+}" class="min-h-screen bg-gray-50 flex flex-col">
+
   <!-- Document editor navbar - sticky beneath site navbar, provides tools and stats -->
   <header class="bg-white border-b border-gray-200 sticky top-14 z-20 shadow-sm">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-2">
+      <!-- Full navbar -->
       <div class="flex flex-row items-center justify-between">
         <!-- Left side: Document action buttons -->
         <div class="flex items-center space-x-2">
@@ -20,28 +24,29 @@
             @click="entitiesSidebarOpen = !entitiesSidebarOpen"
             class="flex items-center px-3 py-1.5 rounded-md bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-colors shadow-sm"
           >
-            <i class="material-icons text-white mr-1 text-sm">people_alt</i>
+            <i class="material-icons text-white mr-1 text-sm align-middle">people_alt</i>
             <span class="font-medium">Entities</span>
           </button>
           
+          
           <!-- Metadata button -->
           <button
-            @click="$dispatch('open-modal', 'document-notes-modal')"
+            @click="$dispatch('open-modal', 'document-metadata-modal')"
             class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
           >
-            <i class="material-icons mr-1 text-sm">description</i>
+            <i class="material-icons mr-1 text-sm align-middle">description</i>
             <span class="font-medium">Metadata</span>
           </button>
           
           <!-- Preview as Reader -->
           <%= link_to document_path(@document), class: "flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm" do %>
-            <i class="material-icons mr-1 text-sm">visibility</i>
+            <i class="material-icons mr-1 text-sm align-middle">visibility</i>
             <span class="font-medium">Preview as Reader</span>
           <% end %>
           
           <!-- Privacy settings -->
           <button type="button" class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm">
-            <i class="material-icons mr-1 text-sm">visibility_off</i>
+            <i class="material-icons mr-1 text-sm align-middle">visibility_off</i>
             <span class="font-medium">Privacy</span>
           </button>
           
@@ -51,7 +56,7 @@
               @click="open = !open"
               class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
             >
-              <i class="material-icons text-sm">more_horiz</i>
+              <i class="material-icons text-sm align-middle">more_horiz</i>
             </button>
             
             <div
@@ -87,6 +92,8 @@
                 
                 <hr class="my-1 border-gray-100">
                 
+                <hr class="my-1 border-gray-100">
+                
                 <!-- Delete Document -->
                 <a href="#" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                   <i class="material-icons text-red-500 mr-3 text-sm">delete</i>
@@ -100,15 +107,15 @@
         <!-- Right side: Document stats -->
         <div class="flex items-center space-x-4 text-sm">
           <!-- Word count -->
-          <div class="flex items-center bg-white/30 px-3 py-1 rounded-md">
-            <i class="material-icons mr-1 text-sm">text_fields</i>
-            <span><span id="word-count">0</span> words</span>
+          <div class="flex items-center bg-gray-50 px-3 py-1.5 rounded-md shadow-sm border border-gray-100">
+            <i class="material-icons mr-1 text-sm text-gray-500">text_fields</i>
+            <span><span id="word-count" class="font-medium">0</span> words</span>
           </div>
           
           <!-- Privacy status -->
-          <div class="flex items-center bg-white/30 px-3 py-1 rounded-md">
-            <i class="material-icons mr-1 text-sm"><%= @document.privacy == 'private' ? 'lock' : 'public' %></i>
-            <span class="capitalize"><%= @document.privacy || 'private' %></span>
+          <div class="flex items-center bg-gray-50 px-3 py-1.5 rounded-md shadow-sm border border-gray-100">
+            <i class="material-icons mr-1 text-sm text-gray-500"><%= @document.privacy == 'private' ? 'lock' : 'public' %></i>
+            <span class="capitalize font-medium"><%= @document.privacy || 'private' %></span>
           </div>
         </div>
       </div>
@@ -155,12 +162,13 @@
       <div class="lg:sticky lg:top-14 lg:h-screen">
         <%= render partial: 'javascripts/content_linking' %>
         
-        <!-- Document notes modal using Alpine.js -->
+        <!-- Document metadata modal using Alpine.js -->
         <div
-          id="document-notes-modal"
-          x-data="{ open: false }"
+          id="document-metadata-modal"
+          x-data="{ open: false, activeTab: 'notes' }"
           x-show="open"
-          @open-modal.window="if ($event.detail === 'document-notes-modal') open = true"
+          @open-modal.window="if ($event.detail === 'document-metadata-modal') open = true"
+          @close-modal.window="open = false"
           @keydown.escape.window="open = false"
           class="fixed inset-0 z-50 overflow-y-auto"
           x-cloak
@@ -181,39 +189,107 @@
               x-transition:leave-end="opacity-0 translate-y-4"
               @click.away="open = false"
             >
-              <%= form_for(@document, remote: true, html: { id: 'document-notes-form' }) do |f| %>
+              <%= form_for(@document, remote: true, html: { id: 'document-metadata-form' }) do |f| %>
                 <!-- Modal header -->
-                <div class="px-6 py-4 border-b border-gray-200">
-                  <div class="flex items-center">
-                    <div class="w-10 h-10 rounded-full <%= Document.color %> flex items-center justify-center mr-3">
-                      <i class="material-icons text-white"><%= Document.icon %></i>
+                <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-teal-500 to-teal-600">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mr-3">
+                        <i class="material-icons text-teal-500"><%= Document.icon %></i>
+                      </div>
+                      <h3 class="text-lg font-medium text-white">Document Metadata</h3>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900">Document notes</h3>
+                    <button @click="open = false" class="text-white hover:text-gray-100 focus:outline-none">
+                      <i class="material-icons">close</i>
+                    </button>
                   </div>
                 </div>
                 
-                <!-- Modal body -->
-                <div class="px-6 py-4">
-                  <p class="text-sm text-gray-500 mb-4">This field will automatically expand as you write.</p>
-                  <%= f.text_area :notes_text,
-                    class: 'w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50',
-                    placeholder: "Write as little or as much as you'd like!",
-                    style: 'min-height: 400px; padding: 10px;'
-                  %>
-                  <p class="text-sm text-gray-500 mt-4">
-                    <strong>To save your notes, please click "Save Changes" below.</strong>
-                    Closing this dialog will preserve your unsaved changes until you refresh the page, but to keep your notes you must save them!
-                  </p>
+                <!-- Tab navigation -->
+                <div class="border-b border-gray-200 bg-gray-50">
+                  <nav class="flex px-6" aria-label="Tabs">
+                    <button
+                      type="button"
+                      @click="activeTab = 'notes'"
+                      :class="activeTab === 'notes' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                      class="py-4 px-4 border-b-2 font-medium text-sm mr-8 transition-colors flex items-center"
+                    >
+                      <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'notes' ? 'text-teal-500' : 'text-gray-400'">notes</i>
+                      Notes
+                    </button>
+                    <button
+                      type="button"
+                      @click="activeTab = 'synopsis'"
+                      :class="activeTab === 'synopsis' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                      class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
+                    >
+                      <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'synopsis' ? 'text-teal-500' : 'text-gray-400'">short_text</i>
+                      Synopsis
+                    </button>
+                  </nav>
+                </div>
+                
+                <!-- Tab content -->
+                <div class="p-6">
+                  <!-- Notes tab -->
+                  <div x-show="activeTab === 'notes'" x-cloak>
+                    <table class="mb-4 w-full">
+                      <tr>
+                        <td class="align-top pr-3" style="width: 24px;">
+                          <i class="material-icons text-teal-500">info</i>
+                        </td>
+                        <td class="align-top">
+                          <span class="text-sm text-gray-600">
+                            Document notes are for your reference only and won't be visible to readers. Use this space for research notes, planning, or any other information you want to keep with your document.
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <%= f.text_area :notes_text,
+                      class: 'w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring focus:ring-teal-500 focus:ring-opacity-30',
+                      placeholder: "Write as little or as much as you'd like!",
+                      style: 'min-height: 300px; padding: 12px;'
+                    %>
+                  </div>
+                  
+                  <!-- Synopsis tab -->
+                  <div x-show="activeTab === 'synopsis'" x-cloak>
+                    <table class="mb-4 w-full">
+                      <tr>
+                        <td class="align-top pr-3" style="width: 24px;">
+                          <i class="material-icons text-teal-500">visibility</i>
+                        </td>
+                        <td class="align-top">
+                          <span class="text-sm text-gray-600">
+                            A brief summary of your document's content. This will be displayed in document listings and previews to give readers an idea of what your document is about.
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <%= f.text_area :synopsis,
+                      class: 'w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring focus:ring-teal-500 focus:ring-opacity-30',
+                      placeholder: "Summarize your document in a few sentences...",
+                      style: 'min-height: 300px; padding: 12px;'
+                    %>
+                  </div>
                 </div>
                 
                 <!-- Modal footer -->
-                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
-                  <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" @click="open = false">
-                    Ignore changes
-                  </button>
-                  <button type="button" onclick='$("form#document-notes-form").submit()' @click="open = false" class="px-4 py-2 text-sm font-medium text-white bg-notebook-blue border border-transparent rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Save changes
-                  </button>
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+                  <div class="text-sm text-gray-500">
+                    <i class="material-icons text-sm align-middle mr-1">save</i>
+                    All changes will be saved
+                  </div>
+                  <div class="flex space-x-3">
+                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
+                      Cancel
+                    </button>
+                    <button type="button" id="save-metadata-button" @click="open = false" class="px-4 py-2 text-sm font-medium text-white bg-teal-500 border border-transparent rounded-md shadow-sm hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                      Save & Close
+                    </button>
+                  </div>
                 </div>
               <% end %>
             </div>
@@ -657,8 +733,11 @@
           // Update save indicator to saving state
           $('.js-autosave-status').text('Saving...');
           $('.js-autosave-icon').addClass('text-gray-400').removeClass('text-gray-900 text-red-500');
-          $('#save-indicator').removeClass('bg-red-500').addClass('bg-white');
+          $('#save-indicator').removeClass('bg-red-500').addClass('bg-white pulse-animation');
           $('.js-autosave-status').removeClass('text-white').addClass('text-gray-600');
+          
+          // Update mini save indicator
+          $('#mini-save-indicator i').addClass('pulse-animation');
           
           // Clear both timers
           clearTimeout(short_timer);
@@ -697,8 +776,11 @@
             // Update indicator to saved state
             $('.js-autosave-status').text('Saved');
             $('.js-autosave-icon').addClass('text-gray-900').removeClass('text-gray-400 text-red-500 text-white');
-            $('#save-indicator').removeClass('bg-red-500').addClass('bg-white');
+            $('#save-indicator').removeClass('bg-red-500 pulse-animation').addClass('bg-white');
             $('.js-autosave-status').removeClass('text-white').addClass('text-gray-600');
+            
+            // Update mini save indicator
+            $('#mini-save-indicator i').removeClass('pulse-animation');
             
             // Make the indicator more visible for a moment
             $('#save-indicator').addClass('bg-green-50');
@@ -751,6 +833,7 @@
           const content = $('#editor').html();
           const wordCount = countWords(content);
           $('#word-count').text(wordCount);
+          $('#mini-word-count').text(wordCount); // Update mini word count too
         };
         
         // Initial word count
@@ -785,31 +868,103 @@
             e.preventDefault();
           }
         });
+        
+        // Keyboard shortcuts
+        $(document).on('keydown', function(e) {
+          // Save (Ctrl+S)
+          if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            performSave();
+          }
+        });
       });
+      </script>
+      
+      <!-- Document metadata modal AJAX functionality -->
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          // Handle Save & Close button click
+          $('#save-metadata-button').on('click', function() {
+            // Get the form
+            const form = $('#document-metadata-form');
+            
+            // Show saving state
+            const button = $(this);
+            const originalText = button.text();
+            button.html('<i class="material-icons text-sm align-middle mr-1">hourglass_top</i> Saving...');
+            button.prop('disabled', true);
+            
+            // Submit the form via AJAX
+            $.ajax({
+              type: 'PATCH',
+              url: form.attr('action'),
+              data: form.serialize(),
+              success: function() {
+                // Show success state
+                button.html('<i class="material-icons text-sm align-middle mr-1">check</i> Saved!');
+                
+                // Close the modal after a short delay
+                setTimeout(function() {
+                  // Reset button
+                  button.html(originalText);
+                  button.prop('disabled', false);
+                  
+                  // The modal should already be closed by the @click="open = false" on the button
+                }, 1000);
+              },
+              error: function() {
+                // Show error state
+                button.html('<i class="material-icons text-sm align-middle mr-1">error</i> Error!');
+                
+                // Reset button after delay
+                setTimeout(function() {
+                  button.html(originalText);
+                  button.prop('disabled', false);
+                }, 2000);
+              }
+            });
+          });
+        });
       </script>
       
       <!-- Custom styles for Medium Editor to match Tailwind design -->
       <style>
+        /* Enhanced Medium Editor toolbar styling */
         .medium-editor-toolbar {
-          border-radius: 0.375rem;
-          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-          border: 1px solid rgba(209, 213, 219, 1);
+          border-radius: 0.5rem;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          border: none;
           background-color: white;
+          transition: all 0.2s ease;
+          transform-origin: center bottom;
+          animation: toolbar-appear 0.2s ease;
+        }
+        
+        @keyframes toolbar-appear {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         
         .medium-editor-toolbar-active {
           visibility: visible;
-          background-color: white;
         }
         
         .medium-editor-toolbar-actions {
-          background-color: white;
+          display: flex;
+          padding: 4px;
+          gap: 2px;
         }
         
         .medium-editor-action {
+          width: 36px;
+          height: 36px;
+          border-radius: 0.375rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.15s ease;
           background-color: white;
           color: rgba(55, 65, 81, 1);
-          transition: background-color 0.2s;
         }
         
         .medium-editor-action:hover {
@@ -849,5 +1004,28 @@
         .prose ul, .prose ol {
           margin-top: 1em;
           margin-bottom: 1em;
+        }
+        
+        /* Autosave indicator animation */
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.6; }
+          100% { opacity: 1; }
+        }
+        
+        .pulse-animation {
+          animation: pulse 1.5s infinite ease-in-out;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 640px) {
+          .medium-editor-action {
+            width: 32px;
+            height: 32px;
+          }
+          
+          #editor {
+            padding: 1rem;
+          }
         }
       </style>
