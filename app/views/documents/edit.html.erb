@@ -44,11 +44,7 @@
             <span class="font-medium">Preview as Reader</span>
           <% end %>
           
-          <!-- Privacy settings -->
-          <button type="button" class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm">
-            <i class="material-icons mr-1 text-sm align-middle">visibility_off</i>
-            <span class="font-medium">Privacy</span>
-          </button>
+          <!-- Privacy settings button removed from here and moved to the right side -->
           
           <!-- Overflow menu -->
           <div class="relative" x-data="{ open: false }">
@@ -112,11 +108,16 @@
             <span><span id="word-count" class="font-medium">0</span> words</span>
           </div>
           
-          <!-- Privacy status -->
-          <div class="flex items-center bg-gray-50 px-3 py-1.5 rounded-md shadow-sm border border-gray-100">
-            <i class="material-icons mr-1 text-sm text-gray-500"><%= @document.privacy == 'private' ? 'lock' : 'public' %></i>
+          <!-- Privacy status - now a clickable button -->
+          <button
+            type="button"
+            @click="$dispatch('open-modal', 'document-privacy-modal')"
+            class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm border border-gray-200 hover:border-gray-300"
+          >
+            <i class="material-icons mr-1 text-sm <%= @document.privacy == 'private' ? 'text-gray-500' : 'text-green-500' %>"><%= @document.privacy == 'private' ? 'lock' : 'public' %></i>
             <span class="capitalize font-medium"><%= @document.privacy || 'private' %></span>
-          </div>
+            <i class="material-icons ml-1 text-xs text-gray-400">edit</i>
+          </button>
         </div>
       </div>
     </div>
@@ -161,6 +162,255 @@
       <!-- Entities sidebar container - positioned in the right column -->
       <div class="lg:sticky lg:top-14 lg:h-screen">
         <%= render partial: 'javascripts/content_linking' %>
+        
+        <!-- Privacy modal with tabs -->
+        <div
+          id="document-privacy-modal"
+          x-data="{ open: false, activeTab: 'document' }"
+          x-show="open"
+          @open-modal.window="if ($event.detail === 'document-privacy-modal') open = true"
+          @close-modal.window="open = false"
+          @keydown.escape.window="open = false"
+          class="fixed inset-0 z-50 overflow-y-auto"
+          x-cloak
+        >
+          <!-- Modal backdrop -->
+          <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" x-show="open" @click="open = false"></div>
+          
+          <!-- Modal content -->
+          <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div
+              class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md transform transition-all"
+              x-show="open"
+              x-transition:enter="ease-out duration-300"
+              x-transition:enter-start="opacity-0 translate-y-4"
+              x-transition:enter-end="opacity-100 translate-y-0"
+              x-transition:leave="ease-in duration-200"
+              x-transition:leave-start="opacity-100 translate-y-0"
+              x-transition:leave-end="opacity-0 translate-y-4"
+              @click.away="open = false"
+            >
+              <!-- Modal header -->
+              <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-teal-500 to-teal-600">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mr-3">
+                      <i class="material-icons text-teal-500"><%= Document.icon %></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-white">Privacy Settings</h3>
+                  </div>
+                  <button @click="open = false" class="text-white hover:text-gray-100 focus:outline-none">
+                    <i class="material-icons">close</i>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Tab navigation -->
+              <div class="border-b border-gray-200 bg-gray-50">
+                <nav class="flex px-6" aria-label="Tabs">
+                  <button
+                    type="button"
+                    @click="activeTab = 'document'"
+                    :class="activeTab === 'document' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
+                  >
+                    <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'document' ? 'text-teal-500' : 'text-gray-400'"><%= Document.icon %></i>
+                    Document Privacy
+                  </button>
+                  
+                  <% if @document.universe.present? %>
+                    <button
+                      type="button"
+                      @click="activeTab = 'universe'"
+                      :class="activeTab === 'universe' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                      class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
+                    >
+                      <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'universe' ? 'text-blue-500' : 'text-gray-400'">public</i>
+                      Universe Privacy
+                      <% if @document.universe.privacy == 'public' %>
+                        <span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          Public
+                        </span>
+                      <% end %>
+                    </button>
+                  <% end %>
+                </nav>
+              </div>
+              
+              <!-- Tab content -->
+              <div class="p-6">
+                <!-- Document privacy tab -->
+                <div x-show="activeTab === 'document'" x-cloak>
+                  <table class="mb-4 w-full">
+                    <tr>
+                      <td class="align-top pr-3" style="width: 24px;">
+                        <i class="material-icons text-teal-500">info</i>
+                      </td>
+                      <td class="align-top">
+                        <span class="text-sm text-gray-600">
+                          Control who can view this document. More privacy options will be available in the future.
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  <% if @document.universe.present? %>
+                    <div class="mb-4 p-3 rounded-md border <%= @document.universe.privacy == 'public' ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-200' %>">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 mr-3">
+                          <div class="w-8 h-8 rounded-full <%= @document.universe.privacy == 'public' ? 'bg-yellow-100' : 'bg-gray-100' %> flex items-center justify-center">
+                            <i class="material-icons text-sm <%= @document.universe.privacy == 'public' ? 'text-yellow-600' : 'text-gray-500' %>"><%= @document.universe.privacy == 'public' ? 'warning' : 'info' %></i>
+                          </div>
+                        </div>
+                        <div>
+                          <p class="text-sm font-medium <%= @document.universe.privacy == 'public' ? 'text-yellow-800' : 'text-gray-700' %>">
+                            This document is in the universe "<%= @document.universe.name %>"
+                          </p>
+                          <p class="text-xs <%= @document.universe.privacy == 'public' ? 'text-yellow-600' : 'text-gray-500' %>">
+                            <% if @document.universe.privacy == 'public' %>
+                              <strong>Note:</strong> This universe is <strong>public</strong>, so this document will be visible to anyone who can view the universe, regardless of its own privacy setting.
+                            <% else %>
+                              This universe is <strong>private</strong>, so this document's privacy setting will be respected.
+                            <% end %>
+                            <a @click="activeTab = 'universe'" class="underline cursor-pointer <%= @document.universe.privacy == 'public' ? 'text-yellow-700' : 'text-gray-600' %> hover:opacity-80">Manage universe privacy</a>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                  
+                  <%= form_for(@document, remote: true, html: { id: 'document-privacy-form' }) do |f| %>
+                    <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                      <%= f.hidden_field :privacy, value: @document.privacy, id: 'document_privacy_field' %>
+                      
+                      <div class="space-y-3">
+                        <!-- Radio button for Private -->
+                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 <%= @document.privacy == 'private' ? 'bg-white border border-teal-500' : '' %>">
+                          <input type="radio" id="document-privacy-private" name="document-privacy-option" value="private" class="h-4 w-4 text-teal-600 focus:ring-teal-500" <%= @document.privacy == 'private' ? 'checked' : '' %> onchange="updateDocumentPrivacy(this)">
+                          <label for="document-privacy-private" class="ml-3 flex items-center cursor-pointer">
+                            <i class="material-icons text-gray-500 mr-2">lock</i>
+                            <div>
+                              <span class="block text-sm font-medium text-gray-900">Private</span>
+                              <span class="block text-xs text-gray-500">Only visible to you</span>
+                            </div>
+                          </label>
+                        </div>
+                        
+                        <!-- Radio button for Public -->
+                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 <%= @document.privacy == 'public' ? 'bg-white border border-teal-500' : '' %>">
+                          <input type="radio" id="document-privacy-public" name="document-privacy-option" value="public" class="h-4 w-4 text-teal-600 focus:ring-teal-500" <%= @document.privacy == 'public' ? 'checked' : '' %> onchange="updateDocumentPrivacy(this)">
+                          <label for="document-privacy-public" class="ml-3 flex items-center cursor-pointer">
+                            <i class="material-icons text-green-500 mr-2">public</i>
+                            <div>
+                              <span class="block text-sm font-medium text-gray-900">Public</span>
+                              <span class="block text-xs text-gray-500">Anyone with the link can view</span>
+                            </div>
+                          </label>
+                        </div>
+                        
+                        <!-- Placeholder for future options (commented out for now) -->
+                        <!--
+                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 opacity-50 cursor-not-allowed">
+                          <input type="radio" id="document-privacy-friends" name="document-privacy-option" value="friends" class="h-4 w-4 text-teal-600 focus:ring-teal-500" disabled>
+                          <label for="document-privacy-friends" class="ml-3 flex items-center">
+                            <i class="material-icons text-blue-500 mr-2">people</i>
+                            <div>
+                              <span class="block text-sm font-medium text-gray-900">Friends Only</span>
+                              <span class="block text-xs text-gray-500">Only visible to you and your friends</span>
+                              <span class="block text-xs text-gray-400 italic">Coming soon</span>
+                            </div>
+                          </label>
+                        </div>
+                        -->
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+                
+                <!-- Universe privacy tab -->
+                <% if @document.universe.present? %>
+                  <div x-show="activeTab === 'universe'" x-cloak>
+                    <table class="mb-4 w-full">
+                      <tr>
+                        <td class="align-top pr-3" style="width: 24px;">
+                          <i class="material-icons text-blue-500">info</i>
+                        </td>
+                        <td class="align-top">
+                          <span class="text-sm text-gray-600">
+                            Documents in a public universe are visible to anyone who can view that universe, regardless of the document's privacy setting.
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <% if @document.universe.user == current_user %>
+                      <%= form_for(@document.universe, remote: true, html: { id: 'universe-privacy-form' }) do |f| %>
+                        <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                          <div class="flex items-center mb-4">
+                            <div class="mr-3">
+                              <i class="material-icons text-blue-500">public</i>
+                            </div>
+                            <div>
+                              <span class="font-medium text-gray-900"><%= @document.universe.name %></span>
+                            </div>
+                          </div>
+                          
+                          <%= f.hidden_field :privacy, value: @document.universe.privacy, id: 'universe_privacy_field' %>
+                          
+                          <div class="space-y-3">
+                            <!-- Radio button for Private -->
+                            <div class="flex items-center p-2 rounded-md hover:bg-gray-100 <%= @document.universe.privacy == 'private' ? 'bg-white border border-blue-500' : '' %>">
+                              <input type="radio" id="universe-privacy-private" name="universe-privacy-option" value="private" class="h-4 w-4 text-blue-600 focus:ring-blue-500" <%= @document.universe.privacy == 'private' ? 'checked' : '' %> onchange="updateUniversePrivacy(this)">
+                              <label for="universe-privacy-private" class="ml-3 flex items-center cursor-pointer">
+                                <i class="material-icons text-gray-500 mr-2">lock</i>
+                                <div>
+                                  <span class="block text-sm font-medium text-gray-900">Private</span>
+                                  <span class="block text-xs text-gray-500">Only visible to you</span>
+                                </div>
+                              </label>
+                            </div>
+                            
+                            <!-- Radio button for Public -->
+                            <div class="flex items-center p-2 rounded-md hover:bg-gray-100 <%= @document.universe.privacy == 'public' ? 'bg-white border border-blue-500' : '' %>">
+                              <input type="radio" id="universe-privacy-public" name="universe-privacy-option" value="public" class="h-4 w-4 text-blue-600 focus:ring-blue-500" <%= @document.universe.privacy == 'public' ? 'checked' : '' %> onchange="updateUniversePrivacy(this)">
+                              <label for="universe-privacy-public" class="ml-3 flex items-center cursor-pointer">
+                                <i class="material-icons text-green-500 mr-2">public</i>
+                                <div>
+                                  <span class="block text-sm font-medium text-gray-900">Public</span>
+                                  <span class="block text-xs text-gray-500">Anyone with the link can view</span>
+                                </div>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      <% end %>
+                    <% else %>
+                      <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-center">
+                          <div class="mr-3">
+                            <i class="material-icons text-blue-500">public</i>
+                          </div>
+                          <div>
+                            <span class="font-medium text-gray-900"><%= @document.universe.name %></span>
+                            <p class="text-sm text-gray-500">Currently: <span class="font-medium capitalize"><%= @document.universe.privacy || 'private' %></span></p>
+                            <p class="text-xs text-gray-500 mt-1">You don't own this universe, so you can't change its privacy settings.</p>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+              
+              <!-- Modal footer -->
+              <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+                <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         
         <!-- Document metadata modal using Alpine.js -->
         <div
@@ -226,6 +476,15 @@
                       <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'synopsis' ? 'text-teal-500' : 'text-gray-400'">short_text</i>
                       Synopsis
                     </button>
+                    <button
+                      type="button"
+                      @click="activeTab = 'universe'"
+                      :class="activeTab === 'universe' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                      class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
+                    >
+                      <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'universe' ? 'text-teal-500' : 'text-gray-400'">public</i>
+                      Universe
+                    </button>
                   </nav>
                 </div>
                 
@@ -273,6 +532,36 @@
                       placeholder: "Summarize your document in a few sentences...",
                       style: 'min-height: 300px; padding: 12px;'
                     %>
+                  </div>
+                  
+                  <!-- Universe tab -->
+                  <div x-show="activeTab === 'universe'" x-cloak>
+                    <table class="mb-4 w-full">
+                      <tr>
+                        <td class="align-top pr-3" style="width: 24px;">
+                          <i class="material-icons text-teal-500">public</i>
+                        </td>
+                        <td class="align-top">
+                          <span class="text-sm text-gray-600">
+                            Select a universe for this document. Documents in a universe can be organized together and share common worldbuilding elements.
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <div class="mt-4">
+                      <label for="document_universe_id" class="block text-sm font-medium text-gray-700 mb-1">Universe</label>
+                      <%= f.collection_select :universe_id,
+                          current_user.universes.order(:name),
+                          :id,
+                          :name,
+                          { include_blank: "No universe" },
+                          { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md" }
+                      %>
+                      <p class="mt-2 text-sm text-gray-500">
+                        Selecting a universe will make this document part of that universe's worldbuilding.
+                      </p>
+                    </div>
                   </div>
                 </div>
                 
@@ -921,6 +1210,380 @@
                   button.html(originalText);
                   button.prop('disabled', false);
                 }, 2000);
+              }
+            });
+          });
+        });
+      </script>
+      
+      <!-- Privacy toggle functionality -->
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          // Document privacy toggle
+          $('#document-privacy-toggle').on('change', function() {
+            const isPublic = $(this).is(':checked');
+            const privacyValue = isPublic ? 'public' : 'private';
+            
+            // Update hidden field
+            $('#document_privacy_field').val(privacyValue);
+            
+            // Update icon in navbar
+            const privacyIcon = isPublic ? 'visibility' : 'visibility_off';
+            $('button[type="button"][@click*="document-privacy-modal"] i').text(privacyIcon);
+            
+            // Also update the privacy status indicator in the navbar
+            // Update the privacy button in the top right
+            const privacyButton = $('button[type="button"][@click*="document-privacy-modal"]');
+            privacyButton.find('i.material-icons').first().text(isPublic ? 'public' : 'lock');
+            privacyButton.find('i.material-icons').first().removeClass('text-gray-500 text-green-500').addClass(isPublic ? 'text-green-500' : 'text-gray-500');
+            privacyButton.find('span.capitalize.font-medium').text(isPublic ? 'public' : 'private');
+            
+            // Submit form
+            $('#document-privacy-form').submit();
+            
+            // Show saving indicator
+            const saveIndicator = $('#save-indicator');
+            saveIndicator.addClass('pulse-animation');
+            $('.js-autosave-status').text('Saving privacy...');
+            
+            // Reset indicator after delay
+            setTimeout(function() {
+              saveIndicator.removeClass('pulse-animation');
+              $('.js-autosave-status').text('Saved');
+            }, 1500);
+          });
+          
+          // Universe privacy toggle (if present)
+          $('#universe-privacy-toggle').on('change', function() {
+            const isPublic = $(this).is(':checked');
+            const privacyValue = isPublic ? 'public' : 'private';
+            
+            // Update hidden field
+            $('#universe_privacy_field').val(privacyValue);
+            
+            // Submit form
+            $('#universe-privacy-form').submit();
+            
+            // Show saving indicator
+            const saveIndicator = $('#save-indicator');
+            saveIndicator.addClass('pulse-animation');
+            $('.js-autosave-status').text('Saving universe privacy...');
+            
+            // Reset indicator after delay
+            setTimeout(function() {
+              saveIndicator.removeClass('pulse-animation');
+              $('.js-autosave-status').text('Saved');
+            }, 1500);
+          });
+          
+          // Helper functions for privacy radio buttons
+          window.updateDocumentPrivacy = function(radio) {
+            // Disable all radio buttons during submission to prevent multiple clicks
+            document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
+              option.disabled = true;
+              option.parentElement.classList.add('opacity-50');
+            });
+            
+            const value = radio.value;
+            document.getElementById('document_privacy_field').value = value;
+            
+            // Update selected state visually
+            document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
+              const container = option.closest('div');
+              if (option.value === value) {
+                container.classList.add('bg-white', 'border', 'border-teal-500');
+              } else {
+                container.classList.remove('bg-white', 'border', 'border-teal-500');
+              }
+            });
+            
+            // Update UI immediately
+            const statusIcon = value === 'public' ? 'public' : 'lock';
+            
+            // Update the privacy button in the top right
+            const privacyButton = $('button[type="button"][\\@click*="document-privacy-modal"]');
+            privacyButton.find('i.material-icons').first().text(statusIcon);
+            privacyButton.find('i.material-icons').first().removeClass('text-gray-500 text-green-500').addClass(value === 'public' ? 'text-green-500' : 'text-gray-500');
+            privacyButton.find('span.capitalize.font-medium').text(value);
+            
+            // Show saving indicator
+            const saveIndicator = $('#save-indicator');
+            saveIndicator.addClass('pulse-animation');
+            $('.js-autosave-status').text('Saving privacy...');
+            
+            // Submit the form
+            $('#document-privacy-form').submit();
+          };
+          
+          // Flag to track if a submission is in progress
+          let universePrivacySubmissionInProgress = false;
+          
+          // Direct AJAX update function for universe privacy
+          window.updateUniversePrivacy = function(radio) {
+            console.log('updateUniversePrivacy called with value:', radio.value);
+            
+            // Prevent multiple submissions
+            if (universePrivacySubmissionInProgress) {
+              console.log('Universe privacy update already in progress, ignoring this request');
+              return;
+            }
+            
+            // Set flag to prevent multiple submissions
+            universePrivacySubmissionInProgress = true;
+            
+            // Disable all radio buttons immediately to prevent multiple clicks
+            document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(option) {
+              option.disabled = true;
+              option.parentElement.classList.add('opacity-50');
+            });
+            
+            // Update selected state visually immediately
+            const value = radio.value;
+            document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(option) {
+              const container = option.closest('div');
+              if (option.value === value) {
+                container.classList.add('bg-white', 'border', 'border-blue-500');
+              } else {
+                container.classList.remove('bg-white', 'border', 'border-blue-500');
+              }
+            });
+            
+            // Show saving indicator immediately
+            const saveIndicator = $('#save-indicator');
+            saveIndicator.addClass('pulse-animation');
+            $('.js-autosave-status').text('Saving universe privacy...');
+            
+            // Get universe ID from form action
+            const universeId = $('#universe-privacy-form').attr('action').split('/').pop();
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
+            
+            console.log('Making AJAX request to update universe privacy to:', value);
+            
+            // Make direct AJAX call instead of form submission
+            $.ajax({
+              type: 'PATCH',
+              url: '/plan/universes/' + universeId,
+              headers: {
+                'X-CSRF-Token': csrfToken
+              },
+              data: {
+                universe: {
+                  privacy: value
+                }
+              },
+              success: function(data, textStatus, xhr) {
+                console.log('Universe privacy update successful');
+                handleUniversePrivacySuccess(value === 'public');
+              },
+              error: function(xhr, status, error) {
+                console.log('Universe privacy update response:', xhr.status, status);
+                
+                // The server is redirecting, which jQuery treats as an error
+                // But we know the update was successful if we get a 302 Found
+                if (xhr.status === 200 || xhr.status === 302) {
+                  console.log('Treating redirect as success');
+                  handleUniversePrivacySuccess(value === 'public');
+                } else {
+                  // Only show error for actual errors
+                  console.error("Universe privacy update error:", status, error);
+                  const saveIndicator = $('#save-indicator');
+                  saveIndicator.removeClass('bg-white pulse-animation').addClass('bg-red-500');
+                  $('.js-autosave-status').text('Error saving universe privacy!').addClass('text-white');
+                  
+                  // Reset indicator after delay
+                  setTimeout(function() {
+                    saveIndicator.removeClass('bg-red-500').addClass('bg-white');
+                    $('.js-autosave-status').text('Saved').removeClass('text-white');
+                  }, 2000);
+                }
+              },
+              complete: function() {
+                console.log('Universe privacy update request completed');
+                // Re-enable radio buttons
+                document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(option) {
+                  option.disabled = false;
+                  option.parentElement.classList.remove('opacity-50');
+                });
+                
+                // Reset submission flag
+                universePrivacySubmissionInProgress = false;
+                
+                // Always remove the pulse animation when the request completes
+                $('#save-indicator').removeClass('pulse-animation');
+              }
+            });
+            
+            // Helper function to handle successful universe privacy updates
+            function handleUniversePrivacySuccess(isPublic) {
+              // Update UI elements based on the new privacy setting
+              window.updateUniversePrivacyUI(isPublic);
+              
+              // Show success in save indicator
+              const saveIndicator = $('#save-indicator');
+              saveIndicator.removeClass('pulse-animation bg-red-500').addClass('bg-green-50');
+              $('.js-autosave-status').text('Universe privacy saved').removeClass('text-white');
+              
+              // Reset indicator after delay
+              setTimeout(function() {
+                saveIndicator.removeClass('bg-green-50');
+                $('.js-autosave-status').text('Saved');
+              }, 2000);
+            }
+          };
+
+          // Function to update UI elements based on universe privacy
+          window.updateUniversePrivacyUI = function(isPublic) {
+            // Update the badge on the Universe tab
+            const universeTab = document.querySelector('button[type="button"][\\@click*="activeTab = \'universe\'"]');
+            if (universeTab) {
+              let badge = universeTab.querySelector('span.ml-2');
+              
+              if (isPublic) {
+                // Add badge if it doesn't exist
+                if (!badge) {
+                  badge = document.createElement('span');
+                  badge.className = 'ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800';
+                  badge.textContent = 'Public';
+                  universeTab.appendChild(badge);
+                }
+              } else {
+                // Remove badge if it exists
+                if (badge) {
+                  badge.remove();
+                }
+              }
+            }
+            
+            // Update the notice in the document privacy tab
+            const universeNotice = document.querySelector('.mb-4.p-3.rounded-md.border');
+            if (universeNotice) {
+              if (isPublic) {
+                universeNotice.classList.remove('bg-gray-50', 'border-gray-200');
+                universeNotice.classList.add('bg-yellow-50', 'border-yellow-200');
+                
+                // Update icon container
+                const iconContainer = universeNotice.querySelector('.w-8.h-8.rounded-full');
+                iconContainer.classList.remove('bg-gray-100');
+                iconContainer.classList.add('bg-yellow-100');
+                
+                // Update icon
+                const icon = iconContainer.querySelector('.material-icons');
+                icon.classList.remove('text-gray-500');
+                icon.classList.add('text-yellow-600');
+                icon.textContent = 'warning';
+                
+                // Update text
+                const title = universeNotice.querySelector('.text-sm.font-medium');
+                title.classList.remove('text-gray-700');
+                title.classList.add('text-yellow-800');
+                
+                const description = universeNotice.querySelector('.text-xs');
+                description.classList.remove('text-gray-500');
+                description.classList.add('text-yellow-600');
+                description.innerHTML = '<strong>Note:</strong> This universe is <strong>public</strong>, so this document will be visible to anyone who can view the universe, regardless of its own privacy setting. <a @click="activeTab = \'universe\'" class="underline cursor-pointer text-yellow-700 hover:opacity-80">Manage universe privacy</a>';
+              } else {
+                universeNotice.classList.remove('bg-yellow-50', 'border-yellow-200');
+                universeNotice.classList.add('bg-gray-50', 'border-gray-200');
+                
+                // Update icon container
+                const iconContainer = universeNotice.querySelector('.w-8.h-8.rounded-full');
+                iconContainer.classList.remove('bg-yellow-100');
+                iconContainer.classList.add('bg-gray-100');
+                
+                // Update icon
+                const icon = iconContainer.querySelector('.material-icons');
+                icon.classList.remove('text-yellow-600');
+                icon.classList.add('text-gray-500');
+                icon.textContent = 'info';
+                
+                // Update text
+                const title = universeNotice.querySelector('.text-sm.font-medium');
+                title.classList.remove('text-yellow-800');
+                title.classList.add('text-gray-700');
+                
+                const description = universeNotice.querySelector('.text-xs');
+                description.classList.remove('text-yellow-600');
+                description.classList.add('text-gray-500');
+                description.innerHTML = 'This universe is <strong>private</strong>, so this document\'s privacy setting will be respected. <a @click="activeTab = \'universe\'" class="underline cursor-pointer text-gray-600 hover:opacity-80">Manage universe privacy</a>';
+              }
+            }
+          };
+          
+          // Handle form submission for document-privacy-form
+          $('#document-privacy-form').on('submit', function(e) {
+            e.preventDefault();
+            
+            const form = $(this);
+            
+            $.ajax({
+              type: 'PATCH',
+              url: form.attr('action'),
+              data: form.serialize(),
+              success: function() {
+                // Show success in save indicator
+                const saveIndicator = $('#save-indicator');
+                saveIndicator.removeClass('pulse-animation bg-red-500').addClass('bg-green-50');
+                $('.js-autosave-status').text('Privacy saved').removeClass('text-white');
+                
+                // Reset indicator after delay
+                setTimeout(function() {
+                  saveIndicator.removeClass('bg-green-50');
+                  $('.js-autosave-status').text('Saved');
+                }, 1500);
+              },
+              error: function() {
+                // Show error in save indicator
+                const saveIndicator = $('#save-indicator');
+                saveIndicator.removeClass('bg-white pulse-animation').addClass('bg-red-500');
+                $('.js-autosave-status').text('Error saving privacy!').addClass('text-white');
+                
+                // Reset indicator after delay
+                setTimeout(function() {
+                  saveIndicator.removeClass('bg-red-500').addClass('bg-white');
+                  $('.js-autosave-status').text('Saved').removeClass('text-white');
+                }, 2000);
+              },
+              complete: function() {
+                // Re-enable radio buttons
+                document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
+                  option.disabled = false;
+                  option.parentElement.classList.remove('opacity-50');
+                });
+              }
+            });
+          });
+          
+          // Prevent the default form submission entirely
+          $('#universe-privacy-form').on('submit', function(e) {
+            console.log('Preventing default form submission for universe privacy');
+            e.preventDefault();
+            return false;
+          });
+          
+          // Make sure the radio buttons trigger the updateUniversePrivacy function
+          document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(radio) {
+            // Re-attach the onchange handler to ensure it works
+            radio.onchange = function() {
+              updateUniversePrivacy(this);
+            };
+          });
+          
+          // Initialize UI based on current universe privacy
+          $(document).ready(function() {
+            <% if @document.universe.present? %>
+              window.updateUniversePrivacyUI(<%= @document.universe.privacy == 'public' ? 'true' : 'false' %>);
+            <% end %>
+          });
+          
+          // Add event listener for Alpine.js tab changes to ensure badge visibility
+          document.addEventListener('alpine:initialized', function() {
+            // When the universe tab becomes active, ensure the badge is properly displayed
+            document.addEventListener('x-on:click', function(event) {
+              if (event.target.getAttribute('@click') &&
+                  event.target.getAttribute('@click').includes("activeTab = 'universe'")) {
+                <% if @document.universe.present? %>
+                  window.updateUniversePrivacyUI(<%= @document.universe.privacy == 'public' ? 'true' : 'false' %>);
+                <% end %>
               }
             });
           });
