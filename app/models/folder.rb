@@ -9,11 +9,11 @@ class Folder < ApplicationRecord
   end
 
   def self.color
-    'lighten-1 teal'
+    'lighten-1 teal bg-notebook-blue'
   end
 
   def self.text_color
-    'text-lighten-1 teal-text'
+    'text-lighten-1 teal-text text-teal-600'
   end
 
   def self.icon

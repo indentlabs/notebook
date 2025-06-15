@@ -1,4 +1,5 @@
 class FoldersController < ApplicationController
+  layout 'tailwind'
   before_action :authenticate_user!
   before_action :set_folder,              only: [:show, :destroy, :update]
   before_action :verify_folder_ownership, only: [:show, :destroy, :update]
@@ -42,35 +43,60 @@ class FoldersController < ApplicationController
     # TODO: can we reuse this content to skip a few queries in this controller action?
     cache_linkable_content_for_each_content_type
 
-    # TODO: add other content types here too
-    @content = Document
-      .where(folder: @folder)
-      .includes([:user, :page_tags, :universe])
-      .order('documents.favorite DESC, documents.title ASC, documents.updated_at DESC')
+    # Get the content type class based on the folder's context
+    content_type_class = @folder.context.constantize rescue Document
+    
+    # Check if the content type has a folder association
+    if content_type_class.column_names.include?('folder_id')
+      # Load content of the appropriate type
+      @content = content_type_class.where(folder: @folder)
+      
+      # Add includes based on available associations
+      includes_array = [:user]
+      includes_array << :page_tags if content_type_class.reflect_on_association(:page_tags)
+      includes_array << :universe if content_type_class.reflect_on_association(:universe)
+      
+      @content = @content.includes(includes_array)
+        .order("#{content_type_class.table_name}.favorite DESC, #{content_type_class.table_name}.title ASC, #{content_type_class.table_name}.updated_at DESC")
 
-    if @universe_scope
-      @content = @content.where(universe: @universe_scope)
+      # Only filter by universe if the content type has a universe association
+      if @universe_scope && content_type_class.reflect_on_association(:universe)
+        @content = @content.where(universe: @universe_scope)
+      end
+    else
+      # If the content type doesn't have a folder association, return an empty array
+      @content = []
+      Rails.logger.warn("Content type #{content_type_class.name} doesn't have a folder_id column")
     end
 
     if params.key?(:favorite_only)
       @content = @content.where(favorite: true)
     end
 
-    @page_tags = PageTag.where(
-      page_type: Document.name,
-      page_id:   @content.pluck(:id)
-    ).order(:tag)
+    # Handle page tags if content has any IDs
+    if @content.any?
+      @page_tags = PageTag.where(
+        page_type: content_type_class.name,
+        page_id:   @content.pluck(:id)
+      ).order(:tag)
 
-    if params.key?(:tag)
-      @filtered_page_tags = @page_tags.where(slug: params[:tag])
+      if params.key?(:tag)
+        @filtered_page_tags = @page_tags.where(slug: params[:tag])
 
-      @content = @content.to_a.select { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
-      # TODO: the above could probably be replaced with something like the below, but not sure on nesting syntax
-      # @content = @content.where(page_tags: { slug: @filtered_page_tags.pluck(:slug) })
+        @content = @content.to_a.select { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
+        # TODO: the above could probably be replaced with something like the below, but not sure on nesting syntax
+        # @content = @content.where(page_tags: { slug: @filtered_page_tags.pluck(:slug) })
+      end
+
+      @page_tags = @page_tags.uniq(&:tag)
+      @suggested_page_tags = (@page_tags.pluck(:slug) + PageTagService.suggested_tags_for(content_type_class.name)).uniq
+    else
+      @page_tags = []
+      @suggested_page_tags = PageTagService.suggested_tags_for(content_type_class.name)
     end
-
-    @page_tags = @page_tags.uniq(&:tag)
-    @suggested_page_tags = (@page_tags.pluck(:slug) + PageTagService.suggested_tags_for('Document')).uniq
+    
+    # Make the content type class available to the view
+    @content_type_class = content_type_class
   end
 
   private
