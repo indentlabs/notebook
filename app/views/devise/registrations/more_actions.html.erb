@@ -1,25 +1,103 @@
-<%= form_for(current_user, as: :user, url: registration_path(:user), html: { method: :put }) do |f| %>
-  <% if current_user.errors.any? %>
-    <div class="card red lighten-3">
-      <div class="card-content">
-        <div class="card-title">Please fix the following errors:</div>
-        <ul class="browser-default">
-          <%= devise_error_messages! %>
-        </ul>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-semibold text-gray-900"><%= @page_title || "Account Settings" %></h1>
+          <p class="mt-1 text-sm text-gray-500">Manage your account settings and preferences</p>
+        </div>
       </div>
     </div>
-  <% end %>
-
-  <div class="row">
-    <div id="preferences" class="col s12">
-      <%= render partial: 'devise/registrations/panes/more', locals: { f: f } %>
+    
+    <div class="flex flex-col lg:flex-row">
+      <!-- Desktop sidebar -->
+      <div class="hidden lg:block lg:w-64 lg:border-r lg:border-gray-200">
+        <%= render 'devise/registrations/settings_sidebar' %>
+      </div>
+      
+      <!-- Mobile sidebar toggle -->
+      <div class="lg:hidden px-4 py-3 border-b border-gray-200">
+        <button id="mobile-nav-toggle" type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue">
+          <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          Navigation
+        </button>
+      </div>
+      
+      <!-- Mobile sidebar (hidden by default) -->
+      <div class="settings-sidebar-mobile fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform -translate-x-full lg:hidden transition-transform duration-300 ease-in-out pt-16">
+        <%= render 'devise/registrations/settings_sidebar' %>
+      </div>
+      
+      <!-- Main content -->
+      <div class="flex-1 p-4 sm:p-6">
+        <%= form_for(current_user, as: :user, url: registration_path(:user), html: { method: :put, id: "settings-form" }) do |f| %>
+          <% if current_user.errors.any? %>
+            <div class="mb-6">
+              <div class="rounded-md bg-red-50 p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+                    <div class="mt-2 text-sm text-red-700">
+                      <ul class="list-disc pl-5 space-y-1">
+                        <%= devise_error_messages! %>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+          
+          <div class="space-y-8">
+            <div>
+              <h2 class="text-lg font-medium text-gray-900">Account Actions</h2>
+              <p class="mt-1 text-sm text-gray-500">Manage your account and take important actions.</p>
+            </div>
+            
+            <%= render partial: 'devise/registrations/panes/more', locals: { f: f } %>
+          </div>
+          
+          <div class="mt-8 border-t border-gray-200 pt-6 flex justify-end">
+            <div class="flex space-x-3">
+              <%= link_to "Cancel", :back, class: 'px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue' %>
+              <%= f.submit "Save changes", class: 'inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-notebook-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue' %>
+            </div>
+          </div>
+        <% end %>
+      </div>
     </div>
   </div>
+</div>
 
-  <div class="center">
-    <div class="actions">
-      <%= f.submit "Save changes", class: 'btn blue' %>
-      <%= link_to "Cancel", :back, class: 'btn grey' %>
-    </div>
-  </div>
-<% end %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Mobile navigation
+    const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+    const settingsSidebar = document.querySelector('.settings-sidebar-mobile');
+    
+    if (mobileNavToggle && settingsSidebar) {
+      mobileNavToggle.addEventListener('click', function() {
+        settingsSidebar.classList.toggle('translate-x-0');
+        settingsSidebar.classList.toggle('-translate-x-full');
+      });
+    }
+    
+    // Close mobile sidebar when clicking outside
+    document.addEventListener('click', function(event) {
+      if (settingsSidebar && 
+          !settingsSidebar.contains(event.target) && 
+          !mobileNavToggle.contains(event.target) &&
+          settingsSidebar.classList.contains('translate-x-0')) {
+        settingsSidebar.classList.remove('translate-x-0');
+        settingsSidebar.classList.add('-translate-x-full');
+      }
+    });
+  });
+</script>

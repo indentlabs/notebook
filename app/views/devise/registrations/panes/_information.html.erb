@@ -1,208 +1,273 @@
-<div class="row">
-  <div class="col s12 m4 grey-text">
-    <h4>Public information</h4>
-    <p class="flow-text">
-      This information is visible to other users on <%= link_to 'your profile', current_user %>.
-    </p>
-  </div>
-  <div class="col s12 m8">
-    <div class="card">
-      <div class="card-content">
-        <div class="field">
-          <%= f.label 'Name (visible on your profile and forum posts)' %><br />
-          <%= f.text_field :name, autofocus: true %>
-        </div>
-
-        <%= f.label 'Username' %><br />
-        <div class="input-field">
-          <i class="material-icons prefix black-text">alternate_email</i>
-          <%= f.text_field :username, data: { length: 40 }, placeholder: 'your-username-here', class: 'with-character-counter' %>
-          <small class="help-text">Your Notebook.ai profile will be available at https://www.notebook.ai/@username.</small><br />
-          <small class="help-text">Up to 40 numbers, letters, and/or the following symbols are allowed: <strong>- _ $ + ! *</strong></small>
+<div class="space-y-8">
+  <!-- Public information section -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
+      <h3 class="text-base font-medium text-gray-900">Public information</h3>
+      <p class="mt-1 text-sm text-gray-500">This information is visible to other users on <%= link_to 'your profile', current_user, class: "text-notebook-blue hover:text-blue-700" %>.</p>
+    </div>
+    
+    <div class="px-4 py-5 sm:p-6 space-y-6">
+      <!-- Name and username -->
+      <div>
+        <label for="user_name" class="block text-sm font-medium text-gray-700">Name (visible on your profile and forum posts)</label>
+        <div class="mt-1">
+          <%= f.text_field :name, autofocus: true, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
         </div>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        <div class="row">
-          <div class="col s12 m6 l4">
-            <label>Your current avatar</label>
-            <br /><br />
-            <%= image_tag current_user.image_url(size=160), class: 'hoverable materialboxed' %>
+      
+      <div>
+        <label for="user_username" class="block text-sm font-medium text-gray-700">Username</label>
+        <div class="mt-1 relative rounded-md shadow-sm">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="text-gray-500 sm:text-sm">@</span>
           </div>
-          <div class="col s12 m6 l8">
-            <label>Upload a new avatar</label>
-            <div class="file-field input-field">
-              <div class="blue btn">
-                <span>Upload</span>
-                <%= f.file_field :avatar %>
-              </div>
-              <div class="file-path-wrapper">
-                <input class="file-path validate" type="text" placeholder="Upload an image">
-              </div>
-            </div>
-            <div class="help-text">
-              Supported file types: .png, .jpg, .jpeg, .gif
-            </div>
-            <div class="help-text">
-              After selecting an image here, submit your changes with the usual "Save changes" button at the bottom of this page to save it.
-            </div>
+          <%= f.text_field :username, data: { max_length: 40 }, placeholder: 'your-username-here', class: "pl-8 shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+        <p class="mt-2 text-sm text-gray-500">Your Notebook.ai profile will be available at https://www.notebook.ai/@username.</p>
+        <p class="mt-1 text-sm text-gray-500">Up to 40 numbers, letters, and/or the following symbols are allowed: <span class="font-semibold">- _ $ + ! *</span></p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Avatar section -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
+      <h3 class="text-base font-medium text-gray-900">Profile picture</h3>
+      <p class="mt-1 text-sm text-gray-500">Your avatar is displayed on your profile and next to your posts</p>
+    </div>
+    
+    <div class="px-4 py-5 sm:p-6">
+      <div class="sm:flex sm:items-start sm:justify-between">
+        <div class="sm:flex sm:items-center">
+          <div class="mb-4 sm:mb-0 sm:mr-6 flex-shrink-0">
+            <%= image_tag current_user.image_url(size=160), class: 'h-24 w-24 rounded-full object-cover shadow-sm' %>
+          </div>
+          <div>
+            <h4 class="text-sm font-medium text-gray-900">Upload a new avatar</h4>
+            <p class="text-sm text-gray-500 mt-1">Supported file types: .png, .jpg, .jpeg, .gif</p>
+            <p class="text-sm text-gray-500 mt-1">After selecting an image, submit your changes with the "Save changes" button to save it.</p>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        <div class="input-field">
-          <%= f.text_area :bio, class: 'materialize-textarea with-character-counter', data: { length: 500 } %>
-          <%= f.label 'Bio' %><br />
+        <div class="mt-5 sm:mt-0">
+          <div class="flex items-center">
+            <label for="user_avatar" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue cursor-pointer">
+              <svg class="-ml-1 mr-2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              Upload
+              <%= f.file_field :avatar, class: "hidden" %>
+            </label>
+          </div>
         </div>
-
-        <div class="input-field">
-          <%= f.text_field :interests, class: 'materialize-textarea' %>
-          <%= f.label 'Interests' %><br />
-        </div>
-
-        <div class="input-field">
-          <%= f.text_field :favorite_genre, class: 'materialize-textarea' %>
-          <%= f.label 'Favorite genre' %><br />
-        </div>
-
-        <div class="input-field">
-          <%= f.text_field :favorite_author, class: 'materialize-textarea' %>
-          <%= f.label 'Favorite author' %><br />
-        </div>
-
-        <div class="input-field">
-          <%= f.text_field :favorite_book, class: 'materialize-textarea' %>
-          <%= f.label 'Favorite book' %><br />
-        </div>
-
-        <div class="input-field">
-          <%= f.text_field :favorite_quote, class: 'materialize-textarea' %>
-          <%= f.label 'Favorite quote' %><br />
-        </div>
-
-        <div class="input-field">
-          <%= f.text_field :inspirations, class: 'materialize-textarea' %>
-          <%= f.label 'Inspirations' %><br />
-        </div>
-
-        <div class="input-field">
-          <%= f.text_field :other_names, class: 'materialize-textarea' %>
-          <%= f.label 'Other names' %><br />
-        </div>
-
-        <div class="input-field">
-          <%= f.text_field :website, class: 'materialize-textarea' %>
-          <%= f.label 'Website' %><br />
-        </div>
-      </div>
-    </div>
-
-    <div class="card lighten-5">
-      <div class="card-content">
-        <div class="field">
-          <%= f.label 'Favorite page type' %><br />
-          <%= f.select(:favorite_page_type, Rails.application.config.content_types[:all].map { |type| [type.name.pluralize, type.name] }, include_blank: 'None') %>
-          <small class="help-text">Selecting a page here will prominently display it on your profile and somewhat theme your profile page to match.</small><br />
-        </div>
-      </div>
-    </div>
-
-    <div class="card yellow lighten-5">
-      <div class="card-content">
-        <div class="field">
-          <%= f.label 'Custom Premium badge text' %><br />
-          <%= f.text_field :forums_badge_text, data: { length: 20 }, class: 'with-character-counter black-text', placeholder: 'Premium Supporter' %>
-          <small class="help-text">Premium users can customize the badge that appears under their name on their profile and next to their name on the forums.</small><br />
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div class="row">
-  <div class="col s12 m4 grey-text">
-    <h4>Private information</h4>
-    <p class="flow-text">
-      This information is only ever visible to you.
-    </p>
-    <p>
-      Notebook.ai will never share this information, but may also look at it to better understand its users.
-    </p>
-  </div>
-
-  <div class="col s12 m8">
-    <div class="card">
-      <div class="card-content">
-        <div class="field">
-          <%= f.label 'Email (always completely private)' %><br />
-          <%= f.email_field :email %>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        <div class="input-field">
-          <%= f.text_field :age, class: 'materialize-textarea' %>
-          <%= f.label 'Age' %><br />
-        </div>
-
-        <div class="input-field">
-          <%= f.text_field :location, class: 'materialize-textarea' %>
-          <%= f.label 'Location' %><br />
-        </div>
-
-        <div class="input-field">
-          <%= f.text_field :gender, class: 'materialize-textarea' %>
-          <%= f.label 'Gender' %><br />
-        </div>
-
-        <div class="input-field">
-          <%= f.text_field :occupation, class: 'materialize-textarea' %>
-          <%= f.label 'Occupation' %><br />
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        Last login
-        <%= time_ago_in_words current_user.current_sign_in_at %> ago
-        from IP 
-        <span class="spoiler"><%= current_user.current_sign_in_ip %></span>.
       </div>
     </div>
   </div>
-</div>
-
-<% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-  <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
-<% end %>
-
-<div class="row">
-  <div class="col s12 m4 grey-text">
-    <h4>Password change</h4>
-    <p class="flow-text">
-      Leave this blank unless you want to change your password.
-    </p>
-  </div>
-  <div class="col s12 m8">
-    <div class="card">
-      <div class="card-content">
-        <div class="field">
-          <%= f.label 'New password' %><br />
-          <%= f.password_field :password, autocomplete: "off" %>
+  
+  <!-- Bio and interests -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
+      <h3 class="text-base font-medium text-gray-900">Bio & interests</h3>
+      <p class="mt-1 text-sm text-gray-500">Tell others about yourself and your writing</p>
+    </div>
+    
+    <div class="px-4 py-5 sm:p-6 space-y-6">
+      <div>
+        <label for="user_bio" class="block text-sm font-medium text-gray-700">Bio</label>
+        <div class="mt-1">
+          <%= f.text_area :bio, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md", rows: 4, data: { max_length: 500 } %>
         </div>
-
-        <div class="field">
-          <%= f.label 'New password (again)' %><br />
-          <%= f.password_field :password_confirmation, autocomplete: "off" %>
+      </div>
+      
+      <div>
+        <label for="user_interests" class="block text-sm font-medium text-gray-700">Interests</label>
+        <div class="mt-1">
+          <%= f.text_field :interests, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div>
+        <label for="user_favorite_genre" class="block text-sm font-medium text-gray-700">Favorite genre</label>
+        <div class="mt-1">
+          <%= f.text_field :favorite_genre, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div>
+        <label for="user_favorite_author" class="block text-sm font-medium text-gray-700">Favorite author</label>
+        <div class="mt-1">
+          <%= f.text_field :favorite_author, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div>
+        <label for="user_favorite_book" class="block text-sm font-medium text-gray-700">Favorite book</label>
+        <div class="mt-1">
+          <%= f.text_field :favorite_book, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div>
+        <label for="user_favorite_quote" class="block text-sm font-medium text-gray-700">Favorite quote</label>
+        <div class="mt-1">
+          <%= f.text_field :favorite_quote, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div>
+        <label for="user_inspirations" class="block text-sm font-medium text-gray-700">Inspirations</label>
+        <div class="mt-1">
+          <%= f.text_field :inspirations, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div>
+        <label for="user_other_names" class="block text-sm font-medium text-gray-700">Other names</label>
+        <div class="mt-1">
+          <%= f.text_field :other_names, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div>
+        <label for="user_website" class="block text-sm font-medium text-gray-700">Website</label>
+        <div class="mt-1 relative rounded-md shadow-sm">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+            </svg>
+          </div>
+          <%= f.text_field :website, class: "pl-10 shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md", placeholder: "https://yourwebsite.com" %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Favorite page type -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
+      <h3 class="text-base font-medium text-gray-900">Profile customization</h3>
+      <p class="mt-1 text-sm text-gray-500">Customize how your profile appears to others</p>
+    </div>
+    
+    <div class="px-4 py-5 sm:p-6 space-y-6">
+      <div>
+        <label for="user_favorite_page_type" class="block text-sm font-medium text-gray-700">Favorite page type</label>
+        <div class="mt-1">
+          <%= f.select(:favorite_page_type, 
+              Rails.application.config.content_types[:all].map { |type| [type.name.pluralize, type.name] }, 
+              { include_blank: 'None' }, 
+              { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-notebook-blue focus:border-notebook-blue sm:text-sm rounded-md" }) %>
+        </div>
+        <p class="mt-2 text-sm text-gray-500">Selecting a page here will prominently display it on your profile and somewhat theme your profile page to match.</p>
+      </div>
+      
+      <div>
+        <label for="user_forums_badge_text" class="block text-sm font-medium text-gray-700">Custom Premium badge text</label>
+        <div class="mt-1">
+          <%= f.text_field :forums_badge_text, data: { max_length: 20 }, placeholder: 'Premium Supporter', class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+        <p class="mt-2 text-sm text-gray-500">Premium users can customize the badge that appears under their name on their profile and next to their name on the forums.</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Private information section -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
+      <h3 class="text-base font-medium text-gray-900">Private information</h3>
+      <p class="mt-1 text-sm text-gray-500">This information is only ever visible to you</p>
+    </div>
+    
+    <div class="px-4 py-5 sm:p-6 space-y-6">
+      <div>
+        <label for="user_email" class="block text-sm font-medium text-gray-700">Email (always completely private)</label>
+        <div class="mt-1">
+          <%= f.email_field :email, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div>
+        <label for="user_age" class="block text-sm font-medium text-gray-700">Age</label>
+        <div class="mt-1">
+          <%= f.text_field :age, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div>
+        <label for="user_location" class="block text-sm font-medium text-gray-700">Location</label>
+        <div class="mt-1">
+          <%= f.text_field :location, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div>
+        <label for="user_gender" class="block text-sm font-medium text-gray-700">Gender</label>
+        <div class="mt-1">
+          <%= f.text_field :gender, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div>
+        <label for="user_occupation" class="block text-sm font-medium text-gray-700">Occupation</label>
+        <div class="mt-1">
+          <%= f.text_field :occupation, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div class="rounded-md bg-gray-50 p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3 flex-1">
+            <p class="text-sm text-gray-700">
+              Last login <span class="font-medium"><%= time_ago_in_words current_user.current_sign_in_at %> ago</span>
+              from IP 
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 cursor-pointer hover:bg-gray-200" onclick="this.classList.toggle('bg-gray-100')"><%= current_user.current_sign_in_ip %></span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+    <div class="rounded-md bg-blue-50 p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3 flex-1">
+          <p class="text-sm text-blue-700">
+            Currently waiting confirmation for: <span class="font-medium"><%= resource.unconfirmed_email %></span>
+          </p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  
+  <!-- Password change section -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
+      <h3 class="text-base font-medium text-gray-900">Password change</h3>
+      <p class="mt-1 text-sm text-gray-500">Leave this blank unless you want to change your password</p>
+    </div>
+    
+    <div class="px-4 py-5 sm:p-6 space-y-6">
+      <div>
+        <label for="user_password" class="block text-sm font-medium text-gray-700">New password</label>
+        <div class="mt-1">
+          <%= f.password_field :password, autocomplete: "off", class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        </div>
+      </div>
+      
+      <div>
+        <label for="user_password_confirmation" class="block text-sm font-medium text-gray-700">New password (again)</label>
+        <div class="mt-1">
+          <%= f.password_field :password_confirmation, autocomplete: "off", class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
         </div>
       </div>
     </div>

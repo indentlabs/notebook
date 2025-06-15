@@ -5,7 +5,15 @@ class RegistrationsController < Devise::RegistrationsController
   before_action :set_navbar_actions, only: [:edit, :preferences, :more_actions]
   before_action :set_navbar_color, only: [:edit, :preferences, :more_actions]
 
-  layout 'tailwind/landing', only: [:new, :create]
+  layout :determine_layout
+
+  def determine_layout
+    if action_name.in?(['new', 'create'])
+      'tailwind/landing'
+    else
+      'tailwind'
+    end
+  end
 
   def new
     super
