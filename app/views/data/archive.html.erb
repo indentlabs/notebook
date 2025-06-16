@@ -1,87 +1,135 @@
-<h4>
-  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
-        position: 'bottom',
-        enterDelay: '500',
-        tooltip: "Back to your Data Vault"
-      } do %>
-    <i class="material-icons">arrow_back</i>
-  <% end %>
-  Your notebook's archive
-</h4>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center mb-8">
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 mr-3', title: "Back to your Data Vault" do %>
+      <i class="material-icons">arrow_back</i>
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-700">Your notebook's archive</h1>
+  </div>
 
-<div class="row">
-  <div class="col s12">
-    <ul class="collapsible white">
-      <li class="active">
-        <div class="collapsible-header blue white-text"><i class="material-icons">settings</i> Welcome to the archives!</div>
-        <div class="collapsible-body">
-          <div class="row">
-            <div class="col s12 m9">
-              <p>
-                <strong>Question</strong>: What should you do if you find your notebook cluttering up with pages you haven't used in a while, 
-                but you don't want to delete them? 
-              </p>
-              <p>
-                <strong>Answer</strong>: You can now archive those pages!
-              </p>
-              <p>
-                To archive a page, simply click the archive icon 
-                (<i class="material-icons red-text" style="position: relative; top: 5px">archive</i>)
-                when editing that page. 
-                Archived pages are still viewable when visited through the archives (or from a direct URL), but won't
-                show up around the rest of Notebook.ai, leaving you to focus on the pages that matter more to you right
-                now.
-              </p>
-              <p>
-                Of course, you an un-archive a page at any time from this page also!
-              </p>
-            </div>
-            <div class="col m3 hide-on-small-only">
-              <%= image_tag 'tristan/small.webp' %>
-            </div>
+  <div class="space-y-4">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden collapsible-section" data-open="true">
+      <button class="toggle-button w-full flex items-center justify-between p-4 bg-blue-600 text-white">
+        <div class="flex items-center">
+          <i class="material-icons mr-2">settings</i>
+          <span class="font-medium">Welcome to the archives!</span>
+        </div>
+        <svg class="w-5 h-5 transform transition-transform rotate-180 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </button>
+      <div class="collapsible-content p-6 border-t border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="md:col-span-3 space-y-4">
+            <p class="text-gray-700">
+              <span class="font-bold">Question</span>: What should you do if you find your notebook cluttering up with pages you haven't used in a while,
+              but you don't want to delete them?
+            </p>
+            <p class="text-gray-700">
+              <span class="font-bold">Answer</span>: You can now archive those pages!
+            </p>
+            <p class="text-gray-700">
+              To archive a page, simply click the archive icon
+              (<i class="material-icons text-red-600 align-middle">archive</i>)
+              when editing that page.
+              Archived pages are still viewable when visited through the archives (or from a direct URL), but won't
+              show up around the rest of Notebook.ai, leaving you to focus on the pages that matter more to you right
+              now.
+            </p>
+            <p class="text-gray-700">
+              Of course, you can un-archive a page at any time from this page also!
+            </p>
+          </div>
+          <div class="hidden md:block">
+            <%= image_tag 'tristan/small.webp', class: "w-full" %>
           </div>
         </div>
-      </li>
-      <% Rails.application.config.content_types[:all].each do |content_type| %>
-        <% archived_content = current_user.send(content_type.name.downcase.pluralize).where.not(archived_at: nil) %>
-        <% next unless archived_content.any? %>
-        <li>
-          <div class="collapsible-header">
-            <i class="material-icons <%= content_type.text_color %>"><%= content_type.icon %></i>
-            <%= pluralize archived_content.count, "archived #{content_type.name.downcase}" %>
+      </div>
+    </div>
+
+    <% Rails.application.config.content_types[:all].each_with_index do |content_type, index| %>
+      <% archived_content = current_user.send(content_type.name.downcase.pluralize).where.not(archived_at: nil) %>
+      <% next unless archived_content.any? %>
+      <div class="bg-white rounded-lg shadow-md overflow-hidden collapsible-section" data-open="false">
+        <button class="toggle-button w-full flex items-center justify-between p-4 hover:bg-gray-50">
+          <div class="flex items-center">
+            <i class="material-icons <%= content_type.text_color %> mr-2"><%= content_type.icon %></i>
+            <span class="font-medium text-gray-800"><%= pluralize archived_content.count, "archived #{content_type.name.downcase}" %></span>
           </div>
-          <div class="collapsible-body">
-            <div class="row">
-              <div class="col s12">
-                <table>
+          <svg class="w-5 h-5 transform transition-transform text-gray-500 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        <div class="collapsible-content hidden border-t border-gray-200">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= content_type.name %> name</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Archived</th>
+                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% archived_content.each do |content| %>
                   <tr>
-                    <th><%= content_type.name %> name</th>
-                    <th>Archived</th>
-                    <th></th>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <%= link_to content, class: "flex items-center #{content_type.text_color} hover:underline" do %>
+                        <i class="material-icons mr-2"><%= content_type.icon %></i>
+                        <span><%= content.name %></span>
+                      <% end %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                      <%= time_ago_in_words content.archived_at %> ago
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                      <%= link_to send("toggle_archive_#{content_type.name.downcase}_path", content), class: "inline-flex items-center px-4 py-2 bg-#{content_type.color} text-white rounded-md hover:bg-opacity-90 transition-colors" do %>
+                        <i class="material-icons mr-1 text-sm">unarchive</i>
+                        <span>Un-archive</span>
+                      <% end %>
+                    </td>
                   </tr>
-                  <% archived_content.each do |content| %>
-                    <tr>
-                      <td>
-                        <%= link_to content, class: "#{content_type.text_color}" do %>
-                          <i class="material-icons left"><%= content_type.icon %></i>
-                          <%= content.name %>
-                        <% end %>
-                      </td>
-                      <td><%= time_ago_in_words content.archived_at %> ago</td>
-                      <td>
-                        <%= link_to send("toggle_archive_#{content_type.name.downcase}_path", content), class: "btn #{content_type.color}" do %>
-                          <i class="material-icons left">unarchive</i>
-                          Un-archive
-                        <% end %>
-                      </td>
-                    </tr>
-                  <% end %>
-                </table>
-              </div>
-            </div>
+                <% end %>
+              </tbody>
+            </table>
           </div>
-        </li>
-      <% end %>
-    </ul>
+        </div>
+      </div>
+    <% end %>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize collapsible sections
+    document.querySelectorAll('.collapsible-section').forEach(section => {
+      const toggleButton = section.querySelector('.toggle-button');
+      const content = section.querySelector('.collapsible-content');
+      const chevron = section.querySelector('.chevron-icon');
+      const isOpen = section.getAttribute('data-open') === 'true';
+      
+      // Set initial state
+      if (isOpen) {
+        content.classList.remove('hidden');
+        chevron.classList.add('rotate-180');
+      } else {
+        content.classList.add('hidden');
+        chevron.classList.remove('rotate-180');
+      }
+      
+      // Add click event listener
+      toggleButton.addEventListener('click', function() {
+        const isCurrentlyOpen = !content.classList.contains('hidden');
+        
+        if (isCurrentlyOpen) {
+          content.classList.add('hidden');
+          chevron.classList.remove('rotate-180');
+          section.setAttribute('data-open', 'false');
+        } else {
+          content.classList.remove('hidden');
+          chevron.classList.add('rotate-180');
+          section.setAttribute('data-open', 'true');
+        }
+      });
+    });
+  });
+</script>

@@ -1,144 +1,187 @@
-<h4>
-  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
-        position: 'bottom',
-        enterDelay: '500',
-        tooltip: "Back to your Data Vault"
-      } do %>
-    <i class="material-icons">arrow_back</i>
-  <% end %>
-  Your notebook's recycle bin
-</h4>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center mb-8">
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 mr-3', title: "Back to your Data Vault" do %>
+      <i class="material-icons">arrow_back</i>
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-700">Recycle Bin</h1>
+  </div>
 
-<div class="row">
-  <div class="col s12">
-    <div class="hoverable card">
-      <div class="card-content">
-        <div class="row">
-          <div class="col s12 m7 l8">
-            <p>
-              Whenever you delete a page from your notebook, it ends up here for a little while.
-              While a page is here, you can recover it at any time to add it back to your notebook.
-              If not recovered, the page will be automatically and permanently deleted after a certain
-              period of time.
-            </p>
-            <br />
-            <p>
-              In other words, use this page if you've accidentally deleted a page and need to recover it.
-            </p>
-            <br />
-            <p class="red-text text-darken-3">
-              Premium users can recover pages up to <strong>7 days</strong> after their deletion.<br />
-              All other users can recover pages up to <strong>2 days</strong> after their deletion.
-            </p>
+  <!-- Information Card -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex flex-col md:flex-row">
+        <div class="md:w-2/3 pr-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Recently Deleted Content</h2>
+          <p class="text-gray-600 mb-4">
+            Whenever you delete a page from your notebook, it ends up here for a limited time.
+            You can recover any page during this period to add it back to your notebook.
+            If not recovered, pages will be permanently deleted after the recovery period ends.
+          </p>
+          <p class="text-gray-600">
+            Use this page if you've accidentally deleted content and need to recover it.
+          </p>
+          
+          <div class="mt-6 bg-red-50 border-l-4 border-red-400 p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <i class="material-icons text-red-400">alarm</i>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">Recovery Period</h3>
+                <div class="mt-2 text-sm text-red-700">
+                  <p>
+                    <% if current_user.on_premium_plan? %>
+                      Premium users can recover pages up to <strong>7 days</strong> after deletion.
+                    <% else %>
+                      You can recover pages up to <strong>2 days</strong> after deletion.
+                      <span class="block mt-1">
+                        <a href="<%= subscription_path %>" class="text-red-800 font-medium hover:text-red-900 underline">
+                          Upgrade to Premium
+                        </a>
+                        for a 7-day recovery period.
+                      </span>
+                    <% end %>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="col hide-on-sm-only m5 l4">
-            <%= image_tag 'tristan/small.webp',
-              class: 'tooltipped tristan',
-              data: {
-                position: 'left',
-                enterDelay: '500',
-                tooltip: "Hey, I'm Tristan! I'm happy to help you around Notebook.ai."
-              } %>
-          </div>
+        </div>
+        <div class="hidden md:block md:w-1/3">
+          <%= image_tag 'tristan/small.webp', 
+            class: 'mx-auto', 
+            alt: "Tristan, the Notebook.ai assistant",
+            title: "Hey, I'm Tristan! I'm happy to help you around Notebook.ai." 
+          %>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="row">
-  <div class="col s12">
-    <% showed_any_content = false %>
+  <% showed_any_content = false %>
 
-    <% @content_pages.each do |content_type_name, content_list| %>
-      <% next unless content_list.any? %>
-      <% showed_any_content = true %>
+  <% @content_pages.each do |content_type_name, content_list| %>
+    <% next unless content_list.any? %>
+    <% showed_any_content = true %>
 
-      <%
-        content_type = content_class_from_name(content_type_name)
-        category_ids_for_this_content_type = AttributeCategory.where(entity_type: content_type_name.downcase, user_id: current_user).pluck(:id)
-        name_field = AttributeField.find_by(field_type: 'name', attribute_category_id: category_ids_for_this_content_type)
+    <%
+      content_type = content_class_from_name(content_type_name)
+      category_ids_for_this_content_type = AttributeCategory.where(entity_type: content_type_name.downcase, user_id: current_user).pluck(:id)
+      name_field = AttributeField.find_by(field_type: 'name', attribute_category_id: category_ids_for_this_content_type)
 
-        content_ids = content_list.pluck(:id)
-        if name_field
-          list_name_lookup_cache = Hash[
-            name_field.attribute_values.where(
-              entity_type: content_type_name
-            ).pluck(:entity_id, :value)
-          ]
-        else
-          list_name_lookup_cache = {}
-        end
-      %>
+      content_ids = content_list.pluck(:id)
+      if name_field
+        list_name_lookup_cache = Hash[
+          name_field.attribute_values.where(
+            entity_type: content_type_name
+          ).pluck(:entity_id, :value)
+        ]
+      else
+        list_name_lookup_cache = {}
+      end
+    %>
 
-      <div class="row">
-        <div class="col s12 m3 l2 grey-text">
-          <h4 style="text-align: right">
-            <%= content_type_name.pluralize %>
-          </h4>
+    <div class="mb-8">
+      <div class="flex items-center mb-4">
+        <div class="w-8 h-8 rounded-full bg-<%= content_type.text_color %> flex items-center justify-center mr-3">
+          <i class="material-icons text-white text-sm"><%= content_type.icon %></i>
         </div>
-        <div class="col s12 m9 l9 offset-l1">
-          <div class="hoverable card">
-            <div class="card-content" style="padding: 0;">
-              <ul class="collection" style='border: 0'>
-                <% content_list.each do |content| %>
-                  <li class="collection-item avatar">
-                    <%= link_to content do %>
-                      <i class="material-icons circle <%= content.class.color %>"><%= content.class.icon %></i>
-                    <% end %>
-                    <span class="title">
-                      <%= (content.respond_to?(:label) ? content.label : list_name_lookup_cache[content.id].presence || content.name) %>
-                    </span>
-                    <div class='grey-text'>
-                      <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="Deleted at <%= content.deleted_at.strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
-                        <i class="material-icons">delete</i>
-                        deleted <%= time_ago_in_words content.deleted_at %> ago
-                      </p>
-                      <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="Recoverable until <%= (content.deleted_at + @maximum_recovery_time).strftime("%m/%d/%Y %H:%M %Z") %>" style="font-size: 80%">
-                        <i class="material-icons">alarm</i>
-                        recoverable for the next <%= distance_of_time_in_words(DateTime.current, content.deleted_at + @maximum_recovery_time) %>
-                      </p>
-                      <% if content.respond_to?(:image_uploads) %>
-                        <p class="timestamp tooltipped" data-position="left" data-delay="500" data-tooltip="<%= (content.image_uploads.sum(:src_file_size) / 1000.0).round(1) %> KB used" style="font-size: 80%">
-                          <i class="material-icons">image</i>
-                          <%= pluralize content.image_uploads.count, 'uploaded image' %>
-                        </p>
-                      <% end %>
-                    </div>
-                    <br />
-                    <div>
-                      <%= form_for content, html: { style: 'float: left' } do |f| %>
-                        <%= f.hidden_field :deleted_at, value: nil %>
-                        <%=
-                          f.submit 'Recover page', 
-                            class: "#{content_class_from_name(content_type_name).color} lighten-4 btn black-text tooltipped",
-                            data: { tooltip: "Un-delete and add this page back to your notebook." }
-                        %>
-                      <% end %>
-                      <%= form_for content do |f| %>
-                        <%= f.hidden_field :deleted_at, value: "1/1 1970".to_date %>
-                        <%= 
-                          f.submit 'Delete immediately', 
-                            class: 'white btn black-text tooltipped',
-                            data: { tooltip: "Delete this page immediately and remove it from your recycle bin." }
-                        %>
-                      <% end %>
-                    </div>
-                    <br />
-                  </li>
-                <% end %>
-
-              </ul>
-            </div>
-          </div>
-        </div>
+        <h2 class="text-xl font-semibold text-gray-800"><%= content_type_name.pluralize %></h2>
       </div>
-    <% end %>
+      
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <ul class="divide-y divide-gray-200">
+          <% content_list.each do |content| %>
+            <li class="p-6">
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div class="flex items-start mb-4 md:mb-0">
+                  <div class="flex-shrink-0">
+                    <%= link_to content do %>
+                      <div class="w-10 h-10 rounded-full bg-<%= content_type.text_color %> flex items-center justify-center">
+                        <i class="material-icons text-white"><%= content_type.icon %></i>
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="ml-4">
+                    <h3 class="text-lg font-medium text-gray-900">
+                      <%= (content.respond_to?(:label) ? content.label : list_name_lookup_cache[content.id].presence || content.name) %>
+                    </h3>
+                    <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+                      <div class="mt-2 flex items-center text-sm text-gray-500">
+                        <i class="material-icons text-gray-400 text-sm mr-1">delete</i>
+                        Deleted <%= time_ago_in_words content.deleted_at %> ago
+                      </div>
+                      
+                      <% 
+                        recovery_deadline = content.deleted_at + @maximum_recovery_time
+                        time_remaining = recovery_deadline - DateTime.current
+                        days_remaining = (time_remaining / 1.day).floor
+                        hours_remaining = ((time_remaining % 1.day) / 1.hour).floor
+                        
+                        # Determine urgency level for color coding
+                        urgency_color = if days_remaining < 1 && hours_remaining < 6
+                          "text-red-600"
+                        elsif days_remaining < 1
+                          "text-orange-500"
+                        else
+                          "text-gray-500"
+                        end
+                      %>
+                      
+                      <div class="mt-2 flex items-center text-sm <%= urgency_color %>">
+                        <i class="material-icons text-sm mr-1">alarm</i>
+                        <% if days_remaining > 0 %>
+                          Recoverable for <%= pluralize(days_remaining, 'day') %><%= hours_remaining > 0 ? " and #{pluralize(hours_remaining, 'hour')}" : "" %>
+                        <% else %>
+                          Recoverable for <%= pluralize(hours_remaining, 'hour') %>
+                        <% end %>
+                      </div>
+                      
+                      <% if content.respond_to?(:image_uploads) && content.image_uploads.any? %>
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                          <i class="material-icons text-sm mr-1">image</i>
+                          <%= pluralize content.image_uploads.count, 'uploaded image' %> 
+                          (<%= (content.image_uploads.sum(:src_file_size) / 1000.0).round(1) %> KB)
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="flex space-x-3">
+                  <%= form_for content do |f| %>
+                    <%= f.hidden_field :deleted_at, value: nil %>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-<%= content_type.text_color %> hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-<%= content_type.text_color %>">
+                      <i class="material-icons mr-1">restore</i>
+                      Recover
+                    </button>
+                  <% end %>
+                  
+                  <%= form_for content do |f| %>
+                    <%= f.hidden_field :deleted_at, value: "1/1 1970".to_date %>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                      <i class="material-icons mr-1">delete_forever</i>
+                      Delete Permanently
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
 
-    <% if !showed_any_content %>
-      <p class="grey-text center">
+  <% if !showed_any_content %>
+    <div class="bg-white rounded-lg shadow-md p-12 text-center">
+      <div class="inline-block p-4 rounded-full bg-gray-100 mb-4">
+        <i class="material-icons text-gray-400 text-4xl">delete_outline</i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No Recently Deleted Content</h3>
+      <p class="text-gray-500 max-w-md mx-auto">
         Looks like you haven't deleted any pages recently. If you do, they will show up here for a limited time.
       </p>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
 </div>

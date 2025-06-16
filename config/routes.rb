@@ -1,5 +1,9 @@
 # rubocop:disable LineLength
 Rails.application.routes.draw do
+  # Add password route for devise registrations
+  devise_scope :user do
+    get 'users/password', to: 'registrations#password', as: 'user_password_edit'
+  end
   get 'styleguide/tailwind'
   default_url_options :host => "notebook.ai"
 
@@ -193,6 +197,7 @@ Rails.application.routes.draw do
       get '/discussions',   to: 'data#discussions'
       get '/collaboration', to: 'data#collaboration'
       get '/green',         to: 'data#green'
+      get '/achievements',  to: 'data#achievements', as: :achievements
       scope 'yearly' do
         get '/',      to: 'data#yearly_index',   as: :year_in_review
         get '/:year', to: 'data#review_year',    as: :review_year
@@ -391,6 +396,9 @@ Rails.application.routes.draw do
       scope '/answers' do
         get '/suggest/:entity_type/:field_label', to: 'attributes#suggest'
       end
+      
+      # Page name lookup
+      get '/page_name', to: 'page_names#show'
 
       # Content index path
       Rails.application.config.content_types[:all].each do |content_type|

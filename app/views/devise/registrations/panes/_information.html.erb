@@ -17,11 +17,11 @@
       
       <div>
         <label for="user_username" class="block text-sm font-medium text-gray-700">Username</label>
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="text-gray-500 sm:text-sm">@</span>
-          </div>
-          <%= f.text_field :username, data: { max_length: 40 }, placeholder: 'your-username-here', class: "pl-8 shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
+        <div class="mt-1 flex rounded-md shadow-sm">
+          <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            @
+          </span>
+          <%= f.text_field :username, data: { max_length: 40 }, placeholder: 'your-username-here', class: "flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-notebook-blue focus:border-notebook-blue sm:text-sm border-gray-300" %>
         </div>
         <p class="mt-2 text-sm text-gray-500">Your Notebook.ai profile will be available at https://www.notebook.ai/@username.</p>
         <p class="mt-1 text-sm text-gray-500">Up to 40 numbers, letters, and/or the following symbols are allowed: <span class="font-semibold">- _ $ + ! *</span></p>
@@ -151,17 +151,27 @@
     <div class="px-4 py-5 sm:p-6 space-y-6">
       <div>
         <label for="user_favorite_page_type" class="block text-sm font-medium text-gray-700">Favorite page type</label>
-        <div class="mt-1">
-          <%= f.select(:favorite_page_type, 
-              Rails.application.config.content_types[:all].map { |type| [type.name.pluralize, type.name] }, 
-              { include_blank: 'None' }, 
-              { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-notebook-blue focus:border-notebook-blue sm:text-sm rounded-md" }) %>
+        <div class="mt-1 relative">
+          <%= f.select(:favorite_page_type,
+              Rails.application.config.content_types[:all].map { |type| [type.name.pluralize, type.name] },
+              { include_blank: 'None' },
+              { class: "block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-notebook-blue focus:border-notebook-blue sm:text-sm rounded-md" }) %>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </div>
         </div>
         <p class="mt-2 text-sm text-gray-500">Selecting a page here will prominently display it on your profile and somewhat theme your profile page to match.</p>
       </div>
       
       <div>
-        <label for="user_forums_badge_text" class="block text-sm font-medium text-gray-700">Custom Premium badge text</label>
+        <label for="user_forums_badge_text" class="flex items-center">
+          <span class="text-sm font-medium text-gray-700">Custom Premium badge text</span>
+          <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+            Premium Only
+          </span>
+        </label>
         <div class="mt-1">
           <%= f.text_field :forums_badge_text, data: { max_length: 20 }, placeholder: 'Premium Supporter', class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
         </div>
@@ -249,27 +259,4 @@
     </div>
   <% end %>
   
-  <!-- Password change section -->
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-    <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
-      <h3 class="text-base font-medium text-gray-900">Password change</h3>
-      <p class="mt-1 text-sm text-gray-500">Leave this blank unless you want to change your password</p>
-    </div>
-    
-    <div class="px-4 py-5 sm:p-6 space-y-6">
-      <div>
-        <label for="user_password" class="block text-sm font-medium text-gray-700">New password</label>
-        <div class="mt-1">
-          <%= f.password_field :password, autocomplete: "off", class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
-        </div>
-      </div>
-      
-      <div>
-        <label for="user_password_confirmation" class="block text-sm font-medium text-gray-700">New password (again)</label>
-        <div class="mt-1">
-          <%= f.password_field :password_confirmation, autocomplete: "off", class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 rounded-md" %>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>

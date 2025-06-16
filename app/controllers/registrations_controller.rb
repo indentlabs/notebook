@@ -40,6 +40,15 @@ class RegistrationsController < Devise::RegistrationsController
 
     @page_title = "More settings"
   end
+  
+  def password
+    @sidenav_expansion = 'my account'
+    
+    @page_title = "Change Password"
+    
+    # Set the resource for the form
+    self.resource = current_user
+  end
 
   private
 

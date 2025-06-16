@@ -1,112 +1,221 @@
-<h4>
-  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
-        position: 'bottom',
-        enterDelay: '500',
-        tooltip: "Back to your Data Vault"
-      } do %>
-    <i class="material-icons">arrow_back</i>
-  <% end %>
-  Download your notebook
-</h4>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header Section -->
+  <div class="flex items-center mb-8">
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 mr-3', title: "Back to your Data Vault" do %>
+      <i class="material-icons">arrow_back</i>
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-700">Export Your Data</h1>
+  </div>
 
-<p>We offer the following download formats, with more coming soon.</p>
-
-<div class="row">
-  <div class="col s12 m4">
-    <div class="hoverable card">
-      <div class="card-content">
-        <div class="card-title">
-          <i class="material-icons blue-text right">file_download</i>
-          Outline (TXT)
+  <!-- Introduction Card -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-100 mb-8 overflow-hidden">
+    <div class="p-6">
+      <div class="flex items-start">
+        <div class="flex-shrink-0 bg-blue-50 rounded-full p-2">
+          <i class="material-icons text-blue-600">info</i>
         </div>
-        <div class="card-body">
-          <blockquote>
+        <div class="ml-4">
+          <h2 class="text-lg font-medium text-gray-800 mb-1">Download your notebook data</h2>
+          <p class="text-gray-600">
+            Export your data in various formats for backup or use in other applications. 
+            Choose the format that best suits your needs.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Format Selection Section -->
+  <div class="mb-8">
+    <h2 class="text-xl font-medium text-gray-800 mb-4">Available Export Formats</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Text Outline Format -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
+        <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 flex justify-between items-center">
+          <h3 class="font-medium text-gray-800">Text Outline</h3>
+          <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">TXT</span>
+        </div>
+        <div class="p-6">
+          <p class="text-gray-600 text-sm mb-4">
             A human-readable format useful for turning your entire notebook into a text outline.
-          </blockquote>
-          <ul>
-            <li><%= link_to "notebook.txt", notebook_outline_path %></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col s12 m4">
-    <div class="hoverable card">
-      <div class="card-content">
-        <div class="card-title">
-          <i class="material-icons circle blue-text right">file_download</i>
-          Excel (CSV)
-        </div>
-        <div class="card-body">
-          <blockquote>
-            A basic spreadsheet format that you can import into Excel, Google Sheets, or any other spreadsheet application.
-          </blockquote>
-          <ul>
-            <% Rails.application.config.content_types[:all].each do |page_type| %>
-              <li>
-                <%= link_to "#{page_type.name.downcase.pluralize}.csv",
-                            notebook_csv_path(model: page_type.name.downcase.pluralize) %>
-              </li>
+          </p>
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500">
+              <i class="material-icons text-xs align-text-bottom">description</i>
+              notebook.txt
+            </div>
+            <%= link_to notebook_outline_path, class: "inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <i class="material-icons text-xs mr-1">file_download</i>
+              Download
             <% end %>
-          </ul>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="col s12 m4">
-    <div class="hoverable card">
-      <div class="card-content">
-        <div class="card-title">
-          <i class="material-icons circle blue-text right">file_download</i>
-          JSON
+      <!-- Markdown Format -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
+        <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 flex justify-between items-center">
+          <h3 class="font-medium text-gray-800">Markdown</h3>
+          <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">MD</span>
         </div>
-        <div class="card-body">
-          <blockquote>
+        <div class="p-6">
+          <p class="text-gray-600 text-sm mb-4">
+            A lightweight markup format that can be easily converted to HTML or other formats.
+          </p>
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500">
+              <i class="material-icons text-xs align-text-bottom">description</i>
+              notebook.md
+            </div>
+            <%= link_to notebook_markdown_path, class: "inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <i class="material-icons text-xs mr-1">file_download</i>
+              Download
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- JSON Format -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
+        <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 flex justify-between items-center">
+          <h3 class="font-medium text-gray-800">JSON</h3>
+          <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Developer</span>
+        </div>
+        <div class="p-6">
+          <p class="text-gray-600 text-sm mb-4">
             JSON exports are recommended for developers and those looking to import their data into JSON-compatible software.
-          </blockquote>
-          <ul>
-            <li><%= link_to "notebook.json", notebook_json_path %></li>
-          </ul>
+          </p>
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500">
+              <i class="material-icons text-xs align-text-bottom">code</i>
+              notebook.json
+            </div>
+            <%= link_to notebook_json_path, class: "inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <i class="material-icons text-xs mr-1">file_download</i>
+              Download
+            <% end %>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="col s12 m4">
-    <div class="hoverable card">
-      <div class="card-content">
-        <div class="card-title">
-          <i class="material-icons circle blue-text right">file_download</i>
-          XML
+      <!-- XML Format -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
+        <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 flex justify-between items-center">
+          <h3 class="font-medium text-gray-800">XML</h3>
+          <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Developer</span>
         </div>
-        <div class="card-body">
-          <blockquote>
+        <div class="p-6">
+          <p class="text-gray-600 text-sm mb-4">
             XML exports are recommended for those looking to import their data into XML-compatible software.
-          </blockquote>
-          <ul>
-            <li><%= link_to "notebook.xml", notebook_xml_path %></li>
-          </ul>
+          </p>
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500">
+              <i class="material-icons text-xs align-text-bottom">code</i>
+              notebook.xml
+            </div>
+            <%= link_to notebook_xml_path, class: "inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <i class="material-icons text-xs mr-1">file_download</i>
+              Download
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- YAML Format -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
+        <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 flex justify-between items-center">
+          <h3 class="font-medium text-gray-800">YAML</h3>
+          <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Developer</span>
+        </div>
+        <div class="p-6">
+          <p class="text-gray-600 text-sm mb-4">
+            YAML exports are a more human-readable format for importing into other applications.
+          </p>
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500">
+              <i class="material-icons text-xs align-text-bottom">code</i>
+              notebook.yml
+            </div>
+            <%= link_to notebook_yml_path, class: "inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <i class="material-icons text-xs mr-1">file_download</i>
+              Download
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- CSV Format - Special case with multiple downloads -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
+        <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 flex justify-between items-center">
+          <h3 class="font-medium text-gray-800">Spreadsheet</h3>
+          <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">CSV</span>
+        </div>
+        <div class="p-6">
+          <p class="text-gray-600 text-sm mb-4">
+            A basic spreadsheet format that you can import into Excel, Google Sheets, or any other spreadsheet application.
+          </p>
+          
+          <div class="mb-2 flex items-center">
+            <i class="material-icons text-gray-400 text-xs mr-1">table_chart</i>
+            <span class="text-sm font-medium text-gray-700">Available exports:</span>
+          </div>
+          
+          <div class="space-y-2 max-h-40 overflow-y-auto pr-2">
+            <% Rails.application.config.content_types[:all].each do |page_type| %>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-600"><%= page_type.name.downcase.pluralize %></span>
+                <%= link_to notebook_csv_path(model: page_type.name.downcase.pluralize), class: "text-blue-600 hover:text-blue-800 flex items-center" do %>
+                  <i class="material-icons text-xs mr-1">file_download</i>
+                  Download
+                <% end %>
+              </div>
+            <% end %>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="col s12 m4">
-    <div class="hoverable card">
-      <div class="card-content">
-        <div class="card-title">
-          <i class="material-icons circle blue-text right">file_download</i>
-          YAML
+  <!-- Coming Soon Section -->
+  <div class="bg-gray-50 rounded-lg border border-gray-200 p-6">
+    <h2 class="text-lg font-medium text-gray-800 mb-2">Coming Soon</h2>
+    <p class="text-gray-600 mb-4">We're working on additional export formats to give you more options for using your data.</p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white rounded p-4 border border-gray-100 opacity-60">
+        <div class="flex items-center">
+          <div class="bg-gray-100 rounded-full p-2 mr-3">
+            <i class="material-icons text-gray-400">picture_as_pdf</i>
+          </div>
+          <div>
+            <h3 class="font-medium text-gray-700">PDF Export</h3>
+            <p class="text-xs text-gray-500">Coming soon</p>
+          </div>
         </div>
-        <div class="card-body">
-          <blockquote>
-            YAML exports are a more human-readable format for importing into other applications.
-          </blockquote>
-          <ul>
-            <li><%= link_to "notebook.yml", notebook_yml_path %></li>
-          </ul>
+      </div>
+      
+      <div class="bg-white rounded p-4 border border-gray-100 opacity-60">
+        <div class="flex items-center">
+          <div class="bg-gray-100 rounded-full p-2 mr-3">
+            <i class="material-icons text-gray-400">html</i>
+          </div>
+          <div>
+            <h3 class="font-medium text-gray-700">HTML Export</h3>
+            <p class="text-xs text-gray-500">Coming soon</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded p-4 border border-gray-100 opacity-60">
+        <div class="flex items-center">
+          <div class="bg-gray-100 rounded-full p-2 mr-3">
+            <i class="material-icons text-gray-400">book</i>
+          </div>
+          <div>
+            <h3 class="font-medium text-gray-700">Scrivener Export</h3>
+            <p class="text-xs text-gray-500">Coming soon</p>
+          </div>
         </div>
       </div>
     </div>

@@ -17,6 +17,7 @@
 
 import "../application.css";
 import 'controllers'
+import '../page_name_loader'
 
 // Support component names relative to this directory:
 var componentRequireContext = require.context("components", true);

@@ -1,10 +1,11 @@
 # Controller for top-level pages of the site that do not have
 # an associated model
 class MainController < ApplicationController
-  layout 'landing', only: [:about_notebook, :for_writers, :for_roleplayers, :for_friends]
+  #layout 'landing', only: [:about_notebook, :for_writers, :for_roleplayers, :for_friends]
   layout 'tailwind', only: [
     :index, :dashboard,
-    :prompts, :table_of_contents
+    :prompts, :table_of_contents,
+    :paper, :privacyinfo
   ]
 
   before_action :authenticate_user!, only: [:dashboard, :prompts, :notes, :recent_content]

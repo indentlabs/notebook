@@ -1,227 +1,399 @@
-<%
-  # Style decisions to move to CSS later
-  card_height = 160
-  icon_yoffset = -1.5
-  icon_xoffset = -5
-  icon_fsize  = 13
-%>
-
-<div class="data-vault row">
-  <div class="col s12">
-    <h4 class="grey-text">
-      Welcome to your personal Data Vault
-    </h4>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl font-bold text-gray-700">
+      Your Data Vault
+    </h1>
+    <div class="relative">
+      <input id="data-vault-search" type="text" placeholder="Search tools..." class="pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+      <i class="material-icons absolute left-3 top-2 text-gray-400">search</i>
+      <button id="clear-search" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600 hidden">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+    <div id="no-results-message" class="hidden mt-4 p-4 bg-yellow-100 text-yellow-800 rounded-lg">
+      No matching tools found. Try a different search term.
+    </div>
   </div>
 
-  <div class="col s12 m12 l6">
-    <%= link_to usage_path, class: 'black-text' do %>
-      <div class="hoverable card green lighten-4">
-        <div class="card-content">
-          <i class="material-icons right green-text text-darken-5">insert_chart</i>
-          <div class="card-title">Your usage overview</div>
-          <p>
-            See how you've used Notebook.ai.
-          </p>
+  <!-- Featured Section -->
+  <div class="mb-12">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+      <i class="material-icons text-blue-600 mr-2">star</i>
+      Featured Tools
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <%= link_to usage_path, class: 'block group data-vault-card' do %>
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold mb-2">Usage Overview</h2>
+              <i class="material-icons text-white group-hover:scale-110 transition-transform">insert_chart</i>
+            </div>
+            <p class="text-blue-100">
+              See how you've used Notebook.ai with detailed analytics and charts.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
-  </div>
+      <% end %>
 
-  <div class="col s12 m12 l6">
-    <%= link_to year_in_review_path, class: 'black-text' do %>
-      <div class="hoverable card blue lighten-5">
-        <div class="card-content">
-          <i class="material-icons right blue-text text-darken-5">date_range</i>
-          <div class="card-title">Year in review</div>
-          <p>
-            See your activity on Notebook.ai broken down per year!
-          </p>
+      <%= link_to year_in_review_path, class: 'block group data-vault-card' do %>
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold mb-2">Year in Review</h2>
+              <i class="material-icons text-white group-hover:scale-110 transition-transform">date_range</i>
+            </div>
+            <p class="text-purple-100">
+              Explore your yearly activity with personalized statistics and insights.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
-  </div>
+      <% end %>
 
-  <div class="col s12 m12 l6">
-    <%= link_to archive_path, class: 'black-text' do %>
-      <div class="hoverable card grey lighten-4">
-        <div class="card-content">
-          <i class="material-icons right grey-text text-darken-1">archive</i>
-          <div class="card-title">Visit your archives</div>
-          <p>
-            Archive notebook pages to hide them without deleting them.
-          </p>
+      <%= link_to edit_user_registration_path, class: 'block group data-vault-card' do %>
+        <div class="bg-gradient-to-br from-gray-700 to-gray-800 text-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold mb-2">Account Settings</h2>
+              <i class="material-icons text-white group-hover:scale-110 transition-transform">settings</i>
+            </div>
+            <p class="text-gray-300">
+              Manage your account preferences, privacy settings, and profile information.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
   </div>
 
-  <div class="col s12 m12 l6">
-    <%= link_to recently_deleted_content_path, class: 'black-text' do %>
-      <div class="hoverable card red lighten-4">
-        <div class="card-content">
-          <i class="material-icons right red-text text-darken-5">delete</i>
-          <div class="card-title">Recycle bin</div>
-          <p>
-            Recover pages you've recently deleted for a short period of time.
-          </p>
+  <!-- Data & Analytics Section -->
+  <div class="mb-12">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+      <i class="material-icons text-blue-600 mr-2">analytics</i>
+      Data & Analytics
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <%= link_to data_documents_path, class: 'block group data-vault-card' do %>
+        <div class="bg-indigo-50 rounded-lg shadow-sm border border-indigo-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Document Statistics</h2>
+              <i class="material-icons <%= Document.text_color %> group-hover:text-indigo-800 transition-colors"><%= Document.icon %></i>
+            </div>
+            <p class="text-gray-600">
+              Track your writing progress and document metrics.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
-  </div>
+      <% end %>
 
-  <div class="col s12 m12 l6">
-    <%= link_to tags_path, class: 'black-text' do %>
-      <div class="hoverable card purple lighten-5">
-        <div class="card-content">
-          <i class="material-icons right purple-text text-lighten-4"><%= PageTag.icon %></i>
-          <div class="card-title">Tag management</div>
-          <p>
-            Manage the tags you've used for your worldbuilding.
-          </p>
+      <%= link_to green_path, class: 'block group data-vault-card' do %>
+        <div class="bg-green-100 rounded-lg shadow-sm border border-green-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Eco Footprint</h2>
+              <i class="material-icons text-green-600 group-hover:text-green-700 transition-colors">public</i>
+            </div>
+            <p class="text-gray-600">
+              See how many trees you've saved by going digital.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
-  </div>
+      <% end %>
 
-  <div class="col s12 m12 l6">
-    <%= link_to notebook_export_path, class: 'black-text' do %>
-      <div class="hoverable card brown lighten-3">
-        <div class="card-content">
-          <i class="material-icons right brown-text text-darken-5">file_download</i>
-          <div class="card-title">Export your data</div>
-          <p>
-            Export your entire notebook in several formats.
-          </p>
+      <%= link_to achievements_path, class: 'block group data-vault-card' do %>
+        <div class="bg-amber-50 rounded-lg shadow-sm border border-amber-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Achievements & Milestones</h2>
+              <i class="material-icons text-amber-600 group-hover:text-amber-700 transition-colors">emoji_events</i>
+            </div>
+            <p class="text-gray-600">
+              Track your progress and unlock worldbuilding achievements.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
   </div>
 
-  <div class="col s12 m12 l6">
-    <%= link_to referrals_path, class: 'black-text' do %>
-      <div class="hoverable card orange lighten-4">
-        <div class="card-content">
-          <i class="material-icons right orange-text text-darken-5">favorite</i>
-          <div class="card-title">Referrals</div>
-          <p>
-            Get your referral code, browse potential rewards, and invite your friends!
-          </p>
+  <!-- Content Management Section -->
+  <div class="mb-12">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+      <i class="material-icons text-purple-600 mr-2">folder</i>
+      Content Management
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <%= link_to archive_path, class: 'block group data-vault-card' do %>
+        <div class="bg-gray-100 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Archives</h2>
+              <i class="material-icons text-gray-700 group-hover:text-gray-800 transition-colors">archive</i>
+            </div>
+            <p class="text-gray-600">
+              Access archived pages without deleting them.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
-  </div>
+      <% end %>
 
-  <div class="col s12 m12 l6">
-    <%= link_to data_documents_path, class: 'black-text' do %>
-      <div class="hoverable card <%= Document.color %> lighten-4">
-        <div class="card-content">
-          <i class="material-icons right <%= Document.text_color %> text-darken-5"><%= Document.icon %></i>
-          <div class="card-title">Document statistics</div>
-          <p>
-            See how you're writing in documents.
-          </p>
+      <%= link_to recently_deleted_content_path, class: 'block group data-vault-card' do %>
+        <div class="bg-red-50 rounded-lg shadow-sm border border-red-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Recycle Bin</h2>
+              <i class="material-icons text-red-700 group-hover:text-red-800 transition-colors">delete</i>
+            </div>
+            <p class="text-gray-600">
+              Recover recently deleted content.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
-  </div>
+      <% end %>
 
-  <div class="col s12 m12 l6">
-    <%= link_to green_path, class: 'black-text' do %>
-      <div class="hoverable card green lighten-2">
-        <div class="card-content">
-          <i class="material-icons right blue-text text-lighten-1">public</i>
-          <div class="card-title">Eco footprint</div>
-          <p>
-            How many trees have you saved by switching to digital?
-          </p>
+      <%= link_to tags_path, class: 'block group data-vault-card' do %>
+        <div class="bg-purple-50 rounded-lg shadow-sm border border-purple-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Tag Management</h2>
+              <i class="material-icons text-purple-700 group-hover:text-purple-800 transition-colors"><%= PageTag.icon %></i>
+            </div>
+            <p class="text-gray-600">
+              Organize your content with tags.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
-  </div>
+      <% end %>
 
-  <div class="col s12 m12 l6">
-    <%= link_to discussions_path, class: 'black-text' do %>
-      <div class="hoverable card blue lighten-4">
-        <div class="card-content">
-          <i class="material-icons right blue-text text-darken-5">forum</i>
-          <div class="card-title">Discussion activity</div>
-          <p>
-            See your activity on the discussion boards.
-          </p>
+      <%= link_to uploads_path, class: 'block group data-vault-card' do %>
+        <div class="bg-yellow-50 rounded-lg shadow-sm border border-yellow-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Image Uploads</h2>
+              <i class="material-icons text-yellow-700 group-hover:text-yellow-800 transition-colors">file_upload</i>
+            </div>
+            <p class="text-gray-600">
+              Manage all your uploaded images.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
   </div>
 
-  <div class="col s12 m12 l6">
-    <%= link_to uploads_path, class: 'black-text' do %>
-      <div class="hoverable card amber lighten-4">
-        <div class="card-content">
-          <i class="material-icons right amber-text text-darken-5">file_upload</i>
-          <div class="card-title">Image uploads</div>
-          <p>
-            Browse all of your image uploads in one place.
-          </p>
+  <!-- Collaboration & Community Section -->
+  <div class="mb-12">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+      <i class="material-icons text-blue-600 mr-2">people</i>
+      Collaboration & Community
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <%= link_to collaboration_path, class: 'block group data-vault-card' do %>
+        <div class="bg-purple-100 rounded-lg shadow-sm border border-purple-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Collaboration</h2>
+              <i class="material-icons text-purple-700 group-hover:text-purple-800 transition-colors"><%= Universe.icon %></i>
+            </div>
+            <p class="text-gray-600">
+              Manage shared universes and collaborators.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
-  </div>
+      <% end %>
 
-  <div class="col s12 m12 l6">
-    <%= link_to collaboration_path, class: 'black-text' do %>
-      <div class="hoverable card purple lighten-4">
-        <div class="card-content">
-          <i class="material-icons right purple-text text-darken-5"><%= Universe.icon %></i>
-          <div class="card-title">Collaboration</div>
-          <p>
-            Learn more about collaborating on Notebook.ai and track which universes are shared with others.
-          </p>
+      <%= link_to discussions_path, class: 'block group data-vault-card' do %>
+        <div class="bg-blue-50 rounded-lg shadow-sm border border-blue-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Discussion Activity</h2>
+              <i class="material-icons text-blue-700 group-hover:text-blue-800 transition-colors">forum</i>
+            </div>
+            <p class="text-gray-600">
+              Track your forum participation.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
-  </div>
+      <% end %>
 
-  <div class="col s12 m12 l6">
-    <%= link_to privacy_policy_path, class: 'black-text' do %>
-      <div class="hoverable card blue lighten-3">
-        <div class="card-content">
-          <i class="material-icons right blue-text text-darken-5">verified_user</i>
-          <div class="card-title">Privacy policy</div>
-          <p>
-            Read our privacy policy.
-          </p>
+      <%= link_to referrals_path, class: 'block group data-vault-card' do %>
+        <div class="bg-orange-50 rounded-lg shadow-sm border border-orange-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Referrals</h2>
+              <i class="material-icons text-orange-700 group-hover:text-orange-800 transition-colors">favorite</i>
+            </div>
+            <p class="text-gray-600">
+              Invite friends and earn rewards.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
   </div>
 
-  <div class="col s12 m12 l6">
-    <%= link_to edit_user_registration_path, class: 'black-text' do %>
-      <div class="hoverable card grey lighten-4">
-        <div class="card-content">
-          <i class="material-icons right grey-text text-darken-1">settings</i>
-          <div class="card-title">Account settings</div>
-          <p>
-            All other account settings here!
-          </p>
+  <!-- Account & Support Section -->
+  <div class="mb-12">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+      <i class="material-icons text-gray-600 mr-2">account_circle</i>
+      Account & Support
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <%= link_to notebook_export_path, class: 'block group data-vault-card' do %>
+        <div class="bg-amber-50 rounded-lg shadow-sm border border-amber-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Export Data</h2>
+              <i class="material-icons text-amber-700 group-hover:text-amber-800 transition-colors">file_download</i>
+            </div>
+            <p class="text-gray-600">
+              Download your notebook in various formats.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
-  </div>
+      <% end %>
 
-  <%# this could actually be a cool s12 banner if we flesh out the help center with guides and stuff %>
-  <div class="col s12 m12 l6">
-    <%= link_to help_center_path, class: 'black-text' do %>
-      <div class="hoverable card pink lighten-4">
-        <div class="card-content">
-          <i class="material-icons right pink-text text-darken-5">help</i>
-          <div class="card-title">Help center</div>
-          <p>
-            Learn more about using Notebook.ai and how to get help, request new features, and report bugs.
-          </p>
+      <%= link_to privacy_policy_path, class: 'block group data-vault-card' do %>
+        <div class="bg-blue-50 rounded-lg shadow-sm border border-blue-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Privacy Policy</h2>
+              <i class="material-icons text-blue-700 group-hover:text-blue-800 transition-colors">verified_user</i>
+            </div>
+            <p class="text-gray-600">
+              Review our privacy practices.
+            </p>
+          </div>
         </div>
-      </div>
-    <% end %>
-  </div>
+      <% end %>
 
+      <%= link_to help_center_path, class: 'block group data-vault-card' do %>
+        <div class="bg-pink-50 rounded-lg shadow-sm border border-pink-200 hover:shadow-md transition-shadow duration-200 h-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Help Center</h2>
+              <i class="material-icons text-pink-700 group-hover:text-pink-800 transition-colors">help</i>
+            </div>
+            <p class="text-gray-600">
+              Get help and request features.
+            </p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('data-vault-search');
+    const clearButton = document.getElementById('clear-search');
+    const cards = document.querySelectorAll('.data-vault-card');
+    const sections = document.querySelectorAll('.mb-12');
+    const noResultsMessage = document.getElementById('no-results-message');
+    
+    // Function to highlight matching text
+    function highlightText(element, searchTerm) {
+      if (!searchTerm) {
+        // Restore original text if no search term
+        if (element.dataset.originalText) {
+          element.innerHTML = element.dataset.originalText;
+        }
+        return;
+      }
+      
+      // Store original text if not already stored
+      if (!element.dataset.originalText) {
+        element.dataset.originalText = element.innerHTML;
+      }
+      
+      const originalText = element.dataset.originalText;
+      const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      element.innerHTML = originalText.replace(regex, '<mark class="bg-yellow-200 px-0.5 rounded">$1</mark>');
+    }
+    
+    // Function to handle search filtering
+    function filterCards() {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      let visibleCardCount = 0;
+      
+      // Show/hide clear button
+      if (searchTerm) {
+        clearButton.classList.remove('hidden');
+      } else {
+        clearButton.classList.add('hidden');
+      }
+      
+      // Show all sections initially
+      sections.forEach(section => {
+        section.style.display = 'block';
+      });
+      
+      // Filter cards based on search term
+      cards.forEach(card => {
+        const titleElement = card.querySelector('h2');
+        const descriptionElement = card.querySelector('p');
+        const cardTitle = titleElement.textContent.toLowerCase();
+        const cardDescription = descriptionElement.textContent.toLowerCase();
+        const isMatch = cardTitle.includes(searchTerm) || cardDescription.includes(searchTerm);
+        
+        card.style.display = isMatch ? 'block' : 'none';
+        
+        // Highlight matching text
+        highlightText(titleElement, searchTerm);
+        highlightText(descriptionElement, searchTerm);
+        
+        if (isMatch) visibleCardCount++;
+      });
+      
+      // Show/hide no results message
+      if (searchTerm && visibleCardCount === 0) {
+        noResultsMessage.classList.remove('hidden');
+      } else {
+        noResultsMessage.classList.add('hidden');
+      }
+      
+      // Hide sections with no visible cards
+      sections.forEach(section => {
+        if (section.querySelector('h2')?.textContent === 'Featured Tools') {
+          // Skip the featured section if we're searching
+          if (searchTerm) {
+            const featuredCards = section.querySelectorAll('.data-vault-card');
+            const hasVisibleCard = Array.from(featuredCards).some(card => card.style.display !== 'none');
+            if (!hasVisibleCard) {
+              section.style.display = 'none';
+            }
+          }
+          return;
+        }
+        
+        const sectionCards = section.querySelectorAll('.data-vault-card');
+        if (sectionCards.length > 0) {
+          const hasVisibleCard = Array.from(sectionCards).some(card => card.style.display !== 'none');
+          if (!hasVisibleCard) {
+            section.style.display = 'none';
+          }
+        }
+      });
+    }
+    
+    // Add event listener for search input
+    searchInput.addEventListener('input', filterCards);
+    
+    // Add event listener for clear button
+    clearButton.addEventListener('click', function() {
+      searchInput.value = '';
+      filterCards();
+      searchInput.focus();
+    });
+    
+    // Clear search when ESC key is pressed
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        this.value = '';
+        filterCards();
+      }
+    });
+  });
+</script>
