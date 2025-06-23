@@ -9,6 +9,8 @@ class PageCollectionsController < ApplicationController
 
   before_action :require_collection_ownership, only: [:edit, :update, :destroy]
 
+  layout 'tailwind', only: [:index, :show, :edit]
+
   # GET /page_collections
   def index
     @page_title = "Collections"
@@ -38,6 +40,8 @@ class PageCollectionsController < ApplicationController
     @page_title = "#{@page_collection.name} - a Collection"
 
     @pages = @page_collection.accepted_submissions.includes({content: [:universe, :user], user: []})
+    @contributors = User.where(id: @pages.to_a.map(&:user_id) - [@page_collection.user_id])
+
     sort_pages
   end
 

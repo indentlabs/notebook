@@ -1,149 +1,271 @@
-<div class="row">
-  <div class="col s12 m9">
-    <div class="hoverable card">
-      <div class="card-content">
-      <div class="card-title">Your referral code</div>
-        <p>
-          Use your personal referral URL for sharing Notebook.ai with others to make sure you get credit when they sign up!
-        </p>
-        <br />
-        <p>
-          <div class="center grey-text text-darken-2">Your referral link is</div>
-          <input type="text"
-            value="<%= @share_link %>"
-            style="text-align: center; font-size: 140%"
-            onClick="this.select();" />
-        </p>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m3">
-    <div class="hoverable card-panel center" style="border-bottom: 10px solid #2196F3">
-      <%# <i class="fa fa-trophy left"></i> %>
-      you have
-      <h1 style="padding: 0; margin: 0" class="blue-text">
-        <strong><%= @referral_count %></strong>
-      </h1>
-      <%= 'referral'.pluralize(@referral_count) %>
-    </div>
-  </div>
-
-  <div class="col s12 m6">
-    <%= link_to [
-      'http://twitter.com/share?',
-      'url=' + CGI.escape(@share_link),
-      '&text=' + CGI.escape("I'm using Notebook.ai to create fictional worlds and I'd love for you to join me!")
-    ].join, target: '_new' do %>
-      <div class="hoverable card-panel white-text" style="background: #1DA1F2">
-        <i class="left fa fa-twitter" style="font-size: 150%"></i>
-        Share to Twitter
-      </div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header Section - Minimalist and focused on community -->
+  <div class="flex items-center mb-8">
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 mr-3', title: "Back to your Data Vault" do %>
+      <i class="material-icons">arrow_back</i>
     <% end %>
+    <h1 class="text-3xl font-bold text-gray-700">Community Sharing</h1>
   </div>
-  <div class="col s12 m6">
-    <a 
-       href="https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=<%= CGI.escape(@share_link) %>&display=popup&ref=plugin&src=share_button" 
-       onclick="return !window.open(this.href, 'Facebook', 'width=640,height=580')">
 
-      <div class="hoverable card-panel white-text" style="background: #4267B2">
-        <i class="left fa fa-facebook" style="font-size: 150%"></i>
-        Share to Facebook
-      </div>
-    </a>
-  </div>
-  <!--
-  <div class="col s12 m4">
-    <%= link_to '#' do %>
-      <div class="hoverable card-panel white-text" style="background: #E60023">
-        <i class="left fa fa-pinterest" style="font-size: 150%"></i>
-        Share to Pinterest
-      </div>
-    <% end %>
-    <script
-      type="text/javascript"
-      async defer
-      src="//assets.pinterest.com/js/pinit.js">
-    </script>
-    <a href="https://www.pinterest.com/pin/create/button/" data-pin-do="buttonBookmark"></a>
-  </div>
-  -->
-</div>
-
-<div class="row">
-  <div class="col s12 m12 l7">
-    <div class="hoverable card">
-      <div class="card-content">
-        <div class="card-title">
-          <span class="badge"><%= pluralize @referral_count, 'referral' %></span>
-          Your referrals
+  <!-- Introduction Card -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-100 mb-8 overflow-hidden">
+    <div class="p-6">
+      <div class="flex flex-col md:flex-row items-start md:items-center">
+        <div class="flex-1 mb-4 md:mb-0 md:mr-6">
+          <h2 class="text-xl font-medium text-gray-800 mb-2">Share Notebook.ai with fellow creators</h2>
+          <p class="text-gray-600">
+            Invite other writers, worldbuilders, and creatives to join our community.
+            As a thank you, you'll receive additional storage space for your creative work.
+          </p>
         </div>
-        <% if @referrals.any? %>
-          <table>
-            <tr>
-              <th>User</th>
-              <th>Signed up</th>
-              <th></th>
-            <tr>
-            <% @referrals.each do |referral| %>
-              <tr>
-                <td>
-                  <%= link_to referral.referree, class: "#{User.text_color}" do %>
-                    <i class="material-icons left"><%= User.icon %></i>
-                    <%= referral.referree.name %>
+        <div class="flex-shrink-0 bg-gray-50 rounded-lg p-4 text-center border border-gray-100">
+          <div class="text-gray-500 text-sm">You've invited</div>
+          <div class="text-3xl font-bold text-gray-800 my-1"><%= @referral_count %></div>
+          <div class="text-gray-500 text-sm"><%= 'creator'.pluralize(@referral_count) %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <!-- Vertical Rewards Track -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden sticky top-4">
+        <div class="border-b border-gray-100">
+          <div class="px-6 py-4">
+            <h2 class="text-lg font-medium text-gray-800">Storage Rewards</h2>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <!-- Current storage earned -->
+          <div class="mb-6">
+            <div class="text-sm text-gray-500 mb-1">You've earned</div>
+            <div class="text-2xl font-medium text-gray-800">
+              <% if @referral_count < 10 %>
+                <%= @referral_count * 100 %>MB
+              <% else %>
+                <%= (@referral_count / 10.0).round(1) %>GB
+              <% end %>
+            </div>
+            <div class="text-sm text-gray-500">of additional storage</div>
+          </div>
+          
+          <!-- Completely redesigned vertical milestone track -->
+          <div class="relative">
+            <!-- The vertical track line -->
+            <div class="absolute left-2.5 top-2 bottom-0 w-1 bg-orange-400"></div>
+            
+            <% milestones = [
+              { count: 5, reward: "500MB storage" },
+              { count: 10, reward: "1GB storage" },
+              { count: 15, reward: "1.5GB storage" },
+              { count: 25, reward: "2.5GB storage" },
+              { count: 50, reward: "5GB storage" },
+              { count: 100, reward: "10GB storage" }
+            ] %>
+            
+            <% milestones.each_with_index do |milestone, index| %>
+              <div class="mb-8 pl-10 relative">
+                <!-- Milestone marker centered on the track -->
+                <div class="absolute left-0 top-0 ml-0.5 w-5 h-5 rounded-full border-2 border-white
+                            <%= @referral_count >= milestone[:count] ? 'bg-orange-500' : 'bg-gray-200' %> z-10"></div>
+                
+                <!-- Milestone content - well separated from the track -->
+                <div class="<%= @referral_count >= milestone[:count] ? '' : 'opacity-70' %>">
+                  <div class="text-sm font-medium <%= @referral_count >= milestone[:count] ? 'text-orange-600' : 'text-gray-600' %>">
+                    <%= milestone[:count] %> <%= 'referral'.pluralize(milestone[:count]) %>
+                  </div>
+                  <div class="text-sm text-gray-600"><%= milestone[:reward] %></div>
+                  
+                  <% if @referral_count >= milestone[:count] %>
+                    <div class="mt-1 inline-flex items-center text-xs text-orange-600">
+                      <i class="material-icons text-xs mr-1">check_circle</i> Achieved
+                    </div>
                   <% end %>
-                </td>
-                <td><%= time_ago_in_words referral.created_at %> ago</td>
-                <td class="right">
-                  <% if user_signed_in? && !referral.referree.blocked_by?(current_user) %>
-                    <% if referral.referree.followed_by?(current_user) %>
-                      <%= form_for(current_user.user_followings.find_by(followed_user_id: referral.referree.id), method: :delete) do |f| %>
-                        <%= f.hidden_field :followed_user_id, value: referral.referree.id %>
-                        <%= link_to '#', onclick: "$('.edit_user_following').first().submit()", class: 'collection-item blue white-text btn waves-effect waves-light' do %>
-                          Unfollow
-                        <% end %>
-                      <% end %>
-                    <% else %>
-                      <%= form_for UserFollowing.new, method: :post do |f| %>
-                        <%= f.hidden_field :followed_user_id, value: referral.referree.id %>
-                        <%= link_to '#', onclick: "$('#new_user_following').submit()", class: 'collection-item blue white-text btn waves-effect' do %>
-                          Follow
-                        <% end %>
-                      <% end %>
-                    <% end %>
-                  <% end %>
-                </td>
-              </tr>
+                </div>
+              </div>
             <% end %>
-          </table>
-        <% else %>
-          <em>Looks like you haven't referred anyone yet! When you do, their profiles will show up here.</em>
-        <% end %>
+            
+            <!-- Future expansion note -->
+            <div class="pl-10 text-xs text-gray-400 italic mt-2">More rewards coming soon...</div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="col s12 m12 l5">
-    <div class="hoverable card">
-      <div class="card-content">
-        <div class="card-title">Your rewards</div>
-        <strong>Up to 10GB in extra storage space</strong>
-        <p>
-          Each user you refer to Notebook.ai earns you an extra 100MB in permanent image upload storage space, up to 10GB (100 referrals).
-        </p>
-        <br />
-        <div class="right">+10GB</div>
-        <div class="progress">
-          <div class="determinate blue" style="width: <%= (@referral_count) %>%"></div>
+      
+    <!-- Share and Referrals Column -->
+    <div class="lg:col-span-2">
+      <!-- Share Section -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 mb-8 overflow-hidden">
+        <div class="border-b border-gray-100">
+          <div class="px-6 py-4">
+            <h2 class="text-lg font-medium text-gray-800">Share with Others</h2>
+          </div>
         </div>
-        <div>
-          You've earned
-          <% if @referral_count < 10 %>
-            <strong><%= @referral_count * 100 %>MB</strong>
+        
+        <div class="p-6">
+          <div class="mb-6">
+            <label for="referral-link" class="block text-sm font-medium text-gray-700 mb-2">Your personal referral link</label>
+            <div class="flex rounded-md shadow-sm">
+              <input type="text" id="referral-link" name="referral-link" value="<%= @share_link %>"
+                     class="flex-1 min-w-0 block w-full px-3 py-2 rounded-l-md border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                     readonly>
+              <button type="button" onclick="copyReferralLink()"
+                      class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <i class="material-icons text-sm mr-1">content_copy</i>
+                Copy
+              </button>
+            </div>
+            <p class="mt-2 text-sm text-gray-500">Share this link with other creators to invite them to Notebook.ai</p>
+          </div>
+          
+          <!-- Completely redesigned share buttons with clear contrast -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Twitter button -->
+            <%= link_to [
+              'http://twitter.com/share?',
+              'url=' + CGI.escape(@share_link),
+              '&text=' + CGI.escape("I'm using Notebook.ai for worldbuilding and creative writing. Join me!")
+            ].join, target: '_blank', class: "block" do %>
+              <div class="bg-black rounded-md p-3 flex items-center justify-center hover:opacity-90 transition-opacity">
+                <div class="flex items-center justify-center text-white">
+                  <i class="fa fa-twitter mr-2"></i>
+                  <span class="font-medium">Twitter / X</span>
+                </div>
+              </div>
+            <% end %>
+            
+            <!-- Facebook button -->
+            <a href="https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=<%= CGI.escape(@share_link) %>&display=popup&ref=plugin&src=share_button"
+               onclick="return !window.open(this.href, 'Facebook', 'width=640,height=580')"
+               class="block">
+              <div class="bg-blue-500 rounded-md p-3 flex items-center justify-center hover:opacity-90 transition-opacity">
+                <div class="flex items-center justify-center text-white">
+                  <i class="fa fa-facebook mr-2"></i>
+                  <span class="font-medium">Facebook</span>
+                </div>
+              </div>
+            </a>
+            
+            <!-- Email button -->
+            <a href="mailto:?subject=Join me on Notebook.ai&body=I'm using Notebook.ai for worldbuilding and creative writing. I think you might enjoy it too! <%= @share_link %>"
+               class="block">
+              <div class="bg-orange-500 rounded-md p-3 flex items-center justify-center hover:opacity-90 transition-opacity">
+                <div class="flex items-center justify-center text-white">
+                  <i class="material-icons text-sm mr-2">email</i>
+                  <span class="font-medium">Email</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Referrals List -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        <div class="border-b border-gray-100">
+          <div class="px-6 py-4 flex justify-between items-center">
+            <h2 class="text-lg font-medium text-gray-800">Your Community</h2>
+            <span class="bg-gray-100 text-gray-700 text-sm px-2 py-1 rounded">
+              <%= pluralize @referral_count, 'creator' %> joined
+            </span>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <% if @referrals.any? %>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creator</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <% @referrals.each do |referral| %>
+                    <tr class="hover:bg-gray-50">
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <%= link_to referral.referree, class: "flex items-center #{User.text_color} hover:underline" do %>
+                          <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
+                            <i class="material-icons text-sm"><%= User.icon %></i>
+                          </div>
+                          <div class="ml-3">
+                            <div class="text-sm font-medium text-gray-900"><%= referral.referree.name %></div>
+                            <% if referral.referree.username.present? %>
+                              <div class="text-xs text-gray-500">@<%= referral.referree.username %></div>
+                            <% end %>
+                          </div>
+                        <% end %>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <%= time_ago_in_words referral.created_at %> ago
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                        <% if user_signed_in? && !referral.referree.blocked_by?(current_user) %>
+                          <% if referral.referree.followed_by?(current_user) %>
+                            <%= form_for(current_user.user_followings.find_by(followed_user_id: referral.referree.id), method: :delete) do |f| %>
+                              <%= f.hidden_field :followed_user_id, value: referral.referree.id %>
+                              <%= link_to '#', onclick: "$('.edit_user_following').first().submit()", class: 'text-gray-600 hover:text-gray-900' do %>
+                                <i class="material-icons text-sm">person_remove</i>
+                              <% end %>
+                            <% end %>
+                          <% else %>
+                            <%= form_for UserFollowing.new, method: :post do |f| %>
+                              <%= f.hidden_field :followed_user_id, value: referral.referree.id %>
+                              <%= link_to '#', onclick: "$('#new_user_following').submit()", class: 'text-blue-600 hover:text-blue-800' do %>
+                                <i class="material-icons text-sm">person_add</i>
+                              <% end %>
+                            <% end %>
+                          <% end %>
+                        <% end %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
           <% else %>
-            <strong><%= @referral_count / 10.0 %>GB</strong>
+            <div class="text-center py-10 px-4">
+              <div class="mx-auto h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                <i class="material-icons text-gray-400">people</i>
+              </div>
+              <h3 class="text-base font-medium text-gray-900 mb-1">No referrals yet</h3>
+              <p class="text-sm text-gray-500 max-w-md mx-auto mb-4">
+                Share your link with other creators to help grow the community.
+              </p>
+              <button type="button" onclick="copyReferralLink()" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i class="material-icons text-sm mr-1">link</i>
+                Copy your link
+              </button>
+            </div>
           <% end %>
-          in extra storage space so far.
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  function copyReferralLink() {
+    const referralLink = document.getElementById('referral-link');
+    referralLink.select();
+    document.execCommand('copy');
+    
+    // Show a minimal toast notification
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded shadow-md flex items-center';
+    toast.innerHTML = '<i class="material-icons text-sm mr-2">check</i> Link copied to clipboard';
+    document.body.appendChild(toast);
+    
+    // Remove the toast after 2 seconds
+    setTimeout(() => {
+      toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+      setTimeout(() => {
+        document.body.removeChild(toast);
+      }, 300);
+    }, 2000);
+  }
+</script>

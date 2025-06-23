@@ -35,11 +35,11 @@ class Document < ApplicationRecord
   KEYS_TO_TRIGGER_REVISION_ON_CHANGE = %w(title body synopsis notes_text)
 
   def self.color
-    'teal'
+    'teal bg-teal-500'
   end
 
   def self.text_color
-    'teal-text'
+    'teal-text text-teal-500'
   end
 
   def color

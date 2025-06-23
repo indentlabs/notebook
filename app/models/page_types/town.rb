@@ -31,11 +31,11 @@ class Town < ApplicationRecord
   end
 
   def self.color
-    'text-lighten-3 lighten-3 purple'
+    'text-lighten-3 lighten-3 purple bg-purple-500'
   end
 
   def self.text_color
-    'text-lighten-3 purple-text'
+    'text-lighten-3 purple-text text-purple-500'
   end
 
   def self.hex_color

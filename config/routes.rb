@@ -1,5 +1,10 @@
 # rubocop:disable LineLength
 Rails.application.routes.draw do
+  # Add password route for devise registrations
+  devise_scope :user do
+    get 'users/password', to: 'registrations#password', as: 'user_password_edit'
+  end
+  get 'styleguide/tailwind'
   default_url_options :host => "notebook.ai"
 
   scope :ai, path: '/ai' do
@@ -73,7 +78,7 @@ Rails.application.routes.draw do
   post 'customization/toggle_content_type'
 
   # User-centric stuff
-  devise_for :users, :controllers => { registrations: 'registrations' }
+  devise_for :users, :controllers => { registrations: 'registrations', sessions: 'sessions' }
   resources :users do
     devise_scope :user do
       get 'preferences',  to: 'registrations#preferences'
@@ -103,6 +108,10 @@ Rails.application.routes.draw do
   get '/@:username/followers', to: 'users#followers'
   get '/@:username/following', to: 'users#following'
 
+  scope '/analysis' do
+    get '/', to: 'document_analyses#index'
+  end
+
   resources :documents do
     # Document Analysis routes
     get '/analysis/',            to: 'document_analyses#show',        on: :member      
@@ -130,10 +139,13 @@ Rails.application.routes.draw do
   resources :folders, only: [:create, :update, :destroy, :show]
 
   scope '/my' do
-    get '/content',         to: 'main#dashboard', as: :dashboard
+    get '/dashboard',       to: 'main#dashboard', as: :dashboard
+    get '/content',         to: 'main#table_of_contents', as: :table_of_contents
     get '/content/recent',  to: 'main#recent_content', as: :recent_content
     get '/content/deleted', to: 'content#deleted', as: :recently_deleted_content
     get '/prompts',         to: 'main#prompts', as: :prompts
+
+    get '/multiverse',      to: 'universes#hub', as: :multiverse
 
     get '/scratchpad',      to: 'main#notes', as: :notes
 
@@ -185,6 +197,7 @@ Rails.application.routes.draw do
       get '/discussions',   to: 'data#discussions'
       get '/collaboration', to: 'data#collaboration'
       get '/green',         to: 'data#green'
+      get '/achievements',  to: 'data#achievements', as: :achievements
       scope 'yearly' do
         get '/',      to: 'data#yearly_index',   as: :year_in_review
         get '/:year', to: 'data#review_year',    as: :review_year
@@ -264,10 +277,16 @@ Rails.application.routes.draw do
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       # resources :characters do
       resources content_type.name.downcase.pluralize.to_sym do
+
+        # Browsable pages
+        get  :gallery,         on: :member
+        get  :references,      on: :member
         get  :changelog,       on: :member
+        get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
+
+        # API endpoints
         get  :toggle_archive,  on: :member
         post :toggle_favorite, on: :member
-        get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
       end
     end
     resources :timelines, only: [:index, :show, :new, :update, :edit, :destroy] do
@@ -377,6 +396,9 @@ Rails.application.routes.draw do
       scope '/answers' do
         get '/suggest/:entity_type/:field_label', to: 'attributes#suggest'
       end
+      
+      # Page name lookup
+      get '/page_name', to: 'page_names#show'
 
       # Content index path
       Rails.application.config.content_types[:all].each do |content_type|

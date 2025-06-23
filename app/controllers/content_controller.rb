@@ -3,6 +3,8 @@
 # TODO: we should probably spin off an Api::ContentController for #api_sort and anything else 
 #       api-wise we need
 class ContentController < ApplicationController
+  layout 'tailwind', only: [:index, :show, :gallery, :references, :deleted]
+
   before_action :authenticate_user!, except: [:show, :changelog, :api_sort] \
     + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }
 
@@ -12,7 +14,7 @@ class ContentController < ApplicationController
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
-  before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit, :index]
+  before_action :cache_linkable_content_for_each_content_type, only: [:new, :show, :edit, :index]
 
   before_action :set_attributes_content_type, only: [:attributes]
 
@@ -22,6 +24,7 @@ class ContentController < ApplicationController
 
   def index
     @content_type_class = content_type_from_controller(self.class)
+    @content_type_name  = @content_type_class.name
     pluralized_content_name = @content_type_class.name.downcase.pluralize
 
     @page_title = "My #{pluralized_content_name}"
@@ -40,6 +43,7 @@ class ContentController < ApplicationController
       page_type: @content_type_class.name,
       page_id:   @content.pluck(:id)
     ).order(:tag)
+    @filtered_page_tags = []
     if params.key?(:slug)
       @filtered_page_tags = @page_tags.where(slug: params[:slug])
       @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
@@ -51,6 +55,10 @@ class ContentController < ApplicationController
     end
 
     @content = @content.sort_by {|x| [x.favorite? ? 0 : 1, x.name] }
+    @folders = current_user
+      .folders
+      .where(context: @content_type_name, parent_folder_id: nil)
+      .order('title ASC')
 
     @questioned_content = @content.sample
     @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
@@ -87,6 +95,13 @@ class ContentController < ApplicationController
     @basil_images       = BasilCommission.where(entity: @content)
                                          .where.not(saved_at: nil)
 
+    if @content.updatable_by?(current_user)
+      @suggested_page_tags = (
+        current_user.page_tags.where(page_type: content_type.name).pluck(:tag) +
+          PageTagService.suggested_tags_for(content_type.name)
+        ).uniq
+    end
+
     if (current_user || User.new).can_read?(@content)
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
@@ -95,6 +110,45 @@ class ContentController < ApplicationController
     else
       return redirect_to root_path, notice: "You don't have permission to view that content."
     end
+  end
+
+  def gallery
+    content_type = content_type_from_controller(self.class)
+    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.include?(content_type.name)
+
+    @content = content_type.find_by(id: params[:id])
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+
+    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+
+    @serialized_content = ContentSerializer.new(@content)
+
+    @primary_image = @content.primary_image
+    @other_images  = @content.image_uploads.where.not(id: @primary_image.try(:id))
+    @basil_images  = @content.basil_commissions.where.not(saved_at: nil)
+  end
+
+  def references
+    content_type = content_type_from_controller(self.class)
+    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.include?(content_type.name)
+
+    @content = content_type.find_by(id: params[:id])
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+
+    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+
+    @serialized_content = ContentSerializer.new(@content)
+
+    analysis_ids = DocumentEntity.where(entity: @content).pluck(:document_analysis_id)
+    document_ids = DocumentAnalysis.where(id: analysis_ids).pluck(:document_id)
+    @documents = Document.where(id: document_ids)
+    @references = @content.incoming_page_references.preload(:referencing_page)
+    @mentioning_attributes = Attribute.where(
+      attribute_field_id: @references.pluck(:attribute_field_id),
+      entity_id: @references.pluck(:referencing_page_id)
+    )
   end
 
   def new
@@ -141,7 +195,7 @@ class ContentController < ApplicationController
       # If the user doesn't have this content type enabled, go ahead and automatically enable it for them
       current_user.user_content_type_activators.find_or_create_by(content_type: @content.class.name)
 
-      return redirect_to edit_polymorphic_path(@content)
+      return redirect_to polymorphic_path(@content, editing: true)
     else
       return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
     end
@@ -519,7 +573,10 @@ class ContentController < ApplicationController
     @content = @entity
     update_page_tags
 
-    render json: attribute_value.to_json, status: 200
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: root_path, notice: "#{@attribute_field.label} updated!") }
+      format.json { render json: attribute_value.to_json, status: 200 }
+    end
   end
 
   def universe_field_update
