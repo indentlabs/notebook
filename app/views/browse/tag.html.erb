@@ -114,11 +114,11 @@
           <div class="row js-content-cards-list">
             <% content_group[:content].each do |content| %>
               <div class="col s12 m6 l4 xl3 js-content-card-container">
-                <div class="hoverable card sticky-action z-depth-1" style="margin-bottom: 20px; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; height: 450px;">
+                <div class="hoverable card sticky-action z-depth-1" style="margin-bottom: 20px; border-radius: 8px; overflow: hidden;">
                   <!-- Color indicator bar at top of card -->
                   <div style="height: 4px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]})" %>;"></div>
                   
-                  <div class="card-image waves-effect waves-block waves-light" style="flex: 0 0 auto;">
+                  <div class="card-image waves-effect waves-block waves-light">
                     <% 
                       # Find image for this content
                       content_image = @random_image_pool_cache.fetch([content.class.name, content.id], [])
@@ -146,7 +146,7 @@
                   </div>
                   
                   <!-- Improved card actions -->
-                  <div class="card-content" style="padding: 16px; border-bottom: 1px solid #f0f0f0; flex: 1 0 auto; display: flex; flex-direction: column;">
+                  <div class="card-content" style="padding: 16px; border-bottom: 1px solid #f0f0f0;">
                     <!-- Creator info with avatar -->
                     <% user = @users_cache[content.user_id] %>
                     <% if user %>
@@ -166,7 +166,7 @@
                     
                     <!-- Tags as pills -->
                     <% if content.respond_to?(:page_tags) && content.page_tags.any? %>
-                      <div class="tags-container" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; flex: 1 0 auto;">
+                      <div class="tags-container" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
                         <% content.page_tags.each do |tag| %>
                           <% if tag.tag == @tag %>
                             <span class="tag-pill" style="padding: 4px 10px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]}-lighten-1)" %>; color: white; border-radius: 20px; font-size: 12px;">
@@ -182,7 +182,7 @@
                     <% end %>
                   </div>
                   
-                  <div class="card-action" style="display: flex; justify-content: space-between; background-color: #fafafa; padding: 12px 16px; flex: 0 0 auto;">
+                  <div class="card-action" style="display: flex; justify-content: space-between; background-color: #fafafa; padding: 12px 16px;">
                     <% if content.is_a?(Document) %>
                       <%= link_to content, class: "#{content_group[:color]}-text", style: "font-weight: 500; display: flex; align-items: center;", target: '_blank' do %>
                         <i class="material-icons left" style="font-size: 18px; margin-right: 6px;">visibility</i> View
@@ -372,25 +372,41 @@
     --orange-lighten-5: #fff3e0;
   }
   
-  /* Equal height card grid */
+  /* Card grid layout */
   .js-content-cards-list {
-    display: flex;
-    flex-wrap: wrap;
+    display: block;
   }
   
-  .js-content-card-container {
-    display: flex;
-    margin-bottom: 20px;
-  }
-  
-  /* Responsive adjustments */
-  @media only screen and (max-width: 993px) {
-    .js-content-card-container {
-      height: auto;
+  /* Card height consistency using CSS Grid */
+  @media only screen and (min-width: 601px) {
+    .js-content-cards-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-gap: 20px;
     }
     
-    .card.sticky-action {
-      height: auto !important;
+    .js-content-card-container {
+      margin-bottom: 0;
+    }
+    
+    .js-content-card-container .card {
+      height: 100%;
+      margin-bottom: 0;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    
+    .card .card-image {
+      grid-row: 1;
+    }
+    
+    .card .card-content {
+      grid-row: 2;
+    }
+    
+    .card .card-action {
+      grid-row: 3;
+      align-self: end;
     }
   }
   
