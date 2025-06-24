@@ -1,3 +1,20 @@
+<!-- Modal structure - defined before the content so it's available immediately -->
+<div id="how-to-join-modal" class="modal modal-how-to-join">
+  <div class="modal-content">
+    <h4><i class="material-icons <%= @accent_color %>-text left" style="margin-right: 10px;">info</i> How to join this showcase</h4>
+    <p>Want your content to appear on this page? Follow these steps:</p>
+    <ol>
+      <li>Add the <span class="highlight">ArtFight2025</span> tag to your content</li>
+      <li>Set your content's privacy to <span class="highlight">Public</span> in the privacy toggle</li>
+      <li>That's it! Your content will appear here automatically</li>
+    </ol>
+    <p class="grey-text" style="font-size: 14px;">Note: It may take a few minutes for new content to appear.</p>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-light <%= @accent_color %> btn-flat white-text">Got it</a>
+  </div>
+</div>
+
 <div class="row">
   <!-- Privacy text in top right -->
   <div class="col s12">
@@ -27,9 +44,9 @@
         
         <!-- Help button for how to join -->
         <div class="help-tooltip-container" style="position: absolute; top: 20px; right: 20px; z-index: 10;">
-          <a class="btn-floating white z-depth-2 pulse" id="how-to-join-btn" style="height: 42px; width: 42px; display: flex; align-items: center; justify-content: center;">
+          <button class="btn-floating white z-depth-2 pulse" id="how-to-join-btn" style="height: 42px; width: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none;" onclick="showHowToJoinModal()">
             <i class="material-icons <%= @accent_color %>-text">help_outline</i>
-          </a>
+          </button>
         </div>
         
         <!-- Art Fight 2025 header info -->
@@ -336,37 +353,17 @@
     filterLinks[0].style.backgroundColor = '<%= @accent_color == "grey" ? "#9e9e9e" : "var(--#{@accent_color}-lighten-4)" %>';
     filterLinks[0].style.fontWeight = '500';
     
-    // How to join modal
-    document.getElementById('how-to-join-btn').addEventListener('click', function() {
-      // Show modal
-      var modalHtml = `
-        <div id="how-to-join-modal" class="modal modal-how-to-join">
-          <div class="modal-content">
-            <h4><i class="material-icons <%= @accent_color %>-text left" style="margin-right: 10px;">info</i> How to join this showcase</h4>
-            <p>Want your content to appear on this page? Follow these steps:</p>
-            <ol>
-              <li>Add the <span class="highlight">ArtFight2025</span> tag to your content</li>
-              <li>Set your content's privacy to <span class="highlight">Public</span> in the privacy toggle</li>
-              <li>That's it! Your content will appear here automatically</li>
-            </ol>
-            <p class="grey-text" style="font-size: 14px;">Note: It may take a few minutes for new content to appear.</p>
-          </div>
-          <div class="modal-footer">
-            <a href="#!" class="modal-close waves-effect waves-light <%= @accent_color %> btn-flat white-text">Got it</a>
-          </div>
-        </div>
-      `;
-      
-      // Add modal to DOM if it doesn't exist
-      if (!document.getElementById('how-to-join-modal')) {
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-      }
-      
-      // Initialize and open modal
+    // Define the showHowToJoinModal function in global scope
+    window.showHowToJoinModal = function() {
+      // Initialize and open the pre-defined modal
       var modalElement = document.getElementById('how-to-join-modal');
       var modalInstance = M.Modal.init(modalElement, {opacity: 0.6});
       modalInstance.open();
-    });
+    };
+    
+    // Initialize the modal when the page loads
+    var howToJoinModal = document.getElementById('how-to-join-modal');
+    M.Modal.init(howToJoinModal, {opacity: 0.6});
   });
 <% end %>
 
