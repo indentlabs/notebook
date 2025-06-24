@@ -25,6 +25,13 @@
         <!-- Gradient overlay for better text contrast -->
         <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%);"></div>
         
+        <!-- Help button for how to join -->
+        <div class="help-tooltip-container" style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+          <a class="btn-floating white z-depth-2 pulse" id="how-to-join-btn" style="height: 42px; width: 42px; display: flex; align-items: center; justify-content: center;">
+            <i class="material-icons <%= @accent_color %>-text">help_outline</i>
+          </a>
+        </div>
+        
         <!-- Art Fight 2025 header info -->
         <div style="position: absolute; top: 40px; left: 40px; z-index: 1; max-width: 60%;">
           <div>
@@ -328,11 +335,69 @@
     // Initialize with "All" selected
     filterLinks[0].style.backgroundColor = '<%= @accent_color == "grey" ? "#9e9e9e" : "var(--#{@accent_color}-lighten-4)" %>';
     filterLinks[0].style.fontWeight = '500';
+    
+    // How to join modal
+    document.getElementById('how-to-join-btn').addEventListener('click', function() {
+      // Show modal
+      var modalHtml = `
+        <div id="how-to-join-modal" class="modal modal-how-to-join">
+          <div class="modal-content">
+            <h4><i class="material-icons <%= @accent_color %>-text left" style="margin-right: 10px;">info</i> How to join this showcase</h4>
+            <p>Want your content to appear on this page? Follow these steps:</p>
+            <ol>
+              <li>Add the <span class="highlight">ArtFight2025</span> tag to your content</li>
+              <li>Set your content's privacy to <span class="highlight">Public</span> in the privacy toggle</li>
+              <li>That's it! Your content will appear here automatically</li>
+            </ol>
+            <p class="grey-text" style="font-size: 14px;">Note: It may take a few minutes for new content to appear.</p>
+          </div>
+          <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-light <%= @accent_color %> btn-flat white-text">Got it</a>
+          </div>
+        </div>
+      `;
+      
+      // Add modal to DOM if it doesn't exist
+      if (!document.getElementById('how-to-join-modal')) {
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+      }
+      
+      // Initialize and open modal
+      var modalElement = document.getElementById('how-to-join-modal');
+      var modalInstance = M.Modal.init(modalElement, {opacity: 0.6});
+      modalInstance.open();
+    });
   });
 <% end %>
 
 <!-- Add CSS variables for colors -->
 <style>
+  /* Help modal for how to join */
+  .modal-how-to-join {
+    border-radius: 8px;
+    max-width: 500px;
+  }
+  
+  .modal-how-to-join h4 {
+    margin-top: 0;
+    font-size: 20px;
+    font-weight: 500;
+  }
+  
+  .modal-how-to-join ol {
+    padding-left: 25px;
+  }
+  
+  .modal-how-to-join li {
+    margin-bottom: 10px;
+  }
+  
+  .modal-how-to-join .highlight {
+    background-color: #f3e5f5;
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+  
   :root {
     --purple: #9c27b0;
     --purple-lighten-1: #ab47bc;
@@ -384,12 +449,13 @@
     margin-bottom: 0;
   }
   
-  /* Make all cards in a row the same height */
+  /* Make all cards in a row the same height and align left */
   .js-content-cards-list {
     display: flex;
     flex-wrap: wrap;
     margin-left: -0.75rem;
     margin-right: -0.75rem;
+    justify-content: flex-start;
   }
   
   /* Make sure card containers take their full column width */
