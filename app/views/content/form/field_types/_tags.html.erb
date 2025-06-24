@@ -28,6 +28,9 @@
         <% end %>
       </div>
     <% end %>
+    
+    <%= render partial: 'notice_dismissal/messages/24', locals: { page: page } %>
+    
     <div class="clearfix"></div>
   </div>
 </div>
@@ -54,6 +57,7 @@
         <% page.page_tags.pluck(:tag).each do |tag| %>
           '<%= tag %>': null,
         <% end %>
+        'ArtFight2025': null
       },
       limit: 100,
       minLength: 1
@@ -65,5 +69,32 @@
     ],
     onChipAdd:    update_hidden_page_tag_value,
     onChipDelete: update_hidden_page_tag_value
+  });
+  
+  $(document).ready(function() {
+    // Initialize tooltips
+    $('.tooltipped').tooltip();
+    
+    // Make js-add-tag links work for both suggested tags and the ArtFight tag
+    $('.js-add-tag').off('click').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent event bubbling
+      
+      var tagText = $(this).find('span').attr('data-badge-caption');
+      var chipsInstance = M.Chips.getInstance($('#chips-for-<%= page.id %>'));
+      
+      // Check if this tag already exists
+      var existingTags = chipsInstance.chipsData.map(function(chip) { return chip.tag; });
+      if (existingTags.indexOf(tagText) === -1) {
+        // Add the tag only if it doesn't already exist
+        chipsInstance.addChip({tag: tagText});
+        update_hidden_page_tag_value(this);
+        
+        // Show a toast notification
+        M.toast({ html: "Added tag: " + tagText });
+      } else {
+        M.toast({ html: "Tag already added: " + tagText });
+      }
+    });
   });
 <% end %>
