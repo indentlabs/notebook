@@ -327,6 +327,11 @@ Rails.application.routes.draw do
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
   end
 
+  # Browse global content routes
+  scope '/browse' do
+    get '/tag/:tag_slug', to: 'browse#tag', as: :browse_tag
+  end
+
   # Fancy shmancy informative pages
   scope '/worldbuilding' do
     Rails.application.config.content_types[:all].each do |content_type|
