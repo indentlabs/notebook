@@ -102,6 +102,7 @@ Rails.application.routes.draw do
   get '/@:username', to: 'users#show', as: :profile_by_username
   get '/@:username/followers', to: 'users#followers'
   get '/@:username/following', to: 'users#following'
+  get '/@:username/tag/:tag_slug', to: 'users#tag', as: :user_tag
 
   resources :documents do
     # Document Analysis routes
