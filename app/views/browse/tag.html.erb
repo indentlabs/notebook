@@ -44,7 +44,7 @@
         
         <!-- Help button for how to join -->
         <div class="help-tooltip-container" style="position: absolute; top: 20px; right: 20px; z-index: 10;">
-          <button class="btn-floating white z-depth-2 pulse" id="how-to-join-btn" style="height: 42px; width: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none;" onclick="showHowToJoinModal()">
+          <button class="btn-floating white z-depth-2 pulse modal-trigger" id="how-to-join-btn" style="height: 42px; width: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none;" data-target="how-to-join-modal">
             <i class="material-icons <%= @accent_color %>-text">help_outline</i>
           </button>
         </div>
@@ -353,17 +353,17 @@
     filterLinks[0].style.backgroundColor = '<%= @accent_color == "grey" ? "#9e9e9e" : "var(--#{@accent_color}-lighten-4)" %>';
     filterLinks[0].style.fontWeight = '500';
     
-    // Define the showHowToJoinModal function in global scope
-    window.showHowToJoinModal = function() {
-      // Initialize and open the pre-defined modal
-      var modalElement = document.getElementById('how-to-join-modal');
-      var modalInstance = M.Modal.init(modalElement, {opacity: 0.6});
-      modalInstance.open();
-    };
+    // Initialize all modals
+    var modalElems = document.querySelectorAll('.modal');
+    var modalInstances = M.Modal.init(modalElems, {opacity: 0.6});
     
-    // Initialize the modal when the page loads
-    var howToJoinModal = document.getElementById('how-to-join-modal');
-    M.Modal.init(howToJoinModal, {opacity: 0.6});
+    // Add click handler to the help button
+    document.getElementById('how-to-join-btn').addEventListener('click', function() {
+      var modalInstance = M.Modal.getInstance(document.getElementById('how-to-join-modal'));
+      if (modalInstance) {
+        modalInstance.open();
+      }
+    });
   });
 <% end %>
 
