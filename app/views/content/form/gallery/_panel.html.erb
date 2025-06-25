@@ -1,11 +1,89 @@
+<% 
+  raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
+  images = raw_model.image_uploads
+  basil_images = @basil_images || []
+  total_images = images.count + basil_images.count
+%>
+
 <div class="row">
-  <div class="col s10 offset-s1">
-    <div>
-      <%= render partial: 'content/form/images/edit_list', locals: { content: content } %>
-    </div>
-    <div>
-      <h5>
-        Upload more images
+  <div class="col s12">
+    <% if images.any? || basil_images.any? %>
+      <!-- Gallery preview section -->
+      <div class="gallery-preview-section">
+        <h5 class="gallery-section-title">
+          <i class="material-icons left">photo_library</i>
+          Current Images (<%= total_images %>)
+        </h5>
+        
+        <div class="gallery-grid">
+          <div class="row">
+            <% images.each do |image| %>
+              <div class="col s12 m6 l4">
+                <div class="image-card">
+                  <div class="image-preview">
+                    <%= image_tag image.src(:medium), class: "responsive-img" %>
+                  </div>
+                  <div class="image-actions">
+                    <div class="image-meta">
+                      <span class="file-size"><%= Filesize.from("#{image.src_file_size}B").to_f('KB').round(2) %> KB</span>
+                    </div>
+                    <div class="image-buttons">
+                      <%= link_to image.src(:original), class: 'btn-flat waves-effect', target: '_blank' do %>
+                        <i class="material-icons">open_in_new</i>
+                      <% end %>
+                      <%= link_to image_deletion_path(image.id),
+                        class: 'btn-flat waves-effect js-remove-image red-text',
+                        method: 'delete',
+                        remote: true,
+                        data: { confirm: "Are you sure? This can't be undone." } do %>
+                        <i class="material-icons">delete</i>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+            
+            <% basil_images.each do |commission| %>
+              <div class="col s12 m6 l4">
+                <div class="image-card">
+                  <div class="image-preview basil-image">
+                    <% if commission.image.attached? %>
+                      <%= image_tag rails_blob_path(commission.image, disposition: "attachment"), class: "responsive-img" %>
+                    <% end %>
+                  </div>
+                  <div class="image-actions">
+                    <div class="image-meta">
+                      <span class="basil-label">Generated with Basil</span>
+                    </div>
+                    <div class="image-buttons">
+                      <% if commission.image.attached? %>
+                        <%= link_to rails_blob_path(commission.image, disposition: "attachment"), class: 'btn-flat waves-effect', target: '_blank' do %>
+                          <i class="material-icons">open_in_new</i>
+                        <% end %>
+                      <% end %>
+                      <%= link_to basil_delete_path(commission),
+                        class: 'btn-flat waves-effect js-remove-image red-text',
+                        method: 'delete',
+                        remote: true,
+                        data: { confirm: "Are you sure? This can't be undone." } do %>
+                        <i class="material-icons">delete</i>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    
+    <!-- Upload section -->
+    <div class="upload-section">
+      <h5 class="gallery-section-title">
+        <i class="material-icons left">file_upload</i>
+        Upload Images
         <small class="grey-text">
           <% if current_user.upload_bandwidth_kb > 0 %>
             You have <%= Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty %> of bandwidth remaining.
@@ -14,25 +92,149 @@
           <% end %>
         </small>
       </h5>
+      
+      <div class="upload-form-container">
+        <%= render partial: 'content/form/images/upload', locals: { f: f, content: content } %>
+        
+        <div class="add-more-container">
+          <%= link_to_add_association "<i class='material-icons left'>add_photo_alternate</i>Add another image".html_safe, f,
+            :image_uploads,
+            class: 'btn-flat waves-effect',
+            partial: 'content/form/images/upload',
+            render_options: { locals: { f: f, content: content }}
+          %>
+        </div>
+        
+        <div class="upload-button-container center">
+          <%= f.submit "Perform uploads", class: 'btn btn-large waves-effect waves-light' %>
+          <p class="upload-note grey-text">
+            Once you've selected your images, press the button above to upload them.
+            This will reload the page.
+          </p>
+        </div>
+      </div>
     </div>
-    <div>
-      <%= render partial: 'content/form/images/upload', locals: { f: f, content: content } %>
+    
+    <!-- CTA for full gallery -->
+    <div class="gallery-cta-container">
+      <div class="card <%= raw_model.class.color %> lighten-5">
+        <div class="card-content center">
+          <i class="material-icons medium <%= raw_model.class.text_color %> text-darken-2">photo_library</i>
+          <h5>View the full gallery</h5>
+          <p>See all images for this <%= raw_model.class.name.downcase %> in a beautiful full-screen gallery.</p>
+          <%= link_to send("gallery_#{raw_model.class.name.downcase}_path", raw_model), class: "btn waves-effect waves-light #{raw_model.class.color}" do %>
+            <i class="material-icons left">fullscreen</i>
+            Open Gallery
+          <% end %>
+        </div>
+      </div>
     </div>
-    <div>
-      <%= link_to_add_association "add another image", f,
-        :image_uploads,
-        partial: 'content/form/images/upload',
-        render_options: { locals: { f: f, content: content }}
-      %>
-    </div>
-    <br />
-    <p class="center">
-      <%= f.submit "Perform uploads", class: 'btn btn-large blue white-text' %>
-    </p>
-    <br />
-    <p class="grey-text">
-      Once you've selected your images, press the above button to upload them.
-      This will reload the page.
-    </p>
   </div>
 </div>
+
+<style>
+  .gallery-section-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .gallery-grid {
+    margin-bottom: 40px;
+  }
+  
+  .image-card {
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .image-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+  }
+  
+  .image-preview {
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+  }
+  
+  .image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .basil-image::after {
+    content: 'AI';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 3px 6px;
+    border-radius: 3px;
+  }
+  
+  .image-actions {
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f0f0f0;
+  }
+  
+  .image-meta {
+    color: #9e9e9e;
+    font-size: 0.85rem;
+  }
+  
+  .basil-label {
+    display: inline-block;
+    font-size: 0.8rem;
+    color: #9c27b0;
+  }
+  
+  .image-buttons {
+    display: flex;
+  }
+  
+  .upload-section {
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+  
+  .upload-form-container {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 4px;
+  }
+  
+  .add-more-container {
+    margin: 15px 0;
+  }
+  
+  .upload-button-container {
+    margin-top: 25px;
+  }
+  
+  .upload-note {
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+  
+  .gallery-cta-container {
+    margin: 40px 0 20px;
+  }
+</style>

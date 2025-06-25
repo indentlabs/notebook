@@ -1,0 +1,980 @@
+<%
+  page_title = "#{@content.name} Gallery"
+  page_description = "Gallery of images for #{@content.name}, a fictional #{@content.class.name.downcase} on Notebook.ai"
+  
+  set_meta_tags title:       page_title,
+                description: page_description,
+                image_src:   @content.first_public_image,
+                og:          { type: 'website' },
+                twitter:     { card: 'photo', image: @content.first_public_image }
+%>
+
+<%= content_for :full_width_page_header do %>
+  <div class="gallery-hero" style="background-color: <%= @content.class.hex_color %>;">
+    <div class="hero-pattern"></div>
+    <div class="container">
+      <div class="gallery-header-content">
+        <!-- Breadcrumb navigation -->
+        <div class="gallery-breadcrumbs">
+          <%= link_to @content.class.name.pluralize, send("#{@content.class.name.downcase.pluralize}_path"), class: 'breadcrumb-link' %> 
+          <span class="breadcrumb-separator">/</span> 
+          <%= link_to @content.name, @content, class: 'breadcrumb-link' %> 
+          <span class="breadcrumb-separator">/</span> 
+          <span class="current-page">Gallery</span>
+        </div>
+        
+        <!-- Gallery title and info -->
+        <h1 class="gallery-title">
+          <i class="material-icons gallery-icon"><%= @content.class.icon %></i>
+          <%= @content.name %>
+        </h1>
+        
+        <div class="gallery-meta">
+          <div class="meta-item">
+            <i class="material-icons">image</i>
+            <%= pluralize(@images.count + @basil_images.count, 'image') %>
+          </div>
+          
+          <% if @universe.present? %>
+            <div class="meta-item">
+              <i class="material-icons">public</i>
+              <span>Universe:</span>
+              <%= link_to @universe.name, @universe, class: 'universe-link' %>
+            </div>
+          <% end %>
+          
+          <%= link_to @content, class: "gallery-back-btn" do %>
+            <i class="material-icons">arrow_back</i>
+            <span>Back to page</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div class="gallery-container">
+  <% if @images.empty? && @basil_images.empty? %>
+    <!-- Empty state -->
+    <div class="empty-gallery">
+      <div class="empty-gallery-content">
+        <div class="empty-icon">
+          <i class="material-icons"><%= @content.class.icon %></i>
+        </div>
+        <h2>No images yet</h2>
+        <p>This <%= @content.class.name.downcase %> doesn't have any images in its gallery.</p>
+        <% if @content.updatable_by?(current_user) %>
+          <%= link_to send("edit_#{@content.class.name.downcase}_path", @content, anchor: "uploads"), class: "btn btn-large #{@content.class.color} waves-effect waves-light" do %>
+            <i class="material-icons left">add_photo_alternate</i>Add Images
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <!-- Gallery grid -->
+    <% 
+      # Merge both image types into a single array
+      combined_images = []
+      @images.each do |image|
+        combined_images << {
+          type: 'regular',
+          data: image,
+          created_at: image.created_at
+        }
+      end
+      
+      @basil_images.each do |commission|
+        combined_images << {
+          type: 'basil',
+          data: commission,
+          created_at: commission.saved_at
+        }
+      end
+      
+      # Randomize the order to mix different image sources
+      combined_images.shuffle!
+    %>
+    
+    <div class="gallery-grid" id="galleryGrid">
+      <% combined_images.each_with_index do |image_item, index| %>
+        <div class="gallery-item">
+          <div class="gallery-card" data-index="<%= index %>">
+            <% if image_item[:type] == 'regular' %>
+              <%= image_tag image_item[:data].src(:medium), class: "gallery-image", 
+                  data: { 
+                    full: image_item[:data].src(:original),
+                    index: index
+                  } %>
+            <% else %>
+              <% 
+                # For BasilCommission, access the image through rails_blob_path
+                if image_item[:data].image.attached?
+                  basil_url = rails_blob_path(image_item[:data].image, disposition: "attachment") 
+                else
+                  basil_url = asset_path("missing-image.jpg")
+                end
+              %>
+              <%= image_tag basil_url, class: "gallery-image", 
+                  data: { 
+                    full: basil_url,
+                    index: index
+                  } %>
+            <% end %>
+            <div class="gallery-card-info">
+              <div class="image-date">
+                <i class="material-icons">schedule</i>
+                <% if image_item[:type] == 'regular' %>
+                  <%= time_ago_in_words(image_item[:data].created_at) %> ago
+                <% else %>
+                  <%= time_ago_in_words(image_item[:data].saved_at) %> ago
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<!-- Overview section -->
+<div class="overview-section">
+  <div class="overview-background">
+    <div class="container">
+      <div class="overview-header">
+        <h2 class="overview-title">About <%= @content.name %></h2>
+        <div class="overview-subtitle">
+          <span class="content-type <%= @content.class.text_color %>">
+            <i class="material-icons"><%= @content.class.icon %></i>
+            <%= @content.class.name %>
+          </span>
+        </div>
+      </div>
+      
+      <div class="overview-content">
+        <% 
+          # Find the overview category if it exists
+          overview_category = @serialized_content&.data&.fetch(:categories, [])&.find { |cat| 
+            cat[:name].downcase == 'overview' || cat[:name].downcase == 'appearance'
+          } if @serialized_content.present?
+        %>
+        
+        <% if overview_category.present? && overview_category[:fields].present? %>
+          <div class="overview-fields">
+            <% overview_category[:fields].reject { |field| field[:hidden] }.each do |field| %>
+              <% 
+                # Skip empty fields
+                next if field[:value].blank? 
+                
+                # Skip private fields
+                next if field[:label].to_s.start_with?("Private") && !(user_signed_in? && @content.user == current_user)
+              %>
+              
+              <div class="overview-field">
+                <div class="field-label">
+                  <span><%= field[:label] %></span>
+                </div>
+                <div class="field-value">
+                  <% if field[:value].is_a?(String) %>
+                    <%= ContentFormatterService.show(text: field[:value], viewing_user: current_user) %>
+                  <% elsif field[:value].is_a?(Array) %>
+                    <%= field[:value].join(", ") %>
+                  <% else %>
+                    <%= field[:value].to_s %>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="no-overview-message">
+            <p>No overview information available for this <%= @content.class.name.downcase %>.</p>
+          </div>
+        <% end %>
+        
+        <!-- CTA Button -->
+        <div class="overview-cta">
+          <%= link_to @content, class: "btn-large waves-effect waves-light #{@content.class.color}" do %>
+            <i class="material-icons left">visibility</i>
+            <span>View full <%= @content.class.name.downcase %> page</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Related content section (when available) -->
+<% if @other_content.any? %>
+  <div class="related-section">
+    <div class="container">
+      <div class="related-header">
+        <h2 class="related-title">
+          <i class="material-icons"><%= @content.class.icon %></i>
+          <span>More <%= @content.class.name.pluralize %> in this Universe</span>
+        </h2>
+      </div>
+      
+      <div class="related-grid">
+        <% @other_content.each do |related| %>
+          <div class="related-item">
+            <%= link_to send("gallery_#{related.class.name.downcase}_path", related), class: "related-card" do %>
+              <div class="related-image">
+                <% 
+                  related_image = ImageUpload.where(content_type: related.class.name, content_id: related.id).first 
+                  related_basil = BasilCommission.where(entity: related).where.not(saved_at: nil).first
+                  
+                  if related_image
+                    image_url = related_image.src(:medium)
+                  elsif related_basil
+                    image_url = related_basil.image
+                  else
+                    image_url = asset_path("card-headers/#{related.class.name.downcase.pluralize}.jpg")
+                  end
+                %>
+                <div class="related-image-container" style="background-image: url('<%= image_url %>');"></div>
+                <div class="related-overlay"></div>
+                <h3 class="related-name"><%= related.name %></h3>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<!-- Custom Lightbox -->
+<div class="custom-lightbox" id="customLightbox">
+  <div class="lightbox-overlay" id="lightboxOverlay"></div>
+  <div class="lightbox-content">
+    <img src="" id="lightboxImage" alt="<%= @content.name %>" />
+    <button class="lightbox-close" id="lightboxClose">×</button>
+    <button class="lightbox-prev" id="lightboxPrev">&lt;</button>
+    <button class="lightbox-next" id="lightboxNext">&gt;</button>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Custom lightbox implementation
+    var lightbox = document.getElementById('customLightbox');
+    var lightboxImg = document.getElementById('lightboxImage');
+    var lightboxOverlay = document.getElementById('lightboxOverlay');
+    var lightboxClose = document.getElementById('lightboxClose');
+    var lightboxPrev = document.getElementById('lightboxPrev');
+    var lightboxNext = document.getElementById('lightboxNext');
+    
+    var galleryImages = document.querySelectorAll('.gallery-image');
+    var currentIndex = 0;
+    var totalImages = galleryImages.length;
+    
+    // Open lightbox function
+    function openLightbox(index) {
+      if (index < 0) index = totalImages - 1;
+      if (index >= totalImages) index = 0;
+      
+      currentIndex = index;
+      var imgSrc = galleryImages[index].getAttribute('data-full');
+      
+      lightboxImg.src = imgSrc;
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden'; // Prevent scrolling
+    }
+    
+    // Close lightbox function
+    function closeLightbox() {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = ''; // Restore scrolling
+    }
+    
+    // Navigate to previous image
+    function prevImage() {
+      openLightbox(currentIndex - 1);
+    }
+    
+    // Navigate to next image
+    function nextImage() {
+      openLightbox(currentIndex + 1);
+    }
+    
+    // Set up click handlers for gallery items
+    galleryImages.forEach(function(img) {
+      img.addEventListener('click', function(e) {
+        e.preventDefault();
+        openLightbox(parseInt(this.getAttribute('data-index')));
+      });
+    });
+    
+    // Make entire gallery card clickable
+    var galleryCards = document.querySelectorAll('.gallery-card');
+    galleryCards.forEach(function(card) {
+      card.addEventListener('click', function(e) {
+        // Skip if already clicked on the image
+        if (e.target.classList.contains('gallery-image')) return;
+        
+        // Open lightbox for this card's image
+        var index = parseInt(this.getAttribute('data-index'));
+        openLightbox(index);
+      });
+    });
+    
+    // Set up lightbox controls
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightboxOverlay.addEventListener('click', closeLightbox);
+    lightboxPrev.addEventListener('click', function(e) {
+      e.stopPropagation();
+      prevImage();
+    });
+    lightboxNext.addEventListener('click', function(e) {
+      e.stopPropagation();
+      nextImage();
+    });
+    
+    // Keyboard controls
+    document.addEventListener('keydown', function(e) {
+      if (!lightbox.classList.contains('active')) return;
+      
+      switch(e.key) {
+        case 'Escape':
+          closeLightbox();
+          break;
+        case 'ArrowLeft':
+          prevImage();
+          break;
+        case 'ArrowRight':
+          nextImage();
+          break;
+      }
+    });
+  });
+</script>
+
+<style>
+  /* ===== HERO SECTION ===== */
+  .gallery-hero {
+    position: relative;
+    padding: 80px 0 50px;
+    color: white;
+    overflow: hidden;
+  }
+  
+  .hero-pattern {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: url(<%= asset_path("card-headers/patterns/pattern#{@content.id % 20 + 1}.png") %>);
+    background-size: cover;
+    background-position: center;
+    opacity: 0.15;
+    mix-blend-mode: soft-light;
+  }
+  
+  .gallery-header-content {
+    position: relative;
+    z-index: 2;
+  }
+  
+  .gallery-breadcrumbs {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 6px 15px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+  
+  .breadcrumb-link {
+    color: rgba(255, 255, 255, 0.9);
+    transition: color 0.2s ease;
+  }
+  
+  .breadcrumb-link:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
+  
+  .breadcrumb-separator {
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0 5px;
+  }
+  
+  .current-page {
+    color: #fff;
+    font-weight: 500;
+  }
+  
+  .gallery-title {
+    font-size: 3rem;
+    font-weight: 300;
+    margin: 0 0 20px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .gallery-icon {
+    margin-right: 15px;
+    font-size: 2.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px;
+    border-radius: 50%;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+  
+  .gallery-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  
+  .meta-item {
+    display: flex;
+    align-items: center;
+    margin-right: 25px;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 5px 15px;
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+  
+  .meta-item i {
+    font-size: 18px;
+    margin-right: 8px;
+  }
+  
+  .meta-item span {
+    margin-right: 5px;
+  }
+  
+  .universe-link {
+    color: white;
+    text-decoration: underline;
+    font-weight: 500;
+  }
+  
+  .gallery-back-btn {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    background: white;
+    color: <%= @content.class.hex_color %>;
+    padding: 8px 20px;
+    border-radius: 30px;
+    font-weight: 500;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  .gallery-back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  }
+  
+  .gallery-back-btn i {
+    margin-right: 8px;
+  }
+  
+  /* ===== GALLERY SECTION ===== */
+  .gallery-container {
+    padding: 50px 0;
+    background-color: #f9f9f9;
+  }
+  
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-gap: 25px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .gallery-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .gallery-card {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    height: 100%;
+  }
+  
+  .gallery-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+  }
+  
+  .gallery-image {
+    width: 100%;
+    display: block;
+    height: 300px;
+    object-fit: cover;
+  }
+  
+  .gallery-card-info {
+    padding: 15px;
+    border-top: 1px solid #f0f0f0;
+  }
+  
+  .image-date {
+    display: flex;
+    align-items: center;
+    color: #757575;
+    font-size: 0.9rem;
+  }
+  
+  .image-date i {
+    font-size: 16px;
+    margin-right: 5px;
+  }
+  
+  /* ===== EMPTY STATE ===== */
+  .empty-gallery {
+    padding: 100px 0;
+    text-align: center;
+  }
+  
+  .empty-gallery-content {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .empty-icon {
+    width: 100px;
+    height: 100px;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+  }
+  
+  .empty-icon i {
+    font-size: 50px;
+    color: #9e9e9e;
+  }
+  
+  .empty-gallery h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-weight: 300;
+    color: #424242;
+  }
+  
+  .empty-gallery p {
+    margin-bottom: 30px;
+    color: #757575;
+  }
+  
+  /* ===== OVERVIEW SECTION ===== */
+  .overview-section {
+    background-color: white;
+    padding-bottom: 80px;
+  }
+  
+  .overview-background {
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23<%= @content.class.hex_color.sub('#', '') %>' fill-opacity='0.03'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  
+  .overview-header {
+    text-align: center;
+    padding: 70px 0 50px;
+    position: relative;
+  }
+  
+  .overview-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: <%= @content.class.hex_color %>;
+    border-radius: 3px;
+  }
+  
+  .overview-title {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin: 0 0 15px;
+    color: #212121;
+  }
+  
+  .overview-subtitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .content-type {
+    display: flex;
+    align-items: center;
+  }
+  
+  .content-type i {
+    margin-right: 8px;
+  }
+  
+  .overview-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 50px 20px 0;
+  }
+  
+  .overview-fields {
+    border: 1px solid #eeeeee;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  
+  .overview-field {
+    padding: 20px 25px;
+    position: relative;
+  }
+  
+  .overview-field:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 25px;
+    right: 25px;
+    height: 1px;
+    background: #f5f5f5;
+  }
+  
+  .field-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    color: #9e9e9e;
+    margin-bottom: 8px;
+  }
+  
+  .field-value {
+    color: #212121;
+    line-height: 1.6;
+  }
+  
+  .field-value p {
+    margin-top: 0;
+  }
+  
+  .field-value p:last-child {
+    margin-bottom: 0;
+  }
+  
+  .no-overview-message {
+    text-align: center;
+    padding: 40px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    color: #757575;
+  }
+  
+  .overview-cta {
+    margin-top: 50px;
+    text-align: center;
+  }
+  
+  /* ===== RELATED CONTENT ===== */
+  .related-section {
+    background: #f5f5f5;
+    padding: 70px 0;
+  }
+  
+  .related-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  
+  .related-title {
+    font-size: 2rem;
+    font-weight: 300;
+    color: #424242;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .related-title i {
+    margin-right: 10px;
+    color: <%= @content.class.hex_color %>;
+  }
+  
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .related-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .related-card {
+    position: relative;
+    display: block;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 200px;
+  }
+  
+  .related-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+  }
+  
+  .related-image {
+    position: relative;
+    height: 100%;
+  }
+  
+  .related-image-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .related-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
+  }
+  
+  .related-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin: 0;
+  }
+  
+  /* ===== CUSTOM LIGHTBOX ===== */
+  .custom-lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99999;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .custom-lightbox.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+  }
+  
+  .lightbox-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.9);
+    z-index: 1;
+  }
+  
+  .lightbox-content {
+    position: relative;
+    z-index: 2;
+    max-width: 95%;
+    max-height: 95%;
+    width: 95%;
+    height: 95%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .lightbox-content img {
+    max-width: 100%;
+    max-height: 95vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  
+  .lightbox-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .lightbox-prev,
+  .lightbox-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.3);
+    border: none;
+    color: white;
+    font-size: 30px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  
+  .lightbox-prev:hover,
+  .lightbox-next:hover,
+  .lightbox-close:hover {
+    background: rgba(255,255,255,0.2);
+  }
+  
+  .lightbox-prev {
+    left: 20px;
+  }
+  
+  .lightbox-next {
+    right: 20px;
+  }
+  
+  /* ===== RESPONSIVE STYLES ===== */
+  @media only screen and (max-width: 992px) {
+    .gallery-grid {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+    
+    .gallery-hero {
+      padding: 60px 0 40px;
+    }
+    
+    .gallery-title {
+      font-size: 2.5rem;
+    }
+    
+    .gallery-icon {
+      font-size: 2rem;
+      padding: 8px;
+    }
+    
+    .overview-title {
+      font-size: 2rem;
+    }
+    
+    .lightbox-prev {
+      left: 10px;
+    }
+    
+    .lightbox-next {
+      right: 10px;
+    }
+  }
+  
+  @media only screen and (max-width: 600px) {
+    .gallery-hero {
+      padding: 40px 0 30px;
+    }
+    
+    .gallery-title {
+      font-size: 2rem;
+    }
+    
+    .gallery-icon {
+      font-size: 1.8rem;
+      padding: 6px;
+    }
+    
+    .gallery-meta {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .gallery-back-btn {
+      margin-left: 0;
+      margin-top: 15px;
+    }
+    
+    .gallery-grid {
+      grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+      padding: 0 15px;
+    }
+    
+    .overview-header {
+      padding: 50px 0 30px;
+    }
+    
+    .overview-title {
+      font-size: 1.8rem;
+    }
+    
+    .related-title {
+      font-size: 1.5rem;
+    }
+    
+    .related-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .lightbox-prev,
+    .lightbox-next {
+      width: 40px;
+      height: 40px;
+      font-size: 24px;
+    }
+    
+    .lightbox-close {
+      top: -35px;
+      width: 35px;
+      height: 35px;
+      font-size: 24px;
+    }
+  }
+</style>

@@ -399,6 +399,35 @@ class ContentController < ApplicationController
     @dummy_model = @content_type_class.new
   end
 
+  def gallery
+    content_type = content_type_from_controller(self.class)
+    @content = content_type.find_by(id: params[:id])
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+    
+    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+    
+    if (current_user || User.new).can_read?(@content)
+      # Serialize content for overview section
+      @serialized_content = ContentSerializer.new(@content)
+
+      # Get all images for this content
+      @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id)
+      
+      # Get additional context information
+      @universe = @content.universe_id.present? ? Universe.find_by(id: @content.universe_id) : nil
+      @other_content = @content.universe_id.present? ? 
+        content_type.where(universe_id: @content.universe_id).where.not(id: @content.id).limit(5) : []
+      
+      # Include basil images too
+      @basil_images = BasilCommission.where(entity: @content).where.not(saved_at: nil)
+      
+      render 'content/gallery'
+    else
+      return redirect_to root_path, notice: "You don't have permission to view that content."
+    end
+  end
+
   def api_sort
     sort_params = params.permit(:content_id, :intended_position, :sortable_class)
     sortable_class = sort_params[:sortable_class].constantize # todo audit

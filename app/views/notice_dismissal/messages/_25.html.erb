@@ -1,0 +1,25 @@
+<%
+  # Only show this promotion until August 1, 2025
+  show_artfight_promo = Date.today <= Date.new(2025, 8, 1)
+%>
+
+<% if show_notice?(id: 25) && show_artfight_promo %>
+  <div class="col s12 m5 l4">
+    <div class="grey-text uppercase center">
+      Happening now
+    </div>
+    <%= link_to browse_tag_path(tag_slug: 'artfight2025') do %>
+      <div class="card-panel hoverable blue darken-1 white-text" style="margin-bottom: 0">
+        <div class="valign-wrapper">
+          <i class="material-icons" class="left" style="font-size: 3em; margin-right: 0.3em;">brush</i>
+          <div>
+            Participating in Art Fight 2025? Browse content tagged #ArtFight2025 from all users!
+          </div>
+        </div>
+      </div>
+    <% end %>
+    <div style="margin-bottom: 2em;">
+      <%= link_to 'dismiss message', notice_dismissal_dismiss_path(notice_id: 25), class: 'right' %>
+    </div>
+  </div>
+<% end %>

@@ -268,6 +268,7 @@ Rails.application.routes.draw do
         get  :changelog,       on: :member
         get  :toggle_archive,  on: :member
         post :toggle_favorite, on: :member
+        get  :gallery,         on: :member
         get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
       end
     end
