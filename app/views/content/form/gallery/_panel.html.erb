@@ -1,9 +1,9 @@
 <% 
   raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
   
-  # Get both image types
-  regular_images = raw_model.image_uploads.to_a
-  basil_images = (@basil_images || [])
+  # Get both image types with ordering
+  regular_images = raw_model.image_uploads.ordered.to_a
+  basil_images = (@basil_images || []).sort_by(&:position)
   
   # Keep track of regular and AI images separately for display
   images = regular_images
@@ -13,6 +13,32 @@
   
   # Find the pinned image (if any) - there should only be one pinned image
   pinned_image = regular_images.find(&:pinned?) || basil_images.find(&:pinned?)
+
+  # Create a combined list of all images for sortable functionality
+  # We'll maintain type information for each
+  combined_images = []
+  regular_images.each do |image|
+    combined_images << {
+      id: image.id,
+      type: 'image_upload',
+      data: image,
+      pinned: image.pinned?
+    }
+  end
+  
+  basil_images.each do |commission|
+    combined_images << {
+      id: commission.id,
+      type: 'basil_commission',
+      data: commission,
+      pinned: commission.pinned?
+    }
+  end
+  
+  # If there's a pinned image, move it to the front
+  if pinned_image
+    combined_images.sort_by! { |img| img[:pinned] ? 0 : 1 }
+  end
 %>
 
 <div class="row">
@@ -23,204 +49,118 @@
         <h5 class="gallery-section-title">
           <i class="material-icons left">photo_library</i>
           Current Images (<%= total_images %>)
+          <span class="right grey-text text-lighten-1 reordering-instructions" style="font-size: 1rem; display: none;">
+            <i class="material-icons left">touch_app</i> Drag images to reorder
+          </span>
         </h5>
         
-        <div class="gallery-grid">
-          <div class="row">
-            <!-- First show the pinned image (if any) -->
-            <% if pinned_image && regular_images.include?(pinned_image) %>
-              <div class="col s12 m6 l6">
-                <div class="image-card">
-                  <div class="image-preview">
-                    <%= link_to pinned_image.src(:original), target: '_blank' do %>
-                      <%= image_tag pinned_image.src(:medium), class: "responsive-img" %>
-                    <% end %>
-                  </div>
-                  <div class="image-actions">
-                    <div class="image-meta">
-                      <span class="file-size"><%= Filesize.from("#{pinned_image.src_file_size}B").to_f('KB').round(2) %> KB</span>
-                    </div>
-                  </div>
-                  
-                  <!-- Pin button with tooltip (positioned absolutely) -->
-                  <%= link_to toggle_image_pin_path(image_type: 'image_upload', image_id: pinned_image.id),
-                    class: "pin-button-overlay js-toggle-pin amber-text tooltipped",
-                    remote: true,
-                    method: :post,
-                    data: { 
-                      type: 'json',
-                      position: 'top',
-                      tooltip: 'Pin this image to always use it in previews of this page'
-                    } do %>
-                    <i class="material-icons">push_pin</i>
-                  <% end %>
-                  
-                  <!-- Delete button with tooltip (positioned absolutely) -->
-                  <%= link_to image_deletion_path(pinned_image.id),
-                    class: 'delete-button-overlay js-remove-image red-text tooltipped',
-                    method: 'delete',
-                    remote: true,
-                    data: { 
-                      confirm: "Are you sure? This can't be undone.",
-                      position: 'top',
-                      tooltip: 'Delete this image' 
-                    } do %>
-                    <i class="material-icons">delete</i>
-                  <% end %>
-                  
-                  <div class="pinned-badge-overlay">
-                    <i class="material-icons amber-text">push_pin</i> Pinned
-                  </div>
-                </div>
-              </div>
-            <% elsif pinned_image && basil_images.include?(pinned_image) %>
-              <div class="col s12 m6 l6">
-                <div class="image-card">
-                  <div class="image-preview basil-image">
-                    <% if pinned_image.image.attached? %>
-                      <%= link_to rails_blob_path(pinned_image.image, disposition: "attachment"), target: '_blank' do %>
-                        <%= image_tag rails_blob_path(pinned_image.image, disposition: "attachment"), class: "responsive-img" %>
+        <div class="gallery-grid sortable-gallery" data-content-type="<%= raw_model.class.name %>" data-content-id="<%= raw_model.id %>">
+          <div class="row js-sortable-gallery-items">
+            <!-- Show images in their sorted order -->
+            <% combined_images.each do |image_item| %>
+              <% 
+                is_pinned = image_item[:pinned]
+                image_data = image_item[:data]
+                image_type = image_item[:type]
+                image_id = image_item[:id]
+              %>
+              <div class="col s12 m6 l6 gallery-sortable-item" data-image-id="<%= image_id %>" data-image-type="<%= image_type %>">
+                <div class="image-card <%= is_pinned ? 'pinned' : '' %>">
+                  <% if image_type == 'image_upload' %>
+                    <div class="image-preview">
+                      <%= link_to image_data.src(:original), target: '_blank' do %>
+                        <%= image_tag image_data.src(:medium), class: "responsive-img" %>
                       <% end %>
+                    </div>
+                    <div class="image-actions">
+                      <div class="image-meta">
+                        <span class="file-size"><%= Filesize.from("#{image_data.src_file_size}B").to_f('KB').round(2) %> KB</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Pin button with tooltip (positioned absolutely) -->
+                    <%= link_to toggle_image_pin_path(image_type: 'image_upload', image_id: image_data.id),
+                      class: "pin-button-overlay js-toggle-pin #{is_pinned ? 'amber-text' : 'grey-text'} tooltipped",
+                      remote: true,
+                      method: :post,
+                      data: { 
+                        type: 'json',
+                        position: 'top',
+                        tooltip: 'Pin this image to always use it in previews of this page'
+                      } do %>
+                      <i class="material-icons">push_pin</i>
                     <% end %>
-                  </div>
-                  <div class="image-actions">
-                    <div class="image-meta">
-                      <span class="basil-label">Generated with Basil</span>
-                    </div>
-                  </div>
-                  
-                  <!-- Pin button with tooltip (positioned absolutely) -->
-                  <%= link_to toggle_image_pin_path(image_type: 'basil_commission', image_id: pinned_image.id),
-                    class: "pin-button-overlay js-toggle-pin amber-text tooltipped",
-                    remote: true,
-                    method: :post,
-                    data: { 
-                      type: 'json',
-                      position: 'top', 
-                      tooltip: 'Pin this image to always use it in previews of this page'
-                    } do %>
-                    <i class="material-icons">push_pin</i>
-                  <% end %>
-                  
-                  <!-- Delete button with tooltip (positioned absolutely) -->
-                  <%= link_to basil_delete_path(pinned_image),
-                    class: 'delete-button-overlay js-remove-image red-text tooltipped',
-                    method: 'delete',
-                    remote: true,
-                    data: { 
-                      confirm: "Are you sure? This can't be undone.",
-                      position: 'top',
-                      tooltip: 'Delete this image'
-                    } do %>
-                    <i class="material-icons">delete</i>
-                  <% end %>
-                  
-                  <div class="pinned-badge-overlay">
-                    <i class="material-icons amber-text">push_pin</i> Pinned
-                  </div>
-                </div>
-              </div>
-            <% end %>
-            
-            <!-- Then show all other regular images -->
-            <% regular_images.each do |image| %>
-              <% next if image == pinned_image %>
-            
-              <div class="col s12 m6 l6">
-                <div class="image-card">
-                  <div class="image-preview">
-                    <%= link_to image.src(:original), target: '_blank' do %>
-                      <%= image_tag image.src(:medium), class: "responsive-img" %>
+                    
+                    <!-- Delete button with tooltip (positioned absolutely) -->
+                    <%= link_to image_deletion_path(image_data.id),
+                      class: 'delete-button-overlay js-remove-image red-text tooltipped',
+                      method: 'delete',
+                      remote: true,
+                      data: { 
+                        confirm: "Are you sure? This can't be undone.",
+                        position: 'top',
+                        tooltip: 'Delete this image' 
+                      } do %>
+                      <i class="material-icons">delete</i>
                     <% end %>
-                  </div>
-                  <div class="image-actions">
-                    <div class="image-meta">
-                      <span class="file-size"><%= Filesize.from("#{image.src_file_size}B").to_f('KB').round(2) %> KB</span>
+                    
+                    <% if is_pinned %>
+                      <div class="pinned-badge-overlay">
+                        <i class="material-icons amber-text">push_pin</i> Pinned
+                      </div>
+                    <% end %>
+                    
+                    <div class="sortable-handle-overlay tooltipped" data-tooltip="Drag to reorder">
+                      <i class="material-icons">drag_handle</i>
                     </div>
-                  </div>
-                  
-                  <!-- Pin button with tooltip (positioned absolutely) -->
-                  <%= link_to toggle_image_pin_path(image_type: 'image_upload', image_id: image.id),
-                    class: "pin-button-overlay js-toggle-pin #{image.pinned? ? 'amber-text' : 'grey-text'} tooltipped",
-                    remote: true,
-                    method: :post,
-                    data: { 
-                      type: 'json',
-                      position: 'top',
-                      tooltip: 'Pin this image to always use it in previews of this page'
-                    } do %>
-                    <i class="material-icons">push_pin</i>
-                  <% end %>
-                  
-                  <!-- Delete button with tooltip (positioned absolutely) -->
-                  <%= link_to image_deletion_path(image.id),
-                    class: 'delete-button-overlay js-remove-image red-text tooltipped',
-                    method: 'delete',
-                    remote: true,
-                    data: { 
-                      confirm: "Are you sure? This can't be undone.",
-                      position: 'top',
-                      tooltip: 'Delete this image' 
-                    } do %>
-                    <i class="material-icons">delete</i>
-                  <% end %>
-                  
-                  <% if image.pinned? %>
-                    <div class="pinned-badge-overlay">
-                      <i class="material-icons amber-text">push_pin</i> Pinned
-                    </div>
-                  <% end %>
-                </div>
-              </div>
-            <% end %>
-            
-            <!-- Then show all basil images -->
-            <% basil_images.each do |commission| %>
-              <% next if commission == pinned_image %>
-              <div class="col s12 m6 l6">
-                <div class="image-card">
-                  <div class="image-preview basil-image">
-                    <% if commission.image.attached? %>
-                      <%= link_to rails_blob_path(commission.image, disposition: "attachment"), target: '_blank' do %>
-                        <%= image_tag rails_blob_path(commission.image, disposition: "attachment"), class: "responsive-img" %>
+                  <% else %>
+                    <div class="image-preview basil-image">
+                      <% if image_data.image.attached? %>
+                        <%= link_to rails_blob_path(image_data.image, disposition: "attachment"), target: '_blank' do %>
+                          <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), class: "responsive-img" %>
+                        <% end %>
                       <% end %>
-                    <% end %>
-                  </div>
-                  <div class="image-actions">
-                    <div class="image-meta">
-                      <span class="basil-label">Generated with Basil</span>
                     </div>
-                  </div>
-                  
-                  <!-- Pin button with tooltip (positioned absolutely) -->
-                  <%= link_to toggle_image_pin_path(image_type: 'basil_commission', image_id: commission.id),
-                    class: "pin-button-overlay js-toggle-pin #{commission.pinned? ? 'amber-text' : 'grey-text'} tooltipped",
-                    remote: true,
-                    method: :post,
-                    data: { 
-                      type: 'json',
-                      position: 'top', 
-                      tooltip: 'Pin this image to always use it in previews of this page'
-                    } do %>
-                    <i class="material-icons">push_pin</i>
-                  <% end %>
-                  
-                  <!-- Delete button with tooltip (positioned absolutely) -->
-                  <%= link_to basil_delete_path(commission),
-                    class: 'delete-button-overlay js-remove-image red-text tooltipped',
-                    method: 'delete',
-                    remote: true,
-                    data: { 
-                      confirm: "Are you sure? This can't be undone.",
-                      position: 'top',
-                      tooltip: 'Delete this image'
-                    } do %>
-                    <i class="material-icons">delete</i>
-                  <% end %>
-                  
-                  <% if commission.pinned? %>
-                    <div class="pinned-badge-overlay">
-                      <i class="material-icons amber-text">push_pin</i> Pinned
+                    <div class="image-actions">
+                      <div class="image-meta">
+                        <span class="basil-label">Generated with Basil</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Pin button with tooltip (positioned absolutely) -->
+                    <%= link_to toggle_image_pin_path(image_type: 'basil_commission', image_id: image_data.id),
+                      class: "pin-button-overlay js-toggle-pin #{is_pinned ? 'amber-text' : 'grey-text'} tooltipped",
+                      remote: true,
+                      method: :post,
+                      data: { 
+                        type: 'json',
+                        position: 'top', 
+                        tooltip: 'Pin this image to always use it in previews of this page'
+                      } do %>
+                      <i class="material-icons">push_pin</i>
+                    <% end %>
+                    
+                    <!-- Delete button with tooltip (positioned absolutely) -->
+                    <%= link_to basil_delete_path(image_data),
+                      class: 'delete-button-overlay js-remove-image red-text tooltipped',
+                      method: 'delete',
+                      remote: true,
+                      data: { 
+                        confirm: "Are you sure? This can't be undone.",
+                        position: 'top',
+                        tooltip: 'Delete this image'
+                      } do %>
+                      <i class="material-icons">delete</i>
+                    <% end %>
+                    
+                    <% if is_pinned %>
+                      <div class="pinned-badge-overlay">
+                        <i class="material-icons amber-text">push_pin</i> Pinned
+                      </div>
+                    <% end %>
+                    
+                    <div class="sortable-handle-overlay tooltipped" data-tooltip="Drag to reorder">
+                      <i class="material-icons">drag_handle</i>
                     </div>
                   <% end %>
                 </div>
@@ -231,6 +171,55 @@
       </div>
     <% end %>
     
+    <!-- Mobile reordering controls -->
+    <div class="mobile-reordering-controls hide-on-med-and-up">
+      <div class="card amber lighten-5">
+        <div class="card-content">
+          <span class="card-title">
+            <i class="material-icons left">touch_app</i>
+            Reorder Images
+          </span>
+          <p>On mobile devices, you can use these controls to change the order of your images:</p>
+          
+          <div class="mobile-reordering-instructions">
+            <p><strong>1.</strong> Select an image to move:</p>
+            <select id="mobileImageSelector" class="browser-default">
+              <% combined_images.each_with_index do |image_item, index| %>
+                <% 
+                  image_data = image_item[:data]
+                  image_type = image_item[:type]
+                  image_id = image_item[:id]
+                  name = image_type == 'image_upload' ? "Image #{index + 1}" : "Basil Image #{index + 1}"
+                  name += " (Pinned)" if image_item[:pinned]
+                %>
+                <option value="<%= image_id %>" data-type="<%= image_type %>" data-index="<%= index %>"><%= name %></option>
+              <% end %>
+            </select>
+            
+            <p><strong>2.</strong> Choose where to move it:</p>
+            <div class="mobile-move-buttons">
+              <button class="btn-small amber" id="moveImageFirst">
+                <i class="material-icons left">first_page</i>
+                First
+              </button>
+              <button class="btn-small amber" id="moveImageUp">
+                <i class="material-icons left">arrow_upward</i>
+                Up
+              </button>
+              <button class="btn-small amber" id="moveImageDown">
+                <i class="material-icons left">arrow_downward</i>
+                Down
+              </button>
+              <button class="btn-small amber" id="moveImageLast">
+                <i class="material-icons left">last_page</i>
+                Last
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Upload section -->
     <div class="upload-section">
       <h5 class="gallery-section-title">
@@ -258,7 +247,9 @@
         </div>
         
         <div class="upload-button-container center">
-          <%= f.submit "Perform uploads", class: 'btn btn-large waves-effect waves-light' %>
+          <%= f.button :submit, class: 'btn btn-large waves-effect waves-light upload-button', data: { disable_with: '<i class="material-icons left">cloud_upload</i> Uploading...' } do %>
+              <span>Perform uploads</span>
+            <% end %>
           <p class="upload-note grey-text">
             Once you've selected your images, press the button above to upload them.
             This will reload the page.
@@ -285,6 +276,53 @@
 </div>
 
 <style>
+  .sortable-handle-overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    cursor: grab;
+    opacity: 0.5;
+  }
+
+  .sortable-handle-overlay:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 1);
+  }
+
+  .image-card:hover .sortable-handle-overlay {
+    opacity: 0.9;
+  }
+
+  .ui-sortable-helper {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  .gallery-sortable-item.ui-sortable-placeholder {
+    visibility: visible !important;
+    background-color: rgba(255, 193, 7, 0.2);
+    border: 2px dashed rgba(255, 193, 7, 0.5);
+    border-radius: 8px;
+    margin: 10px;
+    height: 320px;
+  }
+
+  /* Hide sort handles on mobile - they'll use alternative controls */
+  @media only screen and (max-width: 600px) {
+    .sortable-handle-overlay {
+      display: none;
+    }
+  }
+  
   .gallery-section-title {
     font-size: 1.5rem;
     margin-bottom: 20px;
@@ -437,6 +475,27 @@
     margin: 40px 0 20px;
   }
   
+  /* Mobile reordering styles */
+  .mobile-reordering-controls {
+    margin-bottom: 30px;
+  }
+  
+  .mobile-move-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .mobile-move-buttons .btn-small {
+    flex: 1;
+    min-width: 80px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
   .pinned-section-divider,
   .basil-pinned-divider {
     background-color: #f9f9f9;
@@ -475,6 +534,67 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Initialize sortable functionality for gallery images
+    var galleryItems = document.querySelector('.js-sortable-gallery-items');
+    if (galleryItems) {
+      var sortableGallery = $('.js-sortable-gallery-items');
+      var sortableContainer = sortableGallery.closest('.sortable-gallery');
+      var contentType = sortableContainer.data('content-type');
+      var contentId = sortableContainer.data('content-id');
+
+      // Initialize the jQuery UI sortable
+      sortableGallery.sortable({
+        items: '.gallery-sortable-item',
+        handle: '.sortable-handle-overlay',
+        placeholder: 'gallery-sortable-item ui-sortable-placeholder',
+        cursor: 'move',
+        opacity: 0.8,
+        tolerance: 'pointer',
+        start: function(e, ui) {
+          // Show reordering instructions when drag starts
+          $('.reordering-instructions').fadeIn();
+        },
+        stop: function(e, ui) {
+          // Hide instructions when drag stops
+          $('.reordering-instructions').fadeOut();
+          
+          // Save the new order via API
+          var items = [];
+          $('.gallery-sortable-item').each(function(index) {
+            var imageId = $(this).data('image-id');
+            var imageType = $(this).data('image-type');
+            
+            items.push({
+              id: imageId,
+              type: imageType,
+              position: index + 1 // Position is 1-indexed
+            });
+          });
+          
+          // Save the new order via AJAX
+          $.ajax({
+            url: '/api/v1/gallery_images/sort',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+              images: items,
+              content_type: contentType,
+              content_id: contentId
+            }),
+            success: function(response) {
+              // Show success indicator (optional)
+              M.toast({html: 'Image order saved', classes: 'green'}); 
+            },
+            error: function(error) {
+              console.error('Error saving image order:', error);
+              M.toast({html: 'Failed to save image order', classes: 'red'});
+              // Could refresh the page here to reset the order
+            }
+          });
+        }
+      });
+    }
+    
     // Initialize tooltips
     var tooltips = document.querySelectorAll('.tooltipped');
     M.Tooltip.init(tooltips);
@@ -547,6 +667,110 @@
         });
       });
     });
+    
+    // Mobile reordering logic
+    var mobileImageSelector = document.getElementById('mobileImageSelector');
+    var moveFirstBtn = document.getElementById('moveImageFirst');
+    var moveUpBtn = document.getElementById('moveImageUp');
+    var moveDownBtn = document.getElementById('moveImageDown');
+    var moveLastBtn = document.getElementById('moveImageLast');
+    
+    if (mobileImageSelector && moveUpBtn && moveDownBtn) {
+      var sortableContainer = document.querySelector('.sortable-gallery');
+      var contentType = sortableContainer ? sortableContainer.getAttribute('data-content-type') : '';
+      var contentId = sortableContainer ? sortableContainer.getAttribute('data-content-id') : '';
+      
+      // Helper function to reorder images
+      function reorderImages(getNewPosition) {
+        if (!mobileImageSelector.value) return;
+        
+        var selectedOption = mobileImageSelector.options[mobileImageSelector.selectedIndex];
+        var imageId = mobileImageSelector.value;
+        var imageType = selectedOption.getAttribute('data-type');
+        var currentIndex = parseInt(selectedOption.getAttribute('data-index'));
+        
+        // Get all items
+        var items = Array.from(document.querySelectorAll('.gallery-sortable-item'));
+        var totalItems = items.length;
+        
+        // Calculate new position based on the operation
+        var newPosition = getNewPosition(currentIndex, totalItems);
+        
+        // Update DOM order
+        var itemToMove = items[currentIndex];
+        var parent = itemToMove.parentNode;
+        
+        if (newPosition === 0) {
+          // Move to first position
+          parent.insertBefore(itemToMove, parent.firstChild);
+        } else if (newPosition >= totalItems - 1) {
+          // Move to last position
+          parent.appendChild(itemToMove);
+        } else {
+          // Move to specific position
+          parent.insertBefore(itemToMove, items[newPosition]);
+        }
+        
+        // Update data-index attributes after reordering
+        Array.from(document.querySelectorAll('.gallery-sortable-item')).forEach((item, idx) => {
+          var option = Array.from(mobileImageSelector.options).find(opt => 
+            opt.value === item.getAttribute('data-image-id') && 
+            opt.getAttribute('data-type') === item.getAttribute('data-image-type')
+          );
+          if (option) option.setAttribute('data-index', idx);
+        });
+        
+        // Prepare data for API update
+        var updatedItems = [];
+        Array.from(document.querySelectorAll('.gallery-sortable-item')).forEach((item, idx) => {
+          updatedItems.push({
+            id: item.getAttribute('data-image-id'),
+            type: item.getAttribute('data-image-type'),
+            position: idx + 1 // Position is 1-indexed
+          });
+        });
+        
+        // Save via API
+        fetch('/api/v1/gallery_images/sort', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({
+            images: updatedItems,
+            content_type: contentType,
+            content_id: contentId
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Success toast
+          M.toast({html: 'Image order saved', classes: 'green'});
+        })
+        .catch(error => {
+          console.error('Error saving image order:', error);
+          M.toast({html: 'Failed to save image order', classes: 'red'});
+        });
+      }
+      
+      // Set up event listeners for mobile reordering buttons
+      moveFirstBtn.addEventListener('click', function() {
+        reorderImages(() => 0);
+      });
+      
+      moveUpBtn.addEventListener('click', function() {
+        reorderImages((currentIndex) => Math.max(0, currentIndex - 1));
+      });
+      
+      moveDownBtn.addEventListener('click', function() {
+        reorderImages((currentIndex, totalItems) => Math.min(totalItems - 1, currentIndex + 1));
+      });
+      
+      moveLastBtn.addEventListener('click', function() {
+        reorderImages((currentIndex, totalItems) => totalItems - 1);
+      });
+    }
     
     // Handle delete buttons
     var deleteButtons = document.querySelectorAll('.js-remove-image');

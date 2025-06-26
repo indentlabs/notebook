@@ -89,11 +89,24 @@ module HasImageUploads
       nil
     end
 
+    def pinned_or_random_image_including_private(format: :medium)
+      # First check for pinned images
+      pinned = pinned_image_upload(format)
+      return pinned if pinned.present?
+
+      # If no pinned image, fall back to random selection
+      random_image_including_private(format: format)
+    end
+
     def header_asset_for(class_name)
       # Since we use this as a fallback image on SEO content (for example, Twitter cards for shared notebook pages),
       # we need to include the full protocol + domain + path to ensure they will display the image. A relative path
       # will not work.
-      "https://www.notebook.ai" + ActionController::Base.helpers.asset_url("card-headers/#{class_name.downcase.pluralize}.webp")
+      # 
+      # For direct view rendering, we use the relative asset path which works better with image_tag
+      Rails.env.production? ? 
+        "https://www.notebook.ai" + ActionController::Base.helpers.asset_url("card-headers/#{class_name.downcase.pluralize}.webp") :
+        ActionController::Base.helpers.asset_path("card-headers/#{class_name.downcase.pluralize}.webp")
     end
   end
 end

@@ -2,8 +2,9 @@ class ImageUpload < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :content, polymorphic: true
 
-  # Add scope for pinned images
+  # Add scopes for image ordering
   scope :pinned, -> { where(pinned: true) }
+  scope :ordered, -> { order(:position) }
 
   # This is the old way we uploaded files -- now we're transitioning to ActiveStorage's has_one_attached
   has_attached_file :src,
@@ -35,8 +36,8 @@ class ImageUpload < ApplicationRecord
   alias_attribute 'character_id', :content_id
   #alias_attribute ...
 
-  # Add missing Paperclip attributes for development environment
-  attr_accessor :src_file_name, :src_content_type, :src_file_size, :src_updated_at
+  # Use acts_as_list for ordering images
+  acts_as_list scope: [:content_type, :content_id]
 
   # Add callback to ensure only one pinned image per content
   before_save :ensure_single_pinned_image, if: -> { pinned_changed? && pinned? }

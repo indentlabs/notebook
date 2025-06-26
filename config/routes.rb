@@ -1,5 +1,12 @@
 # rubocop:disable LineLength
 Rails.application.routes.draw do
+  namespace :api do
+    namespace :v1 do
+      post 'gallery_images/sort'
+      get 'categories/suggest/:content_type', to: 'categories#suggest'
+      get 'fields/suggest/:content_type/:category', to: 'fields#suggest'
+    end
+  end
   default_url_options :host => "notebook.ai"
 
   scope :ai, path: '/ai' do
@@ -258,6 +265,7 @@ Rails.application.routes.draw do
       get :timelines, on: :member
 
       get  :changelog,       on: :member
+      get  :gallery,         on: :member
       get  :toggle_archive,  on: :member
       post :toggle_favorite, on: :member
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag

@@ -79,7 +79,8 @@
         combined_images << {
           type: 'regular',
           data: image,
-          created_at: image.created_at
+          created_at: image.created_at,
+          position: image.position || 999999
         }
       end
       
@@ -87,12 +88,13 @@
         combined_images << {
           type: 'basil',
           data: commission,
-          created_at: commission.saved_at
+          created_at: commission.saved_at,
+          position: commission.position || 999999
         }
       end
       
-      # Randomize the order to mix different image sources
-      combined_images.shuffle!
+      # First sort by position (using pinned status as priority)
+      combined_images.sort_by! { |img| [(img[:data].pinned ? 0 : 1), img[:position] || 999999, img[:created_at] || Time.now] }
     %>
     
     <div class="gallery-grid" id="galleryGrid">

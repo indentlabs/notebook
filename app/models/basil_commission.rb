@@ -4,8 +4,9 @@ class BasilCommission < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :entity, polymorphic: true, optional: true
 
-  # Add scope for pinned images
+  # Add scopes for image ordering
   scope :pinned, -> { where(pinned: true) }
+  scope :ordered, -> { order(:position) }
 
   has_one_attached :image,
     service: :amazon_basil,
@@ -47,6 +48,9 @@ class BasilCommission < ApplicationRecord
   def complete?
     image.attached?
   end
+
+  # Use acts_as_list for ordering images
+  acts_as_list scope: [:entity_type, :entity_id]
 
   # Add callback to ensure only one pinned image per entity
   before_save :ensure_single_pinned_image, if: -> { pinned_changed? && pinned? }

@@ -425,16 +425,22 @@ class ContentController < ApplicationController
       # Serialize content for overview section
       @serialized_content = ContentSerializer.new(@content)
 
-      # Get all images for this content
-      @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id)
+      # Get all images for this content with proper ordering
+      @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id).ordered
       
       # Get additional context information
-      @universe = @content.universe_id.present? ? Universe.find_by(id: @content.universe_id) : nil
-      @other_content = @content.universe_id.present? ? 
-        content_type.where(universe_id: @content.universe_id).where.not(id: @content.id).limit(5) : []
+      if @content.is_a?(Universe)
+        # Universe objects don't have a universe_id field
+        @universe = nil
+        @other_content = []
+      else
+        @universe = @content.universe_id.present? ? Universe.find_by(id: @content.universe_id) : nil
+        @other_content = @content.universe_id.present? ? 
+          content_type.where(universe_id: @content.universe_id).where.not(id: @content.id).limit(5) : []
+      end
       
-      # Include basil images too
-      @basil_images = BasilCommission.where(entity: @content).where.not(saved_at: nil)
+      # Include basil images too with proper ordering
+      @basil_images = BasilCommission.where(entity: @content).where.not(saved_at: nil).ordered
       
       render 'content/gallery'
     else
