@@ -293,6 +293,7 @@ Rails.application.routes.draw do
 
     # Image handling
     delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion
+    post '/toggle_image_pin', to: 'content#toggle_image_pin', as: :toggle_image_pin
 
     # Attributes
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization

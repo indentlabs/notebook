@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_05_06_081045) do
+ActiveRecord::Schema.define(version: 2025_06_25_182655) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -202,6 +202,8 @@ ActiveRecord::Schema.define(version: 2025_05_06_081045) do
     t.datetime "saved_at"
     t.datetime "deleted_at"
     t.integer "basil_version", default: 2
+    t.boolean "pinned", default: false
+    t.index ["entity_type", "entity_id", "pinned"], name: "index_basil_commissions_on_entity_pinned"
     t.index ["entity_type", "entity_id", "saved_at"], name: "basil_commissions_ees"
     t.index ["entity_type", "entity_id", "style"], name: "basil_commissions_ees2"
     t.index ["entity_type", "entity_id"], name: "basil_commissions_ee"
@@ -1671,6 +1673,8 @@ ActiveRecord::Schema.define(version: 2025_05_06_081045) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "src"
+    t.boolean "pinned", default: false
+    t.index ["content_type", "content_id", "pinned"], name: "index_image_uploads_on_content_pinned"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
   end

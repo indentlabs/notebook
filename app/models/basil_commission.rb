@@ -4,6 +4,9 @@ class BasilCommission < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :entity, polymorphic: true, optional: true
 
+  # Add scope for pinned images
+  scope :pinned, -> { where(pinned: true) }
+
   has_one_attached :image,
     service: :amazon_basil,
     dependent: :destroy
@@ -43,5 +46,17 @@ class BasilCommission < ApplicationRecord
 
   def complete?
     image.attached?
+  end
+
+  # Add callback to ensure only one pinned image per entity
+  before_save :ensure_single_pinned_image, if: -> { pinned_changed? && pinned? }
+
+  private
+
+  # Ensures only one basil commission can be pinned per entity
+  def ensure_single_pinned_image
+    BasilCommission.where(entity_type: entity_type, entity_id: entity_id, pinned: true)
+                   .where.not(id: id)
+                   .update_all(pinned: false)
   end
 end

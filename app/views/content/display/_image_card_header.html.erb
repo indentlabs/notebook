@@ -2,9 +2,13 @@
   <%= render partial: 'content/display/favorite_control', locals: { content: @content } %>
 
   <ul class="slides">
-    <% @content.public_image_uploads.each do |image_source| %>
+    <% 
+      # First check for any pinned images (ImageUploads)
+      pinned_upload = @content.image_uploads.pinned.where(privacy: 'public').first 
+      if pinned_upload.present? 
+    %>
       <li>
-        <%= image_tag image_source.is_a?(String) ? image_source : image_source.src(:large) %>
+        <%= image_tag pinned_upload.src(:large) %>
         <div class="caption bordered-text center">
           <h3>
             <% if @content.persisted? %>
@@ -26,10 +30,12 @@
           </h3>
         </div>
       </li>
-    <% end %>
-    <% @content.basil_commissions.where.not(saved_at: nil).each do |commission| %>
+    <% 
+      # Then check for pinned BasilCommissions  
+      elsif (pinned_commission = @content.basil_commissions.pinned.where.not(saved_at: nil).first).present? 
+    %>
       <li>
-        <%= image_tag commission.image %>
+        <%= image_tag pinned_commission.image %>
         <div class="caption bordered-text center">
           <h3>
             <% if @content.persisted? %>
@@ -51,6 +57,60 @@
           </h3>
         </div>
       </li>
+    <% 
+      # If no pinned images, show all public images as before
+      else 
+    %>
+      <% @content.public_image_uploads.each do |image_source| %>
+        <li>
+          <%= image_tag image_source.is_a?(String) ? image_source : image_source.src(:large) %>
+          <div class="caption bordered-text center">
+            <h3>
+              <% if @content.persisted? %>
+                <%= link_to @content do %>
+                  <%= simple_format ContentFormatterService.show(
+                    text: @content.name_field_value,
+                    viewing_user: current_user
+                  ) %>
+                <% end %>
+                <small>
+                  <%= simple_format ContentFormatterService.show(
+                    text: @content.description,
+                    viewing_user: current_user
+                  ) %>
+                </small>
+              <% else %>
+                New <%= @content.class.name %>
+              <% end %>
+            </h3>
+          </div>
+        </li>
+      <% end %>
+      <% @content.basil_commissions.where.not(saved_at: nil).each do |commission| %>
+        <li>
+          <%= image_tag commission.image %>
+          <div class="caption bordered-text center">
+            <h3>
+              <% if @content.persisted? %>
+                <%= link_to @content do %>
+                  <%= simple_format ContentFormatterService.show(
+                    text: @content.name_field_value,
+                    viewing_user: current_user
+                  ) %>
+                <% end %>
+                <small>
+                  <%= simple_format ContentFormatterService.show(
+                    text: @content.description,
+                    viewing_user: current_user
+                  ) %>
+                </small>
+              <% else %>
+                New <%= @content.class.name %>
+              <% end %>
+            </h3>
+          </div>
+        </li>
+      <% end %>
     <% end %>
   </ul>
 </div>

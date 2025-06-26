@@ -269,6 +269,56 @@
     var currentIndex = 0;
     var totalImages = galleryImages.length;
     
+    // Pin toggle functionality
+    var pinButtons = document.querySelectorAll('.pin-button');
+    pinButtons.forEach(function(button) {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var url = this.getAttribute('href');
+        var buttonElement = this;
+        
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.pinned) {
+            buttonElement.classList.add('pinned');
+            
+            // Find the parent card and add pinned badge if not exists
+            var card = buttonElement.closest('.gallery-card');
+            if (!card.querySelector('.pinned-badge')) {
+              var badge = document.createElement('div');
+              badge.className = 'pinned-badge';
+              badge.innerHTML = '<i class="material-icons">push_pin</i>';
+              card.appendChild(badge);
+            }
+          } else {
+            buttonElement.classList.remove('pinned');
+            
+            // Remove pinned badge
+            var card = buttonElement.closest('.gallery-card');
+            var badge = card.querySelector('.pinned-badge');
+            if (badge) {
+              badge.remove();
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error toggling pin status:', error);
+        });
+      });
+    });
+    
     // Open lightbox function
     function openLightbox(index) {
       if (index < 0) index = totalImages - 1;
@@ -526,6 +576,9 @@
   .gallery-card-info {
     padding: 15px;
     border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   
   .image-date {
@@ -538,6 +591,49 @@
   .image-date i {
     font-size: 16px;
     margin-right: 5px;
+  }
+  
+  .image-actions {
+    display: flex;
+  }
+  
+  .pin-button {
+    color: #bdbdbd;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+  
+  .pin-button:hover {
+    background-color: rgba(0,0,0,0.05);
+    color: #757575;
+  }
+  
+  .pin-button.pinned {
+    color: #ff9800;
+  }
+  
+  .pinned-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 152, 0, 0.9);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  .pinned-badge i {
+    font-size: 18px;
   }
   
   /* ===== EMPTY STATE ===== */

@@ -55,10 +55,24 @@ class ContentController < ApplicationController
     @questioned_content = @content.sample
     @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
 
-    @random_image_including_private_pool_cache = ImageUpload.where(
+    # Query for both regular and pinned images
+    image_uploads = ImageUpload.where(
       content_type: @content_type_class.name,
       content_id:   @content.pluck(:id)
-    ).group_by { |image| [image.content_type, image.content_id] }
+    )
+    
+    # Group by content but prioritize pinned images
+    @random_image_including_private_pool_cache = {}
+    image_uploads.group_by { |image| [image.content_type, image.content_id] }.each do |key, images|
+      # Check for pinned images first that have a valid src
+      pinned_image = images.find { |img| img.pinned }
+      if pinned_image && pinned_image.src_file_name.present?
+        @random_image_including_private_pool_cache[key] = [pinned_image]
+      else
+        # Use all valid images if no valid pinned image
+        @random_image_including_private_pool_cache[key] = images.select { |img| img.src_file_name.present? }
+      end
+    end
 
     @saved_basil_commissions = BasilCommission.where(
       entity_type: @content_type_class.name,
@@ -426,6 +440,64 @@ class ContentController < ApplicationController
     else
       return redirect_to root_path, notice: "You don't have permission to view that content."
     end
+  end
+
+  def toggle_image_pin
+    # Find the image based on type and ID
+    if params[:image_type] == 'image_upload'
+      @image = ImageUpload.find_by(id: params[:image_id])
+    elsif params[:image_type] == 'basil_commission'
+      @image = BasilCommission.find_by(id: params[:image_id])
+    else
+      return render json: { error: 'Invalid image type' }, status: 400
+    end
+    
+    # Ensure the image exists and the user has permission to modify it
+    if @image.nil?
+      return render json: { error: 'Image not found' }, status: 404
+    end
+    
+    # Check permissions
+    content = params[:image_type] == 'image_upload' ? 
+      @image.content : 
+      @image.entity
+      
+    # Need to check if user owns or contributes to the content directly
+    unless content.user_id == current_user.id || 
+           (content.respond_to?(:universe_id) && 
+            content.universe_id.present? && 
+            current_user.contributable_universe_ids.include?(content.universe_id))
+      return render json: { error: 'Unauthorized' }, status: 403
+    end
+    
+    # Are we pinning or unpinning?
+    new_pin_status = !@image.pinned
+    
+    # If we're pinning this image (not just unpinning), we need to unpin any other images
+    if new_pin_status
+      # First, unpin any other ImageUploads for this content
+      if content.respond_to?(:image_uploads)
+        content.image_uploads.where(pinned: true).where.not(id: params[:image_type] == 'image_upload' ? params[:image_id] : nil).update_all(pinned: false)
+      end
+      
+      # Then, unpin any BasilCommissions for this content
+      if content.respond_to?(:basil_commissions)
+        content.basil_commissions.where(pinned: true).where.not(id: params[:image_type] == 'basil_commission' ? params[:image_id] : nil).update_all(pinned: false)
+      end
+    end
+    
+    # Now toggle this image's pin status
+    @image.update(pinned: new_pin_status)
+    
+    # Clear any cached images to ensure pinned images are shown
+    content.instance_variable_set(:@random_image_including_private_cache, nil)
+    
+    # Return the updated status
+    render json: { 
+      id: @image.id, 
+      type: params[:image_type], 
+      pinned: @image.pinned 
+    }
   end
 
   def api_sort

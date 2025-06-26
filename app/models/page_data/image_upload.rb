@@ -2,6 +2,9 @@ class ImageUpload < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :content, polymorphic: true
 
+  # Add scope for pinned images
+  scope :pinned, -> { where(pinned: true) }
+
   # This is the old way we uploaded files -- now we're transitioning to ActiveStorage's has_one_attached
   has_attached_file :src,
     path: 'content/uploads/:style/:filename',
@@ -19,7 +22,8 @@ class ImageUpload < ApplicationRecord
         File.extname(filename).downcase
       ].join
     },
-    s3_protocol: 'https'
+    s3_protocol: 'https',
+    url: '/system/:class/:attachment/:id_partition/:style/:filename'
   # has_one_attached :upload
 
   validates_attachment_content_type :src, content_type: /\Aimage\/.*\Z/
@@ -31,8 +35,23 @@ class ImageUpload < ApplicationRecord
   alias_attribute 'character_id', :content_id
   #alias_attribute ...
 
+  # Add missing Paperclip attributes for development environment
+  attr_accessor :src_file_name, :src_content_type, :src_file_size, :src_updated_at
+
+  # Add callback to ensure only one pinned image per content
+  before_save :ensure_single_pinned_image, if: -> { pinned_changed? && pinned? }
+
   def delete_s3_image
     # todo: put this in a task for faster delete response times
     src.destroy
+  end
+
+  private
+
+  # Ensures only one image can be pinned per content item
+  def ensure_single_pinned_image
+    ImageUpload.where(content_type: content_type, content_id: content_id, pinned: true)
+              .where.not(id: id)
+              .update_all(pinned: false)
   end
 end

@@ -1,8 +1,18 @@
 <% 
   raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
-  images = raw_model.image_uploads
-  basil_images = @basil_images || []
-  total_images = images.count + basil_images.count
+  
+  # Get both image types
+  regular_images = raw_model.image_uploads.to_a
+  basil_images = (@basil_images || [])
+  
+  # Keep track of regular and AI images separately for display
+  images = regular_images
+  
+  # Calculate total images for display purposes
+  total_images = regular_images.count + basil_images.count
+  
+  # Find the pinned image (if any) - there should only be one pinned image
+  pinned_image = regular_images.find(&:pinned?) || basil_images.find(&:pinned?)
 %>
 
 <div class="row">
@@ -17,60 +27,202 @@
         
         <div class="gallery-grid">
           <div class="row">
-            <% images.each do |image| %>
-              <div class="col s12 m6 l4">
+            <!-- First show the pinned image (if any) -->
+            <% if pinned_image && regular_images.include?(pinned_image) %>
+              <div class="col s12 m6 l6">
                 <div class="image-card">
                   <div class="image-preview">
-                    <%= image_tag image.src(:medium), class: "responsive-img" %>
+                    <%= link_to pinned_image.src(:original), target: '_blank' do %>
+                      <%= image_tag pinned_image.src(:medium), class: "responsive-img" %>
+                    <% end %>
                   </div>
                   <div class="image-actions">
                     <div class="image-meta">
-                      <span class="file-size"><%= Filesize.from("#{image.src_file_size}B").to_f('KB').round(2) %> KB</span>
+                      <span class="file-size"><%= Filesize.from("#{pinned_image.src_file_size}B").to_f('KB').round(2) %> KB</span>
                     </div>
-                    <div class="image-buttons">
-                      <%= link_to image.src(:original), class: 'btn-flat waves-effect', target: '_blank' do %>
-                        <i class="material-icons">open_in_new</i>
-                      <% end %>
-                      <%= link_to image_deletion_path(image.id),
-                        class: 'btn-flat waves-effect js-remove-image red-text',
-                        method: 'delete',
-                        remote: true,
-                        data: { confirm: "Are you sure? This can't be undone." } do %>
-                        <i class="material-icons">delete</i>
-                      <% end %>
-                    </div>
+                  </div>
+                  
+                  <!-- Pin button with tooltip (positioned absolutely) -->
+                  <%= link_to toggle_image_pin_path(image_type: 'image_upload', image_id: pinned_image.id),
+                    class: "pin-button-overlay js-toggle-pin amber-text tooltipped",
+                    remote: true,
+                    method: :post,
+                    data: { 
+                      type: 'json',
+                      position: 'top',
+                      tooltip: 'Pin this image to always use it in previews of this page'
+                    } do %>
+                    <i class="material-icons">push_pin</i>
+                  <% end %>
+                  
+                  <!-- Delete button with tooltip (positioned absolutely) -->
+                  <%= link_to image_deletion_path(pinned_image.id),
+                    class: 'delete-button-overlay js-remove-image red-text tooltipped',
+                    method: 'delete',
+                    remote: true,
+                    data: { 
+                      confirm: "Are you sure? This can't be undone.",
+                      position: 'top',
+                      tooltip: 'Delete this image' 
+                    } do %>
+                    <i class="material-icons">delete</i>
+                  <% end %>
+                  
+                  <div class="pinned-badge-overlay">
+                    <i class="material-icons amber-text">push_pin</i> Pinned
                   </div>
                 </div>
               </div>
-            <% end %>
-            
-            <% basil_images.each do |commission| %>
-              <div class="col s12 m6 l4">
+            <% elsif pinned_image && basil_images.include?(pinned_image) %>
+              <div class="col s12 m6 l6">
                 <div class="image-card">
                   <div class="image-preview basil-image">
-                    <% if commission.image.attached? %>
-                      <%= image_tag rails_blob_path(commission.image, disposition: "attachment"), class: "responsive-img" %>
+                    <% if pinned_image.image.attached? %>
+                      <%= link_to rails_blob_path(pinned_image.image, disposition: "attachment"), target: '_blank' do %>
+                        <%= image_tag rails_blob_path(pinned_image.image, disposition: "attachment"), class: "responsive-img" %>
+                      <% end %>
                     <% end %>
                   </div>
                   <div class="image-actions">
                     <div class="image-meta">
                       <span class="basil-label">Generated with Basil</span>
                     </div>
-                    <div class="image-buttons">
-                      <% if commission.image.attached? %>
-                        <%= link_to rails_blob_path(commission.image, disposition: "attachment"), class: 'btn-flat waves-effect', target: '_blank' do %>
-                          <i class="material-icons">open_in_new</i>
-                        <% end %>
-                      <% end %>
-                      <%= link_to basil_delete_path(commission),
-                        class: 'btn-flat waves-effect js-remove-image red-text',
-                        method: 'delete',
-                        remote: true,
-                        data: { confirm: "Are you sure? This can't be undone." } do %>
-                        <i class="material-icons">delete</i>
-                      <% end %>
+                  </div>
+                  
+                  <!-- Pin button with tooltip (positioned absolutely) -->
+                  <%= link_to toggle_image_pin_path(image_type: 'basil_commission', image_id: pinned_image.id),
+                    class: "pin-button-overlay js-toggle-pin amber-text tooltipped",
+                    remote: true,
+                    method: :post,
+                    data: { 
+                      type: 'json',
+                      position: 'top', 
+                      tooltip: 'Pin this image to always use it in previews of this page'
+                    } do %>
+                    <i class="material-icons">push_pin</i>
+                  <% end %>
+                  
+                  <!-- Delete button with tooltip (positioned absolutely) -->
+                  <%= link_to basil_delete_path(pinned_image),
+                    class: 'delete-button-overlay js-remove-image red-text tooltipped',
+                    method: 'delete',
+                    remote: true,
+                    data: { 
+                      confirm: "Are you sure? This can't be undone.",
+                      position: 'top',
+                      tooltip: 'Delete this image'
+                    } do %>
+                    <i class="material-icons">delete</i>
+                  <% end %>
+                  
+                  <div class="pinned-badge-overlay">
+                    <i class="material-icons amber-text">push_pin</i> Pinned
+                  </div>
+                </div>
+              </div>
+            <% end %>
+            
+            <!-- Then show all other regular images -->
+            <% regular_images.each do |image| %>
+              <% next if image == pinned_image %>
+            
+              <div class="col s12 m6 l6">
+                <div class="image-card">
+                  <div class="image-preview">
+                    <%= link_to image.src(:original), target: '_blank' do %>
+                      <%= image_tag image.src(:medium), class: "responsive-img" %>
+                    <% end %>
+                  </div>
+                  <div class="image-actions">
+                    <div class="image-meta">
+                      <span class="file-size"><%= Filesize.from("#{image.src_file_size}B").to_f('KB').round(2) %> KB</span>
                     </div>
                   </div>
+                  
+                  <!-- Pin button with tooltip (positioned absolutely) -->
+                  <%= link_to toggle_image_pin_path(image_type: 'image_upload', image_id: image.id),
+                    class: "pin-button-overlay js-toggle-pin #{image.pinned? ? 'amber-text' : 'grey-text'} tooltipped",
+                    remote: true,
+                    method: :post,
+                    data: { 
+                      type: 'json',
+                      position: 'top',
+                      tooltip: 'Pin this image to always use it in previews of this page'
+                    } do %>
+                    <i class="material-icons">push_pin</i>
+                  <% end %>
+                  
+                  <!-- Delete button with tooltip (positioned absolutely) -->
+                  <%= link_to image_deletion_path(image.id),
+                    class: 'delete-button-overlay js-remove-image red-text tooltipped',
+                    method: 'delete',
+                    remote: true,
+                    data: { 
+                      confirm: "Are you sure? This can't be undone.",
+                      position: 'top',
+                      tooltip: 'Delete this image' 
+                    } do %>
+                    <i class="material-icons">delete</i>
+                  <% end %>
+                  
+                  <% if image.pinned? %>
+                    <div class="pinned-badge-overlay">
+                      <i class="material-icons amber-text">push_pin</i> Pinned
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+            
+            <!-- Then show all basil images -->
+            <% basil_images.each do |commission| %>
+              <% next if commission == pinned_image %>
+              <div class="col s12 m6 l6">
+                <div class="image-card">
+                  <div class="image-preview basil-image">
+                    <% if commission.image.attached? %>
+                      <%= link_to rails_blob_path(commission.image, disposition: "attachment"), target: '_blank' do %>
+                        <%= image_tag rails_blob_path(commission.image, disposition: "attachment"), class: "responsive-img" %>
+                      <% end %>
+                    <% end %>
+                  </div>
+                  <div class="image-actions">
+                    <div class="image-meta">
+                      <span class="basil-label">Generated with Basil</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Pin button with tooltip (positioned absolutely) -->
+                  <%= link_to toggle_image_pin_path(image_type: 'basil_commission', image_id: commission.id),
+                    class: "pin-button-overlay js-toggle-pin #{commission.pinned? ? 'amber-text' : 'grey-text'} tooltipped",
+                    remote: true,
+                    method: :post,
+                    data: { 
+                      type: 'json',
+                      position: 'top', 
+                      tooltip: 'Pin this image to always use it in previews of this page'
+                    } do %>
+                    <i class="material-icons">push_pin</i>
+                  <% end %>
+                  
+                  <!-- Delete button with tooltip (positioned absolutely) -->
+                  <%= link_to basil_delete_path(commission),
+                    class: 'delete-button-overlay js-remove-image red-text tooltipped',
+                    method: 'delete',
+                    remote: true,
+                    data: { 
+                      confirm: "Are you sure? This can't be undone.",
+                      position: 'top',
+                      tooltip: 'Delete this image'
+                    } do %>
+                    <i class="material-icons">delete</i>
+                  <% end %>
+                  
+                  <% if commission.pinned? %>
+                    <div class="pinned-badge-overlay">
+                      <i class="material-icons amber-text">push_pin</i> Pinned
+                    </div>
+                  <% end %>
                 </div>
               </div>
             <% end %>
@@ -151,6 +303,7 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     margin-bottom: 20px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
   }
   
   .image-card:hover {
@@ -159,7 +312,7 @@
   }
   
   .image-preview {
-    height: 200px;
+    height: 300px;
     overflow: hidden;
     position: relative;
     display: flex;
@@ -172,19 +325,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
-  
-  .basil-image::after {
-    content: 'AI';
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(0,0,0,0.6);
-    color: white;
-    font-size: 0.7rem;
-    font-weight: bold;
-    padding: 3px 6px;
-    border-radius: 3px;
   }
   
   .image-actions {
@@ -208,6 +348,65 @@
   
   .image-buttons {
     display: flex;
+  }
+  
+  /* Positioned action buttons */
+  .pin-button-overlay {
+    position: absolute;
+    bottom: 45px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .delete-button-overlay {
+    position: absolute;
+    bottom: 45px;
+    left: 10px;
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .pin-button-overlay:hover,
+  .delete-button-overlay:hover {
+    background-color: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+  
+  .pinned-badge-overlay {
+    position: absolute;
+    bottom: 90px;
+    left: 10px;
+    background-color: rgba(255, 152, 0, 0.8);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    z-index: 2;
+  }
+  
+  .pinned-badge-overlay i {
+    font-size: 14px;
+    margin-right: 4px;
   }
   
   .upload-section {
@@ -237,4 +436,163 @@
   .gallery-cta-container {
     margin: 40px 0 20px;
   }
+  
+  .pinned-section-divider,
+  .basil-pinned-divider {
+    background-color: #f9f9f9;
+    padding: 8px 15px;
+    border-radius: 4px;
+    margin: 15px 0;
+    font-weight: 500;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .pinned-section-divider i,
+  .basil-pinned-divider i {
+    margin-right: 8px;
+  }
+  
+  .basil-pinned-divider {
+    background-color: #f3e5f5;
+  }
+  
+  .section-header h6 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 10px 0 20px 0;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #ffab40;
+    display: inline-block;
+  }
+  
+  .section-header h6 i {
+    vertical-align: middle;
+    margin-right: 8px;
+  }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltips = document.querySelectorAll('.tooltipped');
+    M.Tooltip.init(tooltips);
+    
+    // Handle pin toggle buttons
+    var pinButtons = document.querySelectorAll('.js-toggle-pin');
+    
+    pinButtons.forEach(function(button) {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        var url = this.getAttribute('href');
+        var buttonElement = this;
+        var imageCard = buttonElement.closest('.image-card');
+        
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Update the UI based on the pin state
+          if (data.pinned) {
+            buttonElement.classList.add('amber-text');
+            buttonElement.classList.remove('grey-text');
+            
+            // Add pinned badge if not exists
+            if (!imageCard.querySelector('.pinned-badge-overlay')) {
+              var pinnedBadge = document.createElement('div');
+              pinnedBadge.className = 'pinned-badge-overlay';
+              pinnedBadge.innerHTML = '<i class="material-icons amber-text">push_pin</i> Pinned';
+              imageCard.appendChild(pinnedBadge);
+            }
+            
+            // Also remove pinned badge from all other images
+            var allPinnedBadges = document.querySelectorAll('.pinned-badge-overlay');
+            var allPinButtons = document.querySelectorAll('.js-toggle-pin');
+            
+            allPinnedBadges.forEach(function(badge) {
+              if (badge.closest('.image-card') !== imageCard) {
+                badge.remove();
+              }
+            });
+            
+            allPinButtons.forEach(function(btn) {
+              if (btn !== buttonElement) {
+                btn.classList.remove('amber-text');
+                btn.classList.add('grey-text');
+              }
+            });
+          } else {
+            buttonElement.classList.remove('amber-text');
+            buttonElement.classList.add('grey-text');
+            
+            // Remove pinned badge
+            var pinnedBadge = imageCard.querySelector('.pinned-badge-overlay');
+            if (pinnedBadge) {
+              pinnedBadge.remove();
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error toggling pin status:', error);
+        });
+      });
+    });
+    
+    // Handle delete buttons
+    var deleteButtons = document.querySelectorAll('.js-remove-image');
+    
+    deleteButtons.forEach(function(button) {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        if (confirm("Are you sure? This can't be undone.")) {
+          var url = this.getAttribute('href');
+          var imageCard = this.closest('.col');
+          
+          fetch(url, {
+            method: 'DELETE',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+              'Accept': 'application/json'
+            },
+            credentials: 'same-origin'
+          })
+          .then(response => {
+            if (response.ok) {
+              // Remove the image from the DOM on successful delete
+              imageCard.remove();
+              
+              // Update the count in the header
+              var countEl = document.querySelector('.gallery-section-title');
+              if (countEl) {
+                var countText = countEl.textContent;
+                var countMatch = countText.match(/\((\d+)\)/);
+                if (countMatch && countMatch[1]) {
+                  var currentCount = parseInt(countMatch[1]);
+                  var newCount = Math.max(0, currentCount - 1);
+                  countEl.textContent = countText.replace(/\(\d+\)/, '(' + newCount + ')');
+                }
+              }
+            } else {
+              console.error('Error deleting image');
+            }
+          })
+          .catch(error => {
+            console.error('Error deleting image:', error);
+          });
+        }
+      });
+    });
+  });
+</script>
