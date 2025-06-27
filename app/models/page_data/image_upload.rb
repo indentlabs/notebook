@@ -23,8 +23,7 @@ class ImageUpload < ApplicationRecord
         File.extname(filename).downcase
       ].join
     },
-    s3_protocol: 'https',
-    url: '/system/:class/:attachment/:id_partition/:style/:filename'
+    s3_protocol: 'https'
   # has_one_attached :upload
 
   validates_attachment_content_type :src, content_type: /\Aimage\/.*\Z/
