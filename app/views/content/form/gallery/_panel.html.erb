@@ -5,9 +5,6 @@
   regular_images = raw_model.image_uploads.ordered.to_a
   basil_images = (@basil_images || []).sort_by(&:position)
   
-  # Keep track of regular and AI images separately for display
-  images = regular_images
-  
   # Calculate total images for display purposes
   total_images = regular_images.count + basil_images.count
   
@@ -22,7 +19,9 @@
       id: image.id,
       type: 'image_upload',
       data: image,
-      pinned: image.pinned?
+      pinned: image.pinned?,
+      created_at: image.created_at,
+      position: image.position || 999999
     }
   end
   
@@ -31,19 +30,26 @@
       id: commission.id,
       type: 'basil_commission',
       data: commission,
-      pinned: commission.pinned?
+      pinned: commission.pinned?,
+      created_at: commission.saved_at,
+      position: commission.position || 999999
     }
   end
   
-  # If there's a pinned image, move it to the front
-  if pinned_image
-    combined_images.sort_by! { |img| img[:pinned] ? 0 : 1 }
+  # Sort by position (using pinned status as priority)
+  combined_images.sort_by! do |img| 
+    # The pinned flag is the primary sort key
+    pinned_sort = img[:pinned] ? 0 : 1
+    # Position is the secondary sort key
+    position_sort = img[:position] || 999999
+    # Created date is tertiary sort
+    [pinned_sort, position_sort, img[:created_at] || Time.current]
   end
 %>
 
 <div class="row">
   <div class="col s12">
-    <% if images.any? || basil_images.any? %>
+    <% if combined_images.any? %>
       <!-- Gallery preview section -->
       <div class="gallery-preview-section">
         <h5 class="gallery-section-title">
