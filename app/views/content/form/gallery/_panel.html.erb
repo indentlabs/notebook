@@ -65,7 +65,7 @@
                 image_id = image_item[:id]
               %>
               <div class="col s12 m6 l6 gallery-sortable-item" data-image-id="<%= image_id %>" data-image-type="<%= image_type %>">
-                <div class="image-card <%= is_pinned ? 'pinned' : '' %>">
+                <div class="image-card <%= is_pinned ? 'image-pinned' : '' %>">
                   <% if image_type == 'image_upload' %>
                     <div class="image-preview">
                       <%= link_to image_data.src(:original), target: '_blank' do %>
@@ -105,7 +105,7 @@
                     <% end %>
                     
                     <% if is_pinned %>
-                      <div class="pinned-badge-overlay">
+                      <div class="image-pinned-badge-overlay">
                         <i class="material-icons amber-text">push_pin</i> Pinned
                       </div>
                     <% end %>
@@ -154,7 +154,7 @@
                     <% end %>
                     
                     <% if is_pinned %>
-                      <div class="pinned-badge-overlay">
+                      <div class="image-pinned-badge-overlay">
                         <i class="material-icons amber-text">push_pin</i> Pinned
                       </div>
                     <% end %>
@@ -433,7 +433,7 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
   }
   
-  .pinned-badge-overlay {
+  .image-pinned-badge-overlay {
     position: absolute;
     bottom: 90px;
     left: 10px;
@@ -447,7 +447,7 @@
     z-index: 2;
   }
   
-  .pinned-badge-overlay i {
+  .image-pinned-badge-overlay i {
     font-size: 14px;
     margin-right: 4px;
   }
@@ -641,13 +641,13 @@
             // Add pinned badge if not exists
             if (!imageCard.querySelector('.pinned-badge-overlay')) {
               var pinnedBadge = document.createElement('div');
-              pinnedBadge.className = 'pinned-badge-overlay';
+              pinnedBadge.className = 'image-pinned-badge-overlay';
               pinnedBadge.innerHTML = '<i class="material-icons amber-text">push_pin</i> Pinned';
               imageCard.appendChild(pinnedBadge);
             }
             
             // Also remove pinned badge from all other images
-            var allPinnedBadges = document.querySelectorAll('.pinned-badge-overlay');
+            var allPinnedBadges = document.querySelectorAll('.image-pinned-badge-overlay');
             var allPinButtons = document.querySelectorAll('.js-toggle-pin');
             
             allPinnedBadges.forEach(function(badge) {
@@ -667,7 +667,7 @@
             buttonElement.classList.add('grey-text');
             
             // Remove pinned badge
-            var pinnedBadge = imageCard.querySelector('.pinned-badge-overlay');
+            var pinnedBadge = imageCard.querySelector('.image-pinned-badge-overlay');
             if (pinnedBadge) {
               pinnedBadge.remove();
             }
