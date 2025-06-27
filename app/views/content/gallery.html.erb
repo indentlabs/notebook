@@ -94,7 +94,14 @@
       end
       
       # First sort by position (using pinned status as priority)
-      combined_images.sort_by! { |img| [(img[:data].pinned ? 0 : 1), img[:position] || 999999, img[:created_at] || Time.now] }
+      combined_images.sort_by! do |img| 
+        # The pinned flag is the primary sort key
+        pinned_sort = (img[:data].respond_to?(:pinned?) && img[:data].pinned?) ? 0 : 1
+        # Position is the secondary sort key (default to created date if no position)
+        position_sort = (img[:data].respond_to?(:position) && img[:data].position.present?) ? img[:data].position : 999999
+        # Created date is tertiary sort
+        [pinned_sort, position_sort, img[:created_at] || Time.now] 
+      end
     %>
     
     <div class="gallery-grid" id="galleryGrid">

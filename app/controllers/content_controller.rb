@@ -492,8 +492,10 @@ class ContentController < ApplicationController
       end
     end
     
-    # Now toggle this image's pin status
-    @image.update(pinned: new_pin_status)
+    # Now toggle this image's pin status - force with update_column to avoid callbacks
+    @image.update_column(:pinned, new_pin_status)
+    # Force reload to ensure we have latest pin status
+    @image.reload
     
     # Clear any cached images to ensure pinned images are shown
     content.instance_variable_set(:@random_image_including_private_cache, nil)

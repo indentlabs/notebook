@@ -421,6 +421,11 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
   
+  .pin-button-overlay.processing {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
   .pin-button-overlay:hover,
   .delete-button-overlay:hover {
     background-color: rgba(255, 255, 255, 1);
@@ -606,6 +611,10 @@
       button.addEventListener('click', function(e) {
         e.preventDefault();
         
+        // Prevent double-clicks by disabling the button temporarily
+        if (this.classList.contains('processing')) return;
+        this.classList.add('processing');
+        
         var url = this.getAttribute('href');
         var buttonElement = this;
         var imageCard = buttonElement.closest('.image-card');
@@ -622,6 +631,8 @@
         })
         .then(response => response.json())
         .then(data => {
+          // Remove processing state
+          buttonElement.classList.remove('processing');
           // Update the UI based on the pin state
           if (data.pinned) {
             buttonElement.classList.add('amber-text');
@@ -664,6 +675,10 @@
         })
         .catch(error => {
           console.error('Error toggling pin status:', error);
+          // Remove processing state on error too
+          buttonElement.classList.remove('processing');
+          // Show error toast
+          M.toast({html: 'Error toggling pin status', classes: 'red'});
         });
       });
     });
