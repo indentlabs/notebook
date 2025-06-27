@@ -3,118 +3,68 @@
 
   <ul class="slides">
     <% 
-      # First check for any pinned images (ImageUploads)
-      pinned_upload = @content.image_uploads.pinned.where(privacy: 'public').first 
-      if pinned_upload.present? 
+      # Get all images with ordering - respect privacy in show page
+      # In content#show we want to be consistent with edit, but only show public images
+      regular_images = @content.image_uploads.ordered.to_a
+      # Filter for public if the current user isn't the owner
+      unless user_signed_in? && @content.user_id == current_user.id
+        regular_images = regular_images.select { |img| img.privacy == 'public' }
+      end
+      basil_images = @content.basil_commissions.where.not(saved_at: nil).ordered.to_a
+      
+      # Use our unified helper to combine and sort all images
+      combined_images = combine_and_sort_gallery_images(regular_images, basil_images)
+      
+      # If we have no images, try to add a default image
+      if combined_images.empty? && @content.respond_to?(:default_image)
+        default_image = @content.default_image
+        if default_image.present?
+          combined_images << {
+            type: 'default',
+            data: default_image
+          }
+        end
+      end
+      
+      # Now loop through all combined images (or at least the first few)
+      display_limit = 1  # For the header, we just show the first image
+      combined_images.take(display_limit).each do |image_item|
+        image_type = image_item[:type]
+        image_data = image_item[:data]
     %>
       <li>
-        <%= image_tag pinned_upload.src(:large) %>
-        <div class="caption bordered-text center">
-          <h3>
-            <% if @content.persisted? %>
-              <%= link_to @content do %>
-                <%= simple_format ContentFormatterService.show(
-                  text: @content.name_field_value,
-                  viewing_user: current_user
-                ) %>
-              <% end %>
-              <small>
-                <%= simple_format ContentFormatterService.show(
-                  text: @content.description,
-                  viewing_user: current_user
-                ) %>
-              </small>
-            <% else %>
-              New <%= @content.class.name %>
-            <% end %>
-          </h3>
-        </div>
-      </li>
-    <% 
-      # Then check for pinned BasilCommissions  
-      elsif (pinned_commission = @content.basil_commissions.pinned.where.not(saved_at: nil).first).present? 
-    %>
-      <li>
-        <%= image_tag pinned_commission.image %>
-        <div class="caption bordered-text center">
-          <h3>
-            <% if @content.persisted? %>
-              <%= link_to @content do %>
-                <%= simple_format ContentFormatterService.show(
-                  text: @content.name_field_value,
-                  viewing_user: current_user
-                ) %>
-              <% end %>
-              <small>
-                <%= simple_format ContentFormatterService.show(
-                  text: @content.description,
-                  viewing_user: current_user
-                ) %>
-              </small>
-            <% else %>
-              New <%= @content.class.name %>
-            <% end %>
-          </h3>
-        </div>
-      </li>
-    <% 
-      # If no pinned images, show all public images as before
-      else 
-    %>
-      <% @content.public_image_uploads.each do |image_source| %>
-        <li>
-          <% if image_source.is_a?(String) %>
-            <img src="<%= image_source %>"> 
+        <% if image_type == 'image_upload' %>
+          <%= image_tag image_data.src(:large) %>
+        <% elsif image_type == 'basil_commission' %>
+          <% if image_data.image.attached? %>
+            <%= image_tag rails_blob_path(image_data.image, disposition: "attachment") %>
           <% else %>
-            <%= image_tag image_source.src(:large) %>
+            <%= image_tag asset_path("missing-image.jpg") %>
           <% end %>
-          <div class="caption bordered-text center">
-            <h3>
-              <% if @content.persisted? %>
-                <%= link_to @content do %>
-                  <%= simple_format ContentFormatterService.show(
-                    text: @content.name_field_value,
-                    viewing_user: current_user
-                  ) %>
-                <% end %>
-                <small>
-                  <%= simple_format ContentFormatterService.show(
-                    text: @content.description,
-                    viewing_user: current_user
-                  ) %>
-                </small>
-              <% else %>
-                New <%= @content.class.name %>
+        <% elsif image_type == 'default' && image_data.is_a?(String) %>
+          <img src="<%= image_data %>">
+        <% end %>
+        <div class="caption bordered-text center">
+          <h3>
+            <% if @content.persisted? %>
+              <%= link_to @content do %>
+                <%= simple_format ContentFormatterService.show(
+                  text: @content.name_field_value,
+                  viewing_user: current_user
+                ) %>
               <% end %>
-            </h3>
-          </div>
-        </li>
-      <% end %>
-      <% @content.basil_commissions.where.not(saved_at: nil).each do |commission| %>
-        <li>
-          <%= image_tag commission.image %>
-          <div class="caption bordered-text center">
-            <h3>
-              <% if @content.persisted? %>
-                <%= link_to @content do %>
-                  <%= simple_format ContentFormatterService.show(
-                    text: @content.name_field_value,
-                    viewing_user: current_user
-                  ) %>
-                <% end %>
-                <small>
-                  <%= simple_format ContentFormatterService.show(
-                    text: @content.description,
-                    viewing_user: current_user
-                  ) %>
-                </small>
-              <% else %>
-                New <%= @content.class.name %>
-              <% end %>
-            </h3>
-          </div>
-        </li>
-      <% end %>
+              <small>
+                <%= simple_format ContentFormatterService.show(
+                  text: @content.description,
+                  viewing_user: current_user
+                ) %>
+              </small>
+            <% else %>
+              New <%= @content.class.name %>
+            <% end %>
+          </h3>
+        </div>
+      </li>
     <% end %>
   </ul>
 </div>

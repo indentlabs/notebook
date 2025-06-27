@@ -44,4 +44,55 @@ module ApplicationHelper
   def show_notice?(id: nil)
     user_signed_in? && current_user.notice_dismissals.where(notice_id: id).none?
   end
+
+  # Combines and sorts gallery images from both ImageUploads and BasilCommissions
+  # for consistent display across all gallery views in the application.
+  # @param regular_images [Array<ImageUpload>] regular image uploads
+  # @param basil_images [Array<BasilCommission>] AI-generated images
+  # @return [Array<Hash>] Combined and sorted array of image hashes
+  def combine_and_sort_gallery_images(regular_images, basil_images)
+    combined_images = []
+    
+    # Add regular images with consistent structure
+    regular_images.each do |image|
+      combined_images << {
+        id: image.id,
+        type: 'image_upload',  # Use consistent naming across all usages
+        data: image,
+        created_at: image.created_at
+      }
+    end
+    
+    # Add basil images with consistent structure
+    basil_images.each do |commission|
+      combined_images << {
+        id: commission.id,
+        type: 'basil_commission',  # Use consistent naming across all usages
+        data: commission,
+        created_at: commission.saved_at
+      }
+    end
+    
+    # Sort with consistent criteria
+    combined_images.sort_by do |img|
+      # First by pinned status - pin always takes precedence 
+      pinned_sort = (img[:data].respond_to?(:pinned?) && img[:data].pinned?) ? 0 : 1
+      
+      # Then by position - using presence check for nil/blank values
+      position_value = if img[:data].respond_to?(:position) && img[:data].position.present?
+                         img[:data].position 
+                       else
+                         999999
+                       end
+                       
+      # Finally by created date as tertiary sort with fallback
+      created_at = img[:created_at] || Time.current
+      
+      # Add a unique identifier to ensure stable sorting
+      unique_id = "#{img[:type]}-#{img[:id]}"
+      
+      # Return sort keys array for stable sorting
+      [pinned_sort, position_value, created_at, unique_id]
+    end
+  end
 end

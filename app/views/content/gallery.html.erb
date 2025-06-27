@@ -73,48 +73,21 @@
   <% else %>
     <!-- Gallery grid -->
     <% 
-      # Merge both image types into a single array
-      combined_images = []
-      @images.each do |image|
-        combined_images << {
-          type: 'regular',
-          data: image,
-          created_at: image.created_at,
-          position: image.position || 999999
-        }
-      end
-      
-      @basil_images.each do |commission|
-        combined_images << {
-          type: 'basil',
-          data: commission,
-          created_at: commission.saved_at,
-          position: commission.position || 999999
-        }
-      end
-      
-      # First sort by position (using pinned status as priority)
-      combined_images.sort_by! do |img| 
-        # The pinned flag is the primary sort key
-        pinned_sort = (img[:data].respond_to?(:pinned?) && img[:data].pinned?) ? 0 : 1
-        # Position is the secondary sort key (default to created date if no position)
-        position_sort = (img[:data].respond_to?(:position) && img[:data].position.present?) ? img[:data].position : 999999
-        # Created date is tertiary sort
-        [pinned_sort, position_sort, img[:created_at] || Time.now] 
-      end
+      # Use the unified helper to combine and sort images consistently
+      combined_images = combine_and_sort_gallery_images(@images, @basil_images)
     %>
     
     <div class="gallery-grid" id="galleryGrid">
       <% combined_images.each_with_index do |image_item, index| %>
         <div class="gallery-item">
           <div class="gallery-card" data-index="<%= index %>">
-            <% if image_item[:type] == 'regular' %>
+            <% if image_item[:type] == 'image_upload' %>
               <%= image_tag image_item[:data].src(:medium), class: "gallery-image", 
                   data: { 
                     full: image_item[:data].src(:original),
                     index: index
                   } %>
-            <% else %>
+            <% elsif image_item[:type] == 'basil_commission' %>
               <% 
                 # For BasilCommission, access the image through rails_blob_path
                 if image_item[:data].image.attached?
@@ -132,10 +105,12 @@
             <div class="gallery-card-info">
               <div class="image-date">
                 <i class="material-icons">schedule</i>
-                <% if image_item[:type] == 'regular' %>
+                <% if image_item[:type] == 'image_upload' %>
                   <%= time_ago_in_words(image_item[:data].created_at) %> ago
-                <% else %>
+                <% elsif image_item[:type] == 'basil_commission' && image_item[:data].respond_to?(:saved_at) %>
                   <%= time_ago_in_words(image_item[:data].saved_at) %> ago
+                <% else %>
+                  <%= time_ago_in_words(image_item[:created_at] || Time.current) %> ago
                 <% end %>
               </div>
             </div>

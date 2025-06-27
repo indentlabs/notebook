@@ -2,49 +2,14 @@
   raw_model = content.is_a?(ContentSerializer) ? content.raw_model : content
   
   # Get both image types with ordering
-  regular_images = raw_model.image_uploads.ordered.to_a
-  basil_images = (@basil_images || []).sort_by(&:position)
+  regular_images = ImageUpload.where(content_type: raw_model.class.name, content_id: raw_model.id).ordered.to_a
+  basil_images = (@basil_images || []).ordered.to_a
   
   # Calculate total images for display purposes
   total_images = regular_images.count + basil_images.count
-  
-  # Find the pinned image (if any) - there should only be one pinned image
-  pinned_image = regular_images.find(&:pinned?) || basil_images.find(&:pinned?)
 
-  # Create a combined list of all images for sortable functionality
-  # We'll maintain type information for each
-  combined_images = []
-  regular_images.each do |image|
-    combined_images << {
-      id: image.id,
-      type: 'image_upload',
-      data: image,
-      pinned: image.pinned?,
-      created_at: image.created_at,
-      position: image.position || 999999
-    }
-  end
-  
-  basil_images.each do |commission|
-    combined_images << {
-      id: commission.id,
-      type: 'basil_commission',
-      data: commission,
-      pinned: commission.pinned?,
-      created_at: commission.saved_at,
-      position: commission.position || 999999
-    }
-  end
-  
-  # Sort by position (using pinned status as priority)
-  combined_images.sort_by! do |img| 
-    # The pinned flag is the primary sort key
-    pinned_sort = img[:pinned] ? 0 : 1
-    # Position is the secondary sort key
-    position_sort = img[:position] || 999999
-    # Created date is tertiary sort
-    [pinned_sort, position_sort, img[:created_at] || Time.current]
-  end
+  # Use the unified helper to combine and sort images consistently
+  combined_images = combine_and_sort_gallery_images(regular_images, basil_images)
 %>
 
 <div class="row">
@@ -65,10 +30,10 @@
             <!-- Show images in their sorted order -->
             <% combined_images.each do |image_item| %>
               <% 
-                is_pinned = image_item[:pinned]
                 image_data = image_item[:data]
                 image_type = image_item[:type]
                 image_id = image_item[:id]
+                is_pinned = image_data.respond_to?(:pinned?) && image_data.pinned?
               %>
               <div class="col s12 m6 l6 gallery-sortable-item" data-image-id="<%= image_id %>" data-image-type="<%= image_type %>">
                 <div class="image-card <%= is_pinned ? 'image-pinned' : '' %>">
