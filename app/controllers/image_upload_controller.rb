@@ -18,8 +18,7 @@ class ImageUploadController < ApplicationController
       return
     end
 
-    # Check if src_file_size is available (might be nil in development environment)
-    reclaimed_space_kb = image.src_file_size.present? ? (image.src_file_size / 1000.0) : 0
+    reclaimed_space_kb = image.src_file_size / 1000.0
 
     # If the user has access to delete the image, go for it
     result = image.destroy
