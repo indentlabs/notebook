@@ -71,7 +71,7 @@ class DocumentsController < ApplicationController
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
     end
 
-    if @document.user.thredded_user_detail.moderation_state == "blocked"
+    if @document.user.nil? || @document.user.thredded_user_detail.moderation_state == "blocked"
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
     end
 

@@ -98,8 +98,10 @@ class ContentController < ApplicationController
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
 
     @serialized_content = ContentSerializer.new(@content)
-    @basil_images       = BasilCommission.where(entity: @content)
-                                         .where.not(saved_at: nil)
+    
+    # For basil images, assume they're all public for now since there's no privacy column
+    @basil_images = BasilCommission.where(entity: @content)
+                                   .where.not(saved_at: nil)
 
     if (current_user || User.new).can_read?(@content)
       respond_to do |format|
@@ -426,7 +428,17 @@ class ContentController < ApplicationController
       @serialized_content = ContentSerializer.new(@content)
 
       # Get all images for this content with proper ordering
-      @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id).ordered
+      # Only show private images to the owner or contributors
+      is_owner_or_contributor = false
+      if current_user.present? && (@content.user == current_user || 
+         (@content.respond_to?(:universe_id) && 
+          @content.universe_id.present? && 
+          current_user.try(:contributable_universe_ids).to_a.include?(@content.universe_id)))
+        is_owner_or_contributor = true
+        @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id).ordered
+      else
+        @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id, privacy: 'public').ordered
+      end
       
       # Get additional context information
       if @content.is_a?(Universe)
