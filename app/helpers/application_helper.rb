@@ -73,26 +73,57 @@ module ApplicationHelper
       }
     end
     
-    # Sort with consistent criteria
+    # Sort with consistent criteria - using only position and creation date
+    # This allows users to order images freely, including pinned images
     combined_images.sort_by do |img|
-      # First by pinned status - pin always takes precedence 
-      pinned_sort = (img[:data].respond_to?(:pinned?) && img[:data].pinned?) ? 0 : 1
-      
-      # Then by position - using presence check for nil/blank values
+      # First by position - using presence check for nil/blank values
       position_value = if img[:data].respond_to?(:position) && img[:data].position.present?
                          img[:data].position 
                        else
                          999999
                        end
                        
-      # Finally by created date as tertiary sort with fallback
+      # Then by created date as secondary sort with fallback
       created_at = img[:created_at] || Time.current
       
       # Add a unique identifier to ensure stable sorting
       unique_id = "#{img[:type]}-#{img[:id]}"
       
-      # Return sort keys array for stable sorting
-      [pinned_sort, position_value, created_at, unique_id]
+      # Return sort keys array for stable sorting - no longer sorting by pinned status
+      [position_value, created_at, unique_id]
     end
+  end
+  
+  # Gets the best image to use for a preview (card/header) by prioritizing pinned images
+  # @param regular_images [Array<ImageUpload>] regular image uploads
+  # @param basil_images [Array<BasilCommission>] AI-generated images
+  # @return [Hash] The best image to use as a preview (pinned if available)
+  def get_preview_image(regular_images, basil_images)
+    # First look for pinned images
+    pinned_regular = regular_images.find { |img| img.respond_to?(:pinned?) && img.pinned? }
+    pinned_basil = basil_images.find { |img| img.respond_to?(:pinned?) && img.pinned? }
+    
+    # Use the first pinned image found (prioritize regular uploads if both exist)
+    if pinned_regular.present?
+      return {
+        id: pinned_regular.id,
+        type: 'image_upload',
+        data: pinned_regular,
+        created_at: pinned_regular.created_at
+      }
+    elsif pinned_basil.present?
+      return {
+        id: pinned_basil.id,
+        type: 'basil_commission',
+        data: pinned_basil,
+        created_at: pinned_basil.saved_at
+      }
+    end
+    
+    # If no pinned images, get all images
+    combined = combine_and_sort_gallery_images(regular_images, basil_images)
+    
+    # Return the first sorted image, or nil if none available
+    combined.first
   end
 end

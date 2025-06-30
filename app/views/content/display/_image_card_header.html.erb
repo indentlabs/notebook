@@ -12,8 +12,9 @@
       end
       basil_images = @content.basil_commissions.where.not(saved_at: nil).ordered.to_a
       
-      # Use our unified helper to combine and sort all images
-      combined_images = combine_and_sort_gallery_images(regular_images, basil_images)
+      # For headers/card previews, use get_preview_image to prioritize pinned images
+      preview_image = get_preview_image(regular_images, basil_images)
+      combined_images = preview_image.present? ? [preview_image] : []
       
       # If we have no images, try to add a default image
       if combined_images.empty? && @content.respond_to?(:default_image)

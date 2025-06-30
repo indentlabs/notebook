@@ -73,7 +73,8 @@
   <% else %>
     <!-- Gallery grid -->
     <% 
-      # Use the unified helper to combine and sort images consistently
+      # Use the unified helper to combine and sort images consistently by position
+      # This no longer prioritizes pinned images in the sort order
       combined_images = combine_and_sort_gallery_images(@images, @basil_images)
     %>
     
@@ -81,6 +82,7 @@
       <% combined_images.each_with_index do |image_item, index| %>
         <div class="gallery-item">
           <div class="gallery-card" data-index="<%= index %>">
+            <%# image_item[:data].position %>
             <% if image_item[:type] == 'image_upload' %>
               <%= image_tag image_item[:data].src(:medium), class: "gallery-image", 
                   data: { 
