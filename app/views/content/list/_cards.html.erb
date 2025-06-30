@@ -1,17 +1,29 @@
 <div class="js-content-cards-list">
   <% content_list.each.with_index do |content, i| %>
     <%
-      content_image = @random_image_including_private_pool_cache.fetch([content.page_type, content.id], [])
-        .sample
-        .try(:src, :medium)
-
-      if @saved_basil_commissions
-        content_image ||= @saved_basil_commissions.fetch([content.page_type, content.id], [])
-          .sample
-          .try(:image)
-          .try(:url)
+      # Check for images from image uploads
+      image_cache = @random_image_including_private_pool_cache.fetch([content.page_type, content.id], [])
+      content_image = nil
+      
+      if image_cache.present?
+        sample_image = image_cache.sample
+        if sample_image && sample_image.respond_to?(:src_file_name) && sample_image.src_file_name.present?
+          content_image = sample_image.src(:medium)
+        end
       end
-
+      
+      # Check for basil commissions if no image yet
+      if content_image.nil? && @saved_basil_commissions
+        basil_cache = @saved_basil_commissions.fetch([content.page_type, content.id], [])
+        if basil_cache.present?
+          sample_commission = basil_cache.sample
+          if sample_commission && sample_commission.image.attached?
+            content_image = sample_commission.image.url
+          end
+        end
+      end
+      
+      # Fall back to default image if still no image
       content_image ||= asset_path("card-headers/#{content.page_type.downcase.pluralize}.jpg")
     %>
     <div class="col s12 m6 l4 js-content-card-container">

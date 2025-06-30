@@ -10,6 +10,18 @@
     </ol>
     <p class="grey-text" style="font-size: 14px;">Note: It may take a few minutes for new content to appear.</p>
   </div>
+  <div class="modal-content" style="border-top: 1px solid #e0e0e0; padding-top: 15px;">
+    <h4><i class="material-icons <%= @accent_color %>-text left" style="margin-right: 10px;">brush</i> What is Art Fight?</h4>
+    <p>Art Fight is an annual art trading event that runs during July where:</p>
+    <ul class="browser-default">
+      <li>Artists are divided into two opposing teams</li>
+      <li>Participants "attack" the opposing team by drawing their original characters (OCs)</li> 
+      <li>Each completed artwork earns points for your team</li>
+      <li>The team with the most points at the end of July wins</li>
+    </ul>
+    <p>It's a great way to practice your art skills, discover new characters to draw, and connect with other creatives. Adding the <span class="highlight">ArtFight2025</span> tag to your public pages helps other Notebook.ai users find your characters for Art Fight!</p>
+    <p class="grey-text" style="font-size: 14px;">Note: Notebook.ai is not officially affiliated with Art Fight. Visit <a href="https://artfight.net" target="_blank" class="<%= @accent_color %>-text">artfight.net</a> to learn more and participate.</p>
+  </div>
   <div class="modal-footer">
     <a href="#!" class="modal-close waves-effect waves-light <%= @accent_color %> btn-flat white-text">Got it</a>
   </div>
@@ -44,7 +56,7 @@
         
         <!-- Help button for how to join -->
         <div class="help-tooltip-container" style="position: absolute; top: 20px; right: 20px; z-index: 10;">
-          <button class="btn-floating white z-depth-2 pulse modal-trigger" id="how-to-join-btn" style="height: 42px; width: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none;" data-target="how-to-join-modal">
+          <button class="btn-floating white z-depth-2 pulse modal-trigger" id="how-to-join-btn" style="height: 42px; width: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none;" data-target="how-to-join-modal" onclick="this.classList.remove('pulse');">
             <i class="material-icons <%= @accent_color %>-text">help_outline</i>
           </button>
         </div>
@@ -101,13 +113,13 @@
       </div>
       
       <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-        <a href="#all" class="category-filter active" style="padding: 6px 12px; border-radius: 4px; background-color: #f5f5f5; text-decoration: none; color: #333; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center;">
+        <a href="javascript:void(0);" onclick="return filterByCategory('all');" class="category-filter active" data-category="all" style="padding: 6px 12px; border-radius: 4px; background-color: #f5f5f5; text-decoration: none; color: #333; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center;">
           <i class="material-icons <%= @accent_color %>-text left" style="font-size: 18px; margin-right: 6px;">layers</i>
           All (<%= total_items %>)
         </a>
         
         <% @tagged_content.each do |content_group| %>
-          <a href="#<%= content_group[:type].downcase %>" class="category-filter" style="padding: 6px 12px; border-radius: 4px; background-color: #f5f5f5; text-decoration: none; color: #333; transition: all 0.2s ease; display: flex; align-items: center;">
+          <a href="javascript:void(0);" onclick="return filterByCategory('<%= content_group[:type].downcase %>');" class="category-filter" data-category="<%= content_group[:type].downcase %>" style="padding: 6px 12px; border-radius: 4px; background-color: #f5f5f5; text-decoration: none; color: #333; transition: all 0.2s ease; display: flex; align-items: center;">
             <i class="material-icons <%= content_group[:color] %>-text left" style="font-size: 18px; margin-right: 6px;"><%= content_group[:icon] %></i>
             <%= content_group[:type].pluralize %> (<%= content_group[:content].count %>)
           </a>
@@ -126,7 +138,7 @@
       </div>
     <% else %>
       <% @tagged_content.each do |content_group| %>
-        <div id="<%= content_group[:type].downcase %>" class="section content-section">
+        <div class="section content-section" data-content-type="<%= content_group[:type].downcase %>" style="opacity: 1;">
           <div class="content-section-header" style="display: flex; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">
             <i class="material-icons <%= content_group[:color] %>-text" style="font-size: 28px; margin-right: 10px;"><%= content_group[:icon] %></i>
             <h4 style="font-size: 24px; font-weight: 500; margin: 0;" class="<%= content_group[:color] %>-text">
@@ -135,164 +147,173 @@
             </h4>
           </div>
           
-          <div class="row js-content-cards-list">
-            <% content_group[:content].each do |content| %>
-              <div class="col s12 m6 l4 xl3 js-content-card-container" style="margin-bottom: 20px;">
-                <div class="hoverable card sticky-action z-depth-1" style="margin-bottom: 20px; border-radius: 8px; overflow: hidden;">
-                  <!-- Color indicator bar at top of card -->
-                  <div style="height: 4px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]})" %>;"></div>
-                  
-                  <div class="card-image waves-effect waves-block waves-light">
-                    <% 
-                      # Find image for this content
-                      content_image = @random_image_pool_cache.fetch([content.class.name, content.id], [])
-                        .sample
-                        .try(:src, :medium)
+          <% if content_group[:type].downcase == 'universe' %>
+            <!-- Special layout for universe cards to ensure left alignment -->
+            <div style="display: block; width: 100%;">
+              <% content_group[:content].each do |content| %>
+                <div style="float: left; width: 25%; padding: 0 0.75rem;" class="universe-card-container">
+                  <%= link_to content do %>
+                    <div class="hoverable card z-depth-1" style="border-radius: 8px; overflow: hidden;">
+                      <!-- Color indicator bar at top of card -->
+                      <div style="height: 4px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]})" %>;"></div>
+                      
+                      <div class="card-image">
+                        <% 
+                          # Find image for this content
+                          content_image = @random_image_pool_cache.fetch([content.class.name, content.id], [])
+                            .sample
+                            .try(:src, :medium)
 
-                      if @saved_basil_commissions
-                        content_image ||= @saved_basil_commissions.fetch([content.class.name, content.id], [])
-                          .sample
-                          .try(:image)
-                          .try(:url)
-                      end
+                          if @saved_basil_commissions
+                            content_image ||= @saved_basil_commissions.fetch([content.class.name, content.id], [])
+                              .sample
+                              .try(:image)
+                              .try(:url)
+                          end
 
-                      content_image ||= asset_path("card-headers/#{content.class.name.downcase.pluralize}.jpg")
-                    %>
-                    <div class="activator" style="height: 200px; background: url('<%= content_image %>'); background-size: cover; background-position: center;"></div>
-                    
-                    <!-- Improved card title -->
-                    <div class="card-title js-content-name activator" style="background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%); padding: 30px 16px 16px 16px; bottom: 0; width: 100%;">
-                      <div style="font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.4); font-size: 18px; color: white;">
-                        <% content_name = content.respond_to?(:name) ? content.name : content.title %>
-                        <%= ContentFormatterService.show(text: content_name.presence || 'Untitled', viewing_user: current_user) %>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Improved card actions -->
-                  <div class="card-content" style="padding: 16px; border-bottom: 1px solid #f0f0f0;">
-                    <!-- Creator info with avatar -->
-                    <% user = @users_cache[content.user_id] %>
-                    <% if user %>
-                      <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                        <%= link_to profile_by_username_path(username: user.username), style: 'display: flex; align-items: center; text-decoration: none;' do %>
-                          <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; margin-right: 10px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-                            <% if user.image_url %>
-                              <img src="<%= user.image_url.html_safe %>" alt="<%= user.display_name %>" style="width: 100%; height: 100%; object-fit: cover;">
-                            <% else %>
-                              <i class="material-icons grey-text text-lighten-1" style="font-size: 20px;">person</i>
-                            <% end %>
+                          content_image ||= asset_path("card-headers/#{content.class.name.downcase.pluralize}.jpg")
+                        %>
+                        <div style="height: 150px; background: url('<%= content_image %>'); background-size: cover; background-position: center;"></div>
+                        
+                        <!-- Simple card title -->
+                        <div class="card-title js-content-name" style="background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%); padding: 30px 16px 16px 16px; bottom: 0; width: 100%;">
+                          <div style="font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.4); font-size: 18px; color: white;">
+                            <% content_name = content.respond_to?(:name) ? content.name : content.title %>
+                            <%= ContentFormatterService.show(text: content_name.presence || 'Untitled', viewing_user: current_user) %>
                           </div>
-                          <span style="font-size: 14px; font-weight: 500; color: #424242;"><%= user.display_name %></span>
-                        <% end %>
-                      </div>
-                    <% end %>
-                    
-                    <!-- Tags as pills -->
-                    <% if content.respond_to?(:page_tags) && content.page_tags.any? %>
-                      <div class="tags-container" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
-                        <% content.page_tags.each do |tag| %>
-                          <% if tag.tag == @tag %>
-                            <span class="tag-pill" style="padding: 4px 10px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]}-lighten-1)" %>; color: white; border-radius: 20px; font-size: 12px;">
-                              <%= tag.tag %>
-                            </span>
-                          <% else %>
-                            <span class="tag-pill" style="padding: 4px 10px; background-color: #f0f0f0; color: #757575; border-radius: 20px; font-size: 12px;">
-                              <%= tag.tag %>
-                            </span>
-                          <% end %>
-                        <% end %>
-                      </div>
-                    <% end %>
-                  </div>
-                  
-                  <div class="card-action" style="display: flex; justify-content: space-between; background-color: #fafafa; padding: 12px 16px;">
-                    <% if content.is_a?(Document) %>
-                      <%= link_to content, class: "#{content_group[:color]}-text", style: "font-weight: 500; display: flex; align-items: center;", target: '_blank' do %>
-                        <i class="material-icons left" style="font-size: 18px; margin-right: 6px;">visibility</i> View
-                      <% end %>
-                    <% else %>
-                      <%= link_to content, class: "#{content_group[:color]}-text", style: "font-weight: 500; display: flex; align-items: center;" do %>
-                        <i class="material-icons left" style="font-size: 18px; margin-right: 6px;">visibility</i> View
-                      <% end %>
-                    <% end %>
-                    
-                    <span class="grey-text" style="font-size: 12px; display: flex; align-items: center;">
-                      <i class="material-icons tiny" style="font-size: 14px; margin-right: 4px;">update</i>
-                      <%= time_ago_in_words content.updated_at %> ago
-                    </span>
-                  </div>
-                  
-                  <!-- Improved reveal with better readability -->
-                  <div class="card-reveal" style="padding: 20px;">
-                    <span class="card-title" style="font-size: 20px; font-weight: 500; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
-                      <%= content_name.presence || 'Untitled' %>
-                      <i class="material-icons right grey-text">close</i>
-                    </span>
-                    
-                    <% if user %>
-                      <div style="display: flex; align-items: center; margin-bottom: 15px; background-color: #f9f9f9; padding: 8px 12px; border-radius: 4px;">
-                        <%= link_to profile_by_username_path(username: user.username), style: 'display: flex; align-items: center; text-decoration: none;' do %>
-                          <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; margin-right: 10px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-                            <% if user.image_url %>
-                              <img src="<%= user.image_url.html_safe %>" alt="<%= user.display_name %>" style="width: 100%; height: 100%; object-fit: cover;">
-                            <% else %>
-                              <i class="material-icons grey-text text-lighten-1" style="font-size: 20px;">person</i>
-                            <% end %>
-                          </div>
-                          <div>
-                            <span style="font-size: 14px; font-weight: 500; color: #424242; display: block;"><%= user.display_name %></span>
-                            <span style="font-size: 12px; color: #757575; display: block;">Creator</span>
-                          </div>
-                        <% end %>
-                      </div>
-                    <% end %>
-                    
-                    <!-- Description with better typography -->
-                    <% content_description = content.try(:description) || content.try(:synopsis) %>
-                    <% if content_description.present? %>
-                      <div style="margin-bottom: 20px; line-height: 1.6; color: #424242;">
-                        <%= sanitize ContentFormatterService.show(text: truncate(content_description, length: 420, escape: false), viewing_user: current_user) %>
-                      </div>
-                    <% end %>
-                    
-                    <!-- Tags displayed in reveal -->
-                    <% if content.respond_to?(:page_tags) && content.page_tags.any? %>
-                      <div style="margin: 20px 0;">
-                        <div style="font-size: 14px; font-weight: 500; color: #757575; margin-bottom: 8px;">Tags:</div>
-                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                          <% content.page_tags.each do |tag| %>
-                            <% if tag.tag == @tag %>
-                              <span style="padding: 6px 12px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]}-lighten-1)" %>; color: white; border-radius: 20px; font-size: 12px;">
-                                <%= tag.tag %>
-                              </span>
-                            <% else %>
-                              <span style="padding: 6px 12px; background-color: #f0f0f0; color: #757575; border-radius: 20px; font-size: 12px;">
-                                <%= tag.tag %>
-                              </span>
-                            <% end %>
-                          <% end %>
                         </div>
                       </div>
-                    <% end %>
-                    
-                    <!-- View button in reveal -->
-                    <div style="margin-top: 20px;">
-                      <% if content.is_a?(Document) %>
-                        <%= link_to content, class: "btn #{content_group[:color]}", style: "width: 100%;", target: '_blank' do %>
-                          <i class="material-icons left">visibility</i> View <%= content_group[:type] %>
+                      
+                      <!-- Simplified card content -->
+                      <div class="card-content" style="padding: 16px;">
+                        <!-- Creator info with avatar -->
+                        <% user = @users_cache[content.user_id] %>
+                        <% if user %>
+                          <div style="display: flex; align-items: center; margin-bottom: 8px; justify-content: space-between;">
+                            <div style="display: flex; align-items: center;">
+                              <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; margin-right: 8px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                <% if user.image_url %>
+                                  <img src="<%= user.image_url.html_safe %>" alt="<%= user.display_name %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                <% else %>
+                                  <i class="material-icons grey-text text-lighten-1" style="font-size: 16px;">person</i>
+                                <% end %>
+                              </div>
+                              <span style="font-size: 13px; font-weight: 500; color: #424242;"><%= user.display_name %></span>
+                            </div>
+                            <!-- Time edited -->
+                            <span class="grey-text" style="font-size: 11px; display: flex; align-items: center;">
+                              <i class="material-icons tiny" style="font-size: 12px; margin-right: 3px;">update</i>
+                              <%= time_ago_in_words content.updated_at %> ago
+                            </span>
+                          </div>
                         <% end %>
-                      <% else %>
-                        <%= link_to content, class: "btn #{content_group[:color]}", style: "width: 100%;" do %>
-                          <i class="material-icons left">visibility</i> View <%= content_group[:type] %>
+                        
+                        <!-- Tags as pills -->
+                        <% if content.respond_to?(:page_tags) && content.page_tags.any? %>
+                          <div class="tags-container" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
+                            <% content.page_tags.each do |tag| %>
+                              <% if tag.tag == @tag %>
+                                <span class="tag-pill" style="padding: 2px 8px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]}-lighten-1)" %>; color: white; border-radius: 20px; font-size: 11px;">
+                                  <%= tag.tag %>
+                                </span>
+                              <% else %>
+                                <span class="tag-pill" style="padding: 2px 8px; background-color: #f0f0f0; color: #757575; border-radius: 20px; font-size: 11px;">
+                                  <%= tag.tag %>
+                                </span>
+                              <% end %>
+                            <% end %>
+                          </div>
                         <% end %>
-                      <% end %>
+                      </div>
                     </div>
-                  </div>
+                  <% end %>
                 </div>
-              </div>
-            <% end %>
-          </div>
+              <% end %>
+            </div> <!-- Close universe special layout -->
+          <% else %>
+            <!-- Standard layout for other content types -->
+            <div class="row js-content-cards-list">
+              <% content_group[:content].each do |content| %>
+                <div class="col s12 m6 l4 xl3 js-content-card-container">
+                  <%= link_to content, target: (content.is_a?(Document) ? '_blank' : nil) do %>
+                    <div class="hoverable card z-depth-1" style="border-radius: 8px; overflow: hidden;">
+                      <!-- Color indicator bar at top of card -->
+                      <div style="height: 4px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]})" %>;"></div>
+                      
+                      <div class="card-image">
+                        <% 
+                          # Find image for this content
+                          content_image = @random_image_pool_cache.fetch([content.class.name, content.id], [])
+                            .sample
+                            .try(:src, :medium)
+
+                          if @saved_basil_commissions
+                            content_image ||= @saved_basil_commissions.fetch([content.class.name, content.id], [])
+                              .sample
+                              .try(:image)
+                              .try(:url)
+                          end
+
+                          content_image ||= asset_path("card-headers/#{content.class.name.downcase.pluralize}.jpg")
+                        %>
+                        <div style="height: 150px; background: url('<%= content_image %>'); background-size: cover; background-position: center;"></div>
+                        
+                        <!-- Simple card title -->
+                        <div class="card-title js-content-name" style="background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%); padding: 30px 16px 16px 16px; bottom: 0; width: 100%;">
+                          <div style="font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.4); font-size: 18px; color: white;">
+                            <% content_name = content.respond_to?(:name) ? content.name : content.title %>
+                            <%= ContentFormatterService.show(text: content_name.presence || 'Untitled', viewing_user: current_user) %>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Simplified card content -->
+                      <div class="card-content" style="padding: 16px;">
+                        <!-- Creator info with avatar -->
+                        <% user = @users_cache[content.user_id] %>
+                        <% if user %>
+                          <div style="display: flex; align-items: center; margin-bottom: 8px; justify-content: space-between;">
+                            <div style="display: flex; align-items: center;">
+                              <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; margin-right: 8px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                <% if user.image_url %>
+                                  <img src="<%= user.image_url.html_safe %>" alt="<%= user.display_name %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                <% else %>
+                                  <i class="material-icons grey-text text-lighten-1" style="font-size: 16px;">person</i>
+                                <% end %>
+                              </div>
+                              <span style="font-size: 13px; font-weight: 500; color: #424242;"><%= user.display_name %></span>
+                            </div>
+                            <!-- Time edited -->
+                            <span class="grey-text" style="font-size: 11px; display: flex; align-items: center;">
+                              <i class="material-icons tiny" style="font-size: 12px; margin-right: 3px;">update</i>
+                              <%= time_ago_in_words content.updated_at %> ago
+                            </span>
+                          </div>
+                        <% end %>
+                        
+                        <!-- Tags as pills -->
+                        <% if content.respond_to?(:page_tags) && content.page_tags.any? %>
+                          <div class="tags-container" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
+                            <% content.page_tags.each do |tag| %>
+                              <% if tag.tag == @tag %>
+                                <span class="tag-pill" style="padding: 2px 8px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]}-lighten-1)" %>; color: white; border-radius: 20px; font-size: 11px;">
+                                  <%= tag.tag %>
+                                </span>
+                              <% else %>
+                                <span class="tag-pill" style="padding: 2px 8px; background-color: #f0f0f0; color: #757575; border-radius: 20px; font-size: 11px;">
+                                  <%= tag.tag %>
+                                </span>
+                              <% end %>
+                            <% end %>
+                          </div>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div> <!-- Close standard row layout -->
+          <% end %>
         </div>
       <% end %>
     <% end %>
@@ -300,71 +321,130 @@
 </div>
 
 <!-- JavaScript for filtering -->
-<%= content_for :javascript do %>
-  document.addEventListener('DOMContentLoaded', function() {
+<script type="text/javascript">
+  function filterContentImmediate() {
+    // This function will be called directly from inline onclick handlers
+    // for more direct control without event binding
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize all modals - keep this from original code
+      var modalElems = document.querySelectorAll('.modal');
+      var modalInstances = M.Modal.init(modalElems, {opacity: 0.6});
+      
+      // Add click handler to the help button
+      document.getElementById('how-to-join-btn').addEventListener('click', function() {
+        // Stop the pulse animation by removing the pulse class
+        this.classList.remove('pulse');
+        
+        // Open the modal
+        var modalInstance = M.Modal.getInstance(document.getElementById('how-to-join-modal'));
+        if (modalInstance) {
+          modalInstance.open();
+        }
+      });
+      
+      // Apply initial filtering based on URL hash
+      let initialCategory = window.location.hash.substring(1) || 'all';
+      
+      // Make sure we don't start with an invalid hash
+      if (initialCategory.startsWith('!') || initialCategory === '#') {
+        initialCategory = 'all';
+      }
+      
+      filterByCategory(initialCategory);
+    });
+  }
+  
+  // Direct filtering function to be called from onclick attribute
+  function filterByCategory(category) {
+    // Normalize input and handle invalid values
+    category = (category || '').toLowerCase();
+    
+    // Special case: handle hash fragments like #! or other invalid values
+    if (category.startsWith('!') || category === '' || category === '#') {
+      category = 'all';
+    }
+    
+    console.log('Filtering by category:', category);
+    
+    // Get elements
     var filterLinks = document.querySelectorAll('.category-filter');
     var contentSections = document.querySelectorAll('.content-section');
+    var validCategory = false;
     
-    // Handle filter clicks
-    filterLinks.forEach(function(link) {
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // Update active state
-        filterLinks.forEach(function(l) { 
-          l.classList.remove('active');
-          l.style.backgroundColor = '#f5f5f5';
-          l.style.fontWeight = '400';
-        });
-        
-        this.classList.add('active');
-        this.style.backgroundColor = '<%= @accent_color == "grey" ? "#9e9e9e" : "var(--#{@accent_color}-lighten-4)" %>';
-        this.style.fontWeight = '500';
-        
-        var target = this.getAttribute('href').substring(1);
-        
-        if (target === 'all') {
-          // Show all sections
-          contentSections.forEach(function(section) {
-            section.style.display = 'block';
-          });
-        } else {
-          // Hide all sections first
-          contentSections.forEach(function(section) {
-            section.style.display = 'none';
-          });
-          
-          // Show only the selected section
-          var selectedSection = document.getElementById(target);
-          if (selectedSection) {
-            selectedSection.style.display = 'block';
-          }
+    // Check if the category matches any available content sections
+    if (category !== 'all') {
+      contentSections.forEach(function(section) {
+        const sectionType = section.getAttribute('data-content-type');
+        if (sectionType && sectionType.toLowerCase() === category.toLowerCase()) {
+          validCategory = true;
         }
-        
-        // Smooth scroll to content area
-        window.scrollTo({
-          top: document.querySelector('.category-filters').offsetTop - 20,
-          behavior: 'smooth'
-        });
       });
-    });
+      
+      // If not a valid category, default to showing all
+      if (!validCategory) {
+        category = 'all';
+      }
+    }
     
-    // Initialize with "All" selected
-    filterLinks[0].style.backgroundColor = '<%= @accent_color == "grey" ? "#9e9e9e" : "var(--#{@accent_color}-lighten-4)" %>';
-    filterLinks[0].style.fontWeight = '500';
-    
-    // Initialize all modals
-    var modalElems = document.querySelectorAll('.modal');
-    var modalInstances = M.Modal.init(modalElems, {opacity: 0.6});
-    
-    // Add click handler to the help button
-    document.getElementById('how-to-join-btn').addEventListener('click', function() {
-      var modalInstance = M.Modal.getInstance(document.getElementById('how-to-join-modal'));
-      if (modalInstance) {
-        modalInstance.open();
+    // Update active state of filter buttons
+    filterLinks.forEach(function(link) {
+      const linkCategory = link.getAttribute('data-category');
+      if (linkCategory === category) {
+        link.classList.add('active');
+        link.style.backgroundColor = '<%= @accent_color == "grey" ? "#9e9e9e" : "var(--#{@accent_color}-lighten-4)" %>';
+        link.style.fontWeight = '500';
+      } else {
+        link.classList.remove('active');
+        link.style.backgroundColor = '#f5f5f5';
+        link.style.fontWeight = '400';
       }
     });
-  });
+    
+    // Apply filtering with animation
+    if (category === 'all') {
+      // Show all sections
+      contentSections.forEach(function(section) {
+        section.style.display = 'block';
+        setTimeout(function() {
+          section.style.opacity = '1';
+        }, 50);
+      });
+    } else {
+      // Show only matching category
+      contentSections.forEach(function(section) {
+        const sectionType = section.getAttribute('data-content-type');
+        if (sectionType && sectionType.toLowerCase() === category.toLowerCase()) {
+          section.style.display = 'block';
+          setTimeout(function() {
+            section.style.opacity = '1';
+          }, 50);
+        } else {
+          section.style.opacity = '0';
+          setTimeout(function() {
+            section.style.display = 'none';
+          }, 300); // Match this to the CSS transition duration
+        }
+      });
+    }
+    
+    // Update URL hash without scrolling, but don't use an invalid hash
+    if (category === 'all') {
+      // For "all", just use the base URL without any hash
+      window.history.replaceState(null, null, window.location.pathname);
+    } else {
+      window.history.replaceState(null, null, '#' + category);
+    }
+    
+    // Return false to prevent default link behavior
+    return false;
+  }
+  
+  // Call this function on page load
+  filterContentImmediate();
+</script>
+
+<%= content_for :javascript do %>
+  // The inline script above handles all functionality
 <% end %>
 
 <!-- Add CSS variables for colors -->
@@ -434,43 +514,37 @@
     --orange-lighten-5: #fff3e0;
   }
   
-  /* Card grid layout */
-  .js-content-cards-list {
-    display: block;
+  /* Animation for content section transitions */
+  .content-section {
+    transition: opacity 0.3s ease-in-out;
+    opacity: 1; /* Ensure sections are visible by default */
   }
   
-  /* Proper card sizing and grid density - reverting to standard Material grid with fixed heights */
-  .js-content-card-container .card {
-    height: 100%;
-    width: 100%;
-    margin-bottom: 0;
+  /* Universe card styling - use direct control */
+  .universe-card-container {
+    display: inline-block;
   }
   
-  /* Make all cards in a row the same height and align left */
-  .js-content-cards-list {
-    display: flex;
-    flex-wrap: wrap;
-    margin-left: -0.75rem;
-    margin-right: -0.75rem;
-    justify-content: flex-start;
+  /* Mobile responsiveness for universe cards */
+  @media only screen and (max-width: 600px) {
+    .universe-card-container {
+      width: 100% !important;
+    }
   }
   
-  /* Make sure card containers take their full column width */
-  .js-content-card-container {
-    display: flex;
+  @media only screen and (min-width: 601px) and (max-width: 992px) {
+    .universe-card-container {
+      width: 50% !important;
+    }
   }
   
-  /* Ensure card images maintain aspect ratio */
-  .card .card-image .activator {
-    height: 200px;
-    width: 100%;
+  @media only screen and (min-width: 993px) and (max-width: 1200px) {
+    .universe-card-container {
+      width: 33.33% !important;
+    }
   }
   
-  /* Ensure card content expands properly */
-  .card .card-content {
-    flex-grow: 1;
-  }
-  
+  /* Category filters styling */
   @media only screen and (max-width: 600px) {
     .category-filters {
       overflow-x: auto;
@@ -488,5 +562,109 @@
     .category-filter {
       flex: 0 0 auto;
     }
+  }
+  
+  /* Link styling for card links */
+  a {
+    color: inherit;
+  }
+  
+  /* Ensure all cards have equal height */
+  .js-content-card-container,
+  .universe-card-container {
+    height: 350px;
+    margin-bottom: 20px;
+    overflow: visible;
+    padding-bottom: 10px;
+  }
+  
+  /* Better card styling */
+  .hoverable.card {
+    transition: box-shadow 0.25s, transform 0.25s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  
+  .hoverable.card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+  }
+  
+  /* Position relative for absolute positioning within */
+  .hoverable.card {
+    position: relative;
+    padding-bottom: 8px;
+    border-bottom: 4px solid #eeeeee;
+  }
+  
+  .js-content-card-container > a,
+  .universe-card-container > a {
+    height: 100%;
+    display: block;
+  }
+  
+  .js-content-card-container .card,
+  .universe-card-container .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .card .card-image {
+    flex: 0 0 auto;
+  }
+  
+  .card .card-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    height: 115px;
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 20px !important;
+  }
+  
+  .tags-container {
+    margin-top: auto;
+    padding-top: 8px;
+    overflow: hidden;
+    max-height: 80px;
+    padding-bottom: 10px;
+  }
+  
+  /* Handle overflowing text */
+  .js-content-name div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    max-height: 50px;
+  }
+  
+  /* Add a fade effect and footer to the card */
+  .card .card-content:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 15px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+    pointer-events: none;
+  }
+  
+  /* Card footer line - more visible */
+  .card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: #f0f0f0;
+    border-radius: 0 0 8px 8px;
+    z-index: 1;
   }
 </style>

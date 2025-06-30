@@ -110,15 +110,15 @@
           <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
             <div class="col s12 m12 l6">
               <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id) do %>
-                <div class="hoverable card" style="margin-bottom: 2px">
+                <div class="hoverable card <%= content_page.color %>" style="margin-bottom: 2px">
                   <div class="card-image">
                     <%= image_tag content_page.random_image_including_private, style: 'height: 245px' %>
-                      <div class="card-title bordered-text">
-                        <i class="material-icons left <%= content_page.text_color %>" style="position: relative; top: 4px">
-                          <%= content_page.icon %>
-                        </i>
-                        <%= content_page.name %>
-                      </div>
+                    <div class="card-title bordered-text">
+                      <i class="material-icons left <%= content_page.text_color %>" style="position: relative; top: 4px">
+                        <%= content_page.icon %>
+                      </i>
+                      <%= content_page.name %>
+                    </div>
                   </div>
                 </div>
               <% end %>
@@ -142,9 +142,9 @@
                 <div class="hoverable card" style="margin-bottom: 2px">
                   <div class="card-image">
                     <%= image_tag universe.random_image_including_private, style: 'height: 162px' %>
-                      <div class="card-title">
-                        <%= universe.name %>
-                      </div>
+                    <div class="card-title">
+                      <%= universe.name %>
+                    </div>
                   </div>
                 </div>
               <% end %>
@@ -155,7 +155,7 @@
     </div>
   <% end %>
 
-  <%= render partial: 'notice_dismissal/messages/23' if show_notice?(id: 23) %>
+  <%= render partial: 'notice_dismissal/messages/25' if show_notice?(id: 25) %>
 
   <div class="col s12 m5 l4">
     <% if @recently_edited_pages.any? %>
