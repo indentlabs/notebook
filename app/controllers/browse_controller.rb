@@ -27,8 +27,10 @@ class BrowseController < ApplicationController
       
       # Go through each content type and find public items with this tag
       Rails.application.config.content_types[:all].each do |content_type|
-        # First find page IDs with this tag
-        tag_page_ids = PageTag.where(page_type: content_type.name, slug: @tag_slug).pluck(:page_id)
+        # First find page IDs with this tag - case insensitive matching for slug
+        tag_page_ids = PageTag.where(page_type: content_type.name)
+                              .where("LOWER(slug) = ?", @tag_slug.downcase)
+                              .pluck(:page_id)
         
         if tag_page_ids.any?
           # Use database-level randomization with the daily seed for caching potential
@@ -49,7 +51,9 @@ class BrowseController < ApplicationController
       end
       
       # Add documents separately since they don't use the common content type structure
-      document_tag_page_ids = PageTag.where(page_type: 'Document', slug: @tag_slug).pluck(:page_id)
+      document_tag_page_ids = PageTag.where(page_type: 'Document')
+                                    .where("LOWER(slug) = ?", @tag_slug.downcase)
+                                    .pluck(:page_id)
       if document_tag_page_ids.any?
         documents = Document.where(id: document_tag_page_ids)
                           .where(privacy: 'public')
@@ -65,7 +69,9 @@ class BrowseController < ApplicationController
       end
       
       # Add timelines separately since they don't use the common content type structure
-      timeline_tag_page_ids = PageTag.where(page_type: 'Timeline', slug: @tag_slug).pluck(:page_id)
+      timeline_tag_page_ids = PageTag.where(page_type: 'Timeline')
+                                    .where("LOWER(slug) = ?", @tag_slug.downcase)
+                                    .pluck(:page_id)
       if timeline_tag_page_ids.any?
         timelines = Timeline.where(id: timeline_tag_page_ids)
                           .where(privacy: 'public')

@@ -68,11 +68,11 @@ class DocumentsController < ApplicationController
 
   def show
     unless @document.present? && (current_user || User.new).can_read?(@document)
-      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
     end
 
     if @document.user.thredded_user_detail.moderation_state == "blocked"
-      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
     end
 
     # Put the focus on the document by removing Notebook.ai actions
@@ -81,7 +81,7 @@ class DocumentsController < ApplicationController
 
   def analysis
     unless @document.present? && (current_user || User.new).can_read?(@document)
-      redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+      redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
     end
 
     @analysis = @document.document_analysis.where.not(queued_at: nil).order('updated_at DESC').first
@@ -98,7 +98,7 @@ class DocumentsController < ApplicationController
   end
 
   def queue_analysis
-    return redirect_back(fallback_location: documents_path, notice: "That document doesn't exist!") unless @document.present?
+    return redirect_back(fallback_location: documents_path, notice: "That document doesn't exist!", status: :not_found) unless @document.present?
     return redirect_back(fallback_location: documents_path, notice: "Document analysis is a feature for Premium users.") unless @document.user.on_premium_plan?
     return redirect_back(fallback_location: documents_path, notice: "You don't have permission to do that!") unless @document.user == current_user
     
@@ -214,7 +214,7 @@ class DocumentsController < ApplicationController
 
   def plaintext
     unless @document.present? && (current_user || User.new).can_read?(@document)
-      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
     end
 
     render layout: 'plaintext'
@@ -335,7 +335,7 @@ class DocumentsController < ApplicationController
     @document = Document.find_by(id: params[:id])
 
     unless @document
-      redirect_to root_path, notice: "Either that document doesn't exist or you don't have permission to view it!"
+      redirect_to root_path, notice: "Either that document doesn't exist or you don't have permission to view it!", status: :not_found
       return
     end
   end

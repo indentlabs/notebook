@@ -25,7 +25,7 @@
         <div class="row">
           <% all_images.each do |image_item| %>
             <div class="col s12 m6 l4">
-              <div class="gallery-preview-card">
+              <div class="gallery-preview-card card">
                 <% if image_item[:type] == 'regular' %>
                   <%= link_to image_item[:data].src(:original), target: "_blank" do %>
                     <%= image_tag image_item[:data].src(:medium), class: 'gallery-preview-image' %>
@@ -44,7 +44,7 @@
         </div>
       </div>
     <% else %>
-      <div class="empty-gallery-message">
+      <div class="empty-gallery-message card-panel">
         <p>No images have been added to this <%= content.class.name.downcase %> yet.</p>
       </div>
     <% end %>
@@ -53,8 +53,8 @@
       <div class="card-panel <%= content.class.color %> lighten-5 gallery-cta-panel">
         <div class="row">
           <div class="col s12 m8">
-            <h5 class="<%= content.class.text_color %> text-darken-2">View Full Gallery Experience</h5>
-            <p>Check out our newly designed gallery page with larger images, lightbox viewing, and an overview section – perfect for sharing with others!</p>
+            <h5 class="<%= content.class.text_color %> text-darken-2 black-text">View Full Gallery Experience</h5>
+            <p class="black-text">Check out our newly designed gallery page with larger images, lightbox viewing, and an overview section – perfect for sharing with others!</p>
           </div>
           <div class="col s12 m4 center-align cta-button-container">
             <%= link_to send("gallery_#{content.class.name.downcase}_path", content), class: "btn-large waves-effect waves-light #{content.class.color}" do %>
@@ -81,6 +81,7 @@
     margin-bottom: 15px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: white;
   }
   
   .gallery-preview-card:hover {

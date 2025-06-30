@@ -89,10 +89,10 @@ class ContentController < ApplicationController
 
   def show    
     content_type = content_type_from_controller(self.class)
-    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.include?(content_type.name)
+    return redirect_to(root_path, notice: "That page doesn't exist!", status: :not_found) unless valid_content_types.include?(content_type.name)
 
     @content = content_type.find_by(id: params[:id])
-    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+    return redirect_to(root_path, notice: "You don't have permission to view that content.", status: :not_found) if @content.nil?
 
     return redirect_to(root_path) if @content.user.nil? # deleted user's content    
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))

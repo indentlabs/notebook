@@ -99,7 +99,10 @@ class UsersController < ApplicationController
     @tag_slug = params[:tag_slug]
     @tag = PageTag.find_by(user_id: @user.id, slug: @tag_slug)
     
-    return redirect_to(profile_by_username_path(username: @user.username), notice: 'That tag does not exist.') if @tag.nil?
+    if @tag.nil?
+      redirect_url = @user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user)
+      return redirect_to(redirect_url, notice: 'That tag does not exist.', status: :not_found)
+    end
 
     # Find all public content with this tag
     @tagged_content = []
@@ -181,7 +184,7 @@ class UsersController < ApplicationController
 
   def set_user
     @user    = User.find_by(user_params)
-    return redirect_to(root_path, notice: 'That user does not exist.') if @user.nil?
+    return redirect_to(root_path, notice: 'That user does not exist.', status: :not_found) if @user.nil?
     return redirect_to(root_path, notice: 'That user has chosen to hide their profile.') if @user.private_profile?
     return redirect_to(root_path, notice: 'That user has had their profile hidden.') if @user.thredded_user_detail.moderation_state == 'blocked'
 

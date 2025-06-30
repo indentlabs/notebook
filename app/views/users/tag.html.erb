@@ -38,7 +38,7 @@
 
           <div style="margin-left: 15px;">
             <div>
-              <%= link_to profile_by_username_path(username: @user.username), class: "white-text" do %>
+              <%= link_to @user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user), class: "white-text" do %>
                 <span style="font-size: 20px; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.3); line-height: 1.2; display: block;">
                   <%= @user.display_name %>
                 </span>
@@ -65,10 +65,10 @@
             
             <div class="chip z-depth-0 <%= @accent_color %> lighten-3" style="border: none; margin: 0;">
               <i class="material-icons left">category</i>
-              <%= pluralize(content_types_count, 'category') %>
+              <%= pluralize(content_types_count, 'page type') %>
             </div>
             
-            <%= link_to profile_by_username_path(username: @user.username), class: "chip grey lighten-4" do %>
+            <%= link_to @user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user), class: "chip grey lighten-4" do %>
               <i class="material-icons left">person</i>
               View profile
             <% end %>
@@ -147,7 +147,7 @@
                             <% if tag.tag == @tag.tag %>
                               <span class="new badge <%= content_group[:color] %> left" data-badge-caption="<%= tag.tag %>"></span>
                             <% else %>
-                              <%= link_to user_tag_path(username: content.user.username, tag_slug: tag.slug) do %>
+                              <%= link_to content.user.username.present? ? user_tag_path(username: content.user.username, tag_slug: tag.slug) : user_id_tag_path(id: content.user.id, tag_slug: tag.slug) do %>
                                 <span class="new badge grey left" data-badge-caption="<%= tag.tag %>"></span>
                               <% end %>
                             <% end %>
@@ -183,7 +183,7 @@
                           <% if tag.tag == @tag.tag %>
                             <span class="new badge <%= content_group[:color] %> left" data-badge-caption="<%= tag.tag %>"></span>
                           <% else %>
-                            <%= link_to user_tag_path(username: content.user.username, tag_slug: tag.slug) do %>
+                            <%= link_to content.user.username.present? ? user_tag_path(username: content.user.username, tag_slug: tag.slug) : user_id_tag_path(id: content.user.id, tag_slug: tag.slug) do %>
                               <span class="new badge grey left" data-badge-caption="<%= tag.tag %>"></span>
                             <% end %>
                           <% end %>

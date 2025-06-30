@@ -47,7 +47,7 @@ class DocumentAnalysesController < ApplicationController
 
   def authorize_user_for_document
     unless @document.present? && (current_user || User.new).can_read?(@document)
-      redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.")
+      redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
       return false
     end
   end

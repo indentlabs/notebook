@@ -110,6 +110,9 @@ Rails.application.routes.draw do
   get '/@:username/followers', to: 'users#followers'
   get '/@:username/following', to: 'users#following'
   get '/@:username/tag/:tag_slug', to: 'users#tag', as: :user_tag
+  
+  # ID-based alternative routes for users without usernames
+  get '/users/:id/tag/:tag_slug', to: 'users#tag', as: :user_id_tag
 
   resources :documents do
     # Document Analysis routes

@@ -80,7 +80,7 @@
               
               <div class="chip z-depth-1 white" style="border: none; margin: 0; font-weight: 500;">
                 <i class="material-icons left <%= @accent_color %>-text">category</i>
-                <%= pluralize(content_types_count, 'category') %>
+                <%= pluralize(content_types_count, 'page type') %>
               </div>
               
               <div class="chip z-depth-1 white" style="border: none; margin: 0; font-weight: 500;">
@@ -106,20 +106,20 @@
   
   <!-- Category quick filters -->
   <div class="col s12">
-    <div class="category-filters z-depth-1" style="background-color: #fff; border-radius: 8px; padding: 16px; margin-bottom: 25px;">
+    <div class="category-filters z-depth-1" style="border-radius: 8px; padding: 16px; margin-bottom: 25px;">
       <div class="category-filter-title" style="margin-bottom: 10px; display: flex; align-items: center;">
         <i class="material-icons <%= @accent_color %>-text" style="margin-right: 8px;">filter_list</i>
         <span style="font-weight: 500; font-size: 16px;">Filter by category:</span>
       </div>
       
       <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-        <a href="javascript:void(0);" onclick="return filterByCategory('all');" class="category-filter active" data-category="all" style="padding: 6px 12px; border-radius: 4px; background-color: #f5f5f5; text-decoration: none; color: #333; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center;">
+        <a href="javascript:void(0);" onclick="return filterByCategory('all');" class="category-filter active black-text" data-category="all" style="padding: 6px 12px; border-radius: 4px; background-color: #f5f5f5; text-decoration: none; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center;">
           <i class="material-icons <%= @accent_color %>-text left" style="font-size: 18px; margin-right: 6px;">layers</i>
           All (<%= total_items %>)
         </a>
         
         <% @tagged_content.each do |content_group| %>
-          <a href="javascript:void(0);" onclick="return filterByCategory('<%= content_group[:type].downcase %>');" class="category-filter" data-category="<%= content_group[:type].downcase %>" style="padding: 6px 12px; border-radius: 4px; background-color: #f5f5f5; text-decoration: none; color: #333; transition: all 0.2s ease; display: flex; align-items: center;">
+          <a href="javascript:void(0);" onclick="return filterByCategory('<%= content_group[:type].downcase %>');" class="category-filter black-text" data-category="<%= content_group[:type].downcase %>" style="padding: 6px 12px; border-radius: 4px; background-color: #f5f5f5; text-decoration: none; transition: all 0.2s ease; display: flex; align-items: center;">
             <i class="material-icons <%= content_group[:color] %>-text left" style="font-size: 18px; margin-right: 6px;"><%= content_group[:icon] %></i>
             <%= content_group[:type].pluralize %> (<%= content_group[:content].count %>)
           </a>
@@ -453,12 +453,23 @@
   .modal-how-to-join {
     border-radius: 8px;
     max-width: 500px;
+    transition: background-color 1s ease;
+  }
+  
+  body.dark .modal-how-to-join {
+    background-color: #2D2D31 !important;
+    color: #ddd;
   }
   
   .modal-how-to-join h4 {
     margin-top: 0;
     font-size: 20px;
     font-weight: 500;
+    transition: color 1s ease;
+  }
+  
+  body.dark .modal-how-to-join h4 {
+    color: white;
   }
   
   .modal-how-to-join ol {
@@ -473,6 +484,17 @@
     background-color: #f3e5f5;
     padding: 2px 5px;
     border-radius: 3px;
+    transition: background-color 1s ease, color 1s ease;
+  }
+  
+  body.dark .modal-how-to-join .highlight {
+    background-color: rgba(156, 39, 176, 0.2);
+    color: white;
+  }
+  
+  /* Fix modal content border */
+  body.dark .modal-content {
+    border-color: rgba(255, 255, 255, 0.1) !important;
   }
   
   :root {
@@ -545,6 +567,39 @@
   }
   
   /* Category filters styling */
+  .category-filters {
+    background-color: #fff;
+    transition: background-color 1s ease;
+  }
+  
+  body.dark .category-filters {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .category-filter {
+    background-color: #f5f5f5;
+    color: #333;
+    transition: background-color 1s ease, color 1s ease;
+  }
+  
+  body.dark .category-filter {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Ensure filter text is always readable regardless of theme */
+  .category-filter {
+    color: #333 !important;
+  }
+  
+  /* Fix the filter title text in dark mode */
+  body.dark .category-filter-title span {
+    color: #ddd;
+  }
+  
+  body.dark .category-filter.active {
+    color: #333;
+  }
+  
   @media only screen and (max-width: 600px) {
     .category-filters {
       overflow-x: auto;
@@ -580,10 +635,16 @@
   
   /* Better card styling */
   .hoverable.card {
-    transition: box-shadow 0.25s, transform 0.25s;
+    transition: box-shadow 0.25s, transform 0.25s, background-color 1s ease;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     border-radius: 8px;
     margin-bottom: 8px;
+    background-color: #fff;
+  }
+  
+  body.dark .hoverable.card {
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   }
   
   .hoverable.card:hover {
@@ -591,11 +652,20 @@
     transform: translateY(-2px);
   }
   
+  body.dark .hoverable.card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  }
+  
   /* Position relative for absolute positioning within */
   .hoverable.card {
     position: relative;
     padding-bottom: 8px;
     border-bottom: 4px solid #eeeeee;
+    transition: border-color 1s ease;
+  }
+  
+  body.dark .hoverable.card {
+    border-bottom: 4px solid rgba(255, 255, 255, 0.1);
   }
   
   .js-content-card-container > a,
@@ -623,6 +693,11 @@
     overflow: hidden;
     position: relative;
     padding-bottom: 20px !important;
+    transition: background-color 1s ease;
+  }
+  
+  body.dark .card .card-content {
+    background-color: rgba(255, 255, 255, 0.1);
   }
   
   .tags-container {
@@ -653,6 +728,11 @@
     height: 15px;
     background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
     pointer-events: none;
+    transition: background 1s ease;
+  }
+  
+  body.dark .card .card-content:after {
+    background: linear-gradient(to bottom, rgba(40,40,45,0) 0%, rgba(40,40,45,1) 100%);
   }
   
   /* Card footer line - more visible */
@@ -666,5 +746,24 @@
     background-color: #f0f0f0;
     border-radius: 0 0 8px 8px;
     z-index: 1;
+    transition: background-color 1s ease;
+  }
+  
+  body.dark .card::after {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Dark mode text styles */
+  body.dark .card .card-content span[style*="color: #424242"] {
+    color: #ddd !important;
+  }
+  
+  body.dark .grey-text {
+    color: #aaa !important;
+  }
+  
+  body.dark .tag-pill[style*="background-color: #f0f0f0"] {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #aaa !important;
   }
 </style>
