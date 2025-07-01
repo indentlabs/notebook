@@ -12,7 +12,7 @@ class DocumentAnalysesController < ApplicationController
 
   # Document analysis landing page for logged out users
   def landing
-    redirect_to hub_path if user_signed_in?
+    redirect_to analysis_hub_path if user_signed_in?
     
     # Set SEO metadata
     set_meta_tags title: "Document Analysis - Notebook.ai",
