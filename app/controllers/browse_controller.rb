@@ -14,6 +14,23 @@ class BrowseController < ApplicationController
     @tag_slug = 'artfight2025' # Use the correctly slugified version
     @tagged_content = []
     
+    # Set SEO metadata for this page
+    set_meta_tags title: 'Art Fight 2025',
+                 description: 'Browse characters, locations, and other creative content from Notebook.ai creators participating in Art Fight 2025. Find inspiration for your next art attack!',
+                 keywords: ['art fight', 'character art', 'original characters', 'ocs', 'art challenge', 'art event', 'artfight2025', 'worldbuilding'],
+                 og: {
+                   title: 'Art Fight 2025 - Notebook.ai',
+                   description: 'Browse characters, locations, and other creative content from Notebook.ai creators participating in Art Fight 2025',
+                   image: view_context.asset_path('card-headers/patterns/pattern5.png'),
+                   type: 'website'
+                 },
+                 twitter: {
+                   card: 'summary_large_image',
+                   title: 'Art Fight 2025 - Notebook.ai',
+                   description: 'Browse characters, locations, and other creative content from Notebook.ai creators participating in Art Fight 2025',
+                   image: view_context.asset_path('card-headers/patterns/pattern5.png')
+                 }
+    
     # Directly check database for any pages with this tag
     tag_exists = PageTag.exists?(slug: @tag_slug)
     
