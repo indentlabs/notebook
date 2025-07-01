@@ -1,0 +1,34 @@
+<%
+  # Only show this promotion until August 1, 2025
+  show_artfight_promo = Date.today <= Date.new(2025, 8, 1)
+%>
+
+<% if show_notice?(id: 24) && show_artfight_promo %>
+  <div class="clearfix"></div>
+  <div class="card-panel purple lighten-4 black-text show-when-focused" style="margin-top: 30px; border-left: 4px solid #9c27b0; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 4px;">
+    <div style="display: flex; align-items: flex-start;">
+      <i class="material-icons purple-text" style="margin-right: 10px;">brush</i>
+      <div style="margin-right: 30px;">
+        <strong style="font-size: 1.05rem;">Participating in Art Fight 2025?</strong>
+        <div style="margin-top: 4px;">
+          <p class="black-text">
+            Click to add the tag below and help others find your <%= page.class.name.downcase %>!
+          </p>
+          <div style="margin-top: 8px;">
+            <%= link_to '#', class: 'js-add-tag', style: 'display: inline-block;' do %>
+              <span class="new badge purple white-text hoverable" data-badge-caption="ArtFight2025" style="margin: 0;"></span>
+            <% end %>
+          </div>
+          <p style="margin-top: 10px; font-size: 0.9rem;" class="black-text">
+            <i class="material-icons tiny">lock</i>
+            Remember to set your <%= page.class.name.downcase %> to <strong>public</strong> in the privacy toggle if you want others to see it. All pages are private by default.
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <%= link_to notice_dismissal_dismiss_path(notice_id: 24), style: 'position: absolute; top: 8px; right: 10px;', class: 'grey-text text-darken-2 tooltipped', data: { position: 'top', tooltip: 'Hide this suggestion' } do %>
+      <i class="material-icons tiny">close</i>
+    <% end %>
+  </div>
+<% end %>

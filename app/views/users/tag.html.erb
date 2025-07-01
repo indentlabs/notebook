@@ -1,0 +1,208 @@
+<div class="row" style="margin-bottom: 0;">
+  <div class="col s12">
+    <%
+      # Generate a consistent pattern URL for the background based on tag name
+      pattern_seed = @tag.tag.bytes.sum % 5 + 1
+      pattern_url = asset_path("card-headers/patterns/pattern#{pattern_seed}.png")
+      
+      # Calculate total items for the stats display
+      total_items = @tagged_content.sum { |group| group[:content].count }
+      content_types_count = @tagged_content.size
+    %>
+    
+    <div class="card z-depth-1" style="border-radius: 4px; overflow: hidden;">
+      <!-- Header with hero image background -->
+      <div class="<%= @accent_color %>" style="position: relative; background: url('<%= pattern_url %>') center center; background-size: cover; height: 180px;">
+        <!-- Dark overlay for better text contrast -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.3);"></div>
+        
+        <!-- Tag floating badge -->
+        <div style="position: absolute; bottom: -24px; left: 24px; z-index: 2;">
+          <div style="display: inline-block; background-color: white; padding: 14px 22px; border-radius: 4px; box-shadow: 0 2px 10px 0 rgba(0,0,0,0.2);">
+            <div style="display: flex; align-items: center;">
+              <i class="material-icons <%= @accent_color %>-text" style="font-size: 28px; margin-right: 12px;"><%= PageTag.icon %></i>
+              <span style="font-size: 28px; font-weight: 500;" class="<%= @accent_color %>-text"><%= @tag.tag %></span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- User info - prominent but elegant -->
+        <div style="position: absolute; top: 20px; left: 24px; z-index: 1; display: flex; align-items: center;">
+          <% if @user.image_url %>
+            <%= image_tag @user.image_url.html_safe, style: 'width: 56px; height: 56px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.2);' %>
+          <% else %>
+            <div style="width: 56px; height: 56px; background-color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+              <i class="material-icons" style="font-size: 32px; color: #757575;">person</i>
+            </div>
+          <% end %>
+
+          <div style="margin-left: 15px;">
+            <div>
+              <%= link_to @user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user), class: "white-text" do %>
+                <span style="font-size: 20px; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.3); line-height: 1.2; display: block;">
+                  <%= @user.display_name %>
+                </span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Stats bar - clean and elegant -->
+      <div class="<%= @accent_color %> lighten-5" style="padding: 30px 24px 16px 24px;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+          <!-- Left section (for title) -->
+          <div style="margin-bottom: 10px;">
+          &nbsp;
+          </div>
+          
+          <!-- Right section (for stats) -->
+          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <div class="chip z-depth-0 <%= @accent_color %> lighten-3" style="border: none; margin: 0;">
+              <i class="material-icons left"><%= PageTag.icon %></i>
+              <%= pluralize(total_items, 'item') %>
+            </div>
+            
+            <div class="chip z-depth-0 <%= @accent_color %> lighten-3" style="border: none; margin: 0;">
+              <i class="material-icons left">category</i>
+              <%= pluralize(content_types_count, 'page type') %>
+            </div>
+            
+            <%= link_to @user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user), class: "chip grey lighten-4" do %>
+              <i class="material-icons left">person</i>
+              View profile
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col s12">
+    <% if @tagged_content.empty? %>
+      <div class="center-align" style="margin-top: 80px">
+        <h5 class="grey-text">No public content with this tag</h5>
+        <p class="grey-text">
+          Either <%= @user.display_name %> has not tagged any public content with "<%= @tag.tag %>" or this content has been deleted.
+        </p>
+      </div>
+    <% else %>
+      <% @tagged_content.each do |content_group| %>
+        <div class="section">
+          <h5 class="<%= content_group[:color] %>-text">
+            <i class="material-icons left"><%= content_group[:icon] %></i>
+            <%= content_group[:type].pluralize %> (<%= content_group[:content].count %>)
+            
+            <span class="grey-text right" style="font-size: 14px; font-weight: normal; margin-top: 5px;">
+              <% 
+                content_type = content_group[:type]
+                if content_type == "Document"
+                  content_type_path = profile_by_username_path(username: @user.username)
+                elsif content_type == "Timeline"
+                  content_type_path = nil # No specific timeline route in user profile
+                else
+                  content_type_path = send("#{content_type.downcase.pluralize}_user_path", id: @user.id) rescue nil
+                end
+              %>
+              <% if content_type_path %>
+                <%= link_to content_type_path, class: "grey-text" do %>
+                  <i class="material-icons tiny" style="position: relative; top: 2px;">visibility</i>
+                  View all <%= content_group[:type].downcase.pluralize %>
+                <% end %>
+              <% end %>
+            </span>
+          </h5>
+          
+          <div class="row js-content-cards-list">
+            <% content_group[:content].each do |content| %>
+              <div class="col s12 m6 l4 js-content-card-container">
+                <div class="hoverable card sticky-action" style="margin-bottom: 2px">
+                  <div class="card-image waves-effect waves-block waves-light">
+                    <% 
+                      # Find image for this content following the same pattern as in _cards.html.erb
+                      content_image = @random_image_including_private_pool_cache.fetch([content.class.name, content.id], [])
+                        .sample
+                        .try(:src, :medium)
+
+                      if @saved_basil_commissions
+                        content_image ||= @saved_basil_commissions.fetch([content.class.name, content.id], [])
+                          .sample
+                          .try(:image)
+                          .try(:url)
+                      end
+
+                      content_image ||= asset_path("card-headers/#{content.class.name.downcase.pluralize}.jpg")
+                    %>
+                    <div class="activator" style="height: 265px; background: url('<%= content_image %>'); background-size: cover;"></div>
+
+                    <span class="card-title js-content-name activator">
+                      <div class="bordered-text">
+                        <% content_name = content.respond_to?(:name) ? content.name : content.title %>
+                        <%= ContentFormatterService.show(text: content_name.presence || 'Untitled', viewing_user: current_user) %>
+                      </div>
+                      
+                      <% if content.respond_to?(:page_tags) %>
+                        <p class="tags-container">
+                          <% content.page_tags.each do |tag| %>
+                            <% if tag.tag == @tag.tag %>
+                              <span class="new badge <%= content_group[:color] %> left" data-badge-caption="<%= tag.tag %>"></span>
+                            <% else %>
+                              <%= link_to content.user.username.present? ? user_tag_path(username: content.user.username, tag_slug: tag.slug) : user_id_tag_path(id: content.user.id, tag_slug: tag.slug) do %>
+                                <span class="new badge grey left" data-badge-caption="<%= tag.tag %>"></span>
+                              <% end %>
+                            <% end %>
+                          <% end %>
+                        </p>
+                      <% end %>
+                    </span>
+                  </div>
+                  <% if user_signed_in? %>
+                    <div class="card-action">
+                      <% if content.is_a?(Document) %>
+                        <%= link_to 'View', content, class: 'blue-text text-lighten-1', target: '_blank' %>
+                      <% else %>
+                        <%= link_to 'View', content, class: 'blue-text text-lighten-1' %>
+                      <% end %>
+                    </div>
+                  <% end %>
+                  <div class="card-reveal">
+                    <span class="card-title">
+                      <%= content_name.presence || 'Untitled' %>
+                      <i class="material-icons right">close</i>
+                    </span>
+                    <% content_description = content.try(:description) || content.try(:synopsis) %>
+                    <% if content_description.present? %>
+                      <p>
+                        <%= sanitize ContentFormatterService.show(text: truncate(content_description, length: 420, escape: false), viewing_user: current_user) %>
+                      </p>
+                    <% end %>
+                    
+                    <% if content.respond_to?(:page_tags) %>
+                      <p class="tags-container">
+                        <% content.page_tags.each do |tag| %>
+                          <% if tag.tag == @tag.tag %>
+                            <span class="new badge <%= content_group[:color] %> left" data-badge-caption="<%= tag.tag %>"></span>
+                          <% else %>
+                            <%= link_to content.user.username.present? ? user_tag_path(username: content.user.username, tag_slug: tag.slug) : user_id_tag_path(id: content.user.id, tag_slug: tag.slug) do %>
+                              <span class="new badge grey left" data-badge-caption="<%= tag.tag %>"></span>
+                            <% end %>
+                          <% end %>
+                        <% end %>
+                      </p>
+                    <% end %>
+                    <div class="clearfix"></div>
+                    <p class="grey-text clearfix">
+                      <%= content.created_at == content.updated_at ? 'created' : 'last updated' %>
+                      <%= time_ago_in_words content.updated_at %>
+                      ago
+                    </p>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

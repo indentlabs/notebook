@@ -1,9 +1,8 @@
 require 'test_helper'
 
 class NoticeDismissalControllerTest < ActionDispatch::IntegrationTest
-  # test "should get dismiss" do
-  #   get notice_dismissal_dismiss_url
-  #   assert_response :success
-  # end
-
+  # Tests are disabled until properly implemented
+  def test_should_get_root_url
+    skip("Test not implemented yet")
+  end
 end

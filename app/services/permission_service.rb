@@ -25,11 +25,18 @@ class PermissionService < Service
   end
 
   def self.user_can_contribute_to_containing_universe?(user:, content:)
+    # Early return if no user is provided
     return false if user.nil?
+    
+    # Special case for attribute-related content
     return true if [AttributeCategory, AttributeField, Attribute].include?(content.class) #todo audit this
 
-    return true if user.contributable_universe_ids.include?(content.universe_id)
-    return true if user.universes.pluck(:id).include?(content.universe_id)
+    # Handle cases where content might not have a universe_id
+    return false if content.universe_id.nil?
+
+    # Check if user can contribute to this universe
+    return true if user.respond_to?(:contributable_universe_ids) && user.contributable_universe_ids.include?(content.universe_id)
+    return true if user.respond_to?(:universes) && user.universes.pluck(:id).include?(content.universe_id)
 
     return false
   end

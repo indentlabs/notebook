@@ -1,4 +1,13 @@
-<%# render partial: 'content/tailwind_components/content_image_header', locals: { content: @serialized_content } %>
+<%
+  page_title = "#{@content.name} Gallery"
+  page_description = "Gallery of images for #{@content.name}, a fictional #{@content.class.name.downcase} on Notebook.ai"
+  
+  set_meta_tags title:       page_title,
+                description: page_description,
+                image_src:   @content.first_public_image,
+                og:          { type: 'website' },
+                twitter:     { card: 'photo', image: @content.first_public_image }
+%>
 
 <div
   x-data="{ showEditMode: <%= params.fetch('editing', false) %> }"
@@ -52,43 +61,6 @@
           </button>
         </div>
       <% end %>
-
-      <!--
-      <div data-controller="dropdown" class="mr-3">
-        <button type="button" data-action="dropdown#toggle click@window->dropdown#hide" class="w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue" id="page-index-button" aria-expanded="false" aria-haspopup="true">
-          <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
-          </svg>
-          Jump to...
-          <svg class="ml-2.5 -mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-          </svg>
-        </button>
-
-        <div data-dropdown-target="menu" class="origin-top-right z-10 absolute right-4 -mt-6 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="page-index-button" tabindex="-1">
-          <div class="py-1" role="none">
-          <% @serialized_content.data[:categories].each do |category| %>
-            <%= link_to "##{category[:label]}", class: "text-gray-700 block px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 border-b border-gray-100", id: category[:id], data: { action: "dropdown#toggle" } do %>
-              <i class="material-icons float-left <%= @serialized_content.class_text_color %> mr-3"><%= category[:icon] %></i>
-              <%= category[:label] %>
-            <% end %>
-          <% end %>
-        </div>
-      </div>
-      -->
-
-      <!--
-      <% if @content.updatable_by?(current_user) %>
-        <div class="mr-3">
-          <button type="button" class="bg-white border rounded-md shadow-sm px-4 py-2 inline-flex items-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            @click=""
-          >
-            <i class="material-icons text-2xl leading-3 mr-3 text-gray-400">dashboard</i>
-            Tools
-          </button>
-        </div>
-      <% end %>
-      -->
     </div>
   </nav>
 
@@ -108,108 +80,145 @@
             <%= render partial: 'content/tailwind_components/content_header', locals: { content: @serialized_content } %>
           </div>
 
-          <!-- PRIMARY image -->
-          <% if @primary_image %>
-            <div class="px-5 py-2 mx-auto pt-6">
-              <div class="flex flex-wrap -m-1 md:-m-2">
-                <%# we should probably scale size/dimensions based on actual image data (which we have here) %>
-                <div class="flex flex-wrap w-2/3">
-                  <div class="w-full p-1 md:p-2">
-                    <%= link_to @primary_image.src.url do %>
-                      <%= image_tag @primary_image.src.url, class: 'block object-cover object-center w-full h-full rounded hover:opacity-90', alt: "Primary image for #{@content.name}" %>
-                    <% end %>
-                  </div>
-                </div>
-                <div class="flex flex-wrap w-1/3 p-12">
-                  <div>
-                    <h2 class="font-bold w-full"><%= @content.name %></h2>
-                    <div class="text-sm text-gray-400">
-                      A <%= @content.class.name.downcase %>
-                      by <%= link_to @content.user.name, @content.user, class: User.text_color %>
+          <!-- Gallery content -->
+          <% if @images.empty? && @basil_images.empty? %>
+            <!-- Empty state -->
+            <div class="flex flex-col items-center justify-center py-20">
+              <div class="bg-gray-100 rounded-full p-6 mb-4">
+                <i class="material-icons text-gray-400 text-5xl"><%= @content.class.icon %></i>
+              </div>
+              <h2 class="text-2xl font-medium text-gray-700 mb-2">No images yet</h2>
+              <p class="text-gray-500 mb-6">This <%= @content.class.name.downcase %> doesn't have any images in its gallery.</p>
+              <% if @content.updatable_by?(current_user) %>
+                <%= link_to send("edit_#{@content.class.name.downcase}_path", @content, anchor: "uploads"), 
+                  class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-notebook-blue hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                  <i class="material-icons text-sm mr-2">add_photo_alternate</i>
+                  Add Images
+                <% end %>
+              <% end %>
+            </div>
+          <% else %>
+            <% 
+              # Use the helper to combine and sort images consistently by position
+              # This keeps the order consistent with the MaterializeCSS version
+              combined_images = combine_and_sort_gallery_images(@images, @basil_images)
+            %>
+            
+            <!-- PRIMARY image if exists -->
+            <% if @primary_image %>
+              <div class="px-5 py-2 mx-auto pt-6">
+                <div class="flex flex-wrap -m-1 md:-m-2">
+                  <div class="flex flex-wrap w-2/3">
+                    <div class="w-full p-1 md:p-2">
+                      <%= link_to @primary_image.src.url do %>
+                        <%= image_tag @primary_image.src.url, class: 'block object-cover object-center w-full h-full rounded hover:opacity-90', alt: "Primary image for #{@content.name}" %>
+                      <% end %>
                     </div>
                   </div>
+                  <div class="flex flex-wrap w-1/3 p-12">
+                    <div>
+                      <h2 class="font-bold w-full"><%= @content.name %></h2>
+                      <div class="text-sm text-gray-400">
+                        A <%= @content.class.name.downcase %>
+                        by <%= link_to @content.user.name, @content.user, class: User.text_color %>
+                      </div>
+                    </div>
 
-                  <div x-show="showEditMode">
-                    <%=
-                      button_to 'Delete this image', image_deletion_path(@primary_image.id),
-                        class: 'js-remove-image text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg',
-                        method: 'delete',
-                        remote: true,
-                        data: { confirm: "Are you sure? This can't be undone." }
-                    %>
+                    <div x-show="showEditMode" class="mt-4">
+                      <%=
+                        button_to 'Delete this image', image_deletion_path(@primary_image.id),
+                          class: 'js-remove-image text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg',
+                          method: 'delete',
+                          remote: true,
+                          data: { confirm: "Are you sure? This can't be undone." }
+                      %>
+                    </div>
                   </div>
-                  <!--
-                  <p class="text-gray-700">
-                    Image description that's provided and might be kind of long so it might have to wrap, so we might as well write this long description here to see if it looks good when it does wrap
-                  </p>
-                  -->
-                  <!--
-                  <div class="text-sm text-gray-400">
-                    3 weeks ago
-                    &middot;
-                    <span class="text-blue-800">
-                      7 kudos
-                    </span>
-                    &middot;
-                    <span class="text-blue-800">
-                      42 comments
-                    </span>
-                  </div>
-                  -->
-                  <!--
-                  <div class="border-b border-gray-200 w-1/3 mx-auto h-1"></div>
-                  -->
                 </div>
+              </div>
+            <% end %>
+
+            <!-- All other images in a grid -->
+            <div class="p-5">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <% combined_images.each_with_index do |image_item, index| %>
+                  <div class="gallery-item relative overflow-hidden rounded-lg shadow-md">
+                    <% if image_item[:type] == 'image_upload' %>
+                      <%= link_to image_item[:data].src(:original), target: "_blank", class: "block" do %>
+                        <%= image_tag image_item[:data].src(:medium), 
+                            class: "w-full h-60 object-cover transform hover:scale-105 transition duration-300",
+                            alt: "Image of #{@content.name}" %>
+                      <% end %>
+                      
+                      <% if @content.updatable_by?(current_user) %>
+                        <div x-show="showEditMode" class="absolute top-2 right-2">
+                          <%=
+                            button_to 'Delete', image_deletion_path(image_item[:data].id),
+                              class: 'bg-red-500 hover:bg-red-700 text-white text-xs py-1 px-2 rounded',
+                              method: :delete,
+                              remote: true,
+                              data: { confirm: "Are you sure? This can't be undone." }
+                          %>
+                        </div>
+                      <% end %>
+                      
+                      <div class="p-3 bg-white dark:bg-gray-800 flex items-center text-sm text-gray-500">
+                        <i class="material-icons text-xs mr-1">schedule</i>
+                        <%= time_ago_in_words(image_item[:data].created_at) %> ago
+                      </div>
+                    <% elsif image_item[:type] == 'basil_commission' %>
+                      <% 
+                        # For BasilCommission, access the image through rails_blob_path
+                        if image_item[:data].image.attached?
+                          basil_url = rails_blob_path(image_item[:data].image, disposition: "attachment") 
+                        else
+                          basil_url = asset_path("missing-image.jpg")
+                        end
+                      %>
+                      <%= link_to basil_url, target: "_blank", class: "block" do %>
+                        <%= image_tag basil_url, 
+                            class: "w-full h-60 object-cover transform hover:scale-105 transition duration-300",
+                            alt: "Generated image of #{@content.name}" %>
+                      <% end %>
+                      
+                      <% if @content.updatable_by?(current_user) %>
+                        <div x-show="showEditMode" class="absolute top-2 right-2">
+                          <%=
+                            button_to 'Delete', basil_delete_path(image_item[:data]),
+                              class: 'bg-red-500 hover:bg-red-700 text-white text-xs py-1 px-2 rounded',
+                              method: :delete,
+                              remote: true,
+                              data: { confirm: "Are you sure? This can't be undone." }
+                          %>
+                        </div>
+                      <% end %>
+                      
+                      <div class="p-3 bg-white dark:bg-gray-800 flex items-center text-sm text-gray-500">
+                        <i class="material-icons text-xs mr-1">schedule</i>
+                        <% if image_item[:data].respond_to?(:saved_at) %>
+                          <%= time_ago_in_words(image_item[:data].saved_at) %> ago
+                        <% else %>
+                          <%= time_ago_in_words(Time.current) %> ago
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
               </div>
             </div>
           <% end %>
 
-          <!-- All other non-primary images -->
-          <div class="px-5 py-2 mx-auto flex flex-wrap">
-            <% @other_images.each do |image| %>
-              <div class="flex flex-wrap w-1/3">
-                <div class="w-full p-2">
-                  <%= link_to image.src.url do %>
-                    <%= image_tag image.src.url, class: 'block object-cover object-center w-full h-full border rounded-lg hover:opacity-90' %>
-                  <% end %>
-                  <div x-show="showEditMode" class="relative -top-8 right-1 text-right">
-                    <%=
-                      button_to 'Delete this image', image_deletion_path(image.id),
-                        class: 'js-remove-image text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg',
-                        method: :delete,
-                        remote: true,
-                        data: { confirm: "Are you sure? This can't be undone." }
-                    %>
-                  </div>
-                </div>
-              </div>
-            <% end %>
-            <% @basil_images.each do |commission| %>
-              <div class="flex flex-wrap w-1/3">
-                <div class="w-full p-1 md:p-2">
-                  <%= link_to commission.image do %>
-                    <%= image_tag commission.image, class: 'block object-cover object-center w-full h-full rounded-lg hover:opacity-90' %>
-                  <% end %>
-                  <div x-show="showEditMode" class="relative -top-8 right-1 text-right">
-                    <%=
-                      button_to 'Delete this image', basil_delete_path(commission),
-                        class: 'js-remove-image text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg',
-                        method: 'delete',
-                        remote: true,
-                        data: { confirm: "Are you sure? This can't be undone." } 
-                    %>
-                  </div>
-
-
-                  
-                </div>
-              </div>
-            <% end %>
-          </div>
-
-          <div x-show="showEditMode">
-            Upload more images
-          </div>
+          <% if @content.updatable_by?(current_user) %>
+            <div x-show="showEditMode" class="p-5">
+              <h3 class="text-lg font-medium text-gray-700 mb-4">Upload more images</h3>
+              <%= form_tag upload_image_path(content_type: @content.class.name, content_id: @content.id), 
+                           multipart: true, class: "flex items-center space-x-2" do %>
+                <%= file_field_tag 'image_uploads[]', multiple: true, accept: 'image/*',
+                                  class: "border border-gray-300 rounded-md py-2 px-3 text-sm" %>
+                <%= submit_tag 'Upload', class: "bg-notebook-blue text-white px-4 py-2 rounded hover:bg-blue-600 transition" %>
+              <% end %>
+            </div>
+          <% end %>
 
         </div>
       </div>
@@ -217,7 +226,6 @@
       <!-- Right pane -->
       <div class="bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0">
         <div class="pl-6 lg:w-80 px-6 pt-6 space-y-8" x-show="showEditMode">
-
           <div class="lg:flex lg:items-center lg:justify-between">
             <div class="flex-1 min-w-0">
               <h2 class="font-bold leading-tight text-gray-900">Gallery customization</h2>
@@ -271,13 +279,6 @@
           </div>
 
           <div>
-            <h2 class="text-sm font-semibold">Upload new images</h2>
-            <p class="text-xs">
-              You can upload additional images to this <%= @content.class.name.downcase %> at the bottom of this page.
-            </p>
-          </div>
-
-          <div>
             <h2 class="text-sm font-semibold">Generate new images</h2>
             <p class="text-xs">
               Our visualizer can also generate new images of <%= @content.name %> for you from your
@@ -297,3 +298,182 @@
     </div>
   </div>
 </div>
+
+<!-- About section -->
+<div class="bg-gray-50 py-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center">
+      <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">About <%= @content.name %></h2>
+      <div class="mt-3 flex justify-center">
+        <div class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-<%= @content.class.color %>-100 text-<%= @content.class.color %>-800">
+          <i class="material-icons mr-1 text-sm"><%= @content.class.icon %></i>
+          <%= @content.class.name %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-12 max-w-3xl mx-auto">
+      <% 
+        # Find the overview category if it exists
+        overview_category = @serialized_content&.data&.fetch(:categories, [])&.find { |cat| 
+          cat[:name].downcase == 'overview' || cat[:name].downcase == 'appearance'
+        } if @serialized_content.present?
+      %>
+      
+      <% if overview_category.present? && overview_category[:fields].present? %>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+          <% overview_category[:fields].reject { |field| field[:hidden] }.each do |field| %>
+            <% 
+              # Skip empty fields
+              next if field[:value].blank? 
+              
+              # Skip private fields
+              next if field[:label].to_s.start_with?("Private") && !(user_signed_in? && @content.user == current_user)
+            %>
+            
+            <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+              <h3 class="text-xs font-medium tracking-wider uppercase text-gray-500 mb-1">
+                <%= field[:label] %>
+              </h3>
+              <div class="text-sm text-gray-900">
+                <% if field[:value].is_a?(String) %>
+                  <%= ContentFormatterService.show(text: field[:value], viewing_user: current_user) %>
+                <% elsif field[:value].is_a?(Array) %>
+                  <%= field[:value].join(", ") %>
+                <% else %>
+                  <%= field[:value].to_s %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg p-8 text-center text-gray-500">
+          <p>No overview information available for this <%= @content.class.name.downcase %>.</p>
+        </div>
+      <% end %>
+      
+      <div class="mt-8 text-center">
+        <%= link_to @content, class: "inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-notebook-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+          <i class="material-icons mr-2">visibility</i>
+          View full <%= @content.class.name.downcase %> page
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Related content section (when available) -->
+<% if @other_content.any? %>
+  <div class="bg-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-extrabold tracking-tight text-gray-900 flex items-center">
+        <i class="material-icons mr-2 text-<%= @content.class.color %>-600"><%= @content.class.icon %></i>
+        More <%= @content.class.name.pluralize %> in this Universe
+      </h2>
+      
+      <div class="mt-8 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+        <% @other_content.each do |related| %>
+          <%= link_to send("gallery_#{related.class.name.downcase}_path", related), class: "group" do %>
+            <div class="w-full aspect-w-1 aspect-h-1 bg-gray-200 rounded-lg overflow-hidden xl:aspect-w-7 xl:aspect-h-8">
+              <% 
+                related_image = ImageUpload.where(content_type: related.class.name, content_id: related.id).first 
+                related_basil = BasilCommission.where(entity: related).where.not(saved_at: nil).first
+                
+                if related_image
+                  image_url = related_image.src(:medium)
+                elsif related_basil
+                  image_url = related_basil.image
+                else
+                  image_url = asset_path("card-headers/#{related.class.name.downcase.pluralize}.jpg")
+                end
+              %>
+              <div class="w-full h-60 bg-cover bg-center group-hover:opacity-75 transition duration-300" 
+                   style="background-image: url('<%= image_url %>');">
+                <div class="w-full h-full bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                  <h3 class="p-4 text-lg font-medium text-white"><%= related.name %></h3>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<!-- Lightbox for images -->
+<div id="gallery-lightbox" class="fixed inset-0 z-50 hidden bg-black/90 flex items-center justify-center">
+  <button id="close-lightbox" class="absolute top-4 right-4 text-white text-4xl">&times;</button>
+  <button id="prev-image" class="absolute left-4 text-white text-4xl">&lt;</button>
+  <button id="next-image" class="absolute right-4 text-white text-4xl">&gt;</button>
+  <img id="lightbox-image" class="max-h-[90vh] max-w-[90vw] object-contain" src="" alt="Image in lightbox">
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Set up lightbox functionality
+    const lightbox = document.getElementById('gallery-lightbox');
+    const lightboxImg = document.getElementById('lightbox-image');
+    const closeBtn = document.getElementById('close-lightbox');
+    const prevBtn = document.getElementById('prev-image');
+    const nextBtn = document.getElementById('next-image');
+    
+    const galleryImages = document.querySelectorAll('.gallery-item img');
+    let currentIndex = 0;
+    const imageUrls = [];
+    
+    // Collect all image URLs
+    galleryImages.forEach(img => {
+      const url = img.parentElement.href;
+      imageUrls.push(url);
+      
+      img.addEventListener('click', function(e) {
+        e.preventDefault();
+        currentIndex = imageUrls.indexOf(img.parentElement.href);
+        openLightbox();
+      });
+    });
+    
+    function openLightbox() {
+      lightboxImg.src = imageUrls[currentIndex];
+      lightbox.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeLightbox() {
+      lightbox.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    
+    function showPrevImage() {
+      currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
+      lightboxImg.src = imageUrls[currentIndex];
+    }
+    
+    function showNextImage() {
+      currentIndex = (currentIndex + 1) % imageUrls.length;
+      lightboxImg.src = imageUrls[currentIndex];
+    }
+    
+    closeBtn.addEventListener('click', closeLightbox);
+    prevBtn.addEventListener('click', showPrevImage);
+    nextBtn.addEventListener('click', showNextImage);
+    
+    // Close on overlay click
+    lightbox.addEventListener('click', function(e) {
+      if (e.target === lightbox) {
+        closeLightbox();
+      }
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+      if (!lightbox.classList.contains('hidden')) {
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') showPrevImage();
+        if (e.key === 'ArrowRight') showNextImage();
+      }
+    });
+  });
+</script>

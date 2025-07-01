@@ -1,0 +1,2063 @@
+<!-- Modal structure - defined before the content so it's available immediately -->
+<div id="how-to-join-modal" class="modal modal-how-to-join">
+  <div class="modal-content">
+    <h4><i class="material-icons <%= @accent_color %>-text left" style="margin-right: 10px;">info</i> How to join this showcase</h4>
+    <p>Want your page to appear here? Follow these steps:</p>
+    <ol>
+      <li>Add the <span class="highlight">ArtFight2025</span> tag to your notebook page</li>
+      <li>Set your page's privacy to <span class="highlight">Public</span> in the privacy toggle</li>
+      <li>That's it! Your page will appear here automatically</li>
+    </ol>
+    <p class="grey-text" style="font-size: 14px;">Note: It may take a few minutes for new content to appear.</p>
+  </div>
+  <div class="modal-content" style="border-top: 1px solid #e0e0e0; padding-top: 15px;">
+    <h4><i class="material-icons <%= @accent_color %>-text left" style="margin-right: 10px;">brush</i> What is Art Fight?</h4>
+    <p>Art Fight is an annual art trading event that runs during July where:</p>
+    <ul class="browser-default">
+      <li>Artists are divided into two opposing teams</li>
+      <li>Participants "attack" the opposing team by drawing their original characters (OCs)</li> 
+      <li>Each completed artwork earns points for your team</li>
+      <li>The team with the most points at the end of July wins</li>
+    </ul>
+    <p>It's a great way to practice your art skills, discover new characters to draw, and connect with other creatives. Adding the <span class="highlight">ArtFight2025</span> tag to your public pages helps other Notebook.ai users find your characters for Art Fight!</p>
+    <p class="grey-text" style="font-size: 14px;">Note: Notebook.ai is not officially affiliated with Art Fight. Visit <a href="https://artfight.net" target="_blank" class="<%= @accent_color %>-text">artfight.net</a> to learn more and participate.</p>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-light <%= @accent_color %> btn-flat white-text">Got it</a>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Privacy text in top right -->
+  <div class="col s12">
+    <div class="grey-text text-darken-1" style="margin: 8px 0; font-size: 0.85rem; text-align: right;">
+      <i class="material-icons tiny" style="position: relative; top: 2px;">lock_open</i>
+      All content on Notebook.ai is private by default. Only pages with the <strong>ArtFight2025</strong> tag <em>and</em> set to <strong>public</strong> appear here.
+    </div>
+  </div>
+  
+  <div class="col s12">
+    <% 
+      # Generate a consistent pattern for the background based on tag name
+      pattern_seed = 5 # Fixed for ArtFight tag
+      pattern_url = asset_path("card-headers/patterns/pattern#{pattern_seed}.png")
+      
+      # Calculate total items for the stats display
+      total_items = @tagged_content.sum { |group| group[:content].count }
+      content_types_count = @tagged_content.size
+      creators_count = @tagged_content.flat_map { |group| group[:content].map(&:user_id) }.uniq.count
+    %>
+    
+    <!-- Enhanced hero header with improved responsive design and accessibility -->
+    <div class="card z-depth-2" style="border-radius: 8px; overflow: hidden; margin-bottom: 30px;" role="region" aria-labelledby="artfight-title">
+      <div class="artfight-header <%= @accent_color %> darken-1" style="position: relative; min-height: 220px; overflow: hidden;">
+        <!-- Animated background with parallax effect -->
+        <div class="animated-background" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('<%= pattern_url %>') center center; background-size: cover; transform: scale(1.1); z-index: 1;" aria-hidden="true"></div>
+        
+        <!-- Gradient overlay with animated elements -->
+        <div class="animated-gradient-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%); z-index: 2;" aria-hidden="true"></div>
+        
+        <!-- Animated decorative elements -->
+        <div class="header-decoration" aria-hidden="true">
+          <div class="floating-shape shape-1"></div>
+          <div class="floating-shape shape-2"></div>
+          <div class="floating-shape shape-3"></div>
+          <div class="floating-shape shape-4"></div>
+        </div>
+        
+        <!-- Help button for how to join - fixed position for all screen sizes -->
+        <div class="help-tooltip-container" style="position: absolute; top: 16px; right: 16px; z-index: 10;">
+          <button class="btn-floating white z-depth-2 pulse modal-trigger" id="how-to-join-btn" 
+                  style="height: 42px; width: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none;" 
+                  data-target="how-to-join-modal" 
+                  onclick="this.classList.remove('pulse');"
+                  aria-label="Learn how to join Art Fight 2025"
+                  title="Learn how to join Art Fight 2025">
+            <i class="material-icons <%= @accent_color %>-text" aria-hidden="true">help_outline</i>
+          </button>
+        </div>
+        
+        <!-- Header content container with proper padding -->
+        <div class="header-content" style="position: relative; z-index: 5; padding: 32px 24px; min-height: 220px; display: flex; flex-direction: column;">
+          <!-- Main header section with responsive text -->
+          <div class="header-text" style="max-width: 100%; margin-bottom: 16px;">
+            <h1 id="artfight-title" class="artfight-title" style="font-size: clamp(28px, 5vw, 38px); font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.4); line-height: 1.2; margin: 0 0 8px 0; color: white;">
+              Art Fight 2025
+            </h1>
+            <h2 id="artfight-subtitle" class="artfight-subtitle" style="font-size: clamp(14px, 3vw, 18px); text-shadow: 0 1px 3px rgba(0,0,0,0.4); font-weight: 400; margin: 0; color: white; margin-top: 8px;">
+              A showcase of creators' public content across Notebook.ai
+            </h2>
+          </div>
+          
+          <!-- Stats chips with improved layout, properly aligned icons, animations, and accessibility -->
+          <div class="stats-container animated-stats" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; margin-bottom: 16px;" aria-label="Event statistics">
+            <div class="chip z-depth-1 white artfight-stat-chip animate-in" style="border: none; margin: 0; font-weight: 500; height: 32px; line-height: 32px; display: flex; align-items: center; animation-delay: 0.2s;" role="status" aria-label="Total pages: <%= pluralize(total_items, 'page') %>">
+              <i class="material-icons <%= @accent_color %>-text pulse-icon" style="margin-right: 8px; font-size: 20px;" aria-hidden="true"><%= PageTag.icon %></i>
+              <span style="white-space: nowrap;" class="counter-value" data-count="<%= total_items %>"><%= pluralize(total_items, 'page') %></span>
+            </div>
+            
+            <div class="chip z-depth-1 white artfight-stat-chip animate-in" style="border: none; margin: 0; font-weight: 500; height: 32px; line-height: 32px; display: flex; align-items: center; animation-delay: 0.4s;" role="status" aria-label="Content types: <%= pluralize(content_types_count, 'page type') %>">
+              <i class="material-icons <%= @accent_color %>-text pulse-icon" style="margin-right: 8px; font-size: 20px;" aria-hidden="true">category</i>
+              <span style="white-space: nowrap;" class="counter-value" data-count="<%= content_types_count %>"><%= pluralize(content_types_count, 'page type') %></span>
+            </div>
+            
+            <div class="chip z-depth-1 white artfight-stat-chip animate-in" style="border: none; margin: 0; font-weight: 500; height: 32px; line-height: 32px; display: flex; align-items: center; animation-delay: 0.6s;" role="status" aria-label="Total creators: <%= pluralize(creators_count, 'creator') %>">
+              <i class="material-icons <%= @accent_color %>-text pulse-icon" style="margin-right: 8px; font-size: 20px;" aria-hidden="true">people</i>
+              <span style="white-space: nowrap;" class="counter-value" data-count="<%= creators_count %>"><%= pluralize(creators_count, 'creator') %></span>
+            </div>
+          </div>
+          
+          <!-- Tag floating badge - responsive positioning with perfect alignment and animation -->
+          <div class="artfight-tag-badge animate-in" style="margin-top: auto; align-self: flex-end; animation-delay: 0.8s;">
+            <div class="tag-badge-container" style="display: inline-block; background-color: white; padding: 12px 18px; border-radius: 8px; box-shadow: 0 4px 15px 0 rgba(0,0,0,0.3); position: relative; overflow: hidden;" role="complementary" aria-label="Featured tag: <%= @tag %>">
+              <!-- Shimmer effect element -->
+              <div class="badge-shimmer"></div>
+              
+              <div style="display: flex; align-items: center;">
+                <i class="material-icons <%= @accent_color %>-text tag-icon-animated" style="font-size: clamp(24px, 4vw, 32px); margin-right: 10px; display: flex;" aria-hidden="true"><%= PageTag.icon %></i>
+                <span style="font-size: clamp(20px, 4vw, 28px); font-weight: 600; line-height: 1;" class="<%= @accent_color %>-text tag-text-animated"><%= @tag %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Enhanced category filters with advanced sorting options and accessibility -->  
+  <div class="col s12">
+    <div class="category-filters z-depth-1" style="border-radius: 8px; padding: 16px; margin-bottom: 25px;" role="navigation" aria-label="Content category filters">
+      <div class="filters-container" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <!-- Category filter section -->
+        <div class="category-filter-section" style="flex: 1 1 auto;">
+          <div class="category-filter-title" style="margin-bottom: 10px; display: flex; align-items: center;">
+            <i class="material-icons <%= @accent_color %>-text" style="margin-right: 8px;" aria-hidden="true">filter_list</i>
+            <h3 id="filter-heading" style="font-weight: 500; font-size: 16px; margin: 0;">Filter by category:</h3>
+          </div>
+          
+          <div class="filter-buttons-container" style="display: flex; flex-wrap: wrap; gap: 8px;" role="tablist" aria-labelledby="filter-heading">
+            <button 
+              class="category-filter active black-text" 
+              data-category="all" 
+              style="padding: 6px 12px; border-radius: 4px; background-color: #f5f5f5; text-decoration: none; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center; border: none; cursor: pointer;"
+              onclick="return filterByCategory('all');" 
+              role="tab"
+              aria-selected="true"
+              aria-controls="all-content"
+              id="tab-all">
+              <i class="material-icons <%= @accent_color %>-text left" style="font-size: 18px; margin-right: 6px;" aria-hidden="true">layers</i>
+              <span>All</span> <span class="category-count">(<%= total_items %>)</span>
+            </button>
+            
+            <% @tagged_content.each do |content_group| %>
+              <button 
+                class="category-filter black-text" 
+                data-category="<%= content_group[:type].downcase %>" 
+                style="padding: 6px 12px; border-radius: 4px; background-color: #f5f5f5; text-decoration: none; transition: all 0.2s ease; display: flex; align-items: center; border: none; cursor: pointer;"
+                onclick="return filterByCategory('<%= content_group[:type].downcase %>');"
+                role="tab"
+                aria-selected="false"
+                aria-controls="<%= content_group[:type].downcase %>-content"
+                id="tab-<%= content_group[:type].downcase %>">
+                <i class="material-icons <%= content_group[:color] %>-text left" style="font-size: 18px; margin-right: 6px;" aria-hidden="true"><%= content_group[:icon] %></i>
+                <span><%= content_group[:type].pluralize %></span> <span class="category-count">(<%= content_group[:content].count %>)</span>
+              </button>
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- Sort options section -->
+        <div class="sort-options-section" style="min-width: 200px;">
+          <div class="sort-title" style="margin-bottom: 10px; display: flex; align-items: center;">
+            <i class="material-icons <%= @accent_color %>-text" style="margin-right: 8px;" aria-hidden="true">sort</i>
+            <h3 id="sort-heading" style="font-weight: 500; font-size: 16px; margin: 0;">Sort by:</h3>
+          </div>
+          
+          <div class="sort-controls" style="display: flex; align-items: center;">
+            <select id="sortSelect" class="browser-default" style="border-radius: 4px; padding: 8px; border: 1px solid #e0e0e0; min-width: 180px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);" aria-labelledby="sort-heading" onchange="applySorting(this.value)">
+              <option value="latest" selected>Latest Updates</option>
+              <option value="oldest">Oldest First</option>
+              <option value="name_asc">Name (A-Z)</option>
+              <option value="name_desc">Name (Z-A)</option>
+              <option value="random">Random</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+  
+  <div class="col s12">
+    <% if @tagged_content.empty? %>
+      <div class="center-align" style="margin-top: 80px;">
+        <h5 class="grey-text">No public content with this tag</h5>
+        <p class="grey-text">
+          No one has created any public content with the "<%= @tag %>" tag yet.
+        </p>
+      </div>
+    <% else %>
+      <% @tagged_content.each do |content_group| %>
+        <div id="<%= content_group[:type].downcase %>-content" class="section content-section" data-content-type="<%= content_group[:type].downcase %>" style="opacity: 1;" role="tabpanel" aria-labelledby="tab-<%= content_group[:type].downcase %>">
+          <div class="content-section-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">
+            <div style="display: flex; align-items: center;">
+              <i class="material-icons <%= content_group[:color] %>-text" style="font-size: 28px; margin-right: 10px;" aria-hidden="true"><%= content_group[:icon] %></i>
+              <h2 id="section-heading-<%= content_group[:type].downcase %>" style="font-size: 24px; font-weight: 500; margin: 0;" class="<%= content_group[:color] %>-text">
+                <%= content_group[:type].pluralize %> 
+                <span class="grey-text" style="font-size: 18px; font-weight: 400;">(<%= content_group[:content].count %>)</span>
+              </h2>
+            </div>
+            
+            <div class="section-actions" style="display: flex; align-items: center;">
+              <span class="results-counter" style="color: #757575; font-size: 14px; margin-right: 10px;">
+                Showing <span class="count-shown"><%= content_group[:content].count %></span> items
+              </span>
+            </div>
+          </div>
+          
+          <% if content_group[:type].downcase == 'universe' %>
+            <!-- Special layout for universe cards to ensure left alignment -->
+            <div style="display: block; width: 100%;">
+              <% content_group[:content].each_with_index do |content, index| %>
+                <div style="float: left; width: 25%; padding: 0 0.75rem;" class="universe-card-container">
+                  <%= link_to content, 
+                      class: "content-card-link", 
+                      aria: { 
+                        label: "#{content.respond_to?(:name) ? content.name : content.title} (#{content.class.name})",
+                        describedby: "card-desc-#{content.class.name}-#{content.id}"
+                      },
+                      tabindex: "0" do %>
+                    <div class="hoverable card z-depth-1 improved-card" style="border-radius: 8px; overflow: hidden;">
+                      <!-- Color indicator bar at top of card -->
+                      <div style="height: 4px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]})" %>;"></div>
+                      
+                      <div class="card-image loading-container">
+                        <% 
+                          # Find image for this content
+                          content_image = @random_image_pool_cache.fetch([content.class.name, content.id], [])
+                            .sample
+                            .try(:src, :medium)
+
+                          if @saved_basil_commissions
+                            content_image ||= @saved_basil_commissions.fetch([content.class.name, content.id], [])
+                              .sample
+                              .try(:image)
+                              .try(:url)
+                          end
+
+                          content_image ||= asset_path("card-headers/#{content.class.name.downcase.pluralize}.jpg")
+                        %>
+                        <!-- Skeleton loading overlay -->
+                        <div class="skeleton-loading"></div>
+                        
+                        <!-- Aspect ratio container for consistent image sizes -->
+                        <div class="image-aspect-ratio">
+                          <div class="card-image-bg" style="background-image: url('<%= content_image %>');"
+                              data-src="<%= content_image %>"
+                              aria-label="Image for <%= content.respond_to?(:name) ? content.name : content.title %>"></div>
+                        </div>
+                        
+                        <!-- Enhanced card title with better gradient -->
+                        <div class="card-title js-content-name" style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0.1) 100%); padding: 30px 16px 16px 16px; bottom: 0; width: 100%;">
+                          <div style="font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.4); font-size: 18px; color: white; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                            <% content_name = content.respond_to?(:name) ? content.name : content.title %>
+                            <%= ContentFormatterService.show(text: content_name.presence || 'Untitled', viewing_user: current_user) %>
+                          </div>
+                          <!-- Content type indicator - positioned on the image -->
+                          <div class="content-type-indicator universe-indicator" style="position: absolute; top: 8px; right: 8px; background-color: <%= content_group[:color] == 'grey' ? 'rgba(158,158,158,0.9)' : "var(--#{content_group[:color]}-lighten-1-transparent)" %>; color: white; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: 500; backdrop-filter: blur(4px); z-index: 3; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+                            <i class="material-icons tiny" style="font-size: 10px; margin-right: 2px; position: relative; top: 1px;"><%= content_group[:icon] %></i>
+                            <%= content.class.name %>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Enhanced card content -->
+                      <div class="card-content improved-card-content" style="padding: 16px;">
+                        <!-- Creator info with avatar -->
+                        <% user = @users_cache[content.user_id] %>
+                        <% if user %>
+                          <div class="creator-info" style="display: flex; align-items: center; margin-bottom: 8px; justify-content: space-between;">
+                            <div style="display: flex; align-items: center;">
+                              <div class="avatar-container" style="width: 28px; height: 28px; border-radius: 50%; overflow: hidden; margin-right: 8px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0,0,0,0.05);">
+                                <% if user.image_url %>
+                                  <img src="<%= user.image_url.html_safe %>" alt="<%= user.display_name %>" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+                                <% else %>
+                                  <i class="material-icons grey-text text-lighten-1" style="font-size: 18px;">person</i>
+                                <% end %>
+                              </div>
+                              <span class="creator-name" style="font-size: 13px; font-weight: 500; color: #424242;"><%= user.display_name %></span>
+                            </div>
+                            <!-- Time edited -->
+                            <span class="time-info grey-text" style="font-size: 11px; display: flex; align-items: center;">
+                              <i class="material-icons tiny" style="font-size: 12px; margin-right: 3px;">update</i>
+                              <%= time_ago_in_words content.updated_at %> ago
+                            </span>
+                          </div>
+                        <% end %>
+                        
+                        <!-- Enhanced tags as pills -->
+                        <% if content.respond_to?(:page_tags) && content.page_tags.any? %>
+                          <div class="tags-container" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px;">
+                            <% content.page_tags.each do |tag| %>
+                              <% if tag.tag == @tag %>
+                                <span class="tag-pill featured-tag" style="padding: 3px 10px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]}-lighten-1)" %>; color: white; border-radius: 20px; font-size: 11px; font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                  <%= tag.tag %>
+                                </span>
+                              <% else %>
+                                <span class="tag-pill" style="padding: 3px 10px; background-color: #f0f0f0; color: #757575; border-radius: 20px; font-size: 11px;">
+                                  <%= tag.tag %>
+                                </span>
+                              <% end %>
+                            <% end %>
+                          </div>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div> <!-- Close universe special layout -->
+          <% else %>
+            <!-- Standard layout for other content types -->
+            <div class="row js-content-cards-list">
+              <% content_group[:content].each_with_index do |content, index| %>
+                <div class="col s12 m6 l4 xl3 js-content-card-container">
+                  <%= link_to content, 
+                      target: (content.is_a?(Document) ? '_blank' : nil), 
+                      class: "content-card-link", 
+                      aria: { 
+                        label: "#{content.respond_to?(:name) ? content.name : content.title} (#{content.class.name})",
+                        describedby: "card-desc-#{content.class.name}-#{content.id}"
+                      },
+                      tabindex: "0" do %>
+                    <div class="hoverable card z-depth-1 improved-card" style="border-radius: 8px; overflow: hidden;">
+                      <!-- Color indicator bar at top of card -->
+                      <div style="height: 4px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]})" %>;"></div>
+                      
+                      <div class="card-image loading-container">
+                        <% 
+                          # Find image for this content
+                          content_image = @random_image_pool_cache.fetch([content.class.name, content.id], [])
+                            .sample
+                            .try(:src, :medium)
+
+                          if @saved_basil_commissions
+                            content_image ||= @saved_basil_commissions.fetch([content.class.name, content.id], [])
+                              .sample
+                              .try(:image)
+                              .try(:url)
+                          end
+
+                          content_image ||= asset_path("card-headers/#{content.class.name.downcase.pluralize}.jpg")
+                        %>
+                        <!-- Skeleton loading overlay -->
+                        <div class="skeleton-loading"></div>
+                        
+                        <!-- Aspect ratio container for consistent image sizes -->
+                        <div class="image-aspect-ratio">
+                          <div class="card-image-bg" style="background-image: url('<%= content_image %>');"
+                              data-src="<%= content_image %>"
+                              aria-label="Image for <%= content.respond_to?(:name) ? content.name : content.title %>"></div>
+                        </div>
+                        
+                        <!-- Enhanced card title with better gradient -->
+                        <div class="card-title js-content-name" style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0.1) 100%); padding: 30px 16px 16px 16px; bottom: 0; width: 100%;">
+                          <div style="font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.4); font-size: 18px; color: white; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                            <% content_name = content.respond_to?(:name) ? content.name : content.title %>
+                            <%= ContentFormatterService.show(text: content_name.presence || 'Untitled', viewing_user: current_user) %>
+                          </div>
+                          <!-- Content type indicator - positioned on the image -->
+                          <div class="content-type-indicator" style="position: absolute; top: 8px; right: 8px; background-color: <%= content_group[:color] == 'grey' ? 'rgba(158,158,158,0.9)' : "var(--#{content_group[:color]}-lighten-1-transparent)" %>; color: white; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: 500; backdrop-filter: blur(4px); z-index: 3; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+                            <i class="material-icons tiny" style="font-size: 10px; margin-right: 2px; position: relative; top: 1px;"><%= content_group[:icon] %></i>
+                            <%= content.class.name %>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Enhanced card content -->
+                      <div class="card-content improved-card-content" style="padding: 16px;">
+                        <!-- Creator info with avatar -->
+                        <% user = @users_cache[content.user_id] %>
+                        <% if user %>
+                          <div class="creator-info" style="display: flex; align-items: center; margin-bottom: 8px; justify-content: space-between;">
+                            <div style="display: flex; align-items: center;">
+                              <div class="avatar-container" style="width: 28px; height: 28px; border-radius: 50%; overflow: hidden; margin-right: 8px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0,0,0,0.05);">
+                                <% if user.image_url %>
+                                  <img src="<%= user.image_url.html_safe %>" alt="<%= user.display_name %>" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+                                <% else %>
+                                  <i class="material-icons grey-text text-lighten-1" style="font-size: 18px;">person</i>
+                                <% end %>
+                              </div>
+                              <span class="creator-name" style="font-size: 13px; font-weight: 500; color: #424242;"><%= user.display_name %></span>
+                            </div>
+                            <!-- Time edited -->
+                            <span class="time-info grey-text" style="font-size: 11px; display: flex; align-items: center;">
+                              <i class="material-icons tiny" style="font-size: 12px; margin-right: 3px;">update</i>
+                              <%= time_ago_in_words content.updated_at %> ago
+                            </span>
+                          </div>
+                        <% end %>
+                        
+                        <!-- Enhanced tags as pills -->
+                        <% if content.respond_to?(:page_tags) && content.page_tags.any? %>
+                          <div class="tags-container" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px;">
+                            <% content.page_tags.each do |tag| %>
+                              <% if tag.tag == @tag %>
+                                <span class="tag-pill featured-tag" style="padding: 3px 10px; background-color: <%= content_group[:color] == 'grey' ? '#9e9e9e' : "var(--#{content_group[:color]}-lighten-1)" %>; color: white; border-radius: 20px; font-size: 11px; font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                  <%= tag.tag %>
+                                </span>
+                              <% else %>
+                                <span class="tag-pill" style="padding: 3px 10px; background-color: #f0f0f0; color: #757575; border-radius: 20px; font-size: 11px;">
+                                  <%= tag.tag %>
+                                </span>
+                              <% end %>
+                            <% end %>
+                          </div>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div> <!-- Close standard row layout -->
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<!-- JavaScript for filtering -->
+<script type="text/javascript">
+  // Store the original content for filtering
+  let originalContent = {};
+  let currentActiveCategory = 'all';
+  
+  function filterContentImmediate() {
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize all modals
+      var modalElems = document.querySelectorAll('.modal');
+      var modalInstances = M.Modal.init(modalElems, {opacity: 0.6});
+      
+      // Add click handler to the help button
+      document.getElementById('how-to-join-btn').addEventListener('click', function() {
+        this.classList.remove('pulse');
+        var modalInstance = M.Modal.getInstance(document.getElementById('how-to-join-modal'));
+        if (modalInstance) {
+          modalInstance.open();
+        }
+      });
+      
+      // Store original content for advanced filtering and sorting
+      storeOriginalContent();
+      
+      // Apply initial filtering based on URL hash
+      let initialCategory = window.location.hash.substring(1) || 'all';
+      if (initialCategory.startsWith('!') || initialCategory === '#') {
+        initialCategory = 'all';
+      }
+      
+      // Apply initial sort from URL params if present
+      const urlParams = new URLSearchParams(window.location.search);
+      const sortParam = urlParams.get('sort');
+      if (sortParam) {
+        document.getElementById('sortSelect').value = sortParam;
+        applySorting(sortParam, false); // Don't update URL again
+      }
+      
+      filterByCategory(initialCategory);
+    });
+  }
+  
+  // Store original content for filtering and sorting
+  function storeOriginalContent() {
+    const contentSections = document.querySelectorAll('.content-section');
+    
+    contentSections.forEach(function(section) {
+      const contentType = section.getAttribute('data-content-type');
+      const contentItems = Array.from(section.querySelectorAll('.js-content-card-container, .universe-card-container'));
+      
+      originalContent[contentType] = contentItems.map(function(item) {
+        const link = item.querySelector('a');
+        const nameElement = item.querySelector('.js-content-name div');
+        const creatorElement = item.querySelector('.creator-name');
+        const timeElement = item.querySelector('.time-info');
+        const tagElements = Array.from(item.querySelectorAll('.tag-pill'));
+        const imageElement = item.querySelector('.card-image-bg');
+        
+        // Check for universe association
+        let universeId = null;
+        const universeLink = item.querySelector('a[href*="universes"]');
+        if (universeLink) {
+          const href = universeLink.getAttribute('href');
+          const match = href.match(/\/universes\/([0-9]+)/);
+          if (match && match[1]) {
+            universeId = match[1];
+          }
+        }
+        
+        return {
+          element: item,
+          url: link ? link.getAttribute('href') : '',
+          name: nameElement ? nameElement.textContent.trim() : '',
+          creator: creatorElement ? creatorElement.textContent.trim() : '',
+          tags: tagElements.map(tag => tag.textContent.trim()),
+          timeUpdated: timeElement ? timeElement.textContent.trim() : '',
+          // Extract date for sorting
+          updatedAt: item.getAttribute('data-updated-at') || '',
+          // Check if item has an image (not the default image)
+          hasImage: imageElement && !imageElement.getAttribute('data-src').includes('card-headers'),
+          // Store universe ID if available
+          universeId: universeId
+        };
+      });
+    });
+  }
+  
+  // Direct filtering function to be called from onclick attribute
+  function filterByCategory(category) {
+    // Normalize input and handle invalid values
+    category = (category || '').toLowerCase();
+    
+    // Special case: handle hash fragments like #! or other invalid values
+    if (category.startsWith('!') || category === '' || category === '#') {
+      category = 'all';
+    }
+    
+    // Store the current active category for combined filtering
+    currentActiveCategory = category;
+    
+    // Get elements
+    var filterButtons = document.querySelectorAll('.category-filter');
+    var contentSections = document.querySelectorAll('.content-section');
+    var validCategory = false;
+    
+    // Check if the category matches any available content sections
+    if (category !== 'all') {
+      contentSections.forEach(function(section) {
+        const sectionType = section.getAttribute('data-content-type');
+        if (sectionType && sectionType.toLowerCase() === category.toLowerCase()) {
+          validCategory = true;
+        }
+      });
+      
+      // If not a valid category, default to showing all
+      if (!validCategory) {
+        category = 'all';
+      }
+    }
+    
+    // Update active state and ARIA attributes of filter buttons
+    filterButtons.forEach(function(button) {
+      const buttonCategory = button.getAttribute('data-category');
+      const isActive = buttonCategory === category;
+      
+      // Update visual state
+      if (isActive) {
+        button.classList.add('active');
+        button.style.backgroundColor = '<%= @accent_color == "grey" ? "#9e9e9e" : "var(--#{@accent_color}-lighten-4)" %>';
+        button.style.fontWeight = '500';
+        button.setAttribute('aria-selected', 'true');
+      } else {
+        button.classList.remove('active');
+        button.style.backgroundColor = '#f5f5f5';
+        button.style.fontWeight = '400';
+        button.setAttribute('aria-selected', 'false');
+      }
+    });
+    
+    // Apply filtering with animation and update ARIA
+    if (category === 'all') {
+      // Show all sections
+      contentSections.forEach(function(section) {
+        section.style.display = 'block';
+        section.setAttribute('aria-hidden', 'false');
+        
+        setTimeout(function() {
+          section.style.opacity = '1';
+          
+          // Ensure all focusable elements are reachable
+          const focusables = section.querySelectorAll('a[href], button, [tabindex="0"]');
+          focusables.forEach(el => {
+            el.setAttribute('tabindex', '0');
+          });
+        }, 50);
+      });
+      
+      // Announce to screen readers
+      announceToScreenReader('Showing all content categories');
+    } else {
+      // Show only matching category
+      contentSections.forEach(function(section) {
+        const sectionType = section.getAttribute('data-content-type');
+        const isVisible = sectionType && sectionType.toLowerCase() === category.toLowerCase();
+        
+        if (isVisible) {
+          section.style.display = 'block';
+          section.setAttribute('aria-hidden', 'false');
+          
+          setTimeout(function() {
+            section.style.opacity = '1';
+            
+            // Ensure all focusable elements are reachable
+            const focusables = section.querySelectorAll('a[href], button, [tabindex="0"]');
+            focusables.forEach(el => {
+              el.setAttribute('tabindex', '0');
+            });
+          }, 50);
+        } else {
+          section.style.opacity = '0';
+          section.setAttribute('aria-hidden', 'true');
+          
+          // Make elements in hidden sections unfocusable
+          const focusables = section.querySelectorAll('a[href], button, [tabindex="0"]');
+          focusables.forEach(el => {
+            el.setAttribute('tabindex', '-1');
+          });
+          
+          setTimeout(function() {
+            section.style.display = 'none';
+          }, 300); // Match this to the CSS transition duration
+        }
+      });
+      
+      // Announce to screen readers
+      announceToScreenReader('Filtered to show ' + category + ' content');
+    }
+    
+    // Update URL hash without scrolling, but don't use an invalid hash
+    if (category === 'all') {
+      // For "all", just use the base URL without any hash
+      window.history.replaceState(null, null, window.location.pathname + window.location.search);
+    } else {
+      window.history.replaceState(null, null, '#' + category + window.location.search);
+    }
+    
+      
+    // Return false to prevent default link behavior
+    return false;
+  }
+  
+  // Handle sorting of content
+  function applySorting(sortValue, updateURL = true) {
+    // Update URL with sort parameter
+    if (updateURL) {
+      const url = new URL(window.location);
+      url.searchParams.set('sort', sortValue);
+      window.history.replaceState({}, '', url);
+    }
+    
+    // Apply sorting to each content section
+    Object.keys(originalContent).forEach(function(contentType) {
+      const section = document.querySelector(`[data-content-type="${contentType}"]`);
+      if (!section) return;
+      
+      // Get container based on content type
+      const isUniverse = contentType === 'universe';
+      const container = isUniverse ? section : section.querySelector('.js-content-cards-list');
+      if (!container) return;
+      
+      // Get a copy of the original content for this section
+      let contentItems = [...originalContent[contentType]];
+      
+      // Apply sort
+      switch (sortValue) {
+        case 'latest':
+          contentItems.sort((a, b) => {
+            // Sort by the data-updated-at attribute (newest first)
+            return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
+          });
+          break;
+          
+        case 'oldest':
+          contentItems.sort((a, b) => {
+            // Sort by the data-updated-at attribute (oldest first)
+            return new Date(a.updatedAt || 0) - new Date(b.updatedAt || 0);
+          });
+          break;
+          
+        case 'name_asc':
+          contentItems.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+          
+        case 'name_desc':
+          contentItems.sort((a, b) => b.name.localeCompare(a.name));
+          break;
+          
+        case 'random':
+          // Fisher-Yates shuffle algorithm
+          for (let i = contentItems.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [contentItems[i], contentItems[j]] = [contentItems[j], contentItems[i]];
+          }
+          break;
+      }
+      
+      // Re-append elements in the new order
+      contentItems.forEach(function(item) {
+        container.appendChild(item.element);
+      });
+      
+      // Update screen reader announcement
+      announceToScreenReader(`Content sorted by ${sortValue.replace('_', ' ')}`);
+    });
+  }
+  
+  
+  // Apply advanced filters
+  
+  
+  // Helper function for screen reader announcements
+  function announceToScreenReader(message) {
+    const ariaLive = document.querySelector('#aria-live-region');
+    
+    if (!ariaLive) {
+      const newAriaLive = document.createElement('div');
+      newAriaLive.id = 'aria-live-region';
+      newAriaLive.setAttribute('aria-live', 'polite');
+      newAriaLive.setAttribute('aria-atomic', 'true');
+      newAriaLive.classList.add('sr-only');
+      newAriaLive.style.position = 'absolute';
+      newAriaLive.style.width = '1px';
+      newAriaLive.style.height = '1px';
+      newAriaLive.style.overflow = 'hidden';
+      newAriaLive.style.clip = 'rect(0, 0, 0, 0)';
+      newAriaLive.style.whiteSpace = 'nowrap';
+      document.body.appendChild(newAriaLive);
+    }
+    
+    const ariaLiveElement = document.querySelector('#aria-live-region');
+    ariaLiveElement.textContent = message;
+  }
+  
+  // Call this function on page load
+  filterContentImmediate();
+</script>
+
+<%= content_for :javascript do %>
+  // Handle card image loading with skeleton effect
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize image lazy loading with skeleton effect
+    initLazyLoadingWithSkeletons();
+    
+    // Initialize keyboard navigation for filter buttons
+    initKeyboardNavigationForFilters();
+    
+    // Initialize mobile filter FAB behavior
+    initMobileFilterFAB();
+    
+    // Initialize number counters for statistics
+    initNumberCounters();
+    
+    // Add animation classes to elements
+    document.querySelectorAll('.js-content-card-container, .universe-card-container').forEach(function(card, index) {
+      // Add data attributes for sorting
+      const timeElement = card.querySelector('.time-info');
+      if (timeElement) {
+        const timeText = timeElement.textContent.trim();
+        let updatedAt = new Date();
+        
+        // Parse "X time ago" format roughly
+        if (timeText.includes('minute')) {
+          const minutes = parseInt(timeText.match(/\d+/)[0] || 0);
+          updatedAt.setMinutes(updatedAt.getMinutes() - minutes);
+        } else if (timeText.includes('hour')) {
+          const hours = parseInt(timeText.match(/\d+/)[0] || 0);
+          updatedAt.setHours(updatedAt.getHours() - hours);
+        } else if (timeText.includes('day')) {
+          const days = parseInt(timeText.match(/\d+/)[0] || 0);
+          updatedAt.setDate(updatedAt.getDate() - days);
+        } else if (timeText.includes('month')) {
+          const months = parseInt(timeText.match(/\d+/)[0] || 0);
+          updatedAt.setMonth(updatedAt.getMonth() - months);
+        } else if (timeText.includes('year')) {
+          const years = parseInt(timeText.match(/\d+/)[0] || 0);
+          updatedAt.setFullYear(updatedAt.getFullYear() - years);
+        }
+        
+        card.setAttribute('data-updated-at', updatedAt.toISOString());
+      }
+      
+      // Stagger animation delay for cards
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      
+      // Stagger entrance animations
+      setTimeout(function() {
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, 50 + (index * 30)); // 30ms delay between each card's animation
+    });
+    
+    // Handle parallax effect on header
+    initHeaderParallax();
+    
+    // Handle focus trapping in visible content sections
+    setupFocusManagement();
+    
+  });
+  
+  // Initialize number counters with animation
+  function initNumberCounters() {
+    const counters = document.querySelectorAll('.counter-value');
+    
+    counters.forEach(counter => {
+      const finalCount = parseInt(counter.getAttribute('data-count'), 10);
+      const originalText = counter.textContent;
+      const suffix = originalText.replace(/^\d+\s*/, ''); // Extract text after the number
+      
+      // Only animate if it's a reasonable number to count up to
+      if (finalCount <= 300) {
+        let count = 0;
+        const duration = 1500; // ms
+        const interval = Math.max(10, duration / finalCount);
+        
+        setTimeout(() => {
+          const timer = setInterval(() => {
+            count++;
+            counter.textContent = count + ' ' + suffix;
+            
+            if (count >= finalCount) {
+              counter.textContent = originalText; // Reset to original for correct pluralization
+              clearInterval(timer);
+            }
+          }, interval);
+        }, 500); // Delay start slightly to ensure elements are visible
+      }
+    });
+  }
+  
+  // Initialize header parallax effect
+  function initHeaderParallax() {
+    const header = document.querySelector('.artfight-header');
+    const background = document.querySelector('.animated-background');
+    
+    if (header && background) {
+      window.addEventListener('scroll', function() {
+        const scrollPosition = window.scrollY;
+        if (scrollPosition < 500) { // Only apply effect near the top of the page
+          const translateY = scrollPosition * 0.15;
+          background.style.transform = `scale(1.1) translateY(${translateY}px)`;
+        }
+      });
+    }
+  }
+  
+  // Initialize mobile filter FAB behavior
+  function initMobileFilterFAB() {
+    const filterSection = document.querySelector('.category-filters');
+    const filterFab = document.getElementById('mobile-filter-fab');
+    const isMobile = window.innerWidth <= 768;
+    
+    if (filterSection && filterFab && isMobile) {
+      // Show FAB when filter section is out of view
+      window.addEventListener('scroll', function() {
+        const filterRect = filterSection.getBoundingClientRect();
+        
+        // If filter section is above viewport, show the FAB
+        if (filterRect.bottom < 0) {
+          filterFab.style.display = 'block';
+          
+          // Animate in
+          filterFab.style.transform = 'scale(1)';
+          filterFab.style.opacity = '1';
+        } else {
+          filterFab.style.transform = 'scale(0)';
+          filterFab.style.opacity = '0';
+          
+          // Hide after animation completes
+          setTimeout(function() {
+            if (filterRect.bottom >= 0) {
+              filterFab.style.display = 'none';
+            }
+          }, 300);
+        }
+      });
+    }
+  }
+  
+  // Function to scroll back to filters when FAB is clicked
+  function showMobileFilters() {
+    const filterSection = document.querySelector('.category-filters');
+    if (filterSection) {
+      // Scroll the filter section into view with smooth animation
+      filterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+  
+  // Initialize keyboard navigation for filter buttons
+  function initKeyboardNavigationForFilters() {
+    const filterButtonsContainer = document.querySelector('.filter-buttons-container');
+    const filterButtons = Array.from(document.querySelectorAll('.category-filter'));
+    
+    if (filterButtonsContainer && filterButtons.length > 0) {
+      // Add keyboard navigation for tab list
+      filterButtonsContainer.addEventListener('keydown', function(e) {
+        // Find index of the current focused button
+        const focusedIndex = filterButtons.indexOf(document.activeElement);
+        
+        if (focusedIndex >= 0) {
+          let nextIndex;
+          
+          switch (e.key) {
+            case 'ArrowRight':
+            case 'ArrowDown':
+              e.preventDefault();
+              nextIndex = (focusedIndex + 1) % filterButtons.length;
+              filterButtons[nextIndex].focus();
+              break;
+              
+            case 'ArrowLeft':
+            case 'ArrowUp':
+              e.preventDefault();
+              nextIndex = (focusedIndex - 1 + filterButtons.length) % filterButtons.length;
+              filterButtons[nextIndex].focus();
+              break;
+              
+            case 'Home':
+              e.preventDefault();
+              filterButtons[0].focus();
+              break;
+              
+            case 'End':
+              e.preventDefault();
+              filterButtons[filterButtons.length - 1].focus();
+              break;
+              
+            case 'Enter':
+            case ' ':
+              e.preventDefault();
+              document.activeElement.click();
+              break;
+          }
+        }
+      });
+    }
+  }
+  
+  // Handle focus management for better accessibility
+  function setupFocusManagement() {
+    // Ensure card links have appropriate focus styles
+    const cardLinks = document.querySelectorAll('.content-card-link');
+    
+    cardLinks.forEach(link => {
+      // Set proper focus styles
+      link.addEventListener('focus', function() {
+        this.querySelector('.improved-card').classList.add('focus-visible');
+      });
+      
+      link.addEventListener('blur', function() {
+        this.querySelector('.improved-card').classList.remove('focus-visible');
+      });
+    });
+  }
+  
+  // Initialize lazy loading with skeleton effect
+  function initLazyLoadingWithSkeletons() {
+    // Set up intersection observer for lazy loading
+    const imgObserver = new IntersectionObserver(function(entries, observer) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          const container = entry.target;
+          const imageBg = container.querySelector('.card-image-bg');
+          const skeletonLoader = container.querySelector('.skeleton-loading');
+          
+          if (imageBg && skeletonLoader) {
+            // Show skeleton while loading
+            skeletonLoader.style.opacity = '1';
+            
+            // Create a new image to test loading
+            const img = new Image();
+            img.src = imageBg.getAttribute('data-src');
+            
+            img.onload = function() {
+              // Hide skeleton when loaded
+              skeletonLoader.style.opacity = '0';
+              
+              // Add loaded class for any additional styling
+              container.classList.add('image-loaded');
+              
+              // Stop observing this element
+              observer.unobserve(container);
+            };
+            
+            img.onerror = function() {
+              // Hide skeleton even if there's an error
+              skeletonLoader.style.opacity = '0';
+              observer.unobserve(container);
+            };
+          }
+        }
+      });
+    }, {
+      rootMargin: '100px', // Load images when they're within 100px of viewport
+      threshold: 0.1
+    });
+    
+    // Observe all image containers
+    document.querySelectorAll('.loading-container').forEach(function(container) {
+      imgObserver.observe(container);
+    });
+  }
+<% end %>
+
+<!-- Mobile Filter Floating Action Button -->
+<div id="mobile-filter-fab" class="mobile-filter-fab" style="display: none; position: fixed; bottom: 16px; right: 16px; z-index: 100;">
+  <button class="btn-floating btn-large <%= @accent_color %> z-depth-3" aria-label="Show filters" onclick="showMobileFilters()">
+    <i class="material-icons" aria-hidden="true">filter_list</i>
+  </button>
+</div>
+
+<!-- Add CSS variables for colors -->
+<style>
+  /* Help modal for how to join */
+  .modal-how-to-join {
+    border-radius: 8px;
+    max-width: 500px;
+    transition: background-color 1s ease;
+  }
+  
+  body.dark .modal-how-to-join {
+    background-color: #2D2D31 !important;
+    color: #ddd;
+  }
+  
+  .modal-how-to-join h4 {
+    margin-top: 0;
+    font-size: 20px;
+    font-weight: 500;
+    transition: color 1s ease;
+  }
+  
+  body.dark .modal-how-to-join h4 {
+    color: white;
+  }
+  
+  .modal-how-to-join ol {
+    padding-left: 25px;
+  }
+  
+  .modal-how-to-join li {
+    margin-bottom: 10px;
+  }
+  
+  .modal-how-to-join .highlight {
+    background-color: #f3e5f5;
+    padding: 2px 5px;
+    border-radius: 3px;
+    transition: background-color 1s ease, color 1s ease;
+  }
+  
+  body.dark .modal-how-to-join .highlight {
+    background-color: rgba(156, 39, 176, 0.2);
+    color: white;
+  }
+  
+  /* Fix modal content border */
+  body.dark .modal-content {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  :root {
+    --purple: #9c27b0;
+    --purple-lighten-1: #ab47bc;
+    --purple-lighten-2: #ba68c8;
+    --purple-lighten-3: #ce93d8;
+    --purple-lighten-4: #e1bee7;
+    --purple-lighten-5: #f3e5f5;
+    --purple-darken-1: #8e24aa;
+    --purple-darken-2: #7b1fa2;
+    
+    --blue: #2196F3;
+    --blue-lighten-1: #42a5f5;
+    --blue-lighten-2: #64b5f6;
+    --blue-lighten-3: #90caf9;
+    --blue-lighten-4: #bbdefb;
+    --blue-lighten-5: #e3f2fd;
+    
+    --green: #4CAF50;
+    --green-lighten-1: #66bb6a;
+    --green-lighten-2: #81c784;
+    --green-lighten-3: #a5d6a7;
+    --green-lighten-4: #c8e6c9;
+    --green-lighten-5: #e8f5e9;
+    
+    --red: #F44336;
+    --red-lighten-1: #ef5350;
+    --red-lighten-2: #e57373;
+    --red-lighten-3: #ef9a9a;
+    --red-lighten-4: #ffcdd2;
+    --red-lighten-5: #ffebee;
+    
+    --orange: #FF9800;
+    --orange-lighten-1: #ffa726;
+    --orange-lighten-2: #ffb74d;
+    --orange-lighten-3: #ffcc80;
+    --orange-lighten-4: #ffe0b2;
+    --orange-lighten-5: #fff3e0;
+  }
+  
+  /* Animation for content section transitions */
+  .content-section {
+    transition: opacity 0.3s ease-in-out;
+    opacity: 1; /* Ensure sections are visible by default */
+  }
+  
+  /* Universe card styling - use direct control */
+  .universe-card-container {
+    display: inline-block;
+  }
+  
+  /* Mobile responsiveness for universe cards */
+  @media only screen and (max-width: 600px) {
+    .universe-card-container {
+      width: 100% !important;
+    }
+  }
+  
+  @media only screen and (min-width: 601px) and (max-width: 992px) {
+    .universe-card-container {
+      width: 50% !important;
+    }
+  }
+  
+  @media only screen and (min-width: 993px) and (max-width: 1200px) {
+    .universe-card-container {
+      width: 33.33% !important;
+    }
+  }
+  
+  /* Responsive ArtFight header styles */
+  .artfight-header {
+    transition: min-height 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Animated background with parallax effect */
+  .animated-background {
+    transition: transform 0.5s ease;
+    animation: subtle-zoom 20s infinite alternate ease-in-out;
+  }
+  
+  @keyframes subtle-zoom {
+    0% { transform: scale(1.1); }
+    100% { transform: scale(1.15); }
+  }
+  
+  /* Animated floating shapes */
+  .header-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 3;
+  }
+  
+  .floating-shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.15;
+    background: white;
+    filter: blur(8px);
+  }
+  
+  .shape-1 {
+    width: 80px;
+    height: 80px;
+    left: 10%;
+    top: 20%;
+    animation: float-1 15s infinite ease-in-out;
+  }
+  
+  .shape-2 {
+    width: 60px;
+    height: 60px;
+    right: 15%;
+    top: 15%;
+    animation: float-2 18s infinite ease-in-out;
+  }
+  
+  .shape-3 {
+    width: 40px;
+    height: 40px;
+    left: 25%;
+    bottom: 20%;
+    animation: float-3 12s infinite ease-in-out;
+  }
+  
+  .shape-4 {
+    width: 30px;
+    height: 30px;
+    right: 25%;
+    bottom: 25%;
+    animation: float-4 20s infinite ease-in-out;
+  }
+  
+  @keyframes float-1 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(20px, -20px); }
+  }
+  
+  @keyframes float-2 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-15px, 15px); }
+  }
+  
+  @keyframes float-3 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(15px, 10px); }
+  }
+  
+  @keyframes float-4 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-20px, -10px); }
+  }
+  
+  /* Animation for stats chips and tag badge */
+  .animate-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fade-in-up 0.6s forwards ease-out;
+  }
+  
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Pulsing icons animation */
+  .pulse-icon {
+    animation: pulse-subtle 2s infinite;
+  }
+  
+  @keyframes pulse-subtle {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  
+  /* Tag badge shimmer effect */
+  .tag-badge-container {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .badge-shimmer {
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: skewX(-20deg);
+    animation: shimmer 4s infinite;
+  }
+  
+  @keyframes shimmer {
+    0%, 100% { left: -150%; }
+    50%, 51% { left: 150%; }
+  }
+  
+  .tag-icon-animated {
+    animation: tag-icon-bounce 2s infinite alternate ease-in-out;
+  }
+  
+  @keyframes tag-icon-bounce {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.15); }
+  }
+  
+  .tag-text-animated {
+    background-image: linear-gradient(90deg, 
+      <%= @accent_color == "grey" ? "#9e9e9e" : "var(--#{@accent_color})" %>, 
+      <%= @accent_color == "grey" ? "#757575" : "var(--#{@accent_color}-lighten-1)" %>, 
+      <%= @accent_color == "grey" ? "#9e9e9e" : "var(--#{@accent_color})" %>);
+    background-size: 200% auto;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: text-gradient 3s linear infinite;
+  }
+  
+  @keyframes text-gradient {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+  
+  .header-content {
+    transition: padding 0.3s ease;
+  }
+  
+  .artfight-stat-chip {
+    padding: 0 12px !important;
+    transition: all 0.2s ease;
+  }
+  
+  /* Fix icon alignment in chips */
+  .artfight-stat-chip i.material-icons {
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  @media only screen and (max-width: 768px) {
+    .artfight-header {
+      min-height: 260px !important;
+    }
+    
+    .header-content {
+      padding: 16px !important;
+      padding-top: 24px !important;
+    }
+    
+    .artfight-stat-chip {
+      padding: 0 10px !important;
+      margin-bottom: 4px !important;
+    }
+    
+    .artfight-tag-badge {
+      margin-top: 8px !important;
+    }
+  }
+  
+  @media only screen and (max-width: 480px) {
+    .artfight-header {
+      min-height: 380px !important;
+    }
+    
+    .header-content {
+      padding: 16px !important;
+      padding-top: 42px !important; /* Ensure room for the help button */
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+    }
+    
+    .stats-container {
+      justify-content: center !important;
+      width: 100% !important;
+      margin-bottom: 12px !important;
+      flex-direction: column !important; 
+      gap: 8px !important;
+    }
+    
+    .artfight-stat-chip {
+      width: 100% !important;
+      justify-content: center !important;
+      padding: 8px 16px !important;
+      height: auto !important;
+    }
+    
+    .artfight-tag-badge {
+      align-self: center !important;
+      margin-top: 16px !important;
+      width: 100% !important;
+    }
+    
+    .artfight-tag-badge > div {
+      padding: 10px 14px !important;
+      width: 100% !important;
+      text-align: center !important;
+    }
+    
+    .artfight-tag-badge > div > div {
+      justify-content: center !important;
+    }
+    
+    .header-text {
+      max-width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 16px !important;
+    }
+    
+    /* Better filter layout for mobile */
+    .filter-buttons-container {
+      overflow-x: auto !important;
+      flex-wrap: nowrap !important;
+      padding-bottom: 8px !important;
+      margin-bottom: 5px !important;
+      justify-content: flex-start !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .category-filter {
+      flex: 0 0 auto !important;
+      white-space: nowrap !important;
+    }
+    
+    /* Improved card layout for mobile */
+    .js-content-card-container,
+    .universe-card-container {
+      height: 320px !important; /* Smaller height for mobile */
+    }
+    
+    /* Bottom floating action button for filter visibility on scroll */
+    .mobile-filter-fab {
+      display: none;
+      transform: scale(0);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    
+    /* Card content tweaks */
+    .card .card-image {
+      height: auto !important;
+    }
+    
+    .image-aspect-ratio {
+      padding-top: 66.67% !important; /* 3:2 Aspect ratio for better mobile viewing */
+    }
+    
+    .card-title {
+      padding: 30px 12px 12px 12px !important;
+    }
+    
+    .card-content {
+      padding: 12px !important;
+    }
+    
+    /* Content section improvements */
+    .content-section-header {
+      margin-bottom: 12px !important;
+      padding-bottom: 6px !important;
+    }
+    
+    .content-section-header h2 {
+      font-size: 20px !important;
+    }
+  }
+  
+  /* Medium size mobile devices */
+  @media only screen and (min-width: 481px) and (max-width: 768px) {
+    .stats-container {
+      justify-content: center !important;
+    }
+    
+    .artfight-header {
+      min-height: 320px !important; 
+    }
+    
+    .filter-buttons-container {
+      overflow-x: auto !important;
+      flex-wrap: nowrap !important;
+      padding-bottom: 8px !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .category-filter {
+      flex: 0 0 auto !important;
+      white-space: nowrap !important;
+    }
+    
+    /* Improved card aspect ratio */
+    .image-aspect-ratio {
+      padding-top: 60% !important; /* 5:3 Aspect ratio */
+    }
+  }
+  
+  /* Category and sort filters styling */
+  .category-filters {
+    background-color: #fff;
+    transition: background-color 1s ease;
+  }
+  
+  body.dark .category-filters {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .category-filter {
+    background-color: #f5f5f5;
+    color: #333;
+    transition: background-color 1s ease, color 1s ease;
+  }
+  
+  body.dark .category-filter {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Ensure filter text is always readable regardless of theme */
+  .category-filter {
+    color: #333 !important;
+  }
+  
+  /* Fix the filter title text in dark mode */
+  body.dark .category-filter-title span, 
+  body.dark .sort-title span,
+  body.dark #sort-heading,
+  body.dark #filter-heading {
+    color: #ddd !important;
+  }
+  
+  body.dark .category-filter.active {
+    color: #333;
+  }
+  
+  /* Enhanced sort dropdown styling */
+  body.dark #sortSelect {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ddd;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Advanced filters panel styling */
+  .advanced-filters-toggle {
+    transition: border-color 1s ease;
+  }
+  
+  body.dark .advanced-filters-toggle {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Enhanced styling for the advanced filters toggle button */
+  #advancedFiltersToggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  body.dark #advancedFiltersToggle:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  #advancedFiltersToggle:focus {
+    outline: none;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  body.dark #advancedFiltersToggle:focus {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Panel styling */
+  .advanced-filters-panel {
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    background-color: white;
+  }
+  
+  .advanced-filters-panel.expanded {
+    opacity: 1;
+  }
+  
+  body.dark .advanced-filters-panel {
+    background-color: #2D2D31;
+  }
+  
+  body.dark .advanced-filters-panel input[type="text"] {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ddd;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  body.dark .advanced-filters-panel input[type="text"]::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  body.dark .advanced-filters-panel label,
+  body.dark .suggested-filters span {
+    color: #aaa !important;
+  }
+  
+  /* Enhanced chip styling for clickable filters */
+  .clickable-filter {
+    transition: all 0.2s ease;
+    background-color: #f5f5f5;
+    font-size: 12px;
+    height: 28px;
+    line-height: 28px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .clickable-filter:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  }
+  
+  .clickable-filter:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  
+  .tag-chip {
+    padding-right: 12px;
+  }
+  
+  .creator-chip {
+    padding-right: 12px;
+    border-left: 3px solid;
+    padding-left: 8px;
+  }
+  
+  /* Content type chip styling */
+  .content-type-checkbox {
+    position: relative;
+    padding: 5px 12px;
+    transition: all 0.2s ease;
+    background-color: #f0f0f0;
+  }
+  
+  .content-type-checkbox input[type="checkbox"] {
+    opacity: 1;
+    position: relative !important;
+    pointer-events: auto !important;
+    width: 18px;
+    height: 18px;
+  }
+  
+  .content-type-checkbox:hover {
+    background-color: #e0e0e0;
+  }
+  
+  /* Style/theme chip styling */
+  .style-chip {
+    background-color: #f5f5f5;
+    padding: 5px 12px;
+    transition: all 0.2s ease;
+  }
+  
+  .style-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  }
+  
+  .style-chip.active {
+    background-color: var(--<%= @accent_color %>-lighten-4);
+    border-left: 3px solid var(--<%= @accent_color %>);
+    padding-left: 10px;
+    font-weight: 500;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  }
+  
+  /* Switch styling */
+  .switch label input[type=checkbox]:checked+.lever {
+    background-color: var(--<%= @accent_color %>-lighten-3);
+  }
+  
+  .switch label input[type=checkbox]:checked+.lever:after {
+    background-color: var(--<%= @accent_color %>);
+  }
+  
+  /* Dark mode styles */
+  body.dark .clickable-filter,
+  body.dark .content-type-checkbox,
+  body.dark .style-chip {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ddd !important;
+  }
+  
+  body.dark .clickable-filter:hover,
+  body.dark .content-type-checkbox:hover,
+  body.dark .style-chip:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+  }
+  
+  body.dark .style-chip.active {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  body.dark .switch label input[type=checkbox]+.lever {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+  
+  body.dark .switch label input[type=checkbox]:checked+.lever {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  body.dark .switch label input[type=checkbox]:checked+.lever:after {
+    background-color: var(--<%= @accent_color %>);
+  }
+  
+  body.dark .no-results-message {
+    color: #aaa !important;
+  }
+  
+  /* Animation for filter chips */
+  @keyframes chip-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .popular-tags-container .clickable-filter,
+  .content-type-checkboxes .content-type-checkbox,
+  .style-theme-chips .style-chip {
+    animation: chip-fade-in 0.4s ease backwards;
+  }
+  
+  .popular-tags-container .clickable-filter:nth-child(1),
+  .content-type-checkboxes .content-type-checkbox:nth-child(1),
+  .style-theme-chips .style-chip:nth-child(1) { animation-delay: 0.1s; }
+  
+  .popular-tags-container .clickable-filter:nth-child(2),
+  .content-type-checkboxes .content-type-checkbox:nth-child(2),
+  .style-theme-chips .style-chip:nth-child(2) { animation-delay: 0.15s; }
+  
+  .popular-tags-container .clickable-filter:nth-child(3),
+  .content-type-checkboxes .content-type-checkbox:nth-child(3),
+  .style-theme-chips .style-chip:nth-child(3) { animation-delay: 0.2s; }
+  
+  .popular-tags-container .clickable-filter:nth-child(4),
+  .content-type-checkboxes .content-type-checkbox:nth-child(4),
+  .style-theme-chips .style-chip:nth-child(4) { animation-delay: 0.25s; }
+  
+  .popular-tags-container .clickable-filter:nth-child(5),
+  .content-type-checkboxes .content-type-checkbox:nth-child(5),
+  .style-theme-chips .style-chip:nth-child(5) { animation-delay: 0.3s; }
+  
+  .popular-tags-container .clickable-filter:nth-child(6),
+  .content-type-checkboxes .content-type-checkbox:nth-child(6),
+  .style-theme-chips .style-chip:nth-child(6) { animation-delay: 0.35s; }
+  
+  .popular-tags-container .clickable-filter:nth-child(7),
+  .content-type-checkboxes .content-type-checkbox:nth-child(7),
+  .style-theme-chips .style-chip:nth-child(7) { animation-delay: 0.4s; }
+  
+  .popular-tags-container .clickable-filter:nth-child(8),
+  .content-type-checkboxes .content-type-checkbox:nth-child(8),
+  .style-theme-chips .style-chip:nth-child(8) { animation-delay: 0.45s; }
+  
+  /* Dark mode improvements */
+  body.dark .filter-actions {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  body.dark .chip.purple.lighten-5 {
+    background-color: rgba(156, 39, 176, 0.15) !important;
+  }
+  
+  @media only screen and (max-width: 600px) {
+    .category-filters {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding-bottom: 6px;
+    }
+    
+    .category-filters > div:last-child {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+    
+    .category-filter {
+      flex: 0 0 auto;
+    }
+  }
+  
+  /* Link styling for card links */
+  a {
+    color: inherit;
+  }
+  
+  /* Ensure all cards have equal height */
+  .js-content-card-container,
+  .universe-card-container {
+    height: 350px;
+    margin-bottom: 20px;
+    overflow: visible;
+    padding-bottom: 10px;
+  }
+  
+  /* Better card styling */
+  .hoverable.card {
+    transition: box-shadow 0.25s, transform 0.25s, background-color 1s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background-color: #fff;
+  }
+  
+  body.dark .hoverable.card {
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+  
+  .hoverable.card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+  }
+  
+  body.dark .hoverable.card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  }
+  
+  /* Position relative for absolute positioning within */
+  .hoverable.card {
+    position: relative;
+    padding-bottom: 8px;
+    border-bottom: 4px solid #eeeeee;
+    transition: border-color 1s ease;
+  }
+  
+  body.dark .hoverable.card {
+    border-bottom: 4px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .js-content-card-container > a,
+  .universe-card-container > a {
+    height: 100%;
+    display: block;
+  }
+  
+  .js-content-card-container .card,
+  .universe-card-container .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .card .card-image {
+    flex: 0 0 auto;
+  }
+  
+  .card .card-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    height: 115px;
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 20px !important;
+    transition: background-color 1s ease;
+  }
+  
+  body.dark .card .card-content {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .tags-container {
+    margin-top: auto;
+    padding-top: 8px;
+    overflow: hidden;
+    max-height: 80px;
+    padding-bottom: 10px;
+  }
+  
+  /* Handle overflowing text */
+  .js-content-name div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    max-height: 50px;
+  }
+  
+  /* Add a fade effect and footer to the card */
+  .card .card-content:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 15px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+    pointer-events: none;
+    transition: background 1s ease;
+  }
+  
+  body.dark .card .card-content:after {
+    background: linear-gradient(to bottom, rgba(40,40,45,0) 0%, rgba(40,40,45,1) 100%);
+  }
+  
+  /* Card footer line - more visible */
+  .card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: #f0f0f0;
+    border-radius: 0 0 8px 8px;
+    z-index: 1;
+    transition: background-color 1s ease;
+  }
+  
+  body.dark .card::after {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Enhanced card styling */
+  .improved-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+  }
+  
+  .improved-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+  }
+  
+  /* Content type indicator transparent background */
+  :root {
+    --purple-lighten-1-transparent: rgba(171, 71, 188, 0.9);
+    --blue-lighten-1-transparent: rgba(66, 165, 245, 0.9);
+    --green-lighten-1-transparent: rgba(102, 187, 106, 0.9);
+    --red-lighten-1-transparent: rgba(239, 83, 80, 0.9);
+    --orange-lighten-1-transparent: rgba(255, 167, 38, 0.9);
+  }
+  
+  /* Aspect ratio container for images */
+  .image-aspect-ratio {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    overflow: hidden;
+  }
+  
+  .card-image-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.5s ease;
+  }
+  
+  .improved-card:hover .card-image-bg {
+    transform: scale(1.05);
+  }
+  
+  /* Loading container and skeleton styling */
+  .loading-container {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .skeleton-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #f0f0f0 0%, #f8f8f8 50%, #f0f0f0 100%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    z-index: 2;
+    opacity: 0; /* Start hidden, will be shown by JavaScript when needed */
+  }
+  
+  @keyframes skeleton-loading {
+    0% { background-position: -100% 0; }
+    100% { background-position: 100% 0; }
+  }
+  
+  body.dark .skeleton-loading {
+    background: linear-gradient(90deg, #303030 0%, #3a3a3a 50%, #303030 100%);
+    background-size: 200% 100%;
+  }
+  
+  /* Featured tag styling */
+  .featured-tag {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .featured-tag::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    animation: tag-shine 3s infinite;
+  }
+  
+  @keyframes tag-shine {
+    0% { left: -100%; }
+    20% { left: 100%; }
+    100% { left: 100%; }
+  }
+  
+  /* Better card content styling */
+  .improved-card-content {
+    position: relative;
+  }
+  
+  /* Content type indicator */
+  .content-type-indicator {
+    display: flex;
+    align-items: center;
+    opacity: 0.9;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  
+  .improved-card:hover .content-type-indicator {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+  
+
+  /* Dark mode text styles */
+  body.dark .card .card-content span[style*="color: #424242"] {
+    color: #ddd !important;
+  }
+  
+  body.dark .grey-text {
+    color: #aaa !important;
+  }
+  
+  body.dark .tag-pill[style*="background-color: #f0f0f0"] {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #aaa !important;
+  }
+  
+  /* Accessibility styles */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+  
+  /* Focus styles for keyboard navigation */
+  .category-filter:focus {
+    outline: 2px solid <%= @accent_color == "grey" ? "#9e9e9e" : "var(--#{@accent_color})" %>;
+    outline-offset: 2px;
+  }
+  
+  .improved-card.focus-visible {
+    outline: 3px solid <%= @accent_color == "grey" ? "#9e9e9e" : "var(--#{@accent_color})" %>;
+    outline-offset: 2px;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+  }
+  
+  /* High contrast focus indicators for dark mode */
+  body.dark .category-filter:focus {
+    outline-color: white;
+  }
+  
+  body.dark .improved-card.focus-visible {
+    outline-color: white;
+  }
+</style>

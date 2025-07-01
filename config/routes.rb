@@ -5,6 +5,15 @@ Rails.application.routes.draw do
     get 'users/password', to: 'registrations#password', as: 'user_password_edit'
   end
   get 'styleguide/tailwind'
+  
+  # API routes from master
+  namespace :api do
+    namespace :v1 do
+      post 'gallery_images/sort'
+      get 'categories/suggest/:content_type', to: 'categories#suggest'
+      get 'fields/suggest/:content_type/:category', to: 'fields#suggest'
+    end
+  end
   default_url_options :host => "notebook.ai"
 
   scope :ai, path: '/ai' do
@@ -107,6 +116,10 @@ Rails.application.routes.draw do
   get '/@:username', to: 'users#show', as: :profile_by_username
   get '/@:username/followers', to: 'users#followers'
   get '/@:username/following', to: 'users#following'
+  get '/@:username/tag/:tag_slug', to: 'users#tag', as: :user_tag
+  
+  # ID-based alternative routes for users without usernames
+  get '/users/:id/tag/:tag_slug', to: 'users#tag', as: :user_id_tag
 
   scope '/analysis' do
     get '/', to: 'document_analyses#index'
@@ -270,6 +283,7 @@ Rails.application.routes.draw do
       get :timelines, on: :member
 
       get  :changelog,       on: :member
+      get  :gallery,         on: :member
       get  :toggle_archive,  on: :member
       post :toggle_favorite, on: :member
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
@@ -287,6 +301,7 @@ Rails.application.routes.draw do
         # API endpoints
         get  :toggle_archive,  on: :member
         post :toggle_favorite, on: :member
+        # Already have these routes above, no need to duplicate
       end
     end
     resources :timelines, only: [:index, :show, :new, :update, :edit, :destroy] do
@@ -310,6 +325,7 @@ Rails.application.routes.draw do
 
     # Image handling
     delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion
+    post '/toggle_image_pin', to: 'content#toggle_image_pin', as: :toggle_image_pin
 
     # Attributes
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
@@ -343,6 +359,11 @@ Rails.application.routes.draw do
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
+  end
+
+  # Browse global content routes
+  scope '/browse' do
+    get '/tag/:tag_slug', to: 'browse#tag', as: :browse_tag
   end
 
   # Fancy shmancy informative pages

@@ -1,0 +1,17 @@
+<% if @popular_tags.any? %>
+  <div class="collection with-header hoverable">
+    <div class="collection-header blue lighten-1 white-text">
+      <div style="padding: 5px 10px">
+        Public Tags
+      </div>
+    </div>
+    <div class="collection-item" style="padding: 14px">
+      <% @popular_tags.each do |tag| %>
+        <%= link_to @user.username.present? ? user_tag_path(username: @user.username, tag_slug: tag.slug) : user_id_tag_path(id: @user.id, tag_slug: tag.slug) do %>
+          <span class="new badge blue lighten-1 left" data-badge-caption="<%= tag.tag %>"></span>
+        <% end %>
+      <% end %>
+      <div style="clear: both"></div>
+    </div>
+  </div>
+<% end %>
