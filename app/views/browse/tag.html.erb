@@ -48,55 +48,56 @@
       creators_count = @tagged_content.flat_map { |group| group[:content].map(&:user_id) }.uniq.count
     %>
     
-    <!-- Enhanced hero header -->
+    <!-- Enhanced hero header with improved responsive design -->
     <div class="card z-depth-2" style="border-radius: 8px; overflow: hidden; margin-bottom: 30px;">
-      <div class="<%= @accent_color %> darken-1" style="position: relative; background: url('<%= pattern_url %>') center center; background-size: cover; height: 220px;">
+      <div class="artfight-header <%= @accent_color %> darken-1" style="position: relative; background: url('<%= pattern_url %>') center center; background-size: cover; min-height: 220px;">
         <!-- Gradient overlay for better text contrast -->
-        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%);"></div>
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);"></div>
         
-        <!-- Help button for how to join -->
-        <div class="help-tooltip-container" style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+        <!-- Help button for how to join - fixed position for all screen sizes -->
+        <div class="help-tooltip-container" style="position: absolute; top: 16px; right: 16px; z-index: 10;">
           <button class="btn-floating white z-depth-2 pulse modal-trigger" id="how-to-join-btn" style="height: 42px; width: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none;" data-target="how-to-join-modal" onclick="this.classList.remove('pulse');">
             <i class="material-icons <%= @accent_color %>-text">help_outline</i>
           </button>
         </div>
         
-        <!-- Art Fight 2025 header info -->
-        <div style="position: absolute; top: 40px; left: 40px; z-index: 1; max-width: 60%;">
-          <div>
-            <h1 style="font-size: 38px; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.4); line-height: 1.2; margin: 0 0 8px 0; color: white;">
+        <!-- Header content container with proper padding -->
+        <div class="header-content" style="position: relative; z-index: 5; padding: 32px 24px; min-height: 220px; display: flex; flex-direction: column;">
+          <!-- Main header section with responsive text -->
+          <div class="header-text" style="max-width: 100%; margin-bottom: 16px;">
+            <h1 class="artfight-title" style="font-size: clamp(28px, 5vw, 38px); font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.4); line-height: 1.2; margin: 0 0 8px 0; color: white;">
               Art Fight 2025
             </h1>
-            <h2 style="font-size: 18px; text-shadow: 0 1px 3px rgba(0,0,0,0.4); font-weight: 400; margin: 0; color: white; margin-top: 8px; margin-bottom: 15px;">
+            <h2 class="artfight-subtitle" style="font-size: clamp(14px, 3vw, 18px); text-shadow: 0 1px 3px rgba(0,0,0,0.4); font-weight: 400; margin: 0; color: white; margin-top: 8px;">
               A showcase of creators' public content across Notebook.ai
             </h2>
+          </div>
+          
+          <!-- Stats chips with improved layout and properly aligned icons -->
+          <div class="stats-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; margin-bottom: 16px;">
+            <div class="chip z-depth-1 white artfight-stat-chip" style="border: none; margin: 0; font-weight: 500; height: 32px; line-height: 32px; display: flex; align-items: center;">
+              <i class="material-icons <%= @accent_color %>-text" style="margin-right: 8px; font-size: 20px;"><%= PageTag.icon %></i>
+              <span style="white-space: nowrap;"><%= pluralize(total_items, 'page') %></span>
+            </div>
             
-            <!-- Stats chips in header instead of below -->
-            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px;">
-              <div class="chip z-depth-1 white" style="border: none; margin: 0; font-weight: 500;">
-                <i class="material-icons left <%= @accent_color %>-text"><%= PageTag.icon %></i>
-                <%= pluralize(total_items, 'page') %>
-              </div>
-              
-              <div class="chip z-depth-1 white" style="border: none; margin: 0; font-weight: 500;">
-                <i class="material-icons left <%= @accent_color %>-text">category</i>
-                <%= pluralize(content_types_count, 'page type') %>
-              </div>
-              
-              <div class="chip z-depth-1 white" style="border: none; margin: 0; font-weight: 500;">
-                <i class="material-icons left <%= @accent_color %>-text">people</i>
-                <%= pluralize(creators_count, 'creator') %>
-              </div>
+            <div class="chip z-depth-1 white artfight-stat-chip" style="border: none; margin: 0; font-weight: 500; height: 32px; line-height: 32px; display: flex; align-items: center;">
+              <i class="material-icons <%= @accent_color %>-text" style="margin-right: 8px; font-size: 20px;">category</i>
+              <span style="white-space: nowrap;"><%= pluralize(content_types_count, 'page type') %></span>
+            </div>
+            
+            <div class="chip z-depth-1 white artfight-stat-chip" style="border: none; margin: 0; font-weight: 500; height: 32px; line-height: 32px; display: flex; align-items: center;">
+              <i class="material-icons <%= @accent_color %>-text" style="margin-right: 8px; font-size: 20px;">people</i>
+              <span style="white-space: nowrap;"><%= pluralize(creators_count, 'creator') %></span>
             </div>
           </div>
-        </div>
-        
-        <!-- Tag floating badge moved to right side -->
-        <div style="position: absolute; bottom: 30px; right: 40px; z-index: 2;">
-          <div style="display: inline-block; background-color: white; padding: 14px 22px; border-radius: 8px; box-shadow: 0 4px 15px 0 rgba(0,0,0,0.3);">
-            <div style="display: flex; align-items: center;">
-              <i class="material-icons <%= @accent_color %>-text" style="font-size: 32px; margin-right: 12px;"><%= PageTag.icon %></i>
-              <span style="font-size: 28px; font-weight: 600;" class="<%= @accent_color %>-text"><%= @tag %></span>
+          
+          <!-- Tag floating badge - responsive positioning with perfect alignment -->
+          <div class="artfight-tag-badge" style="margin-top: auto; align-self: flex-end;">
+            <div style="display: inline-block; background-color: white; padding: 12px 18px; border-radius: 8px; box-shadow: 0 4px 15px 0 rgba(0,0,0,0.3);">
+              <div style="display: flex; align-items: center;">
+                <i class="material-icons <%= @accent_color %>-text" style="font-size: clamp(24px, 4vw, 32px); margin-right: 10px; display: flex;"><%= PageTag.icon %></i>
+                <span style="font-size: clamp(20px, 4vw, 28px); font-weight: 600; line-height: 1;" class="<%= @accent_color %>-text"><%= @tag %></span>
+              </div>
             </div>
           </div>
         </div>
@@ -563,6 +564,79 @@
   @media only screen and (min-width: 993px) and (max-width: 1200px) {
     .universe-card-container {
       width: 33.33% !important;
+    }
+  }
+  
+  /* Responsive ArtFight header styles */
+  .artfight-header {
+    transition: min-height 0.3s ease;
+  }
+  
+  .header-content {
+    transition: padding 0.3s ease;
+  }
+  
+  .artfight-stat-chip {
+    padding: 0 12px !important;
+    transition: all 0.2s ease;
+  }
+  
+  /* Fix icon alignment in chips */
+  .artfight-stat-chip i.material-icons {
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  @media only screen and (max-width: 768px) {
+    .artfight-header {
+      min-height: 260px !important;
+    }
+    
+    .header-content {
+      padding: 16px !important;
+      padding-top: 24px !important;
+    }
+    
+    .artfight-stat-chip {
+      padding: 0 10px !important;
+      margin-bottom: 4px !important;
+    }
+    
+    .artfight-tag-badge {
+      margin-top: 8px !important;
+    }
+  }
+  
+  @media only screen and (max-width: 480px) {
+    .artfight-header {
+      min-height: 300px !important;
+    }
+    
+    .stats-container {
+      justify-content: flex-start !important;
+      width: 100% !important;
+      margin-bottom: 12px !important;
+    }
+    
+    .artfight-tag-badge {
+      align-self: center !important;
+      margin-top: 16px !important;
+    }
+    
+    .artfight-tag-badge > div {
+      padding: 10px 14px !important;
+    }
+    
+    .header-text {
+      max-width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 8px !important;
+    }
+    
+    .stats-container {
+      justify-content: center !important;
     }
   }
   
