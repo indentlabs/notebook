@@ -3,7 +3,7 @@
 # TODO: we should probably spin off an Api::ContentController for #api_sort and anything else 
 #       api-wise we need
 class ContentController < ApplicationController
-  before_action :authenticate_user!, except: [:show, :changelog, :api_sort] \
+  before_action :authenticate_user!, except: [:show, :changelog, :api_sort, :gallery] \
     + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }
 
   skip_before_action :cache_most_used_page_information, only: [
@@ -430,6 +430,7 @@ class ContentController < ApplicationController
       # Get all images for this content with proper ordering
       # Only show private images to the owner or contributors
       is_owner_or_contributor = false
+      # Check if the user is the owner or a contributor
       if current_user.present? && (@content.user == current_user || 
          (@content.respond_to?(:universe_id) && 
           @content.universe_id.present? && 
@@ -854,6 +855,21 @@ class ContentController < ApplicationController
     @navbar_actions = []
 
     return if [AttributeCategory, AttributeField].include?(content_type)
+    
+    # Set up navbar actions for gallery specifically
+    if action_name == 'gallery' && @content.present?
+      # Add a link to view the content page
+      @navbar_actions << {
+        label: @content.name,
+        href: polymorphic_path(@content)
+      }
+      
+      # Add a gallery title indicator
+      @navbar_actions << {
+        label: 'Gallery',
+        href: send("gallery_#{@content.class.name.downcase}_path", @content)
+      }
+    end
   end
 
   def set_sidenav_expansion

@@ -15,7 +15,19 @@
         <span class="new badge <%= raw_model.class.color %> left" data-badge-caption="<%= tag %>"></span>
       <% end %>
     <% else %>
-      <%= link_to user_tag_path(username: content.user.username, tag_slug: PageTagService.slug_for(tag)) do %>
+      <% 
+        # Use browse_tag_path which doesn't require username if it's a globally browsable tag like artfight2025
+        if PageTagService.slug_for(tag).downcase == 'artfight2025'
+          path = browse_tag_path(tag_slug: 'artfight2025')
+        elsif content.user.present? && content.user.username.present?
+          # Fall back to user_tag_path if username is available
+          path = user_tag_path(username: content.user.username, tag_slug: PageTagService.slug_for(tag))
+        else
+          # If neither condition is met, link to the page_tag route for this content type
+          path = send("page_tag_#{raw_model.class.name.downcase.pluralize}_path", slug: PageTagService.slug_for(tag))
+        end
+      %>
+      <%= link_to path do %>
         <span class="new badge <%= raw_model.class.color %> left" data-badge-caption="<%= tag %>"></span>
       <% end %>
     <% end %>

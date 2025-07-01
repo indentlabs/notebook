@@ -158,6 +158,7 @@ class BrowseController < ApplicationController
     # Set a default accent color for the page
     @accent_color = 'purple'
     
+    
     # Sort content types so Characters always appear first
     @tagged_content = @tagged_content.sort_by do |content_group|
       if content_group[:type] == 'Character'
