@@ -147,14 +147,14 @@
               -->
             <% end %>
 
-            <%= link_to '#new-analysis-onboarding', class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?('#new-analysis-onboarding')} hover:bg-notebook-blue hover:text-white" do %>
+            <%= link_to analysis_hub_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(analysis_hub_path)} hover:bg-notebook-blue hover:text-white" do %>
               <i class="material-icons <%= DocumentAnalysis.text_color %> shrink-0 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= DocumentAnalysis.icon %></i>
               <span class="flex-grow text-sm min-w-0 truncate">Analysis</span>
-              <!--
-              <span class="bg-gray-100 rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700">
-                0
-              </span>
-              -->
+              <% if user_signed_in? && DocumentAnalysis.joins(:document).where(documents: { user_id: current_user.id }).where.not(completed_at: nil).count > 0 %>
+                <span class="bg-gray-100 text-black rounded px-1 text-xs group-hover:text-white group-hover:bg-blue-700 shrink-0">
+                  <%= DocumentAnalysis.joins(:document).where(documents: { user_id: current_user.id }).where.not(completed_at: nil).count %>
+                </span>
+              <% end %>
             <% end %>
           </div>
         </div>

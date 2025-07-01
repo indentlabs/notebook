@@ -122,7 +122,8 @@ Rails.application.routes.draw do
   get '/users/:id/tag/:tag_slug', to: 'users#tag', as: :user_id_tag
 
   scope '/analysis' do
-    get '/', to: 'document_analyses#index'
+    get '/', to: 'document_analyses#landing', as: :landing_path
+    get '/hub', to: 'document_analyses#hub', as: :analysis_hub
   end
 
   resources :documents do
