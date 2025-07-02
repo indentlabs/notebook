@@ -19,11 +19,396 @@
 
   <!-- todo mirror this in-repo? -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  
+  <!-- Google Fonts - Modern typography system -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Animations and core design system for the landing page -->
+  <style>
+    :root {
+      /* Core color palette - updated to match site's classic style */
+      --color-primary: #1E88E5; /* Notebook blue as primary */
+      --color-primary-light: #64B5F6;
+      --color-primary-dark: #0D47A1;
+      --color-secondary: #FF8A65; /* Orange as secondary, used sparingly */
+      --color-secondary-light: #FFAB91;
+      --color-secondary-dark: #E64A19;
+      --color-accent: #5E35B1; /* Purple as accent */
+      --color-accent-light: #9575CD;
+      --color-accent-dark: #4527A0;
+      --color-success: #10B981;
+      --color-warning: #FBBF24;
+      --color-danger: #EF4444;
+      --color-gray-50: #F9FAFB;
+      --color-gray-100: #F3F4F6;
+      --color-gray-200: #E5E7EB;
+      --color-gray-300: #D1D5DB;
+      --color-gray-400: #9CA3AF;
+      --color-gray-500: #6B7280;
+      --color-gray-600: #4B5563;
+      --color-gray-700: #374151;
+      --color-gray-800: #1F2937;
+      --color-gray-900: #111827;
+      
+      /* Typography */
+      --font-display: 'Manrope', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      
+      /* Spacing system (8px grid) */
+      --space-1: 0.25rem; /* 4px */
+      --space-2: 0.5rem;  /* 8px */
+      --space-3: 1rem;    /* 16px */
+      --space-4: 1.5rem;  /* 24px */
+      --space-5: 2rem;    /* 32px */
+      --space-6: 3rem;    /* 48px */
+      --space-7: 4rem;    /* 64px */
+      --space-8: 6rem;    /* 96px */
+      --space-9: 8rem;    /* 128px */
+      
+      /* Border radius */
+      --radius-sm: 0.25rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.5rem;
+      --radius-2xl: 2rem;
+      --radius-full: 9999px;
+    }
+    
+    /* Global reset */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-display);
+      letter-spacing: -0.02em;
+    }
+    
+    body {
+      font-family: var(--font-body);
+    }
+    
+    /* Modern 3D effect for cards */
+    .card-3d {
+      transform-style: preserve-3d;
+      transition: all 0.3s ease;
+    }
+    
+    .card-3d:hover {
+      transform: translateY(-10px) rotateX(4deg);
+    }
+    
+    .card-3d .card-shadow {
+      position: absolute;
+      top: 5%;
+      left: 5%;
+      width: 90%;
+      height: 90%;
+      transform: translateZ(-1px);
+      filter: blur(20px);
+      opacity: 0.4;
+      transition: all 0.3s ease;
+    }
+    
+    .card-3d:hover .card-shadow {
+      opacity: 0.6;
+      transform: translateZ(-10px) translateY(10px);
+    }
+    
+    /* Advanced animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+      100% {
+        transform: translateY(0px);
+      }
+    }
+    
+    @keyframes blob {
+      0% {
+        transform: translate(0px, 0px) scale(1);
+      }
+      33% {
+        transform: translate(30px, -50px) scale(1.1);
+      }
+      66% {
+        transform: translate(-20px, 20px) scale(0.9);
+      }
+      100% {
+        transform: translate(0px, 0px) scale(1);
+      }
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.8;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 0.8;
+      }
+    }
+    
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    @keyframes dash {
+      from {
+        stroke-dashoffset: 1000;
+      }
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+    
+    /* Animation classes */
+    .animate-fade-in-up {
+      animation: fadeInUp 0.8s ease-out forwards;
+    }
+    
+    .animate-fade-in-left {
+      animation: fadeInLeft 0.8s ease-out forwards;
+    }
+    
+    .animate-fade-in-right {
+      animation: fadeInRight 0.8s ease-out forwards;
+    }
+    
+    .animate-scale-in {
+      animation: scaleIn 0.8s ease-out forwards;
+    }
+    
+    .animate-float {
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    .animate-blob {
+      animation: blob 7s infinite;
+    }
+    
+    .animate-pulse {
+      animation: pulse 3s ease-in-out infinite;
+    }
+    
+    .animate-spin-slow {
+      animation: spin 15s linear infinite;
+    }
+    
+    .animate-dash {
+      animation: dash 1.5s linear forwards;
+    }
+    
+    /* Animation delays */
+    .delay-100 {
+      animation-delay: 100ms;
+    }
+    
+    .delay-200 {
+      animation-delay: 200ms;
+    }
+    
+    .delay-300 {
+      animation-delay: 300ms;
+    }
+    
+    .delay-400 {
+      animation-delay: 400ms;
+    }
+    
+    .delay-500 {
+      animation-delay: 500ms;
+    }
+    
+    .delay-700 {
+      animation-delay: 700ms;
+    }
+    
+    .delay-1000 {
+      animation-delay: 1000ms;
+    }
+    
+    .delay-2000 {
+      animation-delay: 2000ms;
+    }
+    
+    .delay-3000 {
+      animation-delay: 3000ms;
+    }
+    
+    .delay-4000 {
+      animation-delay: 4000ms;
+    }
+    
+    /* Custom backgrounds */
+    .bg-mesh {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='%2320202A' fill-opacity='0.05'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40h2.5v2.5H40V0zm0 40h2.5v2.5H40V40zM0 0h2.5v2.5H0V0zm0 40h2.5v2.5H0V40z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    .bg-dots {
+      background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    
+    .bg-grid {
+      background-image: linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    
+    /* Glass effect */
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .glass-dark {
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Gradient text */
+    .text-gradient {
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    
+    /* Scroll reveal animation - to be activated with JavaScript */
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    
+    .reveal-on-scroll.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+  
+  <!-- ScrollTrigger for scroll animations -->
+  <script src="https://unpkg.com/scrolltrigger@latest/dist/ScrollTrigger.min.js"></script>
+  
+  <!-- GSAP for advanced animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
 </head>
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
       x-data="{ showSidebar: <%= user_signed_in? ? 'window.innerWidth >= 1024' : 'false' %> }"
 >
+<!-- Initialize scroll reveal animation -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize ScrollTrigger for reveal animations
+    if (typeof ScrollTrigger !== 'undefined') {
+      var reveals = document.querySelectorAll('.reveal-on-scroll');
+      
+      ScrollTrigger.batch(reveals, {
+        onEnter: elements => {
+          elements.forEach(el => {
+            el.classList.add('is-visible');
+          });
+        },
+        once: true
+      });
+    }
+    
+    // Initialize GSAP animations if available
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger);
+      
+      // Animate the vertical connecting line on scroll
+      gsap.from('.feature-connector', {
+        height: 0,
+        ease: 'power1.inOut',
+        scrollTrigger: {
+          trigger: '.feature-connector',
+          start: 'top 80%',
+          end: 'bottom 20%',
+          scrub: true
+        }
+      });
+      
+      // Animate neural network path strokes
+      gsap.set('[stroke-dasharray]', {
+        strokeDashoffset: 1000
+      });
+      
+      gsap.to('[stroke-dasharray]', {
+        strokeDashoffset: 0,
+        duration: 2,
+        ease: 'power2.inOut',
+        stagger: 0.1,
+        scrollTrigger: {
+          trigger: '.neural-network-viz',
+          start: 'top 80%'
+        }
+      });
+    }
+  });
+</script>
   <%= render 'layouts/tailwind/navbar' %>
   <%# render 'cards/ui/alert' %>
   <%# render 'cards/ui/notice' %>
@@ -147,6 +532,7 @@
               -->
             <% end %>
 
+            <!--
             <%= link_to analysis_hub_path, class: "flex items-center px-2 sm:px-4 py-2 cursor-pointer group rounded-l-full transition #{'bg-notebook-blue text-white' if current_page?(analysis_hub_path)} hover:bg-notebook-blue hover:text-white" do %>
               <i class="material-icons <%= DocumentAnalysis.text_color %> shrink-0 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 lg:p-1 mr-2 bg-white rounded-full"><%= DocumentAnalysis.icon %></i>
               <span class="flex-grow text-sm min-w-0 truncate">Analysis</span>
@@ -156,6 +542,7 @@
                 </span>
               <% end %>
             <% end %>
+            -->
           </div>
         </div>
 

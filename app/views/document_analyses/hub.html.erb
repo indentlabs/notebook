@@ -6,21 +6,28 @@
                 description: page_description
 %>
 
-<!-- Simple header with actions -->
-<div class="bg-white shadow-sm border-b border-gray-200">
+<!-- Enhanced header with actions -->
+<div class="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 shadow-lg">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div class="py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
       <div class="flex-1 min-w-0">
-        <h1 class="text-2xl font-bold text-gray-900 sm:truncate">Document Analysis</h1>
-        <p class="mt-1 text-sm text-gray-500">Analyze, track, and improve your writing</p>
+        <div class="flex items-center">
+          <div class="h-12 w-12 rounded-xl <%= DocumentAnalysis.color %> flex items-center justify-center shadow-md mr-4">
+            <i class="material-icons text-white text-2xl"><%= DocumentAnalysis.icon %></i>
+          </div>
+          <div>
+            <h1 class="text-3xl font-bold text-white sm:truncate font-display">Document Analysis</h1>
+            <p class="mt-1 text-lg text-blue-100">Analyze, track, and improve your writing</p>
+          </div>
+        </div>
       </div>
-      <div class="mt-4 flex sm:mt-0 sm:ml-4 gap-2">
-        <%= link_to new_document_path, class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
-          <i class="material-icons text-sm mr-1">add</i> New Document
+      <div class="mt-6 flex sm:mt-0 sm:ml-4 gap-3">
+        <%= link_to new_document_path, class: "inline-flex items-center px-4 py-2 border border-blue-300 shadow-sm text-sm font-medium rounded-lg text-white bg-transparent hover:bg-blue-700 transition-all duration-200" do %>
+          <i class="material-icons text-sm mr-2">add</i> New Document
         <% end %>
         <% if @recent_documents.present? && @recent_documents.any? %>
-          <%= link_to queue_analysis_document_path(@recent_documents.first), method: :get, class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
-            <i class="material-icons text-sm mr-1">analytics</i> Analyze Document
+          <%= link_to queue_analysis_document_path(@recent_documents.first), method: :get, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-notebook-blue hover:bg-blue-600 transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg" do %>
+            <i class="material-icons text-sm mr-2"><%= DocumentAnalysis.icon %></i> Analyze Document
           <% end %>
         <% end %>
       </div>
@@ -29,32 +36,30 @@
 </div>
 
 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-6">
-  <!-- Summary Stats -->
-  <div class="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+  <!-- Summary Stats with Enhanced Visualizations -->
+  <div class="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
     <!-- Total Analyses -->
-    <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="bg-white overflow-hidden shadow-lg rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl hover:border-blue-100">
       <div class="px-4 py-5 sm:p-6">
         <div class="flex items-center">
-          <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
-            <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
+          <div class="flex-shrink-0 <%= DocumentAnalysis.color %> rounded-lg p-3 shadow-md">
+            <i class="material-icons text-white"><%= DocumentAnalysis.icon %></i>
           </div>
           <div class="ml-5 w-0 flex-1">
             <dl>
               <dt class="text-sm font-medium text-gray-500 truncate">Total Analyses</dt>
               <dd>
-                <div class="text-lg font-semibold text-gray-900"><%= @total_analyses_count || 0 %></div>
+                <div class="text-2xl font-bold text-gray-900"><%= @total_analyses_count || 0 %></div>
               </dd>
             </dl>
           </div>
         </div>
       </div>
-      <div class="bg-gray-50 px-4 py-4 sm:px-6">
+      <div class="bg-gray-50 px-4 py-4 sm:px-6 border-t border-gray-100">
         <div class="text-sm flex justify-between">
           <span class="font-medium text-gray-500">Lifetime</span>
           <% if @total_analyses_count && @total_analyses_count > 0 %>
-            <span class="font-medium text-indigo-600 hover:text-indigo-500">
+            <span class="font-medium text-notebook-blue hover:text-blue-600">
               <a href="#analysis-history">View all</a>
             </span>
           <% end %>
@@ -62,11 +67,11 @@
       </div>
     </div>
     
-    <!-- Average Readability -->
-    <div class="bg-white overflow-hidden shadow rounded-lg">
+    <!-- Enhanced Readability Card -->
+    <div class="bg-white overflow-hidden shadow-lg rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl hover:border-blue-100">
       <div class="px-4 py-5 sm:p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+        <div class="flex items-center mb-3">
+          <div class="flex-shrink-0 bg-blue-500 rounded-lg p-3 shadow-md">
             <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
             </svg>
@@ -75,24 +80,40 @@
             <dl>
               <dt class="text-sm font-medium text-gray-500 truncate">Average Readability</dt>
               <dd>
-                <div class="text-lg font-semibold text-gray-900">Grade 10</div>
+                <div class="text-2xl font-bold text-gray-900">Grade 8.7</div>
               </dd>
             </dl>
           </div>
         </div>
+        <!-- Readability meter visualization -->
+        <div class="mt-2">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-gray-500">Elementary</span>
+            <span class="text-xs text-gray-500">College</span>
+          </div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-blue-500" style="width:73%"></div>
+          </div>
+          <div class="mt-1 flex justify-between text-xs text-gray-500">
+            <span>1-6</span>
+            <span>7-9</span>
+            <span>10-12</span>
+            <span>13+</span>
+          </div>
+        </div>
       </div>
-      <div class="bg-gray-50 px-4 py-4 sm:px-6">
+      <div class="bg-gray-50 px-4 py-4 sm:px-6 border-t border-gray-100">
         <div class="text-sm">
           <span class="font-medium text-gray-500">Based on recent documents</span>
         </div>
       </div>
     </div>
     
-    <!-- Words Analyzed -->
-    <div class="bg-white overflow-hidden shadow rounded-lg">
+    <!-- Words Analyzed with Visualization -->
+    <div class="bg-white overflow-hidden shadow-lg rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl hover:border-blue-100">
       <div class="px-4 py-5 sm:p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+        <div class="flex items-center mb-3">
+          <div class="flex-shrink-0 bg-green-500 rounded-lg p-3 shadow-md">
             <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
             </svg>
@@ -101,41 +122,65 @@
             <dl>
               <dt class="text-sm font-medium text-gray-500 truncate">Words Analyzed</dt>
               <dd>
-                <div class="text-lg font-semibold text-gray-900">10,560</div>
+                <div class="text-2xl font-bold text-gray-900">10,560</div>
               </dd>
             </dl>
           </div>
         </div>
+        <!-- Words analyzed trend mini chart -->
+        <div class="mt-2 flex items-end space-x-1 h-10">
+          <% [30, 45, 35, 60, 50, 75, 65].each do |height| %>
+            <div class="bg-green-<%= 200 + rand(3) * 100 %> flex-1 rounded-t transition-all duration-200" style="height:<%= height %>%"></div>
+          <% end %>
+        </div>
       </div>
-      <div class="bg-gray-50 px-4 py-4 sm:px-6">
+      <div class="bg-gray-50 px-4 py-4 sm:px-6 border-t border-gray-100">
         <div class="text-sm">
           <span class="font-medium text-gray-500">Across all documents</span>
         </div>
       </div>
     </div>
     
-    <!-- Improvement Rate -->
-    <div class="bg-white overflow-hidden shadow rounded-lg">
+    <!-- Style Improvement Rate -->
+    <div class="bg-white overflow-hidden shadow-lg rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl hover:border-blue-100">
       <div class="px-4 py-5 sm:p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0 bg-amber-500 rounded-md p-3">
+        <div class="flex items-center mb-3">
+          <div class="flex-shrink-0 <%= DocumentAnalysis.color %> rounded-lg p-3 shadow-md">
             <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
           </div>
           <div class="ml-5 w-0 flex-1">
             <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Improvement Rate</dt>
+              <dt class="text-sm font-medium text-gray-500 truncate">Style Improvement</dt>
               <dd>
-                <div class="text-lg font-semibold text-gray-900">+12%</div>
+                <div class="flex items-baseline">
+                  <div class="text-2xl font-bold text-gray-900">+12%</div>
+                  <div class="ml-2 text-xs text-green-600 font-medium">↑4%</div>
+                </div>
               </dd>
             </dl>
           </div>
         </div>
+        <!-- Style metrics -->
+        <div class="mt-2 grid grid-cols-3 gap-2">
+          <div class="bg-blue-50 rounded-md p-2 text-center">
+            <div class="text-xs text-gray-500">Passive</div>
+            <div class="text-sm font-semibold text-blue-700">-8%</div>
+          </div>
+          <div class="bg-blue-50 rounded-md p-2 text-center">
+            <div class="text-xs text-gray-500">Adverbs</div>
+            <div class="text-sm font-semibold text-blue-700">-15%</div>
+          </div>
+          <div class="bg-blue-50 rounded-md p-2 text-center">
+            <div class="text-xs text-gray-500">Variety</div>
+            <div class="text-sm font-semibold text-green-700">+6%</div>
+          </div>
+        </div>
       </div>
-      <div class="bg-gray-50 px-4 py-4 sm:px-6">
+      <div class="bg-gray-50 px-4 py-4 sm:px-6 border-t border-gray-100">
         <div class="text-sm">
-          <span class="font-medium text-gray-500">Based on readability scores</span>
+          <span class="font-medium text-gray-500">Based on writing metrics</span>
         </div>
       </div>
     </div>
@@ -290,59 +335,184 @@
         </div>
       </div>
 
-      <!-- Analysis Insights -->
+      <!-- Enhanced Analysis Insights with Emotional Analysis -->
       <% if @recent_analyses.present? && @recent_analyses.any? %>
-        <div class="bg-white shadow overflow-hidden rounded-lg mb-6">
-          <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Analysis Insights</h3>
+        <!-- Analysis Insights and Emotional Analysis -->  
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <!-- Analysis Insights Panel -->
+          <div class="bg-white shadow-lg overflow-hidden rounded-xl border border-gray-100">
+            <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 flex items-center">
+              <div class="h-10 w-10 rounded-lg bg-blue-500 flex items-center justify-center shadow-md mr-3">
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 class="text-lg leading-6 font-medium text-gray-900">Writing Insights</h3>
+            </div>
+            <div class="bg-white px-4 py-5 sm:p-6">
+              <!-- Enhanced Insights with more visual cues -->
+              <div class="space-y-4">
+                <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 transition-all duration-200 hover:shadow-md">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                      <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-medium text-blue-800">Sentence Structure</h3>
+                        <span class="text-xs bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">Readability</span>
+                      </div>
+                      <p class="mt-2 text-sm text-blue-700">Average sentence length in "<%= @recent_analyses.first.document.title %>" is 24 words. Consider breaking longer sentences to improve readability.</p>
+                      <div class="mt-3 flex justify-between items-center">
+                        <div class="text-xs text-blue-500">Affects grade level score</div>
+                        <a href="#" class="text-sm font-medium text-blue-700 hover:text-blue-600 flex items-center">
+                          <span>Details</span>
+                          <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="rounded-lg border border-green-200 bg-green-50 p-4 transition-all duration-200 hover:shadow-md">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                      <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-medium text-green-800">Vocabulary Improvement</h3>
+                        <span class="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded-full">Style</span>
+                      </div>
+                      <p class="mt-2 text-sm text-green-700">Your vocabulary diversity score has improved by 15% over the last three documents.</p>
+                      <div class="mt-3 flex justify-between items-center">
+                        <div class="text-xs text-green-500">More varied word choices</div>
+                        <a href="#" class="text-sm font-medium text-green-700 hover:text-green-600 flex items-center">
+                          <span>View trend</span>
+                          <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 transition-all duration-200 hover:shadow-md">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                      <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-medium text-yellow-800">Active Voice Opportunity</h3>
+                        <span class="text-xs bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded-full">Style</span>
+                      </div>
+                      <p class="mt-2 text-sm text-yellow-700">Passive voice usage detected in 18% of sentences. Consider using active voice for more engaging writing.</p>
+                      <div class="mt-3 flex justify-between items-center">
+                        <div class="text-xs text-yellow-500">Industry average: 15%</div>
+                        <a href="#" class="text-sm font-medium text-yellow-700 hover:text-yellow-600 flex items-center">
+                          <span>View examples</span>
+                          <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="bg-white px-4 py-5 sm:p-6">
-            <!-- Example Insights -->
-            <div class="space-y-4">
-              <div class="rounded-md bg-blue-50 p-4">
-                <div class="flex">
-                  <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                    </svg>
-                  </div>
-                  <div class="ml-3 flex-1 md:flex md:justify-between">
-                    <p class="text-sm text-blue-700">Average sentence length in "<%= @recent_analyses.first.document.title %>" is 24 words. Consider breaking longer sentences to improve readability.</p>
-                    <p class="mt-3 text-sm md:mt-0 md:ml-6">
-                      <a href="#" class="whitespace-nowrap font-medium text-blue-700 hover:text-blue-600">Details <span aria-hidden="true">&rarr;</span></a>
-                    </p>
+
+          <!-- Emotional Analysis Panel -->
+          <div class="bg-white shadow-lg overflow-hidden rounded-xl border border-gray-100">
+            <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 flex items-center">
+              <div class="h-10 w-10 rounded-lg bg-purple-500 flex items-center justify-center shadow-md mr-3">
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 class="text-lg leading-6 font-medium text-gray-900">Emotional Analysis</h3>
+            </div>
+            <div class="bg-white px-4 py-5 sm:p-6">
+              <!-- Emotional analysis visualizations -->
+              <div class="space-y-6">
+                <!-- Primary emotions detected -->
+                <div>
+                  <p class="text-sm font-medium text-gray-700 mb-3">Primary Emotions Detected</p>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                      <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                      <div class="text-sm">
+                        <div class="font-medium">Joy</div>
+                        <div class="text-xs text-gray-500">42%</div>
+                      </div>
+                    </div>
+                    <div class="flex items-center p-3 bg-purple-50 rounded-lg">
+                      <div class="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
+                      <div class="text-sm">
+                        <div class="font-medium">Anticipation</div>
+                        <div class="text-xs text-gray-500">24%</div>
+                      </div>
+                    </div>
+                    <div class="flex items-center p-3 bg-yellow-50 rounded-lg">
+                      <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                      <div class="text-sm">
+                        <div class="font-medium">Fear</div>
+                        <div class="text-xs text-gray-500">18%</div>
+                      </div>
+                    </div>
+                    <div class="flex items-center p-3 bg-red-50 rounded-lg">
+                      <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                      <div class="text-sm">
+                        <div class="font-medium">Anger</div>
+                        <div class="text-xs text-gray-500">9%</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <div class="rounded-md bg-green-50 p-4">
-                <div class="flex">
-                  <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                
+                <!-- Emotional arc visualization -->
+                <div>
+                  <p class="text-sm font-medium text-gray-700 mb-3">Emotional Arc</p>
+                  <div class="bg-gray-50 rounded-lg p-3 h-32">
+                    <svg viewBox="0 0 100 50" class="w-full h-full stroke-purple-500 fill-none stroke-2">
+                      <!-- Emotional intensity line -->
+                      <path d="M0,25 C10,15 20,35 30,20 C40,5 50,30 60,25 C70,20 80,40 90,10 C95,5 100,15" />
+                      <!-- Chapter markers -->
+                      <line x1="0" y1="45" x2="0" y2="50" stroke="#6B7280" />
+                      <line x1="33" y1="45" x2="33" y2="50" stroke="#6B7280" />
+                      <line x1="66" y1="45" x2="66" y2="50" stroke="#6B7280" />
+                      <line x1="100" y1="45" x2="100" y2="50" stroke="#6B7280" />
                     </svg>
-                  </div>
-                  <div class="ml-3 flex-1 md:flex md:justify-between">
-                    <p class="text-sm text-green-700">Your vocabulary diversity score has improved by 15% over the last three documents.</p>
-                    <p class="mt-3 text-sm md:mt-0 md:ml-6">
-                      <a href="#" class="whitespace-nowrap font-medium text-green-700 hover:text-green-600">View trend <span aria-hidden="true">&rarr;</span></a>
-                    </p>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>Intro</span>
+                      <span>Middle</span>
+                      <span>Climax</span>
+                      <span>End</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <div class="rounded-md bg-yellow-50 p-4">
-                <div class="flex">
-                  <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                
+                <!-- Emotional insight box -->
+                <div class="p-4 rounded-lg bg-purple-50 border border-purple-100">
+                  <div class="flex items-start">
+                    <svg class="h-5 w-5 text-purple-600 mr-2 shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                  </div>
-                  <div class="ml-3 flex-1 md:flex md:justify-between">
-                    <p class="text-sm text-yellow-700">Passive voice usage detected in 18% of sentences. Consider using active voice for more engaging writing.</p>
-                    <p class="mt-3 text-sm md:mt-0 md:ml-6">
-                      <a href="#" class="whitespace-nowrap font-medium text-yellow-700 hover:text-yellow-600">View examples <span aria-hidden="true">&rarr;</span></a>
-                    </p>
+                    <div>
+                      <h5 class="font-medium text-gray-900 mb-1">Emotional Insight</h5>
+                      <p class="text-sm text-gray-600">The emotional tone shifts from anticipation to fear around the middle section, creating effective narrative tension. Consider amplifying the joy elements in the conclusion for a more satisfying resolution.</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -350,41 +520,191 @@
           </div>
         </div>
 
-        <!-- Analytics Trends -->
-        <div class="bg-white shadow overflow-hidden rounded-lg">
-          <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Analytics Trends</h3>
-          </div>
-          <div class="bg-white px-4 py-5 sm:p-6">
-            <div class="flex flex-col">
-              <!-- Simple chart for readability trends -->
-              <div>
-                <p class="text-sm font-medium text-gray-700 mb-2">Readability Score Trend</p>
-                <div class="h-24 bg-gray-50 rounded-lg p-4 flex items-end space-x-2">
-                  <% 7.times do |i| %>
-                    <% height = 30 + rand(50) %>
-                    <div class="flex flex-col items-center">
-                      <div class="bg-indigo-<%= 400 + (i % 3) * 100 %> h-<%= height %>% w-6 rounded-t transition-all duration-200 hover:bg-indigo-400"></div>
-                      <span class="text-xs text-gray-500 mt-1">Doc <%= i+1 %></span>
-                    </div>
-                  <% end %>
-                </div>
-                <p class="text-xs text-gray-500 mt-2">Based on your last 7 analyzed documents</p>
+        <!-- Enhanced Analytics Dashboard with Style Analysis -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <!-- Writing Style Analysis Card -->
+          <div class="bg-white shadow-lg overflow-hidden rounded-xl border border-gray-100">
+            <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 flex items-center">
+              <div class="h-10 w-10 rounded-lg <%= DocumentAnalysis.color %> flex items-center justify-center shadow-md mr-3">
+                <i class="material-icons text-white"><%= DocumentAnalysis.icon %></i>
               </div>
-              
-              <!-- Word count trend -->
-              <div class="mt-6">
-                <p class="text-sm font-medium text-gray-700 mb-2">Word Count Trend</p>
-                <div class="h-24 bg-gray-50 rounded-lg p-4 flex items-end space-x-2">
-                  <% 7.times do |i| %>
-                    <% height = 40 + rand(50) %>
-                    <div class="flex flex-col items-center">
-                      <div class="bg-green-<%= 400 + (i % 3) * 100 %> h-<%= height %>% w-6 rounded-t transition-all duration-200 hover:bg-green-400"></div>
-                      <span class="text-xs text-gray-500 mt-1">Doc <%= i+1 %></span>
+              <h3 class="text-lg leading-6 font-medium text-gray-900">Style Analysis</h3>
+            </div>
+            <div class="bg-white px-4 py-6 sm:p-6">
+              <div class="flex flex-col space-y-6">
+                <!-- Parts of Speech Distribution -->
+                <div>
+                  <p class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <svg class="h-5 w-5 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    Parts of Speech Distribution
+                  </p>
+                  <div class="flex items-center h-8 rounded-md overflow-hidden bg-gray-100">
+                    <div class="h-full bg-blue-600" style="width:26%" title="Nouns: 26%"></div>
+                    <div class="h-full bg-blue-400" style="width:19%" title="Verbs: 19%"></div>
+                    <div class="h-full bg-blue-300" style="width:9%" title="Adjectives: 9%"></div>
+                    <div class="h-full bg-blue-200" style="width:7%" title="Adverbs: 7%"></div>
+                    <div class="h-full bg-blue-100" style="width:39%" title="Other: 39%"></div>
+                  </div>
+                  <div class="flex items-center text-xs text-gray-500 mt-2">
+                    <div class="flex items-center mr-3">
+                      <div class="w-3 h-3 bg-blue-600 mr-1 rounded"></div>
+                      <span>Nouns (26%)</span>
                     </div>
-                  <% end %>
+                    <div class="flex items-center mr-3">
+                      <div class="w-3 h-3 bg-blue-400 mr-1 rounded"></div>
+                      <span>Verbs (19%)</span>
+                    </div>
+                    <div class="flex items-center mr-3">
+                      <div class="w-3 h-3 bg-blue-300 mr-1 rounded"></div>
+                      <span>Adj. (9%)</span>
+                    </div>
+                    <div class="flex items-center">
+                      <div class="w-3 h-3 bg-blue-200 mr-1 rounded"></div>
+                      <span>Adv. (7%)</span>
+                    </div>
+                  </div>
                 </div>
-                <p class="text-xs text-gray-500 mt-2">Word count progression over time</p>
+                
+                <!-- Sentence Structure Analysis -->
+                <div>
+                  <p class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <svg class="h-5 w-5 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Sentence Structures
+                  </p>
+                  <div class="grid grid-cols-4 gap-2">
+                    <div class="bg-blue-50 p-2 rounded-md text-center">
+                      <div class="text-lg font-bold text-blue-600">42%</div>
+                      <div class="text-xs text-gray-600">Simple</div>
+                    </div>
+                    <div class="bg-blue-50 p-2 rounded-md text-center">
+                      <div class="text-lg font-bold text-blue-600">28%</div>
+                      <div class="text-xs text-gray-600">Compound</div>
+                    </div>
+                    <div class="bg-blue-50 p-2 rounded-md text-center">
+                      <div class="text-lg font-bold text-blue-600">18%</div>
+                      <div class="text-xs text-gray-600">Complex</div>
+                    </div>
+                    <div class="bg-blue-50 p-2 rounded-md text-center">
+                      <div class="text-lg font-bold text-blue-600">12%</div>
+                      <div class="text-xs text-gray-600">Compound-Complex</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Writing Style Metrics -->
+                <div>
+                  <p class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <svg class="h-5 w-5 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Writing Style Metrics
+                  </p>
+                  <div class="grid grid-cols-2 gap-3">
+                    <!-- Passive Voice Metric -->
+                    <div class="border border-gray-200 rounded-lg p-3">
+                      <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm text-gray-600">Passive Voice</span>
+                        <span class="text-sm font-semibold text-gray-900">12%</span>
+                      </div>
+                      <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-400" style="width:12%"></div>
+                      </div>
+                      <div class="mt-1 flex justify-between text-xs">
+                        <span class="text-green-600">Low</span>
+                        <span class="text-yellow-600">Medium</span>
+                        <span class="text-red-600">High</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Adverb Usage Metric -->
+                    <div class="border border-gray-200 rounded-lg p-3">
+                      <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm text-gray-600">Adverb Usage</span>
+                        <span class="text-sm font-semibold text-gray-900">7%</span>
+                      </div>
+                      <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-green-400" style="width:7%"></div>
+                      </div>
+                      <div class="mt-1 flex justify-between text-xs">
+                        <span class="text-green-600">Low</span>
+                        <span class="text-yellow-600">Medium</span>
+                        <span class="text-red-600">High</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Analytics Trends Card -->
+          <div class="bg-white shadow-lg overflow-hidden rounded-xl border border-gray-100">
+            <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 flex items-center">
+              <div class="h-10 w-10 rounded-lg bg-blue-500 flex items-center justify-center shadow-md mr-3">
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <h3 class="text-lg leading-6 font-medium text-gray-900">Analytics Trends</h3>
+            </div>
+            <div class="bg-white px-4 py-6 sm:p-6">
+              <div class="flex flex-col space-y-6">
+                <!-- Enhanced chart for readability trends -->
+                <div>
+                  <div class="flex justify-between items-center mb-3">
+                    <p class="text-sm font-medium text-gray-700 flex items-center">
+                      <svg class="h-5 w-5 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                      </svg>
+                      Readability Score Trend
+                    </p>
+                    <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Improving</span>
+                  </div>
+                  <div class="h-28 bg-gray-50 rounded-lg p-4 flex items-end space-x-2">
+                    <% 7.times do |i| %>
+                      <% height = 30 + (i * 5) + rand(10) %>
+                      <div class="flex flex-col items-center flex-1">
+                        <div class="bg-blue-<%= 300 + (i * 50) %> w-full rounded-t transition-all duration-200 hover:opacity-80" style="height:<%= height %>%"></div>
+                        <span class="text-xs text-gray-500 mt-1">Doc <%= i+1 %></span>
+                      </div>
+                    <% end %>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-2">Based on your last 7 analyzed documents</p>
+                </div>
+                
+                <!-- Enhanced word count trend with annotations -->
+                <div>
+                  <div class="flex justify-between items-center mb-3">
+                    <p class="text-sm font-medium text-gray-700 flex items-center">
+                      <svg class="h-5 w-5 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19" />
+                      </svg>
+                      Word Count Trend
+                    </p>
+                    <span class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">+25% Monthly</span>
+                  </div>
+                  <div class="h-28 bg-gray-50 rounded-lg p-4 flex items-end space-x-2 relative">
+                    <% values = [40, 35, 50, 45, 60, 55, 70] %>
+                    <% values.each_with_index do |height, i| %>
+                      <div class="flex flex-col items-center flex-1">
+                        <div class="bg-green-<%= 400 + (i * 30) %> w-full rounded-t transition-all duration-200 hover:opacity-80" style="height:<%= height %>%"></div>
+                        <span class="text-xs text-gray-500 mt-1">Doc <%= i+1 %></span>
+                      </div>
+                    <% end %>
+                    
+                    <!-- Trend line -->
+                    <div class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none">
+                      <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <path d="M0,<%= 100 - values[0] %> L14,<%= 100 - values[1] %> L28,<%= 100 - values[2] %> L42,<%= 100 - values[3] %> L56,<%= 100 - values[4] %> L70,<%= 100 - values[5] %> L84,<%= 100 - values[6] %>" fill="none" stroke="#10B981" stroke-width="2" stroke-dasharray="4,2" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-2">Word count progression over time</p>
+                </div>
               </div>
             </div>
           </div>
@@ -394,75 +714,105 @@
     
     <!-- Sidebar -->
     <div class="lg:w-80 space-y-6">
-      <!-- Analysis Tools -->
-      <div class="bg-white shadow rounded-lg overflow-hidden">
-        <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
-          <h3 class="text-lg leading-6 font-medium text-gray-900">Analysis Tools</h3>
+      <!-- Enhanced Analysis Tools with Consistent Styling -->
+      <div class="bg-white shadow-lg rounded-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl">
+        <div class="px-4 py-5 sm:px-6 bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-800">
+          <h3 class="text-lg leading-6 font-medium text-white flex items-center">
+            <i class="material-icons text-white mr-2"><%= DocumentAnalysis.icon %></i>
+            Analysis Tools
+          </h3>
         </div>
         <ul class="divide-y divide-gray-200">
           <li>
-            <a href="#" class="block hover:bg-gray-50">
+            <a href="#" class="block hover:bg-blue-50 transition-colors duration-200">
               <div class="px-4 py-4 flex items-center sm:px-6">
                 <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
                   <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                      <i class="material-icons text-blue-500">auto_stories</i>
+                    <div class="flex-shrink-0 bg-blue-100 h-10 w-10 rounded-lg flex items-center justify-center">
+                      <i class="material-icons text-blue-600">auto_stories</i>
                     </div>
                     <div class="ml-4">
                       <p class="text-sm font-medium text-gray-900">Readability Analysis</p>
-                      <p class="text-xs text-gray-500">Flesch-Kincaid, SMOG, more</p>
+                      <p class="text-xs text-gray-500">Flesch-Kincaid, SMOG, Coleman-Liau and more</p>
                     </div>
                   </div>
                 </div>
-                <div class="ml-5 flex-shrink-0">
-                  <i class="material-icons text-gray-400">chevron_right</i>
+                <div class="ml-5 flex-shrink-0 flex items-center">
+                  <span class="mr-3 text-xs font-medium text-blue-600 px-2 py-1 bg-blue-100 rounded-full">Popular</span>
+                  <i class="material-icons text-blue-400">chevron_right</i>
                 </div>
               </div>
             </a>
           </li>
           <li>
-            <a href="#" class="block hover:bg-gray-50">
+            <a href="#" class="block hover:bg-blue-50 transition-colors duration-200">
               <div class="px-4 py-4 flex items-center sm:px-6">
                 <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
                   <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                      <i class="material-icons text-purple-500">style</i>
+                    <div class="flex-shrink-0 bg-green-100 h-10 w-10 rounded-lg flex items-center justify-center">
+                      <i class="material-icons text-green-600">style</i>
                     </div>
                     <div class="ml-4">
                       <p class="text-sm font-medium text-gray-900">Style Analysis</p>
-                      <p class="text-xs text-gray-500">Passive voice, adverbs, more</p>
+                      <p class="text-xs text-gray-500">Passive voice detection, adverb usage, vocabulary diversity</p>
                     </div>
                   </div>
                 </div>
                 <div class="ml-5 flex-shrink-0">
-                  <i class="material-icons text-gray-400">chevron_right</i>
+                  <i class="material-icons text-blue-400">chevron_right</i>
                 </div>
               </div>
             </a>
           </li>
           <li>
-            <a href="#" class="block hover:bg-gray-50">
+            <a href="#" class="block hover:bg-blue-50 transition-colors duration-200">
               <div class="px-4 py-4 flex items-center sm:px-6">
                 <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
                   <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                      <i class="material-icons text-amber-500">sentiment_satisfied_alt</i>
+                    <div class="flex-shrink-0 bg-purple-100 h-10 w-10 rounded-lg flex items-center justify-center">
+                      <i class="material-icons text-purple-600">sentiment_satisfied_alt</i>
                     </div>
                     <div class="ml-4">
-                      <p class="text-sm font-medium text-gray-900">Sentiment Analysis</p>
-                      <p class="text-xs text-gray-500">Emotional tone detection</p>
+                      <p class="text-sm font-medium text-gray-900">Emotional Analysis</p>
+                      <p class="text-xs text-gray-500">Joy, fear, sadness, anger, and disgust detection</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="ml-5 flex-shrink-0 flex items-center">
+                  <span class="mr-3 text-xs font-medium text-purple-600 px-2 py-1 bg-purple-100 rounded-full">New</span>
+                  <i class="material-icons text-blue-400">chevron_right</i>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="block hover:bg-blue-50 transition-colors duration-200">
+              <div class="px-4 py-4 flex items-center sm:px-6">
+                <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-amber-100 h-10 w-10 rounded-lg flex items-center justify-center">
+                      <i class="material-icons text-amber-600">book</i>
+                    </div>
+                    <div class="ml-4">
+                      <p class="text-sm font-medium text-gray-900">Structure Analysis</p>
+                      <p class="text-xs text-gray-500">Pacing, scene balance, narrative arc detection</p>
                     </div>
                   </div>
                 </div>
                 <div class="ml-5 flex-shrink-0">
-                  <i class="material-icons text-gray-400">chevron_right</i>
+                  <i class="material-icons text-blue-400">chevron_right</i>
                 </div>
               </div>
             </a>
           </li>
         </ul>
         <div class="bg-gray-50 px-4 py-4 sm:px-6 border-t border-gray-200">
-          <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">View all tools</a>
+          <a href="#" class="text-sm font-medium text-notebook-blue hover:text-blue-700 flex items-center justify-center">
+            <span>View all analysis tools</span>
+            <svg class="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+          </a>
         </div>
       </div>
       
@@ -520,34 +870,53 @@
         </div>
       </div>
       
-      <!-- Coming Soon Features -->
-      <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg overflow-hidden shadow">
-        <div class="px-4 py-5 sm:p-6 text-white">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 bg-white/20 backdrop-blur-sm rounded-full p-2">
-              <i class="material-icons text-white">rocket_launch</i>
-            </div>
-            <h3 class="ml-3 text-lg font-medium text-white">Coming Soon</h3>
-          </div>
-          
-          <div class="mt-4 space-y-3">
-            <div class="flex items-center">
-              <i class="material-icons text-indigo-200 mr-2 text-sm">bubble_chart</i>
-              <span class="text-sm text-indigo-100">Character Relationship Graphs</span>
-            </div>
-            <div class="flex items-center">
-              <i class="material-icons text-indigo-200 mr-2 text-sm">show_chart</i>
-              <span class="text-sm text-indigo-100">Emotional Arc Visualization</span>
-            </div>
-            <div class="flex items-center">
-              <i class="material-icons text-indigo-200 mr-2 text-sm">fingerprint</i>
-              <span class="text-sm text-indigo-100">Style DNA Profile</span>
-            </div>
-          </div>
-          
-          <div class="mt-5">
-            <a href="#" class="inline-flex items-center px-3 py-2 border border-white/30 rounded-md text-sm font-medium text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm">
-              Learn more
+      <!-- User Help Card -->
+      <div class="bg-white shadow-lg rounded-xl border border-gray-100 overflow-hidden">
+        <div class="bg-blue-50 px-4 py-5 border-b border-blue-100">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 flex items-center">
+            <i class="material-icons text-notebook-blue mr-2">help_outline</i>
+            Tips for Better Analysis Results
+          </h3>
+        </div>
+        <div class="p-6">
+          <ul class="space-y-4">
+            <li class="flex">
+              <div class="flex-shrink-0">
+                <div class="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-100 text-notebook-blue">
+                  <span class="text-lg font-semibold">1</span>
+                </div>
+              </div>
+              <div class="ml-4">
+                <h4 class="text-base font-medium text-gray-900">Complete Documents</h4>
+                <p class="mt-1 text-sm text-gray-600">Analysis works best on complete documents rather than fragments or outlines.</p>
+              </div>
+            </li>
+            <li class="flex">
+              <div class="flex-shrink-0">
+                <div class="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-100 text-notebook-blue">
+                  <span class="text-lg font-semibold">2</span>
+                </div>
+              </div>
+              <div class="ml-4">
+                <h4 class="text-base font-medium text-gray-900">Minimum Length</h4>
+                <p class="mt-1 text-sm text-gray-600">For best results, analyze documents with at least 500 words to provide enough data for meaningful insights.</p>
+              </div>
+            </li>
+            <li class="flex">
+              <div class="flex-shrink-0">
+                <div class="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-100 text-notebook-blue">
+                  <span class="text-lg font-semibold">3</span>
+                </div>
+              </div>
+              <div class="ml-4">
+                <h4 class="text-base font-medium text-gray-900">Multiple Analyses</h4>
+                <p class="mt-1 text-sm text-gray-600">Track your progress by analyzing revised versions of your document to see improvement over time.</p>
+              </div>
+            </li>
+          </ul>
+          <div class="mt-6 flex justify-center">
+            <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-notebook-blue hover:bg-blue-700 transition-all duration-300">
+              Learn more about document analysis
             </a>
           </div>
         </div>
