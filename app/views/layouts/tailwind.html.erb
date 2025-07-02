@@ -16,539 +16,58 @@
   <%= javascript_pack_tag 'application' %>
   <%= render 'layouts/seo' %>
   <script defer type="text/javascript" src="https://js.stripe.com/v2/"></script>
-
-  <!-- todo mirror this in-repo? -->
+  
+  <!-- Simplified stylesheet and script section for debugging -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  
-  <!-- Ripple effect script -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      function createRipple(event) {
-        const button = event.currentTarget;
-        
-        // Remove existing ripples
-        const ripples = button.getElementsByClassName('ripple');
-        while (ripples.length > 0) {
-          ripples[0].remove();
-        }
-        
-        // Create new ripple
-        const ripple = document.createElement('span');
-        ripple.classList.add('ripple');
-        button.appendChild(ripple);
-        
-        // Position the ripple
-        const rect = button.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height) * 1.5;
-        const x = event.clientX - rect.left - (size / 2);
-        const y = event.clientY - rect.top - (size / 2);
-        
-        // Apply styles
-        ripple.style.width = ripple.style.height = `${size}px`;
-        ripple.style.left = `${x}px`;
-        ripple.style.top = `${y}px`;
-        
-        // Remove after animation completes
-        setTimeout(() => {
-          ripple.remove();
-        }, 600);
-      }
-      
-      // Add event listeners to all ripple-effect elements
-      function setupRippleEffects() {
-        const buttons = document.querySelectorAll('.ripple-effect');
-        buttons.forEach(button => {
-          button.addEventListener('click', createRipple);
-        });
-      }
-      
-      // Initial setup
-      setupRippleEffects();
-      
-      // Monitor for new elements (e.g., after Alpine.js renders)
-      const observer = new MutationObserver(mutations => {
-        mutations.forEach(mutation => {
-          if (mutation.addedNodes && mutation.addedNodes.length > 0) {
-            setupRippleEffects();
-          }
-        });
-      });
-      
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-    });
-  </script>
-  
-  <!-- Google Fonts - Modern typography system -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Animations and core design system for the landing page -->
-  <style>
-    /* Ripple effect styles */
-    .ripple-effect {
-      position: relative;
-      overflow: hidden;
-      transform: translate3d(0, 0, 0);
-    }
-
-    .ripple-effect .ripple {
-      position: absolute;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.4);
-      transform: scale(0);
-      animation: ripple-animation 0.6s linear;
-      pointer-events: none;
-    }
-
-    @keyframes ripple-animation {
-      to {
-        transform: scale(2.5);
-        opacity: 0;
-      }
-    }
-    
-    :root {
-      /* Core color palette - updated to match site's classic style */
-      --color-primary: #1E88E5; /* Notebook blue as primary */
-      --color-primary-light: #64B5F6;
-      --color-primary-dark: #0D47A1;
-      --color-secondary: #FF8A65; /* Orange as secondary, used sparingly */
-      --color-secondary-light: #FFAB91;
-      --color-secondary-dark: #E64A19;
-      --color-accent: #5E35B1; /* Purple as accent */
-      --color-accent-light: #9575CD;
-      --color-accent-dark: #4527A0;
-      --color-success: #10B981;
-      --color-warning: #FBBF24;
-      --color-danger: #EF4444;
-      --color-gray-50: #F9FAFB;
-      --color-gray-100: #F3F4F6;
-      --color-gray-200: #E5E7EB;
-      --color-gray-300: #D1D5DB;
-      --color-gray-400: #9CA3AF;
-      --color-gray-500: #6B7280;
-      --color-gray-600: #4B5563;
-      --color-gray-700: #374151;
-      --color-gray-800: #1F2937;
-      --color-gray-900: #111827;
-      
-      /* Typography */
-      --font-display: 'Manrope', sans-serif;
-      --font-body: 'Inter', sans-serif;
-      
-      /* Spacing system (8px grid) */
-      --space-1: 0.25rem; /* 4px */
-      --space-2: 0.5rem;  /* 8px */
-      --space-3: 1rem;    /* 16px */
-      --space-4: 1.5rem;  /* 24px */
-      --space-5: 2rem;    /* 32px */
-      --space-6: 3rem;    /* 48px */
-      --space-7: 4rem;    /* 64px */
-      --space-8: 6rem;    /* 96px */
-      --space-9: 8rem;    /* 128px */
-      
-      /* Border radius */
-      --radius-sm: 0.25rem;
-      --radius-md: 0.5rem;
-      --radius-lg: 1rem;
-      --radius-xl: 1.5rem;
-      --radius-2xl: 2rem;
-      --radius-full: 9999px;
-    }
-    
-    /* Global reset */
-    h1, h2, h3, h4, h5, h6 {
-      font-family: var(--font-display);
-      letter-spacing: -0.02em;
-    }
-    
-    body {
-      font-family: var(--font-body);
-    }
-    
-    /* Modern 3D effect for cards */
-    .card-3d {
-      transform-style: preserve-3d;
-      transition: all 0.3s ease;
-    }
-    
-    .card-3d:hover {
-      transform: translateY(-10px) rotateX(4deg);
-    }
-    
-    .card-3d .card-shadow {
-      position: absolute;
-      top: 5%;
-      left: 5%;
-      width: 90%;
-      height: 90%;
-      transform: translateZ(-1px);
-      filter: blur(20px);
-      opacity: 0.4;
-      transition: all 0.3s ease;
-    }
-    
-    .card-3d:hover .card-shadow {
-      opacity: 0.6;
-      transform: translateZ(-10px) translateY(10px);
-    }
-    
-    /* Advanced animations */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    @keyframes fadeInLeft {
-      from {
-        opacity: 0;
-        transform: translateX(-30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-    
-    @keyframes fadeInRight {
-      from {
-        opacity: 0;
-        transform: translateX(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-    
-    @keyframes scaleIn {
-      from {
-        opacity: 0;
-        transform: scale(0.9);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-    
-    @keyframes float {
-      0% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(-20px);
-      }
-      100% {
-        transform: translateY(0px);
-      }
-    }
-    
-    @keyframes blob {
-      0% {
-        transform: translate(0px, 0px) scale(1);
-      }
-      33% {
-        transform: translate(30px, -50px) scale(1.1);
-      }
-      66% {
-        transform: translate(-20px, 20px) scale(0.9);
-      }
-      100% {
-        transform: translate(0px, 0px) scale(1);
-      }
-    }
-    
-    @keyframes pulse {
-      0% {
-        transform: scale(1);
-        opacity: 0.8;
-      }
-      50% {
-        transform: scale(1.05);
-        opacity: 1;
-      }
-      100% {
-        transform: scale(1);
-        opacity: 0.8;
-      }
-    }
-    
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-    
-    @keyframes dash {
-      from {
-        stroke-dashoffset: 1000;
-      }
-      to {
-        stroke-dashoffset: 0;
-      }
-    }
-    
-    /* Animation classes */
-    .animate-fade-in-up {
-      animation: fadeInUp 0.8s ease-out forwards;
-    }
-    
-    .animate-fade-in-left {
-      animation: fadeInLeft 0.8s ease-out forwards;
-    }
-    
-    .animate-fade-in-right {
-      animation: fadeInRight 0.8s ease-out forwards;
-    }
-    
-    .animate-scale-in {
-      animation: scaleIn 0.8s ease-out forwards;
-    }
-    
-    .animate-float {
-      animation: float 6s ease-in-out infinite;
-    }
-    
-    .animate-blob {
-      animation: blob 7s infinite;
-    }
-    
-    .animate-pulse {
-      animation: pulse 3s ease-in-out infinite;
-    }
-    
-    .animate-spin-slow {
-      animation: spin 15s linear infinite;
-    }
-    
-    .animate-dash {
-      animation: dash 1.5s linear forwards;
-    }
-    
-    /* Animation delays */
-    .delay-100 {
-      animation-delay: 100ms;
-    }
-    
-    .delay-200 {
-      animation-delay: 200ms;
-    }
-    
-    .delay-300 {
-      animation-delay: 300ms;
-    }
-    
-    .delay-400 {
-      animation-delay: 400ms;
-    }
-    
-    .delay-500 {
-      animation-delay: 500ms;
-    }
-    
-    .delay-700 {
-      animation-delay: 700ms;
-    }
-    
-    .delay-1000 {
-      animation-delay: 1000ms;
-    }
-    
-    .delay-2000 {
-      animation-delay: 2000ms;
-    }
-    
-    .delay-3000 {
-      animation-delay: 3000ms;
-    }
-    
-    .delay-4000 {
-      animation-delay: 4000ms;
-    }
-    
-    /* Custom backgrounds */
-    .bg-mesh {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='%2320202A' fill-opacity='0.05'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40h2.5v2.5H40V0zm0 40h2.5v2.5H40V40zM0 0h2.5v2.5H0V0zm0 40h2.5v2.5H0V40z'/%3E%3C/g%3E%3C/svg%3E");
-    }
-    
-    .bg-dots {
-      background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-      background-size: 20px 20px;
-    }
-    
-    .bg-grid {
-      background-image: linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px);
-      background-size: 20px 20px;
-    }
-    
-    /* Glass effect */
-    .glass {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .glass-dark {
-      background: rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    /* Gradient text */
-    .text-gradient {
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-    }
-    
-    /* Scroll reveal animation - to be activated with JavaScript */
-    .reveal-on-scroll {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-    }
-    
-    .reveal-on-scroll.is-visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  </style>
-  
-  <!-- ScrollTrigger for scroll animations -->
-  <script src="https://unpkg.com/scrolltrigger@latest/dist/ScrollTrigger.min.js"></script>
-  
-  <!-- GSAP for advanced animations -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
 </head>
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
       x-data="{ showSidebar: <%= user_signed_in? ? 'window.innerWidth >= 1024' : 'false' %> }"
 >
-<!-- Initialize scroll reveal animation -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initialize ScrollTrigger for reveal animations
-    if (typeof ScrollTrigger !== 'undefined') {
-      var reveals = document.querySelectorAll('.reveal-on-scroll');
-      
-      ScrollTrigger.batch(reveals, {
-        onEnter: elements => {
-          elements.forEach(el => {
-            el.classList.add('is-visible');
-          });
-        },
-        once: true
-      });
-    }
-    
-    // Initialize GSAP animations if available
-    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-      gsap.registerPlugin(ScrollTrigger);
-      
-      // Animate the vertical connecting line on scroll
-      gsap.from('.feature-connector', {
-        height: 0,
-        ease: 'power1.inOut',
-        scrollTrigger: {
-          trigger: '.feature-connector',
-          start: 'top 80%',
-          end: 'bottom 20%',
-          scrub: true
-        }
-      });
-      
-      // Animate neural network path strokes
-      gsap.set('[stroke-dasharray]', {
-        strokeDashoffset: 1000
-      });
-      
-      gsap.to('[stroke-dasharray]', {
-        strokeDashoffset: 0,
-        duration: 2,
-        ease: 'power2.inOut',
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: '.neural-network-viz',
-          start: 'top 80%'
-        }
-      });
-    }
-  });
-</script>
   <%= render 'layouts/tailwind/navbar' %>
-  <%# render 'cards/ui/alert' %>
-  <%# render 'cards/ui/notice' %>
 
-  <!-- sidebar -->
   <% if user_signed_in? %>
-    <!-- Floating notebook toggle button (shows when sidebar is hidden) -->
-    <button x-show="!showSidebar" @click="showSidebar = true" 
-            class="fixed bottom-8 -left-2 z-30"
-            x-cloak>
-      <div class="relative pl-0 hover:pl-2 transition-all duration-300">
-        <div class="ripple-effect bg-notebook-blue text-white rounded-r-lg shadow-lg py-3 px-5 flex flex-row items-center justify-center space-x-4">
-          <!-- Menu icon -->
-          <i class="material-icons text-white text-xl">menu_open</i>
-          
-          <!-- Colored indicators -->
-          <div class="flex flex-row space-x-2">
-            <div class="w-2 h-6 bg-blue-300 rounded-full"></div>
-            <div class="w-2 h-6 bg-green-400 rounded-full"></div>
-            <div class="w-2 h-6 bg-purple-400 rounded-full"></div>
-          </div>
-        </div>
-      </div>
-    </button>
-
+    <!-- Simplified sidebar for debugging -->
     <nav x-show="showSidebar" class="notebook--sidebar fixed top-0 pt-16 flex flex-col left-0 z-20 h-screen overflow-hidden transition-all duration-300 origin-left transform w-56 sm:w-64 lg:w-56" :class="{ '-translate-x-full' : !showSidebar, 'translate-x-0' : showSidebar }">
-      <!-- Clean sidebar background with subtle texture -->
-      <div class="absolute inset-0 bg-white shadow-lg border-r border-gray-200">
-        <!-- Subtle notebook paper texture -->
-        <div class="absolute inset-0 opacity-5">
-          <div class="h-full w-full bg-repeat" style="background-image: url('data:image/svg+xml,%3Csvg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M0 0h100v100H0z" fill="none"/%3E%3Cpath d="M0 0h100v1H0zM0 25h100v1H0zM0 50h100v1H0zM0 75h100v1H0z" fill="%23718096"/%3E%3C/svg%3E');"></div>
-        </div>
-      </div>
+      <div class="absolute inset-0 bg-white shadow-lg border-r border-gray-200"></div>
       
-      <!-- Universe selector - moved here for mobile/tablet -->
-      <div class="lg:hidden p-3 border-b border-gray-200 bg-gray-50 shrink-0">
+      <!-- Universe Context Bar - visible on all screen sizes -->
+      <div class="p-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white shadow-sm shrink-0 relative mb-1">
+        
         <% if @universe_scope %>
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <%= link_to main_app.multiverse_path, class: "flex items-center px-3 py-2 hover:bg-gray-50 border-b border-gray-100" do %>
-              <i class="material-icons <%= Universe.text_color %> text-lg mr-2"><%= Universe.icon %></i>
-              <span class="text-xs text-gray-500 uppercase tracking-wide font-medium">Universe</span>
+          <div class="bg-white rounded-lg shadow-sm border border-blue-100 overflow-hidden">
+            
+            <%= link_to main_app.multiverse_path, class: "flex items-center px-3 py-2 hover:bg-blue-50 border-b border-gray-100 ripple-effect" do %>
+              <div class="flex items-center justify-between w-full">
+                <div class="flex items-center">
+                  <i class="material-icons <%= Universe.text_color %> text-sm mr-1.5"><%= Universe.icon %></i>
+                  <span class="text-xs text-gray-500 uppercase tracking-wide font-medium">Universe</span>
+                </div>
+                <div class="flex items-center text-xs text-blue-500 hover:text-blue-600 transition-colors duration-150">
+                  <span>Change</span>
+                  <i class="material-icons text-xs ml-0.5">swap_horiz</i>
+                </div>
+              </div>
             <% end %>
-            <%= link_to @universe_scope, class: "flex items-center px-3 py-3 hover:bg-purple-50 group" do %>
-              <div class="w-8 h-8 rounded-full <%= Universe.color %> flex items-center justify-center mr-3 group-hover:scale-105 transition-transform">
-                <i class="material-icons text-white text-sm"><%= Universe.icon %></i>
+            
+            <%= link_to @universe_scope, class: "flex items-center px-3 py-2.5 hover:bg-blue-50 ripple-effect group" do %>
+              <div class="w-8 h-8 rounded-md <%= Universe.color %> flex items-center justify-center mr-2.5 group-hover:scale-105 transition-transform shadow-sm">
+                <i class="material-icons text-white text-base"><%= Universe.icon %></i>
               </div>
               <div class="flex-1 min-w-0">
                 <div class="text-sm font-medium text-gray-900 truncate"><%= @universe_scope.name %></div>
-                <div class="text-xs text-gray-500">Active universe</div>
+                <div class="text-xs text-gray-500">
+                  Active universe
+                </div>
               </div>
             <% end %>
           </div>
-
         <% else %>
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <%= link_to main_app.multiverse_path, class: "flex items-center px-3 py-4 hover:bg-purple-50 group" do %>
+          <div class="bg-white rounded-lg shadow-sm border border-blue-100 overflow-hidden">
+            <%= link_to main_app.multiverse_path, class: "flex items-center p-3 hover:bg-purple-50 ripple-effect group" do %>
+              <div class="w-8 h-8 rounded-md bg-purple-100 flex items-center justify-center mr-2.5 group-hover:scale-105 transition-transform shadow-sm">
+                <i class="material-icons text-purple-600 text-base"><%= Universe.icon %></i>
+              </div>
               <div class="flex-1">
                 <div class="text-sm font-medium text-purple-700 group-hover:text-purple-800">Choose a universe</div>
                 <div class="text-xs text-gray-500">Filter your notebook</div>
@@ -557,8 +76,8 @@
           </div>
         <% end %>
       </div>
-
-      <nav class="notebook--sidebar text-sm font-medium overflow-y-auto flex-1 min-h-0 relative z-10 px-2" aria-label="Main Navigation">
+      
+      <nav class="notebook--sidebar text-sm font-medium overflow-y-auto flex-1 min-h-0 relative z-10 px-2.5" aria-label="Main Navigation">
         <!--
         <%= link_to main_app.table_of_contents_path, class: 'flex items-center px-2 py-3 transition cursor-pointer group hover:bg-gray-100' do %>
           <i class="material-icons text-gray-400 shrink-0 w-6 h-6 mr-2 <%= Universe.text_color %>">dashboard</i>
@@ -566,32 +85,32 @@
         <% end %>
         -->
       
-        <div x-data="{ expandedWorldbuildingSidebar: <%= @sidenav_expansion == 'worldbuilding' %> }" class="mb-2">
+        <div x-data="{ expandedWorldbuildingSidebar: <%= @sidenav_expansion == 'worldbuilding' %> }" class="mb-2 mt-1">
           <!-- Section header with indicator dot -->
           <div class="cursor-pointer relative ripple-effect" role="button" @click="expandedWorldbuildingSidebar = !expandedWorldbuildingSidebar">
-            <div class="flex items-center px-3 py-2.5 text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-150">
+            <div class="flex items-center px-3 py-2 text-gray-800 hover:bg-gray-100 rounded-lg transition-colors duration-150">
               <!-- Left color indicator -->
-              <div class="h-5 w-1 rounded-full bg-blue-500 mr-3 shadow-sm" :class="{ 'h-8': expandedWorldbuildingSidebar }"></div>
-              <i class="material-icons text-blue-500 mr-2.5">book</i>
-              <span class="font-medium">Worldbuilding</span>
+              <div class="h-4 w-1 rounded-full bg-blue-500 mr-2.5 shadow-sm" :class="{ 'h-6 animate-pulse': expandedWorldbuildingSidebar }"></div>
+              <i class="material-icons text-blue-500 mr-2 text-base">book</i>
+              <span class="font-medium text-sm">Worldbuilding</span>
               <div class="ml-auto">
-                <svg :class="{ 'rotate-90': expandedWorldbuildingSidebar }" class="w-5 h-5 text-gray-400 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <svg :class="{ 'rotate-90': expandedWorldbuildingSidebar }" class="w-4 h-4 text-gray-400 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                 </svg>
               </div>
             </div>
           </div>
-          <div x-show="expandedWorldbuildingSidebar" x-cloak class="mt-1 pl-4 ml-2 border-l-2 border-blue-300 overflow-hidden space-y-0.5">
+          <div x-show="expandedWorldbuildingSidebar" x-cloak class="mt-1 pl-3.5 ml-2 border-l border-blue-200 overflow-hidden space-y-0.5">
             <!-- Simple content container -->
             <div class="transform transition-all duration-200" 
                  :class="{ 'translate-y-0 opacity-100': expandedWorldbuildingSidebar, 'translate-y-4 opacity-0': !expandedWorldbuildingSidebar }">
             <% @activated_content_types.each do |content_type| %>
               <% content_type_klass = content_class_from_name(content_type) %>
               <% is_current_page = current_page?(main_app.polymorphic_path(content_type_klass)) %>
-              <%= link_to main_app.polymorphic_path(content_type_klass), class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{is_current_page ? 'bg-blue-50 text-blue-800' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'}" do %>
+              <%= link_to main_app.polymorphic_path(content_type_klass), class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{is_current_page ? 'bg-blue-50 text-blue-800' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'}", "aria-current": (is_current_page ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-8 h-8 flex items-center justify-center mr-2.5">
-                    <i class="material-icons <%= content_type_klass.text_color %> text-lg"><%= content_type_klass.icon %></i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
+                    <i class="material-icons <%= content_type_klass.text_color %> text-base"><%= content_type_klass.icon %></i>
                   </div>
                   <div class="flex-grow flex items-center justify-between min-w-0">
                     <span class="text-sm font-medium truncate"><%= content_type.pluralize %></span>
@@ -606,10 +125,10 @@
             <% end %>
 
             <div class="mt-3 border-t border-gray-200 pt-2">
-              <%= link_to main_app.customization_content_types_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.customization_content_types_path) ? 'bg-blue-50 text-blue-800' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'}" do %>
+              <%= link_to main_app.customization_content_types_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.customization_content_types_path) ? 'bg-blue-50 text-blue-800' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'}", "aria-current": (current_page?(main_app.customization_content_types_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-8 h-8 flex items-center justify-center mr-2.5">
-                    <i class="material-icons text-blue-500 text-lg">add</i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
+                    <i class="material-icons text-blue-500 text-base">add</i>
                   </div>
                   <div class="flex-grow">
                     <span class="text-sm font-medium">Add more...</span>
@@ -624,26 +143,26 @@
         <div x-data="{ expandedWritingSidebar: <%= @sidenav_expansion == 'writing' %> }" class="mb-2">
           <!-- Section header with indicator dot -->
           <div class="cursor-pointer relative ripple-effect" role="button" @click="expandedWritingSidebar = !expandedWritingSidebar">
-            <div class="flex items-center px-3 py-2.5 text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-150">
+            <div class="flex items-center px-3 py-2 text-gray-800 hover:bg-gray-100 rounded-lg transition-colors duration-150">
               <!-- Left color indicator -->
-              <div class="h-5 w-1 rounded-full bg-green-500 mr-3 shadow-sm" :class="{ 'h-8': expandedWritingSidebar }"></div>
-              <i class="material-icons text-green-500 mr-2.5">edit</i>
-              <span class="font-medium">Writing</span>
+              <div class="h-4 w-1 rounded-full bg-green-500 mr-2.5 shadow-sm" :class="{ 'h-6 animate-pulse': expandedWritingSidebar }"></div>
+              <i class="material-icons text-green-500 mr-2 text-base">edit</i>
+              <span class="font-medium text-sm">Writing</span>
               <div class="ml-auto">
-                <svg :class="{ 'rotate-90': expandedWritingSidebar }" class="w-5 h-5 text-gray-400 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <svg :class="{ 'rotate-90': expandedWritingSidebar }" class="w-4 h-4 text-gray-400 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                 </svg>
               </div>
             </div>
           </div>
-          <div x-show="expandedWritingSidebar" x-cloak class="mt-1 pl-4 ml-2 border-l-2 border-green-300 overflow-hidden space-y-0.5">
+          <div x-show="expandedWritingSidebar" x-cloak class="mt-1 pl-3.5 ml-2 border-l border-green-200 overflow-hidden space-y-0.5">
             <!-- Simple content container -->
             <div class="transform transition-all duration-200" 
                  :class="{ 'translate-y-0 opacity-100': expandedWritingSidebar, 'translate-y-4 opacity-0': !expandedWritingSidebar }">
-            <%= link_to main_app.documents_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.documents_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}" do %>
+            <%= link_to main_app.documents_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.documents_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}", "aria-current": (current_page?(main_app.documents_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-8 h-8 flex items-center justify-center mr-2.5">
-                    <i class="material-icons <%= Document.text_color %> text-lg"><%= Document.icon %></i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
+                    <i class="material-icons <%= Document.text_color %> text-base"><%= Document.icon %></i>
                   </div>
                   <div class="flex-grow flex items-center justify-between min-w-0">
                     <span class="text-sm font-medium truncate">Documents</span>
@@ -656,10 +175,10 @@
                 </div>
               <% end %>
 
-            <%= link_to main_app.timelines_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.timelines_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}" do %>
+            <%= link_to main_app.timelines_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.timelines_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}", "aria-current": (current_page?(main_app.timelines_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-8 h-8 flex items-center justify-center mr-2.5">
-                    <i class="material-icons <%= Timeline.text_color %> text-lg"><%= Timeline.icon %></i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
+                    <i class="material-icons <%= Timeline.text_color %> text-base"><%= Timeline.icon %></i>
                   </div>
                   <div class="flex-grow flex items-center justify-between min-w-0">
                     <span class="text-sm font-medium truncate">Timelines</span>
@@ -672,34 +191,16 @@
                 </div>
               <% end %>
 
-            <%= link_to main_app.prompts_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.prompts_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}" do %>
+            <%= link_to main_app.prompts_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.prompts_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}", "aria-current": (current_page?(main_app.prompts_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-8 h-8 flex items-center justify-center mr-2.5">
-                    <i class="material-icons text-orange-400 text-lg">lightbulb</i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
+                    <i class="material-icons text-orange-400 text-base">lightbulb</i>
                   </div>
                   <div class="flex-grow">
                     <span class="text-sm font-medium">Prompts</span>
                   </div>
                 </div>
               <% end %>
-
-            <!--
-            <%= link_to analysis_hub_path, class: "flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(analysis_hub_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}" do %>
-                <div class="flex items-center w-full">
-                  <div class="shrink-0 w-8 h-8 flex items-center justify-center mr-2.5">
-                    <i class="material-icons <%= DocumentAnalysis.text_color %> text-lg"><%= DocumentAnalysis.icon %></i>
-                  </div>
-                  <div class="flex-grow flex items-center justify-between min-w-0">
-                    <span class="text-sm font-medium truncate">Analysis</span>
-                    <% if user_signed_in? && DocumentAnalysis.joins(:document).where(documents: { user_id: current_user.id }).where.not(completed_at: nil).count > 0 %>
-                      <span class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full <%= current_page?(analysis_hub_path) ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600 group-hover:bg-green-100 group-hover:text-green-700' %> transition-colors">
-                        <%= DocumentAnalysis.joins(:document).where(documents: { user_id: current_user.id }).where.not(completed_at: nil).count %>
-                      </span>
-                    <% end %>
-                  </div>
-                </div>
-              <% end %>
-            -->
               </div>
             </div>
           </div>
@@ -708,26 +209,26 @@
         <div x-data="{ expandedCommunitySidebar: <%= @sidenav_expansion == 'community' %> }" class="mb-2">
           <!-- Section header with indicator dot -->
           <div class="cursor-pointer relative ripple-effect" role="button" @click="expandedCommunitySidebar = !expandedCommunitySidebar">
-            <div class="flex items-center px-3 py-2.5 text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-150">
+            <div class="flex items-center px-3 py-2 text-gray-800 hover:bg-gray-100 rounded-lg transition-colors duration-150">
               <!-- Left color indicator -->
-              <div class="h-5 w-1 rounded-full bg-purple-500 mr-3 shadow-sm" :class="{ 'h-8': expandedCommunitySidebar }"></div>
-              <i class="material-icons text-purple-500 mr-2.5">groups</i>
-              <span class="font-medium">Community</span>
+              <div class="h-4 w-1 rounded-full bg-purple-500 mr-2.5 shadow-sm" :class="{ 'h-6 animate-pulse': expandedCommunitySidebar }"></div>
+              <i class="material-icons text-purple-500 mr-2 text-base">groups</i>
+              <span class="font-medium text-sm">Community</span>
               <div class="ml-auto">
-                <svg :class="{ 'rotate-90': expandedCommunitySidebar }" class="w-5 h-5 text-gray-400 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <svg :class="{ 'rotate-90': expandedCommunitySidebar }" class="w-4 h-4 text-gray-400 transition transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                 </svg>
               </div>
             </div>
           </div>
-          <div x-show="expandedCommunitySidebar" x-cloak class="mt-1 pl-4 ml-2 border-l-2 border-purple-300 overflow-hidden space-y-0.5">
+          <div x-show="expandedCommunitySidebar" x-cloak class="mt-1 pl-3.5 ml-2 border-l border-purple-200 overflow-hidden space-y-0.5">
             <!-- Simple content container -->
             <div class="transform transition-all duration-200" 
                  :class="{ 'translate-y-0 opacity-100': expandedCommunitySidebar, 'translate-y-4 opacity-0': !expandedCommunitySidebar }">
-            <%= link_to main_app.page_collections_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.page_collections_path) ? 'bg-purple-50 text-purple-800' : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'}" do %>
+            <%= link_to main_app.page_collections_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.page_collections_path) ? 'bg-purple-50 text-purple-800' : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'}", "aria-current": (current_page?(main_app.page_collections_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-8 h-8 flex items-center justify-center mr-2.5">
-                    <i class="material-icons <%= PageCollection.text_color %> text-lg"><%= PageCollection.icon %></i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
+                    <i class="material-icons <%= PageCollection.text_color %> text-base"><%= PageCollection.icon %></i>
                   </div>
                   <div class="flex-grow flex items-center justify-between min-w-0">
                     <span class="text-sm font-medium truncate">Collections</span>
@@ -740,10 +241,10 @@
                 </div>
               <% end %>
 
-            <%= link_to main_app.thredded_path, class: "flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.thredded_path) ? 'bg-purple-50 text-purple-800' : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'}" do %>
+            <%= link_to main_app.thredded_path, class: "flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.thredded_path) ? 'bg-purple-50 text-purple-800' : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'}", "aria-current": (current_page?(main_app.thredded_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-8 h-8 flex items-center justify-center mr-2.5">
-                    <i class="material-icons text-blue-500 text-lg">forum</i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
+                    <i class="material-icons text-blue-500 text-base">forum</i>
                   </div>
                   <div class="flex-grow flex items-center justify-between min-w-0">
                     <span class="text-sm font-medium truncate">Discussions</span>
@@ -754,10 +255,10 @@
                 </div>
               <% end %>
 
-            <%= link_to main_app.stream_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.stream_path) ? 'bg-purple-50 text-purple-800' : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'}" do %>
+            <%= link_to main_app.stream_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.stream_path) ? 'bg-purple-50 text-purple-800' : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'}", "aria-current": (current_page?(main_app.stream_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-8 h-8 flex items-center justify-center mr-2.5">
-                    <i class="material-icons text-purple-400 text-lg">ballot</i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
+                    <i class="material-icons text-purple-400 text-base">ballot</i>
                   </div>
                   <div class="flex-grow flex items-center justify-between min-w-0">
                     <span class="text-sm font-medium truncate">Activity</span>
@@ -769,11 +270,11 @@
           </div>
         </div>
       </nav>
-
-      <div @click="showSidebar = false" class="flex items-center px-4 py-3 cursor-pointer group shrink-0 relative z-10 mx-3 mt-auto mb-8">
-        <div class="ripple-effect relative flex items-center justify-center w-full px-2 py-2.5 bg-notebook-blue text-white rounded-lg shadow-md transition-all duration-200 transform hover:-translate-x-1">
-          <div class="w-8 h-8 flex items-center justify-center">
-            <i class="material-icons text-white text-lg">arrow_back</i>
+      
+      <div @click="showSidebar = false" class="flex items-center px-4 py-3 cursor-pointer group shrink-0 relative z-10 mx-3 mt-auto mb-5">
+        <div class="relative flex items-center justify-center w-full px-2 py-2 bg-notebook-blue text-white rounded-lg shadow-sm transition-all duration-200 transform hover:-translate-x-1 hover:shadow-md">
+          <div class="w-7 h-7 flex items-center justify-center">
+            <i class="material-icons text-white text-base">arrow_back</i>
           </div>
         </div>
       </div>
@@ -781,7 +282,6 @@
 
     <!-- sidebar backdrop on mobile --> 
     <div class="fixed inset-0 z-10 w-screen h-screen bg-black bg-opacity-25 lg:hidden" x-show="showSidebar" @click="showSidebar = false" x-cloak></div>
-
   <% end %>
 
   <!-- main content -->
@@ -802,8 +302,8 @@
         <%= link_to 'https://twitter.com/indentlabs', class: 'text-gray-400 hover:text-gray-500' do %>
           <span class="sr-only">Twitter</span>
           <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
           </svg>
-            <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
         <% end %>
 
         <%= link_to 'https://github.com/indentlabs/notebook', class: 'text-gray-400 hover:text-gray-500' do %>
@@ -818,9 +318,6 @@
       </div>
     </div>
   </footer>
-    
-  <%# react_component("Footer")      unless defined?(@show_footer) && !@show_footer %>
-  <%# render 'layouts/quick_add_fab' unless defined?(@show_footer) && !@show_footer %>
 
   <script type="text/javascript">
     <% if user_signed_in? %>
@@ -832,7 +329,7 @@
     });
   </script>
 
-  <%# render partial: 'content/keyboard_controls_help_modal' %>
   <%= render 'layouts/ganalytics' %>
 </body>
 </html>
+EOF < /dev/null

@@ -53,7 +53,19 @@ class MainController < ApplicationController
     @toc_scope = @universe_scope || current_user
     @toc_user  = @universe_scope.try(:user) || current_user
 
-    content_list = @toc_scope.content_list.sort_by { |page| page['name'] }
+    # Get content list - handle differently depending on whether we're scoped to a universe or a user
+    content_list = if @toc_scope.is_a?(Universe)
+      # For a Universe, we need to get content from the user that's in this universe
+      user_content = @toc_user.content_list(page_scoping: { user_id: @toc_user.id })
+      universe_id = @toc_scope.id
+      user_content.select { |page| page['universe_id']&.to_i == universe_id || page['page_type'] == 'Universe' && page['id'] == universe_id }
+    else
+      # For a User, we can directly use their content_list method
+      @toc_scope.content_list
+    end
+
+    # Sort the content list by name
+    content_list = content_list.sort_by { |page| page['name'] }
 
     @starred_pages = content_list.select { |page| page['favorite'] == 1 }
     @other_pages   = content_list.select { |page| page['favorite'] == 0 }
