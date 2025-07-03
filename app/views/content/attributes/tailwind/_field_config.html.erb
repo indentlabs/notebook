@@ -1,0 +1,253 @@
+<div class="p-4">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-medium text-gray-900">Configure Field</h3>
+    <button @click="selectedField = null" class="p-2 rounded hover:bg-gray-100">
+      <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+  
+  <!-- Tab Navigation -->
+  <div x-data="{ activeTab: 'general' }">
+    <div class="border-b border-gray-200">
+      <nav class="-mb-px flex space-x-6">
+        <button @click="activeTab = 'general'" 
+                :style="activeTab === 'general' ? 'border-color: <%= content_type_class.hex_color %>; color: <%= content_type_class.hex_color %>;' : ''"
+                :class="activeTab === 'general' ? '' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          General
+        </button>
+        <button @click="activeTab = 'appearance'" 
+                :style="activeTab === 'appearance' ? 'border-color: <%= content_type_class.hex_color %>; color: <%= content_type_class.hex_color %>;' : ''"
+                :class="activeTab === 'appearance' ? '' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Appearance
+        </button>
+        <button @click="activeTab = 'advanced'" 
+                :style="activeTab === 'advanced' ? 'border-color: <%= content_type_class.hex_color %>; color: <%= content_type_class.hex_color %>;' : ''"
+                :class="activeTab === 'advanced' ? '' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Advanced
+        </button>
+      </nav>
+    </div>
+    
+    <!-- General Tab -->
+    <div x-show="activeTab === 'general'" class="py-4 space-y-4">
+      <%= form_for(field, method: :put, html: {class: 'space-y-4', 'data-type': 'json'}, remote: true) do |f| %>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Field Label</label>
+          <%= f.text_field :label, class: "shadow-sm block w-full sm:text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color}; border-color: #{content_type_class.hex_color};" %>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Field Type</label>
+          <div class="flex items-center space-x-2">
+            <div class="w-6 h-6 rounded bg-gray-100 flex items-center justify-center">
+              <% if field.field_type == 'text_area' %>
+                <i class="material-icons text-gray-600 text-sm">text_fields</i>
+              <% elsif field.field_type == 'link' %>
+                <i class="material-icons text-blue-600 text-sm">link</i>
+              <% elsif field.field_type == 'name' %>
+                <i class="material-icons text-purple-600 text-sm">label</i>
+              <% elsif field.field_type == 'universe' %>
+                <i class="material-icons text-indigo-600 text-sm">language</i>
+              <% elsif field.field_type == 'tags' %>
+                <i class="material-icons text-green-600 text-sm">local_offer</i>
+              <% else %>
+                <i class="material-icons text-gray-600 text-sm">subject</i>
+              <% end %>
+            </div>
+            <span class="text-sm text-gray-700">
+              <%= field.field_type.humanize %>
+              <% if field.name_field? || field.universe_field? || field.tags_field? %>
+                (Cannot be changed)
+              <% end %>
+            </span>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Display Order</label>
+          <%= f.number_field :position, class: "shadow-sm block w-full sm:text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color}; border-color: #{content_type_class.hex_color};" %>
+          <p class="mt-1 text-xs text-gray-500">Lower numbers appear first. You can also drag and drop to reorder.</p>
+        </div>
+        
+        <div class="pt-2">
+          <%= f.submit 'Save Changes', class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2", style: "background-color: #{content_type_class.hex_color}; --tw-ring-color: #{content_type_class.hex_color};" %>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Appearance Tab -->
+    <div x-show="activeTab === 'appearance'" class="py-4 space-y-4">
+      <div class="space-y-4">
+        <% if field.field_type == 'text_area' %>
+          <div x-data="{ selectedSize: 'medium' }">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Input Size</label>
+            <select x-model="selectedSize" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm rounded-md" style="--tw-ring-color: <%= content_type_class.hex_color %>; border-color: <%= content_type_class.hex_color %>;">
+              <option value="small">Small (one line)</option>
+              <option value="medium">Medium (multiple lines)</option>
+              <option value="large">Large (rich text)</option>
+            </select>
+            
+            <!-- Preview Section -->
+            <div class="mt-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Preview</label>
+              <div class="border border-gray-200 rounded-md p-3 bg-gray-50">
+                <!-- Small input preview -->
+                <input x-show="selectedSize === 'small'" 
+                       type="text" 
+                       placeholder="This is how the small input will look..."
+                       disabled
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white text-gray-500 cursor-not-allowed">
+                
+                <!-- Medium textarea preview -->
+                <textarea x-show="selectedSize === 'medium'"
+                          placeholder="This is how the medium textarea will look...&#10;It spans multiple lines&#10;Perfect for longer descriptions"
+                          disabled
+                          rows="3"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white text-gray-500 cursor-not-allowed resize-none"></textarea>
+                
+                <!-- Large textarea preview -->
+                <textarea x-show="selectedSize === 'large'"
+                          placeholder="This is how the large textarea will look...&#10;It has more vertical space&#10;Ideal for rich text content&#10;Longer descriptions&#10;Multiple paragraphs&#10;And more detailed information"
+                          disabled
+                          rows="6"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white text-gray-500 cursor-not-allowed resize-none"></textarea>
+              </div>
+            </div>
+          </div>
+        <% elsif field.field_type == 'link' %>
+          <%= form_for(field, method: :put, html: {class: 'space-y-4', 'data-type': 'json', id: 'linkable-types-form'}, remote: true) do |f| %>
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <label class="block text-sm font-medium text-gray-700">Linkable Types</label>
+                <div class="flex space-x-2">
+                  <button type="button" 
+                          onclick="selectAllLinkableTypes()" 
+                          class="px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors">
+                    Select All
+                  </button>
+                  <button type="button" 
+                          onclick="selectNoneLinkableTypes()" 
+                          class="px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded transition-colors">
+                    Select None
+                  </button>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 mb-4">Select which content types users can link to from this field.</p>
+              
+              <!-- Hidden field to ensure linkable_types parameter is always sent -->
+              <input type="hidden" name="attribute_field[field_options][linkable_types][]" value="" />
+              
+              <div class="space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-md p-3 bg-gray-50">
+                <% Rails.application.config.content_types[:all].each do |content_type| %>
+                  <label class="flex items-center p-3 bg-white rounded-md border border-gray-200 hover:border-gray-300 hover:bg-gray-50 cursor-pointer transition-colors">
+                    <input type="checkbox" 
+                           name="attribute_field[field_options][linkable_types][]"
+                           value="<%= content_type.name %>"
+                           <%= 'checked' if field.field_options&.dig('linkable_types')&.include?(content_type.name) %>
+                           class="h-4 w-4 border-gray-300 rounded focus:ring-2 focus:ring-offset-2 mr-3"
+                           style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
+                    
+                    <div class="flex items-center flex-grow">
+                      <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3"
+                           style="background-color: <%= content_type.hex_color %>20; color: <%= content_type.hex_color %>;">
+                        <i class="material-icons text-sm"><%= content_type.icon %></i>
+                      </div>
+                      
+                      <div class="flex-grow">
+                        <div class="text-sm font-medium text-gray-900">
+                          <%= content_type.name.pluralize %>
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+                <% end %>
+              </div>
+              
+              <div class="pt-4">
+                <%= f.submit 'Save Linkable Types', class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2", style: "background-color: #{content_type_class.hex_color}; --tw-ring-color: #{content_type_class.hex_color};" %>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Advanced Tab -->
+    <div x-show="activeTab === 'advanced'" class="py-4 space-y-4">
+      <div class="space-y-6">
+        <div>
+          <h6 class="text-sm font-medium text-gray-700 mb-2">Field Visibility</h6>
+          <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+            <%= form_for(field, method: :put, html: {class: 'inline', 'data-type': 'json'}, remote: true) do |f| %>
+              <%= f.hidden_field :hidden, value: !field.hidden %>
+              <% if field.hidden? %>
+                <div class="flex items-start mb-3">
+                  <div class="flex-shrink-0">
+                    <i class="material-icons text-gray-400">visibility_off</i>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-gray-700">This field is currently hidden</p>
+                    <p class="text-xs text-gray-500">It won't appear on content pages until you show it again.</p>
+                  </div>
+                </div>
+                <%= f.submit 'Show this field', class: "px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
+              <% else %>
+                <div class="flex items-start mb-3">
+                  <div class="flex-shrink-0">
+                    <i class="material-icons text-gray-700">visibility</i>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-gray-700">This field is currently visible</p>
+                    <p class="text-xs text-gray-500">It appears on all content pages.</p>
+                  </div>
+                </div>
+                <%= f.submit 'Hide this field', class: "px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+        
+        <div>
+          <h6 class="text-sm font-medium text-gray-700 mb-2">Privacy Settings</h6>
+          <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+            <div class="flex items-center space-x-2 mb-3">
+              <input type="checkbox" 
+                     <%= "checked" if field.label.start_with?('Private') %>
+                     id="field_private"
+                     class="h-4 w-4 border-gray-300 rounded focus:ring-2 focus:ring-offset-2"
+                     style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
+              <label for="field_private" class="text-sm text-gray-700">Mark as private field</label>
+            </div>
+            <p class="text-xs text-gray-500">Private fields are only visible to you, even when sharing content publicly.</p>
+          </div>
+        </div>
+        
+        <% unless field.name_field? || field.universe_field? || field.tags_field? %>
+          <div>
+            <h6 class="text-sm font-medium text-red-700 mb-2">Danger Zone</h6>
+            <div class="bg-red-50 p-4 rounded-md border border-red-200">
+              <p class="text-sm text-red-700 mb-3">
+                Deleting a field will permanently remove it and all its data from all <%= content_type.pluralize.downcase %>.
+              </p>
+              
+              <div class="flex justify-end">
+                <%= link_to "Delete Field",
+                  field,
+                  class: 'px-3 py-1.5 border border-transparent rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500',
+                  method: :delete,
+                  data: {
+                    confirm: "Are you sure? This will delete this field AND all of its answers to EVERY page you've created. This action cannot be undone!"
+                  } %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

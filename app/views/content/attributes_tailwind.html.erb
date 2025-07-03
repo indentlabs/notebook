@@ -1,0 +1,1553 @@
+<%= content_for :full_width_page_header do %>
+  <%= render partial: 'content/components/parallax_header', locals: { content_type: @content_type, content_class: @content_type_class } %>
+<% end %>
+
+<div class="attributes-editor max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" 
+     data-content-type="<%= @content_type %>"
+     style="--content-type-color: <%= @content_type_class.hex_color %>;"
+     x-data="{ 
+        activePanel: 'template',
+        selectedCategory: null,
+        selectedField: null,
+        configuring: false
+     }">
+
+  <!-- Mobile Panel Switch Tabs (visible only on small screens) -->
+  <div class="md:hidden bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div class="flex -mb-px">
+      <button @click="activePanel = 'template'" 
+              :style="activePanel === 'template' ? 'border-color: var(--content-type-color); color: var(--content-type-color)' : ''"
+              :class="activePanel === 'template' ? '' : 'border-transparent text-gray-500'"
+              class="flex-1 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors">
+        Template Editor
+      </button>
+      <button @click="activePanel = 'config'; configuring = true;" 
+              :style="activePanel === 'config' ? 'border-color: var(--content-type-color); color: var(--content-type-color)' : ''"
+              :class="activePanel === 'config' ? '' : 'border-transparent text-gray-500'"
+              class="flex-1 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors">
+        Configuration
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content Area - Two Panel Layout -->
+  <div class="flex flex-col md:flex-row gap-6 mt-4">
+    <!-- Template Panel (always visible on desktop, conditionally on mobile) -->
+    <div :class="{ 'hidden md:block': activePanel === 'config' }"
+         class="flex-1 min-w-0">
+      
+      <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-medium text-gray-900 flex items-center">
+            <i class="material-icons <%= @content_type_class.text_color %> mr-2"><%= @content_type_class.icon %></i>
+            <%= @content_type.titleize %> Template
+          </h2>
+          <div>
+            <button class="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    style="--tw-ring-color: var(--content-type-color);">
+              <i class="material-icons text-gray-500 text-sm align-middle">add</i>
+              <span class="align-middle">Add Category</span>
+            </button>
+          </div>
+        </div>
+        
+        <p class="text-sm text-gray-500 mb-4">
+          Customize the categories and fields for your <%= @content_type.titleize.downcase %> pages. 
+          Drag and drop to rearrange, or use the configuration panel to make detailed changes.
+        </p>
+      </div>
+
+      <!-- Categories Container -->
+      <div id="categories-container" class="space-y-4" data-sortable-class="AttributeCategory">
+        <% @attribute_categories.each do |category| %>
+          <%= render partial: 'content/attributes/tailwind/category_card', locals: { 
+            category: category,
+            content_type_class: @content_type_class,
+            content_type: @content_type
+          } %>
+        <% end %>
+        
+        <!-- Add Category Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-dashed border-gray-300 hover:border-gray-400 transition-colors p-4">
+          <div class="flex justify-center items-center p-6 cursor-pointer" 
+               data-action="click->attributes-editor#showAddCategoryForm">
+            <i class="material-icons text-gray-400 mr-2">add_circle_outline</i>
+            <span class="text-gray-500 font-medium">Add a New Category</span>
+          </div>
+          
+          <!-- Category Form (Hidden by Default) -->
+          <div id="add-category-form" class="hidden p-4 border-t border-gray-200 mt-4">
+            <%= form_for(current_user.attribute_categories.build, method: :post, html: { class: "space-y-4", 'data-type': 'json' }, remote: true) do |f| %>
+              <%= f.hidden_field :entity_type, value: @content_type %>
+              
+              <div>
+                <label for="category_label" class="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
+                <%= f.text_field :label, class: "shadow-sm block w-full sm:text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: var(--content-type-color); --tw-border-opacity: 1; border-color: var(--content-type-color);" %>
+              </div>
+              
+              <div class="flex justify-end space-x-3">
+                <button type="button" class="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                  Cancel
+                </button>
+                <%= f.submit "Add Category", class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2", style: "background-color: var(--content-type-color); --tw-ring-color: var(--content-type-color);" %>
+              </div>
+            <% end %>
+            
+            <div class="mt-6 pt-4 border-t border-gray-200">
+              <div class="text-sm font-medium text-gray-700 mb-2">Category Suggestions</div>
+              <p class="text-sm text-gray-500 mb-2">
+                Notebook.ai can suggest additional categories for your pages.
+              </p>
+              <div class="suggest-categories-container flex flex-wrap gap-2 mb-3"></div>
+              <button type="button" class="js-show-category-suggestions px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none">
+                Show Suggestions
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuration Panel (always visible on desktop, conditionally on mobile) -->
+    <div :class="{ 'hidden md:block': activePanel === 'template' && !configuring }"
+         class="w-full md:w-96 lg:w-96"
+         id="config-panel-container">
+      
+      <!-- Sticky Container for Desktop/Tablet -->
+      <div class="config-panel-sticky">
+         
+        <!-- No Selection State -->
+        <div x-show="!selectedCategory && !selectedField && !configuring" 
+             class="bg-white rounded-lg shadow-md p-6 text-center config-panel-content">
+        <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+          <i class="material-icons text-gray-400 text-2xl">tune</i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Configure Your Template</h3>
+        <p class="text-sm text-gray-500 mb-4">
+          Select a category or field to customize it, or add a new one to get started.
+        </p>
+        <p class="text-xs text-gray-400 mb-1">Tip: You can drag and drop to reorder categories and fields.</p>
+        <button @click="configuring = true" class="mt-2 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+          <span>General Settings</span>
+        </button>
+      </div>
+      
+        <!-- Field Configuration -->
+        <div x-show="selectedField" 
+             class="bg-white rounded-lg shadow-md overflow-hidden config-panel-content">
+          <!-- Content will be loaded dynamically -->
+          <div id="field-config-container" class="p-4">
+            <div class="flex justify-center items-center p-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color: var(--content-type-color);"></div>
+              <span class="ml-2 text-gray-600">Loading field settings...</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Category Configuration -->
+        <div x-show="selectedCategory" 
+             class="bg-white rounded-lg shadow-md overflow-hidden config-panel-content">
+          <!-- Content will be loaded dynamically -->
+          <div id="category-config-container" class="p-4">
+            <div class="flex justify-center items-center p-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color: var(--content-type-color);"></div>
+              <span class="ml-2 text-gray-600">Loading category settings...</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- General Configuration -->
+        <div x-show="configuring && !selectedCategory && !selectedField" 
+             class="bg-white rounded-lg shadow-md overflow-hidden config-panel-content">
+        <%= render partial: 'content/attributes/tailwind/general_settings', locals: {
+          content_type: @content_type,
+          content_type_class: @content_type_class
+        } %>
+        </div>
+        
+      </div> <!-- End sticky container -->
+    </div> <!-- End config panel container -->
+  </div> <!-- End main content area -->
+</div>
+
+<script>
+// Smart sticky panel positioning system
+function initializeSmartStickyPanel() {
+  console.log('Initializing smart sticky panel');
+  
+  const configPanel = $('.config-panel-sticky');
+  const mainContent = $('.flex.flex-col.md\\:flex-row'); // Main content area
+  
+  if (configPanel.length === 0) return;
+  
+  let isSmallScreen = () => $(window).width() < 768;
+  
+  function updateStickyPosition() {
+    if (isSmallScreen()) {
+      // On mobile, remove sticky behavior
+      configPanel.removeClass('config-panel-sticky').css({
+        'position': 'static',
+        'top': 'auto',
+        'max-height': 'none'
+      });
+      return;
+    }
+    
+    // Calculate intelligent top position
+    const windowHeight = $(window).height();
+    const scrollTop = $(window).scrollTop();
+    const headerHeight = 60; // Estimated header height
+    const padding = 32; // 2rem padding (doubled for navbar clearance)
+    
+    // Get the main content container position
+    const mainContentOffset = mainContent.offset();
+    const mainContentTop = mainContentOffset ? mainContentOffset.top : 0;
+    
+    // Calculate optimal top position
+    let topPosition = Math.max(padding, headerHeight - scrollTop + padding);
+    
+    // Ensure we don't go above the main content area
+    if (scrollTop > mainContentTop - headerHeight) {
+      topPosition = Math.max(padding, headerHeight - (scrollTop - (mainContentTop - headerHeight)));
+    }
+    
+    // Calculate max height to prevent overflow
+    const maxHeight = windowHeight - topPosition - padding;
+    
+    configPanel.css({
+      'position': 'sticky',
+      'top': topPosition + 'px',
+      'max-height': maxHeight + 'px'
+    });
+  }
+  
+  // Update on scroll and resize
+  $(window).on('scroll resize', updateStickyPosition);
+  
+  // Initial positioning
+  updateStickyPosition();
+  
+  // Also update when configuration panel content changes
+  $(document).on('alpine:updated', updateStickyPosition);
+  configPanel.on('content-updated', updateStickyPosition);
+}
+
+$(document).ready(function() {
+  console.log('Template editor initialized');
+  
+  // Flag to prevent automatic sortable updates during programmatic changes
+  window.preventSortableUpdate = false;
+  
+  // Initialize smart sticky positioning for configuration panel
+  initializeSmartStickyPanel();
+  
+  // Bind dynamic form handlers to the add category form
+  bindDynamicFormHandlers($('#add-category-form'));
+  
+  // Bind dynamic form handlers to all existing field forms in category cards
+  $('.category-card form[data-remote="true"]').each(function() {
+    bindDynamicFormHandlers($(this).parent());
+  });
+
+  // Handle all remote form submissions with unified feedback system
+  $(document)
+    .on('ajax:send', 'form[data-remote="true"]', function(event) {
+      const form = $(this);
+      const submitButton = form.find('input[type="submit"], button[type="submit"]');
+      
+      // Show loading state
+      submitButton.prop('disabled', true);
+      const originalText = submitButton.val() || submitButton.text();
+      submitButton.data('original-text', originalText);
+      submitButton.val('Saving...').text('Saving...');
+      
+      // Add loading spinner if it's a button
+      if (submitButton.is('button')) {
+        submitButton.prepend('<i class="material-icons animate-spin text-sm mr-1">refresh</i>');
+      }
+    })
+    .on('ajax:success', 'form[data-remote="true"]', function(event, data, status, xhr) {
+      const form = $(this);
+      const submitButton = form.find('input[type="submit"], button[type="submit"]');
+      
+      // Restore button state
+      const originalText = submitButton.data('original-text');
+      submitButton.prop('disabled', false).val(originalText).text(originalText);
+      submitButton.find('.material-icons').remove();
+      
+      console.log('Form submission successful:', data);
+      console.log('Data type:', typeof data);
+      console.log('Is data undefined?', data === undefined);
+      
+      // Ensure data exists
+      if (!data) {
+        console.warn('No data received from form submission');
+        return;
+      }
+      
+      // Handle specific form types
+      if (data.field) {
+        console.log('Handling field update:', data.field);
+        handleFieldUpdate(data.field, data.message);
+        // Show toast notification for field updates
+        showNotification(data.message || 'Field updated successfully!', 'success');
+      } else if (data.category) {
+        console.log('Handling category update:', data.category);
+        handleCategoryUpdate(data.category, data.message);
+        // Show toast notification for category updates
+        showNotification(data.message || 'Category updated successfully!', 'success');
+      } else if (data.category_id && data.success) {
+        console.log('Handling category deletion:', data.category_id);
+        handleCategoryDeletion(data.category_id, data.message);
+        // Show toast notification for category deletion
+        showNotification(data.message || 'Category deleted successfully!', 'success');
+      }
+      
+      // Handle field creation
+      if (form.find('input[name="attribute_field[label]"]').length > 0 && data && data.field) {
+        console.log('Handling field creation:', data);
+        handleFieldCreation(form, data);
+        // Show toast notification for field creation
+        showNotification(data.message || 'Field created successfully!', 'success');
+      }
+      
+      // Handle category creation (now handled by bindDynamicFormHandlers)
+      // if (form.find('input[name="attribute_category[label]"]').length > 0 && data && data.success) {
+      //   console.log('Handling category creation');
+      //   handleCategoryCreation(form, data);
+      //   // Show toast notification for category creation
+      //   showNotification(data.message || 'Category created successfully!', 'success');
+      // }
+    })
+    .on('ajax:error', 'form[data-remote="true"]', function(event, xhr, status, error) {
+      const form = $(this);
+      const submitButton = form.find('input[type="submit"], button[type="submit"]');
+      
+      // Restore button state
+      const originalText = submitButton.data('original-text');
+      submitButton.prop('disabled', false).val(originalText).text(originalText);
+      submitButton.find('.material-icons').remove();
+      
+      console.error('Form submission failed:', xhr.responseJSON);
+      
+      let errorMessage = 'An error occurred while saving changes.';
+      if (xhr.responseJSON && xhr.responseJSON.error) {
+        errorMessage = xhr.responseJSON.error;
+      }
+      
+      // Show error notification
+      showNotification(errorMessage, 'error');
+    });
+
+  // Handle field updates
+  function handleFieldUpdate(field, message) {
+    const fieldItem = $(`.field-item[data-field-id="${field.id}"]`);
+    const visibilityButton = $(`.field-visibility-toggle[data-field-id="${field.id}"]`);
+    
+    // Update field visibility state in the main list
+    if (field.hidden) {
+      fieldItem.addClass('bg-gray-50 border-gray-200');
+      fieldItem.find('.field-label').addClass('text-gray-500');
+      // Add "Hidden" indicator if not already present
+      const hiddenIndicator = fieldItem.find('.text-xs:contains("Hidden")');
+      if (hiddenIndicator.length === 0) {
+        fieldItem.find('.text-xs').append('<span class="ml-1.5 text-gray-400">— Hidden</span>');
+      }
+    } else {
+      fieldItem.removeClass('bg-gray-50 border-gray-200');
+      fieldItem.find('.field-label').removeClass('text-gray-500');
+      // Remove "Hidden" indicator
+      fieldItem.find('.text-xs span:contains("Hidden")').remove();
+    }
+    
+    // Update the eye icon directly without calling updateFieldVisibilityUI to avoid recursion
+    if (visibilityButton.length) {
+      visibilityButton.attr('data-hidden', field.hidden);
+      visibilityButton.attr('title', field.hidden ? 'Hidden field - Click to show' : 'Visible field - Click to hide');
+      
+      const svg = visibilityButton.find('svg');
+      if (field.hidden) {
+        // Show EYE CLOSED icon for hidden state
+        svg.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>');
+      } else {
+        // Show EYE OPEN icon for visible state
+        svg.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 6 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>');
+      }
+    }
+    
+    // Update the configuration panel if it's currently showing this field
+    const configContainer = $('#field-config-container');
+    if (configContainer.is(':visible')) {
+      // Reload the configuration panel to reflect changes
+      selectField(field.id);
+    }
+  }
+  
+  // Handle category updates
+  function handleCategoryUpdate(category, message) {
+    // Prevent sortable updates during programmatic changes
+    window.preventSortableUpdate = true;
+    
+    const categoryCard = $(`.category-card[data-category-id="${category.id}"]`);
+    const visibilityButton = $(`.category-visibility-toggle[data-category-id="${category.id}"]`);
+    
+    // Update category position attribute if provided
+    if (category.position) {
+      categoryCard.attr('data-position', category.position);
+    }
+    
+    // Update category label if it changed
+    if (category.label) {
+      const labelElement = categoryCard.find('.category-label');
+      if (labelElement.length && labelElement.text() !== category.label) {
+        labelElement.text(category.label);
+        console.log('Updated category label to:', category.label);
+      }
+    }
+    
+    // Update category icon if it changed
+    if (category.icon) {
+      const iconElement = categoryCard.find('.category-icon i.material-icons');
+      if (iconElement.length && iconElement.text() !== category.icon) {
+        iconElement.text(category.icon);
+        console.log('Updated category icon to:', category.icon);
+        
+        // Add a subtle pulse animation to show the change
+        iconElement.addClass('animate-pulse');
+        setTimeout(() => {
+          iconElement.removeClass('animate-pulse');
+        }, 1000);
+      }
+    }
+    
+    // Update category visibility state
+    if (category.hidden) {
+      categoryCard.addClass('border-gray-300');
+      categoryCard.find('.category-header').css('background-color', '#f9fafb');
+      categoryCard.find('.category-label').addClass('text-gray-500');
+      categoryCard.find('.category-icon i').addClass('text-gray-400');
+      // Add "Hidden" indicator if not already present
+      const hiddenIndicator = categoryCard.find('.text-xs:contains("Hidden")');
+      if (hiddenIndicator.length === 0) {
+        categoryCard.find('.text-xs').append('<span class="text-gray-400 ml-2">— Hidden</span>');
+      }
+    } else {
+      categoryCard.removeClass('border-gray-300');
+      // Restore original border color (use CSS variable)
+      categoryCard.css('border-color', 'var(--content-type-color)');
+      categoryCard.find('.category-header').css('background-color', 'var(--content-type-color)20');
+      categoryCard.find('.category-label').removeClass('text-gray-500');
+      categoryCard.find('.category-icon i').removeClass('text-gray-400');
+      // Remove "Hidden" indicator
+      categoryCard.find('.text-xs span:contains("Hidden")').remove();
+    }
+    
+    // Update the eye icon directly without calling updateCategoryVisibilityUI to avoid recursion
+    if (visibilityButton.length) {
+      visibilityButton.attr('data-hidden', category.hidden);
+      visibilityButton.attr('title', category.hidden ? 'Hidden category - Click to show' : 'Visible category - Click to hide');
+      
+      const svg = visibilityButton.find('svg');
+      if (category.hidden) {
+        // Show EYE CLOSED icon for hidden state
+        svg.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>');
+      } else {
+        // Show EYE OPEN icon for visible state
+        svg.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>');
+      }
+    }
+    
+    // Update the configuration panel if it's currently showing this category
+    const configContainer = $('#category-config-container');
+    if (configContainer.is(':visible')) {
+      // Reload the configuration panel to reflect changes
+      selectCategory(category.id);
+    }
+    
+    // Re-enable sortable updates after a short delay
+    setTimeout(() => {
+      window.preventSortableUpdate = false;
+    }, 100);
+  }
+  
+  // Handle category deletion
+  function handleCategoryDeletion(categoryId, message) {
+    console.log('Deleting category from UI:', categoryId);
+    
+    // Remove the category card from the DOM
+    const categoryCard = $(`.category-card[data-category-id="${categoryId}"]`);
+    if (categoryCard.length) {
+      // Add fade-out animation before removing
+      categoryCard.fadeOut(300, function() {
+        $(this).remove();
+      });
+    }
+    
+    // Close the configuration panel if it was showing the deleted category
+    const configContainer = $('#category-config-container');
+    if (configContainer.is(':visible')) {
+      // Check if we're currently configuring the deleted category
+      const currentCategoryId = configContainer.find('form[action*="/attribute_categories/' + categoryId + '"]');
+      if (currentCategoryId.length > 0) {
+        // Close the configuration panel
+        configContainer.hide();
+        // Reset Alpine.js state
+        if (window.Alpine && window.Alpine.data) {
+          window.Alpine.data('templateEditor', {
+            configuring: false,
+            selectedCategory: null,
+            selectedField: null
+          });
+        }
+      }
+    }
+  }
+  
+  // Handle new field creation
+  function handleFieldCreation(form, data) {
+    console.log('Creating new field in UI:', data.field);
+    
+    // Clear the form
+    form[0].reset();
+    
+    // Hide the "add field" form
+    const alpineContainer = form.closest('[x-data]');
+    if (alpineContainer.length && alpineContainer[0].__x && alpineContainer[0].__x.$data) {
+      alpineContainer[0].__x.$data.addingField = false;
+    } else {
+      // Fallback: manually hide the form
+      alpineContainer.find('[x-show="addingField"]').hide();
+    }
+    
+    // Use the server-rendered HTML instead of reloading the page
+    if (data.html && data.field) {
+      // Find the correct category's fields container
+      const categoryId = data.field.attribute_category_id;
+      const fieldsContainer = $(`.category-card[data-category-id="${categoryId}"] .fields-container`);
+      
+      if (fieldsContainer.length) {
+        // Insert the new field before the "Add Field" container
+        const addFieldContainer = fieldsContainer.find('.add-field-container');
+        if (addFieldContainer.length) {
+          addFieldContainer.before(data.html);
+        } else {
+          // If no add field container, just append to the fields container
+          fieldsContainer.append(data.html);
+        }
+        
+        // Re-initialize sortable for the new field
+        const newField = $(`.field-item[data-field-id="${data.field.id}"]`);
+        if (newField.length) {
+          // Make sure the fields container is sortable (it should already be, but just in case)
+          if (!fieldsContainer.hasClass('ui-sortable')) {
+            fieldsContainer.sortable({
+              items: '.field-item',
+              handle: '.field-drag-handle',
+              placeholder: 'field-placeholder',
+              cursor: 'grabbing',
+              opacity: 0.8,
+              tolerance: 'pointer',
+              connectWith: '.fields-container',
+              start: function(event, ui) {
+                ui.helper.addClass('ui-sortable-helper');
+              },
+              update: function(event, ui) {
+                const fieldId = ui.item.attr('data-field-id');
+                const domIndex = ui.item.index('.field-item');
+                const newPosition = domIndex + 1;
+                updatePosition('AttributeField', fieldId, newPosition);
+                updateConfigurationFormPosition('field', fieldId, newPosition);
+              }
+            });
+          }
+        }
+        
+        console.log('New field added to UI successfully using server-rendered HTML');
+      } else {
+        console.error('Could not find fields container for category:', categoryId);
+        // Fallback to page reload if we can't find the container
+        location.reload();
+      }
+    } else {
+      console.error('No HTML received from server for new field');
+      // Fallback to page reload if no HTML
+      location.reload();
+    }
+  }
+  
+  // Handle new category creation
+  function handleCategoryCreation(form, data) {
+    console.log('Creating new category in UI:', data.category);
+    
+    // Clear the form
+    form[0].reset();
+    
+    // Hide the add category form
+    $('#add-category-form').addClass('hidden');
+    
+    // Use the server-rendered HTML instead of generating it manually
+    if (data.html) {
+      // Insert the new category before the "Add Category" card
+      const addCategoryCard = $('#add-category-form').closest('.bg-white.rounded-lg.shadow-sm.border.border-dashed');
+      addCategoryCard.before(data.html);
+      
+      // Re-initialize sortable for the new category's fields container
+      const newCategory = $(`.category-card[data-category-id="${data.category.id}"]`);
+      newCategory.find('.fields-container').sortable({
+        items: '.field-item',
+        handle: '.field-drag-handle',
+        placeholder: 'field-placeholder',
+        cursor: 'grabbing',
+        opacity: 0.8,
+        tolerance: 'pointer',
+        connectWith: '.fields-container',
+        start: function(event, ui) {
+          ui.helper.addClass('ui-sortable-helper');
+        },
+        update: function(event, ui) {
+          const fieldId = ui.item.attr('data-field-id');
+          const newPosition = ui.item.index() + 1;
+          updatePosition('AttributeField', fieldId, newPosition);
+          updateConfigurationFormPosition('field', fieldId, newPosition);
+        }
+      });
+      
+      console.log('New category added to UI successfully using server-rendered HTML');
+    } else {
+      console.error('No HTML received from server for new category');
+    }
+  }
+  
+  // Create HTML for a new category card
+  function createCategoryCardHtml(category) {
+    const contentTypeColor = $('[data-content-type]').data('content-type') || 'blue';
+    const cssColorVar = 'var(--content-type-color)';
+    
+    return `
+      <div class="category-card bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow"
+           data-category-id="${category.id}"
+           data-position="${category.position}"
+           x-data="{ isOpen: false }">
+        
+        <!-- Category Header -->
+        <div class="category-header flex items-center justify-between p-4 rounded-t-lg cursor-pointer"
+             style="background-color: ${cssColorVar}20; border-color: ${cssColorVar};"
+             @click="isOpen = !isOpen">
+          
+          <!-- Left side: Drag handle + Icon + Label -->
+          <div class="flex items-center flex-grow">
+            <!-- Drag Handle -->
+            <div class="category-drag-handle p-1 mr-3 rounded hover:bg-white hover:bg-opacity-50 cursor-move"
+                 @click.stop>
+              <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
+              </svg>
+            </div>
+            
+            <!-- Category Icon -->
+            <div class="category-icon flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-3"
+                 style="background-color: ${cssColorVar}; color: white;">
+              <i class="material-icons text-sm">${category.icon || 'category'}</i>
+            </div>
+            
+            <!-- Category Label and Info -->
+            <div class="flex-grow min-w-0">
+              <div class="category-label font-medium text-gray-800 js-category-label">${category.label}</div>
+              <div class="text-xs text-gray-500">
+                0 fields
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right side: Actions -->
+          <div class="flex items-center space-x-2">
+            <!-- Visibility Toggle -->
+            <button class="category-visibility-toggle p-1.5 rounded hover:bg-white hover:bg-opacity-50 transition-colors"
+                    data-category-id="${category.id}"
+                    data-hidden="${category.hidden}"
+                    title="${category.hidden ? 'Hidden category - Click to show' : 'Visible category - Click to hide'}"
+                    @click.stop="toggleCategoryVisibility(${category.id}, ${category.hidden})">
+              <svg class="w-4 h-4 text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                ${category.hidden ? 
+                  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>' :
+                  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>'
+                }
+              </svg>
+            </button>
+            
+            <!-- Configure Button -->
+            <button class="p-1.5 rounded hover:bg-white hover:bg-opacity-50 transition-colors"
+                    title="Configure Category"
+                    @click.stop="console.log('Category clicked:', ${category.id}); $dispatch('select-category', { id: ${category.id} })">
+              <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </button>
+            
+            <!-- Collapse/Expand Chevron -->
+            <svg class="w-5 h-5 text-gray-400 transition-transform transform"
+                 :class="{ 'rotate-180': isOpen }"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+        </div>
+        
+        <!-- Category Content (Fields) -->
+        <div x-show="isOpen" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 transform scale-95"
+             x-transition:enter-end="opacity-100 transform scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 transform scale-100"
+             x-transition:leave-end="opacity-0 transform scale-95"
+             class="border-t border-gray-200">
+          
+          <!-- Fields Container -->
+          <div class="fields-container p-4 space-y-2" data-sortable-class="AttributeField">
+            <!-- Fields will be added here when created -->
+            
+            <!-- Add Field Button -->
+            <div class="add-field-container" x-data="{ addingField: false }">
+              <button @click="addingField = !addingField" 
+                      x-show="!addingField"
+                      class="w-full flex items-center justify-center p-3 border-2 border-dashed border-gray-300 rounded-md hover:border-gray-400 transition-colors text-gray-500 hover:text-gray-600">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Add field to this category
+              </button>
+              
+              <!-- Add Field Form (hidden by default) -->
+              <div x-show="addingField" class="mt-2 p-3 bg-gray-50 rounded-md border">
+                <div class="space-y-3">
+                  <input type="text" 
+                         placeholder="Field name..." 
+                         class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
+                         style="--tw-ring-color: ${cssColorVar}; border-color: ${cssColorVar};">
+                  
+                  <div class="flex justify-end space-x-2">
+                    <button @click="addingField = false" 
+                            class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800">
+                      Cancel
+                    </button>
+                    <button class="px-3 py-1.5 text-sm text-white rounded-md hover:opacity-90"
+                            style="background-color: ${cssColorVar};">
+                      Add Field
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Toggle category visibility from eye icon
+  window.toggleCategoryVisibility = function(categoryId, currentlyHidden) {
+    console.log('toggleCategoryVisibility called:', categoryId, currentlyHidden);
+    
+    const button = $(`.category-visibility-toggle[data-category-id="${categoryId}"]`);
+    const svg = button.find('svg');
+    
+    // Show loading state
+    button.prop('disabled', true);
+    svg.addClass('animate-spin');
+    
+    // Submit via AJAX with simpler data structure
+    $.ajax({
+      url: `/plan/attribute_categories/${categoryId}`,
+      type: 'PUT',
+      data: {
+        'attribute_category[hidden]': currentlyHidden ? 'false' : 'true'
+      },
+      headers: {
+        'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content'),
+        'Accept': 'application/json'
+      },
+      success: function(data) {
+        console.log('Category visibility toggle success:', data);
+        // Update the UI immediately
+        updateCategoryVisibilityUI(categoryId, !currentlyHidden);
+        showNotification(data.message || (currentlyHidden ? 'Category is now visible' : 'Category is now hidden'), 'success');
+      },
+      error: function(xhr, status, error) {
+        console.error('Error toggling category visibility:', xhr, status, error);
+        let errorMessage = 'Failed to update category visibility.';
+        if (xhr.responseJSON && xhr.responseJSON.error) {
+          errorMessage = xhr.responseJSON.error;
+        }
+        showNotification(errorMessage, 'error');
+      },
+      complete: function() {
+        console.log('Category visibility toggle complete');
+        // Restore button state
+        button.prop('disabled', false);
+        svg.removeClass('animate-spin');
+      }
+    });
+  };
+  
+  // Toggle field visibility from eye icon
+  window.toggleFieldVisibility = function(fieldId, currentlyHidden) {
+    console.log('toggleFieldVisibility called:', fieldId, currentlyHidden);
+    
+    const button = $(`.field-visibility-toggle[data-field-id="${fieldId}"]`);
+    const svg = button.find('svg');
+    
+    // Show loading state
+    button.prop('disabled', true);
+    svg.addClass('animate-spin');
+    
+    // Submit via AJAX with simpler data structure
+    $.ajax({
+      url: `/plan/attribute_fields/${fieldId}`,
+      type: 'PUT',
+      data: {
+        'attribute_field[hidden]': currentlyHidden ? 'false' : 'true'
+      },
+      headers: {
+        'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content'),
+        'Accept': 'application/json'
+      },
+      success: function(data) {
+        console.log('Field visibility toggle success:', data);
+        // Update the UI immediately
+        updateFieldVisibilityUI(fieldId, !currentlyHidden);
+        showNotification(data.message || (currentlyHidden ? 'Field is now visible' : 'Field is now hidden'), 'success');
+      },
+      error: function(xhr, status, error) {
+        console.error('Error toggling field visibility:', xhr, status, error);
+        let errorMessage = 'Failed to update field visibility.';
+        if (xhr.responseJSON && xhr.responseJSON.error) {
+          errorMessage = xhr.responseJSON.error;
+        }
+        showNotification(errorMessage, 'error');
+      },
+      complete: function() {
+        console.log('Field visibility toggle complete');
+        // Restore button state
+        button.prop('disabled', false);
+        svg.removeClass('animate-spin');
+      }
+    });
+  };
+  
+  // Update category visibility UI
+  function updateCategoryVisibilityUI(categoryId, isHidden) {
+    const categoryCard = $(`.category-card[data-category-id="${categoryId}"]`);
+    const button = $(`.category-visibility-toggle[data-category-id="${categoryId}"]`);
+    const svg = button.find('svg');
+    
+    // Update button data and tooltip
+    button.attr('data-hidden', isHidden);
+    button.attr('title', isHidden ? 'Hidden category - Click to show' : 'Visible category - Click to hide');
+    
+    // Update the SVG icon
+    if (isHidden) {
+      // Show EYE CLOSED icon for hidden state
+      svg.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>');
+    } else {
+      // Show EYE OPEN icon for visible state
+      svg.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>');
+    }
+    
+    // Update category card appearance
+    handleCategoryUpdate({ id: categoryId, hidden: isHidden }, '');
+  }
+  
+  // Update field visibility UI
+  function updateFieldVisibilityUI(fieldId, isHidden) {
+    const fieldItem = $(`.field-item[data-field-id="${fieldId}"]`);
+    const button = $(`.field-visibility-toggle[data-field-id="${fieldId}"]`);
+    const svg = button.find('svg');
+    
+    // Update button data and tooltip
+    button.attr('data-hidden', isHidden);
+    button.attr('title', isHidden ? 'Hidden field - Click to show' : 'Visible field - Click to hide');
+    
+    // Update the SVG icon
+    if (isHidden) {
+      // Show EYE CLOSED icon for hidden state
+      svg.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>');
+    } else {
+      // Show EYE OPEN icon for visible state
+      svg.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>');
+    }
+    
+    // Update field item appearance
+    handleFieldUpdate({ id: fieldId, hidden: isHidden }, '');
+  }
+  
+  // Notification system
+  function showNotification(message, type = 'info') {
+    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+    const icon = type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info';
+    
+    const notification = $(`
+      <div class="fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center animate-notification-in">
+        <i class="material-icons text-sm mr-2">${icon}</i>
+        <span class="text-sm font-medium">${message}</span>
+        <button class="ml-4 text-white hover:text-gray-200" onclick="$(this).parent().remove()">
+          <i class="material-icons text-sm">close</i>
+        </button>
+      </div>
+    `);
+    
+    $('body').append(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      notification.fadeOut(300, function() {
+        $(this).remove();
+      });
+    }, 5000);
+  }
+  
+  // Initialize jQuery UI sortable for categories
+  $('#categories-container').sortable({
+    items: '.category-card',
+    handle: '.category-drag-handle',
+    placeholder: 'category-placeholder',
+    cursor: 'grabbing',
+    opacity: 0.8,
+    tolerance: 'pointer',
+    start: function(event, ui) {
+      ui.helper.addClass('ui-sortable-helper');
+    },
+    update: function(event, ui) {
+      if (window.preventSortableUpdate) {
+        return;
+      }
+      
+      const categoryId = ui.item.attr('data-category-id');
+      // Use index among only category cards, not all siblings
+      const domIndex = ui.item.index('.category-card');
+      const newPosition = domIndex + 1; // Convert from 0-based to 1-based
+      updatePosition('AttributeCategory', categoryId, newPosition);
+      
+      // Update the position input in the configuration form if it's open for this category
+      updateConfigurationFormPosition('category', categoryId, newPosition);
+    }
+  });
+  
+  // Initialize jQuery UI sortable for fields within each category
+  $('.fields-container').sortable({
+    items: '.field-item',
+    handle: '.field-drag-handle',
+    placeholder: 'field-placeholder',
+    cursor: 'grabbing',
+    opacity: 0.8,
+    tolerance: 'pointer',
+    connectWith: '.fields-container', // Allow dragging between categories
+    start: function(event, ui) {
+      ui.helper.addClass('ui-sortable-helper');
+    },
+    update: function(event, ui) {
+      const fieldId = ui.item.attr('data-field-id');
+      // Use index among only field items, not all siblings
+      const domIndex = ui.item.index('.field-item');
+      const newPosition = domIndex + 1; // Convert from 0-based to 1-based
+      updatePosition('AttributeField', fieldId, newPosition);
+      
+      // Update the position input in the configuration form if it's open for this field
+      updateConfigurationFormPosition('field', fieldId, newPosition);
+    }
+  });
+  
+  // Function to update configuration form position inputs
+  function updateConfigurationFormPosition(type, itemId, newPosition) {
+    console.log(`Updating ${type} position in config form:`, itemId, newPosition);
+    
+    if (type === 'category') {
+      // Check if the category configuration form is open for this category
+      const configContainer = $('#category-config-container');
+      if (configContainer.is(':visible')) {
+        const positionInput = configContainer.find('input[name="attribute_category[position]"]');
+        if (positionInput.length) {
+          console.log('Updating category position input to:', newPosition);
+          positionInput.val(newPosition);
+        }
+      }
+    } else if (type === 'field') {
+      // Check if the field configuration form is open for this field
+      const configContainer = $('#field-config-container');
+      if (configContainer.is(':visible')) {
+        const positionInput = configContainer.find('input[name="attribute_field[position]"]');
+        if (positionInput.length) {
+          console.log('Updating field position input to:', newPosition);
+          positionInput.val(newPosition);
+        }
+      }
+    }
+  }
+
+  // Function to update position via internal routes
+  function updatePosition(sortableClass, contentId, intendedPosition) {
+    let url;
+    
+    if (sortableClass === 'AttributeCategory') {
+      url = `/plan/attribute_categories/${contentId}`;
+    } else if (sortableClass === 'AttributeField') {
+      url = `/plan/attribute_fields/${contentId}`;
+    } else {
+      console.error('Unknown sortable class:', sortableClass);
+      return;
+    }
+    
+    const paramName = sortableClass === 'AttributeCategory' ? 'attribute_category' : 'attribute_field';
+    
+    $.ajax({
+      url: url,
+      type: 'PUT',
+      data: {
+        [paramName]: {
+          position: intendedPosition
+        }
+      },
+      headers: {
+        'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content'),
+        'Accept': 'application/json'
+      },
+      success: function(data) {
+        console.log('Position updated successfully:', data);
+        if (data.message) {
+          showNotification(data.message, 'success');
+        }
+      },
+      error: function(xhr, status, error) {
+        console.error('Error updating position:', xhr, status, error);
+        
+        let errorMessage = 'Failed to reorder items. Please try again.';
+        if (xhr.responseJSON && xhr.responseJSON.error) {
+          errorMessage = xhr.responseJSON.error;
+        }
+        
+        showNotification(errorMessage, 'error');
+      }
+    });
+  }
+  
+  // Function to show error messages to users
+  function showErrorMessage(message) {
+    // Use Materialize toast if available, otherwise create custom notification
+    if (typeof M !== 'undefined' && M.toast) {
+      M.toast({html: message, classes: 'red'});
+    } else {
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 5000);
+    }
+  }
+  
+  // Function to update category icon preview in real-time
+  window.updateCategoryIconPreview = function(categoryId, newIcon) {
+    // Prevent sortable updates during icon preview changes
+    window.preventSortableUpdate = true;
+    
+    // Find the category card in the main template
+    const categoryCard = $(`.category-card[data-category-id="${categoryId}"]`);
+    if (categoryCard.length) {
+      // Update the icon in the category card
+      const iconElement = categoryCard.find('.category-icon i.material-icons');
+      if (iconElement.length) {
+        // Store the original icon if not already stored (for potential revert)
+        if (!iconElement.data('original-icon')) {
+          iconElement.data('original-icon', iconElement.text());
+        }
+        
+        iconElement.text(newIcon);
+        
+        // Add a subtle pulse animation to show the change
+        iconElement.addClass('animate-pulse');
+        setTimeout(() => {
+          iconElement.removeClass('animate-pulse');
+        }, 1000);
+      }
+    } else {
+      console.warn('Could not find category card with ID:', categoryId);
+    }
+    
+    // Re-enable sortable updates after a short delay
+    setTimeout(() => {
+      window.preventSortableUpdate = false;
+    }, 100);
+  }
+    
+  // Listen for Alpine.js category selection events
+  document.addEventListener('select-category', function(event) {
+    console.log('Category selection event received:', event.detail.id);
+    const categoryId = event.detail.id;
+    selectCategory(categoryId);
+  });
+  
+  // Category header click is now handled by Alpine.js @click directive
+  
+  // Listen for Alpine.js field selection events  
+  document.addEventListener('select-field', function(event) {
+    const fieldId = event.detail.id;
+    selectField(fieldId);
+  });
+    
+    // Select category function
+    function selectCategory(categoryId) {
+      console.log('selectCategory called with ID:', categoryId);
+      
+      // Update Alpine.js state
+      const attributesEditor = document.querySelector('.attributes-editor');
+      if (attributesEditor && attributesEditor._x_dataStack) {
+        const alpine = attributesEditor._x_dataStack[0];
+        console.log('Alpine data found:', alpine);
+        alpine.selectedCategory = categoryId;
+        alpine.selectedField = null;
+        alpine.configuring = true;
+        alpine.activePanel = 'config';
+      } else {
+        console.error('Could not find Alpine.js component data');
+      }
+      
+      // Expand the selected category in the main template
+      const categoryCard = $(`.category-card[data-category-id="${categoryId}"]`);
+      if (categoryCard.length) {
+        // Find the Alpine.js component for this category card
+        const categoryElement = categoryCard[0];
+        if (categoryElement._x_dataStack && categoryElement._x_dataStack[0]) {
+          const categoryAlpine = categoryElement._x_dataStack[0];
+          console.log('Expanding category:', categoryId);
+          categoryAlpine.isOpen = true;
+        } else {
+          console.warn('Could not find Alpine.js data for category card:', categoryId);
+        }
+      } else {
+        console.warn('Could not find category card element for ID:', categoryId);
+      }
+      
+      // Show loading state
+      const container = document.getElementById('category-config-container');
+      container.innerHTML = `
+        <div class="flex justify-center items-center p-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color: var(--content-type-color);"></div>
+          <span class="ml-2 text-gray-600">Loading category settings...</span>
+        </div>
+      `;
+      
+      // Load category config via AJAX
+      fetch(`/plan/attribute_categories/${categoryId}/edit`, {
+        method: 'GET',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'Accept': 'text/html'
+        }
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to load category configuration');
+          }
+          return response.text();
+        })
+        .then(html => {
+          container.innerHTML = html;
+          // Manually bind form submission handlers for dynamically loaded content
+          bindDynamicFormHandlers(container);
+          // Update sticky positioning after content loads
+          if (typeof initializeSmartStickyPanel === 'function') {
+            setTimeout(() => $('.config-panel-sticky').trigger('content-updated'), 100);
+          }
+        })
+        .catch(error => {
+          console.error('Error loading category config:', error);
+          container.innerHTML = `
+            <div class="p-4 text-center">
+              <div class="text-red-500 mb-2">
+                <i class="material-icons">error_outline</i>
+              </div>
+              <p class="text-sm text-gray-600 mb-3">Failed to load category settings</p>
+              <button onclick="selectCategory(${categoryId})" class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded">
+                Try Again
+              </button>
+            </div>
+          `;
+        });
+    }
+    
+    // Select field function
+    function selectField(fieldId) {
+      console.log('selectField called with ID:', fieldId);
+      
+      // Update Alpine.js state
+      const attributesEditor = document.querySelector('.attributes-editor');
+      if (attributesEditor && attributesEditor._x_dataStack) {
+        const alpine = attributesEditor._x_dataStack[0];
+        console.log('Alpine data found:', alpine);
+        alpine.selectedField = fieldId;
+        alpine.selectedCategory = null;
+        alpine.configuring = true;
+        alpine.activePanel = 'config';
+      } else {
+        console.error('Could not find Alpine.js component data');
+      }
+      
+      // Show loading state
+      const container = document.getElementById('field-config-container');
+      container.innerHTML = `
+        <div class="flex justify-center items-center p-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color: var(--content-type-color);"></div>
+          <span class="ml-2 text-gray-600">Loading field settings...</span>
+        </div>
+      `;
+      
+      // Load field config via AJAX
+      fetch(`/plan/attribute_fields/${fieldId}/edit`, {
+        method: 'GET',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'Accept': 'text/html'
+        }
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to load field configuration');
+          }
+          return response.text();
+        })
+        .then(html => {
+          container.innerHTML = html;
+          // Manually bind form submission handlers for dynamically loaded content
+          bindDynamicFormHandlers(container);
+          // Update sticky positioning after content loads
+          if (typeof initializeSmartStickyPanel === 'function') {
+            setTimeout(() => $('.config-panel-sticky').trigger('content-updated'), 100);
+          }
+        })
+        .catch(error => {
+          console.error('Error loading field config:', error);
+          container.innerHTML = `
+            <div class="p-4 text-center">
+              <div class="text-red-500 mb-2">
+                <i class="material-icons">error_outline</i>
+              </div>
+              <p class="text-sm text-gray-600 mb-3">Failed to load field settings</p>
+              <button onclick="selectField(${fieldId})" class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded">
+                Try Again
+              </button>
+            </div>
+          `;
+        });
+    }
+    
+  // Function to bind form handlers to dynamically loaded content
+  function bindDynamicFormHandlers(container) {
+    console.log('Binding dynamic form handlers to container:', container);
+    
+    // Find all remote forms in the container
+    $(container).find('form[data-remote="true"]').each(function() {
+      const form = $(this);
+      
+      // Remove existing event handlers to prevent duplicates
+      form.off('submit.dynamic');
+      
+      // Bind new submit handler
+      form.on('submit.dynamic', function(e) {
+        e.preventDefault();
+        
+        const submitButton = form.find('input[type="submit"], button[type="submit"]');
+        const formData = form.serialize();
+        const url = form.attr('action');
+        const method = form.attr('method') || 'POST';
+        
+        console.log('Dynamic form submission:', { url, method, formData });
+        
+        // Show loading state
+        submitButton.prop('disabled', true);
+        const originalText = submitButton.val() || submitButton.text();
+        submitButton.data('original-text', originalText);
+        submitButton.val('Saving...').text('Saving...');
+        
+        // Submit via AJAX with explicit JSON handling
+        $.ajax({
+          url: url,
+          type: method,
+          data: formData,
+          headers: {
+            'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content'),
+            'Accept': 'application/json'
+          },
+          success: function(data) {
+            console.log('Dynamic form submission success:', data);
+            
+            // Restore button state
+            submitButton.prop('disabled', false).val(originalText).text(originalText);
+            
+            // Handle category updates
+            if (data.category) {
+              handleCategoryUpdate(data.category, data.message);
+              showNotification(data.message || 'Category updated successfully!', 'success');
+              
+              // If position was updated, reorder the category in the template
+              if (formData.includes('position')) {
+                reorderCategoryInTemplate(data.category.id, data.category.position);
+              }
+            }
+            
+            // Handle field creation (for dynamically loaded forms)
+            if (data.field && !$(`.field-item[data-field-id="${data.field.id}"]`).length) {
+              console.log('Handling field creation via dynamic form');
+              handleFieldCreation(form, data);
+              showNotification(data.message || 'Field created successfully!', 'success');
+            }
+            
+            // Handle category creation (for dynamically loaded forms)
+            if (data.category && !$(`.category-card[data-category-id="${data.category.id}"]`).length) {
+              console.log('Handling category creation via dynamic form');
+              handleCategoryCreation(form, data);
+              showNotification(data.message || 'Category created successfully!', 'success');
+            }
+            
+            // Handle field updates
+            if (data.field) {
+              handleFieldUpdate(data.field, data.message);
+              showNotification(data.message || 'Field updated successfully!', 'success');
+              
+              // If position was updated, reorder the field in the template
+              if (formData.includes('position')) {
+                reorderFieldInTemplate(data.field.id, data.field.position, data.field.attribute_category_id);
+              }
+            }
+          },
+          error: function(xhr, status, error) {
+            console.error('Dynamic form submission error:', xhr, status, error);
+            
+            // Restore button state
+            submitButton.prop('disabled', false).val(originalText).text(originalText);
+            
+            let errorMessage = 'An error occurred while saving changes.';
+            if (xhr.responseJSON && xhr.responseJSON.error) {
+              errorMessage = xhr.responseJSON.error;
+            }
+            
+            showNotification(errorMessage, 'error');
+          }
+        });
+      });
+    });
+  }
+  
+  // Function to reorder category in template when position is updated via form
+  function reorderCategoryInTemplate(categoryId, newPosition) {
+    
+    const categoryCard = $(`.category-card[data-category-id="${categoryId}"]`);
+    const categoriesContainer = $('#categories-container');
+    
+    if (categoryCard.length && categoriesContainer.length) {
+      // Remove the category from its current position
+      categoryCard.detach();
+      
+      // Find the correct position to insert it
+      const categoryCards = categoriesContainer.find('.category-card');
+      if (newPosition >= categoryCards.length) {
+        // Insert at the end (before the "Add Category" card)
+        const addCategoryCard = categoriesContainer.find('.bg-white.rounded-lg.shadow-sm.border.border-dashed').last();
+        if (addCategoryCard.length) {
+          addCategoryCard.before(categoryCard);
+        } else {
+          categoriesContainer.append(categoryCard);
+        }
+      } else {
+        // Insert at the specific position (convert from 1-based to 0-based)
+        const targetIndex = newPosition - 1;
+        const targetCard = categoryCards.eq(targetIndex);
+        if (targetCard.length) {
+          targetCard.before(categoryCard);
+        } else {
+          categoriesContainer.append(categoryCard);
+        }
+      }
+      
+      // Update data-position attributes for all categories (1-based positions)
+      categoriesContainer.find('.category-card').each(function(index) {
+        $(this).attr('data-position', index + 1);
+      });
+      
+    }
+  }
+  
+  // Function to reorder field in template when position is updated via form
+  function reorderFieldInTemplate(fieldId, newPosition, categoryId) {
+    
+    const fieldItem = $(`.field-item[data-field-id="${fieldId}"]`);
+    const fieldsContainer = $(`.category-card[data-category-id="${categoryId}"] .fields-container`);
+    
+    if (fieldItem.length && fieldsContainer.length) {
+      // Remove the field from its current position
+      fieldItem.detach();
+      
+      // Find the correct position to insert it
+      const fieldItems = fieldsContainer.find('.field-item');
+      if (newPosition >= fieldItems.length) {
+        // Insert at the end (before any "Add Field" elements)
+        const addFieldElement = fieldsContainer.find('[x-show="addingField"]').last();
+        if (addFieldElement.length) {
+          addFieldElement.before(fieldItem);
+        } else {
+          fieldsContainer.append(fieldItem);
+        }
+      } else {
+        // Insert at the specific position (convert from 1-based to 0-based)
+        const targetIndex = newPosition - 1;
+        const targetField = fieldItems.eq(targetIndex);
+        if (targetField.length) {
+          targetField.before(fieldItem);
+        } else {
+          fieldsContainer.append(fieldItem);
+        }
+      }
+      
+      // Update data-position attributes for all fields in this category (1-based positions)
+      fieldsContainer.find('.field-item').each(function(index) {
+        $(this).attr('data-position', index + 1);
+      });
+      
+    }
+  }
+  
+  // Helper functions for linkable types selection
+  window.selectAllLinkableTypes = function() {
+    const checkboxes = $('#field-config-container input[name="attribute_field[field_options][linkable_types][]"]');
+    checkboxes.prop('checked', true);
+    console.log('Selected all linkable types');
+  };
+  
+  window.selectNoneLinkableTypes = function() {
+    const checkboxes = $('#field-config-container input[name="attribute_field[field_options][linkable_types][]"]');
+    checkboxes.prop('checked', false);
+    console.log('Deselected all linkable types');
+  };
+  
+  // Show/hide category form
+  $(document).on('click', '[data-action="click->attributes-editor#showAddCategoryForm"]', function() {
+    $('#add-category-form').toggleClass('hidden');
+  });
+});
+</script>
+
+<style>
+  /* jQuery UI Sortable placeholder styles */
+  .category-placeholder {
+    visibility: visible !important;
+    background: rgba(59, 130, 246, 0.1);
+    border: 2px dashed rgba(59, 130, 246, 0.3);
+    border-radius: 8px;
+    height: 120px;
+    margin: 1rem 0;
+  }
+  
+  .field-placeholder {
+    visibility: visible !important;
+    background: rgba(59, 130, 246, 0.1);
+    border: 2px dashed rgba(59, 130, 246, 0.3);
+    border-radius: 6px;
+    height: 60px;
+    margin: 0.5rem 0;
+  }
+  
+  /* Improve drag handle appearance */
+  .category-drag-handle,
+  .field-drag-handle {
+    cursor: grab;
+  }
+  
+  .category-drag-handle:active,
+  .field-drag-handle:active {
+    cursor: grabbing;
+  }
+  
+  /* Category header styling */
+  .category-header {
+    transition: all 0.2s ease;
+  }
+  
+  .category-header:hover {
+    filter: brightness(0.95);
+  }
+  
+  .category-header:active {
+    filter: brightness(0.9);
+  }
+  
+  /* Sortable helper styles */
+  .ui-sortable-helper {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    transform: rotate(2deg);
+  }
+  
+  /* Notification animations */
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .animate-notification-in {
+    animation: slideInRight 0.3s ease-out;
+  }
+  
+  /* Loading spinner animation */
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+  
+  /* Smart sticky configuration panel */
+  .config-panel-sticky {
+    position: sticky;
+    top: 2rem;
+    transition: all 0.2s ease-out;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+  
+  /* On mobile, don't make it sticky to avoid layout issues */
+  @media (max-width: 768px) {
+    .config-panel-sticky {
+      position: static;
+      max-height: none;
+      overflow-y: visible;
+    }
+  }
+  
+  /* Ensure the configuration panels have proper scrolling */
+  .config-panel-content {
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+  }
+  
+  @media (max-width: 768px) {
+    .config-panel-content {
+      max-height: none;
+      overflow-y: visible;
+    }
+  }
+</style>

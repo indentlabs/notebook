@@ -10,8 +10,11 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       post 'gallery_images/sort'
-      get 'categories/suggest/:content_type', to: 'categories#suggest'
-      get 'fields/suggest/:content_type/:category', to: 'fields#suggest'
+      put 'content/sort', to: 'content#sort'
+      get 'categories/suggest/:content_type', to: 'attribute_categories#suggest'
+      get 'categories/:id/edit', to: 'attribute_categories#edit'
+      get 'fields/suggest/:content_type/:category', to: 'attribute_fields#suggest'
+      get 'fields/:id/edit', to: 'attribute_fields#edit'
     end
   end
   default_url_options :host => "notebook.ai"
@@ -320,9 +323,12 @@ Rails.application.routes.draw do
     end
 
     # Content attributes
-    put '/content/sort', to: 'content#api_sort'
-    resources :attribute_categories, only: [:create, :update, :destroy]
-    resources :attribute_fields,     only: [:create, :update, :destroy]
+    resources :attribute_categories, only: [:create, :update, :destroy, :edit] do
+      get :suggest, on: :collection
+    end
+    resources :attribute_fields,     only: [:create, :update, :destroy, :edit] do
+      get :suggest, on: :collection
+    end
 
     # Image handling
     delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion
@@ -330,6 +336,8 @@ Rails.application.routes.draw do
 
     # Attributes
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
+    get ':content_type/attributes-tailwind', to: 'content#attributes_tailwind', as: :attribute_customization_tailwind
+    get ':content_type/template/export', to: 'content#export_template', as: :export_template
   end
 
   # For non-API API endpoints
@@ -414,6 +422,14 @@ Rails.application.routes.draw do
       end
       scope '/fields' do
         get '/suggest/:entity_type/:category',    to: 'attribute_fields#suggest'
+        get '/:id/edit',                         to: 'attributes#field_edit'
+      end
+      scope '/categories' do
+        get '/suggest/:entity_type',              to: 'attribute_categories#suggest'
+        get '/:id/edit',                         to: 'attributes#category_edit'
+      end
+      scope '/content' do
+        put '/sort',                             to: 'attributes#sort'
       end
       scope '/answers' do
         get '/suggest/:entity_type/:field_label', to: 'attributes#suggest'

@@ -1,0 +1,148 @@
+<div class="p-4">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-lg font-medium text-gray-900 flex items-center">
+      <i class="material-icons text-gray-600 mr-2">settings</i>
+      General Settings
+    </h2>
+    <button @click="configuring = false; selectedCategory = null; selectedField = null;" 
+            class="p-1.5 rounded hover:bg-gray-100" 
+            title="Close Settings">
+      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+
+  <div class="space-y-6">
+    <!-- Template Information -->
+    <div class="bg-gray-50 rounded-lg p-4">
+      <h3 class="font-medium text-gray-900 mb-2 flex items-center">
+        <i class="material-icons text-gray-600 mr-2 text-lg"><%= content_type_class.icon %></i>
+        <%= content_type.titleize %> Template
+      </h3>
+      <p class="text-sm text-gray-600 mb-3">
+        This template defines the structure and fields for your <%= content_type.titleize.downcase %> pages.
+      </p>
+      <div class="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <span class="text-gray-500">Categories:</span>
+          <span class="ml-1 font-medium"><%= @attribute_categories.count %></span>
+        </div>
+        <div>
+          <span class="text-gray-500">Total Fields:</span>
+          <span class="ml-1 font-medium"><%= @attribute_categories.sum { |cat| cat.attribute_fields.count } %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Template Actions -->
+    <div>
+      <h3 class="font-medium text-gray-900 mb-3">Template Actions</h3>
+      <div class="space-y-2">
+        <div class="border border-gray-200 rounded-lg overflow-hidden" x-data="{ exportOpen: false }">
+          <button @click="exportOpen = !exportOpen" 
+                  class="w-full flex items-center justify-between p-3 hover:bg-gray-50 transition-colors text-left">
+            <div class="flex items-center">
+              <i class="material-icons text-gray-600 mr-3">file_download</i>
+              <div>
+                <div class="font-medium text-gray-900">Export Template</div>
+                <div class="text-sm text-gray-500">Download this template configuration</div>
+              </div>
+            </div>
+            <i class="material-icons text-gray-400 transition-transform" 
+               :class="{ 'rotate-180': exportOpen }">expand_more</i>
+          </button>
+          <div x-show="exportOpen" 
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="opacity-0 transform scale-95"
+               x-transition:enter-end="opacity-100 transform scale-100"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-start="opacity-100 transform scale-100"
+               x-transition:leave-end="opacity-0 transform scale-95"
+               class="border-t border-gray-200 bg-gray-50 p-3">
+            <div class="flex space-x-2">
+              <a href="<%= export_template_path(content_type: content_type, format: 'yml') %>" 
+                 class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors">
+                <i class="material-icons text-xs mr-1">code</i>
+                YAML
+              </a>
+              <a href="<%= export_template_path(content_type: content_type, format: 'md') %>"
+                 class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors">
+                <i class="material-icons text-xs mr-1">description</i>
+                Markdown
+              </a>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">
+              YAML for technical users, Markdown for documentation
+            </p>
+          </div>
+        </div>
+        
+        <button class="w-full flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
+          <div class="flex items-center">
+            <i class="material-icons text-gray-600 mr-3">file_upload</i>
+            <div>
+              <div class="font-medium text-gray-900">Import Template</div>
+              <div class="text-sm text-gray-500">Load a saved template configuration</div>
+            </div>
+          </div>
+          <i class="material-icons text-gray-400">chevron_right</i>
+        </button>
+        
+        <button class="w-full flex items-center justify-between p-3 border border-red-200 rounded-lg hover:bg-red-50 transition-colors text-left">
+          <div class="flex items-center">
+            <i class="material-icons text-red-600 mr-3">restore</i>
+            <div>
+              <div class="font-medium text-red-900">Reset Template</div>
+              <div class="text-sm text-red-600">Delete all customizations and start fresh</div>
+            </div>
+          </div>
+          <i class="material-icons text-red-400">chevron_right</i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Template Settings -->
+    <div>
+      <h3 class="font-medium text-gray-900 mb-3">Display Settings</h3>
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-medium text-gray-900">Show field descriptions</div>
+            <div class="text-sm text-gray-500">Display help text for each field</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" class="sr-only peer" checked>
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" style="--tw-ring-color: var(--content-type-color); --peer-checked-bg: var(--content-type-color);"></div>
+          </label>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-medium text-gray-900">Compact field layout</div>
+            <div class="text-sm text-gray-500">Use smaller spacing between fields</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" class="sr-only peer">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" style="--tw-ring-color: var(--content-type-color); --peer-checked-bg: var(--content-type-color);"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="bg-blue-50 rounded-lg p-4">
+      <h3 class="font-medium text-blue-900 mb-2 flex items-center">
+        <i class="material-icons text-blue-600 mr-2">help_outline</i>
+        Need Help?
+      </h3>
+      <p class="text-sm text-blue-700 mb-3">
+        Learn more about customizing your templates and organizing your content.
+      </p>
+      <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center">
+        View Documentation
+        <i class="material-icons text-sm ml-1">arrow_forward</i>
+      </a>
+    </div>
+  </div>
+</div>

@@ -19,6 +19,10 @@ import "../application.css";
 import 'controllers'
 import '../page_name_loader'
 
+// Import Rails UJS for remote forms and CSRF tokens
+import Rails from '@rails/ujs'
+Rails.start()
+
 // Support component names relative to this directory:
 var componentRequireContext = require.context("components", true);
 var ReactRailsUJS = require("react_ujs");
