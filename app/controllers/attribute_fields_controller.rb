@@ -54,18 +54,24 @@ class AttributeFieldsController < ContentController
       cleaned_params[:field_options][:linkable_types] = cleaned_params[:field_options][:linkable_types].reject(&:blank?)
     end
 
+    # Track what actually changed
+    original_hidden = @attribute_field.hidden
+    original_position = @attribute_field.position
+    
     if @attribute_field.update(cleaned_params.merge({ migrated_from_legacy: true }))
       @content = @attribute_field
       
-      # Generate specific message based on what was updated
-      message = if content_params[:hidden] && content_params[:hidden] == 'true'
-        "#{@attribute_field.label} field is now hidden"
-      elsif content_params[:hidden] && content_params[:hidden] == 'false'
-        "#{@attribute_field.label} field is now visible"
-      elsif content_params[:position]
-        "#{@attribute_field.label} field moved to position #{content_params[:position]}"
+      # Generate specific message based on what was actually updated
+      message = if @attribute_field.hidden != original_hidden
+        if @attribute_field.hidden?
+          "#{@attribute_field.label} field is now hidden"
+        else
+          "#{@attribute_field.label} field is now visible"
+        end
+      elsif @attribute_field.position != original_position
+        "#{@attribute_field.label} field moved to position #{@attribute_field.position}"
       else
-        "#{@attribute_field.label} field updated successfully!"
+        "#{@attribute_field.label} field saved successfully!"
       end
       
       successful_response(@attribute_field, message)
@@ -76,6 +82,46 @@ class AttributeFieldsController < ContentController
         "Unable to save page. Error code: " + @attribute_field.errors.to_json
       )
     end
+  end
+
+  def sort
+    content_id = params[:content_id]
+    intended_position = params[:intended_position].to_i
+    attribute_category_id = params[:attribute_category_id]
+    
+    field = current_user.attribute_fields.find_by(id: content_id)
+    
+    unless field
+      render json: { error: "Field not found" }, status: :not_found
+      return
+    end
+    
+    unless field.updatable_by?(current_user)
+      render json: { error: "You don't have permission to reorder that field" }, status: :forbidden
+      return
+    end
+    
+    # If moving to a different category, update the category first
+    if attribute_category_id && field.attribute_category_id.to_s != attribute_category_id.to_s
+      new_category = current_user.attribute_categories.find_by(id: attribute_category_id)
+      if new_category
+        field.update(attribute_category_id: new_category.id)
+      end
+    end
+    
+    # Use acts_as_list to move to the intended position within the category
+    field.insert_at(intended_position + 1) # acts_as_list is 1-indexed
+    
+    render json: { 
+      success: true, 
+      message: "#{field.label} field moved to position #{intended_position + 1}",
+      field: {
+        id: field.id,
+        position: field.position,
+        label: field.label,
+        attribute_category_id: field.attribute_category_id
+      }
+    }, status: :ok
   end
 
   def suggest

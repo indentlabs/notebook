@@ -89,16 +89,107 @@
           <i class="material-icons text-gray-400">chevron_right</i>
         </button>
         
-        <button class="w-full flex items-center justify-between p-3 border border-red-200 rounded-lg hover:bg-red-50 transition-colors text-left">
-          <div class="flex items-center">
-            <i class="material-icons text-red-600 mr-3">restore</i>
-            <div>
-              <div class="font-medium text-red-900">Reset Template</div>
-              <div class="text-sm text-red-600">Delete all customizations and start fresh</div>
+        <div class="border border-red-200 rounded-lg overflow-hidden" 
+             x-data="templateResetComponent()"
+             id="reset-template-component">
+          <button @click="toggleReset()" 
+                  class="w-full flex items-center justify-between p-3 hover:bg-red-50 transition-colors text-left">
+            <div class="flex items-center">
+              <i class="material-icons text-red-600 mr-3">restore</i>
+              <div>
+                <div class="font-medium text-red-900">Reset Template</div>
+                <div class="text-sm text-red-600">Delete all customizations and start fresh</div>
+              </div>
+            </div>
+            <i class="material-icons text-red-400 transition-transform" 
+               :class="{ 'rotate-180': resetOpen }">expand_more</i>
+          </button>
+          
+          <div x-show="resetOpen" 
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="opacity-0 transform scale-95"
+               x-transition:enter-end="opacity-100 transform scale-100"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-start="opacity-100 transform scale-100"
+               x-transition:leave-end="opacity-0 transform scale-95"
+               class="border-t border-red-200 bg-red-50 p-4">
+            
+            <!-- Loading State -->
+            <div x-show="loading" class="text-center py-4">
+              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600 mx-auto mb-2"></div>
+              <p class="text-sm text-red-700">Analyzing template...</p>
+            </div>
+            
+            <!-- Reset Analysis -->
+            <div x-show="!loading && resetAnalysis && !resetConfirm" class="space-y-4">
+              <div class="bg-white rounded-md p-3 border border-red-200">
+                <h4 class="font-medium text-red-900 mb-2 flex items-center">
+                  <i class="material-icons text-red-600 mr-2">warning</i>
+                  Reset Impact Analysis
+                </h4>
+                <div class="text-sm text-red-700 space-y-1">
+                  <p><strong x-text="resetAnalysis?.total_categories || 0"></strong> categories and <strong x-text="resetAnalysis?.total_fields || 0"></strong> fields will be deleted</p>
+                  <p x-show="resetAnalysis?.custom_categories?.length > 0"><strong x-text="resetAnalysis?.custom_categories?.length || 0"></strong> custom categories you created</p>
+                  <p x-show="resetAnalysis?.data_loss_warnings?.length > 0" class="text-red-800 font-medium">
+                    <strong x-text="resetAnalysis?.data_loss_warnings?.length || 0"></strong> fields have data that will be permanently lost!
+                  </p>
+                  <p x-show="resetAnalysis?.filled_attributes_count > 0" class="text-red-900 font-bold">
+                    <strong x-text="resetAnalysis?.filled_attributes_count || 0"></strong> filled answers will be deleted across <strong x-text="resetAnalysis?.affected_pages_count || 0"></strong> different pages
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Data Loss Warnings -->
+              <div x-show="resetAnalysis?.data_loss_warnings?.length > 0" class="bg-red-100 rounded-md p-3 border border-red-300">
+                <h5 class="font-medium text-red-900 mb-2">⚠️ Data Loss Warning</h5>
+                <div class="text-sm text-red-800 space-y-1 max-h-32 overflow-y-auto">
+                  <template x-for="warning in (resetAnalysis?.data_loss_warnings || [])" :key="warning.category + warning.field">
+                    <p><strong x-text="warning.category"></strong> → <span x-text="warning.field"></span> (<span x-text="warning.filled_count"></span> filled answers)</p>
+                  </template>
+                </div>
+              </div>
+              
+              <div class="flex justify-end space-x-2">
+                <button @click="resetOpen = false" 
+                        class="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button @click="resetConfirm = true" 
+                        class="px-3 py-1.5 bg-red-600 border border-red-600 rounded-md text-sm font-medium text-white hover:bg-red-700">
+                  I Understand, Continue
+                </button>
+              </div>
+            </div>
+            
+            <!-- Final Confirmation -->  
+            <div x-show="resetConfirm" class="space-y-4">
+              <div class="bg-red-100 rounded-md p-3 border border-red-300">
+                <h4 class="font-medium text-red-900 mb-2">⚠️ Final Confirmation Required</h4>
+                <p class="text-sm text-red-800 mb-3">
+                  Type "<strong><%= content_type.titleize %></strong>" below to confirm you want to permanently reset this template:
+                </p>
+                <input type="text" 
+                       x-model="confirmText"
+                       placeholder="<%= content_type.titleize %>"
+                       class="w-full px-3 py-2 border border-red-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+              </div>
+              
+              <div class="flex justify-end space-x-2">
+                <button @click="resetConfirm = false" 
+                        class="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button @click="performReset()" 
+                        :disabled="confirmText !== '<%= content_type.titleize %>'"
+                        :class="confirmText === '<%= content_type.titleize %>' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                        class="px-3 py-1.5 border border-transparent rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-500">
+                  <i class="material-icons text-sm mr-1">delete_forever</i>
+                  Reset Template Permanently
+                </button>
+              </div>
             </div>
           </div>
-          <i class="material-icons text-red-400">chevron_right</i>
-        </button>
+        </div>
       </div>
     </div>
 

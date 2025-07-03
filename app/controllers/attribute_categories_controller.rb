@@ -39,18 +39,24 @@ class AttributeCategoriesController < ContentController
       return redirect_back fallback_location: root_path
     end
 
+    # Track what actually changed
+    original_hidden = @attribute_category.hidden
+    original_position = @attribute_category.position
+    
     if @attribute_category.update(content_params)
       @content = @attribute_category
       
-      # Generate specific message based on what was updated
-      message = if content_params[:hidden] && content_params[:hidden] == 'true'
-        "#{@attribute_category.label} category is now hidden"
-      elsif content_params[:hidden] && content_params[:hidden] == 'false'
-        "#{@attribute_category.label} category is now visible"
-      elsif content_params[:position]
-        "#{@attribute_category.label} category moved to position #{content_params[:position]}"
+      # Generate specific message based on what was actually updated
+      message = if @attribute_category.hidden != original_hidden
+        if @attribute_category.hidden?
+          "#{@attribute_category.label} category is now hidden"
+        else
+          "#{@attribute_category.label} category is now visible"
+        end
+      elsif @attribute_category.position != original_position
+        "#{@attribute_category.label} category moved to position #{@attribute_category.position}"
       else
-        "#{@attribute_category.label} category updated successfully!"
+        "#{@attribute_category.label} category saved successfully!"
       end
       
       successful_response(@attribute_category, message)
@@ -98,6 +104,36 @@ class AttributeCategoriesController < ContentController
         }, status: :ok 
       }
     end
+  end
+
+  def sort
+    content_id = params[:content_id]
+    intended_position = params[:intended_position].to_i
+    
+    category = current_user.attribute_categories.find_by(id: content_id)
+    
+    unless category
+      render json: { error: "Category not found" }, status: :not_found
+      return
+    end
+    
+    unless category.updatable_by?(current_user)
+      render json: { error: "You don't have permission to reorder that category" }, status: :forbidden
+      return
+    end
+    
+    # Use acts_as_list to move to the intended position
+    category.insert_at(intended_position + 1) # acts_as_list is 1-indexed
+    
+    render json: { 
+      success: true, 
+      message: "#{category.label} category moved to position #{intended_position + 1}",
+      category: {
+        id: category.id,
+        position: category.position,
+        label: category.label
+      }
+    }, status: :ok
   end
 
   def suggest

@@ -338,6 +338,7 @@ Rails.application.routes.draw do
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
     get ':content_type/attributes-tailwind', to: 'content#attributes_tailwind', as: :attribute_customization_tailwind
     get ':content_type/template/export', to: 'content#export_template', as: :export_template
+    delete ':content_type/template/reset', to: 'content#reset_template', as: :reset_template
   end
 
   # For non-API API endpoints
@@ -347,6 +348,8 @@ Rails.application.routes.draw do
     patch '/text_field_update/:field_id',     to: 'content#text_field_update',     as: :text_field_update
     patch '/tags_field_update/:field_id',     to: 'content#tags_field_update',     as: :tags_field_update
     patch '/universe_field_update/:field_id', to: 'content#universe_field_update', as: :universe_field_update
+    patch '/sort/categories',                 to: 'attribute_categories#sort',     as: :sort_categories_internal
+    patch '/sort/fields',                     to: 'attribute_fields#sort',         as: :sort_fields_internal
   end
 
   get 'search/', to: 'search#results'

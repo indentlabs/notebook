@@ -1,54 +1,175 @@
 // Template Editor JavaScript
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize Alpine component data
-  window.initTemplateEditor = function() {
-    return {
-      selectedCategory: null,
-      selectedField: null,
-      configuring: false,
-      activePanel: window.innerWidth >= 768 ? 'both' : 'template',
-      
-      // Category selection
-      selectCategory(categoryId) {
-        this.selectedCategory = categoryId;
-        this.selectedField = null;
-        this.configuring = true;
-        
-        if (window.innerWidth < 768) {
-          this.activePanel = 'config';
-        }
-        
-        // Load category configuration via AJAX
-        fetch(`/plan/attribute_categories/${categoryId}/edit`)
-          .then(response => response.text())
-          .then(html => {
-            document.getElementById('category-config-container').innerHTML = html;
-          });
-      },
-      
-      // Field selection
-      selectField(fieldId) {
-        this.selectedField = fieldId;
-        this.selectedCategory = null;
-        this.configuring = true;
-        
-        if (window.innerWidth < 768) {
-          this.activePanel = 'config';
-        }
-        
-        // Load field configuration via AJAX
-        fetch(`/plan/attribute_fields/${fieldId}/edit`)
-          .then(response => response.text())
-          .then(html => {
-            document.getElementById('field-config-container').innerHTML = html;
-          });
+// Template Reset Component function for Alpine.js (define before DOM ready)
+window.templateResetComponent = function() {
+  return {
+    resetOpen: false,
+    resetConfirm: false,
+    resetAnalysis: null,
+    loading: false,
+    confirmText: '',
+    
+    toggleReset() {
+      this.resetOpen = !this.resetOpen;
+      if (this.resetOpen && !this.resetAnalysis) {
+        this.fetchAnalysis();
       }
-    };
+    },
+    
+    fetchAnalysis() {
+      console.log('Fetching reset analysis...');
+      this.loading = true;
+      const contentType = document.querySelector('.attributes-editor').dataset.contentType;
+      
+      fetch(`/plan/${contentType}/template/reset`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Analysis data:', data);
+        this.resetAnalysis = data;
+        this.loading = false;
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        this.loading = false;
+        if (typeof showNotification === 'function') {
+          showNotification('Failed to analyze template reset impact', 'error');
+        } else {
+          alert('Failed to analyze template reset impact');
+        }
+      });
+    },
+    
+    performReset() {
+      console.log('Performing reset...');
+      this.loading = true;
+      const contentType = document.querySelector('.attributes-editor').dataset.contentType;
+      
+      fetch(`/plan/${contentType}/template/reset?confirm=true`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          if (typeof showNotification === 'function') {
+            showNotification(data.message, 'success');
+          } else {
+            alert(data.message);
+          }
+          setTimeout(() => window.location.reload(), 2000);
+        } else {
+          if (typeof showNotification === 'function') {
+            showNotification(data.error || 'Failed to reset template', 'error');
+          } else {
+            alert(data.error || 'Failed to reset template');
+          }
+          this.loading = false;
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        if (typeof showNotification === 'function') {
+          showNotification('Failed to reset template', 'error');
+        } else {
+          alert('Failed to reset template');
+        }
+        this.loading = false;
+      });
+    }
   };
+};
+
+// Initialize Alpine component data (global function)
+window.initTemplateEditor = function() {
+  return {
+    selectedCategory: null,
+    selectedField: null,
+    configuring: false,
+    activePanel: window.innerWidth >= 768 ? 'both' : 'template',
+    
+    // Initialize reset analysis as empty object to prevent Alpine errors
+    resetAnalysis: null,
+    
+    // Category selection
+    selectCategory(categoryId) {
+      this.selectedCategory = categoryId;
+      this.selectedField = null;
+      this.configuring = true;
+      
+      if (window.innerWidth < 768) {
+        this.activePanel = 'config';
+      }
+      
+      // Show loading animation
+      showConfigLoadingAnimation('category-config-container');
+      
+      // Load category configuration via AJAX
+      fetch(`/plan/attribute_categories/${categoryId}/edit`)
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('category-config-container').innerHTML = html;
+          // Bind remote form handlers to newly loaded forms
+          bindRemoteFormsInContainer('category-config-container');
+          // Hide loading animation
+          hideConfigLoadingAnimation('category-config-container');
+        })
+        .catch(error => {
+          console.error('Error loading category config:', error);
+          hideConfigLoadingAnimation('category-config-container');
+          showNotification('Failed to load category configuration', 'error');
+        });
+    },
+    
+    // Field selection
+    selectField(fieldId) {
+      this.selectedField = fieldId;
+      this.selectedCategory = null;
+      this.configuring = true;
+      
+      if (window.innerWidth < 768) {
+        this.activePanel = 'config';
+      }
+      
+      // Show loading animation
+      showConfigLoadingAnimation('field-config-container');
+      
+      // Load field configuration via AJAX
+      fetch(`/plan/attribute_fields/${fieldId}/edit`)
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('field-config-container').innerHTML = html;
+          // Bind remote form handlers to newly loaded forms
+          bindRemoteFormsInContainer('field-config-container');
+          // Hide loading animation
+          hideConfigLoadingAnimation('field-config-container');
+        })
+        .catch(error => {
+          console.error('Error loading field config:', error);
+          hideConfigLoadingAnimation('field-config-container');
+          showNotification('Failed to load field configuration', 'error');
+        });
+    }
+  };
+};
+
+document.addEventListener('DOMContentLoaded', function() {
   
   // Initialize sortable for categories
   initSortables();
+  
+  // Handle remote form submissions for dynamically loaded forms
+  setupRemoteFormHandlers();
   
   // Show category form
   document.addEventListener('click', function(event) {
@@ -60,14 +181,24 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Handle select-category event dispatched from category cards
   document.addEventListener('select-category', function(event) {
-    const alpine = Alpine.getRoot(document.querySelector('.attributes-editor'));
-    alpine.$data.selectCategory(event.detail.id);
+    const alpineElement = document.querySelector('.attributes-editor');
+    if (alpineElement && alpineElement._x_dataStack) {
+      const alpine = alpineElement._x_dataStack[0];
+      if (alpine.selectCategory) {
+        alpine.selectCategory(event.detail.id);
+      }
+    }
   });
   
   // Handle select-field event dispatched from field items
   document.addEventListener('select-field', function(event) {
-    const alpine = Alpine.getRoot(document.querySelector('.attributes-editor'));
-    alpine.$data.selectField(event.detail.id);
+    const alpineElement = document.querySelector('.attributes-editor');
+    if (alpineElement && alpineElement._x_dataStack) {
+      const alpine = alpineElement._x_dataStack[0];
+      if (alpine.selectField) {
+        alpine.selectField(event.detail.id);
+      }
+    }
   });
   
   // Category suggestions
@@ -77,7 +208,10 @@ document.addEventListener('DOMContentLoaded', function() {
       const contentType = document.querySelector('.attributes-editor').dataset.contentType;
       const resultContainer = this.closest('div').querySelector('.suggest-categories-container');
       
-      fetch(`/api/v1/categories/suggest/${contentType}`)
+      // Show loading animation in the suggestions container
+      showSuggestionsLoadingAnimation(resultContainer);
+      
+      fetch(`/plan/attribute_categories/suggest?content_type=${contentType}`)
         .then(response => response.json())
         .then(data => {
           const existingCategories = Array.from(document.querySelectorAll('.category-label')).map(el => el.textContent.trim());
@@ -97,6 +231,10 @@ document.addEventListener('DOMContentLoaded', function() {
           } else {
             resultContainer.innerHTML = '<p class="text-sm text-gray-500">No suggestions available at the moment.</p>';
           }
+        })
+        .catch(error => {
+          console.error('Error loading category suggestions:', error);
+          resultContainer.innerHTML = '<p class="text-sm text-red-500">Failed to load suggestions. Please try again.</p>';
         });
       
       this.style.display = 'none';
@@ -112,7 +250,10 @@ document.addEventListener('DOMContentLoaded', function() {
       const categoryLabel = categoryContainer.querySelector('.category-label').textContent.trim();
       const resultContainer = this.closest('div').querySelector('.suggest-fields-container');
       
-      fetch(`/api/v1/fields/suggest/${contentType}/${categoryLabel}`)
+      // Show loading animation in the suggestions container
+      showSuggestionsLoadingAnimation(resultContainer);
+      
+      fetch(`/plan/attribute_fields/suggest?content_type=${contentType}&category=${categoryLabel}`)
         .then(response => response.json())
         .then(data => {
           const existingFields = Array.from(categoryContainer.querySelectorAll('.field-label')).map(el => el.textContent.trim());
@@ -132,6 +273,10 @@ document.addEventListener('DOMContentLoaded', function() {
           } else {
             resultContainer.innerHTML = '<p class="text-sm text-gray-500">No suggestions available at the moment.</p>';
           }
+        })
+        .catch(error => {
+          console.error('Error loading field suggestions:', error);
+          resultContainer.innerHTML = '<p class="text-sm text-red-500">Failed to load suggestions. Please try again.</p>';
         });
       
       this.style.display = 'none';
@@ -158,18 +303,26 @@ function initSortables() {
       const categoryId = ui.item.attr('data-category-id');
       const newPosition = ui.item.index();
       
-      // AJAX request to update position
+      // AJAX request to update position using internal endpoint
       $.ajax({
-        url: '/api/v1/content/sort',
-        type: 'PUT',
+        url: '/internal/sort/categories',
+        type: 'PATCH',
         contentType: 'application/json',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
         data: JSON.stringify({
-          sortable_class: 'AttributeCategory',
           content_id: categoryId,
           intended_position: newPosition
         }),
         success: function(data) {
-          console.log('Category position updated successfully');
+          console.log('Category position updated successfully:', data);
+          if (data.message) {
+            showNotification(data.message, 'success');
+          }
+          
+          // Update the position field in the category config form if it's open
+          updateCategoryConfigPosition(categoryId, data.category.position);
         },
         error: function(xhr, status, error) {
           console.error('Error updating category position:', error);
@@ -193,19 +346,27 @@ function initSortables() {
       const newPosition = ui.item.index();
       const categoryId = ui.item.closest('.fields-container').attr('data-category-id');
       
-      // AJAX request to update position
+      // AJAX request to update position using internal endpoint
       $.ajax({
-        url: '/api/v1/content/sort',
-        type: 'PUT',
+        url: '/internal/sort/fields',
+        type: 'PATCH',
         contentType: 'application/json',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
         data: JSON.stringify({
-          sortable_class: 'AttributeField',
           content_id: fieldId,
           intended_position: newPosition,
           attribute_category_id: categoryId
         }),
         success: function(data) {
-          console.log('Field position updated successfully');
+          console.log('Field position updated successfully:', data);
+          if (data.message) {
+            showNotification(data.message, 'success');
+          }
+          
+          // Update the position field in the field config form if it's open
+          updateFieldConfigPosition(fieldId, data.field.position);
         },
         error: function(xhr, status, error) {
           console.error('Error updating field position:', error);
@@ -216,23 +377,790 @@ function initSortables() {
   });
 }
 
-// Function to show error messages to users
-function showErrorMessage(message) {
-  // Use Materialize toast if available, otherwise create custom notification
-  if (typeof M !== 'undefined' && M.toast) {
-    M.toast({html: message, classes: 'red'});
-  } else {
-    const notification = document.createElement('div');
-    notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.parentNode.removeChild(notification);
+// Notification system
+function showNotification(message, type = 'info') {
+  const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+  const icon = type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info';
+  
+  const notification = $(`
+    <div class="fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center animate-notification-in">
+      <i class="material-icons text-sm mr-2">${icon}</i>
+      <span class="text-sm font-medium">${message}</span>
+      <button class="ml-4 text-white hover:text-gray-200" onclick="$(this).parent().remove()">
+        <i class="material-icons text-sm">close</i>
+      </button>
+    </div>
+  `);
+  
+  $('body').append(notification);
+  
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    notification.fadeOut(300, function() {
+      $(this).remove();
+    });
+  }, 5000);
+}
+
+// Make showNotification globally available
+window.showNotification = showNotification;
+
+// Category visibility toggle function
+window.toggleCategoryVisibility = function(categoryId, isHidden) {
+  const categoryCard = document.querySelector(`[data-category-id="${categoryId}"]`);
+  const button = categoryCard.querySelector('.category-visibility-toggle');
+  
+  fetch(`/plan/attribute_categories/${categoryId}`, {
+    method: 'PUT',
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      attribute_category: {
+        hidden: !isHidden
       }
-    }, 5000);
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success || data.message) {
+      // Update the UI manually instead of reloading
+      const newHiddenState = !isHidden;
+      
+      // Update button data attribute and title
+      button.setAttribute('data-hidden', newHiddenState);
+      button.setAttribute('title', newHiddenState ? 'Hidden category - Click to show' : 'Visible category - Click to hide');
+      
+      // Update the eye icon
+      const eyeIcon = button.querySelector('svg');
+      if (newHiddenState) {
+        // Show closed eye icon
+        eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
+      } else {
+        // Show open eye icon
+        eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+      }
+      
+      // Update category card styling
+      if (newHiddenState) {
+        categoryCard.classList.add('border-gray-300');
+        categoryCard.style.borderColor = '';
+        categoryCard.querySelector('.category-header').style.backgroundColor = '#f9fafb';
+        categoryCard.querySelector('.category-icon i').classList.add('text-gray-400');
+        categoryCard.querySelector('.category-icon i').style.color = '';
+      } else {
+        categoryCard.classList.remove('border-gray-300');
+        const contentTypeColor = getComputedStyle(document.documentElement).getPropertyValue('--content-type-color') || '#6366f1';
+        categoryCard.style.borderColor = contentTypeColor;
+        categoryCard.querySelector('.category-header').style.backgroundColor = contentTypeColor + '20';
+        categoryCard.querySelector('.category-icon i').classList.remove('text-gray-400');
+        categoryCard.querySelector('.category-icon i').style.color = contentTypeColor;
+      }
+      
+      // Update hidden status text
+      const statusText = categoryCard.querySelector('.category-label').parentElement.querySelector('p');
+      if (newHiddenState) {
+        if (!statusText.textContent.includes('— Hidden')) {
+          statusText.innerHTML += '<span class="text-gray-400 ml-2">— Hidden</span>';
+        }
+      } else {
+        statusText.innerHTML = statusText.innerHTML.replace('<span class="text-gray-400 ml-2">— Hidden</span>', '');
+      }
+      
+      showNotification(data.message, 'success');
+    } else {
+      showNotification('Failed to update category visibility', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error toggling category visibility:', error);
+    showNotification('Failed to update category visibility', 'error');
+  });
+};
+
+// Field visibility toggle function
+window.toggleFieldVisibility = function(fieldId, isHidden) {
+  const fieldItem = document.querySelector(`[data-field-id="${fieldId}"]`);
+  const button = fieldItem.querySelector('.field-visibility-toggle');
+  
+  fetch(`/plan/attribute_fields/${fieldId}`, {
+    method: 'PUT',
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      attribute_field: {
+        hidden: !isHidden
+      }
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success || data.message) {
+      // Update the UI manually instead of reloading
+      const newHiddenState = !isHidden;
+      
+      // Update button data attribute and title
+      button.setAttribute('data-hidden', newHiddenState);
+      button.setAttribute('title', newHiddenState ? 'Hidden field - Click to show' : 'Visible field - Click to hide');
+      
+      // Update the eye icon
+      const eyeIcon = button.querySelector('svg');
+      if (newHiddenState) {
+        // Show closed eye icon
+        eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
+      } else {
+        // Show open eye icon
+        eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+      }
+      
+      // Update field item styling
+      if (newHiddenState) {
+        fieldItem.classList.add('bg-gray-50', 'border-gray-200');
+        fieldItem.classList.remove('bg-white');
+        fieldItem.querySelector('.field-label').classList.add('text-gray-500');
+        fieldItem.querySelector('.field-label').classList.remove('text-gray-800');
+      } else {
+        fieldItem.classList.remove('bg-gray-50', 'border-gray-200');
+        fieldItem.classList.add('bg-white');
+        fieldItem.querySelector('.field-label').classList.remove('text-gray-500');
+        fieldItem.querySelector('.field-label').classList.add('text-gray-800');
+      }
+      
+      // Update hidden status text in field info
+      const fieldInfo = fieldItem.querySelector('.text-xs.text-gray-500');
+      if (newHiddenState) {
+        if (!fieldInfo.textContent.includes('— Hidden')) {
+          fieldInfo.innerHTML += '<span class="ml-1.5 text-gray-400">— Hidden</span>';
+        }
+      } else {
+        fieldInfo.innerHTML = fieldInfo.innerHTML.replace('<span class="ml-1.5 text-gray-400">— Hidden</span>', '');
+      }
+      
+      showNotification(data.message, 'success');
+    } else {
+      showNotification('Failed to update field visibility', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error toggling field visibility:', error);
+    showNotification('Failed to update field visibility', 'error');
+  });
+};
+
+// Category icon preview function
+window.updateCategoryIconPreview = function(categoryId, iconName) {
+  // Update the icon preview in the category header
+  const categoryCard = document.querySelector(`[data-category-id="${categoryId}"]`);
+  if (categoryCard) {
+    const iconElement = categoryCard.querySelector('.category-icon i');
+    if (iconElement) {
+      iconElement.textContent = iconName;
+    }
   }
+  
+  // Update the form to show the selected icon
+  const iconPreview = document.getElementById('selected-icon-preview');
+  if (iconPreview) {
+    iconPreview.textContent = iconName;
+  }
+};
+
+// Function to show error messages to users (legacy compatibility)
+function showErrorMessage(message) {
+  showNotification(message, 'error');
+}
+
+// Bind remote form handlers to dynamically loaded forms in a container
+function bindRemoteFormsInContainer(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  // Find all forms with remote: true in the container
+  const remoteForms = container.querySelectorAll('form[data-remote="true"]');
+  
+  remoteForms.forEach(form => {
+    // Remove any existing event listeners to prevent duplicates
+    form.removeEventListener('submit', handleRemoteFormSubmit);
+    
+    // Add our custom submit handler
+    form.addEventListener('submit', handleRemoteFormSubmit);
+  });
+}
+
+// Handle remote form submission manually
+function handleRemoteFormSubmit(event) {
+  event.preventDefault(); // Prevent default form submission
+  
+  const form = event.target;
+  const formData = new FormData(form);
+  const submitButton = form.querySelector('input[type="submit"], button[type="submit"]');
+  let originalText = '';
+  
+  // Disable submit button to prevent double submission
+  if (submitButton) {
+    submitButton.disabled = true;
+    originalText = submitButton.value || submitButton.textContent;
+    if (submitButton.tagName === 'INPUT') {
+      submitButton.value = 'Saving...';
+    } else {
+      submitButton.textContent = 'Saving...';
+    }
+    
+    // Restore button after 3 seconds as fallback
+    setTimeout(() => {
+      submitButton.disabled = false;
+      if (submitButton.tagName === 'INPUT') {
+        submitButton.value = originalText;
+      } else {
+        submitButton.textContent = originalText;
+      }
+    }, 3000);
+  }
+  
+  // Convert FormData to JSON for Rails
+  const jsonData = {};
+  for (let [key, value] of formData.entries()) {
+    // Skip Rails form helper fields
+    if (key === 'utf8' || key === '_method' || key === 'authenticity_token') {
+      continue;
+    }
+    
+    // Handle nested attributes properly - support multiple levels
+    if (key.includes('[') && key.includes(']')) {
+      // Parse nested field names like attribute_field[field_options][input_size]
+      const keyParts = key.split(/[\[\]]+/).filter(part => part !== '');
+      
+      let current = jsonData;
+      for (let i = 0; i < keyParts.length - 1; i++) {
+        const part = keyParts[i];
+        if (!current[part]) {
+          current[part] = {};
+        }
+        current = current[part];
+      }
+      
+      const finalKey = keyParts[keyParts.length - 1];
+      current[finalKey] = value;
+    } else {
+      jsonData[key] = value;
+    }
+  }
+  
+  console.log('Converted form data:', jsonData);
+  
+  // Get the actual HTTP method from Rails form
+  let httpMethod = form.method.toUpperCase();
+  
+  // Check for Rails method override (for PUT/PATCH/DELETE)
+  const methodInput = form.querySelector('input[name="_method"]');
+  if (methodInput) {
+    httpMethod = methodInput.value.toUpperCase();
+  }
+  
+  console.log('Submitting form with method:', httpMethod, 'to:', form.action);
+  
+  // Submit form via fetch
+  fetch(form.action, {
+    method: httpMethod,
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify(jsonData)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Form submitted successfully:', data);
+    
+    // Re-enable submit button
+    if (submitButton) {
+      submitButton.disabled = false;
+      if (submitButton.tagName === 'INPUT') {
+        submitButton.value = originalText;
+      } else {
+        submitButton.textContent = originalText;
+      }
+    }
+    
+    // Show success notification
+    if (data.message) {
+      showNotification(data.message, 'success');
+    }
+    
+    // Handle category form updates
+    if (form.action.includes('/attribute_categories/')) {
+      handleCategoryFormSuccess(form, data);
+    }
+    
+    // Handle field form updates  
+    if (form.action.includes('/attribute_fields/')) {
+      handleFieldFormSuccess(form, data);
+    }
+  })
+  .catch(error => {
+    console.error('Form submission failed:', error);
+    
+    // Re-enable submit button
+    if (submitButton) {
+      submitButton.disabled = false;
+      if (submitButton.tagName === 'INPUT') {
+        submitButton.value = originalText;  
+      } else {
+        submitButton.textContent = originalText;
+      }
+    }
+    
+    showNotification('Failed to save changes', 'error');
+  });
+}
+
+// Setup remote form handlers for dynamically loaded forms
+function setupRemoteFormHandlers() {
+  // Handle successful form submissions (backup for Rails UJS if it works)
+  document.addEventListener('ajax:success', function(event) {
+    const form = event.target;
+    if (!form.matches('form[data-remote="true"]')) return;
+    
+    const response = event.detail[0];
+    console.log('Form submitted successfully via Rails UJS:', response);
+    
+    // Show success notification
+    if (response.message) {
+      showNotification(response.message, 'success');
+    }
+    
+    // Handle category form updates
+    if (form.action.includes('/attribute_categories/')) {
+      handleCategoryFormSuccess(form, response);
+    }
+    
+    // Handle field form updates  
+    if (form.action.includes('/attribute_fields/')) {
+      handleFieldFormSuccess(form, response);
+    }
+  });
+  
+  // Handle form submission errors (backup for Rails UJS if it works)
+  document.addEventListener('ajax:error', function(event) {
+    const form = event.target;
+    if (!form.matches('form[data-remote="true"]')) return;
+    
+    const response = event.detail[0];
+    console.error('Form submission failed via Rails UJS:', response);
+    
+    let errorMessage = 'Failed to save changes';
+    if (response && response.error) {
+      errorMessage = response.error;
+    }
+    
+    showNotification(errorMessage, 'error');
+  });
+}
+
+// Handle successful category form submission
+function handleCategoryFormSuccess(form, response) {
+  // Extract category ID from form action URL
+  const matches = form.action.match(/\/attribute_categories\/(\d+)/);
+  if (!matches) return;
+  
+  const categoryId = matches[1];
+  const categoryCard = document.querySelector(`[data-category-id="${categoryId}"]`);
+  if (!categoryCard) return;
+  
+  // Update category display if label changed
+  if (response.category && response.category.label) {
+    const labelElement = categoryCard.querySelector('.category-label');
+    if (labelElement) {
+      labelElement.textContent = response.category.label;
+    }
+  }
+  
+  // Update category icon if changed
+  if (response.category && response.category.icon) {
+    const iconElement = categoryCard.querySelector('.category-icon i');
+    if (iconElement) {
+      iconElement.textContent = response.category.icon;
+    }
+  }
+  
+  // Handle visibility changes
+  if (response.category && typeof response.category.hidden !== 'undefined') {
+    const isHidden = response.category.hidden;
+    updateCategoryVisibilityUI(categoryId, isHidden);
+  }
+}
+
+// Handle successful field form submission
+function handleFieldFormSuccess(form, response) {
+  // Extract field ID from form action URL
+  const matches = form.action.match(/\/attribute_fields\/(\d+)/);
+  if (!matches) return;
+  
+  const fieldId = matches[1];
+  const fieldItem = document.querySelector(`[data-field-id="${fieldId}"]`);
+  if (!fieldItem) return;
+  
+  // Update field display if label changed
+  if (response.field && response.field.label) {
+    const labelElement = fieldItem.querySelector('.field-label');
+    if (labelElement) {
+      labelElement.textContent = response.field.label;
+    }
+  }
+  
+  // Handle visibility changes
+  if (response.field && typeof response.field.hidden !== 'undefined') {
+    const isHidden = response.field.hidden;
+    updateFieldVisibilityUI(fieldId, isHidden);
+  }
+}
+
+// Update category visibility UI elements
+function updateCategoryVisibilityUI(categoryId, isHidden) {
+  const categoryCard = document.querySelector(`[data-category-id="${categoryId}"]`);
+  if (!categoryCard) return;
+  
+  // Update visibility toggle button
+  const button = categoryCard.querySelector('.category-visibility-toggle');
+  if (button) {
+    button.setAttribute('data-hidden', isHidden);
+    button.setAttribute('title', isHidden ? 'Hidden category - Click to show' : 'Visible category - Click to hide');
+    
+    const eyeIcon = button.querySelector('svg');
+    if (eyeIcon) {
+      if (isHidden) {
+        eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
+      } else {
+        eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+      }
+    }
+  }
+  
+  // Update category card styling
+  if (isHidden) {
+    categoryCard.classList.add('border-gray-300');
+    categoryCard.style.borderColor = '';
+    categoryCard.querySelector('.category-header').style.backgroundColor = '#f9fafb';
+    categoryCard.querySelector('.category-icon i').classList.add('text-gray-400');
+    categoryCard.querySelector('.category-icon i').style.color = '';
+  } else {
+    categoryCard.classList.remove('border-gray-300');
+    const contentTypeColor = getComputedStyle(document.documentElement).getPropertyValue('--content-type-color') || '#6366f1';
+    categoryCard.style.borderColor = contentTypeColor;
+    categoryCard.querySelector('.category-header').style.backgroundColor = contentTypeColor + '20';
+    categoryCard.querySelector('.category-icon i').classList.remove('text-gray-400');
+    categoryCard.querySelector('.category-icon i').style.color = contentTypeColor;
+  }
+  
+  // Update hidden status text
+  const statusText = categoryCard.querySelector('.category-label').parentElement.querySelector('p');
+  if (statusText) {
+    if (isHidden) {
+      if (!statusText.textContent.includes('— Hidden')) {
+        statusText.innerHTML += '<span class="text-gray-400 ml-2">— Hidden</span>';
+      }
+    } else {
+      statusText.innerHTML = statusText.innerHTML.replace('<span class="text-gray-400 ml-2">— Hidden</span>', '');
+    }
+  }
+}
+
+// Update field visibility UI elements
+function updateFieldVisibilityUI(fieldId, isHidden) {
+  const fieldItem = document.querySelector(`[data-field-id="${fieldId}"]`);
+  if (!fieldItem) return;
+  
+  // Update visibility toggle button
+  const button = fieldItem.querySelector('.field-visibility-toggle');
+  if (button) {
+    button.setAttribute('data-hidden', isHidden);
+    button.setAttribute('title', isHidden ? 'Hidden field - Click to show' : 'Visible field - Click to hide');
+    
+    const eyeIcon = button.querySelector('svg');
+    if (eyeIcon) {
+      if (isHidden) {
+        eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
+      } else {
+        eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+      }
+    }
+  }
+  
+  // Update field item styling
+  if (isHidden) {
+    fieldItem.classList.add('bg-gray-50', 'border-gray-200');
+    fieldItem.classList.remove('bg-white');
+    fieldItem.querySelector('.field-label').classList.add('text-gray-500');
+    fieldItem.querySelector('.field-label').classList.remove('text-gray-800');
+  } else {
+    fieldItem.classList.remove('bg-gray-50', 'border-gray-200');
+    fieldItem.classList.add('bg-white');
+    fieldItem.querySelector('.field-label').classList.remove('text-gray-500');
+    fieldItem.querySelector('.field-label').classList.add('text-gray-800');
+  }
+  
+  // Update hidden status text
+  const fieldInfo = fieldItem.querySelector('.text-xs.text-gray-500');
+  if (fieldInfo) {
+    if (isHidden) {
+      if (!fieldInfo.textContent.includes('— Hidden')) {
+        fieldInfo.innerHTML += '<span class="ml-1.5 text-gray-400">— Hidden</span>';
+      }
+    } else {
+      fieldInfo.innerHTML = fieldInfo.innerHTML.replace('<span class="ml-1.5 text-gray-400">— Hidden</span>', '');
+    }
+  }
+}
+
+// Update category configuration form position field after drag and drop
+function updateCategoryConfigPosition(categoryId, newPosition) {
+  // Check if the category config form is currently open
+  const alpineElement = document.querySelector('.attributes-editor');
+  if (alpineElement && alpineElement._x_dataStack) {
+    const alpine = alpineElement._x_dataStack[0];
+    
+    // Only update if this category's config form is currently open
+    if (alpine.selectedCategory == categoryId) {
+      const categoryConfigContainer = document.getElementById('category-config-container');
+      if (categoryConfigContainer) {
+        const positionInput = categoryConfigContainer.querySelector('input[name="attribute_category[position]"]');
+        if (positionInput) {
+          console.log(`Updating category ${categoryId} position input from ${positionInput.value} to ${newPosition}`);
+          positionInput.value = newPosition;
+        }
+      }
+    }
+  }
+}
+
+// Update field configuration form position field after drag and drop
+function updateFieldConfigPosition(fieldId, newPosition) {
+  // Check if the field config form is currently open
+  const alpineElement = document.querySelector('.attributes-editor');
+  if (alpineElement && alpineElement._x_dataStack) {
+    const alpine = alpineElement._x_dataStack[0];
+    
+    // Only update if this field's config form is currently open
+    if (alpine.selectedField == fieldId) {
+      const fieldConfigContainer = document.getElementById('field-config-container');
+      if (fieldConfigContainer) {
+        const positionInput = fieldConfigContainer.querySelector('input[name="attribute_field[position]"]');
+        if (positionInput) {
+          console.log(`Updating field ${fieldId} position input from ${positionInput.value} to ${newPosition}`);
+          positionInput.value = newPosition;
+        }
+      }
+    }
+  }
+}
+
+// Show loading animation for configuration panels
+function showConfigLoadingAnimation(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  // Create loading bar element
+  const loadingBar = document.createElement('div');
+  loadingBar.className = 'config-loading-bar';
+  loadingBar.innerHTML = `
+    <div class="loading-bar-container">
+      <div class="loading-bar-progress"></div>
+    </div>
+    <div class="loading-content">
+      <div class="animate-pulse">
+        <div class="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+        <div class="space-y-3">
+          <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+          <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+          <div class="h-3 bg-gray-200 rounded w-5/6"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Add loading styles
+  const style = document.createElement('style');
+  style.textContent = `
+    .config-loading-bar {
+      position: relative;
+      padding: 1rem;
+    }
+    
+    .loading-bar-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: #f3f4f6;
+      overflow: hidden;
+    }
+    
+    .loading-bar-progress {
+      height: 100%;
+      background: linear-gradient(90deg, var(--content-type-color, #6366f1) 0%, rgba(99, 102, 241, 0.6) 50%, var(--content-type-color, #6366f1) 100%);
+      background-size: 200% 100%;
+      animation: loading-slide 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes loading-slide {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+    
+    .loading-content {
+      margin-top: 1rem;
+    }
+  `;
+  
+  // Add styles to head if not already present
+  if (!document.querySelector('.config-loading-styles')) {
+    style.classList.add('config-loading-styles');
+    document.head.appendChild(style);
+  }
+  
+  // Replace container content with loading animation
+  container.innerHTML = '';
+  container.appendChild(loadingBar);
+}
+
+// Hide loading animation for configuration panels
+function hideConfigLoadingAnimation(containerId) {
+  // The loading animation will be replaced when the actual content loads
+  // This function is called after the content is set, so it's mainly for cleanup
+  // and error handling scenarios
+  
+  // Remove any loading-specific styles or elements if needed
+  const container = document.getElementById(containerId);
+  if (container) {
+    const loadingBar = container.querySelector('.config-loading-bar');
+    if (loadingBar) {
+      loadingBar.remove();
+    }
+  }
+}
+
+// Show loading animation for suggestions containers
+function showSuggestionsLoadingAnimation(container) {
+  if (!container) return;
+  
+  // Create compact loading indicator for suggestions
+  const loadingIndicator = document.createElement('div');
+  loadingIndicator.className = 'suggestions-loading-indicator';
+  loadingIndicator.innerHTML = `
+    <div class="loading-bar-container">
+      <div class="loading-bar-progress"></div>
+    </div>
+    <div class="loading-content">
+      <div class="loading-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <span class="loading-text">Loading suggestions...</span>
+    </div>
+  `;
+  
+  // Add suggestion loading styles if not already present
+  if (!document.querySelector('.suggestions-loading-styles')) {
+    const style = document.createElement('style');
+    style.classList.add('suggestions-loading-styles');
+    style.textContent = `
+      .suggestions-loading-indicator {
+        position: relative;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        background-color: #f9fafb;
+        margin: 0.5rem 0;
+        padding: 0.75rem;
+      }
+      
+      .suggestions-loading-indicator .loading-bar-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #f3f4f6;
+        overflow: hidden;
+        border-radius: 0.375rem 0.375rem 0 0;
+      }
+      
+      .suggestions-loading-indicator .loading-bar-progress {
+        height: 100%;
+        background: linear-gradient(90deg, var(--content-type-color, #6366f1) 0%, rgba(99, 102, 241, 0.6) 50%, var(--content-type-color, #6366f1) 100%);
+        background-size: 200% 100%;
+        animation: loading-slide 1.2s ease-in-out infinite;
+      }
+      
+      .suggestions-loading-indicator .loading-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: 0.25rem;
+      }
+      
+      .suggestions-loading-indicator .loading-dots {
+        display: flex;
+        align-items: center;
+        margin-right: 0.5rem;
+      }
+      
+      .suggestions-loading-indicator .loading-dots .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #9ca3af;
+        margin: 0 2px;
+        animation: loading-dots 1.4s ease-in-out infinite both;
+      }
+      
+      .suggestions-loading-indicator .loading-dots .dot:nth-child(1) {
+        animation-delay: -0.32s;
+      }
+      
+      .suggestions-loading-indicator .loading-dots .dot:nth-child(2) {
+        animation-delay: -0.16s;
+      }
+      
+      .suggestions-loading-indicator .loading-text {
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-weight: 500;
+      }
+      
+      @keyframes loading-dots {
+        0%, 80%, 100% {
+          transform: scale(0.8);
+          opacity: 0.5;
+        }
+        40% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  // Replace container content with loading animation
+  container.innerHTML = '';
+  container.appendChild(loadingIndicator);
 }
 
 // Detect screen size changes to adjust UI
