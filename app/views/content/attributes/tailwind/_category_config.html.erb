@@ -124,29 +124,25 @@
         
         <!-- Category Deletion -->
         <div>
-          <h6 class="text-sm font-medium text-gray-700 mb-2">Danger Zone</h6>
+          <h6 class="text-sm font-medium text-red-700 mb-2 flex items-center">
+            <i class="material-icons text-red-600 text-sm mr-1">warning</i>
+            Danger Zone
+          </h6>
           <div class="bg-red-50 p-4 rounded-md border border-red-200">
-            <div class="flex items-start mb-3">
-              <div class="flex-shrink-0">
-                <i class="material-icons text-red-600">warning</i>
-              </div>
-              <div class="ml-3">
-                <p class="text-sm text-red-800 font-medium">Delete this category</p>
-                <p class="text-xs text-red-600 mt-1">
-                  This will permanently delete the category, all <%= pluralize(category.attribute_fields.count, 'field') %> in it, 
-                  and all content data stored in these fields across your <%= content_type.titleize.downcase %> pages.
-                </p>
-                <p class="text-xs text-red-600 mt-1 font-medium">
-                  This action cannot be undone.
-                </p>
-              </div>
-            </div>
+            <p class="text-sm text-red-800 font-medium mb-1">Delete this category</p>
+            <p class="text-xs text-red-600 mb-1">
+              This will permanently delete the category, all <%= pluralize(category.attribute_fields.count, 'field') %> in it, 
+              and all content data stored in these fields across your <%= content_type.titleize.downcase %> pages.
+            </p>
+            <p class="text-xs text-red-600 font-medium mb-3">
+              This action cannot be undone.
+            </p>
             
             <div x-data="{ confirmDelete: false }" class="space-y-3">
               <div x-show="!confirmDelete">
                 <button @click="confirmDelete = true" 
                         type="button"
-                        class="px-3 py-1.5 bg-red-600 border border-red-600 rounded-md text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        class="w-full px-3 py-1.5 bg-red-600 border border-red-600 rounded-md text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                   Delete Category
                 </button>
               </div>
@@ -166,18 +162,18 @@
                          placeholder="<%= category.label %>"
                          class="shadow-sm block w-full sm:text-sm border-red-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                   
-                  <div class="flex justify-end space-x-2">
-                    <button @click="confirmDelete = false" 
-                            type="button"
-                            class="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                      Cancel
-                    </button>
+                  <div class="space-y-2">
                     <button type="submit"
                             :disabled="confirmText !== '<%= category.label %>'"
                             :class="confirmText === '<%= category.label %>' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
-                            class="px-3 py-1.5 border border-transparent rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            class="w-full px-3 py-1.5 border border-transparent rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                       <i class="material-icons text-sm mr-1">delete_forever</i>
                       Permanently Delete
+                    </button>
+                    <button @click="confirmDelete = false" 
+                            type="button"
+                            class="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                      Cancel
                     </button>
                   </div>
                 <% end %>
