@@ -85,8 +85,7 @@
                 </button>
               </div>
             </div>
-            <p class="text-sm text-gray-500 mb-4">Select which content types users can link to from this field.</p>
-            
+
             <!-- Hidden field to ensure linkable_types parameter is always sent -->
             <input type="hidden" name="attribute_field[field_options][linkable_types][]" value="" />
             
@@ -113,6 +112,8 @@
                 </label>
               <% end %>
             </div>
+            <p class="text-xs text-gray-500 mt-2">Select which page types users can link to from this field.</p>
+
           </div>
         <% end %>
         
@@ -293,55 +294,54 @@
         </div>
         
         <div>
-          <h6 class="text-sm font-medium text-gray-700 mb-2">Field Visibility</h6>
+          <h6 class="text-sm font-medium text-gray-700 mb-2">Sharing Restrictions</h6>
           <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
-            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <div class="text-xs text-blue-800 space-y-1">
-                <div><strong>Hidden fields:</strong> Completely removed from content pages - not shown or used at all</div>
-                <div><strong>Private fields:</strong> Only visible to you, even when your content page is public</div>
+            <div class="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-md">
+              <div class="text-xs text-purple-800">
+                <strong>Note:</strong> All <%= content_type.downcase %> pages are private by default, but these settings affect any page that is public.
               </div>
             </div>
-            <%= form_for(field, method: :put, html: {class: 'inline', 'data-type': 'json'}, remote: true) do |f| %>
-              <%= f.hidden_field :hidden, value: !field.hidden %>
-              <% if field.hidden? %>
-                <div class="flex items-start mb-3">
-                  <div class="flex-shrink-0">
-                    <i class="material-icons text-gray-400">visibility_off</i>
-                  </div>
-                  <div class="ml-3">
-                    <p class="text-sm text-gray-700">This field is currently hidden</p>
-                    <p class="text-xs text-gray-500">It won't appear on content pages until you show it again.</p>
-                  </div>
-                </div>
-                <%= f.submit 'Show this field', class: "px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
-              <% else %>
-                <div class="flex items-start mb-3">
-                  <div class="flex-shrink-0">
-                    <i class="material-icons text-gray-700">visibility</i>
-                  </div>
-                  <div class="ml-3">
-                    <p class="text-sm text-gray-700">This field is currently visible</p>
-                    <p class="text-xs text-gray-500">It appears on all content pages.</p>
-                  </div>
-                </div>
-                <%= f.submit 'Hide this field', class: "px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
-              <% end %>
-            <% end %>
-          </div>
-        </div>
-        
-        <div>
-          <h6 class="text-sm font-medium text-gray-700 mb-2">Privacy Settings</h6>
-          <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
             <div class="flex items-center space-x-2 mb-3">
               <input type="checkbox" 
                      <%= "checked" if field.label.start_with?('Private') %>
                      id="field_private"
                      class="h-4 w-4 border-gray-300 rounded focus:ring-2 focus:ring-offset-2"
                      style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
-              <label for="field_private" class="text-sm text-gray-700">Mark as private field</label>
+              <label for="field_private" class="text-sm text-gray-700">Private: For my eyes only</label>
             </div>
-            <p class="text-xs text-gray-500">Private fields are only visible to you, even when sharing content publicly.</p>
+            <p class="text-xs text-gray-500">Private fields (and their answers) are only visible to you, even when your pages are shared publicly.</p>
+          </div>
+        </div>
+        
+        <div>
+          <h6 class="text-sm font-medium text-gray-700 mb-2">Archives</h6>
+          <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+            <%= form_for(field, method: :put, html: {class: 'inline', 'data-type': 'json'}, remote: true) do |f| %>
+              <%= f.hidden_field :hidden, value: !field.hidden %>
+              <% if field.hidden? %>
+                <div class="flex items-center mb-3">
+                  <div class="flex-shrink-0 mr-3">
+                    <i class="material-icons text-amber-600">archive</i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm text-gray-700">This field is currently archived</p>
+                    <p class="text-xs text-gray-500">It's hidden from your workspace but can be restored anytime.</p>
+                  </div>
+                </div>
+                <%= f.submit 'Restore this field', class: "px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
+              <% else %>
+                <div class="flex items-center mb-3">
+                  <div class="flex-shrink-0 mr-3">
+                    <i class="material-icons text-green-600">check_circle</i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm text-gray-700">This field is currently active</p>
+                    <p class="text-xs text-gray-500">It appears in your template and content pages.</p>
+                  </div>
+                </div>
+                <%= f.submit 'Archive this field', class: "px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
+              <% end %>
+            <% end %>
           </div>
         </div>
         

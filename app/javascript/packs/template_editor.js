@@ -770,7 +770,25 @@ function setupRemoteFormHandlers() {
 
 // Handle successful category form submission
 function handleCategoryFormSuccess(form, response) {
-  // Extract category ID from form action URL
+  // Check if this is a new category creation (POST to /attribute_categories)
+  const isNewCategory = form.method.toUpperCase() === 'POST' && form.action.endsWith('/attribute_categories');
+  
+  if (isNewCategory) {
+    // Handle new category creation
+    if (response.category) {
+      addNewCategoryToUI(response.category, response.rendered_html);
+      
+      // Hide the add category form and reset it
+      const addCategoryForm = document.getElementById('add-category-form');
+      if (addCategoryForm) {
+        addCategoryForm.classList.add('hidden');
+        form.reset();
+      }
+    }
+    return;
+  }
+  
+  // Handle existing category updates
   const matches = form.action.match(/\/attribute_categories\/(\d+)/);
   if (!matches) return;
   
@@ -794,16 +812,380 @@ function handleCategoryFormSuccess(form, response) {
     }
   }
   
-  // Handle visibility changes
+  // Handle archive/visibility changes
   if (response.category && typeof response.category.hidden !== 'undefined') {
-    const isHidden = response.category.hidden;
-    updateCategoryVisibilityUI(categoryId, isHidden);
+    const isArchived = response.category.hidden;
+    updateCategoryArchiveUI(categoryId, isArchived);
+    updateArchivedItemsCount();
+    
+    // Auto-enable "Show archived items" when archiving from config panel
+    if (isArchived) {
+      const alpineElement = document.querySelector('[x-data*="showArchived"]');
+      if (alpineElement && alpineElement._x_dataStack) {
+        const alpine = alpineElement._x_dataStack[0];
+        if (alpine && !alpine.showArchived) {
+          alpine.showArchived = true;
+          toggleArchivedItems(true);
+        }
+      }
+    }
+    
+    // Reload the configuration panel to show the updated archive state
+    reloadCategoryConfiguration(categoryId);
   }
 }
 
+// Reload category configuration panel to reflect updated state
+function reloadCategoryConfiguration(categoryId) {
+  // Only reload if this category's configuration is currently open
+  const alpineElement = document.querySelector('.attributes-editor');
+  if (alpineElement && alpineElement._x_dataStack) {
+    const alpine = alpineElement._x_dataStack[0];
+    
+    if (alpine && alpine.selectedCategory == categoryId) {
+      console.log(`Reloading configuration for category ${categoryId}`);
+      
+      // Show loading animation
+      showConfigLoadingAnimation('category-config-container');
+      
+      // Reload category configuration via AJAX
+      fetch(`/plan/attribute_categories/${categoryId}/edit`)
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('category-config-container').innerHTML = html;
+          // Bind remote form handlers to newly loaded forms
+          bindRemoteFormsInContainer('category-config-container');
+          // Hide loading animation
+          hideConfigLoadingAnimation('category-config-container');
+        })
+        .catch(error => {
+          console.error('Error reloading category config:', error);
+          hideConfigLoadingAnimation('category-config-container');
+          showNotification('Failed to reload category configuration', 'error');
+        });
+    }
+  }
+}
+
+// Add new field to the UI using server-rendered HTML
+function addNewFieldToUI(field, renderedHtml, form) {
+  // Find the fields container for the category this field belongs to
+  const categoryId = field.attribute_category_id;
+  const fieldsContainer = document.querySelector(`.fields-container[data-category-id="${categoryId}"]`);
+  
+  if (!fieldsContainer) {
+    console.error(`Fields container not found for category ${categoryId}`);
+    return;
+  }
+  
+  // If we have rendered HTML from the server, use that
+  if (renderedHtml) {
+    // Add the new field to the fields container
+    fieldsContainer.insertAdjacentHTML('beforeend', renderedHtml);
+    
+    // Update the category field count in the header
+    updateCategoryFieldCount(categoryId);
+    
+    console.log(`Added new field "${field.label}" to category ${categoryId} using server-rendered HTML`);
+    return;
+  }
+  
+  // Fallback: If no rendered HTML provided, log error and skip
+  console.error('No rendered HTML provided for new field. Field not added to UI.');
+}
+
+// Update category field count in the header
+function updateCategoryFieldCount(categoryId) {
+  const categoryCard = document.querySelector(`[data-category-id="${categoryId}"]`);
+  if (!categoryCard) return;
+  
+  const fieldsContainer = categoryCard.querySelector(`.fields-container[data-category-id="${categoryId}"]`);
+  if (!fieldsContainer) return;
+  
+  // Count visible fields (excluding archived ones if they're hidden)
+  const fieldItems = fieldsContainer.querySelectorAll('.field-item');
+  const visibleFields = Array.from(fieldItems).filter(field => 
+    field.style.display !== 'none'
+  );
+  
+  // Update the count in the category header
+  const fieldCountElement = categoryCard.querySelector('.category-label').parentElement.querySelector('p');
+  if (fieldCountElement) {
+    const count = visibleFields.length;
+    const fieldText = count === 1 ? 'field' : 'fields';
+    
+    // Update just the count part, preserving any status text (like "— Archived")
+    const statusMatch = fieldCountElement.innerHTML.match(/<span[^>]*>.*?<\/span>/);
+    const statusText = statusMatch ? statusMatch[0] : '';
+    fieldCountElement.innerHTML = `${count} ${fieldText}${statusText ? ' ' + statusText : ''}`;
+  }
+}
+
+// Add new category to the UI using server-rendered HTML
+function addNewCategoryToUI(category, renderedHtml) {
+  const categoriesContainer = document.getElementById('categories-container');
+  if (!categoriesContainer) return;
+  
+  // If we have rendered HTML from the server, use that instead of generating our own
+  if (renderedHtml) {
+    // Find the "Add Category" card and insert the new category before it
+    const addCategoryCard = categoriesContainer.querySelector('.bg-white.rounded-lg.shadow-sm.border.border-dashed');
+    if (addCategoryCard) {
+      addCategoryCard.insertAdjacentHTML('beforebegin', renderedHtml);
+    } else {
+      // Fallback: add to the end of the container
+      categoriesContainer.insertAdjacentHTML('beforeend', renderedHtml);
+    }
+    
+    console.log(`Added new category "${category.label}" to UI using server-rendered HTML`);
+    return;
+  }
+  
+  // Fallback: If no rendered HTML provided, log error and skip
+  console.error('No rendered HTML provided for new category. Category not added to UI.');
+}
+
+// Handle new field form submission manually
+window.submitFieldForm = function(event) {
+  const form = event.target;
+  const submitButton = form.querySelector('input[type="submit"], button[type="submit"]');
+  
+  // Disable submit button and show loading state
+  let originalText = '';
+  if (submitButton) {
+    submitButton.disabled = true;
+    originalText = submitButton.value || submitButton.textContent;
+    if (submitButton.tagName === 'INPUT') {
+      submitButton.value = 'Creating...';
+    } else {
+      submitButton.textContent = 'Creating...';
+    }
+  }
+  
+  // Convert form data to JSON
+  const formData = new FormData(form);
+  const jsonData = {};
+  
+  for (let [key, value] of formData.entries()) {
+    // Skip Rails form helper fields
+    if (key === 'utf8' || key === '_method' || key === 'authenticity_token') {
+      continue;
+    }
+    
+    // Handle nested attributes properly
+    if (key.includes('[') && key.includes(']')) {
+      const keyParts = key.split(/[\[\]]+/).filter(part => part !== '');
+      let current = jsonData;
+      for (let i = 0; i < keyParts.length - 1; i++) {
+        const part = keyParts[i];
+        if (!current[part]) {
+          current[part] = {};
+        }
+        current = current[part];
+      }
+      const finalKey = keyParts[keyParts.length - 1];
+      
+      // Handle checkbox arrays (like linkable_types)
+      if (form.querySelectorAll(`[name="${key}"]`).length > 1) {
+        if (!current[finalKey]) {
+          current[finalKey] = [];
+        }
+        if (value !== '') {
+          current[finalKey].push(value);
+        }
+      } else {
+        current[finalKey] = value;
+      }
+    } else {
+      jsonData[key] = value;
+    }
+  }
+  
+  console.log('Submitting new field form:', jsonData);
+  
+  // Submit form via fetch
+  fetch(form.action, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify(jsonData)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Field created successfully:', data);
+    
+    // Handle success
+    if (data.field && data.html) {
+      addNewFieldToUI(data.field, data.html, form);
+      
+      // Reset the form and close the add field section
+      form.reset();
+      const addingFieldSection = form.closest('[x-data*="addingField"]');
+      if (addingFieldSection) {
+        // Use Alpine.js to close the form
+        const alpineData = Alpine.$data(addingFieldSection);
+        if (alpineData) {
+          alpineData.addingField = false;
+        }
+      }
+      
+      // Show success notification
+      if (data.message) {
+        showNotification(data.message, 'success');
+      } else {
+        showNotification(`Field "${data.field.label}" created successfully`, 'success');
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Failed to create field:', error);
+    showNotification('Failed to create field', 'error');
+  })
+  .finally(() => {
+    // Re-enable submit button
+    if (submitButton) {
+      submitButton.disabled = false;
+      if (submitButton.tagName === 'INPUT') {
+        submitButton.value = originalText;
+      } else {
+        submitButton.textContent = originalText;
+      }
+    }
+  });
+};
+
+// Handle new category form submission manually
+window.submitCategoryForm = function(event) {
+  const form = event.target;
+  const submitButton = form.querySelector('input[type="submit"], button[type="submit"]');
+  
+  // Disable submit button and show loading state
+  let originalText = '';
+  if (submitButton) {
+    submitButton.disabled = true;
+    originalText = submitButton.value || submitButton.textContent;
+    if (submitButton.tagName === 'INPUT') {
+      submitButton.value = 'Creating...';
+    } else {
+      submitButton.textContent = 'Creating...';
+    }
+  }
+  
+  // Convert form data to JSON
+  const formData = new FormData(form);
+  const jsonData = {};
+  
+  for (let [key, value] of formData.entries()) {
+    // Skip Rails form helper fields
+    if (key === 'utf8' || key === '_method' || key === 'authenticity_token') {
+      continue;
+    }
+    
+    // Handle nested attributes properly
+    if (key.includes('[') && key.includes(']')) {
+      const keyParts = key.split(/[\[\]]+/).filter(part => part !== '');
+      let current = jsonData;
+      for (let i = 0; i < keyParts.length - 1; i++) {
+        const part = keyParts[i];
+        if (!current[part]) {
+          current[part] = {};
+        }
+        current = current[part];
+      }
+      const finalKey = keyParts[keyParts.length - 1];
+      current[finalKey] = value;
+    } else {
+      jsonData[key] = value;
+    }
+  }
+  
+  console.log('Submitting new category form:', jsonData);
+  
+  // Submit form via fetch
+  fetch(form.action, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify(jsonData)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Category created successfully:', data);
+    
+    // Handle success
+    if (data.category) {
+      addNewCategoryToUI(data.category, data.rendered_html);
+      
+      // Hide the form and reset it
+      document.getElementById('add-category-form').classList.add('hidden');
+      form.reset();
+      
+      // Show success notification
+      if (data.message) {
+        showNotification(data.message, 'success');
+      } else {
+        showNotification(`Category "${data.category.label}" created successfully`, 'success');
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Failed to create category:', error);
+    showNotification('Failed to create category', 'error');
+  })
+  .finally(() => {
+    // Re-enable submit button
+    if (submitButton) {
+      submitButton.disabled = false;
+      if (submitButton.tagName === 'INPUT') {
+        submitButton.value = originalText;
+      } else {
+        submitButton.textContent = originalText;
+      }
+    }
+  });
+};
+
 // Handle successful field form submission
 function handleFieldFormSuccess(form, response) {
-  // Extract field ID from form action URL
+  // Check if this is a new field creation (POST to /attribute_fields)
+  const isNewField = form.method.toUpperCase() === 'POST' && form.action.endsWith('/attribute_fields');
+  
+  if (isNewField) {
+    // Handle new field creation
+    if (response.field && response.html) {
+      addNewFieldToUI(response.field, response.html, form);
+      
+      // Reset the form and close the add field section
+      form.reset();
+      const addingFieldSection = form.closest('[x-data*="addingField"]');
+      if (addingFieldSection) {
+        // Use Alpine.js to close the form
+        const alpineData = Alpine.$data(addingFieldSection);
+        if (alpineData) {
+          alpineData.addingField = false;
+        }
+      }
+    }
+    return;
+  }
+  
+  // Handle existing field updates
   const matches = form.action.match(/\/attribute_fields\/(\d+)/);
   if (!matches) return;
   
@@ -1162,6 +1544,399 @@ function showSuggestionsLoadingAnimation(container) {
   container.innerHTML = '';
   container.appendChild(loadingIndicator);
 }
+
+// Archive/restore functionality for fields
+window.toggleFieldArchive = function(fieldId, isArchived) {
+  const fieldItem = document.querySelector(`[data-field-id="${fieldId}"]`);
+  const button = fieldItem.querySelector('.field-archive-toggle');
+  
+  // Show loading state
+  const originalIcon = button.innerHTML;
+  button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>';
+  button.disabled = true;
+  
+  fetch(`/plan/attribute_fields/${fieldId}`, {
+    method: 'PUT',
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      attribute_field: {
+        hidden: !isArchived
+      }
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success || data.message) {
+      const newArchivedState = !isArchived;
+      updateFieldArchiveUI(fieldId, newArchivedState);
+      updateArchivedItemsCount();
+      
+      // Auto-enable "Show archived items" when archiving
+      if (newArchivedState) {
+        const alpineElement = document.querySelector('[x-data*="showArchived"]');
+        if (alpineElement && alpineElement._x_dataStack) {
+          const alpine = alpineElement._x_dataStack[0];
+          if (alpine && !alpine.showArchived) {
+            alpine.showArchived = true;
+            toggleArchivedItems(true);
+          }
+        }
+      }
+      
+      const action = newArchivedState ? 'archived' : 'restored';
+      showNotification(`Field ${action} successfully`, 'success');
+    } else {
+      // Restore original state on error
+      button.innerHTML = originalIcon;
+      button.disabled = false;
+      showNotification('Failed to update field archive status', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error toggling field archive:', error);
+    // Restore original state on error
+    button.innerHTML = originalIcon;
+    button.disabled = false;
+    showNotification('Failed to update field archive status', 'error');
+  });
+};
+
+// Archive/restore functionality for categories  
+window.toggleCategoryArchive = function(categoryId, isArchived) {
+  const categoryCard = document.querySelector(`[data-category-id="${categoryId}"]`);
+  const button = categoryCard.querySelector('.category-archive-toggle');
+  
+  // Show loading state
+  const originalIcon = button.innerHTML;
+  button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>';
+  button.disabled = true;
+  
+  fetch(`/plan/attribute_categories/${categoryId}`, {
+    method: 'PUT',
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      attribute_category: {
+        hidden: !isArchived
+      }
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success || data.message) {
+      const newArchivedState = !isArchived;
+      
+      // If archiving a category, close its configuration panel if it's currently open
+      if (newArchivedState) {
+        const alpineElement = document.querySelector('.attributes-editor');
+        if (alpineElement && alpineElement._x_dataStack) {
+          const alpine = alpineElement._x_dataStack[0];
+          if (alpine && alpine.selectedCategory == categoryId) {
+            // Deselect the category and close configuration panel
+            alpine.selectedCategory = null;
+            alpine.configuring = false;
+            console.log(`Closed configuration panel for archived category ${categoryId}`);
+          }
+        }
+      }
+      
+      updateCategoryArchiveUI(categoryId, newArchivedState);
+      updateArchivedItemsCount();
+      
+      // Auto-enable "Show archived items" when archiving
+      if (newArchivedState) {
+        const alpineElement = document.querySelector('[x-data*="showArchived"]');
+        if (alpineElement && alpineElement._x_dataStack) {
+          const alpine = alpineElement._x_dataStack[0];
+          if (alpine && !alpine.showArchived) {
+            alpine.showArchived = true;
+            toggleArchivedItems(true);
+          }
+        }
+      }
+      
+      const action = newArchivedState ? 'archived' : 'restored';
+      showNotification(`Category ${action} successfully`, 'success');
+    } else {
+      // Restore original state on error
+      button.innerHTML = originalIcon;
+      button.disabled = false;
+      showNotification('Failed to update category archive status', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error toggling category archive:', error);
+    // Restore original state on error
+    button.innerHTML = originalIcon;
+    button.disabled = false;
+    showNotification('Failed to update category archive status', 'error');
+  });
+};
+
+// Toggle show/hide archived items (categories and fields)
+window.toggleArchivedItems = function(show) {
+  const archivedFields = document.querySelectorAll('.field-item[data-archived="true"]');
+  const archivedCategories = document.querySelectorAll('.category-card[data-archived="true"]');
+  
+  archivedFields.forEach(field => {
+    if (show) {
+      field.style.display = '';
+      field.classList.add('archived-field');
+    } else {
+      field.style.display = 'none';
+      field.classList.remove('archived-field');
+    }
+  });
+  
+  archivedCategories.forEach(category => {
+    if (show) {
+      category.style.display = '';
+      category.classList.add('archived-category');
+    } else {
+      category.style.display = 'none';
+      category.classList.remove('archived-category');
+    }
+  });
+  
+  // Show first-time user tip if showing archived items for the first time
+  if (show && !localStorage.getItem('seen_archive_tip')) {
+    showArchiveTip();
+    localStorage.setItem('seen_archive_tip', 'true');
+  }
+};
+
+// Update field archive UI elements
+function updateFieldArchiveUI(fieldId, isArchived) {
+  const fieldItem = document.querySelector(`[data-field-id="${fieldId}"]`);
+  if (!fieldItem) return;
+  
+  // Update data attribute
+  fieldItem.setAttribute('data-archived', isArchived);
+  
+  // Update archive toggle button
+  const button = fieldItem.querySelector('.field-archive-toggle');
+  if (button) {
+    button.setAttribute('data-archived', isArchived);
+    button.setAttribute('title', isArchived ? 'Archived field - Click to restore' : 'Active field - Click to archive');
+    button.disabled = false; // Re-enable button after successful update
+    
+    // Update button content with correct icon
+    if (isArchived) {
+      button.innerHTML = '<i class="material-icons text-amber-600 text-sm">unarchive</i>';
+    } else {
+      button.innerHTML = '<i class="material-icons text-gray-500 text-sm">archive</i>';
+    }
+  }
+  
+  // Update field item styling
+  if (isArchived) {
+    fieldItem.classList.add('bg-gray-100', 'border-gray-300', 'opacity-60', 'archived-field');
+    fieldItem.classList.remove('bg-white');
+    fieldItem.querySelector('.field-label').classList.add('text-gray-500');
+    fieldItem.querySelector('.field-label').classList.remove('text-gray-800');
+    
+    // Add archive icon to label if not present
+    const label = fieldItem.querySelector('.field-label');
+    if (!label.querySelector('.material-icons')) {
+      label.innerHTML += '<i class="material-icons text-amber-600 text-sm ml-1.5 align-middle">archive</i>';
+    }
+  } else {
+    fieldItem.classList.remove('bg-gray-100', 'border-gray-300', 'opacity-60', 'archived-field');
+    fieldItem.classList.add('bg-white');
+    fieldItem.querySelector('.field-label').classList.remove('text-gray-500');
+    fieldItem.querySelector('.field-label').classList.add('text-gray-800');
+    
+    // Remove archive icon from label
+    const archiveIcon = fieldItem.querySelector('.field-label .material-icons');
+    if (archiveIcon) {
+      archiveIcon.remove();
+    }
+  }
+  
+  // Update archive status text
+  const fieldInfo = fieldItem.querySelector('.text-xs.text-gray-500');
+  if (fieldInfo) {
+    // Remove existing status spans
+    fieldInfo.querySelectorAll('span').forEach(span => {
+      if (span.textContent.includes('Hidden') || span.textContent.includes('Archived')) {
+        span.remove();
+      }
+    });
+    
+    // Add archived status if needed
+    if (isArchived) {
+      const archivedSpan = document.createElement('span');
+      archivedSpan.className = 'ml-1.5 text-amber-600';
+      archivedSpan.textContent = '— Archived';
+      fieldInfo.appendChild(archivedSpan);
+    }
+  }
+  
+  // Hide archived field if show archived is off
+  const showArchivedToggle = document.querySelector('input[x-model="showArchived"]');
+  if (showArchivedToggle && !showArchivedToggle.checked && isArchived) {
+    fieldItem.style.display = 'none';
+  } else if (!isArchived) {
+    fieldItem.style.display = '';
+  }
+}
+
+// Update category archive UI elements
+function updateCategoryArchiveUI(categoryId, isArchived) {
+  const categoryCard = document.querySelector(`[data-category-id="${categoryId}"]`);
+  if (!categoryCard) return;
+  
+  // Update data attribute
+  categoryCard.setAttribute('data-archived', isArchived);
+  
+  // Update archive button data attribute and title
+  const archiveButton = categoryCard.querySelector('.category-archive-toggle');
+  if (archiveButton) {
+    archiveButton.setAttribute('data-archived', isArchived);
+    archiveButton.setAttribute('title', isArchived ? 'Archived category - Click to restore' : 'Active category - Click to archive');
+    archiveButton.disabled = false; // Re-enable button after successful update
+    
+    // Update the button icon
+    if (isArchived) {
+      archiveButton.innerHTML = '<i class="material-icons text-amber-600 text-sm">unarchive</i>';
+    } else {
+      archiveButton.innerHTML = '<i class="material-icons text-gray-500 text-sm">archive</i>';
+    }
+  }
+  
+  // Update category styling and archive icon
+  if (isArchived) {
+    categoryCard.classList.add('border-gray-300', 'opacity-60', 'archived-category');
+    categoryCard.style.borderColor = '';
+    categoryCard.querySelector('.category-header').style.backgroundColor = '#f3f4f6';
+    categoryCard.querySelector('.category-icon i').classList.add('text-gray-400');
+    categoryCard.querySelector('.category-icon i').style.color = '';
+    
+    // Add archive icon to label if not present  
+    const label = categoryCard.querySelector('.category-label');
+    if (!label.querySelector('.material-icons')) {
+      label.innerHTML += '<i class="material-icons text-amber-600 text-sm ml-1.5 align-middle">archive</i>';
+    }
+  } else {
+    categoryCard.classList.remove('border-gray-300', 'opacity-60', 'archived-category');
+    const contentTypeColor = getComputedStyle(document.documentElement).getPropertyValue('--content-type-color') || '#6366f1';
+    categoryCard.style.borderColor = contentTypeColor;
+    categoryCard.querySelector('.category-header').style.backgroundColor = contentTypeColor + '20';
+    categoryCard.querySelector('.category-icon i').classList.remove('text-gray-400');
+    categoryCard.querySelector('.category-icon i').style.color = contentTypeColor;
+    
+    // Remove archive icon from label
+    const archiveIcon = categoryCard.querySelector('.category-label .material-icons');
+    if (archiveIcon) {
+      archiveIcon.remove();
+    }
+  }
+  
+  // Update archived status in category details
+  const statusText = categoryCard.querySelector('.category-label').parentElement.querySelector('p');
+  if (statusText) {
+    // Remove existing status spans
+    statusText.querySelectorAll('span').forEach(span => {
+      if (span.textContent.includes('Hidden') || span.textContent.includes('Archived')) {
+        span.remove();
+      }
+    });
+    
+    // Add archived status if needed
+    if (isArchived) {
+      const archivedSpan = document.createElement('span');
+      archivedSpan.className = 'text-amber-600 ml-2';
+      archivedSpan.textContent = '— Archived';
+      statusText.appendChild(archivedSpan);
+    }
+  }
+  
+  // Hide archived category if show archived is off
+  const showArchivedToggle = document.querySelector('input[x-model="showArchived"]');
+  if (showArchivedToggle && !showArchivedToggle.checked && isArchived) {
+    categoryCard.style.display = 'none';
+  } else if (!isArchived) {
+    categoryCard.style.display = '';
+  }
+}
+
+// Update archived items count in the settings panel
+function updateArchivedItemsCount() {
+  const archivedFields = document.querySelectorAll('.field-item[data-archived="true"]');
+  const archivedCategories = document.querySelectorAll('.category-card[data-archived="true"]');
+  const totalArchived = archivedFields.length + archivedCategories.length;
+  
+  // Update Alpine.js data for count display
+  const alpineElement = document.querySelector('[x-data*="showArchived"]');
+  if (alpineElement && alpineElement._x_dataStack) {
+    const alpine = alpineElement._x_dataStack[0];
+    if (alpine && typeof alpine.archivedItemsCount !== 'undefined') {
+      alpine.archivedItemsCount = totalArchived;
+    }
+  }
+}
+
+// Make functions globally available
+window.updateArchivedItemsCount = updateArchivedItemsCount;
+// Legacy function name for backwards compatibility
+window.updateArchivedFieldsCount = updateArchivedItemsCount;
+
+// Select All / Select None functions for link field configuration
+window.selectAllLinkableTypes = function() {
+  const checkboxes = document.querySelectorAll('input[name="attribute_field[field_options][linkable_types][]"]:not([value=""])');
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = true;
+  });
+};
+
+window.selectNoneLinkableTypes = function() {
+  const checkboxes = document.querySelectorAll('input[name="attribute_field[field_options][linkable_types][]"]:not([value=""])');
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = false;
+  });
+};
+
+// Show first-time archive tip
+function showArchiveTip() {
+  const tip = document.createElement('div');
+  tip.className = 'archive-tip-popup fixed bottom-4 right-4 bg-blue-600 text-white p-4 rounded-lg shadow-lg max-w-sm z-50';
+  tip.innerHTML = `
+    <div class="flex items-start">
+      <i class="material-icons text-white mr-2">lightbulb_outline</i>
+      <div class="flex-1">
+        <div class="font-medium">Archive System</div>
+        <div class="text-sm mt-1">
+          Archived categories and fields are greyed out to show where they would restore to while keeping them out of your active workspace.
+        </div>
+        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                class="text-xs underline mt-2 hover:text-blue-200">
+          Got it!
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(tip);
+  
+  // Auto-remove tip after 8 seconds
+  setTimeout(() => {
+    if (tip.parentElement) {
+      tip.remove();
+    }
+  }, 8000);
+}
+
+// Initialize archived items count on page load
+document.addEventListener('DOMContentLoaded', function() {
+  updateArchivedItemsCount();
+});
 
 // Detect screen size changes to adjust UI
 window.addEventListener('resize', function() {

@@ -1,10 +1,12 @@
-<div class="category-card bg-white rounded-lg shadow-md overflow-hidden border-l-4 <%= category.hidden? ? 'border-gray-300' : '' %>"
+<div class="category-card bg-white rounded-lg shadow-md overflow-hidden border-l-4 <%= category.hidden? ? 'border-gray-300 opacity-60 archived-category' : '' %>"
      data-category-id="<%= category.id %>"
      data-position="<%= category.position %>"
+     data-archived="<%= category.hidden? %>"
      x-data="{ isOpen: false }"
      :class="{ 'ring-2 ring-opacity-70': selectedCategory == <%= category.id %> }"
      :style="selectedCategory == <%= category.id %> ? '--tw-ring-color: var(--content-type-color);' : ''"
-     style="<%= category.hidden? ? '' : "border-color: #{content_type_class.hex_color};" %>">
+     style="<%= category.hidden? ? '' : "border-color: #{content_type_class.hex_color};" %>"
+     <% if category.hidden? %>style="display: none;"<% end %>>
   
   <!-- Category Header -->
   <div class="flex items-center p-3 cursor-pointer category-header" 
@@ -26,11 +28,16 @@
     
     <!-- Category Title -->
     <div class="flex-grow">
-      <h3 class="category-label text-gray-900 font-medium"><%= category.label %></h3>
+      <h3 class="category-label text-gray-900 font-medium">
+        <%= category.label %>
+        <% if category.hidden? %>
+          <i class="material-icons text-amber-600 text-sm ml-1.5 align-middle">archive</i>
+        <% end %>
+      </h3>
       <p class="text-gray-500 text-xs">
         <%= pluralize(category.attribute_fields.count, 'field') %>
         <% if category.hidden? %>
-          <span class="text-gray-400 ml-2">— Hidden</span>
+          <span class="text-amber-600 ml-2">— Archived</span>
         <% end %>
       </p>
     </div>
@@ -46,13 +53,17 @@
         </svg>
       </button>
       
-      <!-- Visibility Toggle -->
-      <button class="category-visibility-toggle p-1.5 rounded hover:bg-white hover:bg-opacity-50 transition-colors" 
+      <!-- Archive Toggle -->
+      <button class="category-archive-toggle p-1.5 rounded hover:bg-white hover:bg-opacity-50 transition-colors" 
               data-category-id="<%= category.id %>"
-              data-hidden="<%= category.hidden? %>"
-              title="<%= category.hidden? ? 'Hidden category - Click to show' : 'Visible category - Click to hide' %>"
-              @click.stop="toggleCategoryVisibility(<%= category.id %>, <%= category.hidden? %>)">
-        <svg class="w-4 h-4 text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              data-archived="<%= category.hidden? %>"
+              title="<%= category.hidden? ? 'Archived category - Click to restore' : 'Active category - Click to archive' %>"
+              @click.stop="toggleCategoryArchive(<%= category.id %>, $el.dataset.archived === 'true')">
+        <% if category.hidden? %>
+          <i class="material-icons text-amber-600 text-sm">unarchive</i>
+        <% else %>
+          <i class="material-icons text-gray-500 text-sm">archive</i>
+        <% end %>
           <% if category.hidden? %>
             <!-- Hidden state - show EYE CLOSED icon -->
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
@@ -120,7 +131,7 @@
         
         <!-- Text Field Form -->
         <div x-show="fieldType === 'text_area'">
-          <%= form_for(category.attribute_fields.build, method: :post, html: { class: "space-y-3", 'data-type': 'json' }, remote: true) do |f| %>
+          <%= form_for(category.attribute_fields.build, method: :post, html: { class: "space-y-3", 'data-type': 'json', 'data-remote': 'true', '@submit.prevent': 'submitFieldForm($event)' }, remote: true) do |f| %>
             <%= f.hidden_field :attribute_category_id, value: category.id %>
             <%= f.hidden_field :field_type, value: 'text_area' %>
             
@@ -148,7 +159,7 @@
         
         <!-- Link Field Form -->
         <div x-show="fieldType === 'link'">
-          <%= form_for(category.attribute_fields.build, method: :post, html: { class: "space-y-3", 'data-type': 'json' }, remote: true) do |f| %>
+          <%= form_for(category.attribute_fields.build, method: :post, html: { class: "space-y-3", 'data-type': 'json', 'data-remote': 'true', '@submit.prevent': 'submitFieldForm($event)' }, remote: true) do |f| %>
             <%= f.hidden_field :attribute_category_id, value: category.id %>
             <%= f.hidden_field :field_type, value: 'link' %>
             

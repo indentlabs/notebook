@@ -179,6 +179,21 @@ class AttributeCategoriesController < ContentController
             position: record.position
           }
         }
+        
+        # For new category creation, include rendered HTML
+        if action_name == 'create'
+          content_type_class = record.entity_type.classify.constantize
+          response_data[:rendered_html] = render_to_string(
+            partial: 'content/attributes/tailwind/category_card',
+            formats: [:html],
+            locals: { 
+              category: record,
+              content_type_class: content_type_class,
+              content_type: record.entity_type.downcase
+            }
+          )
+        end
+        
         render json: response_data, status: :ok 
       }
     end

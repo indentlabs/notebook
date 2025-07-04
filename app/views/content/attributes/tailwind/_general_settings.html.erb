@@ -221,6 +221,36 @@
       </div>
     </div>
 
+    <!-- Archive Management -->
+    <div x-data="{ showArchived: false, archivedItemsCount: 0 }" x-init="updateArchivedItemsCount()">
+      <h3 class="font-medium text-gray-900 mb-3">Archive Management</h3>
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-medium text-gray-900 flex items-center">
+              <i class="material-icons text-gray-600 mr-2 text-lg">archive</i>
+              Show archived items
+              <span x-show="archivedItemsCount > 0" 
+                    x-text="`(${archivedItemsCount})`" 
+                    class="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full"></span>
+            </div>
+            <div class="text-sm text-gray-500">Display archived categories and fields in the template editor</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" 
+                   x-model="showArchived" 
+                   @change="toggleArchivedItems($event.target.checked)"
+                   class="sr-only peer">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" style="--tw-ring-color: var(--content-type-color); --peer-checked-bg: var(--content-type-color);"></div>
+          </label>
+        </div>
+        <div x-show="archivedItemsCount === 0" class="text-xs text-gray-400 bg-gray-50 p-2 rounded-md">
+          <i class="material-icons text-xs mr-1">info</i>
+          No archived items. Archive categories or fields to organize your workspace.
+        </div>
+      </div>
+    </div>
+
     <!-- Help Section -->
     <div class="bg-blue-50 rounded-lg p-4">
       <h3 class="font-medium text-blue-900 mb-2 flex items-center">

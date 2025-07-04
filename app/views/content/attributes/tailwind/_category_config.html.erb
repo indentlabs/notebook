@@ -89,34 +89,34 @@
         </div>
         
         <div>
-          <h6 class="text-sm font-medium text-gray-700 mb-2">Category Visibility</h6>
+          <h6 class="text-sm font-medium text-gray-700 mb-2">Archives</h6>
           <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
             <%= form_for(category, url: "/plan/attribute_categories/#{category.id}", method: :put, html: {class: 'inline', 'data-type': 'json'}, remote: true) do |f| %>
               <%= f.hidden_field :name %>
               <%= f.hidden_field :entity_type %>
               <%= f.hidden_field :hidden, value: !category.hidden %>
               <% if category.hidden? %>
-                <div class="flex items-start mb-3">
-                  <div class="flex-shrink-0">
-                    <i class="material-icons text-gray-400">visibility_off</i>
+                <div class="flex items-center mb-3">
+                  <div class="flex-shrink-0 mr-3">
+                    <i class="material-icons text-amber-600">archive</i>
                   </div>
-                  <div class="ml-3">
-                    <p class="text-sm text-gray-700">This category is currently hidden</p>
-                    <p class="text-xs text-gray-500">It won't appear on content pages until you show it again.</p>
+                  <div class="flex-1">
+                    <p class="text-sm text-gray-700">This category is currently archived</p>
+                    <p class="text-xs text-gray-500">It's hidden from your workspace but can be restored anytime.</p>
                   </div>
                 </div>
-                <%= f.submit 'Show this category', class: "px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
+                <%= f.submit 'Restore this category', class: "px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
               <% else %>
-                <div class="flex items-start mb-3">
-                  <div class="flex-shrink-0">
-                    <i class="material-icons text-gray-700">visibility</i>
+                <div class="flex items-center mb-3">
+                  <div class="flex-shrink-0 mr-3">
+                    <i class="material-icons text-green-600">check_circle</i>
                   </div>
-                  <div class="ml-3">
-                    <p class="text-sm text-gray-700">This category is currently visible</p>
-                    <p class="text-xs text-gray-500">It appears on all content pages.</p>
+                  <div class="flex-1">
+                    <p class="text-sm text-gray-700">This category is currently active</p>
+                    <p class="text-xs text-gray-500">It appears in your template and content pages.</p>
                   </div>
                 </div>
-                <%= f.submit 'Hide this category', class: "px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
+                <%= f.submit 'Archive this category', class: "px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
               <% end %>
             <% end %>
           </div>
