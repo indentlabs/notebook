@@ -846,6 +846,9 @@ function handleCategoryFormSuccess(form, response) {
     
     // Reload the configuration panel to show the updated archive state
     reloadCategoryConfiguration(categoryId);
+    
+    // Update General Settings counts when archive status changes
+    updateGeneralSettingsCounts();
   }
 }
 
@@ -899,6 +902,9 @@ function addNewFieldToUI(field, renderedHtml, form) {
     
     // Update the category field count in the header
     updateCategoryFieldCount(categoryId);
+    
+    // Update General Settings counts
+    updateGeneralSettingsCounts();
     
     console.log(`Added new field "${field.label}" to category ${categoryId} using server-rendered HTML`);
     return;
@@ -1043,6 +1049,9 @@ window.submitFieldForm = function(event) {
     if (data.field && data.html) {
       addNewFieldToUI(data.field, data.html, form);
       
+      // Update General Settings counts
+      updateGeneralSettingsCounts();
+      
       // Reset the form and close the add field section
       form.reset();
       const addingFieldSection = form.closest('[x-data*="addingField"]');
@@ -1163,6 +1172,9 @@ window.submitCategoryForm = function(event) {
     if (data.category) {
       addNewCategoryToUI(data.category, data.rendered_html);
       
+      // Update General Settings counts
+      updateGeneralSettingsCounts();
+      
       // Hide the form and reset it
       document.getElementById('add-category-form').classList.add('hidden');
       form.reset();
@@ -1201,6 +1213,9 @@ function handleFieldFormSuccess(form, response) {
     // Handle new field creation
     if (response.field && response.html) {
       addNewFieldToUI(response.field, response.html, form);
+      
+      // Update General Settings counts for new field
+      updateGeneralSettingsCounts();
       
       // Reset the form and close the add field section
       form.reset();
@@ -1615,6 +1630,7 @@ window.toggleFieldArchive = function(fieldId, isArchived) {
       const newArchivedState = !isArchived;
       updateFieldArchiveUI(fieldId, newArchivedState);
       updateArchivedItemsCount();
+      updateGeneralSettingsCounts();
       
       // Auto-enable "Show archived items" when archiving
       if (newArchivedState) {
@@ -1690,6 +1706,7 @@ window.toggleCategoryArchive = function(categoryId, isArchived) {
       
       updateCategoryArchiveUI(categoryId, newArchivedState);
       updateArchivedItemsCount();
+      updateGeneralSettingsCounts();
       
       // Auto-enable "Show archived items" when archiving
       if (newArchivedState) {
@@ -1924,8 +1941,32 @@ function updateArchivedItemsCount() {
   }
 }
 
+// Update General Settings counts for categories and fields
+function updateGeneralSettingsCounts() {
+  // Count total categories (including archived ones)
+  const totalCategories = document.querySelectorAll('.category-card').length;
+  
+  // Count total fields across all categories (including archived ones)
+  const totalFields = document.querySelectorAll('.field-item').length;
+  
+  // Update the categories count in General Settings
+  const categoriesCountElement = document.querySelector('.general-settings-categories-count');
+  if (categoriesCountElement) {
+    categoriesCountElement.textContent = totalCategories;
+  }
+  
+  // Update the total fields count in General Settings
+  const fieldsCountElement = document.querySelector('.general-settings-fields-count');
+  if (fieldsCountElement) {
+    fieldsCountElement.textContent = totalFields;
+  }
+  
+  console.log(`Updated General Settings counts: ${totalCategories} categories, ${totalFields} fields`);
+}
+
 // Make functions globally available
 window.updateArchivedItemsCount = updateArchivedItemsCount;
+window.updateGeneralSettingsCounts = updateGeneralSettingsCounts;
 // Legacy function name for backwards compatibility
 window.updateArchivedFieldsCount = updateArchivedItemsCount;
 
