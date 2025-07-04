@@ -645,7 +645,21 @@ function handleRemoteFormSubmit(event) {
       }
       
       const finalKey = keyParts[keyParts.length - 1];
-      current[finalKey] = value;
+      
+      // Handle checkbox arrays (multiple values with same key)
+      if (current[finalKey] !== undefined) {
+        // If key already exists, convert to array or append to existing array
+        if (Array.isArray(current[finalKey])) {
+          if (value !== '') {  // Skip empty values (Rails hidden field)
+            current[finalKey].push(value);
+          }
+        } else {
+          current[finalKey] = [current[finalKey], value].filter(v => v !== '');
+        }
+      } else {
+        // First occurrence of this key - if it's empty, might be a checkbox array with no selections
+        current[finalKey] = value === '' && key.includes('[]') ? [] : value;
+      }
     } else {
       jsonData[key] = value;
     }
@@ -985,16 +999,19 @@ window.submitFieldForm = function(event) {
       }
       const finalKey = keyParts[keyParts.length - 1];
       
-      // Handle checkbox arrays (like linkable_types)
-      if (form.querySelectorAll(`[name="${key}"]`).length > 1) {
-        if (!current[finalKey]) {
-          current[finalKey] = [];
-        }
-        if (value !== '') {
-          current[finalKey].push(value);
+      // Handle checkbox arrays (multiple values with same key)
+      if (current[finalKey] !== undefined) {
+        // If key already exists, convert to array or append to existing array
+        if (Array.isArray(current[finalKey])) {
+          if (value !== '') {  // Skip empty values (Rails hidden field)
+            current[finalKey].push(value);
+          }
+        } else {
+          current[finalKey] = [current[finalKey], value].filter(v => v !== '');
         }
       } else {
-        current[finalKey] = value;
+        // First occurrence of this key - if it's empty, might be a checkbox array with no selections
+        current[finalKey] = value === '' && key.includes('[]') ? [] : value;
       }
     } else {
       jsonData[key] = value;
@@ -1101,7 +1118,21 @@ window.submitCategoryForm = function(event) {
         current = current[part];
       }
       const finalKey = keyParts[keyParts.length - 1];
-      current[finalKey] = value;
+      
+      // Handle checkbox arrays (multiple values with same key)
+      if (current[finalKey] !== undefined) {
+        // If key already exists, convert to array or append to existing array
+        if (Array.isArray(current[finalKey])) {
+          if (value !== '') {  // Skip empty values (Rails hidden field)
+            current[finalKey].push(value);
+          }
+        } else {
+          current[finalKey] = [current[finalKey], value].filter(v => v !== '');
+        }
+      } else {
+        // First occurrence of this key - if it's empty, might be a checkbox array with no selections
+        current[finalKey] = value === '' && key.includes('[]') ? [] : value;
+      }
     } else {
       jsonData[key] = value;
     }
@@ -1190,9 +1221,19 @@ function handleFieldFormSuccess(form, response) {
   if (!matches) return;
   
   const fieldId = matches[1];
-  const fieldItem = document.querySelector(`[data-field-id="${fieldId}"]`);
+  const fieldItem = document.querySelector(`[data-field-id="${fieldId}"]`);  
   if (!fieldItem) return;
+
+  // For field updates, reload the field item with fresh server-rendered HTML
+  // This ensures all changes (label, linkable_types, visibility, etc.) are reflected
+  if (response.field && response.html) {
+    // Replace the existing field item with the updated one
+    fieldItem.outerHTML = response.html;
+    console.log(`Updated field "${response.field.label}" UI with server-rendered HTML`);
+    return;
+  }
   
+  // Fallback: Manual updates if no HTML provided (legacy support)
   // Update field display if label changed
   if (response.field && response.field.label) {
     const labelElement = fieldItem.querySelector('.field-label');

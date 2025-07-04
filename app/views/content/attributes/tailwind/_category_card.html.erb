@@ -169,22 +169,49 @@
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Link to Content Types</label>
-              <div class="border border-gray-300 rounded-md shadow-sm p-2 max-h-32 overflow-y-auto">
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-medium text-gray-700">Link to Content Types</label>
+                <div class="flex space-x-2">
+                  <button type="button" 
+                          onclick="selectAllLinkableTypes()" 
+                          class="px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors">
+                    Select All
+                  </button>
+                  <button type="button" 
+                          onclick="selectNoneLinkableTypes()" 
+                          class="px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded transition-colors">
+                    Select None
+                  </button>
+                </div>
+              </div>
+
+              <!-- Hidden field to ensure linkable_types parameter is always sent -->
+              <input type="hidden" name="attribute_field[field_options][linkable_types][]" value="" />
+              
+              <div class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-md p-3 bg-gray-50">
                 <% Rails.application.config.content_types[:all].each do |content_type| %>
-                  <div class="flex items-center mb-1 last:mb-0">
-                    <input type="checkbox" name="attribute_field[field_options][linkable_types][]" 
+                  <label class="flex items-center p-2 bg-white rounded-md border border-gray-200 hover:border-gray-300 hover:bg-gray-50 cursor-pointer transition-colors">
+                    <input type="checkbox" 
+                           name="attribute_field[field_options][linkable_types][]"
                            value="<%= content_type.name %>"
-                           id="link_type_<%= content_type.name.downcase %>_<%= category.id %>"
-                           class="h-4 w-4 border-gray-300 rounded focus:ring-2 focus:ring-offset-2"
-                           style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;"
-                    <label for="link_type_<%= content_type.name.downcase %>_<%= category.id %>" class="ml-2 block text-sm text-gray-700">
-                      <i class="material-icons text-xs align-middle mr-1"><%= content_type.icon %></i>
-                      <%= content_type.name.pluralize %>
-                    </label>
-                  </div>
+                           id="link_type_<%= content_type.name.downcase %>_new_<%= category.id %>"
+                           class="h-4 w-4 border-gray-300 rounded focus:ring-2 focus:ring-offset-2 mr-3"
+                           style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
+                    
+                    <div class="flex items-center flex-grow">
+                      <div class="w-6 h-6 rounded-full flex items-center justify-center mr-2"
+                           style="background-color: <%= content_type.hex_color %>20; color: <%= content_type.hex_color %>;">
+                        <i class="material-icons text-xs"><%= content_type.icon %></i>
+                      </div>
+                      
+                      <div class="text-sm font-medium text-gray-900">
+                        <%= content_type.name.pluralize %>
+                      </div>
+                    </div>
+                  </label>
                 <% end %>
               </div>
+              <p class="text-xs text-gray-500 mt-2">Select which page types users can link to from this field.</p>
             </div>
             
             <div class="flex justify-end space-x-2">

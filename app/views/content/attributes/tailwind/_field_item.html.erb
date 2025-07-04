@@ -38,6 +38,24 @@
         <i class="material-icons text-amber-600 text-sm ml-1.5 align-middle">archive</i>
       <% end %>
     </div>
+    
+    <!-- Linkable Content Types Visual Indicators (for link fields only) -->
+    <% if field.field_type == 'link' && field.field_options&.dig('linkable_types')&.any? %>
+      <div class="flex items-center text-xs text-gray-600 mt-1 mb-1">
+        <i class="material-icons text-xs mr-1" style="font-size: 14px;">link</i>
+        <% linkable_types = field.field_options['linkable_types'] || [] %>
+        <% content_types = get_linkable_content_types(linkable_types) %>
+        <% content_types.first(5).each do |content_type| %>
+          <i class="material-icons text-xs mr-0.5 <%= content_type.text_color %>" style="font-size: 14px;" title="<%= content_type.name.pluralize %>">
+            <%= content_type.icon %>
+          </i>
+        <% end %>
+        <% if content_types.length > 5 %>
+          <span class="text-xs text-gray-500 ml-1">+<%= content_types.length - 5 %> more</span>
+        <% end %>
+      </div>
+    <% end %>
+    
     <div class="text-xs text-gray-500">
       <% if field.name_field? %>
         Name field
