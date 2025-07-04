@@ -3,6 +3,8 @@
 # TODO: we should probably spin off an Api::ContentController for #api_sort and anything else 
 #       api-wise we need
 class ContentController < ApplicationController
+  layout 'tailwind', only: [:index, :show, :gallery, :references, :deleted, :attributes_tailwind]
+
   before_action :authenticate_user!, except: [:show, :changelog, :api_sort, :gallery] \
     + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }
 
@@ -12,9 +14,9 @@ class ContentController < ApplicationController
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
-  before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit, :index]
+  before_action :cache_linkable_content_for_each_content_type, only: [:new, :show, :edit, :index]
 
-  before_action :set_attributes_content_type, only: [:attributes]
+  before_action :set_attributes_content_type, only: [:attributes, :attributes_tailwind, :export_template, :reset_template]
 
   before_action :set_navbar_color, except: [:api_sort]
   before_action :set_navbar_actions, except: [:deleted, :api_sort]
@@ -22,6 +24,7 @@ class ContentController < ApplicationController
 
   def index
     @content_type_class = content_type_from_controller(self.class)
+    @content_type_name  = @content_type_class.name
     pluralized_content_name = @content_type_class.name.downcase.pluralize
 
     @page_title = "My #{pluralized_content_name}"
@@ -40,6 +43,7 @@ class ContentController < ApplicationController
       page_type: @content_type_class.name,
       page_id:   @content.pluck(:id)
     ).order(:tag)
+    @filtered_page_tags = []
     if params.key?(:slug)
       @filtered_page_tags = @page_tags.where(slug: params[:slug])
       @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
@@ -51,6 +55,10 @@ class ContentController < ApplicationController
     end
 
     @content = @content.sort_by {|x| [x.favorite? ? 0 : 1, x.name] }
+    @folders = current_user
+      .folders
+      .where(context: @content_type_name, parent_folder_id: nil)
+      .order('title ASC')
 
     @questioned_content = @content.sample
     @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
@@ -103,6 +111,13 @@ class ContentController < ApplicationController
     @basil_images = BasilCommission.where(entity: @content)
                                    .where.not(saved_at: nil)
 
+    if @content.updatable_by?(current_user)
+      @suggested_page_tags = (
+        current_user.page_tags.where(page_type: content_type.name).pluck(:tag) +
+          PageTagService.suggested_tags_for(content_type.name)
+        ).uniq
+    end
+
     if (current_user || User.new).can_read?(@content)
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
@@ -111,6 +126,76 @@ class ContentController < ApplicationController
     else
       return redirect_to root_path, notice: "You don't have permission to view that content."
     end
+  end
+
+  def gallery
+    content_type = content_type_from_controller(self.class)
+    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.include?(content_type.name)
+
+    @content = content_type.find_by(id: params[:id])
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+
+    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+
+    if (current_user || User.new).can_read?(@content)
+      # Serialize content for overview section
+      @serialized_content = ContentSerializer.new(@content)
+
+      # Get all images for this content with proper ordering
+      # Only show private images to the owner or contributors
+      is_owner_or_contributor = false
+      # Check if the user is the owner or a contributor
+      if current_user.present? && (@content.user == current_user || 
+         (@content.respond_to?(:universe_id) && 
+          @content.universe_id.present? && 
+          current_user.try(:contributable_universe_ids).to_a.include?(@content.universe_id)))
+        is_owner_or_contributor = true
+        @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id).ordered
+      else
+        @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id, privacy: 'public').ordered
+      end
+      
+      # Get additional context information
+      if @content.is_a?(Universe)
+        # Universe objects don't have a universe_id field
+        @universe = nil
+        @other_content = []
+      else
+        @universe = @content.universe_id.present? ? Universe.find_by(id: @content.universe_id) : nil
+        @other_content = @content.universe_id.present? ? 
+          content_type.where(universe_id: @content.universe_id).where.not(id: @content.id).limit(5) : []
+      end
+      
+      # Include basil images too with proper ordering
+      @basil_images = BasilCommission.where(entity: @content).where.not(saved_at: nil).ordered
+      
+      render 'content/gallery'
+    else
+      return redirect_to root_path, notice: "You don't have permission to view that content."
+    end
+  end
+
+  def references
+    content_type = content_type_from_controller(self.class)
+    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.include?(content_type.name)
+
+    @content = content_type.find_by(id: params[:id])
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+
+    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+
+    @serialized_content = ContentSerializer.new(@content)
+
+    analysis_ids = DocumentEntity.where(entity: @content).pluck(:document_analysis_id)
+    document_ids = DocumentAnalysis.where(id: analysis_ids).pluck(:document_id)
+    @documents = Document.where(id: document_ids)
+    @references = @content.incoming_page_references.preload(:referencing_page)
+    @mentioning_attributes = Attribute.where(
+      attribute_field_id: @references.pluck(:attribute_field_id),
+      entity_id: @references.pluck(:referencing_page_id)
+    )
   end
 
   def new
@@ -157,7 +242,7 @@ class ContentController < ApplicationController
       # If the user doesn't have this content type enabled, go ahead and automatically enable it for them
       current_user.user_content_type_activators.find_or_create_by(content_type: @content.class.name)
 
-      return redirect_to edit_polymorphic_path(@content)
+      return redirect_to polymorphic_path(@content, editing: true)
     else
       return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
     end
@@ -414,50 +499,61 @@ class ContentController < ApplicationController
 
     @dummy_model = @content_type_class.new
   end
+  
+  def attributes_tailwind
+    @attribute_categories = @content_type_class
+      .attribute_categories(current_user, show_hidden: true)
+      .shown_on_template_editor
+      .order(:position)
 
-  def gallery
-    content_type = content_type_from_controller(self.class)
-    @content = content_type.find_by(id: params[:id])
-    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+    @dummy_model = @content_type_class.new
     
-    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
-    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+    # Use the Tailwind layout
+    render :attributes_tailwind
+  end
+  
+  def export_template
+    service = TemplateExportService.new(current_user, @content_type)
     
-    if (current_user || User.new).can_read?(@content)
-      # Serialize content for overview section
-      @serialized_content = ContentSerializer.new(@content)
-
-      # Get all images for this content with proper ordering
-      # Only show private images to the owner or contributors
-      is_owner_or_contributor = false
-      # Check if the user is the owner or a contributor
-      if current_user.present? && (@content.user == current_user || 
-         (@content.respond_to?(:universe_id) && 
-          @content.universe_id.present? && 
-          current_user.try(:contributable_universe_ids).to_a.include?(@content.universe_id)))
-        is_owner_or_contributor = true
-        @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id).ordered
-      else
-        @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id, privacy: 'public').ordered
-      end
-      
-      # Get additional context information
-      if @content.is_a?(Universe)
-        # Universe objects don't have a universe_id field
-        @universe = nil
-        @other_content = []
-      else
-        @universe = @content.universe_id.present? ? Universe.find_by(id: @content.universe_id) : nil
-        @other_content = @content.universe_id.present? ? 
-          content_type.where(universe_id: @content.universe_id).where.not(id: @content.id).limit(5) : []
-      end
-      
-      # Include basil images too with proper ordering
-      @basil_images = BasilCommission.where(entity: @content).where.not(saved_at: nil).ordered
-      
-      render 'content/gallery'
+    case params[:format]
+    when 'yml', 'yaml'
+      send_data service.export_as_yaml, 
+                filename: "#{@content_type}_template.yml", 
+                type: 'text/plain'
+    when 'md', 'markdown'
+      send_data service.export_as_markdown,
+                filename: "#{@content_type}_template.md", 
+                type: 'text/plain'
     else
-      return redirect_to root_path, notice: "You don't have permission to view that content."
+      redirect_back fallback_location: root_path, alert: 'Invalid export format'
+    end
+  end
+  
+  def reset_template
+    service = TemplateResetService.new(current_user, @content_type)
+    
+    if params[:confirm] == 'true'
+      result = service.reset_template!
+      
+      respond_to do |format|
+        format.json do
+          if result[:success]
+            render json: {
+              success: true,
+              message: result[:message]
+            }, status: :ok
+          else
+            render json: {
+              success: false,
+              error: result[:error]
+            }, status: :unprocessable_entity
+          end
+        end
+      end
+    else
+      # Return analysis for confirmation
+      analysis = service.analyze_reset_impact
+      render json: analysis, status: :ok
     end
   end
 
@@ -641,7 +737,10 @@ class ContentController < ApplicationController
     @content = @entity
     update_page_tags
 
-    render json: attribute_value.to_json, status: 200
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: root_path, notice: "#{@attribute_field.label} updated!") }
+      format.json { render json: attribute_value.to_json, status: 200 }
+    end
   end
 
   def universe_field_update
@@ -812,42 +911,6 @@ class ContentController < ApplicationController
     return unless valid_content_types.include?(entity_page_type)
     @entity = entity_page_type.constantize.find_by(id: entity_page_id)    
   end
-
-  # For index, new, edit
-  # def set_general_navbar_actions
-  #   content_type = @content_type_class || content_type_from_controller(self.class)
-  #   return if [AttributeCategory, AttributeField, Attribute].include?(content_type)
-    
-  #   @navbar_actions = []
-
-  #   if @current_user_content
-  #     @navbar_actions << {
-  #       label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
-  #       href: main_app.polymorphic_path(content_type)
-  #     }
-  #   end
-
-  #   @navbar_actions << {
-  #     label: "New #{content_type.name.downcase}",
-  #     href: main_app.new_polymorphic_path(content_type),
-  #     class: 'right'
-  #   } if user_signed_in? && current_user.can_create?(content_type) \
-  #   || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type.name)
-
-  #   discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
-  #   if discussions_link.present?
-  #     @navbar_actions << {
-  #       label: 'Discussions',
-  #       href: discussions_link
-  #     }
-  #   end
-
-  #   # @navbar_actions << {
-  #   #   label: 'Customize template',
-  #   #   class: 'right',
-  #   #   href: main_app.attribute_customization_path(content_type.name.downcase)
-  #   # }
-  # end
 
   # For showing a specific piece of content
   def set_navbar_actions

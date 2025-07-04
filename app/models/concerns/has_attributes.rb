@@ -11,34 +11,17 @@ module HasAttributes
       # Don't create any attribute categories for AttributeCategories or AttributeFields that share the ContentController
       return [] if ['attribute_category', 'attribute_field'].include?(content_name)
 
-      YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, defaults|
-        # First, query for the category to see if it already exists
-        category = user.attribute_categories.find_or_initialize_by(
-          entity_type: self.content_name,
-          name:        category_name.to_s
-        )
-        creating_new_category = category.new_record?
-
-        # If the category didn't already exist, go ahead and set defaults on it and save
-        if creating_new_category
-          category.label = defaults[:label]
-          category.icon  = defaults[:icon]
-          category.save!
-        end
-
-        # If we created this category for the first time, we also want to make sure we create its default fields, too
-        if creating_new_category && defaults.key?(:attributes)
-          category.attribute_fields << defaults[:attributes].map do |field|
-            af_field = category.attribute_fields.with_deleted.create!(
-              old_column_source: field[:name],
-              user:              user,
-              field_type:        field[:field_type].presence || "text_area",
-              label:             field[:label].presence      || 'Untitled field'
-            )
-            af_field
-          end
-        end
-      end.compact
+      # Use the new TemplateInitializationService for consistency
+      template_service = TemplateInitializationService.new(user, content_name)
+      
+      # Only create template if it doesn't already exist (for new users)
+      if template_service.template_exists?
+        # Return existing categories
+        user.attribute_categories.where(entity_type: content_name).order(:position)
+      else
+        # Create new default template
+        template_service.initialize_default_template!
+      end
     end
 
     def self.attribute_categories(user, show_hidden: false)

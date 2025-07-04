@@ -144,7 +144,7 @@ end
 
 group :development do
   gem 'web-console'
-  gem 'listen'
+  # gem 'listen'
   gem 'bullet'
   gem 'rack-mini-profiler'
   gem 'memory_profiler'
@@ -159,7 +159,8 @@ group :worker do
   # Document understanding
   gem 'htmlentities'
   gem 'birch', git: 'https://github.com/billthompson/birch.git', branch: 'birch-ruby22'
-  gem 'engtagger', github: 'yohasebe/engtagger', ref: 'master' # we might want this in more groups...?
+  gem 'engtagger', '~> 0.4.2' # we might want this in more groups...?
   gem 'ibm_watson'
   gem 'textstat'
 end
+

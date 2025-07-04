@@ -22,11 +22,11 @@ class Timeline < ApplicationRecord
   end
 
   def self.color
-    'green'
+    'green bg-green-500'
   end
 
   def self.text_color
-    'green-text'
+    'green-text text-green-500'
   end
 
   # Needed because we sometimes munge Timelines in with ContentPages :(
@@ -56,5 +56,9 @@ class Timeline < ApplicationRecord
 
   def initialize_first_event
     timeline_events.create(title: "Untitled Event", position: 1)
+  end
+
+  def cached_word_count
+    0 # until we implement it :)
   end
 end

@@ -1,49 +1,733 @@
-<%= content_for :full_width_page_content do %>
-  <div class="container-fluid">
-    <div class="row">
-      <h5>
-        <% if @parent_folder %>
-          <%= link_to @parent_folder do %>
-            <i class="material-icons left tooltipped" data-tooltip="Go up a folder: to <%= @parent_folder.title %>">arrow_upward</i>
-          <% end %>
-        <% else %>
-          <%# todo link to base `context`#index page %>
-          <%= link_to documents_path do %>
-            <i class="material-icons left tooltipped" data-tooltip="Go up a folder: back to Documents">arrow_upward</i>
-          <% end %>
-        <% end %>
-        <%= link_to '#edit-folder-modal', class: 'modal-trigger tooltipped', data: { tooltip: "Click to edit this folder" } do %>
-          <i class="material-icons large left <%= Folder.text_color %>"><%= Folder.icon %></i>
-        <% end %>
-        <%= @folder.title %>
-
-        <% if @child_folders.empty? %>
-          <div class="btn-group right" style="margin-top: 1.9em; margin-right: 0.2em">
-            <%= link_to '#new-folder-modal', class: "btn right #{Folder.color} lighten-1 white-text modal-trigger" do %>
-              <i class="material-icons left">create_new_folder</i>
-              New folder
-            <% end %>
-          </div>
-        <% end %>
-      </h5>
-    </div>
-
-    <%= render partial: 'folders/list', locals: { folders: @child_folders } %>
-
-    <div class="row">
-      <h5>Documents <span class="grey-text"><%= @content.count %></span></h5>
-      <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Document } if @content.any? %>
-      <%=
-        render partial: 'content/list/document_table', locals: {
-          content_list: @content,
-          content_type: Document,
-          folders:      @all_folders.pluck(:title, :id),
-          tags:         @page_tags.to_a
-        }
-      %>
+<div x-data="{
+  showNewFolderModal: false,
+  showEditFolderModal: false,
+  sidebarOpen: false,
+  showContentSidebar: <%= @child_folders.any? || @content.any? %>,
+  viewMode: 'grid',
+  searchQuery: ''
+}" class="h-screen flex bg-gray-50">
+  
+  <!-- Mobile Header -->
+  <div class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-4 py-3">
+    <div class="flex items-center justify-between">
+      <button
+        @click="sidebarOpen = !sidebarOpen"
+        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        <i class="material-icons text-lg mr-2"><%= Folder.icon %></i>
+        <span>Folder</span>
+      </button>
+      
+      <div class="flex items-center space-x-2">
+        <button
+          @click="showNewFolderModal = true"
+          class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-white <%= Folder.color %> hover:opacity-90"
+        >
+          <i class="material-icons text-lg">add</i>
+        </button>
+      </div>
     </div>
   </div>
-<% end %>
 
-<%= render partial: 'folders/new_modal', locals: { content_type: Document, parent_folder: @folder } %>
-<%= render partial: 'folders/edit_modal', locals: { folder: @folder } %>
+  <!-- Content Sidebar -->
+  <aside x-show="showContentSidebar" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="hidden lg:flex lg:flex-col lg:w-80 bg-white border-r border-gray-200">
+    <!-- Sidebar Header -->
+    <div class="px-6 py-6 border-b border-gray-200">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 rounded-lg <%= Folder.color %> flex items-center justify-center">
+            <i class="material-icons text-white"><%= Folder.icon %></i>
+          </div>
+        </div>
+        <div class="ml-4">
+          <h2 class="text-lg font-semibold text-gray-900"><%= @folder.title %></h2>
+          <p class="text-sm text-gray-500"><%= pluralize @content.count, 'item' %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-900"><%= @content.count %></div>
+          <div class="text-xs text-gray-500 uppercase tracking-wide">Total</div>
+        </div>
+        <div class="text-center">
+          <% total_words = @content.map(&:cached_word_count).reject(&:nil?).sum %>
+          <div class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(total_words / 1000) %>k</div>
+          <div class="text-xs text-gray-500 uppercase tracking-wide">Words</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Folders Section -->
+    <div class="flex-1 overflow-y-auto">
+      <div class="px-6 py-4">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-medium text-gray-900">Subfolders</h3>
+          <button
+            @click="showNewFolderModal = true"
+            class="inline-flex items-center p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+          >
+            <i class="material-icons text-lg">add</i>
+          </button>
+        </div>
+        
+        <div class="space-y-1">
+          <% @child_folders.each do |folder| %>
+            <%= link_to folder, class: "group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors" do %>
+              <i class="material-icons text-lg mr-3 text-gray-400 group-hover:text-gray-600"><%= Folder.icon %></i>
+              <span class="truncate"><%= folder.title %></span>
+            <% end %>
+          <% end %>
+          
+          <% if @child_folders.empty? %>
+            <button
+              @click="showNewFolderModal = true"
+              class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            >
+              <i class="material-icons text-lg mr-3">folder_open</i>
+              <span>Create your first subfolder</span>
+            </button>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Content Type Breakdown -->
+      <%
+        content_counts_per_type = Hash.new(0)
+        @content.each { |page| content_counts_per_type[page.respond_to?(:page_type) ? page.page_type : page.class.name] += 1 }
+      %>
+      <% if content_counts_per_type.keys.count > 1 %>
+        <div class="px-6 py-4 border-t border-gray-200">
+          <h3 class="text-sm font-medium text-gray-900 mb-3">Content Types</h3>
+          <div class="space-y-2">
+            <% content_counts_per_type.each do |content_type, count| %>
+              <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center">
+                  <i class="material-icons text-sm mr-2 <%= content_class_from_name(content_type).text_color %>">
+                    <%= content_class_from_name(content_type).icon %>
+                  </i>
+                  <span class="text-gray-700"><%= content_type.downcase.pluralize.humanize %></span>
+                </div>
+                <span class="text-gray-900 font-medium"><%= count %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Additional Stats -->
+      <% if @content.any? %>
+        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <h3 class="text-sm font-medium text-gray-900 mb-3">Activity</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Total words</span>
+              <span class="text-gray-900">
+                <%= number_with_delimiter(@content.map(&:cached_word_count).reject(&:nil?).sum) %>
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Last edited</span>
+              <span class="text-gray-900">
+                <%= distance_of_time_in_words(@content.map(&:updated_at).max, Time.current) %> ago
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Created</span>
+              <span class="text-gray-900">
+                <%= distance_of_time_in_words(@content.map(&:created_at).min, Time.current) %> ago
+              </span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </aside>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div
+    x-show="sidebarOpen"
+    x-transition:enter="transition-opacity ease-linear duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition-opacity ease-linear duration-300"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="fixed inset-0 z-40 lg:hidden"
+    style="display: none;"
+  >
+    <div class="fixed inset-0 bg-black bg-opacity-25" @click="sidebarOpen = false"></div>
+    <div
+      x-show="sidebarOpen"
+      x-transition:enter="transition ease-in-out duration-300 transform"
+      x-transition:enter-start="-translate-x-full"
+      x-transition:enter-end="translate-x-0"
+      x-transition:leave="transition ease-in-out duration-300 transform"
+      x-transition:leave-start="translate-x-0"
+      x-transition:leave-end="-translate-x-full"
+      class="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-xl"
+    >
+      <!-- Mobile sidebar content - simplified version of desktop sidebar -->
+      <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+        <div class="px-4">
+          <div class="flex items-center mb-6">
+            <div class="w-8 h-8 rounded-lg <%= Folder.color %> flex items-center justify-center mr-3">
+              <i class="material-icons text-white text-lg"><%= Folder.icon %></i>
+            </div>
+            <h2 class="text-lg font-semibold text-gray-900"><%= @folder.title %></h2>
+          </div>
+          
+          <!-- Mobile folders list -->
+          <div class="space-y-1">
+            <% @child_folders.each do |folder| %>
+              <%= link_to folder, class: "flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100", onclick: "document.querySelector('[x-data]').__x.$data.sidebarOpen = false" do %>
+                <i class="material-icons text-lg mr-3 text-gray-400"><%= Folder.icon %></i>
+                <span><%= folder.title %></span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <div class="absolute top-0 right-0 -mr-12 pt-2">
+        <button
+          @click="sidebarOpen = false"
+          type="button"
+          class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+        >
+          <span class="sr-only">Close sidebar</span>
+          <i class="material-icons text-white">close</i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col overflow-hidden lg:pt-0 pt-16" :class="{ 'lg:ml-0': !showContentSidebar }">
+    <!-- Breadcrumb Navigation -->
+    <nav class="bg-white border-b border-gray-200 px-6 lg:px-8 py-3">
+      <ol class="flex items-center space-x-2 text-sm">
+        <% if @parent_folder %>
+          <!-- If there's a parent folder, show it in the breadcrumb -->
+          <li>
+            <%= link_to @parent_folder.title, @parent_folder, class: "text-gray-500 hover:text-gray-700 hover:underline truncate max-w-[200px]" %>
+          </li>
+          <li class="text-gray-400">
+            <i class="material-icons text-sm">chevron_right</i>
+          </li>
+        <% else %>
+          <!-- If no parent folder, just show "Folders" without a link -->
+          <li class="text-gray-500">
+            Folders
+          </li>
+          <li class="text-gray-400">
+            <i class="material-icons text-sm">chevron_right</i>
+          </li>
+        <% end %>
+        
+        <li class="font-medium text-gray-900 truncate max-w-[200px]">
+          <%= @folder.title %>
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm">
+      <div class="relative">
+        <%= image_tag asset_path("card-headers/folders.jpg"), class: 'h-32 w-full object-cover lg:h-48' %>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20"></div>
+      </div>
+      <div class="px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <!-- Content Sidebar Toggle Button -->
+            <button
+              @click="showContentSidebar = !showContentSidebar"
+              class="hidden lg:inline-flex items-center p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              title="Toggle content sidebar"
+            >
+              <i class="material-icons text-xl" x-text="showContentSidebar ? 'menu_open' : 'menu'"></i>
+            </button>
+            
+            <!-- Back/Up Navigation -->
+            <% if @parent_folder %>
+              <%= link_to @parent_folder, class: "p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" do %>
+                <i class="material-icons" title="Go up a folder: to <%= @parent_folder.title %>">arrow_upward</i>
+              <% end %>
+            <% else %>
+              <%
+                context_class = @folder.context.constantize rescue Document
+                
+                # Default to documents_path if the context class doesn't have a folder association
+                if context_class.column_names.include?('folder_id')
+                  context_path = context_class.name.downcase.pluralize + "_path"
+                  context_name = @folder.context.pluralize
+                else
+                  context_path = "documents_path"
+                  context_name = "Documents"
+                end
+              %>
+              <%= link_to send(context_path), class: "p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" do %>
+                <i class="material-icons" title="Go up a folder: back to <%= context_name %>">arrow_upward</i>
+              <% end %>
+            <% end %>
+            
+            <!-- Folder Icon and Title -->
+            <div class="flex items-center">
+              <button
+                @click="showEditFolderModal = true"
+                class="w-12 h-12 rounded-lg <%= Folder.color %> flex items-center justify-center mr-3 hover:shadow-lg transition-shadow duration-200 group relative"
+                title="Edit folder"
+              >
+                <i class="material-icons text-white text-xl"><%= Folder.icon %></i>
+                <span class="absolute -bottom-2 -right-2 w-6 h-6 bg-white rounded-full shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <i class="material-icons text-gray-600 text-sm">edit</i>
+                </span>
+              </button>
+              <div>
+                <h1 class="text-2xl font-bold text-gray-900"><%= @folder.title %></h1>
+                <p class="text-gray-600 mt-1">
+                  <% if @universe_scope %>
+                    in <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.text_color} font-medium hover:underline" %>
+                  <% else %>
+                    by <%= link_to current_user.display_name, current_user, class: "#{User.text_color} font-medium hover:underline" %>
+                  <% end %>
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="flex items-center space-x-3">
+            <button
+              @click="showNewFolderModal = true"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white <%= Folder.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-150 hover:shadow-md"
+            >
+              <i class="material-icons text-lg mr-2">create_new_folder</i>
+              <span class="hidden sm:inline">New subfolder</span>
+              <span class="sm:hidden">New</span>
+            </button>
+            
+            <div class="relative" data-controller="dropdown">
+              <button
+                data-action="dropdown#toggle click@window->dropdown#hide"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-150"
+              >
+                <i class="material-icons text-lg mr-2">more_horiz</i>
+                <span class="hidden sm:inline">Actions</span>
+              </button>
+              <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-10">
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <i class="material-icons text-sm mr-2 align-text-bottom">drive_file_move</i>
+                  Move folder
+                </a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <i class="material-icons text-sm mr-2 align-text-bottom">content_copy</i>
+                  Duplicate folder
+                </a>
+                <%=
+                  link_to folder_path(@folder),
+                    method: :delete,
+                    class: "block px-4 py-2 text-sm text-red-600 hover:bg-red-50",
+                    data: {
+                      confirm: "Are you sure? This will delete the folder and move all contents within it back to your default page."
+                    } do
+                %>
+                  <i class="material-icons text-sm mr-2 align-text-bottom">delete</i>
+                  Delete folder
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- Child Folders Section -->
+  <div class="px-6 lg:px-8 py-6">
+    <% if @child_folders.any? %>
+      <h2 class="text-lg font-medium text-gray-900 mb-4">Folders</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+        <% @child_folders.each do |folder| %>
+          <%= link_to folder, class: "bg-white rounded-lg border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 p-4 flex items-center group" do %>
+            <div class="w-10 h-10 rounded-lg <%= Folder.color %> flex items-center justify-center mr-3 flex-shrink-0 group-hover:shadow-md transition-shadow">
+              <i class="material-icons text-white"><%= Folder.icon %></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-base font-medium text-gray-900 truncate"><%= folder.title %></h3>
+              <%
+                begin
+                  context_class = folder.context.constantize
+                  if context_class.column_names.include?('folder_id')
+                    content_count = context_class.where(folder: folder).count
+                    content_type_label = folder.context.downcase
+                  else
+                    content_count = 0
+                    content_type_label = 'item'
+                  end
+                rescue
+                  content_count = 0
+                  content_type_label = 'item'
+                end
+              %>
+              <% if content_count > 0 %>
+                <p class="text-sm text-gray-500"><%= pluralize(content_count, content_type_label) %></p>
+              <% else %>
+                <p class="text-sm text-gray-500">Empty folder</p>
+              <% end %>
+            </div>
+            <i class="material-icons text-gray-400 group-hover:text-gray-600 transition-colors">chevron_right</i>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Content Section -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-3">
+          <h2 class="text-lg font-medium text-gray-900">Contents</h2>
+          <span class="text-sm font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-800"><%= @content.count %></span>
+        </div>
+        
+        <!-- Search and Filter Controls -->
+        <% if @content.any? %>
+          <div class="flex items-center space-x-4">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="material-icons text-gray-400 text-lg">search</i>
+              </div>
+              <div class="relative group" x-data="{ isSearching: false }">
+                <input
+                  x-model="searchQuery"
+                  @input="isSearching = true; setTimeout(() => { isSearching = false }, 300)"
+                  type="text"
+                  placeholder="Search contents..."
+                  class="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <button x-show="searchQuery.length > 0" @click="searchQuery = ''" class="text-gray-400 hover:text-gray-600">
+                    <i class="material-icons text-lg">clear</i>
+                  </button>
+                  <div x-show="isSearching" class="animate-spin h-4 w-4 border-2 border-blue-500 rounded-full border-t-transparent"></div>
+                </div>
+                
+                <!-- Keyboard shortcut hint -->
+                <div class="absolute top-full left-0 mt-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                  Press <kbd class="px-1 py-0.5 bg-gray-700 rounded">⌘K</kbd> to focus search
+                </div>
+              </div>
+            </div>
+            
+            <!-- View Mode Toggle -->
+            <div class="hidden sm:flex border border-gray-300 rounded-lg">
+              <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-l-lg focus:outline-none">
+                <i class="material-icons text-lg">grid_view</i>
+              </button>
+              <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-r-lg focus:outline-none">
+                <i class="material-icons text-lg">view_list</i>
+              </button>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <% if @content.any? %>
+        <!-- Search Empty State -->
+        <div x-show="searchQuery !== ''" x-transition class="hidden" id="search-empty-state">
+          <div class="flex-1 flex items-center justify-center p-12 min-h-96">
+            <div class="text-center max-w-lg">
+              <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-6 shadow-sm">
+                <i class="material-icons text-4xl text-gray-400">search_off</i>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-3">No matching items found</h3>
+              <p class="text-gray-600 mb-8 leading-relaxed" x-text="`We couldn't find any items matching '${searchQuery}'. Try adjusting your search terms.`"></p>
+              
+              <div class="flex justify-center">
+                <button @click="searchQuery = ''" class="inline-flex items-center px-6 py-3 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors shadow-sm">
+                  <i class="material-icons text-lg mr-2">clear</i>
+                  Clear search
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid View -->
+        <div x-show="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <% @content.each do |content_item| %>
+            <div
+              class="group relative"
+              x-show="searchQuery === '' || '<%= content_item.name.downcase %>'.includes(searchQuery.toLowerCase()) || '<%= content_item.respond_to?(:page_type) ? content_item.page_type.downcase : content_item.class.name.downcase %>'.includes(searchQuery.toLowerCase())"
+              x-data="{
+                isFavorite: <%= content_item.respond_to?(:favorite?) ? content_item.favorite? : false %>,
+                isLoading: false,
+                async toggleFavorite(event) {
+                  if (!this.canFavorite) return;
+                  event.preventDefault();
+                  event.stopPropagation();
+                  this.isLoading = true;
+                  try {
+                    const result = await window.toggleItemFavorite('<%= content_item.id %>', '<%= content_item.respond_to?(:page_type) ? content_item.page_type.downcase.pluralize : content_item.class.name.downcase.pluralize %>');
+                    if (result.success) {
+                      this.isFavorite = !this.isFavorite;
+                    } else {
+                      alert('Error toggling favorite. Please try again.');
+                    }
+                  } catch (error) {
+                    console.error('Error:', error);
+                    alert('An unexpected error occurred. Please check the console.');
+                  } finally {
+                    this.isLoading = false;
+                  }
+                },
+                canFavorite: <%= content_item.respond_to?(:favorite?) ? 'true' : 'false' %>
+              }"
+            >
+              <%= link_to (content_item.respond_to?(:view_path) ? content_item.view_path : content_item), class: "block" do %>
+                <div class="bg-white hover:shadow-xl rounded-lg transition-shadow duration-200 overflow-hidden">
+                  <%
+                    content_image = nil
+                    if content_item.respond_to?(:random_image_including_private)
+                      content_image = content_item.random_image_including_private(format: :medium)
+                    end
+                    content_type = if content_item.respond_to?(:page_type) && content_item.page_type.present?
+                                     content_item.page_type
+                                   else
+                                     content_item.class.name
+                                   end
+                    content_image ||= asset_path("card-headers/#{content_type.downcase.pluralize}.jpg")
+                  %>
+                  <%= image_tag content_image, class: 'h-48 w-full object-cover' %>
+                  <div class="p-4">
+                    <div class="flex items-start justify-between">
+                      <div class="flex-1 min-w-0 pr-8">
+                        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide <%= content_item.text_color %> truncate">
+                          <%= content_type %>
+                        </h3>
+                        <h2 class="mt-1 text-lg font-semibold text-gray-900 line-clamp-2" title="<%= content_item.name %>">
+                          <%= content_item.name %>
+                        </h2>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+              <% if content_item.respond_to?(:favorite?) %>
+                <button
+                  @click="toggleFavorite"
+                  :disabled="isLoading"
+                  class="absolute top-4 right-4 group p-1 text-xl rounded-lg bg-white/80 backdrop-blur-sm hover:bg-notebook-blue hover:shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all"
+                  :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                  title="Toggle favorite"
+                >
+                  <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400 group-hover:text-yellow-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                </button>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- List View -->
+        <div x-show="viewMode === 'list'" style="display: none;" class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <% @content.each_with_index do |content_item, index| %>
+            <div
+              class="<%= 'border-t border-gray-200' if index > 0 %> hover:bg-gray-50 transition-colors relative"
+              x-show="searchQuery === '' || '<%= content_item.name.downcase %>'.includes(searchQuery.toLowerCase()) || '<%= content_item.respond_to?(:page_type) ? content_item.page_type.downcase : content_item.class.name.downcase %>'.includes(searchQuery.toLowerCase())"
+              x-data="{
+                isFavorite: <%= content_item.respond_to?(:favorite?) ? content_item.favorite? : false %>,
+                isLoading: false,
+                async toggleFavorite(event) {
+                  if (!this.canFavorite) return;
+                  event.preventDefault();
+                  event.stopPropagation();
+                  this.isLoading = true;
+                  try {
+                    const result = await window.toggleItemFavorite('<%= content_item.id %>', '<%= content_item.respond_to?(:page_type) ? content_item.page_type.downcase.pluralize : content_item.class.name.downcase.pluralize %>');
+                    if (result.success) {
+                      this.isFavorite = !this.isFavorite;
+                    } else {
+                      alert('Error toggling favorite. Please try again.');
+                    }
+                  } catch (error) {
+                    console.error('Error:', error);
+                    alert('An unexpected error occurred. Please check the console.');
+                  } finally {
+                    this.isLoading = false;
+                  }
+                },
+                canFavorite: <%= content_item.respond_to?(:favorite?) ? 'true' : 'false' %>
+              }"
+            >
+              <%= link_to (content_item.respond_to?(:view_path) ? content_item.view_path : content_item), class: "flex items-center p-4 space-x-4" do %>
+                <div class="flex-shrink-0">
+                  <%
+                    content_image = nil
+                    if content_item.respond_to?(:random_image_including_private)
+                      content_image = content_item.random_image_including_private(format: :small)
+                    end
+                    content_type = if content_item.respond_to?(:page_type) && content_item.page_type.present?
+                                     content_item.page_type
+                                   else
+                                     content_item.class.name
+                                   end
+                    content_image ||= asset_path("card-headers/#{content_type.downcase.pluralize}.jpg")
+                  %>
+                  <%= image_tag content_image, class: 'w-16 h-16 rounded-lg object-cover' %>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-lg font-medium text-gray-900 truncate" title="<%= content_item.name %>"><%= content_item.name %></h3>
+                  <p class="text-sm text-gray-500 <%= content_item.text_color %> truncate"><%= content_type %></p>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="material-icons text-gray-400">chevron_right</i>
+                </div>
+              <% end %>
+              <% if content_item.respond_to?(:favorite?) %>
+                <button
+                  @click="toggleFavorite"
+                  :disabled="isLoading"
+                  class="absolute right-12 top-1/2 transform -translate-y-1/2 p-1 text-lg rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                  title="Toggle favorite"
+                >
+                  <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-300 hover:text-gray-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                </button>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <!-- Empty State -->
+        <div class="bg-white rounded-lg border border-gray-200 p-8 text-center shadow-sm hover:shadow-md transition-shadow">
+          <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-6 shadow-sm">
+            <i class="material-icons text-4xl text-gray-400">folder_open</i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">This folder is empty</h3>
+          <p class="text-gray-600 mb-6 max-w-md mx-auto">Add content to this folder by selecting "Move to folder" when viewing any page, or create new content directly.</p>
+          <div class="flex flex-wrap justify-center gap-3 max-w-lg mx-auto">
+            <% Rails.application.config.content_types[:free].each do |content_type| %>
+              <%= link_to new_polymorphic_path(content_type) do %>
+                <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white <%= content_type.color %> hover:opacity-90 hover:shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200">
+                  <i class="material-icons text-sm mr-2"><%= content_type.icon %></i>
+                  New <%= content_type.name %>
+                </button>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- Include modals -->
+  <div x-show="showNewFolderModal">
+    <%= render partial: 'folders/tailwind_new_modal', locals: { content_type: @content_type_class, parent_folder: @folder } %>
+  </div>
+  
+  <div x-show="showEditFolderModal">
+    <%= render partial: 'folders/tailwind_edit_modal', locals: { folder: @folder } %>
+  </div>
+
+  <!-- Enhanced JavaScript -->
+  <script>
+    // Global function for toggling favorites
+    window.toggleItemFavorite = async function(contentId, contentClass) {
+      const csrfToken = document.querySelector('meta[name=csrf-token]').getAttribute('content');
+      let postUrl = contentClass === 'documents'
+        ? `/documents/${contentId}/toggle_favorite`
+        : `/plan/${contentClass}/${contentId}/toggle_favorite`;
+      
+      try {
+        let response = await fetch(postUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({ id: contentId })
+        });
+        
+        if (!response.ok && postUrl.startsWith('/plan/')) {
+          postUrl = `/${contentClass}/${contentId}/toggle_favorite`;
+          response = await fetch(postUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({ id: contentId })
+          });
+        }
+        
+        return { success: response.ok };
+      } catch (error) {
+        console.error('Fetch error:', error);
+        throw error;
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        // Only if not typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        // CMD/Ctrl + K to focus search
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          const searchInput = document.querySelector('input[x-model="searchQuery"]');
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+        }
+        
+        // CMD/Ctrl + \ to toggle content sidebar
+        if ((e.metaKey || e.ctrlKey) && e.key === '\\') {
+          e.preventDefault();
+          const toggleButton = document.querySelector('[\\@click="showContentSidebar = !showContentSidebar"]');
+          if (toggleButton) toggleButton.click();
+        }
+        
+        // 1 for grid view, 2 for list view
+        if (e.key === '1') {
+          e.preventDefault();
+          window.Alpine && window.Alpine.evaluate(document.querySelector('[x-data]'), 'viewMode = "grid"');
+        }
+        if (e.key === '2') {
+          e.preventDefault();
+          window.Alpine && window.Alpine.evaluate(document.querySelector('[x-data]'), 'viewMode = "list"');
+        }
+      });
+
+      // Search empty state management
+      function updateSearchEmptyState() {
+        const searchInput = document.querySelector('input[x-model="searchQuery"]');
+        const searchEmptyState = document.getElementById('search-empty-state');
+        
+        if (!searchInput || !searchEmptyState) return;
+        
+        const searchQuery = searchInput.value.trim();
+        const visibleItems = document.querySelectorAll('[x-show*="searchQuery"]:not([style*="display: none"])');
+        
+        if (searchQuery && visibleItems.length === 0) {
+          searchEmptyState.style.display = 'block';
+        } else {
+          searchEmptyState.style.display = 'none';
+        }
+      }
+      
+      // Watch for search input changes
+      const searchInput = document.querySelector('input[x-model="searchQuery"]');
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          setTimeout(updateSearchEmptyState, 100); // Small delay to let Alpine.js update visibility
+        });
+      }
+    });
+  </script>
+</div>

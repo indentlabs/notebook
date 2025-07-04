@@ -2,6 +2,8 @@
 //# when application.js includes all JS files in the directory with require_tree.
 //# Here be dragons.
 
+// After we have fully moved to TailwindCSS, this file can be safely removed (I think lol).
+
 if (!window.Notebook) { window.Notebook = {}; }
 Notebook.init = function() {
   // Initialize MaterializeCSS stuff

@@ -1,10 +1,16 @@
 # Controller for top-level pages of the site that do not have
 # an associated model
 class MainController < ApplicationController
-  layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_friends]
+  #layout 'landing', only: [:about_notebook, :for_writers, :for_roleplayers, :for_friends]
+  layout 'tailwind', only: [
+    :index, :dashboard,
+    :prompts, :table_of_contents,
+    :paper, :privacyinfo
+  ]
 
   before_action :authenticate_user!, only: [:dashboard, :prompts, :notes, :recent_content]
   before_action :cache_linkable_content_for_each_content_type, only: [:dashboard, :prompts]
+  before_action :set_page_meta_tags
 
   before_action do
     if !user_signed_in? && params[:referral]
@@ -14,6 +20,10 @@ class MainController < ApplicationController
 
   def index
     redirect_to(:dashboard) if user_signed_in?
+
+    @resource ||= User.new
+    @resource_name = :user
+    @devise_mapping ||= Devise.mappings[:user]
   end
 
   def about_notebook
@@ -37,6 +47,31 @@ class MainController < ApplicationController
                                           .includes(:posts, :messageboard)
     
     set_questionable_content # for questions
+  end
+
+  def table_of_contents
+    @toc_scope = @universe_scope || current_user
+    @toc_user  = @universe_scope.try(:user) || current_user
+
+    # Get content list - handle differently depending on whether we're scoped to a universe or a user
+    content_list = if @toc_scope.is_a?(Universe)
+      # For a Universe, we need to get content from the user that's in this universe
+      user_content = @toc_user.content_list(page_scoping: { user_id: @toc_user.id })
+      universe_id = @toc_scope.id
+      user_content.select { |page| page['universe_id']&.to_i == universe_id || page['page_type'] == 'Universe' && page['id'] == universe_id }
+    else
+      # For a User, we can directly use their content_list method
+      @toc_scope.content_list
+    end
+
+    # Sort the content list by name
+    content_list = content_list.sort_by { |page| page['name'] }
+
+    @starred_pages = content_list.select { |page| page['favorite'] == 1 }
+    @other_pages   = content_list.select { |page| page['favorite'] == 0 }
+
+    @page_type_counts = Hash.new(0)
+    content_list.each { |page| @page_type_counts[page['page_type']] += 1 }
   end
 
   def infostack
@@ -106,5 +141,12 @@ class MainController < ApplicationController
   def set_questionable_content
     @content = @current_user_content.except(*%w(Timeline Document)).values.flatten.sample
     @attribute_field_to_question = SerendipitousService.question_for(@content)
+  end
+
+  def set_page_meta_tags
+    set_meta_tags(
+      site: "The smart notebook for worldbuilders - Notebook.ai",
+      page: ''
+    )
   end
 end

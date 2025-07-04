@@ -1,244 +1,503 @@
-<%= content_for :full_width_page_header do %>
-  <%= render partial: 'content/components/parallax_universe_header' %>
-<% end %>
-
-<%= content_for :full_width_page_content do %>
-  <div class="row">  
-    <%= render partial: 'main/dashboard_header_links' %>
-  </div>
-<% end %>
-<div class="row">
-  <% if @current_user_content.values.flatten.count.zero? %>
-    <div class="col s12 m7 l8">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title">Welcome to Notebook.ai!</div>
-          <p>
-            Notebook.ai is designed to feel like a specialized notebook for of all your worldbuilding ideas.
-          </p>
-          <br />
-          <p>
-            Start your worldbuilding journey by creating a universe with the button below (or jump straight to the good stuff!).
-            All of the worldbuildings pages you create can be assigned to a universe, which contains your world.
-            Once you've created a few worlds, they make it easy to focus on just the world you want to work on!
-          </p> 
-        </div>
-      </div>
-
-      <%= link_to new_universe_path do %>
-        <div class="hoverable card-panel <%= Universe.color %> white-text">
-          <i class="material-icons left"><%= Universe.icon %></i>
-          <i class="material-icons right">add</i>
-          Create a Universe
-        </div>
-      <% end %>
-
-      <% (@activated_content_types - ['Universe']).each do |type| %>
-        <%= link_to send("new_#{type.downcase}_path") do %>
-          <div class="hoverable card-panel <%= content_class_from_name(type).color %> white-text">
-            <i class="material-icons left"><%= content_class_from_name(type).icon %></i>
-            <i class="material-icons right">add</i>
-            Create a <%= type %>
+<div class="min-h-full">
+  <div class="flex flex-col flex-1">
+    <main class="flex-1 pb-8">
+      <!-- Modern full-width header -->
+      <div class="bg-gradient-to-r from-slate-50 to-white border-b border-gray-200">
+        <div class="w-full px-4 sm:px-6 lg:px-8">
+          <div class="py-4 sm:py-6 lg:py-8">
+            <div class="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+              <!-- User info section -->
+              <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-4 sm:space-y-0">
+                <%= link_to current_user, class: "group relative self-center sm:self-auto" do %>
+                  <div class="relative">
+                    <%= image_tag current_user.image_url, class: "h-16 w-16 sm:h-20 sm:w-20 rounded-full #{User.color} ring-4 ring-white shadow-lg group-hover:ring-blue-100 transition-all duration-200" %>
+                    <div class="absolute -bottom-1 -right-1 h-4 w-4 sm:h-6 sm:w-6 bg-green-400 rounded-full ring-4 ring-white"></div>
+                  </div>
+                <% end %>
+                
+                <div class="flex flex-col text-center sm:text-left">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-1 sm:space-y-0">
+                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight">
+                      Welcome back, <%= link_to current_user.display_name, current_user, class: "#{User.text_color} hover:opacity-80 transition-opacity" %>
+                    </h1>
+                    <%= render partial: 'thredded/users/badge', locals: { user: current_user } %>
+                  </div>
+                  <p class="text-base sm:text-lg text-gray-600 mt-1">
+                    <em>Ready to create something amazing today?</em>
+                  </p>
+                  
+                  <!--
+                  <div class="flex items-center space-x-6 mt-3">
+                    <div class="flex items-center space-x-2 text-sm text-gray-500">
+                      <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                      </svg>
+                      <span class="font-medium">Active projects</span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm text-gray-500">
+                      <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                      </svg>
+                      <span class="font-medium">Recent activity</span>
+                    </div>
+                  </div>
+                  -->
+                </div>
+              </div>
+              
+              <!-- Action buttons -->
+              <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+                <%= link_to new_character_path do %>
+                  <button type="button" class="fancy-button relative overflow-hidden inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 active:scale-95 active:shadow-sm">
+                    <i class="material-icons mr-2 <%= Character.text_color %> transition-transform duration-200"><%= Character.icon %></i>
+                    <span class="transition-all duration-200">Create Character</span>
+                  </button>
+                <% end %>
+                <% random_enabled_page_type = (current_user.createable_content_types - [Character]).sample %>
+                <%= link_to new_polymorphic_path(random_enabled_page_type) do %>
+                  <button type="button" class="fancy-button relative overflow-hidden inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white <%= random_enabled_page_type.color %> hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 active:scale-95 active:shadow-sm">
+                    <i class="material-icons mr-2 transition-transform duration-200"><%= random_enabled_page_type.icon %></i>
+                    <span class="transition-all duration-200">
+                      Create <%= random_enabled_page_type.name %>
+                    </span>
+                  </button>
+                <% end %>
+              </div>
+            </div>
           </div>
-        <% end %>
-      <% end %>
-
-      <div class="card-panel">
-        <p>
-          The free tier of Notebook.ai was intentionally designed to be enough for most beginner worldbuilders. Your noun trifecta
-          (people, places, and things) can be created with Character, Location, and Item pages.
-        </p>
-        <p>
-          For more advanced worlds, the site is supported by an optional Premium subscription that unlocks
-          <%= pluralize Rails.application.config.content_types[:premium].count, 'other page type' %> for you to use!
-        </p>
+        </div>
       </div>
 
-      <%= link_to customization_content_types_path do %>
-        <div class="card-panel hoverable blue white-text">
-          <i class="material-icons left">add</i>
-          Browse all page types
-        </div>
-      <% end %>
-        
-    </div>
-  <% else %>
-    <div class="col s12 m7 l8">
-      <div class="grey-text uppercase center">
-        Expand
-        <% if @universe_scope.present? %>
-          <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.text_color}" %>
-        <% else %>
-          your worlds
-        <% end %>
-      </div>
-      <%=
-        if @content
-          render partial: 'cards/serendipitous/content_question', locals: { 
-            content: @content, 
-            field: @attribute_field_to_question,
-            expand_by_default: true,
-            include_quick_reference: false
-          }
-        end
-      %>
+      <%# render partial: 'main/components/activity_bar', locals: { } %>
 
-      <%= link_to prompts_path do %>
-        <div class="hoverable card-panel orange white-text" style="margin: 0; margin-bottom: 2em">
-          <i class="material-icons left">lightbulb_outline</i>
-          <i class="material-icons right">arrow_right</i>
-          View more prompts
-          <% if @universe_scope.present? %>
-            in this universe
-          <% end %>
-        </div>
-      <% end %>
+      <div class="max-w-7xl mx-auto my-4 px-4 sm:px-6 lg:px-8">
+        <!-- Mobile-first: stack vertically, then side-by-side on larger screens -->
+        <div class="grid grid-cols-1 xl:grid-cols-8 gap-4 xl:gap-6">
+          <!-- Main content area - full width on mobile, 5/8 on xl -->
+          <div class="xl:col-span-5 space-y-6">
+            <% if @content %>
+              <div class="text-center">
+                <h2 class="text-sm leading-6 font-medium text-gray-500 mb-2">
+                  Expand
+                  <% if @universe_scope.present? %>
+                    <%= link_to @universe_scope.name, @universe_scope, class: Universe.text_color %>
+                  <% else %>
+                    your worlds
+                  <% end %>
+                </h2>
+                <%= render partial: 'main/components/serendipitous_question', locals: { } %>
+              </div>
+            <% end %>
 
-      <% if @universe_scope.present? || @current_user_content.fetch('Universe', []).count == 1 %>
-        <% if @current_user_content.except('Universe').values.flatten.any? %>
-          <div class="grey-text uppercase">
-            <%= pluralize @current_user_content.except('Universe').values.flatten.count, 'page' %>
-            in
-            <span class="<%= Universe.text_color %>">
-              <%= @universe_scope.try(:name) || @current_user_content.fetch('Universe').first.name %>
-            </span>
-            <%= link_to({ universe: 'all' }, class: 'right grey-text') do %>
-              See all universes instead
-              <i class="material-icons right" style="margin: 0">arrow_right</i>
+            <div class="text-center">
+              <h2 class="text-sm leading-6 font-medium text-gray-500 mb-2">
+                Create a new page
+              </h2>
+              <%= render partial: 'main/components/create_new_page_list', locals: { } %>
+            </div>
+          </div>
+          
+          <!-- Sidebar content - full width on mobile, 3/8 on xl -->
+          <div class="xl:col-span-3 space-y-6">
+            <% if @most_recent_threads.any? %>
+              <div class="text-center">
+                <h2 class="text-sm leading-6 font-medium text-gray-500 hover:text-gray-800 mb-2">
+                  <%= link_to 'Active discussions', thredded_path %>
+                </h2>
+                <%= render partial: 'main/components/active_discussions', locals: { discussions: @most_recent_threads } %>
+              </div>
+            <% end %>
+
+            <% if @recently_edited_pages %>
+              <div class="text-center">
+                <h2 class="text-sm leading-6 font-medium text-gray-500 hover:text-gray-800 mb-2">
+                  <%= link_to 'Your recent updates', recent_content_path %>
+                </h2>
+                <%= render partial: 'main/components/recently_edited_pages', locals: { } %>
+              </div>
             <% end %>
           </div>
-          <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
-            <div class="col s12 m12 l6">
-              <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id) do %>
-                <div class="hoverable card <%= content_page.color %>" style="margin-bottom: 2px">
-                  <div class="card-image">
-                    <%= image_tag content_page.random_image_including_private, style: 'height: 245px' %>
-                    <div class="card-title bordered-text">
-                      <i class="material-icons left <%= content_page.text_color %>" style="position: relative; top: 4px">
-                        <%= content_page.icon %>
-                      </i>
-                      <%= content_page.name %>
+          
+          <!-- Content cards section - redesigned for Tailwind from MaterializeCSS -->          
+          <% if @current_user_content && @current_user_content.except('Universe').values.flatten.any? %>
+            <div class="text-center mt-8 xl:col-span-8">
+              <h2 class="text-sm leading-6 font-medium text-gray-500 mb-4">Your Content</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
+                  <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id), class: 'block w-full group' do %>
+                    <div class="fancy-card relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl border border-gray-200/50 transition-all duration-300 hover:-translate-y-1">
+                      <!-- Image container with fixed height -->
+                      <div class="relative h-32 overflow-hidden rounded-t-xl">
+                        <% if content_page.random_image_including_private.present? %>
+                          <%= image_tag content_page.random_image_including_private, class: 'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110' %>
+                        <% else %>
+                          <!-- Fallback when no image is available -->
+                          <div class="absolute inset-0 w-full h-full <%= content_page.color %> bg-opacity-20"></div>
+                        <% end %>
+                        
+                        <!-- Gradient overlay for title readability -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                        
+                        <!-- Content type badge -->
+                        <div class="absolute top-3 right-3 z-20">
+                          <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= content_page.color %> backdrop-blur-sm text-white">
+                            <i class="material-icons text-sm mr-1"><%= content_page.icon %></i>
+                            <%= content_page.page_type %>
+                          </div>
+                        </div>
+
+                        <!-- Title overlay at bottom of image -->
+                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10">
+                          <h3 class="text-lg font-bold text-white line-clamp-2 group-hover:text-blue-300 transition-colors duration-200">
+                            <%= content_page.name %>
+                          </h3>
+                        </div>
+                      </div>
+
+                      <!-- Footer below image -->
+                      <div class="bg-white rounded-b-xl">
+                        <!-- Stats and metadata -->
+                        <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3">
+                          <div class="flex items-center space-x-3 text-xs text-gray-500">
+                            <% if content_page.cached_word_count.present? %>
+                              <div class="flex items-center space-x-1">
+                                <i class="material-icons text-sm text-blue-500">description</i>
+                                <span class="font-medium text-gray-700">
+                                  <%= number_with_delimiter content_page.cached_word_count %>
+                                  <%= 'word'.pluralize(content_page.cached_word_count) %>
+                                </span>
+                              </div>
+                            <% end %>
+                          </div>
+                          <div class="flex items-center space-x-1 text-xs text-gray-500">
+                            <i class="material-icons text-sm text-green-500">schedule</i>
+                            <span>edited <%= time_ago_in_words content_page.updated_at %> ago</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
-        <% end %>
-      <% else %>
-        <%
-          accessible_universes = (@current_user_content.fetch('Universe', []) + current_user.contributable_universes).uniq(&:id)
-          if accessible_universes.count > 1
-        %>
-          <div class="grey-text uppercase center">
-            Focus on one universe at a time
-          </div>
-
-          <%= render partial: 'notice_dismissal/messages/16' %>
-
-          <% accessible_universes.sort_by { |u| u.name.downcase }.each do |universe| %>
-            <div class="col s12 m6 l4">
-              <%= link_to "?universe=#{universe.id}" do %>
-                <div class="hoverable card" style="margin-bottom: 2px">
-                  <div class="card-image">
-                    <%= image_tag universe.random_image_including_private, style: 'height: 162px' %>
-                    <div class="card-title">
-                      <%= universe.name %>
-                    </div>
-                  </div>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
-        <% end %>
-      <% end %>
-    </div>
-  <% end %>
-
-  <%= render partial: 'notice_dismissal/messages/25' if show_notice?(id: 25) %>
-
-  <div class="col s12 m5 l4">
-    <% if @recently_edited_pages.any? %>
-      <div class="grey-text uppercase center">
-        Pick up where you left off
-      </div>
-      <ul style="margin: 0;">
-        <% @recently_edited_pages.first(5).each do |page| %>
-          <% next if page.page_type === 'Document' && page.user != current_user %>
-
-          <% klass = content_class_from_name(page.page_type) %>
-          <%= link_to main_app.send("edit_#{page.page_type.downcase}_path", page.id), class: "#{klass.text_color}" do %>
-            <li class="card-panel hoverable" style="margin-bottom: 0.5em; border-left: 5px solid <%= klass.hex_color %>">
-              <i class="material-icons left <%= klass.text_color %>" style="font-size: 3em;"><%= klass.icon %></i>
-              <%= page.name %>
-              <div class="grey-text">
-                last edited
-                <%= time_ago_in_words page.updated_at %>
-                ago
-              </div>
-            </li>
-          <% end %>
-        <% end %>
-      </ul>
-      <% if @recently_edited_pages.count > 5 %>
-        <div style="margin-bottom: 2em;">
-          <%= link_to 'view more', '#', class: 'sidenav-trigger right', data: { target: 'recent-edits-sidenav' } %>
-        </div>
-      <% end %>
-    <% end %>
-
-    <div class="grey-text uppercase center">Create something new</div>
-    <% @activated_content_types.sample(3).each do |type| %>
-      <% klass = content_class_from_name(type) %>
-      <div>
-        <%= link_to send("new_#{type.downcase}_path"), class: "white-text", style: 'width: 100%' do %>
-          <div class="hoverable card-panel <%= klass.color %>" style="margin-bottom: 4px">
-            <div class="valign-wrapper">
-              <i class="material-icons grey-bordered-text" class="left" style="font-size: 3em;"><%= klass.icon %></i>
-              <span style="font-size: 1.1em; margin-left: 1em">
-                New
-                <%= type %><br />
-                <small>
-                  You've created
-                  <%= pluralize @current_user_content.fetch(type, []).count, type.downcase %>
-                  <% if @universe_scope %>
-                    in this universe
                   <% end %>
-                </small>
-              </span>
+                <% end %>
+              </div>
             </div>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
+          <% end %>
+          
+          <!-- Accessible universes section - redesigned for Tailwind -->
+          <% if !@universe_scope && @current_user_content %>
+            <% accessible_universes = (@current_user_content.fetch('Universe', []) + current_user.contributable_universes).uniq(&:id) %>
+            <% if accessible_universes.count > 1 %>
+              <div class="text-center mt-8 xl:col-span-8">
+                <h2 class="text-sm leading-6 font-medium text-gray-500 mb-2">Focus on one universe at a time</h2>
+                
+                <%= render partial: 'notice_dismissal/messages/16' %>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
+                  <% accessible_universes.sort_by { |u| u.name.downcase }.each do |universe| %>
+                    <%= link_to "?universe=#{universe.id}", class: "block w-full group" do %>
+                      <div class="fancy-card relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl border border-gray-200/50 transition-all duration-300 hover:-translate-y-1">
+                        <!-- Image container with fixed height -->
+                        <div class="relative h-32 overflow-hidden rounded-t-xl">
+                          <%= image_tag universe.random_image_including_private, class: 'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110' %>
+                          
+                          <!-- Gradient overlay for title readability -->
+                          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                          
+                          <!-- Content type badge -->
+                          <div class="absolute top-3 right-3 z-20">
+                            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= Universe.color %> backdrop-blur-sm text-white">
+                              <i class="material-icons text-sm mr-1"><%= Universe.icon %></i>
+                              Universe
+                            </div>
+                          </div>
 
-    <div class="grey-text uppercase center" style="margin-top: 2em">Join discussions</div>
-    <% @most_recent_threads.each do |topic| %>
-      <div>
-        <%= link_to topic, class: "white-text", style: 'width: 100%' do %>
-          <div class="hoverable card-panel blue" style="margin-bottom: 4px">
-            <div class="valign-wrapper">
-              <i class="material-icons grey-bordered-text" class="left" style="font-size: 3em;">forum</i>
-              <span style="font-size: 1em; margin-left: 1em">
-                <%= topic.title %>
-                <small>
-                  <%= pluralize topic.posts.count, 'post' %>
-                </small>
-                <br />
-                <small>
-                  in <strong><%= topic.messageboard.name %></strong>
-                </small>
-              </span>
-            </div>
-          </div>
-        <% end %>
+                          <!-- Title overlay at bottom of image -->
+                          <div class="absolute bottom-0 left-0 right-0 p-4 z-10">
+                            <h3 class="text-lg font-bold text-white line-clamp-2 group-hover:text-blue-300 transition-colors duration-200">
+                              <%= universe.name %>
+                            </h3>
+                          </div>
+                        </div>
+
+                        <!-- Footer below image -->
+                        <div class="bg-white rounded-b-xl">
+                          <!-- Stats and metadata -->
+                          <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3">
+                            <div class="flex items-center space-x-3 text-xs text-gray-500">
+                              <% if universe.respond_to?(:pages_count) && universe.pages_count.present? %>
+                                <div class="flex items-center space-x-1">
+                                  <i class="material-icons text-sm text-blue-500">menu_book</i>
+                                  <span class="font-medium text-gray-700">
+                                    <%= number_with_delimiter universe.pages_count %>
+                                    <%= 'page'.pluralize(universe.pages_count) %>
+                                  </span>
+                                </div>
+                              <% end %>
+                            </div>
+                            <div class="flex items-center space-x-1 text-xs text-gray-500">
+                              <i class="material-icons text-sm text-green-500">schedule</i>
+                              <span>edited <%= time_ago_in_words universe.updated_at %> ago</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
       </div>
-    <% end %>
-    <div style="margin-bottom: 2em;">
-      <%= link_to 'see all', thredded_path, class: 'right' %>
-    </div>
+    </main>
 
   </div>
 </div>
+
+<style>
+/* Button styles */
+.fancy-button {
+  position: relative;
+  transform-style: preserve-3d;
+  background-size: 200% 200%;
+  animation: gradientShift 4s ease infinite;
+}
+
+.fancy-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fancy-button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.fancy-button:active i {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.fancy-button:hover i {
+  transform: scale(1.05);
+}
+
+/* Enhanced glow effect on hover */
+.fancy-button:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Pulse animation on focus */
+.fancy-button:focus {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Card styles */
+.fancy-card {
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.fancy-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.fancy-card:active {
+  transform: translateY(-2px) scale(0.98);
+  transition-duration: 0.1s;
+}
+
+/* Enhanced text effects */
+.fancy-card h3 {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.fancy-card:hover h3 {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+/* Shimmer effect on hover */
+.fancy-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+  border-radius: 0.75rem;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.fancy-card:hover::after {
+  left: 100%;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Button effects
+  const fancyButtons = document.querySelectorAll('.fancy-button');
+  
+  fancyButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      // Create ripple effect
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      ripple.classList.add('ripple');
+      
+      this.appendChild(ripple);
+      
+      // Add click animation classes
+      this.style.transform = 'scale(0.95)';
+      
+      setTimeout(() => {
+        this.style.transform = '';
+        ripple.remove();
+      }, 300);
+      
+      // Add a brief glow effect
+      this.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.5)';
+      setTimeout(() => {
+        this.style.boxShadow = '';
+      }, 200);
+    });
+    
+    // Add floating animation on hover
+    button.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-2px) scale(1.02)';
+    });
+    
+    button.addEventListener('mouseleave', function() {
+      this.style.transform = '';
+    });
+  });
+  
+  // Card effects
+  const fancyCards = document.querySelectorAll('.fancy-card');
+  
+  fancyCards.forEach(card => {
+    card.addEventListener('click', function(e) {
+      // Create ripple effect
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      ripple.classList.add('card-ripple');
+      
+      this.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+    
+    // Add subtle floating animation
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-6px) scale(1.03)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = '';
+    });
+  });
+});
+</script>
+
+<style>
+/* Button ripple effect */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(0);
+  animation: rippleEffect 0.6s linear;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes rippleEffect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Card ripple effect */
+.card-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.4);
+  transform: scale(0);
+  animation: cardRippleEffect 0.6s linear;
+  pointer-events: none;
+  z-index: 15;
+}
+
+@keyframes cardRippleEffect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+</style>
 
 <%= render partial: 'javascripts/content_linking' %>
