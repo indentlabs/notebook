@@ -2,7 +2,18 @@ const colors = require('tailwindcss/colors');
 
 module.exports = {
   purge: [
-    'app/views/*/*.html.erb'
+    'app/views/**/*.html.erb'
+  ],
+  safelist: [
+    // Toggle switch classes
+    'toggle-switch',
+    'toggle-dot',
+    'bg-notebook-blue',
+    'translate-x-5',
+    'translate-x-0',
+    // Ensure pseudo-element classes aren't purged if used elsewhere
+    { pattern: /^after:/ },
+    { pattern: /^peer/ },
   ],
   content: [],
   theme: {
