@@ -524,6 +524,14 @@ class ContentController < ApplicationController
       send_data service.export_as_markdown,
                 filename: "#{@content_type}_template.md", 
                 type: 'text/plain'
+    when 'json'
+      send_data service.export_as_json,
+                filename: "#{@content_type}_template.json", 
+                type: 'application/json'
+    when 'csv'
+      send_data service.export_as_csv,
+                filename: "#{@content_type}_template.csv", 
+                type: 'text/csv'
     else
       redirect_back fallback_location: root_path, alert: 'Invalid export format'
     end

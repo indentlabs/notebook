@@ -60,34 +60,75 @@
                x-transition:leave-start="opacity-100 transform scale-100"
                x-transition:leave-end="opacity-0 transform scale-95"
                class="border-t border-gray-200 bg-gray-50 p-3">
-            <div class="flex space-x-2">
+            <div class="grid grid-cols-2 gap-2">
+              <!-- Technical Formats Row -->
               <a href="<%= export_template_path(content_type: content_type, format: 'yml') %>" 
-                 class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors">
+                 class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors">
                 <i class="material-icons text-xs mr-1">code</i>
                 YAML
               </a>
+              <a href="<%= export_template_path(content_type: content_type, format: 'json') %>"
+                 class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors">
+                <i class="material-icons text-xs mr-1">data_object</i>
+                JSON
+              </a>
+              
+              <!-- User-Friendly Formats Row -->
               <a href="<%= export_template_path(content_type: content_type, format: 'md') %>"
-                 class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors">
+                 class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors">
                 <i class="material-icons text-xs mr-1">description</i>
                 Markdown
               </a>
+              <a href="<%= export_template_path(content_type: content_type, format: 'csv') %>"
+                 class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors">
+                <i class="material-icons text-xs mr-1">table_chart</i>
+                CSV
+              </a>
             </div>
             <p class="text-xs text-gray-500 mt-2">
-              YAML for technical users, Markdown for documentation
+              YAML/JSON for technical users, Markdown/CSV for human readability.
             </p>
           </div>
         </div>
         
-        <button class="w-full flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-          <div class="flex items-center">
-            <i class="material-icons text-gray-600 mr-3">file_upload</i>
-            <div>
-              <div class="font-medium text-gray-900">Import Template</div>
-              <div class="text-sm text-gray-500">Load a saved template configuration</div>
+        <div class="border border-gray-200 rounded-lg overflow-hidden" x-data="{ importOpen: false }">
+          <button @click="importOpen = !importOpen" 
+                  class="w-full flex items-center justify-between p-3 hover:bg-gray-50 transition-colors text-left">
+            <div class="flex items-center">
+              <i class="material-icons text-gray-600 mr-3">file_upload</i>
+              <div>
+                <div class="font-medium text-gray-900">Import Template</div>
+                <div class="text-sm text-gray-500">Load a saved template configuration</div>
+              </div>
+            </div>
+            <i class="material-icons text-gray-400 transition-transform" 
+               :class="{ 'rotate-180': importOpen }">expand_more</i>
+          </button>
+          <div x-show="importOpen" 
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="opacity-0 transform scale-95"
+               x-transition:enter-end="opacity-100 transform scale-100"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-start="opacity-100 transform scale-100"
+               x-transition:leave-end="opacity-0 transform scale-95"
+               class="border-t border-gray-200 bg-gray-50 p-4">
+            <div class="text-center py-6">
+              <div class="text-gray-400 mb-3">
+                <i class="material-icons text-4xl">construction</i>
+              </div>
+              <h4 class="font-medium text-gray-900 mb-2">Coming Soon!</h4>
+              <p class="text-sm text-gray-600 mb-3">
+                Template import functionality is currently in development. Soon you'll be able to:
+              </p>
+              <ul class="text-sm text-gray-600 text-left space-y-1 mb-4 max-w-md mx-auto">
+                <li>• Import YAML/JSON template files</li>
+                <li>• Share templates with other users</li>
+                <li>• Load community-created templates</li>
+                <li>• Restore from template backups</li>
+              </ul>
             </div>
           </div>
-          <i class="material-icons text-gray-400">chevron_right</i>
-        </button>
+        </div>
         
         <div class="border border-red-200 rounded-lg overflow-hidden" 
              x-data="templateResetComponent()"
@@ -196,16 +237,15 @@
 
     <!-- Archive Management -->
     <div x-data="{ showArchived: true, archivedItemsCount: 0 }" x-init="updateArchivedItemsCount()">
-      <h3 class="font-medium text-gray-900 mb-3">Archive Management</h3>
+      <h3 class="font-medium text-gray-900 mb-3">Editor Settings</h3>
       <div class="space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <div class="font-medium text-gray-900">Show archived items</div>
             <div class="text-sm text-gray-500">
-              Display archived categories and fields in the template editor
               <span x-show="archivedItemsCount > 0" 
                     x-text="`(${archivedItemsCount} archived)`" 
-                    class="ml-2 text-xs text-gray-400"></span>
+                    class="text-xs text-gray-400"></span>
             </div>
           </div>
           <div class="toggle-switch relative inline-flex items-center h-6 w-11 bg-gray-200 rounded-full cursor-pointer transition-colors duration-200 ease-in-out">

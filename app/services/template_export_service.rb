@@ -123,6 +123,54 @@ class TemplateExportService
     markdown_content.join("\n")
   end
 
+  def export_as_json
+    template_data = build_template_data
+    JSON.pretty_generate(template_data)
+  end
+
+  def export_as_csv
+    require 'csv'
+    template_data = build_template_data
+    
+    CSV.generate(headers: true) do |csv|
+      # Header row
+      csv << [
+        'Category', 'Category_Position', 'Category_Hidden', 'Category_Description', 
+        'Field', 'Field_Type', 'Field_Position', 'Field_Hidden', 'Field_Description', 
+        'Field_Options'
+      ]
+      
+      # Data rows
+      template_data[:template][:categories].each do |category_name, category_data|
+        if category_data[:fields].any?
+          category_data[:fields].each do |field_name, field_data|
+            csv << [
+              category_data[:label],
+              category_data[:position],
+              category_data[:hidden],
+              category_data[:description],
+              field_data[:label],
+              field_data[:field_type],
+              field_data[:position],  
+              field_data[:hidden],
+              field_data[:description],
+              field_data[:field_options].to_json
+            ]
+          end
+        else
+          # Category with no fields
+          csv << [
+            category_data[:label],
+            category_data[:position],
+            category_data[:hidden],
+            category_data[:description],
+            '', '', '', '', '', ''
+          ]
+        end
+      end
+    end
+  end
+
   private
 
   def load_template_structure
