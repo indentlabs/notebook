@@ -183,70 +183,148 @@
                 
                 <!-- Display Style Options -->
                 <div class="space-y-3">
-                  <label class="flex items-start p-3 border rounded-md cursor-pointer hover:bg-gray-50" 
+                  <label class="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50" 
                          :class="displayStyle === 'list' ? 'border-blue-300 bg-blue-50' : 'border-gray-200'">
                     <input type="radio" 
                            x-model="displayStyle" 
                            name="attribute_field[field_options][display_style]"
                            value="list" 
-                           class="mt-1 h-4 w-4 border-gray-300 focus:ring-2 focus:ring-offset-2"
+                           class="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-offset-2"
                            style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
                     <div class="ml-3">
-                      <div class="text-sm font-medium text-gray-900">Simple List</div>
-                      <div class="text-xs text-gray-500">Character Name • Location Name • Item Name</div>
+                      <div class="text-sm font-medium text-gray-900">Text</div>
                     </div>
                   </label>
                   
-                  <label class="flex items-start p-3 border rounded-md cursor-pointer hover:bg-gray-50" 
+                  <label class="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50" 
+                         :class="displayStyle === 'tags' ? 'border-blue-300 bg-blue-50' : 'border-gray-200'">
+                    <input type="radio" 
+                           x-model="displayStyle" 
+                           name="attribute_field[field_options][display_style]"
+                           value="tags" 
+                           class="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-offset-2"
+                           style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
+                    <div class="ml-3">
+                      <div class="text-sm font-medium text-gray-900">Tags</div>
+                    </div>
+                  </label>
+                  
+                  <label class="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50" 
                          :class="displayStyle === 'cards' ? 'border-blue-300 bg-blue-50' : 'border-gray-200'">
                     <input type="radio" 
                            x-model="displayStyle" 
                            name="attribute_field[field_options][display_style]"
                            value="cards" 
-                           class="mt-1 h-4 w-4 border-gray-300 focus:ring-2 focus:ring-offset-2"
+                           class="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-offset-2"
                            style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
                     <div class="ml-3">
-                      <div class="text-sm font-medium text-gray-900">Cards with Icons</div>
-                      <div class="text-xs text-gray-500">📝 Character Name   🏠 Location Name   ⚔️ Item Name</div>
-                    </div>
-                  </label>
-                  
-                  <label class="flex items-start p-3 border rounded-md cursor-pointer hover:bg-gray-50" 
-                         :class="displayStyle === 'compact' ? 'border-blue-300 bg-blue-50' : 'border-gray-200'">
-                    <input type="radio" 
-                           x-model="displayStyle" 
-                           name="attribute_field[field_options][display_style]"
-                           value="compact" 
-                           class="mt-1 h-4 w-4 border-gray-300 focus:ring-2 focus:ring-offset-2"
-                           style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
-                    <div class="ml-3">
-                      <div class="text-sm font-medium text-gray-900">Compact Tags</div>
-                      <div class="text-xs text-gray-500">[Character Name] [Location Name] [Item Name]</div>
+                      <div class="text-sm font-medium text-gray-900">Cards</div>
                     </div>
                   </label>
                 </div>
                 
-                <!-- Preview (placeholder) -->
+                <!-- Preview -->
                 <div class="mt-4">
                   <label class="block text-sm font-medium text-gray-700 mb-2">Preview</label>
                   <div class="border border-gray-200 rounded-md p-3 bg-gray-50">
+                    <!-- Simple List Preview -->
                     <div x-show="displayStyle === 'list'" class="text-sm text-gray-600">
                       <div>• Alice Johnson</div>
                       <div>• The Rusty Tavern</div>
                       <div>• Magic Sword</div>
                     </div>
-                    <div x-show="displayStyle === 'cards'" class="text-sm text-gray-600">
+                    
+                    <!-- Tags Preview -->
+                    <div x-show="displayStyle === 'tags'" class="text-sm text-gray-600">
                       <div class="flex flex-wrap gap-2">
-                        <span class="inline-flex items-center px-2 py-1 bg-white rounded border">📝 Alice Johnson</span>
-                        <span class="inline-flex items-center px-2 py-1 bg-white rounded border">🏠 The Rusty Tavern</span>
-                        <span class="inline-flex items-center px-2 py-1 bg-white rounded border">⚔️ Magic Sword</span>
+                        <span class="inline-flex items-center px-2 py-1 bg-white rounded border hover:bg-gray-100 hover:border-gray-300 transition-colors duration-150 ease-in-out cursor-pointer">
+                          <i class="material-icons text-xs <%= defined?(Character) ? Character.text_color : 'text-purple-600' %> mr-1"><%= defined?(Character) ? Character.icon : 'person' %></i>
+                          Alice Johnson
+                        </span>
+                        <span class="inline-flex items-center px-2 py-1 bg-white rounded border hover:bg-gray-100 hover:border-gray-300 transition-colors duration-150 ease-in-out cursor-pointer">
+                          <i class="material-icons text-xs <%= defined?(Location) ? Location.text_color : 'text-green-600' %> mr-1"><%= defined?(Location) ? Location.icon : 'place' %></i>
+                          The Rusty Tavern
+                        </span>
+                        <span class="inline-flex items-center px-2 py-1 bg-white rounded border hover:bg-gray-100 hover:border-gray-300 transition-colors duration-150 ease-in-out cursor-pointer">
+                          <i class="material-icons text-xs <%= defined?(Item) ? Item.text_color : 'text-orange-600' %> mr-1"><%= defined?(Item) ? Item.icon : 'category' %></i>
+                          Magic Sword
+                        </span>
                       </div>
                     </div>
-                    <div x-show="displayStyle === 'compact'" class="text-sm text-gray-600">
-                      <div class="flex flex-wrap gap-1">
-                        <span class="px-2 py-1 bg-gray-200 rounded text-xs">Alice Johnson</span>
-                        <span class="px-2 py-1 bg-gray-200 rounded text-xs">The Rusty Tavern</span>
-                        <span class="px-2 py-1 bg-gray-200 rounded text-xs">Magic Sword</span>
+                    
+                    <!-- Cards Preview -->
+                    <div x-show="displayStyle === 'cards'" class="text-sm text-gray-600">
+                      <div class="w-full max-w-md overflow-x-auto overflow-y-hidden">
+                        <div class="flex flex-row flex-nowrap space-x-3 pb-2" style="width: max-content;">
+                        <!-- Character Card -->
+                        <div class="flex-shrink-0 w-40 bg-white rounded-lg border shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
+                          <div class="h-16 bg-gray-200 rounded-t-lg overflow-hidden">
+                            <%= image_tag 'card-headers/characters.jpg', class: 'w-full h-full object-cover', alt: 'Character image' %>
+                          </div>
+                          <div class="h-12 p-2 flex flex-col justify-center">
+                            <div class="text-xs font-medium text-gray-900 truncate leading-tight">Alice Johnson</div>
+                            <div class="text-xs text-gray-500 truncate flex items-center">
+                              <i class="material-icons text-xs <%= defined?(Character) ? Character.text_color : 'text-purple-600' %> mr-1"><%= defined?(Character) ? Character.icon : 'person' %></i>
+                              Character
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Location Card -->
+                        <div class="flex-shrink-0 w-40 bg-white rounded-lg border shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
+                          <div class="h-16 bg-gray-200 rounded-t-lg overflow-hidden">
+                            <%= image_tag 'card-headers/locations.jpg', class: 'w-full h-full object-cover', alt: 'Location image' %>
+                          </div>
+                          <div class="h-12 p-2 flex flex-col justify-center">
+                            <div class="text-xs font-medium text-gray-900 truncate leading-tight">The Rusty Tavern</div>
+                            <div class="text-xs text-gray-500 truncate flex items-center">
+                              <i class="material-icons text-xs <%= defined?(Location) ? Location.text_color : 'text-green-600' %> mr-1"><%= defined?(Location) ? Location.icon : 'place' %></i>
+                              Location
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Item Card -->
+                        <div class="flex-shrink-0 w-40 bg-white rounded-lg border shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
+                          <div class="h-16 bg-gray-200 rounded-t-lg overflow-hidden">
+                            <%= image_tag 'card-headers/items.jpg', class: 'w-full h-full object-cover', alt: 'Item image' %>
+                          </div>
+                          <div class="h-12 p-2 flex flex-col justify-center">
+                            <div class="text-xs font-medium text-gray-900 truncate leading-tight">Magic Sword</div>
+                            <div class="text-xs text-gray-500 truncate flex items-center">
+                              <i class="material-icons text-xs <%= defined?(Item) ? Item.text_color : 'text-orange-600' %> mr-1"><%= defined?(Item) ? Item.icon : 'category' %></i>
+                              Item
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Additional cards to show scrolling -->
+                        <div class="flex-shrink-0 w-40 bg-white rounded-lg border shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
+                          <div class="h-16 bg-gray-200 rounded-t-lg overflow-hidden">
+                            <%= image_tag 'card-headers/characters.jpg', class: 'w-full h-full object-cover', alt: 'Character image' %>
+                          </div>
+                          <div class="h-12 p-2 flex flex-col justify-center">
+                            <div class="text-xs font-medium text-gray-900 truncate leading-tight">Sir Marcus</div>
+                            <div class="text-xs text-gray-500 truncate flex items-center">
+                              <i class="material-icons text-xs <%= defined?(Character) ? Character.text_color : 'text-purple-600' %> mr-1"><%= defined?(Character) ? Character.icon : 'person' %></i>
+                              Character
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="flex-shrink-0 w-40 bg-white rounded-lg border shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
+                          <div class="h-16 bg-gray-200 rounded-t-lg overflow-hidden">
+                            <%= image_tag 'card-headers/locations.jpg', class: 'w-full h-full object-cover', alt: 'Location image' %>
+                          </div>
+                          <div class="h-12 p-2 flex flex-col justify-center">
+                            <div class="text-xs font-medium text-gray-900 truncate leading-tight">Ancient Library</div>
+                            <div class="text-xs text-gray-500 truncate flex items-center">
+                              <i class="material-icons text-xs <%= defined?(Location) ? Location.text_color : 'text-green-600' %> mr-1"><%= defined?(Location) ? Location.icon : 'place' %></i>
+                              Location
+                            </div>
+                          </div>
+                        </div>
+                        </div>
                       </div>
                     </div>
                   </div>
