@@ -232,6 +232,7 @@ Rails.application.routes.draw do
       end
     end
     get '/help', to: 'help#index', as: :help_center
+    get '/help/page-templates', to: 'help#page_templates', as: :help_page_templates
   end
   delete 'delete_my_account', to: 'users#delete_my_account'
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
