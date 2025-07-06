@@ -34,68 +34,36 @@
     <div :class="{ 'hidden md:block': activePanel === 'config' }"
          class="flex-1 min-w-0">
       
-      <!-- Beautiful Hero Header -->
-      <div class="template-hero-header relative overflow-hidden rounded-xl shadow-xl mb-8 bg-white">
-        <!-- Background Image with Overlay -->
+      <!-- Streamlined Header -->
+      <div class="template-header relative overflow-hidden rounded-lg shadow-md mb-6 bg-white">
+        <!-- Background with Frosted Glass Effect -->
         <div class="absolute inset-0">
           <%= image_tag "card-headers/#{@content_type.downcase.pluralize}.jpg", 
                         class: "hero-bg-image w-full h-full object-cover", 
                         alt: "#{@content_type.titleize} background" %>
-          <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30"></div>
-          <div class="absolute inset-0" style="background: linear-gradient(135deg, <%= @content_type_class.hex_color %>cc 0%, <%= @content_type_class.hex_color %>66 50%, transparent 100%);"></div>
+          <!-- Frosted glass overlay for better text readability -->
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-md"></div>
+          <div class="absolute inset-0" style="background: linear-gradient(135deg, <%= @content_type_class.hex_color %>88 0%, <%= @content_type_class.hex_color %>44 50%, transparent 100%);"></div>
         </div>
         
         <!-- Content -->
-        <div class="relative z-10 px-8 py-12">
-          <!-- Icon and Title -->
-          <div class="glass-panel rounded-xl p-6 max-w-4xl">
-            <div class="flex items-center mb-4">
-              <div class="w-16 h-16 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center mr-4 shadow-lg">
-                <i class="material-icons text-2xl" style="color: <%= @content_type_class.hex_color %>;"><%= @content_type_class.icon %></i>
+        <div class="relative z-10 px-6 py-5">
+          <div class="flex items-start justify-between">
+            <!-- Icon and Title -->
+            <div class="flex items-center">
+              <div class="w-12 h-12 rounded-lg flex items-center justify-center mr-4 content-type-icon-bg">
+                <i class="material-icons text-white text-xl"><%= @content_type_class.icon %></i>
               </div>
               <div>
-                <h1 class="text-3xl font-bold text-white mb-1">
+                <h1 class="text-2xl font-semibold text-white leading-tight mb-1">
                   <%= @content_type.titleize %> Template Editor
                 </h1>
-                <p class="text-white/90 text-lg font-medium">
-                  Design your perfect <%= @content_type.titleize.downcase %> structure
+                <p class="text-white text-sm leading-relaxed max-w-2xl">
+                  Edit the template used for your <%= @content_type.titleize.downcase %> pages. Adding or removing a field here will modify all of your already-created <%= @content_type.titleize.downcase %> pages also.
                 </p>
               </div>
             </div>
-            
-            <!-- Description -->
-            <div class="max-w-2xl">
-              <p class="text-white text-base leading-relaxed mb-6">
-                This template will be used for all of your <%= @content_type.titleize.downcase %> pages.
-                You can customize categories and fields to fit your needs; adding or removing categories or
-                fields on this page will also add or remove them from all of your existing <%= @content_type.titleize.downcase %> pages.
-              </p>
-              
-              <!-- Interactive Hints -->
-              <div class="flex items-center space-x-6 text-sm text-white/75">
-                <div class="interactive-hint flex items-center">
-                  <i class="material-icons text-white/60 mr-2 text-lg transition-all duration-300">drag_indicator</i>
-                  <span>Drag to reorder</span>
-                </div>
-                <div class="interactive-hint flex items-center">
-                  <i class="material-icons text-white/60 mr-2 text-lg transition-all duration-300">tune</i>
-                  <span>Click to configure</span>
-                </div>
-                <div class="interactive-hint flex items-center">
-                  <i class="material-icons text-white/60 mr-2 text-lg transition-all duration-300">add_circle</i>
-                  <span>Add new elements</span>
-                </div>
-              </div>
-            </div>
           </div>
-        </div>
-        
-        <!-- Decorative Elements -->
-        <div class="floating-decoration absolute bottom-0 right-0 w-64 h-64 opacity-10">
-          <div class="w-full h-full rounded-full border-4 border-white/30 transform rotate-12"></div>
-        </div>
-        <div class="floating-decoration absolute top-4 right-4 w-32 h-32 opacity-5">
-          <div class="w-full h-full rounded-full border-2 border-white/50"></div>
         </div>
       </div>
 
@@ -217,91 +185,51 @@
 
 
 <style>
-  /* Beautiful Hero Header Styles */
-  .template-hero-header {
+  /* Streamlined Header Styles */
+  .template-header {
     position: relative;
-    background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
   }
   
-  .template-hero-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-    pointer-events: none;
+  .template-header:hover {
+    shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
   
-  /* Parallax effect for background image */
+  /* Subtle background image effect */
   .hero-bg-image {
-    transform: scale(1.1);
-    transition: transform 0.8s ease-out;
+    transition: opacity 0.3s ease;
   }
   
-  .template-hero-header:hover .hero-bg-image {
-    transform: scale(1.05);
+  .template-header:hover .hero-bg-image {
+    opacity: 0.8;
   }
   
-  /* Animated floating elements */
-  @keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-10px) rotate(1deg); }
-  }
-  
-  .floating-decoration {
-    animation: float 6s ease-in-out infinite;
-  }
-  
-  .floating-decoration:nth-child(2) {
-    animation-delay: -2s;
-    animation-duration: 8s;
-  }
-  
-  /* Enhanced backdrop effects */
-  .backdrop-blur-enhanced {
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    background: rgba(255, 255, 255, 0.1);
+  /* Content type icon styling */
+  .content-type-icon-bg {
+    background: linear-gradient(135deg, var(--content-type-color) 0%, color-mix(in srgb, var(--content-type-color) 80%, white) 100%);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
   }
   
-  /* Glassmorphism effect for stats */
-  .glass-panel {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  .content-type-icon-bg:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
   
-  /* Interactive hint animations */
+  /* Interactive hint styling */
   .interactive-hint {
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     cursor: default;
   }
   
   .interactive-hint:hover {
-    transform: translateY(-2px);
     color: rgba(255, 255, 255, 1);
   }
   
   .interactive-hint:hover i {
     color: rgba(255, 255, 255, 0.9);
-    transform: scale(1.1);
-  }
-  
-  /* Stats counter animation */
-  .stats-counter {
-    transition: all 0.3s ease;
-  }
-  
-  .stats-counter:hover {
     transform: scale(1.05);
-    background: rgba(255, 255, 255, 0.3);
   }
   
   /* jQuery UI Sortable placeholder styles */

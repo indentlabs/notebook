@@ -1,5 +1,94 @@
 // Template Editor JavaScript
 
+// Field Deletion Component function for Alpine.js (define before DOM ready)
+window.fieldDeletionComponent = function() {
+  return {
+    showConfirmation: false,
+    deleting: false,
+    
+    deleteField() {
+      this.deleting = true;
+      
+      // Get field information from the current context
+      const fieldConfigContainer = document.getElementById('field-config-container');
+      const fieldForm = fieldConfigContainer.querySelector('form[action*="/attribute_fields/"]');
+      
+      if (!fieldForm) {
+        console.error('Field form not found');
+        showNotification('Unable to delete field - form not found', 'error');
+        this.deleting = false;
+        return;
+      }
+      
+      // Extract field ID from form action URL
+      const fieldIdMatch = fieldForm.action.match(/\/attribute_fields\/(\d+)/);
+      if (!fieldIdMatch) {
+        console.error('Field ID not found in form action');
+        showNotification('Unable to delete field - ID not found', 'error');
+        this.deleting = false;
+        return;
+      }
+      
+      const fieldId = fieldIdMatch[1];
+      
+      // Perform deletion via AJAX
+      fetch(`/plan/attribute_fields/${fieldId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Field deleted successfully:', data);
+        
+        // Remove the field from the UI
+        const fieldItem = document.querySelector(`[data-field-id="${fieldId}"]`);
+        if (fieldItem) {
+          // Update field count in category header before removing
+          const categoryId = fieldItem.closest('.fields-container').dataset.categoryId;
+          fieldItem.remove();
+          updateCategoryFieldCount(categoryId);
+        }
+        
+        // Update General Settings counts
+        updateGeneralSettingsCounts();
+        
+        // Close the configuration panel
+        const alpineElement = document.querySelector('.attributes-editor');
+        if (alpineElement && alpineElement._x_dataStack) {
+          const alpine = alpineElement._x_dataStack[0];
+          if (alpine) {
+            alpine.selectedField = null;
+            alpine.configuring = false;
+          }
+        }
+        
+        // Show success notification
+        if (data.message) {
+          showNotification(data.message, 'success');
+        } else {
+          showNotification('Field deleted successfully', 'success');
+        }
+        
+        this.deleting = false;
+      })
+      .catch(error => {
+        console.error('Failed to delete field:', error);
+        showNotification('Failed to delete field', 'error');
+        this.deleting = false;
+      });
+    }
+  };
+};
+
 // Template Reset Component function for Alpine.js (define before DOM ready)
 window.templateResetComponent = function() {
   return {

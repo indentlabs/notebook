@@ -1,6 +1,6 @@
 class AttributeFieldsController < ContentController
   before_action :authenticate_user!
-  before_action :set_attribute_field, only: [:update, :edit]
+  before_action :set_attribute_field, only: [:update, :edit, :destroy]
 
   def create
     if initialize_object.save!
@@ -19,12 +19,40 @@ class AttributeFieldsController < ContentController
   end
 
   def destroy
-    # Delete this field as usual -- sets @content
-    super
+    unless @attribute_field.deletable_by?(current_user)
+      respond_to do |format|
+        format.html { redirect_back fallback_location: root_path, alert: "You don't have permission to delete that!" }
+        format.json { render json: { success: false, error: "You don't have permission to delete that!" }, status: :forbidden }
+      end
+      return
+    end
 
+    # Store references before deletion
+    field_label = @attribute_field.label
+    related_category = @attribute_field.attribute_category
+    
+    # Delete the field
+    @attribute_field.destroy
+    
     # If the related category is now empty, delete it as well
-    related_category = @content.attribute_category
-    related_category.destroy if related_category.attribute_fields.empty?
+    if related_category.attribute_fields.empty?
+      related_category.destroy
+    end
+    
+    # Respond with success
+    respond_to do |format|
+      format.html { 
+        redirect_to attribute_customization_tailwind_path(content_type: related_category.entity_type), 
+                   notice: "#{field_label} field deleted successfully" 
+      }
+      format.json { 
+        render json: { 
+          success: true, 
+          message: "#{field_label} field deleted successfully",
+          deleted_field_id: params[:id]
+        }, status: :ok 
+      }
+    end
   end
 
   def edit
