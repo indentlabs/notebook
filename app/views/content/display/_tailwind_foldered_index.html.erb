@@ -265,12 +265,32 @@
           </div>
           
           <div class="flex items-center space-x-3">
-            <% if Rails.application.config.content_type_names.include?(content_type_name) %>
-              <%= link_to attribute_customization_path(content_type_name.downcase) do %>
-                <button class="hidden lg:inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  <i class="material-icons text-lg mr-2">tune</i>
-                  Customize template
-                </button>
+            <% if @current_user_content.fetch(content_type_name, []).any? %>
+              <% if content.any? %>
+                <!-- Dropdown menu when user has content -->
+                <div data-controller="dropdown" class="relative">
+                  <button data-action="dropdown#toggle click@window->dropdown#hide" class="hidden lg:inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="material-icons text-lg mr-2">tune</i>
+                    Template
+                    <%= chevron_down %>
+                  </button>
+                  <div data-dropdown-target="menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                    <div class="py-1">
+                      <%= link_to attribute_customization_path(content_type_name.downcase), class: "group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" do %>
+                        <i class="material-icons text-lg mr-3 text-gray-400 group-hover:text-gray-600">tune</i>
+                        Customize template
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% else %>
+                <!-- Full expanded button when user has no content -->
+                <%= link_to attribute_customization_path(content_type_name.downcase) do %>
+                  <button class="hidden lg:inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="material-icons text-lg mr-2">tune</i>
+                    Customize template
+                  </button>
+                <% end %>
               <% end %>
             <% end %>
 
@@ -638,6 +658,35 @@
                 <% end %>
               </div>
             <% end %>
+            
+            <!-- Template Customization Card -->
+            <% if @current_user_content.fetch(content_type_name, []).any? %>
+              <div class="group relative" x-show="searchQuery === ''">
+                <%= link_to attribute_customization_path(content_type_name.downcase), class: "block" do %>
+                  <div class="bg-gradient-to-br from-gray-50 to-blue-50 hover:from-blue-50 hover:to-indigo-50 border-2 border-dashed border-gray-300 hover:border-blue-400 rounded-lg transition-all duration-200 overflow-hidden">
+                    <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-blue-100 flex items-center justify-center relative overflow-hidden">
+                      <div class="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent"></div>
+                      <div class="text-center relative z-10">
+                        <div class="bg-white/90 backdrop-blur-sm rounded-full p-4 mb-3 shadow-sm">
+                          <i class="material-icons text-3xl text-gray-600 group-hover:text-blue-600 transition-colors">tune</i>
+                        </div>
+                        <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Template</div>
+                      </div>
+                    </div>
+                    <div class="p-4">
+                      <div class="text-center">
+                        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+                          Customize
+                        </h3>
+                        <h2 class="text-lg font-semibold text-gray-900">
+                          Template
+                        </h2>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
           </div>
         </div>
         
@@ -707,46 +756,101 @@
         </div>
       <% else %>
         <!-- Empty State -->
-        <div class="flex-1 flex items-center justify-center p-12">
-          <div class="text-center max-w-md">
-            <div class="mx-auto h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center mb-6">
-              <i class="material-icons text-4xl text-gray-400"><%= content_type_class.icon %></i>
+        <div class="flex-1 flex items-center justify-center p-8 min-h-96">
+          <div class="max-w-4xl w-full">
+            <!-- Header -->
+            <div class="text-center mb-8">
+              <div class="mx-auto h-16 w-16 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4 shadow-sm">
+                <i class="material-icons text-3xl text-gray-500"><%= content_type_class.icon %></i>
+              </div>
+              <h2 class="text-2xl font-bold text-gray-900 mb-2">Welcome to your <%= content_type_name.pluralize %></h2>
+              <p class="text-gray-600 max-w-2xl mx-auto">
+                Ready to start building your world? Choose how you'd like to begin your <%= content_type_name.downcase %> collection.
+              </p>
             </div>
-            <h3 class="text-xl font-medium text-gray-900 mb-3">No <%= content_type_name.pluralize.downcase %> yet</h3>
-            <p class="text-gray-500 mb-8">Get started by creating your first <%= content_type_name.downcase %>. You can also customize your template to organize information exactly how you want.</p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-              <% if Rails.application.config.content_type_names.include?(content_type_name) %>
-                <%= link_to attribute_customization_path(content_type_name.downcase) do %>
-                  <button class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    <i class="material-icons text-lg mr-2">tune</i>
-                    Customize template
-                  </button>
-                <% end %>
-              <% end %>
-              <% if current_user.can_create?(content_type_class) %>
-                <%= link_to new_polymorphic_path(content_type_class) do %>
-                  <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white <%= content_type_class.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
-                    <i class="material-icons text-lg mr-2">add</i>
-                    <span class="hidden sm:inline">New <%= content_type_name %></span>
-                    <span class="sm:hidden">New</span>
-                  </button>
-                <% end %>
-              <% else %>
-                <%= link_to subscription_path do %>
-                  <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gray-400 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
-                    <i class="material-icons text-lg mr-2">book</i>
-                    <span class="hidden sm:inline">Upgrade to create a <%= content_type_name %></span>
-                    <span class="sm:hidden">Upgrade</span>
-                  </button>
-                <% end %>
-              <% end %>
 
-              <!-- Customize template button -->
-              <%= link_to attribute_customization_path(content_type_name.downcase) do %>
-                <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gray-400 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
-                  <i class="material-icons text-lg mr-2">tune</i>
-                  Customize template
-                </button>
+            <!-- Action Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-3xl mx-auto mb-8">
+              <!-- Template Customization Card - Always show, using existing card design -->
+              <div class="group relative">
+                <%= link_to attribute_customization_path(content_type_name.downcase), class: "block h-full" do %>
+                  <div class="bg-gradient-to-br from-gray-50 to-blue-50 hover:from-blue-50 hover:to-indigo-50 border-2 border-dashed border-gray-300 hover:border-blue-400 rounded-lg transition-all duration-200 overflow-hidden">
+                    <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-blue-100 flex items-center justify-center relative overflow-hidden">
+                      <div class="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent"></div>
+                      <div class="text-center relative z-10">
+                        <div class="bg-white/90 backdrop-blur-sm rounded-full p-4 mb-3 shadow-sm">
+                          <i class="material-icons text-3xl text-gray-600 group-hover:text-blue-600 transition-colors">tune</i>
+                        </div>
+                        <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Template</div>
+                      </div>
+                    </div>
+                    <div class="p-4">
+                      <div class="text-center">
+                        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+                          Customize
+                        </h3>
+                        <h2 class="text-lg font-semibold text-gray-900">
+                          Template
+                        </h2>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+
+              <!-- Create Content Card or Upgrade Card - Matching the template card style -->
+              <% if current_user.can_create?(content_type_class) %>
+                <div class="group relative">
+                  <%= link_to new_polymorphic_path(content_type_class), class: "block h-full" do %>
+                    <div class="bg-gradient-to-br from-gray-50 to-<%= content_type_class.color.split('-')[1] %>-50 hover:from-<%= content_type_class.color.split('-')[1] %>-50 hover:to-<%= content_type_class.color.split('-')[1] %>-100 border-2 border-dashed border-gray-300 hover:border-<%= content_type_class.color.split('-')[1] %>-400 rounded-lg transition-all duration-200 overflow-hidden">
+                      <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-<%= content_type_class.color.split('-')[1] %>-100 flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent"></div>
+                        <div class="text-center relative z-10">
+                          <div class="bg-white/90 backdrop-blur-sm rounded-full p-4 mb-3 shadow-sm">
+                            <i class="material-icons text-3xl text-gray-600 group-hover:<%= content_type_class.text_color %> transition-colors"><%= content_type_class.icon %></i>
+                          </div>
+                          <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Create</div>
+                        </div>
+                      </div>
+                      <div class="p-4">
+                        <div class="text-center">
+                          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+                            New
+                          </h3>
+                          <h2 class="text-lg font-semibold text-gray-900">
+                            <%= content_type_name %>
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="group relative">
+                  <%= link_to subscription_path, class: "block h-full" do %>
+                    <div class="bg-gradient-to-br from-gray-50 to-purple-50 hover:from-purple-50 hover:to-purple-100 border-2 border-dashed border-gray-300 hover:border-purple-400 rounded-lg transition-all duration-200 overflow-hidden">
+                      <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-purple-100 flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent"></div>
+                        <div class="text-center relative z-10">
+                          <div class="bg-white/90 backdrop-blur-sm rounded-full p-4 mb-3 shadow-sm">
+                            <i class="material-icons text-3xl text-gray-600 group-hover:text-purple-600 transition-colors">star</i>
+                          </div>
+                          <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Premium</div>
+                        </div>
+                      </div>
+                      <div class="p-4">
+                        <div class="text-center">
+                          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+                            Upgrade
+                          </h3>
+                          <h2 class="text-lg font-semibold text-gray-900">
+                            Premium
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
               <% end %>
             </div>
           </div>
