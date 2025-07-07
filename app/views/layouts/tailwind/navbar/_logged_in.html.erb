@@ -25,7 +25,7 @@
   <% end %>
 
   <!-- right-hand side of navbar -->
-  <div class="pr-2 flex items-center justify-end space-x-1 sm:space-x-2 ml-auto h-14">
+  <div class="pr-2 flex items-center justify-end space-x-1 sm:space-x-2 ml-auto h-14" x-data="{ notificationsDropdownOpen: false, accountDropdownOpen: false }">
     <% if user_signed_in? %>
       <%= form_tag main_app.search_path, method: :get, class: 'hidden md:inline-flex items-center relative' do %>
         <input class="w-32 lg:w-48 xl:w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-9 px-3 text-sm rounded focus:outline-none"
@@ -44,8 +44,8 @@
       <% end %>
 
       
-      <div x-data="{ notificationsDropdownOpen: false }" class="inline-flex items-center">
-        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="z-10 block p-2 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'bg-yellow-500 border-yellow-400' : 'bg-white bg-opacity-20 border-white border-opacity-30' %> border-2 hover:bg-opacity-30 rounded-full transition-all duration-200">
+      <div class="inline-flex items-center">
+        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen; accountDropdownOpen = false" class="z-10 block p-2 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'bg-yellow-500 border-yellow-400' : 'bg-white bg-opacity-20 border-white border-opacity-30' %> border-2 hover:bg-opacity-30 rounded-full transition-all duration-200">
           <svg class="h-5 w-5 sm:h-6 sm:w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
           </svg>
@@ -86,8 +86,8 @@
         </div>
       </div>
 
-      <div x-data="{ accountDropdownOpen: false }" class="inline-flex items-center">
-        <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 bg-white bg-opacity-20 border-2 border-white border-opacity-30 hover:bg-opacity-30 hover:border-opacity-50 rounded-full transition-all duration-200">
+      <div class="inline-flex items-center">
+        <button @click="accountDropdownOpen = !accountDropdownOpen; notificationsDropdownOpen = false" class="z-10 block p-1 bg-white bg-opacity-20 border-2 border-white border-opacity-30 hover:bg-opacity-30 hover:border-opacity-50 rounded-full transition-all duration-200">
           <%= image_tag current_user.image_url, class: 'rounded-full h-6 w-6 sm:h-8 sm:w-8' %>
         </button>
         <div x-show="accountDropdownOpen" @click="accountDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
