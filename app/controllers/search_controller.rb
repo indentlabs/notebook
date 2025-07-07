@@ -129,6 +129,64 @@ class SearchController < ApplicationController
     @seen_result_pages = {}
   end
 
+  def autocomplete
+    @query = params[:q]&.strip
+    
+    # Return empty results for short or empty queries
+    if @query.blank? || @query.length < 2
+      render json: []
+      return
+    end
+
+    results = []
+    
+    # Fast name-only search across all content types
+    Rails.application.config.content_types[:all].each do |content_type|
+      begin
+        model_class = content_type.name.constantize
+        
+        # Only search content types that have name columns
+        if model_class.column_names.include?('name')
+          # Fast query with limit to prevent slow searches
+          matching_entities = model_class
+            .where(user_id: current_user.id)
+            .where("LOWER(name) LIKE LOWER(?)", "%#{@query}%")
+            .limit(5) # Limit per content type
+            .select(:id, :name, :created_at) # Only select needed columns
+          
+          matching_entities.each do |entity|
+            results << {
+              id: entity.id,
+              name: entity.name,
+              type: content_type.name,
+              icon: content_type.icon,
+              color: content_type.hex_color,
+              url: main_app.polymorphic_path(entity),
+              created_at: entity.created_at
+            }
+          end
+        end
+      rescue => e
+        # Skip any content types that have issues
+        Rails.logger.debug "Autocomplete: Skipping #{content_type.name}: #{e.message}"
+      end
+      
+      # Stop if we have enough results
+      break if results.size >= 15
+    end
+    
+    # Sort by relevance: exact matches first, then by name
+    results.sort_by! do |result|
+      exact_match = result[:name].downcase == @query.downcase ? 0 : 1
+      [exact_match, result[:name].downcase]
+    end
+    
+    # Limit total results
+    results = results.first(12)
+    
+    render json: results
+  end
+
   helper_method :highlight_search_terms
 
   private

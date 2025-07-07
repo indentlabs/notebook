@@ -354,6 +354,7 @@ Rails.application.routes.draw do
   end
 
   get 'search/', to: 'search#results'
+  get 'search/autocomplete', to: 'search#autocomplete'
 
   authenticate :user, lambda { |u| u.site_administrator? || Rails.env.development? } do
     scope 'admin' do

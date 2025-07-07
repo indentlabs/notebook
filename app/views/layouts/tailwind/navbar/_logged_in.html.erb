@@ -27,21 +27,98 @@
   <!-- right-hand side of navbar -->
   <div class="pr-2 flex items-center justify-end space-x-1 sm:space-x-2 ml-auto h-14" x-data="{ notificationsDropdownOpen: false, accountDropdownOpen: false }">
     <% if user_signed_in? %>
-      <%= form_tag main_app.search_path, method: :get, class: 'hidden md:inline-flex items-center relative' do %>
+      <!-- Dynamic Autocomplete Search -->
+      <div class="hidden md:inline-flex items-center relative" 
+           x-data="searchAutocomplete()" 
+           x-init="init()"
+           @click.away="closeDropdown()">
+        
         <input class="w-32 lg:w-48 xl:w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-9 px-3 text-sm rounded focus:outline-none"
-          type="search" name="q" value="<%= params[:q] %>" placeholder="Search your notebook">
-        <!--
-        <button type="submit" class="relative right-8 top-0.5 mt-4 mr-4">
-          <svg class="text-gray-600 hover:text-notebook-blue h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px"
-            viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve"
-            width="512px" height="512px">
-            <path
-              d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
-          </svg>
-        </button>
-        -->
-      <% end %>
+               type="search" 
+               x-model="query"
+               @input="handleInput()"
+               @keydown="handleKeydown($event)"
+               @focus="handleFocus()"
+               placeholder="Search your notebook"
+               autocomplete="off">
+        
+        <!-- Autocomplete Dropdown -->
+        <div x-show="showDropdown" 
+             x-transition:enter="transition ease-out duration-100"
+             x-transition:enter-start="transform opacity-0 scale-95"
+             x-transition:enter-end="transform opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-75"
+             x-transition:leave-start="transform opacity-100 scale-100"
+             x-transition:leave-end="transform opacity-0 scale-95"
+             class="absolute top-full left-0 right-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 z-50 max-h-80 overflow-y-auto">
+          
+          <!-- Help text when input is focused but empty -->
+          <div x-show="query.length === 0" class="px-4 py-4 text-sm text-gray-600 bg-blue-50 border-b border-blue-100">
+            <div class="flex items-start space-x-3">
+              <i class="material-icons text-blue-500 text-lg">info</i>
+              <div class="space-y-2">
+                <div class="font-medium text-gray-800">Quick Search Tips:</div>
+                <ul class="space-y-1 text-xs">
+                  <li class="flex items-center">
+                    <i class="material-icons text-xs mr-2 text-gray-400">keyboard</i>
+                    Start typing to see your pages as suggestions
+                  </li>
+                  <li class="flex items-center">
+                    <i class="material-icons text-xs mr-2 text-gray-400">mouse</i>
+                    Click on any result to quickly navigate to it
+                  </li>
+                  <li class="flex items-center">
+                    <i class="material-icons text-xs mr-2 text-gray-400">search</i>
+                    Press Enter to search all content in your notebook
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Loading state -->
+          <div x-show="loading && query.length >= 2" class="px-4 py-3 text-sm text-gray-500">
+            <i class="material-icons text-sm animate-spin">refresh</i>
+            Searching...
+          </div>
+          
+          <!-- Results -->
+          <template x-for="(result, index) in results" :key="result.id + '_' + result.type">
+            <a :href="result.url" 
+               class="flex items-center px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+               :class="{ 'bg-blue-50': selectedIndex === index }"
+               @mouseenter="selectedIndex = index">
+              
+              <i class="material-icons text-sm mr-3 rounded-full p-1 w-8 h-8 text-white flex items-center justify-center"
+                 :style="`background-color: ${result.color}`"
+                 x-text="result.icon"></i>
+              
+              <div class="flex-grow min-w-0">
+                <div class="font-medium text-gray-900 truncate" x-text="result.name"></div>
+                <div class="text-xs text-gray-500" x-text="result.type"></div>
+              </div>
+              
+              <i class="material-icons text-gray-400 text-sm">arrow_forward</i>
+            </a>
+          </template>
+          
+          <!-- No results message -->
+          <div x-show="!loading && results.length === 0 && query.length >= 2" 
+               class="px-4 py-3 text-sm text-gray-500">
+            No pages found matching "<span x-text="query"></span>"
+          </div>
+          
+          <!-- Full search link -->
+          <div x-show="query.length >= 2" 
+               class="border-t border-gray-200 bg-gray-50">
+            <a :href="`<%= main_app.search_path %>?q=${encodeURIComponent(query)}`" 
+               class="flex items-center px-4 py-3 text-sm text-blue-600 hover:text-blue-800 hover:bg-gray-100 font-medium">
+              <i class="material-icons text-sm mr-2">search</i>
+              Search my notebook for "<span x-text="query"></span>"
+            </a>
+          </div>
+        </div>
+      </div>
 
       
       <div class="inline-flex items-center">
@@ -137,3 +214,112 @@
     <% end %>
   </div>
 </header>
+
+<script>
+function searchAutocomplete() {
+  return {
+    query: '',
+    results: [],
+    loading: false,
+    showDropdown: false,
+    selectedIndex: -1,
+    debounceTimer: null,
+    
+    init() {
+      // Initialize with any existing query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const q = urlParams.get('q');
+      if (q) {
+        this.query = q;
+      }
+    },
+    
+    handleInput() {
+      clearTimeout(this.debounceTimer);
+      
+      if (this.query.length < 2) {
+        this.results = [];
+        this.showDropdown = false;
+        return;
+      }
+      
+      this.debounceTimer = setTimeout(() => {
+        this.fetchResults();
+      }, 300); // 300ms debounce
+    },
+    
+    handleFocus() {
+      this.showDropdown = true;
+      if (this.query.length >= 2 && this.results.length === 0) {
+        this.fetchResults();
+      }
+    },
+    
+    handleKeydown(event) {
+      if (!this.showDropdown) return;
+      
+      switch(event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          this.selectedIndex = Math.min(this.selectedIndex + 1, this.results.length - 1);
+          break;
+          
+        case 'ArrowUp':
+          event.preventDefault();
+          this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+          break;
+          
+        case 'Enter':
+          event.preventDefault();
+          if (this.selectedIndex >= 0 && this.results[this.selectedIndex]) {
+            // Navigate to selected result
+            window.location.href = this.results[this.selectedIndex].url;
+          } else {
+            // Fall back to full search results page
+            window.location.href = `<%= main_app.search_path %>?q=${encodeURIComponent(this.query)}`;
+          }
+          break;
+          
+        case 'Escape':
+          this.closeDropdown();
+          event.target.blur();
+          break;
+      }
+    },
+    
+    closeDropdown() {
+      this.showDropdown = false;
+      this.selectedIndex = -1;
+    },
+    
+    async fetchResults() {
+      if (this.query.length < 2) return;
+      
+      this.loading = true;
+      this.showDropdown = true;
+      
+      try {
+        const response = await fetch(`<%= main_app.search_autocomplete_path %>?q=${encodeURIComponent(this.query)}`, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        
+        if (response.ok) {
+          this.results = await response.json();
+          this.selectedIndex = -1; // Reset selection when new results arrive
+        } else {
+          console.error('Autocomplete request failed:', response.status);
+          this.results = [];
+        }
+      } catch (error) {
+        console.error('Autocomplete error:', error);
+        this.results = [];
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+}
+</script>
