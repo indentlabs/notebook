@@ -47,6 +47,8 @@ class MainController < ApplicationController
                                           .includes(:posts, :messageboard)
     
     set_questionable_content # for questions
+
+    @sidenav_expansion = 'worldbuilding'
   end
 
   def table_of_contents
