@@ -3,7 +3,7 @@
 # TODO: we should probably spin off an Api::ContentController for #api_sort and anything else 
 #       api-wise we need
 class ContentController < ApplicationController
-  layout 'tailwind', only: [:index, :show, :gallery, :references, :deleted, :attributes_tailwind]
+  layout 'tailwind', only: [:index, :show, :gallery, :references, :deleted, :attributes]
 
   before_action :authenticate_user!, except: [:show, :changelog, :api_sort, :gallery] \
     + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }
@@ -16,7 +16,7 @@ class ContentController < ApplicationController
 
   before_action :cache_linkable_content_for_each_content_type, only: [:new, :show, :edit, :index]
 
-  before_action :set_attributes_content_type, only: [:attributes, :attributes_tailwind, :export_template, :reset_template]
+  before_action :set_attributes_content_type, only: [:attributes, :export_template, :reset_template]
 
   before_action :set_navbar_color, except: [:api_sort]
   before_action :set_navbar_actions, except: [:deleted, :api_sort]
@@ -498,18 +498,6 @@ class ContentController < ApplicationController
       .order(:position)
 
     @dummy_model = @content_type_class.new
-  end
-  
-  def attributes_tailwind
-    @attribute_categories = @content_type_class
-      .attribute_categories(current_user, show_hidden: true)
-      .shown_on_template_editor
-      .order(:position)
-
-    @dummy_model = @content_type_class.new
-    
-    # Use the Tailwind layout
-    render :attributes_tailwind
   end
   
   def export_template

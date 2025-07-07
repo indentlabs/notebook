@@ -35,17 +35,23 @@ module HasImageUploads
         
         # If we don't have any uploaded images, we look for saved Basil commissions
         if result.nil? && respond_to?(:basil_commissions)
-          result = basil_commissions.where.not(saved_at: nil).includes([:image_attachment]).sample.try(:image)
+          basil_image = basil_commissions.where.not(saved_at: nil).includes([:image_attachment]).sample.try(:image)
+          # Handle Active Storage attachments properly
+          if basil_image.present? && basil_image.respond_to?(:url)
+            begin
+              result = basil_image.url
+            rescue
+              result = nil
+            end
+          end
         end
       end
 
-      # Cache the result
-      @random_image_including_private_cache[key] = result
+      # Cache the result (only cache non-nil results to avoid issues)
+      @random_image_including_private_cache[key] = result if result.present?
 
-      # Finally, if we have no image upload, we return the default image for this type
-      result = result.presence || header_asset_for(self.class.name)
-
-      result
+      # Finally, if we have no valid image URL, return the default image for this type
+      result.presence || header_asset_for(self.class.name)
     end
 
     def first_public_image(format = :medium)
@@ -75,7 +81,17 @@ module HasImageUploads
       # Then check basil commissions
       if respond_to?(:basil_commissions)
         pinned_commission = basil_commissions.pinned.where.not(saved_at: nil).includes([:image_attachment]).first
-        return pinned_commission.try(:image) if pinned_commission.present?
+        if pinned_commission.present?
+          basil_image = pinned_commission.try(:image)
+          # Handle Active Storage attachments properly
+          if basil_image.present? && basil_image.respond_to?(:url)
+            begin
+              return basil_image.url
+            rescue
+              return nil
+            end
+          end
+        end
       end
       
       nil
@@ -88,7 +104,17 @@ module HasImageUploads
       
       if respond_to?(:basil_commissions)
         pinned_commission = basil_commissions.pinned.where.not(saved_at: nil).includes([:image_attachment]).first
-        return pinned_commission.try(:image) if pinned_commission.present?
+        if pinned_commission.present?
+          basil_image = pinned_commission.try(:image)
+          # Handle Active Storage attachments properly
+          if basil_image.present? && basil_image.respond_to?(:url)
+            begin
+              return basil_image.url
+            rescue
+              return nil
+            end
+          end
+        end
       end
       
       nil
@@ -109,9 +135,14 @@ module HasImageUploads
       # will not work.
       # 
       # For direct view rendering, we use the relative asset path which works better with image_tag
-      Rails.env.production? ? 
-        "https://www.notebook.ai" + ActionController::Base.helpers.asset_url("card-headers/#{class_name.downcase.pluralize}.webp") :
-        ActionController::Base.helpers.asset_path("card-headers/#{class_name.downcase.pluralize}.webp")
+      asset_filename = "card-headers/#{class_name.downcase.pluralize}.webp"
+      
+      result = Rails.env.production? ? 
+        "https://www.notebook.ai" + ActionController::Base.helpers.asset_url(asset_filename) :
+        ActionController::Base.helpers.asset_path(asset_filename)
+      
+      # Ensure we never return nil - provide a fallback
+      result.presence || (Rails.env.production? ? "https://www.notebook.ai/assets/#{asset_filename}" : "/assets/#{asset_filename}")
     end
   end
 end
