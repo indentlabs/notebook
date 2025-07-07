@@ -88,6 +88,14 @@ class SearchController < ApplicationController
     # Combine both result sets for sorting and pagination
     all_matches = @matched_attributes.to_a + @matched_names
 
+    # Apply search refinement if provided
+    if params[:refine].present?
+      refine_query = params[:refine].strip
+      all_matches.select! do |match|
+        match.value.downcase.include?(refine_query.downcase)
+      end
+    end
+
     # Apply sorting to combined results
     case @sort
     when 'relevance'
@@ -119,5 +127,29 @@ class SearchController < ApplicationController
     end
 
     @seen_result_pages = {}
+  end
+
+  helper_method :highlight_search_terms
+
+  private
+
+  def highlight_search_terms(text, query)
+    return text if query.blank?
+    
+    words = query.split(/\s+/).reject(&:blank?)
+    highlighted = text
+    
+    words.each do |word|
+      highlighted = highlighted.gsub(
+        /\b#{Regexp.escape(word)}\b/i,
+        '<mark class="bg-yellow-200 px-1 py-0.5 rounded text-black font-medium">\0</mark>'
+      )
+    end
+    
+    highlighted.html_safe
+  end
+
+  def search_params
+    params.permit(:q, :sort, :filter, :page, :refine)
   end
 end
