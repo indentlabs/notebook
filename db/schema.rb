@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_06_26_212529) do
+ActiveRecord::Schema.define(version: 2025_07_07_010409) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -183,6 +183,7 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.index ["user_id", "attribute_field_id"], name: "index_attributes_on_user_id_and_attribute_field_id"
     t.index ["user_id", "deleted_at"], name: "index_attributes_on_user_id_and_deleted_at"
     t.index ["user_id", "entity_type", "entity_id"], name: "index_attributes_on_user_id_and_entity_type_and_entity_id"
+    t.index ["user_id", "value"], name: "index_attributes_on_user_id_and_value"
     t.index ["user_id"], name: "index_attributes_on_user_id"
   end
 
