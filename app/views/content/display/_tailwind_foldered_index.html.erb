@@ -22,28 +22,6 @@
   isLoading: false
 }" class="h-screen flex bg-gray-50">
   
-  <!-- Mobile Header -->
-  <div class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-4 py-3">
-    <div class="flex items-center justify-between">
-      <button 
-        @click="sidebarOpen = !sidebarOpen"
-        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-      >
-        <i class="material-icons text-lg mr-2"><%= content_type_class.icon %></i>
-        <span><%= content_type_name.pluralize %></span>
-      </button>
-      
-      <div class="flex items-center space-x-2">
-        <% if current_user.can_create?(content_type_class) %>
-          <%= link_to new_polymorphic_path(content_type_class) do %>
-            <button class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-white <%= content_type_class.color %> hover:opacity-90">
-              <i class="material-icons text-lg">add</i>
-            </button>
-          <% end %>
-        <% end %>
-      </div>
-    </div>
-  </div>
 
   <!-- Content Sidebar -->
   <aside x-show="showContentSidebar" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="hidden lg:flex lg:flex-col lg:w-80 bg-white border-r border-gray-200">

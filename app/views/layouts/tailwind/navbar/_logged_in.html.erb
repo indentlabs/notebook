@@ -8,7 +8,7 @@
 
   <div x-cloak x-show="!showSidebar" class="lg:hidden">
     <span class="sr-only">Menu</span> 
-    <div @click.stop="showSidebar = true" class="mt-2 mr-1 p-1 border-2 hover:border-blue-200 rounded-full" style="border-color: <%= @navbar_color.presence || '#2196F3' %>">
+    <div @click.stop="showSidebar = true" class="mt-2 mr-1 p-1 border-2 border-white border-opacity-30 hover:border-opacity-50 rounded-full transition-all duration-200">
       <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
         <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
       </svg>
@@ -25,17 +25,34 @@
   <% end %>
 
   <!-- right-hand side of navbar -->
-  <div class="pr-2 flex items-center justify-end space-x-1 sm:space-x-2 ml-auto">
+  <div class="pr-2 flex items-center justify-end space-x-1 sm:space-x-2 ml-auto h-14">
     <% if user_signed_in? %>
-      <div x-data="{ notificationsDropdownOpen: false }" class="inline-block">
-        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="z-10 block p-1 border-2 hover:border-blue-200 rounded-full" style="border-color: <%= @navbar_color.presence || '#2196F3' %>">
-          <svg class="h-5 w-5 sm:h-6 sm:w-6 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'text-white' : 'text-blue-300' %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+      <%= form_tag main_app.search_path, method: :get, class: 'hidden md:inline-flex items-center relative' do %>
+        <input class="w-32 lg:w-48 xl:w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-9 px-3 text-sm rounded focus:outline-none"
+          type="search" name="q" value="<%= params[:q] %>" placeholder="Search your notebook">
+        <!--
+        <button type="submit" class="relative right-8 top-0.5 mt-4 mr-4">
+          <svg class="text-gray-600 hover:text-notebook-blue h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px"
+            viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve"
+            width="512px" height="512px">
+            <path
+              d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
+          </svg>
+        </button>
+        -->
+      <% end %>
+
+      
+      <div x-data="{ notificationsDropdownOpen: false }" class="inline-flex items-center">
+        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen" class="z-10 block p-2 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'bg-yellow-500 border-yellow-400' : 'bg-white bg-opacity-20 border-white border-opacity-30' %> border-2 hover:bg-opacity-30 rounded-full transition-all duration-200">
+          <svg class="h-5 w-5 sm:h-6 sm:w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
           </svg>
         </button>
         <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
 
-        <div x-show="notificationsDropdownOpen" class="absolute right-2 sm:right-8 bg-white rounded-md shadow-lg overflow-hidden z-20 w-80 sm:w-2/5 max-w-md">
+        <div x-show="notificationsDropdownOpen" class="absolute top-full right-0 mt-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-80 sm:w-96 max-w-md">
           <div class="pt-2">
             <% @user_notifications.each do |notification| %>
               <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2' do %>
@@ -69,29 +86,13 @@
         </div>
       </div>
 
-      <%= form_tag main_app.search_path, method: :get, class: 'hidden md:inline-block relative' do %>
-        <input class="w-32 lg:w-48 xl:w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-9 px-3 text-sm rounded focus:outline-none"
-          type="search" name="q" value="<%= params[:q] %>" placeholder="Search your notebook">
-        <!--
-        <button type="submit" class="relative right-8 top-0.5 mt-4 mr-4">
-          <svg class="text-gray-600 hover:text-notebook-blue h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px"
-            viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve"
-            width="512px" height="512px">
-            <path
-              d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
-          </svg>
-        </button>
-        -->
-      <% end %>
-
-      <div x-data="{ accountDropdownOpen: false }" class="inline-block">
-        <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 border-2 hover:border-blue-200 rounded-full" style="border-color: <%= @navbar_color.presence || '#2196F3' %>">
+      <div x-data="{ accountDropdownOpen: false }" class="inline-flex items-center">
+        <button @click="accountDropdownOpen = !accountDropdownOpen" class="z-10 block p-1 bg-white bg-opacity-20 border-2 border-white border-opacity-30 hover:bg-opacity-30 hover:border-opacity-50 rounded-full transition-all duration-200">
           <%= image_tag current_user.image_url, class: 'rounded-full h-6 w-6 sm:h-8 sm:w-8' %>
         </button>
         <div x-show="accountDropdownOpen" @click="accountDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
 
-        <div x-show="accountDropdownOpen" class="absolute right-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-64">
+        <div x-show="accountDropdownOpen" class="absolute top-full right-0 mt-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-64">
           <%= link_to current_user.profile_url, class: 'flex border-t p-2 border-b border-gray-300 shadow group hover:bg-notebook-blue hover:text-white' do %>
             <%= image_tag current_user.image_url(size=32), class: 'rounded-full h-12 w-12 sm:h-16 sm:w-16 mr-2 p-1 border-2 border-notebook-blue group-hover:border-green-500' %>
             <div class="m-auto ml-1">
