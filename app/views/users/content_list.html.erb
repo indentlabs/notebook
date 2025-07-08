@@ -1,48 +1,390 @@
-<% if @content_list.any? %>
-  <div class="row">
-    <div class="col s12">
-      <div class="card">
-        <div class="card-image", style="height: 260px; overflow-y: hidden;">
-          <%= image_tag "card-headers/#{@content_type.to_s.downcase.pluralize}.webp" %>
-          <span class="card-title black lighten-3">
-            <i class="material-icons <%= @content_type.text_color %>"><%= @content_type.icon %></i>
-            <%= @content_type.to_s.capitalize.pluralize %>
-            by
-            <i class="material-icons white-text">person</i>
-            <%= link_to @user.name, @user, class: 'white-text' %>
-          </span>
-        </div>
-        <div class="card-content">
-          <%= render partial: 'content/list/cards', locals: {
-            content_list: @content_list,
-            content_type: @content_type,
-            how_add_another_form: false,
-            show_template_editor_form: false,
-            show_new_button: false
-          } %>
-        </div>
-        <div class="clearfix" style="padding-bottom: 2em"></div>
-        <div class="card-action">
-          <%= link_to "Back to #{@user.name}'s profile'", @user %>
+<!-- Main Container -->
+<div class="min-h-screen bg-gray-50">
+  
+  <!-- Hero Section -->
+  <div class="relative bg-gradient-to-br from-indigo-600 via-blue-600 to-purple-700 text-white overflow-hidden">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="0.1" fill-rule="evenodd"%3E%3Cpath d="M20 20c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8 8 3.6 8 8zm0-20c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8 8 3.6 8 8z"/%3E%3C/g%3E%3C/svg%3E');"></div>
+    </div>
+    
+    <!-- Hero Image Background -->
+    <div class="absolute inset-0 opacity-20">
+      <%= image_tag "card-headers/#{@content_type.to_s.downcase.pluralize}.webp", class: "w-full h-full object-cover" %>
+    </div>
+    
+    <!-- Content -->
+    <div class="relative px-6 py-12">
+      <div class="max-w-7xl mx-auto">
+        
+        <!-- Breadcrumb -->
+        <nav class="mb-8">
+          <div class="flex items-center space-x-2 text-white/80 text-sm">
+            <%= link_to "Users", users_path, class: "hover:text-white transition-colors duration-200" %>
+            <i class="material-icons text-xs">chevron_right</i>
+            <%= link_to @user.display_name, (@user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user)), class: "hover:text-white transition-colors duration-200" %>
+            <i class="material-icons text-xs">chevron_right</i>
+            <span class="text-white font-medium"><%= @content_type.to_s.capitalize.pluralize %></span>
+          </div>
+        </nav>
+        
+        <!-- Main Header -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+          
+          <!-- Left: User & Content Type Info -->
+          <div class="flex items-center space-x-6 mb-6 lg:mb-0">
+            
+            <!-- User Avatar -->
+            <div class="flex-shrink-0">
+              <%= link_to (@user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user)), class: "group" do %>
+                <div class="relative">
+                  <% if @user.image_url.present? %>
+                    <%= image_tag @user.image_url, class: "w-20 h-20 rounded-full border-4 border-white/30 group-hover:border-white/50 transition-all duration-300" %>
+                  <% else %>
+                    <div class="w-20 h-20 bg-white/20 rounded-full border-4 border-white/30 group-hover:border-white/50 transition-all duration-300 flex items-center justify-center">
+                      <i class="material-icons text-white text-3xl">person</i>
+                    </div>
+                  <% end %>
+                  
+                  <!-- Online indicator if applicable -->
+                  <% if @user.respond_to?(:online?) && @user.online? %>
+                    <div class="absolute bottom-1 right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+            
+            <!-- User & Content Type Info -->
+            <div>
+              <div class="flex items-center space-x-3 mb-2">
+                <%= link_to (@user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user)), class: "hover:underline" do %>
+                  <h1 class="text-2xl font-bold text-white"><%= @user.display_name %></h1>
+                <% end %>
+                <% if @user.username.present? %>
+                  <span class="text-white/70 text-lg">@<%= @user.username %></span>
+                <% end %>
+              </div>
+              
+              <!-- Content Type Display -->
+              <div class="flex items-center space-x-3">
+                <div class="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full">
+                  <i class="material-icons mr-2 text-white"><%= @content_type.icon %></i>
+                  <span class="text-white font-semibold text-lg"><%= @content_type.to_s.capitalize.pluralize %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right: Stats & Actions -->
+          <div class="flex flex-wrap gap-4">
+            <% if @content_list.any? %>
+              <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-3 text-center">
+                <div class="text-2xl font-bold text-white"><%= @content_list.count %></div>
+                <div class="text-white/80 text-sm">Items</div>
+              </div>
+              
+              <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-3 text-center">
+                <div class="text-2xl font-bold text-white"><%= @content_list.sum(&:cached_word_count) rescue 0 %></div>
+                <div class="text-white/80 text-sm">Words</div>
+              </div>
+            <% end %>
+            
+            <%= link_to (@user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user)), class: "bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors duration-200 rounded-lg px-4 py-3 flex items-center space-x-2" do %>
+              <i class="material-icons text-white">person</i>
+              <span class="text-white font-medium">View Profile</span>
+            <% end %>
+          </div>
         </div>
       </div>
     </div>
   </div>
-<% else %>
-  <div class="center" style="margin: 50px 0">
-    <h4>
-      <i class="material-icons <%= User.text_color %>"><%= User.icon %></i>
-      <%= link_to(@user.name, @user, class: "#{User.text_color}") %>
-      doesn't have any public
-      <%= @content_type.name.downcase.pluralize %> yet!
-    </h4>
-    <h1>
-      <i class="material-icons <%= @content_type.text_color %>" style="font-size: 200%">
-        <%= @content_type.icon %>
-      </i>
-    </h1>
-    <p>
-      <%= t("content_descriptions.#{@content_type.name.downcase}") %>
-    </p>
+  
+  <!-- Content Section -->
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    
+    <% if @content_list.empty? %>
+      
+      <!-- Empty State -->
+      <div class="text-center py-16">
+        <div class="mx-auto w-24 h-24 <%= @content_type.color %> bg-opacity-10 rounded-full flex items-center justify-center mb-6">
+          <i class="material-icons text-4xl <%= @content_type.text_color %>"><%= @content_type.icon %></i>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">No <%= @content_type.to_s.capitalize.pluralize %> Found</h2>
+        <p class="text-gray-600 max-w-md mx-auto mb-6">
+          <%= @user.display_name %> hasn't made any <%= @content_type.name.downcase.pluralize %> public yet, or they may not have any to share.
+        </p>
+        
+        <div class="space-y-4">
+          <p class="text-gray-500 text-sm max-w-lg mx-auto">
+            <%= t("content_descriptions.#{@content_type.name.downcase}") %>
+          </p>
+          
+          <%= link_to (@user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user)), class: "inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200" do %>
+            <i class="material-icons mr-2 text-sm">arrow_back</i>
+            Back to Profile
+          <% end %>
+        </div>
+      </div>
+      
+    <% else %>
+      
+      <!-- Content Actions Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">
+            <%= pluralize(@content_list.count, @content_type.name) %>
+          </h2>
+          <p class="text-gray-600">
+            Public <%= @content_type.name.downcase.pluralize %> by <%= @user.display_name %>
+          </p>
+        </div>
+        
+        <!-- View Options -->
+        <div class="flex items-center space-x-2 mt-4 sm:mt-0">
+          <button id="grid-view" class="view-toggle active p-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200">
+            <i class="material-icons">grid_view</i>
+          </button>
+          <button id="list-view" class="view-toggle p-2 rounded-lg bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors duration-200">
+            <i class="material-icons">view_list</i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Content Grid -->
+      <div id="content-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <% @content_list.each do |content| %>
+          <div class="content-card group">
+            
+            <!-- Card Container -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              
+              <!-- Card Image -->
+              <div class="relative h-48 overflow-hidden">
+                <% 
+                  # Find image for content using the same logic as the original
+                  image_cache = @random_image_including_private_pool_cache.fetch([content.page_type, content.id], [])
+                  content_image = nil
+                  
+                  if image_cache.present?
+                    sample_image = image_cache.sample
+                    if sample_image && sample_image.respond_to?(:src_file_name) && sample_image.src_file_name.present?
+                      content_image = sample_image.src(:medium)
+                    end
+                  end
+                  
+                  if content_image.nil? && @saved_basil_commissions
+                    basil_cache = @saved_basil_commissions.fetch([content.page_type, content.id], [])
+                    if basil_cache.present?
+                      sample_commission = basil_cache.sample
+                      if sample_commission && sample_commission.image.attached?
+                        content_image = sample_commission.image.url
+                      end
+                    end
+                  end
+                  
+                  content_image ||= asset_path("card-headers/#{content.page_type.downcase.pluralize}.jpg")
+                %>
+                
+                <div class="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-300" 
+                     style="background-image: url('<%= content_image %>');">
+                </div>
+                
+                <!-- Gradient Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                
+                <!-- Content Title -->
+                <div class="absolute bottom-4 left-4 right-4">
+                  <h3 class="text-white font-bold text-lg line-clamp-2 mb-2">
+                    <%= content.name.presence || 'Untitled' %>
+                  </h3>
+                  
+                  <!-- Favorite badge if favorited -->
+                  <% if content.respond_to?(:favorite) && content.favorite %>
+                    <div class="inline-flex items-center px-2 py-1 bg-yellow-100 rounded-full">
+                      <i class="material-icons text-yellow-600 text-sm">star</i>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+              
+              <!-- Card Content -->
+              <div class="p-4">
+                
+                <!-- Description -->
+                <% if content.description.present? %>
+                  <p class="text-gray-600 text-sm line-clamp-3 mb-3">
+                    <%= sanitize ContentFormatterService.show(text: truncate(content.description, length: 120, escape: false), viewing_user: current_user) %>
+                  </p>
+                <% end %>
+                
+                <!-- Tags -->
+                <% if content.respond_to?(:page_tags) && content.page_tags.any? %>
+                  <div class="flex flex-wrap gap-1 mb-3">
+                    <% content.page_tags.limit(3).each do |tag| %>
+                      <%= link_to (content.user.username.present? ? user_tag_path(username: content.user.username, tag_slug: tag.slug) : user_id_tag_path(id: content.user.id, tag_slug: tag.slug)), class: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors duration-200" do %>
+                        <%= tag.tag %>
+                      <% end %>
+                    <% end %>
+                    <% if content.page_tags.count > 3 %>
+                      <span class="text-xs text-gray-400">+<%= content.page_tags.count - 3 %> more</span>
+                    <% end %>
+                  </div>
+                <% end %>
+                
+                <!-- Footer -->
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                  <span class="flex items-center">
+                    <i class="material-icons text-xs mr-1">schedule</i>
+                    <%= content.created_at == content.updated_at ? 'Created' : 'Updated' %>
+                    <%= time_ago_in_words(content.updated_at) %> ago
+                  </span>
+                  
+                  <% if user_signed_in? && current_user.can_read?(content) %>
+                    <%= link_to (content.is_a?(ContentPage) ? content.view_path : content), class: "inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200" do %>
+                      <span>View</span>
+                      <i class="material-icons ml-1 text-sm">arrow_forward</i>
+                    <% end %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <!-- Content List View (Hidden by default) -->
+      <div id="content-list" class="hidden space-y-4">
+        <% @content_list.each do |content| %>
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-start space-x-4">
+              
+              <!-- Thumbnail -->
+              <div class="flex-shrink-0">
+                <% 
+                  image_cache = @random_image_including_private_pool_cache.fetch([content.page_type, content.id], [])
+                  content_image = nil
+                  
+                  if image_cache.present?
+                    sample_image = image_cache.sample
+                    if sample_image && sample_image.respond_to?(:src_file_name) && sample_image.src_file_name.present?
+                      content_image = sample_image.src(:medium)
+                    end
+                  end
+                  
+                  content_image ||= asset_path("card-headers/#{content.page_type.downcase.pluralize}.jpg")
+                %>
+                <div class="w-16 h-16 bg-cover bg-center rounded-lg" style="background-image: url('<%= content_image %>');"></div>
+              </div>
+              
+              <!-- Content Info -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-1">
+                      <%= content.name.presence || 'Untitled' %>
+                    </h3>
+                    
+                    <% if content.description.present? %>
+                      <p class="text-gray-600 text-sm line-clamp-2 mb-2">
+                        <%= sanitize ContentFormatterService.show(text: truncate(content.description, length: 200, escape: false), viewing_user: current_user) %>
+                      </p>
+                    <% end %>
+                    
+                    <!-- Tags -->
+                    <% if content.respond_to?(:page_tags) && content.page_tags.any? %>
+                      <div class="flex flex-wrap gap-1 mb-2">
+                        <% content.page_tags.limit(5).each do |tag| %>
+                          <%= link_to (content.user.username.present? ? user_tag_path(username: content.user.username, tag_slug: tag.slug) : user_id_tag_path(id: content.user.id, tag_slug: tag.slug)), class: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors duration-200" do %>
+                            <%= tag.tag %>
+                          <% end %>
+                        <% end %>
+                      </div>
+                    <% end %>
+                    
+                    <div class="flex items-center text-xs text-gray-500">
+                      <i class="material-icons text-xs mr-1">schedule</i>
+                      <%= content.created_at == content.updated_at ? 'Created' : 'Updated' %>
+                      <%= time_ago_in_words(content.updated_at) %> ago
+                    </div>
+                  </div>
+                  
+                  <!-- Actions -->
+                  <div class="flex items-center space-x-2 ml-4">
+                    <% if content.respond_to?(:favorite) && content.favorite %>
+                      <div class="p-2 bg-yellow-100 rounded-lg">
+                        <i class="material-icons text-yellow-600 text-sm">star</i>
+                      </div>
+                    <% end %>
+                    
+                    <% if user_signed_in? && current_user.can_read?(content) %>
+                      <%= link_to (content.is_a?(ContentPage) ? content.view_path : content), class: "inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200" do %>
+                        <i class="material-icons mr-1 text-sm">visibility</i>
+                        View
+                      <% end %>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+    <% end %>
   </div>
-<% end %>
+</div>
+
+<!-- Custom Styles -->
+<style>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.view-toggle.active {
+  background-color: rgb(59 130 246);
+  color: white;
+}
+</style>
+
+<!-- View Toggle JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const gridViewBtn = document.getElementById('grid-view');
+  const listViewBtn = document.getElementById('list-view');
+  const contentGrid = document.getElementById('content-grid');
+  const contentList = document.getElementById('content-list');
+  
+  if (gridViewBtn && listViewBtn && contentGrid && contentList) {
+    gridViewBtn.addEventListener('click', function() {
+      // Show grid, hide list
+      contentGrid.classList.remove('hidden');
+      contentList.classList.add('hidden');
+      
+      // Update button states
+      gridViewBtn.classList.add('active');
+      listViewBtn.classList.remove('active');
+    });
+    
+    listViewBtn.addEventListener('click', function() {
+      // Show list, hide grid
+      contentList.classList.remove('hidden');
+      contentGrid.classList.add('hidden');
+      
+      // Update button states
+      listViewBtn.classList.add('active');
+      gridViewBtn.classList.remove('active');
+    });
+  }
+});
+</script>
