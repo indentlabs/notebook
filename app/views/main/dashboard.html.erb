@@ -145,6 +145,12 @@
                   
                   <div class="text-center mb-3 flex-1 relative">
                     <div class="streak-counter-bg absolute inset-0 opacity-10"></div>
+                    <% if (@current_streak || 0) > 0 %>
+                      <!-- Flame icon behind streak counter -->
+                      <div class="absolute top-0 left-1/2 transform -translate-x-1/2 opacity-15 pointer-events-none" style="top: -20px;">
+                        <i class="material-icons text-orange-500 flame-icon-bg" style="font-size: 6rem;">local_fire_department</i>
+                      </div>
+                    <% end %>
                     <div class="relative z-10">
                       <div class="text-2xl font-bold text-orange-600 mb-0.5">
                         <%= @current_streak || 0 %>
@@ -552,6 +558,34 @@ document.addEventListener('DOMContentLoaded', function() {
   @keyframes flame-pulse {
     0% { transform: scale(1) rotate(-1deg); }
     100% { transform: scale(1.1) rotate(1deg); }
+  }
+  
+  /* Background flame icon styling */
+  .flame-icon-bg {
+    animation: flame-background-dance 4s ease-in-out infinite alternate;
+    filter: blur(1px);
+  }
+  
+  @keyframes flame-background-dance {
+    0% { 
+      transform: scale(1) rotate(-2deg);
+      opacity: 0.12;
+    }
+    50% {
+      transform: scale(1.05) rotate(0deg);
+      opacity: 0.18;
+    }
+    100% { 
+      transform: scale(1.02) rotate(2deg);
+      opacity: 0.15;
+    }
+  }
+  
+  /* Enhanced flame effect on streak hover */
+  .streak-info:hover ~ .flame-icon-bg {
+    animation: flame-background-dance 1.5s ease-in-out infinite alternate;
+    opacity: 0.25 !important;
+    filter: blur(0.5px);
   }
 </style>
 
