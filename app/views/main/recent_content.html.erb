@@ -102,17 +102,37 @@
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
           <i class="material-icons mr-2 text-purple-600">show_chart</i>
-          30-Day Activity
+          7-Day Activity
         </h3>
-        <div class="flex items-end justify-between h-16 space-x-1">
-          <% @daily_activity.each do |date, count| %>
-            <div class="flex-1 bg-purple-100 rounded-t" 
-                 style="height: <%= count > 0 ? [count * 20, 4].max : 2 %>px;"
-                 title="<%= date %>: <%= count %> edits">
+        <div class="relative mb-12">
+          <!-- Chart Container -->
+          <div id="activity-chart" class="flex items-end justify-between h-16 space-x-2 relative">
+            <% @daily_activity.each_with_index do |(date, count), index| %>
+              <div class="activity-bar flex-1 rounded-t transition-all duration-200 cursor-pointer" 
+                   style="height: <%= count > 0 ? [count * 20, 4].max : 2 %>px;"
+                   data-date="<%= date %>"
+                   data-count="<%= count %>"
+                   data-index="<%= index %>">
+              </div>
+            <% end %>
+          </div>
+          
+          <!-- Custom Tooltip -->
+          <div id="chart-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-150 z-20">
+            <div class="bg-gray-900 text-white text-xs rounded-md px-3 py-2 shadow-lg">
+              <div class="font-semibold" id="tooltip-date"></div>
+              <div id="tooltip-count"></div>
+              <!-- Tooltip arrow -->
+              <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
             </div>
-          <% end %>
+          </div>
         </div>
-        <div class="text-xs text-gray-500 mt-2">Hover for details</div>
+        
+        <!-- Chart Legend -->
+        <div class="flex items-center justify-between text-xs text-gray-500">
+          <span>7 days ago</span>
+          <span>Today</span>
+        </div>
       </div>
     </div>
 
@@ -502,10 +522,28 @@
     overflow: hidden;
   }
   
-  /* Activity chart hover effects */
-  .bg-purple-100:hover {
-    background-color: rgb(147 51 234) !important;
-    transition: background-color 0.2s ease;
+  /* Activity chart styling */
+  .activity-bar {
+    background: linear-gradient(to top, #a855f7, #c084fc);
+    min-height: 2px;
+    position: relative;
+  }
+  
+  .activity-bar:hover {
+    background: linear-gradient(to top, #7c3aed, #a855f7);
+    transform: scaleY(1.1);
+    box-shadow: 0 4px 8px rgba(168, 85, 247, 0.3);
+  }
+  
+  .activity-bar[data-count="0"] {
+    background: #e5e7eb;
+    opacity: 0.5;
+  }
+  
+  .activity-bar[data-count="0"]:hover {
+    background: #d1d5db;
+    transform: none;
+    box-shadow: none;
   }
   
   /* Smooth transitions for all interactive elements */
@@ -643,18 +681,53 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     console.log('Filter form not found');
   }
+  // Enhanced activity chart with custom tooltips
+  const chartContainer = document.getElementById('activity-chart');
+  const tooltip = document.getElementById('chart-tooltip');
+  const tooltipDate = document.getElementById('tooltip-date');
+  const tooltipCount = document.getElementById('tooltip-count');
   
-  // Enhanced activity chart tooltips
-  const chartBars = document.querySelectorAll('[title]');
-  chartBars.forEach(bar => {
-    bar.style.cursor = 'pointer';
-    bar.addEventListener('mouseenter', function() {
-      this.style.opacity = '0.8';
+  if (chartContainer && tooltip) {
+    const chartBars = chartContainer.querySelectorAll('.activity-bar');
+    
+    chartBars.forEach(bar => {
+      // Mouse enter - show tooltip
+      bar.addEventListener('mouseenter', function(e) {
+        const date = this.dataset.date;
+        const count = parseInt(this.dataset.count);
+        const index = parseInt(this.dataset.index);
+        
+        // Update tooltip content
+        tooltipDate.textContent = date;
+        tooltipCount.textContent = count === 0 ? 'No activity' : 
+          count === 1 ? '1 edit' : `${count} edits`;
+        
+        // Position tooltip
+        const rect = this.getBoundingClientRect();
+        const chartRect = chartContainer.getBoundingClientRect();
+        const tooltipLeft = rect.left - chartRect.left + (rect.width / 2);
+        
+        tooltip.style.left = `${tooltipLeft}px`;
+        tooltip.style.bottom = `${chartContainer.offsetHeight + 10}px`;
+        tooltip.style.opacity = '1';
+        tooltip.style.transform = 'translateX(-50%) translateY(0)';
+      });
+      
+      // Mouse leave - hide tooltip
+      bar.addEventListener('mouseleave', function() {
+        tooltip.style.opacity = '0';
+        tooltip.style.transform = 'translateX(-50%) translateY(-4px)';
+      });
+      
+      // Click handler for potential future functionality
+      bar.addEventListener('click', function() {
+        const date = this.dataset.date;
+        const count = parseInt(this.dataset.count);
+        console.log(`Clicked on ${date} with ${count} edits`);
+        // Could add filtering by date here in the future
+      });
     });
-    bar.addEventListener('mouseleave', function() {
-      this.style.opacity = '1';
-    });
-  });
+  }
   
   // Animate cards on page load
   const observer = new IntersectionObserver((entries) => {

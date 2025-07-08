@@ -54,9 +54,146 @@
         <!-- Two-Column Layout: 2/3 and 1/3 split -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          <!-- Left Column: Serendipitous Question (2/3) -->
-          <div class="lg:col-span-2">
+          <!-- Left Column: Charts & Serendipitous Question (2/3) -->
+          <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              <!-- 30-Day Activity Chart -->
+              <div class="bg-gradient-to-br from-purple-50 via-white to-purple-25 rounded-lg shadow-sm border border-gray-200 p-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                  <i class="material-icons mr-1 text-purple-600 text-base">show_chart</i>
+                  30-Day Activity
+                </h4>
+                <div class="relative mb-6">
+                  <!-- Chart Container -->
+                  <div id="dashboard-activity-chart" class="flex items-end justify-between h-10 space-x-0.5 relative">
+                    <% if @dashboard_daily_activity %>
+                      <% @dashboard_daily_activity.each_with_index do |(date, count), index| %>
+                        <div class="dashboard-activity-bar flex-1 rounded-t transition-all duration-200 cursor-pointer" 
+                             style="height: <%= count > 0 ? [count * 12, 3].max : 1 %>px;"
+                             data-date="<%= date %>"
+                             data-count="<%= count %>"
+                             data-index="<%= index %>">
+                        </div>
+                      <% end %>
+                    <% end %>
+                  </div>
+                  
+                  <!-- Custom Tooltip -->
+                  <div id="dashboard-chart-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-150 z-20">
+                    <div class="bg-gray-900 text-white text-xs rounded-md px-2 py-1 shadow-lg">
+                      <div class="font-semibold" id="dashboard-tooltip-date"></div>
+                      <div id="dashboard-tooltip-count"></div>
+                      <!-- Tooltip arrow -->
+                      <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-l-transparent border-r-transparent border-t-gray-900"></div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Chart Legend -->
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                  <span>30 days ago</span>
+                  <span>Today</span>
+                </div>
+              </div>
+
+              <!-- Editing Streak -->
+              <div class="bg-gradient-to-br from-orange-50 via-white to-orange-25 rounded-lg shadow-sm border border-gray-200 p-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                  <i class="material-icons mr-1 text-orange-600 text-base">local_fire_department</i>
+                  Editing Streak
+                </h4>
+                
+                <!-- Streak Visualization -->
+                <div class="flex flex-row items-center space-x-4">
+                  <div class="flex items-center justify-center space-x-1 flex-1">
+                    <% if @streak_days %>
+                      <% @streak_days.each_with_index do |day, index| %>
+                        <div class="flex flex-col items-center">
+                          <!-- Day dot -->
+                          <div class="streak-day w-4 h-4 rounded-full border transition-all duration-200 <%= day[:has_activity] ? 'bg-orange-500 border-orange-500 cursor-pointer' : 'bg-gray-100 border-gray-300' %>
+                              <%= index < 6 ? 'relative' : '' %>"
+                              data-date="<%= day[:date].strftime('%B %d, %Y') %>"
+                              data-has-activity="<%= day[:has_activity] %>"
+                              data-edit-count="<%= day[:edit_count] %>"
+                              data-day-index="<%= index %>">
+                            <!-- Connection line to next dot -->
+                            <% if index < 6 %>
+                              <div class="absolute top-1/2 left-full w-1 h-0.5 transform -translate-y-1/2 <%= day[:has_activity] && @streak_days[index + 1][:has_activity] ? 'bg-orange-500' : 'bg-gray-300' %>"></div>
+                            <% end %>
+                          </div>
+                          <!-- Day label -->
+                          <div class="text-xs text-gray-500 mt-0.5"><%= day[:day_name] %></div>
+                        </div>
+                      <% end %>
+                      
+                      <!-- Streak extension for 7+ days -->
+                      <% if (@current_streak || 0) > 7 %>
+                        <div class="flex items-center ml-1">
+                          <div class="w-1 h-1 bg-orange-500 rounded-full mx-0.5"></div>
+                          <div class="w-1 h-1 bg-orange-500 rounded-full mx-0.5"></div>
+                          <div class="w-1 h-1 bg-orange-500 rounded-full mx-0.5"></div>
+                          <div class="w-6 h-6 rounded-full bg-orange-500 border border-orange-600 flex items-center justify-center ml-1">
+                            <span class="text-white text-xs font-bold"><%= @current_streak %></span>
+                          </div>
+                        </div>
+                      <% end %>
+                    <% end %>
+                  </div>
+                  
+                  <div class="text-center mb-3 flex-1 relative">
+                    <div class="streak-counter-bg absolute inset-0 opacity-10"></div>
+                    <div class="relative z-10">
+                      <div class="text-2xl font-bold text-orange-600 mb-0.5">
+                        <%= @current_streak || 0 %>
+                      </div>
+                      <div class="streak-info text-xs text-gray-600 cursor-help transition-colors duration-200 hover:text-orange-600"
+                           data-total-edits="<%= @streak_total_edits || 0 %>"
+                           data-streak-days="<%= @current_streak || 0 %>">
+                        <%= (@current_streak || 0) == 1 ? 'day' : 'days' %> in a row
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Streak Day Tooltip -->
+                <div id="streak-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-150 z-30">
+                  <div class="bg-gray-900 text-white text-xs rounded-md px-2 py-1 shadow-lg">
+                    <div class="font-semibold" id="streak-tooltip-date"></div>
+                    <div id="streak-tooltip-activity"></div>
+                    <!-- Tooltip arrow -->
+                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-l-transparent border-r-transparent border-t-gray-900"></div>
+                  </div>
+                </div>
+                
+                <!-- Streak Info Tooltip -->
+                <div id="streak-info-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-200 z-30">
+                  <div class="relative">
+                    <!-- Tooltip glow effect -->
+                    <div class="absolute -inset-1 bg-gradient-to-r from-orange-400 via-red-400 to-orange-400 rounded-xl blur opacity-30 animate-pulse"></div>
+                    <!-- Main tooltip content -->
+                    <div class="relative bg-gradient-to-br from-orange-800 via-orange-900 to-red-900 text-white text-sm rounded-xl px-5 py-3 shadow-2xl border border-orange-600">
+                      <div class="flex items-center space-x-2 mb-1">
+                        <div class="text-orange-300 text-lg">🔥</div>
+                        <div class="font-bold text-orange-100 text-base tracking-wide" id="streak-info-title"></div>
+                      </div>
+                      <div class="text-orange-200 font-medium text-sm" id="streak-info-details"></div>
+                      <!-- Clean tooltip arrow -->
+                      <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+                        <div class="w-0 h-0" style="border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #9a3412;"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+            
+            <!-- Serendipitous Question -->
             <%= render partial: 'main/components/serendipitous_question', locals: { } %>
+            
           </div>
           
           <!-- Right Column: What's New & Recently Edited Pages (1/3) -->
@@ -67,9 +204,12 @@
               <div>
                 <%= link_to '#' do %>
                   <div class="bg-blue-50 border border-blue-200 rounded-md shadow-sm hover:shadow-lg transition-all duration-300">
-                    <div class="p-4">
-                      <h4 class="text-base font-semibold text-blue-900 mb-2">New Something</h4>
-                      <p class="text-sm text-blue-700 leading-relaxed">This is a little notice box about what's new. I can fit about 2 lines before I feel bad.</p>
+                    <div class="p-6">
+                      <h4 class="text-base font-semibold text-blue-900 mb-2">
+                        <i class="material-icons mr-1 float-left text-sm text-blue-600">new_releases</i>
+                        New Something
+                      </h4>
+                      <p class="text-sm text-blue-700 leading-relaxed">This is a little notice box about what's new. I can fit about 2 lines before I feel bad. Although... with three lines it's the same height as these other cards...</p>
                     </div>
                   </div>
                 <% end %>
@@ -286,3 +426,286 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <%= render partial: 'javascripts/content_linking' %>
+
+<!-- Dashboard Analytics Styles -->
+<style>
+  /* Dashboard Activity Chart Styling */
+  .dashboard-activity-bar {
+    background: linear-gradient(to top, #a855f7, #c084fc);
+    min-height: 2px;
+    position: relative;
+  }
+  
+  .dashboard-activity-bar:hover {
+    background: linear-gradient(to top, #7c3aed, #a855f7);
+    transform: scaleY(1.1);
+    box-shadow: 0 4px 8px rgba(168, 85, 247, 0.3);
+  }
+  
+  .dashboard-activity-bar[data-count="0"] {
+    background: #e5e7eb;
+    opacity: 0.5;
+  }
+  
+  .dashboard-activity-bar[data-count="0"]:hover {
+    background: #d1d5db;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Custom gradient backgrounds for dashboard cards */
+  .purple-25 {
+    --tw-gradient-to: #faf5ff;
+  }
+  
+  .orange-25 {
+    --tw-gradient-to: #fffbf5;
+  }
+
+  /* Fun streak day hover effects */
+  .streak-day[data-has-activity="true"]:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
+    background: linear-gradient(45deg, #f97316, #fb923c) !important;
+    border-color: #ea580c !important;
+    z-index: 10;
+    position: relative;
+  }
+  
+  .streak-day[data-has-activity="true"]:hover::before {
+    content: '🔥';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    animation: flame-dance 0.6s ease-in-out infinite alternate;
+  }
+  
+  @keyframes flame-dance {
+    0% { transform: translateX(-50%) translateY(0px) rotate(-2deg); }
+    100% { transform: translateX(-50%) translateY(-2px) rotate(2deg); }
+  }
+  
+  /* Pulse effect for active streak days */
+  .streak-day[data-has-activity="true"] {
+    animation: subtle-pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes subtle-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
+    50% { box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
+  }
+
+  /* Fire background for streak counter */
+  .streak-counter-bg {
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(249, 115, 22, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(251, 146, 60, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(254, 215, 170, 0.2) 0%, transparent 50%);
+    background-size: 60px 60px, 40px 40px, 80px 80px;
+    background-position: 10px 10px, 30px 5px, 0px 20px;
+    animation: fire-flicker 3s ease-in-out infinite alternate;
+    border-radius: 50%;
+  }
+  
+  @keyframes fire-flicker {
+    0% { 
+      transform: scale(1) rotate(0deg);
+      opacity: 0.05;
+    }
+    50% {
+      transform: scale(1.05) rotate(1deg);
+      opacity: 0.15;
+    }
+    100% { 
+      transform: scale(1.02) rotate(-1deg);
+      opacity: 0.1;
+    }
+  }
+  
+  /* Streak info hover effect */
+  .streak-info:hover {
+    transform: scale(1.05);
+    text-shadow: 0 0 8px rgba(249, 115, 22, 0.5);
+  }
+  
+  /* Enhanced streak info tooltip styling */
+  #streak-info-tooltip {
+    filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.4));
+  }
+  
+  #streak-info-tooltip .relative {
+    backdrop-filter: blur(8px);
+  }
+  
+  /* Smooth tooltip animations */
+  #streak-info-tooltip {
+    transform-origin: bottom center;
+  }
+  
+  /* Enhanced fire emoji animation on hover */
+  .streak-info:hover + #streak-info-tooltip .text-orange-300 {
+    animation: flame-pulse 0.8s ease-in-out infinite alternate;
+  }
+  
+  @keyframes flame-pulse {
+    0% { transform: scale(1) rotate(-1deg); }
+    100% { transform: scale(1.1) rotate(1deg); }
+  }
+</style>
+
+<!-- Dashboard Analytics JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Dashboard activity chart with custom tooltips
+  const dashboardChartContainer = document.getElementById('dashboard-activity-chart');
+  const dashboardTooltip = document.getElementById('dashboard-chart-tooltip');
+  const dashboardTooltipDate = document.getElementById('dashboard-tooltip-date');
+  const dashboardTooltipCount = document.getElementById('dashboard-tooltip-count');
+  
+  if (dashboardChartContainer && dashboardTooltip) {
+    const dashboardChartBars = dashboardChartContainer.querySelectorAll('.dashboard-activity-bar');
+    
+    dashboardChartBars.forEach(bar => {
+      // Mouse enter - show tooltip
+      bar.addEventListener('mouseenter', function(e) {
+        const date = this.dataset.date;
+        const count = parseInt(this.dataset.count);
+        
+        // Update tooltip content
+        dashboardTooltipDate.textContent = date;
+        dashboardTooltipCount.textContent = count === 0 ? 'No activity' : 
+          count === 1 ? '1 edit' : `${count} edits`;
+        
+        // Position tooltip
+        const rect = this.getBoundingClientRect();
+        const chartRect = dashboardChartContainer.getBoundingClientRect();
+        const tooltipLeft = rect.left - chartRect.left + (rect.width / 2);
+        
+        dashboardTooltip.style.left = `${tooltipLeft}px`;
+        dashboardTooltip.style.bottom = `${dashboardChartContainer.offsetHeight + 10}px`;
+        dashboardTooltip.style.opacity = '1';
+        dashboardTooltip.style.transform = 'translateX(-50%) translateY(0)';
+      });
+      
+      // Mouse leave - hide tooltip
+      bar.addEventListener('mouseleave', function() {
+        dashboardTooltip.style.opacity = '0';
+        dashboardTooltip.style.transform = 'translateX(-50%) translateY(-4px)';
+      });
+    });
+  }
+  
+  // Streak day tooltips and hover effects
+  const streakTooltip = document.getElementById('streak-tooltip');
+  const streakTooltipDate = document.getElementById('streak-tooltip-date');
+  const streakTooltipActivity = document.getElementById('streak-tooltip-activity');
+  
+  if (streakTooltip) {
+    const streakDays = document.querySelectorAll('.streak-day[data-has-activity="true"]');
+    
+    streakDays.forEach(day => {
+      // Mouse enter - show tooltip and fun effects
+      day.addEventListener('mouseenter', function(e) {
+        const date = this.dataset.date;
+        const editCount = parseInt(this.dataset.editCount);
+        
+        // Update tooltip content
+        streakTooltipDate.textContent = date;
+        streakTooltipActivity.textContent = editCount === 1 ? 
+          '1 edit made' : `${editCount} edits made`;
+        
+        // Position tooltip relative to the hovered element
+        const rect = this.getBoundingClientRect();
+        const tooltipRect = streakTooltip.getBoundingClientRect();
+        
+        // Position above the dot, centered horizontally
+        const left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+        const top = rect.top - tooltipRect.height - 10; // 10px gap above the dot
+        
+        streakTooltip.style.position = 'fixed';
+        streakTooltip.style.left = `${left}px`;
+        streakTooltip.style.top = `${top}px`;
+        streakTooltip.style.opacity = '1';
+        streakTooltip.style.transform = 'translateY(0)';
+      });
+      
+      // Mouse leave - hide tooltip
+      day.addEventListener('mouseleave', function() {
+        streakTooltip.style.opacity = '0';
+        streakTooltip.style.transform = 'translateY(-4px)';
+      });
+      
+      // Click for extra fun (optional)
+      day.addEventListener('click', function() {
+        // Create a little celebration burst
+        const burst = document.createElement('div');
+        burst.innerHTML = '🎉';
+        burst.style.position = 'fixed';
+        burst.style.fontSize = '12px';
+        burst.style.pointerEvents = 'none';
+        burst.style.zIndex = '50';
+        burst.style.animation = 'celebration-burst 0.8s ease-out forwards';
+        
+        const rect = this.getBoundingClientRect();
+        burst.style.left = (rect.left + rect.width / 2) + 'px';
+        burst.style.top = rect.top + 'px';
+        
+        document.body.appendChild(burst);
+        setTimeout(() => burst.remove(), 800);
+      });
+    });
+  }
+  
+  // Streak info tooltip (for "N days in a row" text)
+  const streakInfoTooltip = document.getElementById('streak-info-tooltip');
+  const streakInfoTitle = document.getElementById('streak-info-title');
+  const streakInfoDetails = document.getElementById('streak-info-details');
+  const streakInfoElement = document.querySelector('.streak-info');
+  
+  if (streakInfoTooltip && streakInfoElement) {
+    // Mouse enter - show streak info tooltip
+    streakInfoElement.addEventListener('mouseenter', function(e) {
+      const totalEdits = parseInt(this.dataset.totalEdits) || 0;
+      const streakDays = parseInt(this.dataset.streakDays) || 0;
+      
+      // Update tooltip content
+      streakInfoTitle.textContent = `${streakDays}-Day Streak`;
+      streakInfoDetails.textContent = totalEdits === 1 ? 
+        '1 total edit made' : `${totalEdits} total edits made`;
+      
+      // Position tooltip relative to the hovered element
+      const rect = this.getBoundingClientRect();
+      const tooltipRect = streakInfoTooltip.getBoundingClientRect();
+      
+      // Position above the text, centered horizontally
+      const left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+      const top = rect.top - tooltipRect.height - 12; // 12px gap above the text
+      
+      streakInfoTooltip.style.position = 'fixed';
+      streakInfoTooltip.style.left = `${left}px`;
+      streakInfoTooltip.style.top = `${top}px`;
+      streakInfoTooltip.style.opacity = '1';
+      streakInfoTooltip.style.transform = 'translateY(0)';
+    });
+    
+    // Mouse leave - hide streak info tooltip
+    streakInfoElement.addEventListener('mouseleave', function() {
+      streakInfoTooltip.style.opacity = '0';
+      streakInfoTooltip.style.transform = 'translateY(-4px)';
+    });
+  }
+});
+
+// Add celebration burst animation
+const celebrationStyle = document.createElement('style');
+celebrationStyle.textContent = `
+  @keyframes celebration-burst {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    50% { transform: translateY(-20px) scale(1.2); opacity: 0.8; }
+    100% { transform: translateY(-40px) scale(0.8); opacity: 0; }
+  }
+`;
+document.head.appendChild(celebrationStyle);
+</script>

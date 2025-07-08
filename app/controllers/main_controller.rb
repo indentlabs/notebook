@@ -47,6 +47,7 @@ class MainController < ApplicationController
                                           .includes(:posts, :messageboard)
     
     set_questionable_content # for questions
+    generate_dashboard_analytics # for activity chart and streak
 
     @sidenav_expansion = 'worldbuilding'
   end
@@ -244,8 +245,8 @@ class MainController < ApplicationController
       .transform_values(&:count)
       .sort_by { |_, count| -count }
     
-    # Activity over time (last 30 days)
-    @daily_activity = (0..29).map do |days_ago|
+    # Activity over time (last 7 days for recent content page)
+    @daily_activity = (0..6).map do |days_ago|
       date = Date.current - days_ago.days
       activity_count = @enhanced_content.count do |item|
         item[:page].updated_at.to_date == date
@@ -265,6 +266,62 @@ class MainController < ApplicationController
       this_week: @enhanced_content.count { |item| item[:days_since_updated] <= 7 },
       this_month: @enhanced_content.count { |item| item[:days_since_updated] <= 30 }
     }
+  end
+
+  def generate_dashboard_analytics
+    return unless user_signed_in?
+    
+    cache_current_user_content
+    all_content = @current_user_content.values.flatten
+    
+    # 30-Day Activity Chart for Dashboard
+    @dashboard_daily_activity = (0..29).map do |days_ago|
+      date = Date.current - days_ago.days
+      activity_count = all_content.count do |content_page|
+        content_page.updated_at.to_date == date
+      end
+      [date.strftime('%m/%d'), activity_count]
+    end.reverse
+    
+    # Calculate Editing Streak
+    calculate_editing_streak(all_content)
+  end
+
+  def calculate_editing_streak(all_content)
+    # Get unique dates when user edited content (last 100 days to be safe)
+    edit_dates = all_content.map { |page| page.updated_at.to_date }.uniq.sort.reverse
+    
+    # Calculate current streak
+    current_streak = 0
+    current_date = Date.current
+    
+    # Check each day going backwards
+    while edit_dates.include?(current_date)
+      current_streak += 1
+      current_date -= 1.day
+    end
+    
+    @current_streak = current_streak
+    
+    # Calculate total edits in current streak
+    @streak_total_edits = 0
+    if current_streak > 0
+      streak_dates = (0..current_streak-1).map { |days_ago| Date.current - days_ago.days }
+      @streak_total_edits = all_content.count { |page| streak_dates.include?(page.updated_at.to_date) }
+    end
+    
+    # Generate last 7 days for streak visualization
+    @streak_days = (0..6).map do |days_ago|
+      date = Date.current - days_ago.days
+      has_activity = edit_dates.include?(date)
+      edit_count = all_content.count { |page| page.updated_at.to_date == date }
+      {
+        date: date,
+        has_activity: has_activity,
+        edit_count: edit_count,
+        day_name: date.strftime('%a')[0] # First letter of day name
+      }
+    end.reverse
   end
 
   def for_writers
