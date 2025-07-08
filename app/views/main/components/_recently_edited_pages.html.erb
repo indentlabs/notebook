@@ -1,169 +1,51 @@
-<div class="space-y-4">
-  <% @recently_edited_pages.first(9).each do |page| %>
+<div class="space-y-3">
+  <% @recently_edited_pages.first(6).each do |page| %>
     <%# Timelines and Documents use edit_polymorphic_path, while ContentPages uses edit_path -- gross %>
     <%= link_to page.try(:view_path) || edit_polymorphic_path(page), class: 'block w-full group' do %>
-      <div class="fancy-card relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl border border-gray-200/50 transition-all duration-300 hover:-translate-y-1">
-        <!-- Image container with fixed height -->
-        <div class="relative h-32 overflow-hidden rounded-t-xl">
-          <%= image_tag page.random_image_including_private, class: 'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110' %>
-          
-          <!-- Gradient overlay for title readability -->
-          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-          
-          <!-- Content type badge -->
-          <div class="absolute top-3 right-3 z-20">
-            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= page.color %> backdrop-blur-sm text-white">
-              <i class="material-icons text-sm mr-1"><%= page.icon %></i>
-              <%= page.page_type %>
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200">
+        <div class="flex items-center space-x-3">
+          <!-- Content Type Icon -->
+          <div class="flex-shrink-0">
+            <div class="w-10 h-10 <%= page.color %> rounded-lg flex items-center justify-center">
+              <i class="material-icons text-white text-lg"><%= page.icon %></i>
             </div>
           </div>
-
-          <!-- Title overlay at bottom of image -->
-          <div class="absolute bottom-0 left-0 right-0 p-4 z-10">
-            <h3 class="text-lg font-bold text-white line-clamp-2 group-hover:text-blue-300 transition-colors duration-200">
+          
+          <!-- Content Info -->
+          <div class="flex-1 min-w-0">
+            <h4 class="font-medium text-gray-900 line-clamp-1 group-hover:text-blue-600 transition-colors">
               <%= page.name %>
-            </h3>
-          </div>
-        </div>
-
-        <!-- Footer below image -->
-        <div class="bg-white rounded-b-xl">
-          <!-- Stats and metadata -->
-          <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3">
-            <div class="flex items-center space-x-3 text-xs text-gray-500">
+            </h4>
+            <div class="flex items-center space-x-3 mt-1 text-sm text-gray-500">
+              <span class="flex items-center space-x-1">
+                <i class="material-icons text-xs">schedule</i>
+                <span>edited <%= time_ago_in_words page.updated_at %> ago</span>
+              </span>
               <% if page.cached_word_count.present? %>
-                <div class="flex items-center space-x-1">
-                  <i class="material-icons text-sm text-blue-500">description</i>
-                  <span class="font-medium text-gray-700">
-                    <%= number_with_delimiter page.cached_word_count %>
-                    <%= 'word'.pluralize(page.cached_word_count) %>
-                  </span>
-                </div>
+                <span class="flex items-center space-x-1">
+                  <i class="material-icons text-xs">description</i>
+                  <span><%= number_with_delimiter page.cached_word_count %> words</span>
+                </span>
+              <% end %>
+              <% if page.respond_to?(:favorite?) && page.favorite? %>
+                <i class="material-icons text-xs text-yellow-500">star</i>
               <% end %>
             </div>
-            <div class="flex items-center space-x-1 text-xs text-gray-500">
-              <i class="material-icons text-sm text-green-500">schedule</i>
-              <span>edited <%= time_ago_in_words page.updated_at %> ago</span>
-            </div>
+          </div>
+          
+          <!-- Quick Edit Arrow -->
+          <div class="flex-shrink-0">
+            <i class="material-icons text-gray-400 group-hover:text-blue-500 transition-colors">arrow_forward</i>
           </div>
         </div>
       </div>
     <% end %>
   <% end %>
-</div>
-
-<style>
-.fancy-card {
-  position: relative;
-  transform-style: preserve-3d;
-}
-
-.fancy-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(59, 130, 246, 0.2);
-  border-color: rgba(59, 130, 246, 0.3);
-}
-
-.fancy-card:active {
-  transform: translateY(-2px) scale(0.98);
-  transition-duration: 0.1s;
-}
-
-/* Enhanced text effects */
-.fancy-card h3 {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.fancy-card:hover h3 {
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-}
-
-/* Shimmer effect on hover */
-.fancy-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
-  border-radius: 0.75rem;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.fancy-card:hover::after {
-  left: 100%;
-}
-
-/* Ripple effect for cards */
-.card-ripple {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(59, 130, 246, 0.4);
-  transform: scale(0);
-  animation: cardRippleEffect 0.6s linear;
-  pointer-events: none;
-  z-index: 15;
-}
-
-@keyframes cardRippleEffect {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-/* Line clamp utilities */
-.line-clamp-1 {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const fancyCards = document.querySelectorAll('.fancy-card');
   
-  fancyCards.forEach(card => {
-    card.addEventListener('click', function(e) {
-      // Create ripple effect
-      const ripple = document.createElement('span');
-      const rect = this.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      const x = e.clientX - rect.left - size / 2;
-      const y = e.clientY - rect.top - size / 2;
-      
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = x + 'px';
-      ripple.style.top = y + 'px';
-      ripple.classList.add('card-ripple');
-      
-      this.appendChild(ripple);
-      
-      setTimeout(() => {
-        ripple.remove();
-      }, 600);
-    });
-    
-    // Add subtle floating animation
-    card.addEventListener('mouseenter', function() {
-      this.style.transform = 'translateY(-6px) scale(1.03)';
-    });
-    
-    card.addEventListener('mouseleave', function() {
-      this.style.transform = '';
-    });
-  });
-});
-</script>
+  <!-- View All Link -->
+  <div class="pt-3 border-t border-gray-100">
+    <%= link_to recent_content_path, class: "block text-center text-sm text-blue-600 hover:text-blue-700 font-medium" do %>
+      View all recent updates →
+    <% end %>
+  </div>
+</div>

@@ -79,6 +79,7 @@ class ApplicationController < ActionController::Base
     cache_current_user_content
     cache_notifications
     cache_recently_edited_pages
+    cache_most_edited_pages
   end
 
   def cache_activated_content_types
@@ -152,6 +153,34 @@ class ApplicationController < ActionController::Base
         .sort_by(&:updated_at)
         .last(amount)
         .reverse
+    else
+      []
+    end
+  end
+
+  def cache_most_edited_pages(amount=50)
+    cache_current_user_content
+
+    @most_edited_pages ||= if user_signed_in?
+      # Get all user's content
+      all_content = @current_user_content.values.flatten
+      
+      # Count edits for each content page using ContentChangeEvent
+      content_with_edit_counts = all_content.map do |content_page|
+        edit_count = ContentChangeEvent.where(
+          content_type: content_page.page_type,
+          content_id: content_page.id,
+          user_id: current_user.id
+        ).count
+        
+        [content_page, edit_count]
+      end
+      
+      # Sort by edit count (descending) and take the top pages
+      # Keep both content page and edit count for the view
+      content_with_edit_counts
+        .sort_by { |content_page, edit_count| -edit_count }
+        .first(amount)
     else
       []
     end

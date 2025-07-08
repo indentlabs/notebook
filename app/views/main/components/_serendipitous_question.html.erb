@@ -1,21 +1,54 @@
 <% if @content %>
-  <div class="bg-white shadow-md rounded-md mb-8">
-    <div class="bg-notebook-blue rounded-t-lg">
-      <%= image_tag @content.random_image_including_private(format: :original), class: 'w-full object-cover object-center max-h-48 rounded-t-md' %>
-    </div>
-    <div class="p-4 lg:flex lg:flex-col lg:justify-between ">
-      <div>
-        <%=
-          if @attribute_field_to_question
-            render partial: 'cards/serendipitous/tailwind_content_question', locals: { 
-              content: @content, 
-              field: @attribute_field_to_question,
-              expand_by_default: true,
-              include_quick_reference: false
-            }
-          end
-        %>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <!-- Hero Image -->
+    <div class="relative h-48 overflow-hidden">
+      <%= image_tag @content.random_image_including_private(format: :original), class: 'w-full h-full object-cover' %>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+      
+      <!-- Content Type Badge -->
+      <div class="absolute top-4 right-4">
+        <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= @content.color %> text-white backdrop-blur-sm">
+          <i class="material-icons text-sm mr-1"><%= @content.icon %></i>
+          <%= @content.page_type %>
+        </div>
       </div>
+      
+      <!-- Content Title -->
+      <div class="absolute bottom-4 left-4 right-4">
+        <h3 class="text-xl font-bold text-white mb-1">
+          <%= link_to @content.name, send("#{@content.page_type.downcase}_path", @content.id), class: "hover:text-blue-200 transition-colors" %>
+        </h3>
+        <p class="text-sm text-gray-200">
+          <% if @content.respond_to?(:universe) && @content.universe.present? %>
+            from <%= @content.universe.name %>
+          <% end %>
+        </p>
+      </div>
+    </div>
+    
+    <!-- Question Content -->
+    <div class="p-6">
+      <% if @attribute_field_to_question %>
+        <%= render partial: 'cards/serendipitous/tailwind_content_question', locals: { 
+          content: @content, 
+          field: @attribute_field_to_question,
+          expand_by_default: true,
+          include_quick_reference: false
+        } %>
+        
+        <!-- Action Buttons -->
+        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+          <%= link_to send("edit_#{@content.page_type.downcase}_path", @content.id), class: "inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white #{@content.color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" do %>
+            <i class="material-icons mr-2 text-sm">edit</i>
+            Work on this
+          <% end %>
+          
+          <button onclick="location.reload()" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+            <i class="material-icons mr-2 text-sm">refresh</i>
+            Ask me something else
+          </button>
+        </div>
+      <% end %>
     </div>
   </div>
 <% end %>

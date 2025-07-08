@@ -1,0 +1,198 @@
+<div class="dashboard-card">
+  <div class="dashboard-card-header">
+    <div class="flex items-center justify-between">
+      <h2 class="dashboard-card-title">
+        <i class="material-icons mr-2 text-gray-600">library_books</i>
+        Content Library
+      </h2>
+      
+      <!-- Tab Navigation -->
+      <div class="flex space-x-1 bg-gray-100 rounded-lg p-1">
+        <button class="tab-button active" data-tab="recent">Recent</button>
+        <button class="tab-button" data-tab="favorites">Favorites</button>
+        <button class="tab-button" data-tab="all">All Content</button>
+        <button class="tab-button" data-tab="by-type">By Type</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="dashboard-card-content">
+    
+    <!-- Recent Tab -->
+    <div class="tab-content" data-tab="recent">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% @current_user_content.except('Universe').values.flatten.sort_by(&:updated_at).reverse.first(15).each do |content_page| %>
+          <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id), class: 'block' do %>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+              <div class="relative h-32 overflow-hidden">
+                <% if content_page.random_image_including_private.present? %>
+                  <%= image_tag content_page.random_image_including_private, class: 'w-full h-full object-cover' %>
+                <% else %>
+                  <div class="w-full h-full <%= content_page.color %> bg-opacity-20 flex items-center justify-center">
+                    <i class="material-icons text-4xl text-white opacity-80"><%= content_page.icon %></i>
+                  </div>
+                <% end %>
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                
+                <div class="absolute top-2 right-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm <%= content_page.color %>">
+                  <i class="material-icons text-xs mr-1"><%= content_page.icon %></i>
+                  <%= content_page.page_type %>
+                </div>
+                
+                <h3 class="absolute bottom-2 left-2 right-2 text-white font-semibold text-sm line-clamp-2">
+                  <%= content_page.name %>
+                </h3>
+              </div>
+              
+              <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                <div class="flex items-center space-x-2">
+                  <% if content_page.cached_word_count.present? %>
+                    <span class="flex items-center space-x-1">
+                      <i class="material-icons text-xs">description</i>
+                      <span><%= number_with_delimiter content_page.cached_word_count %> words</span>
+                    </span>
+                  <% end %>
+                </div>
+                <span class="flex items-center space-x-1">
+                  <i class="material-icons text-xs">schedule</i>
+                  <span>edited <%= time_ago_in_words content_page.updated_at %> ago</span>
+                </span>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Favorites Tab -->
+    <div class="tab-content hidden" data-tab="favorites">
+      <% favorites = @current_user_content.except('Universe').values.flatten.select(&:favorite?) %>
+      <% if favorites.any? %>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% favorites.sort_by { |p| p.name.downcase }.each do |content_page| %>
+            <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id), class: 'block' do %>
+              <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                <div class="relative h-32 overflow-hidden">
+                  <% if content_page.random_image_including_private.present? %>
+                    <%= image_tag content_page.random_image_including_private, class: 'w-full h-full object-cover' %>
+                  <% else %>
+                    <div class="w-full h-full <%= content_page.color %> bg-opacity-20 flex items-center justify-center">
+                      <i class="material-icons text-4xl text-white opacity-80"><%= content_page.icon %></i>
+                    </div>
+                  <% end %>
+                  
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                  
+                  <div class="absolute top-2 left-2">
+                    <i class="material-icons text-yellow-400">star</i>
+                  </div>
+                  
+                  <div class="absolute top-2 right-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm <%= content_page.color %>">
+                    <i class="material-icons text-xs mr-1"><%= content_page.icon %></i>
+                    <%= content_page.page_type %>
+                  </div>
+                  
+                  <h3 class="absolute bottom-2 left-2 right-2 text-white font-semibold text-sm line-clamp-2">
+                    <%= content_page.name %>
+                  </h3>
+                </div>
+                
+                <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                  <div class="flex items-center space-x-2">
+                    <% if content_page.cached_word_count.present? %>
+                      <span class="flex items-center space-x-1">
+                        <i class="material-icons text-xs">description</i>
+                        <span><%= number_with_delimiter content_page.cached_word_count %> words</span>
+                      </span>
+                    <% end %>
+                  </div>
+                  <span class="flex items-center space-x-1">
+                    <i class="material-icons text-xs">schedule</i>
+                    <span>edited <%= time_ago_in_words content_page.updated_at %> ago</span>
+                  </span>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center py-8">
+          <i class="material-icons text-6xl text-gray-300 mb-4">star_border</i>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No favorites yet</h3>
+          <p class="text-gray-500">Star your favorite content to see it here</p>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- All Content Tab -->
+    <div class="tab-content hidden" data-tab="all">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
+          <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id), class: 'block' do %>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+              <div class="relative h-32 overflow-hidden">
+                <% if content_page.random_image_including_private.present? %>
+                  <%= image_tag content_page.random_image_including_private, class: 'w-full h-full object-cover' %>
+                <% else %>
+                  <div class="w-full h-full <%= content_page.color %> bg-opacity-20 flex items-center justify-center">
+                    <i class="material-icons text-3xl text-white opacity-80"><%= content_page.icon %></i>
+                  </div>
+                <% end %>
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                
+                <div class="absolute top-2 right-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm <%= content_page.color %>">
+                  <i class="material-icons text-xs mr-1"><%= content_page.icon %></i>
+                  <%= content_page.page_type %>
+                </div>
+                
+                <h3 class="absolute bottom-2 left-2 right-2 text-white font-semibold text-sm line-clamp-2">
+                  <%= content_page.name %>
+                </h3>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- By Type Tab -->
+    <div class="tab-content hidden" data-tab="by-type">
+      <div class="space-y-6">
+        <% @current_user_content.except('Universe').each do |content_type, pages| %>
+          <% next if pages.empty? %>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+              <% klass = content_class_from_name(content_type) %>
+              <i class="material-icons mr-2 <%= klass.text_color %>"><%= klass.icon %></i>
+              <%= content_type.pluralize %> 
+              <span class="text-sm font-normal text-gray-500 ml-2">(<%= pages.length %>)</span>
+            </h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <% pages.sort_by { |p| p.name.downcase }.each do |content_page| %>
+                <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id), class: 'block' do %>
+                  <div class="bg-white border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:shadow-sm transition-all duration-200">
+                    <div class="flex items-center space-x-2">
+                      <% if content_page.favorite? %>
+                        <i class="material-icons text-yellow-400 text-sm">star</i>
+                      <% end %>
+                      <h4 class="font-medium text-gray-900 line-clamp-1 flex-1">
+                        <%= content_page.name %>
+                      </h4>
+                    </div>
+                    <div class="mt-1 text-xs text-gray-500">
+                      edited <%= time_ago_in_words content_page.updated_at %> ago
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+  </div>
+</div>

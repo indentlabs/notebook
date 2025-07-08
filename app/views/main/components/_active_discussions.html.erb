@@ -1,19 +1,37 @@
-<ul role="list" class="space-y-2 flex mb-8">
+<div class="space-y-3">
   <% discussions.each do |topic| %>
-    <%= link_to topic, class: 'w-full' do %>
-      <li class="text-sm text-white hover:bg-blue-600 bg-blue-500 shadow hover:shadow-md rounded p-2">
-        <i class="material-icons float-left mr-2">forum</i>
-        <div class="line-clamp-1"><%= topic.title %></div>
-        <div>
-          <small>
-            <%= number_with_delimiter (topic.posts.count - 1) %>
-            <%= 'reply'.pluralize(topic.posts.count - 1) %>
-          </small>
-          <small>
-            in <strong><%= topic.messageboard.name %></strong>
-          </small>
+    <%= link_to topic, class: 'block group' do %>
+      <div class="bg-white border border-gray-200 rounded-lg p-3 hover:border-orange-300 hover:shadow-sm transition-all duration-200">
+        <div class="flex items-start space-x-3">
+          <div class="flex-shrink-0 mt-1">
+            <i class="material-icons text-orange-500 text-lg">forum</i>
+          </div>
+          
+          <div class="flex-1 min-w-0">
+            <h4 class="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-orange-600 transition-colors">
+              <%= topic.title %>
+            </h4>
+            
+            <div class="flex items-center space-x-3 mt-1 text-xs text-gray-500">
+              <span>
+                <%= number_with_delimiter (topic.posts.count - 1) %>
+                <%= 'reply'.pluralize(topic.posts.count - 1) %>
+              </span>
+              <span>•</span>
+              <span class="line-clamp-1">
+                in <strong><%= topic.messageboard.name %></strong>
+              </span>
+            </div>
+          </div>
         </div>
-      </li>
+      </div>
     <% end %>
   <% end %>
-</ul>
+  
+  <!-- View All Link -->
+  <div class="pt-3 border-t border-gray-100">
+    <%= link_to thredded_path, class: "block text-center text-sm text-orange-600 hover:text-orange-700 font-medium" do %>
+      Join the discussion →
+    <% end %>
+  </div>
+</div>

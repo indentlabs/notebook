@@ -1,302 +1,201 @@
-<div class="min-h-full">
-  <div class="flex flex-col flex-1">
-    <main class="flex-1 pb-8">
-      <!-- Modern full-width header -->
-      <div class="bg-gradient-to-r from-slate-50 to-white border-b border-gray-200">
-        <div class="w-full px-4 sm:px-6 lg:px-8">
-          <div class="py-4 sm:py-6 lg:py-8">
-            <div class="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-              <!-- User info section -->
-              <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-4 sm:space-y-0">
-                <%= link_to current_user, class: "group relative self-center sm:self-auto" do %>
-                  <div class="relative">
-                    <%= image_tag current_user.image_url, class: "h-16 w-16 sm:h-20 sm:w-20 rounded-full #{User.color} ring-4 ring-white shadow-lg group-hover:ring-blue-100 transition-all duration-200" %>
-                    <div class="absolute -bottom-1 -right-1 h-4 w-4 sm:h-6 sm:w-6 bg-green-400 rounded-full ring-4 ring-white"></div>
-                  </div>
-                <% end %>
-                
-                <div class="flex flex-col text-center sm:text-left">
-                  <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-1 sm:space-y-0">
-                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight">
-                      Welcome back, <%= link_to current_user.display_name, current_user, class: "#{User.text_color} hover:opacity-80 transition-opacity" %>
-                    </h1>
-                    <%= render partial: 'thredded/users/badge', locals: { user: current_user } %>
-                  </div>
-                  <p class="text-base sm:text-lg text-gray-600 mt-1">
-                    <em>Ready to create something amazing today?</em>
-                  </p>
-                  
-                  <!--
-                  <div class="flex items-center space-x-6 mt-3">
-                    <div class="flex items-center space-x-2 text-sm text-gray-500">
-                      <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                      </svg>
-                      <span class="font-medium">Active projects</span>
-                    </div>
-                    <div class="flex items-center space-x-2 text-sm text-gray-500">
-                      <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                      </svg>
-                      <span class="font-medium">Recent activity</span>
-                    </div>
-                  </div>
-                  -->
-                </div>
-              </div>
-              
-              <!-- Action buttons -->
-              <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
-                <%= link_to new_character_path do %>
-                  <button type="button" class="fancy-button relative overflow-hidden inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 active:scale-95 active:shadow-sm">
-                    <i class="material-icons mr-2 <%= Character.text_color %> transition-transform duration-200"><%= Character.icon %></i>
-                    <span class="transition-all duration-200">Create Character</span>
-                  </button>
-                <% end %>
-                <% random_enabled_page_type = (current_user.createable_content_types - [Character]).sample %>
-                <%= link_to new_polymorphic_path(random_enabled_page_type) do %>
-                  <button type="button" class="fancy-button relative overflow-hidden inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white <%= random_enabled_page_type.color %> hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 active:scale-95 active:shadow-sm">
-                    <i class="material-icons mr-2 transition-transform duration-200"><%= random_enabled_page_type.icon %></i>
-                    <span class="transition-all duration-200">
-                      Create <%= random_enabled_page_type.name %>
-                    </span>
-                  </button>
-                <% end %>
-              </div>
+<!-- Main Dashboard Container -->
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  
+  <!-- Hero Section -->
+  <div class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+        
+        <!-- User Welcome -->
+        <div class="flex items-center space-x-4">
+          <%= link_to current_user, class: "group relative" do %>
+            <div class="relative">
+              <%= image_tag current_user.image_url, class: "h-14 w-14 rounded-full #{User.color} ring-3 ring-white shadow-md group-hover:ring-blue-100 transition-all duration-200" %>
+              <div class="absolute -bottom-1 -right-1 h-4 w-4 bg-green-400 rounded-full ring-2 ring-white"></div>
             </div>
+          <% end %>
+          
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">
+              Welcome back, <%= link_to current_user.display_name, current_user, class: "#{User.text_color} hover:opacity-80 transition-opacity" %>
+            </h1>
+                
+            <!-- Quote of the Day -->
+            <%= render partial: 'main/components/quote_of_the_day', locals: { } %>
           </div>
         </div>
-      </div>
-
-      <%# render partial: 'main/components/activity_bar', locals: { } %>
-
-      <div class="max-w-7xl mx-auto my-4 px-4 sm:px-6 lg:px-8">
-        <!-- Mobile-first: stack vertically, then side-by-side on larger screens -->
-        <div class="grid grid-cols-1 xl:grid-cols-8 gap-4 xl:gap-6">
-          <!-- Main content area - full width on mobile, 5/8 on xl -->
-          <div class="xl:col-span-5 space-y-6">
-            <% if @content %>
-              <div class="text-center">
-                <h2 class="text-sm leading-6 font-medium text-gray-500 mb-2">
-                  Expand
-                  <% if @universe_scope.present? %>
-                    <%= link_to @universe_scope.name, @universe_scope, class: Universe.text_color %>
-                  <% else %>
-                    your worlds
-                  <% end %>
-                </h2>
-                <%= render partial: 'main/components/serendipitous_question', locals: { } %>
-              </div>
-            <% end %>
-
-            <div class="text-center">
-              <h2 class="text-sm leading-6 font-medium text-gray-500 mb-2">
-                Create a new page
-              </h2>
-              <%= render partial: 'main/components/create_new_page_list', locals: { } %>
-            </div>
-          </div>
+        
+        <!-- Primary Action Buttons -->
+        <div class="flex space-x-3">
+          <%= link_to new_character_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" do %>
+            <i class="material-icons mr-2 text-sm <%= Character.text_color %>"><%= Character.icon %></i>
+            Create Character
+          <% end %>
           
-          <!-- Sidebar content - full width on mobile, 3/8 on xl -->
-          <div class="xl:col-span-3 space-y-6">
-            <% if @most_recent_threads.any? %>
-              <div class="text-center">
-                <h2 class="text-sm leading-6 font-medium text-gray-500 hover:text-gray-800 mb-2">
-                  <%= link_to 'Active discussions', thredded_path %>
-                </h2>
-                <%= render partial: 'main/components/active_discussions', locals: { discussions: @most_recent_threads } %>
-              </div>
-            <% end %>
-
-            <% if @recently_edited_pages %>
-              <div class="text-center">
-                <h2 class="text-sm leading-6 font-medium text-gray-500 hover:text-gray-800 mb-2">
-                  <%= link_to 'Your recent updates', recent_content_path %>
-                </h2>
-                <%= render partial: 'main/components/recently_edited_pages', locals: { } %>
-              </div>
-            <% end %>
-          </div>
-          
-          <!-- Content cards section - redesigned for Tailwind from MaterializeCSS -->          
-          <% if @current_user_content && @current_user_content.except('Universe').values.flatten.any? %>
-            <div class="text-center mt-8 xl:col-span-8">
-              <h2 class="text-sm leading-6 font-medium text-gray-500 mb-4">Your Content</h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
-                  <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id), class: 'block w-full group' do %>
-                    <div class="fancy-card relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl border border-gray-200/50 transition-all duration-300 hover:-translate-y-1">
-                      <!-- Image container with fixed height -->
-                      <div class="relative h-32 overflow-hidden rounded-t-xl">
-                        <% if content_page.random_image_including_private.present? %>
-                          <%= image_tag content_page.random_image_including_private, class: 'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110' %>
-                        <% else %>
-                          <!-- Fallback when no image is available -->
-                          <div class="absolute inset-0 w-full h-full <%= content_page.color %> bg-opacity-20"></div>
-                        <% end %>
-                        
-                        <!-- Gradient overlay for title readability -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-                        
-                        <!-- Content type badge -->
-                        <div class="absolute top-3 right-3 z-20">
-                          <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= content_page.color %> backdrop-blur-sm text-white">
-                            <i class="material-icons text-sm mr-1"><%= content_page.icon %></i>
-                            <%= content_page.page_type %>
-                          </div>
-                        </div>
-
-                        <!-- Title overlay at bottom of image -->
-                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10">
-                          <h3 class="text-lg font-bold text-white line-clamp-2 group-hover:text-blue-300 transition-colors duration-200">
-                            <%= content_page.name %>
-                          </h3>
-                        </div>
-                      </div>
-
-                      <!-- Footer below image -->
-                      <div class="bg-white rounded-b-xl">
-                        <!-- Stats and metadata -->
-                        <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3">
-                          <div class="flex items-center space-x-3 text-xs text-gray-500">
-                            <% if content_page.cached_word_count.present? %>
-                              <div class="flex items-center space-x-1">
-                                <i class="material-icons text-sm text-blue-500">description</i>
-                                <span class="font-medium text-gray-700">
-                                  <%= number_with_delimiter content_page.cached_word_count %>
-                                  <%= 'word'.pluralize(content_page.cached_word_count) %>
-                                </span>
-                              </div>
-                            <% end %>
-                          </div>
-                          <div class="flex items-center space-x-1 text-xs text-gray-500">
-                            <i class="material-icons text-sm text-green-500">schedule</i>
-                            <span>edited <%= time_ago_in_words content_page.updated_at %> ago</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  <% end %>
-                <% end %>
-              </div>
-            </div>
+          <% random_enabled_page_type = (current_user.createable_content_types - [Character]).sample %>
+          <%= link_to new_polymorphic_path(random_enabled_page_type), class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white #{random_enabled_page_type.color} hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" do %>
+            <i class="material-icons mr-2 text-sm"><%= random_enabled_page_type.icon %></i>
+            Create <%= random_enabled_page_type.name %>
           <% end %>
         </div>
       </div>
-    </main>
-
+    </div>
   </div>
+
+  <div>
+    <%= render partial: 'main/components/create_new_page_list', locals: { } %>
+  </div>
+
+  <!-- Two-Column Hero Section: Expand Your Worlds -->
+  <% if @content %>
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Two-Column Layout: 2/3 and 1/3 split -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <!-- Left Column: Serendipitous Question (2/3) -->
+          <div class="lg:col-span-2">
+            <%= render partial: 'main/components/serendipitous_question', locals: { } %>
+          </div>
+          
+          <!-- Right Column: Recently Edited Pages (1/3) -->
+          <% if @recently_edited_pages %>
+            <div class="lg:col-span-1">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                  <i class="material-icons mr-2 text-blue-600">history</i>
+                  Recently Edited
+                </h3>
+                <%= link_to recent_content_path, class: "text-xs text-blue-600 hover:text-blue-700 font-medium" do %>
+                  View all →
+                <% end %>
+              </div>
+              
+              <!-- Recently Edited Pages Component -->
+              <div class="dashboard-card">
+                <div class="dashboard-card-content">
+                  <%= render partial: 'main/components/recently_edited_pages', locals: { } %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+          
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @most_edited_pages && @most_edited_pages.any? %>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+            <i class="material-icons mr-3 text-gray-600 text-3xl">library_books</i>
+            Most-Edited Pages
+          </h2>
+          <%= link_to recent_content_path, class: "text-sm text-blue-600 hover:text-blue-700 font-medium" do %>
+            View more →
+          <% end %>
+        </div>
+        
+        <!-- Horizontal Scrolling Content Grid -->
+        <div class="overflow-x-auto pb-4">
+          <div class="flex space-x-4 min-w-max">
+            <% @most_edited_pages.first(20).each do |content_page, edit_count| %>
+              <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id), class: 'block flex-shrink-0' do %>
+                <div class="w-64 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                  <div class="relative h-32 overflow-hidden">
+                    <% if content_page.random_image_including_private.present? %>
+                      <%= image_tag content_page.random_image_including_private, class: 'w-full h-full object-cover' %>
+                    <% else %>
+                      <div class="w-full h-full <%= content_page.color %> bg-opacity-20 flex items-center justify-center">
+                        <i class="material-icons text-4xl text-white opacity-80"><%= content_page.icon %></i>
+                      </div>
+                    <% end %>
+                    
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    
+                    <div class="absolute top-2 right-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm <%= content_page.color %>">
+                      <i class="material-icons text-xs mr-1"><%= content_page.icon %></i>
+                      <%= content_page.page_type %>
+                    </div>
+                    
+                    <% if content_page.respond_to?(:favorite?) && content_page.favorite? %>
+                      <div class="absolute top-2 left-2">
+                        <i class="material-icons text-yellow-400 text-sm">star</i>
+                      </div>
+                    <% end %>
+                    
+                    <h3 class="absolute bottom-2 left-2 right-2 text-white font-semibold text-sm line-clamp-2">
+                      <%= content_page.name %>
+                    </h3>
+                  </div>
+                  
+                  <div class="px-4 py-3 border-t border-gray-100">
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                      <span class="flex items-center space-x-1">
+                        <i class="material-icons text-xs">edit</i>
+                        <span><%= number_with_delimiter edit_count %> <%= 'edit'.pluralize(edit_count) %></span>
+                      </span>
+                      
+                      <% if content_page.cached_word_count.present? %>
+                        <span class="flex items-center space-x-1">
+                          <i class="material-icons text-xs">description</i>
+                          <span><%= number_with_delimiter content_page.cached_word_count %> <%= 'word'.pluralize(content_page.cached_word_count) %></span>
+                        </span>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Main Content Area -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Single Column Layout for remaining content -->
+    <div class="max-w-2xl mx-auto space-y-10">
+      
+      <!-- What's New -->
+      <%= render partial: 'main/components/whats_new', locals: { } %>
+      
+      <!-- Forum Activity -->
+      <% if @most_recent_threads.any? %>
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+              <i class="material-icons mr-2 text-orange-600">forum</i>
+              <%= link_to 'Forum Activity', thredded_path, class: "hover:text-orange-600 transition-colors" %>
+            </h3>
+          </div>
+          <div class="dashboard-card">
+            <div class="dashboard-card-content">
+              <%= render partial: 'main/components/active_discussions', locals: { discussions: @most_recent_threads } %>
+            </div>
+          </div>
+        </section>
+      <% end %>
+      
+    </div>
+    
+  </div>
+  
 </div>
 
 <style>
-/* Button styles */
-.fancy-button {
-  position: relative;
-  transform-style: preserve-3d;
-  background-size: 200% 200%;
-  animation: gradientShift 4s ease infinite;
+/* Dashboard Card Styles */
+.dashboard-card {
+  @apply bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300;
 }
 
-.fancy-button::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.6s ease, height 0.6s ease;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.fancy-button:active::before {
-  width: 300px;
-  height: 300px;
-}
-
-.fancy-button:active i {
-  transform: scale(1.1) rotate(5deg);
-}
-
-.fancy-button:hover i {
-  transform: scale(1.05);
-}
-
-/* Enhanced glow effect on hover */
-.fancy-button:hover {
-  filter: brightness(1.05);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Pulse animation on focus */
-.fancy-button:focus {
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-  }
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Card styles */
-.fancy-card {
-  position: relative;
-  transform-style: preserve-3d;
-}
-
-.fancy-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(59, 130, 246, 0.2);
-  border-color: rgba(59, 130, 246, 0.3);
-}
-
-.fancy-card:active {
-  transform: translateY(-2px) scale(0.98);
-  transition-duration: 0.1s;
-}
-
-/* Enhanced text effects */
-.fancy-card h3 {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.fancy-card:hover h3 {
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-}
-
-/* Shimmer effect on hover */
-.fancy-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
-  border-radius: 0.75rem;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.fancy-card:hover::after {
-  left: 100%;
+.dashboard-card-content {
+  @apply p-8;
 }
 
 /* Line clamp utilities */
@@ -313,126 +212,90 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .dashboard-card-content {
+    @apply p-6;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-card-content {
+    @apply p-4;
+  }
+}
+
+/* Smooth scrollbar for horizontal content */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Button effects
-  const fancyButtons = document.querySelectorAll('.fancy-button');
-  
-  fancyButtons.forEach(button => {
-    button.addEventListener('click', function(e) {
-      // Create ripple effect
-      const ripple = document.createElement('span');
-      const rect = this.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      const x = e.clientX - rect.left - size / 2;
-      const y = e.clientY - rect.top - size / 2;
-      
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = x + 'px';
-      ripple.style.top = y + 'px';
-      ripple.classList.add('ripple');
-      
-      this.appendChild(ripple);
-      
-      // Add click animation classes
-      this.style.transform = 'scale(0.95)';
-      
-      setTimeout(() => {
-        this.style.transform = '';
-        ripple.remove();
-      }, 300);
-      
-      // Add a brief glow effect
-      this.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.5)';
-      setTimeout(() => {
-        this.style.boxShadow = '';
-      }, 200);
+  // Animate sections on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
     });
-    
-    // Add floating animation on hover
-    button.addEventListener('mouseenter', function() {
-      this.style.transform = 'translateY(-2px) scale(1.02)';
-    });
-    
-    button.addEventListener('mouseleave', function() {
-      this.style.transform = '';
-    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '50px'
   });
   
-  // Card effects
-  const fancyCards = document.querySelectorAll('.fancy-card');
-  
-  fancyCards.forEach(card => {
-    card.addEventListener('click', function(e) {
-      // Create ripple effect
-      const ripple = document.createElement('span');
-      const rect = this.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      const x = e.clientX - rect.left - size / 2;
-      const y = e.clientY - rect.top - size / 2;
-      
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = x + 'px';
-      ripple.style.top = y + 'px';
-      ripple.classList.add('card-ripple');
-      
-      this.appendChild(ripple);
-      
-      setTimeout(() => {
-        ripple.remove();
-      }, 600);
-    });
-    
-    // Add subtle floating animation
-    card.addEventListener('mouseenter', function() {
-      this.style.transform = 'translateY(-6px) scale(1.03)';
-    });
-    
-    card.addEventListener('mouseleave', function() {
-      this.style.transform = '';
-    });
+  // Observe dashboard sections
+  document.querySelectorAll('section, .dashboard-card').forEach(element => {
+    element.style.opacity = '0';
+    element.style.transform = 'translateY(30px)';
+    element.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    observer.observe(element);
   });
+  
+  // Smooth horizontal scrolling for content library
+  const contentLibrary = document.querySelector('.overflow-x-auto');
+  if (contentLibrary) {
+    let isScrolling = false;
+    
+    contentLibrary.addEventListener('wheel', function(e) {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      
+      e.preventDefault();
+      
+      if (!isScrolling) {
+        requestAnimationFrame(function() {
+          contentLibrary.scrollLeft += e.deltaY;
+          isScrolling = false;
+        });
+        isScrolling = true;
+      }
+    });
+  }
 });
 </script>
-
-<style>
-/* Button ripple effect */
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
-  transform: scale(0);
-  animation: rippleEffect 0.6s linear;
-  pointer-events: none;
-  z-index: 1;
-}
-
-@keyframes rippleEffect {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-/* Card ripple effect */
-.card-ripple {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(59, 130, 246, 0.4);
-  transform: scale(0);
-  animation: cardRippleEffect 0.6s linear;
-  pointer-events: none;
-  z-index: 15;
-}
-
-@keyframes cardRippleEffect {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-</style>
 
 <%= render partial: 'javascripts/content_linking' %>
