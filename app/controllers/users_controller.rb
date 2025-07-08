@@ -205,13 +205,16 @@ class UsersController < ApplicationController
   end
   
   def load_user_activity
-    # Content page shares (stream activity) - only public content
-    @feed = ContentPageShare.where(user_id: @user.id)
-      .joins(:content_page)
-      .where(content_pages: { privacy: 'public' })
+    # Content page shares (stream activity) - filter to only public content
+    all_shares = ContentPageShare.where(user_id: @user.id)
       .order('created_at DESC')
-      .includes([:user, :share_comments])
-      .limit(100)
+      .limit(200) # Get more initially so we have enough after filtering
+    
+    # Filter shares to only include those with public content pages
+    @feed = all_shares.select do |share|
+      next false unless share.content_page
+      share.content_page.respond_to?(:privacy) && share.content_page.privacy == 'public'
+    end.first(100) # Take first 100 after filtering
     
     # Recent content updates - only public content
     @stream = @user.recent_content_list(limit: 20).select do |content|
@@ -279,7 +282,7 @@ class UsersController < ApplicationController
   
   def calculate_activity_streak
     # Calculate consecutive days of activity (only from content shares since edits are excluded)
-    activity_dates = @feed.pluck(:created_at).map(&:to_date).uniq.sort.reverse
+    activity_dates = @feed.map(&:created_at).map(&:to_date).uniq.sort.reverse
     
     streak = 0
     current_date = Date.current
