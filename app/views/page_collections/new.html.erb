@@ -3,10 +3,10 @@
   
   <!-- Hero Section -->
   <div class="bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 text-white">
-    <div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="max-w-7xl mx-auto px-6 py-8">
       
       <!-- Breadcrumb -->
-      <nav class="mb-8">
+      <nav class="mb-6">
         <div class="flex items-center space-x-2 text-white/80 text-sm">
           <%= link_to "Collections", page_collections_path, class: "hover:text-white transition-colors duration-200" %>
           <i class="material-icons text-xs">chevron_right</i>
@@ -15,23 +15,175 @@
       </nav>
       
       <!-- Header Content -->
-      <div class="text-center">
-        <div class="mb-6">
-          <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full backdrop-blur-sm mb-4">
-            <i class="material-icons text-white text-4xl">collections</i>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="w-16 h-16 bg-white/20 rounded-full backdrop-blur-sm flex items-center justify-center">
+            <i class="material-icons text-white text-2xl">collections</i>
+          </div>
+          <div>
+            <h1 class="text-3xl font-bold text-white">Create a Collection</h1>
+            <p class="text-white/90">Curate and organize your favorite content</p>
           </div>
         </div>
         
-        <h1 class="text-4xl font-bold text-white mb-4">Create a Collection</h1>
-        <p class="text-xl text-white/90 max-w-2xl mx-auto">
-          Curate and organize your favorite content into beautiful, shareable collections that others can discover and contribute to.
-        </p>
+        <!-- Progress Indicator -->
+        <div class="hidden lg:flex items-center space-x-2">
+          <div class="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+            <span class="text-white/80 text-sm">Progress:</span>
+            <div class="w-24 h-2 bg-white/20 rounded-full overflow-hidden">
+              <div id="progress-bar" class="h-full bg-white rounded-full transition-all duration-300" style="width: 25%"></div>
+            </div>
+            <span id="progress-text" class="text-white text-sm font-medium">Step 1 of 4</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
   
-  <!-- Form Content -->
-  <div class="max-w-4xl mx-auto px-6 py-8">
-    <%= render 'form', page_collection: @page_collection %>
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <!-- Form Panel -->
+      <div class="space-y-6">
+        
+        <!-- Step Navigation -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex space-x-1">
+              <button class="step-nav active" data-step="1">
+                <span class="step-number">1</span>
+                <span class="step-title">Basics</span>
+              </button>
+              <button class="step-nav" data-step="2">
+                <span class="step-number">2</span>
+                <span class="step-title">Visual</span>
+              </button>
+              <button class="step-nav" data-step="3">
+                <span class="step-number">3</span>
+                <span class="step-title">Content</span>
+              </button>
+              <button class="step-nav" data-step="4">
+                <span class="step-number">4</span>
+                <span class="step-title">Settings</span>
+              </button>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+              <button id="save-draft" class="text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                <i class="material-icons text-sm mr-1">save</i>
+                Save Draft
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Form Content -->
+        <%= render 'wizard_form', page_collection: @page_collection %>
+      </div>
+      
+      <!-- Live Preview Panel -->
+      <div class="lg:sticky lg:top-8 lg:h-fit">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="p-2 bg-blue-100 rounded-lg mr-3">
+                  <i class="material-icons text-blue-600">visibility</i>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">Live Preview</h3>
+                  <p class="text-sm text-gray-600">See how your collection will look</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center space-x-2">
+                <button id="preview-desktop" class="preview-toggle active p-2 rounded-lg bg-blue-100 text-blue-600">
+                  <i class="material-icons text-sm">desktop_mac</i>
+                </button>
+                <button id="preview-mobile" class="preview-toggle p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200">
+                  <i class="material-icons text-sm">phone_iphone</i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Preview Content -->
+          <div id="collection-preview" class="p-6">
+            <%= render 'preview', page_collection: @page_collection %>
+          </div>
+        </div>
+      </div>
+      
+    </div>
   </div>
 </div>
+
+<!-- Custom Styles -->
+<style>
+/* Step Navigation Styles */
+.step-nav {
+  @apply flex flex-col items-center p-3 rounded-lg transition-all duration-200 min-w-0;
+}
+
+.step-nav:not(.active) {
+  @apply text-gray-400 hover:text-gray-600 hover:bg-gray-50;
+}
+
+.step-nav.active {
+  @apply text-blue-600 bg-blue-50;
+}
+
+.step-nav.completed {
+  @apply text-green-600 bg-green-50;
+}
+
+.step-nav.completed .step-number {
+  @apply bg-green-500 text-white;
+}
+
+.step-number {
+  @apply w-8 h-8 rounded-full border-2 border-current flex items-center justify-center text-sm font-semibold mb-1;
+}
+
+.step-nav.active .step-number {
+  @apply bg-blue-500 text-white border-blue-500;
+}
+
+.step-title {
+  @apply text-xs font-medium;
+}
+
+/* Preview Toggle Styles */
+.preview-toggle.active {
+  @apply bg-blue-100 text-blue-600;
+}
+
+/* Mobile Preview Styles */
+.mobile-preview {
+  max-width: 375px;
+  margin: 0 auto;
+}
+
+/* Form Step Styles */
+.form-step {
+  @apply hidden;
+}
+
+.form-step.active {
+  @apply block;
+}
+
+/* Auto-save indicator */
+.auto-save-indicator {
+  @apply text-xs text-gray-500 flex items-center;
+}
+
+.auto-save-indicator.saving {
+  @apply text-blue-600;
+}
+
+.auto-save-indicator.saved {
+  @apply text-green-600;
+}
+</style>
