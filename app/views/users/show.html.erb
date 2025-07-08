@@ -1,3 +1,4 @@
+<!-- SEO and Metadata -->
 <script type="application/ld+json">
   <%
     set_meta_tags title: "#{@user.name || @user.display_name}'s profile",
@@ -16,416 +17,320 @@
   <%= content_jsonld.to_json.html_safe %> %>
 </script>
 
-
-<div class="bg-gray-100">
-  <div class="relative pb-8 bg-gray-800">
-    <div class="absolute inset-0 border-b-2 border-notebook-blue shadow">
-      <img class="w-full h-full object-cover" src="https://cdn.discordapp.com/attachments/1051999930916544554/1052061106786545716/drusepth_worldbuilding_0ffbe5ca-3ea1-4968-a363-72872b294fe7.png" alt="">
-      <div class="absolute inset-0 bg-gray-100 mix-blend-multiply" aria-hidden="true"></div>
-    </div>
-    <div class="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
-      <div class="text-4xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl h-40"></div>
-    </div>
-    <!-- Tab navigation converted to Tailwind from MaterializeCSS -->
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="border-b border-gray-200">
-        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-          <a href="#tab-universes" class="border-notebook-blue text-notebook-blue whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm tab-link active-tab" aria-current="page" data-target="tab-universes">Notebook</a>
-          <a href="#tab-about-me" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm tab-link" data-target="tab-about-me">About Me</a>
-          <a href="#tab-recent-activity" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm tab-link" data-target="tab-recent-activity">Recent Activity</a>
-          <% if defined?(show_collections_tab) && show_collections_tab %>
-            <a href="#tab-collections" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm tab-link" data-target="tab-collections">Collections</a>
-          <% end %>
-        </nav>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tab Content Container -->
-  <div class="tab-content-container max-w-7xl mx-auto relative z-10 pb-32 px-4 sm:px-6 lg:px-8">
-    <!-- Universes Tab Content -->
-    <div id="tab-universes" class="tab-content active">
-      <% if user_signed_in? && @user.respond_to?(:blocked_by?) && @user.blocked_by?(current_user) %>
-        <div class="mt-8 p-4 bg-red-100 text-red-800 rounded-lg text-center">
-          You've blocked this user.
-        </div>
+<!-- Modern User Profile Page -->
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  
+  <!-- Hero Section with Banner and User Identity -->
+  <div class="relative">
+    <!-- Banner Image -->
+    <div class="h-80 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 relative overflow-hidden">
+      <% if @user.respond_to?(:banner_image) && @user.banner_image.present? %>
+        <%= image_tag @user.banner_image, class: "w-full h-full object-cover" %>
       <% else %>
-        <!-- Universes Grid with Tailwind -->
-        <div class="mt-8">
-          <h2 class="text-2xl font-bold tracking-tight text-gray-900 mb-6">Public Universes</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <% if @user.respond_to?(:universes) && @user.universes.respond_to?(:is_public) %>
-              <% @user.universes.is_public.each do |universe| %>
-                <%= link_to universe do %>
-                  <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
-                    <div class="relative h-48">
-                      <%= image_tag universe.first_public_image, class: "w-full h-full object-cover" %>
-                      <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                      <div class="absolute bottom-0 left-0 p-4 text-white font-medium text-xl"><%= universe.name %></div>
-                    </div>
-                    <div class="p-4 <%= Universe.color %> text-white">
-                      <p class="text-sm"><%= truncate(universe.description, length: 140) %></p>
-                    </div>
+        <!-- Fallback gradient with subtle pattern -->
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600"></div>
+        <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><defs><pattern id=\"grain\" width=\"100\" height=\"100\" patternUnits=\"userSpaceOnUse\"><circle cx=\"50\" cy=\"50\" r=\"1\" fill=\"white\" opacity=\"0.1\"/></pattern></defs><rect width=\"100\" height=\"100\" fill=\"url(%23grain)\"/></svg>');"></div>
+      <% end %>
+      
+      <!-- Overlay for better text readability -->
+      <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+    </div>
+    
+    <!-- User Identity Section -->
+    <div class="relative -mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
+          
+          <!-- Left: Profile Info -->
+          <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+            <!-- Profile Picture -->
+            <div class="relative flex-shrink-0">
+              <%= image_tag @user.image_url(120), class: "w-24 h-24 rounded-full border-4 border-white shadow-lg" %>
+              <% if @user.respond_to?(:online?) && @user.online? %>
+                <div class="absolute bottom-1 right-1 w-6 h-6 bg-green-400 rounded-full border-2 border-white"></div>
+              <% end %>
+            </div>
+            
+            <!-- Name and Bio -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center space-x-3">
+                <h1 class="text-3xl font-bold text-gray-900 truncate">
+                  <%= @user.name || @user.display_name %>
+                </h1>
+                <% if @user.respond_to?(:verified?) && @user.verified? %>
+                  <i class="material-icons text-blue-500" title="Verified User">verified</i>
+                <% end %>
+              </div>
+              
+              <% if @user.username.present? %>
+                <p class="text-lg text-gray-500 mt-1">@<%= @user.username %></p>
+              <% end %>
+              
+              <% if @user.bio.present? %>
+                <p class="text-gray-700 mt-3 max-w-2xl line-clamp-2"><%= @user.bio %></p>
+              <% end %>
+              
+              <!-- User Details -->
+              <div class="flex flex-wrap items-center space-x-6 mt-4 text-sm text-gray-500">
+                <% if @user.respond_to?(:location) && @user.location.present? %>
+                  <div class="flex items-center space-x-1">
+                    <i class="material-icons text-xs">location_on</i>
+                    <span><%= @user.location %></span>
                   </div>
                 <% end %>
+                
+                <% if @join_date %>
+                  <div class="flex items-center space-x-1">
+                    <i class="material-icons text-xs">calendar_today</i>
+                    <span>Joined <%= @join_date.strftime('%B %Y') %></span>
+                  </div>
+                <% end %>
+                
+                <% if @user.respond_to?(:website) && @user.website.present? %>
+                  <div class="flex items-center space-x-1">
+                    <i class="material-icons text-xs">link</i>
+                    <%= link_to @user.website, @user.website, target: '_blank', rel: 'nofollow', class: 'text-blue-600 hover:text-blue-700' %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right: Stats and Actions -->
+          <div class="flex flex-col space-y-4">
+            <!-- User Stats -->
+            <div class="flex items-center space-x-6">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-gray-900"><%= number_with_delimiter @total_public_pages %></div>
+                <div class="text-sm text-gray-500">Pages</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-blue-600"><%= number_with_delimiter @followers_count %></div>
+                <div class="text-sm text-gray-500">Followers</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-green-600"><%= number_with_delimiter @following_count %></div>
+                <div class="text-sm text-gray-500">Following</div>
+              </div>
+              <% if @total_words > 0 %>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-purple-600"><%= number_with_delimiter @total_words %></div>
+                  <div class="text-sm text-gray-500">Words</div>
+                </div>
               <% end %>
+            </div>
+            
+            <!-- Action Buttons -->
+            <% unless user_signed_in? && @user == current_user %>
+              <div class="flex items-center space-x-3">
+                <% if user_signed_in? %>
+                  <% unless @is_blocked %>
+                    <button type="button" id="follow-btn" 
+                            class="<%= @is_following ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700' %> text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2"
+                            data-user-id="<%= @user.id %>"
+                            data-following="<%= @is_following %>">
+                      <i class="material-icons text-sm"><%= @is_following ? 'person_remove' : 'person_add' %></i>
+                      <span><%= @is_following ? 'Unfollow' : 'Follow' %></span>
+                    </button>
+                    
+                    <button type="button" class="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2">
+                      <i class="material-icons text-sm">message</i>
+                      <span>Message</span>
+                    </button>
+                  <% else %>
+                    <div class="text-sm text-gray-500 italic">You've blocked this user</div>
+                  <% end %>
+                <% else %>
+                  <%= link_to new_user_session_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2" do %>
+                    <i class="material-icons text-sm">person_add</i>
+                    <span>Follow</span>
+                  <% end %>
+                <% end %>
+                
+                <!-- Share Button -->
+                <button type="button" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                  <i class="material-icons text-sm">share</i>
+                </button>
+              </div>
             <% end %>
           </div>
         </div>
-        
-        <!-- Browse user's public pages section -->
-        <div class="mt-12 grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div class="lg:col-span-1">
-            <div class="bg-blue-50 p-4 rounded-lg">
-              <h3 class="font-medium text-gray-900">Browse Public Pages</h3>
-              <p class="mt-1 text-sm text-gray-600">
-                You can also browse this user's public pages directly.
-                <% if @content.blank? || @content.empty? %>
-                  However, they haven't made anything public yet!
-                <% end %>
-              </p>
-            </div>
-          </div>
-          <div class="lg:col-span-3">
-            <div class="space-y-6">
-              <%= render partial: 'users/profile/public_pages' if lookup_context.template_exists?('users/profile/_public_pages', [], true) %>
-              <%= render partial: 'users/profile/tags' if lookup_context.template_exists?('users/profile/_tags', [], true) %>
-            </div>
-          </div>
-        </div>
-      <% end %>
+      </div>
     </div>
+  </div>
+
+  <!-- Content Section with Tabs -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
     
-    <!-- About Me Tab Content -->
-    <div id="tab-about-me" class="tab-content hidden">
-      <div class="mt-8">
-        <% if lookup_context.template_exists?('users/profile/_actions', [], true) %>
-          <%= render partial: 'users/profile/actions' %>
-        <% end %>
-        
-        <!-- User profile cards - Using the Tailwind design -->
-        <div class="grid grid-cols-1 gap-y-8 lg:grid-cols-3 lg:gap-x-8 mt-6">
-          <div class="flex flex-col bg-white rounded-2xl shadow-xl">
-            <div class="flex-1 relative pt-16 px-6 pb-8 md:px-8">
-              <div class="absolute top-0 inline-block bg-notebook-blue rounded-xl shadow-lg transform -translate-y-1/2">
-                <%= image_tag @user.image_url, class: 'block rounded-lg h-20 w-20 border-2 border-notebook-blue' %>
-              </div>
-              <h3 class="text-xl font-medium <%= User.text_color %>">
-                <%= @user.name %>
-                <span class="text-gray-400 text-xl">
-                  @<%= @user.username %>
-                </span>
-              </h3>
-              <div>
-                <%= render partial: 'thredded/users/badge', locals: { user: @user } if lookup_context.template_exists?('thredded/users/_badge', [], true) %>
-              </div>
-              <ul class="text-base text-gray-500 mt-4">
-                <% if @user.respond_to?(:occupation) && @user.occupation.present? %>
-                  <li class="line-clamp-1">
-                    <i class="material-icons float-left mr-1 text-base">work</i>
-                    <%= @user.occupation %>
-                  </li>
-                <% end %>
-                <% if @user.respond_to?(:location) && @user.location.present? %>
-                  <li class="line-clamp-1">
-                    <i class="material-icons float-left mr-1 text-base">location_on</i>
-                    <%= @user.location %>
-                  </li>
-                <% end %>
-                <% if @user.respond_to?(:website) && @user.website.present? %>
-                  <li class="line-clamp-1">
-                    <i class="material-icons float-left mr-1 text-base">link</i>
-                    <%= link_to @user.website, @user.website, rel: 'nofollow' %>
-                  </li>
-                <% end %>
-              </ul>
-            </div>
-            <div class="bg-gray-50 rounded-bl-2xl rounded-br-2xl flex content-center text-center">
-              <a href="#" class="text-base font-medium <%= User.text_color %> hover:text-green-500 flex-1">
-                Follow
-                <span class="bg-white border border-gray-200 p-1">42</span>
-              </a>
-              <a href="#" class="text-base font-medium text-blue-500 hover:text-blue-400 flex-1">
-                Message
-              </a>
-            </div>
-          </div>
-
-          <div class="flex flex-col bg-white rounded-2xl shadow-xl">
-            <div class="flex-1 relative pt-16 px-6 pb-8 md:px-8">
-              <div class="absolute top-0 px-4 py-3 inline-block bg-notebook-blue rounded-xl shadow-lg transform -translate-y-1/2">
-                <i class="material-icons text-white text-3xl"><%= User.icon %></i>
-              </div>
-              <h3 class="text-xl font-medium text-gray-900">About me</h3>
-              <p class="mt-4 text-base text-gray-500 line-clamp-4">
-                <%= @user.bio %>
-              </p>
-            </div>
-            <div class="p-3 bg-gray-50 rounded-bl-2xl rounded-br-2xl md:px-8">
-              <a href="#" class="text-base font-medium text-notebook-blue hover:text-blue-600">
-                Read more about me
-              </a>
-            </div>
-          </div>
-
-          <% if @user.favorite_page_type? %>
-            <div class="flex flex-col bg-white rounded-2xl shadow-xl">
-              <div class="flex-1 relative pt-16 px-6 pb-8 md:px-8">
-                <div class="absolute top-0 px-4 py-3 inline-block <%= content_class_from_name(@user.favorite_page_type).color %> rounded-xl shadow-lg transform -translate-y-1/2">
-                  <i class="material-icons text-white text-3xl"><%= content_class_from_name(@user.favorite_page_type).icon %></i>
-                </div>
-                <!--
-                <h3 class="text-xl font-medium text-gray-900">My favorite pages</h3>
-                -->
-                <p class="mt-4 text-base text-gray-500">
-                  (something here)
-                </p>
-              </div>
-              <div class="p-3 bg-gray-50 rounded-bl-2xl rounded-br-2xl md:px-8">
-                <a href="#" class="text-base font-medium <%= content_class_from_name(@user.favorite_page_type).text_color %> hover:text-notebook-blue">
-                  See my <%= @user.favorite_page_type.pluralize.downcase %>
-                </a>
-              </div>
-            </div>
-          <% end %>
-        </div>
-      </div>
+    <!-- Tab Navigation -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+      <nav class="flex space-x-8 px-6" aria-label="Profile Tabs">
+        <button class="profile-tab active-tab border-b-2 border-blue-500 text-blue-600 py-4 px-1 font-medium text-sm" data-tab="overview">
+          <i class="material-icons mr-2 text-sm">dashboard</i>
+          Overview
+        </button>
+        <button class="profile-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm" data-tab="universes">
+          <i class="material-icons mr-2 text-sm">public</i>
+          Universes
+        </button>
+        <button class="profile-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm" data-tab="content">
+          <i class="material-icons mr-2 text-sm">library_books</i>
+          Content
+        </button>
+        <button class="profile-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm" data-tab="tags">
+          <i class="material-icons mr-2 text-sm">tag</i>
+          Tags
+        </button>
+        <button class="profile-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm" data-tab="activity">
+          <i class="material-icons mr-2 text-sm">timeline</i>
+          Activity
+        </button>
+        <button class="profile-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm" data-tab="collections">
+          <i class="material-icons mr-2 text-sm">collections_bookmark</i>
+          Collections
+        </button>
+        <button class="profile-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm" data-tab="community">
+          <i class="material-icons mr-2 text-sm">people</i>
+          Community
+        </button>
+      </nav>
     </div>
 
-    <div class="grid gap-6 row-gap-5 mb-8 lg:grid-cols-4 sm:row-gap-6 sm:grid-cols-2">
-      <% if @content && @content.keys %>
-        <% @content.keys.each do |page_type| %>
-          <% page_type_klass = User.new.send(page_type).klass %>
-          <a href="/" aria-label="View Item">
-            <div class="relative overflow-hidden transition duration-200 transform rounded shadow-lg hover:-translate-y-2 hover:shadow-2xl">
-              <%= image_tag "card-headers/#{page_type}.webp", class: "object-cover w-full h-56 md:h-64 xl:h-80" %>
-              <div class="absolute inset-x-0 bottom-0 p-4 <%= page_type_klass.color %> bg-opacity-80">
-                <p class="text-sm font-medium tracking-wide text-white">
-                  <i class="material-icons float-left text-xl relative bottom-1 mr-2"><%= page_type_klass.icon %></i>
-                  <%= page_type.to_s.humanize %>
-                  <span class="float-right bg-white text-notebook-blue px-2 rounded-full">
-                    <%= @content[page_type].length %>
-                  </span>
-                </p>
-              </div>
-            </div>
-          </a>
-        <% end %>
-      <% end %>
-    </div>
-  </div>
-
-  <!-- Recent Activity Tab Content -->
-  <div id="tab-recent-activity" class="tab-content hidden mt-8">
-    <!-- Content for recent activity tab would go here -->
-    <div class="bg-white p-6 rounded-lg shadow-md">
-      <h2 class="text-xl font-medium text-gray-900 mb-4">Recent Activity</h2>
-      <p class="text-gray-500">Recent user activity will be displayed here.</p>
-    </div>
-  </div>
-
-  <!-- Collections Tab Content -->
-  <div id="tab-collections" class="tab-content hidden mt-8">
-    <% if user_signed_in? && @user.respond_to?(:blocked_by?) && @user.blocked_by?(current_user) %>
-      <div class="p-4 bg-red-100 text-red-800 rounded-lg text-center">
-        You've blocked this user.
+    <!-- Tab Content -->
+    <div class="tab-content-container">
+      
+      <!-- Overview Tab (Default) -->
+      <div id="overview-content" class="tab-content active">
+        <%= render partial: 'users/tabs/overview' %>
       </div>
-    <% else %>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Collections content would go here, converted to Tailwind -->
+      
+      <!-- Universes Tab -->
+      <div id="universes-content" class="tab-content hidden">
+        <%= render partial: 'users/tabs/universes' %>
       </div>
-    <% end %>
-  </div>
-</div>
-
-
-<div class="mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl">
-
-  <!--
-  <div class="px-4 py-4 mb-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
-    <div class="flex flex-col w-full mb-6 lg:justify-between lg:flex-row md:mb-8">
-      <div class="flex items-center lg:max-w-xl">
-        <i class="material-icons <%= Universe.text_color %> text-5xl relative bottom-1 mr-3"><%= Universe.icon %></i>
-        <h2 class="font-sans text-2xl font-bold leading-none tracking-tight text-gray-900 sm:text-3xl">
-          <span class="inline-block mb-2">Featured worlds</span>
-        </h2>
+      
+      <!-- Content Tab -->
+      <div id="content-content" class="tab-content hidden">
+        <%= render partial: 'users/tabs/content' %>
       </div>
-    </div>
-    <div class="grid gap-8 row-gap-5 mb-8 lg:grid-cols-3 lg:row-gap-8">
-      <% 4.times do %>
-        <%= link_to '#' do %>
-          <img class="object-cover w-full h-56 mb-6 md:h-64 xl:h-80 duration-200 transform rounded shadow-lg hover:-translate-y-2 hover:shadow-2xl" src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=2&amp;h=750&amp;w=1260" alt="" />
-          <p class="mb-2 text-xl font-bold leading-none sm:text-2xl">
-            Galaxies Orion
-          </p>
-          <p class="text-gray-700">
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.
-          </p>
-        <% end %>
-      <% end %>
-    </div>
-  </div>
-  -->
-
-  <div class="px-4 py-4 mb-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
-    <div class="flex flex-col w-full mb-6 lg:justify-between lg:flex-row md:mb-8">
-      <div class="flex items-center lg:max-w-xl">
-        <i class="material-icons text-notebook-blue text-5xl relative bottom-1 mr-3">book</i>
-        <h2 class="font-sans text-2xl font-bold leading-none tracking-tight text-gray-900 sm:text-3xl">
-          <span class="inline-block mb-2">Explore my notebook pages</span>
-        </h2>
+      
+      <!-- Tags Tab -->
+      <div id="tags-content" class="tab-content hidden">
+        <%= render partial: 'users/tabs/tags' %>
       </div>
-      <div class="text-black py-3 px-4 bg-blue-100 border border-notebook-blue rounded">
-        Only your public pages are visible in this section.
-        All pages are private by default.
+      
+      <!-- Activity Tab -->
+      <div id="activity-content" class="tab-content hidden">
+        <%= render partial: 'users/tabs/activity' %>
       </div>
-    </div>
-    <div class="grid gap-6 row-gap-5 mb-8 lg:grid-cols-4 sm:row-gap-6 sm:grid-cols-2">
-      <% @content.keys.each do |page_type| %>
-        <% page_type_klass = User.new.send(page_type).klass %>
-        <a href="/" aria-label="View Item">
-          <div class="relative overflow-hidden transition duration-200 transform rounded shadow-lg hover:-translate-y-2 hover:shadow-2xl">
-            <%= image_tag "card-headers/#{page_type}.webp", class: "object-cover w-full h-56 md:h-64 xl:h-80" %>
-            <div class="absolute inset-x-0 bottom-0 p-4 <%= page_type_klass.color %> bg-opacity-80">
-              <p class="text-sm font-medium tracking-wide text-white">
-                <i class="material-icons float-left text-xl relative bottom-1 mr-2"><%= page_type_klass.icon %></i>
-                <%= page_type.to_s.humanize %>
-                <span class="float-right bg-white text-notebook-blue px-2 rounded-full">
-                  <%= @content[page_type].length %>
-                </span>
-              </p>
-            </div>
-          </div>
-        </a>
-      <% end %>
-    </div>
-  </div>
-
-  <div class="px-4 py-4 mb-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
-    <div class="flex flex-col w-full mb-6 lg:justify-between lg:flex-row md:mb-8">
-      <div class="flex items-center lg:max-w-xl">
-        <i class="material-icons <%= Document.text_color %> text-5xl relative bottom-1 mr-3"><%= Document.icon %></i>
-        <h2 class="font-sans text-2xl font-bold leading-none tracking-tight text-gray-900 sm:text-3xl">
-          <span class="inline-block mb-2">Read stories</span>
-        </h2>
+      
+      <!-- Collections Tab -->
+      <div id="collections-content" class="tab-content hidden">
+        <%= render partial: 'users/tabs/collections' %>
       </div>
-      <div class="text-black py-3 px-4 bg-blue-100 border border-notebook-blue rounded">
-        Only your public documents are visible in this section.
-        All documents are private by default.
+      
+      <!-- Community Tab -->
+      <div id="community-content" class="tab-content hidden">
+        <%= render partial: 'users/tabs/community' %>
       </div>
-    </div>
-    <div class="grid gap-6 row-gap-5 mb-8 lg:grid-cols-4 sm:row-gap-6 sm:grid-cols-2">
-      <% @user.documents.where(privacy: 'public').each do |document| %>
-        <a href="/" aria-label="View Item">
-          <div class="relative overflow-hidden transition duration-200 transform rounded shadow-lg hover:-translate-y-2 hover:shadow-2xl">
-            <%= image_tag "card-headers/documents.webp", class: "object-cover w-full h-56 md:h-64 xl:h-80" %>
-            <div class="absolute inset-x-0 bottom-0 p-4 <%= Document.color %> bg-opacity-80">
-              <p class="text-sm font-medium tracking-wide text-white">
-                <i class="material-icons float-left text-xl relative bottom-1 mr-2"><%= Document.icon %></i>
-                <%= document.title %>
-              </p>
-            </div>
-          </div>
-        </a>
-      <% end %>
-    </div>
-  </div>
-
-  <div class="px-4 py-4 mb-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
-    <div class="flex flex-col w-full mb-6 lg:justify-between lg:flex-row md:mb-8">
-      <div class="flex items-center lg:max-w-xl">
-        <i class="material-icons <%= PageCollection.text_color %> text-5xl relative bottom-1 mr-3"><%= PageCollection.icon %></i>
-        <h2 class="font-sans text-2xl font-bold leading-none tracking-tight text-gray-900 sm:text-3xl">
-          <span class="inline-block mb-2">Published in</span>
-        </h2>
-      </div>
-      <div class="text-black py-3 px-4 bg-blue-100 border border-notebook-blue rounded">
-        This section automatically updates whenever
-        one of your pages is accepted into someone else's Collection.
-      </div>
-    </div>
-    <div class="grid gap-6 row-gap-5 mb-8 lg:grid-cols-4 sm:row-gap-6 sm:grid-cols-2">
-      <% PageCollection.all.shuffle.first(3).each do |collection| %>
-        <a href="/" aria-label="View Item">
-          <div class="relative overflow-hidden transition duration-200 transform rounded shadow-lg hover:-translate-y-2 hover:shadow-2xl">
-            <%= image_tag @content[:characters].sample.random_image_including_private, class: 'object-cover w-full h-56 md:h-64 xl:h-80' %>
-            <div class="absolute inset-x-0 bottom-0 p-4 <%= PageCollection.color %> bg-opacity-80">
-              <p class="text-sm font-medium tracking-wide text-white">
-                <i class="material-icons float-left text-xl relative bottom-1 mr-2"><%= PageCollection.icon %></i>
-                <%= collection.title %>
-              </p>
-            </div>
-          </div>
-        </a>
-      <% end %>
-    </div>
-  </div>
-
-  <div class="px-4 py-4 mb-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
-    <div class="flex flex-col w-full mb-6 lg:justify-between lg:flex-row md:mb-8">
-      <div class="flex items-center lg:max-w-xl">
-        <i class="material-icons <%= PageCollection.text_color %> text-5xl relative bottom-1 mr-3"><%= PageCollection.icon %></i>
-        <h2 class="font-sans text-2xl font-bold leading-none tracking-tight text-gray-900 sm:text-3xl">
-          <span class="inline-block mb-2">Editor of</span>
-        </h2>
-      </div>
-      <div class="text-black py-3 px-4 bg-blue-100 border border-notebook-blue rounded">
-        This section automatically updates whenever
-        you create a public Collection.
-      </div>
-    </div>
-    <div class="grid gap-6 row-gap-5 mb-8 lg:grid-cols-4 sm:row-gap-6 sm:grid-cols-2">
-      <% @user.page_collections.each do |collection| %>
-        <a href="/" aria-label="View Item">
-          <div class="relative overflow-hidden transition duration-200 transform rounded shadow-lg hover:-translate-y-2 hover:shadow-2xl">
-            <%= image_tag @content[:characters].sample.random_image_including_private, class: 'object-cover w-full h-56 md:h-64 xl:h-80' %>
-            <div class="absolute inset-x-0 bottom-0 p-4 <%= PageCollection.color %> bg-opacity-80">
-              <p class="text-sm font-medium tracking-wide text-white">
-                <i class="material-icons float-left text-xl relative bottom-1 mr-2"><%= PageCollection.icon %></i>
-                <%= collection.title %>
-              </p>
-            </div>
-          </div>
-        </a>
-      <% end %>
+      
     </div>
   </div>
 </div>
 
+<!-- Styles -->
+<style>
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Tab transitions */
+  .tab-content {
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .tab-content.hidden {
+    opacity: 0;
+  }
+  
+  .tab-content.active {
+    opacity: 1;
+  }
+  
+  /* Profile tab active state */
+  .profile-tab.active-tab {
+    border-color: #3b82f6;
+    color: #3b82f6;
+  }
+</style>
+
+<!-- JavaScript for Tab Navigation -->
 <script>
-  // Tab functionality for Tailwind tabs (replacing MaterializeCSS tabs)
-  document.addEventListener('DOMContentLoaded', function() {
-    const tabLinks = document.querySelectorAll('.tab-link');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabLinks.forEach(tabLink => {
-      tabLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // Remove active class from all tabs
-        tabLinks.forEach(link => {
-          link.classList.remove('border-notebook-blue', 'text-notebook-blue');
-          link.classList.add('border-transparent', 'text-gray-500');
-        });
-        
-        // Hide all tab contents
-        tabContents.forEach(content => {
-          content.classList.add('hidden');
-        });
-        
-        // Add active class to clicked tab
-        this.classList.add('border-notebook-blue', 'text-notebook-blue');
-        this.classList.remove('border-transparent', 'text-gray-500');
-        
-        // Show corresponding tab content
-        const targetId = this.getAttribute('data-target');
-        const targetContent = document.getElementById(targetId);
-        if (targetContent) {
-          targetContent.classList.remove('hidden');
-        }
+document.addEventListener('DOMContentLoaded', function() {
+  const tabs = document.querySelectorAll('.profile-tab');
+  const tabContents = document.querySelectorAll('.tab-content');
+  
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      const targetTab = this.dataset.tab;
+      
+      // Remove active state from all tabs
+      tabs.forEach(t => {
+        t.classList.remove('active-tab', 'border-blue-500', 'text-blue-600');
+        t.classList.add('border-transparent', 'text-gray-500');
       });
+      
+      // Hide all tab contents
+      tabContents.forEach(content => {
+        content.classList.add('hidden');
+        content.classList.remove('active');
+      });
+      
+      // Activate clicked tab
+      this.classList.add('active-tab', 'border-blue-500', 'text-blue-600');
+      this.classList.remove('border-transparent', 'text-gray-500');
+      
+      // Show corresponding content
+      const targetContent = document.getElementById(targetTab + '-content');
+      if (targetContent) {
+        targetContent.classList.remove('hidden');
+        targetContent.classList.add('active');
+      }
     });
   });
+});
+
+// Follow button functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const followBtn = document.getElementById('follow-btn');
+  if (followBtn) {
+    followBtn.addEventListener('click', function() {
+      const userId = this.dataset.userId;
+      const isFollowing = this.dataset.following === 'true';
+      
+      // TODO: Implement AJAX follow/unfollow functionality
+      console.log('Follow/unfollow user:', userId, 'Currently following:', isFollowing);
+    });
+  }
+});
 </script>
 
 <%= render partial: 'javascripts/content_linking' %>

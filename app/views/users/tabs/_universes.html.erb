@@ -1,0 +1,256 @@
+<!-- Universes Tab - Visual Universe Gallery -->
+<div class="space-y-6">
+  
+  <!-- Header with Stats -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">Public Universes</h2>
+      <p class="text-gray-600 mt-1">
+        <% universes_count = @user.respond_to?(:universes) ? @user.universes.is_public.count : 0 %>
+        <%= pluralize(universes_count, 'universe') %> shared publicly
+      </p>
+    </div>
+    
+    <!-- Search and Filter -->
+    <div class="mt-4 sm:mt-0 flex items-center space-x-3">
+      <div class="relative">
+        <input type="text" 
+               placeholder="Search universes..." 
+               class="w-64 px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               id="universe-search">
+        <i class="material-icons absolute left-3 top-2.5 text-gray-400 text-sm">search</i>
+      </div>
+      
+      <select class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              id="universe-sort">
+        <option value="updated">Recently Updated</option>
+        <option value="created">Recently Created</option>
+        <option value="name">Alphabetical</option>
+        <option value="popular">Most Words</option>
+      </select>
+    </div>
+  </div>
+  
+  <!-- Check if user has public universes -->
+  <% if @user.respond_to?(:universes) && @user.universes.is_public.any? %>
+    
+    <!-- Universes Grid -->
+    <div id="universes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @user.universes.is_public.order(updated_at: :desc).each do |universe| %>
+        <div class="universe-card group" 
+             data-name="<%= universe.name.downcase %>"
+             data-updated="<%= universe.updated_at.to_i %>"
+             data-created="<%= universe.created_at.to_i %>"
+             data-words="<%= universe.respond_to?(:cached_word_count) && universe.cached_word_count ? universe.cached_word_count : 0 %>">
+          
+          <%= link_to universe, class: "block" do %>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
+              
+              <!-- Universe Cover Image -->
+              <div class="relative h-56 overflow-hidden">
+                <% if universe.respond_to?(:first_public_image) && universe.first_public_image.present? %>
+                  <%= image_tag universe.first_public_image, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
+                <% else %>
+                  <!-- Beautiful gradient fallback -->
+                  <div class="w-full h-full bg-gradient-to-br from-purple-400 via-blue-500 to-indigo-600 relative">
+                    <div class="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                      <i class="material-icons text-white text-8xl opacity-30">public</i>
+                    </div>
+                  </div>
+                <% end %>
+                
+                <!-- Overlay Gradient -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                
+                <!-- Privacy Badge -->
+                <div class="absolute top-3 right-3">
+                  <div class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                    <i class="material-icons text-xs mr-1">public</i>
+                    Public
+                  </div>
+                </div>
+                
+                <!-- Universe Title Overlay -->
+                <div class="absolute bottom-0 left-0 right-0 p-6">
+                  <h3 class="text-white font-bold text-xl mb-2 line-clamp-2">
+                    <%= universe.name %>
+                  </h3>
+                  <% if universe.respond_to?(:description) && universe.description.present? %>
+                    <p class="text-white/90 text-sm line-clamp-2">
+                      <%= truncate(universe.description, length: 120) %>
+                    </p>
+                  <% end %>
+                </div>
+              </div>
+              
+              <!-- Universe Details Card Footer -->
+              <div class="p-5">
+                <!-- Stats Row -->
+                <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                  <div class="flex items-center space-x-4">
+                    <span class="flex items-center">
+                      <i class="material-icons text-xs mr-1">schedule</i>
+                      <%= time_ago_in_words(universe.updated_at) %> ago
+                    </span>
+                    <% if universe.respond_to?(:cached_word_count) && universe.cached_word_count && universe.cached_word_count > 0 %>
+                      <span class="flex items-center">
+                        <i class="material-icons text-xs mr-1">description</i>
+                        <%= number_with_delimiter universe.cached_word_count %>
+                      </span>
+                    <% end %>
+                  </div>
+                  
+                  <!-- Favorite Star -->
+                  <% if universe.respond_to?(:favorite?) && universe.favorite? %>
+                    <i class="material-icons text-yellow-400 text-sm">star</i>
+                  <% end %>
+                </div>
+                
+                <!-- Content Types Preview -->
+                <% if universe.respond_to?(:content_count_summary) %>
+                  <div class="flex items-center space-x-2">
+                    <span class="text-xs text-gray-400">Contains:</span>
+                    <div class="flex items-center space-x-1">
+                      <!-- Show top content types as small badges -->
+                      <% universe.content_count_summary.first(3).each do |type, count| %>
+                        <% type_class = type.constantize rescue nil %>
+                        <% if type_class %>
+                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= type_class.color %> text-white">
+                            <i class="material-icons text-xs mr-1"><%= type_class.icon %></i>
+                            <%= count %>
+                          </span>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+                
+                <!-- Action Hint -->
+                <div class="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div class="flex items-center text-blue-600 text-sm font-medium">
+                    <span>Explore universe</span>
+                    <i class="material-icons ml-1 text-sm">arrow_forward</i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Empty Search Results -->
+    <div id="no-results" class="hidden text-center py-12">
+      <i class="material-icons text-gray-400 text-5xl mb-4">search_off</i>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No universes found</h3>
+      <p class="text-gray-500">Try adjusting your search terms or filters.</p>
+    </div>
+    
+  <% else %>
+    
+    <!-- Empty State -->
+    <div class="text-center py-16">
+      <div class="mx-auto w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mb-6">
+        <i class="material-icons text-purple-600 text-4xl">public</i>
+      </div>
+      
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">
+        <% if user_signed_in? && @user == current_user %>
+          No public universes yet
+        <% else %>
+          <%= @user.name || @user.display_name %> hasn't shared any universes publicly
+        <% end %>
+      </h3>
+      
+      <p class="text-gray-600 max-w-md mx-auto mb-6">
+        <% if user_signed_in? && @user == current_user %>
+          Create your first universe and make it public to share your world with others.
+        <% else %>
+          Universes are the foundation of worldbuilding on Notebook.ai. Check back later to see if they share any!
+        <% end %>
+      </p>
+      
+      <% if user_signed_in? && @user == current_user %>
+        <div class="space-x-4">
+          <%= link_to new_universe_path, class: "bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center" do %>
+            <i class="material-icons mr-2 text-sm">add</i>
+            Create Universe
+          <% end %>
+          
+          <%= link_to universes_path, class: "border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200 inline-flex items-center" do %>
+            <i class="material-icons mr-2 text-sm">settings</i>
+            Manage Privacy
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    
+  <% end %>
+</div>
+
+<!-- JavaScript for Search and Filter -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('universe-search');
+  const sortSelect = document.getElementById('universe-sort');
+  const universesGrid = document.getElementById('universes-grid');
+  const noResults = document.getElementById('no-results');
+  
+  if (searchInput && sortSelect && universesGrid) {
+    let universeCards = Array.from(document.querySelectorAll('.universe-card'));
+    
+    function filterAndSort() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const sortBy = sortSelect.value;
+      
+      // Filter cards
+      let filteredCards = universeCards.filter(card => {
+        const name = card.dataset.name || '';
+        return name.includes(searchTerm);
+      });
+      
+      // Sort cards
+      filteredCards.sort((a, b) => {
+        switch(sortBy) {
+          case 'updated':
+            return parseInt(b.dataset.updated) - parseInt(a.dataset.updated);
+          case 'created':
+            return parseInt(b.dataset.created) - parseInt(a.dataset.created);
+          case 'name':
+            return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+          case 'popular':
+            return parseInt(b.dataset.words) - parseInt(a.dataset.words);
+          default:
+            return 0;
+        }
+      });
+      
+      // Hide all cards first
+      universeCards.forEach(card => {
+        card.style.display = 'none';
+      });
+      
+      // Show filtered and sorted cards
+      if (filteredCards.length > 0) {
+        filteredCards.forEach((card, index) => {
+          card.style.display = 'block';
+          card.style.order = index;
+        });
+        universesGrid.style.display = 'grid';
+        noResults.classList.add('hidden');
+      } else {
+        universesGrid.style.display = 'none';
+        noResults.classList.remove('hidden');
+      }
+    }
+    
+    // Event listeners
+    searchInput.addEventListener('input', filterAndSort);
+    sortSelect.addEventListener('change', filterAndSort);
+    
+    // Initialize with default sort
+    filterAndSort();
+  }
+});
+</script>

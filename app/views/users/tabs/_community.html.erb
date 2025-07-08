@@ -1,0 +1,296 @@
+<!-- Community Tab - Follow Relationships and Social Connections -->
+<div class="space-y-8">
+  
+  <!-- Community Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="p-3 bg-blue-100 rounded-lg">
+          <i class="material-icons text-blue-600 text-2xl">people</i>
+        </div>
+        <div class="ml-4">
+          <div class="text-2xl font-bold text-gray-900"><%= @followers_count %></div>
+          <div class="text-sm text-gray-500">Followers</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="p-3 bg-green-100 rounded-lg">
+          <i class="material-icons text-green-600 text-2xl">person_add</i>
+        </div>
+        <div class="ml-4">
+          <div class="text-2xl font-bold text-gray-900"><%= @following_count %></div>
+          <div class="text-sm text-gray-500">Following</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="p-3 bg-purple-100 rounded-lg">
+          <i class="material-icons text-purple-600 text-2xl">connect_without_contact</i>
+        </div>
+        <div class="ml-4">
+          <div class="text-2xl font-bold text-gray-900">
+            <% mutual_count = user_signed_in? ? (@user.followed_users & current_user.followed_users).count : 0 %>
+            <%= mutual_count %>
+          </div>
+          <div class="text-sm text-gray-500">Mutual connections</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Followers Section -->
+  <div>
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+          <i class="material-icons mr-3 text-blue-600 text-3xl">people</i>
+          Followers
+        </h2>
+        <p class="text-gray-600 mt-1">
+          People following <%= @user.name || @user.display_name %>
+        </p>
+      </div>
+      
+      <% if @followers_count > 12 %>
+        <%= link_to followers_user_path(@user), class: "text-sm text-blue-600 hover:text-blue-700 font-medium" do %>
+          View all <%= @followers_count %> followers →
+        <% end %>
+      <% end %>
+    </div>
+    
+    <% if @followers.any? %>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <% @followers.each do |follower| %>
+            <%= link_to follower, class: "group text-center" do %>
+              <div class="relative">
+                <%= image_tag follower.image_url(80), class: "w-16 h-16 rounded-full border-2 border-gray-200 group-hover:border-blue-300 transition-colors duration-200 mx-auto" %>
+                <% if follower.respond_to?(:online?) && follower.online? %>
+                  <div class="absolute bottom-1 right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
+                <% end %>
+              </div>
+              <h3 class="text-sm font-medium text-gray-900 mt-2 truncate group-hover:text-blue-600 transition-colors duration-200">
+                <%= follower.name || follower.display_name %>
+              </h3>
+              <% if follower.username.present? %>
+                <p class="text-xs text-gray-500 truncate">@<%= follower.username %></p>
+              <% end %>
+              
+              <!-- Mutual connection indicator -->
+              <% if user_signed_in? && current_user != @user && current_user.followed_users.include?(follower) %>
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mt-1">
+                  <i class="material-icons text-xs mr-1">connect_without_contact</i>
+                  Mutual
+                </span>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
+        <i class="material-icons text-gray-400 text-5xl mb-4">people_outline</i>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          <% if user_signed_in? && @user == current_user %>
+            You don't have any followers yet
+          <% else %>
+            <%= @user.name || @user.display_name %> doesn't have any followers yet
+          <% end %>
+        </h3>
+        <p class="text-gray-500 max-w-md mx-auto">
+          <% if user_signed_in? && @user == current_user %>
+            Share your content and engage with the community to attract followers who are interested in your work.
+          <% else %>
+            Be the first to follow <%= @user.name || @user.display_name %> and see their latest updates!
+          <% end %>
+        </p>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Following Section -->
+  <div>
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+          <i class="material-icons mr-3 text-green-600 text-3xl">person_add</i>
+          Following
+        </h2>
+        <p class="text-gray-600 mt-1">
+          People <%= @user.name || @user.display_name %> is following
+        </p>
+      </div>
+      
+      <% if @following_count > 12 %>
+        <%= link_to following_user_path(@user), class: "text-sm text-green-600 hover:text-green-700 font-medium" do %>
+          View all <%= @following_count %> following →
+        <% end %>
+      <% end %>
+    </div>
+    
+    <% if @following.any? %>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <% @following.each do |followed_user| %>
+            <%= link_to followed_user, class: "group text-center" do %>
+              <div class="relative">
+                <%= image_tag followed_user.image_url(80), class: "w-16 h-16 rounded-full border-2 border-gray-200 group-hover:border-green-300 transition-colors duration-200 mx-auto" %>
+                <% if followed_user.respond_to?(:online?) && followed_user.online? %>
+                  <div class="absolute bottom-1 right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
+                <% end %>
+              </div>
+              <h3 class="text-sm font-medium text-gray-900 mt-2 truncate group-hover:text-green-600 transition-colors duration-200">
+                <%= followed_user.name || followed_user.display_name %>
+              </h3>
+              <% if followed_user.username.present? %>
+                <p class="text-xs text-gray-500 truncate">@<%= followed_user.username %></p>
+              <% end %>
+              
+              <!-- Mutual connection indicator -->
+              <% if user_signed_in? && current_user != @user && current_user.followed_users.include?(followed_user) %>
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mt-1">
+                  <i class="material-icons text-xs mr-1">connect_without_contact</i>
+                  Mutual
+                </span>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
+        <i class="material-icons text-gray-400 text-5xl mb-4">person_add_disabled</i>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          <% if user_signed_in? && @user == current_user %>
+            You're not following anyone yet
+          <% else %>
+            <%= @user.name || @user.display_name %> isn't following anyone yet
+          <% end %>
+        </h3>
+        <p class="text-gray-500 max-w-md mx-auto">
+          <% if user_signed_in? && @user == current_user %>
+            Discover interesting creators in the community and follow them to stay updated with their latest content.
+          <% else %>
+            Following others helps build connections and discover new content in the community.
+          <% end %>
+        </p>
+        
+        <% if user_signed_in? && @user == current_user %>
+          <div class="mt-6">
+            <%= link_to users_path, class: "bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center" do %>
+              <i class="material-icons mr-2 text-sm">explore</i>
+              Discover Users
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Recent Community Activity -->
+  <% if @unified_activity.any? %>
+    <div>
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+            <i class="material-icons mr-3 text-purple-600 text-3xl">group_work</i>
+            Community Interactions
+          </h2>
+          <p class="text-gray-600 mt-1">
+            Recent community engagement and interactions
+          </p>
+        </div>
+        
+        <button class="profile-tab text-sm text-purple-600 hover:text-purple-700 font-medium" data-tab="activity">
+          View all activity →
+        </button>
+      </div>
+      
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="space-y-4">
+          <% @unified_activity.select { |a| a[:type] == 'forum_post' || a[:type] == 'share' }.first(5).each do |activity| %>
+            <div class="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-b-0 last:pb-0">
+              <div class="flex-shrink-0 mt-1">
+                <% case activity[:type] %>
+                <% when 'share' %>
+                  <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="material-icons text-blue-600 text-sm">share</i>
+                  </div>
+                <% when 'forum_post' %>
+                  <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                    <i class="material-icons text-purple-600 text-sm">forum</i>
+                  </div>
+                <% end %>
+              </div>
+              
+              <div class="flex-1 min-w-0">
+                <div class="text-sm text-gray-900">
+                  <% case activity[:type] %>
+                  <% when 'share' %>
+                    Shared content with the community
+                  <% when 'forum_post' %>
+                    Participated in forum discussions
+                  <% end %>
+                </div>
+                <div class="text-xs text-gray-500 mt-1">
+                  <%= time_ago_in_words(activity[:created_at]) %> ago
+                </div>
+              </div>
+            </div>
+          <% end %>
+          
+          <% if @unified_activity.select { |a| a[:type] == 'forum_post' || a[:type] == 'share' }.empty? %>
+            <div class="text-center py-8">
+              <i class="material-icons text-gray-400 text-3xl mb-2">group_work</i>
+              <p class="text-gray-500 text-sm">No recent community interactions</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  
+  <!-- Suggested Connections (for current user viewing own profile) -->
+  <% if user_signed_in? && @user == current_user %>
+    <div>
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+            <i class="material-icons mr-3 text-amber-600 text-3xl">recommend</i>
+            Suggested Connections
+          </h2>
+          <p class="text-gray-600 mt-1">
+            Discover other creators you might want to follow
+          </p>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="text-center py-8">
+          <i class="material-icons text-gray-400 text-5xl mb-4">explore</i>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Find Your Community</h3>
+          <p class="text-gray-500 max-w-md mx-auto mb-6">
+            Connect with other worldbuilders, writers, and creators who share your interests and passions.
+          </p>
+          
+          <div class="space-x-4">
+            <%= link_to users_path, class: "bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center" do %>
+              <i class="material-icons mr-2 text-sm">explore</i>
+              Browse Community
+            <% end %>
+            
+            <%= link_to thredded_path, class: "border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200 inline-flex items-center" do %>
+              <i class="material-icons mr-2 text-sm">forum</i>
+              Join Discussions
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -10,19 +10,12 @@ class UsersController < ApplicationController
   def show
     @sidenav_expansion = 'community'
 
-    @feed = ContentPageShare.where(user_id: @user.id)
-      .order('created_at DESC')
-      .includes([:content_page, :secondary_content_page, :user, :share_comments])
-      .limit(100)
-
-    @content = @user.public_content.select { |type, list| list.any? }
-    @tabs    = @content.keys
-    
-    # Get popular tags for this user's public content
-    @popular_tags = get_popular_public_tags_for_user(@user)
-  
-    @favorite_content = @user.favorite_page_type? ? @user.send(@user.favorite_page_type.downcase.pluralize).is_public : []
-    @stream           = @user.recent_content_list(limit: 20)
+    # Load all profile data
+    load_user_content
+    load_user_activity
+    load_user_social_data
+    load_user_collections
+    load_user_statistics
   end
 
   Rails.application.config.content_types[:all].each do |content_type|
@@ -198,6 +191,145 @@ class UsersController < ApplicationController
     params.permit(:id, :username)
   end
   
+  # Data loading methods for profile sections
+  
+  def load_user_content
+    @content = @user.public_content.select { |type, list| list.any? }
+    @tabs = @content.keys
+    @popular_tags = get_popular_public_tags_for_user(@user)
+    @favorite_content = @user.favorite_page_type? ? @user.send(@user.favorite_page_type.downcase.pluralize).is_public : []
+    
+    # Get featured universes (top 3 most recently updated)
+    @featured_universes = @user.universes.is_public.order(updated_at: :desc).limit(3) if @user.respond_to?(:universes)
+    @featured_universes ||= []
+  end
+  
+  def load_user_activity
+    # Content page shares (stream activity) - only public content
+    @feed = ContentPageShare.where(user_id: @user.id)
+      .joins(:content_page)
+      .where(content_pages: { privacy: 'public' })
+      .order('created_at DESC')
+      .includes([:user, :share_comments])
+      .limit(100)
+    
+    # Recent content updates - only public content
+    @stream = @user.recent_content_list(limit: 20).select do |content|
+      content.respond_to?(:privacy) && content.privacy == 'public'
+    end
+    
+    # Skip recent edits - we don't want to show "made an edit" activities
+    @recent_edits = []
+    
+    # Forum activity (if Thredded is available)
+    if defined?(Thredded::Post)
+      @recent_forum_posts = Thredded::Post.where(user_id: @user.id)
+        .where(moderation_state: 'approved')
+        .order(created_at: :desc)
+        .includes(:postable, :messageboard)
+        .limit(10)
+    else
+      @recent_forum_posts = []
+    end
+    
+    # Combine all activities for unified timeline (excluding edits)
+    @unified_activity = build_unified_activity_timeline
+  end
+  
+  def load_user_social_data
+    # Following/follower counts and data
+    @followers_count = @user.followed_by_users.count
+    @following_count = @user.followed_users.count
+    @followers = @user.followed_by_users.limit(12) # For display
+    @following = @user.followed_users.limit(12) # For display
+    
+    # Check if current user follows this user
+    @is_following = user_signed_in? ? @user.followed_by?(current_user) : false
+    @is_blocked = user_signed_in? ? @user.blocked_by?(current_user) : false
+  end
+  
+  def load_user_collections
+    # Collections user maintains
+    @maintained_collections = @user.page_collections.order(updated_at: :desc)
+    
+    # Collections user is published in
+    @published_in_collections = @user.published_in_page_collections.limit(20)
+  end
+  
+  def load_user_statistics
+    # Calculate user statistics
+    @total_public_pages = @content.values.map(&:count).sum
+    @total_words = calculate_total_word_count
+    @join_date = @user.created_at
+    @last_active = [@user.updated_at, @user.current_sign_in_at].compact.max
+    
+    # Activity streak
+    @activity_streak = calculate_activity_streak
+  end
+  
+  def calculate_total_word_count
+    total = 0
+    @content.each do |content_type, pages|
+      pages.each do |page|
+        total += page.cached_word_count if page.respond_to?(:cached_word_count) && page.cached_word_count
+      end
+    end
+    total
+  end
+  
+  def calculate_activity_streak
+    # Calculate consecutive days of activity (only from content shares since edits are excluded)
+    activity_dates = @feed.pluck(:created_at).map(&:to_date).uniq.sort.reverse
+    
+    streak = 0
+    current_date = Date.current
+    
+    activity_dates.each do |date|
+      if date == current_date
+        streak += 1
+        current_date -= 1.day
+      else
+        break
+      end
+    end
+    
+    streak
+  end
+  
+  def build_unified_activity_timeline
+    activities = []
+    
+    # Add content shares
+    @feed.each do |share|
+      activities << {
+        type: 'share',
+        created_at: share.created_at,
+        data: share
+      }
+    end
+    
+    # Add recent edits
+    @recent_edits.each do |edit|
+      activities << {
+        type: 'edit',
+        created_at: edit.created_at,
+        data: edit
+      }
+    end
+    
+    # Add forum posts
+    @recent_forum_posts.each do |post|
+      activities << {
+        type: 'forum_post',
+        created_at: post.created_at,
+        data: post
+      }
+    end
+    
+    # Sort by most recent first
+    activities.sort_by { |activity| activity[:created_at] }.reverse.first(20)
+  end
+
   # Get most popular tags for a user's public content
   def get_popular_public_tags_for_user(user, limit: 10)
     # Find page tags attached to public content
