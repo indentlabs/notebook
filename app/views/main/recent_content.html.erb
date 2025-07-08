@@ -1,32 +1,686 @@
-<%# TODO: put this in more of a timeline design %>
-<div class="row">
-  <div class="col s12">
-    <br />
-    <div class="grey-text uppercase center">Your recent worldbuilding activity</div>
-  </div>
-  <% @recently_edited_pages.each do |page| %>
-    <% action = page.created_at === page.updated_at ? 'Created' : 'Updated' %>
-    <% klass  = page.is_a?(ContentPage) ? content_class_from_name(page.page_type) : page.class %>
-    <div class="col s12 m12 l12 content-page-list">
-      <%= link_to send("#{klass.name.downcase}_path", page.id), class: 'black-text' do %>
-        <div class="hoverable card horizontal">
-          <div class="card-image">
-            <%= image_tag page.random_image_including_private %>
+<!-- Modern Recent Activity Dashboard -->
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  
+  <!-- Hero Section with Activity Overview -->
+  <div class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
+        
+        <!-- Title and Overview -->
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+            <i class="material-icons mr-3 text-blue-600 text-4xl">timeline</i>
+            Recent Activity
+          </h1>
+          <p class="text-gray-600 mt-2">Your worldbuilding journey at a glance</p>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-3 gap-6">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600"><%= number_with_delimiter @total_content %></div>
+            <div class="text-sm text-gray-500">Total Pages</div>
           </div>
-          <div class="card-stacked">
-            <div class="card-content">
-              <div class="card-title">
-                <%= action %>
-                <i class="material-icons left <%= klass.text_color %>"><%= klass.icon %></i>
-                <span class="<%= klass.text_color %>"><%= page.name %></span>
-                <small class="grey-text">
-                  <%= time_ago_in_words page.updated_at %> ago
-                </small>
-              </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-green-600"><%= number_with_delimiter @total_edits %></div>
+            <div class="text-sm text-gray-500">Total Edits</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-purple-600"><%= number_with_delimiter @total_words %></div>
+            <div class="text-sm text-gray-500">Total Words</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Insights Section -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+      
+      <!-- Recent Activity Summary -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <i class="material-icons mr-2 text-blue-600">today</i>
+          Recent Activity
+        </h3>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Today</span>
+            <span class="font-semibold text-blue-600"><%= @recent_summary[:today] %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">This Week</span>
+            <span class="font-semibold text-green-600"><%= @recent_summary[:this_week] %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">This Month</span>
+            <span class="font-semibold text-purple-600"><%= @recent_summary[:this_month] %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Type Breakdown -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <i class="material-icons mr-2 text-green-600">pie_chart</i>
+          Content Types
+        </h3>
+        <div class="space-y-2">
+          <% @content_type_stats.first(4).each do |type, count| %>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600 flex items-center">
+                <i class="material-icons text-xs mr-1 <%= type.constantize.text_color %>"><%= type.constantize.icon %></i>
+                <%= type %>
+              </span>
+              <span class="text-sm font-semibold"><%= count %></span>
             </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Most Active Types -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <i class="material-icons mr-2 text-orange-600">trending_up</i>
+          Most Edited
+        </h3>
+        <div class="space-y-2">
+          <% @most_active_types.each do |type, edit_count| %>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600 flex items-center">
+                <i class="material-icons text-xs mr-1 <%= type.constantize.text_color %>"><%= type.constantize.icon %></i>
+                <%= type %>
+              </span>
+              <span class="text-sm font-semibold text-orange-600"><%= edit_count %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Activity Chart -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <i class="material-icons mr-2 text-purple-600">show_chart</i>
+          30-Day Activity
+        </h3>
+        <div class="flex items-end justify-between h-16 space-x-1">
+          <% @daily_activity.each do |date, count| %>
+            <div class="flex-1 bg-purple-100 rounded-t" 
+                 style="height: <%= count > 0 ? [count * 20, 4].max : 2 %>px;"
+                 title="<%= date %>: <%= count %> edits">
+            </div>
+          <% end %>
+        </div>
+        <div class="text-xs text-gray-500 mt-2">Hover for details</div>
+      </div>
+    </div>
+
+    <!-- Advanced Filter Bar -->
+    <%= form_with url: recent_content_path, method: :get, local: true, class: "bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8", id: "filter-form" do |f| %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+        
+        <!-- Search -->
+        <div class="lg:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Search Content</label>
+          <div class="relative">
+            <input type="text" name="search" value="<%= params[:search] %>" 
+                   placeholder="Search by name..." 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-10">
+            <i class="material-icons absolute left-3 top-2.5 text-gray-400 text-sm">search</i>
+          </div>
+        </div>
+
+        <!-- Content Type Filter -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Content Type</label>
+          <select name="content_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="all" <%= 'selected' if params[:content_type] == 'all' || params[:content_type].blank? %>>All Types</option>
+            <% if @content_type_stats && @content_type_stats.any? %>
+              <% @content_type_stats.each do |type, _| %>
+                <option value="<%= type %>" <%= 'selected' if params[:content_type] == type %>><%= type %></option>
+              <% end %>
+            <% else %>
+              <!-- Fallback: Show common content types -->
+              <% %w[Character Location Item Universe].each do |type| %>
+                <option value="<%= type %>" <%= 'selected' if params[:content_type] == type %>><%= type %></option>
+              <% end %>
+            <% end %>
+          </select>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Time Range</label>
+          <select name="date_range" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="" <%= 'selected' if params[:date_range].blank? %>>All Time</option>
+            <option value="today" <%= 'selected' if params[:date_range] == 'today' %>>Today</option>
+            <option value="week" <%= 'selected' if params[:date_range] == 'week' %>>This Week</option>
+            <option value="month" <%= 'selected' if params[:date_range] == 'month' %>>This Month</option>
+            <option value="year" <%= 'selected' if params[:date_range] == 'year' %>>This Year</option>
+          </select>
+        </div>
+
+        <!-- Sort Options -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+          <select name="sort" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="updated_at" <%= 'selected' if params[:sort] == 'updated_at' || params[:sort].blank? %>>Last Updated</option>
+            <option value="created_at" <%= 'selected' if params[:sort] == 'created_at' %>>Created Date</option>
+            <option value="name" <%= 'selected' if params[:sort] == 'name' %>>Name</option>
+            <option value="edit_count" <%= 'selected' if params[:sort] == 'edit_count' %>>Edit Count</option>
+            <option value="word_count" <%= 'selected' if params[:sort] == 'word_count' %>>Word Count</option>
+            <option value="content_type" <%= 'selected' if params[:sort] == 'content_type' %>>Content Type</option>
+          </select>
+        </div>
+
+        <!-- Apply Filters Button (backup for JS disabled) -->
+        <div>
+          <button type="submit" id="apply-filters-btn" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center">
+            <i class="material-icons mr-2 text-sm">filter_list</i>
+            Apply Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- View Mode and Results Info -->
+      <div class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-gray-600">
+            Showing <%= @paginated_content.length %> of <%= @filtered_content.length %> items
+          </span>
+          
+          <!-- Quick Clear Filters -->
+          <% if params[:search].present? || params[:content_type].present? || params[:date_range].present? || params[:sort].present? || params[:view].present? %>
+            <%= link_to recent_content_path, class: "text-sm text-blue-600 hover:text-blue-700 font-medium" do %>
+              <i class="material-icons text-xs mr-1">clear</i>
+              Clear Filters
+            <% end %>
+          <% end %>
+        </div>
+
+        <!-- View Mode Toggle -->
+        <div class="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+          <%= link_to recent_content_path(params.to_unsafe_h.except('view').merge(view: 'grid')), 
+                      class: "px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200 #{'bg-white text-blue-600 shadow-sm' if @view_mode == 'grid'} #{'text-gray-600 hover:text-gray-900' unless @view_mode == 'grid'}" do %>
+            <i class="material-icons text-sm">grid_view</i>
+          <% end %>
+          <%= link_to recent_content_path(params.to_unsafe_h.except('view').merge(view: 'list')), 
+                      class: "px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200 #{'bg-white text-blue-600 shadow-sm' if @view_mode == 'list'} #{'text-gray-600 hover:text-gray-900' unless @view_mode == 'list'}" do %>
+            <i class="material-icons text-sm">view_list</i>
+          <% end %>
+          <%= link_to recent_content_path(params.to_unsafe_h.except('view').merge(view: 'timeline')), 
+                      class: "px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200 #{'bg-white text-blue-600 shadow-sm' if @view_mode == 'timeline'} #{'text-gray-600 hover:text-gray-900' unless @view_mode == 'timeline'}" do %>
+            <i class="material-icons text-sm">timeline</i>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Content Display -->
+    <% if @paginated_content.any? %>
+      
+      <!-- Grid View -->
+      <% if @view_mode == 'grid' %>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+          <% @paginated_content.each do |item| %>
+            <div class="content-card group">
+              <%= link_to send("edit_#{item[:page].page_type.downcase}_path", item[:page].id), class: 'block' do %>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                  
+                  <!-- Card Header with Image -->
+                  <div class="relative h-48 overflow-hidden">
+                    <% if item[:has_image] %>
+                      <%= image_tag item[:page].random_image_including_private, class: 'w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' %>
+                    <% else %>
+                      <div class="w-full h-full <%= item[:page].color %> bg-opacity-20 flex items-center justify-center">
+                        <i class="material-icons text-6xl text-white opacity-80"><%= item[:page].icon %></i>
+                      </div>
+                    <% end %>
+                    
+                    <!-- Overlay gradient -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    
+                    <!-- Content Type Badge -->
+                    <div class="absolute top-3 right-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm <%= item[:page].color %>">
+                      <i class="material-icons text-xs mr-1"><%= item[:page].icon %></i>
+                      <%= item[:page].page_type %>
+                    </div>
+                    
+                    <!-- Action Badge -->
+                    <div class="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= item[:action] == 'created' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white' %>">
+                      <i class="material-icons text-xs mr-1"><%= item[:action] == 'created' ? 'add_circle' : 'edit' %></i>
+                      <%= item[:action].titleize %>
+                    </div>
+                    
+                    <!-- Title -->
+                    <h3 class="absolute bottom-3 left-3 right-3 text-white font-semibold text-lg line-clamp-2">
+                      <%= item[:page].name %>
+                    </h3>
+                  </div>
+                  
+                  <!-- Card Footer with Stats -->
+                  <div class="px-4 py-3 border-t border-gray-100">
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                      <span class="flex items-center space-x-1">
+                        <i class="material-icons text-xs">schedule</i>
+                        <span><%= time_ago_in_words item[:page].updated_at %> ago</span>
+                      </span>
+                      
+                      <div class="flex items-center space-x-3">
+                        <% if item[:edit_count] > 0 %>
+                          <span class="flex items-center space-x-1">
+                            <i class="material-icons text-xs">edit</i>
+                            <span><%= item[:edit_count] %></span>
+                          </span>
+                        <% end %>
+                        
+                        <% if item[:word_count] > 0 %>
+                          <span class="flex items-center space-x-1">
+                            <i class="material-icons text-xs">description</i>
+                            <span><%= number_with_delimiter item[:word_count] %></span>
+                          </span>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- List View -->
+      <% if @view_mode == 'list' %>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+          <div class="divide-y divide-gray-200">
+            <% @paginated_content.each do |item| %>
+              <%= link_to send("edit_#{item[:page].page_type.downcase}_path", item[:page].id), class: 'block hover:bg-gray-50 transition-colors duration-200' do %>
+                <div class="px-6 py-4 flex items-center space-x-4">
+                  
+                  <!-- Image/Icon -->
+                  <div class="flex-shrink-0">
+                    <% if item[:has_image] %>
+                      <%= image_tag item[:page].random_image_including_private, class: 'w-12 h-12 rounded-lg object-cover' %>
+                    <% else %>
+                      <div class="w-12 h-12 <%= item[:page].color %> bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <i class="material-icons text-lg <%= item[:page].text_color %>"><%= item[:page].icon %></i>
+                      </div>
+                    <% end %>
+                  </div>
+                  
+                  <!-- Content Info -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center space-x-2 mb-1">
+                      <h3 class="text-lg font-semibold text-gray-900 truncate"><%= item[:page].name %></h3>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= item[:page].color %> text-white">
+                        <%= item[:page].page_type %>
+                      </span>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= item[:action] == 'created' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' %>">
+                        <%= item[:action].titleize %>
+                      </span>
+                    </div>
+                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                      <span class="flex items-center space-x-1">
+                        <i class="material-icons text-xs">schedule</i>
+                        <span><%= time_ago_in_words item[:page].updated_at %> ago</span>
+                      </span>
+                      
+                      <% if item[:edit_count] > 0 %>
+                        <span class="flex items-center space-x-1">
+                          <i class="material-icons text-xs">edit</i>
+                          <span><%= item[:edit_count] %> edits</span>
+                        </span>
+                      <% end %>
+                      
+                      <% if item[:word_count] > 0 %>
+                        <span class="flex items-center space-x-1">
+                          <i class="material-icons text-xs">description</i>
+                          <span><%= number_with_delimiter item[:word_count] %> words</span>
+                        </span>
+                      <% end %>
+                    </div>
+                  </div>
+                  
+                  <!-- Arrow -->
+                  <div class="flex-shrink-0">
+                    <i class="material-icons text-gray-400">chevron_right</i>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
           </div>
         </div>
       <% end %>
-    </div>
-  <% end %>
+
+      <!-- Timeline View -->
+      <% if @view_mode == 'timeline' %>
+        <div class="relative">
+          <!-- Timeline line -->
+          <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+          
+          <div class="space-y-8 mb-8">
+            <% @paginated_content.group_by { |item| item[:page].updated_at.to_date }.each do |date, items| %>
+              <!-- Date Header -->
+              <div class="relative flex items-center">
+                <div class="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold z-10">
+                  <%= date.strftime('%d') %>
+                </div>
+                <div class="ml-4">
+                  <h3 class="text-lg font-semibold text-gray-900"><%= date.strftime('%B %d, %Y') %></h3>
+                  <p class="text-sm text-gray-500"><%= pluralize(items.length, 'item') %> updated</p>
+                </div>
+              </div>
+              
+              <!-- Items for this date -->
+              <div class="ml-20 space-y-4">
+                <% items.each do |item| %>
+                  <%= link_to send("edit_#{item[:page].page_type.downcase}_path", item[:page].id), class: 'block' do %>
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 p-4">
+                      <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                          <% if item[:has_image] %>
+                            <%= image_tag item[:page].random_image_including_private, class: 'w-10 h-10 rounded-lg object-cover' %>
+                          <% else %>
+                            <div class="w-10 h-10 <%= item[:page].color %> bg-opacity-20 rounded-lg flex items-center justify-center">
+                              <i class="material-icons text-sm <%= item[:page].text_color %>"><%= item[:page].icon %></i>
+                            </div>
+                          <% end %>
+                        </div>
+                        
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center space-x-2">
+                            <h4 class="font-medium text-gray-900 truncate"><%= item[:page].name %></h4>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= item[:page].color %> text-white">
+                              <%= item[:page].page_type %>
+                            </span>
+                          </div>
+                          <div class="flex items-center space-x-3 mt-1 text-xs text-gray-500">
+                            <span><%= item[:action].titleize %> at <%= item[:page].updated_at.strftime('%I:%M %p') %></span>
+                            <% if item[:edit_count] > 0 %>
+                              <span><%= item[:edit_count] %> edits total</span>
+                            <% end %>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Pagination -->
+      <% if @total_pages > 1 %>
+        <div class="flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-200 px-6 py-4">
+          <div class="text-sm text-gray-600">
+            Page <%= @page %> of <%= @total_pages %>
+          </div>
+          
+          <div class="flex items-center space-x-2">
+            <!-- Previous Page -->
+            <% if @page > 1 %>
+              <%= link_to recent_content_path(params.to_unsafe_h.merge(page: @page - 1)), 
+                          class: "px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                <i class="material-icons text-sm">chevron_left</i>
+              <% end %>
+            <% end %>
+            
+            <!-- Page Numbers -->
+            <% page_range = [[@page - 2, 1].max, [@page + 2, @total_pages].min].max %>
+            <% (1..@total_pages).each do |page_num| %>
+              <% if page_num == @page %>
+                <span class="px-3 py-2 rounded-lg bg-blue-600 text-white font-medium"><%= page_num %></span>
+              <% elsif (page_num - @page).abs <= 2 || page_num == 1 || page_num == @total_pages %>
+                <%= link_to recent_content_path(params.to_unsafe_h.merge(page: page_num)), 
+                            class: "px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                  <%= page_num %>
+                <% end %>
+              <% elsif (page_num - @page).abs == 3 %>
+                <span class="px-2 py-2 text-gray-400">...</span>
+              <% end %>
+            <% end %>
+            
+            <!-- Next Page -->
+            <% if @page < @total_pages %>
+              <%= link_to recent_content_path(params.to_unsafe_h.merge(page: @page + 1)), 
+                          class: "px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                <i class="material-icons text-sm">chevron_right</i>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+    <% else %>
+      <!-- Empty State -->
+      <div class="text-center py-16">
+        <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+          <i class="material-icons text-4xl text-gray-400">search_off</i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">No content found</h3>
+        <p class="text-gray-600 mb-6">
+          <% if params[:search].present? || params[:content_type].present? || params[:date_range].present? %>
+            Try adjusting your filters or search terms.
+          <% else %>
+            Start creating content to see your recent activity here.
+          <% end %>
+        </p>
+        <% if params[:search].present? || params[:content_type].present? || params[:date_range].present? %>
+          <%= link_to recent_content_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+            <i class="material-icons mr-2 text-sm">clear</i>
+            Clear All Filters
+          <% end %>
+        <% else %>
+          <%= link_to dashboard_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+            <i class="material-icons mr-2 text-sm">add</i>
+            Start Creating
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
 </div>
+
+<!-- Custom Styles -->
+<style>
+  .content-card {
+    transition: all 0.3s ease;
+  }
+  
+  .content-card:hover {
+    transform: translateY(-4px);
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Activity chart hover effects */
+  .bg-purple-100:hover {
+    background-color: rgb(147 51 234) !important;
+    transition: background-color 0.2s ease;
+  }
+  
+  /* Smooth transitions for all interactive elements */
+  button, select, input, a {
+    transition: all 0.2s ease;
+  }
+  
+  /* Enhanced focus states */
+  .focus-ring:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: rgb(59 130 246);
+    ring-offset: 2px;
+  }
+
+  /* CRITICAL: Override MaterializeCSS select styling */
+  .select-wrapper {
+    display: none !important;
+  }
+  
+  .dropdown-content {
+    display: none !important;
+  }
+  
+  /* Ensure native selects are visible */
+  select {
+    display: block !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 0.5rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1.5em 1.5em !important;
+    padding-right: 2.5rem !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+  }
+
+  /* Hide any MaterializeCSS generated elements */
+  .caret {
+    display: none !important;
+  }
+  
+  input.select-dropdown {
+    display: none !important;
+  }
+</style>
+
+<!-- Interactive JavaScript -->
+<script>
+// Prevent MaterializeCSS from initializing selects
+if (typeof M !== 'undefined' && M.FormSelect) {
+  const originalInit = M.FormSelect.init;
+  M.FormSelect.init = function() {
+    console.log('Blocked MaterializeCSS FormSelect initialization');
+    return {};
+  };
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Recent Activity page JavaScript loaded');
+  
+  // Remove any MaterializeCSS select wrappers that might have been created
+  document.querySelectorAll('.select-wrapper').forEach(wrapper => {
+    const select = wrapper.querySelector('select');
+    if (select) {
+      wrapper.parentNode.insertBefore(select, wrapper);
+      wrapper.remove();
+    }
+  });
+  
+  // Remove MaterializeCSS dropdown content
+  document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+    dropdown.remove();
+  });
+  
+  // Remove MaterializeCSS select dropdown inputs
+  document.querySelectorAll('input.select-dropdown').forEach(input => {
+    input.remove();
+  });
+  
+  // Auto-submit form on filter changes
+  const filterForm = document.querySelector('#filter-form');
+  
+  if (filterForm) {
+    console.log('Filter form found');
+    
+    // Hide the apply button since we have auto-submission
+    const applyButton = filterForm.querySelector('#apply-filters-btn');
+    if (applyButton) {
+      applyButton.style.display = 'none';
+    }
+    
+    // Get all filter inputs
+    const searchInput = filterForm.querySelector('input[name="search"]');
+    const contentTypeSelect = filterForm.querySelector('select[name="content_type"]');
+    const dateRangeSelect = filterForm.querySelector('select[name="date_range"]');
+    const sortSelect = filterForm.querySelector('select[name="sort"]');
+    
+    // Search input with debouncing
+    if (searchInput) {
+      let searchTimeout;
+      searchInput.addEventListener('input', function() {
+        console.log('Search input changed:', this.value);
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          console.log('Submitting search form');
+          filterForm.submit();
+        }, 800);
+      });
+    }
+    
+    // Content type filter
+    if (contentTypeSelect) {
+      contentTypeSelect.addEventListener('change', function() {
+        console.log('Content type changed:', this.value);
+        filterForm.submit();
+      });
+    }
+    
+    // Date range filter
+    if (dateRangeSelect) {
+      dateRangeSelect.addEventListener('change', function() {
+        console.log('Date range changed:', this.value);
+        filterForm.submit();
+      });
+    }
+    
+    // Sort filter
+    if (sortSelect) {
+      sortSelect.addEventListener('change', function() {
+        console.log('Sort changed:', this.value);
+        filterForm.submit();
+      });
+    }
+  } else {
+    console.log('Filter form not found');
+  }
+  
+  // Enhanced activity chart tooltips
+  const chartBars = document.querySelectorAll('[title]');
+  chartBars.forEach(bar => {
+    bar.style.cursor = 'pointer';
+    bar.addEventListener('mouseenter', function() {
+      this.style.opacity = '0.8';
+    });
+    bar.addEventListener('mouseleave', function() {
+      this.style.opacity = '1';
+    });
+  });
+  
+  // Animate cards on page load
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '50px'
+  });
+  
+  // Observe content cards for animation
+  document.querySelectorAll('.content-card').forEach(element => {
+    element.style.opacity = '0';
+    element.style.transform = 'translateY(30px)';
+    element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(element);
+  });
+  
+  // Debug: Check if dropdowns have options
+  const selects = document.querySelectorAll('select');
+  selects.forEach((select, index) => {
+    console.log(`Select ${index} (${select.name}) has ${select.options.length} options`);
+  });
+});
+</script>

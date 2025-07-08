@@ -59,25 +59,43 @@
             <%= render partial: 'main/components/serendipitous_question', locals: { } %>
           </div>
           
-          <!-- Right Column: Recently Edited Pages (1/3) -->
+          <!-- Right Column: What's New & Recently Edited Pages (1/3) -->
           <% if @recently_edited_pages %>
-            <div class="lg:col-span-1">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                  <i class="material-icons mr-2 text-blue-600">history</i>
-                  Recently Edited
-                </h3>
-                <%= link_to recent_content_path, class: "text-xs text-blue-600 hover:text-blue-700 font-medium" do %>
-                  View all →
-                <% end %>
-              </div>
+            <div class="lg:col-span-1 space-y-6">
               
-              <!-- Recently Edited Pages Component -->
-              <div class="dashboard-card">
-                <div class="dashboard-card-content">
-                  <%= render partial: 'main/components/recently_edited_pages', locals: { } %>
+              <!-- What's New Card -->
+              <div>                
+                <div class="bg-blue-50 border border-blue-200 rounded-md shadow-sm hover:shadow-lg transition-all duration-300">
+                  <div class="p-4">
+                    <h4 class="text-base font-semibold text-blue-900 mb-2">New Something</h4>
+                    <p class="text-sm text-blue-700 leading-relaxed">This is a little notice box about what's new. I can fit about 2 lines before I feel bad.</p>
+                    <div class="text-right">
+                      <%= link_to 'Dismiss', '#', class: 'text-blue-600 hover:text-blue-700 font-medium text-xs' %>
+                    </div>
+                  </div>
                 </div>
               </div>
+              
+              <!-- Recently Edited Pages -->
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="material-icons mr-2 text-blue-600">history</i>
+                    Recently Edited
+                  </h3>
+                  <%= link_to recent_content_path, class: "text-xs text-blue-600 hover:text-blue-700 font-medium" do %>
+                    View all →
+                  <% end %>
+                </div>
+                
+                <!-- Recently Edited Pages Component -->
+                <div class="dashboard-card">
+                  <div class="dashboard-card-content">
+                    <%= render partial: 'main/components/recently_edited_pages', locals: { } %>
+                  </div>
+                </div>
+              </div>
+              
             </div>
           <% end %>
           
@@ -155,36 +173,6 @@
       </div>
     </div>
   <% end %>
-
-  <!-- Main Content Area -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    
-    <!-- Single Column Layout for remaining content -->
-    <div class="max-w-2xl mx-auto space-y-10">
-      
-      <!-- What's New -->
-      <%= render partial: 'main/components/whats_new', locals: { } %>
-      
-      <!-- Forum Activity -->
-      <% if @most_recent_threads.any? %>
-        <section>
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-              <i class="material-icons mr-2 text-orange-600">forum</i>
-              <%= link_to 'Forum Activity', thredded_path, class: "hover:text-orange-600 transition-colors" %>
-            </h3>
-          </div>
-          <div class="dashboard-card">
-            <div class="dashboard-card-content">
-              <%= render partial: 'main/components/active_discussions', locals: { discussions: @most_recent_threads } %>
-            </div>
-          </div>
-        </section>
-      <% end %>
-      
-    </div>
-    
-  </div>
   
 </div>
 
