@@ -343,12 +343,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Submission toggle
-  const submissionToggle = document.querySelector('.submission-toggle');
-  if (submissionToggle) {
-    submissionToggle.addEventListener('change', function() {
-      updatePreview();
-    });
+  // Initialize toggle functionality
+  initializeToggles();
+  
+  function initializeToggles() {
+    const submissionToggle = document.querySelector('.submission-toggle');
+    const autoAcceptToggle = document.querySelector('.auto-accept-toggle');
+    const autoAcceptSetting = document.getElementById('auto-accept-setting');
+    
+    // Set up submission toggle
+    if (submissionToggle) {
+      submissionToggle.addEventListener('change', function() {
+        if (autoAcceptSetting) {
+          if (this.checked) {
+            autoAcceptSetting.classList.remove('hidden');
+          } else {
+            autoAcceptSetting.classList.add('hidden');
+            // Also uncheck auto-accept when submissions are disabled
+            if (autoAcceptToggle) {
+              autoAcceptToggle.checked = false;
+            }
+          }
+        }
+        updatePreview();
+      });
+    }
+    
+    // Set up auto-accept toggle
+    if (autoAcceptToggle) {
+      autoAcceptToggle.addEventListener('change', function() {
+        updatePreview();
+      });
+    }
   }
   
   // Keyboard navigation

@@ -323,15 +323,33 @@
             </span>
           </legend>
           
-          <div class="border border-gray-200 rounded-lg p-4">
-            <%= f.label :allow_submissions, class: 'flex items-start cursor-pointer' do %>
-              <%= f.check_box :allow_submissions, class: 'sr-only submission-toggle' %>
-              <div class="toggle-switch mr-3 mt-0.5"></div>
-              <div class="flex-1">
-                <div class="font-medium text-gray-900 mb-1">Allow submissions from other users</div>
-                <p class="text-sm text-gray-600">Let the community suggest content for your collection</p>
-              </div>
-            <% end %>
+          <div class="space-y-4">
+            <div class="border border-gray-200 rounded-lg p-4">
+              <%= f.label :allow_submissions, class: 'flex items-start cursor-pointer' do %>
+                <%= f.check_box :allow_submissions, class: 'sr-only submission-toggle', id: 'allow_submissions_checkbox' %>
+                <div class="toggle-switch mr-3 mt-0.5"></div>
+                <div class="flex-1">
+                  <div class="font-medium text-gray-900 mb-1">Allow submissions from other users</div>
+                  <p class="text-sm text-gray-600">Let the community suggest content for your collection</p>
+                </div>
+              <% end %>
+            </div>
+            
+            <!-- Auto-accept nested setting -->
+            <div id="auto-accept-setting" class="border border-gray-200 rounded-lg p-4 ml-6 bg-gray-50 hidden">
+              <%= f.label :auto_accept, class: 'flex items-start cursor-pointer' do %>
+                <%= f.check_box :auto_accept, class: 'sr-only auto-accept-toggle' %>
+                <div class="toggle-switch mr-3 mt-0.5"></div>
+                <div class="flex-1">
+                  <div class="font-medium text-gray-900 mb-1">Auto-accept submissions</div>
+                  <p class="text-sm text-gray-600">Automatically publish new submissions without manual review</p>
+                  <div class="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
+                    <i class="material-icons text-xs mr-1">info</i>
+                    <strong>Note:</strong> Only enable this if you trust your community. All submissions will be published immediately.
+                  </div>
+                </div>
+              <% end %>
+            </div>
           </div>
         </fieldset>
       </div>
@@ -408,11 +426,13 @@
   transition: transform 0.2s;
 }
 
-.submission-toggle:checked + .toggle-switch {
+.submission-toggle:checked + .toggle-switch,
+.auto-accept-toggle:checked + .toggle-switch {
   background-color: #10b981;
 }
 
-.submission-toggle:checked + .toggle-switch::after {
+.submission-toggle:checked + .toggle-switch::after,
+.auto-accept-toggle:checked + .toggle-switch::after {
   transform: translateX(24px);
 }
 </style>
