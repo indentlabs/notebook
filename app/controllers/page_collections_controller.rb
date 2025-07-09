@@ -119,7 +119,8 @@ class PageCollectionsController < ApplicationController
       @page_type = content_type
       @pages = @page_collection.accepted_submissions.where(content_type: content_type.name).includes({content: [:universe, :user], user: []})
       @contributors = User.where(id: @pages.to_a.map(&:user_id) - [@page_collection.user_id])
-      @editor_picks = @page_collection.editor_picks_ordered.includes({content: [:universe, :user], user: []})
+      # Filter editor's picks to only show the current content type
+      @editor_picks = @page_collection.editor_picks_ordered.where(content_type: content_type.name).includes({content: [:universe, :user], user: []})
       sort_pages
 
       render :show

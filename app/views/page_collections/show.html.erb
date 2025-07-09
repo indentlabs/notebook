@@ -40,7 +40,7 @@
 <% end %>
 
 <!-- Publication Masthead -->
-<div class="relative bg-gradient-to-br from-gray-50 to-white border-b-4 border-gray-900">
+<div class="relative bg-gradient-to-br <% if @show_page_type_highlight && @page_type %>from-<%= @page_type.color.split(' ').first.gsub('bg-', '') %>-50 to-<%= @page_type.color.split(' ').first.gsub('bg-', '') %>-100 border-b-4 border-<%= @page_type.color.split(' ').first.gsub('bg-', '') %>-600<% else %>from-gray-50 to-white border-b-4 border-gray-900<% end %>">
   
   <!-- Background Pattern/Image -->
   <div class="absolute inset-0">
@@ -57,7 +57,11 @@
       <nav class="flex items-center space-x-2 text-sm text-gray-500">
         <%= link_to "Collections", page_collections_path, class: "hover:text-gray-700 transition-colors duration-200" %>
         <i class="material-icons text-xs">chevron_right</i>
-        <span class="text-gray-900 dark:text-gray-900 font-medium"><%= @page_collection.title %></span>
+        <%= link_to @page_collection.title, @page_collection, class: "hover:text-gray-700 transition-colors duration-200" %>
+        <% if @show_page_type_highlight && @page_type %>
+          <i class="material-icons text-xs">chevron_right</i>
+          <span class="<%= @page_type.text_color %> font-medium"><%= @page_type.name.pluralize %></span>
+        <% end %>
       </nav>
       
       <!-- Publication Controls -->
@@ -81,13 +85,31 @@
       
       <!-- Publication Title -->
       <div class="mb-6">
-        <h1 class="text-5xl lg:text-7xl font-serif font-bold text-gray-900 dark:text-gray-900 leading-tight tracking-tight">
-          <%= @page_collection.title %>
-        </h1>
-        <% if @page_collection.subtitle.present? %>
-          <p class="text-xl lg:text-2xl text-gray-600 font-light italic mt-4 max-w-3xl mx-auto">
-            <%= @page_collection.subtitle %>
+        <% if @show_page_type_highlight && @page_type %>
+          <!-- Content Type Focused Title -->
+          <div class="flex items-center justify-center mb-4">
+            <div class="p-4 <%= @page_type.color %> bg-opacity-20 rounded-full">
+              <i class="material-icons <%= @page_type.text_color %> text-4xl">
+                <%= @page_type.icon %>
+              </i>
+            </div>
+          </div>
+          <h1 class="text-4xl lg:text-6xl font-serif font-bold <%= @page_type.text_color %> leading-tight tracking-tight">
+            <%= @page_type.name.pluralize %>
+          </h1>
+          <p class="text-xl lg:text-2xl text-gray-600 font-light mt-2 max-w-3xl mx-auto">
+            in <%= link_to @page_collection.title, @page_collection, class: "font-medium text-gray-900 hover:text-blue-600 transition-colors duration-200 underline decoration-dotted underline-offset-4" %>
           </p>
+        <% else %>
+          <!-- Default Collection Title -->
+          <h1 class="text-5xl lg:text-7xl font-serif font-bold text-gray-900 dark:text-gray-900 leading-tight tracking-tight">
+            <%= @page_collection.title %>
+          </h1>
+          <% if @page_collection.subtitle.present? %>
+            <p class="text-xl lg:text-2xl text-gray-600 font-light italic mt-4 max-w-3xl mx-auto">
+              <%= @page_collection.subtitle %>
+            </p>
+          <% end %>
         <% end %>
       </div>
       
@@ -115,13 +137,14 @@
       <div class="flex flex-wrap justify-center gap-3 mb-8">
         <% @page_collection.page_types.each do |submittable_class_name| %>
           <% submittable_class = content_class_from_name(submittable_class_name) %>
+          <% is_active = @show_page_type_highlight && @page_type && @page_type.name == submittable_class_name %>
           <%= link_to send("#{submittable_class_name.downcase.pluralize}_page_collection_path", @page_collection.id), 
-              class: "group inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-full shadow-sm hover:shadow-md hover:border-gray-400 transition-all duration-200",
+              class: "group inline-flex items-center px-4 py-2 #{is_active ? 'bg-gray-900 text-white border-gray-900' : 'bg-white border-gray-300 hover:border-gray-400'} rounded-full shadow-sm hover:shadow-md transition-all duration-200",
               title: "View #{submittable_class_name.pluralize} in this collection" do %>
-            <i class="material-icons <%= submittable_class.text_color %> text-lg mr-2 group-hover:scale-110 transition-transform duration-200">
+            <i class="material-icons #{is_active ? 'text-white' : submittable_class.text_color} text-lg mr-2 group-hover:scale-110 transition-transform duration-200">
               <%= submittable_class.icon %>
             </i>
-            <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+            <span class="text-sm font-medium #{is_active ? 'text-white' : 'text-gray-700 group-hover:text-gray-900'}">
               <%= submittable_class_name.pluralize %>
             </span>
           <% end %>
@@ -175,7 +198,11 @@
         <% if @editor_picks.any? %>
           <div class="mb-12 pb-8 border-b border-gray-200">
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-2xl font-serif font-bold text-gray-900">Editor's Picks</h2>
+              <% if @show_page_type_highlight && @page_type %>
+                <h2 class="text-2xl font-serif font-bold text-gray-900">Featured <%= @page_type.name.pluralize %></h2>
+              <% else %>
+                <h2 class="text-2xl font-serif font-bold text-gray-900">Editor's Picks</h2>
+              <% end %>
               <% if @page_collection.user == current_user %>
                 <%= link_to page_collection_manage_editor_picks_path(@page_collection), 
                     class: "text-sm text-blue-600 hover:text-blue-800 font-medium" do %>
@@ -231,10 +258,17 @@
           <!-- Sorting & Filter Controls -->
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-6 border-b border-gray-200">
             <div>
-              <h2 class="text-2xl font-serif font-bold text-gray-900 mb-2">Published Pages</h2>
-              <p class="text-sm text-gray-600">
-                <%= pluralize @pages.count, 'page' %> published in this collection
-              </p>
+              <% if @show_page_type_highlight && @page_type %>
+                <h2 class="text-2xl font-serif font-bold text-gray-900 mb-2">Published <%= @page_type.name.pluralize %></h2>
+                <p class="text-sm text-gray-600">
+                  <%= pluralize @pages.count, @page_type.name.downcase %> published in this collection
+                </p>
+              <% else %>
+                <h2 class="text-2xl font-serif font-bold text-gray-900 mb-2">Published Pages</h2>
+                <p class="text-sm text-gray-600">
+                  <%= pluralize @pages.count, 'page' %> published in this collection
+                </p>
+              <% end %>
             </div>
             
             <!-- Enhanced Sort Controls -->
