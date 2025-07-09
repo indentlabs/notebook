@@ -412,7 +412,7 @@
           <div id="loading-indicator" class="hidden text-center py-12">
             <div class="inline-flex items-center space-x-3">
               <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span class="text-gray-600">Loading more articles...</span>
+              <span class="text-gray-600">Loading more pages...</span>
             </div>
           </div>
           
@@ -978,19 +978,29 @@ document.addEventListener('DOMContentLoaded', function() {
     loadingIndicator.classList.remove('hidden');
     
     try {
-      // Simulate loading more articles (in production, this would be an AJAX request)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Make an AJAX request to get more pages
+      const response = await fetch(`/page_collections/${window.location.pathname.split('/').pop()}/pages?page=${currentPage + 1}`);
+      const data = await response.json();
       
       // Hide loading indicator
       loadingIndicator.classList.add('hidden');
       isLoading = false;
       
-      // In a real implementation, you'd append new articles to the container
-      console.log('Loaded page', ++currentPage);
+      // Append the new pages to the container
+      if (data.pages && data.pages.length > 0) {
+        data.pages.forEach(page => {
+          // Create and append new article HTML
+          articlesContainer.insertAdjacentHTML('beforeend', page.html);
+        });
+        currentPage++;
+      } else {
+        // No more pages to load, remove the scroll observer
+        scrollObserver.unobserve(scrollTrigger);
+      }
     } catch (error) {
       loadingIndicator.classList.add('hidden');
       isLoading = false;
-      console.error('Error loading more articles:', error);
+      console.error('Error loading more pages:', error);
     }
   }
 

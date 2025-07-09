@@ -9,7 +9,7 @@ class PageCollectionsController < ApplicationController
 
   before_action :require_collection_ownership, only: [:edit, :update, :destroy]
 
-  layout 'tailwind', only: [:index, :new, :show, :edit]
+  layout 'tailwind'
 
   # GET /page_collections
   def index
@@ -118,6 +118,8 @@ class PageCollectionsController < ApplicationController
       @show_page_type_highlight = true
       @page_type = content_type
       @pages = @page_collection.accepted_submissions.where(content_type: content_type.name).includes({content: [:universe, :user], user: []})
+      @contributors = User.where(id: @pages.to_a.map(&:user_id) - [@page_collection.user_id])
+      @editor_picks = @page_collection.editor_picks_ordered.includes({content: [:universe, :user], user: []})
       sort_pages
 
       render :show
@@ -165,6 +167,38 @@ class PageCollectionsController < ApplicationController
     response.headers['Content-Type'] = 'application/rss+xml; charset=utf-8'
     
     render layout: false, template: 'page_collections/rss.rss.builder'
+  end
+
+  # GET /page_collections/:id/pages
+  # AJAX endpoint for infinite scrolling
+  def pages
+    set_page_collection
+    
+    unless (@page_collection.privacy == 'public' || (user_signed_in? && @page_collection.user == current_user))
+      return render json: { error: "Not authorized" }, status: :unauthorized
+    end
+
+    page = params[:page].to_i || 1
+    per_page = 5 # Number of items per page
+    
+    # Get paginated submissions
+    @pages = @page_collection.accepted_submissions
+                            .includes({content: [:universe, :user], user: []})
+                            .offset((page - 1) * per_page)
+                            .limit(per_page)
+    
+    sort_pages
+    
+    # Render each page as HTML and return as JSON
+    page_html = @pages.map do |submission|
+      render_to_string(
+        partial: 'page_collections/article',
+        locals: { submission: submission },
+        layout: false
+      )
+    end
+    
+    render json: { pages: page_html.map { |html| { html: html } } }
   end
 
   private

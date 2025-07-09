@@ -74,6 +74,7 @@ Rails.application.routes.draw do
     get 'report',   on: :member
     get 'rss',      on: :member, defaults: { format: 'rss' }
     get 'feed',     on: :member, to: 'page_collections#rss', defaults: { format: 'rss' }, as: 'feed'
+    get 'pages',    on: :member, to: 'page_collections#pages', defaults: { format: 'json' }
 
     get 'by/:user_id', to: 'page_collections#by_user', as: :submissions_by_user
     
