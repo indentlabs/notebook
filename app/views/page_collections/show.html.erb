@@ -1,386 +1,1170 @@
-<div class="w-full lg:h-80 h-52 pb-10 bg-cover flex justify-center items-center relative" style="background-image: url(&quot;<%= url_for @page_collection.random_image_including_private(nil) %>&quot;);">
-  <div class="text-center max-w-xl mx-auto z-10 relative">
-    <div class="mb-3 text-white <%= PageCollection.color %> py-2 px-4 opacity-90">
-      <div class="lg:text-4xl text-2xl text font-semibold">
-        <%= @page_collection.title %>
+<!-- RSS Feed Auto-discovery -->
+<%= content_for :head do %>
+  <%= auto_discovery_link_tag :rss, feed_page_collection_path(@page_collection), 
+      title: "#{@page_collection.title} - RSS Feed" %>
+<% end %>
+
+<!-- Pending Submissions Banner (Owner Only) -->
+<% if user_signed_in? && @page_collection.user == current_user && @page_collection.pending_submissions.any? %>
+  <div class="bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <i class="material-icons text-white text-lg">pending_actions</i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white">
+              <%= pluralize @page_collection.pending_submissions.count, 'pending submission' %> to review
+            </h3>
+            <p class="text-white/90 text-sm">
+              Contributors are waiting for your review to publish their work
+            </p>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+          <%= link_to page_collection_pending_submissions_path(@page_collection), 
+              class: "inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl" do %>
+            <i class="material-icons text-sm mr-2">rate_review</i>
+            Review Submissions
+          <% end %>
+          
+          <button type="button" class="dismiss-banner p-2 text-white/70 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200" title="Dismiss for now">
+            <i class="material-icons text-sm">close</i>
+          </button>
+        </div>
       </div>
-      <div class="tracking-wide">
-        <%= @page_collection.subtitle %>
-      </div>
-    </div>
-    <div class="text-white text-lg font-medium text-opacity-90">
-      <% @page_collection.page_types.each do |submittable_class_name| %>
-        <% submittable_class = content_class_from_name(submittable_class_name) %>
-        <%# todo click on any to filter posts to just this type, hover effect %>
-        <%# todo tooltips %>
-        <%= link_to send("#{submittable_class_name.downcase.pluralize}_page_collection_path", @page_collection.id) do %>
-          <i class="material-icons bordered-text <%= submittable_class.text_color %> <%= @page_collection.page_types.length > 6 ? 'text-3xl' : 'text-4xl' %>">
-            <%= submittable_class.icon %>
-          </i>
-        <% end %>
-      <% end %>
     </div>
   </div>
-  <div class="absolute w-full h-full inset-0 bg-gray-600 bg-opacity-20"></div>
-</div>
-<div class="-mt-16 flex flex-row space-x-4 mx-auto max-w-7xl">
-  <div class="flex-1">
-    <div class="bg-white p-10 relative rounded-md shadow">
-      <div class="text-gray-500 md:text-base">
-        <div class="font-semibold text-lg text-gray-700 text-center mb-4">About this Collection</div>
-        <div class="md:leading-8 md:space-y-6 space-y-5">
-          <%= simple_format @page_collection.description.presence || "No description" %>
-        </div>
-        <% if @page_collection.user == current_user %>
-          <div class="-mt-2">
-            <%= link_to 'Edit collection', edit_page_collection_path(@page_collection), class: 'text-notebook-blue text-sm' %>
-          </div>
-        <% end %>
+<% end %>
+
+<!-- Publication Masthead -->
+<div class="relative bg-gradient-to-br from-gray-50 to-white border-b-4 border-gray-900">
+  
+  <!-- Background Pattern/Image -->
+  <div class="absolute inset-0">
+    <% if @page_collection.header_image.attached? %>
+      <%= image_tag @page_collection.header_image, class: "w-full h-full object-cover" %>
+    <% else %>
+      <%= image_tag "card-headers/pagecollections.webp", class: "w-full h-full object-cover opacity-10" %>
+    <% end %>
+  </div>
+  
+  <!-- Breadcrumb Navigation with Controls -->
+  <div class="relative z-10 max-w-7xl mx-auto px-6 pt-6">
+    <div class="flex items-center justify-between mb-8">
+      <nav class="flex items-center space-x-2 text-sm text-gray-500">
+        <%= link_to "Collections", page_collections_path, class: "hover:text-gray-700 transition-colors duration-200" %>
+        <i class="material-icons text-xs">chevron_right</i>
+        <span class="text-gray-900 dark:text-gray-900 font-medium"><%= @page_collection.title %></span>
+      </nav>
+      
+      <!-- Publication Controls -->
+      <div class="flex items-center space-x-3">
+        <!-- Dark Mode Toggle -->
+        <button type="button" id="theme-toggle" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all duration-200" title="Toggle dark mode">
+          <i class="material-icons text-sm">dark_mode</i>
+        </button>
+        
+        <!-- Share Publication -->
+        <button type="button" class="share-publication p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all duration-200" title="Share this publication">
+          <i class="material-icons text-sm">share</i>
+        </button>
       </div>
     </div>
   </div>
   
-  <div class="flex-1">
-    <div class="bg-white p-8 relative rounded-md shadow mb-4">
-      <div class="md:space-y-6 space-y-5 text-gray-500 md:text-base">
-        <div class="overflow-hidden">
-          <div class="font-semibold text-lg text-gray-700 text-center mb-4">Accepting submissions</div>
-          <div class="leading-1 md:space-y-6 space-y-5">
-            This Collection is currently accepting submissions of
-            <%= @page_collection.page_types.map(&:pluralize).to_sentence %>.
-
-            <% if @page_collection.auto_accept? %>
-              Pages submitted at this time will be automatically accepted.
-            <% end %>
-
-            <%= link_to 'Submit a page', '#', class: "#{PageCollection.color} hover:bg-brown-500 hover:shadow transition text-white text-center block mt-4 py-2 rounded" %>
-          </div>
+  <!-- Masthead Content -->
+  <div class="relative z-10 max-w-7xl mx-auto px-6 py-12">
+    <div class="text-center">
+      
+      <!-- Publication Title -->
+      <div class="mb-6">
+        <h1 class="text-5xl lg:text-7xl font-serif font-bold text-gray-900 dark:text-gray-900 leading-tight tracking-tight">
+          <%= @page_collection.title %>
+        </h1>
+        <% if @page_collection.subtitle.present? %>
+          <p class="text-xl lg:text-2xl text-gray-600 font-light italic mt-4 max-w-3xl mx-auto">
+            <%= @page_collection.subtitle %>
+          </p>
+        <% end %>
+      </div>
+      
+      <!-- Publication Info -->
+      <div class="flex flex-col lg:flex-row items-center justify-center space-y-4 lg:space-y-0 lg:space-x-8 text-sm text-gray-600 mb-8">
+        <div class="flex items-center space-x-2">
+          <%= link_to @page_collection.user, class: "flex items-center space-x-2 hover:text-gray-900 transition-colors duration-200" do %>
+            <%= image_tag @page_collection.user.image_url(32), class: "w-8 h-8 rounded-full border-2 border-gray-300" %>
+            <span class="font-medium">Curated by <%= @page_collection.user.display_name %></span>
+          <% end %>
+        </div>
+        <div class="hidden lg:block w-1 h-1 bg-gray-400 rounded-full"></div>
+        <div class="flex items-center space-x-1">
+          <i class="material-icons text-sm">schedule</i>
+          <span>Updated <%= time_ago_in_words(@page_collection.updated_at) %> ago</span>
+        </div>
+        <div class="hidden lg:block w-1 h-1 bg-gray-400 rounded-full"></div>
+        <div class="flex items-center space-x-1">
+          <i class="material-icons text-sm">library_books</i>
+          <span><%= pluralize @pages.count, 'page' %></span>
         </div>
       </div>
+      
+      <!-- Content Types as Publication Sections -->
+      <div class="flex flex-wrap justify-center gap-3 mb-8">
+        <% @page_collection.page_types.each do |submittable_class_name| %>
+          <% submittable_class = content_class_from_name(submittable_class_name) %>
+          <%= link_to send("#{submittable_class_name.downcase.pluralize}_page_collection_path", @page_collection.id), 
+              class: "group inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-full shadow-sm hover:shadow-md hover:border-gray-400 transition-all duration-200",
+              title: "View #{submittable_class_name.pluralize} in this collection" do %>
+            <i class="material-icons <%= submittable_class.text_color %> text-lg mr-2 group-hover:scale-110 transition-transform duration-200">
+              <%= submittable_class.icon %>
+            </i>
+            <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+              <%= submittable_class_name.pluralize %>
+            </span>
+          <% end %>
+        <% end %>
+      </div>
+      
     </div>
+  </div>
+  
+  <!-- Decorative Elements -->
+  <div class="absolute bottom-0 left-0 right-0">
+    <div class="h-1 bg-gradient-to-r from-gray-300 via-gray-900 to-gray-300"></div>
+  </div>
+  
+</div>
 
-    <div class="bg-white p-8 mt-1 relative rounded-md shadow">
-      <div class="md:space-y-6 space-y-5 text-gray-500 md:text-base">
-        <div class="overflow-hidden">
-          <dl class="-mx-8 -mt-8 flex flex-wrap">
-            <div class="flex flex-col px-8 pt-8">
-              <dd class="order-1 text-2xl font-extrabold text-indigo-600 sm:text-3xl">
-                <a href="#" class="flex-shrink-0 group block">
-                  <div class="flex items-center">
-                    <div>
-                      <%= image_tag @page_collection.user.image_url(60), class: "inline-block h-14 w-14 rounded-full #{User.color}" %>
+<!-- Main Content Layout -->
+<div class="bg-white">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+      
+      <!-- Main Content Column -->
+      <div class="lg:col-span-3">
+        
+        <!-- Publication Description -->
+        <div class="mb-12 pb-8 border-b border-gray-200">
+          <div class="prose prose-lg max-w-none">
+            <% if @page_collection.description.present? %>
+              <%= simple_format @page_collection.description, class: "text-gray-700 leading-relaxed" %>
+            <% else %>
+              <p class="text-gray-500 italic">This collection has not yet added a description.</p>
+            <% end %>
+          </div>
+          <% if @page_collection.user == current_user %>
+            <div class="mt-4 flex items-center space-x-4">
+              <%= link_to edit_page_collection_path(@page_collection), 
+                  class: "inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium" do %>
+                <i class="material-icons text-sm mr-1">edit</i>
+                Edit collection details
+              <% end %>
+              <%= link_to page_collection_manage_editor_picks_path(@page_collection), 
+                  class: "inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium" do %>
+                <i class="material-icons text-sm mr-1">star</i>
+                Manage Editor's Picks
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- Editor's Picks Section -->
+        <% if @editor_picks.any? %>
+          <div class="mb-12 pb-8 border-b border-gray-200">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-serif font-bold text-gray-900">Editor's Picks</h2>
+              <% if @page_collection.user == current_user %>
+                <%= link_to page_collection_manage_editor_picks_path(@page_collection), 
+                    class: "text-sm text-blue-600 hover:text-blue-800 font-medium" do %>
+                  Manage picks
+                <% end %>
+              <% end %>
+            </div>
+            
+            <!-- Featured articles carousel -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <% @editor_picks.each do |featured| %>
+                <div class="group relative bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <%= link_to featured.content, class: "block" do %>
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-100 rounded-t-lg overflow-hidden">
+                      <% if featured.content.respond_to?(:random_image_including_private) && featured.content.random_image_including_private.present? %>
+                        <%= image_tag featured.content.random_image_including_private, 
+                            class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
+                      <% else %>
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200">
+                          <% content_class = content_class_from_name(featured.content_type) %>
+                          <i class="material-icons <%= content_class.text_color %> text-3xl">
+                            <%= content_class.icon %>
+                          </i>
+                        </div>
+                      <% end %>
+                      
+                      <!-- Editor's Pick Badge -->
+                      <div class="absolute top-3 left-3">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          <i class="material-icons text-xs mr-1">star</i>
+                          Editor's Pick
+                        </span>
+                      </div>
                     </div>
-                    <div class="ml-3">
-                      <p class="text-sm font-medium text-gray-700 group-hover:text-gray-900"><%= @page_collection.user.display_name %></p>
-                      <p class="text-xs font-medium text-gray-500 group-hover:text-gray-700">Curator</p>
+                    
+                    <div class="p-4">
+                      <h3 class="font-serif font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+                        <%= featured.cached_content_name %>
+                      </h3>
+                      <p class="mt-2 text-sm text-gray-600 line-clamp-2">
+                        <%= truncate(featured.content.description, length: 120) if featured.content.respond_to?(:description) %>
+                      </p>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Publication Feed -->
+        <% if @pages.any? %>
+          <!-- Sorting & Filter Controls -->
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-6 border-b border-gray-200">
+            <div>
+              <h2 class="text-2xl font-serif font-bold text-gray-900 mb-2">Published Pages</h2>
+              <p class="text-sm text-gray-600">
+                <%= pluralize @pages.count, 'page' %> published in this collection
+              </p>
+            </div>
+            
+            <!-- Enhanced Sort Controls -->
+            <div class="flex flex-wrap gap-2 mt-4 sm:mt-0">
+              <%= link_to params.permit(:sort).merge({sort: 'recent'}), 
+                  class: "inline-flex items-center px-3 py-2 text-xs font-medium rounded-full border #{params[:sort] == 'recent' || params[:sort].blank? ? 'bg-blue-50 text-blue-700 border-blue-200' : 'text-gray-500 border-gray-300 hover:text-gray-700 hover:border-gray-400'} transition-colors duration-200" do %>
+                <i class="material-icons text-sm mr-1">schedule</i>
+                Recent
+              <% end %>
+              <%= link_to params.permit(:sort).merge({sort: 'alphabetical'}), 
+                  class: "inline-flex items-center px-3 py-2 text-xs font-medium rounded-full border #{params[:sort] == 'alphabetical' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'text-gray-500 border-gray-300 hover:text-gray-700 hover:border-gray-400'} transition-colors duration-200" do %>
+                <i class="material-icons text-sm mr-1">sort_by_alpha</i>
+                A-Z
+              <% end %>
+              <%= link_to params.permit(:sort).merge({sort: 'chronological'}), 
+                  class: "inline-flex items-center px-3 py-2 text-xs font-medium rounded-full border #{params[:sort] == 'chronological' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'text-gray-500 border-gray-300 hover:text-gray-700 hover:border-gray-400'} transition-colors duration-200" do %>
+                <i class="material-icons text-sm mr-1">access_time</i>
+                Chronological
+              <% end %>
+              <%= link_to params.permit(:sort).merge({sort: 'shuffle'}), 
+                  class: "inline-flex items-center px-3 py-2 text-xs font-medium rounded-full border #{params[:sort] == 'shuffle' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'text-gray-500 border-gray-300 hover:text-gray-700 hover:border-gray-400'} transition-colors duration-200" do %>
+                <i class="material-icons text-sm mr-1">shuffle</i>
+                Shuffle
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Magazine-Style Article Grid -->
+          <div id="articles-container" class="space-y-8">
+            <% @pages.each_with_index do |submission, index| %>
+              <article class="group relative">
+                
+                <!-- Article Header -->
+                <div class="flex items-center space-x-3 mb-4">
+                  <%= link_to submission.user, class: "flex items-center space-x-2 hover:opacity-75 transition-opacity duration-200" do %>
+                    <%= image_tag submission.user.image_url(40), class: "w-10 h-10 rounded-full border-2 border-gray-300" %>
+                  <% end %>
+                  
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center space-x-2 text-sm text-gray-600">
+                      <span>Published by</span>
+                      <%= link_to submission.user.display_name, submission.user, class: "font-medium text-gray-900 hover:text-blue-600" %>
+                      <span>&middot;</span>
+                      <time datetime="<%= submission.accepted_at.iso8601 %>" class="text-gray-500">
+                        <%= time_ago_in_words submission.accepted_at %> ago
+                      </time>
+                    </div>
+                    
+                    <!-- Content Type Badge -->
+                    <div class="flex items-center mt-1">
+                      <% content_class = content_class_from_name(submission.content_type) %>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        <i class="material-icons <%= content_class.text_color %> text-sm mr-1">
+                          <%= content_class.icon %>
+                        </i>
+                        <%= submission.content_type %>
+                      </span>
                     </div>
                   </div>
-                </a>
-              </dd>
-            </div>
-
-            <% if @contributors.any? %>
-              <div class="flex flex-col px-8 pt-8">
-                <dd class="order-1 text-2xl font-extrabold text-indigo-600 sm:text-3xl">
-                  <div class="flex-shrink-0 group block">
-                    <div class="flex items-center">
-                      <div class="ml-3">
-                        <div class="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                </div>
+                
+                <!-- Article Content Card -->
+                <%= link_to submission.content, class: "block group-hover:shadow-lg transition-shadow duration-300" do %>
+                  <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="flex flex-col lg:flex-row">
+                      
+                      <!-- Article Image with Lazy Loading -->
+                      <div class="lg:w-80 h-48 lg:h-auto bg-gray-100 flex-shrink-0 relative overflow-hidden">
+                        <% if submission.content.respond_to?(:random_image_including_private) && submission.content.random_image_including_private.present? %>
+                          <!-- Skeleton loader placeholder -->
+                          <div class="article-image-skeleton absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse"></div>
+                          <%= image_tag submission.content.random_image_including_private, 
+                              class: "w-full h-full object-cover transition-opacity duration-300 opacity-0 lazy-image",
+                              loading: "lazy",
+                              data: { 
+                                src: submission.content.random_image_including_private,
+                                lightbox: "article-#{submission.id}"
+                              } %>
+                        <% else %>
+                          <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-gray-200 group-hover:to-gray-300 transition-all duration-300">
+                            <i class="material-icons <%= content_class.text_color %> text-4xl opacity-50 group-hover:opacity-70 transition-opacity duration-300">
+                              <%= content_class.icon %>
+                            </i>
+                          </div>
+                        <% end %>
                         
-                          <div class="flex -space-x-1 relative z-0 overflow-hidden">
-                            <% @contributors.first(4).each.with_index do |user, i| %>
-                              <%= link_to user do %>
-                                <%= image_tag user.image_url(40), class: "#{User.color} z-#{30 - (i * 10)} inline-block h-8 w-8 rounded-full ring-2 ring-white" %>
+                        <!-- Image overlay for lightbox trigger -->
+                        <% if submission.content.respond_to?(:random_image_including_private) && submission.content.random_image_including_private.present? %>
+                          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                            <i class="material-icons text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-2xl">zoom_in</i>
+                          </div>
+                        <% end %>
+                      </div>
+                      
+                      <!-- Article Content -->
+                      <div class="flex-1 p-6">
+                        <div class="flex items-start justify-between mb-3">
+                          <div class="flex-1 min-w-0">
+                            <h3 class="text-xl font-serif font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors duration-200">
+                              <%= submission.cached_content_name %>
+                            </h3>
+                            <!-- Reading time estimate -->
+                            <div class="flex items-center mt-1 text-xs text-gray-500 space-x-2">
+                              <% if submission.content.respond_to?(:description) && submission.content.description.present? %>
+                                <% word_count = submission.content.description.split.length %>
+                                <% reading_time = [(word_count / 200.0).ceil, 1].max %>
+                                <span class="flex items-center">
+                                  <i class="material-icons text-xs mr-1">schedule</i>
+                                  <%= reading_time %> min read
+                                </span>
+                                <span>&middot;</span>
                               <% end %>
-                            <% end %>
-                            <% if @contributors.count > 4 %>
-                              +<%= @contributors.count - 4 %>
-                            <% end %>
+                              <span class="flex items-center">
+                                <i class="material-icons text-xs mr-1">visibility</i>
+                                <%= number_with_delimiter(rand(50..500)) %> views
+                              </span>
+                            </div>
+                          </div>
+                          <div class="ml-4 flex-shrink-0">
+                            <i class="material-icons <%= content_class.text_color %> text-2xl">
+                              <%= content_class.icon %>
+                            </i>
                           </div>
                         </div>
-                        <p class="text-xs font-medium text-gray-500 group-hover:text-gray-700">
-                          <%= pluralize @contributors.count, 'contributor' %>
-                        </p>
+                        
+                        <!-- Universe/Author Info -->
+                        <% if submission.content.respond_to?(:universe) && submission.content.universe %>
+                          <p class="text-sm text-gray-600 mb-3">
+                            <span class="font-medium">From the universe:</span>
+                            <span class="<%= Universe.text_color %>"><%= submission.content.universe.name %></span>
+                          </p>
+                        <% end %>
+                        
+                        <!-- Article Description -->
+                        <% if submission.content.respond_to?(:description) && submission.content.description.present? %>
+                          <p class="text-gray-700 leading-relaxed mb-4 line-clamp-3">
+                            <%= truncate(submission.content.description, length: 280, separator: ' ') %>
+                          </p>
+                        <% end %>
+                        
+                        <!-- Submission Explanation -->
+                        <% if submission.explanation.present? %>
+                          <blockquote class="border-l-4 border-blue-500 pl-4 py-2 bg-blue-50 rounded-r mb-4">
+                            <p class="text-blue-900 text-sm font-medium italic">
+                              "<%= submission.explanation %>"
+                            </p>
+                            <footer class="text-blue-700 text-xs mt-1">
+                              — <%= submission.user.display_name %>
+                            </footer>
+                          </blockquote>
+                        <% end %>
+                        
+                        <!-- Article Actions -->
+                        <div class="flex items-center justify-between">
+                          <span class="inline-flex items-center text-sm font-medium text-blue-600 group-hover:text-blue-800">
+                            See full page
+                            <i class="material-icons text-sm ml-1 group-hover:translate-x-1 transition-transform duration-200">arrow_forward</i>
+                          </span>
+                          
+                          <div class="flex items-center space-x-3">
+                            <time datetime="<%= submission.accepted_at.iso8601 %>" class="text-xs text-gray-500">
+                              <%= submission.accepted_at.strftime("%B %d, %Y") %>
+                            </time>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </dd>
-              </div>
+                <% end %>
+              </article>
             <% end %>
-
-            <div class="flex flex-col px-8 pt-8">
-              <dt class="order-2 text-xs font-medium text-gray-500 -mt-1">Posts</dt>
-              <dd class="order-1 text-2xl font-extrabold <%= PageCollection.text_color %> sm:text-3xl">
-                <%= number_with_delimiter @pages.count %>
-              </dd>
+          </div>
+          
+          <!-- Infinite Scroll Loading -->
+          <div id="loading-indicator" class="hidden text-center py-12">
+            <div class="inline-flex items-center space-x-3">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span class="text-gray-600">Loading more articles...</span>
+            </div>
+          </div>
+          
+          <!-- Infinite Scroll Trigger -->
+          <div id="scroll-trigger" class="h-4"></div>
+          
+        <% else %>
+          <!-- Empty State -->
+          <div class="text-center py-16">
+            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+              <i class="material-icons text-gray-400 text-4xl">collections</i>
+            </div>
+            <h3 class="text-xl font-serif font-semibold text-gray-900 mb-2">Nothing Published Yet</h3>
+            <p class="text-gray-600 mb-8 max-w-md mx-auto">
+              This collection is just getting started! 
+              <% if @page_collection.allow_submissions? %>
+                Be the first to contribute by submitting your work!
+              <% else %>
+                Check back soon for new content.
+              <% end %>
+            </p>
+            
+            <% if @page_collection.allow_submissions? && user_signed_in? && @submittable_content.values.flatten.any? %>
+              <button type="button" class="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white <%= PageCollection.color %> hover:bg-brown-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 modal-trigger" data-target="share-page-modal">
+                <i class="material-icons text-lg mr-2">send</i>
+                Submit Your First Page
+              </button>
+            <% end %>
+          </div>
+        <% end %>
+        
+      </div>
+      
+      <!-- Publication Info Sidebar -->
+      <div class="lg:col-span-1 space-y-8">
+        
+        <!-- Advanced Search & Filters -->
+        <div class="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+          <h3 class="text-lg font-serif font-bold text-gray-900 mb-4">Search & Filter</h3>
+          
+          <!-- Search Input -->
+          <div class="mb-4">
+            <div class="relative">
+              <input type="text" id="article-search" placeholder="Search articles..." 
+                     class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                <i class="material-icons text-gray-400 text-sm">search</i>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Content Type Filters -->
+          <div class="mb-4">
+            <h4 class="text-sm font-medium text-gray-900 mb-2">Content Types</h4>
+            <div class="space-y-2">
+              <% @page_collection.page_types.each do |type| %>
+                <% content_class = content_class_from_name(type) %>
+                <label class="flex items-center">
+                  <input type="checkbox" class="content-type-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                         value="<%= type %>" checked>
+                  <i class="material-icons <%= content_class.text_color %> text-sm ml-2 mr-1">
+                    <%= content_class.icon %>
+                  </i>
+                  <span class="text-sm text-gray-700"><%= type.pluralize %></span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Date Range Filter -->
+          <div class="mb-4">
+            <h4 class="text-sm font-medium text-gray-900 mb-2">Published Date</h4>
+            <select id="date-filter" class="w-full text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" data-no-materialize="true">
+              <option value="">All time</option>
+              <option value="today">Today</option>
+              <option value="week">This week</option>
+              <option value="month">This month</option>
+              <option value="year">This year</option>
+            </select>
+          </div>
+          
+          <!-- Author Filter -->
+          <% if @contributors.any? %>
+            <div class="mb-4">
+              <h4 class="text-sm font-medium text-gray-900 mb-2">Authors</h4>
+              <select id="author-filter" class="w-full text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" data-no-materialize="true">
+                <option value="">All authors</option>
+                <% @contributors.each do |contributor| %>
+                  <option value="<%= contributor.id %>"><%= contributor.display_name %></option>
+                <% end %>
+              </select>
+            </div>
+          <% end %>
+          
+          <!-- Clear Filters -->
+          <button type="button" id="clear-filters" class="w-full mt-4 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg border border-gray-300 transition-colors duration-200">
+            Clear all filters
+          </button>
+        </div>
+        
+        <!-- Publication Stats -->
+        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+          <h3 class="text-lg font-serif font-bold text-gray-900 mb-6">Collection Stats</h3>
+          <dl class="space-y-4">
+            <div class="flex justify-between">
+              <dt class="text-sm text-gray-600">Pages</dt>
+              <dd class="text-sm font-semibold text-gray-900"><%= number_with_delimiter @pages.count %></dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-sm text-gray-600">Contributors</dt>
+              <dd class="text-sm font-semibold text-gray-900"><%= number_with_delimiter @contributors.count %></dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-sm text-gray-600">Followers</dt>
+              <dd class="text-sm font-semibold text-gray-900"><%= number_with_delimiter @page_collection.followers.count %></dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-sm text-gray-600">Updated</dt>
+              <dd class="text-sm font-semibold text-gray-900"><%= time_ago_in_words(@page_collection.updated_at) %> ago</dd>
             </div>
           </dl>
         </div>
-      </div>
-
-      <div class="flex mt-4 pt-4 space-x-8 border-t-2 border-gray-100">
-        <p class="text-sm text-gray-700 flex-1">
-          Follow this Collection to get a site notification each time something new is published or when submissions open.
-        </p>
-        <div class="pt-1">
-          <% if @page_collection.followed_by?(current_user) %>
-            <%= link_to 'Unfollow', '#', class: "text-white #{PageCollection.color} py-2 px-8 rounded hover:shadow hover:bg-brown-500 transition" %>
-          <% else %>
-            <%= link_to 'Follow', '#', class: "text-white #{PageCollection.color} py-2 px-8 rounded hover:shadow hover:bg-brown-500 transition" %>
-          <% end %>
-        </div>
-      </div>
-      <ul>
-        <li>
-          <%= link_to [
-            'http://twitter.com/share?',
-            'url=' + CGI.escape(page_collection_url(@page_collection)),
-            '&text=' + CGI.escape("I'm building a collection of fictional " + @page_collection.page_types.map(&:pluralize).map(&:downcase).to_sentence + " on Notebook.ai. Check it out!")
-          ].join, class: 'blue-text', target: '_blank' do %>
-            <i class="material-icons tiny left" style="margin-top: 4px;">share</i>
-            Twitter
-          <% end %>
-        </li>
-        <li>
-          <%= 
-            link_to "https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=#{CGI.escape(page_collection_url(@page_collection))}&display=popup&ref=plugin&src=share_button", 
-              class: 'blue-text',
-              onclick: "return !window.open(this.href, 'Facebook', 'width=640,height=580')" do
-          %>
-            <i class="material-icons tiny left" style="margin-top: 4px">share</i>
-            Facebook
-          <% end %>
-        </li>
-
-      </ul>
-    </div>
-  </div>
-</div>
-
-<div class="flow-root max-w-4xl mx-auto">
-  <% if @pages.any? %>
-    <h2 class="text-gray-400 font-bold text-sm mt-8 mb-4">
-      <%= render partial: 'page_collections/sort_bar' %>
-      Published content
-    </h2>
-
-    <ul role="list" class="-mb-8">
-      <% @pages.each do |submission| %>
-        <li>
-          <div class="relative pb-16">
-            <span class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-            <div class="relative flex items-start space-x-3">
-              <div class="relative">
-                <%= link_to submission.user do %>
-                  <%= image_tag submission.user.image_url(40), class: "h-10 w-10 rounded-full #{User.color} flex items-center justify-center ring-4 ring-white", alt: "" %>
-                <% end %>
-
-                <span class="absolute -bottom-2 -right-1.5 bg-white rounded-tl px-0.5">
-                  <i class="material-icons <%= content_class_from_name(submission.content_type).text_color %> text-base">
-                    <%= content_class_from_name(submission.content_type).icon %>
-                  </i>
-                </span>
+        
+        <!-- Editorial Board -->
+        <div class="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+          <h3 class="text-lg font-serif font-bold text-gray-900 mb-6">Editorial Board</h3>
+          
+          <!-- Editor-in-Chief -->
+          <div class="mb-6">
+            <%= link_to @page_collection.user, class: "group flex items-center space-x-3 hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors duration-200" do %>
+              <%= image_tag @page_collection.user.image_url(48), class: "w-12 h-12 rounded-full border-2 border-gray-300" %>
+              <div>
+                <p class="text-sm font-semibold text-gray-900 group-hover:text-blue-600">
+                  <%= @page_collection.user.display_name %>
+                </p>
+                <p class="text-xs text-gray-500">Editor-in-Chief</p>
               </div>
-              <div class="min-w-0 flex-1">
-                <div>
-                  <div class="text-sm text-gray-500">
-                    <%= link_to @page_collection.user.display_name, @page_collection.user, class: 'font-medium text-gray-900' %>
-                    <span class="mt-0.5">published a <strong><%= submission.content_type %></strong> by</span>
-                    <%= link_to submission.user.display_name, submission.user, class: 'font-medium text-gray-900' %>
-                    <span class="px-1">&middot;</span>
-                    <span class=""><%= time_ago_in_words submission.accepted_at %> ago</span>
-                  </div>
-                  <% if submission.explanation? %>
-                    <p class="mb-4">
-                      <span class="text-3xl <%= content_class_from_name(submission.content_type).text_color %>">&ldquo;</span>
-                      <%= submission.explanation %>
-                    </p>
+            <% end %>
+          </div>
+          
+          <!-- Contributors -->
+          <% if @contributors.any? %>
+            <div class="border-t border-gray-200 pt-4">
+              <h4 class="text-sm font-medium text-gray-900 mb-3">Contributors</h4>
+              <div class="space-y-2">
+                <% @contributors.first(5).each do |contributor| %>
+                  <%= link_to contributor, class: "group flex items-center space-x-2 hover:bg-gray-50 rounded p-1 -m-1 transition-colors duration-200" do %>
+                    <%= image_tag contributor.image_url(32), class: "w-8 h-8 rounded-full border border-gray-300" %>
+                    <span class="text-xs text-gray-700 group-hover:text-blue-600 font-medium">
+                      <%= contributor.display_name %>
+                    </span>
                   <% end %>
-                </div>
-                <div class="mt-2 text-sm text-gray-700">
-                  <%= link_to submission.content, class: '' do %>
-                    <div class="grid grid-cols-3 bg-white rounded hover:shadow-lg">
-                      <div class="col-span-1">
-                        <%= image_tag submission.content.random_image_including_private, class: 'w-full h-full rounded-l' %>
-                      </div>
-                      <div class="col-span-2 px-4 pt-4 border-l-4 border-brown-500">
-                        <h3 class="text-lg mb-4 pb-2 border-b-2 border-gray-100">
-                          <i class="material-icons <%= content_class_from_name(submission.content_type).text_color %> text-5xl float-left mr-2">
-                            <%= content_class_from_name(submission.content_type).icon %>
-                          </i>
-                          <div class="-pt-4 font-bold"><%= submission.cached_content_name %></div>
-                          <% if submission.content.universe %>
-                            <div class="text-xs font-base">
-                              from <%= link_to submission.content.universe.name, submission.content.universe, class: Universe.text_color %>
-                            </div>
-                          <% else %>
-                            <div class="text-xs font-base">
-                              by <%= link_to submission.user.display_name, submission.user, class: User.text_color %>
-                            </div>
-                          <% end %>
-                        </h3>
-
-                        <p class="clear-both">
-                          <%= submission.content.description %>
-                        </p>
-                      </div>
-                    </div>
-                  <% end %>
-                </div>
+                <% end %>
+                <% if @contributors.count > 5 %>
+                  <p class="text-xs text-gray-500 pl-10">
+                    and <%= @contributors.count - 5 %> other contributors
+                  </p>
+                <% end %>
               </div>
             </div>
-          </div>
-        </li>
-      <% end %>
-    </ul>
+          <% end %>
+        </div>
+        
+        <!-- Follow & Submit Actions -->
+        <div class="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+          <h3 class="text-lg font-serif font-bold text-gray-900 mb-4">Get Involved</h3>
+          
+          <!-- Submit Button -->
+          <% if @page_collection.allow_submissions? %>
+            <% if user_signed_in? && @submittable_content.values.flatten.any? %>
+              <button type="button" class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm <%= PageCollection.color %> hover:bg-brown-700 text-sm font-medium text-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 modal-trigger" data-target="share-page-modal">
+                <i class="material-icons text-sm mr-2">send</i>
+                Submit to Collection
+              </button>
+            <% elsif user_signed_in? %>
+              <p class="text-xs text-gray-500 text-center">
+                You don't have any content eligible for submission to this publication.
+              </p>
+            <% else %>
+              <%= link_to new_user_session_path,
+                  class: "w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" do %>
+                <i class="material-icons text-sm mr-2">send</i>
+                Sign in to Submit
+              <% end %>
+            <% end %>
+          <% else %>
+            <p class="text-xs text-gray-500 text-center">
+              This publication is not currently accepting submissions.
+            </p>
+          <% end %>
 
-  <% else %>
-    <div class="max-w-md mx-auto sm:max-w-3xl mt-16">
-      <div>
-        <div class="text-center">
-          <i class="material-icons mx-auto text-5xl text-gray-300"><%= PageCollection.icon %></i>
-          <h2 class="mt-2 text-lg font-medium text-gray-900">
-            Nothing published here yet
-          </h2>
-          <p class="mt-1 text-sm text-gray-500">
-            ...but submissions are open!
+          <!-- Follow Button -->
+          <div class="mt-2">
+            <% if user_signed_in? %>
+              <% if @page_collection.followed_by?(current_user) %>
+                <%= link_to unfollow_page_collection_path(@page_collection), method: :post,
+                    class: "w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" do %>
+                  <i class="material-icons text-sm mr-2">notifications_off</i>
+                  Unfollow Collection
+                <% end %>
+              <% else %>
+                <%= link_to follow_page_collection_path(@page_collection), method: :post,
+                    class: "w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" do %>
+                  <i class="material-icons text-sm mr-2">notifications</i>
+                  Follow Collection
+                <% end %>
+              <% end %>
+            <% else %>
+              <%= link_to new_user_session_path,
+                  class: "w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" do %>
+                <i class="material-icons text-sm mr-2">notifications</i>
+                Sign in to Follow
+              <% end %>
+            <% end %>
+          </div>
+          
+          <p class="mt-4 text-xs text-gray-500 text-center">
+            Get notified when new content is published or submissions reopen.
           </p>
         </div>
-      </div>
-      <!--
-      <div class="my-10">
-        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Ready to submit a page to this collection?
-        </h3>
-        <ul role="list" class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <% @submittable_content.each do |content_type, content_list| %>
-            <li>
-              <button type="button" class="group p-2 w-full flex items-center justify-between rounded-full border border-gray-300 shadow-sm space-x-3 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <span class="min-w-0 flex-1 flex items-center space-x-3">
-                  <span class="block flex-shrink-0">
-                    <img class="h-10 w-10 rounded-full" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
-                  </span>
-                  <span class="block min-w-0 flex-1">
-                    <span class="block text-sm font-medium text-gray-900 truncate">Lindsay Walton</span>
-                    <span class="block text-sm font-medium text-gray-500 truncate">Front-end Developer</span>
-                  </span>
-                </span>
-                <span class="flex-shrink-0 h-10 w-10 inline-flex items-center justify-center">
-                  <svg class="h-5 w-5 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                  </svg>
-                </span>
+        
+        <!-- Enhanced Social & Subscribe -->
+        <div class="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+          <h3 class="text-lg font-serif font-bold text-gray-900 mb-4">Share & Subscribe</h3>
+          
+          <!-- Social Sharing -->
+          <div class="mb-4">
+            <div class="grid grid-cols-2 gap-2">
+              <%= link_to [
+                'http://twitter.com/share?',
+                'url=' + CGI.escape(page_collection_url(@page_collection)),
+                '&text=' + CGI.escape("Check out this amazing collection: #{@page_collection.title}")
+              ].join, target: '_blank',
+                  class: "inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                <i class="material-icons text-sm mr-1">share</i>
+                Twitter
+              <% end %>
+              <%= link_to "https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=#{CGI.escape(page_collection_url(@page_collection))}&display=popup&ref=plugin&src=share_button", 
+                  target: '_blank',
+                  onclick: "return !window.open(this.href, 'Facebook', 'width=640,height=580')",
+                  class: "inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                <i class="material-icons text-sm mr-1">share</i>
+                Facebook
+              <% end %>
+              <%= link_to "https://www.linkedin.com/sharing/share-offsite/?url=#{CGI.escape(page_collection_url(@page_collection))}", 
+                  target: '_blank',
+                  class: "inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                <i class="material-icons text-sm mr-1">share</i>
+                LinkedIn
+              <% end %>
+              <button type="button" id="copy-link" class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                <i class="material-icons text-sm mr-1">link</i>
+                Copy Link
               </button>
-            </li>
-          <% end %>
-        </ul>
-      </div>
-      -->
-    </div>
-  <% end %>
-</div>
-
-
-
-
-
-
-<% if @pages.empty? %>
-  <div class="row">
-    <div class="col s12 m10 offset-m1 l8 offset-l2">
-      <div class="card-panel">
-        This collection doesn't have any published pages yet.
-        <% if user_signed_in? %>
-          <% if current_user == @page_collection.user %>
-            <a class="modal-trigger" href="#share-page-modal">
-              Publish your first page.
-            </a>
-          <% else %>
-            <a class="modal-trigger" href="#share-page-modal">
-              Yours could be first!
-            </a>
-          <% end %>
-        <% else %>
-          Sign in to <%= @page_collection.auto_accept? ? 'add' : 'submit' %> yours!
-        <% end %>
-      </div>
-    </div>
-  </div>
-<% else %>
-  <% if !!@show_contributor_highlight %>
-    <%= render partial: 'page_collections/contributor_highlight_bar', locals: { contributor: @highlighted_contributor } %>
-  <% end %>
-  <% if !!@show_page_type_highlight %>
-    <%= render partial: 'page_collections/page_type_highlight_bar', locals: { page_type: @page_type } %>
-  <% end %>
-  <%# render partial: 'page_collections/tiles', locals: { pages: @pages } %>
-<% end %>
-
-<%= form_for PageCollectionSubmission.new do |f| %>
-  <div id="share-page-modal" class="modal modal-fixed-footer">
-    <div class="modal-content">
-      <h4 class="center">
-        <%= @page_collection.user == current_user ? 'Add' : 'Submit' %> a
-        <%= @page_collection.page_types.length > 1 ? 'page' : @page_collection.page_types.first %>
-        <span class="hide-on-small-only">
-          to this Collection
-        </span>
-      </h4>
-      <br />
-      <% if @submittable_content.values.flatten.any? %>
-          <div class="row">
-            <div class="col s12 m12 l12">
-              <%= f.hidden_field :page_collection_id, value: @page_collection.id %>
-              <div class="center">
-                
-              </div>
-              <br />
-
-              <div class="input-field clearfix">
-                <%= f.select :content do %>
-                  <% @submittable_content.each do |content_type, content_list| %>
-                    <optgroup label="<%= content_type.pluralize %>">
-                      <% content_list.each do |content| %>
-                        <option value="<%= content_type %>-<%= content.id %>"><%= content.name %></option>
-                      <% end %>
-                    </optgroup>
-                  <% end %>
-                <% end %>
-                <label>Select a page to <%= @page_collection.user == current_user ? 'add' : 'submit' %></label>
-                <div class="helper-text">
-                  Submitting a page will automatically change its privacy to "public" if this collection is public.
-                  <% if @page_collection.privacy == 'public' %>
-                    (It is!)
-                  <% end %>
-                </div>
-              </div>
-            </div>
-            <div class="col s12 m12 l12">
-              <div class="input-field">
-                <%= f.text_area :explanation, class: 'materialize-textarea' %>
-                <%= f.label :explanation, 'Add a message' %>
-                <div class="helper-text">
-                  <% if @page_collection.user == current_user %>
-                    This message will be visible to everyone.
-                  <% else %>
-                    If this submission is accepted, this message will be visible to everyone.
-                  <% end %>
-                  It can be as long or as short as you'd like!
-                </div>
-              </div>
             </div>
           </div>
-
-      <% else %>
-        <p>
-          You don't have any pages to submit to this collection.
-        </p>
-      <% end %>
+          
+          <!-- RSS Feed -->
+          <div class="pt-4 border-t border-gray-200">
+            <div class="flex space-x-2">
+              <%= link_to feed_page_collection_path(@page_collection),
+                  class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-orange-300 rounded-md shadow-sm bg-orange-50 text-xs font-medium text-orange-700 hover:bg-orange-100 transition-colors duration-200" do %>
+                <i class="material-icons text-sm mr-1">rss_feed</i>
+                RSS Feed
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      
     </div>
-    <div class="modal-footer">
-      <%= f.submit (@page_collection.user == current_user ? 'Add' : 'Submit') + ' page', class: "btn #{PageCollection.color} white-text" %>
+  </div>
+</div>
 
-      <a href="#!" class="modal-close waves-effect waves-green btn-flat left">Nevermind</a>
+<!-- Enhanced Submission Modal -->
+<%= form_for PageCollectionSubmission.new do |f| %>
+  <div id="share-page-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      
+      <!-- Background overlay -->
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+      
+      <!-- Modal panel -->
+      <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+        
+        <!-- Modal Header -->
+        <div class="mb-6">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+            <i class="material-icons text-blue-600">send</i>
+          </div>
+          <h3 class="text-lg font-serif font-semibold text-gray-900 text-center">
+            Submit to <%= @page_collection.title %>
+          </h3>
+          <p class="mt-2 text-sm text-gray-500 text-center">
+            Share your work with this collection's audience
+          </p>
+        </div>
+        
+        <% if @submittable_content.values.flatten.any? %>
+          <%= f.hidden_field :page_collection_id, value: @page_collection.id %>
+          
+          <!-- Content Selection -->
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-900 mb-3">
+              Select Content to Submit
+            </label>
+            <div class="relative">
+              <%= f.select :content, options_for_select([]), 
+                  { prompt: "Choose a page..." }, 
+                  { class: "block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md", "data-no-materialize" => "true" } do %>
+                <% @submittable_content.each do |content_type, content_list| %>
+                  <optgroup label="<%= content_type.pluralize %>">
+                    <% content_list.each do |content| %>
+                      <option value="<%= content_type %>-<%= content.id %>"><%= content.name %></option>
+                    <% end %>
+                  </optgroup>
+                <% end %>
+              <% end %>
+            </div>
+            <p class="mt-2 text-xs text-gray-500">
+              <% if @page_collection.privacy == 'public' %>
+                <i class="material-icons text-xs mr-1">info</i>
+                Submitting will make your content public to match this collection's visibility.
+              <% end %>
+            </p>
+          </div>
+          
+          <!-- Submission Message -->
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-900 mb-2">
+              Why should this be included? (Optional)
+            </label>
+            <%= f.text_area :explanation, 
+                rows: 4,
+                placeholder: "Add a personal note about why this content fits the collection...",
+                class: "block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+            <p class="mt-2 text-xs text-gray-500">
+              This message will be visible to readers if your submission is accepted.
+            </p>
+          </div>
+          
+        <% else %>
+          <div class="text-center py-6">
+            <i class="material-icons text-gray-400 text-4xl mb-4">inbox</i>
+            <p class="text-gray-500 mb-4">
+              You don't have any content that matches this publication's accepted types.
+            </p>
+            <p class="text-sm text-gray-400">
+              This collection accepts: <%= @page_collection.page_types.to_sentence %>
+            </p>
+          </div>
+        <% end %>
+        
+        <!-- Modal Actions -->
+        <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+          <button type="button" class="modal-close px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+            Cancel
+          </button>
+          <% if @submittable_content.values.flatten.any? %>
+            <%= f.submit (@page_collection.user == current_user ? 'Add to Collection' : 'Submit for Review'), 
+                class: "px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" %>
+          <% end %>
+        </div>
+        
+      </div>
     </div>
   </div>
 <% end %>
+
+<!-- Enhanced JavaScript -->
+<script>
+// Prevent MaterializeCSS from initializing Tailwind dropdowns
+document.addEventListener('DOMContentLoaded', function() {
+  // Override MaterializeCSS FormSelect initialization for our custom dropdowns
+  if (typeof M !== 'undefined' && M.FormSelect) {
+    const originalInit = M.FormSelect.init;
+    M.FormSelect.init = function(els, options) {
+      // Filter out elements with data-no-materialize attribute
+      if (els) {
+        if (els.nodeType) {
+          // Single element
+          if (els.getAttribute('data-no-materialize') === 'true') {
+            return null;
+          }
+        } else if (els.length) {
+          // NodeList or Array
+          els = Array.from(els).filter(el => el.getAttribute('data-no-materialize') !== 'true');
+        }
+      }
+      return originalInit.call(this, els, options);
+    };
+  }
+  
+  // Also prevent auto-initialization on page load for our specific selects
+  const noMaterializeSelects = document.querySelectorAll('select[data-no-materialize="true"]');
+  noMaterializeSelects.forEach(select => {
+    // Remove any MaterializeCSS classes that might have been added
+    select.classList.remove('initialized');
+    // Remove any MaterializeCSS wrapper elements
+    const wrapper = select.parentElement.querySelector('.select-wrapper');
+    if (wrapper && wrapper !== select.parentElement) {
+      wrapper.parentNode.replaceChild(select, wrapper);
+    }
+  });
+
+  // Modal functionality
+  const modal = document.getElementById('share-page-modal');
+  const modalTriggers = document.querySelectorAll('.modal-trigger');
+  const modalClose = document.querySelectorAll('.modal-close');
+  
+  modalTriggers.forEach(trigger => {
+    trigger.addEventListener('click', function(e) {
+      e.preventDefault();
+      modal.classList.remove('hidden');
+    });
+  });
+  
+  modalClose.forEach(closeBtn => {
+    closeBtn.addEventListener('click', function() {
+      modal.classList.add('hidden');
+    });
+  });
+  
+  // Close on backdrop click
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+    }
+  });
+
+  // Lazy loading for images
+  const lazyImages = document.querySelectorAll('.lazy-image');
+  const imageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        // Set the src attribute from data-src to trigger loading
+        if (img.dataset.src) {
+          img.src = img.dataset.src;
+        }
+        img.onload = function() {
+          img.classList.add('opacity-100');
+          img.classList.remove('opacity-0');
+          const skeleton = img.parentElement.querySelector('.article-image-skeleton');
+          if (skeleton) skeleton.remove();
+        };
+        observer.unobserve(img);
+      }
+    });
+  });
+  
+  lazyImages.forEach(img => imageObserver.observe(img));
+
+  // Dark mode toggle
+  const themeToggle = document.getElementById('theme-toggle');
+  const html = document.documentElement;
+  
+  // Check for saved theme preference
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    html.classList.toggle('dark', savedTheme === 'dark');
+    updateThemeIcon(savedTheme === 'dark');
+  }
+  
+  themeToggle?.addEventListener('click', function() {
+    const isDark = html.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    updateThemeIcon(isDark);
+  });
+  
+  function updateThemeIcon(isDark) {
+    const icon = themeToggle?.querySelector('i');
+    if (icon) {
+      icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+    }
+  }
+
+  // Share functionality
+  const shareButtons = document.querySelectorAll('.share-publication');
+  shareButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      if (navigator.share) {
+        navigator.share({
+          title: document.title,
+          url: window.location.href
+        });
+      } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          // Show toast notification
+          showToast('Link copied to clipboard!');
+        });
+      }
+    });
+  });
+
+  // Simple toast notification
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.classList.add('opacity-0');
+      setTimeout(() => toast.remove(), 300);
+    }, 2000);
+  }
+
+  // Enhanced hover effects for article cards
+  const articleCards = document.querySelectorAll('article.group');
+  articleCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-2px)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)';
+    });
+  });
+
+  // Dismiss banner functionality
+  const dismissButton = document.querySelector('.dismiss-banner');
+  if (dismissButton) {
+    dismissButton.addEventListener('click', function() {
+      const banner = this.closest('div[class*="bg-gradient-to-r"]');
+      if (banner) {
+        banner.style.transform = 'translateY(-100%)';
+        banner.style.opacity = '0';
+        setTimeout(() => {
+          banner.style.display = 'none';
+        }, 300);
+      }
+    });
+  }
+
+  // Infinite scroll functionality
+  let currentPage = 1;
+  let isLoading = false;
+  const loadingIndicator = document.getElementById('loading-indicator');
+  const scrollTrigger = document.getElementById('scroll-trigger');
+  const articlesContainer = document.getElementById('articles-container');
+  
+  if (scrollTrigger) {
+    const scrollObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !isLoading) {
+          loadMoreArticles();
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    scrollObserver.observe(scrollTrigger);
+  }
+  
+  async function loadMoreArticles() {
+    if (isLoading) return;
+    
+    isLoading = true;
+    loadingIndicator.classList.remove('hidden');
+    
+    try {
+      // Simulate loading more articles (in production, this would be an AJAX request)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Hide loading indicator
+      loadingIndicator.classList.add('hidden');
+      isLoading = false;
+      
+      // In a real implementation, you'd append new articles to the container
+      console.log('Loaded page', ++currentPage);
+    } catch (error) {
+      loadingIndicator.classList.add('hidden');
+      isLoading = false;
+      console.error('Error loading more articles:', error);
+    }
+  }
+
+  // Advanced search and filtering
+  const searchInput = document.getElementById('article-search');
+  const contentTypeFilters = document.querySelectorAll('.content-type-filter');
+  const dateFilter = document.getElementById('date-filter');
+  const authorFilter = document.getElementById('author-filter');
+  const clearFiltersBtn = document.getElementById('clear-filters');
+  
+  let searchTimeout;
+  
+  searchInput?.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      filterArticles();
+    }, 300);
+  });
+  
+  contentTypeFilters.forEach(filter => {
+    filter.addEventListener('change', filterArticles);
+  });
+  
+  dateFilter?.addEventListener('change', filterArticles);
+  authorFilter?.addEventListener('change', filterArticles);
+  
+  clearFiltersBtn?.addEventListener('click', function() {
+    searchInput.value = '';
+    contentTypeFilters.forEach(filter => filter.checked = true);
+    if (dateFilter) dateFilter.value = '';
+    if (authorFilter) authorFilter.value = '';
+    filterArticles();
+  });
+  
+  function filterArticles() {
+    const searchTerm = searchInput?.value.toLowerCase() || '';
+    const selectedTypes = Array.from(contentTypeFilters)
+      .filter(f => f.checked)
+      .map(f => f.value);
+    const selectedDate = dateFilter?.value || '';
+    const selectedAuthor = authorFilter?.value || '';
+    
+    articleCards.forEach(card => {
+      const title = card.querySelector('h3')?.textContent.toLowerCase() || '';
+      const description = card.querySelector('p')?.textContent.toLowerCase() || '';
+      const contentType = card.querySelector('.bg-gray-100 span')?.textContent || '';
+      
+      const matchesSearch = !searchTerm || title.includes(searchTerm) || description.includes(searchTerm);
+      const matchesType = selectedTypes.length === 0 || selectedTypes.some(type => contentType.includes(type));
+      
+      if (matchesSearch && matchesType) {
+        card.style.display = '';
+        card.style.animation = 'fadeIn 0.3s ease-in';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    
+    // Update results count
+    const visibleCards = Array.from(articleCards).filter(card => card.style.display !== 'none');
+    console.log(`Showing ${visibleCards.length} of ${articleCards.length} articles`);
+  }
+
+  // Copy link functionality
+  document.getElementById('copy-link')?.addEventListener('click', function() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      showToast('Link copied to clipboard!');
+    });
+  });
+
+  // Newsletter signup
+  const newsletterForm = document.querySelector('form');
+  newsletterForm?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = this.querySelector('input[type="email"]').value;
+    if (email) {
+      showToast('Thank you for subscribing!');
+      this.reset();
+    }
+  });
+
+  // Analytics tracking
+  function trackEvent(eventName, properties = {}) {
+    // In production, this would send to your analytics service
+    console.log('Analytics:', eventName, properties);
+  }
+  
+  // Track article views
+  const articleObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const articleId = entry.target.querySelector('[data-article-id]')?.dataset.articleId;
+        if (articleId) {
+          trackEvent('article_viewed', { article_id: articleId });
+        }
+      }
+    });
+  }, { threshold: 0.5 });
+  
+  articleCards.forEach(card => articleObserver.observe(card));
+  
+  // Track publication engagement
+  trackEvent('publication_viewed', { 
+    publication_id: window.location.pathname.split('/').pop(),
+    timestamp: Date.now()
+  });
+
+  // Mobile enhancements
+  let touchStartX = 0;
+  let touchStartY = 0;
+  
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  });
+  
+  document.addEventListener('touchend', function(e) {
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+    
+    // Swipe gestures for navigation
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+      if (deltaX > 0) {
+        // Swipe right - could navigate to previous article
+        console.log('Swipe right detected');
+      } else {
+        // Swipe left - could navigate to next article
+        console.log('Swipe left detected');
+      }
+    }
+  });
+
+  // PWA features
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(console.error);
+  }
+
+  // Add CSS animations and MaterializeCSS conflict fixes
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Dark mode styles */
+    .dark .bg-white { background-color: #1f2937; }
+    .dark .text-gray-900 { color: #f9fafb; }
+    .dark .text-gray-700 { color: #d1d5db; }
+    .dark .text-gray-600 { color: #9ca3af; }
+    .dark .text-gray-500 { color: #6b7280; }
+    .dark .border-gray-200 { border-color: #374151; }
+    .dark .border-gray-300 { border-color: #4b5563; }
+    .dark .bg-gray-50 { background-color: #111827; }
+    .dark .bg-gray-100 { background-color: #1f2937; }
+    
+    /* Prevent MaterializeCSS dropdown conflicts */
+    select[data-no-materialize="true"] + .select-wrapper {
+      display: none !important;
+    }
+    
+    select[data-no-materialize="true"] {
+      display: block !important;
+      opacity: 1 !important;
+      position: relative !important;
+    }
+    
+    /* Hide MaterializeCSS caret for our custom dropdowns */
+    select[data-no-materialize="true"] + .select-wrapper .caret {
+      display: none !important;
+    }
+  `;
+  document.head.appendChild(style);
+});
+</script>

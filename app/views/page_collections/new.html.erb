@@ -48,9 +48,9 @@
       <div class="space-y-6">
         
         <!-- Step Navigation -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
           <div class="flex items-center justify-between">
-            <div class="flex space-x-1">
+            <div class="flex space-x-2">
               <button class="step-nav active" data-step="1">
                 <span class="step-number">1</span>
                 <span class="step-title">Basics</span>
@@ -69,12 +69,6 @@
               </button>
             </div>
             
-            <div class="flex items-center space-x-2">
-              <button id="save-draft" class="text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200">
-                <i class="material-icons text-sm mr-1">save</i>
-                Save Draft
-              </button>
-            </div>
           </div>
         </div>
         
@@ -123,35 +117,75 @@
 <style>
 /* Step Navigation Styles */
 .step-nav {
-  @apply flex flex-col items-center p-3 rounded-lg transition-all duration-200 min-w-0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background: none;
 }
 
-.step-nav:not(.active) {
-  @apply text-gray-400 hover:text-gray-600 hover:bg-gray-50;
+.step-nav:not(.active):not(.completed) {
+  color: #9ca3af;
+}
+
+.step-nav:not(.active):not(.completed):hover {
+  color: #6b7280;
+  background-color: #f9fafb;
 }
 
 .step-nav.active {
-  @apply text-blue-600 bg-blue-50;
+  color: #2563eb;
+  background-color: #eff6ff;
 }
 
 .step-nav.completed {
-  @apply text-green-600 bg-green-50;
-}
-
-.step-nav.completed .step-number {
-  @apply bg-green-500 text-white;
+  color: #059669;
+  background-color: #ecfdf5;
 }
 
 .step-number {
-  @apply w-8 h-8 rounded-full border-2 border-current flex items-center justify-center text-sm font-semibold mb-1;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  transition: all 0.2s ease;
 }
 
 .step-nav.active .step-number {
-  @apply bg-blue-500 text-white border-blue-500;
+  background-color: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.step-nav.completed .step-number {
+  background-color: #059669;
+  color: white;
+  border-color: #059669;
+  font-size: 0; /* Hide the number */
+}
+
+.step-nav.completed .step-number::after {
+  content: '✓';
+  font-size: 10px;
+  color: white;
 }
 
 .step-title {
-  @apply text-xs font-medium;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  line-height: 1.2;
 }
 
 /* Preview Toggle Styles */
@@ -174,16 +208,4 @@
   @apply block;
 }
 
-/* Auto-save indicator */
-.auto-save-indicator {
-  @apply text-xs text-gray-500 flex items-center;
-}
-
-.auto-save-indicator.saving {
-  @apply text-blue-600;
-}
-
-.auto-save-indicator.saved {
-  @apply text-green-600;
-}
 </style>

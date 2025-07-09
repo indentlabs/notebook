@@ -43,6 +43,10 @@ class PageCollection < ApplicationRecord
     User.where(id: accepted_submissions.pluck(:user_id) - [user.id])
   end
 
+  def editor_picks_ordered
+    accepted_submissions.editor_picks.order(:editor_pick_position).limit(6)
+  end
+
   def random_public_image
     return cover_image if cover_image.present?
 

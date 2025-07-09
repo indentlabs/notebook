@@ -201,17 +201,24 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const selectedTypes = [];
     checkboxes.forEach(checkbox => {
-      if (checkbox.checked) {
+      if (checkbox && checkbox.checked) {
         const label = checkbox.closest('label');
-        const icon = label.querySelector('.material-icons').textContent;
-        const colorClass = label.querySelector('.material-icons').className;
-        const name = label.querySelector('span').textContent;
-        
-        selectedTypes.push({
-          icon: icon,
-          colorClass: colorClass,
-          name: name
-        });
+        if (label) {
+          const iconElement = label.querySelector('.material-icons');
+          const spanElement = label.querySelector('span');
+          
+          if (iconElement && spanElement) {
+            const icon = iconElement.textContent;
+            const colorClass = iconElement.className;
+            const name = spanElement.textContent;
+            
+            selectedTypes.push({
+              icon: icon,
+              colorClass: colorClass,
+              name: name
+            });
+          }
+        }
       }
     });
     

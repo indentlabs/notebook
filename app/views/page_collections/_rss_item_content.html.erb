@@ -1,0 +1,47 @@
+<div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+  <!-- Full article image -->
+  <% if submission.content.respond_to?(:random_image_including_private) && submission.content.random_image_including_private.present? %>
+    <div style="margin-bottom: 20px; text-align: center;">
+      <%= image_tag submission.content.random_image_including_private, 
+          style: "max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);" %>
+    </div>
+  <% end %>
+
+  <!-- Article content -->
+  <% if submission.content.respond_to?(:description) && submission.content.description.present? %>
+    <div style="margin-bottom: 24px; font-size: 16px; line-height: 1.8;">
+      <%= simple_format(submission.content.description) %>
+    </div>
+  <% end %>
+
+  <!-- Submission context -->
+  <div style="margin: 24px 0; padding: 16px; background-color: #f8f9fa; border-radius: 8px;">
+    <h4 style="margin: 0 0 8px 0; color: #495057;">About this submission</h4>
+    <p style="margin: 0; font-style: italic; color: #6c757d;">
+      "<%= submission.explanation %>"
+    </p>
+    <p style="margin: 8px 0 0 0; font-size: 14px; color: #6c757d;">
+      — <%= submission.user.display_name %>, contributor to <%= @page_collection.title %>
+    </p>
+  </div>
+
+  <!-- Additional metadata -->
+  <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #dee2e6; font-size: 14px; color: #6c757d;">
+    <p style="margin: 0;">
+      <strong>Content Type:</strong> <%= submission.content_type %>
+      <% if submission.content.respond_to?(:universe) && submission.content.universe %>
+        <br><strong>Universe:</strong> <%= submission.content.universe.name %>
+      <% end %>
+      <br><strong>Published:</strong> <%= submission.accepted_at.strftime("%B %d, %Y at %I:%M %p") %>
+      <br><strong>Collection:</strong> <a href="<%= page_collection_url(@page_collection) %>" style="color: #007bff;"><%= @page_collection.title %></a>
+    </p>
+  </div>
+
+  <!-- Footer -->
+  <div style="margin-top: 24px; padding: 16px; background-color: #e9ecef; text-align: center; border-radius: 8px;">
+    <p style="margin: 0 0 8px 0; font-weight: bold;">Read more from this collection</p>
+    <a href="<%= page_collection_url(@page_collection) %>" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+      Visit <%= @page_collection.title %> →
+    </a>
+  </div>
+</div>

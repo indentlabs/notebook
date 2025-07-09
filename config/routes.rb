@@ -72,8 +72,14 @@ Rails.application.routes.draw do
     get 'follow',   on: :member
     get 'unfollow', on: :member
     get 'report',   on: :member
+    get 'rss',      on: :member, defaults: { format: 'rss' }
+    get 'feed',     on: :member, to: 'page_collections#rss', defaults: { format: 'rss' }, as: 'feed'
 
     get 'by/:user_id', to: 'page_collections#by_user', as: :submissions_by_user
+    
+    # Editor picks management
+    get 'editor_picks', to: 'page_collection_editor_picks#index', as: 'manage_editor_picks'
+    resources :editor_picks, controller: 'page_collection_editor_picks', except: [:show, :edit]
   end
   resources :page_collection_submissions do
     get 'approve', on: :member

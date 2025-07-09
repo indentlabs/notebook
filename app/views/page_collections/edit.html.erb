@@ -1,30 +1,504 @@
-<div>
-  <h1 class="text-center text-xl <%= PageCollection.text_color %> font-bold my-8">
-    <%= @page_collection.title %>
-  </h1>
-
-  <%= render 'form', page_collection: @page_collection %>
-</div>
-
-
-<%# todo maybe move this to a Danger Zone tab on the form, if persisted? %>
-<div class="max-w-7xl mx-auto my-16">
-  <div class="md:grid md:grid-cols-3 md:gap-6">
-    <div class="md:col-span-1">
-      <div class="px-4 sm:px-0">
-        <h3 class="text-lg font-medium leading-6 text-gray-900">Administrative actions</h3>
-        <p class="mt-1 text-sm text-gray-600">These actions are only shown to you, the owner.</p>
+<!-- Main Container -->
+<div class="min-h-screen bg-gray-50">
+  
+  <!-- Hero Section -->
+  <div class="bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 text-white">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+      
+      <!-- Breadcrumb -->
+      <nav class="mb-6">
+        <div class="flex items-center space-x-2 text-white/80 text-sm">
+          <%= link_to "Collections", page_collections_path, class: "hover:text-white transition-colors duration-200" %>
+          <i class="material-icons text-xs">chevron_right</i>
+          <%= link_to @page_collection.title, @page_collection, class: "hover:text-white transition-colors duration-200" %>
+          <i class="material-icons text-xs">chevron_right</i>
+          <span class="text-white font-medium">Edit Collection</span>
+        </div>
+      </nav>
+      
+      <!-- Header Content -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="w-16 h-16 bg-white/20 rounded-full backdrop-blur-sm flex items-center justify-center">
+            <i class="material-icons text-white text-2xl">edit</i>
+          </div>
+          <div>
+            <h1 class="text-3xl font-bold text-white">Edit Collection</h1>
+            <p class="text-white/90">Update your collection settings and content</p>
+          </div>
+        </div>
+        
+        <!-- Collection Info -->
+        <div class="hidden lg:flex items-center space-x-4 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+          <div class="text-right">
+            <div class="text-white font-semibold"><%= @page_collection.title %></div>
+            <div class="text-white/70 text-sm">
+              <%= pluralize @page_collection.accepted_submissions.count, 'article' %> published
+            </div>
+          </div>
+          <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+            <i class="material-icons text-white">collections</i>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="mt-5 md:mt-0 md:col-span-2">
-      <%= 
-        link_to 'Permanently this page collection',
-          @page_collection,
-          method: :DELETE, 
-          class: 'bg-red-500 px-4 py-2 text-white rounded', 
-          data: { confirm: "Are you sure? This will PERMANENTLY delete this entire collection! It cannot be undone!" }
-      %>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="max-w-4xl mx-auto px-6 py-8">
+    <div class="space-y-6">
+        
+        <%= form_with(model: @page_collection, local: true, id: 'collection-form') do |f| %>
+          
+          <!-- Basic Information -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden form-section">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-amber-50 to-orange-50">
+              <div class="flex items-center">
+                <div class="p-2 bg-amber-100 rounded-lg mr-3">
+                  <i class="material-icons text-amber-600">edit</i>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                  <p class="text-sm text-gray-600">Update your collection's name and description</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-6 space-y-6">
+              <!-- Title and Subtitle Row -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Title -->
+                <div>
+                  <%= f.label :title, class: 'block text-sm font-medium text-gray-900 mb-2' do %>
+                    <span class="flex items-center">
+                      <i class="material-icons text-gray-400 text-sm mr-2">title</i>
+                      Collection Title *
+                    </span>
+                  <% end %>
+                  <%= f.text_field :title, 
+                      placeholder: 'My Awesome Collection', 
+                      class: 'block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors duration-200 text-sm',
+                      required: true %>
+                  <p class="mt-1 text-xs text-gray-500">Choose a descriptive name that captures what your collection is about</p>
+                </div>
+
+                <!-- Subtitle -->  
+                <div>
+                  <%= f.label :subtitle, class: 'block text-sm font-medium text-gray-900 mb-2' do %>
+                    <span class="flex items-center">
+                      <i class="material-icons text-gray-400 text-sm mr-2">subtitles</i>
+                      Subtitle
+                    </span>
+                  <% end %>
+                  <%= f.text_field :subtitle, 
+                      placeholder: 'A curated selection of my favorite pages', 
+                      class: 'block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors duration-200 text-sm' %>
+                  <p class="mt-1 text-xs text-gray-500">Optional tagline to give more context about your collection</p>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div>
+                <%= f.label :description, class: 'block text-sm font-medium text-gray-900 mb-2' do %>
+                  <span class="flex items-center">
+                    <i class="material-icons text-gray-400 text-sm mr-2">description</i>
+                    Description
+                  </span>
+                <% end %>
+                <%= f.text_area :description, 
+                    placeholder: "Write as little or as much as you'd like! Describe what makes this collection special...", 
+                    rows: 4,
+                    class: 'block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors duration-200 text-sm resize-none' %>
+                <p class="mt-1 text-xs text-gray-500">
+                  Brief description for your collection. <code class="bg-gray-100 px-1 rounded text-xs">&lt;strong&gt;</code> and <code class="bg-gray-100 px-1 rounded text-xs">&lt;em&gt;</code> tags are supported.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visual Design -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden form-section">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div class="flex items-center">
+                <div class="p-2 bg-blue-100 rounded-lg mr-3">
+                  <i class="material-icons text-blue-600">palette</i>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900">Visual Design</h2>
+                  <p class="text-sm text-gray-600">Customize how your collection looks</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-6 space-y-6">
+              <!-- Header Image -->
+              <div>
+                <label class="block text-sm font-medium text-gray-900 mb-4">
+                  <span class="flex items-center">
+                    <i class="material-icons text-gray-400 text-sm mr-2">image</i>
+                    Header Image
+                  </span>
+                </label>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <!-- Current Image Preview -->
+                  <% if @page_collection.persisted? && @page_collection.header_image.attached? %>
+                    <div class="md:col-span-1">
+                      <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100">
+                        <%= link_to url_for(@page_collection.header_image), target: '_blank', class: "block w-full h-full" do %>
+                          <%= image_tag @page_collection.first_public_image, class: 'w-full h-full object-cover hover:scale-105 transition-transform duration-200' %>
+                        <% end %>
+                      </div>
+                      <p class="text-xs text-gray-500 mt-2 text-center">Current image</p>
+                    </div>
+                  <% end %>
+                  
+                  <!-- Upload Area -->
+                  <div class="<%= @page_collection.persisted? && @page_collection.header_image.attached? ? 'md:col-span-2' : 'md:col-span-3' %>">
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors duration-200">
+                      <div class="space-y-4">
+                        <div class="mx-auto w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <i class="material-icons text-gray-400 text-2xl">cloud_upload</i>
+                        </div>
+                        
+                        <div>
+                          <%= f.label :header_image, class: 'cursor-pointer' do %>
+                            <span class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 transition-colors duration-200">
+                              <i class="material-icons text-sm mr-2">add_photo_alternate</i>
+                              <%= @page_collection.header_image.attached? ? 'Change Image' : 'Choose Image' %>
+                            </span>
+                            <%= f.file_field :header_image, 
+                                class: 'sr-only', 
+                                accept: 'image/*' %>
+                          <% end %>
+                          <p class="text-sm text-gray-500 mt-2">or drag and drop</p>
+                        </div>
+                        
+                        <div class="text-xs text-gray-500">
+                          <p>PNG, JPG, GIF up to 1MB</p>
+                          <p>Recommended: 1200×400px for best results</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Content Types -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden form-section">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50">
+              <div class="flex items-center">
+                <div class="p-2 bg-purple-100 rounded-lg mr-3">
+                  <i class="material-icons text-purple-600">category</i>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900">Content Types</h2>
+                  <p class="text-sm text-gray-600">Choose what types of content can be added</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-6">
+              <!-- Quick Selection -->
+              <div class="flex items-center space-x-4 mb-6 p-3 bg-gray-50 rounded-lg">
+                <span class="text-sm font-medium text-gray-700">Quick select:</span>
+                <button type="button" id="select-common-types" class="text-sm font-medium text-green-600 hover:text-green-700 transition-colors duration-200">
+                  Common Types
+                </button>
+                <span class="text-gray-300">|</span>
+                <button type="button" id="select-all-types" class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200">
+                  All Types
+                </button>
+                <span class="text-gray-300">|</span>
+                <button type="button" id="select-none-types" class="text-sm font-medium text-gray-600 hover:text-gray-700 transition-colors duration-200">
+                  None
+                </button>
+              </div>
+              
+              <!-- Content Type Grid -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                <% Rails.application.config.content_types[:all].each do |content_type| %>
+                  <div class="content-type-option">
+                    <%= f.label "page_types[#{content_type.name}]", class: 'flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 group' do %>
+                      <%= f.check_box "page_types[#{content_type.name}]", 
+                          checked: @page_collection.page_types.include?(content_type.name), 
+                          class: 'sr-only content-type-checkbox',
+                          data: { 
+                            type: content_type.name.downcase,
+                            common: %w[character location item universe].include?(content_type.name.downcase)
+                          } %>
+                      
+                      <!-- Custom Checkbox -->
+                      <div class="checkbox-custom w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center mr-3 flex-shrink-0 group-hover:border-gray-400 transition-colors duration-200">
+                        <i class="material-icons text-white text-sm opacity-0 check-icon">check</i>
+                      </div>
+                      
+                      <!-- Content Type Info -->
+                      <div class="flex items-center flex-1 min-w-0">
+                        <div class="p-2 <%= content_type.color %> bg-opacity-10 rounded-lg mr-3 flex-shrink-0">
+                          <i class="material-icons <%= content_type.text_color %> text-sm">
+                            <%= content_type.icon %>
+                          </i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-900 truncate">
+                          <%= content_type.name.pluralize %>
+                        </span>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Privacy & Settings -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden form-section">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
+              <div class="flex items-center">
+                <div class="p-2 bg-green-100 rounded-lg mr-3">
+                  <i class="material-icons text-green-600">settings</i>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900">Privacy & Settings</h2>
+                  <p class="text-sm text-gray-600">Control who can see and contribute to your collection</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-6 space-y-8">
+              <!-- Privacy Settings -->
+              <fieldset>
+                <legend class="block text-sm font-medium text-gray-900 mb-4">
+                  <span class="flex items-center">
+                    <i class="material-icons text-gray-400 text-sm mr-2">visibility</i>
+                    Visibility *
+                  </span>
+                </legend>
+                
+                <div class="space-y-3">
+                  <%= f.label :privacy, class: 'flex items-start p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-gray-300 transition-all duration-200' do %>
+                    <%= f.radio_button :privacy, 'public', class: 'mt-1 mr-3 text-green-600 focus:ring-green-500' %>
+                    <div class="flex-1">
+                      <div class="flex items-center mb-1">
+                        <i class="material-icons text-green-600 text-sm mr-2">public</i>
+                        <span class="font-medium text-gray-900">Public</span>
+                      </div>
+                      <p class="text-sm text-gray-600">Anyone can discover and view this collection</p>
+                    </div>
+                  <% end %>
+                  
+                  <%= f.label :privacy, class: 'flex items-start p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-gray-300 transition-all duration-200' do %>
+                    <%= f.radio_button :privacy, 'private', class: 'mt-1 mr-3 text-gray-600 focus:ring-gray-500' %>
+                    <div class="flex-1">
+                      <div class="flex items-center mb-1">
+                        <i class="material-icons text-gray-600 text-sm mr-2">lock</i>
+                        <span class="font-medium text-gray-900">Private</span>
+                      </div>
+                      <p class="text-sm text-gray-600">Only you can see this collection</p>
+                    </div>
+                  <% end %>
+                </div>
+              </fieldset>
+
+              <!-- Submission Settings -->
+              <fieldset>
+                <legend class="block text-sm font-medium text-gray-900 mb-4">
+                  <span class="flex items-center">
+                    <i class="material-icons text-gray-400 text-sm mr-2">inbox</i>
+                    Community Contributions
+                  </span>
+                </legend>
+                
+                <div class="border border-gray-200 rounded-lg p-4">
+                  <%= f.label :allow_submissions, class: 'flex items-start cursor-pointer' do %>
+                    <%= f.check_box :allow_submissions, class: 'sr-only submission-toggle' %>
+                    <div class="toggle-switch mr-3 mt-0.5"></div>
+                    <div class="flex-1">
+                      <div class="font-medium text-gray-900 mb-1">Allow submissions from other users</div>
+                      <p class="text-sm text-gray-600">Let the community suggest content for your collection</p>
+                    </div>
+                  <% end %>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="bg-white rounded-xl shadow-sm border border-red-200 overflow-hidden form-section">
+            <div class="px-6 py-4 border-b border-red-200 bg-gradient-to-r from-red-50 to-pink-50">
+              <div class="flex items-center">
+                <div class="p-2 bg-red-100 rounded-lg mr-3">
+                  <i class="material-icons text-red-600">warning</i>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900">Danger Zone</h2>
+                  <p class="text-sm text-gray-600">Irreversible actions for this collection</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-6">
+              <div class="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
+                <div>
+                  <h3 class="text-sm font-medium text-red-900">Delete Collection</h3>
+                  <p class="text-sm text-red-700">Permanently delete this collection and all its content. This cannot be undone.</p>
+                </div>
+                <%= link_to @page_collection,
+                    method: :DELETE,
+                    class: 'inline-flex items-center px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200',
+                    data: { confirm: "Are you sure? This will PERMANENTLY delete this entire collection! It cannot be undone!" } do %>
+                  <i class="material-icons text-sm mr-2">delete_forever</i>
+                  Delete Collection
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+              <%= link_to @page_collection, class: "px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                Cancel
+              <% end %>
+              
+              <div class="flex items-center space-x-3">
+                <%= link_to @page_collection, class: "px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                  <i class="material-icons text-sm mr-2">visibility</i>
+                  Preview
+                <% end %>
+                <%= f.submit 'Save Changes', class: "px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 inline-flex items-center" %>
+              </div>
+            </div>
+          </div>
+        <% end %>
     </div>
   </div>
 </div>
+
+<!-- Custom Styles -->
+<style>
+/* Custom Checkbox Styles */
+.content-type-option input[type="checkbox"]:checked + label .checkbox-custom {
+  @apply bg-purple-500 border-purple-500;
+}
+
+.content-type-option input[type="checkbox"]:checked + label .check-icon {
+  @apply opacity-100;
+}
+
+/* Toggle Switch Styles */
+.toggle-switch {
+  width: 48px;
+  height: 24px;
+  background-color: #e5e7eb;
+  border-radius: 12px;
+  position: relative;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: white;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+}
+
+.submission-toggle:checked + .toggle-switch {
+  background-color: #10b981;
+}
+
+.submission-toggle:checked + .toggle-switch::after {
+  transform: translateX(24px);
+}
+
+/* Form section spacing improvements */
+.form-section {
+  transition: all 0.2s ease;
+}
+
+.form-section:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+</style>
+
+<!-- JavaScript for Quick Selection -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Quick content type selection
+  document.getElementById('select-common-types')?.addEventListener('click', function() {
+    document.querySelectorAll('.content-type-checkbox').forEach(checkbox => {
+      const isCommon = checkbox.dataset.common === 'true';
+      checkbox.checked = isCommon;
+      updateCheckboxStyles(checkbox);
+    });
+  });
+  
+  document.getElementById('select-all-types')?.addEventListener('click', function() {
+    document.querySelectorAll('.content-type-checkbox').forEach(checkbox => {
+      checkbox.checked = true;
+      updateCheckboxStyles(checkbox);
+    });
+  });
+  
+  document.getElementById('select-none-types')?.addEventListener('click', function() {
+    document.querySelectorAll('.content-type-checkbox').forEach(checkbox => {
+      checkbox.checked = false;
+      updateCheckboxStyles(checkbox);
+    });
+  });
+  
+  // Initialize checkbox styles
+  document.querySelectorAll('.content-type-checkbox').forEach(checkbox => {
+    updateCheckboxStyles(checkbox);
+    checkbox.addEventListener('change', function() {
+      updateCheckboxStyles(this);
+    });
+  });
+  
+  function updateCheckboxStyles(checkbox) {
+    const customCheckbox = checkbox.parentElement.querySelector('.checkbox-custom');
+    const checkIcon = customCheckbox.querySelector('.check-icon');
+    
+    if (checkbox.checked) {
+      customCheckbox.classList.add('bg-purple-500', 'border-purple-500');
+      customCheckbox.classList.remove('border-gray-300');
+      checkIcon.classList.add('opacity-100');
+      checkIcon.classList.remove('opacity-0');
+    } else {
+      customCheckbox.classList.remove('bg-purple-500', 'border-purple-500');
+      customCheckbox.classList.add('border-gray-300');
+      checkIcon.classList.remove('opacity-100');
+      checkIcon.classList.add('opacity-0');
+    }
+  }
+  
+  // Initialize toggle switch styles
+  document.querySelectorAll('.submission-toggle').forEach(toggle => {
+    updateToggleStyles(toggle);
+    toggle.addEventListener('change', function() {
+      updateToggleStyles(this);
+    });
+  });
+  
+  function updateToggleStyles(toggle) {
+    const toggleSwitch = toggle.nextElementSibling;
+    if (toggle.checked) {
+      toggleSwitch.classList.add('bg-green-500');
+      toggleSwitch.classList.remove('bg-gray-300');
+    } else {
+      toggleSwitch.classList.remove('bg-green-500');
+      toggleSwitch.classList.add('bg-gray-300');
+    }
+  }
+});
+</script>
 

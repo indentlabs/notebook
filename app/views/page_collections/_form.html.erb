@@ -114,10 +114,10 @@
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <!-- Current Image Preview -->
-          <% if @page_collection.persisted? && @page_collection.header_image %>
+          <% if @page_collection.persisted? && @page_collection.header_image.attached? %>
             <div class="md:col-span-1">
               <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100">
-                <%= link_to @page_collection.header_image, target: '_blank', class: "block w-full h-full" do %>
+                <%= link_to url_for(@page_collection.header_image), target: '_blank', class: "block w-full h-full" do %>
                   <%= image_tag @page_collection.first_public_image, class: 'w-full h-full object-cover hover:scale-105 transition-transform duration-200' %>
                 <% end %>
               </div>
@@ -126,7 +126,7 @@
           <% end %>
           
           <!-- Upload Area -->
-          <div class="<%= @page_collection.persisted? && @page_collection.header_image ? 'md:col-span-2' : 'md:col-span-3' %>">
+          <div class="<%= @page_collection.persisted? && @page_collection.header_image.attached? ? 'md:col-span-2' : 'md:col-span-3' %>">
             <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors duration-200">
               <div class="space-y-4">
                 <div class="mx-auto w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">

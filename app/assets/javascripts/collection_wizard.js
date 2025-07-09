@@ -1,5 +1,9 @@
 // Collection Creation Wizard Controller
 document.addEventListener('DOMContentLoaded', function() {
+  // Only initialize if we're on the collection form page
+  const collectionForm = document.getElementById('collection-form');
+  if (!collectionForm) return;
+  
   let currentStep = 1;
   const totalSteps = 4;
   
@@ -13,8 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set up form interactions
     setupFormInteractions();
     
-    // Set up auto-save
-    setupAutoSave();
     
     // Set up content type selection
     setupContentTypeSelection();
@@ -30,29 +32,33 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function setupStepNavigation() {
-    // Step navigation buttons
+    // Step navigation buttons - allow free navigation between steps
     document.querySelectorAll('.step-nav').forEach(button => {
-      button.addEventListener('click', function() {
-        const targetStep = parseInt(this.dataset.step);
-        if (targetStep <= getCompletedSteps() + 1) {
+      if (button) {
+        button.addEventListener('click', function() {
+          const targetStep = parseInt(this.dataset.step);
           goToStep(targetStep);
-        }
-      });
+        });
+      }
     });
     
     // Next/Previous buttons
     document.querySelectorAll('.next-step').forEach(button => {
-      button.addEventListener('click', function() {
-        if (validateCurrentStep()) {
-          nextStep();
-        }
-      });
+      if (button) {
+        button.addEventListener('click', function() {
+          if (validateCurrentStep()) {
+            nextStep();
+          }
+        });
+      }
     });
     
     document.querySelectorAll('.prev-step').forEach(button => {
-      button.addEventListener('click', function() {
-        previousStep();
-      });
+      if (button) {
+        button.addEventListener('click', function() {
+          previousStep();
+        });
+      }
     });
   }
   
@@ -61,17 +67,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const formInputs = document.querySelectorAll('#collection-form input, #collection-form textarea, #collection-form select');
     
     formInputs.forEach(input => {
-      input.addEventListener('input', function() {
-        updatePreview();
-        validateCurrentStep();
-        markAsModified();
-      });
-      
-      input.addEventListener('change', function() {
-        updatePreview();
-        validateCurrentStep();
-        markAsModified();
-      });
+      if (input) {
+        input.addEventListener('input', function() {
+          updatePreview();
+          validateCurrentStep();
+        });
+        
+        input.addEventListener('change', function() {
+          updatePreview();
+          validateCurrentStep();
+        });
+      }
     });
     
     // Character counter for description
@@ -101,61 +107,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  function setupAutoSave() {
-    let saveTimeout;
-    let isModified = false;
-    
-    window.markAsModified = function() {
-      isModified = true;
-      updateSaveStatus('saving');
-      
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(() => {
-        if (isModified) {
-          saveDraft();
-        }
-      }, 2000);
-    };
-    
-    function saveDraft() {
-      // Simulate auto-save (in a real app, this would make an AJAX request)
-      updateSaveStatus('saving');
-      
-      setTimeout(() => {
-        updateSaveStatus('saved');
-        isModified = false;
-      }, 1000);
-    }
-    
-    function updateSaveStatus(status) {
-      const saveStatus = document.getElementById('save-status');
-      const saveIndicator = document.querySelector('.auto-save-indicator');
-      
-      if (saveStatus && saveIndicator) {
-        saveIndicator.className = `auto-save-indicator ${status}`;
-        
-        switch(status) {
-          case 'saving':
-            saveStatus.textContent = 'Saving changes...';
-            break;
-          case 'saved':
-            saveStatus.textContent = 'All changes saved';
-            break;
-          case 'error':
-            saveStatus.textContent = 'Error saving changes';
-            break;
-        }
-      }
-    }
-    
-    // Manual save draft button
-    const saveDraftButton = document.getElementById('save-draft');
-    if (saveDraftButton) {
-      saveDraftButton.addEventListener('click', function() {
-        saveDraft();
-      });
-    }
-  }
   
   function setupContentTypeSelection() {
     const selectAllBtn = document.getElementById('select-all-types');
@@ -171,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function() {
           updateCheckboxUI(checkbox);
         });
         updatePreview();
-        markAsModified();
       });
     }
     
@@ -183,7 +133,6 @@ document.addEventListener('DOMContentLoaded', function() {
           updateCheckboxUI(checkbox);
         });
         updatePreview();
-        markAsModified();
       });
     }
     
@@ -195,7 +144,6 @@ document.addEventListener('DOMContentLoaded', function() {
           updateCheckboxUI(checkbox);
         });
         updatePreview();
-        markAsModified();
       });
     }
     
@@ -204,7 +152,6 @@ document.addEventListener('DOMContentLoaded', function() {
       checkbox.addEventListener('change', function() {
         updateCheckboxUI(this);
         updatePreview();
-        markAsModified();
       });
       // Initialize UI
       updateCheckboxUI(checkbox);
@@ -244,7 +191,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update preview theme
         updatePreviewTheme(this.dataset.theme);
-        markAsModified();
       });
     });
   }
@@ -286,23 +232,48 @@ document.addEventListener('DOMContentLoaded', function() {
       targetStep.classList.add('active');
     }
     
-    // Update step navigation
+    // Update step navigation appearance
     document.querySelectorAll('.step-nav').forEach(nav => {
       nav.classList.remove('active', 'completed');
     });
     
-    // Mark completed steps
-    for (let i = 1; i < stepNumber; i++) {
-      const nav = document.querySelector(`[data-step="${i}"]`);
-      if (nav) nav.classList.add('completed');
-    }
-    
     // Mark current step as active
     const currentNav = document.querySelector(`[data-step="${stepNumber}"]`);
-    if (currentNav) currentNav.classList.add('active');
+    if (currentNav) {
+      currentNav.classList.add('active');
+    }
+    
+    // Mark completed steps (steps that have valid data)
+    updateStepCompletionStatus();
     
     currentStep = stepNumber;
     updateProgress();
+  }
+  
+  function updateStepCompletionStatus() {
+    // Step 1: Basic info
+    if (validateBasicInfo()) {
+      const step1Nav = document.querySelector('[data-step="1"]');
+      if (step1Nav && !step1Nav.classList.contains('active')) {
+        step1Nav.classList.add('completed');
+      }
+    }
+    
+    // Step 3: Content types
+    if (validateContentTypes()) {
+      const step3Nav = document.querySelector('[data-step="3"]');
+      if (step3Nav && !step3Nav.classList.contains('active')) {
+        step3Nav.classList.add('completed');
+      }
+    }
+    
+    // Step 4: Settings
+    if (validateSettings()) {
+      const step4Nav = document.querySelector('[data-step="4"]');
+      if (step4Nav && !step4Nav.classList.contains('active')) {
+        step4Nav.classList.add('completed');
+      }
+    }
   }
   
   function nextStep() {
@@ -377,7 +348,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (submissionToggle) {
     submissionToggle.addEventListener('change', function() {
       updatePreview();
-      markAsModified();
     });
   }
   
@@ -392,12 +362,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Prevent accidental navigation away
-  window.addEventListener('beforeunload', function(e) {
-    const saveStatus = document.getElementById('save-status');
-    if (saveStatus && saveStatus.textContent.includes('Saving')) {
-      e.preventDefault();
-      e.returnValue = '';
-    }
-  });
 });

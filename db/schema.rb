@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_07_07_024945) do
+ActiveRecord::Schema.define(version: 2025_07_09_024732) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -2474,7 +2474,9 @@ ActiveRecord::Schema.define(version: 2025_07_07_024945) do
     t.string "explanation"
     t.string "cached_content_name"
     t.datetime "deleted_at"
+    t.integer "editor_pick_position"
     t.index ["content_type", "content_id"], name: "polycontent_collection_index"
+    t.index ["page_collection_id", "editor_pick_position"], name: "index_page_collection_submissions_on_editor_pick_position", unique: true, where: "editor_pick_position IS NOT NULL"
     t.index ["page_collection_id"], name: "index_page_collection_submissions_on_page_collection_id"
     t.index ["user_id"], name: "index_page_collection_submissions_on_user_id"
   end

@@ -4,7 +4,7 @@ class PageCollectionsController < ApplicationController
   before_action :set_sidenav_expansion
   before_action :set_navbar_color
 
-  before_action :set_page_collection, only: [:show, :edit, :by_user, :update, :destroy, :follow, :unfollow, :report]
+  before_action :set_page_collection, only: [:show, :edit, :by_user, :update, :destroy, :follow, :unfollow, :report, :rss]
   before_action :set_submittable_content, only: [:show, :by_user]
 
   before_action :require_collection_ownership, only: [:edit, :update, :destroy]
@@ -41,6 +41,7 @@ class PageCollectionsController < ApplicationController
 
     @pages = @page_collection.accepted_submissions.includes({content: [:universe, :user], user: []})
     @contributors = User.where(id: @pages.to_a.map(&:user_id) - [@page_collection.user_id])
+    @editor_picks = @page_collection.editor_picks_ordered.includes({content: [:universe, :user], user: []})
 
     sort_pages
   end
@@ -151,6 +152,19 @@ class PageCollectionsController < ApplicationController
     @show_contributor_highlight = true
     @highlighted_contributor = User.find_by(id: params[:user_id].to_i)
     render :show
+  end
+
+  def rss
+    unless (@page_collection.privacy == 'public' || (user_signed_in? && @page_collection.user == current_user))
+      return redirect_to page_collections_path, notice: "That Collection is not public."
+    end
+
+    @pages = @page_collection.accepted_submissions.includes({content: [:universe, :user], user: []}).limit(50)
+    
+    # Set the response content type explicitly
+    response.headers['Content-Type'] = 'application/rss+xml; charset=utf-8'
+    
+    render layout: false, template: 'page_collections/rss.rss.builder'
   end
 
   private
