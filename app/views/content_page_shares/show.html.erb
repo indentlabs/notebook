@@ -1,150 +1,198 @@
-<div class="stream-item row">
-  <div class="col s12 m12 l4">
-    <div class="grey-text uppercase">
-      <br />
-      Shared page
-    </div>
-    <% if @share.content_page %>
-      <div class="hoverable card">
-        <div class="card-image">
-          <%= link_to @share.content_page do %>
-            <%= image_tag @share.content_page.first_public_image %>
-            <span class="card-title bordered-text">
-              <i class="material-icons <%= @share.content_page.class.text_color %> left small"><%= @share.content_page.class.icon %></i>
-              <%= @share.content_page.name %>
-            </span>
-          <% end %>
-        </div>
-      </div>
-    <% else %>
-      <div class="hoverable card">
-        The shared page has been removed.
-      </div>
-    <% end %>
-    <div class="grey-text uppercase">
-      <br />
-      Created by
-    </div>
-    <%= link_to @share.user do %>
-      <div class="hoverable card <%= User.color %>">
-        <!-- todo vertical card stack user avatar -->
-        <div class="card-content">
-          <div class="card-title white-text">
-            <i class="material-icons left"><%= User.icon %></i>
-            <%= @share.user.display_name %>
+<div class="min-h-screen bg-gray-100 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="lg:grid lg:grid-cols-12 lg:gap-8">
+      <!-- Sidebar -->
+      <aside class="lg:col-span-4">
+        <!-- Shared Content Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div class="p-4 border-b border-gray-200">
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Shared Page</h3>
           </div>
-          <%= render partial: 'thredded/users/badge', locals: { user: @share.user } %>
-        </div>
-      </div>
-    <% end %>
-    <br />
-    <div>
-      <ul>
-        <li class="uppercase grey-text">
-          Share Actions
-        </li>
-        <li>
-          <% if @share.followed_by?(current_user) %>
-            <%= link_to 'Unfollow this share', unfollow_user_content_page_share_path(user_id: @share.user.id, id: @share.id) %>
+          <% if @share.content_page %>
+            <div class="relative">
+              <%= link_to @share.content_page, class: "block hover:shadow-lg transition-shadow" do %>
+                <% if @share.content_page.respond_to?(:first_public_image) && @share.content_page.first_public_image.present? %>
+                  <div class="aspect-w-16 aspect-h-9">
+                    <%= image_tag @share.content_page.first_public_image, class: "w-full h-48 object-cover rounded-t-lg" %>
+                  </div>
+                <% end %>
+                <div class="p-4" style="border-left: 4px solid <%= @share.content_page.class.hex_color %>">
+                  <div class="flex items-center">
+                    <i class="material-icons text-sm mr-2" style="color: <%= @share.content_page.class.hex_color %>"><%= @share.content_page.class.icon %></i>
+                    <h4 class="text-lg font-semibold text-gray-900"><%= @share.content_page.name %></h4>
+                  </div>
+                </div>
+              <% end %>
+            </div>
           <% else %>
-            <%= link_to 'Follow this share', follow_user_content_page_share_path(user_id: @share.user.id, id: @share.id) %>
-          <% end %>
-        </li>
-        <% if @share.user == current_user %>
-          <li>
-            <%= 
-              link_to user_content_page_share_path(user_id: @share.user.id, id: @share.id),
-                method: :DELETE,
-                data: { confirm: "Are you sure? This will delete this share and any comments that have been posted to it!" } do
-            %>
-              Delete this share
-            <% end %>
-          </li>
-        <% else %>
-          <li>
-            <%= link_to report_user_content_page_share_path(user_id: @share.user.id, id: @share.id) do %>
-              Report this share
-            <% end %>
-          </li>
-        <% end %>
-        <li>
-          <%= link_to 'Back to your stream', main_app.stream_path %>
-        </li>
-      </ul>
-    </div>
-    <div>
-      <ul>
-        <li class="grey-text uppercase">
-          Reshare to...
-        </li>
-        <li>
-          <%= link_to [
-            'http://twitter.com/share?',
-            'url=' + CGI.escape(user_content_page_share_url(user_id: @share.user.id, id: @share.id)),
-            '&text=' + CGI.escape(@share.message)
-          ].join, class: 'blue-text', target: '_blank' do %>
-            <i class="material-icons tiny left" style="margin-top: 4px;">share</i>
-            Twitter
-          <% end %>
-        </li>
-        <li>
-          <%= 
-            link_to "https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=#{CGI.escape(user_content_page_share_url(user_id: @share.user.id, id: @share.id))}&display=popup&ref=plugin&src=share_button", 
-              class: 'blue-text',
-              onclick: "return !window.open(this.href, 'Facebook', 'width=640,height=580')" do
-          %>
-            <i class="material-icons tiny left" style="margin-top: 4px">share</i>
-            Facebook
-          <% end %>
-        </li>
-
-      </ul>
-    </div>
-  </div>
-  <div class="col s12 m12 l7">
-    <div class="card">
-      <div class="card-content">
-        <p>
-          <%= link_to @share.user, class: "#{User.text_color}" do %>
-            <%= image_tag @share.user.image_url(size=20), class: 'left circle avatar' %>
-            <%= @share.user.name %>
-          <% end %>
-          said:
-          <span class="grey-text right">
-            <%= time_ago_in_words @share.shared_at %> ago
-          </span>
-        </p>
-        <% if @share.message.present? %>
-          <blockquote class="original-comment black-text">
-            <%=
-              simple_format ContentFormatterService.show(
-                text:         @share.message,
-                viewing_user: current_user
-              )
-            %>
-          </blockquote>
-        <% end %>
-        
-        <%= render partial: 'share_comments/form', locals: { share: @share } %>
-        <br /><br />
-
-        <div class="uppercase grey-text center">
-          <%= pluralize @share.share_comments.count, 'comment' %>
-        </div>
-        <div class="row">
-          <% @share.share_comments.each do |comment| %>
-            <%= 
-              render partial: 'share_comments/show', 
-                    locals: { comment: comment, share: @share }
-            %>
+            <div class="p-4 text-center text-gray-500">
+              <i class="material-icons text-4xl text-gray-300 mb-2">help_outline</i>
+              <p>The shared page has been removed.</p>
+            </div>
           <% end %>
         </div>
 
-        <% if @share.share_comments.count > 10 %>
-          <%= render partial: 'share_comments/form', locals: { share: @share } %>
-        <% end %>
-        <br /><br />
-      </div>
+        <!-- User Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div class="p-4 border-b border-gray-200">
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Shared By</h3>
+          </div>
+          <%= link_to @share.user, class: "block p-4 hover:bg-gray-50 transition-colors" do %>
+            <div class="flex items-center">
+              <%= image_tag @share.user.image_url(size: 48), class: "h-12 w-12 rounded-full mr-4" %>
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900"><%= @share.user.display_name %></h4>
+                <%= render partial: 'thredded/users/badge', locals: { user: @share.user } %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Actions -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div class="p-4 border-b border-gray-200">
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Actions</h3>
+          </div>
+          <div class="p-4 space-y-2">
+            <% if @share.followed_by?(current_user) %>
+              <%= link_to unfollow_user_content_page_share_path(user_id: @share.user.id, id: @share.id), 
+                  class: "block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md" do %>
+                <i class="material-icons text-sm mr-2">notifications_off</i>
+                Unfollow this share
+              <% end %>
+            <% else %>
+              <%= link_to follow_user_content_page_share_path(user_id: @share.user.id, id: @share.id), 
+                  class: "block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md" do %>
+                <i class="material-icons text-sm mr-2">notifications</i>
+                Follow this share
+              <% end %>
+            <% end %>
+            
+            <% if @share.user == current_user %>
+              <%= link_to user_content_page_share_path(user_id: @share.user.id, id: @share.id),
+                  method: :DELETE,
+                  data: { confirm: "Are you sure? This will delete this share and any comments that have been posted to it!" },
+                  class: "block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md" do %>
+                <i class="material-icons text-sm mr-2">delete</i>
+                Delete this share
+              <% end %>
+            <% else %>
+              <%= link_to report_user_content_page_share_path(user_id: @share.user.id, id: @share.id),
+                  class: "block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md" do %>
+                <i class="material-icons text-sm mr-2">report</i>
+                Report this share
+              <% end %>
+            <% end %>
+            
+            <%= link_to main_app.stream_path, 
+                class: "block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md" do %>
+              <i class="material-icons text-sm mr-2">arrow_back</i>
+              Back to stream
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Share to Social -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div class="p-4 border-b border-gray-200">
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Share</h3>
+          </div>
+          <div class="p-4 space-y-2">
+            <%= link_to [
+              'http://twitter.com/share?',
+              'url=' + CGI.escape(user_content_page_share_url(user_id: @share.user.id, id: @share.id)),
+              '&text=' + CGI.escape(@share.message.to_s)
+            ].join, target: '_blank', 
+                class: "flex items-center px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-md" do %>
+              <i class="material-icons text-sm mr-2">share</i>
+              Twitter
+            <% end %>
+            
+            <%= link_to "https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=#{CGI.escape(user_content_page_share_url(user_id: @share.user.id, id: @share.id))}&display=popup&ref=plugin&src=share_button", 
+                onclick: "return !window.open(this.href, 'Facebook', 'width=640,height=580')",
+                class: "flex items-center px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-md" do %>
+              <i class="material-icons text-sm mr-2">share</i>
+              Facebook
+            <% end %>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="lg:col-span-8">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div class="p-6 border-b border-gray-200">
+            <div class="flex items-start space-x-3">
+              <%= image_tag @share.user.image_url(size: 40), class: "h-10 w-10 rounded-full" %>
+              <div class="flex-1">
+                <div class="flex items-center space-x-2">
+                  <%= link_to @share.user, class: "font-medium text-gray-900 hover:text-gray-700" do %>
+                    <%= @share.user.display_name %>
+                  <% end %>
+                  <span class="text-gray-500">shared this</span>
+                  <span class="text-gray-400">•</span>
+                  <span class="text-sm text-gray-500"><%= time_ago_in_words @share.shared_at %> ago</span>
+                </div>
+                <% if @share.message.present? %>
+                  <div class="mt-3 text-gray-700">
+                    <%= simple_format ContentFormatterService.show(text: @share.message, viewing_user: current_user) %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comments Section -->
+          <div class="p-6">
+            <!-- Comment Form -->
+            <div class="mb-6">
+              <%= form_for ShareComment.new, local: true, class: "flex space-x-3" do |f| %>
+                <%= f.hidden_field :content_page_share_id, value: @share.id %>
+                <div class="flex-shrink-0">
+                  <%= image_tag current_user.image_url(size: 40), class: "h-10 w-10 rounded-full" %>
+                </div>
+                <div class="flex-1 space-y-3">
+                  <%= f.text_area :message, 
+                      placeholder: "Add a comment...", 
+                      rows: 3,
+                      class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+                  <div class="flex justify-end">
+                    <%= f.submit "Post Comment", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+
+            <!-- Comments List -->
+            <div class="border-t border-gray-200 pt-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">
+                <%= pluralize @share.share_comments.count, 'comment' %>
+              </h3>
+              
+              <% if @share.share_comments.any? %>
+                <div class="space-y-6">
+                  <% @share.share_comments.each do |comment| %>
+                    <div class="flex space-x-3">
+                      <%= image_tag comment.user.image_url(size: 32), class: "h-8 w-8 rounded-full flex-shrink-0" %>
+                      <div class="flex-1">
+                        <div class="flex items-center space-x-2">
+                          <span class="font-medium text-gray-900"><%= comment.user.display_name %></span>
+                          <span class="text-sm text-gray-500"><%= time_ago_in_words comment.created_at %> ago</span>
+                        </div>
+                        <div class="mt-1 text-gray-700">
+                          <%= simple_format ContentFormatterService.show(text: comment.message, viewing_user: current_user) %>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <p class="text-gray-500 text-center py-8">No comments yet. Be the first to comment!</p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   </div>
 </div>

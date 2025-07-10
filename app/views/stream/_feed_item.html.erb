@@ -1,0 +1,172 @@
+<div class="group relative">
+  <!-- Main card with clean material design -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+    
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-4">
+      <div class="flex items-center space-x-4">
+        <div class="relative">
+          <%= image_tag share.user.image_url(size: 48), class: "h-12 w-12 rounded-full shadow-sm" %>
+          <% if share.content_page %>
+            <div class="absolute -bottom-1 -right-1 h-6 w-6 rounded-full shadow-sm flex items-center justify-center" style="background-color: <%= share.content_page.class.hex_color %>;">
+              <i class="material-icons text-white text-sm"><%= share.content_page.class.icon %></i>
+            </div>
+          <% end %>
+        </div>
+        
+        <div class="flex-1">
+          <div class="flex items-center space-x-2">
+            <%= link_to share.user, class: "font-semibold text-gray-900 hover:text-indigo-600 transition-colors" do %>
+              <%= share.user.display_name %>
+            <% end %>
+            <% if share.content_page %>
+              <span class="text-gray-500">shared a</span>
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background-color: <%= share.content_page.class.hex_color %>20; color: <%= share.content_page.class.hex_color %>;">
+                <%= share.content_page.class.name.downcase %>
+              </span>
+            <% else %>
+              <span class="text-red-500">shared a deleted page</span>
+            <% end %>
+          </div>
+          <p class="text-sm text-gray-500 mt-0.5">
+            <%= time_ago_in_words share.created_at %> ago
+          </p>
+        </div>
+      </div>
+      
+      <!-- Action menu -->
+      <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+        <button class="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Message -->
+    <% if share.message.present? %>
+      <div class="mb-4">
+        <div class="prose prose-sm max-w-none text-gray-700 leading-relaxed">
+          <%= simple_format ContentFormatterService.show(text: share.message, viewing_user: current_user) %>
+        </div>
+      </div>
+    <% end %>
+    
+    <!-- Content Preview -->
+    <% if share.content_page %>
+      <%= link_to [share.user, share], class: 'block group/content' do %>
+        <div class="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50 hover:shadow-sm hover:border-gray-300 transition-all duration-200">
+          <div class="flex">
+            <% if share.content_page.respond_to?(:first_public_image) && share.content_page.first_public_image.present? %>
+              <div class="flex-shrink-0 w-32 h-24">
+                <%= image_tag share.content_page.first_public_image, class: 'w-full h-full object-cover' %>
+              </div>
+            <% end %>
+            <div class="flex-1 p-4" style="border-left: 3px solid <%= share.content_page.class.hex_color %>;">
+              <h3 class="font-semibold text-gray-900 group-hover/content:text-indigo-600 transition-colors flex items-center">
+                <i class="material-icons text-lg mr-2" style="color: <%= share.content_page.class.hex_color %>"><%= share.content_page.class.icon %></i>
+                <%= share.content_page.name %>
+              </h3>
+              <% if share.content_page.respond_to?(:description) && share.content_page.description.present? %>
+                <p class="text-sm text-gray-600 mt-2 line-clamp-2">
+                  <%= truncate(strip_tags(share.content_page.description), length: 120) %>
+                </p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+    
+    <!-- Interaction Bar -->
+    <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200/50">
+      <div class="flex items-center space-x-6">
+        <!-- Comments -->
+        <button class="flex items-center space-x-2 text-gray-500 hover:text-indigo-600 transition-colors group/btn">
+          <div class="p-1.5 rounded-lg group-hover/btn:bg-indigo-50 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+          </div>
+          <span class="text-sm font-medium">
+            <% if share.share_comments.any? %>
+              <%= pluralize share.share_comments.count, 'comment' %>
+            <% else %>
+              Comment
+            <% end %>
+          </span>
+        </button>
+        
+        <!-- Like (placeholder) -->
+        <button class="flex items-center space-x-2 text-gray-500 hover:text-red-600 transition-colors group/btn">
+          <div class="p-1.5 rounded-lg group-hover/btn:bg-red-50 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+          </div>
+          <span class="text-sm font-medium">Like</span>
+        </button>
+        
+        <!-- Share (placeholder) -->
+        <button class="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors group/btn">
+          <div class="p-1.5 rounded-lg group-hover/btn:bg-blue-50 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+            </svg>
+          </div>
+          <span class="text-sm font-medium">Share</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Comments Section (if any) -->
+    <% if share.share_comments.any? %>
+      <div class="mt-4 pt-4 border-t border-gray-200/50">
+        <div class="space-y-4">
+          <% share.share_comments.limit(2).each do |comment| %>
+            <div class="flex space-x-3">
+              <%= image_tag comment.user.image_url(size: 32), class: "h-8 w-8 rounded-full flex-shrink-0" %>
+              <div class="flex-1 min-w-0">
+                <div class="bg-gray-50 rounded-lg px-3 py-2">
+                  <div class="flex items-center space-x-2 mb-1">
+                    <span class="font-medium text-sm text-gray-900"><%= comment.user.display_name %></span>
+                    <span class="text-xs text-gray-500"><%= time_ago_in_words comment.created_at %> ago</span>
+                  </div>
+                  <div class="text-sm text-gray-700">
+                    <%= simple_format ContentFormatterService.show(text: comment.message, viewing_user: current_user) %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+          
+          <% if share.share_comments.count > 2 %>
+            <div class="text-center">
+              <%= link_to [share.user, share], class: "text-sm text-indigo-600 hover:text-indigo-500 font-medium" do %>
+                View all <%= share.share_comments.count %> comments
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+    
+    <!-- Quick comment form -->
+    <div class="mt-4 pt-4 border-t border-gray-200/50">
+      <%= form_for ShareComment.new, local: true, class: "flex space-x-3" do |f| %>
+        <%= f.hidden_field :content_page_share_id, value: share.id %>
+        <div class="flex-shrink-0">
+          <%= image_tag current_user.image_url(size: 32), class: "h-8 w-8 rounded-full" %>
+        </div>
+        <div class="flex-1 flex space-x-3">
+          <%= f.text_area :message, 
+              placeholder: "Add a thoughtful comment...", 
+              rows: 1,
+              class: "flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors resize-none" %>
+          <%= f.submit "Post", class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

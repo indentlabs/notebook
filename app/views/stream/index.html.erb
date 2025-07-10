@@ -1,336 +1,202 @@
-<div class="min-h-screen bg-gray-100">
-  <header class="bg-white shadow-sm lg:static lg:overflow-y-visible">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="relative flex justify-between xl:grid xl:grid-cols-12 lg:gap-8">
-        <div class="flex md:absolute md:left-0 md:inset-y-0 lg:static xl:col-span-2">
-          <div class="flex-shrink-0 flex items-center">
-            <span class="relative z-0 inline-flex shadow-sm rounded-md">
-              <button type="button" class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-notebook-blue focus:border-notebook-blue">Following</button>
-              <button type="button" class="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-notebook-blue focus:border-notebook-blue">Everyone</button>
-            </span>
-
-          </div>
+<div class="min-h-screen bg-gray-50" data-in-app="true">
+  <!-- Clean Header -->
+  <header class="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Left: Navigation -->
+        <div class="flex items-center space-x-1">
+          <%= link_to stream_path, class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors #{'bg-blue-50 text-blue-700 border border-blue-200' if request.path == stream_path} #{'text-gray-600 hover:text-gray-900 hover:bg-gray-50' unless request.path == stream_path}" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            Following
+          <% end %>
+          <%= link_to stream_world_path, class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors #{'bg-blue-50 text-blue-700 border border-blue-200' if request.path == stream_world_path} #{'text-gray-600 hover:text-gray-900 hover:bg-gray-50' unless request.path == stream_world_path}" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Everyone
+          <% end %>
         </div>
-        <div class="min-w-0 flex-1 md:px-8 lg:px-0 xl:col-span-6">
-          <div class="flex items-center px-6 py-4 md:max-w-3xl md:mx-auto lg:max-w-none lg:mx-0 xl:px-0">
-            <div class="w-full">
-              <label for="search" class="sr-only">Share something...</label>
-              <div class="relative">
-                <div class="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-                  <!-- Heroicon name: solid/search -->
-                  <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                  </svg>
-                </div>
-                <input id="search" name="search" class="block w-full bg-white border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm placeholder-gray-500 focus:outline-none focus:text-gray-900 focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Search shared posts..." type="search">
+
+        <!-- Center: Search -->
+        <div class="flex-1 max-w-md mx-8">
+          <%= form_with url: request.path, method: :get, local: true do |f| %>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
               </div>
+              <%= f.text_field :search, 
+                  value: params[:search], 
+                  placeholder: "Search posts...", 
+                  class: "block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" %>
             </div>
-          </div>
-        </div>
-        <div class="flex md:absolute md:left-0 md:inset-y-0 lg:static xl:col-span-2">
-          <div class="flex-shrink-0 flex items-center">
-            rhs
-          </div>
+          <% end %>
         </div>
 
+        <!-- Right: Empty for balance -->
+        <div class="w-24"></div>
       </div>
     </div>
   </header>
 
-  <div class="py-6">
-    <div class="max-w-3xl mx-auto sm:px-6 lg:max-w-7xl lg:px-8 lg:grid lg:grid-cols-12 lg:gap-8">
-      <!--
-      <div class="hidden lg:block lg:col-span-3 xl:col-span-2">
-        <nav aria-label="Sidebar" class="divide-y divide-gray-300">
-          filters / highlights (each page, documents, timelines)
-        </nav>
+  <!-- Main Content Area -->
+  <div class="py-6 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+      
+      <!-- Collapsible Share CTA -->
+      <div class="mb-6">
+        <div id="share-cta-collapsed" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 cursor-pointer hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <%= image_tag current_user.image_url(size: 40), class: "h-10 w-10 rounded-full" %>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Want to share a page with the world?</p>
+                <p class="text-xs text-gray-500">Share your work and get feedback from the community</p>
+              </div>
+            </div>
+            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+        </div>
+        
+        <div id="share-form-expanded" class="hidden bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <%= form_for [current_user, ContentPageShare.new(user: current_user)], local: true, class: "tailwind-styled-form" do |f| %>
+            <div class="p-6 border-b border-gray-100">
+              <div class="flex items-start space-x-4">
+                <%= image_tag current_user.image_url(size: 48), class: "h-12 w-12 rounded-full" %>
+                <div class="flex-1">
+                  <h3 class="text-lg font-medium text-gray-900 mb-1">Share a page</h3>
+                  <p class="text-sm text-gray-600">Choose one of your pages to share with the community</p>
+                </div>
+                <button type="button" id="close-share-form" class="text-gray-400 hover:text-gray-600">
+                  <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="p-6 space-y-4">
+              <div>
+                <%= f.select :content_page, 
+                    options_for_select([['Select a page to share...', '']] + 
+                      @current_user_content.flat_map do |content_type, content_list|
+                        content_list.sort_by(&:name).map { |content| ["#{content.name} (#{content_type})", "#{content_type}-#{content.id}"] }
+                      end), 
+                    {}, 
+                    { class: "block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" } %>
+              </div>
+              
+              <div>
+                <%= f.text_area :message, 
+                    placeholder: "Add a message about your page (optional)", 
+                    rows: 3,
+                    class: "block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none" %>
+              </div>
+              
+              <div class="flex items-center justify-between pt-2">
+                <div class="flex items-center text-sm text-gray-500">
+                  <svg class="w-4 h-4 mr-1.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  Page will be made public
+                </div>
+                <%= f.submit "Share", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
       </div>
-      -->
-      <main class="lg:col-span-12 xl:col-span-8">
-        <div class="bg-notebook-blue text-white my-8 p-2 rounded">
-          share input form TODO
+      <!-- Feed Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+          <div class="h-8 w-1 bg-blue-600 rounded-full"></div>
+          <h2 class="text-xl font-bold text-gray-900">
+            <%= request.path == stream_path ? "Following" : "Everyone" %>
+          </h2>
+          <span class="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+            <%= @feed.length %> posts
+          </span>
         </div>
-        <h2 class="text-gray-400 font-bold text-sm my-4">Shares from people you follow</h2>
-        <div class="flow-root">
-          <ul role="list" class="-mb-8">
-            <li>
-              <div class="relative pb-8">
-                <span class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-                <div class="relative flex items-start space-x-3">
-                  <div class="relative">
-                    <img class="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center ring-8 ring-white" src="https://images.unsplash.com/photo-1520785643438-5bf77931f493?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80" alt="">
-
-                    <span class="absolute -bottom-2 -right-1.5 bg-white rounded-tl px-0.5">
-                      <i class="material-icons <%= Creature.text_color %> text-base"><%= Creature.icon %></i>
-                    </span>
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <div>
-                      <div class="text-sm text-gray-500">
-                        <a href="#" class="font-medium text-gray-900">Andrew Brown</a>
-                        <span class="mt-0.5">shared a <strong>Creature</strong></span>
-                        <span class="px-1">&middot;</span>
-                        <span class="">6h ago</span>
-                      </div>
-                      <p>
-                        message with share
-                      </p>
-                    </div>
-                    <div class="mt-2 text-sm text-gray-700">
-                      <%= link_to '#', class: '' do %>
-                        <div class="grid grid-cols-3 bg-white rounded hover:shadow-lg">
-                          <div class="col-span-1">
-                            <%= image_tag Character.last.random_image_including_private, class: 'w-full h-full rounded-l' %>
-                          </div>
-                          <div class="col-span-2 pl-4 pt-4 border-l-4 border-brown-500">
-                            <h3 class="text-lg mb-4 font-bold">
-                              <i class="material-icons <%= Creature.text_color %> float-left mr-2"><%= Creature.icon %></i>
-                              Page name
-                            </h3>
-                            Details or description here
-                          </div>
-                        </div>
-                      <% end %>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </li>
-
-            <li>
-              <div class="relative pb-8">
-                <span class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-                <div class="relative flex items-start space-x-3">
-                  <div>
-                    <div class="relative px-1">
-                      <div class="relative">
-                        <img class="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center ring-8 ring-white" src="https://images.unsplash.com/photo-1520785643438-5bf77931f493?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80" alt="">
-
-                        <span class="absolute -bottom-2 -right-1.5 bg-white rounded-tl px-0.5">
-                          <i class="material-icons <%= User.text_color %> text-base"><%= User.icon %></i>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="min-w-0 flex-1 py-1.5">
-                    <div class="text-sm text-gray-500">
-                      <a href="#" class="font-medium text-gray-900">Dr. Evil</a>
-                      followed
-                      <a href="#" class="font-medium text-gray-900">Bob "Bob" Bobson</a>
-                      <span class="px-1">&middot;</span>
-                      <span class="text-sm text-gray-500">2d ago</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </li>
-
-            <li>
-              <div class="relative pb-8">
-                <span class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-                <div class="relative flex items-start space-x-3">
-                  <div>
-                    <div class="relative px-1">
-                      <div class="relative">
-                        <img class="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center ring-8 ring-white" src="https://images.unsplash.com/photo-1520785643438-5bf77931f493?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80" alt="">
-
-                        <span class="absolute -bottom-2 -right-1.5 bg-white rounded-tl px-0.5">
-                          <i class="material-icons text-blue-500 text-base">forum</i>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="min-w-0 flex-1 py-0">
-                    <div class="text-sm leading-8 text-gray-500">
-                      <span class="mr-0.5">
-                        <a href="#" class="font-medium text-gray-900">Dr. Evil</a>
-                        started a forum discussion
-                      </span>
-                      <span class="px-1">&middot;</span>
-                      <span class="text-sm text-gray-500">2d ago</span>
-                      <div class="ml-1">
-                        <a href="#" class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-1 text-sm bg-blue-500 hover:bg-blue-400 hover:shadow-lg">
-                          <i class="material-icons float-left text-white">forum</i>
-                          <span class="ml-3.5 font-medium text-white">What is the name of that guy who did the thing?</span>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </li>
-
-            <li>
-              <div class="relative pb-8">
-                <div class="relative flex items-start space-x-3">
-                  <div class="relative">
-                    <img class="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center ring-8 ring-white" src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80" alt="">
-
-                    <span class="absolute -bottom-2 -right-1.5 bg-white rounded-tl px-0.5">
-                      <i class="material-icons <%= Document.text_color %> text-base"><%= Document.icon %></i>
-                    </span>
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <div class="text-sm">
-                      <a href="#" class="font-medium text-gray-900">Jason Meyers</a>
-                      <span class="text-gray-500">shared a <strong>Document</strong></span>
-                      <span class="px-1">&middot;</span>
-                      <span class="text-sm text-gray-500">5d ago</span>
-                    </div>
-                    <div class="mt-2 text-sm text-gray-700">
-                      <%= link_to '#', class: '' do %>
-                        <div class="grid grid-cols-3 bg-white rounded hover:shadow-lg">
-                          <div class="col-span-1">
-                            <%= image_tag Character.last.random_image_including_private, class: 'w-full h-full rounded-l' %>
-                          </div>
-                          <div class="col-span-2 pl-4 pt-4 border-l-4 border-teal-500">
-                            <h3 class="text-lg mb-4 font-bold">
-                              <i class="material-icons <%= Document.text_color %> float-left mr-2"><%= Document.icon %></i>
-                              Document name
-                            </h3>
-                            Details or description here
-                          </div>
-                        </div>
-                      <% end %>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </li>
-          </ul>
+      </div>
+      
+      <!-- Feed Content -->
+      <% if @feed.empty? %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+          <div class="mb-6">
+            <div class="mx-auto h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center">
+              <svg class="h-8 w-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">No posts here yet!</h3>
+          <p class="text-gray-600 mb-6 max-w-md mx-auto leading-relaxed">
+            <%= request.path == stream_path ? 
+                "Follow other worldbuilders to see their amazing creations appear here." : 
+                "Be the first to share something amazing with the community!" %>
+          </p>
+          <%= link_to "Discover Creators", users_path, class: "inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors" %>
         </div>
-      </main>
-      <aside class="hidden xl:block xl:col-span-4">
-        <h2 class="text-gray-400 font-bold text-sm my-4">Pages requesting feedback</h2>
-        <div>
-          <ul role="list" class="divide-y divide-gray-200">
-            <li class="pt-0 pb-2">
-              <div class="flex space-x-3">
-                <img class="h-12 w-12 rounded-lg" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" alt="">
-                <div class="flex-1 space-y-1">
-                  <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-medium">
-                      <i class="material-icons <%= Character.text_color %> float-left text-sm mr-1"><%= Character.icon %></i>
-                      Lindsay Walton
-                    </h3>
-                    <p class="text-sm text-gray-500">1h</p>
-                  </div>
-                  <p class="text-sm text-gray-500">for <strong>general feedback</strong></p>
-                </div>
-              </div>
-            </li>
-            <li class="py-2">
-              <div class="flex space-x-3">
-                <img class="h-12 w-12 rounded-lg" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" alt="">
-                <div class="flex-1 space-y-1">
-                  <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-medium">
-                      <i class="material-icons <%= Character.text_color %> float-left text-sm mr-1"><%= Character.icon %></i>
-                      Lindsay Walton
-                    </h3>
-                    <p class="text-sm text-gray-500">1h</p>
-                  </div>
-                  <p class="text-sm text-gray-500">for <strong>believability</strong>, <strong>science check</strong></p>
-                </div>
-              </div>
-            </li>
-            <li class="py-2">
-              <div class="flex space-x-3">
-                <img class="h-12 w-12 rounded-lg" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" alt="">
-                <div class="flex-1 space-y-1">
-                  <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-medium">
-                      <i class="material-icons <%= Character.text_color %> float-left text-sm mr-1"><%= Character.icon %></i>
-                      Lindsay Walton
-                    </h3>
-                    <p class="text-sm text-gray-500">2h</p>
-                  </div>
-                  <p class="text-sm text-gray-500">for <strong>sensitivity</strong></p>
-                </div>
-              </div>
-            </li>
-
-            <!-- More items... -->
-          </ul>
+      <% else %>
+        <div class="space-y-6">
+          <% @feed.each_with_index do |share, index| %>
+            <%= render partial: 'stream/feed_item', locals: { share: share, is_last: index == @feed.length - 1 } %>
+          <% end %>
         </div>
-
-        <h2 class="text-gray-400 font-bold text-sm mt-4 mb-2">Discussions happening now</h2>
-        <div class="space-y-1">
-          <div class="ml-1">
-            <a href="#" class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-1 text-sm bg-blue-500 hover:bg-blue-400 hover:shadow-lg">
-              <i class="material-icons float-left text-white">forum</i>
-              <span class="ml-3.5 font-medium text-white">What is the name of that guy who did the thing?</span>
-            </a>
-          </div>
-          <div class="ml-1">
-            <a href="#" class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-1 text-sm bg-blue-500 hover:bg-blue-400 hover:shadow-lg">
-              <i class="material-icons float-left text-white">forum</i>
-              <span class="ml-3.5 font-medium text-white">What is your favorite crayon to write on rocks with?</span>
-            </a>
-          </div>
-          <div class="ml-1">
-            <a href="#" class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-1 text-sm bg-blue-500 hover:bg-blue-400 hover:shadow-lg">
-              <i class="material-icons float-left text-white">forum</i>
-              <span class="ml-3.5 font-medium text-white">How 2 write good</span>
-            </a>
-          </div>
-          <div class="ml-1">
-            <a href="#" class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-1 text-sm bg-blue-500 hover:bg-blue-400 hover:shadow-lg">
-              <i class="material-icons float-left text-white">forum</i>
-              <span class="ml-3.5 font-medium text-white">DAE hate the new design?</span>
-            </a>
-          </div>
+        
+        <!-- Load More -->
+        <div class="mt-12 text-center">
+          <button class="inline-flex items-center px-6 py-3 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Load more posts
+          </button>
         </div>
-
-        <h2 class="text-gray-400 font-bold text-sm mt-4 mb-2">Newest discussion</h2>
-        <div class="space-y-1">
-          <div class="ml-1">
-            <a href="#" class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-1 text-sm bg-blue-500 hover:bg-blue-400 hover:shadow-lg">
-              <i class="material-icons float-left text-white">forum</i>
-              <span class="ml-3.5 font-medium text-white">how do i get in contact with cashapp support</span>
-            </a>
-          </div>
-        </div>
-      </aside>
+      <% end %>
     </div>
   </div>
 </div>
 
+<script>
+// Disable MaterializeCSS initialization for Tailwind-styled forms
+document.addEventListener('DOMContentLoaded', function() {
+  // Prevent MaterializeCSS from initializing on Tailwind select elements
+  if (window.M && window.M.FormSelect) {
+    document.querySelectorAll('.tailwind-styled-form select').forEach(function(select) {
+      select.classList.add('no-autoinit');
+    });
+  }
+  
+  // Handle collapsible share form
+  const shareCtaCollapsed = document.getElementById('share-cta-collapsed');
+  const shareFormExpanded = document.getElementById('share-form-expanded');
+  const closeShareForm = document.getElementById('close-share-form');
+  
+  if (shareCtaCollapsed) {
+    shareCtaCollapsed.addEventListener('click', function() {
+      shareCtaCollapsed.classList.add('hidden');
+      shareFormExpanded.classList.remove('hidden');
+    });
+  }
+  
+  if (closeShareForm) {
+    closeShareForm.addEventListener('click', function() {
+      shareFormExpanded.classList.add('hidden');
+      shareCtaCollapsed.classList.remove('hidden');
+    });
+  }
+});
+</script>
 
 
 
 
 
 
-<br />
 
-<%= render partial: 'notice_dismissal/messages/12' %>
-
-<div class="row">
-  <div class="col s12">
-    <%= render partial: 'content_page_shares/form' %>
-  </div>
-</div>
-
-<%= render partial: 'stream/share', collection: @feed %>
-
-<% if @feed.empty? %>
-  <div class="row">
-    <div class='col s12'>
-      <div class="hoverable card">
-        <div class="card-content">
-          <p class="card-title">
-            There are no posts here yet!
-          </p>
-          <p>
-            You can follow other worldbuilders from their profiles.
-            Whenever a user you follow shares one of their public pages,
-            it will appear here for you to comment on!
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-<% end %>
-
-<%= render partial: 'javascripts/content_linking' %>
