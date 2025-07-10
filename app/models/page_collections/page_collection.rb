@@ -102,7 +102,7 @@ class PageCollection < ApplicationRecord
   end
 
   def self.icon
-    'layers'
+    'auto_stories'
   end
 
   def page_type

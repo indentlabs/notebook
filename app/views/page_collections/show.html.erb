@@ -878,6 +878,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // Handle form submission
+  const submissionForm = document.querySelector('#share-page-modal form');
+  if (submissionForm) {
+    submissionForm.addEventListener('submit', function(e) {
+      // Validate that content is selected
+      const contentSelect = this.querySelector('select[name="page_collection_submission[content]"]');
+      if (!contentSelect || !contentSelect.value) {
+        e.preventDefault();
+        showToast('Please select content to submit.');
+        return false;
+      }
+      
+      // Let the form submit normally - don't prevent default
+      // The form will handle the submission via Rails
+    });
+  }
+
   // Lazy loading for images
   const lazyImages = document.querySelectorAll('.lazy-image');
   const imageObserver = new IntersectionObserver((entries, observer) => {
@@ -1012,8 +1029,14 @@ document.addEventListener('DOMContentLoaded', function() {
     loadingIndicator.classList.remove('hidden');
     
     try {
-      // Make an AJAX request to get more pages
-      const response = await fetch(`/page_collections/${window.location.pathname.split('/').pop()}/pages?page=${currentPage + 1}`);
+      // Make an AJAX request to get more pages - use the correct collection ID
+      const collectionId = '<%= @page_collection.id %>';
+      const response = await fetch(`/collections/${collectionId}/pages?page=${currentPage + 1}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       
       // Hide loading indicator
@@ -1105,16 +1128,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Newsletter signup
-  const newsletterForm = document.querySelector('form');
-  newsletterForm?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const email = this.querySelector('input[type="email"]').value;
-    if (email) {
-      showToast('Thank you for subscribing!');
-      this.reset();
-    }
-  });
+  // Newsletter signup - only target newsletter forms, not the submission modal
+  const newsletterForm = document.querySelector('form:not(#share-page-modal form)');
+  if (newsletterForm && newsletterForm.querySelector('input[type="email"]')) {
+    newsletterForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = this.querySelector('input[type="email"]').value;
+      if (email) {
+        showToast('Thank you for subscribing!');
+        this.reset();
+      }
+    });
+  }
 
   // Analytics tracking
   function trackEvent(eventName, properties = {}) {

@@ -121,44 +121,115 @@
       </div>
 
       
+      <!-- Paper-Style Notification Dropdown -->
       <div class="inline-flex items-center">
-        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen; accountDropdownOpen = false" class="z-10 block p-2 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'bg-yellow-500 border-yellow-400' : 'bg-white bg-opacity-20 border-white border-opacity-30' %> border-2 hover:bg-opacity-30 rounded-full transition-all duration-200">
+        <!-- Notification Button -->
+        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen; accountDropdownOpen = false" class="z-10 block p-2 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'bg-yellow-300 border-yellow-400' : 'bg-white bg-opacity-20 border-white border-opacity-30' %> border-2 hover:bg-opacity-30 rounded-full transition-all duration-200">
           <svg class="h-5 w-5 sm:h-6 sm:w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
           </svg>
         </button>
+        
+        <!-- Backdrop -->
         <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
 
-        <div x-show="notificationsDropdownOpen" class="absolute top-full right-0 mt-2 bg-white rounded-md shadow-lg overflow-hidden z-20 w-80 sm:w-96 max-w-md">
-          <div class="pt-2">
-            <% @user_notifications.each do |notification| %>
-              <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b hover:bg-gray-100 -mx-2' do %>
-                <i class="material-icons bg-<%= notification.icon_color %>-500 text-white rounded-full p-1 h-8 w-8 mx-1"><%= notification.icon %></i>                
-                <div class="text-black text-sm mx-2 flex-grow <%= 'font-bold' unless notification.viewed_at? %>">
-                  <%= notification.message_html.html_safe %>
-                </div>
-                <div class="text-gray-400 text-xs hidden sm:block">
-                  <%= time_ago_in_words notification.happened_at %> ago
-                </div>
+        <!-- Notebook.ai Style Notification Panel -->
+        <div x-show="notificationsDropdownOpen" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="transform opacity-0 scale-95 translate-y-1"
+             x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
+             x-transition:leave-end="transform opacity-0 scale-95 translate-y-1"
+             class="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-20 overflow-hidden">
+          
+          <!-- Header -->
+          <div class="px-4 py-3 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-gray-900 flex items-center">
+                <i class="material-icons mr-2 text-blue-600 text-base">notifications</i>
+                Recent Activity
+              </h3>
+              <% if @user_notifications.reject { |n| n.viewed_at? }.any? %>
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  <%= @user_notifications.reject { |n| n.viewed_at? }.count %> new
+                </span>
               <% end %>
+            </div>
+          </div>
+
+          <!-- Notifications List -->
+          <div class="max-h-80 overflow-y-auto">
+            <% if @user_notifications.any? %>
+              <div class="space-y-1 p-2">
+                <% @user_notifications.first(6).each_with_index do |notification, index| %>
+                  <% is_unread = !notification.viewed_at? %>
+                  <%= link_to main_app.notification_path(notification), 
+                      class: "block group" do %>
+                    <div class="bg-white border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:shadow-sm transition-all duration-200 <%= is_unread ? 'bg-yellow-50 border-yellow-200' : '' %>">
+                      <div class="flex items-start space-x-3">
+                        <!-- Icon -->
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-<%= notification.icon_color %>-500 rounded-lg flex items-center justify-center">
+                            <i class="material-icons text-white text-sm"><%= notification.icon %></i>
+                          </div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="flex-1 min-w-0">
+                          <div class="text-sm text-gray-900 <%= is_unread ? 'font-medium' : '' %> leading-relaxed group-hover:text-blue-600 transition-colors">
+                            <%= notification.message_html.html_safe %>
+                          </div>
+                          <div class="flex items-center justify-between mt-1">
+                            <div class="flex items-center space-x-1 text-xs text-gray-500">
+                              <i class="material-icons text-xs">schedule</i>
+                              <span><%= time_ago_in_words(notification.happened_at) %> ago</span>
+                            </div>
+                            <% if is_unread %>
+                              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                New
+                              </span>
+                            <% end %>
+                          </div>
+                        </div>
+                        
+                        <!-- Arrow -->
+                        <div class="flex-shrink-0">
+                          <i class="material-icons text-gray-400 group-hover:text-blue-500 transition-colors text-sm">arrow_forward</i>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            <% else %>
+              <!-- Empty State -->
+              <div class="px-4 py-8 text-center">
+                <div class="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
+                  <i class="material-icons text-gray-400 text-lg">notifications_none</i>
+                </div>
+                <h4 class="text-sm font-medium text-gray-900 mb-1">All caught up!</h4>
+                <p class="text-xs text-gray-500">No new notifications to show</p>
+              </div>
             <% end %>
           </div>
-          <% if @user_notifications.empty? %>
-            <div class="relative block my-4 mx-6 border-2 border-gray-300 border-dashed rounded-lg p-8 sm:p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              <svg class="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-blue-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-              </svg>
-              <span class="mt-2 block text-sm font-medium text-gray-900">
-                Your notifications will appear here<br />
-                <sub class="text-gray-500">..when you have any!</sub>
-              </span>
+
+          <!-- Footer -->
+          <% if @user_notifications.any? %>
+            <div class="border-t border-gray-200 bg-gray-50 px-4 py-3">
+              <div class="flex space-x-2">
+                <%= link_to main_app.mark_all_read_path, 
+                    class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200" do %>
+                  <i class="material-icons text-xs mr-1">done_all</i>
+                  Mark all read
+                <% end %>
+                <%= link_to main_app.notifications_path, 
+                    class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent shadow-sm text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200" do %>
+                  View all
+                  <i class="material-icons text-xs ml-1">arrow_forward</i>
+                <% end %>
+              </div>
             </div>
-          <% end %>
-          <%= link_to main_app.mark_all_read_path, class: 'block bg-blue-100 hover:bg-blue-50 text-black text-center py-2' do %>
-            Mark all notifications read
-          <% end %>
-          <%= link_to main_app.notifications_path, class: 'block bg-notebook-blue hover:bg-blue-500 text-white text-center font-bold py-2' do %>
-            See all notifications
           <% end %>
         </div>
       </div>
