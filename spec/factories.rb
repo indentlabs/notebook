@@ -1,12 +1,12 @@
-# FactoryBot.define do
-#   sequence :email do |n|
-#     "email#{n}@example.com"
-#   end
+FactoryBot.define do
+  sequence :email do |n|
+    "email#{n}@example.com"
+  end
 
-#   factory :user do
-#     email
-#     password { 'password' }
-#   end
+  factory :user do
+    email
+    password { 'password' }
+  end
 
 #   factory :universe do
 #     sequence :name do |n|
@@ -58,4 +58,4 @@
 #     attribute_category
 #     field_type 'textarea'
 #   end
-# end
+end

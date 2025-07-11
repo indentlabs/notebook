@@ -59,8 +59,13 @@ class UsersController < ApplicationController
     stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
     stripe_subscription = stripe_customer.subscriptions.data[0]
     if stripe_subscription
-      stripe_subscription.plan = 'starter'
-      stripe_subscription.save
+      # Update subscription to starter plan using modern API
+      Stripe::Subscription.modify(stripe_subscription.id, {
+        items: [{
+          id: stripe_subscription.items.data[0].id,
+          price: 'starter'
+        }]
+      })
     end
 
     report_user_deletion_to_slack(current_user)

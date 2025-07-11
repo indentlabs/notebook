@@ -12,17 +12,23 @@ class SubscriptionService < Service
 
       if stripe_subscription.nil?
         # Create a new subscription on Stripe
-        Stripe::Subscription.create(customer: user.stripe_customer_id, plan: plan_id)
+        Stripe::Subscription.create(customer: user.stripe_customer_id, price: plan_id)
         stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
         stripe_subscription = stripe_customer.subscriptions.data[0]
       else
-        # Edit an existing Stripe subscription
-        stripe_subscription.plan = plan_id
+        # Edit an existing Stripe subscription by modifying its items
+        Stripe::Subscription.modify(stripe_subscription.id, {
+          items: [{
+            id: stripe_subscription.items.data[0].id,
+            price: plan_id
+          }]
+        })
+        # Retrieve the updated subscription
+        stripe_subscription = Stripe::Subscription.retrieve(stripe_subscription.id)
       end
 
-      # Save the change
+      # The subscription is already saved by the modify call above
       begin
-        stripe_subscription.save unless Rails.env.test?
 
         # Add any bonus bandwidth granted by the plan
         user.update(
