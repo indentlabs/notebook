@@ -6,6 +6,7 @@ class StreamController < ApplicationController
   before_action :set_stream_navbar_color, only: [:index, :global]
   before_action :set_sidenav_expansion
   before_action :cache_linkable_content_for_each_content_type, only: [:index, :global]
+  before_action :load_recent_forum_topics, only: [:index, :global]
 
   def index
     @page_title = "What's happening"
@@ -78,5 +79,24 @@ class StreamController < ApplicationController
 
   def set_sidenav_expansion
     @sidenav_expansion = 'community'
+  end
+
+  private
+
+  def load_recent_forum_topics
+    # Get the 5 most recent forum posts and their topics
+    recent_posts = Thredded::Post.joins(:topic)
+                                 .where(deleted_at: nil)
+                                 .order(created_at: :desc)
+                                 .limit(10)
+                                 .includes(:topic, :user)
+
+    # Get unique topics from recent posts, limited to 5
+    @recent_forum_topics = recent_posts.map(&:topic)
+                                      .uniq { |topic| topic.id }
+                                      .first(5)
+  rescue => e
+    Rails.logger.error "Error loading recent forum topics: #{e.message}"
+    @recent_forum_topics = []
   end
 end

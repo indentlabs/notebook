@@ -5,6 +5,7 @@ class ContentPageSharesController < ApplicationController
     :show, :edit, :update, :destroy, 
     :follow, :unfollow, :report
   ]
+  before_action :load_recent_forum_topics, only: [:show]
 
   # GET /content_page_shares
   def index
@@ -16,6 +17,15 @@ class ContentPageSharesController < ApplicationController
     @page_title = "#{@share.user.display_name}'s #{@share.content_page_type} shared"
 
     @sidenav_expansion = 'community'
+    
+    # Set up follow/block status for the share creator
+    if current_user
+      @is_following = current_user.user_followings.exists?(followed_user: @share.user)
+      @is_blocked = current_user.user_blockings.exists?(blocked_user: @share.user)
+    else
+      @is_following = false
+      @is_blocked = false
+    end
   end
 
   # GET /content_page_shares/new
@@ -86,5 +96,22 @@ class ContentPageSharesController < ApplicationController
       user_id:           current_user.id,
       shared_at:         DateTime.current
     }
+  end
+
+  def load_recent_forum_topics
+    # Get the 5 most recent forum posts and their topics
+    recent_posts = Thredded::Post.joins(:topic)
+                                 .where(deleted_at: nil)
+                                 .order(created_at: :desc)
+                                 .limit(10)
+                                 .includes(:topic, :user)
+
+    # Get unique topics from recent posts, limited to 5
+    @recent_forum_topics = recent_posts.map(&:topic)
+                                      .uniq { |topic| topic.id }
+                                      .first(5)
+  rescue => e
+    Rails.logger.error "Error loading recent forum topics: #{e.message}"
+    @recent_forum_topics = []
   end
 end
