@@ -91,7 +91,11 @@
 
         <% else %>
           <%
-            active_plan_on_stripe = @stripe_customer.subscriptions.data.select { |sub| sub.plan.id == @selected_plan.stripe_plan_id }.first
+            # Get subscriptions with safe navigation and use modern price.id instead of plan.id
+            subscriptions = @stripe_customer.subscriptions&.data || []
+            active_plan_on_stripe = subscriptions.select { |sub| 
+              sub.items&.data&.any? { |item| item.price&.id == @selected_plan.stripe_plan_id }
+            }.first
           %>
           <% if active_plan_on_stripe %>
             <p class="center">

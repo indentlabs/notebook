@@ -133,6 +133,7 @@ class SubscriptionsController < ApplicationController
   def information
     @selected_plan = BillingPlan.find_by(stripe_plan_id: params['plan'], available: true)
     @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
+    @stripe_payment_methods = @stripe_customer.list_payment_methods(type: 'card')
   end
 
   # Save a payment method
