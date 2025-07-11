@@ -57,7 +57,10 @@ class UsersController < ApplicationController
 
     # Make sure the user is set to Starter on Stripe so we don't keep charging them
     stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
-    stripe_subscription = stripe_customer.subscriptions.data[0]
+    
+    # Use safe navigation to handle customers without subscriptions
+    subscriptions = stripe_customer.subscriptions&.data || []
+    stripe_subscription = subscriptions.first
     if stripe_subscription
       # Update subscription to starter plan using modern API
       Stripe::Subscription.modify(stripe_subscription.id, {

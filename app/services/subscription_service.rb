@@ -8,13 +8,19 @@ class SubscriptionService < Service
     # Sync with Stripe (todo pipe into StripeService)
     unless Rails.env.test?
       stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
-      stripe_subscription = stripe_customer.subscriptions.data[0]
+      
+      # Use safe navigation to handle customers without subscriptions
+      subscriptions = stripe_customer.subscriptions&.data || []
+      stripe_subscription = subscriptions.first
 
       if stripe_subscription.nil?
         # Create a new subscription on Stripe
         Stripe::Subscription.create(customer: user.stripe_customer_id, price: plan_id)
         stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
-        stripe_subscription = stripe_customer.subscriptions.data[0]
+        
+        # Use safe navigation to get the newly created subscription
+        subscriptions = stripe_customer.subscriptions&.data || []
+        stripe_subscription = subscriptions.first
       else
         # Edit an existing Stripe subscription by modifying its items
         Stripe::Subscription.modify(stripe_subscription.id, {

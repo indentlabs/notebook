@@ -145,7 +145,6 @@ class SubscriptionsController < ApplicationController
     end
 
     stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
-    stripe_subscription = stripe_customer.subscriptions.data[0]
     begin
       # Delete all existing payment methods to have our new one "replace" them
       existing_payment_methods = stripe_customer.list_payment_methods(type: 'card')
@@ -179,7 +178,10 @@ class SubscriptionsController < ApplicationController
 
   def delete_payment_method
     stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
-    stripe_subscription = stripe_customer.subscriptions.data[0]
+    
+    # Use safe navigation to handle customers without subscriptions
+    subscriptions = stripe_customer.subscriptions&.data || []
+    stripe_subscription = subscriptions.first
 
     payment_methods = stripe_customer.list_payment_methods(type: 'card')
     payment_methods.data.each do |payment_method|
@@ -189,14 +191,16 @@ class SubscriptionsController < ApplicationController
     notice = ['Your payment method has been successfully deleted.']
 
     # Check if user has a non-starter subscription using modern API
-    current_price_id = stripe_subscription.items.data[0].price.id
-    if current_price_id != 'starter'
-      # Cancel the user's at the end of its effective period on Stripe's end, so they don't get rebilled
-      stripe_subscription.delete(at_period_end: true)
+    if stripe_subscription&.items&.data&.any?
+      current_price_id = stripe_subscription.items.data[0].price.id
+      if current_price_id != 'starter'
+        # Cancel the user's at the end of its effective period on Stripe's end, so they don't get rebilled
+        stripe_subscription.delete(at_period_end: true)
 
-      active_billing_plan = BillingPlan.find_by(stripe_plan_id: current_price_id)
-      if active_billing_plan
-        notice << "Your #{active_billing_plan.name} subscription will end on #{Time.at(stripe_subscription.current_period_end).strftime('%B %d')}."
+        active_billing_plan = BillingPlan.find_by(stripe_plan_id: current_price_id)
+        if active_billing_plan
+          notice << "Your #{active_billing_plan.name} subscription will end on #{Time.at(stripe_subscription.current_period_end).strftime('%B %d')}."
+        end
       end
     end
 
