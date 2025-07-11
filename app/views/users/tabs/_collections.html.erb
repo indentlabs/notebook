@@ -1,0 +1,266 @@
+<!-- Collections Tab - Maintained and Published Collections -->
+<div class="space-y-8">
+  
+  <!-- Collections I Maintain Section -->
+  <div>
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+          <i class="material-icons mr-3 text-blue-600 text-3xl">collections_bookmark</i>
+          Collections I Maintain
+        </h2>
+        <p class="text-gray-600 mt-1">
+          Collections curated and managed by <%= @user.name || @user.display_name %>
+        </p>
+      </div>
+      
+      <% if user_signed_in? && @user == current_user %>
+        <%= link_to new_page_collection_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center" do %>
+          <i class="material-icons mr-2 text-sm">add</i>
+          Create Collection
+        <% end %>
+      <% end %>
+    </div>
+    
+    <% if @maintained_collections.any? %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% @maintained_collections.each do |collection| %>
+          <%= link_to collection, class: "group" do %>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              
+              <!-- Collection Cover -->
+              <div class="relative h-48 overflow-hidden">
+                <% if collection.respond_to?(:cover_image) && collection.cover_image.present? %>
+                  <%= image_tag collection.cover_image, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
+                <% else %>
+                  <!-- Generate cover from collection content -->
+                  <div class="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-indigo-600 relative">
+                    <div class="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                      <i class="material-icons text-white text-8xl opacity-30">collections_bookmark</i>
+                    </div>
+                  </div>
+                <% end %>
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                
+                <!-- Collection Stats Badge -->
+                <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-900 px-3 py-1 rounded-full text-sm font-medium">
+                  <% if collection.respond_to?(:page_collection_submissions) %>
+                    <%= collection.page_collection_submissions.accepted.count %> items
+                  <% else %>
+                    Collection
+                  <% end %>
+                </div>
+                
+                <!-- Collection Title -->
+                <div class="absolute bottom-4 left-4 right-4">
+                  <h3 class="text-white font-bold text-xl mb-2 line-clamp-2">
+                    <%= collection.title %>
+                  </h3>
+                  <% if collection.respond_to?(:description) && collection.description.present? %>
+                    <p class="text-white/90 text-sm line-clamp-2">
+                      <%= truncate(collection.description, length: 100) %>
+                    </p>
+                  <% end %>
+                </div>
+              </div>
+              
+              <!-- Collection Details -->
+              <div class="p-5">
+                <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                  <span class="flex items-center">
+                    <i class="material-icons text-xs mr-1">schedule</i>
+                    Updated <%= time_ago_in_words(collection.updated_at) %> ago
+                  </span>
+                  
+                  <% if collection.respond_to?(:privacy) %>
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= collection.privacy == 'public' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                      <i class="material-icons text-xs mr-1"><%= collection.privacy == 'public' ? 'public' : 'lock' %></i>
+                      <%= collection.privacy.titleize %>
+                    </span>
+                  <% end %>
+                </div>
+                
+                <!-- Collection Metrics -->
+                <% if collection.respond_to?(:page_collection_submissions) %>
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4 text-xs text-gray-500">
+                      <span class="flex items-center">
+                        <i class="material-icons text-xs mr-1">collections</i>
+                        <%= collection.page_collection_submissions.accepted.count %> accepted
+                      </span>
+                      <% if collection.page_collection_submissions.pending.any? %>
+                        <span class="flex items-center">
+                          <i class="material-icons text-xs mr-1">hourglass_empty</i>
+                          <%= collection.page_collection_submissions.pending.count %> pending
+                        </span>
+                      <% end %>
+                    </div>
+                    
+                    <div class="flex items-center text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <span>View collection</span>
+                      <i class="material-icons ml-1 text-sm">arrow_forward</i>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
+        <i class="material-icons text-gray-400 text-5xl mb-4">collections_bookmark</i>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          <% if user_signed_in? && @user == current_user %>
+            You haven't created any collections yet
+          <% else %>
+            <%= @user.name || @user.display_name %> hasn't created any collections
+          <% end %>
+        </h3>
+        <p class="text-gray-500 max-w-md mx-auto">
+          <% if user_signed_in? && @user == current_user %>
+            Collections let you curate and organize content from the community. Create your first collection to get started!
+          <% else %>
+            Collections are curated groups of community content organized by theme, genre, or other criteria.
+          <% end %>
+        </p>
+        
+        <% if user_signed_in? && @user == current_user %>
+          <div class="mt-6">
+            <%= link_to new_page_collection_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center" do %>
+              <i class="material-icons mr-2 text-sm">add</i>
+              Create Your First Collection
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Published In Collections Section -->
+  <div>
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+          <i class="material-icons mr-3 text-green-600 text-3xl">featured_play_list</i>
+          Published In Collections
+        </h2>
+        <p class="text-gray-600 mt-1">
+          Collections featuring <%= @user.name || @user.display_name %>'s content
+        </p>
+      </div>
+      
+      <div class="text-sm text-gray-500">
+        <%= pluralize(@published_in_collections.count, 'collection') %>
+      </div>
+    </div>
+    
+    <% if @published_in_collections.any? %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% @published_in_collections.each do |collection| %>
+          <%= link_to collection, class: "group" do %>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              
+              <!-- Collection Cover -->
+              <div class="relative h-40 overflow-hidden">
+                <% if collection.respond_to?(:cover_image) && collection.cover_image.present? %>
+                  <%= image_tag collection.cover_image, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
+                <% else %>
+                  <div class="w-full h-full bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 relative">
+                    <div class="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                      <i class="material-icons text-white text-6xl opacity-30">featured_play_list</i>
+                    </div>
+                  </div>
+                <% end %>
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                
+                <!-- Featured Badge -->
+                <div class="absolute top-3 left-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                  <i class="material-icons text-xs mr-1">star</i>
+                  Featured
+                </div>
+                
+                <!-- Collection Title -->
+                <div class="absolute bottom-3 left-3 right-3">
+                  <h3 class="text-white font-semibold text-lg line-clamp-1">
+                    <%= collection.title %>
+                  </h3>
+                  <p class="text-white/80 text-sm">
+                    by <%= collection.user.name rescue 'Unknown' %>
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Collection Details -->
+              <div class="p-4">
+                <% if collection.respond_to?(:description) && collection.description.present? %>
+                  <p class="text-gray-600 text-sm line-clamp-2 mb-3">
+                    <%= truncate(collection.description, length: 120) %>
+                  </p>
+                <% end %>
+                
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                  <span class="flex items-center">
+                    <i class="material-icons text-xs mr-1">schedule</i>
+                    <%= time_ago_in_words(collection.updated_at) %> ago
+                  </span>
+                  
+                  <% if collection.respond_to?(:page_collection_submissions) %>
+                    <span class="flex items-center">
+                      <i class="material-icons text-xs mr-1">collections</i>
+                      <%= collection.page_collection_submissions.accepted.count %> items
+                    </span>
+                  <% end %>
+                </div>
+                
+                <!-- Action Hint -->
+                <div class="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div class="flex items-center text-green-600 text-sm font-medium">
+                    <span>View collection</span>
+                    <i class="material-icons ml-1 text-sm">arrow_forward</i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
+        <i class="material-icons text-gray-400 text-5xl mb-4">featured_play_list</i>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          <% if user_signed_in? && @user == current_user %>
+            Your content hasn't been featured in collections yet
+          <% else %>
+            <%= @user.name || @user.display_name %>'s content hasn't been featured in collections
+          <% end %>
+        </h3>
+        <p class="text-gray-500 max-w-md mx-auto">
+          <% if user_signed_in? && @user == current_user %>
+            When other users accept your content into their collections, those collections will appear here. Keep creating great content!
+          <% else %>
+            When this user's content gets accepted into community collections, they'll be showcased here.
+          <% end %>
+        </p>
+        
+        <% if user_signed_in? && @user == current_user %>
+          <div class="mt-6 space-x-4">
+            <%= link_to characters_path, class: "bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center" do %>
+              <i class="material-icons mr-2 text-sm">create</i>
+              Create More Content
+            <% end %>
+            
+            <%= link_to page_collections_path, class: "border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200 inline-flex items-center" do %>
+              <i class="material-icons mr-2 text-sm">explore</i>
+              Browse Collections
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

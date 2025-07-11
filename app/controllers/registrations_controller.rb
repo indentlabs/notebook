@@ -5,8 +5,19 @@ class RegistrationsController < Devise::RegistrationsController
   before_action :set_navbar_actions, only: [:edit, :preferences, :more_actions]
   before_action :set_navbar_color, only: [:edit, :preferences, :more_actions]
 
+  layout :determine_layout
+
+  def determine_layout
+    if action_name.in?(['new', 'create'])
+      'tailwind/landing'
+    else
+      'tailwind'
+    end
+  end
+
   def new
     super
+    
     if params[:referral]
       session[:referral] = params[:referral]
     end
@@ -28,6 +39,15 @@ class RegistrationsController < Devise::RegistrationsController
     @sidenav_expansion = 'my account'
 
     @page_title = "More settings"
+  end
+  
+  def password
+    @sidenav_expansion = 'my account'
+    
+    @page_title = "Change Password"
+    
+    # Set the resource for the form
+    self.resource = current_user
   end
 
   private

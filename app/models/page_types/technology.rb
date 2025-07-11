@@ -28,11 +28,11 @@ class Technology < ApplicationRecord
   end
 
   def self.color
-    'text-darken-2 red'
+    'text-darken-2 red bg-fuchsia-500'
   end
 
   def self.text_color
-    'text-darken-2 red-text'
+    'text-darken-2 red-text text-fuchsia-500'
   end
 
   def self.hex_color

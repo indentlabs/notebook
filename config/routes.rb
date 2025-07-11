@@ -1,10 +1,20 @@
 # rubocop:disable LineLength
 Rails.application.routes.draw do
+  # Add password route for devise registrations
+  devise_scope :user do
+    get 'users/password', to: 'registrations#password', as: 'user_password_edit'
+  end
+  get 'styleguide/tailwind'
+  
+  # API routes from master
   namespace :api do
     namespace :v1 do
       post 'gallery_images/sort'
-      get 'categories/suggest/:content_type', to: 'categories#suggest'
-      get 'fields/suggest/:content_type/:category', to: 'fields#suggest'
+      put 'content/sort', to: 'content#sort'
+      get 'categories/suggest/:content_type', to: 'attribute_categories#suggest'
+      get 'categories/:id/edit', to: 'attribute_categories#edit'
+      get 'fields/suggest/:content_type/:category', to: 'attribute_fields#suggest'
+      get 'fields/:id/edit', to: 'attribute_fields#edit'
     end
   end
   default_url_options :host => "notebook.ai"
@@ -62,8 +72,15 @@ Rails.application.routes.draw do
     get 'follow',   on: :member
     get 'unfollow', on: :member
     get 'report',   on: :member
+    get 'rss',      on: :member, defaults: { format: 'rss' }
+    get 'feed',     on: :member, to: 'page_collections#rss', defaults: { format: 'rss' }, as: 'feed'
+    get 'pages',    on: :member, to: 'page_collections#pages', defaults: { format: 'json' }
 
     get 'by/:user_id', to: 'page_collections#by_user', as: :submissions_by_user
+    
+    # Editor picks management
+    get 'editor_picks', to: 'page_collection_editor_picks#index', as: 'manage_editor_picks'
+    resources :editor_picks, controller: 'page_collection_editor_picks', except: [:show, :edit]
   end
   resources :page_collection_submissions do
     get 'approve', on: :member
@@ -80,7 +97,7 @@ Rails.application.routes.draw do
   post 'customization/toggle_content_type'
 
   # User-centric stuff
-  devise_for :users, :controllers => { registrations: 'registrations' }
+  devise_for :users, :controllers => { registrations: 'registrations', sessions: 'sessions' }
   resources :users do
     devise_scope :user do
       get 'preferences',  to: 'registrations#preferences'
@@ -114,6 +131,11 @@ Rails.application.routes.draw do
   # ID-based alternative routes for users without usernames
   get '/users/:id/tag/:tag_slug', to: 'users#tag', as: :user_id_tag
 
+  scope '/analysis' do
+    get '/', to: 'document_analyses#landing', as: :landing_path
+    get '/hub', to: 'document_analyses#hub', as: :analysis_hub
+  end
+
   resources :documents do
     # Document Analysis routes
     get '/analysis/',            to: 'document_analyses#show',        on: :member      
@@ -141,10 +163,13 @@ Rails.application.routes.draw do
   resources :folders, only: [:create, :update, :destroy, :show]
 
   scope '/my' do
-    get '/content',         to: 'main#dashboard', as: :dashboard
+    get '/dashboard',       to: 'main#dashboard', as: :dashboard
+    get '/content',         to: 'main#table_of_contents', as: :table_of_contents
     get '/content/recent',  to: 'main#recent_content', as: :recent_content
     get '/content/deleted', to: 'content#deleted', as: :recently_deleted_content
     get '/prompts',         to: 'main#prompts', as: :prompts
+
+    get '/multiverse',      to: 'universes#hub', as: :multiverse
 
     get '/scratchpad',      to: 'main#notes', as: :notes
 
@@ -196,6 +221,7 @@ Rails.application.routes.draw do
       get '/discussions',   to: 'data#discussions'
       get '/collaboration', to: 'data#collaboration'
       get '/green',         to: 'data#green'
+      get '/achievements',  to: 'data#achievements', as: :achievements
       scope 'yearly' do
         get '/',      to: 'data#yearly_index',   as: :year_in_review
         get '/:year', to: 'data#review_year',    as: :review_year
@@ -213,6 +239,8 @@ Rails.application.routes.draw do
       end
     end
     get '/help', to: 'help#index', as: :help_center
+    get '/help/page-templates', to: 'help#page_templates', as: :help_page_templates
+    get '/help/organizing-with-universes', to: 'help#organizing_with_universes', as: :help_organizing_with_universes
   end
   delete 'delete_my_account', to: 'users#delete_my_account'
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
@@ -276,11 +304,17 @@ Rails.application.routes.draw do
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       # resources :characters do
       resources content_type.name.downcase.pluralize.to_sym do
+
+        # Browsable pages
+        get  :gallery,         on: :member
+        get  :references,      on: :member
         get  :changelog,       on: :member
+        get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
+
+        # API endpoints
         get  :toggle_archive,  on: :member
         post :toggle_favorite, on: :member
-        get  :gallery,         on: :member
-        get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
+        # Already have these routes above, no need to duplicate
       end
     end
     resources :timelines, only: [:index, :show, :new, :update, :edit, :destroy] do
@@ -298,9 +332,12 @@ Rails.application.routes.draw do
     end
 
     # Content attributes
-    put '/content/sort', to: 'content#api_sort'
-    resources :attribute_categories, only: [:create, :update, :destroy]
-    resources :attribute_fields,     only: [:create, :update, :destroy]
+    resources :attribute_categories, only: [:create, :update, :destroy, :edit] do
+      get :suggest, on: :collection
+    end
+    resources :attribute_fields,     only: [:create, :update, :destroy, :edit] do
+      get :suggest, on: :collection
+    end
 
     # Image handling
     delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion
@@ -308,6 +345,8 @@ Rails.application.routes.draw do
 
     # Attributes
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
+    get ':content_type/template/export', to: 'content#export_template', as: :export_template
+    delete ':content_type/template/reset', to: 'content#reset_template', as: :reset_template
   end
 
   # For non-API API endpoints
@@ -317,9 +356,12 @@ Rails.application.routes.draw do
     patch '/text_field_update/:field_id',     to: 'content#text_field_update',     as: :text_field_update
     patch '/tags_field_update/:field_id',     to: 'content#tags_field_update',     as: :tags_field_update
     patch '/universe_field_update/:field_id', to: 'content#universe_field_update', as: :universe_field_update
+    patch '/sort/categories',                 to: 'attribute_categories#sort',     as: :sort_categories_internal
+    patch '/sort/fields',                     to: 'attribute_fields#sort',         as: :sort_fields_internal
   end
 
   get 'search/', to: 'search#results'
+  get 'search/autocomplete', to: 'search#autocomplete'
 
   authenticate :user, lambda { |u| u.site_administrator? || Rails.env.development? } do
     scope 'admin' do
@@ -392,10 +434,21 @@ Rails.application.routes.draw do
       end
       scope '/fields' do
         get '/suggest/:entity_type/:category',    to: 'attribute_fields#suggest'
+        get '/:id/edit',                         to: 'attributes#field_edit'
+      end
+      scope '/categories' do
+        get '/suggest/:entity_type',              to: 'attribute_categories#suggest'
+        get '/:id/edit',                         to: 'attributes#category_edit'
+      end
+      scope '/content' do
+        put '/sort',                             to: 'attributes#sort'
       end
       scope '/answers' do
         get '/suggest/:entity_type/:field_label', to: 'attributes#suggest'
       end
+      
+      # Page name lookup
+      get '/page_name', to: 'page_names#show'
 
       # Content index path
       Rails.application.config.content_types[:all].each do |content_type|

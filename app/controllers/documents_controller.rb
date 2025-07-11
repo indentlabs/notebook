@@ -1,4 +1,6 @@
 class DocumentsController < ApplicationController
+  layout :determine_layout
+
   before_action :authenticate_user!, except: [:show, :analysis]
 
   # todo Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
@@ -17,8 +19,6 @@ class DocumentsController < ApplicationController
   # TODO: verify_user_can_read, verify_user_can_edit, etc before_actions instead of inlining them
 
   before_action :cache_linkable_content_for_each_content_type, only: [:edit]
-
-  layout 'editor',    only: [:edit]
 
   def index
     @page_title = "My documents"
@@ -56,6 +56,7 @@ class DocumentsController < ApplicationController
       page_id:   @documents.map(&:id)
     ).order(:tag)
 
+    @filtered_page_tags = []
     if params.key?(:tag)
       @filtered_page_tags = @page_tags.where(slug: params[:tag])
       @documents = @documents.to_a.select { |document| @filtered_page_tags.pluck(:page_id).include?(document.id) }
@@ -217,7 +218,7 @@ class DocumentsController < ApplicationController
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
     end
 
-    render layout: 'plaintext'
+    render
   end
 
   def toggle_favorite
@@ -291,6 +292,19 @@ class DocumentsController < ApplicationController
 
   def set_footer_visibility
     @show_footer = false
+  end
+
+  # Determines which layout to use based on the current action
+  def determine_layout
+    if action_name == 'edit'
+      'editor'
+    elsif ['index', 'show'].include?(action_name)
+      'tailwind'
+    elsif action_name == 'plaintext'
+      'plaintext'
+    else
+      'application' # Default layout for other actions
+    end
   end
 
   private
