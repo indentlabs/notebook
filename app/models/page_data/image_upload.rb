@@ -50,8 +50,15 @@ class ImageUpload < ApplicationRecord
 
   # Ensures only one image can be pinned per content item
   def ensure_single_pinned_image
+    # Unpin other image uploads for this content
     ImageUpload.where(content_type: content_type, content_id: content_id, pinned: true)
               .where.not(id: id)
               .update_all(pinned: false)
+    
+    # Also unpin any basil commissions for this content
+    if content.respond_to?(:basil_commissions)
+      BasilCommission.where(entity_type: content_type, entity_id: content_id, pinned: true)
+                     .update_all(pinned: false)
+    end
   end
 end

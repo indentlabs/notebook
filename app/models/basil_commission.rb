@@ -59,8 +59,15 @@ class BasilCommission < ApplicationRecord
 
   # Ensures only one basil commission can be pinned per entity
   def ensure_single_pinned_image
+    # Unpin other basil commissions for this entity
     BasilCommission.where(entity_type: entity_type, entity_id: entity_id, pinned: true)
                    .where.not(id: id)
                    .update_all(pinned: false)
+    
+    # Also unpin any image uploads for this entity
+    if entity.respond_to?(:image_uploads)
+      ImageUpload.where(content_type: entity_type, content_id: entity_id, pinned: true)
+                 .update_all(pinned: false)
+    end
   end
 end
