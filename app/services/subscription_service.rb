@@ -15,7 +15,10 @@ class SubscriptionService < Service
 
       if stripe_subscription.nil?
         # Create a new subscription on Stripe
-        Stripe::Subscription.create(customer: user.stripe_customer_id, price: plan_id)
+        Stripe::Subscription.create({
+          customer: user.stripe_customer_id,
+          items: [{ price: plan_id }]
+        })
         stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
         
         # Use safe navigation to get the newly created subscription

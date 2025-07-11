@@ -254,7 +254,10 @@ class User < ApplicationRecord
       self.save
 
       # If we're creating this Customer in Stripe for the first time, we should also associate them with the free tier
-      Stripe::Subscription.create(customer: self.stripe_customer_id, plan: 'starter')
+      Stripe::Subscription.create({
+        customer: self.stripe_customer_id,
+        items: [{ price: 'starter' }]
+      })
     end
 
     self.stripe_customer_id
