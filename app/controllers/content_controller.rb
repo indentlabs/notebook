@@ -492,20 +492,32 @@ class ContentController < ApplicationController
     # Are we pinning or unpinning?
     new_pin_status = !@image.pinned
     
-    # Use update instead of update_column to trigger model callbacks
-    # The model callbacks will handle unpinning other images automatically
-    @image.update!(pinned: new_pin_status)
+    # If we're pinning this image, unpin all other images for this content first
+    # This prevents database locking issues from the model callbacks
+    if new_pin_status == true
+      # Unpin other image uploads for this content
+      ImageUpload.where(content_type: content.class.name, content_id: content.id, pinned: true)
+                .where.not(id: @image.id)
+                .update_all(pinned: false)
+      
+      # Also unpin any basil commissions for this content
+      BasilCommission.where(entity_type: content.class.name, entity_id: content.id, pinned: true)
+                     .update_all(pinned: false)
+    end
+    
+    # Now update this image's pin status (without triggering callbacks that cause locks)
+    @image.update_column(:pinned, new_pin_status)
     
     # Clear any cached images to ensure pinned images are shown
     content.instance_variable_set(:@random_image_including_private_cache, nil)
     content.instance_variable_set(:@pinned_public_image_cache, nil)
     content.instance_variable_set(:@first_public_image_cache, nil)
     
-    # Return the updated status
+    # Return the updated status (use new_pin_status since update_column might not refresh the object)
     render json: { 
       id: @image.id, 
       type: params[:image_type], 
-      pinned: @image.pinned 
+      pinned: new_pin_status 
     }
   end
 
