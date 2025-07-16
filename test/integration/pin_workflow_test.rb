@@ -222,5 +222,10 @@ class PinWorkflowTest < ActionDispatch::IntegrationTest
     assert_equal 1, pinned_count, "Only one image should be pinned"
   end
 
+  # Ensure we're signed out after all tests to avoid affecting smoke tests  
+  teardown do
+    sign_out :user if @user
+  end
+
   # Using Devise::Test::IntegrationHelpers for sign_in
 end

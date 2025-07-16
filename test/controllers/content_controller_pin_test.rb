@@ -196,5 +196,10 @@ class ContentControllerPinTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  # Ensure we're signed out after all tests to avoid affecting smoke tests
+  teardown do
+    sign_out :user if @user
+  end
+
   # Using Devise::Test::IntegrationHelpers for sign_in/sign_out
 end
