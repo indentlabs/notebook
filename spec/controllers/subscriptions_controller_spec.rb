@@ -6,6 +6,9 @@ include Rails.application.routes.url_helpers
 RSpec.describe SubscriptionsController, type: :controller do
   before do
     WebMock.disable_net_connect!(allow_localhost: true)
+    
+    # Enable request logging to debug what requests are being made
+    # WebMock::Config.instance.show_stubbing_instructions = true
 
     # Need to stub .save on StripeObject, but this doesn't seem to work
     #Stripe::StripeObject.any_instance.stub(:save).and_return(true)
@@ -48,10 +51,26 @@ RSpec.describe SubscriptionsController, type: :controller do
         headers: {}
       )
 
-    # Stub creating subscription with price instead of plan
+    # Stub PaymentMethod.list for SubscriptionService (without payment methods)
+    stub_request(:get, "https://api.stripe.com/v1/payment_methods")
+      .with(query: {customer: 'stripe-id', type: 'card'})
+      .to_return(
+        status: 200,
+        body: {
+          data: []
+        }.to_json,
+        headers: {}
+      )
+
+    # Stub creating subscription with items array (no payment method)
     stub_request(:post, "https://api.stripe.com/v1/subscriptions")
-      .with(body: { customer: "stripe-id", price: 'starter' })
+      .with(body: { customer: "stripe-id", items: [{price: 'starter'}] })
       .to_return(status: 200, body: {id: 'sub_starter'}.to_json, headers: {})
+
+    # Stub creating subscription with items array (with payment method)
+    stub_request(:post, "https://api.stripe.com/v1/subscriptions")
+      .with(body: { customer: "stripe-id", items: [{price: 'premium'}], default_payment_method: 'pm_123' })
+      .to_return(status: 200, body: {id: 'sub_premium'}.to_json, headers: {})
 
     # Stub updating subscription with Subscription.modify
     stub_request(:post, "https://api.stripe.com/v1/subscriptions/sub_123")
@@ -143,9 +162,26 @@ RSpec.describe SubscriptionsController, type: :controller do
     end
 
     it "allows upgrading to Premium when they have a payment method saved" do
-      # Re-stub list_payment_methods to include a payment method
+      # Re-stub list_payment_methods to include a payment method (for controller check)
       stub_request(:get, "https://api.stripe.com/v1/customers/stripe-id/payment_methods")
         .with(query: {type: 'card'})
+        .to_return(
+          status: 200,
+          body: {
+            data: [{
+              id: 'pm_123',
+              card: {
+                brand: 'visa',
+                last4: '4242'
+              }
+            }]
+          }.to_json,
+          headers: {}
+        )
+
+      # Re-stub PaymentMethod.list for SubscriptionService (with payment method)
+      stub_request(:get, "https://api.stripe.com/v1/payment_methods")
+        .with(query: {customer: 'stripe-id', type: 'card'})
         .to_return(
           status: 200,
           body: {

@@ -14,11 +14,26 @@ class SubscriptionService < Service
       stripe_subscription = subscriptions.first
 
       if stripe_subscription.nil?
-        # Create a new subscription on Stripe
-        Stripe::Subscription.create({
+        # Get the customer's default payment method
+        payment_methods = Stripe::PaymentMethod.list({
+          customer: user.stripe_customer_id,
+          type: 'card'
+        })
+        
+        default_payment_method = payment_methods.data.first&.id
+        
+        # Create a new subscription on Stripe with the default payment method
+        subscription_params = {
           customer: user.stripe_customer_id,
           items: [{ price: plan_id }]
-        })
+        }
+        
+        # Add default payment method if available
+        if default_payment_method
+          subscription_params[:default_payment_method] = default_payment_method
+        end
+        
+        Stripe::Subscription.create(subscription_params)
         stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
         
         # Use safe navigation to get the newly created subscription
