@@ -2,368 +2,543 @@
 <% on_premium_plan = ['early-adopters', 'premium', 'premium-trio', 'premium-annual'].include?(@active_billing_plan.try(:stripe_plan_id)) %>
 <% active_stripe_plan = @active_billing_plan.try(:stripe_plan_id) %>
 
-<%= content_for :full_width_page_header do %>
-  <p class="center hide-on-small-only">
-    <% Rails.application.config.content_types[:all_non_universe].each do |content_class| %>
-      <% can_create = current_user.can_create?(content_class) || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_class.name) %>
-      <% edit_message = current_user.send(content_class.name.pluralize.downcase).any? && !can_create %>
-      <i class="material-icons <%= can_create ? content_class.color : 'grey' %>-text tooltipped small" data-position="bottom" data-delay="0" data-tooltip="You <%= can_create ? 'can' : 'cannot' %> create new <%= content_class.name.pluralize.downcase %>.<%= ' You can edit your existing ones.' if edit_message %>">
-        <%= content_class.icon %>
-      </i>
-    <% end %>
-  </p>
-<% end %>
-
 <%= render partial: 'notice_dismissal/messages/06' %>
 
-<h4>Subscription Plan</h4>
-<p>
-  <% if free_for_life_user %>
-    <p style="margin-top: 20px;">
-      Thank you! You were there at Notebook.ai's beginnings, so we've gifted you <strong>a free, unlimited account for life</strong>. Subscriptions below have been disabled, because you already have everything unlocked.
-    </p>
-    <p>
-      Thank you for helping make Notebook.ai what it is today.
-    </p>
-  <% elsif @active_promotions.any? %>
-    <p>
-      You're currently subscribed to Notebook.ai's <strong><%= @active_billing_plan.name %></strong> plan, but have access to Premium features through your
-      active Premium Code (<%= @active_promo_code.description %>) for <%= distance_of_time_in_words DateTime.current, @active_promotions.first.expires_at %> longer.
-    </p>
-  <% else %>
-    You're currently subscribed to Notebook's <strong><%= @active_billing_plan.name %></strong> plan.
-    <% unless @active_billing_plan.nil? || @active_billing_plan.stripe_plan_id == 'starter' %>
-      <% renewal_day = current_user.active_subscriptions.first.start_date.day %>
-      While active, your subscription will automatically renew.
-      <% if active_stripe_plan == 'premium' %>
-        You will be charged <%= number_to_currency(@active_billing_plan.monthly_cents / 100) %>
-        on the <%= renewal_day %><%= renewal_day.ordinal %> of each month.
-      <% end %>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
 
-      Click <%= link_to 'here', billing_faq_path %> to view our cancellation policy and other frequently-asked questions.
-    <% end %>
-  <% end %>
-</p>
-
-<div class="row">
-  <div class="col s12 m6 l3">
-    <div class="card black-text <%= 'blue lighten-5' if @active_billing_plan.stripe_plan_id == 'starter' %>" style="min-height: 470px;">
-      <div class="card-content">
-        <h4 class="center">
-          <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">class</i>
-          Starter
-        </h4>
-        <h5 class="center">
-          $0/month<br /><br />
-        </h5>
-        <ul class="plan-features">
-          <li>
-            <i class="material-icons green-text">check</i>
-            Plan up to <strong>5</strong> universes
-          </li>
-          <li>
-            <i class="material-icons green-text">check</i>
-            Upload <strong>50MB</strong> of images
-          </li>
-          <li>
-            <i class="material-icons green-text">check</i>
-            Create <strong>core</strong> page types
-          </li>
-          <li class="center">
-            <i class="material-icons <%= Universe.text_color %> tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create up to 5 <%= Universe.name.pluralize %>">
-              <%= Universe.icon %>
-            </i>
-            <% (Rails.application.config.content_types[:free]).each do |content_class| %>
-              <% next if content_class.name == "Universe" %>
-              <i class="material-icons <%= content_class.text_color %> tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
-                <%= content_class.icon %>
-              </i>
-            <% end %>
-            <br /><br /><br />
-          </li>
-        </ul>
+  <!-- Header with Current Plan Status -->
+  <div class="bg-gradient-to-r from-gray-50 to-blue-50/50 border-b-4 border-notebook-blue rounded-t-xl mb-8 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-6">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <!-- Page Title -->
+      <div class="flex-1">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Subscription Management</h1>
+        <p class="text-gray-600">Manage your Notebook.ai subscription and billing preferences</p>
       </div>
-      <div class="row center">
-        <% if @active_billing_plan.stripe_plan_id == 'starter' %>
-          <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white disabled black-text' %>
-        <% else %>
-          <%= link_to 'Downgrade', change_subscription_path('starter'), class: "btn-large waves-effect waves-light white black-text #{'disabled' if free_for_life_user}" %>
-        <% end %>
-      </div>
-      <br />
-    </div>
-  </div>
-
-  <div class="col s12 m6 l3">
-    <div class="card black-text <%= 'light-blue lighten-5' if active_stripe_plan == 'premium' %>" style="min-height: 470px;">
-      <div class="card-content">
-        <h4 class="center">
-          <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">grade</i>
-          Premium
-        </h4>
-        <h5 class="center">
-          $9/month<br />
-          <small>billed monthly</small>
-        </h5>
-        <ul class="plan-features">
-          <li>
-            <i class="material-icons green-text">check</i>
-            Plan <strong>unlimited</strong> universes
-          </li>
-          <li>
-            <i class="material-icons green-text">check</i>
-            Upload <strong>10GB</strong> of images
-          </li>
-          <li>
-            <i class="material-icons green-text">check</i>
-            Create <strong>all <%= Rails.application.config.content_types[:all].count %></strong> page types
-          </li>
-          <li class="center">
-            <% Rails.application.config.content_types[:all].each_with_index do |content_class, i| %>
-              <%= '<br />'.html_safe if i % 4 == 0 && i != 0 %>
-              <i class="material-icons <%= content_class.text_color %> tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
-                <%= content_class.icon %>
-              </i>
-            <% end %>
-          </li>
-        </ul>
-      </div>
-      <div class="row center">
-        <% if active_stripe_plan == 'premium' %>
-          <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
-        <% elsif on_premium_plan %>
-          <%= link_to 'Change Plan', change_subscription_path('premium'), class: "btn-large waves-effect waves-light white blue-text #{'disabled' if free_for_life_user}" %>
-        <% elsif @active_promotions.any? %>
-          <%= link_to 'Premium is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
-        <% else %>
-          <%= link_to 'Upgrade', change_subscription_path('premium'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
-        <% end %>
-      </div>
-      <br />
-    </div>
-  </div>
-
-  <div class="col s12 m6 l3">
-    <div class="card black-text <%= 'light-blue lighten-5' if active_stripe_plan == 'premium-trio' %>" style="min-height: 470px;">
-      <div class="card-content">
-        <h4 class="center">
-          <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">grade</i>
-          Premium
-        </h4>
-        <h5 class="center">
-          $8/month<br />
-          <small>billed every 3 months</small>
-        </h5>
-        <ul class="plan-features">
-          <li>
-            <i class="material-icons green-text">check</i>
-            Plan <strong>unlimited</strong> universes
-          </li>
-          <li>
-            <i class="material-icons green-text">check</i>
-            Upload <strong>10GB</strong> of images
-          </li>
-          <li>
-            <i class="material-icons green-text">check</i>
-            Create <strong>all <%= Rails.application.config.content_types[:all].count %></strong> page types
-          </li>
-          <li class="center">
-            <% Rails.application.config.content_types[:all].each_with_index do |content_class, i| %>
-              <%= '<br />'.html_safe if i % 4 == 0 && i != 0 %>
-              <i class="material-icons <%= content_class.text_color %> tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
-                <%= content_class.icon %>
-              </i>
-            <% end %>
-          </li>
-        </ul>
-      </div>
-      <div class="row center">
-        <% if active_stripe_plan == 'premium-trio' %>
-          <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
-        <% elsif on_premium_plan %>
-          <%= link_to 'Change Plan', change_subscription_path('premium-trio'), class: "btn-large waves-effect waves-light white blue-text #{'disabled' if free_for_life_user}" %>
-        <% elsif @active_promotions.any? %>
-          <%= link_to 'Premium is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
-        <% else %>
-          <%= link_to 'Upgrade', change_subscription_path('premium-trio'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
-        <% end %>
-      </div>
-      <br />
-    </div>
-  </div>
-
-  <div class="col s12 m6 l3">
-    <div class="card black-text <%= 'light-blue lighten-5' if active_stripe_plan == 'premium-annual' %>" style="min-height: 470px;">
-      <div class="card-content">
-        <h4 class="center">
-          <i class="material-icons" style="font-size: 90%; position: relative; top: 3px;">grade</i>
-          Premium
-        </h4>
-        <h5 class="center">
-          $7/month<br />
-          <small>billed annually</small>
-        </h5>
-        <ul class="plan-features">
-          <li>
-            <i class="material-icons green-text">check</i>
-            Plan <strong>unlimited</strong> universes
-          </li>
-          <li>
-            <i class="material-icons green-text">check</i>
-            Upload <strong>10GB</strong> of images
-          </li>
-          <li>
-            <i class="material-icons green-text">check</i>
-            Create <strong>all <%= Rails.application.config.content_types[:all].count %></strong> page types
-          </li>
-          <li class="center">
-            <% Rails.application.config.content_types[:all].each_with_index do |content_class, i| %>
-              <%= '<br />'.html_safe if i % 4 == 0 && i != 0 %>
-              <i class="material-icons <%= content_class.text_color %> tooltipped" style="font-size: 240%" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
-                <%= content_class.icon %>
-              </i>
-            <% end %>
-          </li>
-        </ul>
-      </div>
-      <div class="row center">
-        <% if active_stripe_plan == 'premium-annual' %>
-          <%= link_to 'Plan is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
-        <% elsif on_premium_plan %>
-          <%= link_to 'Change Plan', change_subscription_path('premium-annual'), class: "btn-large waves-effect waves-light white blue-text #{'disabled' if free_for_life_user}" %>
-        <% elsif @active_promotions.any? %>
-          <%= link_to 'Premium is active', '#', class: 'btn-large waves-effect waves-light white black-text disabled' %>
-        <% else %>
-          <%= link_to 'Upgrade', change_subscription_path('premium-annual'), class: "btn-large waves-effect waves-light blue white-text #{'disabled' if free_for_life_user}" %>
-        <% end %>
-      </div>
-      <br />
-    </div>
-  </div>
-
-  <div class="col s12 m12 l9 offset-l3">
-    <div class="card">
-      <div class="card-content">
-
-        <% if on_premium_plan || free_for_life_user %>
-          <div class="card-title">Your subscription is active!</div>
-          <p>
-            All page types are unlocked. You can turn on or off whichever ones you'd like by
-            <%= link_to 'clicking here', customization_content_types_path %> or on the button below.
-          </p>
-          <br />
-          <p>
-            <%= link_to 'Enable premium pages', customization_content_types_path, class: 'btn btn-large blue white-text' %>
-          </p>
-        <% else %>
-          <div class="card-title">Choose your way to pay</div>
-          <p>
-            The standard Premium membership is $9 per month. However, you can save more by choosing to pay every three months or once a year.
-          </p>
-        <% end %>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col s12 m12 l6">
-    <%= link_to prepay_path, class: 'black-text' do %>
-      <div class="hoverable card orange lighten-3">
-        <div class="card-content">
-          <div class="card-title black-text">
-            <i class="fa fa-paypal left"></i>
-            New: Purchase Premium with PayPal
+      
+      <!-- Current Plan Status - Expanded -->
+      <div class="flex-1 max-w-2xl">
+        <div class="flex items-center bg-white border-2 <%= free_for_life_user ? 'border-green-200 bg-green-50/50' : (on_premium_plan || @active_promotions.any?) ? 'border-blue-200 bg-blue-50/50' : 'border-gray-200 bg-gray-50/50' %> rounded-xl px-6 py-4 shadow-lg hover:shadow-xl transition-all duration-200">
+          <div class="w-12 h-12 bg-gradient-to-br <%= free_for_life_user ? 'from-green-400 to-green-600' : (on_premium_plan || @active_promotions.any?) ? 'from-blue-400 to-blue-600' : 'from-gray-400 to-gray-600' %> rounded-xl flex items-center justify-center mr-4 shadow-sm">
+            <i class="material-icons text-white text-lg"><%= free_for_life_user ? 'verified' : (on_premium_plan || @active_promotions.any?) ? 'grade' : 'class' %></i>
           </div>
-
-          <p class="black-text">
-            You can now purchase <strong>Premium Codes</strong> with PayPal!
-          </p>
-          <br />
-          <p class="black-text">
-            These codes let you prepay for however many months of Premium you'd like, and can be manually activated at any time. 
-            Each code can be used only once, but can be used by anyone you share the code with &mdash;
-            so they make great gifts, too!
-          </p>
-          <br />
-          <p class="black-text">
-            Click here to learn more.
-          </p>
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="text-lg font-bold text-gray-900">
+                <% if free_for_life_user %>
+                  Lifetime Premium
+                <% elsif @active_promotions.any? %>
+                  Premium Access
+                <% elsif on_premium_plan %>
+                  <%= @active_billing_plan.name %> Plan
+                <% else %>
+                  Starter Plan
+                <% end %>
+              </span>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= free_for_life_user ? 'bg-green-100 text-green-700' : (on_premium_plan || @active_promotions.any?) ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700' %>">
+                Current Plan
+              </span>
+            </div>
+            <div class="flex items-center gap-6 text-sm text-gray-600">
+              <div class="flex items-center gap-2">
+                <i class="material-icons text-xs text-gray-400">apps</i>
+                <span>
+                  <% if free_for_life_user || on_premium_plan || @active_promotions.any? %>
+                    Unlimited universes
+                  <% else %>
+                    5 universes max
+                  <% end %>
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i class="material-icons text-xs text-gray-400">cloud_upload</i>
+                <span>
+                  <% if free_for_life_user || on_premium_plan || @active_promotions.any? %>
+                    10GB storage
+                  <% else %>
+                    50MB storage
+                  <% end %>
+                </span>
+              </div>
+              <% if on_premium_plan && !@active_billing_plan.nil? && @active_billing_plan.stripe_plan_id != 'starter' %>
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-xs text-gray-400">schedule</i>
+                  <span>
+                    <% if active_stripe_plan == 'premium' %>
+                      <%= number_to_currency(@active_billing_plan.monthly_cents / 100) %>/month
+                    <% else %>
+                      <%= active_stripe_plan == 'premium-trio' ? 'Quarterly' : 'Annual' %> billing
+                    <% end %>
+                  </span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+          <% if on_premium_plan || free_for_life_user %>
+            <%= link_to customization_content_types_path, class: 'inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600/90 backdrop-blur-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transition-all duration-200 ml-4' do %>
+              <i class="material-icons text-sm mr-2">settings</i>
+              Manage Features
+            <% end %>
+          <% end %>
         </div>
       </div>
-    <% end %>
-  </div>
-
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content">
-
-        <div class="card-title">Have a Premium Code to redeem?</div>
-        <p>
-          Enter your promotional code below to apply its benefits to your account. Codes may only be used once per account.
-        </p>
-
-        <% if current_user.page_unlock_promo_codes.where('uses_remaining > 0').any? %>
-          <br />
-          <p>
-            <span class="grey-text">Your purchased codes, available to activate:</span>
-          </p>
-          <ul>
-            <% current_user.page_unlock_promo_codes.where('uses_remaining > 0').each do |code| %>
-              <li><a href="#" class="js-prepaid-promo-code green-text"><%= code.code %></a> (<%= code.description %>)</li>
-            <% end %>
-          </ul>
-        <% end %>
-
-        <%= form_for :promotional_code, url: redeem_path do |form| %>
-          <div class="input-field col s6">
-            <%= form.text_field :promo_code %>
-            <label for="promo_code">Code</label>
-          </div>
-          
-          <div class="input-field col s6">
-            <%= form.submit 'Redeem code', class: 'white black-text btn' %>
-          </div>
-        <% end  %>
-        <div class="clearfix"></div>
-
-        <% if current_user.active_promotions.any? %>
-          <p>
-            Your <%= pluralize current_user.active_promo_codes.count, 'active promo code' %>:
-
-            <ul class="browser-default">
-              <% current_user.active_promo_codes.each do |promo_code| %>
-                <% promotion = Promotion.find_by(user: current_user, page_unlock_promo_code_id: promo_code.id) %>
-                <li>
-                  <p>
-                    <strong><%= promo_code.code %></strong> - <%= promo_code.description %>
-                    <span class="grey-text">
-                      (active for <%= distance_of_time_in_words(DateTime.current, promotion.expires_at) %> longer)
-                    </span>
-                  </p>
-                  <p>
-                    Pages unlocked:
-                    <% promo_code.page_types.each do |page_type| %>
-                      <% page_type_class = content_class_from_name(page_type) %>
-                      <%= link_to polymorphic_path(page_type_class) do %>
-                        <i class="material-icons <%= page_type_class.text_color %> tooltipped" data-tooltip="<%= page_type.pluralize %>">
-                          <%= page_type_class.icon %>
-                        </i>
-                      <% end %>
-                    <% end %>
-                  </p>
-                </li>
-              <% end %>
-            </ul>
-
-            <%= link_to 'Click here to turn on your new page types!', customization_content_types_path, class: 'btn blue white-text' %>
-          </p>
-        <% end %>
-      </div>
     </div>
   </div>
-</div>
 
-<div class="center help-text">
-  All prices are in US Dollars. Making payments using another currency will automatically exchange into US Dollars at the current exchange rates.
+  <!-- Premium Plan Cards -->
+  <% unless free_for_life_user %>
+    <div class="mb-12">
+      <div class="text-center mb-10">
+        <h3 class="text-3xl font-bold text-gray-900 mb-4">Choose Your Plan</h3>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">Compare features and find the perfect fit for your creative needs</p>
+      </div>
+      
+      <!-- Plan Cards Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Starter Plan -->
+        <div class="plan-card relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 <%= @active_billing_plan.stripe_plan_id == 'starter' ? 'ring-2 ring-blue-500 shadow-blue-100' : 'hover:scale-105' %>">
+          <% if @active_billing_plan.stripe_plan_id == 'starter' %>
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+              <span class="bg-blue-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg whitespace-nowrap">Current</span>
+            </div>
+          <% end %>
+          
+          <div class="p-8">
+            <!-- Plan Header -->
+            <div class="text-center mb-8">
+              <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <i class="material-icons text-gray-600 text-2xl">class</i>
+              </div>
+              <h4 class="text-xl font-bold text-gray-900 mb-2">Starter</h4>
+              <div class="text-4xl font-bold text-gray-900 mb-1">$0</div>
+              <div class="text-gray-500">per month</div>
+            </div>
+            
+            <!-- Features List -->
+            <div class="space-y-4 mb-8">
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700">Up to <strong>5 universes</strong></span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700"><strong>50MB</strong> image storage</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700">Core page types</span>
+              </div>
+            </div>
+            
+            <!-- Action Button -->
+            <div class="mt-auto">
+              <% if @active_billing_plan.stripe_plan_id == 'starter' %>
+                <button class="w-full py-3 px-4 rounded-xl text-sm font-semibold bg-gray-100 text-gray-500 cursor-not-allowed">
+                  Current Plan
+                </button>
+              <% else %>
+                <%= link_to change_subscription_path('starter'), class: "w-full py-3 px-4 rounded-xl text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 text-center block #{'pointer-events-none opacity-50' if free_for_life_user}" do %>
+                  Switch to Starter
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Premium Monthly Plan -->
+        <div class="plan-card relative bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 <%= active_stripe_plan == 'premium' ? 'ring-2 ring-blue-500 shadow-blue-200/50' : 'hover:scale-105' %> border border-blue-300">
+          <% if active_stripe_plan == 'premium' %>
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+              <span class="bg-blue-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg whitespace-nowrap">Current</span>
+            </div>
+          <% end %>
+          
+          <div class="p-8">
+            <!-- Plan Header -->
+            <div class="text-center mb-8">
+              <div class="w-16 h-16 bg-gradient-to-br from-blue-200 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <i class="material-icons text-blue-700 text-2xl">grade</i>
+              </div>
+              <h4 class="text-xl font-bold text-gray-900 mb-2">Premium</h4>
+              <div class="text-4xl font-bold text-gray-900 mb-1">$9</div>
+              <div class="text-gray-500">per month</div>
+            </div>
+            
+            <!-- Features List -->
+            <div class="space-y-4 mb-8">
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700"><strong>Unlimited</strong> universes</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700"><strong>10GB</strong> image storage</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700">All <strong><%= Rails.application.config.content_types[:all].count %></strong> page types</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700">Document analysis</span>
+              </div>
+            </div>
+            
+            <!-- Action Button -->
+            <div class="mt-auto">
+              <% if active_stripe_plan == 'premium' %>
+                <button class="w-full py-3 px-4 rounded-xl text-sm font-semibold bg-blue-100 text-blue-800 cursor-not-allowed">
+                  Current Plan
+                </button>
+              <% elsif on_premium_plan %>
+                <%= link_to change_subscription_path('premium'), class: "w-full py-3 px-4 rounded-xl text-sm font-semibold text-blue-600 bg-white border-2 border-blue-200 hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 text-center block #{'pointer-events-none opacity-50' if free_for_life_user}" do %>
+                  Switch to Monthly
+                <% end %>
+              <% elsif @active_promotions.any? %>
+                <button class="w-full py-3 px-4 rounded-xl text-sm font-semibold bg-green-100 text-green-800 cursor-not-allowed">
+                  Premium Active
+                </button>
+              <% else %>
+                <%= link_to change_subscription_path('premium'), class: "w-full py-3 px-4 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transition-all duration-200 text-center block #{'pointer-events-none opacity-50' if free_for_life_user}" do %>
+                  Upgrade Now
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Premium Quarterly Plan -->
+        <div class="plan-card relative bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 <%= active_stripe_plan == 'premium-trio' ? 'ring-2 ring-purple-500 shadow-purple-200/50' : 'hover:scale-105' %> border border-purple-300">
+          <% if active_stripe_plan == 'premium-trio' %>
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+              <span class="bg-blue-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg whitespace-nowrap">Current</span>
+            </div>
+          <% else %>
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+              <span class="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg whitespace-nowrap">Most Popular</span>
+            </div>
+          <% end %>
+          <div class="absolute -top-2 -right-2 z-10">
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">Save 11%</span>
+          </div>
+          
+          <div class="p-8">
+            <!-- Plan Header -->
+            <div class="text-center mb-8">
+              <div class="w-16 h-16 bg-gradient-to-br from-purple-200 to-pink-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <i class="material-icons text-purple-700 text-2xl">grade</i>
+              </div>
+              <h4 class="text-xl font-bold text-gray-900 mb-2">Premium</h4>
+              <div class="text-4xl font-bold text-gray-900 mb-1">$8</div>
+              <div class="text-gray-500 mb-1">per month</div>
+              <div class="text-xs text-green-600 font-semibold">Billed quarterly</div>
+            </div>
+            
+            <!-- Features List -->
+            <div class="space-y-4 mb-8">
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700"><strong>Unlimited</strong> universes</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700"><strong>10GB</strong> image storage</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700">All <strong><%= Rails.application.config.content_types[:all].count %></strong> page types</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700">Document analysis</span>
+              </div>
+            </div>
+            
+            <!-- Action Button -->
+            <div class="mt-auto">
+              <% if active_stripe_plan == 'premium-trio' %>
+                <button class="w-full py-3 px-4 rounded-xl text-sm font-semibold bg-blue-100 text-blue-800 cursor-not-allowed">
+                  Current Plan
+                </button>
+              <% elsif on_premium_plan %>
+                <%= link_to change_subscription_path('premium-trio'), class: "w-full py-3 px-4 rounded-xl text-sm font-semibold text-blue-600 bg-white border-2 border-blue-200 hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 text-center block #{'pointer-events-none opacity-50' if free_for_life_user}" do %>
+                  Switch to Quarterly
+                <% end %>
+              <% elsif @active_promotions.any? %>
+                <button class="w-full py-3 px-4 rounded-xl text-sm font-semibold bg-green-100 text-green-800 cursor-not-allowed">
+                  Premium Active
+                </button>
+              <% else %>
+                <%= link_to change_subscription_path('premium-trio'), class: "w-full py-3 px-4 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transition-all duration-200 text-center block #{'pointer-events-none opacity-50' if free_for_life_user}" do %>
+                  Upgrade Now
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Premium Annual Plan -->
+        <div class="plan-card relative bg-gradient-to-br from-amber-50 to-orange-100 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 <%= active_stripe_plan == 'premium-annual' ? 'ring-2 ring-amber-500 shadow-amber-200/50' : 'hover:scale-105' %> border border-amber-300">
+          <% if active_stripe_plan == 'premium-annual' %>
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+              <span class="bg-blue-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg whitespace-nowrap">Current</span>
+            </div>
+          <% end %>
+          <div class="absolute -top-2 -right-2 z-10">
+            <span class="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">Save 22%</span>
+          </div>
+          
+          <div class="p-8">
+            <!-- Plan Header -->
+            <div class="text-center mb-8">
+              <div class="w-16 h-16 bg-gradient-to-br from-amber-200 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <i class="material-icons text-amber-700 text-2xl">grade</i>
+              </div>
+              <h4 class="text-xl font-bold text-gray-900 mb-2">Premium</h4>
+              <div class="text-4xl font-bold text-gray-900 mb-1">$7</div>
+              <div class="text-gray-600 mb-1">per month</div>
+              <div class="text-xs text-green-600 font-semibold">Billed annually</div>
+            </div>
+            
+            <!-- Features List -->
+            <div class="space-y-4 mb-8">
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700"><strong>Unlimited</strong> universes</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700"><strong>10GB</strong> image storage</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700">All <strong><%= Rails.application.config.content_types[:all].count %></strong> page types</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-gray-700">Document analysis</span>
+              </div>
+            </div>
+            
+            <!-- Action Button -->
+            <div class="mt-auto">
+              <% if active_stripe_plan == 'premium-annual' %>
+                <button class="w-full py-3 px-4 rounded-xl text-sm font-semibold bg-blue-100 text-blue-800 cursor-not-allowed">
+                  Current Plan
+                </button>
+              <% elsif on_premium_plan %>
+                <%= link_to change_subscription_path('premium-annual'), class: "w-full py-3 px-4 rounded-xl text-sm font-semibold text-blue-600 bg-white border-2 border-blue-300 hover:border-blue-400 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 text-center block #{'pointer-events-none opacity-50' if free_for_life_user}" do %>
+                  Switch to Annual
+                <% end %>
+              <% elsif @active_promotions.any? %>
+                <button class="w-full py-3 px-4 rounded-xl text-sm font-semibold bg-green-100 text-green-800 cursor-not-allowed">
+                  Premium Active
+                </button>
+              <% else %>
+                <%= link_to change_subscription_path('premium-annual'), class: "w-full py-3 px-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-xl hover:shadow-2xl transition-all duration-200 text-center block #{'pointer-events-none opacity-50' if free_for_life_user}" do %>
+                  Upgrade Now
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Account Actions -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <!-- Billing History -->
+    <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+      <div class="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold text-gray-900">Billing History</h3>
+      </div>
+      <div class="px-6 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+              <i class="material-icons text-blue-600">receipt</i>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-900">Transaction History</p>
+              <p class="text-sm text-gray-500">View all your billing records</p>
+            </div>
+          </div>
+          <%= link_to billing_history_path, class: 'inline-flex items-center px-4 py-2.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200' do %>
+            View History
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Methods -->
+    <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+      <div class="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold text-gray-900">Payment Methods</h3>
+      </div>
+      <div class="px-6 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+              <i class="material-icons text-blue-600">credit_card</i>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-900">
+                <% if @stripe_payment_methods.data.length > 0 %>
+                  <%= (@stripe_payment_methods.data[0].try(:card).try(:brand) || 'Card').titleize %> •••• <%= @stripe_payment_methods.data[0].try(:card).try(:last4) %>
+                <% else %>
+                  No payment method on file
+                <% end %>
+              </p>
+              <p class="text-sm text-gray-500">
+                <% if @stripe_payment_methods.data.length > 0 %>
+                  Primary payment method
+                <% else %>
+                  Add a payment method to upgrade
+                <% end %>
+              </p>
+            </div>
+          </div>
+          <%= link_to payment_info_path, class: 'inline-flex items-center px-4 py-2.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200' do %>
+            <%= @stripe_payment_methods.data.length > 0 ? 'Update' : 'Add Payment Method' %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Payment & Code Actions -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <!-- Prepay for Premium -->
+    <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+      <div class="bg-gradient-to-r from-gray-50 to-orange-50 px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold text-gray-900">Prepay for Premium</h3>
+      </div>
+      <div class="px-6 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+              <i class="fab fa-paypal text-blue-600 text-lg"></i>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-900">PayPal Premium Codes</p>
+              <p class="text-sm text-gray-500">Prepaid codes for gift or personal use</p>
+            </div>
+          </div>
+          <%= link_to prepay_path, class: 'inline-flex items-center px-4 py-2.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200' do %>
+            Purchase Codes
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Redeem a Premium Code -->
+    <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+      <div class="bg-gradient-to-r from-gray-50 to-green-50 px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold text-gray-900">Redeem a Premium Code</h3>
+      </div>
+    <div class="px-6 py-4">
+      <!-- Available Codes -->
+      <% if current_user.page_unlock_promo_codes.where('uses_remaining > 0').any? %>
+        <div class="mb-4">
+          <h4 class="text-sm font-medium text-gray-900 mb-2">Available to activate:</h4>
+          <div class="space-y-2">
+            <% current_user.page_unlock_promo_codes.where('uses_remaining > 0').each do |code| %>
+              <div class="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                <div>
+                  <code class="text-sm font-mono text-gray-900"><%= code.code %></code>
+                  <span class="text-sm text-gray-500 ml-2">(<%= code.description %>)</span>
+                </div>
+                <button type="button" class="js-prepaid-promo-code text-blue-600 hover:text-blue-800 text-sm font-medium" data-code="<%= code.code %>">
+                  Use Code
+                </button>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Redemption Form -->
+      <%= form_for :promotional_code, url: redeem_path, local: true, class: 'flex items-center space-x-3' do |form| %>
+        <div class="flex-1">
+          <%= form.text_field :promo_code, 
+              placeholder: 'Enter promotional code',
+              class: 'block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm font-mono uppercase py-2.5 px-3',
+              id: 'promo_code_input' %>
+        </div>
+        <%= form.submit 'Redeem', class: 'inline-flex items-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all duration-200' %>
+      <% end %>
+
+      <!-- Active Promotions -->
+      <% if current_user.active_promotions.any? %>
+        <div class="mt-6 pt-6 border-t border-gray-200">
+          <h4 class="text-sm font-medium text-gray-900 mb-3">Active promotional codes:</h4>
+          <div class="space-y-3">
+            <% current_user.active_promo_codes.each do |promo_code| %>
+              <% promotion = Promotion.find_by(user: current_user, page_unlock_promo_code_id: promo_code.id) %>
+              <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <code class="text-sm font-mono text-green-800"><%= promo_code.code %></code>
+                  <span class="text-xs text-green-600">
+                    Expires <%= distance_of_time_in_words(DateTime.current, promotion.expires_at) %>
+                  </span>
+                </div>
+                <p class="text-sm text-green-700"><%= promo_code.description %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <script>
+    // Auto-fill promo code when clicking on purchased codes
+    document.addEventListener('DOMContentLoaded', function() {
+      const promoButtons = document.querySelectorAll('.js-prepaid-promo-code');
+      const promoInput = document.getElementById('promo_code_input');
+      
+      if (promoInput) {
+        promoButtons.forEach(button => {
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const code = this.dataset.code;
+            promoInput.value = code;
+            promoInput.focus();
+          });
+        });
+      }
+    });
+  </script>
+
 </div>
