@@ -9,6 +9,48 @@
 
   <!-- Main Content -->
   <div class="space-y-12">
+    <!-- Features & Capabilities Section -->
+    <section>
+      <div class="flex items-center mb-4">
+        <i class="material-icons text-indigo-600 mr-2">info</i>
+        <h2 class="text-2xl font-semibold text-gray-800">Features & Capabilities</h2>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-12">
+        <%= link_to help_free_features_path, class: "block" do %>
+          <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow p-6">
+            <div class="flex items-center mb-3">
+              <div class="bg-green-50 rounded-full p-2 mr-3">
+                <i class="material-icons text-green-600">explore</i>
+              </div>
+              <h3 class="font-medium text-gray-800">Free Features Guide</h3>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">Complete overview of free features including core worldbuilding pages, document creation, universe organization, community features, and collaboration tools.</p>
+            <div class="flex items-center text-sm text-green-600 font-medium">
+              <span>Read guide</span>
+              <i class="material-icons ml-1 text-sm">arrow_forward</i>
+            </div>
+          </div>
+        <% end %>
+        
+        <%= link_to help_premium_features_path, class: "block" do %>
+          <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow p-6">
+            <div class="flex items-center mb-3">
+              <div class="bg-purple-50 rounded-full p-2 mr-3">
+                <i class="material-icons text-purple-600">star</i>
+              </div>
+              <h3 class="font-medium text-gray-800">Premium Features Guide</h3>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">Comprehensive guide to Premium features including advanced content types, document analysis, unlimited storage, timelines, collections, and collaboration tools.</p>
+            <div class="flex items-center text-sm text-purple-600 font-medium">
+              <span>Read guide</span>
+              <i class="material-icons ml-1 text-sm">arrow_forward</i>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
     <!-- Worldbuilding Pages Section -->
     <section>
       <div class="flex items-center mb-4">
@@ -38,7 +80,7 @@
         <h2 class="text-2xl font-semibold text-gray-800">Documentation</h2>
       </div>
       
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-12">
         <%= link_to help_page_templates_path, class: "block" do %>
           <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow p-6">
             <div class="flex items-center mb-3">
@@ -206,31 +248,33 @@
       </div>
     </section>
 
-    <!-- Additional Help Section -->
-    <section>
-      <div class="flex items-center mb-4">
-        <i class="material-icons text-amber-600 mr-2">contact_support</i>
-        <h2 class="text-2xl font-semibold text-gray-800">Additional help</h2>
-      </div>
-      
-      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-        <div class="prose text-gray-600 max-w-none">
-          <p>
-            Have a question not answered by anything above? Feel free to send me an email any time at <strong>andrew@indentlabs.com</strong> and I'll get back to you
-            as quickly as possible. I'm always happy to help!
-          </p>
-          <p>
-            Happy worldbuilding!
-          </p>
+    <!-- Additional Help Section - Only for signed-in users -->
+    <% if user_signed_in? %>
+      <section>
+        <div class="flex items-center mb-4">
+          <i class="material-icons text-amber-600 mr-2">contact_support</i>
+          <h2 class="text-2xl font-semibold text-gray-800">Additional help</h2>
         </div>
         
-        <div class="mt-6 flex">
-          <a href="mailto:andrew@indentlabs.com" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <i class="material-icons mr-2">email</i>
-            Contact Support
-          </a>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+          <div class="prose text-gray-600 max-w-none">
+            <p>
+              Have a question not answered by anything above? Feel free to send me an email any time at <strong>andrew@indentlabs.com</strong> and I'll get back to you
+              as quickly as possible. I'm always happy to help!
+            </p>
+            <p>
+              Happy worldbuilding!
+            </p>
+          </div>
+          
+          <div class="mt-6 flex">
+            <a href="mailto:andrew@indentlabs.com" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <i class="material-icons mr-2">email</i>
+              Contact Support
+            </a>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    <% end %>
   </div>
 </div>

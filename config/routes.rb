@@ -238,15 +238,19 @@ Rails.application.routes.draw do
         get '/:model.csv',    to: 'export#csv',           as: :notebook_csv
       end
     end
-    get '/help', to: 'help#index', as: :help_center
-    get '/help/page-templates', to: 'help#page_templates', as: :help_page_templates
-    get '/help/organizing-with-universes', to: 'help#organizing_with_universes', as: :help_organizing_with_universes
   end
   delete 'delete_my_account', to: 'users#delete_my_account'
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
 
   get '/paper', to: redirect('https://www.notebook-paper.com')
+
+  # Help Center - Public routes
+  get '/help', to: 'help#index', as: :help_center
+  get '/help/page-templates', to: 'help#page_templates', as: :help_page_templates
+  get '/help/organizing-with-universes', to: 'help#organizing_with_universes', as: :help_organizing_with_universes
+  get '/help/premium-features', to: 'help#premium_features', as: :help_premium_features
+  get '/help/free-features', to: 'help#free_features', as: :help_free_features
 
   # Main pages
   root to: 'main#index'
