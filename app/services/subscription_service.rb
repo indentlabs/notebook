@@ -8,21 +8,51 @@ class SubscriptionService < Service
     # Sync with Stripe (todo pipe into StripeService)
     unless Rails.env.test?
       stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
-      stripe_subscription = stripe_customer.subscriptions.data[0]
+      
+      # Use safe navigation to handle customers without subscriptions
+      subscriptions = stripe_customer.subscriptions&.data || []
+      stripe_subscription = subscriptions.first
 
       if stripe_subscription.nil?
-        # Create a new subscription on Stripe
-        Stripe::Subscription.create(customer: user.stripe_customer_id, plan: plan_id)
+        # Get the customer's default payment method
+        payment_methods = Stripe::PaymentMethod.list({
+          customer: user.stripe_customer_id,
+          type: 'card'
+        })
+        
+        default_payment_method = payment_methods.data.first&.id
+        
+        # Create a new subscription on Stripe with the default payment method
+        subscription_params = {
+          customer: user.stripe_customer_id,
+          items: [{ price: plan_id }]
+        }
+        
+        # Add default payment method if available
+        if default_payment_method
+          subscription_params[:default_payment_method] = default_payment_method
+        end
+        
+        Stripe::Subscription.create(subscription_params)
         stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
-        stripe_subscription = stripe_customer.subscriptions.data[0]
+        
+        # Use safe navigation to get the newly created subscription
+        subscriptions = stripe_customer.subscriptions&.data || []
+        stripe_subscription = subscriptions.first
       else
-        # Edit an existing Stripe subscription
-        stripe_subscription.plan = plan_id
+        # Edit an existing Stripe subscription by modifying its items
+        Stripe::Subscription.modify(stripe_subscription.id, {
+          items: [{
+            id: stripe_subscription.items.data[0].id,
+            price: plan_id
+          }]
+        })
+        # Retrieve the updated subscription
+        stripe_subscription = Stripe::Subscription.retrieve(stripe_subscription.id)
       end
 
-      # Save the change
+      # The subscription is already saved by the modify call above
       begin
-        stripe_subscription.save unless Rails.env.test?
 
         # Add any bonus bandwidth granted by the plan
         user.update(

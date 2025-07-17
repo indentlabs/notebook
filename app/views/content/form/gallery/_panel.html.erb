@@ -609,9 +609,10 @@
           if (data.pinned) {
             buttonElement.classList.add('amber-text');
             buttonElement.classList.remove('grey-text');
+            imageCard.classList.add('image-pinned');
             
             // Add pinned badge if not exists
-            if (!imageCard.querySelector('.pinned-badge-overlay')) {
+            if (!imageCard.querySelector('.image-pinned-badge-overlay')) {
               var pinnedBadge = document.createElement('div');
               pinnedBadge.className = 'image-pinned-badge-overlay';
               pinnedBadge.innerHTML = '<i class="material-icons amber-text">push_pin</i> Pinned';
@@ -632,11 +633,17 @@
               if (btn !== buttonElement) {
                 btn.classList.remove('amber-text');
                 btn.classList.add('grey-text');
+                // Also remove image-pinned class from other cards
+                var otherCard = btn.closest('.image-card');
+                if (otherCard) {
+                  otherCard.classList.remove('image-pinned');
+                }
               }
             });
           } else {
             buttonElement.classList.remove('amber-text');
             buttonElement.classList.add('grey-text');
+            imageCard.classList.remove('image-pinned');
             
             // Remove pinned badge
             var pinnedBadge = imageCard.querySelector('.image-pinned-badge-overlay');

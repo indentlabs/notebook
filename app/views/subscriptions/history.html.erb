@@ -14,7 +14,7 @@
             </p>
           </div>
           <div class="col s12 m6">
-            <% if @stripe_customer.sources.total_count == 0 %>
+            <% if @stripe_payment_methods.data.length == 0 %>
               <p>
                 We don't currently have a payment method on file for you. You'll be asked to add one whenever you
                 upgrade, but you can add one at any time here.
@@ -26,7 +26,7 @@
             <% else %>
               <p>
                 We have a payment method on file for you through Stripe
-                (<%= @stripe_customer.sources.data[0].try(:brand) || 'a card' %> ending in <%= @stripe_customer.sources.data[0].last4 %>),
+                (<%= @stripe_payment_methods.data[0].try(:card).try(:brand) || 'a card' %> ending in <%= @stripe_payment_methods.data[0].try(:card).try(:last4) %>),
                 but since we don't store it, you cannot edit it. You can choose to add a new one (replacing the old),
                 or delete the existing one.
               </p>
@@ -34,7 +34,7 @@
           </div>
         </div>
       </div>
-      <% if @stripe_customer.sources.total_count > 0 %>
+      <% if @stripe_payment_methods.data.length > 0 %>
       <div class="card-action">
         <%= link_to "Add new payment method", payment_info_path %>
         <%= link_to "Delete existing payment method", delete_payment_method_path %>
@@ -56,7 +56,7 @@
       <div class="card-content">
         <div class="card-title">
           <div class="right">
-            <% account_balance = @stripe_customer.account_balance %>
+            <% account_balance = @stripe_customer.balance %>
             <%= 'Outstanding balance:' if account_balance > 0 %> <%= number_to_currency(account_balance.abs / 100.0) if account_balance != 0 %> <%= 'credit' if account_balance < 0 %>
           </div>
           Billing history
@@ -73,9 +73,9 @@
             <% @stripe_invoices.first(10).each do |invoice| %>
               <tr>
                 <td>
-                  <%= Time.at(invoice.date).strftime("%B %d, %Y") %><br />
-                  at <%= Time.at(invoice.date).strftime("%I:%M %p") %><br />
-                  <%= '(Pending)' if Time.at(invoice.date) > Time.now %>
+                  <%= Time.at(invoice.created).strftime("%B %d, %Y") %><br />
+                  at <%= Time.at(invoice.created).strftime("%I:%M %p") %><br />
+                  <%= '(Pending)' if Time.at(invoice.created) > Time.now %>
                 </td>
                 <td>
                   <ul>

@@ -584,32 +584,32 @@ class ContentController < ApplicationController
     # Are we pinning or unpinning?
     new_pin_status = !@image.pinned
     
-    # If we're pinning this image (not just unpinning), we need to unpin any other images
-    if new_pin_status
-      # First, unpin any other ImageUploads for this content
-      if content.respond_to?(:image_uploads)
-        content.image_uploads.where(pinned: true).where.not(id: params[:image_type] == 'image_upload' ? params[:image_id] : nil).update_all(pinned: false)
-      end
+    # If we're pinning this image, unpin all other images for this content first
+    # This prevents database locking issues from the model callbacks
+    if new_pin_status == true
+      # Unpin other image uploads for this content
+      ImageUpload.where(content_type: content.class.name, content_id: content.id, pinned: true)
+                .where.not(id: @image.id)
+                .update_all(pinned: false)
       
-      # Then, unpin any BasilCommissions for this content
-      if content.respond_to?(:basil_commissions)
-        content.basil_commissions.where(pinned: true).where.not(id: params[:image_type] == 'basil_commission' ? params[:image_id] : nil).update_all(pinned: false)
-      end
+      # Also unpin any basil commissions for this content
+      BasilCommission.where(entity_type: content.class.name, entity_id: content.id, pinned: true)
+                     .update_all(pinned: false)
     end
     
-    # Now toggle this image's pin status - force with update_column to avoid callbacks
+    # Now update this image's pin status (without triggering callbacks that cause locks)
     @image.update_column(:pinned, new_pin_status)
-    # Force reload to ensure we have latest pin status
-    @image.reload
     
     # Clear any cached images to ensure pinned images are shown
     content.instance_variable_set(:@random_image_including_private_cache, nil)
+    content.instance_variable_set(:@pinned_public_image_cache, nil)
+    content.instance_variable_set(:@first_public_image_cache, nil)
     
-    # Return the updated status
+    # Return the updated status (use new_pin_status since update_column might not refresh the object)
     render json: { 
       id: @image.id, 
       type: params[:image_type], 
-      pinned: @image.pinned 
+      pinned: new_pin_status 
     }
   end
 

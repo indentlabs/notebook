@@ -52,15 +52,7 @@ class BasilCommission < ApplicationRecord
   # Use acts_as_list for ordering images
   acts_as_list scope: [:entity_type, :entity_id]
 
-  # Add callback to ensure only one pinned image per entity
-  before_save :ensure_single_pinned_image, if: -> { pinned_changed? && pinned? }
+  # Note: Pin unpinning logic is handled in the controller to prevent database locking issues
 
   private
-
-  # Ensures only one basil commission can be pinned per entity
-  def ensure_single_pinned_image
-    BasilCommission.where(entity_type: entity_type, entity_id: entity_id, pinned: true)
-                   .where.not(id: id)
-                   .update_all(pinned: false)
-  end
 end

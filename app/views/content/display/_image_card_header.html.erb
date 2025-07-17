@@ -16,13 +16,13 @@
       preview_image = get_preview_image(regular_images, basil_images)
       combined_images = preview_image.present? ? [preview_image] : []
       
-      # If we have no images, try to add a default image
-      if combined_images.empty? && @content.respond_to?(:default_image)
-        default_image = @content.default_image
-        if default_image.present?
+      # If we have no images, add the card-header fallback image
+      if combined_images.empty?
+        card_header_path = @content.header_asset_for(@content.class.name)
+        if card_header_path.present?
           combined_images << {
-            type: 'default',
-            data: default_image
+            type: 'card_header',
+            data: card_header_path
           }
         end
       end
@@ -42,8 +42,8 @@
           <% else %>
             <%= image_tag asset_path("missing-image.jpg") %>
           <% end %>
-        <% elsif image_type == 'default' && image_data.is_a?(String) %>
-          <img src="<%= image_data %>">
+        <% elsif image_type == 'card_header' && image_data.is_a?(String) %>
+          <%= image_tag image_data %>
         <% end %>
         <div class="caption bordered-text center">
           <h3>

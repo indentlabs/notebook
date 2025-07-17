@@ -21,6 +21,7 @@ class SubscriptionsController < ApplicationController
 
   def history
     @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
+    @stripe_payment_methods = @stripe_customer.list_payment_methods(type: 'card')
     @stripe_invoices = Stripe::Invoice.list({
       customer: current_user.stripe_customer_id
     })
@@ -132,6 +133,7 @@ class SubscriptionsController < ApplicationController
   def information
     @selected_plan = BillingPlan.find_by(stripe_plan_id: params['plan'], available: true)
     @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
+    @stripe_payment_methods = @stripe_customer.list_payment_methods(type: 'card')
   end
 
   # Save a payment method
@@ -143,15 +145,19 @@ class SubscriptionsController < ApplicationController
     end
 
     stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
-    stripe_subscription = stripe_customer.subscriptions.data[0]
     begin
       # Delete all existing payment methods to have our new one "replace" them
-      stripe_customer.sources.each do |payment_method|
-        payment_method.delete
+      existing_payment_methods = stripe_customer.list_payment_methods(type: 'card')
+      existing_payment_methods.data.each do |payment_method|
+        payment_method.detach
       end
 
       # Add the new card info
-      stripe_customer.sources.create(source: valid_token)
+      payment_method = Stripe::PaymentMethod.create({
+        type: 'card',
+        card: { token: valid_token }
+      })
+      payment_method.attach(customer: stripe_customer.id)
     rescue Stripe::CardError => e
       flash[:alert] = "We couldn't save your payment information because #{e.message.downcase} Please double check that your information is correct."
       return redirect_back fallback_location: payment_info_path
@@ -172,21 +178,29 @@ class SubscriptionsController < ApplicationController
 
   def delete_payment_method
     stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
-    stripe_subscription = stripe_customer.subscriptions.data[0]
+    
+    # Use safe navigation to handle customers without subscriptions
+    subscriptions = stripe_customer.subscriptions&.data || []
+    stripe_subscription = subscriptions.first
 
-    stripe_customer.sources.each do |payment_method|
-      payment_method.delete
+    payment_methods = stripe_customer.list_payment_methods(type: 'card')
+    payment_methods.data.each do |payment_method|
+      payment_method.detach
     end
 
     notice = ['Your payment method has been successfully deleted.']
 
-    if stripe_subscription.plan.id != 'starter'
-      # Cancel the user's at the end of its effective period on Stripe's end, so they don't get rebilled
-      stripe_subscription.delete(at_period_end: true)
+    # Check if user has a non-starter subscription using modern API
+    if stripe_subscription&.items&.data&.any?
+      current_price_id = stripe_subscription.items.data[0].price.id
+      if current_price_id != 'starter'
+        # Cancel the user's at the end of its effective period on Stripe's end, so they don't get rebilled
+        stripe_subscription.delete(at_period_end: true)
 
-      active_billing_plan = BillingPlan.find_by(stripe_plan_id: stripe_subscription.plan.id)
-      if active_billing_plan
-        notice << "Your #{active_billing_plan.name} subscription will end on #{Time.at(stripe_subscription.current_period_end).strftime('%B %d')}."
+        active_billing_plan = BillingPlan.find_by(stripe_plan_id: current_price_id)
+        if active_billing_plan
+          notice << "Your #{active_billing_plan.name} subscription will end on #{Time.at(stripe_subscription.current_period_end).strftime('%B %d')}."
+        end
       end
     end
 
@@ -256,7 +270,8 @@ class SubscriptionsController < ApplicationController
       # If we're upgrading to premium, we want to check that a payment method
       # is already on file. If it is, we process the plan change. If it's not,
       # we redirect to the payment method page.
-      if stripe_customer.sources.total_count > 0
+      payment_methods = stripe_customer.list_payment_methods(type: 'card')
+      if payment_methods.data.length > 0
         process_plan_change(current_user, plan_id)
       else
         return :payment_method_needed

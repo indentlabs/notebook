@@ -254,13 +254,38 @@ class User < ApplicationRecord
 
   def initialize_stripe_customer
     if self.stripe_customer_id.nil?
-      customer_data = Stripe::Customer.create(email: self.email)
+      unless Rails.env.test?
+        customer_data = Stripe::Customer.create(email: self.email)
 
-      self.stripe_customer_id = customer_data.id
-      self.save
+        self.stripe_customer_id = customer_data.id
+        self.save
 
-      # If we're creating this Customer in Stripe for the first time, we should also associate them with the free tier
-      Stripe::Subscription.create(customer: self.stripe_customer_id, plan: 'starter')
+        # If we're creating this Customer in Stripe for the first time, we should also associate them with the free tier
+        # Get the customer's available payment methods (if any)
+        payment_methods = Stripe::PaymentMethod.list({
+          customer: self.stripe_customer_id,
+          type: 'card'
+        })
+        
+        default_payment_method = payment_methods.data.first&.id
+        
+        # Create subscription with payment method if available
+        subscription_params = {
+          customer: self.stripe_customer_id,
+          items: [{ price: 'starter' }]
+        }
+        
+        # Add default payment method if available (free tier may not have payment methods)
+        if default_payment_method
+          subscription_params[:default_payment_method] = default_payment_method
+        end
+        
+        Stripe::Subscription.create(subscription_params)
+      else
+        # In test environment, just set a dummy customer ID
+        self.stripe_customer_id = 'test_customer_id'
+        self.save
+      end
     end
 
     self.stripe_customer_id

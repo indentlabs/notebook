@@ -23,7 +23,10 @@ namespace :data_integrity do
       User.where(selected_billing_plan_id: billing_plan_id).find_each do |user|
         # puts "Checking user ID #{user.id}"
         stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
-        stripe_subscription = stripe_customer.subscriptions.data[0]
+        
+        # Use safe navigation to handle customers without subscriptions
+        subscriptions = stripe_customer.subscriptions&.data || []
+        stripe_subscription = subscriptions.first
 
         # Go through each of the customer's subscription items and make sure their
         # current billing plan is included as one.
@@ -31,7 +34,8 @@ namespace :data_integrity do
           should_downgrade_user = true
         else
           should_downgrade_user = stripe_subscription.items.data.none? do |subscription_item|
-            subscription_item.plan.id == active_billing_plan.stripe_plan_id
+            # Use price.id instead of deprecated plan.id
+            subscription_item.price.id == active_billing_plan.stripe_plan_id
           end
         end
 
