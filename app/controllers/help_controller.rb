@@ -29,6 +29,26 @@ class HelpController < ApplicationController
     @page_title = "Free Features Guide"
     @meta_description = "Complete overview of free features in Notebook.ai including core worldbuilding pages, document creation, universe organization, community features, and collaboration tools."
   end
+
+  def your_first_universe
+    @page_title = "Your First Universe - Getting Started Guide"
+    @meta_description = "Step-by-step guide to creating your first fictional universe in Notebook.ai. Learn how to organize characters, locations, items, and build the foundation of your worldbuilding project."
+  end
+
+  def page_visualization
+    @page_title = "Page Visualization with Basil"
+    @meta_description = "Complete guide to visualizing your worldbuilding content with Basil. Learn how to generate character portraits, location art, and item illustrations from your page details."
+  end
+
+  def document_analysis
+    @page_title = "Document Analysis Guide"
+    @meta_description = "Master Notebook.ai's AI-powered document analysis feature. Learn how to automatically extract characters, locations, and plot elements from your manuscripts and stories."
+  end
+
+  def organizing_with_tags
+    @page_title = "Organizing with Tags"
+    @meta_description = "Master the art of content organization using tags in Notebook.ai. Learn how to create, manage, and use tags to efficiently organize and discover your worldbuilding content."
+  end
   
   def set_sidenav_expansion
     @sidenav_expansion = 'my account'

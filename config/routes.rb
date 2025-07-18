@@ -247,6 +247,10 @@ Rails.application.routes.draw do
 
   # Help Center - Public routes
   get '/help', to: 'help#index', as: :help_center
+  get '/help/your-first-universe', to: 'help#your_first_universe', as: :help_your_first_universe
+  get '/help/page-visualization', to: 'help#page_visualization', as: :help_page_visualization
+  get '/help/document-analysis', to: 'help#document_analysis', as: :help_document_analysis
+  get '/help/organizing-with-tags', to: 'help#organizing_with_tags', as: :help_organizing_with_tags
   get '/help/page-templates', to: 'help#page_templates', as: :help_page_templates
   get '/help/organizing-with-universes', to: 'help#organizing_with_universes', as: :help_organizing_with_universes
   get '/help/premium-features', to: 'help#premium_features', as: :help_premium_features
