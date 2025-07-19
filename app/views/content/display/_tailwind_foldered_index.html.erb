@@ -88,6 +88,25 @@
         </div>
       </div>
 
+      <!-- Recently Edited Pages -->
+      <% if content.any? %>
+        <% recent_pages = content.sort_by(&:updated_at).reverse.first(5) %>
+        <div class="px-6 py-4 border-t border-gray-200">
+          <h3 class="text-sm font-medium text-gray-900 mb-3">Recently Edited</h3>
+          <div class="space-y-1">
+            <% recent_pages.each do |page| %>
+              <%= link_to (page.is_a?(ContentPage) ? page.view_path : page), class: "group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors" do %>
+                <i class="material-icons text-lg mr-3 text-gray-400 group-hover:text-notebook-blue <%= page.text_color %>"><%= page.icon %></i>
+                <div class="flex-1 min-w-0">
+                  <span class="truncate block"><%= page.name %></span>
+                  <span class="text-xs text-gray-500 truncate block"><%= distance_of_time_in_words(page.updated_at, Time.current) %> ago</span>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
       <!-- Content Type Breakdown (if mixed) -->
       <% non_folder_content_types = content_counts_per_type.reject { |type, _| type == 'Folder' } %>
       <% if non_folder_content_types.count > 1 %>
@@ -221,7 +240,7 @@
             <div class="flex-shrink-0">
               <% if @universe_scope %>
                 <%= link_to @universe_scope do %>
-                  <%= image_tag @universe_scope.random_image_including_private(format: :hero), class: 'h-16 w-16 rounded-xl ring-4 ring-white shadow-lg lg:h-20 lg:w-20' %>
+                  <%= image_tag @universe_scope.random_image_including_private(format: :hero), class: 'h-16 w-24 rounded-xl ring-4 ring-white shadow-lg lg:h-20 lg:w-32 object-cover' %>
                 <% end %>
               <% else %>
                 <%= image_tag current_user.image_url, class: 'h-16 w-16 rounded-xl ring-4 ring-white shadow-lg lg:h-20 lg:w-20' %>
