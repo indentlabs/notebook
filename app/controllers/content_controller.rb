@@ -38,10 +38,12 @@ class ContentController < ApplicationController
 
     @show_scope_notice = @universe_scope.present? && @content_type_class != Universe
 
-    # Filters
+    # For tags, we need all content IDs (not just paginated) to show all available tags
+    all_content_ids = @content.map(&:id)
+    
     @page_tags = PageTag.where(
       page_type: @content_type_class.name,
-      page_id:   @content.pluck(:id)
+      page_id:   all_content_ids
     ).order(:tag)
     @filtered_page_tags = []
     if params.key?(:slug)
@@ -56,46 +58,65 @@ class ContentController < ApplicationController
 
     # Sort content with favorites always first, then by selected sort option
     sort_option = params[:sort] || 'updated_at'
-    @content = case sort_option
-               when 'alphabetical'
-                 @content.sort_by { |x| [x.favorite? ? 0 : 1, x.name.downcase] }
-               when 'created_at'
-                 @content.sort_by { |x| [x.favorite? ? 0 : 1, x.created_at] }.reverse
-               else # 'updated_at' or default
-                 @content.sort_by { |x| [x.favorite? ? 0 : 1, x.updated_at] }.reverse
-               end
+    sorted_content = case sort_option
+                     when 'alphabetical'
+                       @content.sort_by { |x| [x.favorite? ? 0 : 1, x.name.downcase] }
+                     when 'created_at'
+                       @content.sort_by { |x| [x.favorite? ? 0 : 1, x.created_at] }.reverse
+                     else # 'updated_at' or default
+                       @content.sort_by { |x| [x.favorite? ? 0 : 1, x.updated_at] }.reverse
+                     end
+    
+    # Implement pagination manually since @content is an array
+    @total_content_count = sorted_content.size
+    page = params[:page] || 1
+    per_page = 50
+    @current_page = page.to_i
+    @total_pages = (@total_content_count.to_f / per_page).ceil
+    
+    # Calculate pagination slice
+    start_index = ((@current_page - 1) * per_page)
+    end_index = start_index + per_page - 1
+    @content = sorted_content[start_index..end_index] || []
     @folders = current_user
       .folders
       .where(context: @content_type_name, parent_folder_id: nil)
       .order('title ASC')
 
-    @questioned_content = @content.sample
-    @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
+    # Only load expensive features if we have content to show
+    if @content.any?
+      @questioned_content = @content.sample
+      @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
 
-    # Query for both regular and pinned images
-    image_uploads = ImageUpload.where(
-      content_type: @content_type_class.name,
-      content_id:   @content.pluck(:id)
-    )
-    
-    # Group by content but prioritize pinned images
-    @random_image_including_private_pool_cache = {}
-    image_uploads.group_by { |image| [image.content_type, image.content_id] }.each do |key, images|
-      # Check for pinned images first that have a valid src
-      pinned_image = images.find { |img| img.pinned }
-      if pinned_image && pinned_image.src_file_name.present?
-        @random_image_including_private_pool_cache[key] = [pinned_image]
-      else
-        # Use all valid images if no valid pinned image
-        @random_image_including_private_pool_cache[key] = images.select { |img| img.src_file_name.present? }
+      # Query for both regular and pinned images - only for current page content
+      current_page_content_ids = @content.map(&:id)
+      image_uploads = ImageUpload.where(
+        content_type: @content_type_class.name,
+        content_id:   current_page_content_ids
+      )
+      
+      # Group by content but prioritize pinned images
+      @random_image_including_private_pool_cache = {}
+      image_uploads.group_by { |image| [image.content_type, image.content_id] }.each do |key, images|
+        # Check for pinned images first that have a valid src
+        pinned_image = images.find { |img| img.pinned }
+        if pinned_image && pinned_image.src_file_name.present?
+          @random_image_including_private_pool_cache[key] = [pinned_image]
+        else
+          # Use all valid images if no valid pinned image
+          @random_image_including_private_pool_cache[key] = images.select { |img| img.src_file_name.present? }
+        end
       end
-    end
 
-    @saved_basil_commissions = BasilCommission.where(
-      entity_type: @content_type_class.name,
-      entity_id:   @content.pluck(:id)
-    ).where.not(saved_at: nil)
-    .group_by { |commission| [commission.entity_type, commission.entity_id] }
+      @saved_basil_commissions = BasilCommission.where(
+        entity_type: @content_type_class.name,
+        entity_id:   current_page_content_ids
+      ).where.not(saved_at: nil)
+      .group_by { |commission| [commission.entity_type, commission.entity_id] }
+    else
+      @random_image_including_private_pool_cache = {}
+      @saved_basil_commissions = {}
+    end
 
     # Uh, do we ever actually make JSON requests to logged-in user pages?
     respond_to do |format|
