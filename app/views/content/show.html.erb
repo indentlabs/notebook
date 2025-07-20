@@ -21,6 +21,85 @@
     current_page: :show 
   } %>
 
+  <!-- Hero Image Header -->
+  <div class="relative h-64 md:h-80 lg:h-96 bg-gray-900 overflow-hidden -mt-16 md:-mt-20 lg:-mt-24">
+    <% 
+      # Get images using the same logic as dashboard cards
+      regular_images = @content.image_uploads.ordered.to_a
+      # Filter for public if the current user isn't the owner
+      unless user_signed_in? && @content.user_id == current_user.id
+        regular_images = regular_images.select { |img| img.privacy == 'public' }
+      end
+      basil_images = @content.basil_commissions.where.not(saved_at: nil).ordered.to_a
+      
+      # Use get_preview_image to prioritize pinned images, then randomize
+      preview_image = get_preview_image(regular_images, basil_images)
+    %>
+    
+    <% if preview_image.present? %>
+      <% image_type = preview_image[:type] %>
+      <% image_data = preview_image[:data] %>
+      
+      <% if image_type == 'image_upload' %>
+        <%= image_tag image_data.src.url, 
+                      class: "w-full h-full object-cover",
+                      alt: "#{@content.name} banner image" %>
+      <% elsif image_type == 'basil_commission' %>
+        <% if image_data.image.attached? %>
+          <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), 
+                        class: "w-full h-full object-cover",
+                        alt: "#{@content.name} banner image" %>
+        <% else %>
+          <%= image_tag "content/card-headers/#{@content.class.name.downcase}.jpg", 
+                        class: "w-full h-full object-cover",
+                        alt: "#{@content.name} banner image" %>
+        <% end %>
+      <% end %>
+    <% else %>
+      <%= image_tag "content/card-headers/#{@content.class.name.downcase}.jpg", 
+                    class: "w-full h-full object-cover",
+                    alt: "#{@content.name} banner image" %>
+    <% end %>
+      
+    <!-- Strong gradient overlay for text contrast -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+      
+      <!-- Content overlay with solid background -->
+      <div class="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
+        <div class="max-w-4xl mx-auto">
+          <!-- Sophisticated header container -->
+          <div class="bg-notebook-blue bg-opacity-80 backdrop-blur-xl rounded-2xl p-6 border border-white border-opacity-20 shadow-2xl">
+            <div class="flex items-center space-x-4">
+              <!-- Premium page icon -->
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 <%= @serialized_content.class_color %> rounded-xl flex items-center justify-center shadow-lg ring-2 ring-white ring-opacity-20">
+                  <i class="material-icons text-white text-xl font-light"><%= @serialized_content.class_icon %></i>
+                </div>
+              </div>
+              
+              <!-- Enhanced typography section -->
+              <div class="flex-1 min-w-0">
+                <!-- Page name with refined typography -->
+                <h1 class="text-xl lg:text-2xl font-semibold text-white truncate mb-1 tracking-tight leading-tight">
+                  <%= @content.name %>
+                </h1>
+                
+                <!-- Universe information -->
+                <% if @content.respond_to?(:universe) && @content.universe.present? %>
+                  <div class="mt-3">
+                    <span class="inline-flex items-center text-white <%= Universe.color %> px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
+                      <i class="material-icons text-sm mr-2"><%= Universe.icon %></i>
+                      <span class="font-medium"><%= @content.universe.name %></span>
+                    </span>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   <!-- Main responsive layout -->
   <div class="max-w-full mx-auto">
     <div class="flex min-h-screen relative">

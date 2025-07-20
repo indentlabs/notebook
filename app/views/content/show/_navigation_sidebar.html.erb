@@ -1,39 +1,9 @@
 <div class="h-full flex flex-col overflow-hidden">
-  <!-- Page Header with Image -->
-  <div class="flex-shrink-0 p-6 border-b border-gray-200">
-    <div class="flex items-start space-x-4">
-      <!-- Page Image -->
-      <div class="flex-shrink-0">
-        <% if raw_content.respond_to?(:first_public_image) && raw_content.first_public_image.present? %>
-          <%= image_tag raw_content.first_public_image, 
-                        class: "w-16 h-16 rounded-lg object-cover shadow-sm ring-1 ring-black ring-opacity-5" %>
-        <% else %>
-          <div class="w-16 h-16 rounded-lg <%= content.class_color %> flex items-center justify-center shadow-sm">
-            <i class="material-icons text-white text-2xl"><%= content.class_icon %></i>
-          </div>
-        <% end %>
-      </div>
-      
-      <!-- Page Info -->
-      <div class="flex-1 min-w-0">
-        <h1 class="text-xl font-bold text-gray-900 truncate" title="<%= content.name %>">
-          <%= content.name %>
-        </h1>
-        <p class="text-sm <%= content.class_text_color %> font-medium">
-          <%= content.class_name %>
-        </p>
-        <p class="text-xs text-gray-500 mt-1">
-          by <%= link_to content.user.display_name, content.user, class: "#{User.text_color} hover:underline" %>
-        </p>
-      </div>
-    </div>
-  </div>
-
   <!-- Navigation Content -->
-  <div class="flex-1 overflow-y-auto">
+  <div class="flex-1 overflow-y-auto pt-6">
     
     <!-- Categories Section -->
-    <div class="p-4 border-b border-gray-200">
+    <div class="px-4 pb-4 border-b border-gray-200">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Categories</h3>
         <button @click="showAllCategories()" 
@@ -63,20 +33,20 @@
           </button>
         <% end %>
         
-        <!-- Expand All Categories option -->
+        <!-- Show All Categories option -->
         <button @click="showAllCategories()" 
-                :class="isExpandAllActive() ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
-                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors border-t border-gray-200 mt-2 pt-3">
-          <i class="material-icons text-lg mr-3" 
-             :class="isExpandAllActive() ? 'text-white' : '<%= content.class_text_color %>'">view_agenda</i>
-          Show All Categories
+                :class="isExpandAllActive() ? '<%= content.class_color %> text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
+                class="group flex items-center px-3 py-2 text-sm rounded-md w-full text-left transition-colors mt-1">
+          <i class="material-icons text-lg mr-3 opacity-60" 
+             :class="isExpandAllActive() ? 'text-white opacity-100' : ''">view_agenda</i>
+          <span class="italic">Show All Categories</span>
         </button>
       </nav>
     </div>
 
     <!-- Views Section -->
-    <div class="p-4 border-b border-gray-200">
-      <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Views</h3>
+    <div class="px-4 py-4 border-b border-gray-200">
+      <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Dive Deeper</h3>
       <nav class="space-y-1">        
         <!-- Gallery View -->
         <button @click="switchView('gallery')" 
@@ -119,34 +89,63 @@
 
     <!-- Universe Card -->
     <% if raw_content.respond_to?(:universe) && raw_content.universe.present? %>
-      <div class="p-4 border-b border-gray-200">
-        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Universe</h3>
-        <%= link_to raw_content.universe, class: "block p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors" do %>
-          <div class="flex items-center space-x-3">
-            <div class="flex-shrink-0">
-              <% if raw_content.universe.respond_to?(:first_public_image) && raw_content.universe.first_public_image.present? %>
-                <%= image_tag raw_content.universe.first_public_image, 
-                              class: "w-10 h-10 rounded-lg object-cover" %>
-              <% else %>
-                <div class="w-10 h-10 rounded-lg <%= Universe.color %> flex items-center justify-center">
-                  <i class="material-icons text-white text-lg"><%= Universe.icon %></i>
+      <div class="px-4 py-4 border-b border-gray-200">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">In Universe</h3>
+        
+        <% if raw_content.universe.respond_to?(:first_public_image) && raw_content.universe.first_public_image.present? %>
+          <!-- Visual universe card with background image -->
+          <%= link_to raw_content.universe, class: "block relative h-24 rounded-lg overflow-hidden group hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200" do %>
+            <!-- Background image -->
+            <%= image_tag raw_content.universe.first_public_image, 
+                          class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" %>
+            
+            <!-- Gradient overlay for text readability -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            
+            <!-- Content overlay -->
+            <div class="absolute inset-0 p-3 flex flex-col justify-end">
+              <div class="flex items-end justify-between">
+                <div class="flex-1 min-w-0">
+                  <p class="text-white font-semibold text-sm truncate mb-1">
+                    <%= raw_content.universe.name %>
+                  </p>
+                  <p class="text-white/90 text-xs flex items-center">
+                    <i class="material-icons text-xs mr-1"><%= Universe.icon %></i>
+                    Universe
+                  </p>
                 </div>
-              <% end %>
+                <i class="material-icons text-white/80 group-hover:text-white text-lg ml-2">chevron_right</i>
+              </div>
             </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-900 truncate">
-                <%= raw_content.universe.name %>
-              </p>
-              <p class="text-xs <%= Universe.text_color %>">Universe</p>
+          <% end %>
+        <% else %>
+          <!-- Fallback card for universes without images -->
+          <%= link_to raw_content.universe, class: "block relative h-24 rounded-lg overflow-hidden group hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200 #{Universe.color}" do %>
+            <!-- Pattern background -->
+            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.3"%3E%3Cpath d="M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+            
+            <!-- Content -->
+            <div class="relative p-3 h-full flex flex-col justify-end">
+              <div class="flex items-end justify-between">
+                <div class="flex-1 min-w-0">
+                  <p class="text-white font-semibold text-sm truncate mb-1">
+                    <%= raw_content.universe.name %>
+                  </p>
+                  <p class="text-white/90 text-xs flex items-center">
+                    <i class="material-icons text-xs mr-1"><%= Universe.icon %></i>
+                    Universe
+                  </p>
+                </div>
+                <i class="material-icons text-white/80 group-hover:text-white text-lg ml-2">chevron_right</i>
+              </div>
             </div>
-            <i class="material-icons text-gray-400 text-lg">chevron_right</i>
-          </div>
+          <% end %>
         <% end %>
       </div>
     <% end %>
 
     <!-- Page Stats -->
-    <div class="p-4 border-b border-gray-200">
+    <div class="px-4 py-4 border-b border-gray-200">
       <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Page Stats</h3>
       <div class="space-y-3">
         
@@ -193,7 +192,7 @@
   </div>
 
   <!-- Bottom Links (Compact) -->
-  <div class="flex-shrink-0 px-4 py-3 bg-gray-50 border-t border-gray-200">
+  <div class="flex-shrink-0 px-4 py-4 bg-gray-50 border-t border-gray-200">
     <div class="space-y-1">
       <!-- Forum Discussion Link -->
       <% forum_url = ForumsLinkbuilderService.worldbuilding_url(content.raw_model.class) %>

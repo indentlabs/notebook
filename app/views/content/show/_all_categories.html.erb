@@ -4,29 +4,25 @@
     <% has_content = category[:fields].any? { |field| field[:value].present? } %>
     <% next unless has_content %>
 
-    <div class="category-section" id="category-<%= category[:label].parameterize %>">
-      <!-- Category Header -->
-      <div class="mb-6">
-        <div class="flex items-center mb-4">
-          <i class="material-icons text-2xl <%= content.class_text_color %> mr-3"><%= category[:icon] %></i>
-          <h3 class="text-xl font-bold text-gray-900"><%= category[:label] %></h3>
-        </div>
-      </div>
-
-      <!-- Category Fields -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <% category[:fields].each do |field| %>
-          <% next if field[:value].blank? %>
-          
-          <div class="field-display">
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <!-- Clean category container focused on content -->
+    <div class="category-section bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" id="category-<%= category[:label].parameterize %>">
+      <!-- Category Fields - clean vertical layout -->
+      <div class="p-8">
+        <div class="space-y-10">
+          <% category[:fields].each do |field| %>
+            <% next if field[:value].blank? %>
+            
+            <div class="field-display">
               <!-- Field Label -->
-              <dt class="text-sm font-medium <%= content.class_text_color %> mb-2">
+              <dt class="text-base font-semibold <%= content.class_text_color %> mb-4 flex items-center">
                 <%= field[:label] %>
+                <% if field[:type] == 'name' %>
+                  <i class="material-icons text-sm ml-2 text-gray-400">fingerprint</i>
+                <% end %>
               </dt>
               
               <!-- Field Content -->
-              <dd class="text-gray-900">
+              <dd class="text-gray-800 leading-relaxed">
                 <%=
                   case field[:type]
                   when 'name'
@@ -40,13 +36,13 @@
                   when 'tags'
                     render partial: 'content/tailwind_components/fields/tags', locals: { field: field }
                   else
-                    simple_format(field[:value])
+                    content_tag(:div, simple_format(field[:value]), class: "prose prose-gray prose-lg max-w-none leading-relaxed")
                   end
                 %>
               </dd>
             </div>
-          </div>
-        <% end %>
+          <% end %>
+        </div>
       </div>
     </div>
   <% end %>

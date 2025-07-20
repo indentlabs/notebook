@@ -1,42 +1,46 @@
 <% has_content = category[:fields].any? { |field| field[:value].present? } %>
 
 <% if has_content %>
-  <div class="space-y-6">
-    <% category[:fields].each do |field| %>
-      <% next if field[:value].blank? %>
-      
-      <div class="field-display">
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <!-- Field Label -->
-          <dt class="text-sm font-medium <%= content.class_text_color %> mb-3 flex items-center">
-            <%= field[:label] %>
-            <% if field[:type] == 'name' %>
-              <i class="material-icons text-sm ml-2 text-gray-400">fingerprint</i>
-            <% end %>
-          </dt>
+  <!-- Clean category container focused on content -->
+  <div class="category-section bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" id="category-<%= category[:label].parameterize %>">
+    <!-- Category Fields - clean vertical layout -->
+    <div class="p-8">
+      <div class="space-y-10">
+        <% category[:fields].each do |field| %>
+          <% next if field[:value].blank? %>
           
-          <!-- Field Content -->
-          <dd class="text-gray-900">
-            <%=
-              case field[:type]
-              when 'name'
-                render partial: 'content/tailwind_components/fields/name', locals: { field: field }
-              when 'text_area', 'textarea'
-                render partial: 'content/tailwind_components/fields/text', locals: { field: field }
-              when 'link'
-                render partial: 'content/tailwind_components/fields/link', locals: { field: field }
-              when 'universe'
-                render partial: 'content/tailwind_components/fields/universe', locals: { field: field }
-              when 'tags'
-                render partial: 'content/tailwind_components/fields/tags', locals: { field: field }
-              else
-                content_tag(:div, simple_format(field[:value]), class: "prose prose-sm max-w-none")
-              end
-            %>
-          </dd>
-        </div>
+          <div class="field-display">
+            <!-- Field Label -->
+            <dt class="text-base font-semibold <%= content.class_text_color %> mb-4 flex items-center">
+              <%= field[:label] %>
+              <% if field[:type] == 'name' %>
+                <i class="material-icons text-sm ml-2 text-gray-400">fingerprint</i>
+              <% end %>
+            </dt>
+            
+            <!-- Field Content -->
+            <dd class="text-gray-800 leading-relaxed">
+              <%=
+                case field[:type]
+                when 'name'
+                  render partial: 'content/tailwind_components/fields/name', locals: { field: field }
+                when 'text_area', 'textarea'
+                  render partial: 'content/tailwind_components/fields/text', locals: { field: field }
+                when 'link'
+                  render partial: 'content/tailwind_components/fields/link', locals: { field: field }
+                when 'universe'
+                  render partial: 'content/tailwind_components/fields/universe', locals: { field: field }
+                when 'tags'
+                  render partial: 'content/tailwind_components/fields/tags', locals: { field: field }
+                else
+                  content_tag(:div, simple_format(field[:value]), class: "prose prose-gray prose-lg max-w-none leading-relaxed")
+                end
+              %>
+            </dd>
+          </div>
+        <% end %>
       </div>
-    <% end %>
+    </div>
   </div>
 <% else %>
   <!-- Empty category state -->

@@ -27,10 +27,10 @@
     
     <!-- Regular uploaded images -->
     <% content_images.each do |image| %>
-      <div class="gallery-item group cursor-pointer" onclick="openImageModal('<%= image.src.url if image.src.attached? %>', '<%= escape_javascript(image.caption || '') %>')">
+      <div class="gallery-item group cursor-pointer" onclick="openImageModal('<%= image.src.url if image.src.present? %>', '<%= escape_javascript(image.src_file_name || 'Image') %>')">
         <div class="relative">
-          <% if image.src.attached? %>
-            <%= image_tag image.src, 
+          <% if image.src.present? %>
+            <%= image_tag image.src.url, 
                           class: "w-full h-64 object-cover",
                           loading: "lazy" %>
           <% end %>
@@ -50,11 +50,7 @@
         
         <!-- Image info -->
         <div class="p-4">
-          <% if image.caption.present? %>
-            <h4 class="font-medium text-gray-900 mb-1 truncate"><%= image.caption %></h4>
-          <% else %>
-            <h4 class="font-medium text-gray-500 mb-1 italic">Untitled</h4>
-          <% end %>
+          <h4 class="font-medium text-gray-900 mb-1 truncate"><%= image.src_file_name || 'Untitled' %></h4>
           <p class="text-xs text-gray-500">
             Uploaded <%= distance_of_time_in_words(image.created_at, Time.current) %> ago
           </p>
@@ -64,10 +60,17 @@
     
     <!-- Basil AI generated images -->
     <% basil_images.each do |basil| %>
-      <div class="gallery-item group cursor-pointer" onclick="openImageModal('<%= basil.src_url rescue '' %>', 'AI Generated Image')">
+      <% 
+        basil_url = if basil.image.attached?
+                      rails_blob_path(basil.image, disposition: "attachment")
+                    else
+                      asset_path("missing-image.jpg")
+                    end
+      %>
+      <div class="gallery-item group cursor-pointer" onclick="openImageModal('<%= basil_url %>', 'AI Generated Image')">
         <div class="relative">
-          <% if basil.src_url.present? %>
-            <%= image_tag basil.src_url, 
+          <% if basil.image.attached? %>
+            <%= image_tag basil_url, 
                           class: "w-full h-64 object-cover",
                           loading: "lazy" %>
           <% end %>
