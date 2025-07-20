@@ -451,33 +451,47 @@
           <div data-controller="dropdown" class="relative">
             <button data-action="dropdown#toggle click@window->dropdown#hide" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
               <i class="material-icons text-lg mr-2">sort</i>
-              Sort
+              <% 
+                sort_labels = {
+                  'updated_at' => 'Recently edited',
+                  'alphabetical' => 'Alphabetical',
+                  'created_at' => 'Date created'
+                }
+                current_sort = params[:sort] || 'updated_at'
+              %>
+              <%= sort_labels[current_sort] || 'Sort' %>
               <%= chevron_down %>
             </button>
             <div data-dropdown-target="menu" class="origin-top-left absolute left-0 mt-2 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
               <div class="py-1">
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Recently edited</a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Alphabetical</a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Favorites first</a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Date created</a>
+                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'updated_at' })), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'bg-gray-100 font-medium' if params[:sort] == 'updated_at' || params[:sort].blank?}" do %>
+                  Recently edited
+                <% end %>
+                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'alphabetical' })), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'bg-gray-100 font-medium' if params[:sort] == 'alphabetical'}" do %>
+                  Alphabetical
+                <% end %>
+                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'created_at' })), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'bg-gray-100 font-medium' if params[:sort] == 'created_at'}" do %>
+                  Date created
+                <% end %>
               </div>
             </div>
           </div>
 
           <!-- Tag Filter -->
-          <% if defined?(page_tags) && page_tags.any? %>
+          <% if true # Always show tag filter so users can start tagging %>
             <div data-controller="dropdown" class="relative">
               <%= form_with url: "", method: :get, local: true, class: "contents" do |form| %>
+                <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
                 <button 
                   data-action="dropdown#toggle click@window->dropdown#hide" 
                   type="button"
-                  class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 <%= content_type_class.color if defined?(filtered_page_tags) && filtered_page_tags.any? %>"
+                  class="inline-flex items-center px-3 py-2 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'border-blue-300 bg-blue-50 text-blue-900 hover:bg-blue-100' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50' %>"
                 >
-                  <i class="material-icons text-lg mr-2 <%= content_type_class.text_color %>">label</i>
+                  <i class="material-icons text-lg mr-2 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'text-blue-600' : content_type_class.text_color %>">label</i>
                   Tags
-                  <% if defined?(filtered_page_tags) && filtered_page_tags.any? %>
-                    <span class="ml-1.5 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                      <%= filtered_page_tags.count %>
+                  <% if @filtered_page_tags && @filtered_page_tags.any? %>
+                    <span class="ml-1.5 bg-blue-200 text-blue-900 text-xs font-medium px-2 py-0.5 rounded-full">
+                      <%= @filtered_page_tags.count %>
                     </span>
                   <% end %>
                   <%= chevron_down %>
@@ -485,26 +499,34 @@
                 <div data-dropdown-target="menu" class="origin-top-right absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
                   <div class="p-4">
                     <div class="space-y-3">
-                      <% page_tags.each do |page_tag| %>
-                        <div class="flex items-center">
-                          <input 
-                            id="filter-tag-<%= page_tag.id %>" 
-                            name="slug[]" 
-                            <%= 'checked' if defined?(filtered_page_tags) && filtered_page_tags.map(&:slug).include?(page_tag.slug) %> 
-                            value="<%= page_tag.slug %>" 
-                            type="checkbox" 
-                            class="h-4 w-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500"
-                          >
-                          <label for="filter-tag-<%= page_tag.id %>" class="ml-3 text-sm font-medium text-gray-900">
-                            <%= page_tag.tag %>
-                          </label>
+                      <% if @page_tags && @page_tags.any? %>
+                        <% @page_tags.each do |page_tag| %>
+                          <div class="flex items-center">
+                            <input 
+                              id="filter-tag-<%= page_tag.id %>" 
+                              name="slug[]" 
+                              <%= 'checked' if @filtered_page_tags && @filtered_page_tags.map(&:slug).include?(page_tag.slug) %> 
+                              value="<%= page_tag.slug %>" 
+                              type="checkbox" 
+                              class="h-4 w-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500"
+                            >
+                            <label for="filter-tag-<%= page_tag.id %>" class="ml-3 text-sm font-medium text-gray-900">
+                              <%= page_tag.tag %>
+                            </label>
+                          </div>
+                        <% end %>
+                        <div class="pt-2">
+                          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg">
+                            Apply filters
+                          </button>
+                        </div>
+                      <% else %>
+                        <div class="text-center text-gray-500 py-4">
+                          <i class="material-icons text-2xl mb-2 text-gray-400">label_outline</i>
+                          <p class="text-sm">No tags yet</p>
+                          <p class="text-xs mt-1">Add tags to your <%= @content_type_name.downcase.pluralize %> to filter by them</p>
                         </div>
                       <% end %>
-                      <div class="pt-2">
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg">
-                          Apply filters
-                        </button>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -532,13 +554,13 @@
       </div>
       
       <!-- Active Filters -->
-      <% if defined?(filtered_page_tags) && filtered_page_tags.any? %>
+      <% if @filtered_page_tags && @filtered_page_tags.any? %>
         <div class="mt-3 flex flex-wrap items-center gap-2">
           <span class="text-sm text-gray-500">Filtered by:</span>
-          <% filtered_page_tags.each do |page_tag| %>
+          <% @filtered_page_tags.each do |page_tag| %>
             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
               <%= page_tag.tag %>
-              <%= link_to(polymorphic_path(content_type_class, { slug: params.fetch(:slug, []) - [page_tag.slug] })) do %>
+              <%= link_to(polymorphic_path(content_type_class, params.permit(:sort, :favorite_only).merge({ slug: params.fetch(:slug, []) - [page_tag.slug] }))) do %>
                 <button class="ml-1 hover:text-blue-600">
                   <i class="material-icons text-sm">close</i>
                 </button>
