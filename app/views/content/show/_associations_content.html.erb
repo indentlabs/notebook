@@ -1,0 +1,165 @@
+<%
+  # Get associations data
+  # This would typically come from the controller, but we'll fetch what we can
+  references = []
+  mentioned_in_documents = []
+  linked_from_pages = []
+  
+  # Try to get references if the method exists
+  if raw_content.respond_to?(:incoming_page_references)
+    references = raw_content.incoming_page_references.includes(:referencing_page).limit(50) rescue []
+  end
+  
+  # Try to get document mentions if available
+  if raw_content.respond_to?(:document_entities)
+    document_entities = raw_content.document_entities.includes(:document).limit(20) rescue []
+    mentioned_in_documents = document_entities.map(&:document).compact.uniq
+  end
+  
+  total_associations = references.count + mentioned_in_documents.count
+%>
+
+<% if total_associations > 0 %>
+  
+  <!-- Page References Section -->
+  <% if references.any? %>
+    <div class="mb-8">
+      <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+        <i class="material-icons text-xl <%= content.class_text_color %> mr-2">link</i>
+        Referenced by Other Pages
+        <span class="ml-2 bg-gray-100 text-gray-600 text-sm px-2 py-1 rounded-full">
+          <%= references.count %>
+        </span>
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <% references.each do |reference| %>
+          <% referencing_page = reference.referencing_page %>
+          <% next unless referencing_page %>
+          
+          <div class="association-item">
+            <%= link_to referencing_page, class: "flex items-center space-x-4 w-full" do %>
+              <!-- Page Icon -->
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 <%= referencing_page.class.color %> rounded-lg flex items-center justify-center">
+                  <i class="material-icons text-white text-lg"><%= referencing_page.class.icon %></i>
+                </div>
+              </div>
+              
+              <!-- Page Info -->
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-medium text-gray-900 truncate">
+                  <%= referencing_page.name %>
+                </h4>
+                <p class="text-xs <%= referencing_page.class.text_color %>">
+                  <%= referencing_page.class.name %>
+                </p>
+                <% if reference.respond_to?(:cached_relation_title) && reference.cached_relation_title.present? %>
+                  <p class="text-xs text-gray-500">
+                    via <%= reference.cached_relation_title %>
+                  </p>
+                <% end %>
+              </div>
+              
+              <!-- Arrow -->
+              <div class="flex-shrink-0">
+                <i class="material-icons text-gray-400">chevron_right</i>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+  
+  <!-- Document Mentions Section -->
+  <% if mentioned_in_documents.any? %>
+    <div class="mb-8">
+      <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+        <i class="material-icons text-xl <%= content.class_text_color %> mr-2">description</i>
+        Mentioned in Documents
+        <span class="ml-2 bg-gray-100 text-gray-600 text-sm px-2 py-1 rounded-full">
+          <%= mentioned_in_documents.count %>
+        </span>
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <% mentioned_in_documents.each do |document| %>
+          <div class="association-item">
+            <%= link_to document, class: "flex items-center space-x-4 w-full" do %>
+              <!-- Document Icon -->
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <i class="material-icons text-white text-lg">description</i>
+                </div>
+              </div>
+              
+              <!-- Document Info -->
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-medium text-gray-900 truncate">
+                  <%= document.name %>
+                </h4>
+                <p class="text-xs text-blue-600">Document</p>
+                <p class="text-xs text-gray-500">
+                  by <%= document.user.display_name %>
+                </p>
+              </div>
+              
+              <!-- Arrow -->
+              <div class="flex-shrink-0">
+                <i class="material-icons text-gray-400">chevron_right</i>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+  
+  <!-- View More Links -->
+  <div class="text-center">
+    <%= link_to send("references_#{raw_content.class.name.downcase}_path", raw_content), 
+                class: "inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+      <i class="material-icons text-lg mr-2">link</i>
+      View All References
+      <i class="material-icons text-sm ml-2">open_in_new</i>
+    <% end %>
+  </div>
+
+<% else %>
+  <!-- Empty associations state -->
+  <div class="text-center py-12">
+    <div class="mx-auto h-16 w-16 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+      <i class="material-icons text-2xl text-gray-400">link</i>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No associations yet</h3>
+    <p class="text-gray-500 mb-6 max-w-md mx-auto">
+      This <%= content.class_name.downcase %> isn't referenced by any other pages or documents yet. 
+      As you build your world and link content together, connections will appear here.
+    </p>
+    
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <!-- Create related content suggestions -->
+      <% if content.class_name != 'Universe' %>
+        <%= link_to new_polymorphic_path(Character), 
+                    class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+          <i class="material-icons text-lg mr-2">person_add</i>
+          Create Related Character
+        <% end %>
+        
+        <%= link_to new_polymorphic_path(Location), 
+                    class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+          <i class="material-icons text-lg mr-2">place</i>
+          Create Related Location
+        <% end %>
+      <% end %>
+    </div>
+    
+    <div class="mt-6">
+      <p class="text-xs text-gray-400 max-w-lg mx-auto">
+        Tip: Use the "link" field type when editing content to create connections between your pages. 
+        These connections will automatically appear here.
+      </p>
+    </div>
+  </div>
+<% end %>

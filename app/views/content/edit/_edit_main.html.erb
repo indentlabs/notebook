@@ -1,0 +1,228 @@
+<div class="space-y-8 divide-y divide-gray-200 px-6">
+  <div class="divide-y divide-gray-200 space-y-20 mb-20">
+    <% content.data[:categories].each do |category| %>
+      <% next if category[:label] == 'Gallery' %>
+
+      <div class="category-section" id="category-<%= category[:label].parameterize %>">
+        <div class="pt-4 flex flex-row space-x-32">
+          <div id="<%= category[:label] %>" class="anchor-offset"></div>
+          <h3 class="text-lg leading-6 font-medium text-gray-900 flex-1">
+            <i class="material-icons float-left <%= content.class_text_color %> mr-2"><%= category[:icon] %></i>
+            <%= category[:label] %>
+          </h3>
+          
+          <!-- Progress indicator for edit mode -->
+          <% if category[:percent_complete].present? && category[:percent_complete] >= 25 %>
+            <div class="flex-1 bg-gray-200 rounded-full h-4 relative top-1.5">
+              <div class="<%= content.class_color %> text-xs text-white font-medium text-center p-0.5 leading-none rounded-full line-clamp-1" style="width: <%= category[:percent_complete] %>%">
+                <%= category[:percent_complete] %>% complete
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="mt-6 sm:mt-5 space-y-2 pb-8">
+          <% category[:fields].each do |field| %>
+            <div class="sm:grid sm:grid-cols-4 sm:gap-4 sm:items-start border-t border-gray-200 pt-4 pb-2" 
+                 data-field-id="<%= field[:id] %>" 
+                 data-field-type="<%= field[:type] %>">
+              
+              <!-- Field label -->
+              <div class="px-4 sm:text-right mb-2 sm:mb-0">
+                <label for="<%= field[:name] %>" class="block pt-1 text-sm font-medium text-gray-700">
+                  <%= field[:label] %>
+                  <% if field[:required] %>
+                    <span class="text-red-500 ml-1">*</span>
+                  <% end %>
+                </label>
+                
+                <!-- Field help text if available -->
+                <% if field[:help_text].present? %>
+                  <p class="mt-1 text-xs text-gray-500"><%= field[:help_text] %></p>
+                <% end %>
+              </div>
+              
+              <!-- Field input -->
+              <div class="mt-1 sm:mt-0 col-span-3 mb-4 relative">
+                <%= form_for content.raw_model, url: FieldTypeService.form_path(field), remote: true, authenticity_token: true, html: { class: "field-form" } do |f| %>
+                  <%= hidden_field_tag "entity[entity_id]",   content.id %>
+                  <%= hidden_field_tag "entity[entity_type]", content.class_name %>
+                  
+                  <!-- Autosave status indicator -->
+                  <div class="absolute top-0 right-0 autosave-indicator opacity-0 transition-opacity duration-200">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                      Saved
+                    </span>
+                  </div>
+                  
+                  <%=
+                    case field[:type]
+                    when 'name', 'text_area', 'textarea'
+                      render partial: 'content/form/rich_text_input', locals: {
+                        f:            f, 
+                        content:      content,
+                        field:        field,
+                        show_label:   false,
+                        autocomplete: AutocompleteService.for_field_label(content_model: content.class, label: field[:label]),
+                        autosave:     true
+                      }
+                    when 'universe'
+                      render partial: 'content/form/field_types/universe', locals: {
+                        f:         f,
+                        field:     field,
+                        page:      content,
+                        raw_model: content.raw_model
+                      }
+                    when 'tags'
+                      render partial: 'content/form/field_types/tags', locals: {
+                        f:         f,
+                        field:     field,
+                        page:      content,
+                        raw_model: content.raw_model
+                      }
+                    when 'link'
+                      render partial: 'content/form/field_types/link', locals: {
+                        f:         f,
+                        field:     field,
+                        page:      content,
+                        raw_model: content.raw_model
+                      }
+                    end
+                  %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Enhanced autosave feedback and mobile optimizations -->
+<style>
+.field-form input:focus,
+.field-form textarea:focus {
+  @apply ring-2 ring-blue-500 border-blue-500;
+}
+
+.field-form.saving input,
+.field-form.saving textarea {
+  @apply ring-2 ring-yellow-400 border-yellow-400;
+}
+
+.field-form.saved input,
+.field-form.saved textarea {
+  @apply ring-2 ring-green-400 border-green-400;
+}
+
+.field-form.error input,
+.field-form.error textarea {
+  @apply ring-2 ring-red-400 border-red-400;
+}
+
+.autosave-indicator.show {
+  @apply opacity-100;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .category-section {
+    @apply px-2;
+  }
+  
+  .field-form input,
+  .field-form textarea,
+  .field-form select {
+    @apply text-base; /* Prevent zoom on iOS */
+    min-height: 44px; /* Touch-friendly target size */
+  }
+  
+  .autosave-indicator {
+    @apply relative top-0 right-0 mt-2;
+    position: relative !important;
+  }
+  
+  /* Better spacing on mobile */
+  .space-y-20 > * + * {
+    @apply mt-12;
+  }
+  
+  /* Collapsible categories on mobile */
+  .category-section h3 {
+    @apply cursor-pointer;
+  }
+}
+
+/* Touch improvements */
+@media (hover: none) and (pointer: coarse) {
+  button, 
+  .btn,
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better touch targets for dropdowns */
+  .dropdown-toggle {
+    padding: 12px 16px;
+  }
+}
+</style>
+
+<script>
+// Mobile sidebar toggle function
+function toggleMobileSidebar() {
+  const sidebar = document.querySelector('.xl\\:w-64, .xl\\:w-80');
+  const button = event.target;
+  
+  if (sidebar) {
+    if (sidebar.classList.contains('hidden')) {
+      sidebar.classList.remove('hidden');
+      button.innerHTML = '<i class="material-icons text-lg mr-2">close</i>Hide Info';
+    } else {
+      sidebar.classList.add('hidden', 'lg:block');
+      button.innerHTML = '<i class="material-icons text-lg mr-2">info</i>Page Info';
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Enhanced autosave feedback
+  document.addEventListener('autosave:start', function(e) {
+    const form = e.target.closest('.field-form');
+    if (form) {
+      form.classList.add('saving');
+      form.classList.remove('saved', 'error');
+    }
+  });
+  
+  document.addEventListener('autosave:success', function(e) {
+    const form = e.target.closest('.field-form');
+    if (form) {
+      form.classList.add('saved');
+      form.classList.remove('saving', 'error');
+      
+      const indicator = form.querySelector('.autosave-indicator');
+      if (indicator) {
+        indicator.classList.add('show');
+        setTimeout(() => {
+          indicator.classList.remove('show');
+        }, 2000);
+      }
+    }
+  });
+  
+  document.addEventListener('autosave:error', function(e) {
+    const form = e.target.closest('.field-form');
+    if (form) {
+      form.classList.add('error');
+      form.classList.remove('saving', 'saved');
+    }
+  });
+});
+</script>

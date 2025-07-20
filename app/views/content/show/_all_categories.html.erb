@@ -1,0 +1,71 @@
+<div class="space-y-12">
+  <% content.data[:categories].each do |category| %>
+    <% next if category[:label] == 'Gallery' %>
+    <% has_content = category[:fields].any? { |field| field[:value].present? } %>
+    <% next unless has_content %>
+
+    <div class="category-section" id="category-<%= category[:label].parameterize %>">
+      <!-- Category Header -->
+      <div class="mb-6">
+        <div class="flex items-center mb-4">
+          <i class="material-icons text-2xl <%= content.class_text_color %> mr-3"><%= category[:icon] %></i>
+          <h3 class="text-xl font-bold text-gray-900"><%= category[:label] %></h3>
+        </div>
+      </div>
+
+      <!-- Category Fields -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <% category[:fields].each do |field| %>
+          <% next if field[:value].blank? %>
+          
+          <div class="field-display">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <!-- Field Label -->
+              <dt class="text-sm font-medium <%= content.class_text_color %> mb-2">
+                <%= field[:label] %>
+              </dt>
+              
+              <!-- Field Content -->
+              <dd class="text-gray-900">
+                <%=
+                  case field[:type]
+                  when 'name'
+                    render partial: 'content/tailwind_components/fields/name', locals: { field: field }
+                  when 'text_area', 'textarea'
+                    render partial: 'content/tailwind_components/fields/text', locals: { field: field }
+                  when 'link'
+                    render partial: 'content/tailwind_components/fields/link', locals: { field: field }
+                  when 'universe'
+                    render partial: 'content/tailwind_components/fields/universe', locals: { field: field }
+                  when 'tags'
+                    render partial: 'content/tailwind_components/fields/tags', locals: { field: field }
+                  else
+                    simple_format(field[:value])
+                  end
+                %>
+              </dd>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+  
+  <!-- Empty state if no content -->
+  <% if content.data[:categories].none? { |cat| cat[:fields].any? { |field| field[:value].present? } } %>
+    <div class="text-center py-12">
+      <div class="mx-auto h-12 w-12 text-gray-400 mb-4">
+        <i class="material-icons text-4xl"><%= content.class_icon %></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No content yet</h3>
+      <p class="text-gray-500 mb-6">This <%= content.class_name.downcase %> doesn't have any information filled in yet.</p>
+      <% if defined?(raw_content) && raw_content.updatable_by?(current_user) %>
+        <%= link_to polymorphic_path(raw_content, action: :edit), 
+                    class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white #{content.class_color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+          <i class="material-icons text-lg mr-2">edit</i>
+          Start Adding Information
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

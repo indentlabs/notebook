@@ -1,0 +1,226 @@
+<div class="h-full flex flex-col overflow-hidden">
+  <!-- Page Header with Image -->
+  <div class="flex-shrink-0 p-6 border-b border-gray-200">
+    <div class="flex items-start space-x-4">
+      <!-- Page Image -->
+      <div class="flex-shrink-0">
+        <% if raw_content.respond_to?(:first_public_image) && raw_content.first_public_image.present? %>
+          <%= image_tag raw_content.first_public_image, 
+                        class: "w-16 h-16 rounded-lg object-cover shadow-sm ring-1 ring-black ring-opacity-5" %>
+        <% else %>
+          <div class="w-16 h-16 rounded-lg <%= content.class_color %> flex items-center justify-center shadow-sm">
+            <i class="material-icons text-white text-2xl"><%= content.class_icon %></i>
+          </div>
+        <% end %>
+      </div>
+      
+      <!-- Page Info -->
+      <div class="flex-1 min-w-0">
+        <h1 class="text-xl font-bold text-gray-900 truncate" title="<%= content.name %>">
+          <%= content.name %>
+        </h1>
+        <p class="text-sm <%= content.class_text_color %> font-medium">
+          <%= content.class_name %>
+        </p>
+        <p class="text-xs text-gray-500 mt-1">
+          by <%= link_to content.user.display_name, content.user, class: "#{User.text_color} hover:underline" %>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Content -->
+  <div class="flex-1 overflow-y-auto">
+    
+    <!-- Categories Section -->
+    <div class="p-4 border-b border-gray-200">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Categories</h3>
+        <button @click="showAllCategories()" 
+                :class="isExpandAllActive() ? '<%= content.class_color %> text-white' : 'text-gray-400 hover:text-gray-600'"
+                class="p-1 rounded text-xs transition-colors"
+                title="Show all categories">
+          <i class="material-icons text-sm">unfold_more</i>
+        </button>
+      </div>
+      
+      <nav class="space-y-1">
+        <% content.data[:categories].each do |category| %>
+          <% next if category[:label] == 'Gallery' %>
+          <% has_content = category[:fields].any? { |field| field[:value].present? } %>
+          
+          <button @click="showCategory('<%= category[:label] %>')" 
+                  :class="isCategoryActive('<%= category[:label] %>') ? '<%= content.class_color %> text-white' : '<%= has_content ? 'text-gray-700 hover:bg-gray-50' : 'text-gray-400' %>'"
+                  class="group flex items-center justify-between px-3 py-2 text-sm rounded-md w-full text-left transition-colors">
+            <div class="flex items-center">
+              <i class="material-icons text-lg mr-3 <%= has_content ? content.class_text_color : 'text-gray-400' %>"
+                 :class="isCategoryActive('<%= category[:label] %>') ? 'text-white' : ''"><%= category[:icon] %></i>
+              <span><%= category[:label] %></span>
+            </div>
+            <% unless has_content %>
+              <span class="text-xs text-gray-400">Empty</span>
+            <% end %>
+          </button>
+        <% end %>
+        
+        <!-- Expand All Categories option -->
+        <button @click="showAllCategories()" 
+                :class="isExpandAllActive() ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors border-t border-gray-200 mt-2 pt-3">
+          <i class="material-icons text-lg mr-3" 
+             :class="isExpandAllActive() ? 'text-white' : '<%= content.class_text_color %>'">view_agenda</i>
+          Show All Categories
+        </button>
+      </nav>
+    </div>
+
+    <!-- Views Section -->
+    <div class="p-4 border-b border-gray-200">
+      <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Views</h3>
+      <nav class="space-y-1">        
+        <!-- Gallery View -->
+        <button @click="switchView('gallery')" 
+                :class="isViewActive('gallery') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+          <i class="material-icons text-lg mr-3" 
+             :class="isViewActive('gallery') ? 'text-white' : '<%= content.class_text_color %>'">photo_library</i>
+          Gallery
+        </button>
+        
+        <!-- Associations View -->
+        <button @click="switchView('associations')" 
+                :class="isViewActive('associations') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+          <i class="material-icons text-lg mr-3" 
+             :class="isViewActive('associations') ? 'text-white' : '<%= content.class_text_color %>'">link</i>
+          Associations
+        </button>
+        
+        <!-- Collections View -->
+        <button @click="switchView('collections')" 
+                :class="isViewActive('collections') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+          <i class="material-icons text-lg mr-3" 
+             :class="isViewActive('collections') ? 'text-white' : '<%= content.class_text_color %>'">collections_bookmark</i>
+          Collections
+        </button>
+        
+        <!-- Feedback View -->
+        <button @click="switchView('feedback')" 
+                :class="isViewActive('feedback') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+          <i class="material-icons text-lg mr-3" 
+             :class="isViewActive('feedback') ? 'text-white' : '<%= content.class_text_color %>'">chat</i>
+          Feedback
+          <span class="ml-auto bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full">Soon</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Universe Card -->
+    <% if raw_content.respond_to?(:universe) && raw_content.universe.present? %>
+      <div class="p-4 border-b border-gray-200">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Universe</h3>
+        <%= link_to raw_content.universe, class: "block p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors" do %>
+          <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+              <% if raw_content.universe.respond_to?(:first_public_image) && raw_content.universe.first_public_image.present? %>
+                <%= image_tag raw_content.universe.first_public_image, 
+                              class: "w-10 h-10 rounded-lg object-cover" %>
+              <% else %>
+                <div class="w-10 h-10 rounded-lg <%= Universe.color %> flex items-center justify-center">
+                  <i class="material-icons text-white text-lg"><%= Universe.icon %></i>
+                </div>
+              <% end %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate">
+                <%= raw_content.universe.name %>
+              </p>
+              <p class="text-xs <%= Universe.text_color %>">Universe</p>
+            </div>
+            <i class="material-icons text-gray-400 text-lg">chevron_right</i>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Page Stats -->
+    <div class="p-4 border-b border-gray-200">
+      <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Page Stats</h3>
+      <div class="space-y-3">
+        
+        <!-- Visibility (first and clickable) -->
+        <% if raw_content.respond_to?(:privacy) %>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Visibility</span>
+            <button class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100 <%= raw_content.privacy == 'public' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-700 border border-gray-200' %>"
+                    title="Click to manage privacy settings">
+              <% if raw_content.privacy == 'public' %>
+                <i class="material-icons text-sm mr-1.5">public</i>
+                Public
+              <% else %>
+                <i class="material-icons text-sm mr-1.5">lock</i>
+                Private
+              <% end %>
+              <i class="material-icons text-xs ml-1 text-gray-400">edit</i>
+            </button>
+          </div>
+        <% end %>
+        
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">Word count</span>
+          <span class="font-medium text-gray-900 px-2 py-1 bg-gray-50 rounded">
+            <%= number_with_delimiter(content.cached_word_count || 0) %>
+          </span>
+        </div>
+        
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">Created</span>
+          <span class="font-medium text-gray-900" title="<%= raw_content.created_at.strftime('%B %d, %Y at %I:%M %p') %>">
+            <%= distance_of_time_in_words(raw_content.created_at, Time.current) %> ago
+          </span>
+        </div>
+        
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">Last updated</span>
+          <span class="font-medium text-gray-900" title="<%= raw_content.updated_at.strftime('%B %d, %Y at %I:%M %p') %>">
+            <%= distance_of_time_in_words(raw_content.updated_at, Time.current) %> ago
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Links (Compact) -->
+  <div class="flex-shrink-0 px-4 py-3 bg-gray-50 border-t border-gray-200">
+    <div class="space-y-1">
+      <!-- Forum Discussion Link -->
+      <% forum_url = ForumsLinkbuilderService.worldbuilding_url(content.raw_model.class) %>
+      <% if forum_url %>
+        <%= link_to forum_url, 
+                    class: "flex items-center px-2 py-1.5 text-xs text-gray-600 rounded hover:bg-gray-100 hover:text-gray-700 transition-colors",
+                    target: "_blank" do %>
+          <i class="material-icons text-sm mr-2 text-gray-400">forum</i>
+          Discuss <%= content.class_name.pluralize %>
+          <i class="material-icons text-xs ml-auto text-gray-400">open_in_new</i>
+        <% end %>
+      <% end %>
+      
+      <!-- Create New Link -->
+      <%= link_to new_polymorphic_path(content.raw_model.class), 
+                  class: "flex items-center px-2 py-1.5 text-xs text-gray-600 rounded hover:bg-gray-100 hover:text-gray-700 transition-colors" do %>
+        <i class="material-icons text-sm mr-2 text-gray-400">add</i>
+        Create <%= content.class_name.downcase %>
+      <% end %>
+      
+      <!-- User's Content Link -->
+      <%= link_to send("#{content.class_name.downcase.pluralize}_user_path", content.user), 
+                  class: "flex items-center px-2 py-1.5 text-xs text-gray-600 rounded hover:bg-gray-100 hover:text-gray-700 transition-colors" do %>
+        <i class="material-icons text-sm mr-2 text-gray-400">person</i>
+        More by <%= content.user.display_name %>
+        <i class="material-icons text-xs ml-auto text-gray-400">open_in_new</i>
+      <% end %>
+    </div>
+  </div>
+</div>

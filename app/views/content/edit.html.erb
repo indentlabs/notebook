@@ -1,54 +1,60 @@
-<% set_meta_tags title: "Editing " + @content.name, description: @content.description %>
-
-<%= content_for :full_width_page_header do %>
-  <%= render partial: 'content/display/image_card_header' %>
+<%= render layout: 'content/shared/page_layout', locals: { 
+  show_edit_controls: true, 
+  current_page: :edit 
+} do %>
+  <%= render partial: 'content/edit/edit_main', locals: { content: @serialized_content } %>
 <% end %>
 
-<div class="row flex">
-  <div class="col s12 m3">
-    <div class="sticky-below-navbar">
-      <%=
-        render partial: 'content/display/sidelinks',
-          locals: {
-            editing: true,
-            content: @serialized_content
-          }
-      %>
-    </div>
-  </div>
+<% content_for :right_sidebar do %>
+  <%= render partial: 'content/edit/edit_tools', locals: { content: @serialized_content } %>
+<% end %>
 
-  <div class="col s12 m6">
-    <%= render partial: 'content/form', locals: { content: @serialized_content } %>
-  </div>
-
-  <div class="col s12 m3">
-    <div class="sticky-below-navbar">
-      <%=
-        render partial: 'content/display/sideactions',
-          locals: {
-            editing: true,
-            content: @serialized_content
-          }
-      %>
-    </div>
-  </div>
-</div>
-
-<%# todo: surely we can strip this out (to a general slider.js?), no? %>
-<script type="text/javascript">
-  $(document).ready(function() {
-    $('.slider').slider({
-      height: 200,
-      indicators: false
-    });
+<!-- Edit-specific JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Track unsaved changes
+  let hasUnsavedChanges = false;
+  
+  // Mark as having unsaved changes when any form field changes
+  document.addEventListener('input', function(e) {
+    if (e.target.closest('form')) {
+      hasUnsavedChanges = true;
+    }
   });
+  
+  // Clear unsaved changes flag when autosave succeeds
+  document.addEventListener('autosave:success', function() {
+    hasUnsavedChanges = false;
+  });
+  
+  // Warn user about unsaved changes when leaving page
+  window.addEventListener('beforeunload', function(e) {
+    if (hasUnsavedChanges) {
+      e.preventDefault();
+      e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+      return 'You have unsaved changes. Are you sure you want to leave?';
+    }
+  });
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + S to save all (if needed)
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      // Trigger autosave on currently focused field if any
+      const activeElement = document.activeElement;
+      if (activeElement && activeElement.classList.contains('autosave-closest-form-on-change')) {
+        activeElement.blur(); // This triggers autosave
+      }
+    }
+    
+    // Escape to cancel/go back
+    if (e.key === 'Escape' && !e.target.closest('.dropdown-menu')) {
+      e.preventDefault();
+      if (confirm('Are you sure you want to stop editing? Any unsaved changes will be lost.')) {
+        window.location.href = '<%= polymorphic_path(@content) %>';
+      }
+    }
+  });
+});
 </script>
-<%= render partial: 'javascripts/content_linking' %>
-
-<script type="text/javascript">
-  DISABLE_KEYBOARD_SHORTCUTS = true;
-</script>
-
-<% if @content.persisted? %>
-  <%= render partial: 'content/share', locals: { shared_content: @content} %>
-<% end %>

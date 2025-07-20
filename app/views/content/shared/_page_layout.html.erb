@@ -1,0 +1,59 @@
+<%
+  # Set meta tags for the content page
+  page_description = "#{@content.name}, #{@content.description} — a fictional #{@content.class.name.downcase} on Notebook.ai"
+  page_description ||= @content.description
+  page_description ||= "#{@content.name} is a fictional #{@content.class.name.downcase} on Notebook.ai"
+
+  set_meta_tags title:       @content.name,
+                description: page_description.truncate(160),
+                image_src:   @content.first_public_image,
+                og:          { type: 'website' },
+                twitter:     { card: 'photo', image: @content.first_public_image }
+%>
+
+<div class="relative min-h-full flex flex-col">
+  <%= render partial: 'content/shared/breadcrumb_nav', locals: { 
+    content: @serialized_content, 
+    show_edit_controls: local_assigns.fetch(:show_edit_controls, true),
+    current_page: local_assigns.fetch(:current_page, :show)
+  } %>
+
+  <!-- 3 column wrapper -->
+  <div class="flex-grow w-full lg:flex min-h-screen">
+    <!-- Left sidebar & main wrapper -->
+    <div class="flex-1 min-w-0 xl:flex">
+      <!-- Mobile sidebar toggle for edit pages -->
+      <% if local_assigns.fetch(:current_page, :show) == :edit %>
+        <div class="lg:hidden bg-white border-b border-gray-200 p-4">
+          <button type="button" 
+                  onclick="toggleMobileSidebar()"
+                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <i class="material-icons text-lg mr-2">info</i>
+            Page Info
+          </button>
+        </div>
+      <% end %>
+      <% if @serialized_content.class_name == Universe.name %>
+        <%= render partial: 'content/tailwind_components/universe_context_sidenav', locals: { content: @serialized_content } %>
+      <% else %>
+        <%= render partial: 'content/tailwind_components/content_context_sidenav', locals: { content: @serialized_content } %>
+      <% end %>
+
+      <div class="bg-white lg:min-w-0 lg:flex-1 border-b border-gray-200 shadow">
+        <div class="pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
+          <%= render partial: 'content/tailwind_components/content_header', locals: { content: @serialized_content } %>
+        </div>
+
+        <!-- Main content area - yielded from parent template -->
+        <%= yield %>
+      </div>
+    </div>
+
+    <!-- Right pane - optional, yielded from parent template -->
+    <% if content_for?(:right_sidebar) %>
+      <div class="bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0">
+        <%= yield :right_sidebar %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,69 @@
+<nav class="bg-white h-16 border-b border-gray-200 flex sticky top-14 z-40" aria-label="Breadcrumb">
+  <ol role="list" class="flex-1 mx-auto px-4 flex space-x-4 sm:px-6 lg:px-8">
+    <li class="flex">
+      <div class="flex items-center">
+        <%= link_to root_path, class: 'text-gray-400 hover:text-gray-500' do %>
+          <i class="material-icons flex-shrink-0 text-2xl relative top-1">dashboard</i>
+          <span class="sr-only">Home</span>
+        <% end %>
+      </div>
+    </li>
+
+    <li class="flex">
+      <div class="flex items-center">
+        <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+        </svg>
+        <%= link_to content.class_name.pluralize, send("#{content.class_name.downcase.pluralize}_path"), class: 'ml-4 text-sm font-medium text-gray-500 hover:text-gray-700' %>
+      </div>
+    </li>
+
+    <li class="flex">
+      <div class="flex items-center">
+        <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+        </svg>
+        <%= link_to content.name, content.raw_model, class: 'ml-4 text-sm font-medium text-gray-500 hover:text-gray-700', aria: { current: 'page' } %>
+      </div>
+    </li>
+
+    <!-- Edit breadcrumb for edit pages -->
+    <% if current_page == :edit %>
+      <li class="flex">
+        <div class="flex items-center">
+          <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+          </svg>
+          <span class="ml-4 text-sm font-medium text-gray-900" aria-current="page">Edit</span>
+        </div>
+      </li>
+    <% end %>
+  </ol>
+
+  <div class="flex flex-row pt-3">
+    <% if show_edit_controls && @content.updatable_by?(current_user) %>
+      <% if current_page == :show %>
+        <!-- Show page - Edit button -->
+        <div class="mr-3">
+          <%= link_to polymorphic_path(@content, action: :edit) do %>
+            <button type="button" class="w-full bg-notebook-blue border border-notebook-blue rounded-md shadow-sm px-4 py-2 inline-flex items-center text-sm font-medium text-gray-200 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <i class="material-icons text-2xl leading-3 mr-3">edit</i>
+              Edit Page
+            </button>
+          <% end %>
+        </div>
+      <% elsif current_page == :edit %>
+        <!-- Edit page - Done/Cancel buttons -->
+        <div class="mr-3">
+          <%= link_to @content do %>
+            <button type="button" class="w-full bg-gray-600 border border-gray-600 rounded-md shadow-sm px-4 py-2 inline-flex items-center text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+              <i class="material-icons text-2xl leading-3 mr-3">visibility</i>
+              Done Editing
+            </button>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+
+  </div>
+</nav>
