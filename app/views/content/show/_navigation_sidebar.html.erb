@@ -14,7 +14,7 @@
         </button>
       </div>
       
-      <nav class="space-y-1">
+      <nav class="space-y-0.5">
         <% content.data[:categories].each do |category| %>
           <% next if category[:label] == 'Gallery' %>
           <% has_content = category[:fields].any? { |field| field[:value].present? } %>
@@ -47,7 +47,7 @@
     <!-- Views Section -->
     <div class="px-4 py-4 border-b border-gray-200">
       <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Dive Deeper</h3>
-      <nav class="space-y-1">        
+      <nav class="space-y-0.5">        
         <!-- Gallery View -->
         <button @click="switchView('gallery')" 
                 :class="isViewActive('gallery') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
@@ -144,7 +144,7 @@
       </div>
     <% end %>
 
-    <!-- Page Stats -->
+    <!-- Public Stats -->
     <div class="px-4 py-4 border-b border-gray-200">
       <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Page Stats</h3>
       <div class="space-y-3">
@@ -173,39 +173,46 @@
             <%= number_with_delimiter(content.cached_word_count || 0) %>
           </span>
         </div>
-        
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-600">Created</span>
-          <span class="font-medium text-gray-900" title="<%= raw_content.created_at.strftime('%B %d, %Y at %I:%M %p') %>">
-            <%= distance_of_time_in_words(raw_content.created_at, Time.current) %> ago
-          </span>
-        </div>
-        
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-600">Last updated</span>
-          <span class="font-medium text-gray-900" title="<%= raw_content.updated_at.strftime('%B %d, %Y at %I:%M %p') %>">
-            <%= distance_of_time_in_words(raw_content.updated_at, Time.current) %> ago
-          </span>
-        </div>
       </div>
     </div>
+
+    <!-- Owner Stats -->
+    <% if user_signed_in? && raw_content.user_id == current_user.id %>
+      <div class="px-4 py-4 border-b border-gray-200 bg-blue-50 bg-opacity-30">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center" title="Only visible to you as the page owner">
+          Owner Stats
+          <i class="material-icons text-xs text-gray-400 ml-1">lock</i>
+        </h3>
+        <div class="space-y-3">
+          
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Created</span>
+            <span class="font-medium text-gray-900" title="<%= raw_content.created_at.strftime('%B %d, %Y at %I:%M %p') %>">
+              <%= distance_of_time_in_words(raw_content.created_at, Time.current) %> ago
+            </span>
+          </div>
+          
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Last updated</span>
+            <span class="font-medium text-gray-900" title="<%= raw_content.updated_at.strftime('%B %d, %Y at %I:%M %p') %>">
+              <%= distance_of_time_in_words(raw_content.updated_at, Time.current) %> ago
+            </span>
+          </div>
+          
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Changes</span>
+            <%= link_to send("changelog_#{raw_content.class.name.downcase}_path", raw_content), class: "font-medium text-blue-600 hover:text-blue-700 hover:underline px-2 py-1 bg-white rounded transition-colors", title: "View changelog" do %>
+              <%= number_with_delimiter(raw_content.attribute_change_events.count) %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
   </div>
 
   <!-- Bottom Links (Compact) -->
   <div class="flex-shrink-0 px-4 py-4 bg-gray-50 border-t border-gray-200">
     <div class="space-y-1">
-      <!-- Forum Discussion Link -->
-      <% forum_url = ForumsLinkbuilderService.worldbuilding_url(content.raw_model.class) %>
-      <% if forum_url %>
-        <%= link_to forum_url, 
-                    class: "flex items-center px-2 py-1.5 text-xs text-gray-600 rounded hover:bg-gray-100 hover:text-gray-700 transition-colors",
-                    target: "_blank" do %>
-          <i class="material-icons text-sm mr-2 text-gray-400">forum</i>
-          Discuss <%= content.class_name.pluralize %>
-          <i class="material-icons text-xs ml-auto text-gray-400">open_in_new</i>
-        <% end %>
-      <% end %>
-      
       <!-- Create New Link -->
       <%= link_to new_polymorphic_path(content.raw_model.class), 
                   class: "flex items-center px-2 py-1.5 text-xs text-gray-600 rounded hover:bg-gray-100 hover:text-gray-700 transition-colors" do %>

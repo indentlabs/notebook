@@ -3,7 +3,7 @@
 # TODO: we should probably spin off an Api::ContentController for #api_sort and anything else 
 #       api-wise we need
 class ContentController < ApplicationController
-  layout 'tailwind', only: [:index, :show, :gallery, :references, :deleted, :attributes]
+  layout 'tailwind'
 
   before_action :authenticate_user!, except: [:show, :changelog, :api_sort, :gallery] \
     + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }

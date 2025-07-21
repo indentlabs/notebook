@@ -32,13 +32,13 @@
                               class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
                               alt: "#{content.name} preview" %>
               <% else %>
-                <%= image_tag "content/card-headers/#{raw_content.class.name.downcase}.jpg", 
+                <%= image_tag asset_path("content/card-headers/#{raw_content.class.name.downcase.pluralize}.jpg"), 
                               class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
                               alt: "#{content.name} preview" %>
               <% end %>
             <% end %>
           <% else %>
-            <%= image_tag "content/card-headers/#{raw_content.class.name.downcase}.jpg", 
+            <%= image_tag "card-headers/#{raw_content.class.name.downcase.pluralize}.jpg", 
                           class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
                           alt: "#{content.name} preview" %>
           <% end %>
@@ -58,151 +58,72 @@
       <% end %>
     </div>
     
-    <!-- Tools Header -->
+    <!-- Tools -->
     <div class="pb-4 border-b border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-900 mb-2">Quick Links</h2>
-      <p class="text-sm text-gray-500">External resources and navigation</p>
-    </div>
-    
-    <!-- Coming Soon Notice -->
-    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-      <div class="flex items-start">
-        <div class="flex-shrink-0">
-          <i class="material-icons text-yellow-600 text-lg">construction</i>
-        </div>
-        <div class="ml-3">
-          <h3 class="text-sm font-medium text-yellow-800">Coming Soon</h3>
-          <p class="text-xs text-yellow-700 mt-1">
-            External navigation links will appear here
-          </p>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Placeholder Navigation Sections -->
-    
-    <!-- Related Tools Section -->
-    <div class="space-y-3">
-      <h3 class="text-sm font-semibold text-gray-900 flex items-center">
+      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
         <i class="material-icons text-sm <%= content.class_text_color %> mr-2">build</i>
-        Writing Tools
-      </h3>
+        Tools
+      </h2>
       
-      <div class="space-y-2 opacity-50">
-        <div class="flex items-center p-2 text-sm text-gray-600 bg-gray-100 rounded-md">
-          <i class="material-icons text-sm mr-2">edit</i>
-          <span class="flex-1">Character Generator</span>
-          <i class="material-icons text-xs">open_in_new</i>
-        </div>
+      <div class="grid grid-cols-2 gap-2">
+        <%= link_to "#", class: "group flex flex-col items-center p-3 text-xs rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white text-center" do %>
+          <i class="material-icons text-lg text-gray-400 group-hover:text-purple-500 mb-1">lightbulb</i>
+          <span class="font-medium text-gray-700 group-hover:text-purple-700">Brainstorm</span>
+        <% end %>
         
-        <div class="flex items-center p-2 text-sm text-gray-600 bg-gray-100 rounded-md">
-          <i class="material-icons text-sm mr-2">map</i>
-          <span class="flex-1">Name Generator</span>
-          <i class="material-icons text-xs">open_in_new</i>
-        </div>
+        <%= link_to "#", class: "group flex flex-col items-center p-3 text-xs rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white text-center" do %>
+          <i class="material-icons text-lg text-gray-400 group-hover:text-purple-500 mb-1">find_in_page</i>
+          <span class="font-medium text-gray-700 group-hover:text-purple-700">Research</span>
+        <% end %>
+
+        <%= link_to "#", class: "group flex flex-col items-center p-3 text-xs rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white text-center" do %>
+          <i class="material-icons text-lg text-gray-400 group-hover:text-purple-500 mb-1">visibility</i>
+          <span class="font-medium text-gray-700 group-hover:text-purple-700">Visualize</span>
+        <% end %>
         
-        <div class="flex items-center p-2 text-sm text-gray-600 bg-gray-100 rounded-md">
-          <i class="material-icons text-sm mr-2">auto_stories</i>
-          <span class="flex-1">Plot Generator</span>
-          <i class="material-icons text-xs">open_in_new</i>
-        </div>
+        <%= link_to "#", class: "group flex flex-col items-center p-3 text-xs rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white text-center" do %>
+          <i class="material-icons text-lg text-gray-400 group-hover:text-purple-500 mb-1">analytics</i>
+          <span class="font-medium text-gray-700 group-hover:text-purple-700">Analyze</span>
+        <% end %>
       </div>
     </div>
     
-    <!-- Resources Section -->
-    <div class="space-y-3">
-      <h3 class="text-sm font-semibold text-gray-900 flex items-center">
+    <!-- Community -->
+    <div class="pb-4 border-b border-gray-200">
+      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">groups</i>
+        Community
+      </h2>
+      
+      <div class="space-y-2">
+        <% forum_url = ForumsLinkbuilderService.worldbuilding_url(content.raw_model.class) %>
+        <% if forum_url %>
+          <%= link_to forum_url, target: "_blank", class: "group flex items-center p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors" do %>
+            <i class="material-icons text-base text-gray-400 group-hover:text-blue-500 mr-3">forum</i>
+            <div class="flex-1">
+              <div class="text-sm font-medium text-gray-900 group-hover:text-blue-700"><%= content.class_name.pluralize %> Forum</div>
+              <div class="text-xs text-gray-500">Discuss <%= content.class_name.pluralize.downcase %> with others</div>
+            </div>
+            <i class="material-icons text-xs text-gray-400 group-hover:text-blue-500">open_in_new</i>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Resources -->
+    <div class="pb-4 border-b border-gray-200">
+      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
         <i class="material-icons text-sm <%= content.class_text_color %> mr-2">school</i>
         Resources
-      </h3>
+      </h2>
       
-      <div class="space-y-2 opacity-50">
-        <div class="flex items-center p-2 text-sm text-gray-600 bg-gray-100 rounded-md">
-          <i class="material-icons text-sm mr-2">help</i>
-          <span class="flex-1">Writing Guides</span>
-          <i class="material-icons text-xs">open_in_new</i>
-        </div>
-        
-        <div class="flex items-center p-2 text-sm text-gray-600 bg-gray-100 rounded-md">
-          <i class="material-icons text-sm mr-2">video_library</i>
-          <span class="flex-1">Tutorials</span>
-          <i class="material-icons text-xs">open_in_new</i>
-        </div>
-        
-        <div class="flex items-center p-2 text-sm text-gray-600 bg-gray-100 rounded-md">
-          <i class="material-icons text-sm mr-2">forum</i>
-          <span class="flex-1">Community</span>
-          <i class="material-icons text-xs">open_in_new</i>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Research Section -->
-    <div class="space-y-3">
-      <h3 class="text-sm font-semibold text-gray-900 flex items-center">
-        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">search</i>
-        Research
-      </h3>
-      
-      <div class="space-y-2 opacity-50">
-        <div class="flex items-center p-2 text-sm text-gray-600 bg-gray-100 rounded-md">
-          <i class="material-icons text-sm mr-2">language</i>
-          <span class="flex-1">Wikipedia</span>
-          <i class="material-icons text-xs">open_in_new</i>
-        </div>
-        
-        <div class="flex items-center p-2 text-sm text-gray-600 bg-gray-100 rounded-md">
-          <i class="material-icons text-sm mr-2">image_search</i>
-          <span class="flex-1">Image References</span>
-          <i class="material-icons text-xs">open_in_new</i>
-        </div>
-        
-        <div class="flex items-center p-2 text-sm text-gray-600 bg-gray-100 rounded-md">
-          <i class="material-icons text-sm mr-2">public</i>
-          <span class="flex-1">World Atlas</span>
-          <i class="material-icons text-xs">open_in_new</i>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Related Content Section -->
-    <div class="space-y-3">
-      <h3 class="text-sm font-semibold text-gray-900 flex items-center">
-        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">explore</i>
-        Explore More
-      </h3>
-      
-      <div class="space-y-2 opacity-50">
-        <div class="flex items-center p-2 text-sm text-gray-600 bg-gray-100 rounded-md">
-          <i class="material-icons text-sm mr-2">trending_up</i>
-          <span class="flex-1">Popular Content</span>
-          <i class="material-icons text-xs">open_in_new</i>
-        </div>
-        
-        <div class="flex items-center p-2 text-sm text-gray-600 bg-gray-100 rounded-md">
-          <i class="material-icons text-sm mr-2">shuffle</i>
-          <span class="flex-1">Random Content</span>
-          <i class="material-icons text-xs">open_in_new</i>
-        </div>
-        
-        <div class="flex items-center p-2 text-sm text-gray-600 bg-gray-100 rounded-md">
-          <i class="material-icons text-sm mr-2">collections</i>
-          <span class="flex-1">Featured Collections</span>
-          <i class="material-icons text-xs">open_in_new</i>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Footer -->
-    <div class="pt-6 border-t border-gray-200">
-      <div class="text-center">
-        <div class="mx-auto h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center mb-3">
-          <i class="material-icons text-gray-500 text-sm">more_horiz</i>
-        </div>
-        <p class="text-xs text-gray-500 mb-2">More tools coming soon</p>
-        <p class="text-xs text-gray-400">
-          All links will open in new tabs
-        </p>
+      <div class="space-y-1">
+        <%= link_to "#", class: "text-sm text-gray-700 hover:text-blue-600 block hover:underline" do %>
+          Writing Guides
+        <% end %>
+        <%= link_to "#", class: "text-sm text-gray-700 hover:text-blue-600 block hover:underline" do %>
+          Research Guides
+        <% end %>
       </div>
     </div>
     

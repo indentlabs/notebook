@@ -27,7 +27,7 @@
 
   <% if user_signed_in? %>
     <!-- Simplified sidebar for debugging -->
-    <nav x-show="showSidebar" class="notebook--sidebar fixed top-0 pt-16 flex flex-col left-0 z-20 h-screen overflow-hidden border-r transition-all duration-300 origin-left transform w-56 sm:w-64 lg:w-56" :class="{ '-translate-x-full' : !showSidebar, 'translate-x-0' : showSidebar }">
+    <nav x-show="showSidebar" class="notebook--sidebar fixed top-0 pt-16 flex flex-col left-0 z-20 h-screen overflow-hidden border-r transition-all duration-300 origin-left transform w-60 sm:w-64 lg:w-60" :class="{ '-translate-x-full' : !showSidebar, 'translate-x-0' : showSidebar }">
       <div class="absolute inset-0 bg-white shadow-lg border-r border-gray-200"></div>
       
       <!-- Universe Context Bar - visible on all screen sizes -->
@@ -99,17 +99,17 @@
               </div>
             </div>
           </div>
-          <div x-show="expandedWorldbuildingSidebar" x-cloak class="mt-1 pl-3.5 ml-2 border-l border-blue-200 overflow-hidden space-y-0.5">
+          <div x-show="expandedWorldbuildingSidebar" x-cloak class="mt-1 pl-3.5 ml-2 border-l border-blue-200 overflow-hidden space-y-1">
             <!-- Simple content container -->
             <div class="transform transition-all duration-200" 
                  :class="{ 'translate-y-0 opacity-100': expandedWorldbuildingSidebar, 'translate-y-4 opacity-0': !expandedWorldbuildingSidebar }">
             <% @activated_content_types.each do |content_type| %>
               <% content_type_klass = content_class_from_name(content_type) %>
               <% is_current_page = current_page?(main_app.polymorphic_path(content_type_klass)) %>
-              <%= link_to main_app.polymorphic_path(content_type_klass), class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{is_current_page ? 'bg-blue-50 text-blue-800' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'}", "aria-current": (is_current_page ? "page" : "false") do %>
+              <%= link_to main_app.polymorphic_path(content_type_klass), class: "ripple-effect flex items-center px-3 py-2 cursor-pointer group rounded-md transition duration-200 #{is_current_page ? 'bg-blue-50 text-blue-800' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'}", "aria-current": (is_current_page ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
-                    <i class="material-icons <%= content_type_klass.text_color %> text-base"><%= content_type_klass.icon %></i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-3">
+                    <i class="material-icons <%= content_type_klass.text_color %> text-lg"><%= content_type_klass.icon %></i>
                   </div>
                   <div class="flex-grow flex items-center justify-between min-w-0">
                     <span class="text-sm font-medium truncate"><%= content_type.pluralize %></span>
@@ -124,10 +124,10 @@
             <% end %>
 
             <div class="mt-3 border-t border-gray-200 pt-2">
-              <%= link_to main_app.customization_content_types_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.customization_content_types_path) ? 'bg-blue-50 text-blue-800' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'}", "aria-current": (current_page?(main_app.customization_content_types_path) ? "page" : "false") do %>
+              <%= link_to main_app.customization_content_types_path, class: "ripple-effect flex items-center px-3 py-2 cursor-pointer group rounded-md transition duration-200 #{current_page?(main_app.customization_content_types_path) ? 'bg-blue-50 text-blue-800' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'}", "aria-current": (current_page?(main_app.customization_content_types_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
-                    <i class="material-icons text-blue-500 text-base">add</i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-3">
+                    <i class="material-icons text-blue-500 text-lg">add</i>
                   </div>
                   <div class="flex-grow">
                     <span class="text-sm font-medium">Add more...</span>
@@ -154,14 +154,14 @@
               </div>
             </div>
           </div>
-          <div x-show="expandedWritingSidebar" x-cloak class="mt-1 pl-3.5 ml-2 border-l border-green-200 overflow-hidden space-y-0.5">
+          <div x-show="expandedWritingSidebar" x-cloak class="mt-1 pl-3.5 ml-2 border-l border-green-200 overflow-hidden space-y-1">
             <!-- Simple content container -->
             <div class="transform transition-all duration-200" 
                  :class="{ 'translate-y-0 opacity-100': expandedWritingSidebar, 'translate-y-4 opacity-0': !expandedWritingSidebar }">
-            <%= link_to main_app.documents_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.documents_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}", "aria-current": (current_page?(main_app.documents_path) ? "page" : "false") do %>
+            <%= link_to main_app.documents_path, class: "ripple-effect flex items-center px-3 py-2 cursor-pointer group rounded-md transition duration-200 #{current_page?(main_app.documents_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}", "aria-current": (current_page?(main_app.documents_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
-                    <i class="material-icons <%= Document.text_color %> text-base"><%= Document.icon %></i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-3">
+                    <i class="material-icons <%= Document.text_color %> text-lg"><%= Document.icon %></i>
                   </div>
                   <div class="flex-grow flex items-center justify-between min-w-0">
                     <span class="text-sm font-medium truncate">Documents</span>
@@ -174,10 +174,10 @@
                 </div>
               <% end %>
 
-            <%= link_to main_app.timelines_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.timelines_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}", "aria-current": (current_page?(main_app.timelines_path) ? "page" : "false") do %>
+            <%= link_to main_app.timelines_path, class: "ripple-effect flex items-center px-3 py-2 cursor-pointer group rounded-md transition duration-200 #{current_page?(main_app.timelines_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}", "aria-current": (current_page?(main_app.timelines_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
-                    <i class="material-icons <%= Timeline.text_color %> text-base"><%= Timeline.icon %></i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-3">
+                    <i class="material-icons <%= Timeline.text_color %> text-lg"><%= Timeline.icon %></i>
                   </div>
                   <div class="flex-grow flex items-center justify-between min-w-0">
                     <span class="text-sm font-medium truncate">Timelines</span>
@@ -190,10 +190,10 @@
                 </div>
               <% end %>
 
-            <%= link_to main_app.prompts_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.prompts_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}", "aria-current": (current_page?(main_app.prompts_path) ? "page" : "false") do %>
+            <%= link_to main_app.prompts_path, class: "ripple-effect flex items-center px-3 py-2 cursor-pointer group rounded-md transition duration-200 #{current_page?(main_app.prompts_path) ? 'bg-green-50 text-green-800' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}", "aria-current": (current_page?(main_app.prompts_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
-                    <i class="material-icons text-orange-400 text-base">lightbulb</i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-3">
+                    <i class="material-icons text-orange-400 text-lg">lightbulb</i>
                   </div>
                   <div class="flex-grow">
                     <span class="text-sm font-medium">Prompts</span>
@@ -220,14 +220,14 @@
               </div>
             </div>
           </div>
-          <div x-show="expandedCommunitySidebar" x-cloak class="mt-1 pl-3.5 ml-2 border-l border-purple-200 overflow-hidden space-y-0.5">
+          <div x-show="expandedCommunitySidebar" x-cloak class="mt-1 pl-3.5 ml-2 border-l border-purple-200 overflow-hidden space-y-1">
             <!-- Simple content container -->
             <div class="transform transition-all duration-200" 
                  :class="{ 'translate-y-0 opacity-100': expandedCommunitySidebar, 'translate-y-4 opacity-0': !expandedCommunitySidebar }">
-            <%= link_to main_app.page_collections_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.page_collections_path) ? 'bg-purple-50 text-purple-800' : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'}", "aria-current": (current_page?(main_app.page_collections_path) ? "page" : "false") do %>
+            <%= link_to main_app.page_collections_path, class: "ripple-effect flex items-center px-3 py-2 cursor-pointer group rounded-md transition duration-200 #{current_page?(main_app.page_collections_path) ? 'bg-purple-50 text-purple-800' : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'}", "aria-current": (current_page?(main_app.page_collections_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
-                    <i class="material-icons <%= PageCollection.text_color %> text-base"><%= PageCollection.icon %></i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-3">
+                    <i class="material-icons <%= PageCollection.text_color %> text-lg"><%= PageCollection.icon %></i>
                   </div>
                   <div class="flex-grow flex items-center justify-between min-w-0">
                     <span class="text-sm font-medium truncate">Collections</span>
@@ -240,10 +240,10 @@
                 </div>
               <% end %>
 
-            <%= link_to main_app.thredded_path, class: "flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.thredded_path) ? 'bg-purple-50 text-purple-800' : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'}", "aria-current": (current_page?(main_app.thredded_path) ? "page" : "false") do %>
+            <%= link_to main_app.thredded_path, class: "flex items-center px-3 py-2 cursor-pointer group rounded-md transition duration-200 #{current_page?(main_app.thredded_path) ? 'bg-purple-50 text-purple-800' : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'}", "aria-current": (current_page?(main_app.thredded_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
-                    <i class="material-icons text-blue-500 text-base">forum</i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-3">
+                    <i class="material-icons text-blue-500 text-lg">forum</i>
                   </div>
                   <div class="flex-grow flex items-center justify-between min-w-0">
                     <span class="text-sm font-medium truncate">Discussions</span>
@@ -254,10 +254,10 @@
                 </div>
               <% end %>
 
-            <%= link_to main_app.stream_path, class: "ripple-effect flex items-center px-2 py-1.5 my-0.5 cursor-pointer group rounded transition duration-200 #{current_page?(main_app.stream_path) ? 'bg-purple-50 text-purple-800' : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'}", "aria-current": (current_page?(main_app.stream_path) ? "page" : "false") do %>
+            <%= link_to main_app.stream_path, class: "ripple-effect flex items-center px-3 py-2 cursor-pointer group rounded-md transition duration-200 #{current_page?(main_app.stream_path) ? 'bg-purple-50 text-purple-800' : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'}", "aria-current": (current_page?(main_app.stream_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
-                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-2.5">
-                    <i class="material-icons text-purple-400 text-base">ballot</i>
+                  <div class="shrink-0 w-7 h-7 flex items-center justify-center mr-3">
+                    <i class="material-icons text-purple-400 text-lg">ballot</i>
                   </div>
                   <div class="flex-grow flex items-center justify-between min-w-0">
                     <span class="text-sm font-medium truncate">Activity</span>
@@ -303,11 +303,11 @@
   <% end %>
 
   <!-- main content -->
-  <main <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-64 lg:ml-56': showSidebar }"<% end %> class="transition-all duration-300">
+  <main <% if user_signed_in? %>:class="{ 'ml-60 sm:ml-64 lg:ml-60': showSidebar }"<% end %> class="transition-all duration-300">
     <%= yield %>
   </main>
 
-  <footer <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-64 lg:ml-56': showSidebar }"<% end %> class="transition-all duration-300">
+  <footer <% if user_signed_in? %>:class="{ 'ml-60 sm:ml-64 lg:ml-60': showSidebar }"<% end %> class="transition-all duration-300">
     <div class="max-w-7xl mx-auto pt-24 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
       <div class="flex justify-center space-x-6 md:order-2">
         <%= link_to 'https://www.facebook.com/notebookai/', class: 'text-gray-400 hover:text-gray-500' do %>
