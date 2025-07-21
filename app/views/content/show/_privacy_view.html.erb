@@ -1,0 +1,389 @@
+<!-- Privacy Management Interface -->
+<div x-data="{ 
+  selectedPrivacy: '<%= raw_content.privacy || 'private' %>',
+  publicType: 'standard', // 'standard', 'password', 'discoverable'
+  password: '',
+  isLoading: false,
+  showToast: false,
+  toastMessage: ''
+}" 
+x-init="
+  // Update sub-options when privacy changes
+  $watch('selectedPrivacy', (value, oldValue) => {
+    if (value === 'private') {
+      publicType = 'standard';
+    }
+    // Auto-save when privacy changes
+    if (oldValue !== undefined) {
+      savePrivacySettings();
+    }
+  });
+  
+  // Auto-save when sub-options change
+  $watch('publicType', () => savePrivacySettings());
+  $watch('password', () => {
+    if (password.length >= 8) {
+      savePrivacySettings();
+    }
+  });
+  
+  // Auto-save function
+  savePrivacySettings() {
+    this.isLoading = true;
+    
+    // Simulate API call for now (replace with actual form submission)
+    setTimeout(() => {
+      this.isLoading = false;
+      this.showToast = true;
+      this.toastMessage = 'Privacy settings updated';
+      
+      // Auto-hide toast after 3 seconds
+      setTimeout(() => {
+        this.showToast = false;
+      }, 3000);
+    }, 500);
+    
+    // TODO: Replace with actual form submission
+    // fetch('/content/<%= raw_content.id %>/privacy', {
+    //   method: 'PATCH',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'X-CSRF-Token': document.querySelector('meta[name=\"csrf-token\"]').content
+    //   },
+    //   body: JSON.stringify({
+    //     privacy: this.selectedPrivacy,
+    //     password_protected: this.passwordProtected,
+    //     discoverable: this.discoverable,
+    //     password: this.password
+    //   })
+    // });
+  }
+"
+class="max-w-4xl mx-auto space-y-8">
+
+  <!-- Toast Notification -->
+  <div x-show="showToast"
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0 transform translate-y-2"
+       x-transition:enter-end="opacity-100 transform translate-y-0"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100 transform translate-y-0"
+       x-transition:leave-end="opacity-0 transform translate-y-2"
+       class="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center">
+    <i class="material-icons text-sm mr-2">check_circle</i>
+    <span x-text="toastMessage"></span>
+  </div>
+
+  <!-- Current Status Overview -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <div :class="selectedPrivacy === 'public' ? 'bg-green-100' : 'bg-gray-100'"
+             class="w-12 h-12 rounded-lg flex items-center justify-center mr-4 transition-colors duration-200">
+          <i :class="selectedPrivacy === 'public' ? 'text-green-600' : 'text-gray-600'"
+             class="material-icons text-xl transition-colors duration-200"
+             x-text="selectedPrivacy === 'public' ? 'public' : 'lock'">
+          </i>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+            Current Status
+            <div x-show="isLoading" class="ml-2">
+              <i class="material-icons text-sm text-blue-500 animate-spin">refresh</i>
+            </div>
+          </h3>
+          <p class="text-sm text-gray-600">
+            This <%= content.class_name.downcase %> is currently 
+            <span :class="selectedPrivacy === 'public' ? 'text-green-600' : 'text-gray-600'"
+                  class="font-medium transition-colors duration-200"
+                  x-text="selectedPrivacy.charAt(0).toUpperCase() + selectedPrivacy.slice(1)">
+            </span>
+            <span x-show="selectedPrivacy === 'public' && publicType === 'password'" class="text-orange-600 font-medium"> + Password Protected</span>
+            <span x-show="selectedPrivacy === 'public' && publicType === 'discoverable'" class="text-blue-600 font-medium"> + Discoverable</span>
+          </p>
+        </div>
+      </div>
+      <div class="text-right">
+        <div class="text-sm text-gray-500">Effective visibility</div>
+        <% if raw_content.respond_to?(:universe) && raw_content.universe.present? && raw_content.universe.privacy == 'public' %>
+          <div class="font-medium text-green-600 flex items-center justify-end mt-1">
+            <span>Public</span>
+            <i class="material-icons text-sm ml-1 text-blue-500" title="Set by universe '<%= raw_content.universe.name %>'">info</i>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">via Universe</div>
+        <% else %>
+          <div :class="selectedPrivacy === 'public' ? 'text-green-600' : 'text-gray-600'"
+               class="font-medium transition-colors duration-200 mt-1"
+               x-text="selectedPrivacy.charAt(0).toUpperCase() + selectedPrivacy.slice(1)">
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Level Selection -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold text-gray-900 mb-3">Privacy Settings</h3>
+      <p class="text-gray-600">Choose who can see and access this <%= content.class_name.downcase %></p>
+    </div>
+
+    <div class="space-y-4">
+      <!-- Private Option -->
+      <label class="group relative cursor-pointer block">
+        <input type="radio" 
+               name="privacy" 
+               value="private" 
+               x-model="selectedPrivacy"
+               class="sr-only">
+        <div :class="selectedPrivacy === 'private' ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'"
+             class="border-2 rounded-xl p-6 transition-all duration-200 group-hover:scale-[1.01]">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <div :class="selectedPrivacy === 'private' ? 'bg-blue-500 text-white shadow-lg' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'"
+                   class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200">
+                <i class="material-icons text-lg">lock</i>
+              </div>
+            </div>
+            <div class="ml-4 flex-1">
+              <div class="text-lg font-semibold text-gray-900 mb-1">Private</div>
+              <div class="text-gray-600">Only you and collaborators can see this page</div>
+            </div>
+            <div class="flex-shrink-0 ml-4">
+              <div :class="selectedPrivacy === 'private' ? 'text-blue-500' : 'text-gray-300'"
+                   class="transition-colors duration-200">
+                <i class="material-icons text-xl">check_circle</i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </label>
+
+      <!-- Public Option -->
+      <label class="group relative cursor-pointer block">
+        <input type="radio" 
+               name="privacy" 
+               value="public" 
+               x-model="selectedPrivacy"
+               class="sr-only">
+        <div :class="selectedPrivacy === 'public' ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'"
+             class="border-2 rounded-xl p-6 transition-all duration-200 group-hover:scale-[1.01]">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <div :class="selectedPrivacy === 'public' ? 'bg-blue-500 text-white shadow-lg' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'"
+                   class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200">
+                <i class="material-icons text-lg">public</i>
+              </div>
+            </div>
+            <div class="ml-4 flex-1">
+              <div class="text-lg font-semibold text-gray-900 mb-1">Public</div>
+              <div class="text-gray-600">Anyone with the link can view this page</div>
+            </div>
+            <div class="flex-shrink-0 ml-4">
+              <div :class="selectedPrivacy === 'public' ? 'text-blue-500' : 'text-gray-300'"
+                   class="transition-colors duration-200">
+                <i class="material-icons text-xl">check_circle</i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </label>
+    </div>
+
+    <!-- Additional Privacy Options -->
+    <div x-show="selectedPrivacy === 'public' || selectedPrivacy === 'private'" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform -translate-y-4"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         class="mt-8 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+      
+      <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+        <i class="material-icons text-gray-600 mr-2">tune</i>
+        Additional Options
+      </h4>
+      
+      <div class="space-y-4">
+        <!-- Public Page Types -->
+        <div x-show="selectedPrivacy === 'public'" class="space-y-4">
+          <div class="text-sm font-medium text-gray-700 mb-3">Choose public page type:</div>
+          
+          <!-- Standard Public -->
+          <label class="group flex items-start cursor-pointer p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200"
+                 :class="publicType === 'standard' ? 'border-blue-500 bg-blue-50' : ''">
+            <input type="radio" 
+                   name="publicType"
+                   value="standard"
+                   x-model="publicType"
+                   class="mt-1.5 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300">
+            <div class="ml-4 flex-1">
+              <div class="flex items-center mb-2">
+                <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
+                  <i class="material-icons text-sm text-blue-600">public</i>
+                </div>
+                <div class="font-medium text-gray-900">Standard Public</div>
+              </div>
+              <div class="text-sm text-gray-600 ml-11">Anyone with the link can view this page</div>
+            </div>
+          </label>
+
+          <!-- Password Protected -->
+          <label class="group flex items-start cursor-pointer p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200"
+                 :class="publicType === 'password' ? 'border-orange-500 bg-orange-50' : ''">
+            <input type="radio" 
+                   name="publicType"
+                   value="password"
+                   x-model="publicType"
+                   class="mt-1.5 h-5 w-5 text-orange-600 focus:ring-orange-500 border-gray-300">
+            <div class="ml-4 flex-1">
+              <div class="flex items-center mb-2">
+                <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center mr-3">
+                  <i class="material-icons text-sm text-orange-600">key</i>
+                </div>
+                <div class="font-medium text-gray-900">Password Protected</div>
+                <div class="text-xs text-orange-600 ml-2 px-2 py-1 bg-orange-100 rounded-md font-medium">Coming Soon</div>
+              </div>
+              <div class="text-sm text-gray-600 ml-11">Require a password to view this public page</div>
+            </div>
+          </label>
+
+          <!-- Discoverable -->
+          <label class="group flex items-start cursor-pointer p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200"
+                 :class="publicType === 'discoverable' ? 'border-green-500 bg-green-50' : ''">
+            <input type="radio" 
+                   name="publicType"
+                   value="discoverable"
+                   x-model="publicType"
+                   class="mt-1.5 h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300">
+            <div class="ml-4 flex-1">
+              <div class="flex items-center mb-2">
+                <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mr-3">
+                  <i class="material-icons text-sm text-green-600">search</i>
+                </div>
+                <div class="font-medium text-gray-900">Discoverable</div>
+                <div class="text-xs text-orange-600 ml-2 px-2 py-1 bg-orange-100 rounded-md font-medium">Coming Soon</div>
+              </div>
+              <div class="text-sm text-gray-600 ml-11">Appears in public searches and content indexes</div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Private Page Message -->
+        <div x-show="selectedPrivacy === 'private'" class="text-center py-6">
+          <div class="flex items-center justify-center mb-3">
+            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+              <i class="material-icons text-gray-500">lock</i>
+            </div>
+          </div>
+          <div class="text-gray-600 font-medium">
+            Private pages are only visible to you and collaborators.
+          </div>
+          <div class="text-sm text-gray-500 mt-1">
+            No additional options are available for private pages.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Password Field (shown when password protection is enabled) -->
+    <div x-show="publicType === 'password'" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform -translate-y-4"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         class="mt-6 p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200">
+      <div class="flex items-center mb-4">
+        <div class="w-8 h-8 rounded-lg bg-orange-200 flex items-center justify-center mr-3">
+          <i class="material-icons text-sm text-orange-700">key</i>
+        </div>
+        <label for="password" class="text-lg font-medium text-gray-900">
+          Set Password
+        </label>
+      </div>
+      <input type="password" 
+             id="password"
+             x-model="password"
+             placeholder="Enter a strong password"
+             class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+      <p class="text-sm text-gray-600 mt-3 flex items-center">
+        <i class="material-icons text-sm text-gray-500 mr-2">info</i>
+        Password must be at least 8 characters long
+      </p>
+    </div>
+  </div>
+
+  <!-- Universe Inheritance (if applicable) -->
+  <% if raw_content.respond_to?(:universe) && raw_content.universe.present? %>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+      <div class="mb-6">
+        <h3 class="text-xl font-semibold text-gray-900 mb-3 flex items-center">
+          <i class="material-icons text-xl <%= Universe.text_color %> mr-3"><%= Universe.icon %></i>
+          Universe Privacy
+        </h3>
+        <p class="text-gray-600">This page belongs to a universe with its own privacy settings that can override individual page settings</p>
+      </div>
+
+      <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 relative overflow-hidden">
+        <!-- Background pattern -->
+        <div class="absolute inset-0 opacity-5">
+          <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\"40\" height=\"40\" viewBox=\"0 0 40 40\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"%23000\" fill-opacity=\"0.1\"%3E%3Cpath d=\"M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z\"/%3E%3C/g%3E%3C/svg%3E');"></div>
+        </div>
+        
+        <div class="relative flex items-start">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 rounded-xl <%= Universe.color %> flex items-center justify-center shadow-lg">
+              <i class="material-icons text-lg text-white"><%= Universe.icon %></i>
+            </div>
+          </div>
+          <div class="ml-4 flex-1">
+            <div class="text-lg font-semibold text-gray-900 mb-2"><%= raw_content.universe.name %></div>
+            <div class="flex items-center mb-3">
+              <span class="text-sm text-gray-600 mr-2">Universe is currently:</span>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <%= (raw_content.universe.privacy || 'private') == 'public' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-gray-100 text-gray-800 border border-gray-200' %>">
+                <i class="material-icons text-sm mr-1.5"><%= (raw_content.universe.privacy || 'private') == 'public' ? 'public' : 'lock' %></i>
+                <%= (raw_content.universe.privacy || 'private').capitalize %>
+              </span>
+            </div>
+            
+            <% if (raw_content.universe.privacy || 'private') == 'public' %>
+              <div class="bg-blue-100 border border-blue-200 rounded-lg p-3 mb-4">
+                <div class="flex items-start">
+                  <i class="material-icons text-blue-600 text-lg mr-2 mt-0.5">bolt</i>
+                  <div>
+                    <div class="text-sm font-medium text-blue-900">Universe Override Active</div>
+                    <div class="text-xs text-blue-700 mt-1">All pages in this universe are automatically public, regardless of individual page settings</div>
+                  </div>
+                </div>
+              </div>
+            <% else %>
+              <div class="bg-gray-100 border border-gray-200 rounded-lg p-3 mb-4">
+                <div class="flex items-start">
+                  <i class="material-icons text-gray-600 text-lg mr-2 mt-0.5">info</i>
+                  <div>
+                    <div class="text-sm font-medium text-gray-900">Individual Page Settings Apply</div>
+                    <div class="text-xs text-gray-700 mt-1">Since this universe is private, your individual page privacy settings determine visibility</div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          <div class="ml-4 flex-shrink-0">
+            <%= link_to raw_content.universe, 
+                        class: "inline-flex items-center px-4 py-2 bg-white border border-blue-300 rounded-lg text-sm font-medium text-blue-700 hover:bg-blue-50 hover:border-blue-400 transition-all duration-200 shadow-sm hover:shadow-md" do %>
+              <i class="material-icons text-sm mr-2">settings</i>
+              Manage Universe
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+
+  <!-- Action Info -->
+  <div class="flex justify-center pt-8 border-t border-gray-200">
+    <div class="text-sm text-gray-500 flex items-center">
+      <i class="material-icons text-sm mr-2">info</i>
+      Changes are saved automatically
+    </div>
+  </div>
+
+</div>

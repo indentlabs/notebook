@@ -47,7 +47,7 @@ class ContentController < ApplicationController
     ).order(:tag)
     @filtered_page_tags = []
     if params.key?(:slug)
-      @filtered_page_tags = @page_tags.where(slug: params[:slug])
+      @filtered_page_tags = @page_tags.where(slug: params[:slug]).uniq(&:slug)
       @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
     @page_tags = @page_tags.uniq(&:tag)
@@ -450,6 +450,26 @@ class ContentController < ApplicationController
     @serialized_content = ContentSerializer.new(@content)
     return redirect_to(root_path, notice: "You don't have permission to view that content.") unless @content.updatable_by?(current_user || User.new)
 
+    # Generate changelog statistics and data
+    @stats = ChangelogStatsService.new(@content)
+    @change_intensity = @stats.change_intensity_by_week
+    
+    # Get paginated change events first, then group them
+    page = params[:page] || 1
+    per_page = 20 # 20 change events per page
+    
+    # Get the base query for change events (without the .last() limit)
+    change_events_query = ContentChangeEvent.where(
+      content_id: Attribute.where(
+        entity_type: @content.class.name,
+        entity_id: @content.id
+      ),
+      content_type: "Attribute"
+    ).includes(:user).order('created_at DESC')
+    
+    @paginated_events = change_events_query.paginate(page: page, per_page: per_page)
+    @grouped_changes = group_events_by_date(@paginated_events)
+
     if user_signed_in?
       @navbar_actions << {
         label: @serialized_content.name,
@@ -791,6 +811,20 @@ class ContentController < ApplicationController
   end
 
   private
+
+  def group_events_by_date(events)
+    # Group events by date for timeline display
+    grouped = events.group_by { |event| event.created_at.to_date }
+    
+    grouped.map do |date, date_events|
+      {
+        date: date,
+        events: date_events,
+        total_field_changes: date_events.sum { |event| event.changed_fields.keys.length },
+        users: date_events.map(&:user).compact.uniq
+      }
+    end.sort_by { |group| group[:date] }.reverse
+  end
 
   def update_page_tags
     tag_list = field_params.fetch('value', '').split(PageTag::SUBMISSION_DELIMITER)
