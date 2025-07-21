@@ -74,7 +74,7 @@
                     Updated <%= time_ago_in_words(collection.updated_at) %> ago
                   </span>
                   
-                  <% if collection.respond_to?(:privacy) %>
+                  <% if collection.respond_to?(:privacy) && collection.privacy.present? %>
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= collection.privacy == 'public' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
                       <i class="material-icons text-xs mr-1"><%= collection.privacy == 'public' ? 'public' : 'lock' %></i>
                       <%= collection.privacy.titleize %>
@@ -88,14 +88,12 @@
                     <div class="flex items-center space-x-4 text-xs text-gray-500">
                       <span class="flex items-center">
                         <i class="material-icons text-xs mr-1">collections</i>
-                        <%= collection.page_collection_submissions.accepted.count %> accepted
+                        <% 
+                          submissions = collection.page_collection_submissions
+                          total_count = submissions.count rescue 0
+                        %>
+                        <%= total_count %> items
                       </span>
-                      <% if collection.page_collection_submissions.pending.any? %>
-                        <span class="flex items-center">
-                          <i class="material-icons text-xs mr-1">hourglass_empty</i>
-                          <%= collection.page_collection_submissions.pending.count %> pending
-                        </span>
-                      <% end %>
                     </div>
                     
                     <div class="flex items-center text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">

@@ -5,7 +5,7 @@
 class ContentController < ApplicationController
   layout 'tailwind'
 
-  before_action :authenticate_user!, except: [:show, :changelog, :api_sort, :gallery] \
+  before_action :authenticate_user!, except: [:show, :changelog, :api_sort] \
     + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }
 
   skip_before_action :cache_most_used_page_information, only: [
@@ -158,53 +158,6 @@ class ContentController < ApplicationController
     end
   end
 
-  def gallery
-    content_type = content_type_from_controller(self.class)
-    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.include?(content_type.name)
-
-    @content = content_type.find_by(id: params[:id])
-    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
-
-    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
-    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
-
-    if (current_user || User.new).can_read?(@content)
-      # Serialize content for overview section
-      @serialized_content = ContentSerializer.new(@content)
-
-      # Get all images for this content with proper ordering
-      # Only show private images to the owner or contributors
-      is_owner_or_contributor = false
-      # Check if the user is the owner or a contributor
-      if current_user.present? && (@content.user == current_user || 
-         (@content.respond_to?(:universe_id) && 
-          @content.universe_id.present? && 
-          current_user.try(:contributable_universe_ids).to_a.include?(@content.universe_id)))
-        is_owner_or_contributor = true
-        @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id).ordered
-      else
-        @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id, privacy: 'public').ordered
-      end
-      
-      # Get additional context information
-      if @content.is_a?(Universe)
-        # Universe objects don't have a universe_id field
-        @universe = nil
-        @other_content = []
-      else
-        @universe = @content.universe_id.present? ? Universe.find_by(id: @content.universe_id) : nil
-        @other_content = @content.universe_id.present? ? 
-          content_type.where(universe_id: @content.universe_id).where.not(id: @content.id).limit(5) : []
-      end
-      
-      # Include basil images too with proper ordering
-      @basil_images = BasilCommission.where(entity: @content).where.not(saved_at: nil).ordered
-      
-      render 'content/gallery'
-    else
-      return redirect_to root_path, notice: "You don't have permission to view that content."
-    end
-  end
 
   def references
     content_type = content_type_from_controller(self.class)
@@ -979,20 +932,6 @@ class ContentController < ApplicationController
 
     return if [AttributeCategory, AttributeField].include?(content_type)
     
-    # Set up navbar actions for gallery specifically
-    if action_name == 'gallery' && @content.present?
-      # Add a link to view the content page
-      @navbar_actions << {
-        label: @content.name,
-        href: polymorphic_path(@content)
-      }
-      
-      # Add a gallery title indicator
-      @navbar_actions << {
-        label: 'Gallery',
-        href: send("gallery_#{@content.class.name.downcase}_path", @content)
-      }
-    end
   end
 
   def set_sidenav_expansion

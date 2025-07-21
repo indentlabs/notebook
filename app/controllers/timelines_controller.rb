@@ -1,5 +1,6 @@
 class TimelinesController < ApplicationController
-  layout 'tailwind', only: [:index]
+  layout 'tailwind'
+  include ApplicationHelper
 
   before_action :authenticate_user!, except: [:show]
   before_action :set_timeline, only: [:show, :edit, :update, :destroy]
@@ -51,6 +52,12 @@ class TimelinesController < ApplicationController
     @content_type_class = Timeline
     @content_type_name = @content_type_class.name
     @content = @timelines
+    @total_content_count = @timelines.count
+    
+    # Set up pagination variables (no actual pagination for now, but template expects them)
+    @current_page = 1
+    @total_pages = 1
+    
     @folders = []
     render 'content/index'
   end
@@ -69,6 +76,24 @@ class TimelinesController < ApplicationController
   def edit
     @page_title = "Editing #{@timeline.name}"
     @suggested_page_tags = []
+    cache_linkable_content_for_each_content_type
+    
+    # Get content already linked to other events in this timeline
+    @timeline_linked_content = {}
+    timeline_entity_ids = @timeline.timeline_events
+                                   .joins(:timeline_event_entities)
+                                   .pluck('timeline_event_entities.entity_type', 'timeline_event_entities.entity_id')
+                                   .uniq
+    
+    timeline_entity_ids.group_by(&:first).each do |entity_type, entity_pairs|
+      entity_ids = entity_pairs.map(&:last).uniq
+      content_class = content_class_from_name(entity_type)
+      next unless content_class
+      
+      @timeline_linked_content[entity_type] = content_class.where(id: entity_ids)
+                                                          .where(user: current_user)
+                                                          .limit(20)
+    end
   end
 
   # POST /timelines

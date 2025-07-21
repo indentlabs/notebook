@@ -304,17 +304,22 @@ Rails.application.routes.draw do
       get :timelines, on: :member
 
       get  :changelog,       on: :member
-      get  :gallery,         on: :member
+      # Redirect old gallery URLs to the show page with #gallery hash
+      get  :gallery,         on: :member, to: redirect { |params, req| "/plan/#{params[:controller].split('/').last}/#{params[:id]}#gallery" }
       get  :toggle_archive,  on: :member
       post :toggle_favorite, on: :member
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
     end
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
+      # Skip Timeline since it has its own explicit routes below
+      next if content_type.name == 'Timeline'
+      
       # resources :characters do
       resources content_type.name.downcase.pluralize.to_sym do
 
         # Browsable pages
-        get  :gallery,         on: :member
+        # Redirect old gallery URLs to the show page with #gallery hash
+        get  :gallery,         on: :member, to: redirect { |params, req| "/plan/#{params[:controller].split('/').last}/#{params[:id]}#gallery" }
         get  :references,      on: :member
         get  :changelog,       on: :member
         get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag

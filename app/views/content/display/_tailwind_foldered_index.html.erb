@@ -547,8 +547,8 @@
           </div>
           
           <span class="text-sm text-gray-500">
-            <% if @total_content_count > 0 %>
-              <span x-text="searchQuery === '' ? 'Showing <%= content.count %> of <%= @total_content_count %> items' : 'Filtered results'"></span>
+            <% if (@total_content_count || 0) > 0 %>
+              <span x-text="searchQuery === '' ? 'Showing <%= content.count %> of <%= @total_content_count || 0 %> items' : 'Filtered results'"></span>
               <span x-show="searchQuery !== ''" x-text="`for '${searchQuery}'`" class="text-gray-400"></span>
             <% else %>
               <span>No items</span>
@@ -881,13 +881,13 @@
       <% end %>
       
       <!-- Pagination -->
-      <% if @total_pages > 1 %>
+      <% if (@total_pages || 1) > 1 %>
         <div class="bg-white border-t border-gray-200 px-6 lg:px-8 py-4">
           <div class="flex items-center justify-between">
             <div class="flex-1 flex justify-between sm:hidden">
               <!-- Mobile pagination -->
-              <% if @current_page > 1 %>
-                <%= link_to url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: @current_page - 1 })), class: "relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-white border border-gray-300 hover:bg-gray-50" do %>
+              <% if (@current_page || 1) > 1 %>
+                <%= link_to url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: (@current_page || 1) - 1 })), class: "relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-white border border-gray-300 hover:bg-gray-50" do %>
                   Previous
                 <% end %>
               <% else %>
@@ -896,8 +896,8 @@
                 </span>
               <% end %>
               
-              <% if @current_page < @total_pages %>
-                <%= link_to url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: @current_page + 1 })), class: "ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-white border border-gray-300 hover:bg-gray-50" do %>
+              <% if (@current_page || 1) < (@total_pages || 1) %>
+                <%= link_to url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: (@current_page || 1) + 1 })), class: "ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-white border border-gray-300 hover:bg-gray-50" do %>
                   Next
                 <% end %>
               <% else %>
@@ -911,9 +911,9 @@
               <div>
                 <p class="text-sm text-gray-700">
                   Showing
-                  <span class="font-medium"><%= (@current_page - 1) * 50 + 1 %></span>
+                  <span class="font-medium"><%= ((@current_page || 1) - 1) * 50 + 1 %></span>
                   to
-                  <span class="font-medium"><%= [@current_page * 50, @total_content_count].min %></span>
+                  <span class="font-medium"><%= [(@current_page || 1) * 50, (@total_content_count || 0)].min %></span>
                   of
                   <span class="font-medium"><%= @total_content_count %></span>
                   results
@@ -922,8 +922,8 @@
               <div>
                 <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                   <!-- Previous button -->
-                  <% if @current_page > 1 %>
-                    <%= link_to url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: @current_page - 1 })), class: "relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" do %>
+                  <% if (@current_page || 1) > 1 %>
+                    <%= link_to url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: (@current_page || 1) - 1 })), class: "relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" do %>
                       <span class="sr-only">Previous</span>
                       <i class="material-icons text-lg">chevron_left</i>
                     <% end %>
@@ -936,13 +936,13 @@
                   
                   <!-- Page numbers -->
                   <% 
-                    start_page = [@current_page - 2, 1].max
-                    end_page = [start_page + 4, @total_pages].min
+                    start_page = [(@current_page || 1) - 2, 1].max
+                    end_page = [start_page + 4, (@total_pages || 1)].min
                     start_page = [end_page - 4, 1].max
                   %>
                   
                   <% (start_page..end_page).each do |page_num| %>
-                    <% if page_num == @current_page %>
+                    <% if page_num == (@current_page || 1) %>
                       <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">
                         <%= page_num %>
                       </span>
@@ -952,8 +952,8 @@
                   <% end %>
                   
                   <!-- Next button -->
-                  <% if @current_page < @total_pages %>
-                    <%= link_to url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: @current_page + 1 })), class: "relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" do %>
+                  <% if (@current_page || 1) < (@total_pages || 1) %>
+                    <%= link_to url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: (@current_page || 1) + 1 })), class: "relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" do %>
                       <span class="sr-only">Next</span>
                       <i class="material-icons text-lg">chevron_right</i>
                     <% end %>

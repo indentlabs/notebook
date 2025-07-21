@@ -55,13 +55,42 @@ class TimelineEventsController < ApplicationController
   end
 
   def link_entity
-    return unless @timeline_event.can_be_modified_by?(current_user)
-    @timeline_event.timeline_event_entities.find_or_create_by(timeline_event_entity_params)
+    return render json: { error: 'Not authorized' }, status: :forbidden unless @timeline_event.can_be_modified_by?(current_user)
+    
+    entity = @timeline_event.timeline_event_entities.find_or_create_by(timeline_event_entity_params)
+    
+    if entity.persisted?
+      render json: { 
+        status: 'success', 
+        message: 'Content linked successfully',
+        entity_id: entity.id,
+        entity_type: entity.entity_type
+      }
+    else
+      render json: { 
+        status: 'error', 
+        message: 'Failed to link content',
+        errors: entity.errors.full_messages 
+      }, status: :unprocessable_entity
+    end
   end
 
   def unlink_entity
-    return unless @timeline_event.can_be_modified_by?(current_user)
-    @timeline_event.timeline_event_entities.find_by(id: params[:entity_id].to_i).try(:destroy)
+    return render json: { error: 'Not authorized' }, status: :forbidden unless @timeline_event.can_be_modified_by?(current_user)
+    
+    entity = @timeline_event.timeline_event_entities.find_by(id: params[:entity_id].to_i)
+    
+    if entity&.destroy
+      render json: { 
+        status: 'success', 
+        message: 'Content unlinked successfully' 
+      }
+    else
+      render json: { 
+        status: 'error', 
+        message: 'Failed to unlink content' 
+      }, status: :unprocessable_entity
+    end
   end
 
   # Move functions
@@ -90,7 +119,8 @@ class TimelineEventsController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def timeline_event_params
-    params.require(:timeline_event).permit(:time_label, :title, :description, :notes, :timeline_id)
+    params.require(:timeline_event).permit(:time_label, :title, :description, :notes, :timeline_id, 
+                                          :event_type, :importance_level, :end_time_label, :status, :private_notes)
   end
 
   def timeline_event_entity_params

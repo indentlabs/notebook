@@ -6,7 +6,7 @@ Rails.application.config.content_type_names = {
   all: %w(
     Universe Character Location Item Building Condition Continent Country Creature Deity Flora
     Food Government Group Job Landmark Language Lore Magic Planet Race Religion Scene
-    School Sport Technology Town Tradition Vehicle
+    School Sport Technology Timeline Town Tradition Vehicle
   )
 }
 
@@ -15,8 +15,7 @@ Rails.application.config.content_types = {
   all: [
     Universe, Character, Location, Item, Building, Condition, Continent, Country, Creature, Deity, Flora,
     Food, Government, Group, Job, Landmark, Language, Lore, Magic, Planet, Race, Religion, Scene,
-    School, Sport, 
-    Technology, Town, Tradition, Vehicle,
+    School, Sport, Technology, Timeline, Town, Tradition, Vehicle,
   ],
 
   # These content types are always on for all users, and cannot be toggled off
@@ -28,7 +27,7 @@ Rails.application.config.content_types = {
   # These content types are available to be turned on
   available: [
     Building, Condition, Country, Creature, Deity, Flora, Government, Group, Job, Landmark, Language,
-    Magic, Planet, Race, Religion, Scene, Technology, Town, Tradition, Vehicle, Sport, School, Food,
+    Magic, Planet, Race, Religion, Scene, Technology, Timeline, Town, Tradition, Vehicle, Sport, School, Food,
     Continent, Lore
   ],
 
@@ -48,6 +47,7 @@ Rails.application.config.content_types = {
     School,
     Job,
     Technology,
+    Timeline,
     Lore,
     Vehicle,
     Condition, 

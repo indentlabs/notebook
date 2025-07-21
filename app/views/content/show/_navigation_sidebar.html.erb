@@ -10,7 +10,8 @@
                 :class="isExpandAllActive() ? '<%= content.class_color %> text-white' : 'text-gray-400 hover:text-gray-600'"
                 class="p-1 rounded text-xs transition-colors"
                 title="Show all categories">
-          <i class="material-icons text-sm">unfold_more</i>
+          <i class="material-icons text-sm" 
+             :class="isExpandAllActive() ? 'text-white' : ''">unfold_more</i>
         </button>
       </div>
       
@@ -23,8 +24,8 @@
                   :class="isCategoryActive('<%= category[:label] %>') ? '<%= content.class_color %> text-white' : '<%= has_content ? 'text-gray-700 hover:bg-gray-50' : 'text-gray-400' %>'"
                   class="group flex items-center justify-between px-3 py-2 text-sm rounded-md w-full text-left transition-colors">
             <div class="flex items-center">
-              <i class="material-icons text-lg mr-3 <%= has_content ? content.class_text_color : 'text-gray-400' %>"
-                 :class="isCategoryActive('<%= category[:label] %>') ? 'text-white' : ''"><%= category[:icon] %></i>
+              <i class="material-icons text-lg mr-3"
+                 :class="isCategoryActive('<%= category[:label] %>') ? 'text-white' : '<%= has_content ? content.class_text_color : 'text-gray-400' %>'"><%= category[:icon] %></i>
               <span><%= category[:label] %></span>
             </div>
             <% unless has_content %>
@@ -37,8 +38,8 @@
         <button @click="showAllCategories()" 
                 :class="isExpandAllActive() ? '<%= content.class_color %> text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
                 class="group flex items-center px-3 py-2 text-sm rounded-md w-full text-left transition-colors mt-1">
-          <i class="material-icons text-lg mr-3 opacity-60" 
-             :class="isExpandAllActive() ? 'text-white opacity-100' : ''">view_agenda</i>
+          <i class="material-icons text-lg mr-3" 
+             :class="isExpandAllActive() ? 'text-white opacity-100' : 'opacity-60'">view_agenda</i>
           <span class="italic">Show All Categories</span>
         </button>
       </nav>
@@ -75,6 +76,15 @@
           Collections
         </button>
         
+        <!-- Timelines View -->
+        <button @click="switchView('timelines')" 
+                :class="isViewActive('timelines') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+          <i class="material-icons text-lg mr-3" 
+             :class="isViewActive('timelines') ? 'text-white' : '<%= content.class_text_color %>'">timeline</i>
+          Timelines
+        </button>
+        
         <!-- Feedback View -->
         <button @click="switchView('feedback')" 
                 :class="isViewActive('feedback') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
@@ -82,7 +92,6 @@
           <i class="material-icons text-lg mr-3" 
              :class="isViewActive('feedback') ? 'text-white' : '<%= content.class_text_color %>'">chat</i>
           Feedback
-          <span class="ml-auto bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full">Soon</span>
         </button>
       </nav>
     </div>

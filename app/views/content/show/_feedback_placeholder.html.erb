@@ -1,201 +1,503 @@
-<!-- Feedback System Placeholder -->
-<div class="space-y-8">
+<!-- Real Feedback System -->
+<div class="space-y-8" x-data="feedbackController()">
   
-  <!-- Coming Soon Notice -->
-  <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-    <div class="flex items-center">
-      <div class="flex-shrink-0">
-        <i class="material-icons text-blue-600 text-2xl">feedback</i>
-      </div>
-      <div class="ml-4">
-        <h3 class="text-lg font-medium text-blue-900">Community Feedback Coming Soon!</h3>
-        <p class="text-blue-700 mt-1">
-          We're building a comment system where community members can leave feedback and suggestions on your content.
-        </p>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Placeholder Comment Form -->
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-    <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-      <i class="material-icons text-xl <%= content.class_text_color %> mr-2">add_comment</i>
-      Leave Feedback
-    </h4>
-    
-    <form class="space-y-4 opacity-50 pointer-events-none">
-      <div>
-        <label for="comment-type" class="block text-sm font-medium text-gray-700 mb-2">
-          Feedback Type
-        </label>
-        <select id="comment-type" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-          <option>General Comment</option>
-          <option>Suggestion</option>
-          <option>Question</option>
-          <option>Compliment</option>
-        </select>
-      </div>
-      
-      <div>
-        <label for="comment-text" class="block text-sm font-medium text-gray-700 mb-2">
-          Your Feedback
-        </label>
-        <textarea id="comment-text" rows="4" 
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Share your thoughts, suggestions, or questions about this <%= content.class_name.downcase %>..."></textarea>
-      </div>
-      
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <label class="flex items-center">
-            <input type="checkbox" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-            <span class="ml-2 text-sm text-gray-600">Send me notifications about responses</span>
-          </label>
+  <!-- Owner Controls Panel (Only visible to page owner) -->
+  <% if user_signed_in? && raw_content.user_id == current_user.id %>
+    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center mr-3">
+            <i class="material-icons text-white text-lg">settings</i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-gray-900">Feedback Settings</h3>
+            <p class="text-sm text-gray-600">Choose which emotional reactions are available for this <%= content.class_name.downcase %></p>
+          </div>
         </div>
-        
-        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-          <i class="material-icons text-lg mr-2">send</i>
-          Post Feedback
+        <button @click="showSettings = !showSettings" 
+                class="flex items-center px-4 py-2 bg-white border border-amber-300 rounded-lg text-amber-700 hover:bg-amber-50 transition-colors">
+          <i class="material-icons text-lg mr-2" 
+             :class="showSettings ? 'rotate-180' : ''">expand_more</i>
+          <span x-text="showSettings ? 'Hide Settings' : 'Configure Reactions'"></span>
         </button>
       </div>
-    </form>
+      
+      <!-- Expandable Settings Panel -->
+      <div x-show="showSettings" 
+           x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0 scale-95"
+           x-transition:enter-end="opacity-100 scale-100"
+           x-transition:leave="transition ease-in duration-150"
+           x-transition:leave-start="opacity-100 scale-100"
+           x-transition:leave-end="opacity-0 scale-95">
+        
+        <div class="border-t border-amber-200 pt-4 mt-4">
+          <h4 class="font-semibold text-gray-900 mb-3">Available Emotional Reactions</h4>
+          <p class="text-sm text-gray-600 mb-4">Toggle which reactions readers can use to describe your <%= content.class_name.downcase %>. All are enabled by default.</p>
+          
+          <!-- Reaction Toggle Grid -->
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <% [
+              { name: 'Interesting', icon: 'psychology', color: 'blue' },
+              { name: 'Unique', icon: 'star', color: 'purple' },
+              { name: 'Memorable', icon: 'bookmark', color: 'green' },
+              { name: 'Inspiring', icon: 'lightbulb', color: 'yellow' },
+              { name: 'Relatable', icon: 'favorite', color: 'pink' },
+              { name: 'Complex', icon: 'category', color: 'indigo' },
+              { name: 'Mysterious', icon: 'help', color: 'gray' },
+              { name: 'Charming', icon: 'mood', color: 'rose' },
+              { name: 'Brave', icon: 'shield', color: 'red' },
+              { name: 'Wise', icon: 'school', color: 'amber' },
+              { name: 'Creative', icon: 'palette', color: 'cyan' },
+              { name: 'Powerful', icon: 'flash_on', color: 'orange' }
+            ].each do |reaction| %>
+              <label class="flex items-center p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <input type="checkbox" 
+                       :checked="enabledReactions.includes('<%= reaction[:name].downcase %>')"
+                       @change="toggleEnabledReaction('<%= reaction[:name].downcase %>')"
+                       class="rounded border-gray-300 text-<%= reaction[:color] %>-600 shadow-sm mr-3">
+                <div class="flex items-center space-x-2">
+                  <i class="material-icons text-lg text-<%= reaction[:color] %>-500"><%= reaction[:icon] %></i>
+                  <span class="font-medium text-sm text-gray-900"><%= reaction[:name] %></span>
+                </div>
+              </label>
+            <% end %>
+          </div>
+          
+          <div class="mt-4 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <button @click="enableAllReactions()" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                Enable All
+              </button>
+              <button @click="disableAllReactions()" class="text-sm text-gray-600 hover:text-gray-700 font-medium">
+                Disable All
+              </button>
+            </div>
+            <div class="text-sm text-gray-500">
+              <span x-text="enabledReactions.length"></span> of 12 reactions enabled
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  
+  <!-- Emotional Reactions Section -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div class="mb-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-2 flex items-center">
+        <div class="w-8 h-8 <%= content.class_color %> rounded-lg flex items-center justify-center mr-3">
+          <i class="material-icons text-white text-lg">sentiment_satisfied</i>
+        </div>
+        How would you describe this <%= content.class_name.downcase %>?
+      </h3>
+      <p class="text-gray-600 text-sm">Share your emotional response with the author with a quick reaction</p>
+    </div>
+    
+    <!-- Reaction Buttons Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <% [
+        { name: 'Interesting', icon: 'psychology', color: 'blue', count: 23 },
+        { name: 'Unique', icon: 'star', color: 'purple', count: 18 },
+        { name: 'Memorable', icon: 'bookmark', color: 'green', count: 15 },
+        { name: 'Inspiring', icon: 'lightbulb', color: 'yellow', count: 12 },
+        { name: 'Relatable', icon: 'favorite', color: 'pink', count: 9 },
+        { name: 'Complex', icon: 'category', color: 'indigo', count: 7 },
+        { name: 'Mysterious', icon: 'help', color: 'gray', count: 11 },
+        { name: 'Charming', icon: 'mood', color: 'rose', count: 14 },
+        { name: 'Brave', icon: 'shield', color: 'red', count: 8 },
+        { name: 'Wise', icon: 'school', color: 'amber', count: 6 },
+        { name: 'Creative', icon: 'palette', color: 'cyan', count: 10 },
+        { name: 'Powerful', icon: 'flash_on', color: 'orange', count: 13 }
+      ].each do |reaction| %>
+        <button @click="toggleReaction('<%= reaction[:name].downcase %>')" 
+                :class="reactions.includes('<%= reaction[:name].downcase %>') ? 'bg-<%= reaction[:color] %>-100 border-<%= reaction[:color] %>-300 text-<%= reaction[:color] %>-800' : 'bg-white border-<%= reaction[:color] %>-200 text-gray-700 hover:bg-<%= reaction[:color] %>-50'"
+                class="flex items-center justify-between p-3 rounded-lg border transition-all duration-200 hover:shadow-sm">
+          <div class="flex items-center space-x-2">
+            <i class="material-icons text-lg text-<%= reaction[:color] %>-500"><%= reaction[:icon] %></i>
+            <span class="font-medium text-sm"><%= reaction[:name] %></span>
+          </div>
+          <span class="text-xs font-semibold px-2 py-1 rounded-full" 
+                :class="reactions.includes('<%= reaction[:name].downcase %>') ? 'bg-<%= reaction[:color] %>-200 text-<%= reaction[:color] %>-800' : 'bg-<%= reaction[:color] %>-100 text-<%= reaction[:color] %>-700'">
+            <%= reaction[:count] %>
+          </span>
+        </button>
+      <% end %>
+    </div>
     
     <div class="mt-4 text-center">
-      <p class="text-sm text-gray-500">
-        <i class="material-icons text-sm mr-1">info</i>
-        Comment system launching soon! Follow us for updates.
+      <p class="text-xs text-gray-500">
+        <span x-text="reactions.length"></span> reactions selected • Help the author understand how their work resonates
       </p>
     </div>
   </div>
   
-  <!-- Placeholder Comments Section -->
+  <!-- Comment Form -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div class="mb-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-2 flex items-center">
+        <div class="w-8 h-8 <%= content.class_color %> rounded-lg flex items-center justify-center mr-3">
+          <i class="material-icons text-white text-lg">chat</i>
+        </div>
+        Share Your Thoughts
+      </h3>
+      <p class="text-gray-600 text-sm">Join the conversation with constructive feedback and questions</p>
+    </div>
+    
+    <form @submit.prevent="submitComment()" class="space-y-4">
+      <div class="flex items-start space-x-4">
+        <!-- User Avatar -->
+        <div class="flex-shrink-0 mt-1">
+          <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+            <i class="material-icons text-gray-500">person</i>
+          </div>
+        </div>
+        
+        <!-- Comment Input -->
+        <div class="flex-1">
+          <textarea x-model="newComment" 
+                    rows="4" 
+                    placeholder="Share your thoughts about this <%= content.class_name.downcase %>... Ask questions, give compliments, or provide constructive suggestions."
+                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"></textarea>
+          
+          <div class="mt-3 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <label class="flex items-center text-sm text-gray-600">
+                <input type="checkbox" checked="checked" class="rounded border-gray-300 text-blue-600 shadow-sm mr-2">
+                Get notified of replies (with site notifications, not email)
+              </label>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+              <span class="text-xs text-gray-500" x-text="500 - newComment.length + ' characters left'"></span>
+              <button type="submit" 
+                      :disabled="!newComment.trim()"
+                      :class="newComment.trim() ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                      class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                <i class="material-icons text-lg mr-2">send</i>
+                Post Comment
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <!-- Comments Section -->
   <div class="space-y-6">
     <div class="flex items-center justify-between">
-      <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-        <i class="material-icons text-xl <%= content.class_text_color %> mr-2">forum</i>
-        Community Feedback
-        <span class="ml-2 bg-gray-100 text-gray-600 text-sm px-2 py-1 rounded-full">Coming Soon</span>
+      <h4 class="text-xl font-bold text-gray-900 flex items-center">
+        <div class="w-8 h-8 <%= content.class_color %> rounded-lg flex items-center justify-center mr-3">
+          <i class="material-icons text-white text-lg">forum</i>
+        </div>
+        Comments
+        <span class="ml-3 bg-gray-100 text-gray-600 text-sm px-3 py-1 rounded-full">24</span>
       </h4>
+      <div class="flex items-center space-x-2 text-sm text-gray-500">
+        <button class="flex items-center hover:text-gray-700 transition-colors">
+          <i class="material-icons text-sm mr-1">sort</i>
+          Newest first
+        </button>
+      </div>
     </div>
     
-    <!-- Sample placeholder comments -->
-    <div class="space-y-4 opacity-50">
+    <!-- Comments List -->
+    <div class="space-y-6">
       
-      <!-- Placeholder comment 1 -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <!-- Comment 1 with Reply -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div class="flex items-start space-x-4">
           <div class="flex-shrink-0">
-            <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-              <i class="material-icons text-gray-500">person</i>
+            <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-sm">
+              <span class="text-white font-semibold text-sm">SC</span>
             </div>
           </div>
           <div class="flex-1">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center space-x-2">
-                <h5 class="font-medium text-gray-900">Community Member</h5>
-                <span class="text-xs text-gray-500">• 2 days ago</span>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center space-x-3">
+                <h5 class="font-semibold text-gray-900">Sarah Chen</h5>
+                <span class="text-xs text-gray-500">2 days ago</span>
               </div>
-              <div class="flex items-center space-x-1">
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  <i class="material-icons text-xs mr-1">thumb_up</i>
-                  Compliment
-                </span>
+              <button class="text-gray-400 hover:text-gray-600">
+                <i class="material-icons text-sm">more_horiz</i>
+              </button>
+            </div>
+            
+            <div class="prose prose-sm max-w-none mb-4">
+              <p class="text-gray-800 leading-relaxed">
+                I absolutely love the depth you've brought to this <%= content.class_name.downcase %>! The backstory really brings it to life and makes it feel authentic. Have you considered exploring how this connects to the broader world you're building? The potential for expansion here is incredible!
+              </p>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4 text-sm">
+                <button class="flex items-center text-gray-500 hover:text-green-600 transition-colors">
+                  <i class="material-icons text-sm mr-1">thumb_up</i>
+                  <span class="font-medium">12</span>
+                </button>
+                <button @click="toggleReply('comment-1')" class="flex items-center text-gray-500 hover:text-blue-600 transition-colors">
+                  <i class="material-icons text-sm mr-1">reply</i>
+                  Reply
+                </button>
+              </div>
+              <span class="text-xs text-gray-500">1 reply</span>
+            </div>
+            
+            <!-- Reply Form -->
+            <div x-show="activeReply === 'comment-1'" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="mt-4 pl-4 border-l-2 border-gray-200">
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                  <i class="material-icons text-gray-500 text-sm">person</i>
+                </div>
+                <div class="flex-1">
+                  <textarea rows="3" 
+                            placeholder="Write a reply..."
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"></textarea>
+                  <div class="mt-2 flex justify-end space-x-2">
+                    <button @click="activeReply = null" class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800">Cancel</button>
+                    <button class="px-4 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Reply</button>
+                  </div>
+                </div>
               </div>
             </div>
-            <p class="text-gray-700 mb-3">
-              "I love the detail you've put into this <%= content.class_name.downcase %>! The backstory really brings it to life. Have you considered exploring [related aspect]?"
-            </p>
-            <div class="flex items-center space-x-4 text-sm text-gray-500">
-              <button class="flex items-center hover:text-gray-700">
-                <i class="material-icons text-sm mr-1">thumb_up</i>
-                Helpful (5)
-              </button>
-              <button class="flex items-center hover:text-gray-700">
-                <i class="material-icons text-sm mr-1">reply</i>
-                Reply
-              </button>
+            
+            <!-- Existing Reply -->
+            <div class="mt-4 pl-4 border-l-2 border-blue-200 bg-blue-50 rounded-r-lg p-4">
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 <%= content.class_color %> rounded-full flex items-center justify-center flex-shrink-0">
+                  <i class="material-icons text-white text-xs">edit</i>
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center space-x-2 mb-2">
+                    <span class="text-sm font-semibold text-gray-900">Author</span>
+                    <span class="text-xs text-gray-500">1 day ago</span>
+                  </div>
+                  <p class="text-sm text-gray-800 leading-relaxed">
+                    Thank you so much! That's exactly what I was hoping to achieve. You're absolutely right about the broader connections - I'm actually working on a companion piece that explores that relationship. Stay tuned! 
+                  </p>
+                  <div class="mt-2 flex items-center space-x-3 text-xs">
+                    <button class="flex items-center text-gray-500 hover:text-green-600 transition-colors">
+                      <i class="material-icons text-xs mr-1">thumb_up</i>
+                      <span>3</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      
-      <!-- Placeholder comment 2 -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+
+      <!-- Comment 2 -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div class="flex items-start space-x-4">
           <div class="flex-shrink-0">
-            <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-              <i class="material-icons text-gray-500">person</i>
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center shadow-sm">
+              <span class="text-white font-semibold text-sm">AR</span>
             </div>
           </div>
           <div class="flex-1">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center space-x-2">
-                <h5 class="font-medium text-gray-900">Another User</h5>
-                <span class="text-xs text-gray-500">• 1 week ago</span>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center space-x-3">
+                <h5 class="font-semibold text-gray-900">Alex Rodriguez</h5>
+                <span class="text-xs text-gray-500">5 days ago</span>
               </div>
-              <div class="flex items-center space-x-1">
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  <i class="material-icons text-xs mr-1">help</i>
-                  Question
-                </span>
+              <button class="text-gray-400 hover:text-gray-600">
+                <i class="material-icons text-sm">more_horiz</i>
+              </button>
+            </div>
+            
+            <div class="prose prose-sm max-w-none mb-4">
+              <p class="text-gray-800 leading-relaxed">
+                This is fascinating work! I'm really curious about the relationship between this <%= content.class_name.downcase %> and the broader themes in your universe. The way you've developed the personality traits feels very authentic and relatable.
+              </p>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4 text-sm">
+                <button class="flex items-center text-gray-500 hover:text-green-600 transition-colors">
+                  <i class="material-icons text-sm mr-1">thumb_up</i>
+                  <span class="font-medium">8</span>
+                </button>
+                <button @click="toggleReply('comment-2')" class="flex items-center text-gray-500 hover:text-blue-600 transition-colors">
+                  <i class="material-icons text-sm mr-1">reply</i>
+                  Reply
+                </button>
               </div>
             </div>
-            <p class="text-gray-700 mb-3">
-              "This is really interesting! I'm curious about the relationship between this and [other element]. Could you expand on that connection?"
-            </p>
-            <div class="flex items-center space-x-4 text-sm text-gray-500">
-              <button class="flex items-center hover:text-gray-700">
-                <i class="material-icons text-sm mr-1">thumb_up</i>
-                Helpful (2)
-              </button>
-              <button class="flex items-center hover:text-gray-700">
-                <i class="material-icons text-sm mr-1">reply</i>
-                Reply
-              </button>
+            
+            <!-- Reply Form -->
+            <div x-show="activeReply === 'comment-2'" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="mt-4 pl-4 border-l-2 border-gray-200">
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                  <i class="material-icons text-gray-500 text-sm">person</i>
+                </div>
+                <div class="flex-1">
+                  <textarea rows="3" 
+                            placeholder="Write a reply..."
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"></textarea>
+                  <div class="mt-2 flex justify-end space-x-2">
+                    <button @click="activeReply = null" class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800">Cancel</button>
+                    <button class="px-4 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Reply</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      
-    </div>
-    
-    <!-- Empty state message -->
-    <div class="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
-      <div class="mx-auto h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-        <i class="material-icons text-xl text-gray-400">forum</i>
+
+      <!-- Comment 3 -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center shadow-sm">
+              <span class="text-white font-semibold text-sm">MJ</span>
+            </div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center space-x-3">
+                <h5 class="font-semibold text-gray-900">Maya Johnson</h5>
+                <span class="text-xs text-gray-500">1 week ago</span>
+              </div>
+              <button class="text-gray-400 hover:text-gray-600">
+                <i class="material-icons text-sm">more_horiz</i>
+              </button>
+            </div>
+            
+            <div class="prose prose-sm max-w-none mb-4">
+              <p class="text-gray-800 leading-relaxed">
+                The attention to detail here is incredible! I especially love how you've balanced the strengths and flaws - it makes the <%= content.class_name.downcase %> feel like a real person. Are you planning to explore more of their backstory in future works?
+              </p>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4 text-sm">
+                <button class="flex items-center text-gray-500 hover:text-green-600 transition-colors">
+                  <i class="material-icons text-sm mr-1">thumb_up</i>
+                  <span class="font-medium">15</span>
+                </button>
+                <button @click="toggleReply('comment-3')" class="flex items-center text-gray-500 hover:text-blue-600 transition-colors">
+                  <i class="material-icons text-sm mr-1">reply</i>
+                  Reply
+                </button>
+              </div>
+            </div>
+            
+            <!-- Reply Form -->
+            <div x-show="activeReply === 'comment-3'" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="mt-4 pl-4 border-l-2 border-gray-200">
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                  <i class="material-icons text-gray-500 text-sm">person</i>
+                </div>
+                <div class="flex-1">
+                  <textarea rows="3" 
+                            placeholder="Write a reply..."
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"></textarea>
+                  <div class="mt-2 flex justify-end space-x-2">
+                    <button @click="activeReply = null" class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800">Cancel</button>
+                    <button class="px-4 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Reply</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">Feedback System Coming Soon</h3>
-      <p class="text-gray-500 max-w-md mx-auto">
-        We're building tools for community members to leave constructive feedback, ask questions, and share suggestions about your content.
-      </p>
-    </div>
-  </div>
-  
-  <!-- Feature Preview -->
-  <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6">
-    <h4 class="text-lg font-semibold text-purple-900 mb-4 flex items-center">
-      <i class="material-icons text-xl mr-2">preview</i>
-      What's Coming
-    </h4>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-      <div class="flex items-center text-purple-800">
-        <i class="material-icons text-sm mr-2">check_circle</i>
-        Constructive feedback system
-      </div>
-      <div class="flex items-center text-purple-800">
-        <i class="material-icons text-sm mr-2">check_circle</i>
-        Comment moderation tools
-      </div>
-      <div class="flex items-center text-purple-800">
-        <i class="material-icons text-sm mr-2">check_circle</i>
-        Notification system
-      </div>
-      <div class="flex items-center text-purple-800">
-        <i class="material-icons text-sm mr-2">check_circle</i>
-        Threaded discussions
+
+      <!-- Load More Comments -->
+      <div class="text-center py-6">
+        <button class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+          <i class="material-icons text-lg mr-2">expand_more</i>
+          Load More Comments
+          <span class="ml-2 bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">+21 more</span>
+        </button>
       </div>
     </div>
   </div>
   
 </div>
+
+<!-- Alpine.js Controller for Feedback System -->
+<script>
+function feedbackController() {
+  return {
+    // Settings panel
+    showSettings: false,
+    enabledReactions: [
+      'interesting', 'unique', 'memorable', 'inspiring', 'relatable', 'complex', 
+      'mysterious', 'charming', 'brave', 'wise', 'creative', 'powerful'
+    ],
+    
+    // Reaction system
+    reactions: [],
+    
+    // Comment system
+    newComment: '',
+    activeReply: null,
+    
+    toggleReaction(reaction) {
+      if (this.reactions.includes(reaction)) {
+        this.reactions = this.reactions.filter(r => r !== reaction);
+      } else {
+        this.reactions.push(reaction);
+      }
+    },
+    
+    submitComment() {
+      if (this.newComment.trim()) {
+        // Here you would typically send the comment to your backend
+        console.log('Submitting comment:', this.newComment);
+        
+        // Reset form
+        this.newComment = '';
+        
+        // Show success message (you might want to implement this)
+        alert('Comment submitted successfully!');
+      }
+    },
+    
+    toggleReply(commentId) {
+      if (this.activeReply === commentId) {
+        this.activeReply = null;
+      } else {
+        this.activeReply = commentId;
+      }
+    },
+    
+    // Settings management
+    toggleEnabledReaction(reaction) {
+      if (this.enabledReactions.includes(reaction)) {
+        this.enabledReactions = this.enabledReactions.filter(r => r !== reaction);
+      } else {
+        this.enabledReactions.push(reaction);
+      }
+    },
+    
+    enableAllReactions() {
+      this.enabledReactions = [
+        'interesting', 'unique', 'memorable', 'inspiring', 'relatable', 'complex', 
+        'mysterious', 'charming', 'brave', 'wise', 'creative', 'powerful'
+      ];
+    },
+    
+    disableAllReactions() {
+      this.enabledReactions = [];
+    }
+  }
+}
+</script>

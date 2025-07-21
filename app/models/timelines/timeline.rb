@@ -57,8 +57,4 @@ class Timeline < ApplicationRecord
   def initialize_first_event
     timeline_events.create(title: "Untitled Event", position: 1)
   end
-
-  def cached_word_count
-    0 # until we implement it :)
-  end
 end
