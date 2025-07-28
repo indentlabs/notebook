@@ -60,11 +60,16 @@ class TimelineEventsController < ApplicationController
     entity = @timeline_event.timeline_event_entities.find_or_create_by(timeline_event_entity_params)
     
     if entity.persisted?
+      # Reload the timeline event to get the latest linked content
+      @timeline_event.reload
+      
       render json: { 
         status: 'success', 
         message: 'Content linked successfully',
-        entity_id: entity.id,
-        entity_type: entity.entity_type
+        html: render_to_string(
+          partial: 'shared/timeline_event_linked_content', 
+          locals: { timeline_event: @timeline_event }
+        )
       }
     else
       render json: { 
@@ -81,9 +86,16 @@ class TimelineEventsController < ApplicationController
     entity = @timeline_event.timeline_event_entities.find_by(id: params[:entity_id].to_i)
     
     if entity&.destroy
+      # Reload the timeline event to get the latest linked content
+      @timeline_event.reload
+      
       render json: { 
         status: 'success', 
-        message: 'Content unlinked successfully' 
+        message: 'Content unlinked successfully',
+        html: render_to_string(
+          partial: 'shared/timeline_event_linked_content', 
+          locals: { timeline_event: @timeline_event }
+        )
       }
     else
       render json: { 
