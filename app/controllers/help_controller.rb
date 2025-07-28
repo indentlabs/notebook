@@ -4,8 +4,6 @@ class HelpController < ApplicationController
 
   before_action :set_sidenav_expansion
 
-  layout 'tailwind'
-
   def index
     @page_title = "Help center"
   end

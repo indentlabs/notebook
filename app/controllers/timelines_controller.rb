@@ -1,5 +1,4 @@
 class TimelinesController < ApplicationController
-  layout 'tailwind'
   include ApplicationHelper
 
   before_action :authenticate_user!, except: [:show]

@@ -1,6 +1,4 @@
 class StreamController < ApplicationController
-  layout 'tailwind', only: [:index, :global]
-
   before_action :authenticate_user!
   before_action :set_stream_navbar_actions, only: [:index, :global]
   before_action :set_stream_navbar_color, only: [:index, :global]

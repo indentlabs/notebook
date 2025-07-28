@@ -3,8 +3,6 @@ class PageCollectionEditorPicksController < ApplicationController
   before_action :set_page_collection
   before_action :require_collection_ownership
 
-  layout 'tailwind'
-
   # GET /collections/:page_collection_id/editor_picks
   def index
     @current_picks = @page_collection.editor_picks_ordered.includes({content: [:universe, :user], user: []})

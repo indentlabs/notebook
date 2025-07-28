@@ -4,8 +4,6 @@ class PageCollectionSubmissionsController < ApplicationController
 
   before_action :require_collection_ownership, only: [:index]
 
-  layout 'tailwind', only: [:index]
-
   # GET /page_collection_submissions
   def index
     @page_collection_submissions = @page_collection.page_collection_submissions.where(accepted_at: nil)

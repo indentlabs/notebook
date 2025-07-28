@@ -2,11 +2,6 @@
 # an associated model
 class MainController < ApplicationController
   #layout 'landing', only: [:about_notebook, :for_writers, :for_roleplayers, :for_friends]
-  layout 'tailwind', only: [
-    :index, :dashboard,
-    :prompts, :table_of_contents,
-    :paper, :privacyinfo, :recent_content
-  ]
 
   before_action :authenticate_user!, only: [:dashboard, :prompts, :notes, :recent_content]
   before_action :cache_linkable_content_for_each_content_type, only: [:dashboard, :prompts]

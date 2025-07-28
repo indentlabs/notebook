@@ -49,7 +49,7 @@ $(document).ready(function() {
       console.log('error saving changes');
 
       // TODO show some message to refresh the page or something
-      // M.toast({ html: "There was an error saving your changes. Please back up any changes and refresh the page." });
+      console.error("There was an error saving your changes. Please back up any changes and refresh the page.");
     }
   });
 

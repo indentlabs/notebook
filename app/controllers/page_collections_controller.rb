@@ -9,8 +9,6 @@ class PageCollectionsController < ApplicationController
 
   before_action :require_collection_ownership, only: [:edit, :update, :destroy]
 
-  layout 'tailwind'
-
   # GET /page_collections
   def index
     @page_title = "Collections"

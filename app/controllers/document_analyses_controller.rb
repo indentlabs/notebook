@@ -8,8 +8,6 @@ class DocumentAnalysesController < ApplicationController
   before_action :set_sidenav_expansion
   # before_action :set_navbar_actions
 
-  layout 'tailwind', only: [:index, :landing, :hub]
-
   # Document analysis landing page for logged out users
   def landing
     redirect_to analysis_hub_path if user_signed_in?

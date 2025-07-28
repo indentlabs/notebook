@@ -6,8 +6,6 @@ class SubscriptionsController < ApplicationController
   before_action :set_navbar_actions,    except: [:redeem, :prepay_paid]
   before_action :set_sidenav_expansion, except: [:redeem, :prepay_paid]
 
-  layout 'tailwind'
-
   # General billing page
   def new
     @sidenav_expansion = 'my account'

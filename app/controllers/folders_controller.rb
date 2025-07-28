@@ -1,5 +1,4 @@
 class FoldersController < ApplicationController
-  layout 'tailwind'
   before_action :authenticate_user!
   before_action :set_folder,              only: [:show, :destroy, :update]
   before_action :verify_folder_ownership, only: [:show, :destroy, :update]

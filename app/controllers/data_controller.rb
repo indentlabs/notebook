@@ -4,8 +4,6 @@ class DataController < ApplicationController
   before_action :set_sidenav_expansion
   before_action :set_navbar_color
 
-  layout 'tailwind'
-
   def index
     @page_title = "My data vault"
   end

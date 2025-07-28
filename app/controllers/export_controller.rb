@@ -5,8 +5,6 @@ class ExportController < ApplicationController
   skip_before_action :cache_most_used_page_information, only: [:outline, :notebook_json]
   skip_before_action :cache_forums_unread_counts,       only: [:outline, :notebook_json]
 
-  layout 'tailwind', only: [:index]
-
   def index
     @sidenav_expansion = 'my account'
   end

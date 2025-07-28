@@ -1,8 +1,6 @@
 class SearchController < ApplicationController
   before_action :authenticate_user!
 
-  layout 'tailwind'
-
   def results
     @query  = params[:q]&.strip
     @sort   = params[:sort] || 'relevance'

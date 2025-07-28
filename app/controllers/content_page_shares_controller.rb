@@ -1,5 +1,4 @@
 class ContentPageSharesController < ApplicationController
-  layout 'tailwind', only: [:show]
   before_action :authenticate_user!, except: [:show]
   before_action :set_content_page_share, only: [
     :show, :edit, :update, :destroy, 
