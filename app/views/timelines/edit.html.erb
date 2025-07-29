@@ -1,7 +1,7 @@
 <div x-data="timelineEditor()" class="min-h-screen bg-gray-50">
 
-  <!-- Timeline Header -->
-  <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+  <!-- Timeline Header - Clean Paper Style -->
+  <div class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
     <div class="max-w-7xl mx-auto">
       <!-- Top Bar with Actions -->
       <div class="px-6 py-4 flex items-center justify-between">
@@ -45,7 +45,7 @@
             <span class="hidden sm:inline">Settings</span>
           </button>
           
-          <button @click="showShareModal = true" 
+          <button @click="typeof showShareModal !== 'undefined' ? (showShareModal = true) : console.error('showShareModal not available')" 
                   class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
             <i class="material-icons text-lg mr-2">share</i>
             <span class="hidden sm:inline">Share</span>
@@ -61,43 +61,80 @@
       <!-- Timeline Title -->
       <div class="px-6 pb-6">
         <%= form_for @timeline, html: { class: 'timeline-meta-form', '@submit': 'autoSaveStatus = "saving"' }, remote: true do |f| %>
-          <div class="group">
+          <div class="group relative">
             <%= f.text_field :name, 
-                class: "text-3xl font-bold text-gray-900 bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 w-full transition-colors placeholder-gray-400",
+                class: "text-3xl font-bold text-gray-900 bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 w-full transition-all duration-200 placeholder-gray-400 pr-10",
                 placeholder: "Timeline title...",
                 'x-model': 'timelineData.name',
-                '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-          </div>
-          
-          <!-- Universe Selector -->
-          <div class="mt-3 flex items-center space-x-2 text-sm">
-            <i class="material-icons text-gray-400"><%= Universe.icon %></i>
-            <%= f.select :universe_id, 
-                options_from_collection_for_select(current_user.universes, :id, :name, @timeline.universe_id),
-                { include_blank: "No universe" },
-                { class: "text-gray-600 bg-transparent border-0 focus:ring-0 focus:border-gray-300",
-                  '@change': 'submitFormRemotely($el.form)' } %>
+                '@input.debounce.500ms': 'submitFormRemotely($el.form)',
+                '@focus': 'titleFocused = true',
+                '@blur': 'titleFocused = false' %>
+            
+            <!-- Edit Indicator -->
+            <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+              <i class="material-icons text-lg text-gray-400 group-hover:text-gray-600 transition-colors duration-200" 
+                 :class="{ 'text-green-500': titleFocused }">edit</i>
+            </div>
+            
+            <!-- Character Counter -->
+            <div class="absolute -bottom-6 right-0 text-xs text-gray-400" x-show="titleFocused">
+              <span x-text="timelineData.name.length"></span><span class="text-gray-300">/255</span>
+            </div>
           </div>
         <% end %>
       </div>
     </div>
   </div>
 
-  <!-- Meta Panel (Collapsible) -->
+  <!-- Settings Panel (Floating Card) -->
   <div x-show="showMetaPanel" 
-       x-transition:enter="transition ease-out duration-200"
-       x-transition:enter-start="opacity-0 -translate-y-2"
-       x-transition:enter-end="opacity-100 translate-y-0"
-       x-transition:leave="transition ease-in duration-150"
-       x-transition:leave-start="opacity-100 translate-y-0"
-       x-transition:leave-end="opacity-0 -translate-y-2"
-       class="bg-white border-b border-gray-200 shadow-sm"
-       style="display: none;">
-    <div class="max-w-7xl mx-auto px-6 py-6">
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0 scale-95 -translate-y-4"
+       x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+       x-transition:leave-end="opacity-0 scale-95 -translate-y-4"
+       class="fixed inset-0 z-40 overflow-y-auto bg-black bg-opacity-25 backdrop-blur-sm"
+       style="display: none;"
+       @click.self="showMetaPanel = false">
+    <div class="flex items-start justify-center min-h-screen pt-16 px-4">
+      <div class="relative bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-auto border border-gray-100">
+        <!-- Close Button -->
+        <button @click="showMetaPanel = false" 
+                class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors z-10">
+          <i class="material-icons text-lg">close</i>
+        </button>
+        
+        <!-- Panel Header -->
+        <div class="px-8 py-6 border-b border-gray-200">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
+              <i class="material-icons text-green-600 text-lg">settings</i>
+            </div>
+            <div class="ml-4">
+              <h3 class="text-lg font-semibold text-gray-900">Timeline Settings</h3>
+              <p class="text-sm text-gray-500">Configure your timeline details and metadata</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Panel Content -->
+        <div class="px-8 py-6">
       <%= form_for @timeline, html: { class: 'timeline-meta-form' }, remote: true do |f| %>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- Left Column -->
           <div class="space-y-6">
+            <!-- Universe Selector -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Universe</label>
+              <%= f.select :universe_id, 
+                  options_from_collection_for_select(current_user.universes, :id, :name, @timeline.universe_id),
+                  { include_blank: "No universe" },
+                  { class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500",
+                    '@change': 'submitFormRemotely($el.form)' } %>
+              <p class="mt-1 text-sm text-gray-500">Organize this timeline within a universe</p>
+            </div>
+            
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
               <%= f.text_area :subtitle, 
@@ -181,6 +218,8 @@
           </div>
         </div>
       <% end %>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -290,40 +329,38 @@
     </div>
 
     <!-- Timeline Events -->
-    <div class="timeline-events-container space-y-8" data-timeline-id="<%= @timeline.id %>">
+    <!-- DEBUG: Start of timeline-events-container -->
+    <div class="timeline-events-container" data-timeline-id="<%= @timeline.id %>">
+      <!-- DEBUG: Total events in database: <%= @timeline.timeline_events.count %> -->
       <% @timeline.timeline_events.includes(:timeline_event_entities).each_with_index do |event, index| %>
-        <div class="timeline-event-container relative" 
+        <div class="timeline-event-container group" 
              data-event-id="<%= event.id %>" 
              data-timeline-id="<%= @timeline.id %>"
              data-event-type="<%= event.event_type %>"
              data-importance="<%= event.importance_level %>"
-             data-status="<%= event.status %>"
-             x-show="shouldShowEvent($el)">
-          
-          <!-- Timeline Connector -->
-          <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-green-200" 
-               style="<%= 'display: none;' if index == @timeline.timeline_events.count - 1 %>"></div>
-          
+             data-status="<%= event.status %>">
           <!-- Event Content -->
           <div class="flex items-start space-x-6">
-            <!-- Timeline Dot and Controls -->
-            <div class="flex flex-col items-center space-y-4 flex-shrink-0">
-              <!-- Timeline Dot -->
-              <div class="w-4 h-4 timeline-dot-<%= event.event_type_info[:color] %> rounded-full border-4 border-white shadow-sm z-10"></div>
+            <!-- Premium Timeline Dot and Controls -->
+            <div class="flex flex-col items-center space-y-4 flex-shrink-0 z-10">
+              <!-- Clean Timeline Dot -->
+              <div class="relative">
+                <div class="w-4 h-4 rounded-full timeline-dot-<%= event.event_type_info[:color] %>"></div>
+              </div>
               
-              <!-- Move Controls -->
-              <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <!-- Timeline Move Controls -->
+              <div class="timeline-move-controls opacity-0 group-hover:opacity-100 transition-opacity">
                 <div class="flex flex-col space-y-1">
-                  <%= link_to '#', class: 'js-move-event-to-top p-1 text-gray-400 hover:text-gray-600 rounded' do %>
+                  <%= link_to '#', class: 'js-move-event-to-top' do %>
                     <i class="material-icons text-sm">keyboard_double_arrow_up</i>
                   <% end %>
-                  <%= link_to '#', class: 'js-move-event-up p-1 text-gray-400 hover:text-gray-600 rounded' do %>
+                  <%= link_to '#', class: 'js-move-event-up' do %>
                     <i class="material-icons text-sm">keyboard_arrow_up</i>
                   <% end %>
-                  <%= link_to '#', class: 'js-move-event-down p-1 text-gray-400 hover:text-gray-600 rounded' do %>
+                  <%= link_to '#', class: 'js-move-event-down' do %>
                     <i class="material-icons text-sm">keyboard_arrow_down</i>
                   <% end %>
-                  <%= link_to '#', class: 'js-move-event-to-bottom p-1 text-gray-400 hover:text-gray-600 rounded' do %>
+                  <%= link_to '#', class: 'js-move-event-to-bottom' do %>
                     <i class="material-icons text-sm">keyboard_double_arrow_down</i>
                   <% end %>
                 </div>
@@ -331,25 +368,85 @@
             </div>
             
             <!-- Event Card -->
-            <div class="flex-1 group">
+            <div class="flex-1">
               <%= form_for event, html: { class: 'autosave-form' }, remote: true do |f| %>
                 <%= f.hidden_field :timeline_id %>
                 
-                <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow <%= event.color_class %> timeline-event-<%= event.importance_level %>">
-                  <!-- Event Header -->
-                  <div class="px-6 py-4 border-b border-gray-100">
-                    <!-- Event Type and Status Badges -->
-                    <div class="flex items-center justify-between mb-3">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200">
+                  
+                  <!-- Event Card Header -->
+                  <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                      <!-- Event Title -->
+                      <div class="flex-1">
+                        <%= f.text_field :title, 
+                            class: "event-title w-full text-lg font-semibold text-gray-900 bg-transparent border-0 hover:bg-white hover:border hover:border-gray-200 focus:bg-white focus:border-green-500 focus:ring-0 transition-colors px-2 py-1 rounded",
+                            placeholder: "Event title...",
+                            '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                      </div>
+                      
+                      <!-- Event Actions -->
+                      <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                        <button type="button" 
+                                @click="typeof openLinkModal !== 'undefined' ? openLinkModal(<%= event.id %>) : console.error('openLinkModal not available')"
+                                class="p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-50">
+                          <i class="material-icons text-sm">link</i>
+                        </button>
+                        <button type="button" 
+                                onclick="deleteEvent(<%= event.id %>, this)"
+                                class="p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-red-50">
+                          <i class="material-icons text-sm">delete</i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Event Body -->
+                  <div class="px-4 py-3">
+                    
+                    <!-- Clean Time Header -->
+                    <div class="flex items-center space-x-4 mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div class="flex items-center justify-center w-10 h-10 bg-green-500 rounded-lg shadow-sm">
+                        <i class="material-icons text-white text-lg">schedule</i>
+                      </div>
+                      <div class="flex items-center space-x-3 flex-1">
+                        <!-- Start Time -->
+                        <div class="flex-1">
+                          <label class="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
+                          <%= f.text_field :time_label, 
+                              class: "timeline-input w-full text-sm font-medium text-gray-800",
+                              placeholder: "Start time",
+                              '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                        </div>
+                        
+                        <!-- Arrow Separator -->
+                        <div class="flex items-center justify-center w-8 h-8 bg-white rounded-full border border-gray-200 mt-6">
+                          <i class="material-icons text-sm text-green-500">arrow_forward</i>
+                        </div>
+                        
+                        <!-- End Time -->
+                        <div class="flex-1">
+                          <label class="block text-xs font-medium text-gray-700 mb-1">End Time</label>
+                          <%= f.text_field :end_time_label, 
+                              class: "timeline-input w-full text-sm font-medium text-gray-800",
+                              placeholder: "End time (optional)",
+                              '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Clean Event Type and Status Badges -->
+                    <div class="flex items-center space-x-3 mb-3">
                       <div class="flex items-center space-x-2">
-                        <span class="event-type-badge inline-flex items-center px-2 py-1 rounded-full text-xs font-medium">
+                        <!-- Event Type Badge -->
+                        <span class="event-type-badge inline-flex items-center">
                           <i class="material-icons text-xs mr-1"><%= event.event_type_info[:icon] %></i>
                           <%= event.event_type_info[:name] %>
                         </span>
-                        <span class="status-badge-<%= event.status %> inline-flex items-center px-2 py-1 rounded-full text-xs font-medium">
-                          <%= event.status_info[:name] %>
-                        </span>
+                        
                         <% if event.importance_level == 'major' %>
-                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                          <!-- Major Importance Badge -->
+                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
                             <i class="material-icons text-xs mr-1">star</i>
                             Major
                           </span>
@@ -357,139 +454,150 @@
                       </div>
                     </div>
                     
-                    <div class="flex items-start justify-between">
-                      <div class="flex-1 min-w-0">
-                        <!-- Time Range -->
-                        <div class="flex items-center space-x-2 mb-2">
-                          <%= f.text_field :time_label, 
-                              class: "text-sm text-green-600 font-medium bg-transparent border-0 focus:ring-0 placeholder-green-400 flex-1",
-                              placeholder: "When did this happen?",
-                              '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                          
-                          <% if event.has_duration? || event.end_time_label.present? %>
-                            <span class="text-sm text-gray-400">to</span>
-                            <%= f.text_field :end_time_label, 
-                                class: "text-sm text-green-600 font-medium bg-transparent border-0 focus:ring-0 placeholder-green-400 flex-1",
-                                placeholder: "End time (optional)",
-                                '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                          <% else %>
-                            <button type="button" 
-                                    onclick="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                                    class="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded border border-dashed border-gray-300 hover:border-gray-400">
-                              + Duration
-                            </button>
-                            <div class="flex items-center space-x-2" style="display: none;">
-                              <span class="text-sm text-gray-400">to</span>
-                              <%= f.text_field :end_time_label, 
-                                  class: "text-sm text-green-600 font-medium bg-transparent border-0 focus:ring-0 placeholder-green-400 flex-1",
-                                  placeholder: "End time (optional)",
-                                  '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                            </div>
-                          <% end %>
-                        </div>
-                        
-                        <!-- Event Title -->
-                        <%= f.text_field :title, 
-                            class: "event-title text-xl font-semibold text-gray-900 bg-transparent border-0 focus:ring-0 w-full placeholder-gray-400",
-                            placeholder: "Event title...",
-                            '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                      </div>
+                    
+                    <!-- Clean Description -->
+                    <div class="mb-4">
+                      <%= f.text_area :description, 
+                          rows: 2,
+                          class: "timeline-input w-full text-sm text-gray-700 resize-none",
+                          placeholder: "What happened?",
+                          '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                    </div>
+                    
+                    <!-- Expandable Icons Bar -->
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                      <span class="status-badge-<%= event.status %> inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">
+                        <%= event.status_info[:name] %>
+                      </span>
                       
-                      <!-- Event Actions -->
-                      <div class="ml-4 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div class="flex items-center space-x-2">
+                        <!-- Settings Icon -->
                         <button type="button" 
-                                @click="openLinkModal(<%= event.id %>)"
-                                class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50">
-                          <i class="material-icons text-lg">link</i>
+                                @click="typeof toggleEventSection !== 'undefined' ? toggleEventSection(<%= event.id %>, 'settings') : console.error('toggleEventSection not available')"
+                                class="expandable-icon"
+                                :class="{ 'active': typeof isEventSectionOpen !== 'undefined' ? isEventSectionOpen(<%= event.id %>, 'settings') : false }"
+                                title="Event Settings">
+                          <i class="material-icons text-sm">settings</i>
                         </button>
+                        
+                        <!-- Notes Icon -->
                         <button type="button" 
-                                onclick="deleteEvent(<%= event.id %>, this)"
-                                class="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50">
-                          <i class="material-icons text-lg">delete</i>
+                                @click="typeof toggleEventSection !== 'undefined' ? toggleEventSection(<%= event.id %>, 'notes') : console.error('toggleEventSection not available')"
+                                class="expandable-icon"
+                                :class="{ 'active': typeof isEventSectionOpen !== 'undefined' ? isEventSectionOpen(<%= event.id %>, 'notes') : false }"
+                                title="Notes">
+                          <i class="material-icons text-sm">note</i>
+                        </button>
+                        
+                        <!-- Status Icon -->
+                        <button type="button" 
+                                @click="typeof toggleEventSection !== 'undefined' ? toggleEventSection(<%= event.id %>, 'status') : console.error('toggleEventSection not available')"
+                                class="expandable-icon"
+                                :class="{ 'active': typeof isEventSectionOpen !== 'undefined' ? isEventSectionOpen(<%= event.id %>, 'status') : false }"
+                                title="Status">
+                          <i class="material-icons text-sm">check_circle</i>
                         </button>
                       </div>
                     </div>
+                    
+                    <!-- Expandable Sections -->
+                    <div class="space-y-3">
+                      <!-- Settings Section -->
+                      <div x-show="typeof isEventSectionOpen !== 'undefined' ? isEventSectionOpen(<%= event.id %>, 'settings') : false" 
+                           x-transition:enter="transition ease-out duration-200"
+                           x-transition:enter-start="opacity-0 -translate-y-2"
+                           x-transition:enter-end="opacity-100 translate-y-0"
+                           x-transition:leave="transition ease-in duration-150"
+                           x-transition:leave-start="opacity-100 translate-y-0"
+                           x-transition:leave-end="opacity-0 -translate-y-2"
+                           class="expandable-section settings-section bg-gray-50 rounded-lg p-3 space-y-3">
+                        <h4 class="text-sm font-medium text-gray-900 flex items-center">
+                          <i class="material-icons text-sm mr-2 text-green-600">settings</i>
+                          Event Settings
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <!-- Event Type -->
+                          <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Event Type</label>
+                            <%= f.select :event_type, 
+                                options_for_select(TimelineEvent::EVENT_TYPES.map { |k, v| [v[:name], k] }, event.event_type),
+                                {},
+                                { class: "w-full text-xs px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500",
+                                  '@change': 'submitFormRemotely($el.form)' } %>
+                          </div>
+                          
+                          <!-- Importance Level -->
+                          <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Importance</label>
+                            <%= f.select :importance_level,
+                                options_for_select(TimelineEvent::IMPORTANCE_LEVELS.map { |k, v| [v[:name], k] }, event.importance_level),
+                                {},
+                                { class: "w-full text-xs px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500",
+                                  '@change': 'submitFormRemotely($el.form)' } %>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Notes Section -->
+                      <div x-show="typeof isEventSectionOpen !== 'undefined' ? isEventSectionOpen(<%= event.id %>, 'notes') : false" 
+                           x-transition:enter="transition ease-out duration-200"
+                           x-transition:enter-start="opacity-0 -translate-y-2"
+                           x-transition:enter-end="opacity-100 translate-y-0"
+                           x-transition:leave="transition ease-in duration-150"
+                           x-transition:leave-start="opacity-100 translate-y-0"
+                           x-transition:leave-end="opacity-0 -translate-y-2"
+                           class="expandable-section notes-section bg-blue-50 rounded-lg p-3 space-y-3">
+                        <h4 class="text-sm font-medium text-gray-900 flex items-center">
+                          <i class="material-icons text-sm mr-2 text-blue-600">note</i>
+                          Notes
+                        </h4>
+                        <div class="space-y-3">
+                          <!-- Public Notes -->
+                          <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Public Notes</label>
+                            <%= f.text_area :notes, 
+                                rows: 2,
+                                class: "w-full text-xs px-2 py-1 text-gray-600 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none placeholder-gray-400",
+                                placeholder: "Additional notes...",
+                                '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                          </div>
+                          
+                          <!-- Private Notes -->
+                          <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1 flex items-center">
+                              <i class="material-icons text-xs mr-1 text-amber-600">lock</i>
+                              Private Notes
+                            </label>
+                            <%= f.text_area :private_notes, 
+                                rows: 2,
+                                class: "w-full text-xs px-2 py-1 text-gray-600 bg-amber-50 border border-amber-200 rounded focus:ring-1 focus:ring-amber-500 focus:border-amber-500 resize-none placeholder-amber-400",
+                                placeholder: "Private notes...",
+                                '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Status Section -->
+                      <div x-show="typeof isEventSectionOpen !== 'undefined' ? isEventSectionOpen(<%= event.id %>, 'status') : false" 
+                           x-transition:enter="transition ease-out duration-200"
+                           x-transition:enter-start="opacity-0 -translate-y-2"
+                           x-transition:enter-end="opacity-100 translate-y-0"
+                           x-transition:leave="transition ease-in duration-150"
+                           x-transition:leave-start="opacity-100 translate-y-0"
+                           x-transition:leave-end="opacity-0 -translate-y-2"
+                           class="expandable-section status-section bg-purple-50 rounded-lg p-3">
+                        <h4 class="text-sm font-medium text-gray-900 flex items-center mb-2">
+                          <i class="material-icons text-sm mr-2 text-purple-600">check_circle</i>
+                          Status
+                        </h4>
+                        <%= f.select :status,
+                            options_for_select(TimelineEvent::STATUS_OPTIONS.map { |k, v| [v[:name], k] }, event.status),
+                            {},
+                            { class: "w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white",
+                              '@change': 'submitFormRemotely($el.form)' } %>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <!-- Event Body -->
-                  <div class="px-6 py-4 space-y-4">
-                    <!-- Description -->
-                    <%= f.text_area :description, 
-                        rows: 3,
-                        class: "w-full px-0 py-0 text-gray-700 bg-transparent border-0 focus:ring-0 resize-none placeholder-gray-400",
-                        placeholder: "What happened in this event?",
-                        '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                    
-                    <!-- Event Configuration -->
-                    <details class="group/config">
-                      <summary class="cursor-pointer text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center">
-                        <i class="material-icons text-sm mr-2 group-open/config:rotate-90 transition-transform">chevron_right</i>
-                        Event Settings
-                      </summary>
-                      <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- Event Type -->
-                        <div>
-                          <label class="block text-xs font-medium text-gray-700 mb-1">Event Type</label>
-                          <%= f.select :event_type, 
-                              options_for_select(TimelineEvent::EVENT_TYPES.map { |k, v| [v[:name], k] }, event.event_type),
-                              {},
-                              { class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm",
-                                '@change': 'submitFormRemotely($el.form)' } %>
-                        </div>
-                        
-                        <!-- Importance Level -->
-                        <div>
-                          <label class="block text-xs font-medium text-gray-700 mb-1">Importance</label>
-                          <%= f.select :importance_level,
-                              options_for_select(TimelineEvent::IMPORTANCE_LEVELS.map { |k, v| [v[:name], k] }, event.importance_level),
-                              {},
-                              { class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm",
-                                '@change': 'submitFormRemotely($el.form)' } %>
-                        </div>
-                        
-                        <!-- Status -->
-                        <div>
-                          <label class="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                          <%= f.select :status,
-                              options_for_select(TimelineEvent::STATUS_OPTIONS.map { |k, v| [v[:name], k] }, event.status),
-                              {},
-                              { class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm",
-                                '@change': 'submitFormRemotely($el.form)' } %>
-                        </div>
-                      </div>
-                    </details>
-                    
-                    <!-- Notes -->
-                    <details class="group/notes">
-                      <summary class="cursor-pointer text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center">
-                        <i class="material-icons text-sm mr-2 group-open/notes:rotate-90 transition-transform">chevron_right</i>
-                        Notes
-                      </summary>
-                      <div class="mt-3 space-y-3">
-                        <!-- Public Notes -->
-                        <div>
-                          <label class="block text-xs font-medium text-gray-700 mb-1">Public Notes</label>
-                          <%= f.text_area :notes, 
-                              rows: 2,
-                              class: "w-full px-3 py-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none placeholder-gray-400",
-                              placeholder: "Additional notes about this event...",
-                              '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                        </div>
-                        
-                        <!-- Private Notes -->
-                        <div>
-                          <label class="block text-xs font-medium text-gray-700 mb-1 flex items-center">
-                            <i class="material-icons text-xs mr-1 text-amber-600">lock</i>
-                            Private Notes
-                          </label>
-                          <%= f.text_area :private_notes, 
-                              rows: 2,
-                              class: "w-full px-3 py-2 text-sm text-gray-600 bg-amber-50 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none placeholder-amber-400",
-                              placeholder: "Private author notes (only visible to you)...",
-                              '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                        </div>
-                      </div>
-                    </details>
                     
                     <!-- Linked Content -->
                     <%= render 'shared/timeline_event_linked_content', timeline_event: event %>
@@ -501,6 +609,7 @@
         </div>
       <% end %>
     </div>
+    <!-- DEBUG: End of timeline-events-container -->
     
     <!-- Empty State -->
     <% if @timeline.timeline_events.empty? %>
@@ -522,7 +631,7 @@
   </div>
 
   <!-- Link Content Modal -->
-  <div x-show="showLinkModal" 
+  <div x-show="typeof showLinkModal !== 'undefined' ? showLinkModal : false" 
        x-transition:enter="transition ease-out duration-200"
        x-transition:enter-start="opacity-0"
        x-transition:enter-end="opacity-100"
@@ -533,7 +642,7 @@
        style="display: none;">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
       <!-- Backdrop -->
-      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="closeLinkModal()"></div>
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="typeof closeLinkModal !== 'undefined' ? closeLinkModal() : console.error('closeLinkModal not available')"></div>
       
       <!-- Modal -->
       <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full sm:p-6">
@@ -552,8 +661,8 @@
             <div class="space-y-3">
               <!-- All Pages Filter -->
               <button type="button"
-                      @click="selectedFilter = selectedFilter === 'all' ? '' : 'all'"
-                      :class="{ 'bg-green-100 text-green-800 border-green-300': selectedFilter === 'all' || !selectedFilter }"
+                      @click="typeof selectedFilter !== 'undefined' ? (selectedFilter = selectedFilter === 'all' ? '' : 'all') : console.error('selectedFilter not available')"
+                      :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? (selectedFilter === 'all' || !selectedFilter) : true }"
                       class="w-full text-left px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors flex items-center">
                 <i class="material-icons text-sm mr-2 text-gray-600">view_list</i>
                 <span class="text-sm font-medium">All Pages</span>
@@ -562,8 +671,8 @@
               <!-- Timeline Content Filter (if exists) -->
               <% if @timeline_linked_content&.any? { |_, content| content.any? } %>
                 <button type="button"
-                        @click="selectedFilter = selectedFilter === 'timeline' ? '' : 'timeline'"
-                        :class="{ 'bg-blue-100 text-blue-800 border-blue-300': selectedFilter === 'timeline' }"
+                        @click="typeof selectedFilter !== 'undefined' ? (selectedFilter = selectedFilter === 'timeline' ? '' : 'timeline') : console.error('selectedFilter not available')"
+                        :class="{ 'bg-blue-100 text-blue-800 border-blue-300': typeof selectedFilter !== 'undefined' ? selectedFilter === 'timeline' : false }"
                         class="w-full text-left px-3 py-2 rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 transition-colors flex items-center">
                   <i class="material-icons text-sm mr-2">timeline</i>
                   <span class="text-sm font-medium">Timeline Content</span>
@@ -580,8 +689,8 @@
                   <% next if @current_user_content[content_type].empty? %>
                   <% content_type_class = content_class_from_name(content_type) %>
                   <button type="button"
-                          @click="selectedFilter = selectedFilter === '<%= content_type.downcase %>' ? '' : '<%= content_type.downcase %>'"
-                          :class="{ 'bg-green-100 text-green-800 border-green-300': selectedFilter === '<%= content_type.downcase %>' }"
+                          @click="typeof selectedFilter !== 'undefined' ? (selectedFilter = selectedFilter === '<%= content_type.downcase %>' ? '' : '<%= content_type.downcase %>') : console.error('selectedFilter not available')"
+                          :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? selectedFilter === '<%= content_type.downcase %>' : false }"
                           class="w-full text-left px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-between group">
                     <div class="flex items-center min-w-0">
                       <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %> flex-shrink-0"><%= content_type_class.icon %></i>
@@ -599,32 +708,32 @@
             <!-- Mobile Filter Toggle (Visible on mobile only) -->
             <div class="md:hidden mb-4">
               <button type="button"
-                      @click="showMobileFilters = !showMobileFilters"
+                      @click="typeof showMobileFilters !== 'undefined' ? (showMobileFilters = !showMobileFilters) : console.error('showMobileFilters not available')"
                       class="w-full flex items-center justify-between px-4 py-2 bg-gray-50 rounded-lg border border-gray-300 text-gray-700">
                 <span class="flex items-center">
                   <i class="material-icons text-sm mr-2">filter_list</i>
                   <span class="text-sm font-medium">Filters</span>
                 </span>
-                <i class="material-icons text-sm" :class="showMobileFilters ? 'rotate-180' : ''">expand_more</i>
+                <i class="material-icons text-sm" :class="typeof showMobileFilters !== 'undefined' ? (showMobileFilters ? 'rotate-180' : '') : ''">expand_more</i>
               </button>
               
               <!-- Mobile Filter Panel -->
-              <div x-show="showMobileFilters" 
+              <div x-show="typeof showMobileFilters !== 'undefined' ? showMobileFilters : false" 
                    x-transition:enter="transition ease-out duration-200"
                    x-transition:enter-start="opacity-0 -translate-y-2"
                    x-transition:enter-end="opacity-100 translate-y-0"
                    class="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <div class="grid grid-cols-2 gap-2">
                   <button type="button"
-                          @click="selectedFilter = ''; showMobileFilters = false"
-                          :class="{ 'bg-green-100 text-green-800 border-green-300': !selectedFilter }"
+                          @click="typeof selectedFilter !== 'undefined' && typeof showMobileFilters !== 'undefined' ? (selectedFilter = '', showMobileFilters = false) : console.error('variables not available')"
+                          :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? !selectedFilter : true }"
                           class="px-3 py-2 rounded border border-gray-300 text-gray-700 text-sm">
                     All Pages
                   </button>
                   <% if @timeline_linked_content&.any? { |_, content| content.any? } %>
                     <button type="button"
-                            @click="selectedFilter = 'timeline'; showMobileFilters = false"
-                            :class="{ 'bg-blue-100 text-blue-800 border-blue-300': selectedFilter === 'timeline' }"
+                            @click="typeof selectedFilter !== 'undefined' && typeof showMobileFilters !== 'undefined' ? (selectedFilter = 'timeline', showMobileFilters = false) : console.error('variables not available')"
+                            :class="{ 'bg-blue-100 text-blue-800 border-blue-300': typeof selectedFilter !== 'undefined' ? selectedFilter === 'timeline' : false }"
                             class="px-3 py-2 rounded border border-blue-300 text-blue-700 text-sm">
                       Timeline
                     </button>
@@ -632,8 +741,8 @@
                   <% @current_user_content.keys.sort.first(6).each do |content_type| %>
                     <% next if @current_user_content[content_type].empty? %>
                     <button type="button"
-                            @click="selectedFilter = '<%= content_type.downcase %>'; showMobileFilters = false"
-                            :class="{ 'bg-green-100 text-green-800 border-green-300': selectedFilter === '<%= content_type.downcase %>' }"
+                            @click="typeof selectedFilter !== 'undefined' && typeof showMobileFilters !== 'undefined' ? (selectedFilter = '<%= content_type.downcase %>', showMobileFilters = false) : console.error('variables not available')"
+                            :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? selectedFilter === '<%= content_type.downcase %>' : false }"
                             class="px-2 py-2 rounded border border-gray-300 text-gray-700 text-xs truncate">
                       <%= content_type.pluralize %>
                     </button>
@@ -648,30 +757,31 @@
                 <i class="material-icons text-gray-400 text-lg">search</i>
               </div>
               <input type="text" 
-                     x-model="linkModalSearchQuery"
+                     :value="typeof linkModalSearchQuery !== 'undefined' ? linkModalSearchQuery : ''"
+                     @input="typeof linkModalSearchQuery !== 'undefined' ? (linkModalSearchQuery = $event.target.value) : null"
                      placeholder="Search your content..." 
                      class="link-modal-search block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                     @keydown.escape="closeLinkModal()"
-                     @keydown.enter.prevent="linkFirstResult()">
+                     @keydown.escape="typeof closeLinkModal !== 'undefined' ? closeLinkModal() : console.error('closeLinkModal not available')"
+                     @keydown.enter.prevent="typeof linkFirstResult !== 'undefined' ? linkFirstResult() : console.error('linkFirstResult not available')">
             </div>
             
             <!-- Content Lists -->
             <div class="flex-1 overflow-y-auto space-y-4 min-h-0 pr-2">
               <!-- Timeline Linked Content Section -->
               <% if @timeline_linked_content&.any? { |_, content| content.any? } %>
-                <div x-show="selectedFilter === 'timeline'" class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div x-show="typeof selectedFilter !== 'undefined' ? selectedFilter === 'timeline' : false" class="bg-blue-50 rounded-lg p-4 border border-blue-200">
                   <button type="button"
-                          @click="toggleSection('timeline-overview')"
+                          @click="typeof toggleSection !== 'undefined' ? toggleSection('timeline-overview') : console.error('toggleSection not available')"
                           class="w-full text-left mb-3 flex items-center justify-between hover:bg-blue-100 rounded-lg p-2 -m-2 transition-colors">
                     <div class="flex items-center">
                       <i class="material-icons text-sm mr-2 text-blue-600">timeline</i>
                       <h4 class="text-sm font-semibold text-blue-900">Already Used in This Timeline</h4>
                     </div>
                     <i class="material-icons text-sm text-blue-600 transition-transform duration-200" 
-                       :class="isSectionCollapsed('timeline-overview') ? '' : 'rotate-90'">chevron_right</i>
+                       :class="typeof isSectionCollapsed !== 'undefined' ? (isSectionCollapsed('timeline-overview') ? '' : 'rotate-90') : ''">chevron_right</i>
                   </button>
                   
-                  <div x-show="!isSectionCollapsed('timeline-overview')"
+                  <div x-show="typeof isSectionCollapsed !== 'undefined' ? !isSectionCollapsed('timeline-overview') : true"
                        x-transition:enter="transition ease-out duration-200"
                        x-transition:enter-start="opacity-0 -translate-y-2"
                        x-transition:enter-end="opacity-100 translate-y-0"
@@ -687,7 +797,7 @@
                         
                         <div>
                           <button type="button"
-                                  @click="toggleSection('timeline-<%= content_type.downcase %>')"
+                                  @click="typeof toggleSection !== 'undefined' ? toggleSection('timeline-<%= content_type.downcase %>') : console.error('toggleSection not available')"
                                   class="w-full text-left mb-3 flex items-center justify-between hover:bg-blue-100 rounded-lg p-2 -m-2 transition-colors">
                             <div class="flex items-center">
                               <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
@@ -695,10 +805,10 @@
                               <span class="ml-2 text-xs text-blue-700 font-normal">(<%= content_list.count %>)</span>
                             </div>
                             <i class="material-icons text-xs text-blue-600 transition-transform duration-200" 
-                               :class="isSectionCollapsed('timeline-<%= content_type.downcase %>') ? '' : 'rotate-90'">chevron_right</i>
+                               :class="typeof isSectionCollapsed !== 'undefined' ? (isSectionCollapsed('timeline-<%= content_type.downcase %>') ? '' : 'rotate-90') : ''">chevron_right</i>
                           </button>
                           
-                          <div x-show="!isSectionCollapsed('timeline-<%= content_type.downcase %>')"
+                          <div x-show="typeof isSectionCollapsed !== 'undefined' ? !isSectionCollapsed('timeline-<%= content_type.downcase %>') : true"
                                x-transition:enter="transition ease-out duration-200"
                                x-transition:enter-start="opacity-0 -translate-y-2"
                                x-transition:enter-end="opacity-100 translate-y-0"
@@ -710,7 +820,7 @@
                                       data-id="<%= content.id %>"
                                       data-type="<%= content_type %>"
                                       data-name="<%= j(content_name) %>"
-                                      x-show="linkableContentMatches('<%= j(content_name) %>', '<%= j(content_type) %>')">
+                                      x-show="typeof linkableContentMatches !== 'undefined' ? linkableContentMatches('<%= j(content_name) %>', '<%= j(content_type) %>') : true">
                                 <div class="flex items-center">
                                   <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
                                   <span class="text-sm font-medium text-blue-900"><%= content_name %></span>
@@ -731,9 +841,9 @@
                 <% next if content_list.empty? %>
                 <% content_type_class = content_class_from_name(content_type) %>
                 
-                <div x-show="linkableContentMatches('<%= j(content_type) %>', '<%= j(content_type) %>')">
+                <div x-show="typeof linkableContentMatches !== 'undefined' ? linkableContentMatches('<%= j(content_type) %>', '<%= j(content_type) %>') : true">
                   <button type="button"
-                          @click="toggleSection('<%= content_type.downcase %>')"
+                          @click="typeof toggleSection !== 'undefined' ? toggleSection('<%= content_type.downcase %>') : console.error('toggleSection not available')"
                           class="w-full text-left mb-3 flex items-center justify-between hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors">
                     <div class="flex items-center">
                       <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
@@ -741,10 +851,10 @@
                       <span class="ml-2 text-xs text-gray-500 font-normal">(<%= content_list.count %>)</span>
                     </div>
                     <i class="material-icons text-sm text-gray-400 transition-transform duration-200" 
-                       :class="isSectionCollapsed('<%= content_type.downcase %>') ? '' : 'rotate-90'">chevron_right</i>
+                       :class="typeof isSectionCollapsed !== 'undefined' ? (isSectionCollapsed('<%= content_type.downcase %>') ? '' : 'rotate-90') : ''">chevron_right</i>
                   </button>
                   
-                  <div x-show="!isSectionCollapsed('<%= content_type.downcase %>')"
+                  <div x-show="typeof isSectionCollapsed !== 'undefined' ? !isSectionCollapsed('<%= content_type.downcase %>') : true"
                        x-transition:enter="transition ease-out duration-200"
                        x-transition:enter-start="opacity-0 -translate-y-2"
                        x-transition:enter-end="opacity-100 translate-y-0"
@@ -759,7 +869,7 @@
                               data-id="<%= content.id %>"
                               data-type="<%= content_type %>"
                               data-name="<%= j(content_name) %>"
-                              x-show="linkableContentMatches('<%= j(content_name) %>', '<%= j(content_type) %>')">
+                              x-show="typeof linkableContentMatches !== 'undefined' ? linkableContentMatches('<%= j(content_name) %>', '<%= j(content_type) %>') : true">
                         <div class="flex items-center min-w-0">
                           <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %> flex-shrink-0"><%= content_type_class.icon %></i>
                           <span class="text-sm text-gray-700 group-hover:text-gray-900 truncate">
@@ -785,7 +895,7 @@
         <!-- Modal Footer -->
         <div class="mt-6 flex justify-end">
           <button type="button" 
-                  @click="closeLinkModal()"
+                  @click="typeof closeLinkModal !== 'undefined' ? closeLinkModal() : console.error('closeLinkModal not available')"
                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
             <span>Close</span>
             <span class="ml-2 text-xs text-gray-400">(ESC)</span>
@@ -796,7 +906,7 @@
   </div>
 
   <!-- Share Modal -->
-  <div x-show="showShareModal" 
+  <div x-show="typeof showShareModal !== 'undefined' ? showShareModal : false" 
        x-transition:enter="transition ease-out duration-200"
        x-transition:enter-start="opacity-0"
        x-transition:enter-end="opacity-100"
@@ -807,7 +917,7 @@
        style="display: none;">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
       <!-- Backdrop -->
-      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showShareModal = false"></div>
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="typeof showShareModal !== 'undefined' ? (showShareModal = false) : console.error('showShareModal not available')"></div>
       
       <!-- Modal -->
       <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
@@ -858,7 +968,7 @@
         
         <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
           <button type="button" 
-                  @click="showShareModal = false"
+                  @click="typeof showShareModal !== 'undefined' ? (showShareModal = false) : console.error('showShareModal not available')"
                   class="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:mt-0 sm:w-auto sm:text-sm">
             Close
           </button>
@@ -870,31 +980,30 @@
   <!-- Hidden Template for New Events -->
   <div class="timeline-event-template" style="display: none;">
     <% event = TimelineEvent.new %>
-    <div class="timeline-event-container relative group" 
+    <div class="timeline-event-container group" 
          data-event-id="-1" 
-         data-timeline-id="<%= @timeline.id %>">
-      
-      <!-- Timeline Connector -->
-      <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-green-200"></div>
-      
+         data-timeline-id="<%= @timeline.id %>"
+         data-event-type="general"
+         data-importance="minor"
+         data-status="completed">
       <!-- Event Content -->
       <div class="flex items-start space-x-6">
         <!-- Timeline Dot and Controls -->
         <div class="flex flex-col items-center space-y-4 flex-shrink-0">
-          <div class="w-4 h-4 timeline-dot-gray rounded-full border-4 border-white shadow-sm z-10"></div>
+          <div class="w-4 h-4 timeline-dot-gray rounded-full"></div>
           
-          <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div class="timeline-move-controls opacity-0 group-hover:opacity-100 transition-opacity">
             <div class="flex flex-col space-y-1">
-              <%= link_to '#', class: 'js-move-event-to-top p-1 text-gray-400 hover:text-gray-600 rounded' do %>
+              <%= link_to '#', class: 'js-move-event-to-top' do %>
                 <i class="material-icons text-sm">keyboard_double_arrow_up</i>
               <% end %>
-              <%= link_to '#', class: 'js-move-event-up p-1 text-gray-400 hover:text-gray-600 rounded' do %>
+              <%= link_to '#', class: 'js-move-event-up' do %>
                 <i class="material-icons text-sm">keyboard_arrow_up</i>
               <% end %>
-              <%= link_to '#', class: 'js-move-event-down p-1 text-gray-400 hover:text-gray-600 rounded' do %>
+              <%= link_to '#', class: 'js-move-event-down' do %>
                 <i class="material-icons text-sm">keyboard_arrow_down</i>
               <% end %>
-              <%= link_to '#', class: 'js-move-event-to-bottom p-1 text-gray-400 hover:text-gray-600 rounded' do %>
+              <%= link_to '#', class: 'js-move-event-to-bottom' do %>
                 <i class="material-icons text-sm">keyboard_double_arrow_down</i>
               <% end %>
             </div>
@@ -906,138 +1015,113 @@
           <%= form_for event, html: { class: 'autosave-form' }, remote: true, method: :patch do |f| %>
             <%= f.hidden_field :timeline_id, value: @timeline.id %>
             
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow timeline-event-gray timeline-event-minor">
-              <!-- Event Header -->
-              <div class="px-6 py-4 border-b border-gray-100">
-                <!-- Event Type and Status Badges -->
-                <div class="flex items-center justify-between mb-3">
-                  <div class="flex items-center space-x-2">
-                    <span class="event-type-badge inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      <i class="material-icons text-xs mr-1">event</i>
-                      General Event
-                    </span>
-                    <span class="status-badge-completed inline-flex items-center px-2 py-1 rounded-full text-xs font-medium">
-                      Completed
-                    </span>
-                  </div>
-                </div>
-                
-                <div class="flex items-start justify-between">
-                  <div class="flex-1 min-w-0">
-                    <!-- Time Range -->
-                    <div class="flex items-center space-x-2 mb-2">
-                      <%= f.text_field :time_label, 
-                          class: "text-sm text-green-600 font-medium bg-transparent border-0 focus:ring-0 placeholder-green-400 flex-1",
-                          placeholder: "When did this happen?" %>
-                      
-                      <button type="button" 
-                              onclick="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                              class="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded border border-dashed border-gray-300 hover:border-gray-400">
-                        + Duration
-                      </button>
-                      <div class="flex items-center space-x-2" style="display: none;">
-                        <span class="text-sm text-gray-400">to</span>
-                        <%= f.text_field :end_time_label, 
-                            class: "text-sm text-green-600 font-medium bg-transparent border-0 focus:ring-0 placeholder-green-400 flex-1",
-                            placeholder: "End time (optional)" %>
-                      </div>
-                    </div>
-                    
-                    <!-- Event Title -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200">
+              
+              <!-- Event Card Header -->
+              <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                <div class="flex items-center justify-between">
+                  <!-- Event Title -->
+                  <div class="flex-1">
                     <%= f.text_field :title, 
-                        class: "event-title text-xl font-semibold text-gray-900 bg-transparent border-0 focus:ring-0 w-full placeholder-gray-400",
+                        class: "event-title w-full text-lg font-semibold text-gray-900 bg-transparent border-0 hover:bg-white hover:border hover:border-gray-200 focus:bg-white focus:border-green-500 focus:ring-0 transition-colors px-2 py-1 rounded",
                         placeholder: "Event title..." %>
                   </div>
                   
-                  <div class="ml-4 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <!-- Event Actions -->
+                  <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
                     <button type="button" 
-                            class="js-template-link-btn p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                            class="js-template-link-btn p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-50"
                             onclick="alert('Please save this event first before linking content.')">
-                      <i class="material-icons text-lg">link</i>
+                      <i class="material-icons text-sm">link</i>
                     </button>
                     <button type="button" 
-                            class="js-delete-timeline-event p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50"
+                            class="js-delete-timeline-event p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-red-50"
                             onclick="deleteEvent(null, this)">
-                      <i class="material-icons text-lg">delete</i>
+                      <i class="material-icons text-sm">delete</i>
                     </button>
                   </div>
                 </div>
               </div>
               
               <!-- Event Body -->
-              <div class="px-6 py-4 space-y-4">
-                <!-- Description -->
-                <%= f.text_area :description, 
-                    rows: 3,
-                    class: "w-full px-0 py-0 text-gray-700 bg-transparent border-0 focus:ring-0 resize-none placeholder-gray-400",
-                    placeholder: "What happened in this event?" %>
+              <div class="px-4 py-3">
                 
-                <!-- Event Configuration -->
-                <details class="group/config">
-                  <summary class="cursor-pointer text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center">
-                    <i class="material-icons text-sm mr-2 group-open/config:rotate-90 transition-transform">chevron_right</i>
-                    Event Settings
-                  </summary>
-                  <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Event Type -->
-                    <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Event Type</label>
-                      <%= f.select :event_type, 
-                          options_for_select(TimelineEvent::EVENT_TYPES.map { |k, v| [v[:name], k] }, 'general'),
-                          {},
-                          { class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm" } %>
-                    </div>
-                    
-                    <!-- Importance Level -->
-                    <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Importance</label>
-                      <%= f.select :importance_level,
-                          options_for_select(TimelineEvent::IMPORTANCE_LEVELS.map { |k, v| [v[:name], k] }, 'minor'),
-                          {},
-                          { class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm" } %>
-                    </div>
-                    
-                    <!-- Status -->
-                    <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                      <%= f.select :status,
-                          options_for_select(TimelineEvent::STATUS_OPTIONS.map { |k, v| [v[:name], k] }, 'completed'),
-                          {},
-                          { class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm" } %>
-                    </div>
+                <!-- Time Header - Prominent -->
+                <div class="flex items-center space-x-3 mb-3">
+                  <i class="material-icons text-green-600">schedule</i>
+                  <div class="flex items-center space-x-2 flex-1">
+                    <%= f.text_field :time_label, 
+                        class: "text-base font-medium text-green-600 bg-transparent border-0 border-b border-transparent hover:border-green-300 focus:border-green-500 focus:ring-0 placeholder-green-400 transition-colors",
+                        placeholder: "Start time" %>
+                    <i class="material-icons text-sm text-gray-400">arrow_forward</i>
+                    <%= f.text_field :end_time_label, 
+                        class: "text-base font-medium text-green-600 bg-transparent border-0 border-b border-transparent hover:border-green-300 focus:border-green-500 focus:ring-0 placeholder-green-400 transition-colors",
+                        placeholder: "End time (optional)" %>
                   </div>
-                </details>
+                </div>
                 
-                <!-- Notes -->
-                <details class="group/notes">
-                  <summary class="cursor-pointer text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center">
-                    <i class="material-icons text-sm mr-2 group-open/notes:rotate-90 transition-transform">chevron_right</i>
-                    Notes
-                  </summary>
-                  <div class="mt-3 space-y-3">
-                    <!-- Public Notes -->
-                    <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Public Notes</label>
-                      <%= f.text_area :notes, 
-                          rows: 2,
-                          class: "w-full px-3 py-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none placeholder-gray-400",
-                          placeholder: "Additional notes about this event..." %>
-                    </div>
+                <!-- Event Type and Status Badges -->
+                <div class="flex items-center space-x-2 mb-2">
+                  <span class="event-type-badge inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800">
+                    <i class="material-icons text-xs mr-1">event</i>
+                    General Event
+                  </span>
+                </div>
+                
+                <!-- Event Title - More Compact -->
+                <%= f.text_field :title, 
+                    class: "event-title text-lg font-semibold text-gray-900 bg-transparent border-0 focus:ring-0 w-full placeholder-gray-400 mb-2",
+                    placeholder: "Event title..." %>
+                
+                <!-- Description - Single Line by Default -->
+                <div class="relative">
+                  <%= f.text_area :description, 
+                      rows: 1,
+                      class: "w-full text-sm text-gray-700 bg-transparent border-0 focus:ring-0 resize-none placeholder-gray-400 transition-all",
+                      placeholder: "What happened?",
+                      style: "min-height: 1.5rem;" %>
+                </div>
+                
+                <!-- Expandable Icons Bar -->
+                <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                  <span class="status-badge-completed inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">
+                    Completed
+                  </span>
+                  
+                  <div class="flex items-center space-x-2">
+                    <!-- Settings Icon -->
+                    <button type="button" 
+                            class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                            title="Event Settings"
+                            disabled>
+                      <i class="material-icons text-sm">settings</i>
+                    </button>
                     
-                    <!-- Private Notes -->
-                    <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1 flex items-center">
-                        <i class="material-icons text-xs mr-1 text-amber-600">lock</i>
-                        Private Notes
-                      </label>
-                      <%= f.text_area :private_notes, 
-                          rows: 2,
-                          class: "w-full px-3 py-2 text-sm text-gray-600 bg-amber-50 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none placeholder-amber-400",
-                          placeholder: "Private author notes (only visible to you)..." %>
-                    </div>
+                    <!-- Notes Icon -->
+                    <button type="button" 
+                            class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                            title="Notes"
+                            disabled>
+                      <i class="material-icons text-sm">note</i>
+                    </button>
+                    
+                    <!-- Importance Icon -->
+                    <button type="button" 
+                            class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                            title="Importance"
+                            disabled>
+                      <i class="material-icons text-sm">star</i>
+                    </button>
+                    
+                    <!-- Status Icon -->
+                    <button type="button" 
+                            class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                            title="Status"
+                            disabled>
+                      <i class="material-icons text-sm">check_circle</i>
+                    </button>
                   </div>
-                </details>
-              </div>
+                </div>
             </div>
           <% end %>
         </div>
@@ -1048,7 +1132,7 @@
 
 <!-- JavaScript for Timeline Editor -->
 <script>
-// Alpine.js timeline editor component
+// Create a direct Alpine.js component using object literal syntax
 function timelineEditor() {
   return {
     showMetaPanel: false,
@@ -1064,6 +1148,8 @@ function timelineEditor() {
     collapsedSections: {},
     selectedEvents: [],
     autoSaveStatus: 'saved',
+    titleFocused: false,
+    eventSections: {},
     eventTypeFilters: [],
     importanceFilters: [],
     statusFilters: [],
@@ -1075,8 +1161,23 @@ function timelineEditor() {
       private_notes: '<%= j(@timeline.private_notes) %>'
     },
     
+    // Initialize method with debugging
+    init() {
+      console.log('Timeline editor Alpine.js component initialized');
+      console.log('Available methods:', Object.getOwnPropertyNames(this).filter(name => typeof this[name] === 'function'));
+      
+      // Test critical functions
+      console.log('Testing isEventSectionOpen function:', typeof this.isEventSectionOpen);
+      console.log('Testing linkableContentMatches function:', typeof this.linkableContentMatches);
+      console.log('Testing toggleEventSection function:', typeof this.toggleEventSection);
+      
+      // Make functions globally available for debugging
+      window.timelineEditorDebug = this;
+    },
+    
     // Filter helper methods
     clearAllFilters() {
+      console.log('clearAllFilters called');
       this.eventTypeFilters = [];
       this.importanceFilters = [];
       this.statusFilters = [];
@@ -1120,16 +1221,18 @@ function timelineEditor() {
     getEventDataFromElement(eventElement) {
       const title = eventElement.querySelector('input[name*="[title]"]')?.value || '';
       const description = eventElement.querySelector('textarea[name*="[description]"]')?.value || '';
-      const typeSelect = eventElement.querySelector('select[name*="[event_type]"]');
-      const importanceSelect = eventElement.querySelector('select[name*="[importance_level]"]');
-      const statusSelect = eventElement.querySelector('select[name*="[status]"]');
+      
+      // Use data attributes instead of form elements for reliable filtering
+      const type = eventElement.dataset.eventType || eventElement.getAttribute('data-event-type') || 'general';
+      const importance = eventElement.dataset.importance || eventElement.getAttribute('data-importance') || 'minor'; 
+      const status = eventElement.dataset.status || eventElement.getAttribute('data-status') || 'completed';
       
       return {
         title: title.toLowerCase(),
         description: description.toLowerCase(),
-        type: typeSelect?.value || 'general',
-        importance: importanceSelect?.value || 'minor',
-        status: statusSelect?.value || 'completed'
+        type: type || 'general',
+        importance: importance || 'minor',
+        status: status || 'completed'
       };
     },
     
@@ -1140,6 +1243,7 @@ function timelineEditor() {
     
     // Link modal methods
     openLinkModal(eventId) {
+      console.log('openLinkModal called with eventId:', eventId);
       this.linkingEventId = eventId;
       this.showLinkModal = true;
       this.linkModalSearchQuery = '';
@@ -1153,6 +1257,7 @@ function timelineEditor() {
     },
     
     closeLinkModal() {
+      console.log('closeLinkModal called');
       this.showLinkModal = false;
       this.linkingEventId = null;
       this.linkModalSearchQuery = '';
@@ -1162,14 +1267,19 @@ function timelineEditor() {
     },
     
     toggleSection(sectionKey) {
+      console.log('toggleSection called with key:', sectionKey);
       this.collapsedSections[sectionKey] = !this.collapsedSections[sectionKey];
     },
     
     isSectionCollapsed(sectionKey) {
-      return this.collapsedSections[sectionKey] || false;
+      const result = this.collapsedSections[sectionKey] || false;
+      console.log('isSectionCollapsed called with key:', sectionKey, 'result:', result);
+      return result;
     },
     
     linkableContentMatches(contentName, contentType) {
+      console.log('linkableContentMatches called with:', contentName, contentType);
+      
       // First check filter selection
       if (this.selectedFilter && this.selectedFilter !== 'all') {
         // Special case for timeline filter
@@ -1209,9 +1319,25 @@ function timelineEditor() {
       if (firstVisibleButton) {
         firstVisibleButton.click();
       }
+    },
+    
+    // Event section management
+    toggleEventSection(eventId, section) {
+      const key = `${eventId}_${section}`;
+      console.log('toggleEventSection called:', eventId, section, 'key:', key);
+      this.eventSections[key] = !this.eventSections[key];
+    },
+    
+    isEventSectionOpen(eventId, section) {
+      const key = `${eventId}_${section}`;
+      const result = this.eventSections[key] || false;
+      console.log('isEventSectionOpen called:', eventId, section, 'key:', key, 'result:', result);
+      return result;
     }
   };
 }
+
+console.log('Timeline editor function defined');
 
 // Helper function to submit forms remotely
 function submitFormRemotely(form) {
@@ -1272,6 +1398,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function createTimelineEvent(timelineId) {
+    console.log('Creating timeline event for timeline:', timelineId);
+    
     // Show loading state
     const createBtn = document.getElementById('js-create-timeline-event');
     const originalText = createBtn.innerHTML;
@@ -1290,17 +1418,23 @@ document.addEventListener('DOMContentLoaded', function() {
       body: JSON.stringify({
         timeline_event: {
           title: "Untitled Event",
-          timeline_id: timelineId
+          timeline_id: timelineId,
+          event_type: "general",
+          importance_level: "minor",
+          status: "completed"
         }
       })
     })
     .then(response => response.json())
     .then(data => {
+      console.log('Server response:', data);
       if (data.status === 'success') {
+        console.log('Event created successfully with ID:', data.id);
         addEventToTimeline(data.id, timelineId);
         const alpineEl = document.querySelector('[x-data]');
         if (alpineEl) Alpine.$data(alpineEl).autoSaveStatus = 'saved';
       } else {
+        console.error('Event creation failed:', data);
         throw new Error('Failed to create event');
       }
     })
@@ -1320,6 +1454,10 @@ document.addEventListener('DOMContentLoaded', function() {
   function addEventToTimeline(eventId, timelineId) {
     const template = document.querySelector('.timeline-event-template .timeline-event-container');
     const eventsContainer = document.querySelector('.timeline-events-container');
+    
+    console.log('Adding event to container:', eventsContainer);
+    console.log('Container children before:', eventsContainer.children.length);
+    
     const emptyState = eventsContainer.querySelector('.text-center.py-12');
     
     // Hide empty state if it exists
@@ -1330,9 +1468,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clone the template
     const newEvent = template.cloneNode(true);
     
-    // Update the event with the new ID
+    // Update the event with the new ID and required data attributes
     newEvent.setAttribute('data-event-id', eventId);
     newEvent.setAttribute('data-timeline-id', timelineId);
+    newEvent.setAttribute('data-event-type', 'general');
+    newEvent.setAttribute('data-importance', 'minor');
+    newEvent.setAttribute('data-status', 'completed');
     
     // Update form action URL
     const form = newEvent.querySelector('.autosave-form');
@@ -1372,6 +1513,9 @@ document.addEventListener('DOMContentLoaded', function() {
     newEvent.style.opacity = '0';
     newEvent.style.transform = 'translateY(-20px)';
     eventsContainer.appendChild(newEvent);
+    
+    console.log('Container children after:', eventsContainer.children.length);
+    console.log('New event parent:', newEvent.parentElement);
     
     // Trigger animation
     setTimeout(() => {
@@ -1756,3 +1900,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Alpine.js initialization complete
 </script>
+
