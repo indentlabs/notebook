@@ -128,6 +128,37 @@ class TimelineEventsController < ApplicationController
     @timeline_event.move_to_bottom if @timeline_event.can_be_modified_by?(current_user)
   end
 
+  # Drag and drop sorting endpoint (internal API)
+  def sort
+    content_id = params[:content_id]
+    intended_position = params[:intended_position].to_i
+    
+    timeline_event = TimelineEvent.find_by(id: content_id)
+    
+    unless timeline_event
+      render json: { error: "Timeline event not found" }, status: :not_found
+      return
+    end
+    
+    unless timeline_event.can_be_modified_by?(current_user)
+      render json: { error: "You don't have permission to reorder that timeline event" }, status: :forbidden
+      return
+    end
+    
+    # Use acts_as_list to move to the intended position
+    timeline_event.insert_at(intended_position + 1) # acts_as_list is 1-indexed
+    
+    render json: { 
+      success: true, 
+      message: "Timeline event moved to position #{intended_position + 1}",
+      timeline_event: {
+        id: timeline_event.id,
+        position: timeline_event.position,
+        title: timeline_event.title
+      }
+    }, status: :ok
+  end
+
   def add_tag
     return render json: { error: 'Not authorized' }, status: :forbidden unless @timeline_event.can_be_modified_by?(current_user)
     

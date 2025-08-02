@@ -373,6 +373,7 @@ Rails.application.routes.draw do
     patch '/universe_field_update/:field_id', to: 'content#universe_field_update', as: :universe_field_update
     patch '/sort/categories',                 to: 'attribute_categories#sort',     as: :sort_categories_internal
     patch '/sort/fields',                     to: 'attribute_fields#sort',         as: :sort_fields_internal
+    patch '/sort/timeline_events',            to: 'timeline_events#sort',          as: :sort_timeline_events_internal
   end
 
   get 'search/', to: 'search#results'

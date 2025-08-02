@@ -363,8 +363,14 @@
                           <% end %>
                         </div>
                         
+                        <!-- Drag Handle -->
+                        <div class="timeline-event-drag-handle mr-2 p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing rounded-lg transition-colors opacity-0 group-hover:opacity-100" 
+                             title="Drag to reorder event">
+                          <i class="material-icons text-lg">drag_indicator</i>
+                        </div>
+                        
                         <!-- Event Actions -->
-                        <div class="ml-4 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity timeline-move-controls">
+                        <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity timeline-move-controls">
                           <button type="button" 
                                   @click="typeof openLinkModal !== 'undefined' ? openLinkModal(<%= event.id %>) : console.error('openLinkModal not available')"
                                   class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
@@ -374,7 +380,7 @@
                           <div class="relative" x-data="{ showMoveMenu: false }">
                             <button @click="showMoveMenu = !showMoveMenu" 
                                     class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                              <i class="material-icons text-lg">drag_handle</i>
+                              <i class="material-icons text-lg">more_vert</i>
                             </button>
                             
                             <div x-show="showMoveMenu" 
@@ -718,8 +724,14 @@
               </div>
             </div>
             
+            <!-- Drag Handle -->
+            <div class="timeline-event-drag-handle mr-2 p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing rounded-lg transition-colors opacity-0 group-hover:opacity-100" 
+                 title="Drag to reorder event">
+              <i class="material-icons text-lg">drag_indicator</i>
+            </div>
+            
             <!-- Event Actions -->
-            <div class="ml-4 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity timeline-move-controls">
+            <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity timeline-move-controls">
               <button type="button" 
                       class="js-template-link-btn p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
                 <i class="material-icons text-lg">link</i>
@@ -728,7 +740,7 @@
               <div class="relative" x-data="{ showMoveMenu: false }">
                 <button @click="showMoveMenu = !showMoveMenu" 
                         class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                  <i class="material-icons text-lg">drag_handle</i>
+                  <i class="material-icons text-lg">more_vert</i>
                 </button>
                 
                 <div x-show="showMoveMenu" 
@@ -2350,7 +2362,207 @@ function submitFormWithFetch(form) {
 </script>
 
 <script>
+// Initialize timeline events sortable functionality
+function initTimelineEventsSortable() {
+  // Check if jQuery UI is available
+  if (typeof $ === 'undefined' || !$.fn.sortable) {
+    console.error('jQuery UI Sortable not found - drag and drop disabled');
+    return;
+  }
+  
+  const eventsContainer = $('.timeline-events-container');
+  if (!eventsContainer.length) return;
+  
+  eventsContainer.sortable({
+    items: '.timeline-event-container:not(.timeline-event-template)',
+    handle: '.timeline-event-drag-handle',
+    placeholder: 'timeline-event-placeholder',
+    cursor: 'grabbing',
+    opacity: 0.8,
+    tolerance: 'pointer',
+    distance: 10, // Prevent accidental drags
+    helper: 'clone',
+    start: function(event, ui) {
+      // Add visual feedback
+      ui.item.addClass('timeline-event-dragging');
+      ui.placeholder.addClass('timeline-event-placeholder');
+      
+      // Store original position for rollback if needed
+      ui.item.data('original-position', ui.item.index());
+    },
+    update: function(event, ui) {
+      const eventId = ui.item.attr('data-event-id');
+      const originalPosition = ui.item.data('original-position');
+      let newPosition = ui.item.index();
+      
+      if (!eventId) {
+        console.error('Event ID not found');
+        return;
+      }
+      
+      // Fix jQuery UI Sortable off-by-one position reporting
+      const targetPosition = newPosition - 1;
+      
+      // Show loading state
+      const alpineEl = document.querySelector('[x-data]');
+      if (alpineEl) {
+        Alpine.$data(alpineEl).autoSaveStatus = 'saving';
+      }
+      
+      // AJAX request to update position using new internal endpoint
+      $.ajax({
+        url: '/internal/sort/timeline_events',
+        type: 'PATCH',
+        contentType: 'application/json',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        data: JSON.stringify({
+          content_id: eventId,
+          intended_position: targetPosition
+        }),
+        success: function(data) {
+          console.log('Timeline event position updated successfully:', data);
+          
+          // Update Alpine.js save status
+          if (alpineEl) {
+            Alpine.$data(alpineEl).autoSaveStatus = 'saved';
+            setTimeout(() => {
+              if (Alpine.$data(alpineEl).autoSaveStatus === 'saved') {
+                Alpine.$data(alpineEl).autoSaveStatus = 'saved';
+              }
+            }, 2000);
+          }
+          
+          if (data.message) {
+            showTimelineSuccessMessage(data.message);
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('Error updating timeline event position:', error);
+          
+          // Update Alpine.js save status
+          if (alpineEl) {
+            Alpine.$data(alpineEl).autoSaveStatus = 'error';
+          }
+          
+          // Revert to original position
+          const originalPosition = ui.item.data('original-position');
+          if (typeof originalPosition !== 'undefined') {
+            revertEventPosition(ui.item, originalPosition);
+          }
+          
+          showTimelineErrorMessage('Failed to reorder events. Please try again.');
+        }
+      });
+    },
+    stop: function(event, ui) {
+      // Remove visual feedback
+      ui.item.removeClass('timeline-event-dragging');
+    }
+  });
+  
+  // Add custom CSS for drag feedback
+  if (!document.getElementById('timeline-drag-styles')) {
+    const style = document.createElement('style');
+    style.id = 'timeline-drag-styles';
+    style.textContent = `
+      .timeline-event-placeholder {
+        height: 120px !important;
+        background: linear-gradient(45deg, #f3f4f6 25%, transparent 25%), 
+                    linear-gradient(-45deg, #f3f4f6 25%, transparent 25%), 
+                    linear-gradient(45deg, transparent 75%, #f3f4f6 75%), 
+                    linear-gradient(-45deg, transparent 75%, #f3f4f6 75%);
+        background-size: 20px 20px;
+        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        border: 2px dashed #10b981;
+        border-radius: 0.75rem;
+        margin: 0 0 2rem 0;
+        opacity: 0.7;
+        position: relative;
+      }
+      
+      .timeline-event-placeholder:before {
+        content: 'Drop event here';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #10b981;
+        font-weight: 500;
+        font-size: 0.875rem;
+      }
+      
+      .timeline-event-dragging {
+        transform: rotate(2deg);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        z-index: 1000;
+      }
+      
+      .ui-sortable-helper {
+        width: auto !important;
+        max-width: 600px;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+// Helper function to revert event position on error
+function revertEventPosition(eventItem, originalPosition) {
+  const eventsContainer = eventItem.parent();
+  const allEvents = eventsContainer.children('.timeline-event-container:not(.timeline-event-template)');
+  
+  if (originalPosition === 0) {
+    eventsContainer.prepend(eventItem);
+  } else if (originalPosition >= allEvents.length - 1) {
+    eventsContainer.append(eventItem);
+  } else {
+    allEvents.eq(originalPosition).before(eventItem);
+  }
+}
+
+// Timeline-specific notification functions
+function showTimelineSuccessMessage(message) {
+  showNotificationToast(message, 'success');
+}
+
+function showTimelineErrorMessage(message) {
+  showNotificationToast(message, 'error');
+}
+
+function showNotificationToast(message, type = 'info') {
+  const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+  const icon = type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info';
+  
+  const toast = $(`
+    <div class="fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center transform translate-x-full transition-transform">
+      <i class="material-icons text-sm mr-2">${icon}</i>
+      <span class="text-sm font-medium">${message}</span>
+      <button class="ml-4 text-white hover:text-gray-200" onclick="$(this).parent().remove()">
+        <i class="material-icons text-sm">close</i>
+      </button>
+    </div>
+  `);
+  
+  $('body').append(toast);
+  
+  // Animate in
+  setTimeout(() => {
+    toast.removeClass('translate-x-full');
+  }, 10);
+  
+  // Auto-remove after 4 seconds
+  setTimeout(() => {
+    toast.addClass('translate-x-full');
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+  
+  // Initialize timeline events drag and drop
+  initTimelineEventsSortable();
 
   // Auto-save functionality
   document.addEventListener('ajax:success', function(event) {
