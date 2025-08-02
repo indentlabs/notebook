@@ -1,10 +1,10 @@
-<div x-data="timelineEditor()" class="min-h-screen bg-gray-50">
+<div x-data="timelineEditor()" class="h-screen flex flex-col bg-gray-50">
 
-  <!-- Timeline Header - Clean Paper Style -->
-  <div class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-    <div class="max-w-7xl mx-auto">
-      <!-- Top Bar with Actions -->
-      <div class="px-6 py-4 flex items-center justify-between">
+  <!-- Timeline Header - Modern Application Style -->
+  <header class="bg-white border-b border-gray-200 shadow-sm z-40 flex-shrink-0">
+    <div class="px-6 py-4">
+      <!-- Top Navigation Bar -->
+      <div class="flex items-center justify-between mb-4">
         <div class="flex items-center space-x-4">
           <!-- Back Button -->
           <%= link_to timelines_path, class: "inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors" do %>
@@ -31,7 +31,7 @@
         
         <div class="flex items-center space-x-3">
           <!-- Timeline Stats -->
-          <div class="hidden sm:flex items-center space-x-4 text-sm text-gray-600">
+          <div class="hidden sm:flex items-center space-x-4 text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-lg">
             <span><%= @timeline.timeline_events.count %> events</span>
             <span>•</span>
             <span><%= number_with_delimiter(@timeline.cached_word_count) %> words</span>
@@ -39,19 +39,19 @@
           
           <!-- Action Buttons -->
           <button @click="showMetaPanel = !showMetaPanel" 
-                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                   :class="{ 'bg-gray-100 text-gray-900': showMetaPanel }">
             <i class="material-icons text-lg mr-2">settings</i>
             <span class="hidden sm:inline">Settings</span>
           </button>
           
           <button @click="typeof showShareModal !== 'undefined' ? (showShareModal = true) : console.error('showShareModal not available')" 
-                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
             <i class="material-icons text-lg mr-2">share</i>
             <span class="hidden sm:inline">Share</span>
           </button>
           
-          <%= link_to timeline_path(@timeline), class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm" do %>
+          <%= link_to timeline_path(@timeline), class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors" do %>
             <i class="material-icons text-lg mr-2">visibility</i>
             <span class="hidden sm:inline">View</span>
           <% end %>
@@ -59,29 +59,531 @@
       </div>
       
       <!-- Timeline Title -->
-      <div class="px-6 pb-6">
-        <%= form_for @timeline, html: { class: 'timeline-meta-form', '@submit': 'autoSaveStatus = "saving"' }, remote: true do |f| %>
-          <div class="group relative">
-            <%= f.text_field :name, 
-                class: "text-3xl font-bold text-gray-900 bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 w-full transition-all duration-200 placeholder-gray-400 pr-10",
-                placeholder: "Timeline title...",
-                'x-model': 'timelineData.name',
-                '@input.debounce.500ms': 'submitFormRemotely($el.form)',
-                '@focus': 'titleFocused = true',
-                '@blur': 'titleFocused = false' %>
-            
-            <!-- Edit Indicator -->
-            <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-              <i class="material-icons text-lg text-gray-400 group-hover:text-gray-600 transition-colors duration-200" 
-                 :class="{ 'text-green-500': titleFocused }">edit</i>
-            </div>
-            
-            <!-- Character Counter -->
-            <div class="absolute -bottom-6 right-0 text-xs text-gray-400" x-show="titleFocused">
-              <span x-text="timelineData.name.length"></span><span class="text-gray-300">/255</span>
+      <%= form_for @timeline, html: { class: 'timeline-meta-form', '@submit': 'autoSaveStatus = "saving"' }, remote: true do |f| %>
+        <div class="group relative">
+          <%= f.text_field :name, 
+              class: "text-2xl font-bold text-gray-900 bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 w-full transition-all duration-200 placeholder-gray-400 pr-10",
+              placeholder: "Timeline title...",
+              'x-model': 'timelineData.name',
+              '@input.debounce.500ms': 'submitFormRemotely($el.form)',
+              '@focus': 'titleFocused = true',
+              '@blur': 'titleFocused = false' %>
+          
+          <!-- Edit Indicator -->
+          <div class="absolute right-0 top-1/2 transform -translate-y-1/2">
+            <i class="material-icons text-lg text-gray-400 group-hover:text-gray-600 transition-colors duration-200" 
+               :class="{ 'text-green-500': titleFocused }">edit</i>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </header>
+
+  <!-- Three-Column Layout -->
+  <div class="flex-1 flex min-h-0">
+    <!-- Left Sidebar - Tools & Filters -->
+    <aside class="w-80 bg-white border-r border-gray-200 flex-shrink-0 hidden lg:block">
+      <div class="h-full flex flex-col">
+        <!-- Sidebar Header -->
+        <div class="px-6 py-4 border-b border-gray-100">
+          <h3 class="text-lg font-semibold text-gray-900">Timeline Tools</h3>
+        </div>
+        
+        <!-- Sidebar Content -->
+        <div class="flex-1 overflow-y-auto">
+          <!-- Search Section -->
+          <div class="p-6 border-b border-gray-100">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Search Events</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="material-icons text-gray-400 text-lg">search</i>
+              </div>
+              <input type="text" 
+                     x-model="searchQuery"
+                     @input="applyEventFilters()"
+                     @keydown.escape="searchQuery = ''; applyEventFilters()"
+                     placeholder="Search timeline..."
+                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-sm">
             </div>
           </div>
-        <% end %>
+          
+          <!-- Quick Actions -->
+          <div class="p-6 border-b border-gray-100">
+            <h4 class="text-sm font-medium text-gray-900 mb-3">Quick Actions</h4>
+            <div class="space-y-2">
+              <button id="js-create-timeline-event" 
+                      class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors">
+                <i class="material-icons text-lg mr-2">add</i>
+                Add Event
+              </button>
+            </div>
+          </div>
+          
+          <!-- Linked Content Summary -->
+          <div class="p-6">
+            <h4 class="text-sm font-medium text-gray-900 mb-3">Linked Content</h4>
+            
+            <% if @timeline_content_summary.any? %>
+              <div class="space-y-2">
+                <% @timeline_content_summary.each do |content_type, summary_data| %>
+                  <% content_class = summary_data[:content_class] %>
+                  
+                  <!-- Content Type Header -->
+                  <div class="group">
+                    <button type="button"
+                            @click="toggleContentSummarySection('<%= content_type.downcase %>')"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div class="flex items-center min-w-0 flex-1">
+                        <i class="material-icons text-sm mr-2 <%= content_class.text_color %> transition-transform duration-200"
+                           :class="isContentSummaryCollapsed('<%= content_type.downcase %>') ? '' : 'rotate-90'">
+                          chevron_right
+                        </i>
+                        <i class="material-icons text-sm mr-2 <%= content_class.text_color %> flex-shrink-0">
+                          <%= content_class.icon %>
+                        </i>
+                        <span class="text-sm font-medium text-gray-700 truncate">
+                          <%= content_type.pluralize %>
+                        </span>
+                      </div>
+                      <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full ml-2 flex-shrink-0">
+                        <%= summary_data[:count] %>
+                      </span>
+                    </button>
+                    
+                    <!-- Expandable Content List -->
+                    <div x-show="!isContentSummaryCollapsed('<%= content_type.downcase %>')"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-2"
+                         class="ml-6 mt-2 space-y-1">
+                      
+                      <% summary_data[:items].each do |item| %>
+                        <% item_name = item.name.presence || "Untitled #{content_type}" %>
+                        <div class="flex items-center py-1">
+                          <i class="material-icons text-xs mr-2 text-gray-400">arrow_right</i>
+                          <%= link_to item_name, item, 
+                              target: '_blank',
+                              class: 'text-sm text-gray-600 hover:text-gray-900 hover:underline transition-colors truncate' %>
+                        </div>
+                      <% end %>
+                      
+                      <% if summary_data[:total_items] > 10 %>
+                        <div class="text-xs text-gray-500 py-1 pl-5">
+                          <i class="material-icons text-xs mr-1">more_horiz</i>
+                          <%= summary_data[:total_items] - 10 %> more <%= content_type.pluralize.downcase %>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <!-- Empty State -->
+              <div class="text-center py-6">
+                <div class="w-12 h-12 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                  <i class="material-icons text-gray-400">link_off</i>
+                </div>
+                <p class="text-sm text-gray-500">
+                  No linked content yet
+                </p>
+                <p class="text-xs text-gray-400 mt-1">
+                  Content will appear here when you link pages to events
+                </p>
+              </div>
+            <% end %>
+          </div>
+          
+          <!-- Timeline Stats -->
+          <div class="p-6 border-t border-gray-100">
+            <h4 class="text-sm font-medium text-gray-900 mb-3">Timeline Stats</h4>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Total Events</span>
+                <span class="text-sm font-medium text-gray-900"><%= @timeline.timeline_events.count %></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Word Count</span>
+                <span class="text-sm font-medium text-gray-900"><%= number_with_delimiter(@timeline.cached_word_count) %></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Total Linked Pages</span>
+                <span class="text-sm font-medium text-gray-900"><%= @timeline.timeline_events.joins(:timeline_event_entities).count %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Timeline Area -->
+    <main class="flex-1 flex flex-col min-w-0">
+      <!-- Timeline Container -->
+      <div class="flex-1 overflow-y-auto bg-gray-50">
+        <div class="max-w-4xl mx-auto py-8 px-6">
+          <!-- Timeline Events Container -->
+          <div class="timeline-events-container relative" data-timeline-id="<%= @timeline.id %>">
+            <!-- Timeline Rail -->
+            <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300 timeline-spine rounded-full"></div>
+            
+            <!-- Timeline Events -->
+            <% if @timeline.timeline_events.any? %>
+              <% @timeline.timeline_events.includes(:timeline_event_entities).each_with_index do |event, index| %>
+                <div class="timeline-event-container relative mb-8 last:mb-0" 
+                     data-event-id="<%= event.id %>" 
+                     data-timeline-id="<%= @timeline.id %>"
+                     data-position="<%= index %>">
+                  
+                  <!-- Timeline Connection -->
+                  <div class="absolute left-6 top-6 w-6 h-6 bg-white border-4 border-green-500 rounded-full z-10 timeline-dot shadow-sm"></div>
+                  
+                  <!-- Event Card -->
+                  <div class="ml-16 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 timeline-event-card group cursor-pointer"
+                       @click="$event.alpineProcessed = true; selectEvent(<%= event.id %>, {
+                         id: <%= event.id %>,
+                         title: '<%= j(event.title) %>',
+                         time_label: '<%= j(event.time_label) %>',
+                         description: '<%= j(event.description) %>',
+                         event_type: '<%= event.event_type || 'general' %>',
+                         importance_level: '<%= event.importance_level || 'minor' %>',
+                         status: '<%= event.status || 'completed' %>'
+                       })"
+                       :class="{ 'ring-2 ring-green-500 ring-opacity-50': selectedEventId === <%= event.id %> }">
+                    <!-- Card Header -->
+                    <div class="px-6 py-4 border-b border-gray-100">
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1 min-w-0">
+                          <div class="group relative">
+                            <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
+                              <%= f.text_field :title, 
+                                  value: event.title.presence || "Untitled Event",
+                                  class: "text-xl font-semibold text-gray-900 bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 w-full transition-all duration-200 placeholder-gray-400",
+                                  placeholder: "Event title...",
+                                  '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                            <% end %>
+                          </div>
+                          
+                          <% if event.time_label.present? || true %>
+                            <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div>
+                                <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
+                                  <%= f.text_field :time_label, 
+                                      value: event.time_label,
+                                      class: "text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400 w-full",
+                                      placeholder: "When does this start?",
+                                      '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                                <% end %>
+                              </div>
+                              <div>
+                                <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
+                                  <%= f.text_field :end_time_label, 
+                                      value: event.end_time_label,
+                                      class: "text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400 w-full",
+                                      placeholder: "When does this end?",
+                                      '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                                <% end %>
+                              </div>
+                            </div>
+                          <% end %>
+                        </div>
+                        
+                        <!-- Event Actions -->
+                        <div class="ml-4 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity timeline-move-controls">
+                          <button type="button" 
+                                  @click="typeof openLinkModal !== 'undefined' ? openLinkModal(<%= event.id %>) : console.error('openLinkModal not available')"
+                                  class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                            <i class="material-icons text-lg">link</i>
+                          </button>
+                          
+                          <div class="relative" x-data="{ showMoveMenu: false }">
+                            <button @click="showMoveMenu = !showMoveMenu" 
+                                    class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                              <i class="material-icons text-lg">drag_handle</i>
+                            </button>
+                            
+                            <div x-show="showMoveMenu" 
+                                 x-transition
+                                 @click.away="showMoveMenu = false"
+                                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+                              <div class="py-1">
+                                <a href="#" class="js-move-event-to-top flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                  <i class="material-icons text-sm mr-3">vertical_align_top</i>
+                                  Move to Top
+                                </a>
+                                <a href="#" class="js-move-event-up flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                  <i class="material-icons text-sm mr-3">keyboard_arrow_up</i>
+                                  Move Up
+                                </a>
+                                <a href="#" class="js-move-event-down flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                  <i class="material-icons text-sm mr-3">keyboard_arrow_down</i>
+                                  Move Down
+                                </a>
+                                <a href="#" class="js-move-event-to-bottom flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                  <i class="material-icons text-sm mr-3">vertical_align_bottom</i>
+                                  Move to Bottom
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Card Body -->
+                    <div class="px-6 py-4 space-y-4">
+                      <!-- Description -->
+                      <div>
+                        <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
+                          <%= f.text_area :description, 
+                              rows: 3,
+                              class: "w-full text-gray-700 bg-transparent border border-gray-200 rounded-lg px-3 py-2 focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:ring-opacity-20 transition-all duration-200 placeholder-gray-400 resize-none",
+                              placeholder: "What happens in this event?",
+                              '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                        <% end %>
+                      </div>
+                      
+                      <!-- Linked Content -->
+                      <%= render 'shared/timeline_event_linked_content', timeline_event: event %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            <% else %>
+              <!-- Empty State -->
+              <div class="text-center py-16">
+                <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mb-6 shadow-sm">
+                  <i class="material-icons text-4xl text-green-600">timeline</i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">Your timeline is empty</h3>
+                <p class="text-gray-600 mb-8 max-w-md mx-auto">
+                  Start building your timeline by adding your first event. Track important moments, plot points, and key developments in chronological order.
+                </p>
+                <button id="js-create-first-event"
+                        class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors">
+                  <i class="material-icons text-lg mr-2">add</i>
+                  Add Your First Event
+                </button>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Right Inspector Panel -->
+    <aside class="w-96 bg-white border-l border-gray-200 flex-shrink-0 hidden xl:block">
+      <div class="h-full flex flex-col">
+        <!-- Inspector Header -->
+        <div class="px-6 py-4 border-b border-gray-100">
+          <h3 class="text-lg font-semibold text-gray-900">Event Details</h3>
+        </div>
+        
+        <!-- Inspector Content -->
+        <div class="flex-1 overflow-y-auto">
+          <!-- Empty State -->
+          <div x-show="!selectedEventId" class="p-6">
+            <div class="text-center text-gray-500 py-8">
+              <i class="material-icons text-4xl mb-4 text-gray-300">click</i>
+              <p class="text-sm">Select an event to view details and manage linked content</p>
+            </div>
+          </div>
+          
+          <!-- Event Details Panel -->
+          <div x-show="selectedEventId" class="p-6 space-y-6">
+            <!-- Event Title Section -->
+            <div class="border-b border-gray-100 pb-4">
+              <h4 class="text-lg font-semibold text-gray-900 mb-2" x-text="selectedEventTitle || 'Untitled Event'"></h4>
+              
+              <!-- Time Information -->
+              <div class="space-y-1">
+                <div x-show="selectedEventTimeLabel" class="flex items-center text-sm text-gray-600">
+                  <i class="material-icons text-sm mr-2 text-green-600">schedule</i>
+                  <span>Starts: </span>
+                  <span x-text="selectedEventTimeLabel"></span>
+                </div>
+                <div x-show="selectedEventEndTimeLabel" class="flex items-center text-sm text-gray-600">
+                  <i class="material-icons text-sm mr-2 text-red-600">schedule</i>
+                  <span>Ends: </span>
+                  <span x-text="selectedEventEndTimeLabel"></span>
+                </div>
+                <div x-show="!selectedEventTimeLabel && !selectedEventEndTimeLabel" class="text-sm text-gray-500 italic">
+                  No time specified
+                </div>
+              </div>
+              
+            </div>
+            
+            <!-- Event Metadata -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Type</label>
+                <div class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium capitalize" 
+                     x-text="selectedEventType"></div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Importance</label>
+                <div class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium capitalize" 
+                     x-text="selectedEventImportance"></div>
+              </div>
+            </div>
+            
+            
+            <!-- Linked Content Section -->
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h5 class="text-sm font-medium text-gray-900">Linked Content</h5>
+                <button @click="typeof openLinkModal !== 'undefined' ? openLinkModal(selectedEventId) : console.error('openLinkModal not available')"
+                        class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-lg text-green-700 bg-green-100 hover:bg-green-200 transition-colors">
+                  <i class="material-icons text-sm mr-1">add</i>
+                  Add Link
+                </button>
+              </div>
+              
+              <!-- Dynamic Linked Content List -->
+              <div id="sidebar-linked-content" class="space-y-2">
+                <!-- Content will be populated by JavaScript -->
+                <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+                  <i class="material-icons text-xs mr-1">info</i>
+                  Linked content will appear here when you connect pages to this event
+                </div>
+              </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="pt-4 border-t border-gray-100">
+              <h5 class="text-sm font-medium text-gray-900 mb-3">Quick Actions</h5>
+              <div class="grid grid-cols-2 gap-2">
+                <button @click="typeof openLinkModal !== 'undefined' ? openLinkModal(selectedEventId) : console.error('openLinkModal not available')"
+                        class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors">
+                  <i class="material-icons text-sm mr-1">link</i>
+                  Link Content
+                </button>
+                <button onclick="deleteEvent(typeof selectedEventId !== 'undefined' ? selectedEventId : null, this)"
+                        class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 transition-colors">
+                  <i class="material-icons text-sm mr-1">delete</i>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Hidden Event Template for JavaScript -->
+  <div class="timeline-event-template" style="display: none;">
+    <div class="timeline-event-container relative mb-8" 
+         data-event-id="-1" 
+         data-timeline-id="<%= @timeline.id %>"
+         data-position="-1">
+      
+      <!-- Timeline Connection -->
+      <div class="absolute left-6 top-6 w-6 h-6 bg-white border-4 border-green-500 rounded-full z-10 timeline-dot shadow-sm"></div>
+      
+      <!-- Event Card -->
+      <div class="ml-16 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 timeline-event-card group cursor-pointer js-template-event-card">
+        <!-- Card Header -->
+        <div class="px-6 py-4 border-b border-gray-100">
+          <div class="flex items-start justify-between">
+            <div class="flex-1 min-w-0">
+              <div class="relative">
+                <form class="autosave-form" action="" method="post" data-remote="true">
+                  <input name="_method" type="hidden" value="patch">
+                  <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>">
+                  <input type="text" 
+                         name="timeline_event[title]" 
+                         value="Untitled Event"
+                         class="text-xl font-semibold text-gray-900 bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 w-full transition-all duration-200 placeholder-gray-400"
+                         placeholder="Event title..."
+                         x-on:input.debounce.500ms="submitFormRemotely($el.form)">
+                </form>
+              </div>
+              
+              <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <form class="autosave-form" action="" method="post" data-remote="true">
+                    <input name="_method" type="hidden" value="patch">
+                    <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>">
+                    <input type="text" 
+                           name="timeline_event[time_label]" 
+                           class="text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400 w-full"
+                           placeholder="When does this start?"
+                           x-on:input.debounce.500ms="submitFormRemotely($el.form)">
+                  </form>
+                </div>
+                <div>
+                  <form class="autosave-form" action="" method="post" data-remote="true">
+                    <input name="_method" type="hidden" value="patch">
+                    <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>">
+                    <input type="text" 
+                           name="timeline_event[end_time_label]" 
+                           class="text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400 w-full"
+                           placeholder="When does this end?"
+                           x-on:input.debounce.500ms="submitFormRemotely($el.form)">
+                  </form>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Event Actions -->
+            <div class="ml-4 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity timeline-move-controls">
+              <button type="button" 
+                      class="js-template-link-btn p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                <i class="material-icons text-lg">link</i>
+              </button>
+              
+              <div class="relative" x-data="{ showMoveMenu: false }">
+                <button @click="showMoveMenu = !showMoveMenu" 
+                        class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                  <i class="material-icons text-lg">drag_handle</i>
+                </button>
+                
+                <div x-show="showMoveMenu" 
+                     x-transition
+                     @click.away="showMoveMenu = false"
+                     class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+                  <div class="py-1">
+                    <a href="#" class="js-move-event-to-top flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                      <i class="material-icons text-sm mr-3">vertical_align_top</i>
+                      Move to Top
+                    </a>
+                    <a href="#" class="js-move-event-up flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                      <i class="material-icons text-sm mr-3">keyboard_arrow_up</i>
+                      Move Up
+                    </a>
+                    <a href="#" class="js-move-event-down flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                      <i class="material-icons text-sm mr-3">keyboard_arrow_down</i>
+                      Move Down
+                    </a>
+                    <a href="#" class="js-move-event-to-bottom flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                      <i class="material-icons text-sm mr-3">vertical_align_bottom</i>
+                      Move to Bottom
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Card Body -->
+        <div class="px-6 py-4 space-y-4">
+          <!-- Description -->
+          <div>
+            <form class="autosave-form" action="" method="post" data-remote="true">
+              <input name="_method" type="hidden" value="patch">
+              <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>">
+              <textarea name="timeline_event[description]" 
+                        rows="3"
+                        class="w-full text-gray-700 bg-transparent border border-gray-200 rounded-lg px-3 py-2 focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:ring-opacity-20 transition-all duration-200 placeholder-gray-400 resize-none"
+                        placeholder="What happens in this event?"
+                        x-on:input.debounce.500ms="submitFormRemotely($el.form)"></textarea>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -120,514 +622,107 @@
         
         <!-- Panel Content -->
         <div class="px-8 py-6">
-      <%= form_for @timeline, html: { class: 'timeline-meta-form' }, remote: true do |f| %>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Left Column -->
-          <div class="space-y-6">
-            <!-- Universe Selector -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Universe</label>
-              <%= f.select :universe_id, 
-                  options_from_collection_for_select(current_user.universes, :id, :name, @timeline.universe_id),
-                  { include_blank: "No universe" },
-                  { class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500",
-                    '@change': 'submitFormRemotely($el.form)' } %>
-              <p class="mt-1 text-sm text-gray-500">Organize this timeline within a universe</p>
+          <%= form_for @timeline, html: { class: 'timeline-meta-form' }, remote: true do |f| %>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left Column -->
+            <div class="space-y-6">
+              <!-- Universe Selector -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Universe</label>
+                <%= f.select :universe_id, 
+                    options_from_collection_for_select(current_user.universes, :id, :name, @timeline.universe_id),
+                    { include_blank: "No universe" },
+                    { class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500",
+                      '@change': 'submitFormRemotely($el.form)' } %>
+                <p class="mt-1 text-sm text-gray-500">Organize this timeline within a universe</p>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
+                <%= f.text_area :subtitle, 
+                    rows: 2,
+                    class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none",
+                    placeholder: "Brief description of this timeline...",
+                    'x-model': 'timelineData.subtitle',
+                    '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <%= f.text_area :description, 
+                    rows: 4,
+                    class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500",
+                    placeholder: "Detailed description of this timeline...",
+                    'x-model': 'timelineData.description',
+                    '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+              </div>
             </div>
             
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
-              <%= f.text_area :subtitle, 
-                  rows: 2,
-                  class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none",
-                  placeholder: "Brief description of this timeline...",
-                  'x-model': 'timelineData.subtitle',
-                  '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-              <%= f.text_area :description, 
-                  rows: 4,
-                  class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500",
-                  placeholder: "Detailed description of this timeline...",
-                  'x-model': 'timelineData.description',
-                  '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+            <!-- Right Column -->
+            <div class="space-y-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                <%= f.text_area :notes, 
+                    rows: 3,
+                    class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500",
+                    placeholder: "Public notes about this timeline...",
+                    'x-model': 'timelineData.notes',
+                    '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Private Notes</label>
+                <%= f.text_area :private_notes, 
+                    rows: 3,
+                    class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500",
+                    placeholder: "Private notes (only visible to you)...",
+                    'x-model': 'timelineData.private_notes',
+                    '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+              </div>
+              
+              <!-- Tags Section -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                <div class="space-y-2">
+                  <div class="flex flex-wrap gap-2">
+                    <% @timeline.page_tags.each do |tag| %>
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                        <%= tag.tag %>
+                        <button type="button" class="ml-2 hover:text-green-600">
+                          <i class="material-icons text-sm">close</i>
+                        </button>
+                      </span>
+                    <% end %>
+                  </div>
+                  <input type="text" 
+                         placeholder="Add tags..." 
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
+                         @keydown.enter.prevent="addTag($event.target.value); $event.target.value = ''">
+                </div>
+              </div>
             </div>
           </div>
           
-          <!-- Right Column -->
-          <div class="space-y-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-              <%= f.text_area :notes, 
-                  rows: 3,
-                  class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500",
-                  placeholder: "Public notes about this timeline...",
-                  'x-model': 'timelineData.notes',
-                  '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Private Notes</label>
-              <%= f.text_area :private_notes, 
-                  rows: 3,
-                  class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500",
-                  placeholder: "Private notes (only visible to you)...",
-                  'x-model': 'timelineData.private_notes',
-                  '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-            </div>
-            
-            <!-- Tags Section -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
-              <div class="space-y-2">
-                <div class="flex flex-wrap gap-2">
-                  <% @timeline.page_tags.each do |tag| %>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
-                      <%= tag.tag %>
-                      <button type="button" class="ml-2 hover:text-green-600">
-                        <i class="material-icons text-sm">close</i>
-                      </button>
-                    </span>
-                  <% end %>
-                </div>
-                <input type="text" 
-                       placeholder="Add tags..." 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
-                       @keydown.enter.prevent="addTag($event.target.value); $event.target.value = ''">
+          <!-- Danger Zone -->
+          <div class="mt-8 pt-8 border-t border-gray-200">
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900">Danger Zone</h3>
+                <p class="text-sm text-gray-600">These actions cannot be undone.</p>
               </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Danger Zone -->
-        <div class="mt-8 pt-8 border-t border-gray-200">
-          <div class="flex justify-between items-center">
-            <div>
-              <h3 class="text-lg font-medium text-gray-900">Danger Zone</h3>
-              <p class="text-sm text-gray-600">These actions cannot be undone.</p>
-            </div>
-            <%= link_to timeline_path(@timeline), 
-                method: :delete,
-                data: { confirm: "Are you sure you want to delete this timeline? This cannot be undone!" },
-                class: "inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
-              <i class="material-icons text-lg mr-2">delete</i>
-              Delete Timeline
-            <% end %>
-          </div>
-        </div>
-      <% end %>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Timeline Editor -->
-  <div class="max-w-7xl mx-auto px-6 py-8">
-    <!-- Search and Controls -->
-    <div class="mb-8 flex items-center justify-between">
-      <div class="flex items-center space-x-4">
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="material-icons text-gray-400 text-lg">search</i>
-          </div>
-          <input x-model="searchQuery"
-                 type="text" 
-                 placeholder="Search events..." 
-                 class="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm">
-        </div>
-        
-        <button @click="showFilters = !showFilters"
-                class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                :class="{ 'bg-gray-100 text-gray-900': showFilters }">
-          <i class="material-icons text-lg mr-2">filter_list</i>
-          <span class="hidden sm:inline">Filters</span>
-        </button>
-        
-        <span class="text-sm text-gray-500">
-          <%= pluralize(@timeline.timeline_events.count, 'event') %>
-        </span>
-      </div>
-      
-      <button id="js-create-timeline-event"
-              class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm">
-        <i class="material-icons text-lg mr-2">add</i>
-        Add Event
-      </button>
-    </div>
-
-    <!-- Filters Panel -->
-    <div x-show="showFilters" 
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-2"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 -translate-y-2"
-         class="mb-8 bg-white rounded-lg border border-gray-200 p-6 shadow-sm"
-         style="display: none;">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Event Type Filters -->
-        <div class="filter-group">
-          <h3 class="text-sm font-medium text-gray-900 mb-3">Event Types</h3>
-          <div class="space-y-2">
-            <% TimelineEvent::EVENT_TYPES.each do |type_key, type_info| %>
-              <label class="filter-checkbox">
-                <input type="checkbox" 
-                       x-model="eventTypeFilters" 
-                       value="<%= type_key %>"
-                       class="rounded border-gray-300 text-green-600 focus:ring-green-500">
-                <div class="filter-color-dot bg-<%= type_info[:color] %>-500"></div>
-                <span class="text-sm text-gray-700"><%= type_info[:name] %></span>
-              </label>
-            <% end %>
-          </div>
-        </div>
-        
-        <!-- Importance Filters -->
-        <div class="filter-group">
-          <h3 class="text-sm font-medium text-gray-900 mb-3">Importance Level</h3>
-          <div class="space-y-2">
-            <% TimelineEvent::IMPORTANCE_LEVELS.each do |level_key, level_info| %>
-              <label class="filter-checkbox">
-                <input type="checkbox" 
-                       x-model="importanceFilters" 
-                       value="<%= level_key %>"
-                       class="rounded border-gray-300 text-green-600 focus:ring-green-500">
-                <span class="text-sm text-gray-700"><%= level_info[:name] %></span>
-              </label>
-            <% end %>
-          </div>
-        </div>
-        
-        <!-- Status Filters -->
-        <div class="filter-group">
-          <h3 class="text-sm font-medium text-gray-900 mb-3">Status</h3>
-          <div class="space-y-2">
-            <% TimelineEvent::STATUS_OPTIONS.each do |status_key, status_info| %>
-              <label class="filter-checkbox">
-                <input type="checkbox" 
-                       x-model="statusFilters" 
-                       value="<%= status_key %>"
-                       class="rounded border-gray-300 text-green-600 focus:ring-green-500">
-                <span class="text-sm text-gray-700"><%= status_info[:name] %></span>
-              </label>
-            <% end %>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Filter Actions -->
-      <div class="mt-6 flex justify-between items-center pt-4 border-t border-gray-200">
-        <button @click="clearAllFilters()" 
-                class="text-sm text-gray-600 hover:text-gray-900">
-          Clear All Filters
-        </button>
-        <span class="text-sm text-gray-500" x-text="getFilteredEventCount() + ' events match filters'"></span>
-      </div>
-    </div>
-
-    <!-- Timeline Events -->
-    <!-- DEBUG: Start of timeline-events-container -->
-    <div class="timeline-events-container" data-timeline-id="<%= @timeline.id %>">
-      <!-- DEBUG: Total events in database: <%= @timeline.timeline_events.count %> -->
-      <% @timeline.timeline_events.includes(:timeline_event_entities).each_with_index do |event, index| %>
-        <div class="timeline-event-container group" 
-             data-event-id="<%= event.id %>" 
-             data-timeline-id="<%= @timeline.id %>"
-             data-event-type="<%= event.event_type %>"
-             data-importance="<%= event.importance_level %>"
-             data-status="<%= event.status %>">
-          <!-- Event Content -->
-          <div class="flex items-start space-x-6">
-            <!-- Premium Timeline Dot and Controls -->
-            <div class="flex flex-col items-center space-y-4 flex-shrink-0 z-10">
-              <!-- Clean Timeline Dot -->
-              <div class="relative">
-                <div class="w-4 h-4 rounded-full timeline-dot-<%= event.event_type_info[:color] %>"></div>
-              </div>
-              
-              <!-- Timeline Move Controls -->
-              <div class="timeline-move-controls opacity-0 group-hover:opacity-100 transition-opacity">
-                <div class="flex flex-col space-y-1">
-                  <%= link_to '#', class: 'js-move-event-to-top' do %>
-                    <i class="material-icons text-sm">keyboard_double_arrow_up</i>
-                  <% end %>
-                  <%= link_to '#', class: 'js-move-event-up' do %>
-                    <i class="material-icons text-sm">keyboard_arrow_up</i>
-                  <% end %>
-                  <%= link_to '#', class: 'js-move-event-down' do %>
-                    <i class="material-icons text-sm">keyboard_arrow_down</i>
-                  <% end %>
-                  <%= link_to '#', class: 'js-move-event-to-bottom' do %>
-                    <i class="material-icons text-sm">keyboard_double_arrow_down</i>
-                  <% end %>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Event Card -->
-            <div class="flex-1">
-              <%= form_for event, html: { class: 'autosave-form' }, remote: true do |f| %>
-                <%= f.hidden_field :timeline_id %>
-                
-                <div class="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200">
-                  
-                  <!-- Event Card Header -->
-                  <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                    <div class="flex items-center justify-between">
-                      <!-- Event Title -->
-                      <div class="flex-1">
-                        <%= f.text_field :title, 
-                            class: "event-title w-full text-lg font-semibold text-gray-900 bg-transparent border-0 hover:bg-white hover:border hover:border-gray-200 focus:bg-white focus:border-green-500 focus:ring-0 transition-colors px-2 py-1 rounded",
-                            placeholder: "Event title...",
-                            '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                      </div>
-                      
-                      <!-- Event Actions -->
-                      <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
-                        <button type="button" 
-                                @click="typeof openLinkModal !== 'undefined' ? openLinkModal(<%= event.id %>) : console.error('openLinkModal not available')"
-                                class="p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-50">
-                          <i class="material-icons text-sm">link</i>
-                        </button>
-                        <button type="button" 
-                                onclick="deleteEvent(<%= event.id %>, this)"
-                                class="p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-red-50">
-                          <i class="material-icons text-sm">delete</i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Event Body -->
-                  <div class="px-4 py-3">
-                    
-                    <!-- Clean Time Header -->
-                    <div class="flex items-center space-x-4 mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <div class="flex items-center justify-center w-10 h-10 bg-green-500 rounded-lg shadow-sm">
-                        <i class="material-icons text-white text-lg">schedule</i>
-                      </div>
-                      <div class="flex items-center space-x-3 flex-1">
-                        <!-- Start Time -->
-                        <div class="flex-1">
-                          <label class="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
-                          <%= f.text_field :time_label, 
-                              class: "timeline-input w-full text-sm font-medium text-gray-800",
-                              placeholder: "Start time",
-                              '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                        </div>
-                        
-                        <!-- Arrow Separator -->
-                        <div class="flex items-center justify-center w-8 h-8 bg-white rounded-full border border-gray-200 mt-6">
-                          <i class="material-icons text-sm text-green-500">arrow_forward</i>
-                        </div>
-                        
-                        <!-- End Time -->
-                        <div class="flex-1">
-                          <label class="block text-xs font-medium text-gray-700 mb-1">End Time</label>
-                          <%= f.text_field :end_time_label, 
-                              class: "timeline-input w-full text-sm font-medium text-gray-800",
-                              placeholder: "End time (optional)",
-                              '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <!-- Clean Event Type and Status Badges -->
-                    <div class="flex items-center space-x-3 mb-3">
-                      <div class="flex items-center space-x-2">
-                        <!-- Event Type Badge -->
-                        <span class="event-type-badge inline-flex items-center">
-                          <i class="material-icons text-xs mr-1"><%= event.event_type_info[:icon] %></i>
-                          <%= event.event_type_info[:name] %>
-                        </span>
-                        
-                        <% if event.importance_level == 'major' %>
-                          <!-- Major Importance Badge -->
-                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
-                            <i class="material-icons text-xs mr-1">star</i>
-                            Major
-                          </span>
-                        <% end %>
-                      </div>
-                    </div>
-                    
-                    
-                    <!-- Clean Description -->
-                    <div class="mb-4">
-                      <%= f.text_area :description, 
-                          rows: 2,
-                          class: "timeline-input w-full text-sm text-gray-700 resize-none",
-                          placeholder: "What happened?",
-                          '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                    </div>
-                    
-                    <!-- Expandable Icons Bar -->
-                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                      <span class="status-badge-<%= event.status %> inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">
-                        <%= event.status_info[:name] %>
-                      </span>
-                      
-                      <div class="flex items-center space-x-2">
-                        <!-- Settings Icon -->
-                        <button type="button" 
-                                @click="typeof toggleEventSection !== 'undefined' ? toggleEventSection(<%= event.id %>, 'settings') : console.error('toggleEventSection not available')"
-                                class="expandable-icon"
-                                :class="{ 'active': typeof isEventSectionOpen !== 'undefined' ? isEventSectionOpen(<%= event.id %>, 'settings') : false }"
-                                title="Event Settings">
-                          <i class="material-icons text-sm">settings</i>
-                        </button>
-                        
-                        <!-- Notes Icon -->
-                        <button type="button" 
-                                @click="typeof toggleEventSection !== 'undefined' ? toggleEventSection(<%= event.id %>, 'notes') : console.error('toggleEventSection not available')"
-                                class="expandable-icon"
-                                :class="{ 'active': typeof isEventSectionOpen !== 'undefined' ? isEventSectionOpen(<%= event.id %>, 'notes') : false }"
-                                title="Notes">
-                          <i class="material-icons text-sm">note</i>
-                        </button>
-                        
-                        <!-- Status Icon -->
-                        <button type="button" 
-                                @click="typeof toggleEventSection !== 'undefined' ? toggleEventSection(<%= event.id %>, 'status') : console.error('toggleEventSection not available')"
-                                class="expandable-icon"
-                                :class="{ 'active': typeof isEventSectionOpen !== 'undefined' ? isEventSectionOpen(<%= event.id %>, 'status') : false }"
-                                title="Status">
-                          <i class="material-icons text-sm">check_circle</i>
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <!-- Expandable Sections -->
-                    <div class="space-y-3">
-                      <!-- Settings Section -->
-                      <div x-show="typeof isEventSectionOpen !== 'undefined' ? isEventSectionOpen(<%= event.id %>, 'settings') : false" 
-                           x-transition:enter="transition ease-out duration-200"
-                           x-transition:enter-start="opacity-0 -translate-y-2"
-                           x-transition:enter-end="opacity-100 translate-y-0"
-                           x-transition:leave="transition ease-in duration-150"
-                           x-transition:leave-start="opacity-100 translate-y-0"
-                           x-transition:leave-end="opacity-0 -translate-y-2"
-                           class="expandable-section settings-section bg-gray-50 rounded-lg p-3 space-y-3">
-                        <h4 class="text-sm font-medium text-gray-900 flex items-center">
-                          <i class="material-icons text-sm mr-2 text-green-600">settings</i>
-                          Event Settings
-                        </h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <!-- Event Type -->
-                          <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Event Type</label>
-                            <%= f.select :event_type, 
-                                options_for_select(TimelineEvent::EVENT_TYPES.map { |k, v| [v[:name], k] }, event.event_type),
-                                {},
-                                { class: "w-full text-xs px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500",
-                                  '@change': 'submitFormRemotely($el.form)' } %>
-                          </div>
-                          
-                          <!-- Importance Level -->
-                          <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Importance</label>
-                            <%= f.select :importance_level,
-                                options_for_select(TimelineEvent::IMPORTANCE_LEVELS.map { |k, v| [v[:name], k] }, event.importance_level),
-                                {},
-                                { class: "w-full text-xs px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500",
-                                  '@change': 'submitFormRemotely($el.form)' } %>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <!-- Notes Section -->
-                      <div x-show="typeof isEventSectionOpen !== 'undefined' ? isEventSectionOpen(<%= event.id %>, 'notes') : false" 
-                           x-transition:enter="transition ease-out duration-200"
-                           x-transition:enter-start="opacity-0 -translate-y-2"
-                           x-transition:enter-end="opacity-100 translate-y-0"
-                           x-transition:leave="transition ease-in duration-150"
-                           x-transition:leave-start="opacity-100 translate-y-0"
-                           x-transition:leave-end="opacity-0 -translate-y-2"
-                           class="expandable-section notes-section bg-blue-50 rounded-lg p-3 space-y-3">
-                        <h4 class="text-sm font-medium text-gray-900 flex items-center">
-                          <i class="material-icons text-sm mr-2 text-blue-600">note</i>
-                          Notes
-                        </h4>
-                        <div class="space-y-3">
-                          <!-- Public Notes -->
-                          <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Public Notes</label>
-                            <%= f.text_area :notes, 
-                                rows: 2,
-                                class: "w-full text-xs px-2 py-1 text-gray-600 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none placeholder-gray-400",
-                                placeholder: "Additional notes...",
-                                '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                          </div>
-                          
-                          <!-- Private Notes -->
-                          <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1 flex items-center">
-                              <i class="material-icons text-xs mr-1 text-amber-600">lock</i>
-                              Private Notes
-                            </label>
-                            <%= f.text_area :private_notes, 
-                                rows: 2,
-                                class: "w-full text-xs px-2 py-1 text-gray-600 bg-amber-50 border border-amber-200 rounded focus:ring-1 focus:ring-amber-500 focus:border-amber-500 resize-none placeholder-amber-400",
-                                placeholder: "Private notes...",
-                                '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <!-- Status Section -->
-                      <div x-show="typeof isEventSectionOpen !== 'undefined' ? isEventSectionOpen(<%= event.id %>, 'status') : false" 
-                           x-transition:enter="transition ease-out duration-200"
-                           x-transition:enter-start="opacity-0 -translate-y-2"
-                           x-transition:enter-end="opacity-100 translate-y-0"
-                           x-transition:leave="transition ease-in duration-150"
-                           x-transition:leave-start="opacity-100 translate-y-0"
-                           x-transition:leave-end="opacity-0 -translate-y-2"
-                           class="expandable-section status-section bg-purple-50 rounded-lg p-3">
-                        <h4 class="text-sm font-medium text-gray-900 flex items-center mb-2">
-                          <i class="material-icons text-sm mr-2 text-purple-600">check_circle</i>
-                          Status
-                        </h4>
-                        <%= f.select :status,
-                            options_for_select(TimelineEvent::STATUS_OPTIONS.map { |k, v| [v[:name], k] }, event.status),
-                            {},
-                            { class: "w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white",
-                              '@change': 'submitFormRemotely($el.form)' } %>
-                      </div>
-                    </div>
-                  </div>
-                    
-                    <!-- Linked Content -->
-                    <%= render 'shared/timeline_event_linked_content', timeline_event: event %>
-                  </div>
-                </div>
+              <%= link_to timeline_path(@timeline), 
+                  method: :delete,
+                  data: { confirm: "Are you sure you want to delete this timeline? This cannot be undone!" },
+                  class: "inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+                <i class="material-icons text-lg mr-2">delete</i>
+                Delete Timeline
               <% end %>
             </div>
           </div>
+          <% end %>
         </div>
-      <% end %>
-    </div>
-    <!-- DEBUG: End of timeline-events-container -->
-    
-    <!-- Empty State -->
-    <% if @timeline.timeline_events.empty? %>
-      <div class="text-center py-12">
-        <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mb-6 shadow-sm">
-          <i class="material-icons text-4xl text-green-600">timeline</i>
-        </div>
-        <h3 class="text-xl font-semibold text-gray-900 mb-3">Your timeline is empty</h3>
-        <p class="text-gray-600 mb-8 max-w-md mx-auto">
-          Start building your timeline by adding your first event. Track important moments, plot points, and key developments in chronological order.
-        </p>
-        <button id="js-create-first-event"
-                class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm">
-          <i class="material-icons text-lg mr-2">add</i>
-          Add Your First Event
-        </button>
       </div>
-    <% end %>
+    </div>
   </div>
 
   <!-- Link Content Modal -->
@@ -976,158 +1071,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Hidden Template for New Events -->
-  <div class="timeline-event-template" style="display: none;">
-    <% event = TimelineEvent.new %>
-    <div class="timeline-event-container group" 
-         data-event-id="-1" 
-         data-timeline-id="<%= @timeline.id %>"
-         data-event-type="general"
-         data-importance="minor"
-         data-status="completed">
-      <!-- Event Content -->
-      <div class="flex items-start space-x-6">
-        <!-- Timeline Dot and Controls -->
-        <div class="flex flex-col items-center space-y-4 flex-shrink-0">
-          <div class="w-4 h-4 timeline-dot-gray rounded-full"></div>
-          
-          <div class="timeline-move-controls opacity-0 group-hover:opacity-100 transition-opacity">
-            <div class="flex flex-col space-y-1">
-              <%= link_to '#', class: 'js-move-event-to-top' do %>
-                <i class="material-icons text-sm">keyboard_double_arrow_up</i>
-              <% end %>
-              <%= link_to '#', class: 'js-move-event-up' do %>
-                <i class="material-icons text-sm">keyboard_arrow_up</i>
-              <% end %>
-              <%= link_to '#', class: 'js-move-event-down' do %>
-                <i class="material-icons text-sm">keyboard_arrow_down</i>
-              <% end %>
-              <%= link_to '#', class: 'js-move-event-to-bottom' do %>
-                <i class="material-icons text-sm">keyboard_double_arrow_down</i>
-              <% end %>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Event Card -->
-        <div class="flex-1">
-          <%= form_for event, html: { class: 'autosave-form' }, remote: true, method: :patch do |f| %>
-            <%= f.hidden_field :timeline_id, value: @timeline.id %>
-            
-            <div class="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200">
-              
-              <!-- Event Card Header -->
-              <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                <div class="flex items-center justify-between">
-                  <!-- Event Title -->
-                  <div class="flex-1">
-                    <%= f.text_field :title, 
-                        class: "event-title w-full text-lg font-semibold text-gray-900 bg-transparent border-0 hover:bg-white hover:border hover:border-gray-200 focus:bg-white focus:border-green-500 focus:ring-0 transition-colors px-2 py-1 rounded",
-                        placeholder: "Event title..." %>
-                  </div>
-                  
-                  <!-- Event Actions -->
-                  <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
-                    <button type="button" 
-                            class="js-template-link-btn p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-50"
-                            onclick="alert('Please save this event first before linking content.')">
-                      <i class="material-icons text-sm">link</i>
-                    </button>
-                    <button type="button" 
-                            class="js-delete-timeline-event p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-red-50"
-                            onclick="deleteEvent(null, this)">
-                      <i class="material-icons text-sm">delete</i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Event Body -->
-              <div class="px-4 py-3">
-                
-                <!-- Time Header - Prominent -->
-                <div class="flex items-center space-x-3 mb-3">
-                  <i class="material-icons text-green-600">schedule</i>
-                  <div class="flex items-center space-x-2 flex-1">
-                    <%= f.text_field :time_label, 
-                        class: "text-base font-medium text-green-600 bg-transparent border-0 border-b border-transparent hover:border-green-300 focus:border-green-500 focus:ring-0 placeholder-green-400 transition-colors",
-                        placeholder: "Start time" %>
-                    <i class="material-icons text-sm text-gray-400">arrow_forward</i>
-                    <%= f.text_field :end_time_label, 
-                        class: "text-base font-medium text-green-600 bg-transparent border-0 border-b border-transparent hover:border-green-300 focus:border-green-500 focus:ring-0 placeholder-green-400 transition-colors",
-                        placeholder: "End time (optional)" %>
-                  </div>
-                </div>
-                
-                <!-- Event Type and Status Badges -->
-                <div class="flex items-center space-x-2 mb-2">
-                  <span class="event-type-badge inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800">
-                    <i class="material-icons text-xs mr-1">event</i>
-                    General Event
-                  </span>
-                </div>
-                
-                <!-- Event Title - More Compact -->
-                <%= f.text_field :title, 
-                    class: "event-title text-lg font-semibold text-gray-900 bg-transparent border-0 focus:ring-0 w-full placeholder-gray-400 mb-2",
-                    placeholder: "Event title..." %>
-                
-                <!-- Description - Single Line by Default -->
-                <div class="relative">
-                  <%= f.text_area :description, 
-                      rows: 1,
-                      class: "w-full text-sm text-gray-700 bg-transparent border-0 focus:ring-0 resize-none placeholder-gray-400 transition-all",
-                      placeholder: "What happened?",
-                      style: "min-height: 1.5rem;" %>
-                </div>
-                
-                <!-- Expandable Icons Bar -->
-                <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                  <span class="status-badge-completed inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">
-                    Completed
-                  </span>
-                  
-                  <div class="flex items-center space-x-2">
-                    <!-- Settings Icon -->
-                    <button type="button" 
-                            class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-                            title="Event Settings"
-                            disabled>
-                      <i class="material-icons text-sm">settings</i>
-                    </button>
-                    
-                    <!-- Notes Icon -->
-                    <button type="button" 
-                            class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-                            title="Notes"
-                            disabled>
-                      <i class="material-icons text-sm">note</i>
-                    </button>
-                    
-                    <!-- Importance Icon -->
-                    <button type="button" 
-                            class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-                            title="Importance"
-                            disabled>
-                      <i class="material-icons text-sm">star</i>
-                    </button>
-                    
-                    <!-- Status Icon -->
-                    <button type="button" 
-                            class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-                            title="Status"
-                            disabled>
-                      <i class="material-icons text-sm">check_circle</i>
-                    </button>
-                  </div>
-                </div>
-            </div>
-          <% end %>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- JavaScript for Timeline Editor -->
@@ -1146,13 +1089,23 @@ function timelineEditor() {
     linkModalSearchQuery: '',
     selectedFilter: 'all',
     collapsedSections: {},
+    contentSummaryCollapsed: {},
     selectedEvents: [],
+    selectedEventId: null,
+    selectedEventData: null,
     autoSaveStatus: 'saved',
     titleFocused: false,
     eventSections: {},
     eventTypeFilters: [],
     importanceFilters: [],
     statusFilters: [],
+    
+    // Reactive properties for real-time inspector panel updates
+    liveTitle: '',
+    liveTimeLabel: '',
+    liveEndTimeLabel: '',
+    liveDescription: '',
+    activeInputListeners: new Map(), // Track active listeners for cleanup
     timelineData: {
       name: '<%= j(@timeline.name) %>',
       subtitle: '<%= j(@timeline.subtitle) %>',
@@ -1161,23 +1114,48 @@ function timelineEditor() {
       private_notes: '<%= j(@timeline.private_notes) %>'
     },
     
-    // Initialize method with debugging
+    // Initialize method
     init() {
-      console.log('Timeline editor Alpine.js component initialized');
-      console.log('Available methods:', Object.getOwnPropertyNames(this).filter(name => typeof this[name] === 'function'));
-      
-      // Test critical functions
-      console.log('Testing isEventSectionOpen function:', typeof this.isEventSectionOpen);
-      console.log('Testing linkableContentMatches function:', typeof this.linkableContentMatches);
-      console.log('Testing toggleEventSection function:', typeof this.toggleEventSection);
-      
-      // Make functions globally available for debugging
-      window.timelineEditorDebug = this;
+      // Add fallback click handlers for server-rendered events in case Alpine.js @click isn't working
+      setTimeout(() => {
+        const serverEventCards = document.querySelectorAll('.timeline-event-card:not(.js-template-event-card)');
+        
+        serverEventCards.forEach((card) => {
+          const eventContainer = card.closest('[data-event-id]');
+          if (eventContainer) {
+            const eventId = parseInt(eventContainer.getAttribute('data-event-id'));
+            
+            // Add a JavaScript click listener as fallback
+            card.addEventListener('click', (e) => {
+              // Check if Alpine.js handler already processed this
+              if (e.alpineProcessed) {
+                return;
+              }
+              
+              // Get event data from the card
+              const titleEl = card.querySelector('input[name*="[title]"]');
+              const timeEl = card.querySelector('input[name*="[time_label]"]');
+              const descEl = card.querySelector('textarea[name*="[description]"]');
+              
+              const eventData = {
+                id: eventId,
+                title: titleEl ? titleEl.value : 'Untitled Event',
+                time_label: timeEl ? timeEl.value : '',
+                description: descEl ? descEl.value : '',
+                event_type: 'general',
+                importance_level: 'minor',
+                status: 'completed'
+              };
+              
+              this.selectEvent(eventId, eventData);
+            });
+          }
+        });
+      }, 500);
     },
     
     // Filter helper methods
     clearAllFilters() {
-      console.log('clearAllFilters called');
       this.eventTypeFilters = [];
       this.importanceFilters = [];
       this.statusFilters = [];
@@ -1241,9 +1219,72 @@ function timelineEditor() {
       return eventData.title.includes(query) || eventData.description.includes(query);
     },
     
+    // Apply real-time filtering to timeline events
+    applyEventFilters() {
+      const events = document.querySelectorAll('.timeline-event-container:not(.timeline-event-template)');
+      let visibleCount = 0;
+      
+      events.forEach(eventElement => {
+        const shouldShow = this.shouldShowEvent(eventElement);
+        
+        if (shouldShow) {
+          eventElement.style.display = 'block';
+          eventElement.style.opacity = '1';
+          eventElement.style.transform = 'translateY(0)';
+          visibleCount++;
+        } else {
+          eventElement.style.opacity = '0';
+          eventElement.style.transform = 'translateY(-10px)';
+          setTimeout(() => {
+            if (!this.shouldShowEvent(eventElement)) {
+              eventElement.style.display = 'none';
+            }
+          }, 200);
+        }
+      });
+      
+      // Update empty state
+      this.updateEmptyState(visibleCount);
+      
+      return visibleCount;
+    },
+    
+    updateEmptyState(visibleCount) {
+      const eventsContainer = document.querySelector('.timeline-events-container');
+      let emptyState = eventsContainer.querySelector('.search-empty-state');
+      
+      if (visibleCount === 0 && this.searchQuery.length > 0) {
+        // Show search empty state
+        if (!emptyState) {
+          emptyState = document.createElement('div');
+          emptyState.className = 'search-empty-state text-center py-16';
+          emptyState.innerHTML = `
+            <div class="mx-auto h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <i class="material-icons text-2xl text-gray-400">search_off</i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No events found</h3>
+            <p class="text-gray-600 text-sm">
+              Try adjusting your search terms or clear the search to see all events.
+            </p>
+            <button @click="searchQuery = ''; applyEventFilters()" 
+                    class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+              <i class="material-icons text-sm mr-2">clear</i>
+              Clear Search
+            </button>
+          `;
+          eventsContainer.appendChild(emptyState);
+        }
+        emptyState.style.display = 'block';
+      } else {
+        // Hide search empty state
+        if (emptyState) {
+          emptyState.style.display = 'none';
+        }
+      }
+    },
+    
     // Link modal methods
     openLinkModal(eventId) {
-      console.log('openLinkModal called with eventId:', eventId);
       this.linkingEventId = eventId;
       this.showLinkModal = true;
       this.linkModalSearchQuery = '';
@@ -1257,7 +1298,6 @@ function timelineEditor() {
     },
     
     closeLinkModal() {
-      console.log('closeLinkModal called');
       this.showLinkModal = false;
       this.linkingEventId = null;
       this.linkModalSearchQuery = '';
@@ -1267,18 +1307,24 @@ function timelineEditor() {
     },
     
     toggleSection(sectionKey) {
-      console.log('toggleSection called with key:', sectionKey);
       this.collapsedSections[sectionKey] = !this.collapsedSections[sectionKey];
     },
     
     isSectionCollapsed(sectionKey) {
-      const result = this.collapsedSections[sectionKey] || false;
-      console.log('isSectionCollapsed called with key:', sectionKey, 'result:', result);
-      return result;
+      return this.collapsedSections[sectionKey] || false;
+    },
+    
+    // Content summary section management
+    toggleContentSummarySection(contentType) {
+      this.contentSummaryCollapsed[contentType] = !this.contentSummaryCollapsed[contentType];
+    },
+    
+    isContentSummaryCollapsed(contentType) {
+      // Default to expanded (false) on first load
+      return this.contentSummaryCollapsed[contentType] || false;
     },
     
     linkableContentMatches(contentName, contentType) {
-      console.log('linkableContentMatches called with:', contentName, contentType);
       
       // First check filter selection
       if (this.selectedFilter && this.selectedFilter !== 'all') {
@@ -1324,43 +1370,350 @@ function timelineEditor() {
     // Event section management
     toggleEventSection(eventId, section) {
       const key = `${eventId}_${section}`;
-      console.log('toggleEventSection called:', eventId, section, 'key:', key);
       this.eventSections[key] = !this.eventSections[key];
     },
     
     isEventSectionOpen(eventId, section) {
       const key = `${eventId}_${section}`;
-      const result = this.eventSections[key] || false;
-      console.log('isEventSectionOpen called:', eventId, section, 'key:', key, 'result:', result);
-      return result;
+      return this.eventSections[key] || false;
+    },
+    
+    // Event selection for inspector panel
+    selectEvent(eventId, eventData) {
+      this.selectedEventId = eventId;
+      this.selectedEventData = eventData;
+      
+      // Set up live form listeners for real-time inspector panel updates
+      this.setupLiveFormListeners(eventId);
+      
+      // Update sidebar linked content
+      this.updateSidebarLinkedContent(eventId);
+      
+      // Scroll inspector panel to top
+      const inspectorContent = document.querySelector('.w-96 .overflow-y-auto');
+      if (inspectorContent) {
+        inspectorContent.scrollTop = 0;
+      }
+    },
+    
+    clearEventSelection() {
+      this.selectedEventId = null;
+      this.selectedEventData = null;
+      this.clearInputListeners();
+    },
+    
+    // Set up real-time input listeners for inspector panel updates
+    setupLiveFormListeners(eventId) {
+      // Clear any existing listeners first
+      this.clearInputListeners();
+      
+      // Find form inputs for this event
+      const eventContainer = document.querySelector(`[data-event-id="${eventId}"]`);
+      if (!eventContainer) {
+        return;
+      }
+      
+      const titleInput = eventContainer.querySelector('input[name*="[title]"]');
+      const timeLabelInput = eventContainer.querySelector('input[name*="[time_label]"]');
+      const endTimeLabelInput = eventContainer.querySelector('input[name*="[end_time_label]"]');
+      const descriptionTextarea = eventContainer.querySelector('textarea[name*="[description]"]');
+      
+      // Set initial values
+      this.liveTitle = titleInput?.value || 'Untitled Event';
+      this.liveTimeLabel = timeLabelInput?.value || '';
+      this.liveEndTimeLabel = endTimeLabelInput?.value || '';
+      this.liveDescription = descriptionTextarea?.value || '';
+      
+      // Create and store event listeners
+      const listeners = [];
+      
+      if (titleInput) {
+        const titleListener = (e) => {
+          this.liveTitle = e.target.value || 'Untitled Event';
+        };
+        titleInput.addEventListener('input', titleListener);
+        listeners.push({ element: titleInput, type: 'input', listener: titleListener });
+      }
+      
+      if (timeLabelInput) {
+        const timeLabelListener = (e) => {
+          this.liveTimeLabel = e.target.value || '';
+        };
+        timeLabelInput.addEventListener('input', timeLabelListener);
+        listeners.push({ element: timeLabelInput, type: 'input', listener: timeLabelListener });
+      }
+      
+      if (endTimeLabelInput) {
+        const endTimeLabelListener = (e) => {
+          this.liveEndTimeLabel = e.target.value || '';
+        };
+        endTimeLabelInput.addEventListener('input', endTimeLabelListener);
+        listeners.push({ element: endTimeLabelInput, type: 'input', listener: endTimeLabelListener });
+      }
+      
+      if (descriptionTextarea) {
+        const descriptionListener = (e) => {
+          this.liveDescription = e.target.value || '';
+        };
+        descriptionTextarea.addEventListener('input', descriptionListener);
+        listeners.push({ element: descriptionTextarea, type: 'input', listener: descriptionListener });
+      }
+      
+      // Store listeners for cleanup
+      this.activeInputListeners.set(eventId, listeners);
+    },
+    
+    // Clear all active input listeners
+    clearInputListeners() {
+      this.activeInputListeners.forEach((listeners, eventId) => {
+        listeners.forEach(({ element, type, listener }) => {
+          element.removeEventListener(type, listener);
+        });
+      });
+      
+      this.activeInputListeners.clear();
+      
+      // Reset live data
+      this.liveTitle = '';
+      this.liveTimeLabel = '';
+      this.liveEndTimeLabel = '';
+      this.liveDescription = '';
+    },
+    
+    // Update sidebar linked content
+    updateSidebarLinkedContent(eventId) {
+      const sidebarContainer = document.getElementById('sidebar-linked-content');
+      if (!sidebarContainer) {
+        return;
+      }
+      
+      // Find the main timeline linked content for this event
+      const mainLinkedContent = document.querySelector(`#linked-content-${eventId}`);
+      if (!mainLinkedContent) {
+        // Show empty state
+        sidebarContainer.innerHTML = `
+          <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+            <i class="material-icons text-xs mr-1">info</i>
+            Linked content will appear here when you connect pages to this event
+          </div>
+        `;
+        return;
+      }
+      
+      // Extract linked entities from the main content
+      const linkedCards = mainLinkedContent.querySelectorAll('.linked-content-card');
+      
+      if (linkedCards.length === 0) {
+        // Show empty state
+        sidebarContainer.innerHTML = `
+          <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+            <i class="material-icons text-xs mr-1">info</i>
+            Linked content will appear here when you connect pages to this event
+          </div>
+        `;
+        return;
+      }
+      
+      // Build compact vertical list
+      let sidebarHTML = '';
+      linkedCards.forEach(card => {
+        const nameLink = card.querySelector('.type-badge a');
+        const icon = card.querySelector('.type-badge i');
+        const removeButton = card.querySelector('.remove-btn');
+        
+        if (nameLink && icon) {
+          const name = nameLink.textContent.trim();
+          const href = nameLink.getAttribute('href');
+          const iconClass = icon.className;
+          const iconText = icon.textContent;
+          const removeHref = removeButton ? removeButton.getAttribute('href') : '';
+          
+          sidebarHTML += `
+            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+              <div class="flex items-center min-w-0 flex-1">
+                <i class="${iconClass} text-sm mr-2 flex-shrink-0">${iconText}</i>
+                <a href="${href}" class="text-sm text-gray-700 hover:text-gray-900 font-medium truncate" target="_blank">
+                  ${name}
+                </a>
+              </div>
+              ${removeButton ? `
+                <button onclick="unlinkFromSidebar('${removeHref}', this)" 
+                        class="ml-2 p-1 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all duration-200 flex-shrink-0"
+                        title="Remove link">
+                  <i class="material-icons text-xs">close</i>
+                </button>
+              ` : ''}
+            </div>
+          `;
+        }
+      });
+      
+      sidebarContainer.innerHTML = sidebarHTML;
+    },
+    
+    // Computed properties for live form data reading (now using reactive data with DOM fallback)
+    get selectedEventTitle() {
+      if (!this.selectedEventId) return '';
+      
+      // Use reactive data if available (updated by input listeners)
+      if (this.liveTitle) {
+        return this.liveTitle;
+      }
+      
+      // Fallback to DOM query for initial load
+      const input = document.querySelector(`[data-event-id="${this.selectedEventId}"] input[name*="[title]"]`);
+      return input?.value || 'Untitled Event';
+    },
+    
+    get selectedEventTimeLabel() {
+      if (!this.selectedEventId) return '';
+      
+      // Use reactive data if available (updated by input listeners)
+      if (this.liveTimeLabel !== '') {
+        return this.liveTimeLabel;
+      }
+      
+      // Fallback to DOM query for initial load
+      const input = document.querySelector(`[data-event-id="${this.selectedEventId}"] input[name*="[time_label]"]`);
+      return input?.value || '';
+    },
+    
+    get selectedEventEndTimeLabel() {
+      if (!this.selectedEventId) return '';
+      
+      // Use reactive data if available (updated by input listeners)
+      if (this.liveEndTimeLabel !== '') {
+        return this.liveEndTimeLabel;
+      }
+      
+      // Fallback to DOM query for initial load
+      const input = document.querySelector(`[data-event-id="${this.selectedEventId}"] input[name*="[end_time_label]"]`);
+      return input?.value || '';
+    },
+    
+    get selectedEventDescription() {
+      if (!this.selectedEventId) return '';
+      
+      // Use reactive data if available (updated by input listeners)
+      if (this.liveDescription !== '') {
+        return this.liveDescription;
+      }
+      
+      // Fallback to DOM query for initial load
+      const textarea = document.querySelector(`[data-event-id="${this.selectedEventId}"] textarea[name*="[description]"]`);
+      return textarea?.value || '';
+    },
+    
+    get selectedEventType() {
+      if (!this.selectedEventId) return 'general';
+      // For now, return from static data since event_type isn't in the form yet
+      return this.selectedEventData?.event_type || 'general';
+    },
+    
+    get selectedEventImportance() {
+      if (!this.selectedEventId) return 'minor';
+      // For now, return from static data since importance_level isn't in the form yet
+      return this.selectedEventData?.importance_level || 'minor';
     }
   };
 }
 
-console.log('Timeline editor function defined');
 
 // Helper function to submit forms remotely
 function submitFormRemotely(form) {
+  
   if (form.getAttribute('data-remote') !== 'true') {
     form.setAttribute('data-remote', 'true');
   }
+  
   
   // Use Rails UJS to submit the form remotely
   if (typeof Rails !== 'undefined' && Rails.fire) {
     Rails.fire(form, 'submit');
   } else {
-    // Fallback: dispatch submit event that Rails UJS should catch
-    const event = document.createEvent('HTMLEvents');
-    event.initEvent('submit', true, true);
-    form.dispatchEvent(event);
+    // Manual AJAX implementation since Rails UJS is not working
+    submitFormWithFetch(form);
   }
+}
+
+// Manual AJAX form submission function
+function submitFormWithFetch(form) {
+  
+  // Set auto-save status to saving
+  const alpineEl = document.querySelector('[x-data]');
+  if (alpineEl) {
+    Alpine.$data(alpineEl).autoSaveStatus = 'saving';
+  }
+  
+  const formData = new FormData(form);
+  const url = form.action;
+  const method = form.method.toUpperCase();
+  
+  // Add Rails authenticity token if not present
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+  if (csrfToken && !formData.has('authenticity_token')) {
+    formData.append('authenticity_token', csrfToken);
+  }
+  
+  
+  fetch(url, {
+    method: method,
+    body: formData,
+    headers: {
+      'X-CSRF-Token': csrfToken,
+      'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+  })
+  .then(data => {
+    
+    // Trigger success event manually
+    const successEvent = new CustomEvent('ajax:success', {
+      detail: [data],
+      bubbles: true,
+      cancelable: true
+    });
+    form.dispatchEvent(successEvent);
+    
+    // Update auto-save status
+    if (alpineEl) {
+      Alpine.$data(alpineEl).autoSaveStatus = 'saved';
+      setTimeout(() => {
+        Alpine.$data(alpineEl).autoSaveStatus = 'saved';
+      }, 2000);
+    }
+  })
+  .catch(error => {
+    
+    // Trigger error event manually
+    const errorEvent = new CustomEvent('ajax:error', {
+      detail: [null, { status: 'error', message: error.message }],
+      bubbles: true,
+      cancelable: true
+    });
+    form.dispatchEvent(errorEvent);
+    
+    // Update auto-save status
+    if (alpineEl) {
+      Alpine.$data(alpineEl).autoSaveStatus = 'error';
+    }
+  });
 }
 </script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
   // Auto-save functionality
   document.addEventListener('ajax:success', function(event) {
+    
     if (event.target.matches('.timeline-meta-form, .autosave-form')) {
       // Update autoSaveStatus through Alpine data
       const alpineEl = document.querySelector('[x-data]');
@@ -1374,6 +1727,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   document.addEventListener('ajax:error', function(event) {
+    
     if (event.target.matches('.timeline-meta-form, .autosave-form')) {
       const alpineEl = document.querySelector('[x-data]');
       if (alpineEl) {
@@ -1398,7 +1752,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function createTimelineEvent(timelineId) {
-    console.log('Creating timeline event for timeline:', timelineId);
     
     // Show loading state
     const createBtn = document.getElementById('js-create-timeline-event');
@@ -1427,19 +1780,15 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => response.json())
     .then(data => {
-      console.log('Server response:', data);
       if (data.status === 'success') {
-        console.log('Event created successfully with ID:', data.id);
         addEventToTimeline(data.id, timelineId);
         const alpineEl = document.querySelector('[x-data]');
         if (alpineEl) Alpine.$data(alpineEl).autoSaveStatus = 'saved';
       } else {
-        console.error('Event creation failed:', data);
         throw new Error('Failed to create event');
       }
     })
     .catch(error => {
-      console.error('Error creating timeline event:', error);
       const alpineEl = document.querySelector('[x-data]');
       if (alpineEl) Alpine.$data(alpineEl).autoSaveStatus = 'error';
       showErrorMessage('Failed to create timeline event. Please try again.');
@@ -1452,21 +1801,31 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function addEventToTimeline(eventId, timelineId) {
-    const template = document.querySelector('.timeline-event-template .timeline-event-container');
+    const templateEl = document.querySelector('.timeline-event-template');
     const eventsContainer = document.querySelector('.timeline-events-container');
     
-    console.log('Adding event to container:', eventsContainer);
-    console.log('Container children before:', eventsContainer.children.length);
     
-    const emptyState = eventsContainer.querySelector('.text-center.py-12');
+    if (!templateEl) {
+      showErrorMessage('Template not found. Please refresh the page and try again.');
+      return;
+    }
+    
+    const emptyState = eventsContainer.querySelector('.text-center.py-16');
     
     // Hide empty state if it exists
     if (emptyState) {
       emptyState.style.display = 'none';
     }
     
-    // Clone the template
-    const newEvent = template.cloneNode(true);
+    // Clone the template container directly
+    const templateContainer = templateEl.querySelector('.timeline-event-container');
+    
+    if (!templateContainer) {
+      showErrorMessage('Template structure error. Please refresh the page and try again.');
+      return;
+    }
+    
+    const newEvent = templateContainer.cloneNode(true);
     
     // Update the event with the new ID and required data attributes
     newEvent.setAttribute('data-event-id', eventId);
@@ -1475,17 +1834,11 @@ document.addEventListener('DOMContentLoaded', function() {
     newEvent.setAttribute('data-importance', 'minor');
     newEvent.setAttribute('data-status', 'completed');
     
-    // Update form action URL
-    const form = newEvent.querySelector('.autosave-form');
-    if (form) {
+    // Update all form action URLs
+    const forms = newEvent.querySelectorAll('.autosave-form');
+    forms.forEach(form => {
       form.setAttribute('action', `/plan/timeline_events/${eventId}`);
-    }
-    
-    // Update delete link
-    const deleteLink = newEvent.querySelector('.js-delete-timeline-event');
-    if (deleteLink) {
-      deleteLink.setAttribute('href', `/plan/timeline_events/${eventId}`);
-    }
+    });
     
     // Update link button - replace template link button with functional one
     const linkButton = newEvent.querySelector('.js-template-link-btn');
@@ -1500,22 +1853,47 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update unique IDs for form fields
     const timeLabel = newEvent.querySelector('input[name="timeline_event[time_label]"]');
+    const endTimeLabel = newEvent.querySelector('input[name="timeline_event[end_time_label]"]');
     const title = newEvent.querySelector('input[name="timeline_event[title]"]');
     const description = newEvent.querySelector('textarea[name="timeline_event[description]"]');
     const notes = newEvent.querySelector('textarea[name="timeline_event[notes]"]');
     
     if (timeLabel) timeLabel.id = `timeline_event_time_label_${eventId}`;
+    if (endTimeLabel) endTimeLabel.id = `timeline_event_end_time_label_${eventId}`;
     if (title) title.id = `timeline_event_title_${eventId}`;
     if (description) description.id = `timeline_event_description_${eventId}`;
     if (notes) notes.id = `timeline_event_notes_${eventId}`;
+    
+    // Add click handler for event selection
+    const eventCard = newEvent.querySelector('.js-template-event-card');
+    if (eventCard) {
+      eventCard.classList.remove('js-template-event-card');
+      eventCard.addEventListener('click', function(e) {
+        
+        const alpineEl = document.querySelector('[x-data]');
+        if (alpineEl) {
+          const alpineData = Alpine.$data(alpineEl);
+          
+          const eventData = {
+            id: eventId,
+            title: title ? title.value : 'Untitled Event',
+            time_label: timeLabel ? timeLabel.value : '',
+            end_time_label: endTimeLabel ? endTimeLabel.value : '',
+            description: description ? description.value : '',
+            event_type: 'general',
+            importance_level: 'minor',
+            status: 'completed'
+          };
+          alpineData.selectEvent(eventId, eventData);
+        }
+      });
+    }
     
     // Add the new event with animation
     newEvent.style.opacity = '0';
     newEvent.style.transform = 'translateY(-20px)';
     eventsContainer.appendChild(newEvent);
     
-    console.log('Container children after:', eventsContainer.children.length);
-    console.log('New event parent:', newEvent.parentElement);
     
     // Trigger animation
     setTimeout(() => {
@@ -1612,6 +1990,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Replace the linked content section with server-rendered HTML
             replaceLinkedContentSection(eventId, data.html);
             
+            // Update sidebar linked content if this event is selected
+            const alpineEl = document.querySelector('[x-data]');
+            if (alpineEl && Alpine.$data(alpineEl).selectedEventId == eventId) {
+              Alpine.$data(alpineEl).updateSidebarLinkedContent(eventId);
+            }
+            
             // Show success feedback on the button itself
             const originalContent = button.innerHTML;
             button.innerHTML = '<div class="flex items-center justify-between text-green-600"><div class="flex items-center"><i class="material-icons text-sm mr-2">check_circle</i><span>Added!</span></div></div>';
@@ -1630,8 +2014,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         })
         .catch(error => {
-          console.error('Error linking entity:', error);
-          showErrorMessage('Error linking content. Please try again.');
+            showErrorMessage('Error linking content. Please try again.');
         })
         .finally(() => {
           // Reset button state
@@ -1681,6 +2064,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Extract event ID from the URL
         const eventId = event.target.href.match(/\/timeline_events\/(\d+)\/unlink/)[1];
         replaceLinkedContentSection(eventId, response.html);
+        
+        // Update sidebar linked content if this event is selected
+        const alpineEl = document.querySelector('[x-data]');
+        if (alpineEl && Alpine.$data(alpineEl).selectedEventId == eventId) {
+          Alpine.$data(alpineEl).updateSidebarLinkedContent(eventId);
+        }
+        
         showSuccessMessage(response.message || 'Content unlinked successfully!');
       }
     }
@@ -1746,7 +2136,6 @@ document.addEventListener('DOMContentLoaded', function() {
         showSuccessMessage('Event moved successfully!');
       })
       .catch(error => {
-        console.error('Error moving event:', error);
         showErrorMessage('Error moving event. Please try again.');
       });
     }
@@ -1811,6 +2200,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // Global function for unlinking from sidebar
+  window.unlinkFromSidebar = function(unlinkHref, button) {
+    
+    // Show loading state
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<div class="animate-spin rounded-full h-3 w-3 border-b-2 border-red-500"></div>';
+    button.disabled = true;
+    
+    // Make request to unlink
+    fetch(unlinkHref, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        // Update main linked content section
+        const eventId = unlinkHref.match(/timeline_events\/(\d+)\/unlink/)[1];
+        replaceLinkedContentSection(eventId, data.html);
+        
+        // Update sidebar
+        const alpineEl = document.querySelector('[x-data]');
+        if (alpineEl && Alpine.$data(alpineEl).selectedEventId) {
+          Alpine.$data(alpineEl).updateSidebarLinkedContent(Alpine.$data(alpineEl).selectedEventId);
+        }
+        
+        showSuccessMessage(data.message || 'Content unlinked successfully!');
+      } else {
+        throw new Error(data.message || 'Failed to unlink content');
+      }
+    })
+    .catch(error => {
+      button.innerHTML = originalHTML;
+      button.disabled = false;
+      showErrorMessage('Error unlinking content. Please try again.');
+    });
+  };
+
   // Make deleteEvent globally available
   window.deleteEvent = function(eventId, button) {
     const eventContainer = button.closest('.timeline-event-container');
@@ -1838,6 +2268,12 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     })
     .then(() => {
+      // Clear inspector selection if this event was selected
+      const alpineEl = document.querySelector('[x-data]');
+      if (alpineEl && Alpine.$data(alpineEl).selectedEventId == eventId) {
+        Alpine.$data(alpineEl).clearEventSelection();
+      }
+      
       // Animate removal
       eventContainer.style.transition = 'all 0.3s ease-in';
       eventContainer.style.opacity = '0';
@@ -1860,7 +2296,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 300);
     })
     .catch(error => {
-      console.error('Error deleting event:', error);
       button.innerHTML = originalIcon;
       button.disabled = false;
       showErrorMessage('Error deleting event. Please try again.');
@@ -1870,7 +2305,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function showEmptyState() {
     const eventsContainer = document.querySelector('.timeline-events-container');
     const emptyState = document.createElement('div');
-    emptyState.className = 'text-center py-12';
+    emptyState.className = 'text-center py-16';
     emptyState.innerHTML = `
       <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mb-6 shadow-sm">
         <i class="material-icons text-4xl text-green-600">timeline</i>
@@ -1900,4 +2335,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Alpine.js initialization complete
 </script>
-

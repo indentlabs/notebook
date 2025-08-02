@@ -79,6 +79,7 @@ class TimelinesController < ApplicationController
     
     # Get content already linked to other events in this timeline
     @timeline_linked_content = {}
+    @timeline_content_summary = {}
     timeline_entity_ids = @timeline.timeline_events
                                    .joins(:timeline_event_entities)
                                    .pluck('timeline_event_entities.entity_type', 'timeline_event_entities.entity_id')
@@ -89,9 +90,22 @@ class TimelinesController < ApplicationController
       content_class = content_class_from_name(entity_type)
       next unless content_class
       
+      # Original data for link modal
       @timeline_linked_content[entity_type] = content_class.where(id: entity_ids)
                                                           .where(user: current_user)
                                                           .limit(20)
+      
+      # Enhanced data for content summary sidebar
+      all_content = content_class.where(id: entity_ids)
+                                .where(user: current_user)
+                                .order(:name)
+      
+      @timeline_content_summary[entity_type] = {
+        count: all_content.count,
+        items: all_content.limit(10), # Show first 10, with expansion option
+        total_items: all_content.count,
+        content_class: content_class
+      }
     end
   end
 
