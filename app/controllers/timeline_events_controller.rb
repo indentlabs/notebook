@@ -2,7 +2,7 @@ class TimelineEventsController < ApplicationController
   before_action :set_timeline_event, only: [
     :show, :edit, :update, :destroy,
     :move_up, :move_to_top, :move_down, :move_to_bottom,
-    :link_entity, :unlink_entity
+    :link_entity, :unlink_entity, :add_tag, :remove_tag
   ]
 
   # GET /timeline_events
@@ -39,11 +39,17 @@ class TimelineEventsController < ApplicationController
   # PATCH/PUT /timeline_events/1
   def update
     if @timeline_event.update(timeline_event_params)
-      redirect_to @timeline_event, notice: 'Timeline event was successfully updated.'
+      respond_to do |format|
+        format.html { redirect_to @timeline_event, notice: 'Timeline event was successfully updated.' }
+        format.json { render json: { status: 'success', message: 'Timeline event updated successfully' } }
+        format.js   { render json: { status: 'success', message: 'Timeline event updated successfully' } }
+      end
     else
-      require 'pry'
-      binding.pry
-      render json: :failure
+      respond_to do |format|
+        format.html { render :edit }
+        format.json { render json: { status: 'error', message: 'Failed to update timeline event', errors: @timeline_event.errors.full_messages }, status: :unprocessable_entity }
+        format.js   { render json: { status: 'error', message: 'Failed to update timeline event', errors: @timeline_event.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -120,6 +126,67 @@ class TimelineEventsController < ApplicationController
 
   def move_to_bottom
     @timeline_event.move_to_bottom if @timeline_event.can_be_modified_by?(current_user)
+  end
+
+  def add_tag
+    return render json: { error: 'Not authorized' }, status: :forbidden unless @timeline_event.can_be_modified_by?(current_user)
+    
+    tag_name = params[:tag_name]&.strip
+    return render json: { error: 'Tag name is required' }, status: :bad_request if tag_name.blank?
+    
+    # Check if tag already exists for this event
+    existing_tag = @timeline_event.page_tags.find_by(tag: tag_name)
+    if existing_tag
+      return render json: { 
+        status: 'error', 
+        message: 'Tag already exists for this event' 
+      }, status: :unprocessable_entity
+    end
+    
+    # Create the tag
+    tag = @timeline_event.page_tags.create(
+      tag: tag_name,
+      slug: PageTagService.slug_for(tag_name),
+      user: current_user
+    )
+    
+    if tag.persisted?
+      render json: { 
+        status: 'success', 
+        message: 'Tag added successfully',
+        tag: {
+          id: tag.id,
+          name: tag.tag
+        }
+      }
+    else
+      render json: { 
+        status: 'error', 
+        message: 'Failed to add tag',
+        errors: tag.errors.full_messages 
+      }, status: :unprocessable_entity
+    end
+  end
+
+  def remove_tag
+    return render json: { error: 'Not authorized' }, status: :forbidden unless @timeline_event.can_be_modified_by?(current_user)
+    
+    tag_name = params[:tag_name]&.strip
+    return render json: { error: 'Tag name is required' }, status: :bad_request if tag_name.blank?
+    
+    tag = @timeline_event.page_tags.find_by(tag: tag_name)
+    
+    if tag&.destroy
+      render json: { 
+        status: 'success', 
+        message: 'Tag removed successfully' 
+      }
+    else
+      render json: { 
+        status: 'error', 
+        message: 'Tag not found or failed to remove' 
+      }, status: :unprocessable_entity
+    end
   end
 
   private

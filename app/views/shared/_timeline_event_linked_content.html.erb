@@ -1,12 +1,12 @@
 <% if timeline_event.timeline_event_entities.any? %>
   <div class="border-t border-gray-100 pt-4" id="linked-content-<%= timeline_event.id %>">
-    <h4 class="text-sm font-medium text-gray-700 mb-4 flex items-center px-6">
+    <h4 class="text-sm font-medium text-gray-700 mb-4 flex items-center">
       <i class="material-icons text-sm mr-2">link</i>
       Linked Content
     </h4>
     
-    <!-- Horizontal Scrolling Cards - Break out of parent padding -->
-    <div class="-mx-6 px-6 overflow-x-auto pb-2 linked-content-scroll linked-content-breakout">
+    <!-- Horizontal Scrolling Cards - Contained within parent -->
+    <div class="overflow-x-auto pb-2 linked-content-scroll linked-content-breakout">
       <div class="flex space-x-4" style="width: max-content;">
         <% timeline_event.timeline_event_entities.includes(:entity).order(:entity_type).each do |te_entity| %>
           <% next if te_entity.entity.nil? %>
@@ -37,12 +37,12 @@
               <% end %>
               
               <!-- Gradient Overlay for Text Readability -->
-              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+              <div class="absolute inset-0 gradient-overlay"></div>
             </div>
             
             <!-- Name Badge -->
             <div class="absolute top-2 left-2">
-              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium type-badge bg-white/90 backdrop-blur-sm text-white">
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium type-badge bg-white/90 backdrop-blur-sm text-gray-900">
                 <i class="material-icons text-xs mr-1 <%= klass.text_color %>"><%= klass.icon %></i>
                 <%= link_to entity.name.presence || "Untitled #{te_entity.entity_type}", entity %>
               </span>

@@ -116,7 +116,78 @@
                 <i class="material-icons text-lg mr-2">add</i>
                 Add Event
               </button>
+              
+              <button @click="showTagFilters = !showTagFilters"
+                      class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors"
+                      :class="{ 'bg-gray-100 text-gray-900': showTagFilters }">
+                <i class="material-icons text-lg mr-2">filter_list</i>
+                Filter Events
+              </button>
             </div>
+          </div>
+          
+          <!-- Tag Filters Panel -->
+          <div x-show="showTagFilters"
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="opacity-0 -translate-y-2"
+               x-transition:enter-end="opacity-100 translate-y-0"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-start="opacity-100 translate-y-0"
+               x-transition:leave-end="opacity-0 -translate-y-2"
+               class="px-6 pb-6 border-b border-gray-100">
+            
+            <!-- Filter Mode Toggle -->
+            <div class="mb-4">
+              <div class="flex rounded-lg bg-gray-100 p-1">
+                <button @click="changeTagFilterMode('filter')"
+                        :class="tagFilterMode === 'filter' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                        class="flex-1 px-3 py-1 text-sm font-medium rounded-md transition-colors">
+                  Filter
+                </button>
+                <button @click="changeTagFilterMode('highlight')"
+                        :class="tagFilterMode === 'highlight' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                        class="flex-1 px-3 py-1 text-sm font-medium rounded-md transition-colors">
+                  Highlight
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">
+                <span x-show="tagFilterMode === 'filter'">Show only events with selected tags</span>
+                <span x-show="tagFilterMode === 'highlight'">Show all events, highlight selected tags</span>
+              </p>
+            </div>
+            
+            <!-- Tag Selection List -->
+            <% if @timeline_event_tags.any? %>
+              <div class="space-y-2 max-h-48 overflow-y-auto">
+                <% @timeline_event_tags.each do |tag_data| %>
+                  <label class="flex items-center space-x-2 text-sm cursor-pointer hover:bg-gray-50 rounded px-2 py-1 transition-colors">
+                    <input type="checkbox"
+                           x-model="selectedTagFilters"
+                           value="<%= tag_data[:name] %>"
+                           @change="applyEventFilters()"
+                           class="rounded border-gray-300 text-green-600 focus:ring-green-500 focus:ring-offset-0">
+                    <span class="flex-1 text-gray-700"><%= tag_data[:name] %></span>
+                    <span class="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full"><%= tag_data[:count] %></span>
+                  </label>
+                <% end %>
+              </div>
+              
+              <!-- Clear Filters -->
+              <div class="mt-3 pt-3 border-t border-gray-200">
+                <button @click="clearTagFilters()"
+                        x-show="selectedTagFilters.length > 0"
+                        class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                  <i class="material-icons text-sm mr-1">clear</i>
+                  Clear all filters
+                </button>
+              </div>
+            <% else %>
+              <div class="text-center py-4 text-gray-500">
+                <i class="material-icons text-2xl mb-2 text-gray-300">label_outline</i>
+                <p class="text-sm">No tags found</p>
+                <p class="text-xs text-gray-400">Add tags to events to enable filtering</p>
+              </div>
+            <% end %>
           </div>
           
           <!-- Linked Content Summary -->
@@ -237,7 +308,9 @@
                      data-position="<%= index %>">
                   
                   <!-- Timeline Connection -->
-                  <div class="absolute left-6 top-6 w-6 h-6 bg-white border-4 border-green-500 rounded-full z-10 timeline-dot shadow-sm"></div>
+                  <div class="absolute left-6 top-6 w-6 h-6 <%= Timeline.color %> rounded-full z-10 timeline-dot shadow-sm flex items-center justify-center">
+                    <i class="material-icons text-white text-xs"><%= event.event_type_icon %></i>
+                  </div>
                   
                   <!-- Event Card -->
                   <div class="ml-16 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 timeline-event-card group cursor-pointer"
@@ -245,10 +318,11 @@
                          id: <%= event.id %>,
                          title: '<%= j(event.title) %>',
                          time_label: '<%= j(event.time_label) %>',
+                         end_time_label: '<%= j(event.end_time_label) %>',
                          description: '<%= j(event.description) %>',
                          event_type: '<%= event.event_type || 'general' %>',
-                         importance_level: '<%= event.importance_level || 'minor' %>',
-                         status: '<%= event.status || 'completed' %>'
+                         status: '<%= event.status || 'completed' %>',
+                         tags: [<%= event.page_tags.map { |tag| "'#{j(tag.tag)}'" }.join(', ') %>]
                        })"
                        :class="{ 'ring-2 ring-green-500 ring-opacity-50': selectedEventId === <%= event.id %> }">
                     <!-- Card Header -->
@@ -344,6 +418,20 @@
                         <% end %>
                       </div>
                       
+                      <!-- Tags Display -->
+                      <% if event.page_tags.any? %>
+                        <div class="flex flex-wrap gap-1" id="event-tags-<%= event.id %>">
+                          <% event.page_tags.each do |tag| %>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                              <%= tag.tag %>
+                            </span>
+                          <% end %>
+                        </div>
+                      <% else %>
+                        <!-- Empty container for tags to be populated by JavaScript -->
+                        <div class="flex flex-wrap gap-1 hidden" id="event-tags-<%= event.id %>"></div>
+                      <% end %>
+                      
                       <!-- Linked Content -->
                       <%= render 'shared/timeline_event_linked_content', timeline_event: event %>
                     </div>
@@ -415,20 +503,120 @@
               
             </div>
             
-            <!-- Event Metadata -->
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Type</label>
-                <div class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium capitalize" 
-                     x-text="selectedEventType"></div>
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Importance</label>
-                <div class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium capitalize" 
-                     x-text="selectedEventImportance"></div>
+            <!-- Event Type Selector -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-2">Event Type</label>
+              <div class="relative" x-data="{ showEventTypeDropdown: false }">
+                <button @click="showEventTypeDropdown = !showEventTypeDropdown"
+                        class="w-full flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-sm"
+                        type="button">
+                  <div class="flex items-center">
+                    <i class="material-icons text-sm mr-2 text-green-600" x-text="getEventTypeIcon(selectedEventId)"></i>
+                    <span class="capitalize" x-text="getEventTypeName(selectedEventId)"></span>
+                  </div>
+                  <i class="material-icons text-sm text-gray-400 transition-transform duration-200"
+                     :class="showEventTypeDropdown ? 'rotate-180' : ''">expand_more</i>
+                </button>
+                
+                <!-- Event Type Dropdown -->
+                <div x-show="showEventTypeDropdown"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     @click.away="showEventTypeDropdown = false"
+                     class="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                  
+                  <% TimelineEvent::EVENT_TYPES.each do |type_key, type_info| %>
+                    <button type="button"
+                            @click="updateEventType('<%= type_key %>'); showEventTypeDropdown = false"
+                            class="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center transition-colors border-b border-gray-100 last:border-b-0">
+                      <i class="material-icons text-sm mr-3 text-green-600"><%= type_info[:icon] %></i>
+                      <span class="text-sm"><%= type_info[:name] %></span>
+                    </button>
+                  <% end %>
+                </div>
               </div>
             </div>
             
+            <!-- Event Tags -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-2">Tags</label>
+              
+              <!-- Existing Tags Display -->
+              <div x-show="selectedEventId && getEventTags(selectedEventId).length > 0" class="mb-3">
+                <div class="flex flex-wrap gap-2">
+                  <template x-for="tag in getEventTags(selectedEventId)" :key="tag">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium transition-all duration-200"
+                          :class="isTagLoading(selectedEventId, tag) ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 text-blue-800'">
+                      <!-- Loading spinner for tags being processed -->
+                      <div x-show="isTagLoading(selectedEventId, tag)" class="animate-spin rounded-full h-3 w-3 border-b border-gray-400 mr-1"></div>
+                      <span x-text="tag"></span>
+                      <button @click="removeEventTag(tag)" 
+                              type="button"
+                              :disabled="isTagLoading(selectedEventId, tag)"
+                              class="ml-1 p-0.5 rounded-full transition-colors"
+                              :class="isTagLoading(selectedEventId, tag) ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-blue-200'">
+                        <i class="material-icons text-xs">close</i>
+                      </button>
+                    </span>
+                  </template>
+                </div>
+              </div>
+              
+              <!-- Tag Input with Suggestions -->
+              <div class="relative" x-data="{ showTagSuggestions: false, tagInput: '' }">
+                <input type="text"
+                       x-model="tagInput"
+                       @input="showTagSuggestions = tagInput.length > 0"
+                       @focus="showTagSuggestions = tagInput.length > 0"
+                       @keydown.enter.prevent="addEventTag(tagInput); tagInput = ''; showTagSuggestions = false"
+                       @keydown.escape="tagInput = ''; showTagSuggestions = false"
+                       placeholder="Add tag..."
+                       class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                
+                <!-- Tag Suggestions Dropdown -->
+                <div x-show="showTagSuggestions"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     @click.away="showTagSuggestions = false"
+                     class="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-32 overflow-y-auto">
+                  
+                  <!-- Default Suggested Tags -->
+                  <div class="py-1">
+                    <div class="px-3 py-1 text-xs font-medium text-gray-500 bg-gray-50 border-b border-gray-100">Suggested Tags</div>
+                    <% %w[Character\ Development Character\ Introduction Worldbuilding Flashback Foreshadowing Action Discovery Plot\ Twist Turning\ Point Relationship Tonal\ Shift POV\ Shift].each do |suggested_tag| %>
+                      <button type="button"
+                              x-show="'<%= suggested_tag %>'.toLowerCase().includes(tagInput.toLowerCase()) || tagInput === ''"
+                              @click="addEventTag('<%= suggested_tag %>'); tagInput = ''; showTagSuggestions = false"
+                              class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors">
+                        <%= suggested_tag %>
+                      </button>
+                    <% end %>
+                    
+                    <!-- Custom Tag Option -->
+                    <div x-show="tagInput && tagInput.length > 1" class="border-t border-gray-100">
+                      <button type="button"
+                              @click="addEventTag(tagInput); tagInput = ''; showTagSuggestions = false"
+                              class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors text-green-600 font-medium">
+                        <i class="material-icons text-xs mr-1">add</i>
+                        <span>Add "</span><span x-text="tagInput"></span><span>"</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Empty State -->
+              <div x-show="selectedEventId && getEventTags(selectedEventId).length === 0" 
+                   class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 mt-2">
+                <i class="material-icons text-xs mr-1">label_outline</i>
+                No tags yet. Add tags to categorize this event.
+              </div>
+            </div>
             
             <!-- Linked Content Section -->
             <div>
@@ -481,7 +669,9 @@
          data-position="-1">
       
       <!-- Timeline Connection -->
-      <div class="absolute left-6 top-6 w-6 h-6 bg-white border-4 border-green-500 rounded-full z-10 timeline-dot shadow-sm"></div>
+      <div class="absolute left-6 top-6 w-6 h-6 <%= Timeline.color %> rounded-full z-10 timeline-dot shadow-sm flex items-center justify-center">
+        <i class="material-icons text-white text-xs">radio_button_checked</i>
+      </div>
       
       <!-- Event Card -->
       <div class="ml-16 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 timeline-event-card group cursor-pointer js-template-event-card">
@@ -583,6 +773,9 @@
                         x-on:input.debounce.500ms="submitFormRemotely($el.form)"></textarea>
             </form>
           </div>
+          
+          <!-- Tags Display (Empty for template, will be populated by JavaScript) -->
+          <div class="flex flex-wrap gap-1 hidden js-template-event-tags"></div>
         </div>
       </div>
     </div>
@@ -1099,6 +1292,13 @@ function timelineEditor() {
     eventTypeFilters: [],
     importanceFilters: [],
     statusFilters: [],
+    eventTags: {}, // Store tags for each event: { eventId: [tag1, tag2, ...] }
+    loadingTags: new Set(), // Track which tags are currently being processed
+    
+    // Tag filtering state
+    showTagFilters: false,
+    selectedTagFilters: [],
+    tagFilterMode: 'filter', // 'filter' or 'highlight'
     
     // Reactive properties for real-time inspector panel updates
     liveTitle: '',
@@ -1116,6 +1316,9 @@ function timelineEditor() {
     
     // Initialize method
     init() {
+      // Initialize eventTags from server-rendered DOM data
+      this.initializeEventTagsFromDOM();
+      
       // Add fallback click handlers for server-rendered events in case Alpine.js @click isn't working
       setTimeout(() => {
         const serverEventCards = document.querySelectorAll('.timeline-event-card:not(.js-template-event-card)');
@@ -1144,7 +1347,8 @@ function timelineEditor() {
                 description: descEl ? descEl.value : '',
                 event_type: 'general',
                 importance_level: 'minor',
-                status: 'completed'
+                status: 'completed',
+                tags: []
               };
               
               this.selectEvent(eventId, eventData);
@@ -1152,6 +1356,29 @@ function timelineEditor() {
           }
         });
       }, 500);
+    },
+    
+    // Initialize eventTags object from server-rendered DOM
+    initializeEventTagsFromDOM() {
+      const eventContainers = document.querySelectorAll('.timeline-event-container:not(.timeline-event-template)');
+      
+      eventContainers.forEach(container => {
+        const eventId = container.getAttribute('data-event-id');
+        if (!eventId) return;
+        
+        // Find the tags container for this event
+        const tagContainer = container.querySelector(`#event-tags-${eventId}`);
+        if (!tagContainer) {
+          this.eventTags[eventId] = [];
+          return;
+        }
+        
+        // Extract tag names from server-rendered spans
+        const tagSpans = tagContainer.querySelectorAll('span');
+        const tags = Array.from(tagSpans).map(span => span.textContent.trim());
+        
+        this.eventTags[eventId] = tags;
+      });
     },
     
     // Filter helper methods
@@ -1176,6 +1403,21 @@ function timelineEditor() {
       // Search filter
       if (this.searchQuery && !this.matchesSearch(eventData)) {
         return false;
+      }
+      
+      // Tag filter - only apply in filter mode, not highlight mode
+      if (this.tagFilterMode === 'filter' && this.selectedTagFilters.length > 0) {
+        const eventId = eventElement.getAttribute('data-event-id');
+        const eventTags = this.getEventTags(eventId);
+        
+        // Check if event has any of the selected tags
+        const hasSelectedTag = this.selectedTagFilters.some(selectedTag => 
+          eventTags.includes(selectedTag)
+        );
+        
+        if (!hasSelectedTag) {
+          return false;
+        }
       }
       
       // Type filter
@@ -1226,6 +1468,7 @@ function timelineEditor() {
       
       events.forEach(eventElement => {
         const shouldShow = this.shouldShowEvent(eventElement);
+        const eventId = eventElement.getAttribute('data-event-id');
         
         if (shouldShow) {
           eventElement.style.display = 'block';
@@ -1240,6 +1483,11 @@ function timelineEditor() {
               eventElement.style.display = 'none';
             }
           }, 200);
+        }
+        
+        // Update tag display for highlight mode (only when needed)
+        if (eventId && shouldShow && this.tagFilterMode === 'highlight' && this.selectedTagFilters.length > 0) {
+          this.updateMainPanelTags(eventId);
         }
       });
       
@@ -1388,6 +1636,18 @@ function timelineEditor() {
       
       // Update sidebar linked content
       this.updateSidebarLinkedContent(eventId);
+      
+      // Load tags for this event - use provided tags or ensure they're cached
+      if (eventData && eventData.tags) {
+        this.eventTags[eventId] = eventData.tags;
+        // Only update tag display if tags were actually provided
+        if (eventData.tags.length > 0) {
+          this.updateMainPanelTags(eventId);
+        }
+      } else {
+        // getEventTags() will handle caching from DOM if needed
+        this.getEventTags(eventId);
+      }
       
       // Scroll inspector panel to top
       const inspectorContent = document.querySelector('.w-96 .overflow-y-auto');
@@ -1606,14 +1866,395 @@ function timelineEditor() {
     
     get selectedEventType() {
       if (!this.selectedEventId) return 'general';
-      // For now, return from static data since event_type isn't in the form yet
       return this.selectedEventData?.event_type || 'general';
     },
     
-    get selectedEventImportance() {
-      if (!this.selectedEventId) return 'minor';
-      // For now, return from static data since importance_level isn't in the form yet
-      return this.selectedEventData?.importance_level || 'minor';
+    // Event type helper methods
+    getEventTypeIcon(eventId) {
+      if (!eventId) return 'radio_button_checked';
+      const eventType = this.selectedEventData?.event_type || 'general';
+      const eventTypeMap = {
+        'general': 'radio_button_checked',
+        'setup': 'foundation',
+        'exposition': 'info',
+        'inciting_incident': 'flash_on',
+        'complication': 'warning',
+        'obstacle': 'block',
+        'conflict': 'gavel',
+        'progress': 'trending_up',
+        'revelation': 'visibility',
+        'transformation': 'autorenew',
+        'climax': 'whatshot',
+        'resolution': 'check_circle',
+        'aftermath': 'restore'
+      };
+      return eventTypeMap[eventType] || 'radio_button_checked';
+    },
+    
+    getEventTypeName(eventId) {
+      if (!eventId) return 'General';
+      const eventType = this.selectedEventData?.event_type || 'general';
+      const eventTypeMap = {
+        'general': 'General',
+        'setup': 'Setup',
+        'exposition': 'Exposition',
+        'inciting_incident': 'Inciting Incident',
+        'complication': 'Complication',
+        'obstacle': 'Obstacle',
+        'conflict': 'Conflict',
+        'progress': 'Progress',
+        'revelation': 'Revelation',
+        'transformation': 'Transformation',
+        'climax': 'Climax',
+        'resolution': 'Resolution',
+        'aftermath': 'Aftermath'
+      };
+      return eventTypeMap[eventType] || 'General';
+    },
+    
+    // Update event type and refresh timeline dot
+    updateEventType(newType) {
+      if (!this.selectedEventId) return;
+      
+      // Update the selected event data
+      if (this.selectedEventData) {
+        this.selectedEventData.event_type = newType;
+      }
+      
+      // Find the event form and submit the update
+      const eventContainer = document.querySelector(`[data-event-id="${this.selectedEventId}"]`);
+      if (eventContainer) {
+        // Create a form to submit the event type update
+        const form = document.createElement('form');
+        form.setAttribute('method', 'POST');
+        form.setAttribute('action', `/plan/timeline_events/${this.selectedEventId}`);
+        form.classList.add('autosave-form');
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (csrfToken) {
+          const csrfInput = document.createElement('input');
+          csrfInput.type = 'hidden';
+          csrfInput.name = 'authenticity_token';
+          csrfInput.value = csrfToken;
+          form.appendChild(csrfInput);
+        }
+        
+        // Add method override
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'patch';
+        form.appendChild(methodInput);
+        
+        // Add event type
+        const eventTypeInput = document.createElement('input');
+        eventTypeInput.type = 'hidden';
+        eventTypeInput.name = 'timeline_event[event_type]';
+        eventTypeInput.value = newType;
+        form.appendChild(eventTypeInput);
+        
+        // Submit via our existing auto-save mechanism
+        submitFormWithFetch(form);
+        
+        // Update the timeline dot icon immediately
+        const timelineDot = eventContainer.querySelector('.timeline-dot i');
+        if (timelineDot) {
+          const iconMap = {
+            'general': 'radio_button_checked',
+            'setup': 'foundation',
+            'exposition': 'info',
+            'inciting_incident': 'flash_on',
+            'complication': 'warning',
+            'obstacle': 'block',
+            'conflict': 'gavel',
+            'progress': 'trending_up',
+            'revelation': 'visibility',
+            'transformation': 'autorenew',
+            'climax': 'whatshot',
+            'resolution': 'check_circle',
+            'aftermath': 'restore'
+          };
+          timelineDot.textContent = iconMap[newType] || 'radio_button_checked';
+        }
+      }
+    },
+    
+    // Tag management methods
+    getEventTags(eventId) {
+      if (!eventId) return [];
+      
+      // If we have cached tags, return them
+      if (this.eventTags[eventId]) {
+        return this.eventTags[eventId];
+      }
+      
+      // Fallback: scrape tags from DOM if not in cache
+      const tagContainer = document.querySelector(`#event-tags-${eventId}`);
+      if (!tagContainer) {
+        this.eventTags[eventId] = [];
+        return [];
+      }
+      
+      const tagSpans = tagContainer.querySelectorAll('span');
+      const tags = Array.from(tagSpans).map(span => span.textContent.trim());
+      
+      // Cache the scraped tags
+      this.eventTags[eventId] = tags;
+      return tags;
+    },
+    
+    loadEventTags(eventId) {
+      if (!eventId) return;
+      
+      // Find the event's existing tags from the server-rendered data
+      const eventContainer = document.querySelector(`[data-event-id="${eventId}"]`);
+      if (!eventContainer) {
+        this.eventTags[eventId] = [];
+        return;
+      }
+      
+      // For now, initialize empty array - in future could fetch from API
+      // The tags will be loaded when the page renders with existing data
+      this.eventTags[eventId] = [];
+    },
+    
+    addEventTag(tagName) {
+      if (!this.selectedEventId || !tagName.trim()) return;
+      
+      const cleanTagName = tagName.trim();
+      
+      // Check if tag already exists
+      const existingTags = this.getEventTags(this.selectedEventId);
+      if (existingTags.includes(cleanTagName)) {
+        return; // Tag already exists
+      }
+      
+      // Optimistically add tag to local state immediately
+      if (!this.eventTags[this.selectedEventId]) {
+        this.eventTags[this.selectedEventId] = [];
+      }
+      this.eventTags[this.selectedEventId].push(cleanTagName);
+      
+      // Clear tag container cache for this event
+      if (this._tagContainerCache) {
+        this._tagContainerCache.delete(this.selectedEventId);
+      }
+      
+      // Update the main panel tag display
+      this.updateMainPanelTags(this.selectedEventId);
+      
+      // Mark this tag as loading
+      this.loadingTags.add(`${this.selectedEventId}-${cleanTagName}`);
+      
+      // Set loading state
+      this.autoSaveStatus = 'saving';
+      
+      // Make API call to add tag
+      fetch(`/plan/timeline_events/${this.selectedEventId}/tags`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          tag_name: cleanTagName
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          // Remove loading state for this tag
+          this.loadingTags.delete(`${this.selectedEventId}-${cleanTagName}`);
+          
+          // Tag was already added optimistically, just update save status
+          this.autoSaveStatus = 'saved';
+          setTimeout(() => {
+            if (this.autoSaveStatus === 'saved') {
+              this.autoSaveStatus = 'saved'; // Keep it visible for a moment
+            }
+          }, 1000);
+        } else {
+          throw new Error(data.message || 'Failed to add tag');
+        }
+      })
+      .catch(error => {
+        console.error('Error adding tag:', error);
+        this.autoSaveStatus = 'error';
+        
+        // Remove loading state for this tag
+        this.loadingTags.delete(`${this.selectedEventId}-${cleanTagName}`);
+        
+        // Remove the optimistically added tag since the request failed
+        if (this.eventTags[this.selectedEventId]) {
+          this.eventTags[this.selectedEventId] = this.eventTags[this.selectedEventId].filter(tag => tag !== cleanTagName);
+        }
+        
+        // Clear tag container cache for this event
+        if (this._tagContainerCache) {
+          this._tagContainerCache.delete(this.selectedEventId);
+        }
+        
+        // Update the main panel tag display
+        this.updateMainPanelTags(this.selectedEventId);
+        
+        // Show error for a few seconds, then revert
+        setTimeout(() => {
+          if (this.autoSaveStatus === 'error') {
+            this.autoSaveStatus = 'saved';
+          }
+        }, 3000);
+      });
+    },
+    
+    removeEventTag(tagName) {
+      if (!this.selectedEventId || !tagName) return;
+      
+      // Store the original tags for rollback if needed
+      const originalTags = [...(this.eventTags[this.selectedEventId] || [])];
+      
+      // Mark this tag as loading before removal
+      this.loadingTags.add(`${this.selectedEventId}-${tagName}`);
+      
+      // Optimistically remove tag from local state immediately
+      if (this.eventTags[this.selectedEventId]) {
+        this.eventTags[this.selectedEventId] = this.eventTags[this.selectedEventId].filter(tag => tag !== tagName);
+      }
+      
+      // Clear tag container cache for this event
+      if (this._tagContainerCache) {
+        this._tagContainerCache.delete(this.selectedEventId);
+      }
+      
+      // Update the main panel tag display
+      this.updateMainPanelTags(this.selectedEventId);
+      
+      // Set loading state
+      this.autoSaveStatus = 'saving';
+      
+      // Make API call to remove tag
+      fetch(`/plan/timeline_events/${this.selectedEventId}/tags/${encodeURIComponent(tagName)}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          // Remove loading state for this tag
+          this.loadingTags.delete(`${this.selectedEventId}-${tagName}`);
+          
+          // Tag was already removed optimistically, just update save status
+          this.autoSaveStatus = 'saved';
+          setTimeout(() => {
+            if (this.autoSaveStatus === 'saved') {
+              this.autoSaveStatus = 'saved'; // Keep it visible for a moment
+            }
+          }, 1000);
+        } else {
+          throw new Error(data.message || 'Failed to remove tag');
+        }
+      })
+      .catch(error => {
+        console.error('Error removing tag:', error);
+        this.autoSaveStatus = 'error';
+        
+        // Remove loading state for this tag
+        this.loadingTags.delete(`${this.selectedEventId}-${tagName}`);
+        
+        // Restore the original tags since the request failed
+        this.eventTags[this.selectedEventId] = originalTags;
+        
+        // Clear tag container cache for this event
+        if (this._tagContainerCache) {
+          this._tagContainerCache.delete(this.selectedEventId);
+        }
+        
+        // Update the main panel tag display
+        this.updateMainPanelTags(this.selectedEventId);
+        
+        // Show error for a few seconds, then revert
+        setTimeout(() => {
+          if (this.autoSaveStatus === 'error') {
+            this.autoSaveStatus = 'saved';
+          }
+        }, 3000);
+      });
+    },
+    
+    // Helper method to check if a tag is currently loading
+    isTagLoading(eventId, tagName) {
+      return this.loadingTags.has(`${eventId}-${tagName}`);
+    },
+    
+    // Update the main panel tag display for an event
+    updateMainPanelTags(eventId) {
+      // Cache DOM query
+      if (!this._tagContainerCache) {
+        this._tagContainerCache = new Map();
+      }
+      
+      let tagContainer = this._tagContainerCache.get(eventId);
+      if (!tagContainer) {
+        tagContainer = document.querySelector(`#event-tags-${eventId}`);
+        if (!tagContainer) return;
+        this._tagContainerCache.set(eventId, tagContainer);
+      }
+      
+      const eventTags = this.getEventTags(eventId);
+      
+      if (eventTags.length === 0) {
+        // Batch DOM updates
+        if (!tagContainer.classList.contains('hidden')) {
+          tagContainer.classList.add('hidden');
+          tagContainer.innerHTML = '';
+        }
+      } else {
+        // Check if we need to update highlighting
+        const needsHighlightUpdate = this.tagFilterMode === 'highlight' && this.selectedTagFilters.length > 0;
+        const currentContent = tagContainer.innerHTML;
+        
+        const newContent = eventTags.map(tag => {
+          const isHighlighted = needsHighlightUpdate && this.selectedTagFilters.includes(tag);
+          return `
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${
+              isHighlighted 
+                ? 'bg-yellow-200 text-yellow-800 border border-yellow-300' 
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+            }">
+              ${tag}
+            </span>
+          `;
+        }).join('');
+        
+        // Only update DOM if content actually changed
+        if (currentContent !== newContent) {
+          tagContainer.classList.remove('hidden');
+          tagContainer.innerHTML = newContent;
+        }
+      }
+    },
+    
+    // Clear all tag filters
+    clearTagFilters() {
+      this.selectedTagFilters = [];
+      this.applyEventFilters();
+      
+      // Only update tag displays if we were in highlight mode
+      if (this.tagFilterMode === 'highlight') {
+        Object.keys(this.eventTags).forEach(eventId => {
+          this.updateMainPanelTags(eventId);
+        });
+      }
+    },
+    
+    // Handle tag filter mode change
+    changeTagFilterMode(newMode) {
+      this.tagFilterMode = newMode;
+      this.applyEventFilters();
     }
   };
 }
@@ -1773,7 +2414,6 @@ document.addEventListener('DOMContentLoaded', function() {
           title: "Untitled Event",
           timeline_id: timelineId,
           event_type: "general",
-          importance_level: "minor",
           status: "completed"
         }
       })
@@ -1864,6 +2504,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (description) description.id = `timeline_event_description_${eventId}`;
     if (notes) notes.id = `timeline_event_notes_${eventId}`;
     
+    // Update the tag container ID
+    const tagContainer = newEvent.querySelector('.js-template-event-tags');
+    if (tagContainer) {
+      tagContainer.id = `event-tags-${eventId}`;
+      tagContainer.classList.remove('js-template-event-tags');
+    }
+    
     // Add click handler for event selection
     const eventCard = newEvent.querySelector('.js-template-event-card');
     if (eventCard) {
@@ -1881,8 +2528,8 @@ document.addEventListener('DOMContentLoaded', function() {
             end_time_label: endTimeLabel ? endTimeLabel.value : '',
             description: description ? description.value : '',
             event_type: 'general',
-            importance_level: 'minor',
-            status: 'completed'
+            status: 'completed',
+            tags: []
           };
           alpineData.selectEvent(eventId, eventData);
         }

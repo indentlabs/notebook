@@ -298,8 +298,6 @@ class DocumentsController < ApplicationController
   def determine_layout
     if action_name == 'edit'
       'editor'
-    elsif ['index', 'show'].include?(action_name)
-      'tailwind'
     elsif action_name == 'plaintext'
       'plaintext'
     else

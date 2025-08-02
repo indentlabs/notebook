@@ -77,6 +77,9 @@ class TimelinesController < ApplicationController
     @suggested_page_tags = []
     cache_linkable_content_for_each_content_type
     
+    # Collect all unique tags from timeline events for filtering
+    @timeline_event_tags = collect_timeline_event_tags
+    
     # Get content already linked to other events in this timeline
     @timeline_linked_content = {}
     @timeline_content_summary = {}
@@ -191,5 +194,17 @@ class TimelinesController < ApplicationController
 
   def set_sidenav_expansion
     @sidenav_expansion = 'writing'
+  end
+
+  def collect_timeline_event_tags
+    # Get all unique tags from timeline events with their usage counts
+    tag_counts = @timeline.timeline_events
+                          .joins(:page_tags)
+                          .group('page_tags.tag')
+                          .count
+    
+    # Return array of hashes with tag name and count for easy access in view
+    tag_counts.map { |tag, count| { name: tag, count: count } }
+              .sort_by { |tag_data| tag_data[:name].downcase }
   end
 end

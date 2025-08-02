@@ -342,6 +342,8 @@ Rails.application.routes.draw do
       end
       post 'link',              to: 'timeline_events#link_entity',    on: :member
       post 'unlink/:entity_id', to: 'timeline_events#unlink_entity',  on: :member, as: :unlink_entity
+      post 'tags',              to: 'timeline_events#add_tag',        on: :member, as: :add_tag
+      delete 'tags/:tag_name',  to: 'timeline_events#remove_tag',     on: :member, as: :remove_tag
     end
 
     # Content attributes

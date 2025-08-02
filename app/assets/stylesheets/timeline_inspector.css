@@ -1,0 +1,296 @@
+/* =========================
+   TIMELINE INSPECTOR PANEL
+   Modern Details & Linking UI
+   ========================= */
+
+/* Inspector Panel Container */
+.timeline-inspector {
+  background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+  border-left: 1px solid #e5e7eb;
+  box-shadow: 
+    inset 1px 0 0 0 rgba(255, 255, 255, 0.5),
+    -2px 0 8px -2px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-inspector::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, 
+    transparent 0%, 
+    rgba(16, 185, 129, 0.1) 50%, 
+    transparent 100%
+  );
+}
+
+/* Inspector Header */
+.timeline-inspector .px-6.py-4.border-b {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e2e8f0;
+  position: relative;
+}
+
+.timeline-inspector .px-6.py-4.border-b::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    #cbd5e1 50%, 
+    transparent 100%
+  );
+}
+
+/* Event Title in Inspector */
+.timeline-inspector h4 {
+  color: #1f2937;
+  font-weight: 600;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Metadata Badges */
+.timeline-inspector .px-3.py-1 {
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  border: 1px solid transparent;
+}
+
+.timeline-inspector .bg-blue-100 {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.timeline-inspector .bg-yellow-100 {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+/* Description Panel */
+.timeline-inspector .bg-gray-50 {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.timeline-inspector .bg-gray-50:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 2px 4px 0 rgba(0, 0, 0, 0.05),
+    0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Quick Action Buttons */
+.timeline-inspector button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-inspector button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    transparent 100%
+  );
+  transition: left 0.5s ease;
+}
+
+.timeline-inspector button:hover::before {
+  left: 100%;
+}
+
+/* Link Content Button */
+.timeline-inspector .bg-green-100 {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 1px solid #6ee7b7;
+  box-shadow: 
+    0 1px 2px 0 rgba(16, 185, 129, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.timeline-inspector .bg-green-100:hover {
+  background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 2px 4px 0 rgba(16, 185, 129, 0.2),
+    0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Delete Button */
+.timeline-inspector .bg-red-50 {
+  background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+  border: 1px solid #fca5a5;
+  box-shadow: 
+    0 1px 2px 0 rgba(239, 68, 68, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.timeline-inspector .bg-red-50:hover {
+  background: linear-gradient(135deg, #fecaca 0%, #f87171 100%);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 2px 4px 0 rgba(239, 68, 68, 0.2),
+    0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Empty State Styling */
+.timeline-inspector .text-gray-500 {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Linked Content Info Box */
+.timeline-inspector .bg-gray-50.rounded-lg {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #10b981;
+}
+
+/* Section Dividers */
+.timeline-inspector .border-t,
+.timeline-inspector .border-b {
+  border-color: #f1f5f9;
+}
+
+/* Scrollbar Styling */
+.timeline-inspector .overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.timeline-inspector .overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.timeline-inspector .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+}
+
+.timeline-inspector .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+/* Mobile Responsive */
+@media (max-width: 1280px) {
+  .timeline-inspector {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 24rem;
+    height: 100vh;
+    z-index: 50;
+    transition: right 0.3s ease;
+    box-shadow: 
+      -2px 0 10px 0 rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(0, 0, 0, 0.05);
+  }
+  
+  .timeline-inspector.open {
+    right: 0;
+  }
+  
+  /* Mobile backdrop */
+  .timeline-inspector-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  
+  .timeline-inspector-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Focus States */
+.timeline-inspector button:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* Loading States */
+.timeline-inspector button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.timeline-inspector button:disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Subtle pattern overlay */
+.timeline-inspector::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(16, 185, 129, 0.02) 1px, transparent 0);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.timeline-inspector > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Animation for content changes */
+.timeline-inspector [x-show] {
+  transition: all 0.2s ease-out;
+}
+
+/* Enhanced section headers */
+.timeline-inspector h5 {
+  position: relative;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.timeline-inspector h5::after {
+  content: '';
+  position: absolute;
+  bottom: -0.25rem;
+  left: 0;
+  width: 1.5rem;
+  height: 2px;
+  background: linear-gradient(90deg, #10b981 0%, transparent 100%);
+  border-radius: 1px;
+}

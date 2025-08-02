@@ -4,59 +4,42 @@ class TimelineEvent < ApplicationRecord
   belongs_to :timeline, touch: true
 
   has_many :timeline_event_entities, dependent: :destroy
+  
+  include HasPageTags
 
   acts_as_list scope: [:timeline_id]
 
-  # Validations
-  validates :event_type, presence: true, inclusion: { in: %w[general plot_event character_development world_event historical battle political cultural mystery research] }
-  validates :importance_level, presence: true, inclusion: { in: %w[major minor background] }
-  validates :status, presence: true, inclusion: { in: %w[planned happening completed cancelled] }
-
-  # Scopes
-  scope :by_type, ->(type) { where(event_type: type) }
-  scope :by_importance, ->(level) { where(importance_level: level) }
-  scope :by_status, ->(status) { where(status: status) }
-  scope :major_events, -> { where(importance_level: 'major') }
-  scope :completed_events, -> { where(status: 'completed') }
-
-  # Event type definitions with display info
+  # Event type definitions with narrative focus and Material Icons
   EVENT_TYPES = {
-    'general' => { name: 'General Event', color: 'gray', icon: 'event' },
-    'plot_event' => { name: 'Plot Event', color: 'blue', icon: 'timeline' },
-    'character_development' => { name: 'Character Development', color: 'green', icon: 'person' },
-    'world_event' => { name: 'World Event', color: 'purple', icon: 'public' },
-    'historical' => { name: 'Historical', color: 'amber', icon: 'history' },
-    'battle' => { name: 'Battle/Conflict', color: 'red', icon: 'sword' },
-    'political' => { name: 'Political', color: 'indigo', icon: 'gavel' },
-    'cultural' => { name: 'Cultural', color: 'pink', icon: 'celebration' },
-    'mystery' => { name: 'Mystery/Clue', color: 'yellow', icon: 'search' },
-    'research' => { name: 'Research Note', color: 'teal', icon: 'book' }
+    'general' => { name: 'General', icon: 'radio_button_checked' },
+    'setup' => { name: 'Setup', icon: 'foundation' },
+    'exposition' => { name: 'Exposition', icon: 'info' },
+    'inciting_incident' => { name: 'Inciting Incident', icon: 'flash_on' },
+    'complication' => { name: 'Complication', icon: 'warning' },
+    'obstacle' => { name: 'Obstacle', icon: 'block' },
+    'conflict' => { name: 'Conflict', icon: 'gavel' },
+    'progress' => { name: 'Progress', icon: 'trending_up' },
+    'revelation' => { name: 'Revelation', icon: 'visibility' },
+    'transformation' => { name: 'Transformation', icon: 'autorenew' },
+    'climax' => { name: 'Climax', icon: 'whatshot' },
+    'resolution' => { name: 'Resolution', icon: 'check_circle' },
+    'aftermath' => { name: 'Aftermath', icon: 'restore' }
   }.freeze
 
-  IMPORTANCE_LEVELS = {
-    'major' => { name: 'Major Event', weight: 3 },
-    'minor' => { name: 'Minor Event', weight: 2 },
-    'background' => { name: 'Background Detail', weight: 1 }
-  }.freeze
-
-  STATUS_OPTIONS = {
-    'planned' => { name: 'Planned', color: 'yellow' },
-    'happening' => { name: 'Happening', color: 'blue' },
-    'completed' => { name: 'Completed', color: 'green' },
-    'cancelled' => { name: 'Cancelled', color: 'gray' }
-  }.freeze
+  # Validation
+  validates :event_type, inclusion: { in: EVENT_TYPES.keys }
 
   # Helper methods
   def event_type_info
     EVENT_TYPES[event_type] || EVENT_TYPES['general']
   end
 
-  def importance_info
-    IMPORTANCE_LEVELS[importance_level] || IMPORTANCE_LEVELS['minor']
+  def event_type_icon
+    event_type_info[:icon]
   end
 
-  def status_info
-    STATUS_OPTIONS[status] || STATUS_OPTIONS['completed']
+  def event_type_name
+    event_type_info[:name]
   end
 
   def has_duration?
@@ -66,14 +49,6 @@ class TimelineEvent < ApplicationRecord
   def display_duration
     return time_label if end_time_label.blank?
     "#{time_label} - #{end_time_label}"
-  end
-
-  def color_class
-    "timeline-event-#{event_type_info[:color]}"
-  end
-
-  def importance_weight
-    importance_info[:weight]
   end
 
   # todo move this to a real permissions authorizer
