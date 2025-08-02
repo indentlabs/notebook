@@ -340,24 +340,46 @@
                           </div>
                           
                           <% if event.time_label.present? || true %>
-                            <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
-                              <div>
-                                <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
-                                  <%= f.text_field :time_label, 
-                                      value: event.time_label,
-                                      class: "text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400 w-full",
-                                      placeholder: "When does this start?",
-                                      '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                                <% end %>
-                              </div>
-                              <div>
-                                <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
-                                  <%= f.text_field :end_time_label, 
-                                      value: event.end_time_label,
-                                      class: "text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400 w-full",
-                                      placeholder: "When does this end?",
-                                      '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                                <% end %>
+                            <div class="mt-2 timeline-duration-container">
+                              <div class="timeline-duration-fields" x-data="{ startTime: '<%= j(event.time_label) %>' }">
+                                <!-- Start Time Field -->
+                                <div class="timeline-duration-start">
+                                  <div class="timeline-duration-field-wrapper">
+                                    <i class="material-icons timeline-duration-icon">schedule</i>
+                                    <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
+                                      <%= f.text_field :time_label, 
+                                          value: event.time_label,
+                                          class: "timeline-duration-input text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400",
+                                          placeholder: "Start time",
+                                          'x-model': 'startTime',
+                                          '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                                    <% end %>
+                                  </div>
+                                </div>
+                                
+                                <!-- Duration Connector and End Field (shown only when start time exists) -->
+                                <template x-if="startTime && startTime.trim() !== ''">
+                                  <div class="timeline-duration-end-section">
+                                    <!-- Duration Connector -->
+                                    <div class="timeline-duration-connector">
+                                      <span class="timeline-duration-arrow">—</span>
+                                    </div>
+                                    
+                                    <!-- End Time Field -->
+                                    <div class="timeline-duration-end">
+                                      <div class="timeline-duration-field-wrapper">
+                                        <i class="material-icons timeline-duration-icon">schedule</i>
+                                        <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
+                                          <%= f.text_field :end_time_label, 
+                                              value: event.end_time_label,
+                                              class: "timeline-duration-input text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400",
+                                              placeholder: "End time",
+                                              '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                                        <% end %>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </template>
                               </div>
                             </div>
                           <% end %>
@@ -365,7 +387,7 @@
                         
                         <!-- Drag Handle -->
                         <div class="timeline-event-drag-handle mr-2 p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing rounded-lg transition-colors opacity-0 group-hover:opacity-100" 
-                             title="Drag to reorder event">
+                             title="Click and drag to reorder this event in the timeline">
                           <i class="material-icons text-lg">drag_indicator</i>
                         </div>
                         
@@ -698,35 +720,57 @@
                 </form>
               </div>
               
-              <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <form class="autosave-form" action="" method="post" data-remote="true">
-                    <input name="_method" type="hidden" value="patch">
-                    <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>">
-                    <input type="text" 
-                           name="timeline_event[time_label]" 
-                           class="text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400 w-full"
-                           placeholder="When does this start?"
-                           x-on:input.debounce.500ms="submitFormRemotely($el.form)">
-                  </form>
-                </div>
-                <div>
-                  <form class="autosave-form" action="" method="post" data-remote="true">
-                    <input name="_method" type="hidden" value="patch">
-                    <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>">
-                    <input type="text" 
-                           name="timeline_event[end_time_label]" 
-                           class="text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400 w-full"
-                           placeholder="When does this end?"
-                           x-on:input.debounce.500ms="submitFormRemotely($el.form)">
-                  </form>
+              <div class="mt-2 timeline-duration-container">
+                <div class="timeline-duration-fields" x-data="{ startTime: '' }">
+                  <!-- Start Time Field -->
+                  <div class="timeline-duration-start">
+                    <div class="timeline-duration-field-wrapper">
+                      <i class="material-icons timeline-duration-icon">schedule</i>
+                      <form class="autosave-form" action="" method="post" data-remote="true">
+                        <input name="_method" type="hidden" value="patch">
+                        <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>">
+                        <input type="text" 
+                               name="timeline_event[time_label]" 
+                               class="timeline-duration-input text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400"
+                               placeholder="Start time"
+                               x-model="startTime"
+                               x-on:input.debounce.500ms="submitFormRemotely($el.form)">
+                      </form>
+                    </div>
+                  </div>
+                  
+                  <!-- Duration Connector and End Field (shown only when start time exists) -->
+                  <template x-if="startTime && startTime.trim() !== ''">
+                    <div class="timeline-duration-end-section">
+                      <!-- Duration Connector -->
+                      <div class="timeline-duration-connector">
+                        <span class="timeline-duration-arrow">—</span>
+                      </div>
+                      
+                      <!-- End Time Field -->
+                      <div class="timeline-duration-end">
+                        <div class="timeline-duration-field-wrapper">
+                          <i class="material-icons timeline-duration-icon">schedule</i>
+                          <form class="autosave-form" action="" method="post" data-remote="true">
+                            <input name="_method" type="hidden" value="patch">
+                            <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>">
+                            <input type="text" 
+                                   name="timeline_event[end_time_label]" 
+                                   class="timeline-duration-input text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400"
+                                   placeholder="End time"
+                                   x-on:input.debounce.500ms="submitFormRemotely($el.form)">
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
                 </div>
               </div>
             </div>
             
             <!-- Drag Handle -->
             <div class="timeline-event-drag-handle mr-2 p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing rounded-lg transition-colors opacity-0 group-hover:opacity-100" 
-                 title="Drag to reorder event">
+                 title="Click and drag to reorder this event in the timeline">
               <i class="material-icons text-lg">drag_indicator</i>
             </div>
             
