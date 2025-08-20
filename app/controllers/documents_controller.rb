@@ -25,6 +25,7 @@ class DocumentsController < ApplicationController
     @recent_documents = current_user
       .linkable_documents.order('updated_at DESC')
       .includes([:user, :page_tags, :universe])
+      .limit(10) # Limit for sidebar display
 
     @documents = current_user
       .linkable_documents
@@ -35,6 +36,34 @@ class DocumentsController < ApplicationController
       .folders
       .where(context: 'Document', parent_folder_id: nil)
       .order('title ASC')
+
+    # Calculate frequent folders (top 5 by document count)
+    @frequent_folders = current_user
+      .folders
+      .where(context: 'Document')
+      .joins(:documents)
+      .group('folders.id')
+      .order('COUNT(documents.id) DESC')
+      .limit(5)
+
+    # Writing statistics
+    @total_documents = current_user.linkable_documents.count
+    @total_word_count = current_user.linkable_documents.sum(:cached_word_count) || 0
+    @average_words_per_doc = @total_documents > 0 ? (@total_word_count.to_f / @total_documents).round : 0
+
+    # This month's stats
+    @documents_this_month = current_user.linkable_documents
+      .where('created_at >= ?', Date.current.beginning_of_month)
+      .count
+
+    # Calculate writing streak using WordCountUpdate
+    calculate_writing_streak_data
+
+    # Recent activity for feed
+    @recent_activity = current_user.linkable_documents
+      .order('updated_at DESC')
+      .limit(10)
+      .select(:id, :title, :updated_at, :cached_word_count, :user_id)
 
     # TODO: can we reuse this content to skip a few queries in this controller action?
     cache_linkable_content_for_each_content_type
@@ -306,6 +335,40 @@ class DocumentsController < ApplicationController
   end
 
   private
+
+  def calculate_writing_streak_data
+    # Get last 30 days of word count updates
+    @writing_activity = {}
+    30.downto(0) do |days_ago|
+      date = Date.current - days_ago
+      @writing_activity[date] = WordCountUpdate
+        .where(user: current_user, for_date: date)
+        .sum(:word_count)
+    end
+
+    # Calculate current streak
+    @current_streak = 0
+    Date.current.downto(Date.current - 365) do |date|
+      if WordCountUpdate.where(user: current_user, for_date: date).exists?
+        @current_streak += 1
+      else
+        break
+      end
+    end
+
+    # Calculate longest streak (simplified version for now)
+    @longest_streak = @current_streak # This would need more complex calculation
+
+    # Today's word count
+    @words_written_today = WordCountUpdate
+      .where(user: current_user, for_date: Date.current)
+      .sum(:word_count)
+
+    # This week's word count
+    @words_written_this_week = WordCountUpdate
+      .where(user: current_user, for_date: Date.current.beginning_of_week..Date.current)
+      .sum(:word_count)
+  end
 
   def update_page_tags(document)
     tag_list = document_tag_params.fetch('value', '').split(PageTag::SUBMISSION_DELIMITER)
