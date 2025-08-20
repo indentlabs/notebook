@@ -332,6 +332,8 @@ Rails.application.routes.draw do
     end
     resources :timelines, only: [:index, :show, :new, :update, :edit, :destroy] do
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
+      get 'tag_suggestions', to: 'timelines#tag_suggestions', on: :member
+      get :toggle_archive, on: :member
     end
     resources :timeline_events do
       scope '/move', as: :move do

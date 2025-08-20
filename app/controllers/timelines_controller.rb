@@ -2,7 +2,7 @@ class TimelinesController < ApplicationController
   include ApplicationHelper
 
   before_action :authenticate_user!, except: [:show]
-  before_action :set_timeline, only: [:show, :edit, :update, :destroy]
+  before_action :set_timeline, only: [:show, :edit, :update, :destroy, :toggle_archive]
 
   before_action :set_navbar_color
   before_action :set_sidenav_expansion
@@ -141,6 +141,44 @@ class TimelinesController < ApplicationController
   def destroy
     @timeline.destroy
     redirect_to timelines_url, notice: 'Timeline was successfully destroyed.'
+  end
+
+  # GET /timelines/1/toggle_archive
+  def toggle_archive
+    unless @timeline.updatable_by?(current_user)
+      flash[:notice] = "You don't have permission to edit that!"
+      return redirect_back fallback_location: @timeline
+    end
+
+    verb = nil
+    success = if @timeline.archived?
+      verb = "unarchived"
+      @timeline.unarchive!
+    else
+      verb = "archived"
+      @timeline.archive!
+    end
+
+    if success
+      flash[:notice] = "Timeline #{verb} successfully!"
+    else
+      flash[:alert] = "Failed to #{verb.sub('ed', '')} timeline."
+    end
+
+    redirect_back fallback_location: edit_timeline_path(@timeline)
+  end
+
+  # GET /timelines/1/tag_suggestions
+  def tag_suggestions
+    # Get all unique tags from all of the current user's timelines
+    user_timeline_tags = PageTag.where(
+      user: current_user,
+      page_type: 'Timeline'
+    ).distinct.pluck(:tag).sort
+
+    render json: {
+      suggestions: user_timeline_tags
+    }
   end
 
   private

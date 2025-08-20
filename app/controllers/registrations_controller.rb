@@ -11,7 +11,7 @@ class RegistrationsController < Devise::RegistrationsController
     if action_name.in?(['new', 'create'])
       'tailwind/landing'
     else
-      'tailwind'
+      'application'
     end
   end
 
