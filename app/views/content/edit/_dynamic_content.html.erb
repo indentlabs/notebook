@@ -1,0 +1,276 @@
+<div id="dynamic-content" class="h-full overflow-y-auto">
+  
+  <!-- Details View (Form Fields) -->
+  <div x-show="currentView === 'details'" class="p-8">
+    
+    <!-- Show All Categories (Expanded View) -->
+    <div x-show="expandAllCategories">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Edit All Details</h2>
+        <p class="text-gray-600">Complete information for this <%= content.class_name.downcase %></p>
+      </div>
+      
+      <%= render partial: 'content/edit/all_categories', locals: { content: content, raw_content: raw_content } %>
+    </div>
+
+    <!-- Single Category View -->
+    <div x-show="!expandAllCategories && currentCategory">
+      <% content.data[:categories].each do |category| %>
+        <% next if category[:label] == 'Gallery' %>
+        
+        <div x-show="currentCategory === '<%= category[:label] %>'">
+          <div class="mb-6">
+            <div class="flex items-center mb-4">
+              <div class="flex items-center">
+                <i class="material-icons text-3xl <%= content.class_text_color %> mr-3"><%= category[:icon] %></i>
+                <div>
+                  <h2 class="text-2xl font-bold text-gray-900">Edit <%= category[:label] %></h2>
+                  <p class="text-gray-600">Update <%= category[:label].downcase %> details for this <%= content.class_name.downcase %></p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Progress indicator -->
+            <% if category[:percent_complete].present? && category[:percent_complete] >= 25 %>
+              <div class="bg-gray-200 rounded-full h-2 mb-4">
+                <div class="<%= content.class_color %> text-xs text-white font-medium text-center leading-none rounded-full h-2" 
+                     style="width: <%= category[:percent_complete] %>%">
+                </div>
+              </div>
+              <p class="text-sm text-gray-600 mb-4"><%= category[:percent_complete] %>% complete</p>
+            <% end %>
+          </div>
+          
+          <%= render partial: 'content/edit/single_category', locals: { 
+            content: content, 
+            category: category,
+            raw_content: raw_content 
+          } %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Default: Show first category -->
+    <div x-show="!expandAllCategories && !currentCategory">
+      <% first_category = content.data[:categories].find { |cat| cat[:label] != 'Gallery' } %>
+      <% if first_category %>
+        <div>
+          <div class="mb-6">
+            <div class="flex items-center mb-4">
+              <div class="flex items-center">
+                <i class="material-icons text-3xl <%= content.class_text_color %> mr-3"><%= first_category[:icon] %></i>
+                <div>
+                  <h2 class="text-2xl font-bold text-gray-900">Edit <%= first_category[:label] %></h2>
+                  <p class="text-gray-600">Update <%= first_category[:label].downcase %> details for this <%= content.class_name.downcase %></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <%= render partial: 'content/edit/single_category', locals: { 
+            content: content, 
+            category: first_category,
+            raw_content: raw_content 
+          } %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Gallery View -->
+  <div x-show="currentView === 'gallery'" class="p-8">
+    <div class="mb-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Gallery Management</h2>
+          <p class="text-gray-600">Upload and manage images for this <%= content.class_name.downcase %></p>
+        </div>
+      </div>
+    </div>
+    
+    <%= form_for raw_content, url: polymorphic_path(raw_content), method: :patch, html: { multipart: true } do |f| %>
+      <%= render partial: 'content/edit/gallery_panel', locals: { 
+        content: content, 
+        raw_content: raw_content,
+        f: f
+      } %>
+    <% end %>
+  </div>
+
+  <!-- Privacy View -->
+  <div x-show="currentView === 'privacy'" class="p-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Privacy & Sharing</h2>
+      <p class="text-gray-600">Control who can see and edit this <%= content.class_name.downcase %></p>
+    </div>
+    
+    <div class="max-w-2xl">
+      <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Visibility Settings</h3>
+        
+        <%= form_for raw_content, remote: true, html: { class: "space-y-4" } do |f| %>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Who can see this page?</label>
+            <div class="space-y-2">
+              <label class="flex items-start">
+                <%= f.radio_button :privacy, 'public', class: 'mt-1 mr-3' %>
+                <div>
+                  <div class="font-medium">Public</div>
+                  <div class="text-sm text-gray-500">Anyone on the internet can view this page</div>
+                </div>
+              </label>
+              
+              <label class="flex items-start">
+                <%= f.radio_button :privacy, 'private', class: 'mt-1 mr-3' %>
+                <div>
+                  <div class="font-medium">Private</div>
+                  <div class="text-sm text-gray-500">Only you can view this page</div>
+                </div>
+              </label>
+            </div>
+          </div>
+          
+          <div class="pt-4">
+            <%= f.submit "Update Privacy Settings", class: "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          </div>
+        <% end %>
+      </div>
+      
+      <% if raw_content.respond_to?(:contributors) %>
+        <div class="bg-white rounded-lg shadow border border-gray-200 p-6 mt-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Collaborators</h3>
+          <p class="text-sm text-gray-600 mb-4">Users who can edit this page with you</p>
+          
+          <!-- Add collaborator form would go here -->
+          <div class="text-gray-500 text-sm">
+            Collaborator management coming soon...
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Universe View -->
+  <% if raw_content.respond_to?(:universe_id) %>
+    <div x-show="currentView === 'universe'" class="p-8">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Universe Assignment</h2>
+        <p class="text-gray-600">Assign this <%= content.class_name.downcase %> to a universe</p>
+      </div>
+      
+      <div class="max-w-2xl">
+        <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
+          <%= form_for raw_content, remote: true, html: { class: "space-y-4" } do |f| %>
+            <div>
+              <label for="universe_id" class="block text-sm font-medium text-gray-700 mb-2">
+                Select Universe
+              </label>
+              <%= f.select :universe_id, 
+                          options_for_select(
+                            [['No universe', nil]] + current_user.universes.pluck(:name, :id),
+                            raw_content.universe_id
+                          ),
+                          {},
+                          { 
+                            class: "block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500",
+                            onchange: "this.form.submit();"
+                          } %>
+              <p class="mt-2 text-sm text-gray-500">
+                Assigning to a universe helps organize your content and enables cross-references.
+              </p>
+            </div>
+          <% end %>
+          
+          <% if raw_content.universe.present? %>
+            <div class="mt-6 pt-6 border-t border-gray-200">
+              <h4 class="text-sm font-medium text-gray-900 mb-3">Current Universe</h4>
+              <%= link_to raw_content.universe, class: "block group" do %>
+                <div class="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div class="flex-shrink-0">
+                    <div class="w-12 h-12 <%= Universe.color %> rounded-lg flex items-center justify-center">
+                      <i class="material-icons text-white"><%= Universe.icon %></i>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">
+                      <%= raw_content.universe.name %>
+                    </p>
+                    <p class="text-sm text-gray-500">
+                      <%= pluralize raw_content.universe.characters.count, 'character' %>,
+                      <%= pluralize raw_content.universe.locations.count, 'location' %>
+                    </p>
+                  </div>
+                  <i class="material-icons text-gray-400 group-hover:text-gray-600">chevron_right</i>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Settings View -->
+  <div x-show="currentView === 'settings'" class="p-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Page Settings</h2>
+      <p class="text-gray-600">Advanced settings for this <%= content.class_name.downcase %></p>
+    </div>
+    
+    <div class="max-w-2xl space-y-6">
+      <!-- Tags Section -->
+      <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Tags</h3>
+        <p class="text-sm text-gray-600 mb-4">Add tags to help organize and find this page</p>
+        
+        <%= form_for raw_content, remote: true do |f| %>
+          <div class="space-y-2">
+            <!-- Existing tags display -->
+            <% if content.page_tags.any? %>
+              <div class="flex flex-wrap gap-2 mb-3">
+                <% content.page_tags.each do |tag| %>
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    <%= tag %>
+                    <button type="button" class="ml-2 text-blue-600 hover:text-blue-800">
+                      <i class="material-icons text-xs">close</i>
+                    </button>
+                  </span>
+                <% end %>
+              </div>
+            <% end %>
+            
+            <!-- Add new tag input -->
+            <div class="flex gap-2">
+              <input type="text" 
+                     placeholder="Add a tag..." 
+                     class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+              <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                Add Tag
+              </button>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <!-- Delete Section -->
+      <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
+        <h3 class="text-lg font-medium text-red-900 mb-4">Danger Zone</h3>
+        
+        <div class="border border-red-300 rounded-lg p-4 bg-red-50">
+          <h4 class="text-sm font-medium text-red-800 mb-2">Delete this <%= content.class_name.downcase %></h4>
+          <p class="text-sm text-red-600 mb-4">
+            Once deleted, this page cannot be recovered. All associated data will be permanently removed.
+          </p>
+          <%= link_to polymorphic_path(raw_content), 
+                      method: :delete,
+                      data: { confirm: "Are you sure you want to delete #{raw_content.name}? This cannot be undone." },
+                      class: "inline-flex items-center px-4 py-2 border border-red-600 text-sm font-medium rounded-md text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+            <i class="material-icons text-sm mr-2">delete_forever</i>
+            Delete <%= content.class_name %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

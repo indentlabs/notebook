@@ -1,0 +1,235 @@
+<div class="h-full flex flex-col overflow-hidden">
+  <!-- Navigation Content -->
+  <div class="flex-1 overflow-y-auto pt-6">
+    
+    <!-- Categories Section for Details View -->
+    <div class="px-4 pb-4 border-b border-gray-200">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Edit Sections</h3>
+        <button @click="showAllCategories()" 
+                :class="isExpandAllActive() ? '<%= content.class_color %> text-white' : 'text-gray-400 hover:text-gray-600'"
+                class="p-1 rounded text-xs transition-colors"
+                title="Show all categories">
+          <i class="material-icons text-sm" 
+             :class="isExpandAllActive() ? 'text-white' : ''">unfold_more</i>
+        </button>
+      </div>
+      
+      <nav class="space-y-0.5">
+        <!-- Details/Form Fields Tab -->
+        <button @click="switchView('details')" 
+                :class="isViewActive('details') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+          <i class="material-icons text-lg mr-3" 
+             :class="isViewActive('details') ? 'text-white' : '<%= content.class_text_color %>'">edit</i>
+          Details
+        </button>
+        
+        <!-- Category navigation (shown when Details is active) -->
+        <div x-show="currentView === 'details'" class="ml-4 mt-1 space-y-0.5">
+          <% content.data[:categories].each do |category| %>
+            <% next if category[:label] == 'Gallery' %>
+            <% has_content = category[:fields].any? { |field| field[:value].present? } %>
+            
+            <button @click="showCategory('<%= category[:label] %>')" 
+                    :class="isCategoryActive('<%= category[:label] %>') ? 'bg-gray-100 text-gray-900' : '<%= has_content ? 'text-gray-600 hover:bg-gray-50' : 'text-gray-400' %>'"
+                    class="group flex items-center justify-between px-3 py-1.5 text-xs rounded-md w-full text-left transition-colors">
+              <div class="flex items-center">
+                <i class="material-icons text-sm mr-2 opacity-60"><%= category[:icon] %></i>
+                <span><%= category[:label] %></span>
+              </div>
+              <% if category[:percent_complete].present? && category[:percent_complete] > 0 %>
+                <span class="text-xs <%= has_content ? 'text-gray-500' : 'text-gray-400' %>">
+                  <%= category[:percent_complete] %>%
+                </span>
+              <% elsif !has_content %>
+                <span class="text-xs text-gray-400">Empty</span>
+              <% end %>
+            </button>
+          <% end %>
+          
+          <!-- Show All Categories option -->
+          <button @click="showAllCategories()" 
+                  :class="isExpandAllActive() ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
+                  class="group flex items-center px-3 py-1.5 text-xs rounded-md w-full text-left transition-colors mt-1">
+            <i class="material-icons text-sm mr-2 opacity-60">view_agenda</i>
+            <span class="italic">Show All Sections</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Edit Tools Section -->
+    <div class="px-4 py-4 border-b border-gray-200">
+      <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Page Management</h3>
+      <nav class="space-y-0.5">
+        <!-- Gallery Tab -->
+        <button @click="switchView('gallery')" 
+                :class="isViewActive('gallery') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+          <i class="material-icons text-lg mr-3" 
+             :class="isViewActive('gallery') ? 'text-white' : 'text-pink-500'">photo_library</i>
+          Gallery
+          <% 
+            image_count = raw_content.image_uploads.count rescue 0
+            basil_count = raw_content.basil_commissions.where.not(saved_at: nil).count rescue 0
+            total_images = image_count + basil_count
+          %>
+          <% if total_images > 0 %>
+            <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
+                  :class="isViewActive('gallery') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 text-gray-600'">
+              <%= total_images %>
+            </span>
+          <% end %>
+        </button>
+        
+        <!-- Privacy Tab -->
+        <button @click="switchView('privacy')" 
+                :class="isViewActive('privacy') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+          <i class="material-icons text-lg mr-3" 
+             :class="isViewActive('privacy') ? 'text-white' : '<%= content.class_text_color %>'">
+            <%= raw_content.privacy == 'public' ? 'public' : 'lock' %>
+          </i>
+          Privacy & Sharing
+        </button>
+        
+        <!-- Universe Tab (if applicable) -->
+        <% if raw_content.respond_to?(:universe_id) %>
+          <button @click="switchView('universe')" 
+                  :class="isViewActive('universe') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
+                  class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+            <i class="material-icons text-lg mr-3" 
+               :class="isViewActive('universe') ? 'text-white' : '<%= Universe.text_color %>'"><%= Universe.icon %></i>
+            Universe
+            <% if raw_content.universe.present? %>
+              <span class="ml-auto text-xs text-gray-500 truncate max-w-[100px]">
+                <%= raw_content.universe.name %>
+              </span>
+            <% end %>
+          </button>
+        <% end %>
+        
+        <!-- Settings Tab -->
+        <button @click="switchView('settings')" 
+                :class="isViewActive('settings') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+          <i class="material-icons text-lg mr-3" 
+             :class="isViewActive('settings') ? 'text-white' : 'text-gray-500'">settings</i>
+          Settings
+        </button>
+      </nav>
+    </div>
+
+    <!-- Universe Card (if assigned) -->
+    <% if raw_content.respond_to?(:universe) && raw_content.universe.present? %>
+      <div class="px-4 py-4 border-b border-gray-200">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">In Universe</h3>
+        
+        <% if raw_content.universe.respond_to?(:first_public_image) && raw_content.universe.first_public_image.present? %>
+          <!-- Visual universe card with background image -->
+          <%= link_to raw_content.universe, class: "block relative h-24 rounded-lg overflow-hidden group hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200" do %>
+            <!-- Background image -->
+            <%= image_tag raw_content.universe.first_public_image, 
+                          class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" %>
+            
+            <!-- Gradient overlay for text readability -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            
+            <!-- Content overlay -->
+            <div class="absolute inset-0 p-3 flex flex-col justify-end">
+              <div class="flex items-end justify-between">
+                <div class="flex-1 min-w-0">
+                  <p class="text-white font-semibold text-sm truncate mb-1">
+                    <%= raw_content.universe.name %>
+                  </p>
+                  <p class="text-white/90 text-xs flex items-center">
+                    <i class="material-icons text-xs mr-1"><%= Universe.icon %></i>
+                    Universe
+                  </p>
+                </div>
+                <i class="material-icons text-white/80 group-hover:text-white text-lg ml-2">open_in_new</i>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <!-- Fallback card for universes without images -->
+          <%= link_to raw_content.universe, class: "block relative h-24 rounded-lg overflow-hidden group hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200 #{Universe.color}" do %>
+            <!-- Pattern background -->
+            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.3"%3E%3Cpath d="M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+            
+            <!-- Content -->
+            <div class="relative p-3 h-full flex flex-col justify-end">
+              <div class="flex items-end justify-between">
+                <div class="flex-1 min-w-0">
+                  <p class="text-white font-semibold text-sm truncate mb-1">
+                    <%= raw_content.universe.name %>
+                  </p>
+                  <p class="text-white/90 text-xs flex items-center">
+                    <i class="material-icons text-xs mr-1"><%= Universe.icon %></i>
+                    Universe
+                  </p>
+                </div>
+                <i class="material-icons text-white/80 group-hover:text-white text-lg ml-2">open_in_new</i>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Edit Stats -->
+    <div class="px-4 py-4 border-b border-gray-200">
+      <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Page Stats</h3>
+      <div class="space-y-3">
+        
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">Word count</span>
+          <span class="font-medium text-gray-900 px-2 py-1 bg-gray-50 rounded">
+            <%= number_with_delimiter(content.cached_word_count || 0) %>
+          </span>
+        </div>
+        
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">Last saved</span>
+          <span class="font-medium text-gray-900" id="last-saved-time">
+            <%= distance_of_time_in_words(raw_content.updated_at, Time.current) %> ago
+          </span>
+        </div>
+        
+        <% 
+          total_fields = content.data[:categories].map { |cat| cat[:fields].count }.sum
+          completed_fields = content.data[:categories].map { |cat| cat[:fields].count { |field| field[:value].present? } }.sum
+          completion_percent = total_fields > 0 ? (completed_fields.to_f / total_fields * 100).round : 0
+        %>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">Completion</span>
+          <span class="font-medium text-gray-900">
+            <%= completion_percent %>%
+            <span class="text-xs text-gray-500">(<%= completed_fields %>/<%= total_fields %>)</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Actions -->
+  <div class="flex-shrink-0 px-4 py-4 bg-gray-50 border-t border-gray-200">
+    <div class="space-y-2">
+      <!-- View Page Link -->
+      <%= link_to raw_content, 
+                  class: "flex items-center justify-center px-3 py-2 text-sm font-medium text-white <%= content.class_color %> rounded-md hover:opacity-90 transition-colors w-full" do %>
+        <i class="material-icons text-sm mr-2">visibility</i>
+        View Page
+      <% end %>
+      
+      <!-- Template Customization -->
+      <%= link_to attribute_customization_path(content.class_name.downcase), 
+                  class: "flex items-center justify-center px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors w-full",
+                  target: "_blank" do %>
+        <i class="material-icons text-sm mr-2">tune</i>
+        Customize Template
+      <% end %>
+    </div>
+  </div>
+</div>

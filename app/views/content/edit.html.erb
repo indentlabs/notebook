@@ -1,60 +1,207 @@
-<% content_for :right_sidebar do %>
-  <%= render partial: 'content/edit/edit_tools', locals: { content: @serialized_content } %>
-<% end %>
+<%
+  page_description = "Editing #{@content.name} — a fictional #{@content.class.name.downcase} on Notebook.ai"
+  set_meta_tags title:       "Edit #{@content.name}",
+                description: page_description.truncate(160)
+%>
 
-<%= render layout: 'content/shared/page_layout', locals: { 
-  show_edit_controls: true, 
-  current_page: :edit 
-} do %>
-  <%= render partial: 'content/edit/edit_main', locals: { content: @serialized_content } %>
-<% end %>
+<div class="min-h-screen bg-gray-50" 
+     x-data="editPageController()" 
+     x-init="init()">
+  
+  <!-- Header with breadcrumbs -->
+  <%= render partial: 'content/shared/breadcrumb_nav', locals: { 
+    content: @serialized_content, 
+    show_edit_controls: false,
+    current_page: :edit 
+  } %>
 
-<!-- Edit-specific JavaScript -->
+  <!-- Main responsive layout -->
+  <div class="max-w-full mx-auto">
+    <div class="flex min-h-screen relative">
+      
+      <!-- Left Column - Navigation -->
+      <div class="w-72 bg-white border-r border-gray-200 shadow-sm flex-shrink-0">
+        <%= render partial: 'content/edit/navigation_sidebar', locals: { 
+          content: @serialized_content, 
+          raw_content: @content 
+        } %>
+      </div>
+      
+      <!-- Center Column - Dynamic Content -->
+      <div class="flex-1 bg-white">
+        <%= render partial: 'content/edit/dynamic_content', locals: { 
+          content: @serialized_content, 
+          raw_content: @content 
+        } %>
+      </div>
+      
+      <!-- Right Column - Desktop Only -->
+      <div class="hidden lg:block w-64 bg-gray-50 border-l border-gray-200 flex-shrink-0">
+        <%= render partial: 'content/edit/secondary_sidebar', locals: { 
+          content: @serialized_content, 
+          raw_content: @content 
+        } %>
+      </div>
+      
+      <!-- Mobile/Tablet Right Sidebar Toggle Tab -->
+      <div class="lg:hidden fixed right-0 top-1/2 transform -translate-y-1/2 z-40">
+        <button @click="toggleRightSidebar()" 
+                class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-l-lg shadow-lg transition-colors"
+                title="Edit Tools">
+          <i class="material-icons text-lg" x-show="!showRightSidebar">chevron_left</i>
+          <i class="material-icons text-lg" x-show="showRightSidebar">chevron_right</i>
+        </button>
+      </div>
+      
+      <!-- Mobile/Tablet Right Sidebar Overlay -->
+      <div x-show="showRightSidebar" 
+           x-transition:enter="transition-opacity ease-linear duration-200"
+           x-transition:enter-start="opacity-0"
+           x-transition:enter-end="opacity-100"
+           x-transition:leave="transition-opacity ease-linear duration-200"
+           x-transition:leave-start="opacity-100"
+           x-transition:leave-end="opacity-0"
+           @click="showRightSidebar = false"
+           class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+      </div>
+      
+      <!-- Mobile/Tablet Right Sidebar -->
+      <div x-show="showRightSidebar"
+           x-transition:enter="transform transition ease-in-out duration-200"
+           x-transition:enter-start="translate-x-full"
+           x-transition:enter-end="translate-x-0"
+           x-transition:leave="transform transition ease-in-out duration-200"
+           x-transition:leave-start="translate-x-0"
+           x-transition:leave-end="translate-x-full"
+           class="lg:hidden fixed right-0 top-0 h-full w-72 bg-gray-50 border-l border-gray-200 shadow-xl z-50 overflow-y-auto">
+        
+        <!-- Close button -->
+        <div class="p-4 border-b border-gray-200 bg-white">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-900">Edit Tools</h2>
+            <button @click="showRightSidebar = false" 
+                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <i class="material-icons text-gray-500">close</i>
+            </button>
+          </div>
+        </div>
+        
+        <%= render partial: 'content/edit/secondary_sidebar', locals: { 
+          content: @serialized_content, 
+          raw_content: @content 
+        } %>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- Alpine.js Controller for dynamic content switching -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Track unsaved changes
-  let hasUnsavedChanges = false;
-  
-  // Mark as having unsaved changes when any form field changes
-  document.addEventListener('input', function(e) {
-    if (e.target.closest('form')) {
-      hasUnsavedChanges = true;
-    }
-  });
-  
-  // Clear unsaved changes flag when autosave succeeds
-  document.addEventListener('autosave:success', function() {
-    hasUnsavedChanges = false;
-  });
-  
-  // Warn user about unsaved changes when leaving page
-  window.addEventListener('beforeunload', function(e) {
-    if (hasUnsavedChanges) {
-      e.preventDefault();
-      e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-      return 'You have unsaved changes. Are you sure you want to leave?';
-    }
-  });
-  
-  // Keyboard shortcuts
-  document.addEventListener('keydown', function(e) {
-    // Ctrl/Cmd + S to save all (if needed)
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-      e.preventDefault();
-      // Trigger autosave on currently focused field if any
-      const activeElement = document.activeElement;
-      if (activeElement && activeElement.classList.contains('autosave-closest-form-on-change')) {
-        activeElement.blur(); // This triggers autosave
-      }
-    }
+function editPageController() {
+  return {
+    currentView: 'details',
+    currentCategory: '<%= @serialized_content.data[:categories].find { |cat| cat[:label] != "Gallery" }&.dig(:label) %>',
+    expandAllCategories: false,
+    showRightSidebar: false,
+    hasUnsavedChanges: false,
     
-    // Escape to cancel/go back
-    if (e.key === 'Escape' && !e.target.closest('.dropdown-menu')) {
-      e.preventDefault();
-      if (confirm('Are you sure you want to stop editing? Any unsaved changes will be lost.')) {
-        window.location.href = '<%= polymorphic_path(@content) %>';
+    init() {
+      // Set initial view from URL hash if present
+      const hash = window.location.hash.substring(1);
+      if (['details', 'gallery', 'privacy', 'universe', 'settings'].includes(hash)) {
+        this.currentView = hash;
       }
+      
+      // Track unsaved changes
+      document.addEventListener('input', (e) => {
+        if (e.target.closest('form')) {
+          this.hasUnsavedChanges = true;
+        }
+      });
+      
+      // Clear unsaved changes flag when autosave succeeds
+      document.addEventListener('autosave:success', () => {
+        this.hasUnsavedChanges = false;
+      });
+      
+      // Warn user about unsaved changes when leaving page
+      window.addEventListener('beforeunload', (e) => {
+        if (this.hasUnsavedChanges) {
+          e.preventDefault();
+          e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+          return 'You have unsaved changes. Are you sure you want to leave?';
+        }
+      });
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + S to save
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+          const activeElement = document.activeElement;
+          if (activeElement && activeElement.classList.contains('autosave-closest-form-on-change')) {
+            activeElement.blur(); // Trigger autosave
+          }
+        }
+        
+        // Escape to go back to view mode
+        if (e.key === 'Escape' && !e.target.closest('.dropdown-menu')) {
+          e.preventDefault();
+          if (confirm('Are you sure you want to stop editing? Any unsaved changes will be lost.')) {
+            window.location.href = '<%= polymorphic_path(@content) %>';
+          }
+        }
+      });
+      
+      // Close right sidebar on window resize to desktop
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1024) { // lg breakpoint
+          this.showRightSidebar = false;
+        }
+      });
+    },
+    
+    switchView(view) {
+      this.currentView = view;
+      this.currentCategory = null;
+      this.expandAllCategories = false;
+      window.location.hash = view;
+      
+      // Scroll to top of content area
+      const contentArea = document.querySelector('.flex-1');
+      if (contentArea) contentArea.scrollTop = 0;
+    },
+    
+    showCategory(categoryName) {
+      this.currentView = 'details';
+      this.currentCategory = categoryName;
+      this.expandAllCategories = false;
+      window.location.hash = 'details';
+    },
+    
+    showAllCategories() {
+      this.currentView = 'details';
+      this.currentCategory = null;
+      this.expandAllCategories = true;
+      window.location.hash = 'details';
+    },
+    
+    isViewActive(view) {
+      return this.currentView === view;
+    },
+    
+    isCategoryActive(categoryName) {
+      return this.currentView === 'details' && this.currentCategory === categoryName && !this.expandAllCategories;
+    },
+    
+    isExpandAllActive() {
+      return this.currentView === 'details' && this.expandAllCategories;
+    },
+    
+    toggleRightSidebar() {
+      this.showRightSidebar = !this.showRightSidebar;
     }
-  });
-});
+  }
+}
 </script>

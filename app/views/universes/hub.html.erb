@@ -1,15 +1,81 @@
 <style>
-  @keyframes breathing-zoom {
+  @keyframes gentle-drift {
     0%, 100% {
-      transform: scale(1);
+      transform: scale(1.01) translateX(0);
+    }
+    25% {
+      transform: scale(1.015) translateX(-1%);
     }
     50% {
-      transform: scale(1.03);
+      transform: scale(1.02) translateX(0);
+    }
+    75% {
+      transform: scale(1.015) translateX(1%);
     }
   }
   
   .breathing-header {
-    animation: breathing-zoom 8s ease-in-out infinite;
+    animation: gentle-drift 12s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 
+        0 0 20px rgba(147, 51, 234, 0.5),
+        0 0 40px rgba(147, 51, 234, 0.3),
+        0 0 60px rgba(147, 51, 234, 0.1),
+        inset 0 0 20px rgba(147, 51, 234, 0.2);
+    }
+    50% {
+      box-shadow: 
+        0 0 30px rgba(147, 51, 234, 0.8),
+        0 0 60px rgba(147, 51, 234, 0.5),
+        0 0 90px rgba(147, 51, 234, 0.3),
+        inset 0 0 30px rgba(147, 51, 234, 0.4);
+    }
+  }
+  
+  .universe-portal {
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .universe-portal::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: conic-gradient(from 180deg at 50% 50%, 
+      transparent,
+      rgba(147, 51, 234, 0.1),
+      rgba(168, 85, 247, 0.3),
+      rgba(147, 51, 234, 0.1),
+      transparent);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: spin 4s linear infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  li:hover .universe-portal {
+    animation: pulse-glow 2s ease-in-out infinite;
+    transform: scale(1.05);
+  }
+  
+  li:hover .universe-portal::before {
+    opacity: 1;
   }
 </style>
 
@@ -50,7 +116,7 @@
   <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
     <li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200">
       <div class="flex-1 flex flex-col p-8">
-        <%= image_tag "card-headers/universes.webp", class: 'w-48 h-48 flex-shrink-0 mx-auto rounded-full border-2 border-purple-800' %>
+        <%= image_tag "card-headers/universes.webp", class: 'w-48 h-48 flex-shrink-0 mx-auto rounded-full border-2 border-purple-800 universe-portal' %>
         <h3 class="mt-6 text-gray-900 text-sm font-medium">All universes</h3>
         <dl class="mt-1 flex-grow flex flex-col justify-between">
           <dd class="text-gray-500 text-sm">Selecting this option will clear your universe filter and show <em>all</em> content from <em>all</em> universes.</dd>
@@ -72,7 +138,7 @@
       <li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200">
         <div class="flex-1 flex flex-col p-8">
           <%= link_to universe.view_path do %>
-            <%= image_tag universe.random_image_including_private, class: 'w-48 h-48 flex-shrink-0 mx-auto rounded-full border-2 border-purple-800 hover:opacity-80' %>
+            <%= image_tag universe.random_image_including_private, class: 'w-48 h-48 flex-shrink-0 mx-auto rounded-full border-2 border-purple-800 universe-portal' %>
           <% end %>
           <h3 class="mt-6 text-gray-900 text-sm font-medium"><%= universe.name %></h3>
           <dl class="mt-1 flex-grow flex flex-col justify-between">
