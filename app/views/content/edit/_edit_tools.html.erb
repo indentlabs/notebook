@@ -1,13 +1,7 @@
-<div class="hidden lg:block w-80 px-6 pt-6" id="desktop-edit-tools">
-  <!-- Edit Status Panel -->
+<div class="hidden lg:block w-80 h-full flex flex-col" id="desktop-edit-tools">
+  <div class="flex-1 overflow-y-auto px-6 pt-6 pb-6">
+    <!-- Edit Status Panel -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 p-4">
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-sm font-medium text-gray-900">Edit Status</h3>
-      <div class="text-xs text-gray-500" id="last-saved">
-        Auto-saving...
-      </div>
-    </div>
-    
     <!-- Overall completion -->
     <% total_fields = content.data[:categories].map { |cat| cat[:fields].count }.sum %>
     <% completed_fields = content.data[:categories].map { |cat| cat[:fields].count { |field| field[:value].present? } }.sum %>
@@ -25,10 +19,6 @@
     
     <!-- Quick stats -->
     <div class="grid grid-cols-2 gap-3 text-sm">
-      <div>
-        <span class="text-gray-500">Word count:</span>
-        <span class="text-gray-900 font-medium"><%= number_with_delimiter(content.cached_word_count || 0) %></span>
-      </div>
       <div>
         <span class="text-gray-500">Completion:</span>
         <span class="text-gray-900 font-medium"><%= completion_percent %>%</span>
@@ -65,26 +55,6 @@
           </button>
         </div>
       <% end %>
-    </div>
-  </div>
-
-  <!-- Template Actions -->
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 p-4">
-    <h3 class="text-sm font-medium text-gray-900 mb-3">Template Tools</h3>
-    <div class="space-y-2">
-      <%= link_to attribute_customization_path(content.class_name.downcase), 
-                  class: "w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
-                  target: "_blank" do %>
-        <i class="material-icons text-lg mr-2">tune</i>
-        Customize Template
-      <% end %>
-      
-      <button type="button" 
-              onclick="expandAllCategories()"
-              class="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-        <i class="material-icons text-lg mr-2">unfold_more</i>
-        Show All Fields
-      </button>
     </div>
   </div>
 
@@ -134,33 +104,13 @@
     </div>
   <% end %>
 
-  <!-- Quick Actions -->
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 p-4">
-    <h3 class="text-sm font-medium text-gray-900 mb-3">Actions</h3>
-    <div class="space-y-2">
-      <%= link_to @content, 
-                  class: "w-full inline-flex items-center justify-center px-3 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" do %>
-        <i class="material-icons text-lg mr-2">visibility</i>
-        View Page
-      <% end %>
-      
-      <% if @content.respond_to?(:gallery_path) %>
-        <%= link_to send("gallery_#{@content.class.name.downcase}_path", @content), 
-                    class: "w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-          <i class="material-icons text-lg mr-2">photo_library</i>
-          Manage Images
-        <% end %>
-      <% end %>
-    </div>
-  </div>
-
   <!-- Keyboard Shortcuts Help -->
   <div class="bg-gray-50 rounded-lg p-4 text-xs text-gray-600">
     <h4 class="font-medium text-gray-700 mb-2">Keyboard Shortcuts</h4>
     <div class="space-y-1">
       <div class="flex justify-between">
         <span>Save current field</span>
-        <kbd class="px-1 py-0.5 bg-gray-200 rounded">⌘S</kbd>
+        <kbd class="px-1 py-0.5 bg-gray-200 rounded keyboard-shortcut-save">⌘S</kbd>
       </div>
       <div class="flex justify-between">
         <span>Exit editing</span>
@@ -172,9 +122,21 @@
       </div>
     </div>
   </div>
+  </div>
 </div>
 
 <script>
+// Detect OS and update keyboard shortcuts
+document.addEventListener('DOMContentLoaded', function() {
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0 || 
+                navigator.userAgent.toUpperCase().indexOf('MAC') >= 0;
+  
+  // Update all save shortcut displays
+  document.querySelectorAll('.keyboard-shortcut-save').forEach(function(element) {
+    element.textContent = isMac ? '⌘S' : 'Ctrl+S';
+  });
+});
+
 function expandAllCategories() {
   // Show all field sections
   document.querySelectorAll('.category-section').forEach(section => {
@@ -325,13 +287,6 @@ function focusNextEmptyField() {
                     class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
           <i class="material-icons text-lg mr-1">visibility</i>
           View
-        <% end %>
-        
-        <%= link_to attribute_customization_path(content.class_name.downcase), 
-                    class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
-                    target: "_blank" do %>
-          <i class="material-icons text-lg mr-1">tune</i>
-          Template
         <% end %>
       </div>
     </div>
