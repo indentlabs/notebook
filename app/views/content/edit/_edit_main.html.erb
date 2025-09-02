@@ -194,7 +194,7 @@ function toggleMobileSidebar() {
 document.addEventListener('DOMContentLoaded', function() {
   // Enhanced autosave feedback
   document.addEventListener('autosave:start', function(e) {
-    const form = e.target.closest('.field-form');
+    const form = e.detail.field?.closest('.field-form');
     if (form) {
       form.classList.add('saving');
       form.classList.remove('saved', 'error');
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   document.addEventListener('autosave:success', function(e) {
-    const form = e.target.closest('.field-form');
+    const form = e.detail.field?.closest('.field-form');
     if (form) {
       form.classList.add('saved');
       form.classList.remove('saving', 'error');
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   document.addEventListener('autosave:error', function(e) {
-    const form = e.target.closest('.field-form');
+    const form = e.detail.field?.closest('.field-form');
     if (form) {
       form.classList.add('error');
       form.classList.remove('saving', 'saved');

@@ -5,7 +5,9 @@
       # TODO: audit which universes are included here for 1. collaborating and 2. free users collaborating on premium universes
       select_tag "field[value]",
         options_for_select(
-          @linkables_raw['Universe'].compact.sort_by(&:name).map { |u| [u.name, u.id] },
+          @linkables_raw['Universe'].compact.sort_by(&:name).map { |u| 
+            [u.name, u.id, { 'data-universe-privacy': u.privacy || 'private' }] 
+          },
           raw_model.try(:universe_id) || @universe_scope.try(:id)
         ),
         include_blank: true,

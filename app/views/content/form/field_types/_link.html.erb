@@ -32,8 +32,8 @@
     <div class="inline-block relative w-full">
       <div class="flex flex-col items-center relative">
         <%# Closed state %>
-        <div x-on:click="open" class="w-full">
-          <div class="flex border border-gray-200 bg-white rounded">
+        <div class="w-full">
+          <div @click="open()" class="flex border border-gray-200 bg-white rounded cursor-pointer hover:border-gray-400 transition-colors">
             <div class="flex flex-auto flex-wrap">
               <%# Chips for all selected options %>
               <template x-for="(option,index) in selected" :key="index">
@@ -57,28 +57,25 @@
               </template>
               
               <%# Placeholder component for when no options are selected %>
-              <div x-show="selected.length == 0" class="flex-1">
+              <div x-show="selected.length == 0" class="flex-1 pointer-events-none">
                 <input placeholder="Link your other pages"
-                       class="bg-transparent p-1 px-2 appearance-none outline-none h-full w-full text-gray-800"
+                       class="bg-transparent p-1 px-2 appearance-none outline-none h-full w-full text-gray-800 cursor-pointer"
                        x-bind:value="selectedValues()"
                        disabled
+                       readonly
                 />
               </div>
             </div>
 
             <%# Dropdown arrow %>
-            <div class="text-gray-300 w-8 py-1 pl-2 pr-1 border-l flex items-center border-gray-200">
-              <button type="button" x-show="isOpen() === false" x-on:click="open" class="cursor-pointer w-6 h-6 text-gray-600 outline-none focus:outline-none">
-                <svg version="1.1" class="fill-current h-4 w-4" viewBox="0 0 20 20">
-                  <path d="M17.418,6.109c0.272-0.268,0.709-0.268,0.979,0s0.271,0.701,0,0.969l-7.908,7.83 c-0.27,0.268-0.707,0.268-0.979,0l-7.908-7.83c-0.27-0.268-0.27-0.701,0-0.969c0.271-0.268,0.709-0.268,0.979,0L10,13.25 L17.418,6.109z" />
-                </svg>
-              </button>
-              <button type="button" x-show="isOpen() === true" @click="close" class="cursor-pointer w-6 h-6 text-gray-600 outline-none focus:outline-none">
-                <svg class="fill-current h-4 w-4" viewBox="0 0 20 20">
-                  <path d="M2.582,13.891c-0.272,0.268-0.709,0.268-0.979,0s-0.271-0.701,0-0.969l7.908-7.83 c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,0.268-0.709,0.268-0.978,0L10,6.75L2.582,13.891z" />
-                </svg>
-              </button>
-            </div>
+            <button type="button" @click.stop="isOpen() ? close() : open()" class="text-gray-300 w-8 py-1 pl-2 pr-1 border-l flex items-center justify-center border-gray-200 cursor-pointer hover:bg-gray-50 focus:outline-none">
+              <svg x-show="isOpen() === false" class="fill-current h-4 w-4 pointer-events-none select-none" viewBox="0 0 20 20" style="pointer-events: none;">
+                <path d="M17.418,6.109c0.272-0.268,0.709-0.268,0.979,0s0.271,0.701,0,0.969l-7.908,7.83 c-0.27,0.268-0.707,0.268-0.979,0l-7.908-7.83c-0.27-0.268-0.27-0.701,0-0.969c0.271-0.268,0.709-0.268,0.979,0L10,13.25 L17.418,6.109z" style="pointer-events: none;" />
+              </svg>
+              <svg x-show="isOpen() === true" class="fill-current h-4 w-4 pointer-events-none select-none" viewBox="0 0 20 20" style="pointer-events: none;">
+                <path d="M2.582,13.891c-0.272,0.268-0.709,0.268-0.979,0s-0.271-0.701,0-0.969l7.908-7.83 c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,0.268-0.709,0.268-0.978,0L10,6.75L2.582,13.891z" style="pointer-events: none;" />
+              </svg>
+            </button>
           </div>
         </div>
 

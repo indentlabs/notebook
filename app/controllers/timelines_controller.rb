@@ -58,7 +58,7 @@ class TimelinesController < ApplicationController
     @total_pages = 1
     
     @folders = []
-    render 'content/index'
+    render 'timelines/index'
   end
 
   def show

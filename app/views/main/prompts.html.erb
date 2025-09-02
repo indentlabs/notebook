@@ -1,52 +1,615 @@
-<section class="text-gray-600 body-font">
-  <div class="container px-5 py-24 mx-auto flex flex-wrap items-center">
-    <div class="lg:w-2/5 md:pr-16 lg:pr-0 pr-0">
-      <div class="text-xs text-gray-500 ml-8 mb-2 uppercase">
-        A prompt from your world
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50" x-data="writingPrompt()">
+  <!-- Include content linking functionality -->
+  <%= render partial: 'javascripts/content_linking_alpine' %>
+  
+  <!-- Main Content Area -->
+  <div class="py-12 px-6">
+    <div class="max-w-4xl mx-auto">
+      
+      <!-- Top Stats Bar -->
+      <div class="mb-8 flex items-center justify-between">
+        <!-- Left: Writing Stats -->
+        <div class="flex items-center space-x-4 text-sm text-gray-500">
+          <div class="flex items-center space-x-1" x-show="hasStartedWriting">
+            <i class="material-icons text-base" :class="{ 'text-orange-500': isPaused }">
+              <span x-text="isPaused ? 'pause_circle' : 'schedule'"></span>
+            </i>
+            <span x-text="formattedTime" :class="{ 'text-orange-500': isPaused }"></span>
+          </div>
+          <div class="text-gray-300" x-show="hasStartedWriting">•</div>
+          <div class="flex items-center space-x-1">
+            <i class="material-icons text-base">edit</i>
+            <span><span x-text="wordCount"></span> words</span>
+          </div>
+          <div class="text-gray-300" x-show="hasStartedWriting && wpm > 0">•</div>
+          <div class="flex items-center space-x-1" x-show="hasStartedWriting && wpm > 0">
+            <i class="material-icons text-base">speed</i>
+            <span><span x-text="wpm"></span> wpm</span>
+          </div>
+        </div>
+        
+        <!-- Right: Actions -->
+        <div class="flex items-center space-x-2">
+          <button @click="getNewPrompt()" 
+                  class="px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-2 text-sm">
+            <i class="material-icons text-base">refresh</i>
+            <span>New Prompt</span>
+          </button>
+        </div>
       </div>
-      <h1 class="title-font font-medium leading-normal text-4xl text-white bg-notebook-blue px-8 py-6 rounded">
-        <%=
-          t(
-            "serendipitous_questions.attributes.#{@content.page_type.downcase}.#{@attribute_field_to_question.label.downcase}",
-            name:    @content.name,
-            default: "What is #{@content.name}'s #{@attribute_field_to_question.label.downcase}?"
-          )
-        %>
-      </h1>
-    </div>
-    <div class="lg:w-3/6 bg-gray-100 rounded-lg p-8 flex flex-col md:ml-auto w-full mt-10 md:mt-0">
-      <div class="text-xs text-gray-500 uppercase ml-8">expanding</div>
-      <h2 class="text-gray-900 text-xl font-medium title-font mb-5">
-        <%= link_to @content.view_path do %>
-          <i class="material-icons float-left <%= @content.text_color %> mr-2"><%= @content.icon %></i>
-          <%= @content.name %>
-        <% end %>
-      </h2>
+      
+      <!-- Prompt Section -->
+      <div class="mb-6 animate-fade-in">
+        <!-- Content Context -->
+        <div class="mb-6 flex items-center space-x-3">
+          <div class="flex items-center space-x-2 text-sm text-gray-500">
+            <span class="uppercase tracking-wider text-xs">Expanding</span>
+            <span class="text-gray-300">•</span>
+          </div>
+          <%= link_to @content.view_path, class: "flex items-center space-x-2 group" do %>
+            <i class="material-icons text-lg <%= @content.text_color %>"><%= @content.icon %></i>
+            <span class="text-gray-700 group-hover:text-gray-900 font-medium transition-colors"><%= @content.name %></span>
+            <i class="material-icons text-base text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</i>
+          <% end %>
+        </div>
+        
+        <!-- The Prompt - Clean presentation -->
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold text-gray-900 leading-relaxed mb-3">
+            <%=
+              t(
+                "serendipitous_questions.attributes.#{@content.page_type.downcase}.#{@attribute_field_to_question.label.downcase}",
+                name:    @content.name,
+                default: "What is #{@content.name}'s #{@attribute_field_to_question.label.downcase}?"
+              )
+            %>
+          </h1>
+          <div class="text-sm text-gray-500">
+            <span class="inline-flex items-center space-x-1">
+              <i class="material-icons text-base">label</i>
+              <span><%= @attribute_field_to_question.label %></span>
+            </span>
+          </div>
+        </div>
+      </div>
 
-      <%= form_for @content, url: FieldTypeService.form_path_from_attribute_field(@attribute_field_to_question), method: :patch do |f| %>
+      <!-- Writing Area -->
+      <%= form_for @content, url: FieldTypeService.form_path_from_attribute_field(@attribute_field_to_question), 
+                   method: :patch, remote: true, html: { "@submit.prevent": "handleSave" } do |f| %>
         <%= hidden_field(:override, :redirect_path, value: prompts_path) %>
-
         <%= hidden_field_tag "entity[entity_id]",   @content.id %>
         <%= hidden_field_tag "entity[entity_type]", @content.page_type %>
-
-        <div class="relative">
-          <%= hidden_field_tag "field[name]", @attribute_field_to_question[:id] %>
-          <label for="field[value]" class="leading-7 text-sm text-gray-600"><%= @attribute_field_to_question.label %></label>
-          <%=
-            text_area_tag "field[value]",
-                          @attribute_field_to_question[:value],
-                          class: "js-can-mention-pages w-full h-96 bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out",
-                          placeholder: "Write as little or as much as you'd like!"
-          %>
+        <%= hidden_field_tag "field[name]", @attribute_field_to_question[:id] %>
+        
+        <!-- Beautiful Writing Box -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl">
+          <!-- Editor Toolbar -->
+          <div class="border-b border-gray-100 px-6 py-3 flex items-center justify-between bg-gradient-to-b from-gray-50 to-white">
+            <div class="flex items-center space-x-3">
+              <button type="button" @click="insertMarkdown('**', '**')" 
+                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                      title="Bold (Cmd/Ctrl+B)">
+                <i class="material-icons text-lg">format_bold</i>
+              </button>
+              <button type="button" @click="insertMarkdown('*', '*')" 
+                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                      title="Italic (Cmd/Ctrl+I)">
+                <i class="material-icons text-lg">format_italic</i>
+              </button>
+              <div class="w-px h-6 bg-gray-200"></div>
+              <button type="button" @click="insertMarkdown('# ', '')" 
+                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                      title="Heading">
+                <i class="material-icons text-lg">title</i>
+              </button>
+              <button type="button" @click="insertMarkdown('- ', '')" 
+                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                      title="List">
+                <i class="material-icons text-lg">format_list_bulleted</i>
+              </button>
+              <button type="button" @click="insertMarkdown('> ', '')" 
+                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                      title="Quote">
+                <i class="material-icons text-lg">format_quote</i>
+              </button>
+            </div>
+            
+            <div class="flex items-center space-x-3 text-sm text-gray-500">
+              <span class="text-xs text-gray-400" x-text="autosaveStatus">
+                Auto-saves every 30 seconds • Press Esc to save now
+              </span>
+            </div>
+          </div>
+          
+          <!-- Text Editor with Auto-Expand -->
+          <div class="relative bg-gradient-to-b from-white to-gray-50/30" x-data="contentLinking()">
+            <%=
+              text_area_tag "field[value]",
+                            @attribute_field_to_question[:value],
+                            class: "js-can-mention-pages autosave-closest-form-on-change w-full p-8 text-lg leading-relaxed text-gray-800 
+                                   placeholder-gray-400 border-2 border-gray-200 focus:ring-0 focus:outline-none resize-none
+                                   transition-all duration-200",
+                            placeholder: "Start writing your thoughts here...\n\nYour response will be saved automatically as you type.",
+                            "x-model": "content",
+                            "@input": "handleInput",
+                            "@focus": "resumeTimer",
+                            "@blur": "pauseTimer",
+                            "@keydown.cmd.s.prevent": "handleSave",
+                            "@keydown.ctrl.s.prevent": "handleSave",
+                            "@keydown.cmd.b.prevent": "() => insertMarkdown('**', '**')",
+                            "@keydown.ctrl.b.prevent": "() => insertMarkdown('**', '**')",
+                            "@keydown.cmd.i.prevent": "() => insertMarkdown('*', '*')",
+                            "@keydown.ctrl.i.prevent": "() => insertMarkdown('*', '*')",
+                            "@keydown.escape.prevent": "$event.target.blur()",
+                            "x-ref": "editor",
+                            style: "min-height: 400px; overflow-y: hidden;"
+            %>
+            
+            <!-- Dropdown for content suggestions -->
+            <div x-show="showDropdown"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="linkables-dropdown-container absolute w-96 bg-white rounded-lg shadow-lg border border-gray-200"
+                 :style="`top: ${dropdownPosition.top}px; left: ${dropdownPosition.left}px; z-index: 9999;`">
+              <div class="linkables-dropdown max-h-80 overflow-y-auto">
+                <template x-for="(item, index) in filteredResults" :key="item.value">
+                  <div @click="selectItem(item)"
+                       @mousedown.prevent
+                       :class="{ 'bg-blue-50': index === selectedIndex }"
+                       class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors">
+                    <div class="flex items-center space-x-3">
+                      <div :class="[getIconColorClass(item.color), getBackgroundColor(item.color)]" 
+                           class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center">
+                        <i class="material-icons text-sm" x-text="item.icon"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-medium text-gray-900 truncate" x-text="item.name"></div>
+                        <div class="text-xs text-gray-500" x-text="item.type"></div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+                <div x-show="filteredResults.length === 0" class="px-4 py-3 text-gray-500 text-sm">
+                  No matching content found
+                </div>
+              </div>
+            </div>
+            
+            <!-- Mention Helper Tooltip -->
+            <div class="absolute bottom-4 right-4 text-xs text-gray-400 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full">
+              Press @ to mention other pages
+            </div>
+          </div>
+          
+          <!-- Footer Actions -->
+          <div class="border-t border-gray-100 px-6 py-4 bg-gradient-to-b from-white to-gray-50 flex items-center justify-between">
+            <div class="flex items-center space-x-4 text-sm text-gray-500">
+              <span class="flex items-center space-x-1">
+                <i class="material-icons text-base">subject</i>
+                <span><span x-text="characterCount"></span> characters</span>
+              </span>
+              <span class="text-gray-300">•</span>
+              <span class="flex items-center space-x-1">
+                <i class="material-icons text-base">timer</i>
+                <span>~<span x-text="readingTime"></span> min read</span>
+              </span>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+              <button type="button" @click="handleSaveAndNext" 
+                      class="px-5 py-2.5 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors flex items-center space-x-2 shadow-sm">
+                <span>Save & Next</span>
+                <i class="material-icons text-base">arrow_forward</i>
+              </button>
+              <button type="submit" 
+                      class="px-5 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors flex items-center space-x-2 shadow-sm">
+                <i class="material-icons text-base">save</i>
+                <span>Save Answer</span>
+              </button>
+            </div>
+          </div>
         </div>
-        <p class="text-xs text-gray-500 mb-4">
-          Don't forget: you can mention any of your other pages by typing @ in the text box.
-        </p>
-
-        <%= button_tag(type: 'submit', class: "text-white bg-notebook-blue border-0 py-2 px-8 focus:outline-none hover:bg-blue-500 rounded text-lg") do %>
-          Save answer
-        <% end %>
       <% end %>
+      
+      <!-- Writing Tips Card -->
+      <div class="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-6 shadow-sm">
+        <h3 class="font-semibold text-blue-900 mb-3 flex items-center space-x-2">
+          <i class="material-icons text-xl">lightbulb</i>
+          <span>Writing Tips</span>
+        </h3>
+        <ul class="space-y-2 text-sm text-blue-800">
+          <li class="flex items-start space-x-2">
+            <span class="text-blue-500 mt-0.5">•</span>
+            <span>Take your time to explore the prompt deeply. Quality over speed.</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-blue-500 mt-0.5">•</span>
+            <span>Use @ to reference and create connections to other pages in your world.</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-blue-500 mt-0.5">•</span>
+            <span>Press Cmd/Ctrl + S to manually save, or let auto-save handle it.</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-blue-500 mt-0.5">•</span>
+            <span>Press Esc to pause your writing and timer.</span>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
-</section>
+</div>
+
+<style>
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+  
+  /* Smooth focus transition for textarea */
+  textarea:focus {
+    background: linear-gradient(to bottom, #ffffff, #fafafa);
+  }
+  
+  /* Custom scrollbar for textarea */
+  textarea::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  textarea::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  textarea::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+  
+  textarea::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+</style>
+
+<script>
+
+function writingPrompt() {
+  return {
+    content: `<%= j(@attribute_field_to_question[:value] || "") %>`,
+    wordCount: 0,
+    characterCount: 0,
+    readingTime: 0,
+    startTime: null,
+    elapsedSeconds: 0,
+    totalElapsedSeconds: 0,
+    formattedTime: '00:00',
+    wpm: 0,
+    hasStartedWriting: false,
+    initialWordCount: 0,
+    lastSavedContent: '',
+    timerInterval: null,
+    isPaused: false,
+    pausedAt: null,
+    autosaveStatus: 'Auto-saves every 30 seconds • Press Esc to save now',
+    isAutosaving: false,
+    lastAutosaveTime: 0,
+    
+    init() {
+      this.lastSavedContent = this.content;
+      this.initialWordCount = this.content.trim() ? this.content.trim().split(/\s+/).length : 0;
+      this.wordCount = this.initialWordCount;
+      this.updateWordCount();
+      
+      // Set up autosave listeners and interval after DOM is ready
+      this.$nextTick(() => {
+        this.setupAutosaveListeners();
+        this.setupAutosaveInterval();
+      });
+      
+      // Escape key to blur input and pause timer
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.activeElement === this.$refs.editor) {
+          e.preventDefault();
+          this.$refs.editor.blur();
+        }
+      });
+      
+      // Start with focus on the editor and adjust height
+      this.$nextTick(() => {
+        if (this.$refs.editor) {
+          this.$refs.editor.focus();
+          this.adjustTextareaHeight();
+        }
+      });
+    },
+    
+    handleInput() {
+      // Start the timer on first input if not already started
+      if (!this.hasStartedWriting && this.content.trim().length > 0) {
+        this.startWriting();
+      }
+      
+      this.updateWordCount();
+      this.adjustTextareaHeight();
+      this.calculateWPM();
+    },
+    
+    startWriting() {
+      if (this.hasStartedWriting) return;
+      
+      this.hasStartedWriting = true;
+      this.startTime = Date.now();
+      this.startTimer();
+    },
+    
+    pauseTimer() {
+      if (!this.hasStartedWriting || this.isPaused) return;
+      
+      this.isPaused = true;
+      this.pausedAt = Date.now();
+      
+      // Save the elapsed time before pausing
+      this.totalElapsedSeconds = this.elapsedSeconds;
+      
+      // Stop the timer interval
+      if (this.timerInterval) {
+        clearInterval(this.timerInterval);
+        this.timerInterval = null;
+      }
+      
+      // Note: Autosave on Escape is handled by the content linking system
+    },
+    
+    resumeTimer() {
+      if (!this.hasStartedWriting || !this.isPaused) return;
+      
+      this.isPaused = false;
+      
+      // Adjust start time to account for the pause duration
+      const pauseDuration = Date.now() - this.pausedAt;
+      this.startTime = this.startTime + pauseDuration;
+      
+      // Restart the timer
+      this.startTimer();
+    },
+    
+    calculateWPM() {
+      if (!this.hasStartedWriting || this.elapsedSeconds < 2) {
+        this.wpm = 0;
+        return;
+      }
+      
+      // Calculate words written since starting (excluding initial content)
+      const wordsWritten = Math.max(0, this.wordCount - this.initialWordCount);
+      const minutesElapsed = this.elapsedSeconds / 60;
+      
+      if (minutesElapsed > 0) {
+        this.wpm = Math.round(wordsWritten / minutesElapsed);
+      }
+    },
+    
+    adjustTextareaHeight(element) {
+      const textarea = element || this.$refs.editor;
+      if (!textarea) return; // Guard clause to prevent errors
+      
+      // Reset height to recalculate
+      textarea.style.height = 'auto';
+      // Set new height based on content
+      const newHeight = Math.max(400, textarea.scrollHeight);
+      textarea.style.height = newHeight + 'px';
+    },
+    
+    updateWordCount() {
+      const text = this.content || '';
+      this.wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+      this.characterCount = text.length;
+      this.readingTime = Math.max(1, Math.round(this.wordCount / 200));
+    },
+    
+    startTimer() {
+      if (this.timerInterval) return;
+      
+      this.timerInterval = setInterval(() => {
+        if (!this.startTime || this.isPaused) return;
+        
+        this.elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+        const minutes = Math.floor(this.elapsedSeconds / 60);
+        const seconds = this.elapsedSeconds % 60;
+        this.formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Update WPM calculation every second
+        this.calculateWPM();
+      }, 1000);
+    },
+    
+    insertMarkdown(before, after) {
+      const textarea = this.$refs.editor;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = this.content.substring(start, end);
+      const replacement = before + selectedText + after;
+      
+      this.content = this.content.substring(0, start) + replacement + this.content.substring(end);
+      
+      // Set cursor position
+      this.$nextTick(() => {
+        const newPosition = start + before.length + selectedText.length;
+        textarea.setSelectionRange(newPosition, newPosition);
+        textarea.focus();
+        this.adjustTextareaHeight();
+      });
+      
+      this.updateWordCount();
+    },
+    
+    handleSave(event) {
+      if (event) event.preventDefault();
+      
+      // Check for content changes first
+      if (this.content === this.lastSavedContent) {
+        console.log('No changes to save');
+        return;
+      }
+      
+      // Prevent multiple simultaneous autosave requests
+      if (this.isAutosaving) {
+        console.log('Autosave already in progress, skipping...');
+        return;
+      }
+      
+      // Throttle autosave calls to prevent duplicate requests (minimum 2 seconds between saves)
+      const now = Date.now();
+      if (now - this.lastAutosaveTime < 2000) {
+        console.log('Autosave throttled - too soon since last save');
+        return;
+      }
+      
+      this.lastAutosaveTime = now;
+      
+      // Use the unified jQuery autosave system
+      const textarea = document.querySelector('.autosave-closest-form-on-change');
+      if (textarea && window.$ && window.$(textarea).length) {
+        console.log('Manual save triggering jQuery autosave, current autosaveStatus:', this.autosaveStatus);
+        window.$(textarea).trigger('change');
+      } else {
+        console.log('Could not trigger autosave: textarea or jQuery not available');
+      }
+    },
+    
+    handleSaveAndNext() {
+      if (this.content !== this.lastSavedContent) {
+        this.handleSave();
+      }
+      setTimeout(() => {
+        window.location.href = '<%= prompts_path %>';
+      }, 500);
+    },
+    
+    getNewPrompt() {
+      if (this.content !== this.lastSavedContent && this.content.length > 10) {
+        if (confirm('You have unsaved changes. Save before getting a new prompt?')) {
+          this.handleSave();
+          setTimeout(() => {
+            if (this.timerInterval) clearInterval(this.timerInterval);
+            window.location.href = '<%= prompts_path %>';
+          }, 500);
+          return;
+        }
+      }
+      if (this.timerInterval) clearInterval(this.timerInterval);
+      window.location.href = '<%= prompts_path %>';
+    },
+    
+    setupAutosaveListeners() {
+      // Listen for autosave events from the jQuery system
+      // Use class selector since textarea is in a different Alpine component
+      const textarea = document.querySelector('.autosave-closest-form-on-change');
+      if (!textarea) {
+        console.log('Could not find autosave textarea');
+        return;
+      }
+      
+      console.log('Setting up autosave listeners on textarea:', textarea);
+      
+      const $textarea = $(textarea);
+      const form = $textarea.closest('form');
+      const formAction = form.attr('action');
+      const component = this; // Store Alpine component reference for event handlers
+      
+      // Hook into the change event that triggers autosave.js
+      $textarea.on('change', function() {
+        console.log('Change event fired, setting status to Auto-saving...');
+        component.autosaveStatus = 'Auto-saving...';
+        component.isAutosaving = true;
+      });
+      
+      // Listen for AJAX events specifically for this form's autosave requests
+      $(document).ajaxSuccess(function(event, xhr, settings) {
+        console.log('AJAX Success:', settings.url, settings.type);
+        // Check if this is an autosave request for this specific form
+        if (settings.url && settings.url === formAction + '.json' && settings.type === 'PATCH') {
+          console.log('Autosave success detected for this form, setting status to Saved');
+          component.autosaveStatus = '✓ Saved';
+          component.lastSavedContent = component.content;
+          component.isAutosaving = false;
+          component.lastAutosaveTime = 0; // Reset throttle on successful save
+          setTimeout(() => {
+            component.autosaveStatus = 'Auto-saves every 30 seconds • Press Esc to save now';
+          }, 2000);
+        }
+      });
+      
+      $(document).ajaxError(function(event, xhr, settings) {
+        console.log('AJAX Error:', settings.url, settings.type);
+        // Check if this is an autosave request for this specific form that failed
+        if (settings.url && settings.url === formAction + '.json' && settings.type === 'PATCH') {
+          console.log('Autosave error detected for this form, setting status to Error');
+          component.autosaveStatus = '✗ Error saving';
+          component.isAutosaving = false;
+          setTimeout(() => {
+            component.autosaveStatus = 'Auto-saves every 30 seconds • Press Esc to save now';
+          }, 3000);
+        }
+      });
+      
+      // Also listen for the custom event dispatched by autosave.js as backup
+      document.addEventListener('autosave:success', function() {
+        console.log('Custom autosave:success event fired');
+        component.autosaveStatus = '✓ Saved';
+        component.lastSavedContent = component.content;
+        component.isAutosaving = false;
+        component.lastAutosaveTime = 0; // Reset throttle on successful save
+        setTimeout(() => {
+          component.autosaveStatus = 'Auto-saves every 30 seconds • Press Esc to save now';
+        }, 2000);
+      });
+    },
+    
+    setupAutosaveInterval() {
+      // Auto-save every 30 seconds if content has changed
+      setInterval(() => {
+        console.log('30-second interval check:', {
+          contentChanged: this.content !== this.lastSavedContent,
+          hasContent: this.content.length > 0,
+          isAutosaving: this.isAutosaving,
+          currentStatus: this.autosaveStatus
+        });
+        
+        if (this.content !== this.lastSavedContent && 
+            this.content.length > 0 &&
+            !this.isAutosaving) {
+          console.log('30-second autosave triggered');
+          this.handleSave();
+        }
+      }, 30000);
+    }
+  }
+}
+</script>

@@ -1,130 +1,100 @@
 <!-- Secondary Sidebar - Edit Tools and Quick Actions -->
 <div class="h-full overflow-y-auto">
-  <div class="p-6 space-y-6">
+  <div class="p-4 space-y-4">
     
-    <!-- Page Image Card -->
-    <% 
-      # Get the same preview image logic
-      regular_images = raw_content.image_uploads.ordered.to_a rescue []
-      unless user_signed_in? && raw_content.user_id == current_user.id
-        regular_images = regular_images.select { |img| img.privacy == 'public' } rescue []
-      end
-      basil_images = raw_content.basil_commissions.where.not(saved_at: nil).ordered.to_a rescue []
-      preview_image = get_preview_image(regular_images, basil_images) rescue nil
-    %>
-    
-    <div class="pb-4 border-b border-gray-200">
-      <button @click="switchView('gallery')" 
-              class="block group w-full text-left" 
-              title="Manage gallery">
-        <div class="relative aspect-square rounded-xl overflow-hidden shadow-lg ring-1 ring-gray-200 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200 bg-gray-100">
-          <% if preview_image.present? %>
-            <% image_type = preview_image[:type] %>
-            <% image_data = preview_image[:data] %>
-            
-            <% if image_type == 'image_upload' %>
-              <%= image_tag image_data.src.url, 
-                            class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
-                            alt: "#{content.name} preview" %>
-            <% elsif image_type == 'basil_commission' %>
-              <% if image_data.image.attached? %>
-                <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), 
-                              class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
-                              alt: "#{content.name} preview" %>
-              <% else %>
-                <%= image_tag "card-headers/#{raw_content.class.name.downcase.pluralize}.jpg", 
-                              class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
-                              alt: "#{content.name} preview" %>
-              <% end %>
-            <% end %>
-          <% else %>
-            <%= image_tag "card-headers/#{raw_content.class.name.downcase.pluralize}.jpg", 
-                          class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
-                          alt: "#{content.name} preview" %>
-          <% end %>
-          
-          <!-- Overlay on hover -->
-          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
-            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white bg-opacity-90 rounded-full p-3">
-              <i class="material-icons text-gray-700 text-xl">edit</i>
-            </div>
-          </div>
+    <!-- Save Status -->
+    <div class="bg-white rounded-lg border border-gray-200 px-3 py-2">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <div class="w-2 h-2 bg-green-400 rounded-full mr-2" id="save-indicator"></div>
+          <span class="text-sm text-gray-700">Saved</span>
         </div>
-        
-        <div class="mt-3 text-center">
-          <p class="text-sm font-medium text-gray-900">Manage Gallery</p>
-          <p class="text-xs text-gray-500">
-            <% 
-              image_count = raw_content.image_uploads.count rescue 0
-              basil_count = raw_content.basil_commissions.where.not(saved_at: nil).count rescue 0
-              total_images = image_count + basil_count
-            %>
-            <%= pluralize(total_images, 'image') %>
-          </p>
-        </div>
-      </button>
-    </div>
-    
-    <!-- Save Status Panel -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-sm font-medium text-gray-900">Edit Status</h3>
         <div class="text-xs text-gray-500" id="last-saved">
           Auto-saving...
         </div>
       </div>
+    </div>
+    
+    <!-- Tools -->
+    <div class="pb-4 border-b border-gray-200">
+      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">build</i>
+        Tools
+      </h2>
       
-      <!-- Overall completion -->
-      <% 
-        total_fields = content.data[:categories].map { |cat| cat[:fields].count }.sum
-        completed_fields = content.data[:categories].map { |cat| cat[:fields].count { |field| field[:value].present? } }.sum
-        completion_percent = total_fields > 0 ? (completed_fields.to_f / total_fields * 100).round : 0
-      %>
-      
-      <div class="mb-3">
-        <div class="flex justify-between text-sm text-gray-600 mb-1">
-          <span>Overall Progress</span>
-          <span><%= completed_fields %>/<%= total_fields %> fields</span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-2">
-          <div class="<%= content.class_color %> h-2 rounded-full transition-all duration-300" 
-               style="width: <%= completion_percent %>%"></div>
-        </div>
-      </div>
-      
-      <!-- Quick stats -->
-      <div class="text-sm">
-        <div class="flex justify-between">
-          <span class="text-gray-500">Completion:</span>
-          <span class="text-gray-900 font-medium"><%= completion_percent %>%</span>
-        </div>
+      <div class="w-full">
+        <%= link_to basil_content_path(raw_content.class.name, raw_content.id), 
+                    target: "_blank",
+                    class: "group flex items-center justify-between p-3 w-full rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white" do %>
+          <div class="flex items-center">
+            <i class="material-icons text-xl text-gray-400 group-hover:text-purple-500 mr-3">visibility</i>
+            <div>
+              <div class="font-medium text-gray-700 group-hover:text-purple-700 text-sm">Visualize</div>
+              <div class="text-xs text-gray-500 group-hover:text-purple-600">Generate images</div>
+            </div>
+          </div>
+          <i class="material-icons text-gray-400 group-hover:text-purple-500 text-lg">arrow_outward</i>
+        <% end %>
       </div>
     </div>
     
-    <!-- Quick Actions -->
-    <div class="pb-4 border-b border-gray-200">
-      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">flash_on</i>
-        Quick Actions
-      </h2>
-      
-      <div class="space-y-2">
-        <button @click="showAllCategories()" 
-                class="w-full flex items-center justify-center px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors bg-white">
-          <i class="material-icons text-sm mr-2">unfold_more</i>
-          Show All Fields
-        </button>
+    <!-- Page Stats -->
+    <div class="bg-white rounded-lg p-3 border border-gray-200 mb-4">
+      <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">analytics</i>
+        Page Stats
+      </h3>
+      <div class="space-y-3">
         
-        <button onclick="focusNextEmptyField()" 
-                class="w-full flex items-center justify-center px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors bg-white">
-          <i class="material-icons text-sm mr-2">navigate_next</i>
-          Next Empty Field
-        </button>
+        <!-- Effective Visibility -->
+        <% if raw_content.respond_to?(:privacy) %>
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-gray-600">Visibility</span>
+            <button @click="switchView('privacy')" 
+                    :class="isEffectivelyPublic ? 
+                      'inline-flex items-center px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-gray-100 bg-green-50 text-green-700 border border-green-200' : 
+                      'inline-flex items-center px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-gray-100 bg-gray-50 text-gray-700 border border-gray-200'"
+                    title="Click to manage privacy settings">
+              <i class="material-icons text-xs mr-1" 
+                 x-text="isEffectivelyPublic ? 'public' : 'lock'"></i>
+              <span x-text="isEffectivelyPublic ? 'Public' : 'Private'"></span>
+              <span x-show="showUniverseIndicator" 
+                    class="text-xs text-green-600 ml-1">(via universe)</span>
+            </button>
+          </div>
+        <% end %>
+        
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">Word count</span>
+          <span class="font-medium text-gray-900 px-2 py-1 bg-gray-50 rounded text-xs">
+            <%= number_with_delimiter(content.cached_word_count || 0) %>
+          </span>
+        </div>
+        
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">Last saved</span>
+          <span class="font-medium text-gray-900 text-xs" id="last-saved-time">
+            <%= distance_of_time_in_words(raw_content.updated_at, Time.current) %> ago
+          </span>
+        </div>
+        
+        <% 
+          total_fields = content.data[:categories].map { |cat| cat[:fields].count }.sum
+          completed_fields = content.data[:categories].map { |cat| cat[:fields].count { |field| field[:value].present? } }.sum
+          completion_percent = total_fields > 0 ? (completed_fields.to_f / total_fields * 100).round : 0
+        %>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">Completion</span>
+          <span class="font-medium text-gray-900 text-xs">
+            <%= completion_percent %>%
+            <span class="text-xs text-gray-500">(<%= completed_fields %>/<%= total_fields %>)</span>
+          </span>
+        </div>
       </div>
     </div>
     
     <!-- Keyboard Shortcuts Help -->
-    <div class="bg-gray-50 rounded-lg p-4 text-xs text-gray-600">
+    <div class="bg-gray-50 rounded-lg p-3 text-xs text-gray-600">
       <h4 class="font-medium text-gray-700 mb-2">Keyboard Shortcuts</h4>
       <div class="space-y-1">
         <div class="flex justify-between">
@@ -156,24 +126,51 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// Update last saved time
+// Update save status
 document.addEventListener('autosave:success', function() {
   const lastSavedEl = document.getElementById('last-saved');
+  const saveIndicator = document.getElementById('save-indicator');
+  const saveText = saveIndicator?.parentElement.querySelector('span');
+  
   if (lastSavedEl) {
-    lastSavedEl.textContent = 'Saved ' + new Date().toLocaleTimeString();
+    lastSavedEl.textContent = new Date().toLocaleTimeString();
+  }
+  if (saveIndicator) {
+    saveIndicator.className = 'w-2 h-2 bg-green-400 rounded-full mr-2';
+  }
+  if (saveText) {
+    saveText.textContent = 'Saved';
+    saveText.className = 'text-sm text-gray-700';
   }
 });
 
-// Focus next empty field
-function focusNextEmptyField() {
-  const emptyFields = document.querySelectorAll('.field-form input[value=""], .field-form textarea:empty');
+// Show saving status when autosave starts
+document.addEventListener('autosave:start', function() {
+  const saveIndicator = document.getElementById('save-indicator');
+  const saveText = saveIndicator?.parentElement.querySelector('span');
   
-  if (emptyFields.length > 0) {
-    emptyFields[0].focus();
-    emptyFields[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-  } else {
-    // Show success message - all fields have content
-    alert('All fields have content! 🎉');
+  if (saveIndicator) {
+    saveIndicator.className = 'w-2 h-2 bg-yellow-400 rounded-full mr-2';
   }
-}
+  if (saveText) {
+    saveText.textContent = 'Saving...';
+    saveText.className = 'text-sm text-yellow-700';
+  }
+});
+
+// Show unsaved changes when user starts typing
+document.addEventListener('input', function(e) {
+  if (e.target.matches('.autosave-closest-form-on-change')) {
+    const saveIndicator = document.getElementById('save-indicator');
+    const saveText = saveIndicator?.parentElement.querySelector('span');
+    
+    if (saveIndicator) {
+      saveIndicator.className = 'w-2 h-2 bg-amber-400 rounded-full mr-2';
+    }
+    if (saveText) {
+      saveText.textContent = 'Unsaved changes';
+      saveText.className = 'text-sm text-amber-700';
+    }
+  }
+});
 </script>

@@ -8,10 +8,13 @@
      x-data="editPageController()" 
      x-init="init()">
   
+  <!-- Include content linking functionality -->
+  <%= render partial: 'javascripts/content_linking_alpine' %>
+  
   <!-- Header with breadcrumbs -->
   <%= render partial: 'content/shared/breadcrumb_nav', locals: { 
     content: @serialized_content, 
-    show_edit_controls: false,
+    show_edit_controls: true,
     current_page: :edit 
   } %>
 
@@ -106,6 +109,19 @@ function editPageController() {
     showRightSidebar: false,
     hasUnsavedChanges: false,
     
+    // Privacy state
+    selectedPrivacy: '<%= @content.privacy || 'private' %>',
+    universePrivacy: '<%= @content.respond_to?(:universe) && @content.universe.present? ? (@content.universe.privacy || 'private') : 'private' %>',
+    
+    // Computed property for effective visibility
+    get isEffectivelyPublic() {
+      return this.selectedPrivacy === 'public' || this.universePrivacy === 'public';
+    },
+    
+    get showUniverseIndicator() {
+      return this.selectedPrivacy !== 'public' && this.universePrivacy === 'public';
+    },
+    
     init() {
       // Set initial view from URL hash if present
       const hash = window.location.hash.substring(1);
@@ -120,9 +136,10 @@ function editPageController() {
         }
       });
       
-      // Clear unsaved changes flag when autosave succeeds
+      // Clear unsaved changes flag when autosave succeeds and update last saved time
       document.addEventListener('autosave:success', () => {
         this.hasUnsavedChanges = false;
+        this.updateLastSavedTime();
       });
       
       // Warn user about unsaved changes when leaving page
@@ -163,6 +180,11 @@ function editPageController() {
       
       // Listen for universe field changes and update Privacy tab
       this.watchUniverseChanges();
+      
+      // Listen for privacy updates from the privacy form
+      window.addEventListener('privacy-updated', (e) => {
+        this.selectedPrivacy = e.detail.privacy;
+      });
     },
     
     watchUniverseChanges() {
@@ -170,27 +192,63 @@ function editPageController() {
       
       // Watch for changes on universe select field
       document.addEventListener('change', function(e) {
-        if (e.target.classList.contains('universe-select-field')) {
+        if (e.target.classList.contains('universe-select-field') || e.target.dataset.universeSelect) {
           const universeId = e.target.value;
-          const contentId = e.target.dataset.contentId;
-          const contentType = e.target.dataset.contentType;
+          const selectedOption = e.target.options[e.target.selectedIndex];
+          const universeName = selectedOption ? selectedOption.text : '';
+          const universePrivacy = selectedOption ? selectedOption.dataset.universePrivacy : 'private';
           
-          // Update the Privacy tab's Universe section
-          self.updatePrivacyUniverseSection(universeId);
+          console.log('Universe changed to:', universeId, universeName, 'Privacy:', universePrivacy);
+          
+          // Update the Alpine.js reactive state
+          self.universePrivacy = universePrivacy;
+          
+          // Update both the Privacy tab and sidebar Universe sections
+          self.updatePrivacyUniverseSection(universeId, universeName, universePrivacy);
+          self.updateSidebarUniverseSection(universeId, universeName);
+        }
+      });
+      
+      // Also watch for successful autosave to ensure we catch the update
+      document.addEventListener('ajax:success', function(e) {
+        // Update last saved time for any successful AJAX save
+        self.updateLastSavedTime();
+        
+        if (e.target && e.target.querySelector && e.target.querySelector('.universe-select-field')) {
+          const select = e.target.querySelector('.universe-select-field');
+          if (select) {
+            const universeId = select.value;
+            const selectedOption = select.options[select.selectedIndex];
+            const universeName = selectedOption ? selectedOption.text : '';
+            const universePrivacy = selectedOption ? selectedOption.dataset.universePrivacy : 'private';
+            
+            console.log('Universe updated via autosave:', universeId, universeName, 'Privacy:', universePrivacy);
+            
+            // Update the Alpine.js reactive state
+            self.universePrivacy = universePrivacy;
+            
+            self.updatePrivacyUniverseSection(universeId, universeName, universePrivacy);
+            self.updateSidebarUniverseSection(universeId, universeName);
+          }
         }
       });
     },
     
-    updatePrivacyUniverseSection(universeId) {
+    updatePrivacyUniverseSection(universeId, universeName, universePrivacy) {
       const privacyUniverseSection = document.querySelector('[data-privacy-universe-section]');
-      if (!privacyUniverseSection) return;
+      if (!privacyUniverseSection) {
+        console.log('Privacy universe section not found');
+        return;
+      }
       
-      if (!universeId || universeId === '') {
+      console.log('Updating privacy universe section with ID:', universeId);
+      
+      if (!universeId || universeId === '' || universeId === 'null') {
         // Show "No Universe Assigned" state
         this.showNoUniverseState(privacyUniverseSection);
       } else {
-        // Fetch universe data and update the section
-        this.fetchAndShowUniverseState(privacyUniverseSection, universeId);
+        // Show universe state without fetching
+        this.showUniverseState(privacyUniverseSection, universeId, universeName, universePrivacy);
       }
     },
     
@@ -198,6 +256,8 @@ function editPageController() {
       // Find and update the content area
       const contentArea = section.querySelector('[data-universe-content]');
       if (contentArea) {
+        console.log('Showing no universe state');
+        const firstCategoryLabel = '<%= @serialized_content.data[:categories].first[:label] rescue "Overview" %>';
         contentArea.innerHTML = `
           <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-4">
             <div class="flex items-start">
@@ -209,7 +269,7 @@ function editPageController() {
               <div class="ml-3 flex-1">
                 <div class="font-semibold text-gray-900 mb-1">No Universe Assigned</div>
                 <div class="text-sm text-gray-600 mb-3">
-                  This page isn't part of a universe yet.
+                  This <%= @serialized_content.class_name.downcase %> isn't part of a universe yet.
                 </div>
                 <div class="bg-white border border-gray-200 rounded p-3 mb-3">
                   <div class="text-xs font-medium text-gray-700 mb-1">Benefits of using universes:</div>
@@ -229,73 +289,134 @@ function editPageController() {
                   </ul>
                 </div>
               </div>
+              <div class="ml-3 flex-shrink-0">
+                <button onclick="this.closest('[x-data]').__x.$data.switchView('details'); this.closest('[x-data]').__x.$data.currentCategory = null; this.closest('[x-data]').__x.$data.expandAllCategories = false; this.closest('[x-data]').__x.$data.currentCategory = '${firstCategoryLabel}';" 
+                        class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white border border-blue-600 rounded text-xs font-medium hover:bg-blue-700 transition-colors">
+                  <i class="material-icons text-xs mr-1">add</i>
+                  Assign Universe
+                </button>
+              </div>
             </div>
           </div>
         `;
       }
     },
     
-    fetchAndShowUniverseState(section, universeId) {
-      // Make AJAX call to get universe data
-      fetch(`/universes/${universeId}.json`, {
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'application/json'
-        }
-      })
-      .then(response => response.json())
-      .then(universe => {
-        const contentArea = section.querySelector('[data-universe-content]');
-        if (contentArea) {
-          const isPublic = universe.privacy === 'public';
-          contentArea.innerHTML = `
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-              <div class="flex items-start">
-                <div class="flex-shrink-0">
-                  <div class="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center">
-                    <i class="material-icons text-white text-sm">language</i>
-                  </div>
-                </div>
-                <div class="ml-3 flex-1">
-                  <div class="font-semibold text-gray-900 mb-1">${universe.name}</div>
-                  <div class="flex items-center mb-2">
-                    <span class="text-sm text-gray-600 mr-2">Universe is:</span>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
-                      <i class="material-icons text-xs mr-1">${isPublic ? 'public' : 'lock'}</i>
-                      ${isPublic ? 'Public' : 'Private'}
-                    </span>
-                  </div>
-                  ${isPublic ? `
-                    <div class="bg-blue-100 border border-blue-200 rounded p-2">
-                      <div class="flex items-start">
-                        <i class="material-icons text-blue-600 text-sm mr-2 mt-0.5">bolt</i>
-                        <div>
-                          <div class="text-xs font-medium text-blue-900">Universe Override Active</div>
-                          <div class="text-xs text-blue-700">All pages in this universe are automatically public</div>
-                        </div>
-                      </div>
-                    </div>
-                  ` : `
-                    <div class="text-xs text-gray-600">
-                      Individual page privacy settings apply
-                    </div>
-                  `}
-                </div>
-                <div class="ml-3 flex-shrink-0">
-                  <a href="/universes/${universeId}/edit" 
-                     class="inline-flex items-center px-3 py-1.5 bg-white border border-blue-300 rounded text-xs font-medium text-blue-700 hover:bg-blue-50 transition-colors">
-                    <i class="material-icons text-xs mr-1">settings</i>
-                    Manage
-                  </a>
-                </div>
+    showUniverseState(section, universeId, universeName, universePrivacy) {
+      const contentArea = section.querySelector('[data-universe-content]');
+      if (!contentArea) {
+        console.log('Content area not found');
+        return;
+      }
+      
+      const isPublic = universePrivacy === 'public';
+      const displayName = universeName || 'Selected Universe';
+      
+      contentArea.innerHTML = `
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 rounded-lg <%= Universe.color %> flex items-center justify-center">
+                <i class="material-icons text-white text-sm"><%= Universe.icon %></i>
               </div>
             </div>
-          `;
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching universe data:', error);
-      });
+            <div class="ml-3 flex-1">
+              <div class="font-semibold text-gray-900 mb-1">${displayName}</div>
+              <div class="flex items-center mb-2">
+                <span class="text-sm text-gray-600 mr-2">Universe is:</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                  <i class="material-icons text-xs mr-1">${isPublic ? 'public' : 'lock'}</i>
+                  ${isPublic ? 'Public' : 'Private'}
+                </span>
+              </div>
+              ${isPublic ? `
+                <div class="bg-blue-100 border border-blue-200 rounded p-2">
+                  <div class="flex items-start">
+                    <i class="material-icons text-blue-600 text-sm mr-2 mt-0.5">bolt</i>
+                    <div>
+                      <div class="text-xs font-medium text-blue-900">Universe Override Active</div>
+                      <div class="text-xs text-blue-700">All pages in this universe are automatically public</div>
+                    </div>
+                  </div>
+                </div>
+              ` : `
+                <div class="text-xs text-gray-600">
+                  Individual page privacy settings apply
+                </div>
+              `}
+            </div>
+            <div class="ml-3 flex-shrink-0">
+              <a href="/universes/${universeId}/edit" 
+                 class="inline-flex items-center px-3 py-1.5 bg-white border border-blue-300 rounded text-xs font-medium text-blue-700 hover:bg-blue-50 transition-colors">
+                <i class="material-icons text-xs mr-1">settings</i>
+                Manage
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+    
+    updateSidebarUniverseSection(universeId, universeName) {
+      const sidebarSection = document.querySelector('[data-sidebar-universe-section]');
+      if (!sidebarSection) {
+        console.log('Sidebar universe section not found');
+        return;
+      }
+      
+      const contentArea = sidebarSection.querySelector('[data-sidebar-universe-content]');
+      if (!contentArea) {
+        console.log('Sidebar universe content area not found');
+        return;
+      }
+      
+      console.log('Updating sidebar universe section with ID:', universeId);
+      
+      if (!universeId || universeId === '' || universeId === 'null') {
+        // Show "No universe assigned" state
+        contentArea.innerHTML = `
+          <div class="text-center py-3">
+            <div class="w-10 h-10 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+              <i class="material-icons text-gray-400 text-sm"><%= Universe.icon %></i>
+            </div>
+            <p class="text-xs text-gray-500">No universe assigned</p>
+          </div>
+        `;
+      } else {
+        // Show universe card with image
+        const displayName = universeName || 'Selected Universe';
+        
+        // We'll try to load the default universe card header image
+        // The actual universe image would require a fetch, but we can use the default fallback
+        contentArea.innerHTML = `
+          <a href="/universes/${universeId}" class="block relative h-24 rounded-lg overflow-hidden group hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200 <%= Universe.color %>">
+            <!-- Background image - use the card header fallback -->
+            <img src="/assets/card-headers/universes.jpg" 
+                 class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                 alt="${displayName} preview"
+                 onerror="this.style.display='none';">
+            
+            <!-- Gradient overlay for text readability -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            
+            <!-- Content overlay -->
+            <div class="absolute inset-0 p-3 flex flex-col justify-end">
+              <div class="flex items-end justify-between">
+                <div class="flex-1 min-w-0">
+                  <p class="text-white font-semibold text-sm truncate mb-1">
+                    ${displayName}
+                  </p>
+                  <p class="text-white/90 text-xs flex items-center">
+                    <i class="material-icons text-xs mr-1"><%= Universe.icon %></i>
+                    Universe
+                  </p>
+                </div>
+                <i class="material-icons text-white/80 group-hover:text-white text-lg ml-2">open_in_new</i>
+              </div>
+            </div>
+          </a>
+        `;
+      }
     },
     
     switchView(view) {
@@ -337,7 +458,98 @@ function editPageController() {
     
     toggleRightSidebar() {
       this.showRightSidebar = !this.showRightSidebar;
+    },
+    
+    updateLastSavedTime() {
+      // Update the "Last saved" time in the left sidebar
+      const lastSavedElement = document.getElementById('last-saved-time');
+      if (lastSavedElement) {
+        // Show "just now" for very recent saves, otherwise show relative time
+        lastSavedElement.textContent = 'just now';
+        
+        // After a short delay, you could update it to show "a few seconds ago"
+        setTimeout(() => {
+          if (lastSavedElement) {
+            lastSavedElement.textContent = 'a few seconds ago';
+          }
+        }, 5000);
+      }
     }
   }
 }
+
+// Delete confirmation function
+function confirmDelete(pageName, deletePath) {
+  // Create a more robust confirmation dialog
+  const confirmed = confirm(`⚠️ WARNING: This action cannot be undone!\n\nAre you absolutely sure you want to permanently delete "${pageName}"?\n\nAll associated data, images, and links will be lost forever.`);
+  
+  if (confirmed) {
+    // Second confirmation for extra safety
+    const doubleConfirmed = confirm(`This is your FINAL warning!\n\nType OK to permanently delete "${pageName}".`);
+    
+    if (doubleConfirmed) {
+      // Create a form and submit it with DELETE method
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = deletePath;
+      
+      // Add CSRF token
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+      const csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = 'authenticity_token';
+      csrfInput.value = csrfToken;
+      form.appendChild(csrfInput);
+      
+      // Add method override for DELETE
+      const methodInput = document.createElement('input');
+      methodInput.type = 'hidden';
+      methodInput.name = '_method';
+      methodInput.value = 'delete';
+      form.appendChild(methodInput);
+      
+      // Append to body and submit
+      document.body.appendChild(form);
+      form.submit();
+    }
+  }
+}
+
+// Update breadcrumb when name field is saved
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('autosave:success', function(event) {
+    // Check if this is a name-type field being saved
+    const field = event.detail.field;
+    const fieldContainer = field.closest('[data-field-type]');
+    const fieldType = fieldContainer?.dataset.fieldType;
+    
+    // Only proceed if this is a name-type field
+    if (fieldType === 'name') {
+      // Get the new name from the field value
+      const newName = field.value?.trim();
+      
+      if (newName && newName !== '' && !newName.startsWith('New ')) {
+        // Update the breadcrumb link text
+        const breadcrumbLink = document.querySelector('[data-breadcrumb-name]');
+        if (breadcrumbLink) {
+          breadcrumbLink.textContent = newName;
+        }
+        
+        // Also update the page title
+        const pageTitle = document.title;
+        const titleParts = pageTitle.split(' — ');
+        if (titleParts.length > 0) {
+          titleParts[0] = 'Edit ' + newName;
+          document.title = titleParts.join(' — ');
+        }
+        
+        // Update the page header if it exists
+        const pageHeader = document.querySelector('h1.page-header, .page-title');
+        if (pageHeader) {
+          pageHeader.textContent = newName;
+        }
+      }
+    }
+  });
+});
 </script>

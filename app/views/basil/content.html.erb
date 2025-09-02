@@ -1,329 +1,562 @@
-<script type="text/javascript">
-function commission_basil(style) {
-  // Set style hidden value to our selected style
-  $('#basil_commission_style').val(style);
-
-  // Submit form to start the commission
-  $('#new_basil_commission').submit();
-}
-</script>
-
-<div class="row">
-  <%= form_for BasilCommission.new, url: basil_commission_path(@content_type, @content.id) do |f| %>
-    <%= f.hidden_field :style,       value: 'realistic' %>
-    <%= f.hidden_field :entity_type, value: @content.page_type %>
-    <%= f.hidden_field :entity_id,   value: @content.id %>
-    <div class="col s12 m4">
-      <div class="card-panel" style="padding: 1rem;">
-        <div style="margin: 1em 0; margin-bottom: 1rem;">
-          <%= link_to basil_path, class: 'grey-text text-darken-2' do %>
-            Basil
+<!-- Basil Content Page - TailwindCSS Redesign -->
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30">
+  <!-- Header with Breadcrumb -->
+  <div class="bg-white border-b sticky top-0 z-10">
+    <div class="px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 space-y-2 sm:space-y-0">
+        <nav class="flex items-center space-x-2 text-sm">
+          <%= link_to basil_path, class: 'text-gray-500 hover:text-gray-700 transition-colors' do %>
+            <i class="material-icons text-purple-500 text-lg mr-1">auto_awesome</i>
+            <span>Basil</span>
           <% end %>
-          <i class="material-icons grey-text" style="display:inline-flex; vertical-align:top;">chevron_right</i>
-          <%= link_to basil_content_index_path(content_type: @content.page_type), class: 'grey-text text-darken-2' do %>
-            <%= @content.page_type.pluralize %>
+          <i class="material-icons text-gray-400 text-sm">chevron_right</i>
+          <%= link_to basil_content_index_path(content_type: @content.page_type), class: 'text-gray-500 hover:text-gray-700 transition-colors' do %>
+            <span class="hidden sm:inline"><%= @content.page_type.pluralize %></span>
+            <span class="sm:hidden"><%= @content.page_type.pluralize.truncate(10) %></span>
           <% end %>
-        </div>
-        <div class="clearfix">
-          <%= image_tag @content.random_image_including_private(format: :medium), style: 'width: 100%' %>
-          <h1 style="font-size: 2rem; margin-bottom: 0">
-            <%= link_to @content.name, @content.view_path, class: @content.text_color %>
-          </h1>
-          <%= link_to @content.edit_path, class: 'grey-text text-darken-2', style: 'margin-bottom: 1rem; display: inline-block;' do %>
-            Edit this <%= @content.page_type.downcase %>
+          <i class="material-icons text-gray-400 text-sm">chevron_right</i>
+          <span class="font-medium text-gray-900 truncate max-w-[200px] sm:max-w-none"><%= @content.name %></span>
+        </nav>
+        
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          <%= link_to @content.view_path, class: 'inline-flex items-center px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors' do %>
+            <i class="material-icons text-sm mr-1">visibility</i>
+            <span class="hidden sm:inline">View Page</span>
+            <span class="sm:hidden">View</span>
+          <% end %>
+          <%= link_to @content.edit_path, class: 'inline-flex items-center px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-purple-700 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors' do %>
+            <i class="material-icons text-sm mr-1">edit</i>
+            Edit
           <% end %>
         </div>
-
-        <ul>
-          <% @relevant_fields.each do |field, value| %>
-            <%= f.hidden_field "field[#{field.id}][label]", value: field.label %>
-            <%= f.hidden_field "field[#{field.id}][value]", value: value %>
-            
-            <li style="margin-bottom: 1em">
-              <div style="margin-bottom: 1rem; padding-bottom: 1rem;">
-                <div class="grey-text text-darken-1" style="font-weight: bold; font-size: 0.8em">
-                  <div style="display: flex; align-items: center;">
-                    <span style="position: relative; top: 0px; padding-right: 0.5rem; flex-grow: 1;"><%= field.label %></span>
-                    <%= range_field_tag "basil_commission[field][#{field.id}][importance]", @guidance.fetch(field.id.to_s, 1), { min: 0, max: 1.3, step: 0.1, style: 'width: 60%;', class: 'js-importance-slider hide' } %>
-                  </div>
-                </div>
-                <div style="margin-top: 0.5rem;">
-                  <%= value %>
-                </div>
-              </div>
-            </li>
-          <% end %>
-        </ul>
-
-        <% if @relevant_fields.empty? %>
-          <div class="red card-panel lighten-3">
-            <strong>Basil works best with guidance!</strong>
-            <br /><br />
-            Please <%= link_to 'fill out more fields', @content.edit_path %> for this page
-            before requesting an image.
-          </div>
-        <% end %>
-
-        <div>
-          <% if @can_request_another && @relevant_fields.any? %>
-            <a href="javascript:var sliders = document.getElementsByClassName('js-importance-slider'); for(var i = 0; i < sliders.length; i++) sliders.item(i).classList.remove('hide'); document.getElementById('importance-explainer').classList.remove('hide');" class="waves-effect waves-light btn-small purple lighten-1" style="margin-bottom: 1rem;">Customize importance</a>
-          <% end %>
-
-          <div id="importance-explainer" class="js-importance-slider hide grey lighten-5" style="margin-right: 1em; padding: 1rem;">
-            <strong>How to customize per-field importance</strong>
-            <br /><br />
-
-            Customizing importance allows you to tell Basil which fields are more or less important to you. For example, if Basil is
-            focusing too hard on something specific you've said, you can turn down the importance of that field with
-            the slider.
-            <br /><br />
-            You can also tell Basil to ignore your answer to a field entirely by dragging the slider all the way to the left.
-            <br /><br />
-            Your preferences for this page are saved whenever you request an image and will be used for all future images for your <%= @content_type.downcase.pluralize %>.
-          </div>
-        </div>
-
-        <!--
-        <div style="margin-top: 2rem">
-          <%= link_to new_polymorphic_path(@content.page_type.downcase), class: "hoverable card-panel white-text #{@content.color}", style: 'display: block' do %>
-            <i class="material-icons left">add</i>
-            <span>
-              Create another <%= @content.page_type.downcase %>
-            </span>
-          <% end %>
-        </div>
-        -->
-      </div>
-
-      <div style="margin-top: 1.5rem; margin-bottom: 1rem;">
-        <% unless current_user.on_premium_plan? %>
-          <div class="orange lighten-2 card-panel">
-            <strong>
-              Image generation is a Premium-only feature, but free accounts can still generate up
-              to <%= pluralize BasilService::FREE_IMAGE_LIMIT, 'image' %> for free.
-            </strong>
-            <br /><br />
-            You have generated <%= pluralize @generated_images_count, 'image' %>
-            and have <%= pluralize [0, BasilService::FREE_IMAGE_LIMIT - @generated_images_count].max, 'free image' %> remaining:
-            <div class="progress white">
-              <div class="determinate blue" style="width: <%= [@generated_images_count, BasilService::FREE_IMAGE_LIMIT].min %>%"></div>
-            </div>
-
-            <% if @generated_images_count >= BasilService::FREE_IMAGE_LIMIT %>
-              <%= link_to 'Click here to manage your billing plan', subscription_path, class: 'blue-text text-darken-4' %>
-            <% end %>
-          </div>
-        <% end %>
       </div>
     </div>
-  <% end %>
+  </div>
 
-  <div class="col s12 m8" style="margin-top: 1rem">
-    <%= render partial: 'notice_dismissal/messages/19' if show_notice?(id: 19) %>
-
-    <% if @can_request_another && @relevant_fields.any? %>
-      <div class="row" style="padding-left: 0.5rem">
-        <div class="grey-text center" style="font-size: 1.2rem; margin-bottom: 0.5rem;"><strong>Image Styles</strong></div>
-        <% BasilService.enabled_styles_for(@content.page_type).each do |style| %>
-          <div class="col s12 m6 l4">
-            <%= link_to "javascript:commission_basil('#{style}')",
-                        class: "waves-effect waves-light purple lighten-1 white-text hoverable",
-                        style: "display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 120px; text-align: center; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-decoration: none; transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;" do %>
-              <i class="material-icons" style="font-size: 2rem; margin-bottom: 0.5rem;">palette</i>
-              <span><%= style.humanize %></span>
+  <%= form_for BasilCommission.new, url: basil_commission_path(@content_type, @content.id), html: { id: 'basil-commission-form' } do |f| %>
+    <%= f.hidden_field :style, value: 'realistic', id: 'basil_commission_style' %>
+    <%= f.hidden_field :entity_type, value: @content.page_type %>
+    <%= f.hidden_field :entity_id, value: @content.id %>
+    
+    <div class="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+        
+        <!-- Left Column: Content Info & Fields -->
+        <div class="lg:col-span-1 xl:col-span-1">
+          <!-- Content Card -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-4">
+            <% if @content.random_image_including_private(format: :medium) %>
+              <div class="aspect-w-16 aspect-h-9 bg-gray-100">
+                <%= image_tag @content.random_image_including_private(format: :medium), 
+                    class: 'w-full h-32 sm:h-40 lg:h-48 object-cover' %>
+              </div>
             <% end %>
-          </div>
-        <% end %>
-        <% BasilService.experimental_styles_for(@content.page_type).each do |style| %>
-          <div class="col s12 m6 l4">
-            <%= link_to "javascript:commission_basil('#{style}')",
-                        class: "waves-effect waves-light purple lighten-3 white-text hoverable",
-                        style: "display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 120px; text-align: center; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-decoration: none; transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;" do %>
-              <i class="material-icons" style="font-size: 2rem; margin-bottom: 0.5rem;">science</i>
-              <span><%= style.humanize %> (Experimental)</span>
-            <% end %>
-          </div>
-        <% end %>
-        <div class="grey-text center col s12"><strong>Click a style to generate an image in that style</strong></div>
-      </div>
-    <% end %>
-
-    <% if !@can_request_another && @in_progress_commissions.any? %>
-      <div class="card-panel blue lighten-5" style="padding: 1.5rem; display: flex; align-items: center; border-left: 5px solid #1e88e5; /* Blue darken-1 */">
-        <i class="material-icons blue-text text-darken-2" style="font-size: 2.8rem; margin-right: 1.5rem;">hourglass_top</i>
-        <div>
-          <h6 class="blue-grey-text text-darken-3" style="font-weight: 500; margin-top: 0; margin-bottom: 0.35rem;">
-            Basil is currently working on <%= pluralize @in_progress_commissions.count, 'commission' %> for you.
-          </h6>
-          <p class="blue-grey-text text-darken-1" style="margin-bottom: 0; font-size: 0.95rem;">
-            As soon as one is complete, you'll be able to request another.
-          </p>
-        </div>
-      </div>
-    <% end %>
-
-    <div class="row" style="padding-left: 0.5rem">
-      <% @commissions.each do |commission| %>
-        <div class="col s12">
-          <div>
-            <% if commission.complete? %>
-              <div class="card">
-                <div class="card-image">
-                  <%= link_to commission.image do %>
-                    <%= image_tag commission.image %>
-                  <% end %>
+            
+            <div class="p-4 sm:p-5 lg:p-6">
+              <div class="flex items-start justify-between mb-3">
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center mb-1">
+                    <i class="material-icons <%= @content.text_color %> text-sm mr-1.5"><%= @content.icon %></i>
+                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider"><%= @content.page_type %></span>
+                  </div>
+                  <h2 class="text-xl sm:text-2xl font-bold text-gray-900 truncate"><%= @content.name %></h2>
                 </div>
-                <div class="card-content" style="padding: 18px;">
-                  <div>
-                    <strong><%= @content.name %></strong>
-                    <% if commission.style? %>
-                      <em>(<%= commission.style.humanize %>)</em>
-                    <% end %>
+              </div>
+              
+              <!-- Field Values -->
+              <div class="space-y-3">
+                <% if @relevant_fields.empty? %>
+                  <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <div class="flex items-start">
+                      <i class="material-icons text-amber-600 text-lg mr-2 flex-shrink-0">warning</i>
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-amber-900 mb-1">More details needed</p>
+                        <p class="text-xs text-amber-700">
+                          <%= link_to 'Add more fields', @content.edit_path, class: 'underline hover:no-underline' %> 
+                          to help Basil generate better images.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div class="grey-text text-darken-2">
-                    <span style="font-size: 0.8em">Completed <%= time_ago_in_words commission.completed_at %> ago</span>
-                    &middot;<br />
-                    <span style="font-size: 0.8em">Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %></span>
-                  </div>
-                  <div style="margin-top: 1em">
-                    <div class="center" style="font-size: 0.9em; margin-bottom: 0.5rem;"><strong>Feedback for Basil</strong></div>
-                    <div class="row" style="margin-bottom: 0;">
-                      <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), url: basil_feedback_path(commission.job_id), method: :POST, remote: true do |f| %>
-                        <div class="col s3 center-align" style="padding: 0 2px;">
-                          <label>
-                            <%= f.radio_button :score_adjustment, '-2', { class: 'autosave-closest-form-on-change' } %>
-                            <span class="black-text"><i class="material-icons red-text text-darken-1">sentiment_very_dissatisfied</i></span>
-                          </label>
-                        </div>
-                        <div class="col s2 center-align" style="padding: 0 2px;">
-                          <label>
-                            <%= f.radio_button :score_adjustment, '-1', { class: 'autosave-closest-form-on-change' } %>
-                            <span class="black-text"><i class="material-icons orange-text">sentiment_dissatisfied</i></span>
-                          </label>
-                        </div>
-                        <div class="col s2 center-align" style="padding: 0 2px;">
-                          <label>
-                            <%= f.radio_button :score_adjustment, '1', { class: 'autosave-closest-form-on-change' } %>
-                            <span class="black-text"><i class="material-icons light-green-text">sentiment_satisfied</i></span>
-                          </label>
-                        </div>
-                        <div class="col s2 center-align" style="padding: 0 2px;">
-                          <label>
-                            <%= f.radio_button :score_adjustment, '2', { class: 'autosave-closest-form-on-change' } %>
-                            <span class="black-text"><i class="material-icons green-text text-darken-1">sentiment_very_satisfied</i></span>
-                          </label>
-                        </div>
-                        <div class="col s3 center-align" style="padding: 0 2px;">
-                          <label>
-                            <%= f.radio_button :score_adjustment, '3', { class: 'autosave-closest-form-on-change' } %>
-                            <span class="red-text text-darken-1"><i class="material-icons">favorite</i></span>
-                          </label>
+                <% else %>
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between mb-2">
+                      <h3 class="text-sm font-semibold text-gray-900">Field Details</h3>
+                      <button type="button" 
+                              id="customize-importance-btn"
+                              class="text-xs font-medium text-purple-600 hover:text-purple-700 transition-colors">
+                        <span class="hidden sm:inline">Customize importance</span>
+                        <i class="material-icons text-sm sm:hidden">tune</i>
+                      </button>
+                    </div>
+                    
+                    <div class="max-h-[300px] sm:max-h-[400px] overflow-y-auto space-y-2">
+                      <% @relevant_fields.each_with_index do |(field, value), index| %>
+                        <%= f.hidden_field "field[#{field.id}][label]", value: field.label %>
+                        <%= f.hidden_field "field[#{field.id}][value]", value: value %>
+                        
+                        <div class="border-l-2 border-gray-200 pl-3 py-1 hover:border-purple-400 transition-colors">
+                          <div class="flex items-start justify-between">
+                            <div class="flex-1 min-w-0 mr-2">
+                              <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <%= field.label %>
+                              </label>
+                              <p class="text-sm text-gray-900 mt-0.5 break-words">
+                                <%= value.presence || "—" %>
+                              </p>
+                            </div>
+                            
+                            <!-- Importance Slider (Hidden by default) -->
+                            <div class="importance-slider hidden flex-shrink-0 flex items-center space-x-1">
+                              <span class="text-xs text-gray-500 hidden sm:inline">Low</span>
+                              <%= range_field_tag "basil_commission[field][#{field.id}][importance]", 
+                                  @guidance.fetch(field.id.to_s, 1), 
+                                  { min: 0, max: 1.3, step: 0.1, 
+                                    class: 'w-16 sm:w-20 basil-importance-range',
+                                    data: { field_id: field.id } } %>
+                              <span class="text-xs text-gray-500 hidden sm:inline">High</span>
+                            </div>
+                          </div>
                         </div>
                       <% end %>
                     </div>
                   </div>
-                </div>
-                <div class="card-action">
-                  <% if commission.saved_at? %>
-                    <%= link_to 'Saved', commission.entity, class: 'blue-text' %>
-                  <% else %>
-                    <%= link_to "Save to page", '#', class: 'js-save-commission purple-text', data: { endpoint: basil_save_path(commission) } %>
+                  
+                  <!-- Importance Help (Hidden by default) -->
+                  <div id="importance-help" class="hidden mt-3 p-2 sm:p-3 bg-purple-50 rounded-lg">
+                    <p class="text-xs text-purple-700">
+                      <strong>Adjust importance:</strong> Drag sliders to control how much Basil focuses on each field. 
+                      Set to 0 to ignore a field completely.
+                    </p>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Premium/Free Tier Notice -->
+          <% unless current_user.on_premium_plan? %>
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-3 sm:p-4 text-white">
+              <div class="flex items-start">
+                <i class="material-icons text-purple-200 mr-2 sm:mr-3 text-lg sm:text-base">auto_awesome</i>
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-semibold mb-1 text-sm">Free Tier</h4>
+                  <p class="text-xs sm:text-sm text-purple-100 mb-2 sm:mb-3">
+                    <%= @generated_images_count %> of <%= BasilService::FREE_IMAGE_LIMIT %> free images used
+                  </p>
+                  <div class="w-full bg-purple-700 rounded-full h-1.5 sm:h-2 mb-2 sm:mb-3">
+                    <div class="bg-white rounded-full h-1.5 sm:h-2 transition-all duration-500" 
+                         style="width: <%= [(@generated_images_count.to_f / BasilService::FREE_IMAGE_LIMIT * 100), 100].min %>%"></div>
+                  </div>
+                  <% if @generated_images_count >= BasilService::FREE_IMAGE_LIMIT %>
+                    <%= link_to subscription_path, class: 'inline-flex items-center text-xs font-medium bg-white text-purple-700 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-purple-50 transition-colors' do %>
+                      Upgrade for unlimited
+                      <i class="material-icons text-sm ml-1">arrow_forward</i>
+                    <% end %>
                   <% end %>
-                  <%= link_to "Delete", '#', class: 'js-delete-commission red-text right right-align', style: 'margin-right: 0', data: { endpoint: basil_delete_path(commission) } %>
                 </div>
               </div>
-            <% else %>
-              <div class="card-panel orange lighten-5 basil-loading-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 1px dashed #a5d6a7; /* Light green for pulsing border */ min-height: 180px; position: relative; overflow: hidden;">
-                <div class="preloader-wrapper medium active">
-                  <div class="spinner-layer spinner-blue-only">
-                    <div class="circle-clipper left">
-                      <div class="circle"></div>
-                    </div><div class="gap-patch">
-                      <div class="circle"></div>
-                    </div><div class="circle-clipper right">
-                      <div class="circle"></div>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- Center Column: Style Selection -->
+        <div class="lg:col-span-1 xl:col-span-1">
+          <% if @can_request_another && @relevant_fields.any? %>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 lg:p-6">
+              <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center">
+                <i class="material-icons text-purple-500 mr-2 text-lg sm:text-base">palette</i>
+                Choose a Style
+              </h3>
+              
+              <!-- Main Styles -->
+              <div class="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <% BasilService.enabled_styles_for(@content.page_type).each do |style| %>
+                  <button type="button"
+                          onclick="submitBasilForm('<%= style %>')"
+                          class="group relative bg-white border-2 border-gray-200 rounded-lg p-2 sm:p-3 lg:p-4 hover:border-purple-500 hover:shadow-md transition-all duration-200 text-left">
+                    <div class="flex flex-col items-center text-center">
+                      <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-1 sm:mb-2 group-hover:bg-purple-200 transition-colors">
+                        <i class="material-icons text-purple-600 text-sm sm:text-base">
+                          <%= case style
+                              when 'photograph' then 'photo_camera'
+                              when 'watercolor_painting' then 'brush'
+                              when 'pencil_sketch' then 'edit'
+                              when 'smiling' then 'sentiment_satisfied'
+                              when 'villain' then 'sentiment_very_dissatisfied'
+                              when 'horror' then 'nights_stay'
+                              when 'painting' then 'palette'
+                              when 'sketch' then 'draw'
+                              when 'interior' then 'home'
+                              when 'exterior' then 'domain'
+                              when 'aerial_photograph' then 'flight'
+                              when 'fantasy' then 'auto_awesome'
+                              when 'anime' then 'star'
+                              when 'product_photography' then 'inventory_2'
+                              when 'macro_photography' then 'zoom_in'
+                              when 'cutaway_render' then 'layers'
+                              when 'action_shot' then 'sports'
+                              when 'amateur_photograph' then 'photo'
+                              when 'celestial_body' then 'brightness_3'
+                              when 'abstract' then 'category'
+                              when 'geometric' then 'square'
+                              when 'symbolic' then 'psychology'
+                              else 'auto_awesome'
+                              end %>
+                        </i>
+                      </div>
+                      <span class="text-xs sm:text-sm font-medium text-gray-900 group-hover:text-purple-700">
+                        <%= style.humanize %>
+                      </span>
                     </div>
+                  </button>
+                <% end %>
+              </div>
+              
+              <!-- Experimental Styles -->
+              <% if BasilService.experimental_styles_for(@content.page_type).any? %>
+                <div class="border-t pt-3 sm:pt-4">
+                  <h4 class="text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3 flex items-center">
+                    <i class="material-icons text-amber-500 text-sm mr-1">science</i>
+                    Experimental Styles
+                  </h4>
+                  <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                    <% BasilService.experimental_styles_for(@content.page_type).each do |style| %>
+                      <button type="button"
+                              onclick="submitBasilForm('<%= style %>')"
+                              class="group relative bg-amber-50 border border-amber-200 rounded-lg p-2 sm:p-3 hover:border-amber-400 hover:bg-amber-100 transition-all duration-200 text-left">
+                        <div class="flex items-center">
+                          <i class="material-icons text-amber-600 text-xs sm:text-sm mr-1 sm:mr-2">science</i>
+                          <span class="text-xs font-medium text-gray-700 truncate">
+                            <%= style.humanize %>
+                          </span>
+                        </div>
+                      </button>
+                    <% end %>
                   </div>
                 </div>
-                <h5 style="color: #424242; font-weight: 600; margin-bottom: 0.5rem;">Working on it!</h5>
-                <p style="font-size: 1rem; color: #616161; margin-bottom: 0.75rem;">
-                  Basil is crafting your image in the <strong><%= commission.style.try(:humanize) || 'selected' %></strong> style.
-                </p>
-                <p style="font-size: 0.9em; color: #757575;">
-                  Requested <%= time_ago_in_words(commission.created_at) %> ago. <br class="hide-on-med-and-up">Please refresh for updates.
+              <% end %>
+              
+              <p class="text-xs text-gray-500 mt-3 sm:mt-4 text-center">
+                Click any style to generate an image
+              </p>
+            </div>
+          <% elsif !@can_request_another && @in_progress_commissions.any? %>
+            <!-- Queue Full Notice -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-5 lg:p-6">
+              <div class="flex items-start">
+                <div class="flex-shrink-0">
+                  <i class="material-icons text-blue-500 text-xl sm:text-2xl">hourglass_empty</i>
+                </div>
+                <div class="ml-2 sm:ml-3">
+                  <h3 class="text-sm font-semibold text-blue-900">Generation in Progress</h3>
+                  <p class="mt-1 text-xs sm:text-sm text-blue-700">
+                    Basil is working on <%= pluralize @in_progress_commissions.count, 'image' %>. 
+                    New requests will be available once these complete.
+                  </p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- Right Column: Generated Images -->
+        <div class="lg:col-span-1 xl:col-span-2">
+          <div class="space-y-4">
+            <% if @commissions.any? %>
+              <h3 class="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+                <i class="material-icons text-purple-500 mr-2 text-lg sm:text-base">collections</i>
+                Generated Images
+              </h3>
+            <% end %>
+            
+            <!-- Grid layout for larger screens -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4">
+              <% @commissions.each do |commission| %>
+                <% if commission.complete? %>
+                  <!-- Completed Image Card -->
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden group">
+                    <div class="relative">
+                      <%= link_to commission.image, target: '_blank', class: 'block' do %>
+                        <%= image_tag commission.image, class: 'w-full h-auto' %>
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity flex items-center justify-center">
+                          <i class="material-icons text-white opacity-0 group-hover:opacity-100 transition-opacity text-2xl sm:text-3xl">zoom_in</i>
+                        </div>
+                      <% end %>
+                    </div>
+                    
+                    <div class="p-3 sm:p-4">
+                      <div class="flex items-start justify-between mb-2 sm:mb-3">
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-medium text-gray-900 truncate"><%= @content.name %></p>
+                          <p class="text-xs text-gray-500">
+                            <%= commission.style.try(:humanize) %> • 
+                            <%= time_ago_in_words commission.completed_at %> ago
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <!-- Feedback Section -->
+                      <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), 
+                          url: basil_feedback_path(commission.job_id), 
+                          method: :POST, 
+                          remote: true,
+                          html: { class: 'feedback-form', data: { commission_id: commission.id } } do |f| %>
+                        <div class="flex items-center justify-center space-x-1 mb-2 sm:mb-3">
+                          <% [
+                            [-2, 'sentiment_very_dissatisfied', 'text-red-500'],
+                            [-1, 'sentiment_dissatisfied', 'text-orange-500'],
+                            [1, 'sentiment_satisfied', 'text-green-500'],
+                            [2, 'sentiment_very_satisfied', 'text-green-600'],
+                            [3, 'favorite', 'text-red-500']
+                          ].each do |score, icon, color| %>
+                            <label class="cursor-pointer">
+                              <%= f.radio_button :score_adjustment, score, 
+                                  class: 'hidden peer feedback-radio',
+                                  onchange: "this.form.requestSubmit()" %>
+                              <i class="material-icons text-xl sm:text-2xl text-gray-300 hover:text-gray-400 peer-checked:<%= color %> transition-colors">
+                                <%= icon %>
+                              </i>
+                            </label>
+                          <% end %>
+                        </div>
+                      <% end %>
+                      
+                      <!-- Actions -->
+                      <div class="flex items-center justify-between pt-2 sm:pt-3 border-t">
+                        <% if commission.saved_at? %>
+                          <span class="inline-flex items-center text-xs sm:text-sm text-green-600">
+                            <i class="material-icons text-sm mr-1">check_circle</i>
+                            Saved
+                          </span>
+                        <% else %>
+                          <button type="button" 
+                                  class="save-btn inline-flex items-center text-xs sm:text-sm font-medium text-purple-600 hover:text-purple-700"
+                                  data-endpoint="<%= basil_save_path(commission) %>">
+                            <i class="material-icons text-sm mr-1">save</i>
+                            <span class="hidden sm:inline">Save to page</span>
+                            <span class="sm:hidden">Save</span>
+                          </button>
+                        <% end %>
+                        
+                        <button type="button"
+                                class="delete-btn inline-flex items-center text-xs sm:text-sm font-medium text-red-600 hover:text-red-700"
+                                data-endpoint="<%= basil_delete_path(commission) %>">
+                          <i class="material-icons text-sm mr-1">delete</i>
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                <% else %>
+                  <!-- Loading Card -->
+                  <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl border border-purple-200 p-4 sm:p-5 lg:p-6">
+                    <div class="flex items-center">
+                      <div class="relative flex-shrink-0">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                      </div>
+                      <div class="ml-3 sm:ml-4 flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-gray-900">Generating...</p>
+                        <p class="text-xs text-gray-600 truncate">
+                          <%= commission.style.try(:humanize) || 'Style' %> • 
+                          Started <%= time_ago_in_words commission.created_at %> ago
+                        </p>
+                        <p class="text-xs text-purple-600 mt-1">
+                          Please refresh to see updates
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+            
+            <% if @commissions.count == 10 %>
+              <div class="bg-gray-50 rounded-lg p-3 sm:p-4 text-center">
+                <p class="text-xs sm:text-sm text-gray-600">
+                  Showing last 10 images. 
+                  <%= link_to 'View all in feedback center', basil_rating_queue_path, class: 'text-purple-600 hover:text-purple-700 font-medium' %>
                 </p>
               </div>
             <% end %>
           </div>
         </div>
-      <% end %>
-    </div>
-
-    <% if @commissions.count == 10 %>
-      <div class="card-panel">
-        <div><strong>End of the list?</strong></div>
-        <p>
-          Only your 10 most recent generations are displayed here, but you can still find all
-          of your generated images on the <%= link_to 'Basil Feedback', basil_rating_queue_path %> pages.
-        </p>
       </div>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
 </div>
 
-<% content_for :javascript do %>
-$(document).ready(function() {
-  $('.js-save-commission').click(function(e) {
-    $(this).text('Saved!');
+<script>
+// Submit form with selected style
+function submitBasilForm(style) {
+  document.getElementById('basil_commission_style').value = style;
+  document.getElementById('basil-commission-form').submit();
+}
 
-    var save_endpoint = $(this).data('endpoint') + '.json';
-    $.post(save_endpoint, function(data) {
-      console.log(data);
-
-      M.toast({ html: "This image has been added to <%= @content.name.gsub('"', '\"') %>'s page." });
+document.addEventListener('DOMContentLoaded', function() {
+  // Toggle importance sliders
+  const customizeBtn = document.getElementById('customize-importance-btn');
+  const sliders = document.querySelectorAll('.importance-slider');
+  const helpText = document.getElementById('importance-help');
+  
+  if (customizeBtn) {
+    customizeBtn.addEventListener('click', function() {
+      sliders.forEach(slider => slider.classList.toggle('hidden'));
+      helpText.classList.toggle('hidden');
+      
+      const isHidden = helpText.classList.contains('hidden');
+      const btnText = customizeBtn.querySelector('span');
+      if (btnText) {
+        btnText.textContent = isHidden ? 'Customize importance' : 'Hide importance';
+      }
     });
-
-    e.preventDefault();
-  });
-
-  $('.js-delete-commission').click(function(e) {
-    $(this).text('Deleting...');
-    $(this).closest('.card').hide();
-
-    var delete_endpoint = $(this).data('endpoint') + '.json';
-    $.ajax({
-        url: delete_endpoint,
-        type: 'DELETE',
-        success: function(result) {
-          $(this).closest('.card').hide();
-
-          M.toast({ html: "Image successfully deleted." });
+  }
+  
+  // Save commission
+  document.querySelectorAll('.save-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const endpoint = this.dataset.endpoint + '.json';
+      const button = this;
+      
+      button.innerHTML = '<i class="material-icons text-sm mr-1">check</i>Saved!';
+      button.classList.add('text-green-600');
+      button.disabled = true;
+      
+      fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+          'Content-Type': 'application/json'
         }
+      }).then(response => response.json())
+        .then(data => {
+          // Show success message
+          showNotification("Image saved to <%= @content.name.gsub('"', '\"') %>'s page");
+        });
     });
-
-    e.preventDefault();
   });
+  
+  // Delete commission
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      if (!confirm('Are you sure you want to delete this image?')) return;
+      
+      const endpoint = this.dataset.endpoint + '.json';
+      const card = this.closest('.bg-white');
+      
+      fetch(endpoint, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        }
+      }).then(response => response.json())
+        .then(data => {
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.95)';
+          setTimeout(() => card.remove(), 300);
+          showNotification('Image deleted successfully');
+        });
+    });
+  });
+  
+  // Show notification helper
+  function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed bottom-4 right-4 bg-gray-900 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-y-20 text-xs sm:text-sm';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.transform = 'translateY(0)';
+    }, 100);
+    
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
 });
-<% end %>
+</script>
 
-<% content_for :css_includes do %>
-  <style>
-    @keyframes pulse-border {
-      0% {
-        border-color: #a5d6a7; /* Light green */
-        box-shadow: 0 0 0 0 rgba(165, 214, 167, 0.4);
-      }
-      70% {
-        box-shadow: 0 0 0 10px rgba(165, 214, 167, 0);
-      }
-      100% {
-        border-color: #e8f5e9; /* Lighter green */
-        box-shadow: 0 0 0 0 rgba(165, 214, 167, 0);
-      }
-    }
+<style>
+/* Range slider styling for importance controls */
+.basil-importance-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  outline: none;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
 
-    .basil-loading-card {
-      animation: pulse-border 2s infinite;
-    }
-  </style>
-<% end %>
+.basil-importance-range:hover {
+  opacity: 1;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+.basil-importance-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #9333ea;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.basil-importance-range::-webkit-slider-thumb:hover {
+  background: #7c3aed;
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(147, 51, 234, 0.4);
+}
+
+/* Firefox */
+.basil-importance-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #9333ea;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.basil-importance-range::-moz-range-thumb:hover {
+  background: #7c3aed;
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(147, 51, 234, 0.4);
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 640px) {
+  .basil-importance-range {
+    height: 8px;
+  }
+  
+  .basil-importance-range::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .basil-importance-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+  }
+}
+</style>

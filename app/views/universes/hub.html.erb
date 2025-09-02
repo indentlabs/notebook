@@ -191,7 +191,15 @@
 
 <section class="container mx-auto mt-8">
   <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-    <li class="col-span-1 flex flex-col text-center bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-lg shadow-lg border-2 border-transparent bg-clip-padding relative overflow-hidden group all-universes-card">
+    <li class="col-span-1 flex flex-col text-center bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-lg shadow-lg border-2 <%= @universe_scope.nil? ? 'border-purple-500 ring-2 ring-purple-300 ring-offset-2' : 'border-transparent' %> bg-clip-padding relative overflow-hidden group all-universes-card">
+      <% if @universe_scope.nil? %>
+        <div class="absolute top-2 right-2 z-10">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-purple-600 text-white shadow-sm">
+            <i class="material-icons text-xs mr-1">check_circle</i>
+            Active
+          </span>
+        </div>
+      <% end %>
       <div class="absolute inset-0 bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400 opacity-50 transition-opacity duration-300 all-universes-gradient-border" style="margin: -2px; border-radius: 0.5rem; z-index: -1;"></div>
       <%= link_to dashboard_path(universe: 'all'), class: 'flex flex-col h-full p-8 relative bg-white rounded-lg', style: 'margin: 2px;' do %>
         <div class="flex-1 flex flex-col">
@@ -219,7 +227,15 @@
     </li>
 
     <% @universes.each do |universe| %>
-      <li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow universe-card">
+      <li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow universe-card <%= @universe_scope&.id == universe.id ? 'ring-2 ring-purple-500 ring-offset-2' : '' %> relative">
+        <% if @universe_scope&.id == universe.id %>
+          <div class="absolute top-2 right-2 z-10">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-purple-600 text-white shadow-sm">
+              <i class="material-icons text-xs mr-1">check_circle</i>
+              Active
+            </span>
+          </div>
+        <% end %>
         <%= link_to dashboard_path(universe: universe.id), class: 'universe-card-link flex flex-col h-full' do %>
           <div class="flex-1 flex flex-col p-8">
             <%= image_tag universe.random_image_including_private, class: 'w-48 h-48 flex-shrink-0 mx-auto rounded-full border-2 border-purple-800 universe-portal' %>

@@ -1,0 +1,355 @@
+<%# Alpine.js-based content linking system %>
+<% if @linkables_cache %>
+  <script>
+    // Global linkables data for Alpine components
+    window.notebookLinkables = [
+      <% @linkables_cache.each do |class_name, collection| %>
+        <% linkable_class = content_class_from_name(class_name) %>
+        <% collection.each do |page_name, page_id| %>
+          {
+            name: "<%= j(page_name.to_s.strip) %>",
+            value: '[[<%= class_name %>-<%= page_id %>]]',
+            type: '<%= class_name %>',
+            color: '<%= linkable_class.color %>',
+            icon: '<%= linkable_class.icon %>',
+            textColor: '<%= linkable_class.text_color %>'
+          },
+        <% end %>
+      <% end %>
+    ];
+
+    // Alpine.js component for content linking
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('contentLinking', () => ({
+        showDropdown: false,
+        searchTerm: '',
+        selectedIndex: 0,
+        caretPosition: 0,
+        triggerPosition: null,
+        textElement: null,
+        filteredResults: [],
+        maxResults: 8,
+        dropdownPosition: { top: 0, left: 0 },
+
+        init() {
+          // Find the text element (textarea or contenteditable with the mention class)
+          this.textElement = this.$el.querySelector('.js-can-mention-pages, textarea, [contenteditable="true"]');
+          if (!this.textElement) return;
+
+          // Add event listeners with custom names to avoid conflicts
+          this.textElement.addEventListener('input', (e) => this.handleMentionInput(e));
+          this.textElement.addEventListener('keydown', (e) => this.handleMentionKeydown(e));
+          this.textElement.addEventListener('blur', (e) => this.handleMentionBlur(e));
+          this.textElement.addEventListener('click', (e) => this.handleMentionClick(e));
+        },
+
+        handleMentionInput(event) {
+          const text = this.textElement.value || this.textElement.innerText;
+          const cursorPos = this.getCursorPosition();
+          
+          // Look for @ symbol before cursor
+          const beforeCursor = text.substring(0, cursorPos);
+          const lastAtIndex = beforeCursor.lastIndexOf('@');
+          
+          if (lastAtIndex !== -1) {
+            const afterAt = beforeCursor.substring(lastAtIndex + 1);
+            
+            // Check if we're still in a mention (no spaces, brackets, etc.)
+            if (!/[\s\[\]]/.test(afterAt)) {
+              this.searchTerm = afterAt.toLowerCase();
+              this.triggerPosition = lastAtIndex;
+              this.updateFilteredResults();
+              
+              if (this.filteredResults.length > 0) {
+                this.calculateDropdownPosition();
+                this.showDropdown = true;
+                this.selectedIndex = 0;
+              } else {
+                this.hideDropdown();
+              }
+            } else {
+              this.hideDropdown();
+            }
+          } else {
+            this.hideDropdown();
+          }
+        },
+
+        handleMentionKeydown(event) {
+          if (!this.showDropdown) return;
+
+          switch(event.key) {
+            case 'ArrowDown':
+              event.preventDefault();
+              this.selectedIndex = Math.min(this.selectedIndex + 1, this.filteredResults.length - 1);
+              this.scrollToSelected();
+              break;
+            case 'ArrowUp':
+              event.preventDefault();
+              this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
+              this.scrollToSelected();
+              break;
+            case 'Enter':
+              event.preventDefault();
+              if (this.filteredResults[this.selectedIndex]) {
+                this.selectItem(this.filteredResults[this.selectedIndex]);
+              }
+              break;
+            case 'Escape':
+              event.preventDefault();
+              this.hideDropdown();
+              this.triggerAutosave();
+              break;
+            case 'Tab':
+              if (this.filteredResults[this.selectedIndex]) {
+                event.preventDefault();
+                this.selectItem(this.filteredResults[this.selectedIndex]);
+              }
+              break;
+          }
+        },
+
+        handleMentionBlur(event) {
+          // Delay to allow click events on dropdown items
+          setTimeout(() => {
+            // Only hide if the focus has moved completely away from our component
+            if (!this.$el.contains(document.activeElement) && !this.showDropdown) {
+              this.hideDropdown();
+            }
+          }, 150);
+        },
+
+        handleMentionClick(event) {
+          // Re-check for @ mentions at cursor position
+          this.handleMentionInput(event);
+        },
+
+        updateFilteredResults() {
+          if (!this.searchTerm) {
+            this.filteredResults = window.notebookLinkables.slice(0, this.maxResults);
+          } else {
+            // Score-based search for better results
+            const scored = window.notebookLinkables.map(item => {
+              const nameMatch = item.name.toLowerCase();
+              const search = this.searchTerm.toLowerCase();
+              
+              let score = 0;
+              if (nameMatch.startsWith(search)) {
+                score = 100 - (nameMatch.length - search.length);
+              } else if (nameMatch.includes(search)) {
+                score = 50 - nameMatch.indexOf(search);
+              }
+              
+              return { ...item, score };
+            });
+
+            this.filteredResults = scored
+              .filter(item => item.score > 0)
+              .sort((a, b) => b.score - a.score)
+              .slice(0, this.maxResults);
+          }
+        },
+
+        selectItem(item) {
+          const text = this.textElement.value || this.textElement.innerText;
+          const beforeTrigger = text.substring(0, this.triggerPosition);
+          const afterCursor = text.substring(this.getCursorPosition());
+          
+          // Replace @mention with the selected item
+          const newText = beforeTrigger + item.value + ' ' + afterCursor;
+          
+          if (this.textElement.tagName === 'TEXTAREA') {
+            this.textElement.value = newText;
+            // Set cursor position after the inserted text
+            const newCursorPos = this.triggerPosition + item.value.length + 1;
+            
+            // Focus the textarea first, then set selection
+            this.textElement.focus();
+            this.textElement.setSelectionRange(newCursorPos, newCursorPos);
+          } else {
+            this.textElement.innerText = newText;
+            this.textElement.focus();
+          }
+
+          // Trigger input event for any listeners
+          this.textElement.dispatchEvent(new Event('input', { bubbles: true }));
+          
+          this.hideDropdown();
+          
+          // Trigger autosave after inserting a link
+          setTimeout(() => {
+            this.triggerAutosave();
+          }, 100);
+        },
+
+        hideDropdown() {
+          this.showDropdown = false;
+          this.searchTerm = '';
+          this.selectedIndex = 0;
+          this.triggerPosition = null;
+        },
+
+        getCursorPosition() {
+          if (this.textElement.tagName === 'TEXTAREA') {
+            return this.textElement.selectionStart;
+          } else {
+            // For contenteditable
+            const selection = window.getSelection();
+            if (selection.rangeCount === 0) return 0;
+            
+            const range = selection.getRangeAt(0);
+            const preCaretRange = range.cloneRange();
+            preCaretRange.selectNodeContents(this.textElement);
+            preCaretRange.setEnd(range.endContainer, range.endOffset);
+            return preCaretRange.toString().length;
+          }
+        },
+
+        scrollToSelected() {
+          this.$nextTick(() => {
+            const dropdown = this.$el.querySelector('.linkables-dropdown');
+            const selected = dropdown?.children[this.selectedIndex];
+            if (selected) {
+              selected.scrollIntoView({ block: 'nearest' });
+            }
+          });
+        },
+
+        getIconColorClass(color) {
+          // The color is already in Tailwind format like 'bg-red-500'
+          // Convert bg-* to text-* for icon colors
+          if (color && color.startsWith('bg-')) {
+            return color.replace('bg-', 'text-');
+          }
+          return color || 'text-gray-500';
+        },
+        
+        getBackgroundColor(color) {
+          // Extract the color name from bg-*-500 format
+          if (color && color.startsWith('bg-')) {
+            const colorName = color.match(/bg-(\w+)-/)?.[1];
+            if (colorName) {
+              return `bg-${colorName}-50`;
+            }
+          }
+          return 'bg-gray-50';
+        },
+        
+        calculateDropdownPosition() {
+          // Get the text before the @ symbol to calculate position
+          const text = this.textElement.value;
+          const textBeforeTrigger = text.substring(0, this.triggerPosition);
+          
+          // Get computed styles
+          const styles = window.getComputedStyle(this.textElement);
+          const fontSize = parseFloat(styles.fontSize);
+          const lineHeight = parseFloat(styles.lineHeight) || fontSize * 1.5;
+          const paddingTop = parseFloat(styles.paddingTop);
+          const paddingLeft = parseFloat(styles.paddingLeft);
+          
+          // Create a mirror element to measure text
+          const mirror = document.createElement('div');
+          mirror.style.position = 'absolute';
+          mirror.style.visibility = 'hidden';
+          mirror.style.whiteSpace = 'pre-wrap';
+          mirror.style.wordWrap = 'break-word';
+          mirror.style.fontSize = styles.fontSize;
+          mirror.style.fontFamily = styles.fontFamily;
+          mirror.style.fontWeight = styles.fontWeight;
+          mirror.style.lineHeight = styles.lineHeight;
+          mirror.style.padding = styles.padding;
+          mirror.style.width = (this.textElement.offsetWidth - paddingLeft * 2) + 'px';
+          
+          // Add text up to the @ symbol
+          mirror.textContent = textBeforeTrigger + '@';
+          document.body.appendChild(mirror);
+          
+          // Get the height of all text to find vertical position
+          const totalHeight = mirror.offsetHeight;
+          
+          // Get the position of the @ symbol
+          const atSpan = document.createElement('span');
+          atSpan.textContent = '@';
+          mirror.innerHTML = '';
+          
+          // Add text before @ and then the @ in a span
+          const beforeText = document.createTextNode(textBeforeTrigger);
+          mirror.appendChild(beforeText);
+          mirror.appendChild(atSpan);
+          
+          // Get position of the @ symbol
+          const atRect = atSpan.getBoundingClientRect();
+          const mirrorRect = mirror.getBoundingClientRect();
+          
+          // Calculate relative positions
+          const relativeTop = atRect.top - mirrorRect.top;
+          const relativeLeft = atRect.left - mirrorRect.left;
+          
+          // Account for textarea scroll
+          const scrollTop = this.textElement.scrollTop;
+          
+          // Calculate final position relative to textarea
+          this.dropdownPosition = {
+            top: paddingTop + relativeTop - scrollTop + lineHeight,
+            left: paddingLeft + relativeLeft
+          };
+          
+          // Ensure dropdown doesn't go off-screen
+          const textareaRect = this.textElement.getBoundingClientRect();
+          const maxLeft = textareaRect.width - 400; // 400px is dropdown width
+          if (this.dropdownPosition.left > maxLeft) {
+            this.dropdownPosition.left = maxLeft;
+          }
+          
+          // Clean up
+          document.body.removeChild(mirror);
+        },
+        
+        triggerAutosave() {
+          // The existing autosave system listens for 'change' events on elements with 'autosave-closest-form-on-change' class
+          if (this.textElement.classList.contains('autosave-closest-form-on-change')) {
+            // Dispatch a change event to trigger the existing autosave system
+            const changeEvent = new Event('change', { 
+              bubbles: true, 
+              cancelable: true 
+            });
+            this.textElement.dispatchEvent(changeEvent);
+            
+            // Also try jQuery trigger as a fallback
+            if (window.$ && window.$(this.textElement).length) {
+              window.$(this.textElement).trigger('change');
+            }
+          } 
+          // Also check for enhanced autosave system
+          else if (this.textElement.classList.contains('js-enhanced-autosave')) {
+            // For enhanced autosave, trigger a blur event which immediately saves
+            const blurEvent = new Event('blur', { 
+              bubbles: true, 
+              cancelable: true 
+            });
+            this.textElement.dispatchEvent(blurEvent);
+          }
+          // Fallback: try to find and trigger jQuery change event
+          else {
+            // Try jQuery if available (for backward compatibility)
+            if (window.$ && window.$(this.textElement).length) {
+              window.$(this.textElement).trigger('change');
+            }
+          }
+        }
+      }));
+    });
+  </script>
+
+  <style>
+    /* Ensure dropdown appears above other elements and isn't clipped */
+    .linkables-dropdown-container {
+      z-index: 9999;
+    }
+    
+    /* Ensure parent containers don't clip the dropdown */
+    [x-data*="contentLinking"] {
+      overflow: visible !important;
+    }
+  </style>
+<% end %>

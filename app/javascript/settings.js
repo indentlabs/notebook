@@ -287,8 +287,17 @@ function initializeToasts() {
     }, 3000);
   };
   
-  // Add event listeners to forms
-  document.querySelectorAll('form').forEach(form => {
+  // Add event listeners to settings forms only
+  // Only apply to forms on settings pages or forms with specific settings classes
+  const settingsForms = document.querySelectorAll(
+    '.settings-form, ' +
+    'form[action*="/settings"], ' + 
+    'form[action*="/customization"], ' +
+    'form[action*="/billing"], ' +
+    'form[action*="/account"]'
+  );
+  
+  settingsForms.forEach(form => {
     form.addEventListener('submit', function() {
       // Store a flag in localStorage to show toast after redirect
       localStorage.setItem('showSettingsSavedToast', 'true');

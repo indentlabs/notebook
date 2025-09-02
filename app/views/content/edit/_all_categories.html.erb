@@ -45,7 +45,7 @@
             <!-- Field input -->
             <div class="mt-1 sm:mt-0 sm:col-span-3 relative">
               <!-- Autosave status indicator -->
-              <div class="absolute top-0 right-0 autosave-indicator opacity-0 transition-opacity duration-200 z-10">
+              <div class="absolute top-0 right-0 autosave-indicator opacity-0 pointer-events-none transition-opacity duration-200 z-10">
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                   <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -123,7 +123,7 @@
 }
 
 .autosave-indicator.show {
-  @apply opacity-100;
+  @apply opacity-100 pointer-events-auto;
 }
 </style>
 
@@ -131,7 +131,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Enhanced autosave feedback
   document.addEventListener('autosave:start', function(e) {
-    const form = e.target.closest('.field-form');
+    const form = e.detail.field?.closest('.field-form');
     if (form) {
       form.classList.add('saving');
       form.classList.remove('saved', 'error');
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   document.addEventListener('autosave:success', function(e) {
-    const form = e.target.closest('.field-form');
+    const form = e.detail.field?.closest('.field-form');
     if (form) {
       form.classList.add('saved');
       form.classList.remove('saving', 'error');
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   document.addEventListener('autosave:error', function(e) {
-    const form = e.target.closest('.field-form');
+    const form = e.detail.field?.closest('.field-form');
     if (form) {
       form.classList.add('error');
       form.classList.remove('saving', 'saved');

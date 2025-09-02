@@ -31,6 +31,12 @@ $(document).ready(function() {
           field.removeClass(in_progress_saving_class);
           field.addClass(saved_successfully_class);
 
+          // Dispatch a custom event for successful autosave
+          var event = new CustomEvent('autosave:success', {
+            detail: { field: field[0], response: response }
+          });
+          document.dispatchEvent(event);
+
           // Reset back to default coloring after 10 seconds
           setTimeout(function () {
             field.removeClass(saved_successfully_class);

@@ -202,24 +202,34 @@
             </h3>
             
             <!-- Quick comment form -->
-            <div class="mb-6 pb-6 border-b border-gray-200">
-              <div class="flex items-start space-x-3 w-full">
-                <div class="flex-shrink-0">
-                  <%= image_tag current_user.image_url(size: 32), class: "h-8 w-8 rounded-full border border-green-200" %>
-                </div>
-                <%= form_for ShareComment.new, local: true, html: { class: "flex-1" } do |f| %>
-                  <%= f.hidden_field :content_page_share_id, value: @share.id %>
-                  <div class="flex items-start space-x-3">
-                    <%= f.text_area :message, 
-                        placeholder: "Add a thoughtful comment...", 
-                        rows: 3,
-                        id: "comment-input",
-                        class: "flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors resize-none" %>
-                    <%= f.submit "Post", class: "flex-shrink-0 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors" %>
+            <% if user_signed_in? %>
+              <div class="mb-6 pb-6 border-b border-gray-200">
+                <div class="flex items-start space-x-3 w-full">
+                  <div class="flex-shrink-0">
+                    <%= image_tag current_user.image_url(size: 32), class: "h-8 w-8 rounded-full border border-green-200" %>
                   </div>
-                <% end %>
+                  <%= form_for ShareComment.new, local: true, html: { class: "flex-1" } do |f| %>
+                    <%= f.hidden_field :content_page_share_id, value: @share.id %>
+                    <div class="flex items-start space-x-3">
+                      <%= f.text_area :message, 
+                          placeholder: "Add a thoughtful comment...", 
+                          rows: 3,
+                          id: "comment-input",
+                          class: "flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors resize-none" %>
+                      <%= f.submit "Post", class: "flex-shrink-0 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors" %>
+                    </div>
+                  <% end %>
+                </div>
               </div>
-            </div>
+            <% else %>
+              <div class="mb-6 pb-6 border-b border-gray-200">
+                <div class="bg-gray-50 rounded-lg p-4 text-center">
+                  <p class="text-gray-600 text-sm">
+                    <%= link_to "Sign in", new_user_session_path, class: "text-blue-600 hover:text-blue-700 font-medium" %> to leave a comment
+                  </p>
+                </div>
+              </div>
+            <% end %>
             
             <!-- Comments List -->
             <% if @share.share_comments.any? %>
@@ -488,7 +498,7 @@ function showNotification(message, type) {
   // Create notification element
   var notification = document.createElement('div');
   var bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
-  notification.className = 'copy-notification fixed top-4 right-4 ' + bgColor + ' text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-y-0 opacity-100';
+  notification.className = 'copy-notification fixed bottom-4 right-4 ' + bgColor + ' text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-y-0 opacity-100';
   
   // Add icon based on type
   var icon = type === 'success' ? 
@@ -496,17 +506,20 @@ function showNotification(message, type) {
     '<svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
   
   notification.innerHTML = icon + message;
+  notification.style.transform = 'translateY(100%)';
+  notification.style.opacity = '0';
   document.body.appendChild(notification);
   
-  // Animate in
+  // Animate in (slide up from bottom)
   setTimeout(function() {
     notification.style.transform = 'translateY(0)';
+    notification.style.opacity = '1';
   }, 10);
   
   // Remove after 4 seconds
   setTimeout(function() {
     notification.style.opacity = '0';
-    notification.style.transform = 'translateY(-10px)';
+    notification.style.transform = 'translateY(100%)';
     setTimeout(function() {
       if (notification.parentNode) {
         notification.parentNode.removeChild(notification);
