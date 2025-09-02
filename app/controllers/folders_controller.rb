@@ -45,6 +45,32 @@ class FoldersController < ApplicationController
     # Get the content type class based on the folder's context
     content_type_class = @folder.context.constantize rescue Document
     
+    # Add sidebar data
+    # Recent folders in this context (for left sidebar)
+    @recent_folders = current_user.folders
+      .where(context: @folder.context)
+      .order('updated_at DESC')
+      .limit(10)
+    
+    # Calculate quick actions based on folder context
+    @quick_actions = []
+    if @folder.context == 'Document'
+      @quick_actions << { label: 'New Document', path: new_document_path(folder: @folder.id), icon: 'add', color: 'blue' }
+    elsif Rails.application.config.content_types[:all].map(&:name).include?(@folder.context)
+      content_klass = content_class_from_name(@folder.context)
+      @quick_actions << { 
+        label: "New #{@folder.context}", 
+        path: new_polymorphic_path(content_klass, folder: @folder.id), 
+        icon: content_klass.icon, 
+        color: content_klass.hex_color 
+      }
+    end
+    @quick_actions << { label: 'New Subfolder', action: 'showNewFolderModal = true', icon: 'create_new_folder', color: Folder.hex_color }
+    
+    # Folder statistics (for right sidebar)
+    @total_items_in_folder = 0
+    @total_words_in_folder = 0
+    
     # Check if the content type has a folder association
     if content_type_class.column_names.include?('folder_id')
       # Load content of the appropriate type
@@ -96,6 +122,26 @@ class FoldersController < ApplicationController
     
     # Make the content type class available to the view
     @content_type_class = content_type_class
+    
+    # Calculate folder statistics after content is loaded
+    if @content.respond_to?(:count)
+      @total_items_in_folder = @content.count
+      if content_type_class.column_names.include?('cached_word_count')
+        @total_words_in_folder = @content.sum(:cached_word_count) || 0
+      end
+    end
+    
+    # Activity stats
+    @items_this_month = 0
+    if @content.any? && content_type_class.column_names.include?('created_at')
+      @items_this_month = @content.where('created_at >= ?', Date.current.beginning_of_month).count
+    end
+    
+    # Last activity in folder
+    @last_activity = nil
+    if @content.any? && content_type_class.column_names.include?('updated_at')
+      @last_activity = @content.maximum(:updated_at)
+    end
   end
 
   private

@@ -11,6 +11,11 @@ module.exports = {
     'bg-notebook-blue',
     'translate-x-5',
     'translate-x-0',
+    // Icon rotation animation
+    'rotate-90',
+    'group-hover:rotate-90',
+    'transition-transform',
+    'duration-200',
     // Ensure pseudo-element classes aren't purged if used elsewhere
     { pattern: /^after:/ },
     { pattern: /^peer/ },

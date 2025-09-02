@@ -12,6 +12,10 @@ class Folder < ApplicationRecord
     'lighten-1 teal bg-notebook-blue'
   end
 
+  def self.hex_color
+    '#0000ff'
+  end
+
   def self.text_color
     'text-lighten-1 teal-text text-teal-600'
   end

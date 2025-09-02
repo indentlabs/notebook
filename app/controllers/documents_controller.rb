@@ -27,15 +27,33 @@ class DocumentsController < ApplicationController
       .includes([:user, :page_tags, :universe])
       .limit(10) # Limit for sidebar display
 
+    # Apply sorting based on params
     @documents = current_user
       .linkable_documents
-      .order('favorite DESC, title ASC, updated_at DESC')
       .includes([:user, :page_tags, :universe])
+    
+    case params[:sort]
+    when 'alphabetical'
+      @documents = @documents.order(favorite: :desc, title: :asc)
+    when 'word_count'
+      @documents = @documents.order(favorite: :desc).order(Arel.sql('cached_word_count DESC NULLS LAST'))
+    when 'created'
+      @documents = @documents.order(favorite: :desc, created_at: :desc)
+    else # default to 'updated' or no param
+      @documents = @documents.order(favorite: :desc, updated_at: :desc)
+    end
 
     @folders = current_user
       .folders
       .where(context: 'Document', parent_folder_id: nil)
       .order('title ASC')
+    
+    # Apply global search if query param is present
+    if params[:q].present?
+      search_query = "%#{params[:q]}%"
+      @documents = @documents.where("title ILIKE ? OR body ILIKE ?", search_query, search_query)
+      @folders = @folders.where("title ILIKE ?", search_query)
+    end
 
     # Calculate frequent folders (top 5 by document count)
     @frequent_folders = current_user
@@ -254,11 +272,15 @@ class DocumentsController < ApplicationController
     document = Document.with_deleted.find_or_initialize_by(id: params[:id])
 
     unless document.updatable_by?(current_user)
-      flash[:notice] = "You don't have permission to edit that!"
-      return redirect_back fallback_location: document
+      render json: { error: "You don't have permission to edit that!" }, status: :forbidden
+      return
     end
 
-    document.update!(favorite: !document.favorite)
+    if document.update(favorite: !document.favorite)
+      render json: { success: true, favorite: document.favorite }
+    else
+      render json: { error: "Failed to update favorite status" }, status: :unprocessable_entity
+    end
   end
 
   def destroy
@@ -337,28 +359,6 @@ class DocumentsController < ApplicationController
   private
 
   def calculate_writing_streak_data
-    # Get last 30 days of word count updates
-    @writing_activity = {}
-    30.downto(0) do |days_ago|
-      date = Date.current - days_ago
-      @writing_activity[date] = WordCountUpdate
-        .where(user: current_user, for_date: date)
-        .sum(:word_count)
-    end
-
-    # Calculate current streak
-    @current_streak = 0
-    Date.current.downto(Date.current - 365) do |date|
-      if WordCountUpdate.where(user: current_user, for_date: date).exists?
-        @current_streak += 1
-      else
-        break
-      end
-    end
-
-    # Calculate longest streak (simplified version for now)
-    @longest_streak = @current_streak # This would need more complex calculation
-
     # Today's word count
     @words_written_today = WordCountUpdate
       .where(user: current_user, for_date: Date.current)

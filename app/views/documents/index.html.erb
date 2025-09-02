@@ -63,15 +63,17 @@ class="min-h-screen bg-gray-50">
       
       <!-- Global Search -->
       <div class="p-4 border-b border-gray-200">
-        <div class="relative">
+        <form action="<%= documents_path %>" method="get" class="relative">
           <input
-            x-model="globalSearchQuery"
+            name="q"
             type="text"
             placeholder="Search all documents..."
+            value="<%= params[:q] %>"
             class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            @keydown.enter="$el.form.submit()"
           />
           <i class="material-icons absolute left-3 top-2.5 text-gray-400 text-lg">search</i>
-        </div>
+        </form>
       </div>
       
       <!-- Quick Actions -->
@@ -176,7 +178,14 @@ class="min-h-screen bg-gray-50">
               >
                 <i class="material-icons" x-text="leftSidebarOpen ? 'menu_open' : 'menu'"></i>
               </button>
-              <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Documents Library</h1>
+              <h1 class="text-xl sm:text-2xl font-bold text-gray-900">
+                Documents Trunk
+                <% if params[:q].present? %>
+                  <span class="text-sm font-normal text-gray-500 ml-2">
+                    - Searching for "<%= params[:q] %>"
+                  </span>
+                <% end %>
+              </h1>
             </div>
             
             <!-- Right Sidebar Toggle -->
@@ -223,10 +232,22 @@ class="min-h-screen bg-gray-50">
                   <i class="material-icons ml-1 text-sm">arrow_drop_down</i>
                 </button>
                 <div x-show="open" class="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-10">
-                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Recently Updated</a>
-                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Alphabetical (A-Z)</a>
-                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Word Count</a>
-                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Date Created</a>
+                  <%= link_to documents_path(sort: 'updated'), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'font-medium bg-gray-50' if params[:sort].nil? || params[:sort] == 'updated'}" do %>
+                    <% if params[:sort].nil? || params[:sort] == 'updated' %><i class="material-icons text-xs mr-1 align-middle">check</i><% end %>
+                    Recently Updated
+                  <% end %>
+                  <%= link_to documents_path(sort: 'alphabetical'), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'font-medium bg-gray-50' if params[:sort] == 'alphabetical'}" do %>
+                    <% if params[:sort] == 'alphabetical' %><i class="material-icons text-xs mr-1 align-middle">check</i><% end %>
+                    Alphabetical (A-Z)
+                  <% end %>
+                  <%= link_to documents_path(sort: 'word_count'), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'font-medium bg-gray-50' if params[:sort] == 'word_count'}" do %>
+                    <% if params[:sort] == 'word_count' %><i class="material-icons text-xs mr-1 align-middle">check</i><% end %>
+                    Word Count
+                  <% end %>
+                  <%= link_to documents_path(sort: 'created'), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'font-medium bg-gray-50' if params[:sort] == 'created'}" do %>
+                    <% if params[:sort] == 'created' %><i class="material-icons text-xs mr-1 align-middle">check</i><% end %>
+                    Date Created
+                  <% end %>
                 </div>
               </div>
             </div>
@@ -251,14 +272,26 @@ class="min-h-screen bg-gray-50">
         <% if @folders.any? || @documents.any? %>
           <!-- Grid View -->
           <div x-show="viewMode === 'grid'" class="space-y-8">
+            <!-- No results message -->
+            <template x-if="searchQuery && !Array.from(document.querySelectorAll('[x-show*=searchQuery]')).some(el => el.style.display !== 'none')">
+              <div class="text-center py-12">
+                <i class="material-icons text-gray-400 text-5xl mb-4">search_off</i>
+                <p class="text-gray-500">No documents or folders match "<span x-text="searchQuery"></span>"</p>
+                <button @click="searchQuery = ''" class="mt-4 text-sm text-blue-600 hover:text-blue-800">Clear filter</button>
+              </div>
+            </template>
             <!-- Folders Section -->
             <% if @folders.any? %>
               <div>
                 <h3 class="text-sm font-medium text-gray-500 mb-4">Folders</h3>
                 <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                   <% @folders.each do |folder| %>
-                    <%= link_to folder_path(folder), class: "block group" do %>
-                      <div class="relative transform transition-all duration-200 hover:-translate-y-0.5 hover:scale-105">
+                    <div x-show="searchQuery === '' || '<%= folder.title.downcase %>'.includes(searchQuery.toLowerCase())"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 transform scale-90"
+                         x-transition:enter-end="opacity-100 transform scale-100">
+                      <%= link_to folder_path(folder), class: "block group" do %>
+                        <div class="relative transform transition-all duration-200 hover:-translate-y-0.5 hover:scale-105">
                         <div class="relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-200">
                           <div class="h-1 <%= Folder.color %>"></div>
                           <div class="bg-white border border-gray-200 rounded-b-lg">
@@ -285,6 +318,7 @@ class="min-h-screen bg-gray-50">
                         </div>
                       </div>
                     <% end %>
+                    </div>
                   <% end %>
                 </div>
               </div>
@@ -296,7 +330,33 @@ class="min-h-screen bg-gray-50">
                 <h3 class="text-sm font-medium text-gray-500 mb-4">Documents</h3>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                   <% @documents.each do |document| %>
-                    <div class="group relative bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+                    <div x-show="searchQuery === '' || '<%= document.title.downcase %>'.includes(searchQuery.toLowerCase())"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 transform scale-90"
+                         x-transition:enter-end="opacity-100 transform scale-100"
+                         class="group relative bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+                         x-data="{
+                           isFavorite: <%= document.favorite? %>,
+                           isLoading: false,
+                           async toggleFavorite(event) {
+                             event.preventDefault();
+                             event.stopPropagation();
+                             this.isLoading = true;
+                             try {
+                               const result = await window.toggleDocumentFavorite('<%= document.id %>');
+                               if (result.success) {
+                                 this.isFavorite = !this.isFavorite;
+                               } else {
+                                 alert('Error toggling favorite. Please try again.');
+                               }
+                             } catch (error) {
+                               console.error('Error:', error);
+                               alert('An unexpected error occurred. Please check the console.');
+                             } finally {
+                               this.isLoading = false;
+                             }
+                           }
+                         }">
                       <%= link_to edit_document_path(document), class: "block" do %>
                         <!-- Header image area -->
                         <div class="relative h-24 bg-gray-100 overflow-hidden">
@@ -323,6 +383,7 @@ class="min-h-screen bg-gray-50">
                                 </h3>
                               </div>
                             </div>
+
                           </div>
                         </div>
                         
@@ -345,6 +406,16 @@ class="min-h-screen bg-gray-50">
                           </span>
                         </div>
                       <% end %>
+                      <!-- Favorite Toggle Button -->
+                      <button
+                        @click="toggleFavorite"
+                        :disabled="isLoading"
+                        class="absolute top-2 left-2 p-1 text-xl rounded-lg bg-white/90 backdrop-blur-sm hover:bg-white hover:shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all z-10"
+                        :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                        title="Toggle favorite"
+                      >
+                        <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                      </button>
                     </div>
                   <% end %>
                 </div>
@@ -354,7 +425,147 @@ class="min-h-screen bg-gray-50">
           
           <!-- List View -->
           <div x-show="viewMode === 'list'" style="display: none;" class="space-y-6">
-            <!-- Similar structure for list view -->
+            <!-- Folders Section -->
+            <% if @folders.any? %>
+              <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-4">Folders</h3>
+                <div class="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200">
+                  <ul class="divide-y divide-gray-200">
+                    <% @folders.each do |folder| %>
+                      <li x-show="searchQuery === '' || '<%= folder.title.downcase %>'.includes(searchQuery.toLowerCase())"
+                          x-transition:enter="transition ease-out duration-100"
+                          x-transition:enter-start="opacity-0"
+                          x-transition:enter-end="opacity-100">
+                        <%= link_to folder_path(folder), class: "block hover:bg-gray-50" do %>
+                          <div class="px-4 py-4 flex items-center sm:px-6">
+                            <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
+                              <div class="flex items-center">
+                                <div class="<%= Folder.color %> rounded-lg p-2 mr-3 shadow-sm">
+                                  <i class="material-icons text-white text-xl"><%= Folder.icon %></i>
+                                </div>
+                                <div>
+                                  <div class="text-sm font-medium text-gray-900"><%= folder.title %></div>
+                                  <div class="mt-1 text-xs text-gray-500">
+                                    <% if folder.documents.count > 0 %>
+                                      <%= folder.documents.count %> <%= 'document'.pluralize(folder.documents.count) %>
+                                    <% else %>
+                                      Empty folder
+                                    <% end %>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="ml-5 flex-shrink-0">
+                              <i class="material-icons text-gray-400">chevron_right</i>
+                            </div>
+                          </div>
+                        <% end %>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            <% end %>
+            
+            <!-- Documents Section -->
+            <% if @documents.any? %>
+              <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-4">Documents</h3>
+                <div class="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200">
+                  <ul class="divide-y divide-gray-200">
+                    <% @documents.each do |document| %>
+                      <li x-show="searchQuery === '' || '<%= document.title.downcase %>'.includes(searchQuery.toLowerCase())"
+                          x-transition:enter="transition ease-out duration-100"
+                          x-transition:enter-start="opacity-0"
+                          x-transition:enter-end="opacity-100"
+                          x-data="{
+                            isFavorite: <%= document.favorite? %>,
+                            isLoading: false,
+                            async toggleFavorite(event) {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              this.isLoading = true;
+                              try {
+                                const result = await window.toggleDocumentFavorite('<%= document.id %>');
+                                if (result.success) {
+                                  this.isFavorite = !this.isFavorite;
+                                } else {
+                                  alert('Error toggling favorite. Please try again.');
+                                }
+                              } catch (error) {
+                                console.error('Error:', error);
+                                alert('An unexpected error occurred. Please check the console.');
+                              } finally {
+                                this.isLoading = false;
+                              }
+                            }
+                          }">
+                        <%= link_to edit_document_path(document), class: "block hover:bg-gray-50 group" do %>
+                          <div class="relative px-4 py-3 flex items-center">
+                            <!-- Recency indicator -->
+                            <% 
+                              time_diff = Time.current - document.updated_at
+                              recency_class = case
+                                when time_diff < 1.hour then "bg-red-500 animate-pulse"
+                                when time_diff < 6.hours then "bg-orange-500"
+                                when time_diff < 24.hours then "bg-yellow-500"
+                                else "bg-gray-400"
+                              end
+                            %>
+                            <div class="flex-shrink-0 mr-3">
+                              <div class="w-2 h-2 rounded-full <%= recency_class %>"></div>
+                            </div>
+                            
+                            <!-- Document icon -->
+                            <div class="flex-shrink-0 mr-3">
+                              <i class="material-icons <%= Document.text_color %> text-lg">description</i>
+                            </div>
+                            
+                            <!-- Document info -->
+                            <div class="min-w-0 flex-1">
+                              <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                  <h3 class="text-sm font-medium text-gray-900 truncate"><%= document.title %></h3>
+                                  <% if document.folder %>
+                                    <span class="text-xs text-gray-500 flex items-center">
+                                      <i class="material-icons text-xs mr-1 <%= Folder.text_color %>">folder</i>
+                                      <%= document.folder.title %>
+                                    </span>
+                                  <% end %>
+                                </div>
+                                <div class="flex items-center space-x-6 text-xs">
+                                  <span class="text-gray-600 font-medium">
+                                    <i class="material-icons text-xs mr-0.5 <%= Document.text_color %> align-middle">description</i>
+                                    <%= number_with_delimiter(document.cached_word_count || 0) %> words
+                                  </span>
+                                  <span class="text-gray-500 font-medium"><%= time_ago_in_words(document.updated_at) %> ago</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <!-- Favorite Toggle Button -->
+                            <button
+                              @click="toggleFavorite"
+                              :disabled="isLoading"
+                              class="ml-2 p-1 text-lg rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                              :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                              title="Toggle favorite"
+                            >
+                              <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                            </button>
+                            
+                            <!-- Chevron -->
+                            <div class="ml-2 flex-shrink-0">
+                              <i class="material-icons text-gray-400 text-lg">chevron_right</i>
+                            </div>
+                          </div>
+                        <% end %>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            <% end %>
           </div>
         <% else %>
           <!-- Empty State -->
@@ -398,40 +609,6 @@ class="min-h-screen bg-gray-50">
         <button @click="rightSidebarOpen = false" class="lg:hidden p-1 text-gray-400 hover:text-gray-600">
           <i class="material-icons">close</i>
         </button>
-      </div>
-      
-      <!-- Writing Streak -->
-      <div class="p-6 border-b border-gray-200">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-semibold text-gray-900">Writing Streak</h3>
-          <div class="flex items-center space-x-2">
-            <span class="text-2xl font-bold text-orange-500"><%= @current_streak %></span>
-            <span class="text-sm text-gray-500">days</span>
-          </div>
-        </div>
-        
-        <!-- GitHub-style contribution graph -->
-        <div class="mt-4">
-          <div class="grid grid-cols-7 gap-1">
-            <% @writing_activity.each do |date, word_count| %>
-              <% 
-                intensity_class = case word_count
-                  when 0 then "bg-gray-100"
-                  when 1..100 then "bg-green-200"
-                  when 101..500 then "bg-green-300"
-                  when 501..1000 then "bg-green-400"
-                  else "bg-green-500"
-                end
-              %>
-              <div class="w-full aspect-square rounded-sm <%= intensity_class %> hover:ring-2 hover:ring-gray-400 cursor-pointer"
-                   title="<%= date.strftime('%b %d') %>: <%= number_with_delimiter(word_count) %> words">
-              </div>
-            <% end %>
-          </div>
-          <div class="mt-2 text-xs text-gray-500 text-center">
-            Last 30 days
-          </div>
-        </div>
       </div>
       
       <!-- Overall Stats -->
@@ -483,22 +660,6 @@ class="min-h-screen bg-gray-50">
         </div>
       </div>
       
-      <!-- Recent Activity -->
-      <div class="p-6">
-        <h3 class="text-sm font-semibold text-gray-900 mb-4">Recent Activity</h3>
-        <div class="space-y-3">
-          <% @recent_activity.each do |document| %>
-            <div class="text-sm">
-              <div class="font-medium text-gray-900 truncate">
-                <%= link_to document.title, edit_document_path(document), class: "hover:text-blue-600" %>
-              </div>
-              <div class="text-xs text-gray-500">
-                <%= time_ago_in_words(document.updated_at) %> ago
-              </div>
-            </div>
-          <% end %>
-        </div>
-      </div>
     </aside>
   </div>
   
@@ -509,6 +670,28 @@ class="min-h-screen bg-gray-50">
 </div>
 
 <script>
+  // Toggle favorite function for documents
+  window.toggleDocumentFavorite = async function(documentId) {
+    const csrfToken = document.querySelector('meta[name=csrf-token]').getAttribute('content');
+    const postUrl = `/documents/${documentId}/toggle_favorite`;
+    
+    try {
+      const response = await fetch(postUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify({ id: documentId })
+      });
+      
+      return { success: response.ok };
+    } catch (error) {
+      console.error('Fetch error:', error);
+      throw error;
+    }
+  };
+
   // Keyboard shortcuts
   document.addEventListener('keydown', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
