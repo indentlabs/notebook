@@ -12,6 +12,7 @@ module.exports = {
     'translate-x-5',
     'translate-x-0',
     // Icon rotation animation
+    'transform',
     'rotate-90',
     'group-hover:rotate-90',
     'transition-transform',

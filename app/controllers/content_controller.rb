@@ -223,7 +223,7 @@ class ContentController < ApplicationController
       # If the user doesn't have this content type enabled, go ahead and automatically enable it for them
       current_user.user_content_type_activators.find_or_create_by(content_type: @content.class.name)
 
-      return redirect_to polymorphic_path(@content, editing: true)
+      return redirect_to edit_polymorphic_path(@content)
     else
       return redirect_to(subscription_path, notice: "#{@content.class.name.pluralize} require a Premium subscription to create.")
     end
