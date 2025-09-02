@@ -3,49 +3,38 @@
     <div class="flex items-center justify-between">
       <div class="flex-1">
         <div class="space-y-8 sm:flex sm:justify-between sm:items-center xl:block">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 w-full mb-2">
-              <% image = content.raw_model.random_image_including_private %>
-              <%= link_to send("gallery_#{content.class_name.downcase}_path") do %>
-                <%= image_tag image, class: 'rounded-lg bg-notebook-blue h-64 object-cover object-center hover:shadow hover:opacity-90' %>
-              <% end %>
-            </div>
-            <div class="space-y-1">
-              <div class="text-sm font-medium text-gray-900 mb-1">
-                <i class="material-icons float-left <%= content.class_text_color %> mr-2"><%= content.class_icon %></i>
-                <span class="relative top-0.5"><%= content.name %></span>
-              </div>
-              <%= link_to content.user, class: 'group flex items-center text-xs' do %>
-                <i class="material-icons mr-2 <%= User.text_color %>"><%= User.icon %></i>
-                by &nbsp
-                <span class="text-gray-500 group-hover:<%= User.text_color %> font-medium"><%= content.user.display_name %></span>
-              <% end %>
-            </div>
-
-            <div class="space-y-1 mt-2">
-              <%= link_to content.raw_model, class: 'block my-0' do %>
-                <button type="button" class="mt-0 inline-flex items-center px-4 py-2 border border-b-0 border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:ml-3 xl:ml-0 xl:w-full">
-                  <i class="material-icons <%= content.class_text_color %> mr-1"><%= content.class_icon %></i>
-                  <span class="flex-grow text-left">Details</span>
-                </button>
-              <% end %>
-              <%= link_to send("gallery_#{content.class_name.downcase}_path") do %>
-                <button type="button" class="mt-0 inline-flex items-center px-4 py-2 border border-b-0 border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:ml-3 xl:ml-0 xl:w-full">
-                  <i class="material-icons text-pink-500 mr-1">image</i>
-                  <span class="flex-grow text-left">Gallery</span>
-                  <!--
-                  <span class="bg-gray-100 p-1 text-xs rounded-lg">42</span>
-                  -->
-                </button>
-              <% end %>
-              <%= link_to send("references_#{content.class_name.downcase}_path") do %>
-                <button type="button" class="mt-0 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:ml-3 xl:ml-0 xl:w-full">
-                  <i class="material-icons <%= Document.text_color %> mr-1"><%= Document.icon %></i>
-                  <span class="flex-grow text-left">References</span>
-                </button>
-              <% end %>
-            </div>
+          <div class="flex-shrink-0 w-full mb-2">
+            <% image = content.raw_model.random_image_including_private %>
+            <%= link_to send("gallery_#{content.class_name.downcase}_path") do %>
+              <%= image_tag image, class: 'rounded-lg bg-notebook-blue h-64 object-cover object-center hover:shadow hover:opacity-90' %>
+            <% end %>
           </div>
+
+          <% if local_assigns.fetch(:current_page, :show) != :edit %>
+            <div class="space-y-1">
+                <%= link_to content.raw_model, class: 'block my-0' do %>
+                  <button type="button" class="mt-0 inline-flex items-center px-4 py-2 border border-b-0 border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:ml-3 xl:ml-0 xl:w-full">
+                    <i class="material-icons <%= content.class_text_color %> mr-1"><%= content.class_icon %></i>
+                    <span class="flex-grow text-left">Details</span>
+                  </button>
+                <% end %>
+                <%= link_to send("gallery_#{content.class_name.downcase}_path") do %>
+                  <button type="button" class="mt-0 inline-flex items-center px-4 py-2 border border-b-0 border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:ml-3 xl:ml-0 xl:w-full">
+                    <i class="material-icons text-pink-500 mr-1">image</i>
+                    <span class="flex-grow text-left">Gallery</span>
+                    <!--
+                    <span class="bg-gray-100 p-1 text-xs rounded-lg">42</span>
+                    -->
+                  </button>
+                <% end %>
+                <%= link_to send("references_#{content.class_name.downcase}_path") do %>
+                  <button type="button" class="mt-0 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue sm:ml-3 xl:ml-0 xl:w-full">
+                    <i class="material-icons <%= Document.text_color %> mr-1"><%= Document.icon %></i>
+                    <span class="flex-grow text-left">References</span>
+                  </button>
+                <% end %>
+            </div>
+          <% end %>
 
           <% if content.universe %>
             <div class="mb-4">
