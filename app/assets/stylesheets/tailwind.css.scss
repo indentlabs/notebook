@@ -62,3 +62,49 @@
 .group:hover .casino-icon-rotate {
   transform: rotate(90deg);
 }
+
+/* Casino button click animations */
+.casino-button-clicking {
+  animation: quickPress 0.2s ease-out;
+  position: relative;
+  overflow: visible !important;
+}
+
+.casino-button-clicking .casino-icon-rotate {
+  animation: quickSpin 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+            slowSpin 2s linear 0.3s infinite;
+}
+
+/* Ripple effect from click point */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(0);
+  animation: rippleExpand 0.6s ease-out;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes quickPress {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+@keyframes quickSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slowSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes rippleExpand {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}

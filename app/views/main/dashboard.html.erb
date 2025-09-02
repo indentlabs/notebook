@@ -28,7 +28,9 @@
         <!-- Primary Action Buttons -->
         <div class="flex space-x-3">
           <% random_enabled_page_type = (current_user.createable_content_types - [Character]).sample %>
-          <%= link_to new_polymorphic_path(random_enabled_page_type), class: "group inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white #{random_enabled_page_type.color} hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" do %>
+          <%= link_to new_polymorphic_path(random_enabled_page_type), 
+              class: "casino-create-button group inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white #{random_enabled_page_type.color} hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200",
+              data: { turbo: false } do %>
             <i class="material-icons mr-2 text-lg casino-icon-rotate">casino</i>
             Create <%= random_enabled_page_type.name %>
           <% end %>
@@ -737,4 +739,40 @@ celebrationStyle.textContent = `
   }
 `;
 document.head.appendChild(celebrationStyle);
+
+// Casino button click animation
+document.addEventListener('DOMContentLoaded', function() {
+  const casinoButton = document.querySelector('.casino-create-button');
+  
+  if (casinoButton) {
+    casinoButton.addEventListener('click', function(e) {
+      // Don't prevent default - let the navigation happen
+      
+      // Add clicking class for animation
+      this.classList.add('casino-button-clicking');
+      
+      // Create ripple effect at click position
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      
+      // Calculate position relative to button
+      const rect = this.getBoundingClientRect();
+      const size = 20;
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      
+      // Add ripple to button
+      this.appendChild(ripple);
+      
+      // Clean up ripple after animation (but don't remove clicking class since page will navigate)
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+  }
+});
 </script>
