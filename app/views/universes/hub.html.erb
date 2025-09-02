@@ -18,64 +18,121 @@
     animation: gentle-drift 12s ease-in-out infinite;
   }
   
-  @keyframes pulse-glow {
-    0%, 100% {
-      box-shadow: 
-        0 0 20px rgba(147, 51, 234, 0.5),
-        0 0 40px rgba(147, 51, 234, 0.3),
-        0 0 60px rgba(147, 51, 234, 0.1),
-        inset 0 0 20px rgba(147, 51, 234, 0.2);
-    }
-    50% {
-      box-shadow: 
-        0 0 30px rgba(147, 51, 234, 0.8),
-        0 0 60px rgba(147, 51, 234, 0.5),
-        0 0 90px rgba(147, 51, 234, 0.3),
-        inset 0 0 30px rgba(147, 51, 234, 0.4);
-    }
-  }
-  
+  /* Simplified universe portal effect */
   .universe-portal {
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
   }
   
+  /* Event horizon (dark center) - simple fade in */
   .universe-portal::before {
     content: '';
     position: absolute;
-    top: -3px;
-    left: -3px;
-    right: -3px;
-    bottom: -3px;
-    background: conic-gradient(from 180deg at 50% 50%, 
-      transparent,
-      rgba(147, 51, 234, 0.1),
-      rgba(168, 85, 247, 0.3),
-      rgba(147, 51, 234, 0.1),
-      transparent);
+    top: 50%;
+    left: 50%;
+    width: 35%;
+    height: 35%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle at center,
+      rgba(0, 0, 0, 0.8) 0%,
+      rgba(0, 0, 0, 0.4) 40%,
+      rgba(0, 0, 0, 0) 70%
+    );
     border-radius: 50%;
     opacity: 0;
-    transition: opacity 0.3s ease;
-    animation: spin 4s linear infinite;
+    transition: opacity 0.4s ease;
     pointer-events: none;
+    z-index: 2;
   }
   
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+  /* Purple glow - static, no animation */
+  .universe-portal::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: radial-gradient(circle at center,
+      transparent 30%,
+      rgba(147, 51, 234, 0.2) 50%,
+      rgba(168, 85, 247, 0.1) 70%,
+      transparent 100%
+    );
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 1;
   }
   
+  /* Simple hover effects for portal */
   li:hover .universe-portal {
-    animation: pulse-glow 2s ease-in-out infinite;
-    transform: scale(1.05);
+    transform: scale(0.96);
+    box-shadow: 
+      0 0 30px rgba(147, 51, 234, 0.6),
+      0 0 60px rgba(168, 85, 247, 0.3),
+      inset 0 0 60px rgba(0, 0, 0, 0.5);
   }
   
   li:hover .universe-portal::before {
     opacity: 1;
+  }
+  
+  li:hover .universe-portal::after {
+    opacity: 1;
+  }
+  
+  /* Simplified card black hole effect */
+  .universe-card {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.4s ease;
+    cursor: pointer;
+    background: white;
+  }
+  
+  /* Single gradient background on hover */
+  .universe-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at center,
+      rgba(147, 51, 234, 0.05) 0%,
+      rgba(168, 85, 247, 0.02) 50%,
+      transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  /* Card hover state - simple transitions only */
+  .universe-card:hover {
+    transform: scale(0.98);
+    box-shadow: 
+      0 10px 40px rgba(147, 51, 234, 0.3),
+      0 0 80px rgba(147, 51, 234, 0.15) inset;
+  }
+  
+  .universe-card:hover::before {
+    opacity: 1;
+  }
+  
+  .universe-card > * {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .universe-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
   }
 </style>
 
@@ -114,62 +171,36 @@
 
 <section class="container mx-auto mt-8">
   <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-    <li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200">
-      <div class="flex-1 flex flex-col p-8">
-        <%= image_tag "card-headers/universes.webp", class: 'w-48 h-48 flex-shrink-0 mx-auto rounded-full border-2 border-purple-800 universe-portal' %>
-        <h3 class="mt-6 text-gray-900 text-sm font-medium">All universes</h3>
-        <dl class="mt-1 flex-grow flex flex-col justify-between">
-          <dd class="text-gray-500 text-sm">Selecting this option will clear your universe filter and show <em>all</em> content from <em>all</em> universes.</dd>
-        </dl>
-      </div>
-      <div>
-        <div class="-mt-px flex divide-x divide-gray-200">
-          <div class="w-0 flex-1 flex hover:shadow-lg">
-            <%= link_to dashboard_path(universe: 'all'), class: 'relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-b-lg hover:bg-purple-800 hover:text-white' do %>
-              <i class="material-icons">fullscreen</i>
-              <span class="ml-3">No&nbsp;Filter</span>
-            <% end %>
-          </div>
+    <li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow universe-card">
+      <%= link_to dashboard_path(universe: 'all'), class: 'universe-card-link flex flex-col h-full' do %>
+        <div class="flex-1 flex flex-col p-8">
+          <%= image_tag "card-headers/universes.webp", class: 'w-48 h-48 flex-shrink-0 mx-auto rounded-full border-2 border-purple-800 universe-portal' %>
+          <h3 class="mt-6 text-gray-900 text-sm font-medium">All universes</h3>
+          <dl class="mt-1 flex-grow flex flex-col justify-between">
+            <dd class="text-gray-500 text-sm">Selecting this option will clear your universe filter and show <em>all</em> content from <em>all</em> universes.</dd>
+          </dl>
         </div>
-      </div>
+      <% end %>
     </li>
 
     <% @universes.each do |universe| %>
-      <li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200">
-        <div class="flex-1 flex flex-col p-8">
-          <%= link_to universe.view_path do %>
+      <li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow universe-card">
+        <%= link_to dashboard_path(universe: universe.id), class: 'universe-card-link flex flex-col h-full' do %>
+          <div class="flex-1 flex flex-col p-8">
             <%= image_tag universe.random_image_including_private, class: 'w-48 h-48 flex-shrink-0 mx-auto rounded-full border-2 border-purple-800 universe-portal' %>
-          <% end %>
-          <h3 class="mt-6 text-gray-900 text-sm font-medium"><%= universe.name %></h3>
-          <dl class="mt-1 flex-grow flex flex-col justify-between">
-            <dd class="text-gray-500 text-sm"><%= universe.description %></dd>
-            <dd class="mt-3">
-              <% if universe.user_id == current_user.id %>
-                <span class="px-2 py-1 text-green-800 text-xs font-medium bg-green-100 rounded-full">Owner</span>
-              <% else %>
-                <span class="px-2 py-1 text-green-800 text-xs font-medium bg-green-100 rounded-full">Collaborator</span>
-              <% end %>
-            </dd>
-          </dl>
-        </div>
-        <div>
-          <div class="-mt-px flex divide-x divide-gray-200">
-            <div class="w-0 flex-1 flex hover:shadow-lg">
-              <%= link_to dashboard_path(universe: universe.id), class: 'relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-b-lg hover:bg-purple-800 hover:text-white' do %>
-                <i class="material-icons">fullscreen</i>
-                <span class="ml-3">Focus</span>
-              <% end %>
-            </div>
-            <!--
-            <div class="-ml-px w-0 flex-1 flex hover:shadow-lg">
-              <%= link_to universe_path(universe), class: 'relative w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-br-lg hover:text-gray-500' do %>
-                <i class="material-icons"><%= Universe.icon %></i>
-                <span class="ml-3">View</span>
-              <% end %>
-            </div>
-            -->
+            <h3 class="mt-6 text-gray-900 text-sm font-medium"><%= universe.name %></h3>
+            <dl class="mt-1 flex-grow flex flex-col justify-between">
+              <dd class="text-gray-500 text-sm"><%= universe.description %></dd>
+              <dd class="mt-3">
+                <% if universe.user_id == current_user.id %>
+                  <span class="px-2 py-1 text-green-800 text-xs font-medium bg-green-100 rounded-full">Owner</span>
+                <% else %>
+                  <span class="px-2 py-1 text-green-800 text-xs font-medium bg-green-100 rounded-full">Collaborator</span>
+                <% end %>
+              </dd>
+            </dl>
           </div>
-        </div>
+        <% end %>
       </li>
     <% end %>
   </ul>
